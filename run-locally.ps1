@@ -1,7 +1,7 @@
 $data = @{
     memory_limit = 100000;
     time_limit = 10000;
-    programming_language = 'python3';
+    programming_language = 'python';
     natural_language = 'nl';
     resources = './excercise';
     source = './excercise/test.py';
@@ -10,3 +10,4 @@ $data = @{
 }
 
 ConvertTo-Json $data | python ./tested.py
+#Measure-Command { ConvertTo-Json $data | python ./tested.py | Out-Default}

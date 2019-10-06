@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import ClassVar, Optional
 
-from .common import Annotation, BadgeCount, Message
+from .common import Annotation, BadgeCount, Message, Status
 
 
 @dataclass
@@ -26,20 +26,10 @@ class _Commands(str, Enum):
     START_TESTCASE = "start-testcase"
 
 
-class StatusEnum(str, Enum):
-    COMPILATION_ERROR = "compilation error"
-    CORRECT = "correct"
-    CORRECT_ANSWER = "correct answer"
-    INTERNAL_ERROR = "internal error"
-    RUNTIME_ERROR = "runtime error"
-    WRONG = "wrong"
-    WRONG_ANSWER = "wrong answer"
-
-
 @dataclass
-class Status:
+class StatusMessage:
     """Describes the outcome of the judgement."""
-    enum: StatusEnum
+    enum: Status
     human: Optional[str] = None
 
 
@@ -104,7 +94,7 @@ class CloseTest(_Update):
     """Close the current test. Accepted iff status is correct, but you can overwrite this."""
     command = _Commands.CLOSE_TEST
     generated: str
-    status: Status
+    status: StatusMessage
     accepted: Optional[bool] = None
     data: Optional[TestData] = None
 
@@ -138,4 +128,4 @@ class CloseJudgment(_Update):
     """
     command = _Commands.CLOSE_JUDGEMENT
     accepted: Optional[bool] = None
-    status: Optional[Status] = None
+    status: Optional[StatusMessage] = None

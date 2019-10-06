@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Optional, List
 
-from .common import Message, BadgeCount, Annotation
+from .common import Message, BadgeCount, Annotation, Status
 
 
 @dataclass
@@ -40,18 +40,6 @@ class Tab:
     description: Optional[str] = None
     groups: Optional[List[Context]] = None
     messages: Optional[List[Message]] = None
-
-
-class Status(Enum):
-    COMPILATION_ERROR = "compilation error"
-    CORRECT = "correct"
-    CORRECT_ANSWER = "correct answer"
-    INTERNAL_ERROR = "internal error"
-    MEMORY_LIMIT_EXCEEDED = "memory limit exceeded"
-    RUNTIME_ERROR = "runtime error"
-    TIME_LIMIT_EXCEEDED = "time limit exceeded"
-    WRONG = "wrong"
-    WRONG_ANSWER = "wrong answer"
 
 
 @dataclass

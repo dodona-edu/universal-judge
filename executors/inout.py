@@ -82,7 +82,7 @@ class InOutTester(Tester):
         context.clean()
         # Collect stdout from messages.
         stdout = []
-        stderr = []
+        errors = []
         for message in messages['iopub']:
             type_ = message['header']['msg_type']
             if type_ == 'stream':
@@ -90,17 +90,23 @@ class InOutTester(Tester):
                 if stream == 'stdout':
                     stdout.append(message['content']['text'])
                 elif stream == 'stderr':
-                    stderr.append(message['content']['text'])
+                    errors.append({'ename': 'StdErr', 'evalue' : message['content']['text']})
                 else:
                     raise ValueError(f"Unknown type {stream}")
-        produced_output = ''.join(stdout)
-        comparator = SimpleStringComparator()
-        result = comparator.compare(expected, produced_output)
 
-        if result:
-            status = po.Status(po.StatusEnum.CORRECT_ANSWER)
+        for message in messages['client']:
+            if message['msg_type'] == 'error':
+                errors.append(message['content'])
+
+        produced_output = ''.join(stdout)
+        if errors and any(e['ename'] == 'TimeoutError' for e in errors):
+            status = po.StatusMessage(po.Status.TIME_LIMIT_EXCEEDED)
         else:
-            status = po.Status(po.StatusEnum.WRONG_ANSWER)
+            comparator = SimpleStringComparator()
+            if comparator.compare(expected, produced_output):
+                status = po.StatusMessage(po.Status.CORRECT)
+            else:
+                status = po.StatusMessage(po.Status.WRONG)
         return po.CloseTest(produced_output, status, data=TestData(channel='stdout'))
 
     def test(self, code, context: JupyterContext):

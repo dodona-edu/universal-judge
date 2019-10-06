@@ -39,3 +39,12 @@ class Annotation:
     type: Optional[Severity] = None
     rows: Optional[Index] = None
     columns: Optional[Index] = None
+
+
+class Status(str, Enum):
+    COMPILATION_ERROR = "compilation error"
+    CORRECT = "correct"
+    MEMORY_LIMIT_EXCEEDED = "memory limit exceeded"
+    RUNTIME_ERROR = "runtime error"
+    TIME_LIMIT_EXCEEDED = "time limit exceeded"
+    WRONG = "wrong"

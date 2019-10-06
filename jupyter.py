@@ -59,6 +59,7 @@ class JupyterContext(Thread):
     def execute_statements(self, statements, timeout, memory_limit, std_input=None, silent=False):
         self.__flush_channels()
         kernel_finished, unprocessed_messages = False, True
+        std_input = std_input.splitlines(False) if std_input is not None else []
         with Timeout(timeout) as timeout:
             with MemoryLimit(memory_limit, self.manager.kernel.pid) as memory_limiter:
                 start_time = time.perf_counter()
@@ -116,7 +117,7 @@ class JupyterContext(Thread):
                                     messages['iopub'].append(message)
                             elif message['msg_type'] == 'input_request':
                                 if std_input:
-                                    self.client.input(std_input)
+                                    self.client.input(std_input.pop(0))
                                 else:
                                     messages['client'].append({
                                         'msg_type': 'error',
