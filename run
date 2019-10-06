@@ -1,2 +1,13 @@
-#!/usr/bin/env python3
+#!/bin/sh
 
+# Script that runs the Pythia judge inside a container that supports both Bash
+# and Python 3.5.
+# 
+#   - stdin: run configuration (JSON)
+#   - stdout: evaluation results (JSON)
+#   - stderr: should be empty
+#   - exit status: should be zero
+
+DIR="$(dirname $0)"
+
+python "$DIR/pythia_judge.py"
