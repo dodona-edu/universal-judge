@@ -124,5 +124,5 @@ class InOutTester(Tester):
                 report_update(po.CloseTestcase())
                 report_update(po.CloseContext())
 
-    report_update(po.CloseTab())
+            report_update(po.CloseTab())
     report_update(po.CloseJudgment())
