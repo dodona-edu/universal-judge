@@ -32,7 +32,8 @@ def read_config() -> Config:
     """Read the configuration from stdout"""
     test = sys.stdin.read()
     config_ = json.loads(test)
-    return Config(**config_)
+    needed_config = {x:config_[x] for x in Config._fields}
+    return Config(**needed_config)
 
 
 if __name__ == '__main__':

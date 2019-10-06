@@ -1,8 +1,7 @@
 #!/bin/sh
 
-# Script that runs the Pythia judge inside a container that supports both Bash
-# and Python 3.5.
-# 
+# Script that runs the judge inside a container that supports Python.
+#
 #   - stdin: run configuration (JSON)
 #   - stdout: evaluation results (JSON)
 #   - stderr: should be empty
@@ -10,4 +9,4 @@
 
 DIR="$(dirname $0)"
 
-python "$DIR/pythia_judge.py"
+python "$DIR/tested.py"
