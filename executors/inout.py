@@ -3,10 +3,13 @@ import glob
 from sys import stderr
 from typing import List, Tuple, Dict
 from pathlib import Path
+from ansi2html import Ansi2HTMLConverter
+
 
 from dodona.partial_output import TestData
 from tested import Config
 from dodona import partial_output as po
+from dodona.common import ExtendedMessage
 from dodona.dodona import report_update
 from jupyter import JupyterContext
 
@@ -111,8 +114,11 @@ class InOutTester(Tester):
             status = po.StatusMessage(po.Status.RUNTIME_ERROR)
             # Print to stderr
             error = next(e for e in errors if e['ename'] == 'RuntimeError')
-            m = po.AppendMessage('\n'.join(error['evalue']))
-            report_update(m)
+            # Convert ASCII to colour
+            conv = Ansi2HTMLConverter()
+            coloured = [conv.convert(x) for x in error['evalue']]
+            m = ExtendedMessage(description='\n'.join(coloured), format='html')
+            report_update(po.AppendMessage(message=m))
         else:
             comparator = SimpleStringComparator()
             if comparator.compare(expected, produced_output):

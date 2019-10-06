@@ -14,7 +14,7 @@ class Permission(Enum):
 class ExtendedMessage:
     description: str
     format: str
-    permission: Optional[Permission]
+    permission: Optional[Permission] = None
 
 
 Message = Union[ExtendedMessage, str]
