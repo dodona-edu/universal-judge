@@ -111,7 +111,7 @@ class InOutTester(Tester):
             status = po.StatusMessage(po.Status.RUNTIME_ERROR)
             # Print to stderr
             error = next(e for e in errors if e['ename'] == 'RuntimeError')
-            m = po.AppendMessage(error)
+            m = po.AppendMessage(error['evalue'])
             report_update(m)
         else:
             comparator = SimpleStringComparator()
