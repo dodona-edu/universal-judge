@@ -18,7 +18,7 @@ def _class_and_instance_attributes(object_) -> dict:
     # Add class attributes
     for key, value in vars(object_.__class__).items():
         if key[:2] != '__' and not callable(value):
-            d[key] = value
+            d[key] = getattr(object_, key)
     return d
 
 
