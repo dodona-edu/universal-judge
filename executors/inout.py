@@ -3,6 +3,7 @@ import glob
 from typing import List, Tuple, Dict
 from pathlib import Path
 
+from dodona.partial_output import TestData
 from tested import Config
 from dodona import partial_output as po
 from dodona.dodona import report_update
@@ -100,7 +101,7 @@ class InOutTester(Tester):
             status = po.Status(po.StatusEnum.CORRECT_ANSWER)
         else:
             status = po.Status(po.StatusEnum.WRONG_ANSWER)
-        return po.CloseTest(produced_output, status)
+        return po.CloseTest(produced_output, status, data=TestData(channel='stdout'))
 
     def test(self, code, context: JupyterContext):
         # Start judgement

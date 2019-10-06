@@ -5,6 +5,12 @@ from typing import ClassVar, Optional
 from .common import Annotation, BadgeCount, Message
 
 
+@dataclass
+class TestData:
+    """This is not documented, but used nonetheless"""
+    channel: Optional[str] = None
+
+
 class _Commands(str, Enum):
     ANNOTATE_CODE = "annotate-code"
     APPEND_MESSAGE = "append-message"
@@ -77,6 +83,7 @@ class StartTest(_Update):
     command = _Commands.START_TEST
     expected: str
     description: Optional[Message] = None
+    data: Optional[TestData] = None
 
 
 @dataclass
@@ -99,6 +106,7 @@ class CloseTest(_Update):
     generated: str
     status: Status
     accepted: Optional[bool] = None
+    data: Optional[TestData] = None
 
 
 @dataclass
