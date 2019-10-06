@@ -1,5 +1,6 @@
 # Executor for exercises where stdin expects input and receives output in stdout.
 import glob
+from sys import stderr
 from typing import List, Tuple, Dict
 from pathlib import Path
 
@@ -93,6 +94,11 @@ class InOutTester(Tester):
                     errors.append({'ename': 'StdErr', 'evalue' : message['content']['text']})
                 else:
                     raise ValueError(f"Unknown type {stream}")
+            elif type_ == 'error' and message['content']['traceback']:
+                errors.append({
+                    'ename': 'RuntimeError',
+                    'evalue': message['content']['traceback']
+                })
 
         for message in messages['client']:
             if message['msg_type'] == 'error':
@@ -101,6 +107,12 @@ class InOutTester(Tester):
         produced_output = ''.join(stdout)
         if errors and any(e['ename'] == 'TimeoutError' for e in errors):
             status = po.StatusMessage(po.Status.TIME_LIMIT_EXCEEDED)
+        elif errors and any(e['ename'] == 'RuntimeError' for e in errors):
+            status = po.StatusMessage(po.Status.RUNTIME_ERROR)
+            # Print to stderr
+            error = next(e for e in errors if e['ename'] == 'RuntimeError')
+            m = po.AppendMessage(error)
+            report_update(m)
         else:
             comparator = SimpleStringComparator()
             if comparator.compare(expected, produced_output):
