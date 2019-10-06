@@ -1,5 +1,6 @@
 # Executor for exercises where stdin expects input and receives output in stdout.
 import glob
+import re
 from sys import stderr
 from typing import List, Tuple, Dict
 from pathlib import Path
@@ -116,7 +117,7 @@ class InOutTester(Tester):
             error = next(e for e in errors if e['ename'] == 'RuntimeError')
             # Convert ASCII to colour
             coloured = [ansi2html(x) for x in error['evalue']]
-            m = ExtendedMessage(description='<br>'.join(coloured), format='html')
+            m = ExtendedMessage(description='<pre>' + '<br>'.join(coloured) + '</pre>', format='html')
             report_update(po.AppendMessage(message=m))
         else:
             comparator = SimpleStringComparator()
