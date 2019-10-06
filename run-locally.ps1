@@ -1,5 +1,5 @@
 $data = @{
-    memory_limit = 100000;
+    memory_limit = 536870912;
     time_limit = 10000;
     programming_language = 'python';
     natural_language = 'nl';

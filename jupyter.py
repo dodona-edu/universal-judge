@@ -1,5 +1,7 @@
 import atexit
 import queue
+import sys
+
 import time
 from threading import Thread
 
@@ -41,11 +43,8 @@ class JupyterContext(Thread):
         self.failed = False
 
     def run(self):
-        try:
-            self.manager, self.client = start_new_kernel(kernel_name=self.language)
-            atexit.register(self.clean)
-        except:
-            self.failed = True
+        self.manager, self.client = start_new_kernel(kernel_name=self.language)
+        atexit.register(self.clean)
         self.client.allow_stdin = self.allow_stdin
         # for elem in self.code:
         #     self.execute_statements(elem)

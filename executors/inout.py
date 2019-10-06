@@ -67,7 +67,7 @@ class InOutTester(Tester):
 
     def get_values(self, file) -> List[str]:
         with open(f"{self.config.resources}/{file}", "r") as f:
-            return f.read().splitlines(False)
+            return f.readlines()
 
     def evaluate_code(self, code, input_, expected, context: JupyterContext) -> po.CloseTest:
         # Evaluate the code with input, and produce a result.
@@ -119,6 +119,8 @@ class InOutTester(Tester):
             coloured = [ansi2html(x) for x in error['evalue']]
             m = ExtendedMessage(description='<pre>' + '<br>'.join(coloured) + '</pre>', format='html')
             report_update(po.AppendMessage(message=m))
+        elif errors and any(e['ename'] == 'MemoryError' for e in errors):
+            status = po.StatusMessage(po.Status.MEMORY_LIMIT_EXCEEDED)
         else:
             comparator = SimpleStringComparator()
             if comparator.compare(expected, produced_output):
