@@ -9,14 +9,6 @@ import sys
 from typing import NamedTuple
 
 
-# Map programming languages to the kernel that will be used.
-# Evaluate if we could use the SOS kernel here.
-KERNEL_MAPPING = {
-    'python': 'ipython',
-    'javascript': 'ijavascript'
-}
-
-
 class Config(NamedTuple):
     resources: str
     source: str
@@ -32,7 +24,7 @@ def read_config() -> Config:
     """Read the configuration from stdout"""
     test = sys.stdin.read()
     config_ = json.loads(test)
-    needed_config = {x:config_[x] for x in Config._fields}
+    needed_config = {x: config_[x] for x in Config._fields}
     return Config(**needed_config)
 
 

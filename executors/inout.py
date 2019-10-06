@@ -113,8 +113,8 @@ class InOutTester(Tester):
             report_update(po.StartContext())
             report_update(po.StartTestcase())
 
-            inputs = self.get_values(f"test.in")
-            outputs = self.get_values(f"test.out")
+            inputs = self.get_values(f"{test}.in")
+            outputs = self.get_values(f"{test}.out")
 
             for (input_, expected) in zip(inputs, outputs):
                 report_update(po.StartTest(expected=expected))
