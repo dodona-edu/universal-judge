@@ -1,0 +1,12 @@
+$data = @{
+    memory_limit = 100000;
+    time_limit = 10000;
+    programming_language = 'python3';
+    natural_language = 'nl';
+    resources = './excercise';
+    source = './excercise/test.py';
+    judge = 'ignored';
+    workdir = 'ignored';
+}
+
+ConvertTo-Json $data | python ./tested.py
