@@ -3,7 +3,7 @@ import glob
 from sys import stderr
 from typing import List, Tuple, Dict
 from pathlib import Path
-from ansi2html import Ansi2HTMLConverter
+from utils.ascii_to_html import ansi2html
 
 
 from dodona.partial_output import TestData
@@ -115,8 +115,7 @@ class InOutTester(Tester):
             # Print to stderr
             error = next(e for e in errors if e['ename'] == 'RuntimeError')
             # Convert ASCII to colour
-            conv = Ansi2HTMLConverter()
-            coloured = [conv.convert(x) for x in error['evalue']]
+            coloured = [ansi2html(x) for x in error['evalue']]
             m = ExtendedMessage(description='\n'.join(coloured), format='html')
             report_update(po.AppendMessage(message=m))
         else:
