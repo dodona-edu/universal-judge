@@ -111,18 +111,17 @@ class InOutTester(Tester):
         for test in to_test:
             report_update(po.StartTab(title=test))
             report_update(po.StartContext())
-            report_update(po.StartTestcase())
 
             inputs = self.get_values(f"{test}.in")
             outputs = self.get_values(f"{test}.out")
 
             for (input_, expected) in zip(inputs, outputs):
+                report_update(po.StartTestcase(description=input_))
                 report_update(po.StartTest(expected=expected))
                 result = self.evaluate_code(code, input_, expected, context)
                 report_update(result)
+                report_update(po.CloseTestcase())
 
-            report_update(po.CloseTestcase())
-            report_update(po.CloseContext())
-            report_update(po.CloseTab())
-
+        report_update(po.CloseContext())
+        report_update(po.CloseTab())
         report_update(po.CloseJudgment())

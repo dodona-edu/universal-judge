@@ -68,7 +68,7 @@ class StartContext(_Update):
 class StartTestcase(_Update):
     """Start on a new testcase with given description"""
     command = _Commands.START_TESTCASE
-    description: Optional[Message] = None
+    description: Message
 
 
 @dataclass
