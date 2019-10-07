@@ -22,8 +22,17 @@ class Config(NamedTuple):
 
 def read_config() -> Config:
     """Read the configuration from stdout"""
-    test = sys.stdin.read()
-    config_ = json.loads(test)
+    #test = sys.stdin.read()
+    config_ = {
+        "memory_limit": 536870912,
+        "time_limit": 10000000,
+        "programming_language": 'python',
+        "natural_language": 'nl',
+        "resources": './excercise',
+        "source": './excercise/test.py',
+        "judge": 'ignored',
+        "workdir": 'ignored',
+    }
     needed_config = {x: config_[x] for x in Config._fields}
     return Config(**needed_config)
 
