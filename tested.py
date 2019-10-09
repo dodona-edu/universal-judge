@@ -51,7 +51,7 @@ if __name__ == '__main__':
         user_code = f.read()
 
     # Run it.
-    from executors.inout import InOutTester
+    from executors.kernel import InOutTester
     from jupyter import JupyterContext
 
     tester = InOutTester(config)

@@ -1,4 +1,4 @@
-from .types import *
+from .parser import *
 
 with Judgment() as judgment:
     with Tab(judgment, "Correctheid") as tab:

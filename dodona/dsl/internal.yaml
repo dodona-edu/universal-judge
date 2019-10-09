@@ -1,0 +1,41 @@
+# A judgement consists of tabs
+tabs:
+  - name: "Correctheid"
+    contexts:
+      - description: "An optional description of the context"
+        testcases:
+          - description: "The actual description of the test case"
+            tests:
+              - description: "Description of a test with stdin -> stdout"
+                input:
+                  stdin:
+                    type: text
+                    data: "Hallo"
+                output:
+                  stdout:
+                    type: text
+                    data: "Test"
+              - description: "Description of a test with file stdin and stdout"
+                input:
+                  stdin:
+                    type: file
+                    data: "Path to file to be used as stdin"
+                output:
+                  stdout:
+                    type: file
+                    data: "Path to file to check against stdout"
+              - description: "Description of test that produces file"
+                input:
+                  stdin:
+                    type: text
+                    data: "Hallo"
+                output:
+                  file:
+                    expected: "path to file that is expected"
+                    actual: "path were actual file should be"
+                evaluator:
+                  type: "builtin"
+                  name: "comparator"
+                  language: "ignored with built in"
+                  options:
+                    - ignoreCase
