@@ -1,10 +1,8 @@
 import atexit
 import queue
-import sys
-
-import time
 from threading import Thread
 
+import time
 import zmq
 from jupyter_client.manager import start_new_kernel
 
@@ -46,7 +44,7 @@ class JupyterContext(Thread):
         self.manager, self.client = start_new_kernel(kernel_name=self.language)
         atexit.register(self.clean)
         self.client.allow_stdin = self.allow_stdin
-        # for elem in self.code:
+        # for elem in self.user_code:
         #     self.execute_statements(elem)
         return self
 

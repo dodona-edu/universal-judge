@@ -12,7 +12,7 @@ class TestData:
 
 
 class _Commands(str, Enum):
-    ANNOTATE_CODE = "annotate-code"
+    ANNOTATE_CODE = "annotate-user_code"
     APPEND_MESSAGE = "append-message"
     CLOSE_CONTEXT = "close-context"
     CLOSE_JUDGEMENT = "close-judgement"
@@ -85,7 +85,7 @@ class AppendMessage(_Update):
 
 @dataclass
 class AnnotateCode(Annotation, _Update):
-    """Annotate a piece of code."""
+    """Annotate a piece of user_code."""
     command = _Commands.ANNOTATE_CODE
 
 

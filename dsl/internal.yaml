@@ -1,4 +1,4 @@
-# A judgement consists of tabs
+name: "ok"
 tabs:
   - name: "Correctheid"
     contexts:

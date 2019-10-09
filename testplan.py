@@ -1,14 +1,12 @@
-# DSL types.
-#
-# Eventually, the DSL should look a bit like this:
-#
-# with Judgement() as judgement:
-#
-# end
-import json
 from dataclasses import dataclass, field
-from dataclasses_json import dataclass_json
+from pathlib import Path
 from typing import List, Optional
+
+from dataclasses_json import dataclass_json
+
+
+class TestPlanError(ValueError):
+    pass
 
 
 @dataclass_json
@@ -23,7 +21,6 @@ class Stdin:
 class Stdout:
     type: Optional[str] = "text"
     data: Optional[str] = None
-    ignore: bool = False
 
 
 @dataclass_json
@@ -52,7 +49,7 @@ class Output:
 @dataclass_json
 @dataclass
 class Evaluator:
-    name: str
+    name: Optional[str] = "textComparator"
     type: Optional[str] = "builtin"
     language: Optional[str] = None
     options: Optional[List[str]] = field(default_factory=list)
@@ -64,7 +61,7 @@ class Test:
     description: str
     input: Input
     output: Output
-    evaluator: Optional[Evaluator] = Evaluator(name="comparator")
+    evaluator: Optional[Evaluator] = None
 
 
 @dataclass_json
@@ -77,8 +74,8 @@ class Testcase:
 @dataclass_json
 @dataclass
 class Context:
-    description: str
     testcases: List[Testcase]
+    description: Optional[str] = None
 
 
 @dataclass_json
@@ -92,19 +89,23 @@ class Tab:
 @dataclass_json
 @dataclass
 class Plan:
-    tabs: List[Tab]
+    name: Optional[str] = None
+    tabs: Optional[List[Tab]] = field(default_factory=list)
 
 
-def parse_test_plan(file) -> Plan:
+def parse_test_plan(test_file) -> Plan:
     """Parse a test plan into the structures."""
 
-    # Load json
-    with open(file, "r") as file:
-        raw = file.read()
+    raw = test_file.read()
+    plan = Plan.from_json(raw)
 
-    # We assume it is valid
-    return Plan.from_json(raw)
+    if not plan.name:
+        plan.name = Path(test_file.name).stem
+
+    return plan
 
 
 if __name__ == '__main__':
-    parse_test_plan("./internal.json")
+    with open('internal.json', 'r') as f:
+        r = parse_test_plan(f)
+        print(r)

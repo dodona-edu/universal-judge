@@ -4,8 +4,6 @@
 # For now, this only handles running the execution kernel.
 #
 
-import json
-import sys
 from typing import NamedTuple
 
 
@@ -41,19 +39,21 @@ if __name__ == '__main__':
     config = read_config()
 
     # For now, the action plan is as follows:
-    # 1. Load the student code in the kernel
+    # 1. Load the student user_code in the kernel
     # 2. Process the input line-by-line
     #    - Check the output for each element.
     # 3. Finish
 
-    # Read code
+    # Read user_code
     with open(config.source, 'r') as f:
         user_code = f.read()
 
     # Run it.
-    from executors.kernel import InOutTester
+    from judge import KernelJudge
     from jupyter import JupyterContext
 
-    tester = InOutTester(config)
+    tester = KernelJudge(config)
+    tester.judge()
+    tester._execute_test_plan()
 
     tester.test(user_code, JupyterContext(language=config.programming_language))

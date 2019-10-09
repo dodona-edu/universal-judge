@@ -32,7 +32,7 @@ class Severity(Enum):
 
 @dataclass
 class Annotation:
-    """Annotate a piece of code."""
+    """Annotate a piece of user_code."""
     row: Index
     text: str
     column: Optional[Index] = None
@@ -48,3 +48,4 @@ class Status(str, Enum):
     RUNTIME_ERROR = "runtime error"
     TIME_LIMIT_EXCEEDED = "time limit exceeded"
     WRONG = "wrong"
+    INTERNAL_ERROR = "internal error"
