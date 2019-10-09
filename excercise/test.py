@@ -1,3 +1,3 @@
 i = input()
-j = input()
+#j = input()
 print(i)

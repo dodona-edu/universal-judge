@@ -1,21 +1,17 @@
 # Executor for exercises where stdin expects input and receives output in stdout.
-import glob
 from dataclasses import dataclass
 from typing import List
-from pathlib import Path
 
-from comparator import Comparator, TextComparator, FileComparator, NothingComparator
-from testplan import Plan, TestPlanError, Test, parse_test_plan
-from utils.ascii_to_html import ansi2html
-
-from tested import Config
-from dodona import partial_output as po
-from dodona import common as co
+from comparator import Comparator, FileComparator, NothingComparator, TextComparator
+from dodona import common as co, partial_output as po
 from dodona.dodona import report_update
 from jupyter import JupyterContext
+from tested import Config
+from testplan import parse_test_plan, Plan, Test, TestPlanError
+from utils.ascii_to_html import ansi2html
 
 
-def __get_expected(test: Test) -> str:
+def _get_expected(test: Test) -> str:
     """Get the expected value of a test"""
     if test.input.stdin.type == "text":
         return test.input.stdin.data
@@ -26,7 +22,7 @@ def __get_expected(test: Test) -> str:
         raise TestPlanError(f"Unknown input type in test plan: {test.input.stdin.type}")
 
 
-def __get_evaluator(test: Test) -> Comparator:
+def _get_evaluator(test: Test) -> Comparator:
     """Get the evaluator for a test"""
     if not test.evaluator:  # Determine from output type
         if test.output.stdout:
@@ -100,6 +96,9 @@ class KernelJudge(Judge):
     @staticmethod
     def _execute_statement(code, input_, context: JupyterContext, timeout, memory_limit) -> ExecutionResult:
         """Execute user_code."""
+        # print("Running:")
+        # print(code)
+        # print(input_)
         messages = context.execute_statements(code, timeout, memory_limit, std_input=input_)
         # Collect stdout from messages.
         stdout_ = []
@@ -147,7 +146,8 @@ class KernelJudge(Judge):
             elif error['ename'] == 'RuntimeError':
                 error_codes.append(po.Status.RUNTIME_ERROR)
                 coloured = [ansi2html(x) for x in error['evalue']]
-                messages.append(co.ExtendedMessage(description='<pre>' + '<br>'.join(coloured) + '</pre>', format='html'))
+                messages.append(
+                    co.ExtendedMessage(description='<pre>' + '<br>'.join(coloured) + '</pre>', format='html'))
             elif error['ename'] == 'StdError':
                 stderr_.append(error['evalue'])
                 error_codes.append(po.Status.WRONG)
@@ -167,7 +167,7 @@ class KernelJudge(Judge):
         """
         # Get the expected input for a test.
         try:
-            expected = test.get_expected()
+            expected = _get_expected(test)
         except TestPlanError as e:
             report_update(po.StartTest(""))
             report_update(po.AppendMessage(co.ExtendedMessage(
@@ -179,7 +179,7 @@ class KernelJudge(Judge):
             return False
         report_update(po.StartTest(expected))
         try:
-            evaluator = test.get_evaluator()
+            evaluator = _get_evaluator(test)
         except TestPlanError as e:
             report_update(po.AppendMessage(co.ExtendedMessage(
                 description=str(e),
@@ -236,6 +236,7 @@ class KernelJudge(Judge):
             report_update(po.StartTab(title=tab.name))
             for context in tab.contexts:
                 if not is_running:
+                    print("Starting context")
                     j_context.run()
                 report_update(po.StartContext(context.description))
                 for testcase in context.testcases:
@@ -247,8 +248,11 @@ class KernelJudge(Judge):
                     report_update(po.CloseTestcase())
                 report_update(po.CloseContext())
                 # TODO: kernels that don't support this.
-                r = self._execute_statement("%reset", None, j_context, 100, self.config.memory_limit)
+                #print("Running reset")
+                r = self._execute_statement("%reset -f in out dhist", None, j_context, 5, self.config.memory_limit)
                 if r.errors:
+                    #print(r)
+                    #print("Stopping context")
                     j_context.clean()
                     is_running = False
             report_update(po.CloseTab())

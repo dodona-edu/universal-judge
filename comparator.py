@@ -32,12 +32,12 @@ class TextComparator(Comparator):
     def __init__(self, expected_is_file=False, arguments=None):
 
         if not arguments:
-            arguments = set()
+            arguments = {"ignoreWhitespace"}
         self.expected_is_file = expected_is_file
 
-        self.ignore_whitespace = "ignore_whitespace" in arguments
-        self.allow_floating_point = "allow_floating_point" in arguments
-        self.case_insensitive = "case_insensitive" in arguments
+        self.ignore_whitespace = "ignoreWhitespace" in arguments
+        self.allow_floating_point = "allowFloating_point" in arguments
+        self.case_insensitive = "caseInsensitive" in arguments
 
     def evaluate(self, expected: str, actual: str) -> bool:
         if self.expected_is_file:

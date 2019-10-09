@@ -20,7 +20,7 @@ class Config(NamedTuple):
 
 def read_config() -> Config:
     """Read the configuration from stdout"""
-    #test = sys.stdin.read()
+    # test = sys.stdin.read()
     config_ = {
         "memory_limit": 536870912,
         "time_limit": 10000000,
@@ -50,10 +50,5 @@ if __name__ == '__main__':
 
     # Run it.
     from judge import KernelJudge
-    from jupyter import JupyterContext
-
     tester = KernelJudge(config)
     tester.judge()
-    tester._execute_test_plan()
-
-    tester.test(user_code, JupyterContext(language=config.programming_language))
