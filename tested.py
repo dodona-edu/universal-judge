@@ -3,7 +3,8 @@
 #
 # For now, this only handles running the execution kernel.
 #
-
+import json
+import sys
 from typing import NamedTuple
 
 
@@ -20,7 +21,6 @@ class Config(NamedTuple):
 
 def read_config() -> Config:
     """Read the configuration from stdout"""
-    # test = sys.stdin.read()
     config_ = {
         "memory_limit": 536870912,
         "time_limit": 10000000,
@@ -31,6 +31,8 @@ def read_config() -> Config:
         "judge": 'ignored',
         "workdir": 'ignored',
     }
+    config_json = sys.stdin.read()
+    config_ = json.loads(config_json)
     needed_config = {x: config_[x] for x in Config._fields}
     return Config(**needed_config)
 
