@@ -2,7 +2,7 @@ FROM python:3.7-buster
 
 # First, install all necessary packages for running things.
 
-RUN pip install psutil jupyter-client ipykernel ansi2html
+RUN pip install psutil jupyter-client ipykernel ansi2html dataclasses-json
 
 RUN chmod 711 /mnt
 
