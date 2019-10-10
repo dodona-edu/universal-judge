@@ -130,7 +130,7 @@ class RunError(RuntimeError):
 
 
 FAST_KERNELS = {
-    'python8': '%reset -f in out dhist'
+    'python': '%reset -f in out dhist'
 }
 
 
@@ -145,7 +145,7 @@ class KernelQueue:
         self.language = language
         self.queue = queue.Queue()
         if size is None:
-            self.size = 1 if language in FAST_KERNELS else size
+            self.size = 1 if language in FAST_KERNELS else 4
         else:
             self.size = size
         self.stopping = False
