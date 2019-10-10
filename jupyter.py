@@ -151,7 +151,7 @@ class KernelQueue:
         self.stopping = False
 
         # Create first one synchronously.
-        self._fill(size)
+        self._fill(self.size)
 
     def _fill(self, amount):
         while self.queue.qsize() < amount:
