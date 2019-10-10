@@ -53,6 +53,12 @@ class JupyterContext(Thread):
         self.client.stop_channels()
         self.manager.shutdown_kernel()
 
+    def restart(self):
+        self.manager.restart_kernel(now=True)
+
+    def is_running(self):
+        return self.manager.is_alive()
+
     def execute_statements(self, statements, timeout, memory_limit, std_input=None, silent=False):
         self.__flush_channels()
         kernel_finished, unprocessed_messages = False, True
@@ -101,8 +107,6 @@ class JupyterContext(Thread):
                             if channel is self.client.iopub_channel:
                                 if message['msg_type'] == 'status':
                                     if message['content']['execution_state'] == 'idle':
-                                        if not kernel_finished:
-                                            total_time = time.perf_counter() - start_time
                                         kernel_finished = True
                                     elif message['content']['execution_state'] in {'starting'}:
                                         pass
@@ -119,8 +123,8 @@ class JupyterContext(Thread):
                                     messages['client'].append({
                                         'msg_type': 'error',
                                         'content': {
-                                            'ename': 'TimeoutError',
-                                            'evalue': 'time limit exceeded'
+                                            'ename': 'TooMuchInput',
+                                            'evalue': 'EOF while running code'
                                         }
                                     })
                                     kernel_finished = True

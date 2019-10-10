@@ -31,8 +31,8 @@ def read_config() -> Config:
         "judge": 'ignored',
         "workdir": 'ignored',
     }
-    config_json = sys.stdin.read()
-    config_ = json.loads(config_json)
+    #config_json = sys.stdin.read()
+    #config_ = json.loads(config_json)
     needed_config = {x: config_[x] for x in Config._fields}
     return Config(**needed_config)
 

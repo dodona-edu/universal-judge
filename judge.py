@@ -151,6 +151,9 @@ class KernelJudge(Judge):
             elif error['ename'] == 'StdError':
                 stderr_.append(error['evalue'])
                 error_codes.append(po.Status.WRONG)
+            elif error['ename'] == 'TooMuchInput':
+                stderr_.append(error['evalue'])
+                error_codes.append(po.Status.WRONG)
             else:
                 print()
                 print(f"Unknown error: {error}")
@@ -236,7 +239,6 @@ class KernelJudge(Judge):
             report_update(po.StartTab(title=tab.name))
             for context in tab.contexts:
                 if not is_running:
-                    print("Starting context")
                     j_context.run()
                 report_update(po.StartContext(context.description))
                 for testcase in context.testcases:
@@ -248,12 +250,12 @@ class KernelJudge(Judge):
                     report_update(po.CloseTestcase())
                 report_update(po.CloseContext())
                 # TODO: kernels that don't support this.
-                #print("Running reset")
-                r = self._execute_statement("%reset -f in out dhist", None, j_context, 5, self.config.memory_limit)
+                print("\nRunning reset")
+                r = self._execute_statement("%reset -f in out dhist", None, j_context, 1, self.config.memory_limit)
                 if r.errors:
-                    #print(r)
-                    #print("Stopping context")
-                    j_context.clean()
+                    print()
+                    print("Stopping context")
+                    j_context.restart()
                     is_running = False
             report_update(po.CloseTab())
         report_update(po.CloseJudgment())
