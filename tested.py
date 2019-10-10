@@ -54,3 +54,4 @@ if __name__ == '__main__':
     from judge import KernelJudge
     tester = KernelJudge(config)
     tester.judge()
+    print("Final...")

@@ -1,11 +1,11 @@
 # Executor for exercises where stdin expects input and receives output in stdout.
 from dataclasses import dataclass
-from typing import List
+from typing import List, Tuple
 
 from comparator import Comparator, FileComparator, NothingComparator, TextComparator
 from dodona import common as co, partial_output as po
 from dodona.dodona import report_update
-from jupyter import JupyterContext
+from jupyter import JupyterContext, KernelQueue
 from tested import Config
 from testplan import parse_test_plan, Plan, Test, TestPlanError
 from utils.ascii_to_html import ansi2html
@@ -66,13 +66,12 @@ class Judge:
     def __init__(self, config: Config):
         self.config = config
 
-    def _execute_test_plan(self, submission: str, test_plan: Plan, j_context: JupyterContext):
+    def _execute_test_plan(self, submission: str, test_plan: Plan):
         """
         Execute a test plan.
 
         :param test_plan: The plan to execute.
         :param submission: The code submitted by the user.
-        :param j_context: A context used to evaluate the user code.
         """
         raise NotImplementedError()
 
@@ -85,7 +84,7 @@ class Judge:
         with open(f"{self.config.resources}/basic.json", 'r') as file:
             plan = parse_test_plan(file)
 
-        self._execute_test_plan(submission_code, plan, JupyterContext(language=self.config.programming_language))
+        self._execute_test_plan(submission_code, plan)
 
 
 class KernelJudge(Judge):
@@ -94,7 +93,7 @@ class KernelJudge(Judge):
     """
 
     @staticmethod
-    def _execute_statement(code, input_, context: JupyterContext, timeout, memory_limit) -> ExecutionResult:
+    def _execute_statement(code, input_, context: JupyterContext, timeout, memory_limit) -> Tuple[ExecutionResult, bool]:
         """Execute user_code."""
         # print("Running:")
         # print(code)
@@ -139,6 +138,7 @@ class KernelJudge(Judge):
         stderr_ = []
         messages = []
 
+        fast_restart = False
         # Process error messages.
         for error in errors_:
             if error['ename'] == 'TimeoutError':
@@ -154,11 +154,12 @@ class KernelJudge(Judge):
             elif error['ename'] == 'TooMuchInput':
                 stderr_.append(error['evalue'])
                 error_codes.append(po.Status.WRONG)
+                fast_restart = True
             else:
                 print()
                 print(f"Unknown error: {error}")
 
-        return ExecutionResult(stdout_, stderr_, error_codes, messages)
+        return ExecutionResult(stdout_, stderr_, error_codes, messages), fast_restart
 
     def _execute_test(self, submission: str, test: Test, context: JupyterContext) -> bool:
         """
@@ -194,7 +195,7 @@ class KernelJudge(Judge):
 
         input_ = test.input.stdin.data
 
-        result = self._execute_statement(submission, input_, context,
+        result, fast_restart = self._execute_statement(submission, input_, context,
                                          timeout=self.config.time_limit,
                                          memory_limit=self.config.memory_limit)
 
@@ -224,41 +225,34 @@ class KernelJudge(Judge):
             report_update(po.AppendMessage(message=message))
 
         report_update(po.CloseTest(actual, po.StatusMessage(status), data=po.TestData(channel="stdout")))
-        return False
+        return fast_restart
 
-    def _execute_test_plan(self, submission: str, test_plan: Plan, j_context: JupyterContext):
+    def _execute_test_plan(self, submission: str, test_plan: Plan):
         """Execute a test plan"""
 
-        # Start the Jupyter kernel.
-        j_context.run()
-        is_running = True
+        # Start a pool of kernels.
+        kernels = KernelQueue(language=self.config.programming_language)
+        current_kernel = kernels.get_kernel(None)
 
         # TODO: when should contexts be cleared?
         report_update(po.StartJudgment())
         for tab in test_plan.tabs:
             report_update(po.StartTab(title=tab.name))
             for context in tab.contexts:
-                if not is_running:
-                    j_context.run()
                 report_update(po.StartContext(context.description))
                 for testcase in context.testcases:
                     report_update(po.StartTestcase(testcase.description))
                     for test in testcase.tests:
-                        if self._execute_test(submission, test, j_context):
-                            j_context.clean()
-                            j_context.start()
+                        self._execute_test(submission, test, current_kernel)
                     report_update(po.CloseTestcase())
                 report_update(po.CloseContext())
-                # TODO: kernels that don't support this.
-                print("\nRunning reset")
-                r = self._execute_statement("%reset -f in out dhist", None, j_context, 1, self.config.memory_limit)
-                if r.errors:
-                    print()
-                    print("Stopping context")
-                    j_context.restart()
-                    is_running = False
+                print("Stopping context")
+                current_kernel = kernels.get_kernel(current_kernel)
             report_update(po.CloseTab())
         report_update(po.CloseJudgment())
 
-        if is_running:
-            j_context.clean()
+        print("Clean kernels...")
+        kernels.clean()
+        print("Kernels are cleaned")
+        current_kernel.clean()
+        print("Cleaned")

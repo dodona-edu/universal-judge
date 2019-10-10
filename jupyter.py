@@ -10,29 +10,6 @@ from utils.memory_limit import MemoryLimit
 from utils.timeout import Timeout
 
 
-def get_queue(num_elements=4, language='python3', allow_stdin=True):
-    context_queue = queue.Queue()
-    for _ in range(num_elements):
-        new_element = JupyterContext(language=language, allow_stdin=allow_stdin)
-        new_element.start()
-        context_queue.put(new_element)
-    return context_queue
-
-
-def fill_queue(context_queue, num_elements=4, language='python3', allow_stdin=True):
-    while context_queue.qsize() < num_elements:
-        new_element = JupyterContext(language=language, allow_stdin=allow_stdin)
-        new_element.start()
-        context_queue.put(new_element)
-
-
-def clean_queue(context_queue):
-    while not context_queue.empty():
-        element = context_queue.get()
-        element.join()
-        element.clean()
-
-
 class JupyterContext(Thread):
     def __init__(self, language='python3', allow_stdin=True):
         super().__init__()
@@ -152,13 +129,82 @@ class RunError(RuntimeError):
         self.error = error
 
 
-def run_outside(context, func, args, timeout=None, memory_limit=None):
-    for elem in func[:-1]:
-        context.execute_statements(elem.format(*args))
-    messages = context.execute_statements(
-        func[-1].format(*args),
-        timeout=timeout, memory_limit=memory_limit)
-    for channel in messages:
-        for message in messages[channel]:
-            if message['msg_type'] == 'error':
-                raise RunError(message['content'])
+FAST_KERNELS = {
+    'python8': '%reset -f in out dhist'
+}
+
+
+class KernelQueue:
+    """
+    A multithreaded kernel manager. This allows clients to execute multiple statements after each other, without waiting
+    for start and restart times.
+    The first time you create a new instance of this class, one kernel is created synchronously.
+    """
+
+    def __init__(self, language, size=2):
+        self.language = language
+        self.queue = queue.Queue()
+        self.size = size
+        self.stopping = False
+
+        # Create first one synchronously.
+        self._fill(size)
+
+    def _fill(self, amount):
+        while self.queue.qsize() < amount:
+            self._add_new_kernel()
+
+    def new_kernel(self):
+        print(f"Producing new kernel")
+        return JupyterContext(self.language)
+
+    def _add_new_kernel(self):
+        kernel = self.new_kernel()
+        kernel.run()
+        if self.stopping:
+            kernel.clean()
+            print("Ignoring reset kernel, since we are stopping")
+        else:
+            self.queue.put(kernel)
+            print("Kernel was constructed and added to the queue!")
+
+    def get_kernel(self, existing=None):
+        print(f"Getting kernel from queue with size {self.queue.qsize()}")
+        new_kernel = self.queue.get()
+        if existing is not None:
+            print(f"Re-purposing existing kernel")
+            t = Thread(name="KR", target=self._reset_kernel, args=[existing])
+            t.setDaemon(True)
+            t.start()
+        print("Returning new kernel")
+        return new_kernel
+
+    def _reset_kernel(self, kernel: JupyterContext):
+        if self.language in FAST_KERNELS:
+            print("Doing fast reset")
+            r = kernel.execute_statements(FAST_KERNELS[self.language], 1, None)
+            if not any(m['msg_type'] == 'error' for m in r['client']):
+                if self.stopping:
+                    kernel.clean()
+                    print("Ignoring reset kernel, since we are stopping")
+                else:
+                    self.queue.put(kernel)
+                    print("Kernel was reset and added back to the queue!")
+                return
+
+        print("Doing slow kernel reset...")
+        kernel.clean()
+        new_kernel = self.new_kernel()
+        new_kernel.run()
+        if self.stopping:
+            new_kernel.clean()
+            print("Ignoring reset kernel, since we are stopping")
+        else:
+            self.queue.put(new_kernel)
+            print("Kernel was reset and added back to the queue!")
+
+    def clean(self):
+        self.stopping = True
+        while not self.queue.empty():
+            k = self.queue.get()
+            k.clean()
