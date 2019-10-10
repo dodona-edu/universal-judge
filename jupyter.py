@@ -145,7 +145,7 @@ class KernelQueue:
         self.language = language
         self.queue = queue.Queue()
         if size is None:
-            self.size = 1 if language in FAST_KERNELS else 4
+            self.size = 2 if language in FAST_KERNELS else 4
         else:
             self.size = size
         self.stopping = False
