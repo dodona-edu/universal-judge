@@ -34,7 +34,7 @@ def report_feedback(feedback: Feedback):
     Send feedback to stdout.
     """
     json.dump(feedback, sys.stdout, cls=_EnhancedJSONEncoder)
-    print()
+    # print()
 
 
 def report_update(update: _Update):
