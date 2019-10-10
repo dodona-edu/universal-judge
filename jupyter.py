@@ -141,10 +141,13 @@ class KernelQueue:
     The first time you create a new instance of this class, one kernel is created synchronously.
     """
 
-    def __init__(self, language, size=2):
+    def __init__(self, language, size=None):
         self.language = language
         self.queue = queue.Queue()
-        self.size = size
+        if size is None:
+            self.size = 1 if language in FAST_KERNELS else size
+        else:
+            self.size = size
         self.stopping = False
 
         # Create first one synchronously.
@@ -155,7 +158,7 @@ class KernelQueue:
             self._add_new_kernel()
 
     def new_kernel(self):
-        print(f"Producing new kernel")
+        # print(f"Producing new kernel")
         return JupyterContext(self.language)
 
     def _add_new_kernel(self):
@@ -163,45 +166,45 @@ class KernelQueue:
         kernel.run()
         if self.stopping:
             kernel.clean()
-            print("Ignoring reset kernel, since we are stopping")
+            # print("Ignoring reset kernel, since we are stopping")
         else:
             self.queue.put(kernel)
-            print("Kernel was constructed and added to the queue!")
+            # print("Kernel was constructed and added to the queue!")
 
     def get_kernel(self, existing=None):
-        print(f"Getting kernel from queue with size {self.queue.qsize()}")
+        # print(f"Getting kernel from queue with size {self.queue.qsize()}")
         new_kernel = self.queue.get()
         if existing is not None:
-            print(f"Re-purposing existing kernel")
+            # print(f"Re-purposing existing kernel")
             t = Thread(name="KR", target=self._reset_kernel, args=[existing])
             t.setDaemon(True)
             t.start()
-        print("Returning new kernel")
+        # print("Returning new kernel")
         return new_kernel
 
     def _reset_kernel(self, kernel: JupyterContext):
         if self.language in FAST_KERNELS:
-            print("Doing fast reset")
+            # print("Doing fast reset")
             r = kernel.execute_statements(FAST_KERNELS[self.language], 1, None)
             if not any(m['msg_type'] == 'error' for m in r['client']):
                 if self.stopping:
                     kernel.clean()
-                    print("Ignoring reset kernel, since we are stopping")
+                    # print("Ignoring reset kernel, since we are stopping")
                 else:
                     self.queue.put(kernel)
-                    print("Kernel was reset and added back to the queue!")
+                    # print("Kernel was reset and added back to the queue!")
                 return
 
-        print("Doing slow kernel reset...")
+        # print("Doing slow kernel reset...")
         kernel.clean()
         new_kernel = self.new_kernel()
         new_kernel.run()
         if self.stopping:
             new_kernel.clean()
-            print("Ignoring reset kernel, since we are stopping")
+            # print("Ignoring reset kernel, since we are stopping")
         else:
             self.queue.put(new_kernel)
-            print("Kernel was reset and added back to the queue!")
+            # print("Kernel was reset and added back to the queue!")
 
     def clean(self):
         self.stopping = True

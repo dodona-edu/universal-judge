@@ -42,4 +42,4 @@ def report_update(update: _Update):
     Send an update to stdout.
     """
     json.dump(update, sys.stdout, cls=_EnhancedJSONEncoder)
-    print()
+    # print()
