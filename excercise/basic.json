@@ -1,5 +1,8 @@
 {
   "name": null,
+  "run": {
+    "object": "Test"
+  },
   "tabs": [
     {
       "name": "Correctheid",

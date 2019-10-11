@@ -17,6 +17,16 @@ class Config(NamedTuple):
     programming_language: str
     workdir: str
     judge: str
+    kernel: str
+
+
+LANGUAGE_TO_KERNEL = {
+    'python': 'python3',
+    'python3': 'python3',
+    'r': 'ir',
+    'julia': 'julia-1.2',
+    'haskell': 'ihaskell'
+}
 
 
 def read_config() -> Config:
@@ -24,16 +34,17 @@ def read_config() -> Config:
     config_ = {
         "memory_limit": 536870912,
         "time_limit": 10000000,
-        "programming_language": 'python',
+        "programming_language": 'java',
         "natural_language": 'nl',
         "resources": './excercise',
-        "source": './excercise/test.py',
+        "source": './excercise/test.java',
         "judge": 'ignored',
         "workdir": 'ignored',
     }
-    config_json = sys.stdin.read()
-    config_ = json.loads(config_json)
-    needed_config = {x: config_[x] for x in Config._fields}
+    #config_json = sys.stdin.read()
+    #config_ = json.loads(config_json)
+    needed_config = {x: config_[x] for x in Config._fields if x in config_}
+    needed_config['kernel'] = LANGUAGE_TO_KERNEL.get(config_["programming_language"], config_["programming_language"])
     return Config(**needed_config)
 
 

@@ -9,6 +9,13 @@ class TestPlanError(ValueError):
     pass
 
 
+# Special class denoting the name of the object that must be run.
+@dataclass_json
+@dataclass
+class Run:
+    object: str
+
+
 @dataclass_json
 @dataclass
 class Stdin:
@@ -62,6 +69,10 @@ class Test:
     input: Input
     output: Output
     evaluator: Optional[Evaluator] = None
+    run: Optional[Run] = None
+
+    def get_run(self):
+        return self.run if self.run else self.parent.get_run()
 
 
 @dataclass_json
@@ -69,6 +80,10 @@ class Test:
 class Testcase:
     description: str
     tests: List[Test]
+    run: Optional[Run] = None
+
+    def get_run(self):
+        return self.run if self.run else self.parent.get_run()
 
 
 @dataclass_json
@@ -76,6 +91,10 @@ class Testcase:
 class Context:
     testcases: List[Testcase]
     description: Optional[str] = None
+    run: Optional[Run] = None
+
+    def get_run(self):
+        return self.run if self.run else self.parent.get_run()
 
 
 @dataclass_json
@@ -84,6 +103,10 @@ class Tab:
     name: str
     contexts: List[Context]
     description: Optional[str] = None
+    run: Optional[Run] = None
+
+    def get_run(self):
+        return self.run if self.run else self.parent.get_run()
 
 
 @dataclass_json
@@ -91,21 +114,34 @@ class Tab:
 class Plan:
     name: Optional[str] = None
     tabs: Optional[List[Tab]] = field(default_factory=list)
+    run: Optional[Run] = None
+
+    def get_run(self):
+        return self.run if self.run else self.parent.get_run()
 
 
 def parse_test_plan(test_file) -> Plan:
     """Parse a test plan into the structures."""
 
     raw = test_file.read()
-    plan = Plan.from_json(raw)
+    plan: Plan = Plan.from_json(raw)
 
     if not plan.name:
         plan.name = Path(test_file.name).stem
+
+    # Add parent to all elements
+    for tab in plan.tabs:
+        tab.parent = plan
+        for context in tab.contexts:
+            context.parent = tab
+            for testcase in context.testcases:
+                testcase.parent = context
+                for test in testcase.tests:
+                    test.parent = testcase
 
     return plan
 
 
 if __name__ == '__main__':
-    with open('internal.json', 'r') as f:
+    with open('dsl/internal.json', 'r') as f:
         r = parse_test_plan(f)
-        print(r)

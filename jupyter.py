@@ -130,7 +130,7 @@ class RunError(RuntimeError):
 
 
 FAST_KERNELS = {
-    'python': '%reset -f in out dhist'
+    'python3': '%reset -f in out dhist'
 }
 
 
@@ -141,11 +141,11 @@ class KernelQueue:
     The first time you create a new instance of this class, one kernel is created synchronously.
     """
 
-    def __init__(self, language, size=None):
-        self.language = language
+    def __init__(self, kernel, size=None):
+        self.kernel = kernel
         self.queue = queue.Queue()
         if size is None:
-            self.size = 2 if language in FAST_KERNELS else 4
+            self.size = 2 if kernel in FAST_KERNELS else 4
         else:
             self.size = size
         self.stopping = False
@@ -159,7 +159,7 @@ class KernelQueue:
 
     def new_kernel(self):
         # print(f"Producing new kernel")
-        return JupyterContext(self.language)
+        return JupyterContext(self.kernel)
 
     def _add_new_kernel(self):
         kernel = self.new_kernel()
@@ -183,9 +183,9 @@ class KernelQueue:
         return new_kernel
 
     def _reset_kernel(self, kernel: JupyterContext):
-        if self.language in FAST_KERNELS:
+        if self.kernel in FAST_KERNELS:
             # print("Doing fast reset")
-            r = kernel.execute_statements(FAST_KERNELS[self.language], 1, None)
+            r = kernel.execute_statements(FAST_KERNELS[self.kernel], 1, None)
             if not any(m['msg_type'] == 'error' for m in r['client']):
                 if self.stopping:
                     kernel.clean()

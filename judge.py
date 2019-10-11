@@ -1,13 +1,13 @@
 # Executor for exercises where stdin expects input and receives output in stdout.
 from dataclasses import dataclass
-from typing import List, Tuple
+from typing import List
 
 from comparator import Comparator, FileComparator, NothingComparator, TextComparator
 from dodona import common as co, partial_output as po
 from dodona.dodona import report_update
 from jupyter import JupyterContext, KernelQueue
 from tested import Config
-from testplan import parse_test_plan, Plan, Test, TestPlanError
+from testplan import parse_test_plan, Plan, Run, Test, TestPlanError
 from utils.ascii_to_html import ansi2html
 
 
@@ -48,6 +48,19 @@ def _get_evaluator(test: Test) -> Comparator:
             raise TestPlanError(f"Unknown buil-in evaluator: {test.evaluator.name}")
     elif test.evaluator.type == 'external':
         raise NotImplementedError()
+
+
+RUN_KERNELS = {
+    'java': '\n{}.main(new String[]{{}})'
+}
+
+
+def needs_run(kernel: str) -> bool:
+    return kernel in RUN_KERNELS
+
+
+def create_run(kernel: str, run: Run) -> str:
+    return RUN_KERNELS[kernel].format(run.object)
 
 
 @dataclass
@@ -93,7 +106,7 @@ class KernelJudge(Judge):
     """
 
     @staticmethod
-    def _execute_statement(code, input_, context: JupyterContext, timeout, memory_limit) -> Tuple[ExecutionResult, bool]:
+    def _execute_statement(code, input_, context: JupyterContext, timeout, memory_limit) -> ExecutionResult:
         """Execute user_code."""
         # print("Running:")
         # print(code)
@@ -138,7 +151,6 @@ class KernelJudge(Judge):
         stderr_ = []
         messages = []
 
-        fast_restart = False
         # Process error messages.
         for error in errors_:
             if error['ename'] == 'TimeoutError':
@@ -148,20 +160,16 @@ class KernelJudge(Judge):
                 coloured = [ansi2html(x) for x in error['evalue']]
                 messages.append(
                     co.ExtendedMessage(description='<pre>' + '<br>'.join(coloured) + '</pre>', format='html'))
-            elif error['ename'] == 'StdError':
+            elif error['ename'] in ('StdError', 'TooMuchInput'):
                 stderr_.append(error['evalue'])
                 error_codes.append(po.Status.WRONG)
-            elif error['ename'] == 'TooMuchInput':
-                stderr_.append(error['evalue'])
-                error_codes.append(po.Status.WRONG)
-                fast_restart = True
             else:
                 print()
                 print(f"Unknown error: {error}")
 
-        return ExecutionResult(stdout_, stderr_, error_codes, messages), fast_restart
+        return ExecutionResult(stdout_, stderr_, error_codes, messages)
 
-    def _execute_test(self, submission: str, test: Test, context: JupyterContext) -> bool:
+    def _execute_test(self, submission: str, test: Test, context: JupyterContext):
         """
         Run a single test.
         :param submission: The code to run the test against.
@@ -180,7 +188,7 @@ class KernelJudge(Judge):
                 permission=co.Permission.STAFF
             )))
             report_update(po.CloseTest("Internal error", po.StatusMessage(po.Status.INTERNAL_ERROR)))
-            return False
+            return
         report_update(po.StartTest(expected))
         try:
             evaluator = _get_evaluator(test)
@@ -191,11 +199,15 @@ class KernelJudge(Judge):
                 permission=co.Permission.STAFF
             )))
             report_update(po.CloseTest("Internal error", po.StatusMessage(po.Status.INTERNAL_ERROR)))
-            return False
+            return
 
         input_ = test.input.stdin.data
 
-        result, fast_restart = self._execute_statement(submission, input_, context,
+        if needs_run(self.config.kernel):
+            run = create_run(self.config.kernel, test.get_run())
+            submission += run
+
+        result = self._execute_statement(submission, input_, context,
                                          timeout=self.config.time_limit,
                                          memory_limit=self.config.memory_limit)
 
@@ -225,13 +237,12 @@ class KernelJudge(Judge):
             report_update(po.AppendMessage(message=message))
 
         report_update(po.CloseTest(actual, po.StatusMessage(status), data=po.TestData(channel="stdout")))
-        return fast_restart
 
     def _execute_test_plan(self, submission: str, test_plan: Plan):
         """Execute a test plan"""
 
         # Start a pool of kernels.
-        kernels = KernelQueue(language=self.config.programming_language)
+        kernels = KernelQueue(kernel=self.config.kernel)
         current_kernel = kernels.get_kernel(None)
 
         # TODO: when should contexts be cleared?
