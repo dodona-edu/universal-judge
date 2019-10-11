@@ -1,89 +1,125 @@
 from dataclasses import dataclass, field
+from enum import Enum
 from pathlib import Path
-from typing import List, Optional
-
+from typing import List, Optional, Union
+from deprecated import deprecated
 from dataclasses_json import dataclass_json
 
 
 class TestPlanError(ValueError):
+    """Error when the test plan is not valid."""
     pass
 
 
 # Special class denoting the name of the object that must be run.
 @dataclass_json
 @dataclass
+@deprecated  # Remove this in the future
 class Run:
     object: str
 
 
-@dataclass_json
-@dataclass
-class Stdin:
-    data: Optional[str] = None
-    type: Optional[str] = "text"
+class DataType(Enum):
+    text = "text"  # Literal values
+    file = "file"  # Path to a file
+
+
+class ChannelState(Enum):
+    none = "none"  # There is nothing on this channel, i.e. completely empty.
+
+
+class OutputChannelState(Enum):
+    none = "none"  # There is nothing on this channel, i.e. completely empty.
+    ignored = "ignored"  # Ignore everything on this channel, i.e. doesn't matter what you use.
 
 
 @dataclass_json
 @dataclass
-class Stdout:
-    type: Optional[str] = "text"
-    data: Optional[str] = None
+class ChannelData:
+    """Describes the data on channel (stdin or stdout)"""
+    data: str  # The actual data.
+    type: Optional[DataType] = DataType.text  # The type of the data field.
+
+
+InputChannel = Union[ChannelData, ChannelState]
+OutputChannel = Union[ChannelData, OutputChannelState]
 
 
 @dataclass_json
 @dataclass
 class FileOutput:
-    expected: str
-    actual: str
+    """Describes output where the code should produce a file."""
+    expected: str  # Path to the expected file
+    actual: str  # Path to the generated file (by the users code)
 
 
 @dataclass_json
 @dataclass
 class Input:
-    stdin: Optional[Stdin] = Stdin()
-    # Add function calls and such here.
+    """Describes the input channels for a test"""
+    stdin: Optional[InputChannel] = ChannelState.none  # Describes stdin. If "none", there is no stdin.
+    # Add function calls and such here, as separate input channels.
 
 
 @dataclass_json
 @dataclass
 class Output:
-    # Receive output on stdout
-    stdout: Optional[Stdout] = Stdout()
-    # The output should be a file.
-    file: Optional[FileOutput] = None
+    """Describes the output channels for a test"""
+    stdout: Optional[OutputChannel] = OutputChannelState.ignored  # Stdout is ignored by default
+    stderr: Optional[OutputChannel] = OutputChannelState.none  # Stderr should be empty by default
+    file: Optional[FileOutput] = None  # The output can be a file.
+
+
+class EvaluatorType(Enum):
+    builtin = "builtin"
+    external = "external"
+
+
+TEXT_COMPARATOR = "textComparator"
+TEXT_ARGUMENTS = ["ignoreWhitespace"]
 
 
 @dataclass_json
 @dataclass
 class Evaluator:
-    name: Optional[str] = "textComparator"
-    type: Optional[str] = "builtin"
-    language: Optional[str] = None
-    options: Optional[List[str]] = field(default_factory=list)
+    """Will evaluate the test."""
+    name: Optional[str] = TEXT_COMPARATOR  # Name of the comparator or path to the evaluator.
+    type: Optional[EvaluatorType] = EvaluatorType.builtin  # Type of the evaluator.
+    language: Optional[str] = None  # Ignored when using built-in evaluators
+    options: Optional[List[str]] = field(default_factory=lambda: TEXT_ARGUMENTS)  # Pass options to the evaluator.
 
 
 @dataclass_json
 @dataclass
 class Test:
-    description: str
-    input: Input
-    output: Output
+    """Describes a single test"""
+    description: str  # Description of the test.
+    input: Input  # Input of the test.
+    output: Output  # Output of the test.
     evaluator: Optional[Evaluator] = None
-    run: Optional[Run] = None
+    run: Optional[Run] = None  # Optional run arguments TODO
 
     def get_run(self):
         return self.run if self.run else self.parent.get_run()
+
+    def get_evaluator(self):
+        return self.evaluator if self.evaluator else self.parent.get_evaluator()
 
 
 @dataclass_json
 @dataclass
 class Testcase:
-    description: str
-    tests: List[Test]
-    run: Optional[Run] = None
+    """Describes a test case, consisting of some tests."""
+    description: str  # Description of the test case.
+    tests: List[Test]  # Tests in the test case.
+    run: Optional[Run] = None  # Optional run arguments
+    evaluator: Optional[Evaluator] = None
 
     def get_run(self):
         return self.run if self.run else self.parent.get_run()
+
+    def get_evaluator(self):
+        return self.evaluator if self.evaluator else self.parent.get_evaluator()
 
 
 @dataclass_json
@@ -92,9 +128,13 @@ class Context:
     testcases: List[Testcase]
     description: Optional[str] = None
     run: Optional[Run] = None
+    evaluator: Optional[Evaluator] = None
 
     def get_run(self):
         return self.run if self.run else self.parent.get_run()
+
+    def get_evaluator(self):
+        return self.evaluator if self.evaluator else self.parent.get_evaluator()
 
 
 @dataclass_json
@@ -104,9 +144,13 @@ class Tab:
     contexts: List[Context]
     description: Optional[str] = None
     run: Optional[Run] = None
+    evaluator: Optional[Evaluator] = None
 
     def get_run(self):
         return self.run if self.run else self.parent.get_run()
+
+    def get_evaluator(self):
+        return self.evaluator if self.evaluator else self.parent.get_evaluator()
 
 
 @dataclass_json
@@ -115,9 +159,13 @@ class Plan:
     name: Optional[str] = None
     tabs: Optional[List[Tab]] = field(default_factory=list)
     run: Optional[Run] = None
+    evaluator: Optional[Evaluator] = Evaluator()
 
     def get_run(self):
-        return self.run if self.run else self.parent.get_run()
+        return self.run
+
+    def get_evaluator(self):
+        return self.evaluator
 
 
 def parse_test_plan(test_file) -> Plan:

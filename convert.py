@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import argparse
 
-from testplan import Test, Input, Stdin, Output, Stdout, Testcase, Context, Tab, Plan
+from testplan import Test, Input, Stdin, Output, ChannelData, Testcase, Context, Tab, Plan
 
 
 def convert(input_file, output_file, result):
@@ -18,7 +18,7 @@ def convert(input_file, output_file, result):
     contexts = []
     for input_, output_ in zip(inputs, outputs):
         stdin_ = Input(stdin=Stdin(data=input_))
-        stdout_ = Output(stdout=Stdout(data=output_))
+        stdout_ = Output(stdout=ChannelData(data=output_))
         test = Test(description=input_, input=stdin_, output=stdout_)
         testcase = Testcase(description=input_, tests=[test])
         contexts.append(Context(testcases=[testcase]))
