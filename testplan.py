@@ -2,7 +2,6 @@ from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
 from typing import List, Optional, Union
-from deprecated import deprecated
 from dataclasses_json import dataclass_json
 
 
@@ -14,9 +13,8 @@ class TestPlanError(ValueError):
 # Special class denoting the name of the object that must be run.
 @dataclass_json
 @dataclass
-@deprecated  # Remove this in the future
 class Run:
-    object: str
+    classname: str
 
 
 class DataType(Enum):
