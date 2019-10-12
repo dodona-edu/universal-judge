@@ -1,9 +1,17 @@
+import groovy.json.JsonBuilder
+import groovy.json.JsonGenerator
+import groovy.json.JsonOutput
+import groovy.transform.CompileDynamic
+import groovy.transform.CompileStatic
+import org.codehaus.groovy.control.CompilerConfiguration
+
+@CompileStatic
 class ChannelData {
-    final static Set ALLOWED = ['text', 'file']
+    final static Set ALLOWED = ['text', 'file'] as Set
     String data
     String type = 'text'
 
-    def data(String data) {
+    String data(String data) {
         this.data = data
     }
 
@@ -13,10 +21,17 @@ class ChannelData {
         }
         this.type = type
     }
+
+    Object toJson() {
+        def builder = new JsonBuilder()
+        builder data: this.data, type: this.type
+        return builder.content
+    }
 }
 
+@CompileStatic
 class Input {
-    final static Set ALLOWED = ['none']
+    final static Set ALLOWED = ['none'] as Set
     def stdin = 'none'
 
     def stdin(String state) {
@@ -26,9 +41,9 @@ class Input {
         stdin = state
     }
 
-    def stdin(@DelegatesTo(value = ChannelData, strategy = Closure.DELEGATE_FIRST) Closure<?> spec) {
+    def stdin(@DelegatesTo(value = ChannelData, strategy = Closure.DELEGATE_FIRST) Closure<?> cl) {
         def channelData = new ChannelData()
-        spec.rehydrate(channelData, this, this)
+        def spec = cl.rehydrate(channelData, this, this)
         spec.resolveStrategy = Closure.DELEGATE_FIRST
         spec()
         if (!channelData.data?.trim() || !channelData.type?.trim()) {
@@ -36,8 +51,15 @@ class Input {
         }
         stdin = channelData
     }
+
+    Object toJson() {
+        JsonBuilder builder = new JsonBuilder()
+        builder stdin: this.stdin instanceof String ? this.stdin : (this.stdin as ChannelData).toJson()
+        return builder.content
+    }
 }
 
+@CompileStatic
 class FileOutput {
     String expected
     String actual
@@ -51,29 +73,30 @@ class FileOutput {
     }
 }
 
+@CompileStatic
 class Output {
-    final static Set ALLOWED = ['none', 'ignored']
-    def stdout = 'none'
-    def stderr = 'ignored'
+    final static Set<String> ALLOWED = Set.of('none', 'ignored')
+    def stdout = 'ignored'
+    def stderr = 'none'
     FileOutput file
 
     def stdout(String state) {
         if (!ALLOWED.contains(state)) {
-            throw new TestPlanException("Output channel stdout is $type, must be one of $ALLOWED")
+            throw new TestPlanException("Output channel stdout is $state, must be one of $ALLOWED")
         }
         this.stdout = state
     }
 
     def stderr(String state) {
         if (!ALLOWED.contains(state)) {
-            throw new TestPlanException("Output channel stderr is $type, must be one of $ALLOWED")
+            throw new TestPlanException("Output channel stderr is $state, must be one of $ALLOWED")
         }
         this.stderr = state
     }
 
-    def stderr(@DelegatesTo(value = ChannelData, strategy = Closure.DELEGATE_FIRST) Closure<?> spec) {
+    def stderr(@DelegatesTo(value = ChannelData, strategy = Closure.DELEGATE_FIRST) Closure<?> cl) {
         def channelData = new ChannelData()
-        spec.rehydrate(channelData, this, this)
+        def spec = cl.rehydrate(channelData, this, this)
         spec.resolveStrategy = Closure.DELEGATE_FIRST
         spec()
         if (!channelData.data?.trim() || !channelData.type?.trim()) {
@@ -82,9 +105,9 @@ class Output {
         stderr = channelData
     }
 
-    def stdout(@DelegatesTo(value = ChannelData, strategy = Closure.DELEGATE_FIRST) Closure<?> spec) {
+    def stdout(@DelegatesTo(value = ChannelData, strategy = Closure.DELEGATE_FIRST) Closure<?> cl) {
         def channelData = new ChannelData()
-        spec.rehydrate(channelData, this, this)
+        def spec = cl.rehydrate(channelData, this, this)
         spec.resolveStrategy = Closure.DELEGATE_FIRST
         spec()
         if (!channelData.data?.trim() || !channelData.type?.trim()) {
@@ -93,9 +116,9 @@ class Output {
         stdout = channelData
     }
 
-    def file(@DelegatesTo(value = FileOutput, strategy = Closure.DELEGATE_FIRST) Closure<?> spec) {
+    def file(@DelegatesTo(value = FileOutput, strategy = Closure.DELEGATE_FIRST) Closure<?> cl) {
         def fileOutput = new FileOutput()
-        spec.rehydrate(fileOutput, this, this)
+        def spec = cl.rehydrate(fileOutput, this, this)
         spec.resolveStrategy = Closure.DELEGATE_FIRST
         spec()
         if (!fileOutput.expected?.trim() || !fileOutput.actual?.trim()) {
@@ -103,20 +126,29 @@ class Output {
         }
         file = fileOutput
     }
+
+    Object toJson() {
+        JsonBuilder builder = new JsonBuilder()
+        builder stdout: this.stdout instanceof String ? this.stdout : (this.stdout as ChannelData).toJson(),
+                stderr: this.stderr instanceof String ? this.stderr : (this.stderr as ChannelData).toJson(),
+                file: this.file
+        return builder.content
+    }
 }
 
+@CompileStatic
 class Test {
     String description
     Input input
     Output output
 
-    def description(String string) {
+    String description(String string) {
         this.description = string
     }
 
-    def input(@DelegatesTo(value = Input, strategy = Closure.DELEGATE_FIRST) Closure<?> spec) {
+    def input(@DelegatesTo(value = Input, strategy = Closure.DELEGATE_FIRST) Closure<?> cl) {
         def input = new Input()
-        spec.rehydrate(input, this, this)
+        def spec = cl.rehydrate(input, this, this)
         spec.resolveStrategy = Closure.DELEGATE_FIRST
         spec()
         if (!input.stdin) {
@@ -133,9 +165,9 @@ class Test {
         this.input.stdin = channel
     }
 
-    def output(@DelegatesTo(value = Output, strategy = Closure.DELEGATE_FIRST) Closure<?> spec) {
+    def output(@DelegatesTo(value = Output, strategy = Closure.DELEGATE_FIRST) Closure<?> cl) {
         def output = new Output()
-        spec.rehydrate(output, this, this)
+        def spec = cl.rehydrate(output, this, this)
         spec.resolveStrategy = Closure.DELEGATE_FIRST
         spec()
         if (!output.stdout || !output.stderr) {
@@ -152,28 +184,59 @@ class Test {
         this.output.stdout = channel
     }
 
+    Object toJson() {
+        def builder = new JsonBuilder()
+        builder description: this.description, input: this.input.toJson(), output: this.output.toJson()
+        return builder.content
+    }
+
 }
 
+@CompileStatic
 class Testcase {
-    String description
+    String description = ""
     List<Test> tests = new ArrayList<>()
 
     def description(String description) {
         this.description = description
     }
 
-    def test(@DelegatesTo(value = Test, strategy = Closure.DELEGATE_FIRST) Closure<?> spec) {
+    List<Test> test(@DelegatesTo(value = Test, strategy = Closure.DELEGATE_FIRST) Closure<?> cl) {
         def test = new Test()
-        spec.rehydrate(test, this, this)
+        def spec = cl.rehydrate(test, this, this)
         spec.resolveStrategy = Closure.DELEGATE_FIRST
         spec()
-        if (!test.description?.trim() || !test.input || !test.output) {
+        if (!test.input || !test.output) {
             throw new TestPlanException("Test requires description, input and output!")
         }
+        // Add description if it doesn't exist.
+        if (!test.description) {
+            if (test.input instanceof Input) {
+                if (test.input.stdin instanceof ChannelData) {
+                    def input = test.input.stdin as ChannelData
+                    test.description(input.data)
+                } else {
+                    test.description(test.input.stdin as String)
+                }
+            } else if (test.input instanceof String) {
+                test.description(test.input as String)
+            } else {
+                throw new AssertionError()
+            }
+        }
+
         tests << test
+    }
+
+    Object toJson() {
+        def builder = new JsonBuilder()
+        builder description: this.description
+        builder tests: this.tests.collect { it.toJson() }
+        return builder.content
     }
 }
 
+@CompileStatic
 class Context {
     String description
     List<Testcase> testcases = new ArrayList<>()
@@ -182,9 +245,9 @@ class Context {
         this.description = description
     }
 
-    def testcase(@DelegatesTo(value = Testcase, strategy = Closure.DELEGATE_FIRST) Closure<?> spec) {
+    def testcase(@DelegatesTo(value = Testcase, strategy = Closure.DELEGATE_FIRST) Closure<?> cl) {
         def testcase = new Testcase()
-        spec.rehydrate(testcase, this, this)
+        def spec = cl.rehydrate(testcase, this, this)
         spec.resolveStrategy = Closure.DELEGATE_FIRST
         spec()
         if (!testcase.description?.trim() || testcase.tests.isEmpty()) {
@@ -200,8 +263,16 @@ class Context {
         testcase.description = testcase.tests[0].description
         testcases << testcase
     }
+
+    Object toJson() {
+        def builder = new JsonBuilder()
+        builder description: this.description
+        builder testcases: this.testcases.collect { it.toJson() }
+        return builder.content
+    }
 }
 
+@CompileStatic
 class Tab {
     String name
     List<Context> contexts = new ArrayList<>()
@@ -210,9 +281,9 @@ class Tab {
         this.name = name
     }
 
-    def context(@DelegatesTo(value = Context, strategy = Closure.DELEGATE_FIRST) Closure<?> spec) {
+    void context(@DelegatesTo(value = Context, strategy = Closure.DELEGATE_FIRST) Closure<?> cl) {
         def context = new Context()
-        spec.rehydrate(context, this, this)
+        def spec = cl.rehydrate(context, this, this)
         spec.resolveStrategy = Closure.DELEGATE_FIRST
         spec()
         if (!context.testcases.isEmpty()) {
@@ -221,7 +292,7 @@ class Tab {
         contexts << context
     }
 
-    def test(@DelegatesTo(value = Test, strategy = Closure.DELEGATE_FIRST) Closure<?> spec) {
+    void test(@DelegatesTo(value = Test, strategy = Closure.DELEGATE_FIRST) Closure<?> spec) {
         // Create test case and use that.
         def testcase = new Testcase()
         testcase.test(spec)
@@ -230,14 +301,23 @@ class Tab {
         context.testcases << testcase
         contexts << context
     }
+
+    Object toJson() {
+        def builder = new JsonBuilder()
+        builder name: this.name
+        builder contexts: this.contexts.collect { it.toJson() }
+        return builder.content
+    }
 }
 
+@CompileStatic
 class TestPlanException extends Exception {
     TestPlanException(String message) {
         super(message)
     }
 }
 
+@CompileStatic
 class Plan {
     List<Tab> tabs = new ArrayList<>()
 
@@ -252,42 +332,44 @@ class Plan {
         }
         tabs << tab
     }
+
+    Object toJson() {
+        def builder = new JsonBuilder()
+        builder tabs: this.tabs.collect { it.toJson() }
+        return builder.content
+    }
 }
 
+@CompileStatic
+abstract class PlanScript extends Script {
 
-def static plan(@DelegatesTo(value = Plan, strategy = Closure.DELEGATE_FIRST) Closure<?> cl) {
-    def plan = new Plan()
-    def code = cl.rehydrate(plan, dsl, dsl)
-    code.resolveStrategy = Closure.DELEGATE_FIRST
-    print(code())
+    Plan plan
+
+    void plan(@DelegatesTo(value = Plan, strategy = Closure.DELEGATE_FIRST) Closure<?> cl) {
+        def plan = new Plan()
+        def code = cl.rehydrate(plan, this, this)
+        code.resolveStrategy = Closure.DELEGATE_FIRST
+        code()
+        this.plan = plan
+    }
+
+
 }
 
+@CompileStatic
+class Converter {
 
-// Test DSL
-
-plan {
-
-    tab {
-        name "hallo"
-
-        test {
-            input "Hallo"
-            input {
-                stdin {
-                    data "Hallo"
-                    type "text"
-                }
-            }
-        }
-
+    static void main(String[] args) {
+        parseDsl(args[0])
     }
 
-    tab {
-
+    static void parseDsl(String path) {
+        def config = new CompilerConfiguration()
+        config.scriptBaseClass = PlanScript.class.name
+        def shell = new GroovyShell(this.class.classLoader, new Binding(), config)
+        PlanScript script = shell.parse(new File(path)) as PlanScript
+        script.run()
+        def json = JsonOutput.toJson(script.plan.toJson())
+        println(JsonOutput.prettyPrint(json))
     }
-
-    tab {
-
-    }
-
 }
