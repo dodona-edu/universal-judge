@@ -1,6 +1,34 @@
+// Zoals duidelijk is, kan het plan redelijk compact zijn met minimale informatie
+// Het eerste voorbeeld toont wel aan dat het uiteraard mogelijk is om alles tot in details te definiëren.
 plan {
 	tab{
 		name 'Correctheid'
+		context {
+			description "Beschrijving van de context"
+			testcase {
+				description "Volledige testcase"
+				test {
+					description "Test voor proscribable"
+					input {
+						stdin {
+							data 'proscribable'
+							type 'text'
+						}
+					}
+					output {
+						stdout {
+							data "Hallo"
+							type 'text'
+						}
+						stderr 'none'
+					}
+					runArgs {
+						// Configuratie voor testen die met objecten werken, zoals Java.
+						classname 'Main'
+					}
+				}
+			}
+		}
 		test {
 			input 'proscribable'
 			output 'proscribable'

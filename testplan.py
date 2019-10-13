@@ -95,7 +95,7 @@ class Test:
     input: Input  # Input of the test.
     output: Output  # Output of the test.
     evaluator: Optional[Evaluator] = None
-    run: Optional[Run] = None  # Optional run arguments TODO
+    runArgs: Optional[Run] = None  # Optional run arguments TODO
 
     def get_run(self):
         return self.run if self.run else self.parent.get_run()
@@ -184,6 +184,28 @@ def parse_test_plan(test_file) -> Plan:
                 testcase.parent = context
                 for test in testcase.tests:
                     test.parent = testcase
+
+    return plan
+
+
+def parse_test_plan_json(json_string) -> Plan:
+    """Parse a test plan into the structures."""
+
+    plan: Plan = Plan.from_json(json_string)
+    plan.name = "Deprecated, will be removed."
+    print(plan)
+
+    # TODO: properly fix the union types somehow
+    for tab in plan.tabs:
+        for context in tab.contexts:
+            for testcase in context.testcases:
+                for test in testcase.tests:
+                    if isinstance(test.input.stdin, dict):
+                        test.input.stdin = ChannelData.from_dict(test.input.stdin)
+                    if isinstance(test.output.stdout, dict):
+                        test.output.stdout = ChannelData.from_dict(test.output.stdout)
+                    if isinstance(test.output.stderr, dict):
+                        test.output.stderr = ChannelData.from_dict(test.output.stderr)
 
     return plan
 

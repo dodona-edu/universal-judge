@@ -317,7 +317,7 @@ class Tab implements WithRunArgs {
         def spec = cl.rehydrate(context, this, this)
         spec.resolveStrategy = Closure.DELEGATE_FIRST
         spec()
-        if (!context.testcases.isEmpty()) {
+        if (context.testcases.isEmpty()) {
             throw new TestPlanException("Context requires testcases!")
         }
         contexts << context

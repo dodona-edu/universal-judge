@@ -5,7 +5,10 @@
 #
 import json
 import sys
+from subprocess import Popen, PIPE, STDOUT
 from typing import NamedTuple
+
+from testplan import parse_test_plan, parse_test_plan_json
 
 
 class Config(NamedTuple):
@@ -57,11 +60,12 @@ if __name__ == '__main__':
     #    - Check the output for each element.
     # 3. Finish
 
-    # Read user_code
-    with open(config.source, 'r') as f:
-        user_code = f.read()
+    # Read test plan
+    p = Popen(['java', '-jar', './dsl/gDSL.jar', '-d', f"{config.resources}/plan.groovy"], stdout=PIPE)
+    json = p.stdout.read()
+    plan = parse_test_plan_json(json)
 
     # Run it.
     from judge import KernelJudge
     tester = KernelJudge(config)
-    tester.judge()
+    tester.judge(plan)

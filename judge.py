@@ -7,15 +7,15 @@ from dodona import common as co, partial_output as po
 from dodona.dodona import report_update
 from jupyter import JupyterContext, KernelQueue
 from tested import Config
-from testplan import parse_test_plan, Plan, Run, Test, TestPlanError
+from testplan import parse_test_plan, Plan, Run, Test, TestPlanError, DataType
 from utils.ascii_to_html import ansi2html
 
 
 def _get_expected(test: Test) -> str:
     """Get the expected value of a test"""
-    if test.input.stdin.type == "text":
+    if test.input.stdin.type == DataType.text:
         return test.input.stdin.data
-    elif test.input.stdin.type == "file":
+    elif test.input.stdin.type == DataType.file:
         with open(test.input.stdin.data, "r") as file:
             return file.read()
     else:
@@ -26,9 +26,9 @@ def _get_evaluator(test: Test) -> Comparator:
     """Get the evaluator for a test"""
     if not test.evaluator:  # Determine from output type
         if test.output.stdout:
-            if test.output.stdout.type == 'text':
+            if test.output.stdout.type == DataType.text:
                 return TextComparator()
-            elif test.output.stdout.type == 'file':
+            elif test.output.stdout.type == DataType.file:
                 return TextComparator(expected_is_file=True)
             else:
                 raise TestPlanError(f"Unknown stdout type in test plan: {test.output.stdout.type}")
@@ -38,7 +38,7 @@ def _get_evaluator(test: Test) -> Comparator:
             return NothingComparator()
     elif test.evaluator.type == 'builtin':
         if test.evaluator.name == 'textComparator':
-            if test.output.stdout and test.output.stdout.type == 'file':
+            if test.output.stdout and test.output.stdout.type == DataType.file:
                 return TextComparator(expected_is_file=True, arguments=test.evaluator.options)
             else:
                 return TextComparator(arguments=test.evaluator.options)
@@ -60,7 +60,7 @@ def needs_run(kernel: str) -> bool:
 
 
 def create_run(kernel: str, run: Run) -> str:
-    return RUN_KERNELS[kernel].format(run.object)
+    return RUN_KERNELS[kernel].format(run.classname)
 
 
 @dataclass
@@ -88,14 +88,10 @@ class Judge:
         """
         raise NotImplementedError()
 
-    def judge(self):
+    def judge(self, plan):
         """Get and execute the test plan for an exercise, resulting in a judgment."""
         with open(self.config.source, 'r') as file:
             submission_code = file.read()
-
-        # For now we always want basic.json
-        with open(f"{self.config.resources}/basic.json", 'r') as file:
-            plan = parse_test_plan(file)
 
         self._execute_test_plan(submission_code, plan)
 
@@ -204,7 +200,7 @@ class KernelJudge(Judge):
         input_ = test.input.stdin.data
 
         if needs_run(self.config.kernel):
-            run = create_run(self.config.kernel, test.get_run())
+            run = create_run(self.config.kernel, test.runArgs)
             submission += run
 
         result = self._execute_statement(submission, input_, context,
