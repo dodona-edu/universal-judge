@@ -42,8 +42,7 @@ class JupyterContext(Thread):
         std_input = std_input.splitlines(False) if std_input is not None else []
         with Timeout(timeout) as timeout:
             with MemoryLimit(memory_limit, self.manager.kernel.pid) as memory_limiter:
-                start_time = time.perf_counter()
-                self.client.execute(code=statements, silent=silent, store_history=False)
+                r = self.client.execute(code=statements, silent=silent, store_history=False)
 
                 messages = {'iopub': [], 'stdin': [], 'client': []}
 
@@ -88,7 +87,7 @@ class JupyterContext(Thread):
                                     elif message['content']['execution_state'] in {'starting'}:
                                         pass
                                     elif message['content']['execution_state'] in {'busy'}:
-                                        start_time = time.perf_counter()
+                                        pass
                                 elif message['msg_type'] == 'execute_input':
                                     pass
                                 else:
@@ -130,7 +129,8 @@ class RunError(RuntimeError):
 
 
 FAST_KERNELS = {
-    'python3': '%reset -f in out dhist'
+    'python3': '%reset -f in out dhist',
+    'ir': 'rm(list = ls())'
 }
 
 

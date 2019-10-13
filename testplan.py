@@ -193,7 +193,6 @@ def parse_test_plan_json(json_string) -> Plan:
 
     plan: Plan = Plan.from_json(json_string)
     plan.name = "Deprecated, will be removed."
-    print(plan)
 
     # TODO: properly fix the union types somehow
     for tab in plan.tabs:

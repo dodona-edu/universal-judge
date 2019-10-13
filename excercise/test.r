@@ -1,2 +1,2 @@
-line <- readLines(n=1, ok=FALSE)
-write(line)
+line <- readline()  # Custom readline from kernel
+write("line")

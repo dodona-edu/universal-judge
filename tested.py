@@ -8,7 +8,7 @@ import sys
 from subprocess import Popen, PIPE, STDOUT
 from typing import NamedTuple
 
-from testplan import parse_test_plan, parse_test_plan_json
+from testplan import parse_test_plan_json
 
 
 class Config(NamedTuple):
@@ -28,7 +28,8 @@ LANGUAGE_TO_KERNEL = {
     'python3': 'python3',
     'r': 'ir',
     'julia': 'julia-1.2',
-    'haskell': 'ihaskell'
+    'haskell': 'ihaskell',
+    'javascript': 'javascript'
 }
 
 
@@ -37,10 +38,10 @@ def read_config() -> Config:
     config_ = {
         "memory_limit": 536870912,
         "time_limit": 10000000,
-        "programming_language": 'java',
+        "programming_language": 'javascript',
         "natural_language": 'nl',
         "resources": './excercise',
-        "source": './excercise/test.java',
+        "source": './excercise/test.js',
         "judge": 'ignored',
         "workdir": 'ignored',
     }
