@@ -1,52 +1,70 @@
 # Executor for exercises where stdin expects input and receives output in stdout.
 from dataclasses import dataclass
-from typing import List
+from typing import List, Optional
 
-from comparator import Comparator, FileComparator, NothingComparator, TextComparator
+from comparator import Comparator, FileComparator, TextComparator
 from dodona import common as co, partial_output as po
 from dodona.dodona import report_update
 from jupyter import JupyterContext, KernelQueue
 from tested import Config
-from testplan import parse_test_plan, Plan, Run, Test, TestPlanError, DataType
+from testplan import ChannelState, DataType, Evaluator, EvaluatorType, OutputChannelState, Plan, Run, Test, \
+    TestPlanError, TEXT_COMPARATOR
 from utils.ascii_to_html import ansi2html
 
 
-def _get_expected(test: Test) -> str:
-    """Get the expected value of a test"""
-    if test.input.stdin.type == DataType.text:
+def _get_input(test: Test) -> List[str]:
+    """Get the input for of a test"""
+    if test.input.stdin == ChannelState.none.value:
+        return []
+    elif test.input.stdin.type == DataType.text:
         return test.input.stdin.data
     elif test.input.stdin.type == DataType.file:
         with open(test.input.stdin.data, "r") as file:
-            return file.read()
+            return file.readlines()
     else:
         raise TestPlanError(f"Unknown input type in test plan: {test.input.stdin.type}")
 
 
-def _get_evaluator(test: Test) -> Comparator:
+def _get_stdout(test: Test) -> Optional[List[str]]:
+    """Get the stdout value of a test"""
+    if test.output.stdout == OutputChannelState.ignored.value:
+        return None
+    elif test.output.stdout == OutputChannelState.none.value:
+        return []
+    elif test.output.stdout.type == DataType.text:
+        return test.output.stdout.data
+    elif test.output.stdout.type == DataType.file:
+        with open(test.output.stdout.data, "r") as file:
+            return file.readlines()
+    else:
+        raise TestPlanError(f"Unknown output type in test plan: {test.output.stdout.type}")
+
+
+def _get_stderr(test: Test) -> Optional[List[str]]:
+    """Get the stderr value of a test"""
+    if test.output.stderr == OutputChannelState.ignored:
+        return None
+    elif test.output.stderr == OutputChannelState.none.value:
+        return []
+    elif test.output.stderr.type == DataType.text:
+        return test.output.stderr.data
+    elif test.output.stderr.type == DataType.file:
+        with open(test.output.stderr.data, "r") as file:
+            return file.readlines()
+    else:
+        raise TestPlanError(f"Unknown stderr type in test plan: {test.output.stderr.type}")
+
+
+def _get_evaluator(evaluator: Evaluator) -> Comparator:
     """Get the evaluator for a test"""
-    if not test.evaluator:  # Determine from output type
-        if test.output.stdout:
-            if test.output.stdout.type == DataType.text:
-                return TextComparator()
-            elif test.output.stdout.type == DataType.file:
-                return TextComparator(expected_is_file=True)
-            else:
-                raise TestPlanError(f"Unknown stdout type in test plan: {test.output.stdout.type}")
-        elif test.output.file:
-            return FileComparator()
+    if evaluator.type == EvaluatorType.builtin:
+        if evaluator.name == TEXT_COMPARATOR:
+            return TextComparator(arguments=evaluator.options)
+        elif evaluator.name == "fileComparator":
+            return FileComparator(arguments=evaluator.options)
         else:
-            return NothingComparator()
-    elif test.evaluator.type == 'builtin':
-        if test.evaluator.name == 'textComparator':
-            if test.output.stdout and test.output.stdout.type == DataType.file:
-                return TextComparator(expected_is_file=True, arguments=test.evaluator.options)
-            else:
-                return TextComparator(arguments=test.evaluator.options)
-        elif test.evaluator.name == 'fileComparator':
-            return FileComparator(arguments=test.evaluator.options)
-        else:
-            raise TestPlanError(f"Unknown buil-in evaluator: {test.evaluator.name}")
-    elif test.evaluator.type == 'external':
+            raise TestPlanError(f"Unknown buil-in evaluator: {evaluator.name}")
+    elif evaluator.type == 'external':
         raise NotImplementedError()
 
 
@@ -175,7 +193,7 @@ class KernelJudge(Judge):
         """
         # Get the expected input for a test.
         try:
-            expected = _get_expected(test)
+            input_ = _get_input(test)
         except TestPlanError as e:
             report_update(po.StartTest(""))
             report_update(po.AppendMessage(co.ExtendedMessage(
@@ -185,9 +203,11 @@ class KernelJudge(Judge):
             )))
             report_update(po.CloseTest("Internal error", po.StatusMessage(po.Status.INTERNAL_ERROR)))
             return
-        report_update(po.StartTest(expected))
+        report_update(po.StartTest("\n".join(input_)))
         try:
-            evaluator = _get_evaluator(test)
+            stdout_evaluator = _get_evaluator(test.evaluators.stdout)
+            stderr_evaluator = _get_evaluator(test.evaluators.stderr)
+            file_evaluator = _get_evaluator(test.evaluators.file)
         except TestPlanError as e:
             report_update(po.AppendMessage(co.ExtendedMessage(
                 description=str(e),
@@ -196,8 +216,6 @@ class KernelJudge(Judge):
             )))
             report_update(po.CloseTest("Internal error", po.StatusMessage(po.Status.INTERNAL_ERROR)))
             return
-
-        input_ = test.input.stdin.data
 
         if needs_run(self.config.kernel):
             run = create_run(self.config.kernel, test.runArgs)
@@ -214,17 +232,22 @@ class KernelJudge(Judge):
             if stderr:
                 result.messages.append(co.ExtendedMessage(description=stderr, format='text'))
         else:
-            # Evaluate solution
-            if test.output.stdout:  # Evaluate output from stdout
-                actual = "\n".join(result.stdout)
-                success = evaluator.evaluate(test.output.stdout.data, actual)
-            elif test.output.file:  # Output must be a file, compare them
+            actual = ""
+            success = True
+            # Evaluate the stdout channel
+            stdout_ = _get_stdout(test)
+            if stdout_ is not None:  # We evaluate the stdout
+                success = stdout_evaluator.evaluate(stdout_, result.stdout)
+
+            # Evaluate the stderr channel
+            stderr_ = _get_stderr(test)
+            if stderr_ is not None:  # Check stderr
+                success = success and stderr_evaluator.evaluate(stderr_, result.stderr)
+
+            # Evaluate the file channel (if present)
+            if test.output.file:
                 actual = test.output.file.actual
-                success = evaluator.evaluate(test.output.file.expected, actual)
-            else:
-                # This evaluator does nothing.
-                actual = ""
-                success = evaluator.evaluate("", actual)
+                success = success and file_evaluator.evaluate(test.output.file.expected, actual)
 
             status = po.Status.CORRECT if success else po.Status.WRONG
 

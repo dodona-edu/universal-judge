@@ -1,3 +1,9 @@
+"""Testplan
+
+This module is the authoritative source on the format and behaviour of the
+testplan. Note that the implementation in the judge is kept simple by design;
+unless noted, the judge will not provide default values for missing fields.
+"""
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
@@ -14,7 +20,8 @@ class TestPlanError(ValueError):
 @dataclass_json
 @dataclass
 class Run:
-    classname: str
+    """Arguments necessary for loading the user's code into the context."""
+    classname: Optional[str]
 
 
 class DataType(Enum):
@@ -35,8 +42,8 @@ class OutputChannelState(Enum):
 @dataclass
 class ChannelData:
     """Describes the data on channel (stdin or stdout)"""
-    data: str  # The actual data.
-    type: Optional[DataType] = DataType.text  # The type of the data field.
+    data: Union[str, List[str]]
+    type: Optional[DataType] = DataType.text
 
 
 InputChannel = Union[ChannelData, ChannelState]
@@ -89,81 +96,66 @@ class Evaluator:
 
 @dataclass_json
 @dataclass
+class Evaluators:
+    stdout: Evaluator
+    stderr: Evaluator
+    file: Evaluator
+
+
+@dataclass_json
+@dataclass
 class Test:
     """Describes a single test"""
-    description: str  # Description of the test.
-    input: Input  # Input of the test.
-    output: Output  # Output of the test.
-    evaluator: Optional[Evaluator] = None
-    runArgs: Optional[Run] = None  # Optional run arguments TODO
-
-    def get_run(self):
-        return self.run if self.run else self.parent.get_run()
-
-    def get_evaluator(self):
-        return self.evaluator if self.evaluator else self.parent.get_evaluator()
+    output: Output
+    evaluators: Evaluators
+    description: Optional[str]
 
 
 @dataclass_json
 @dataclass
 class Testcase:
-    """Describes a test case, consisting of some tests."""
-    description: str  # Description of the test case.
-    tests: List[Test]  # Tests in the test case.
-    run: Optional[Run] = None  # Optional run arguments
-    evaluator: Optional[Evaluator] = None
+    """A test case is defined by an input and a set of tests."""
+    input: Input
+    tests: List[Test]
+    description: Optional[str]  # Will be generated if None.
 
-    def get_run(self):
-        return self.run if self.run else self.parent.get_run()
 
-    def get_evaluator(self):
-        return self.evaluator if self.evaluator else self.parent.get_evaluator()
+@dataclass_json
+@dataclass
+class Consummation(Testcase):
+    """Essentially the same as a normal testcase, but allows to specify if a
+    main method should be executed or not for non-script languages (such as
+    Java or C).
+    """
+    main: Run
 
 
 @dataclass_json
 @dataclass
 class Context:
-    testcases: List[Testcase]
+    """A context is what the name implies: executes things in the same context.
+    As such, the context consists of three main things: the preparation, the
+    consummation and the post-processing.
+    """
+    consummation: Consummation
+    postprocessing: List[Testcase]
     description: Optional[str] = None
-    run: Optional[Run] = None
-    evaluator: Optional[Evaluator] = None
-
-    def get_run(self):
-        return self.run if self.run else self.parent.get_run()
-
-    def get_evaluator(self):
-        return self.evaluator if self.evaluator else self.parent.get_evaluator()
+    preparation: Optional[str] = None
 
 
 @dataclass_json
 @dataclass
 class Tab:
+    """Represents a tab on Dodona."""
     name: str
     contexts: List[Context]
-    description: Optional[str] = None
-    run: Optional[Run] = None
-    evaluator: Optional[Evaluator] = None
-
-    def get_run(self):
-        return self.run if self.run else self.parent.get_run()
-
-    def get_evaluator(self):
-        return self.evaluator if self.evaluator else self.parent.get_evaluator()
 
 
 @dataclass_json
 @dataclass
 class Plan:
-    name: Optional[str] = None
+    """General test plan, which is used to run tests of some code."""
     tabs: Optional[List[Tab]] = field(default_factory=list)
-    run: Optional[Run] = None
-    evaluator: Optional[Evaluator] = Evaluator()
-
-    def get_run(self):
-        return self.run
-
-    def get_evaluator(self):
-        return self.evaluator
 
 
 def parse_test_plan(test_file) -> Plan:
@@ -194,17 +186,20 @@ def parse_test_plan_json(json_string) -> Plan:
     plan: Plan = Plan.from_json(json_string)
     plan.name = "Deprecated, will be removed."
 
-    # TODO: properly fix the union types somehow
+    # Fix union types.
     for tab in plan.tabs:
         for context in tab.contexts:
             for testcase in context.testcases:
                 for test in testcase.tests:
                     if isinstance(test.input.stdin, dict):
-                        test.input.stdin = ChannelData.from_dict(test.input.stdin)
+                        test.input.stdin =\
+                            ChannelData.from_dict(test.input.stdin)
                     if isinstance(test.output.stdout, dict):
-                        test.output.stdout = ChannelData.from_dict(test.output.stdout)
+                        test.output.stdout =\
+                            ChannelData.from_dict(test.output.stdout)
                     if isinstance(test.output.stderr, dict):
-                        test.output.stderr = ChannelData.from_dict(test.output.stderr)
+                        test.output.stderr =\
+                            ChannelData.from_dict(test.output.stderr)
 
     return plan
 

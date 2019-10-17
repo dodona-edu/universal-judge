@@ -4,30 +4,54 @@ plan {
 	tab{
 		name 'Correctheid'
 		context {
-			description "Beschrijving van de context"
+			// 1. Dingen voor het uitvoeren (before), bv. argumenten (Jupyter command line misschien)
+
+			// 2. Run testcase (uitvoeren code van studenten) + argument
+			// -> input, output, etc.
+
+			// 3. After testcases (neveneffecten) (functie/... is verplicht)
+
+			// Exit status
+			before {
+				// TODO: what moet dit precies zijn? Code uitvoeren? Variabelen klaarzetten?
+				//   In welke taal moet dat zijn?
+			}
+			input 'proscribable'
+			output 'proscribable'
+			run {
+				// uitvoeren van de code (studenten)
+			}
+
 			testcase {
 				description "Volledige testcase"
-				test {
-					description "Test voor proscribable"
-					input {
-						stdin {
-							data 'proscribable'
-							type 'text'
-						}
-					}
-					output {
-						stdout {
-							data "Hallo"
-							type 'text'
-						}
-						stderr 'none'
-					}
-					runArgs {
-						// Configuratie voor testen die met objecten werken, zoals Java.
-						classname 'Main'
+				input {
+					stdin {
+						data "input1.txt"
+						type 'file'
 					}
 				}
+
+				output {
+					stdout {
+						data "Hallo"
+						type 'text'
+					}
+					stderr 'ignored'
+					file {
+
+					}
+				}
+				evaluators {
+					stdout: {
+
+					}
+				}
+
 			}
+		}
+		runArgs {
+			// Configuratie voor testen die met objecten werken, zoals Java.
+			classname 'Main'
 		}
 		test {
 			input 'proscribable'

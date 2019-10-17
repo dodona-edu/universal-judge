@@ -1,12 +1,12 @@
 import math
-from typing import Optional
+from typing import Optional, Union, List
 
 from testplan import TestPlanError
 
 
 class Comparator:
 
-    def evaluate(self, expected: str, actual: str) -> bool:
+    def evaluate(self, expected: Union[str, List[str]], actual: Union[str, List[str]]) -> bool:
         raise NotImplementedError
 
 
@@ -29,23 +29,20 @@ class TextComparator(Comparator):
     A series of flags can control the output:
     """
 
-    def __init__(self, expected_is_file=False, arguments=None):
+    def __init__(self, arguments=None):
 
         if not arguments:
             arguments = {"ignoreWhitespace"}
-        self.expected_is_file = expected_is_file
 
         self.ignore_whitespace = "ignoreWhitespace" in arguments
         self.allow_floating_point = "allowFloating_point" in arguments
         self.case_insensitive = "caseInsensitive" in arguments
 
-    def evaluate(self, expected: str, actual: str) -> bool:
-        if self.expected_is_file:
-            try:
-                with open(expected, 'r') as file:
-                    expected = file.read()
-            except FileNotFoundError:
-                raise TestPlanError(f"File containing expected data {expected} not found.")
+    def evaluate(self, expected: Union[str, List[str]], actual: Union[str, List[str]]) -> bool:
+        if isinstance(expected, list):
+            expected = "\n".join(expected)
+        if isinstance(actual, list):
+            actual = "\n".join(actual)
         if self.ignore_whitespace:
             expected = expected.strip()
             actual = actual.strip()

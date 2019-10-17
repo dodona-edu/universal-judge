@@ -38,10 +38,10 @@ def read_config() -> Config:
     config_ = {
         "memory_limit": 536870912,
         "time_limit": 10000000,
-        "programming_language": 'javascript',
+        "programming_language": 'python',
         "natural_language": 'nl',
         "resources": './excercise',
-        "source": './excercise/test.js',
+        "source": './excercise/test.py',
         "judge": 'ignored',
         "workdir": 'ignored',
     }
@@ -63,8 +63,10 @@ if __name__ == '__main__':
 
     # Read test plan
     p = Popen(['java', '-jar', './dsl/gDSL.jar', '-d', f"{config.resources}/plan.groovy"], stdout=PIPE)
-    json = p.stdout.read()
-    plan = parse_test_plan_json(json)
+    json_string = p.stdout.read()
+    plan = parse_test_plan_json(json_string)
+
+    print(plan)
 
     # Run it.
     from judge import KernelJudge
