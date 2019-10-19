@@ -142,6 +142,9 @@ class Context:
     description: Optional[str] = None
     preparation: Optional[str] = None
 
+    def all_testcases(self) -> List[Testcase]:
+        return [self.execution] + self.postprocessing
+
 
 @dataclass_json
 @dataclass
@@ -158,29 +161,7 @@ class Plan:
     tabs: List[Tab] = field(default_factory=list)
 
 
-def parse_test_plan(test_file) -> Plan:
-    """Parse a test plano into the structures."""
-
-    raw = test_file.read()
-    plan: Plan = Plan.from_json(raw)
-
-    if not plan.name:
-        plan.name = Path(test_file.name).stem
-
-    # Add parent to all elements
-    for tab in plan.tabs:
-        tab.parent = plan
-        for context in tab.contexts:
-            context.parent = tab
-            for testcase in context.testcases:
-                testcase.parent = context
-                for test in testcase.tests:
-                    test.parent = testcase
-
-    return plan
-
-
-def parse_test_plan_json(json_string) -> Plan:
+def parse_test_plan(json_string) -> Plan:
     """Parse a test plano into the structures."""
 
     plan: Plan = Plan.from_json(json_string)
@@ -189,22 +170,62 @@ def parse_test_plan_json(json_string) -> Plan:
     # Fix union types.
     for tab in plan.tabs:
         for context in tab.contexts:
-            cases = [x for x in [context.preparation, *context.postprocessing] if x]
-            for testcase in cases:
+            for testcase in context.all_testcases():
+                if isinstance(testcase.input.stdin, dict):
+                    testcase.input.stdin = ChannelData.from_dict(testcase.input.stdin)
                 for test in testcase.tests:
-                    if isinstance(test.input.stdin, dict):
-                        test.input.stdin =\
-                            ChannelData.from_dict(test.input.stdin)
                     if isinstance(test.output.stdout, dict):
-                        test.output.stdout =\
-                            ChannelData.from_dict(test.output.stdout)
+                        test.output.stdout = ChannelData.from_dict(test.output.stdout)
                     if isinstance(test.output.stderr, dict):
-                        test.output.stderr =\
-                            ChannelData.from_dict(test.output.stderr)
+                        test.output.stderr = ChannelData.from_dict(test.output.stderr)
 
     return plan
 
 
 if __name__ == '__main__':
-    with open('dsl/internal.json', 'r') as f:
-        r = parse_test_plan(f)
+    with open('dsl/internal2.json', 'r') as f:
+        r = parse_test_plan(f.read())
+        print(r)
+
+
+def _get_input(test: Testcase) -> List[str]:
+    """Get the input for of a test"""
+    if test.input.stdin == ChannelState.none.value:
+        return []
+    elif test.input.stdin.type == DataType.text:
+        return test.input.stdin.data
+    elif test.input.stdin.type == DataType.file:
+        with open(test.input.stdin.data, "r") as file:
+            return file.readlines()
+    else:
+        raise TestPlanError(f"Unknown input type in test plano: {test.input.stdin.type}")
+
+
+def _get_stdout(test: Test) -> Optional[List[str]]:
+    """Get the stdout value of a test"""
+    if test.output.stdout == OutputChannelState.ignored.value:
+        return None
+    elif test.output.stdout == OutputChannelState.none.value:
+        return []
+    elif test.output.stdout.type == DataType.text:
+        return test.output.stdout.data
+    elif test.output.stdout.type == DataType.file:
+        with open(test.output.stdout.data, "r") as file:
+            return file.readlines()
+    else:
+        raise TestPlanError(f"Unknown output type in test plano: {test.output.stdout.type}")
+
+
+def _get_stderr(test: Test) -> Optional[List[str]]:
+    """Get the stderr value of a test"""
+    if test.output.stderr == OutputChannelState.ignored:
+        return None
+    elif test.output.stderr == OutputChannelState.none.value:
+        return []
+    elif test.output.stderr.type == DataType.text:
+        return test.output.stderr.data
+    elif test.output.stderr.type == DataType.file:
+        with open(test.output.stderr.data, "r") as file:
+            return file.readlines()
+    else:
+        raise TestPlanError(f"Unknown stderr type in test plano: {test.output.stderr.type}")

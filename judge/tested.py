@@ -3,14 +3,12 @@
 #
 # For now, this only handles running the execution kernel.
 #
-import json
-import sys
-from subprocess import Popen, PIPE, STDOUT
+from subprocess import Popen, PIPE
 from typing import NamedTuple
 
 import jinja2
 
-from testplan import parse_test_plan_json
+from testplan import parse_test_plan
 
 
 class Config(NamedTuple):
@@ -42,10 +40,10 @@ def read_config() -> Config:
         "time_limit": 10000000,
         "programming_language": 'python',
         "natural_language": 'nl',
-        "resources": './excercise',
-        "source": './excercise/test.py',
-        "judge": 'ignored',
-        "workdir": 'ignored',
+        "resources": '../exercise',
+        "source": '../exercise/test.py',
+        "judge": '.',
+        "workdir": './workdir',
     }
     #config_json = sys.stdin.read()
     #config_ = json.loads(config_json)
@@ -64,34 +62,11 @@ if __name__ == '__main__':
     # 3. Finish
 
     # Read test plano
-    p = Popen(['java', '-jar', './dsl/gDSL.jar', '-d', f"{config.resources}/plan.groovy"], stdout=PIPE)
+    p = Popen(['java', '-jar', '../dsl/build/libs/dsl.jar', '-d', f"{config.resources}/plan.groovy"], stdout=PIPE, stderr=PIPE)
     json_string = p.stdout.read()
-    plan = parse_test_plan_json(json_string)
-
-    with open(config.source, 'r') as file:
-        submission_code = file.read()
-
-    print(plan)
-
-    templateLoader = jinja2.FileSystemLoader(searchpath="./templates/python")
-    templateEnv = jinja2.Environment(loader=templateLoader)
-    template = templateEnv.get_template("submission.jinja2")
-    outputText = template.render(code=submission_code)
-
-    template2 = templateEnv.get_template("context.jinja2")
-    outputText2 = template2.render(
-        code_identifier="test",
-        output_file="output.txt",
-    )
-
-    with open("./tt/submission.py", "w") as file:
-        file.write(outputText)
-    with open("./tt/testcase.py", "w") as file:
-        file.write(outputText2)
-
-
+    plan = parse_test_plan(json_string)
 
     # Run it.
-    # from judge import KernelJudge
-    # tester = KernelJudge(config)
-    # tester.judge(plano)
+    from judge import GeneratorJudge
+    tester = GeneratorJudge(config)
+    tester.judge(plan)

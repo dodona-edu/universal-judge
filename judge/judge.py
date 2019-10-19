@@ -1,58 +1,16 @@
 # Executor for exercises where stdin expects input and receives output in stdout.
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List
 
 from comparator import Comparator, FileComparator, TextComparator
 from dodona import common as co, partial_output as po
 from dodona.dodona import report_update
 from jupyter import JupyterContext, KernelQueue
+from runners.python import PythonRunner
 from tested import Config
-from testplan import ChannelState, DataType, Evaluator, EvaluatorType, OutputChannelState, Plan, Run, Test, \
-    TestPlanError, TEXT_COMPARATOR
+from testplan import _get_input, _get_stderr, _get_stdout, Evaluator, EvaluatorType, Plan, Run, Test, TestPlanError, \
+    TEXT_COMPARATOR, Context
 from utils.ascii_to_html import ansi2html
-
-
-def _get_input(test: Test) -> List[str]:
-    """Get the input for of a test"""
-    if test.input.stdin == ChannelState.none.value:
-        return []
-    elif test.input.stdin.type == DataType.text:
-        return test.input.stdin.data
-    elif test.input.stdin.type == DataType.file:
-        with open(test.input.stdin.data, "r") as file:
-            return file.readlines()
-    else:
-        raise TestPlanError(f"Unknown input type in test plano: {test.input.stdin.type}")
-
-
-def _get_stdout(test: Test) -> Optional[List[str]]:
-    """Get the stdout value of a test"""
-    if test.output.stdout == OutputChannelState.ignored.value:
-        return None
-    elif test.output.stdout == OutputChannelState.none.value:
-        return []
-    elif test.output.stdout.type == DataType.text:
-        return test.output.stdout.data
-    elif test.output.stdout.type == DataType.file:
-        with open(test.output.stdout.data, "r") as file:
-            return file.readlines()
-    else:
-        raise TestPlanError(f"Unknown output type in test plano: {test.output.stdout.type}")
-
-
-def _get_stderr(test: Test) -> Optional[List[str]]:
-    """Get the stderr value of a test"""
-    if test.output.stderr == OutputChannelState.ignored:
-        return None
-    elif test.output.stderr == OutputChannelState.none.value:
-        return []
-    elif test.output.stderr.type == DataType.text:
-        return test.output.stderr.data
-    elif test.output.stderr.type == DataType.file:
-        with open(test.output.stderr.data, "r") as file:
-            return file.readlines()
-    else:
-        raise TestPlanError(f"Unknown stderr type in test plano: {test.output.stderr.type}")
 
 
 def _get_evaluator(evaluator: Evaluator) -> Comparator:
@@ -291,4 +249,69 @@ class KernelJudge(Judge):
 class GeneratorJudge(Judge):
 
     def _execute_test_plan(self, submission: str, test_plan: Plan):
-        pass
+
+        report_update(po.StartJudgment())
+        # Generate test files.
+        runner = PythonRunner(self.config)
+        ids = runner.generate_code(submission, test_plan)
+
+        for tab in test_plan.tabs:
+            report_update(po.StartTab(title=tab.name))
+            for id_, context in zip(ids, tab.contexts):
+                report_update(po.StartContext(context.description))
+                try:
+                    result = runner.execute(id_, context)
+                except TestPlanError as e:
+                    report_update(po.AppendMessage(co.ExtendedMessage(
+                        description=str(e),
+                        format='text',
+                        permission=co.Permission.STAFF
+                    )))
+                    report_update(po.CloseTest("Internal error",
+                                               po.StatusMessage(po.Status.INTERNAL_ERROR)))
+                    continue
+                self._process_results(context, result)
+                report_update(po.CloseContext())
+            report_update(po.CloseTab())
+        report_update(po.CloseJudgment())
+
+    def _process_results(self, context: Context, results: ExecutionResult):
+
+        for i, testcase in enumerate(context.all_testcases()):
+            report_update(po.StartTestcase(testcase.description))
+            input_ = _get_input(testcase)
+            test = testcase.tests[0]  # We assume only one test per testcase.
+            report_update(po.StartTest("\n".join(input_)))  # TODO: fancy input
+            try:
+                stdout_evaluator = _get_evaluator(test.evaluators.stdout)
+                stderr_evaluator = _get_evaluator(test.evaluators.stderr)
+                file_evaluator = _get_evaluator(test.evaluators.file)
+            except TestPlanError as e:
+                report_update(po.AppendMessage(co.ExtendedMessage(
+                    description=str(e),
+                    format='text',
+                    permission=co.Permission.STAFF
+                )))
+                report_update(po.CloseTest("Internal error", po.StatusMessage(po.Status.INTERNAL_ERROR)))
+                continue
+
+            actual = ""
+            success = True
+            # TODO: allow test on return value.
+            # Evaluate the stdout channel
+            stdout_ = _get_stdout(test)
+            if stdout_ is not None:  # We evaluate the stdout
+                success = stdout_evaluator.evaluate(stdout_, results.stdout[i])
+            # Evaluate the stderr channel
+            stderr_ = _get_stderr(test)
+            if stderr_ is not None:  # Check stderr
+                success = success and stderr_evaluator.evaluate(stderr_, results.stderr[i])
+            # Evaluate the file channel (if present)
+            if test.output.file:
+                actual = test.output.file.actual
+                success = success and file_evaluator.evaluate(test.output.file.expected, actual)
+
+            status = po.Status.CORRECT if success else po.Status.WRONG
+            # TODO: report data channel based on actual tests.
+            report_update(po.CloseTest(actual, po.StatusMessage(status), data=po.TestData(channel="stdout")))
+            report_update(po.CloseTestcase())

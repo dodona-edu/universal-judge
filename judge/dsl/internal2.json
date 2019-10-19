@@ -1,0 +1,66 @@
+{
+  "tabs": [
+    {
+      "name": "Correctheid",
+      "contexts": [
+        {
+          "description": "Beschrijving van de context",
+          "execution": {
+            "main": {
+              "classname": "Main"
+            },
+            "description": null,
+            "input": {
+              "stdin": {
+                "data": [
+                  "proscribable"
+                ],
+                "type": "text"
+              }
+            },
+            "tests": [
+              {
+                "description": null,
+                "output": {
+                  "stdout": {
+                    "data": [
+                      "Hallo"
+                    ],
+                    "type": "text"
+                  },
+                  "stderr": "none",
+                  "file": null
+                },
+                "evaluators": {
+                  "stdout": {
+                    "type": "builtin",
+                    "language": "",
+                    "options": [
+                    ],
+                    "name": "textComparator"
+                  },
+                  "stderr": {
+                    "type": "builtin",
+                    "language": "",
+                    "options": [
+                    ],
+                    "name": "textComparator"
+                  },
+                  "file": {
+                    "type": "builtin",
+                    "language": "",
+                    "options": [
+                    ],
+                    "name": "fileComparator"
+                  }
+                }
+              }
+            ]
+          },
+          "postprocessing": [
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{#
+This function generates a function call in Python.
+#}
+import sys
+
+{{ code_identifier }}_file = open("{{ output_file }}", "w")
+
+{# Indicate the execution will start #}
+# Start of execution
+sys.stderr.writeln("--{{ code_identifier }}--")
+sys.stdout.writeln("--{{ code_identifier }}--")
+{{ code_identifier }}_file.writeln("--{{ code_identifier }}--")
+
+from .submission import *
+
+sys.stderr.writeln("--{{ code_identifier }}--")
+sys.stdout.writeln("--{{ code_identifier }}--")
+{{ code_identifier }}_file.writeln("--{{ code_identifier }}--")
+
+# Start of postprocessing
+
+{% for input in postprocessing %}
+  {# Do the post processing #}
+  sys.stderr.writeln("--{{ code_identifier }}--")
+  sys.stdout.writeln("--{{ code_identifier }}--")
+  {{ code_identifier }}_file.writeln("--{{ code_identifier }}--")
+{% endfor %}
