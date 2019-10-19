@@ -1,0 +1,5 @@
+deprecated
+ipykernel
+jupyter-client
+psutil
+jinja2

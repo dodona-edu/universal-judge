@@ -1,0 +1,12 @@
+#!/bin/sh
+
+# Script that runs the judge inside a container that supports Python.
+#
+#   - stdin: run configuration (JSON)
+#   - stdout: evaluation results (JSON)
+#   - stderr: should be empty
+#   - exit status: should be zero
+
+DIR="$(dirname $0)"
+
+python "$DIR/tested.py"

@@ -1,0 +1,4 @@
+/**
+ * @author Niko Strijbol
+ */
+scriptSuperClass(pattern: "plan.groovy", superClass: "dodona.PlanScript")
