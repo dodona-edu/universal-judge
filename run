@@ -9,4 +9,4 @@
 
 DIR="$(dirname $0)"
 
-python "$DIR/tested.py"
+python "$DIR/judge/tested.py"
