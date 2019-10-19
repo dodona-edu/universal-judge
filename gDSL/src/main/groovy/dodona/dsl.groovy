@@ -369,7 +369,7 @@ class Testcase implements WithClosureResolver {
 }
 
 @CompileStatic
-class Consummation extends Testcase implements WithRunArgs, WithPropagation {
+class Execution extends Testcase implements WithRunArgs, WithPropagation {
     Object toJson() {
         def builder = new JsonBuilder()
         builder main: this.main.toJson(),
@@ -392,19 +392,19 @@ class Consummation extends Testcase implements WithRunArgs, WithPropagation {
 class Context implements WithRunArgs, WithPropagation {
     String description
     String preparation
-    Consummation consummation
+    Execution execution
     List<Testcase> testcases = []
 
     def description(String description) {
         this.description = description
     }
 
-    def consummation(@DelegatesTo(value = Consummation, strategy = Closure.DELEGATE_FIRST) Closure<?> cl) {
-        def consummation = resolve(Consummation, cl)
-        if (consummation.tests.empty) {
-            println "Consummation has no tests."
+    def execution(@DelegatesTo(value = Execution, strategy = Closure.DELEGATE_FIRST) Closure<?> cl) {
+        def execution = resolve(Execution, cl)
+        if (execution.tests.empty) {
+            println "Execution has no tests."
         }
-        this.consummation = consummation
+        this.execution = execution
     }
 
     def postprocess(@DelegatesTo(value = Testcase, strategy = Closure.DELEGATE_FIRST) Closure<?> cl) {
@@ -418,7 +418,7 @@ class Context implements WithRunArgs, WithPropagation {
     Object toJson() {
         def builder = new JsonBuilder()
         builder description: this.description,
-                consummation: this.consummation.toJson(),
+                execution: this.execution.toJson(),
                 postprocessing: this.testcases.collect { it.toJson() }
         return builder.content
     }
@@ -435,7 +435,7 @@ class Context implements WithRunArgs, WithPropagation {
 
     @Override
     List<? extends WithPropagation> children() {
-        return consummation == null ? [] : [consummation]
+        return execution == null ? [] : [execution]
     }
 }
 
@@ -450,8 +450,8 @@ class Tab implements WithRunArgs, WithPropagation {
 
     void context(@DelegatesTo(value = Context, strategy = Closure.DELEGATE_FIRST) Closure<?> cl) {
         def context = resolve(Context, cl)
-        if (context.testcases.isEmpty() && context.consummation == null) {
-            throw new TestPlanException("Both consummation and postprocesses are null; not sure what to do!")
+        if (context.testcases.isEmpty() && context.execution == null) {
+            throw new TestPlanException("Both execution and postprocesses are null; not sure what to do!")
         }
         contexts << context
     }

@@ -7,7 +7,7 @@ from testplan import Test, Input, Output, ChannelData, Testcase, Context, Tab, P
 def generate_groovy(inputs, outputs, result):
     with open(result, 'w') as file:
 
-        file.write("plan {\n")
+        file.write("plano {\n")
         file.write("\ttab{\n")
         file.write("\t\tname 'Correctheid'\n")
         for input_, output_ in zip(inputs, outputs):

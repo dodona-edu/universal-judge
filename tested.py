@@ -8,6 +8,8 @@ import sys
 from subprocess import Popen, PIPE, STDOUT
 from typing import NamedTuple
 
+import jinja2
+
 from testplan import parse_test_plan_json
 
 
@@ -55,20 +57,41 @@ def read_config() -> Config:
 if __name__ == '__main__':
     config = read_config()
 
-    # For now, the action plan is as follows:
+    # For now, the action plano is as follows:
     # 1. Load the student user_code in the kernel
     # 2. Process the input line-by-line
     #    - Check the output for each element.
     # 3. Finish
 
-    # Read test plan
+    # Read test plano
     p = Popen(['java', '-jar', './dsl/gDSL.jar', '-d', f"{config.resources}/plan.groovy"], stdout=PIPE)
     json_string = p.stdout.read()
     plan = parse_test_plan_json(json_string)
 
+    with open(config.source, 'r') as file:
+        submission_code = file.read()
+
     print(plan)
 
+    templateLoader = jinja2.FileSystemLoader(searchpath="./templates/python")
+    templateEnv = jinja2.Environment(loader=templateLoader)
+    template = templateEnv.get_template("submission.jinja2")
+    outputText = template.render(code=submission_code)
+
+    template2 = templateEnv.get_template("context.jinja2")
+    outputText2 = template2.render(
+        code_identifier="test",
+        output_file="output.txt",
+    )
+
+    with open("./tt/submission.py", "w") as file:
+        file.write(outputText)
+    with open("./tt/testcase.py", "w") as file:
+        file.write(outputText2)
+
+
+
     # Run it.
-    from judge import KernelJudge
-    tester = KernelJudge(config)
-    tester.judge(plan)
+    # from judge import KernelJudge
+    # tester = KernelJudge(config)
+    # tester.judge(plano)

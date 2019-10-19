@@ -22,7 +22,7 @@ def _get_input(test: Test) -> List[str]:
         with open(test.input.stdin.data, "r") as file:
             return file.readlines()
     else:
-        raise TestPlanError(f"Unknown input type in test plan: {test.input.stdin.type}")
+        raise TestPlanError(f"Unknown input type in test plano: {test.input.stdin.type}")
 
 
 def _get_stdout(test: Test) -> Optional[List[str]]:
@@ -37,7 +37,7 @@ def _get_stdout(test: Test) -> Optional[List[str]]:
         with open(test.output.stdout.data, "r") as file:
             return file.readlines()
     else:
-        raise TestPlanError(f"Unknown output type in test plan: {test.output.stdout.type}")
+        raise TestPlanError(f"Unknown output type in test plano: {test.output.stdout.type}")
 
 
 def _get_stderr(test: Test) -> Optional[List[str]]:
@@ -52,7 +52,7 @@ def _get_stderr(test: Test) -> Optional[List[str]]:
         with open(test.output.stderr.data, "r") as file:
             return file.readlines()
     else:
-        raise TestPlanError(f"Unknown stderr type in test plan: {test.output.stderr.type}")
+        raise TestPlanError(f"Unknown stderr type in test plano: {test.output.stderr.type}")
 
 
 def _get_evaluator(evaluator: Evaluator) -> Comparator:
@@ -99,15 +99,15 @@ class Judge:
 
     def _execute_test_plan(self, submission: str, test_plan: Plan):
         """
-        Execute a test plan.
+        Execute a test plano.
 
-        :param test_plan: The plan to execute.
+        :param test_plan: The plano to execute.
         :param submission: The code submitted by the user.
         """
         raise NotImplementedError()
 
     def judge(self, plan):
-        """Get and execute the test plan for an exercise, resulting in a judgment."""
+        """Get and execute the test plano for an exercise, resulting in a judgment."""
         with open(self.config.source, 'r') as file:
             submission_code = file.read()
 
@@ -258,7 +258,7 @@ class KernelJudge(Judge):
         report_update(po.CloseTest(actual, po.StatusMessage(status), data=po.TestData(channel="stdout")))
 
     def _execute_test_plan(self, submission: str, test_plan: Plan):
-        """Execute a test plan"""
+        """Execute a test plano"""
 
         # Start a pool of kernels.
         kernels = KernelQueue(kernel=self.config.kernel)
@@ -286,3 +286,9 @@ class KernelJudge(Judge):
         # print("Kernels are cleaned")
         current_kernel.clean()
         # print("Cleaned")
+
+
+class GeneratorJudge(Judge):
+
+    def _execute_test_plan(self, submission: str, test_plan: Plan):
+        pass

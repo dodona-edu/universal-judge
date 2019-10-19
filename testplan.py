@@ -12,7 +12,7 @@ from dataclasses_json import dataclass_json
 
 
 class TestPlanError(ValueError):
-    """Error when the test plan is not valid."""
+    """Error when the test plano is not valid."""
     pass
 
 
@@ -122,7 +122,7 @@ class Testcase:
 
 @dataclass_json
 @dataclass
-class Consummation(Testcase):
+class Execution(Testcase):
     """Essentially the same as a normal testcase, but allows to specify if a
     main method should be executed or not for non-script languages (such as
     Java or C).
@@ -135,9 +135,9 @@ class Consummation(Testcase):
 class Context:
     """A context is what the name implies: executes things in the same context.
     As such, the context consists of three main things: the preparation, the
-    consummation and the post-processing.
+    execution and the post-processing.
     """
-    consummation: Consummation
+    execution: Execution
     postprocessing: List[Testcase]
     description: Optional[str] = None
     preparation: Optional[str] = None
@@ -154,12 +154,12 @@ class Tab:
 @dataclass_json
 @dataclass
 class Plan:
-    """General test plan, which is used to run tests of some code."""
-    tabs: Optional[List[Tab]] = field(default_factory=list)
+    """General test plano, which is used to run tests of some code."""
+    tabs: List[Tab] = field(default_factory=list)
 
 
 def parse_test_plan(test_file) -> Plan:
-    """Parse a test plan into the structures."""
+    """Parse a test plano into the structures."""
 
     raw = test_file.read()
     plan: Plan = Plan.from_json(raw)
@@ -181,7 +181,7 @@ def parse_test_plan(test_file) -> Plan:
 
 
 def parse_test_plan_json(json_string) -> Plan:
-    """Parse a test plan into the structures."""
+    """Parse a test plano into the structures."""
 
     plan: Plan = Plan.from_json(json_string)
     plan.name = "Deprecated, will be removed."
@@ -189,7 +189,8 @@ def parse_test_plan_json(json_string) -> Plan:
     # Fix union types.
     for tab in plan.tabs:
         for context in tab.contexts:
-            for testcase in context.testcases:
+            cases = [x for x in [context.preparation, *context.postprocessing] if x]
+            for testcase in cases:
                 for test in testcase.tests:
                     if isinstance(test.input.stdin, dict):
                         test.input.stdin =\

@@ -3,7 +3,7 @@ plan {
 		name 'Correctheid'
 		context {
 			description "Beschrijving van de context"
-			consummation {
+			execution {
 				input {
 					stdin {
 						data 'proscribable'
