@@ -3,6 +3,8 @@
 #
 # For now, this only handles running the execution kernel.
 #
+import json
+import sys
 from subprocess import Popen, PIPE
 from typing import NamedTuple
 
@@ -45,8 +47,8 @@ def read_config() -> Config:
         "judge": '.',
         "workdir": './workdir',
     }
-    #config_json = sys.stdin.read()
-    #config_ = json.loads(config_json)
+    config_json = sys.stdin.read()
+    config_ = json.loads(config_json)
     needed_config = {x: config_[x] for x in Config._fields if x in config_}
     needed_config['kernel'] = LANGUAGE_TO_KERNEL.get(config_["programming_language"], config_["programming_language"])
     return Config(**needed_config)
