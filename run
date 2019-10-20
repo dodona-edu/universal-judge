@@ -8,5 +8,7 @@
 #   - exit status: should be zero
 
 DIR="$(dirname $0)"
-
-python "$DIR/judge/tested.py"
+cd "$DIR/judge/"
+echo "Dir is now"
+echo "$DIR"
+python "./tested.py"
