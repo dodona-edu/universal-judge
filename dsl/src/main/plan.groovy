@@ -1,23 +1,35 @@
 plan {
-	tab{
+	tab {
 		name 'Correctheid'
 		context {
 			description "Beschrijving van de context"
 			execution {
 				input {
 					stdin {
-						data 'proscribable'
-						type 'text'
+						type "text"
+						data "invoertekst"
 					}
 				}
-				test {
-					output {
-						stdout {
-							data "Hallo"
-							type 'text'
-						}
-						stderr 'none'
+				output {
+					stdout {
+						type "text"
+						data "invoertekst"
 					}
+					specialStderr "none"
+				}
+			}
+			additional {
+				input {
+					function {
+						name "echo"
+						type "top"
+						argument "test"
+						argument 25
+					}
+					specialStdin "none"
+				}
+				output {
+					stdout "test-25"
 				}
 			}
 		}

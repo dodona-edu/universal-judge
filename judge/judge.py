@@ -8,7 +8,7 @@ from dodona.dodona import report_update
 from jupyter import JupyterContext, KernelQueue
 from runners.python import PythonRunner
 from tested import Config
-from testplan import _get_input, _get_stderr, _get_stdout, Evaluator, EvaluatorType, Plan, Run, Test, TestPlanError, \
+from testplan import _get_input, _get_stderr, _get_stdout, Evaluator, EvaluatorType, Plan, RunArgs, Test, TestPlanError, \
     TEXT_COMPARATOR, Context
 from utils.ascii_to_html import ansi2html
 
@@ -27,7 +27,7 @@ def _get_evaluator(evaluator: Evaluator) -> Comparator:
 
 
 RUN_KERNELS = {
-    'java': '\n{}.main(new String[]{{}})'
+    'java': '\n{}.execution(new String[]{{}})'
 }
 
 
@@ -35,7 +35,7 @@ def needs_run(kernel: str) -> bool:
     return kernel in RUN_KERNELS
 
 
-def create_run(kernel: str, run: Run) -> str:
+def create_run(kernel: str, run: RunArgs) -> str:
     return RUN_KERNELS[kernel].format(run.classname)
 
 

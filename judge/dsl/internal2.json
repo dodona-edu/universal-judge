@@ -6,58 +6,113 @@
         {
           "description": "Beschrijving van de context",
           "execution": {
-            "main": {
-              "classname": "Main"
-            },
             "description": null,
+            "output": {
+              "stdout": {
+                "data": [
+                  "invoertekst"
+                ],
+                "type": "text"
+              },
+              "stderr": "none",
+              "file": null
+            },
+            "evaluators": {
+              "stdout": {
+                "type": "builtin",
+                "language": null,
+                "options": [
+                ],
+                "name": "textComparator"
+              },
+              "stderr": {
+                "type": "builtin",
+                "language": null,
+                "options": [
+                ],
+                "name": "textComparator"
+              },
+              "file": {
+                "type": "builtin",
+                "language": null,
+                "options": [
+                ],
+                "name": "fileComparator"
+              }
+            },
             "input": {
+              "function": {
+                "type": "main",
+                "name": null,
+                "object": "Main",
+                "arguments": [
+                ]
+              },
               "stdin": {
                 "data": [
-                  "proscribable"
+                  "invoertekst"
                 ],
                 "type": "text"
               }
-            },
-            "tests": [
-              {
-                "description": null,
-                "output": {
-                  "stdout": {
-                    "data": [
-                      "Hallo"
-                    ],
-                    "type": "text"
-                  },
-                  "stderr": "none",
-                  "file": null
-                },
-                "evaluators": {
-                  "stdout": {
-                    "type": "builtin",
-                    "language": "",
-                    "options": [
-                    ],
-                    "name": "textComparator"
-                  },
-                  "stderr": {
-                    "type": "builtin",
-                    "language": "",
-                    "options": [
-                    ],
-                    "name": "textComparator"
-                  },
-                  "file": {
-                    "type": "builtin",
-                    "language": "",
-                    "options": [
-                    ],
-                    "name": "fileComparator"
-                  }
-                }
-              }
-            ]
+            }
           },
-          "postprocessing": [
+          "additional": [
+            {
+              "description": null,
+              "output": {
+                "stdout": {
+                  "data": [
+                    "test-25"
+                  ],
+                  "type": "text"
+                },
+                "stderr": "none",
+                "file": null
+              },
+              "evaluators": {
+                "stdout": {
+                  "type": "builtin",
+                  "language": null,
+                  "options": [
+                  ],
+                  "name": "textComparator"
+                },
+                "stderr": {
+                  "type": "builtin",
+                  "language": null,
+                  "options": [
+                  ],
+                  "name": "textComparator"
+                },
+                "file": {
+                  "type": "builtin",
+                  "language": null,
+                  "options": [
+                  ],
+                  "name": "fileComparator"
+                }
+              },
+              "input": {
+                "function": {
+                  "type": "top",
+                  "name": "echo",
+                  "object": "Main",
+                  "arguments": [
+                    {
+                      "type": "text",
+                      "name": null,
+                      "data": "test"
+                    },
+                    {
+                      "type": "integer",
+                      "name": null,
+                      "data": 25
+                    }
+                  ]
+                },
+                "stdin": "none"
+              }
+            }
           ]
         }
       ]

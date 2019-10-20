@@ -6,22 +6,13 @@ unless noted, the judge will not provide default values for missing fields.
 """
 from dataclasses import dataclass, field
 from enum import Enum
-from pathlib import Path
 from typing import List, Optional, Union
 from dataclasses_json import dataclass_json
 
 
 class TestPlanError(ValueError):
-    """Error when the test plano is not valid."""
+    """Error when the test plan is not valid."""
     pass
-
-
-# Special class denoting the name of the object that must be run.
-@dataclass_json
-@dataclass
-class Run:
-    """Arguments necessary for loading the user's code into the context."""
-    classname: Optional[str]
 
 
 class DataType(Enum):
@@ -58,21 +49,51 @@ class FileOutput:
     actual: str  # Path to the generated file (by the users code)
 
 
+class Type(Enum):
+    integer = "integer"
+    decimal = "decimal"
+    text = "text"
+
+
+class FunctionArg:
+    type: Type  # Type of the argument
+    name: Optional[str]  # Name of the argument, ignored if not supported by the language
+    data: str  # Data to pass to the function
+
+
+class FunctionType(Enum):
+    top = "top"  # top level function
+    static = "static"  # static function
+    instance = "instance"  # instance function
+    main = "main"  # Main function for running code
+
+
+@dataclass_json
+@dataclass
+class FunctionCall:
+    """Represents a function call"""
+    type: FunctionType
+    name: Optional[str]
+    object: str
+    arguments: List[FunctionArg]
+    # Return values are not supported yet, always void.
+
+
 @dataclass_json
 @dataclass
 class Input:
     """Describes the input channels for a test"""
-    stdin: Optional[InputChannel] = ChannelState.none  # Describes stdin. If "none", there is no stdin.
-    # Add function calls and such here, as separate input channels.
+    stdin: InputChannel
+    function: FunctionCall
 
 
 @dataclass_json
 @dataclass
 class Output:
     """Describes the output channels for a test"""
-    stdout: Optional[OutputChannel] = OutputChannelState.ignored  # Stdout is ignored by default
-    stderr: Optional[OutputChannel] = OutputChannelState.none  # Stderr should be empty by default
-    file: Optional[FileOutput] = None  # The output can be a file.
+    stdout: OutputChannel
+    stderr: OutputChannel
+    file: Optional[FileOutput]
 
 
 class EvaluatorType(Enum):
@@ -88,10 +109,10 @@ TEXT_ARGUMENTS = ["ignoreWhitespace"]
 @dataclass
 class Evaluator:
     """Will evaluate the test."""
-    name: Optional[str] = TEXT_COMPARATOR  # Name of the comparator or path to the evaluator.
-    type: Optional[EvaluatorType] = EvaluatorType.builtin  # Type of the evaluator.
-    language: Optional[str] = None  # Ignored when using built-in evaluators
-    options: Optional[List[str]] = field(default_factory=lambda: TEXT_ARGUMENTS)  # Pass options to the evaluator.
+    name: str  # Name of the comparator or path to the evaluator.
+    type: EvaluatorType  # Type of the evaluator.
+    language: Optional[str]  # Ignored when using built-in evaluators
+    options: List[str]  # Pass options to the evaluator.
 
 
 @dataclass_json
@@ -104,30 +125,12 @@ class Evaluators:
 
 @dataclass_json
 @dataclass
-class Test:
-    """Describes a single test"""
-    output: Output
-    evaluators: Evaluators
-    description: Optional[str]
-
-
-@dataclass_json
-@dataclass
 class Testcase:
     """A test case is defined by an input and a set of tests."""
     input: Input
-    tests: List[Test]
+    output: Output
+    evaluators: Evaluators
     description: Optional[str]  # Will be generated if None.
-
-
-@dataclass_json
-@dataclass
-class Execution(Testcase):
-    """Essentially the same as a normal testcase, but allows to specify if a
-    main method should be executed or not for non-script languages (such as
-    Java or C).
-    """
-    main: Run
 
 
 @dataclass_json
@@ -137,13 +140,12 @@ class Context:
     As such, the context consists of three main things: the preparation, the
     execution and the post-processing.
     """
-    execution: Execution
-    postprocessing: List[Testcase]
+    execution: Testcase
+    additional: List[Testcase]
     description: Optional[str] = None
-    preparation: Optional[str] = None
 
     def all_testcases(self) -> List[Testcase]:
-        return [self.execution] + self.postprocessing
+        return [self.execution] + self.additional
 
 
 @dataclass_json
@@ -157,12 +159,12 @@ class Tab:
 @dataclass_json
 @dataclass
 class Plan:
-    """General test plano, which is used to run tests of some code."""
+    """General test plan, which is used to run tests of some code."""
     tabs: List[Tab] = field(default_factory=list)
 
 
 def parse_test_plan(json_string) -> Plan:
-    """Parse a test plano into the structures."""
+    """Parse a test plan into the structures."""
 
     plan: Plan = Plan.from_json(json_string)
     plan.name = "Deprecated, will be removed."
@@ -173,11 +175,16 @@ def parse_test_plan(json_string) -> Plan:
             for testcase in context.all_testcases():
                 if isinstance(testcase.input.stdin, dict):
                     testcase.input.stdin = ChannelData.from_dict(testcase.input.stdin)
-                for test in testcase.tests:
-                    if isinstance(test.output.stdout, dict):
-                        test.output.stdout = ChannelData.from_dict(test.output.stdout)
-                    if isinstance(test.output.stderr, dict):
-                        test.output.stderr = ChannelData.from_dict(test.output.stderr)
+                elif isinstance(testcase.input.stdin, str):
+                    testcase.input.stdin = ChannelState[testcase.input.stdin]
+                if isinstance(testcase.output.stdout, dict):
+                    testcase.output.stdout = ChannelData.from_dict(testcase.output.stdout)
+                elif isinstance(testcase.output.stdout, str):
+                    testcase.output.stdout = OutputChannelState[testcase.output.stdout]
+                if isinstance(testcase.output.stderr, dict):
+                    testcase.output.stderr = ChannelData.from_dict(testcase.output.stderr)
+                elif isinstance(testcase.output.stderr, str):
+                    testcase.output.stderr = OutputChannelState[testcase.output.stderr]
 
     return plan
 
@@ -186,6 +193,7 @@ if __name__ == '__main__':
     with open('dsl/internal2.json', 'r') as f:
         r = parse_test_plan(f.read())
         print(r)
+        print(r.to_json())
 
 
 def _get_input(test: Testcase) -> List[str]:
@@ -201,7 +209,7 @@ def _get_input(test: Testcase) -> List[str]:
         raise TestPlanError(f"Unknown input type in test plano: {test.input.stdin.type}")
 
 
-def _get_stdout(test: Test) -> Optional[List[str]]:
+def _get_stdout(test: Testcase) -> Optional[List[str]]:
     """Get the stdout value of a test"""
     if test.output.stdout == OutputChannelState.ignored.value:
         return None
@@ -216,7 +224,7 @@ def _get_stdout(test: Test) -> Optional[List[str]]:
         raise TestPlanError(f"Unknown output type in test plano: {test.output.stdout.type}")
 
 
-def _get_stderr(test: Test) -> Optional[List[str]]:
+def _get_stderr(test: Testcase) -> Optional[List[str]]:
     """Get the stderr value of a test"""
     if test.output.stderr == OutputChannelState.ignored:
         return None
