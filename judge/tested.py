@@ -66,6 +66,7 @@ if __name__ == '__main__':
     # Read test plano
     p = Popen(['java', '-jar', '../dsl/build/libs/dsl.jar', '-d', f"{config.resources}/plan.groovy"], stdout=PIPE, stderr=PIPE)
     json_string = p.stdout.read()
+    print(f"JSON is {json_string}")
     plan = parse_test_plan(json_string)
 
     # Run it.
