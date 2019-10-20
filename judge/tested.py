@@ -44,7 +44,7 @@ def read_config() -> Config:
         "natural_language": 'nl',
         "resources": '../exercise',
         "source": '../exercise/test.py',
-        "judge": '.',
+        "judge": '../',
         "workdir": './workdir',
     }
     config_json = sys.stdin.read()

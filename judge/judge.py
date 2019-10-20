@@ -295,7 +295,7 @@ class GeneratorJudge(Judge):
                 report_update(po.CloseTest("Internal error", po.StatusMessage(po.Status.INTERNAL_ERROR)))
                 continue
 
-            actual = ""
+            actual = results.stdout[i]
             success = True
             # TODO: allow test on return value.
             # Evaluate the stdout channel
@@ -313,5 +313,6 @@ class GeneratorJudge(Judge):
 
             status = po.Status.CORRECT if success else po.Status.WRONG
             # TODO: report data channel based on actual tests.
+            print(actual)
             report_update(po.CloseTest(actual, po.StatusMessage(status), data=po.TestData(channel="stdout")))
             report_update(po.CloseTestcase())
