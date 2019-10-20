@@ -278,8 +278,8 @@ class GeneratorJudge(Judge):
     def _process_results(self, context: Context, results: ExecutionResult):
 
         for i, testcase in enumerate(context.all_testcases()):
-            report_update(po.StartTestcase(testcase.description))
             input_ = _get_input(testcase)
+            report_update(po.StartTestcase("\n".join(input_)))  # TODO: fancy input
             test = testcase.tests[0]  # We assume only one test per testcase.
             report_update(po.StartTest("\n".join(input_)))  # TODO: fancy input
             try:
