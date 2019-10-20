@@ -23,8 +23,7 @@ class PythonRunner(Runner):
         self.identifier = _get_identifier()
 
     def generate_code(self, submission: str, plan: Plan) -> List[str]:
-        print("Generating code for plan...")
-        loader = jinja2.FileSystemLoader(searchpath=f"{self.config.judge}/runners/templates/python")
+        loader = jinja2.FileSystemLoader(searchpath=f"{self.config.judge}/judge/runners/templates/python")
         environment = jinja2.Environment(loader=loader)
 
         submission_template = environment.get_template("submission.jinja2")
@@ -49,7 +48,6 @@ class PythonRunner(Runner):
         return context_ids
 
     def execute(self, context_id: str, context: Context, timeout=None) -> ExecutionResult:
-        print(f"Executing context {context_id}")
         file = self.config.workdir + f"/context-{context_id}.py"
 
         # Collect stdin
