@@ -313,6 +313,5 @@ class GeneratorJudge(Judge):
 
             status = po.Status.CORRECT if success else po.Status.WRONG
             # TODO: report data channel based on actual tests.
-            print(actual)
             report_update(po.CloseTest(actual, po.StatusMessage(status), data=po.TestData(channel="stdout")))
             report_update(po.CloseTestcase())
