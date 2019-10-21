@@ -55,6 +55,8 @@ class Type(Enum):
     text = "text"
 
 
+@dataclass_json
+@dataclass
 class FunctionArg:
     type: Type  # Type of the argument
     name: Optional[str]  # Name of the argument, ignored if not supported by the language
@@ -198,7 +200,7 @@ if __name__ == '__main__':
 
 def _get_input(test: Testcase) -> List[str]:
     """Get the input for of a test"""
-    if test.input.stdin == ChannelState.none.value:
+    if test.input.stdin == ChannelState.none:
         return []
     elif test.input.stdin.type == DataType.text:
         return test.input.stdin.data
@@ -228,7 +230,7 @@ def _get_stderr(test: Testcase) -> Optional[List[str]]:
     """Get the stderr value of a test"""
     if test.output.stderr == OutputChannelState.ignored:
         return None
-    elif test.output.stderr == OutputChannelState.none.value:
+    elif test.output.stderr == OutputChannelState.none:
         return []
     elif test.output.stderr.type == DataType.text:
         return test.output.stderr.data

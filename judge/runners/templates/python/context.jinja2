@@ -2,26 +2,36 @@
 This file represents all code that will be executed for one text context.
 #}
 import sys
+import traceback
 
+{# A third "channel", used to communicate with the runner #}
 {{ code_identifier }}_file = open("{{ output_file }}", "w")
 
-{# Indicate the execution will start #}
-# Start of execution
-sys.stderr.write("--{{ code_identifier }}--")
-sys.stdout.write("--{{ code_identifier }}--")
-{{ code_identifier }}_file.write("--{{ code_identifier }}--")
+{# Set the arguments #}
+{%- if execution.args %}
+sys.argv.extend([{{ execution.args | join(', ') }}])
+{%- endif -%}
+{# Import the code for the first time #}
+{#sys.stderr.write("--{{ code_identifier }}-- SEP")#}
+{#sys.stdout.write("--{{ code_identifier }}-- SEP")#}
+{#{{ code_identifier }}_file.write("--{{ code_identifier }}-- SEP")#}
+try:
+    import submission
+except:
+    traceback.print_exc()
 
-import submission
-
-sys.stderr.write("--{{ code_identifier }}--")
-sys.stdout.write("--{{ code_identifier }}--")
-{{ code_identifier }}_file.write("--{{ code_identifier }}--")
-
-# Start of postprocessing
-
-{#{% for input in additional %}#}
-  {# Do the post processing #}
-{#  sys.stderr.writeln("--{{ code_identifier }}--")#}
-{#  sys.stdout.writeln("--{{ code_identifier }}--")#}
-{#  {{ code_identifier }}_file.writeln("--{{ code_identifier }}--")#}
-{#{% endfor %}#}
+{# Handle test cases #}
+{% for additional in additionals -%}
+sys.stderr.write("--{{ code_identifier }}-- SEP")
+sys.stdout.write("--{{ code_identifier }}-- SEP")
+{{ code_identifier }}_file.write("--{{ code_identifier }}-- SEP")
+try:
+{%- with function=additional.input.function %}
+    submission.{% include "function.jinja2" %}
+{% endwith %}
+except:
+    traceback.print_exc()
+{#sys.stderr.write("--{{ code_identifier }}-- END")#}
+{#sys.stdout.write("--{{ code_identifier }}-- END")#}
+{#{{ code_identifier }}_file.write("--{{ code_identifier }}-- END")#}
+{%- endfor %}

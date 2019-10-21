@@ -8,8 +8,8 @@ from dodona.dodona import report_update
 from jupyter import JupyterContext, KernelQueue
 from runners.python import PythonRunner
 from tested import Config
-from testplan import _get_input, _get_stderr, _get_stdout, Evaluator, EvaluatorType, Plan, RunArgs, Test, TestPlanError, \
-    TEXT_COMPARATOR, Context
+from testplan import _get_input, _get_stderr, _get_stdout, Evaluator, EvaluatorType, Plan, TestPlanError, \
+    TEXT_COMPARATOR, Context, Testcase
 from utils.ascii_to_html import ansi2html
 
 
@@ -33,10 +33,6 @@ RUN_KERNELS = {
 
 def needs_run(kernel: str) -> bool:
     return kernel in RUN_KERNELS
-
-
-def create_run(kernel: str, run: RunArgs) -> str:
-    return RUN_KERNELS[kernel].format(run.classname)
 
 
 @dataclass
@@ -141,7 +137,7 @@ class KernelJudge(Judge):
 
         return ExecutionResult(stdout_, stderr_, error_codes, messages)
 
-    def _execute_test(self, submission: str, test: Test, context: JupyterContext):
+    def _execute_test(self, submission: str, test: Testcase, context: JupyterContext):
         """
         Run a single test.
         :param submission: The code to run the test against.
@@ -176,7 +172,7 @@ class KernelJudge(Judge):
             return
 
         if needs_run(self.config.kernel):
-            run = create_run(self.config.kernel, test.runArgs)
+            run = ""#create_run(self.config.kernel, test.runArgs)
             submission += run
 
         result = self._execute_statement(submission, input_, context,
@@ -234,16 +230,12 @@ class KernelJudge(Judge):
                         self._execute_test(submission, test, current_kernel)
                     report_update(po.CloseTestcase())
                 report_update(po.CloseContext())
-                # print("Stopping context")
                 current_kernel = kernels.get_kernel(current_kernel)
             report_update(po.CloseTab())
         report_update(po.CloseJudgment())
 
-        # print("Clean kernels...")
         kernels.clean()
-        # print("Kernels are cleaned")
         current_kernel.clean()
-        # print("Cleaned")
 
 
 class GeneratorJudge(Judge):
@@ -280,12 +272,11 @@ class GeneratorJudge(Judge):
         for i, testcase in enumerate(context.all_testcases()):
             input_ = _get_input(testcase)
             report_update(po.StartTestcase("\n".join(input_)))  # TODO: fancy input
-            test = testcase.tests[0]  # We assume only one test per testcase.
             report_update(po.StartTest("\n".join(input_)))  # TODO: fancy input
             try:
-                stdout_evaluator = _get_evaluator(test.evaluators.stdout)
-                stderr_evaluator = _get_evaluator(test.evaluators.stderr)
-                file_evaluator = _get_evaluator(test.evaluators.file)
+                stdout_evaluator = _get_evaluator(testcase.evaluators.stdout)
+                stderr_evaluator = _get_evaluator(testcase.evaluators.stderr)
+                file_evaluator = _get_evaluator(testcase.evaluators.file)
             except TestPlanError as e:
                 report_update(po.AppendMessage(co.ExtendedMessage(
                     description=str(e),
@@ -298,18 +289,20 @@ class GeneratorJudge(Judge):
             actual = results.stdout[i]
             success = True
             # TODO: allow test on return value.
+            # TODO: handle incomplete test case
+            # TODO: check start and end of stream?
             # Evaluate the stdout channel
-            stdout_ = _get_stdout(test)
+            stdout_ = _get_stdout(testcase)
             if stdout_ is not None:  # We evaluate the stdout
                 success = stdout_evaluator.evaluate(stdout_, results.stdout[i])
             # Evaluate the stderr channel
-            stderr_ = _get_stderr(test)
+            stderr_ = _get_stderr(testcase)
             if stderr_ is not None:  # Check stderr
                 success = success and stderr_evaluator.evaluate(stderr_, results.stderr[i])
             # Evaluate the file channel (if present)
-            if test.output.file:
-                actual = test.output.file.actual
-                success = success and file_evaluator.evaluate(test.output.file.expected, actual)
+            if testcase.output.file:
+                actual = testcase.output.file.actual
+                success = success and file_evaluator.evaluate(testcase.output.file.expected, actual)
 
             status = po.Status.CORRECT if success else po.Status.WRONG
             # TODO: report data channel based on actual tests.
