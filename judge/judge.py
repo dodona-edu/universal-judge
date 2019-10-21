@@ -26,6 +26,18 @@ def _get_evaluator(evaluator: Evaluator) -> Comparator:
         raise NotImplementedError()
 
 
+def _evaluate_channel(
+        channel: str,
+        expected: List[str],
+        actual: str,
+        evaluator: Comparator):
+    if expected is not None:  # We evaluate the stdout
+        report_update(po.StartTest("\n".join(expected)))
+        success = evaluator.evaluate(expected, actual)
+        status = po.Status.CORRECT if success else po.Status.WRONG
+        report_update(po.CloseTest(actual, po.StatusMessage(status), data=po.TestData(channel=channel)))
+
+
 RUN_KERNELS = {
     'java': '\n{}.execution(new String[]{{}})'
 }
@@ -272,7 +284,6 @@ class GeneratorJudge(Judge):
         for i, testcase in enumerate(context.all_testcases()):
             input_ = _get_input(testcase)
             report_update(po.StartTestcase("\n".join(input_)))  # TODO: fancy input
-            report_update(po.StartTest("\n".join(input_)))  # TODO: fancy input
             try:
                 stdout_evaluator = _get_evaluator(testcase.evaluators.stdout)
                 stderr_evaluator = _get_evaluator(testcase.evaluators.stderr)
@@ -291,20 +302,26 @@ class GeneratorJudge(Judge):
             # TODO: allow test on return value.
             # TODO: handle incomplete test case
             # TODO: check start and end of stream?
-            # Evaluate the stdout channel
-            stdout_ = _get_stdout(testcase)
-            if stdout_ is not None:  # We evaluate the stdout
-                success = stdout_evaluator.evaluate(stdout_, results.stdout[i])
-            # Evaluate the stderr channel
-            stderr_ = _get_stderr(testcase)
-            if stderr_ is not None:  # Check stderr
-                success = success and stderr_evaluator.evaluate(stderr_, results.stderr[i])
-            # Evaluate the file channel (if present)
-            if testcase.output.file:
-                actual = testcase.output.file.actual
-                success = success and file_evaluator.evaluate(testcase.output.file.expected, actual)
 
-            status = po.Status.CORRECT if success else po.Status.WRONG
-            # TODO: report data channel based on actual tests.
-            report_update(po.CloseTest(actual, po.StatusMessage(status), data=po.TestData(channel="stdout")))
+            # Evaluate the stdout channel
+            _evaluate_channel(
+                "stdout",
+                _get_stdout(testcase),
+                results.stdout[i],
+                stdout_evaluator
+            )
+            # Evaluate the stderr channel
+            _evaluate_channel(
+                "stderr",
+                _get_stderr(testcase),
+                results.stderr[i],
+                stderr_evaluator
+            )
+
+            if testcase.output.file:  # TODO: code
+                report_update(po.StartTest(testcase.output.file.actual))
+                success = file_evaluator.evaluate(testcase.output.file.expected, actual)
+                status = po.Status.CORRECT if success else po.Status.WRONG
+                report_update(po.CloseTest(actual, po.StatusMessage(status), data=po.TestData(channel="file")))
+
             report_update(po.CloseTestcase())
