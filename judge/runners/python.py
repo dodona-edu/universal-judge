@@ -58,7 +58,7 @@ class PythonRunner(Runner):
 
         stdin_ = []
         for testcase in context.all_testcases():
-            stdin_.append("\n".join(_get_stdin(testcase)))
+            stdin_.append(_get_stdin(testcase))
         stdin_ = "\n".join(stdin_)
 
         p = subprocess.run(['python', file], input=stdin_, timeout=timeout, text=True, capture_output=True)
