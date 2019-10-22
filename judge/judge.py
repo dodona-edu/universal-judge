@@ -45,7 +45,7 @@ def _evaluate_channel(channel: str, expected: Optional[str], actual: str, evalua
     if expected is None:
         return  # Nothing to do
     success, expected = evaluator.evaluate(expected, actual)
-    if expected and success:
+    if not expected and success:
         return  # Nothing to report.
     report_update(po.StartTest(expected))
     status = po.Status.CORRECT if success else po.Status.WRONG
