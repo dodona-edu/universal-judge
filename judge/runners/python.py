@@ -1,15 +1,13 @@
 import random
 import string
 import subprocess
-from typing import List, Tuple
+from typing import List
 
 import jinja2
 
-from dodona.common import Message, ExtendedMessage, Permission
-from runners.common import Runner, ExecutionResult
+from runners.common import ExecutionResult, Runner
 from tested import Config
-from testplan import Context, Plan, Tab, ChannelState, Testcase, DataType, TestPlanError, _get_input, FunctionCall, \
-    FunctionType, Type
+from testplan import _get_stdin, Context, FunctionCall, FunctionType, Plan, ValueType
 
 
 def _get_identifier() -> str:
@@ -20,16 +18,26 @@ def _get_identifier() -> str:
 
 class PythonRunner(Runner):
 
-    def main(self, c: FunctionCall) -> str:
-        return ""
+    def __get_environment(self) -> jinja2.Environment:
+        loader = jinja2.FileSystemLoader(searchpath=f"{self.config.judge}/judge/runners/templates/python")
+        return jinja2.Environment(loader=loader, undefined=jinja2.StrictUndefined)
+
+    def function_call(self, call: FunctionCall) -> str:
+        env = self.__get_environment()
+        template = env.get_template("function.jinja2")
+        return template.render(
+            function=call,
+            FunctionType=FunctionType,
+            FunctionCall=FunctionCall,
+            ValueType=ValueType
+        )
 
     def __init__(self, config: Config):
         super().__init__(config)
         self.identifier = _get_identifier()
 
     def generate_code(self, submission: str, plan: Plan) -> List[str]:
-        loader = jinja2.FileSystemLoader(searchpath=f"{self.config.judge}/judge/runners/templates/python")
-        environment = jinja2.Environment(loader=loader, undefined=jinja2.StrictUndefined)
+        environment = self.__get_environment()
 
         submission_template = environment.get_template("submission.jinja2")
         submission_result = submission_template.render(code=submission)
@@ -50,7 +58,7 @@ class PythonRunner(Runner):
                     output_file=f"{self.config.workdir}/output.txt",
                     additionals=context.additional,
                     FunctionType=FunctionType,
-                    Type=Type
+                    ValueType=ValueType
                 )
                 with open(self.config.workdir + f"/context-{id_}.py", "w") as file:
                     file.write(context_result)
@@ -63,38 +71,16 @@ class PythonRunner(Runner):
         # Collect stdin
         stdin_ = []
         for testcase in context.all_testcases():
-            stdin_.append("\n".join(_get_input(testcase)))
+            stdin_.append("\n".join(_get_stdin(testcase)))
         stdin_ = "\n".join(stdin_)
 
         # First, we start the code.
         p = subprocess.run(['python', file], input=stdin_,
                            timeout=timeout, text=True, capture_output=True)
-        identifier = f"--{self.identifier}--"
-        start = f"{identifier} START"
-        separator = f"{identifier} SEP"
-        end = f"{identifier} END"
-        # Check that the code has started
-        messages = []
-        # problem = False
-        # if not p.stdout.startswith(start):
-        #     messages.append(ExtendedMessage("stdout did not start with proper begin tag", "text", Permission.STAFF))
-        #     messages.append(ExtendedMessage("A problem occurred before evaluating your code", "text", Permission.STUDENT))
-        #     problem = True
-        # if not p.stderr.startswith(start):
-        #     messages.append(ExtendedMessage("stderr did not start with proper begin tag", "text", Permission.STAFF))
-        #     messages.append(ExtendedMessage("A problem occurred before evaluating your code", "text", Permission.STUDENT))
-        #     problem = True
-        #
-        # if not p.stdout.endswith(end):
-        #     messages.append(ExtendedMessage("stdout did not end with proper end tag", "text", Permission.STAFF))
-        #     messages.append(ExtendedMessage("Could not complete the evaluation of your code", "text", Permission.STUDENT))
-        #     problem = True
-        # if not p.stderr.endswith(end):
-        #     messages.append(ExtendedMessage("stderr did not end with proper end tag", "text", Permission.STAFF))
-        #     messages.append(ExtendedMessage("Could not complete the evaluation of your code", "text", Permission.STUDENT))
-        #     problem = True
+        identifier = f"--{self.identifier}-- SEP"
+        stdout_ = p.stdout
+        stderr_ = p.stderr
+        with open(f"{self.config.workdir}/output.txt", "r") as f:
+            values = f.read()
 
-        stdout_ = p.stdout.split(separator)
-        stderr_ = p.stderr.split(separator)
-
-        return ExecutionResult(stdout_, stderr_, [], p.returncode)
+        return ExecutionResult(identifier, stdout_, stderr_, values, p.returncode)

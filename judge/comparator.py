@@ -1,19 +1,13 @@
 import math
-from typing import Optional, Union, List
+from typing import Optional
 
 from testplan import TestPlanError
 
 
 class Comparator:
 
-    def evaluate(self, expected: Union[str, List[str]], actual: Union[str, List[str]]) -> bool:
+    def evaluate(self, expected: Optional[str], actual: str) -> bool:
         raise NotImplementedError
-
-
-class NothingComparator(Comparator):
-
-    def evaluate(self, expected: str, actual: str) -> bool:
-        return True
 
 
 def _is_number(string: str) -> Optional[float]:
@@ -38,11 +32,11 @@ class TextComparator(Comparator):
         self.allow_floating_point = "allowFloating_point" in arguments
         self.case_insensitive = "caseInsensitive" in arguments
 
-    def evaluate(self, expected: Union[str, List[str]], actual: Union[str, List[str]]) -> bool:
-        if isinstance(expected, list):
-            expected = "\n".join(expected)
-        if isinstance(actual, list):
-            actual = "\n".join(actual)
+    def evaluate(self, expected: Optional[str], actual: str) -> bool:
+
+        if expected is None:
+            return True
+
         if self.ignore_whitespace:
             expected = expected.strip()
             actual = actual.strip()
@@ -71,7 +65,10 @@ class FileComparator(Comparator):
         self.ignore_whitespace = "ignore_whitespace" in arguments
         self.case_insensitive = "case_insensitive" in arguments
 
-    def evaluate(self, expected: str, actual: str) -> bool:
+    def evaluate(self, expected: Optional[str], actual: str) -> bool:
+
+        if expected is None:
+            raise TestPlanError("File comparator requires expected value.")
 
         try:
             with open(expected, "r") as file:

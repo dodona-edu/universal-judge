@@ -15,52 +15,29 @@ class TestPlanError(ValueError):
     pass
 
 
-class DataType(Enum):
-    text = "text"  # Literal values
-    file = "file"  # Path to a file
-
-
-class ChannelState(Enum):
-    none = "none"  # There is nothing on this channel, i.e. completely empty.
-
-
-class OutputChannelState(Enum):
-    none = "none"  # There is nothing on this channel, i.e. completely empty.
-    ignored = "ignored"  # Ignore everything on this channel, i.e. doesn't matter what you use.
+# region Functions
+class ValueType(Enum):
+    # Primitive types
+    integer = "integer"  # Represents all integers
+    rational = "rational"  # Represents all rational numbers
+    text = "text"  # Represents textual data
+    # Others
+    unknown = "unknown"  # We don't know the type of this value
 
 
 @dataclass_json
 @dataclass
-class ChannelData:
-    """Describes the data on channel (stdin or stdout)"""
-    data: Union[str, List[str]]
-    type: Optional[DataType] = DataType.text
-
-
-InputChannel = Union[ChannelData, ChannelState]
-OutputChannel = Union[ChannelData, OutputChannelState]
+class Value:
+    """Represents a value, which consists of the data and a type."""
+    data: str
+    type: ValueType
 
 
 @dataclass_json
 @dataclass
-class FileOutput:
-    """Describes output where the code should produce a file."""
-    expected: str  # Path to the expected file
-    actual: str  # Path to the generated file (by the users code)
-
-
-class Type(Enum):
-    integer = "integer"
-    decimal = "decimal"
-    text = "text"
-
-
-@dataclass_json
-@dataclass
-class FunctionArg:
-    type: Type  # Type of the argument
+class FunctionArg(Value):
+    """Argument of a function"""
     name: Optional[str]  # Name of the argument, ignored if not supported by the language
-    data: str  # Data to pass to the function
 
 
 class FunctionType(Enum):
@@ -78,14 +55,46 @@ class FunctionCall:
     name: Optional[str]
     object: str
     arguments: List[FunctionArg]
-    # Return values are not supported yet, always void.
+    result: Optional[Value]
+# endregion
+
+
+# region Channels
+class ChannelType(Enum):
+    text = "text"  # Literal values
+    file = "file"  # Path to a file
+
+
+class ChannelState(Enum):
+    none = "none"  # There is nothing on this channel, i.e. completely empty.
+
+
+class OutputChannelState(Enum):
+    none = "none"  # There is nothing on this channel, i.e. completely empty.
+    ignored = "ignored"  # Ignore everything on this channel, i.e. doesn't matter what you use.
+
+
+@dataclass_json
+@dataclass
+class ChannelData:
+    """Describes the data on channel (stdin or stdout)"""
+    data: str
+    type: ChannelType
+
+
+@dataclass_json
+@dataclass
+class FileOutput:
+    """Describes output where the code should produce a file."""
+    expected: str  # Path to the expected file
+    actual: str  # Path to the generated file (by the users code)
 
 
 @dataclass_json
 @dataclass
 class Input:
     """Describes the input channels for a test"""
-    stdin: InputChannel
+    stdin: Union[ChannelData, ChannelState]
     function: FunctionCall
 
 
@@ -93,11 +102,13 @@ class Input:
 @dataclass
 class Output:
     """Describes the output channels for a test"""
-    stdout: OutputChannel
-    stderr: OutputChannel
+    stdout: Union[ChannelData, OutputChannelState]
+    stderr: Union[ChannelData, OutputChannelState]
     file: Optional[FileOutput]
+# endregion
 
 
+# region Evaluators
 class EvaluatorType(Enum):
     builtin = "builtin"
     external = "external"
@@ -123,6 +134,8 @@ class Evaluators:
     stdout: Evaluator
     stderr: Evaluator
     file: Evaluator
+    function: Evaluator
+# endregion
 
 
 @dataclass_json
@@ -153,7 +166,11 @@ class Context:
 @dataclass_json
 @dataclass
 class Tab:
-    """Represents a tab on Dodona."""
+    # noinspection PyUnresolvedReferences
+    """Represents a tab on Dodona.
+
+    :param name: OK
+    """
     name: str
     contexts: List[Context]
 
@@ -198,44 +215,44 @@ if __name__ == '__main__':
         print(r.to_json())
 
 
-def _get_input(test: Testcase) -> List[str]:
-    """Get the input for of a test"""
+def _get_stdin(test: Testcase) -> str:
+    """Get the input for of a test as text."""
     if test.input.stdin == ChannelState.none:
-        return []
-    elif test.input.stdin.type == DataType.text:
+        return ""
+    elif test.input.stdin.type == ChannelType.text:
         return test.input.stdin.data
-    elif test.input.stdin.type == DataType.file:
-        with open(test.input.stdin.data, "r") as file:
-            return file.readlines()
+    elif test.input.stdin.type == ChannelType.file:
+        with open(test.input.stdin.data[0], "r") as file:
+            return file.read()
     else:
         raise TestPlanError(f"Unknown input type in test plano: {test.input.stdin.type}")
 
 
-def _get_stdout(test: Testcase) -> Optional[List[str]]:
-    """Get the stdout value of a test"""
+def _get_stdout(test: Testcase) -> Optional[str]:
+    """Get the stdout value of a test as text."""
     if test.output.stdout == OutputChannelState.ignored.value:
         return None
     elif test.output.stdout == OutputChannelState.none.value:
-        return []
-    elif test.output.stdout.type == DataType.text:
+        return ""
+    elif test.output.stdout.type == ChannelType.text:
         return test.output.stdout.data
-    elif test.output.stdout.type == DataType.file:
-        with open(test.output.stdout.data, "r") as file:
-            return file.readlines()
+    elif test.output.stdout.type == ChannelType.file:
+        with open(test.output.stdout.data[0], "r") as file:
+            return file.read()
     else:
         raise TestPlanError(f"Unknown output type in test plano: {test.output.stdout.type}")
 
 
-def _get_stderr(test: Testcase) -> Optional[List[str]]:
-    """Get the stderr value of a test"""
+def _get_stderr(test: Testcase) -> Optional[str]:
+    """Get the stderr value of a test as text."""
     if test.output.stderr == OutputChannelState.ignored:
         return None
     elif test.output.stderr == OutputChannelState.none:
-        return []
-    elif test.output.stderr.type == DataType.text:
+        return ""
+    elif test.output.stderr.type == ChannelType.text:
         return test.output.stderr.data
-    elif test.output.stderr.type == DataType.file:
-        with open(test.output.stderr.data, "r") as file:
-            return file.readlines()
+    elif test.output.stderr.type == ChannelType.file:
+        with open(test.output.stderr.data[0], "r") as file:
+            return file.read()
     else:
         raise TestPlanError(f"Unknown stderr type in test plano: {test.output.stderr.type}")

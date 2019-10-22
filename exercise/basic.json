@@ -9,9 +9,7 @@
             "description": null,
             "output": {
               "stdout": {
-                "data": [
-                  "invoertekst"
-                ],
+                "data": "invoertekst",
                 "type": "text"
               },
               "stderr": "none",
@@ -41,7 +39,8 @@
 
                 ],
                 "name": "fileComparator"
-              }
+              },
+              "function": null
             },
             "input": {
               "function": {
@@ -50,12 +49,11 @@
                 "object": "Main",
                 "arguments": [
 
-                ]
+                ],
+                "result": null
               },
               "stdin": {
-                "data": [
-                  "invoertekst"
-                ],
+                "data": "invoertekst",
                 "type": "text"
               }
             }
@@ -65,9 +63,7 @@
               "description": null,
               "output": {
                 "stdout": {
-                  "data": [
-                    "test-25"
-                  ],
+                  "data": "test-25",
                   "type": "text"
                 },
                 "stderr": "none",
@@ -97,7 +93,8 @@
 
                   ],
                   "name": "fileComparator"
-                }
+                },
+                "function": null
               },
               "input": {
                 "function": {
@@ -115,7 +112,8 @@
                       "name": null,
                       "data": 25
                     }
-                  ]
+                  ],
+                  "result": null
                 },
                 "stdin": "none"
               }

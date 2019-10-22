@@ -3,6 +3,7 @@ This file represents all code that will be executed for one text context.
 #}
 import sys
 import traceback
+import typing
 
 {# A third "channel", used to communicate with the runner #}
 {{ code_identifier }}_file = open("{{ output_file }}", "w")
@@ -12,9 +13,6 @@ import traceback
 sys.argv.extend([{{ execution.args | join(', ') }}])
 {%- endif -%}
 {# Import the code for the first time #}
-{#sys.stderr.write("--{{ code_identifier }}-- SEP")#}
-{#sys.stdout.write("--{{ code_identifier }}-- SEP")#}
-{#{{ code_identifier }}_file.write("--{{ code_identifier }}-- SEP")#}
 try:
     import submission
 except:
@@ -27,11 +25,8 @@ sys.stdout.write("--{{ code_identifier }}-- SEP")
 {{ code_identifier }}_file.write("--{{ code_identifier }}-- SEP")
 try:
 {%- with function=additional.input.function %}
-    submission.{% include "function.jinja2" %}
+    typing.send({{ code_identifier }}_file, submission.{% include "function.jinja2" %})
 {% endwith %}
 except:
     traceback.print_exc()
-{#sys.stderr.write("--{{ code_identifier }}-- END")#}
-{#sys.stdout.write("--{{ code_identifier }}-- END")#}
-{#{{ code_identifier }}_file.write("--{{ code_identifier }}-- END")#}
 {%- endfor %}

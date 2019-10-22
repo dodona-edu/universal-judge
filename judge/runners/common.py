@@ -3,8 +3,7 @@ from dataclasses import dataclass
 from typing import List
 
 from tested import Config
-from testplan import Plan, Context, FunctionArg, Type, FunctionCall, FunctionType, TestPlanError
-from dodona.common import ExtendedMessage
+from testplan import Plan, Context, FunctionArg, ValueType, FunctionCall, FunctionType, TestPlanError
 
 
 @dataclass
@@ -16,9 +15,10 @@ class ExecutionResult:
     execute the test. E.g. the string at position 0 in stdout is the result of executing the
     testcase at position 0 in the context.
     """
-    stdout: List[str]
-    stderr: List[str]
-    results: List[str]
+    separator: str
+    stdout: str
+    stderr: str
+    results: str
     value: int  # The return value.
 
 
@@ -45,6 +45,9 @@ class Runner:
         else:
             pass
 
+    def function_call(self, call: FunctionCall) -> str:
+        raise NotImplementedError
+
     def execute(self, context_id: str, context: Context) -> ExecutionResult:
         """
         Args:
@@ -53,13 +56,10 @@ class Runner:
         """
         raise NotImplementedError
 
-    def main(self, c: FunctionCall) -> str:
-        raise NotImplementedError
-
     def execution_args(self, c: Context) -> dict:
 
         def convert_value(arg: FunctionArg) -> str:
-            if arg.type == Type.text:
+            if arg.type == ValueType.text:
                 return f'"{arg.data}"'
             else:
                 return str(arg.data)
@@ -75,7 +75,7 @@ class Runner:
         if input_.function.type != FunctionType.main:
             raise TestPlanError("Main function must have type main")
 
-        call = self.main(c.execution.input.function)
+        call = self.function_call(c.execution.input.function)
 
         return {
             "args": converted,

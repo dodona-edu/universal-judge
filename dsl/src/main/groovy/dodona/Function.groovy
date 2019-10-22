@@ -6,7 +6,7 @@ import groovy.transform.CompileStatic
 @CompileStatic
 enum Type implements JsonEnabled {
     INTEGER,
-    DECIMAL,
+    RATIONAL,
     TEXT
 
     @Override
@@ -16,17 +16,38 @@ enum Type implements JsonEnabled {
 }
 
 @CompileStatic
-class FunctionArg implements JsonEnabled {
+class Value implements JsonEnabled {
     Type type
-    String name
     Object data
+
+    Value(Type type, Object data) {
+        this.type = type
+        this.data = data
+    }
 
     @Override
     Object toJson() {
         def builder = new JsonBuilder()
         builder type: type.toJson(),
-                name: name,
                 data: data
+        return builder
+    }
+}
+
+@CompileStatic
+class FunctionArg extends Value {
+    String name
+
+    FunctionArg(Type type, Object data, String name = null) {
+        super(type, data)
+        this.name = null
+    }
+
+    @Override
+    Object toJson() {
+        def builder = new JsonBuilder()
+        builder name: name,
+                *: super.toJson()
         return builder.content
     }
 }
@@ -49,6 +70,7 @@ class FunctionCall implements WithClosureResolver, WithEnums {
     FunctionType type
     String name
     String object = "Main"
+    Value result
     List<FunctionArg> arguments = []
 
     def name(String name) {
@@ -72,56 +94,52 @@ class FunctionCall implements WithClosureResolver, WithEnums {
         return builder.content
     }
 
+    def result(String text) {
+        this.result = new Value(Type.TEXT, text)
+    }
+
+    def result(int value) {
+        this.result = new Value(Type.INTEGER, value)
+    }
+
+    def result(double value) {
+        this.result = new Value(Type.RATIONAL, value)
+    }
+
+    def result(float value) {
+        this.result(value as double)
+    }
+
     def arguments(String[] arguments) {
-        this.arguments.addAll(arguments.collect { s -> {
-            def arg = new FunctionArg()
-            arg.type = Type.TEXT
-            arg.data = s
-            return arg
-        }})
+        arguments.each { argument(it) }
     }
 
     def arguments(Integer[] arguments) {
-        this.arguments.addAll(arguments.collect { s -> {
-            def arg = new FunctionArg()
-            arg.type = Type.INTEGER
-            arg.data = s
-            return arg
-        }})
+        arguments.each { argument(it) }
     }
 
     def arguments(Double[] arguments) {
-        this.arguments.addAll(arguments.collect { s -> {
-            def arg = new FunctionArg()
-            arg.type = Type.DECIMAL
-            arg.data = s
-            return arg
-        }})
+        arguments.each { argument(it) }
     }
 
     def arguments(Float[] arguments) {
-        this.arguments.addAll(arguments.collect { s -> {
-            def arg = new FunctionArg()
-            arg.type = Type.DECIMAL
-            arg.data = s
-            return arg
-        }})
+        arguments.each { argument(it) }
     }
 
     def argument(String value) {
-        this.arguments([value] as String[])
+        this.arguments << new FunctionArg(Type.TEXT, value)
     }
 
-    def argument(Double value) {
-        this.arguments([value] as Double[])
+    def argument(double value) {
+        this.arguments << new FunctionArg(Type.RATIONAL, value)
     }
 
-    def argument(Float value) {
-        this.arguments([value] as Float[])
+    def argument(float value) {
+        this.argument(value as double)
     }
 
     def argument(Integer value) {
-        this.arguments([value] as Integer[])
+        this.arguments << new FunctionArg(Type.INTEGER, value)
     }
 
     static FunctionCall main(String object, List<FunctionArg> args) {

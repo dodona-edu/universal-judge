@@ -1,7 +1,7 @@
 {%- if argument.name -%}
 {{ argument.name }}=
 {%- endif -%}
-{%- if argument.type == Type.text -%}
+{%- if argument.type == ValueType.text -%}
 "{{ argument.data }}"
 {%- else -%}
 {{ argument.data }}

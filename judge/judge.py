@@ -1,20 +1,23 @@
 # Executor for exercises where stdin expects input and receives output in stdout.
 from dataclasses import dataclass
-from typing import List
+from typing import List, Optional
 
 from comparator import Comparator, FileComparator, TextComparator
 from dodona import common as co, partial_output as po
+from dodona.common import ExtendedMessage
+from dodona.common import supports_input_highlighting
 from dodona.dodona import report_update
 from jupyter import JupyterContext, KernelQueue
+from runners.common import Runner, ExecutionResult
 from runners.python import PythonRunner
 from tested import Config
-from testplan import _get_input, _get_stderr, _get_stdout, Evaluator, EvaluatorType, Plan, TestPlanError, \
+from testplan import _get_stdin, _get_stderr, _get_stdout, Evaluator, EvaluatorType, Plan, TestPlanError, \
     TEXT_COMPARATOR, Context, Testcase
 from utils.ascii_to_html import ansi2html
 
 
 def _get_evaluator(evaluator: Evaluator) -> Comparator:
-    """Get the evaluator for a test"""
+    """Get the evaluator instance from a test plan."""
     if evaluator.type == EvaluatorType.builtin:
         if evaluator.name == TEXT_COMPARATOR:
             return TextComparator(arguments=evaluator.options)
@@ -26,16 +29,22 @@ def _get_evaluator(evaluator: Evaluator) -> Comparator:
         raise NotImplementedError()
 
 
-def _evaluate_channel(
-        channel: str,
-        expected: List[str],
-        actual: str,
-        evaluator: Comparator):
-    if expected is not None:  # We evaluate the stdout
-        report_update(po.StartTest("\n".join(expected)))
-        success = evaluator.evaluate(expected, actual)
-        status = po.Status.CORRECT if success else po.Status.WRONG
-        report_update(po.CloseTest(actual, po.StatusMessage(status), data=po.TestData(channel=channel)))
+def _evaluate_channel(channel: str, expected: Optional[str], actual: str, evaluator: Comparator):
+    """
+    Evaluate the output on a given channel. This function will output the appropriate messages
+    to start and end a new test in Dodona.
+
+    :param channel: The name of the channel being evaluated. Will be displayed in Dodona.
+    :param expected: The expected value, or None to skip evaluation.
+    :param actual: The actual output. Ignored if expected is None.
+    :param evaluator: The evaluator to use.
+    """
+    if expected is None:
+        return  # Nothing to do
+    report_update(po.StartTest(expected))
+    success = evaluator.evaluate(expected, actual)
+    status = po.Status.CORRECT if success else po.Status.WRONG
+    report_update(po.CloseTest(actual, po.StatusMessage(status), data=po.TestData(channel)))
 
 
 RUN_KERNELS = {
@@ -48,7 +57,7 @@ def needs_run(kernel: str) -> bool:
 
 
 @dataclass
-class ExecutionResult:
+class KernelResult:
     stdout: List[str]
     stderr: List[str]
     errors: List[po.Status]
@@ -57,7 +66,6 @@ class ExecutionResult:
 
 class Judge:
     """Will evaluate an exercise."""
-
     config: Config
 
     def __init__(self, config: Config):
@@ -86,7 +94,7 @@ class KernelJudge(Judge):
     """
 
     @staticmethod
-    def _execute_statement(code, input_, context: JupyterContext, timeout, memory_limit) -> ExecutionResult:
+    def _execute_statement(code, input_, context: JupyterContext, timeout, memory_limit) -> KernelResult:
         """Execute user_code."""
         # print("Running:")
         # print(code)
@@ -147,7 +155,7 @@ class KernelJudge(Judge):
                 print()
                 print(f"Unknown error: {error}")
 
-        return ExecutionResult(stdout_, stderr_, error_codes, messages)
+        return KernelResult(stdout_, stderr_, error_codes, messages)
 
     def _execute_test(self, submission: str, test: Testcase, context: JupyterContext):
         """
@@ -159,7 +167,7 @@ class KernelJudge(Judge):
         """
         # Get the expected input for a test.
         try:
-            input_ = _get_input(test)
+            input_ = _get_stdin(test)
         except TestPlanError as e:
             report_update(po.StartTest(""))
             report_update(po.AppendMessage(co.ExtendedMessage(
@@ -203,12 +211,12 @@ class KernelJudge(Judge):
             # Evaluate the stdout channel
             stdout_ = _get_stdout(test)
             if stdout_ is not None:  # We evaluate the stdout
-                success = stdout_evaluator.evaluate(stdout_, result.stdout)
+                success = stdout_evaluator.evaluate(stdout_, "\n".join(result.stdout))
 
             # Evaluate the stderr channel
             stderr_ = _get_stderr(test)
             if stderr_ is not None:  # Check stderr
-                success = success and stderr_evaluator.evaluate(stderr_, result.stderr)
+                success = success and stderr_evaluator.evaluate(stderr_, "\n".join(result.stderr))
 
             # Evaluate the file channel (if present)
             if test.output.file:
@@ -250,21 +258,56 @@ class KernelJudge(Judge):
         current_kernel.clean()
 
 
+def _get_readable_input(case: Testcase, runner: Runner) -> ExtendedMessage:
+    """
+    Get human readable input for a testcase. This function will use, in order of availability:
+
+    1. A description on the testcase.
+    2. A function call.
+    3. The stdin.
+
+    If the input is code, the message type will be set to code or the language's name,
+    if Dodona has support for the language.
+
+    :param case: The testcase to get the input from.
+    :param runner: Used to generate a function if the input is a function.
+    """
+    input_ = case.input
+    format_ = 'text'  # By default, we use text as input.
+    if case.description:
+        text = case.description
+    elif input_.function:
+        text = runner.function_call(input_.function)
+        if supports_input_highlighting(runner.config.programming_language):
+            format_ = runner.config.programming_language
+        else:
+            format_ = 'code'
+    elif input_.stdin:
+        text = _get_stdin(case)
+    else:
+        raise TestPlanError("Testcase without either description, stdin or function is not allowed.")
+    return ExtendedMessage(description=text, format=format_)
+
+
 class GeneratorJudge(Judge):
 
-    def _execute_test_plan(self, submission: str, test_plan: Plan):
+    runner: Runner
 
+    def __init__(self, config: Config):
+        super().__init__(config)
+        self.runner = PythonRunner(self.config)
+
+    def _execute_test_plan(self, submission: str, test_plan: Plan):
         report_update(po.StartJudgment())
         # Generate test files.
-        runner = PythonRunner(self.config)
-        ids = runner.generate_code(submission, test_plan)
+        ids = self.runner.generate_code(submission, test_plan)
 
         for tab in test_plan.tabs:
             report_update(po.StartTab(title=tab.name))
             for id_, context in zip(ids, tab.contexts):
                 report_update(po.StartContext(context.description))
                 try:
-                    result = runner.execute(id_, context)
+                    result = self.runner.execute(id_, context)
                 except TestPlanError as e:
                     report_update(po.AppendMessage(co.ExtendedMessage(
                         description=str(e),
@@ -282,8 +325,8 @@ class GeneratorJudge(Judge):
     def _process_results(self, context: Context, results: ExecutionResult):
 
         for i, testcase in enumerate(context.all_testcases()):
-            input_ = _get_input(testcase)
-            report_update(po.StartTestcase("\n".join(input_)))  # TODO: fancy input
+            readable_input = _get_readable_input(testcase, self.runner)
+            report_update(po.StartTestcase(readable_input))
             try:
                 stdout_evaluator = _get_evaluator(testcase.evaluators.stdout)
                 stderr_evaluator = _get_evaluator(testcase.evaluators.stderr)
@@ -297,31 +340,24 @@ class GeneratorJudge(Judge):
                 report_update(po.CloseTest("Internal error", po.StatusMessage(po.Status.INTERNAL_ERROR)))
                 continue
 
-            actual = results.stdout[i]
-            success = True
-            # TODO: allow test on return value.
-            # TODO: handle incomplete test case
-            # TODO: check start and end of stream?
+            # When errors occur, an evaluation could terminated prematurely.
+            # Catch this, and stop execution.
+            if i > len(results.stdout) or i > len(results.stderr) or i > len(results.results):
+                # Recover what we can from the errors and send it to the user.
+                if i <= len(results.stderr):
+                    error = results.stderr[i]
+                else:
+                    error = "Evaluation unfortunately stopped early, and without error message."
+                report_update(po.AppendMessage(co.ExtendedMessage(error, 'text')))
+                continue
 
-            # Evaluate the stdout channel
-            _evaluate_channel(
-                "stdout",
-                _get_stdout(testcase),
-                results.stdout[i],
-                stdout_evaluator
-            )
+            # Evaluate the actual results of the testcase.
+            _evaluate_channel("stdout", _get_stdout(testcase), results.stdout[i], stdout_evaluator)
             # Evaluate the stderr channel
-            _evaluate_channel(
-                "stderr",
-                _get_stderr(testcase),
-                results.stderr[i],
-                stderr_evaluator
-            )
-
-            if testcase.output.file:  # TODO: code
-                report_update(po.StartTest(testcase.output.file.actual))
-                success = file_evaluator.evaluate(testcase.output.file.expected, actual)
-                status = po.Status.CORRECT if success else po.Status.WRONG
-                report_update(po.CloseTest(actual, po.StatusMessage(status), data=po.TestData(channel="file")))
+            _evaluate_channel("stderr", _get_stderr(testcase), results.stderr[i], stderr_evaluator)
+            # TODO: evaluate the return channel.
+            expected_file = getattr(testcase.output.file, 'expected', None)
+            actual_file = getattr(testcase.output.file, 'expected', None)
+            _evaluate_channel("file", expected_file, actual_file, file_evaluator)
 
             report_update(po.CloseTestcase())
