@@ -13,20 +13,14 @@ import typing
 sys.argv.extend([{{ execution.args | join(', ') }}])
 {%- endif -%}
 {# Import the code for the first time #}
-try:
-    import submission
-except:
-    traceback.print_exc()
+import submission
 
 {# Handle test cases #}
 {% for additional in additionals -%}
 sys.stderr.write("--{{ code_identifier }}-- SEP")
 sys.stdout.write("--{{ code_identifier }}-- SEP")
 {{ code_identifier }}_file.write("--{{ code_identifier }}-- SEP")
-try:
 {%- with function=additional.input.function %}
-    typing.send({{ code_identifier }}_file, submission.{% include "function.jinja2" %})
+typing.send({{ code_identifier }}_file, submission.{% include "function.jinja2" %})
 {% endwith %}
-except:
-    traceback.print_exc()
 {%- endfor %}
