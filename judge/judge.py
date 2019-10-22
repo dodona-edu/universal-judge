@@ -344,27 +344,28 @@ class GeneratorJudge(Judge):
         # output we have, to ensure we send as much feedback as possible to the user.
 
         for i, testcase in enumerate(context.all_testcases()):
-            readable_input = _get_readable_input(testcase, self.runner)
-            report_update(po.StartTestcase(readable_input))
+
             try:
                 stdout_evaluator = _get_evaluator(testcase.evaluators.stdout)
                 stderr_evaluator = _get_evaluator(testcase.evaluators.stderr)
                 file_evaluator = _get_evaluator(testcase.evaluators.file)
             except TestPlanError as e:
                 report_update(po.AppendMessage(co.ExtendedMessage(str(e), 'text', co.Permission.STAFF)))
-                report_update(po.CloseTest("Internal error", po.StatusMessage(po.Status.INTERNAL_ERROR)))
-                continue
+                break
 
             # When errors occur, an evaluation could terminated prematurely.
             # Catch this, and stop execution.
             if i >= len(stdout_) or i >= len(stderr_) or i >= len(values):
                 # Recover what we can from the errors and send it to the user.
                 if i < len(stderr_):
-                    error = stderr_[i]
+                    report_update(po.AppendMessage(co.ExtendedMessage(stderr_[i], 'text')))
                 else:
-                    error = "Evaluation unfortunately stopped early, and without error message."
-                report_update(po.AppendMessage(co.ExtendedMessage(error, 'text')))
-                continue
+                    # TODO: what should we do here?
+                    error = "Could not execute"
+                break  # Stop now.
+
+            readable_input = _get_readable_input(testcase, self.runner)
+            report_update(po.StartTestcase(readable_input))
 
             # Evaluate the actual results of the testcase.
             _evaluate_channel("stdout", _get_stdout(testcase), stdout_[i], stdout_evaluator)
