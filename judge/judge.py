@@ -34,6 +34,9 @@ def _evaluate_channel(channel: str, expected: Optional[str], actual: str, evalua
     Evaluate the output on a given channel. This function will output the appropriate messages
     to start and end a new test in Dodona.
 
+    Additionally, this is a silent evaluation: if there should be no output, and there is no output,
+    nothing is written to Dodona.
+
     :param channel: The name of the channel being evaluated. Will be displayed in Dodona.
     :param expected: The expected value, or None to skip evaluation.
     :param actual: The actual output. Ignored if expected is None.
@@ -41,8 +44,10 @@ def _evaluate_channel(channel: str, expected: Optional[str], actual: str, evalua
     """
     if expected is None:
         return  # Nothing to do
+    success, expected = evaluator.evaluate(expected, actual)
+    if expected and success:
+        return  # Nothing to report.
     report_update(po.StartTest(expected))
-    success = evaluator.evaluate(expected, actual)
     status = po.Status.CORRECT if success else po.Status.WRONG
     report_update(po.CloseTest(actual, po.StatusMessage(status), data=po.TestData(channel)))
 

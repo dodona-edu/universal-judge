@@ -1,12 +1,12 @@
 import math
-from typing import Optional
+from typing import Optional, Tuple
 
 from testplan import TestPlanError
 
 
 class Comparator:
 
-    def evaluate(self, expected: Optional[str], actual: str) -> bool:
+    def evaluate(self, expected: str, actual: str) -> Tuple[bool, str]:
         raise NotImplementedError
 
 
@@ -32,11 +32,7 @@ class TextComparator(Comparator):
         self.allow_floating_point = "allowFloating_point" in arguments
         self.case_insensitive = "caseInsensitive" in arguments
 
-    def evaluate(self, expected: Optional[str], actual: str) -> bool:
-
-        if expected is None:
-            return True
-
+    def evaluate(self, expected: str, actual: str) -> Tuple[bool, str]:
         if self.ignore_whitespace:
             expected = expected.strip()
             actual = actual.strip()
@@ -47,9 +43,9 @@ class TextComparator(Comparator):
         actual_float = _is_number(actual)
         if self.allow_floating_point and actual_float:
             expected_float = _is_number(expected)
-            return expected_float and math.isclose(actual_float, expected_float)
+            return expected_float and math.isclose(actual_float, expected_float), str(expected_float)
         else:
-            return actual == expected
+            return actual == expected, expected
 
 
 class FileComparator(Comparator):
@@ -65,11 +61,7 @@ class FileComparator(Comparator):
         self.ignore_whitespace = "ignore_whitespace" in arguments
         self.case_insensitive = "case_insensitive" in arguments
 
-    def evaluate(self, expected: Optional[str], actual: str) -> bool:
-
-        if expected is None:
-            raise TestPlanError("File comparator requires expected value.")
-
+    def evaluate(self, expected: str, actual: str) -> Tuple[bool, str]:
         try:
             with open(expected, "r") as file:
                 expected = file.read()
@@ -86,4 +78,4 @@ class FileComparator(Comparator):
             expected = expected.lower()
             actual = actual.lower()
 
-        return actual == expected
+        return actual == expected, expected
