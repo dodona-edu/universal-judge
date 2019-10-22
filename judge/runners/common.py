@@ -2,6 +2,8 @@
 from dataclasses import dataclass
 from typing import List
 
+import jinja2
+
 from tested import Config
 from testplan import Plan, Context, FunctionArg, ValueType, FunctionCall, FunctionType, TestPlanError
 
@@ -38,15 +40,16 @@ class Runner:
         """Return True if there needs to be a compilation step."""
         return False
 
+    def needs_main(self):
+        """Return True if the language requires a main function."""
+        return False
+
     def compile(self):
         """Do the compilation step."""
         if self.needs_compilation():
             raise NotImplementedError
         else:
             pass
-
-    def function_call(self, call: FunctionCall) -> str:
-        raise NotImplementedError
 
     def execute(self, context_id: str, context: Context) -> ExecutionResult:
         """
@@ -56,28 +59,40 @@ class Runner:
         """
         raise NotImplementedError
 
+    def _path_to_templates(self) -> str:
+        return f"{self.config.judge}/judge/runners/templates/{self.config.programming_language}"
+
+    def _get_environment(self) -> jinja2.Environment:
+        """Get the environment for the templates."""
+        loader = jinja2.FileSystemLoader(self._path_to_templates())
+        return jinja2.Environment(loader=loader, undefined=jinja2.StrictUndefined)
+
+    # def argument_template(self, argument: FunctionArg) -> str:
+    #     """Produce code for a single argument"""
+    #     env = self.__get_environment()
+    #     template = env.get_template("argument.jinja2")
+    #     return template.render(
+    #         argument=argument,
+    #         ValueType=ValueType
+    #     )
+
+    def function_call(self, call: FunctionCall) -> str:
+        """Produce code for a single function call"""
+        env = self._get_environment()
+        template = env.get_template("function.jinja2")
+        return template.render(
+            function=call,
+            FunctionType=FunctionType,
+            FunctionCall=FunctionCall,
+            ValueType=ValueType
+        )
+
     def execution_args(self, c: Context) -> dict:
 
-        def convert_value(arg: FunctionArg) -> str:
-            if arg.type == ValueType.text:
-                return f'"{arg.data}"'
-            else:
-                return str(arg.data)
-
-        input_ = c.execution.input
-        args = input_.function.arguments
-        converted = []
-        for argument in args:
-            if argument.name:
-                converted.append(argument.name)
-            converted.append(convert_value(argument))
-
-        if input_.function.type != FunctionType.main:
+        if c.execution.input.function.type != FunctionType.main:
             raise TestPlanError("Main function must have type main")
 
-        call = self.function_call(c.execution.input.function)
-
         return {
-            "args": converted,
-            "call": call
+            "args": c.execution.input.function.arguments,
+            "call": self.function_call(c.execution.input.function)
         }

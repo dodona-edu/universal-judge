@@ -2,6 +2,7 @@ import random
 import string
 import subprocess
 from typing import List
+import shutil
 
 import jinja2
 
@@ -18,26 +19,12 @@ def _get_identifier() -> str:
 
 class PythonRunner(Runner):
 
-    def __get_environment(self) -> jinja2.Environment:
-        loader = jinja2.FileSystemLoader(searchpath=f"{self.config.judge}/judge/runners/templates/python")
-        return jinja2.Environment(loader=loader, undefined=jinja2.StrictUndefined)
-
-    def function_call(self, call: FunctionCall) -> str:
-        env = self.__get_environment()
-        template = env.get_template("function.jinja2")
-        return template.render(
-            function=call,
-            FunctionType=FunctionType,
-            FunctionCall=FunctionCall,
-            ValueType=ValueType
-        )
-
     def __init__(self, config: Config):
         super().__init__(config)
         self.identifier = _get_identifier()
 
     def generate_code(self, submission: str, plan: Plan) -> List[str]:
-        environment = self.__get_environment()
+        environment = self._get_environment()
 
         submission_template = environment.get_template("submission.jinja2")
         submission_result = submission_template.render(code=submission)
@@ -63,24 +50,20 @@ class PythonRunner(Runner):
                 with open(self.config.workdir + f"/context-{id_}.py", "w") as file:
                     file.write(context_result)
                 context_ids.append(id_)
+        shutil.copy2(f"{self._path_to_templates()}/typing.py", self.config.workdir)
         return context_ids
 
     def execute(self, context_id: str, context: Context, timeout=None) -> ExecutionResult:
         file = self.config.workdir + f"/context-{context_id}.py"
 
-        # Collect stdin
         stdin_ = []
         for testcase in context.all_testcases():
             stdin_.append("\n".join(_get_stdin(testcase)))
         stdin_ = "\n".join(stdin_)
 
-        # First, we start the code.
-        p = subprocess.run(['python', file], input=stdin_,
-                           timeout=timeout, text=True, capture_output=True)
+        p = subprocess.run(['python', file], input=stdin_, timeout=timeout, text=True, capture_output=True)
         identifier = f"--{self.identifier}-- SEP"
-        stdout_ = p.stdout
-        stderr_ = p.stderr
         with open(f"{self.config.workdir}/output.txt", "r") as f:
             values = f.read()
 
-        return ExecutionResult(identifier, stdout_, stderr_, values, p.returncode)
+        return ExecutionResult(identifier, p.stdout, p.stderr, values, p.returncode)

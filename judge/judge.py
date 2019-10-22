@@ -12,7 +12,7 @@ from runners.common import Runner, ExecutionResult
 from runners.python import PythonRunner
 from tested import Config
 from testplan import _get_stdin, _get_stderr, _get_stdout, Evaluator, EvaluatorType, Plan, TestPlanError, \
-    TEXT_COMPARATOR, Context, Testcase
+    TEXT_COMPARATOR, Context, Testcase, FunctionType
 from utils.ascii_to_html import ansi2html
 
 
@@ -263,7 +263,9 @@ def _get_readable_input(case: Testcase, runner: Runner) -> ExtendedMessage:
     Get human readable input for a testcase. This function will use, in order of availability:
 
     1. A description on the testcase.
-    2. A function call.
+    2. A function call. If the function call is the main function, only use the main function if
+       the language requires a main function. However, if there is no stdin but there is a main
+       function for a language that does not use it, a placeholder will be used.
     3. The stdin.
 
     If the input is code, the message type will be set to code or the language's name,
@@ -276,7 +278,7 @@ def _get_readable_input(case: Testcase, runner: Runner) -> ExtendedMessage:
     format_ = 'text'  # By default, we use text as input.
     if case.description:
         text = case.description
-    elif input_.function:
+    elif input_.function and (input_.function.type != FunctionType.main or runner.needs_main()):
         text = runner.function_call(input_.function)
         if supports_input_highlighting(runner.config.programming_language):
             format_ = runner.config.programming_language
@@ -285,7 +287,12 @@ def _get_readable_input(case: Testcase, runner: Runner) -> ExtendedMessage:
     elif input_.stdin:
         text = _get_stdin(case)
     else:
-        raise TestPlanError("Testcase without either description, stdin or function is not allowed.")
+        # If there is no stdin, but there is a main function but we end up here, this means the
+        # language does not use main functions. In that case, we use a placeholder.
+        if input_.function and input_.function.type == FunctionType.main:
+            text = "Code execution"
+        else:
+            raise TestPlanError("Testcase without either description, stdin or function is not allowed.")
     return ExtendedMessage(description=text, format=format_)
 
 
@@ -323,6 +330,13 @@ class GeneratorJudge(Judge):
         report_update(po.CloseJudgment())
 
     def _process_results(self, context: Context, results: ExecutionResult):
+        # Process output
+        stdout_ = results.stdout.split(results.separator)
+        stderr_ = results.stderr.split(results.separator)
+        values = results.results.split(results.separator)
+
+        # There might be less output than testcase, which is an error. However, we process the
+        # output we have, to ensure we send as much feedback as possible to the user.
 
         for i, testcase in enumerate(context.all_testcases()):
             readable_input = _get_readable_input(testcase, self.runner)
@@ -332,30 +346,26 @@ class GeneratorJudge(Judge):
                 stderr_evaluator = _get_evaluator(testcase.evaluators.stderr)
                 file_evaluator = _get_evaluator(testcase.evaluators.file)
             except TestPlanError as e:
-                report_update(po.AppendMessage(co.ExtendedMessage(
-                    description=str(e),
-                    format='text',
-                    permission=co.Permission.STAFF
-                )))
+                report_update(po.AppendMessage(co.ExtendedMessage(str(e), 'text', co.Permission.STAFF)))
                 report_update(po.CloseTest("Internal error", po.StatusMessage(po.Status.INTERNAL_ERROR)))
                 continue
 
             # When errors occur, an evaluation could terminated prematurely.
             # Catch this, and stop execution.
-            if i > len(results.stdout) or i > len(results.stderr) or i > len(results.results):
+            if i >= len(stdout_) or i >= len(stderr_) or i >= len(values):
                 # Recover what we can from the errors and send it to the user.
-                if i <= len(results.stderr):
-                    error = results.stderr[i]
+                if i < len(stderr_):
+                    error = stderr_[i]
                 else:
                     error = "Evaluation unfortunately stopped early, and without error message."
                 report_update(po.AppendMessage(co.ExtendedMessage(error, 'text')))
                 continue
 
             # Evaluate the actual results of the testcase.
-            _evaluate_channel("stdout", _get_stdout(testcase), results.stdout[i], stdout_evaluator)
-            # Evaluate the stderr channel
-            _evaluate_channel("stderr", _get_stderr(testcase), results.stderr[i], stderr_evaluator)
+            _evaluate_channel("stdout", _get_stdout(testcase), stdout_[i], stdout_evaluator)
             # TODO: evaluate the return channel.
+            # Evaluate the stderr channel
+            _evaluate_channel("stderr", _get_stderr(testcase), stderr_[i], stderr_evaluator)
             expected_file = getattr(testcase.output.file, 'expected', None)
             actual_file = getattr(testcase.output.file, 'expected', None)
             _evaluate_channel("file", expected_file, actual_file, file_evaluator)

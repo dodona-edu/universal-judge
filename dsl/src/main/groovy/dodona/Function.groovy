@@ -30,7 +30,7 @@ class Value implements JsonEnabled {
         def builder = new JsonBuilder()
         builder type: type.toJson(),
                 data: data
-        return builder
+        return builder.content
     }
 }
 
@@ -65,50 +65,9 @@ enum FunctionType implements JsonEnabled {
     }
 }
 
-@CompileStatic
-class FunctionCall implements WithClosureResolver, WithEnums {
-    FunctionType type
-    String name
-    String object = "Main"
-    Value result
+trait WithArguments {
+
     List<FunctionArg> arguments = []
-
-    def name(String name) {
-        this.name = name
-    }
-
-    def type(String type) {
-        this.type = convert(type, "type", FunctionType)
-    }
-
-    def object(String name) {
-        this.object = object
-    }
-
-    Object toJson() {
-        def builder = new JsonBuilder()
-        builder type: type.toJson(),
-                name: name,
-                object: object,
-                arguments: arguments.collect { it.toJson() }
-        return builder.content
-    }
-
-    def result(String text) {
-        this.result = new Value(Type.TEXT, text)
-    }
-
-    def result(int value) {
-        this.result = new Value(Type.INTEGER, value)
-    }
-
-    def result(double value) {
-        this.result = new Value(Type.RATIONAL, value)
-    }
-
-    def result(float value) {
-        this.result(value as double)
-    }
 
     def arguments(String[] arguments) {
         arguments.each { argument(it) }
@@ -140,6 +99,52 @@ class FunctionCall implements WithClosureResolver, WithEnums {
 
     def argument(Integer value) {
         this.arguments << new FunctionArg(Type.INTEGER, value)
+    }
+}
+
+@CompileStatic
+class FunctionCall implements WithClosureResolver, WithEnums, WithArguments {
+    FunctionType type
+    String name
+    String object = "Main"
+    Value result
+
+    def name(String name) {
+        this.name = name
+    }
+
+    def type(String type) {
+        this.type = convert(type, "type", FunctionType)
+    }
+
+    def object(String name) {
+        this.object = object
+    }
+
+    Object toJson() {
+        def builder = new JsonBuilder()
+        builder type: type.toJson(),
+                name: name,
+                object: object,
+                arguments: this.arguments*.toJson(),
+                result: result?.toJson()
+        return builder.content
+    }
+
+    def result(String text) {
+        this.result = new Value(Type.TEXT, text)
+    }
+
+    def result(int value) {
+        this.result = new Value(Type.INTEGER, value)
+    }
+
+    def result(double value) {
+        this.result = new Value(Type.RATIONAL, value)
+    }
+
+    def result(float value) {
+        this.result(value as double)
     }
 
     static FunctionCall main(String object, List<FunctionArg> args) {

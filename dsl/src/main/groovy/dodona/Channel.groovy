@@ -36,15 +36,15 @@ enum OutputChannelState implements JsonEnabled {
 
 @CompileStatic
 class ChannelData implements WithEnums, JsonEnabled {
-    List<String> data = []
+    String data
     DataType type = DataType.TEXT
 
     void data(String data) {
-        this.data = [data]
+        this.data = data
     }
 
     void data(List<String> data) {
-        this.data = data
+        this.data = data.join("\n")
     }
 
     def type(String type) {
@@ -110,25 +110,11 @@ abstract class BaseInput implements WithClosureResolver, WithEnums {
 }
 
 @CompileStatic
-class MainFunctionCallClosure {
+class MainFunctionCallClosure implements WithArguments {
     String object = "Main"
-    List<FunctionArg> arguments = []
 
     def object(String object) {
         this.object = object
-    }
-
-    def arguments(List<String> arguments) {
-        this.arguments.addAll(arguments.collect { s -> {
-            def arg = new FunctionArg()
-            arg.type = Type.TEXT
-            arg.data = s
-            return arg
-        }})
-    }
-
-    def argument(String value) {
-        this.arguments([value])
     }
 }
 

@@ -103,13 +103,13 @@
                   "object": "Main",
                   "arguments": [
                     {
-                      "type": "text",
                       "name": null,
+                      "type": "text",
                       "data": "test"
                     },
                     {
-                      "type": "integer",
                       "name": null,
+                      "type": "integer",
                       "data": 25
                     }
                   ],
