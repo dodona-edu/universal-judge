@@ -48,7 +48,7 @@ def _evaluate_channel(channel: str, expected: Optional[str], actual: str, evalua
     report_update(po.StartTest(expected))
     if error:
         # TODO: can we colour this output somehow?
-        message = co.ExtendedMessage(f"<pre>{error}</pre>", format='html')
+        message = co.ExtendedMessage(error, format='code')
         report_update(po.AppendMessage(message))
         status = po.Status.RUNTIME_ERROR
     else:
