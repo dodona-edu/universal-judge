@@ -35,8 +35,7 @@ def _evaluate_channel(channel: str, expected: Optional[str], actual: str, evalua
     Evaluate the output on a given channel. This function will output the appropriate messages
     to start and end a new test in Dodona.
 
-    If errors is given and the result is not correct, the test will fail with a runtime exception.
-    Should the test pass, we ignore any errors.
+    If errors is given, the test will end with a runtime error.
 
     :param channel: The name of the channel being evaluated. Will be displayed in Dodona.
     :param expected: The expected value, or None to skip evaluation.
@@ -47,17 +46,15 @@ def _evaluate_channel(channel: str, expected: Optional[str], actual: str, evalua
     if expected is None:
         return  # Nothing to do
     report_update(po.StartTest(expected))
-    success = evaluator.evaluate(expected, actual)
-    if success:
-        status = po.Status.CORRECT
+    if error:
+        # TODO: can we colour this output somehow?
+        message = co.ExtendedMessage(f"<pre>{error}</pre>", format='html')
+        report_update(po.AppendMessage(message))
+        status = po.Status.RUNTIME_ERROR
     else:
-        if error:
-            # TODO: can we colour this output somehow?
-            message = co.ExtendedMessage(f"<pre>{error}</pre>", format='html')
-            report_update(po.AppendMessage(message))
-            status = po.Status.RUNTIME_ERROR
-        else:
-            status = po.Status.WRONG
+        success = evaluator.evaluate(expected, actual)
+        status = po.Status.CORRECT if success else po.Status.WRONG
+
     report_update(po.CloseTest(actual, po.StatusMessage(status), data=po.TestData(channel)))
 
 
@@ -381,7 +378,7 @@ class GeneratorJudge(Judge):
             # outputs of the actual tests. However, inside the special case of stderr, there is
             # another special case: if stderr is not "none", we consider it a normal output stream.
             error_text = None
-            if testcase.output.stdout != OutputChannelState.none:
+            if testcase.output.stderr != OutputChannelState.none:
                 _evaluate_channel("stderr", _get_stderr(testcase), stderr_[i], stderr_evaluator)
             else:
                 error_text = stderr_[i]
