@@ -12,7 +12,7 @@ from runners.common import Runner, ExecutionResult
 from runners.python import PythonRunner
 from tested import Config
 from testplan import _get_stdin, _get_stderr, _get_stdout, Evaluator, EvaluatorType, Plan, TestPlanError, \
-    TEXT_COMPARATOR, Context, Testcase, FunctionType
+    TEXT_COMPARATOR, Context, Testcase, FunctionType, OutputChannelState
 from utils.ascii_to_html import ansi2html
 
 
@@ -29,31 +29,36 @@ def _get_evaluator(evaluator: Evaluator) -> Comparator:
         raise NotImplementedError()
 
 
-@dataclass
-class ChannelEvaluator:
-    channel_name: str
-    evaluator: Comparator
-    ignore: bool = False
-    ok: po.Status = po.Status.CORRECT
-    no: po.Status = po.Status.WRONG
+def _evaluate_channel(channel: str, expected: Optional[str], actual: str, evaluator: Comparator,
+                      error: Optional[str] = None):
+    """
+    Evaluate the output on a given channel. This function will output the appropriate messages
+    to start and end a new test in Dodona.
 
-    def evaluate(self, expected: Optional[str], actual: str):
-        """
-        Evaluate the output on a given channel. This function will output the appropriate messages
-        to start and end a new test in Dodona.
+    If errors is given and the result is not correct, the test will fail with a runtime exception.
+    Should the test pass, we ignore any errors.
 
-        Additionally, this is a silent evaluation: if there should be no output, and there is no output,
-        nothing is written to Dodona. (only if ignore is True)
-        """
-        if expected is None:
-            return  # Nothing to do
-        success, expected = self.evaluator.evaluate(expected, actual)
-        if self.ignore and not expected and success:
-            return  # Nothing to report.
-        report_update(po.StartTest(expected))
-        report_update(po.CloseTest(actual,
-                                   po.StatusMessage(self.ok if success else self.no),
-                                   data=po.TestData(self.channel_name)))
+    :param channel: The name of the channel being evaluated. Will be displayed in Dodona.
+    :param expected: The expected value, or None to skip evaluation.
+    :param actual: The actual output. Ignored if expected is None.
+    :param evaluator: The evaluator to use.
+    :param error: The potential errors.
+    """
+    if expected is None:
+        return  # Nothing to do
+    report_update(po.StartTest(expected))
+    success = evaluator.evaluate(expected, actual)
+    if success:
+        status = po.Status.CORRECT
+    else:
+        if error:
+            # TODO: can we colour this output somehow?
+            message = co.ExtendedMessage(f"<pre>{error}</pre>", format='html')
+            report_update(po.AppendMessage(message))
+            status = po.Status.RUNTIME_ERROR
+        else:
+            status = po.Status.WRONG
+    report_update(po.CloseTest(actual, po.StatusMessage(status), data=po.TestData(channel)))
 
 
 RUN_KERNELS = {
@@ -372,14 +377,23 @@ class GeneratorJudge(Judge):
             report_update(po.StartTestcase(readable_input))
 
             # Evaluate the actual results of the testcase.
-            stdout_eval = ChannelEvaluator("stdout", stdout_evaluator)
-            stdout_eval.evaluate(_get_stdout(testcase), stdout_[i])
-            stderr_eval = ChannelEvaluator("stderr", stderr_evaluator, True, po.Status.CORRECT, po.Status.WRONG)
-            stderr_eval.evaluate(_get_stderr(testcase), stderr_[i])
+            # First, we evaluate stderr. If there are error messages, we include them in the
+            # outputs of the actual tests. However, inside the special case of stderr, there is
+            # another special case: if stderr is not "none", we consider it a normal output stream.
+            error_text = None
+            if testcase.output.stdout != OutputChannelState.none:
+                _evaluate_channel("stderr", _get_stderr(testcase), stderr_[i], stderr_evaluator)
+            else:
+                error_text = stderr_[i]
+            _evaluate_channel("stdout", _get_stdout(testcase), stdout_[i], stdout_evaluator, error_text)
             expected_file = getattr(testcase.output.file, 'expected', None)
-            actual_file = getattr(testcase.output.file, 'actual', None)
-            file_eval = ChannelEvaluator("file", file_evaluator)
-            file_eval.evaluate(expected_file, actual_file)
+            actual_file = getattr(testcase.output.file, 'expected', None)
+            _evaluate_channel("file", expected_file, actual_file, file_evaluator, error_text)
             # TODO: evaluate the return channel.
+            # Evaluate the stderr channel, which is a special case.
+            # If stderr is set to non
+
+
+
 
             report_update(po.CloseTestcase())
