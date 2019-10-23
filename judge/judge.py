@@ -387,10 +387,5 @@ class GeneratorJudge(Judge):
             actual_file = getattr(testcase.output.file, 'expected', None)
             _evaluate_channel("file", expected_file, actual_file, file_evaluator, error_text)
             # TODO: evaluate the return channel.
-            # Evaluate the stderr channel, which is a special case.
-            # If stderr is set to non
-
-
-
 
             report_update(po.CloseTestcase())
