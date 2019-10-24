@@ -7,22 +7,16 @@ def send(stream, value):
     if value is None:
         return
     if isinstance(value, str):
-        json.dump({
-            "data": value,
-            "type": "text"
-        }, stream)
+        type_ = "text"
     elif isinstance(value, int):
-        json.dump({
-            "data": value,
-            "type": "integer"
-        }, stream)
+        type_ = "integer"
     elif isinstance(value, float):
-        json.dump({
-            "data": value,
-            "type": "rational"
-        }, stream)
+        type_ = "rational"
+    elif isinstance(value, bool):
+        type_ = "boolean"
     else:
-        json.dump({
-            "data": value,
-            "type": "unknown"
-        }, stream)
+        type_ = "unknown"
+    json.dump({
+        "data": value,
+        "type": type_
+    }, stream)

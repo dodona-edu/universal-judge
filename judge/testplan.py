@@ -21,6 +21,7 @@ class ValueType(Enum):
     integer = "integer"  # Represents all integers
     rational = "rational"  # Represents all rational numbers
     text = "text"  # Represents textual data
+    boolean = "boolean"
     # Others
     unknown = "unknown"  # We don't know the type of this value
 

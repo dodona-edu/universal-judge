@@ -236,6 +236,10 @@ class Output implements WithClosureResolver, WithEnums {
         this.result(value as double)
     }
 
+    def result(boolean value) {
+        this.result = new Value(Type.BOOLEAN, value)
+    }
+
     Object toJson() {
         JsonBuilder builder = new JsonBuilder()
         builder stdout: this.stdout.toJson(),

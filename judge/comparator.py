@@ -1,5 +1,5 @@
 import math
-from typing import Optional
+from typing import Optional, Union
 
 from testplan import TestPlanError, Value, ValueType
 
@@ -94,7 +94,7 @@ class FileComparator(Comparator):
         return expected
 
 
-def _definition_to_type(definition):
+def _definition_to_type(definition: Union[dict, Value]):
     if isinstance(definition, dict):
         definition = Value.from_dict(definition)
     if definition.type == ValueType.integer:
@@ -103,6 +103,8 @@ def _definition_to_type(definition):
         return float(definition.data)
     elif definition.type == ValueType.text:
         return definition.data
+    elif definition.type == ValueType.boolean:
+        return bool(definition.data)
     else:
         raise TestPlanError(f"Unknown data type {definition.type} for {definition}.")
 

@@ -7,7 +7,8 @@ import groovy.transform.CompileStatic
 enum Type implements JsonEnabled {
     INTEGER,
     RATIONAL,
-    TEXT
+    TEXT,
+    BOOLEAN
 
     @Override
     Object toJson() {
@@ -73,15 +74,19 @@ trait WithArguments {
         arguments.each { argument(it) }
     }
 
-    def arguments(Integer[] arguments) {
+    def arguments(int[] arguments) {
         arguments.each { argument(it) }
     }
 
-    def arguments(Double[] arguments) {
+    def arguments(double[] arguments) {
         arguments.each { argument(it) }
     }
 
-    def arguments(Float[] arguments) {
+    def arguments(float[] arguments) {
+        arguments.each { argument(it) }
+    }
+
+    def argument(boolean[] arguments) {
         arguments.each { argument(it) }
     }
 
@@ -97,8 +102,12 @@ trait WithArguments {
         this.argument(value as double)
     }
 
-    def argument(Integer value) {
+    def argument(int value) {
         this.arguments << new FunctionArg(Type.INTEGER, value)
+    }
+
+    def argument(boolean value) {
+        this.arguments << new FunctionArg(Type.BOOLEAN, value)
     }
 }
 
