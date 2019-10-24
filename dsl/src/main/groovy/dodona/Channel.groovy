@@ -162,6 +162,7 @@ class Output implements WithClosureResolver, WithEnums {
     JsonEnabled stdout = OutputChannelState.IGNORED
     JsonEnabled stderr = OutputChannelState.NONE
     FileOutput file
+    Value result
 
     def stdout(List<String> data) {
         def channelData = new ChannelData()
@@ -219,11 +220,28 @@ class Output implements WithClosureResolver, WithEnums {
         file = fileOutput
     }
 
+    def result(String text) {
+        this.result = new Value(Type.TEXT, text)
+    }
+
+    def result(int value) {
+        this.result = new Value(Type.INTEGER, value)
+    }
+
+    def result(double value) {
+        this.result = new Value(Type.RATIONAL, value)
+    }
+
+    def result(float value) {
+        this.result(value as double)
+    }
+
     Object toJson() {
         JsonBuilder builder = new JsonBuilder()
         builder stdout: this.stdout.toJson(),
                 stderr: this.stderr.toJson(),
-                file: this.file
+                file: this.file,
+                result: this.result?.toJson()
         return builder.content
     }
 }

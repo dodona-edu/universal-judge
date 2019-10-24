@@ -30,6 +30,7 @@ plan {
 				}
 				output {
 					stdout "test-25"
+					result "test-25"
 				}
 			}
 		}

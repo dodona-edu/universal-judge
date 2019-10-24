@@ -13,14 +13,14 @@
                 "type": "text"
               },
               "stderr": "none",
-              "file": null
+              "file": null,
+              "result": null
             },
             "evaluators": {
               "stdout": {
                 "type": "builtin",
                 "language": null,
                 "options": [
-
                 ],
                 "name": "textComparator"
               },
@@ -28,7 +28,6 @@
                 "type": "builtin",
                 "language": null,
                 "options": [
-
                 ],
                 "name": "textComparator"
               },
@@ -36,11 +35,16 @@
                 "type": "builtin",
                 "language": null,
                 "options": [
-
                 ],
                 "name": "fileComparator"
               },
-              "function": null
+              "result": {
+                "type": "builtin",
+                "language": null,
+                "options": [
+                ],
+                "name": "valueComparator"
+              }
             },
             "input": {
               "function": {
@@ -48,9 +52,7 @@
                 "name": null,
                 "object": "Main",
                 "arguments": [
-
-                ],
-                "result": null
+                ]
               },
               "stdin": {
                 "data": "invoertekst",
@@ -67,14 +69,17 @@
                   "type": "text"
                 },
                 "stderr": "none",
-                "file": null
+                "file": null,
+                "result": {
+                  "type": "text",
+                  "data": "test-25"
+                }
               },
               "evaluators": {
                 "stdout": {
                   "type": "builtin",
                   "language": null,
                   "options": [
-
                   ],
                   "name": "textComparator"
                 },
@@ -82,7 +87,6 @@
                   "type": "builtin",
                   "language": null,
                   "options": [
-
                   ],
                   "name": "textComparator"
                 },
@@ -90,11 +94,16 @@
                   "type": "builtin",
                   "language": null,
                   "options": [
-
                   ],
                   "name": "fileComparator"
                 },
-                "function": null
+                "result": {
+                  "type": "builtin",
+                  "language": null,
+                  "options": [
+                  ],
+                  "name": "valueComparator"
+                }
               },
               "input": {
                 "function": {
@@ -112,8 +121,7 @@
                       "type": "integer",
                       "data": 25
                     }
-                  ],
-                  "result": null
+                  ]
                 },
                 "stdin": "none"
               }

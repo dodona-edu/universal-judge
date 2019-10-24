@@ -1,5 +1,7 @@
 # Executor for exercises where stdin expects input and receives output in stdout.
+import json
 from dataclasses import dataclass
+from json import JSONDecodeError
 from typing import List, Optional
 
 from comparator import Comparator, FileComparator, TextComparator, ValueComparator
@@ -12,7 +14,8 @@ from runners.common import Runner, ExecutionResult
 from runners.python import PythonRunner
 from tested import Config
 from testplan import _get_stdin, _get_stderr, _get_stdout, Evaluator, EvaluatorType, Plan, TestPlanError, \
-    TEXT_COMPARATOR, Context, Testcase, FunctionType, OutputChannelState, FILE_COMPARATOR, VALUE_COMPARATOR
+    TEXT_COMPARATOR, Context, Testcase, FunctionType, OutputChannelState, FILE_COMPARATOR, VALUE_COMPARATOR, Value, \
+    ValueType
 from utils.ascii_to_html import ansi2html
 
 
@@ -31,7 +34,7 @@ def _get_evaluator(evaluator: Evaluator) -> Comparator:
         raise NotImplementedError()
 
 
-def _evaluate_channel(channel: str, expected: Optional[str], actual: str, evaluator: Comparator,
+def _evaluate_channel(channel: str, expected, actual, evaluator: Comparator,
                       error: Optional[str] = None):
     """
     Evaluate the output on a given channel. This function will output the appropriate messages
@@ -47,9 +50,8 @@ def _evaluate_channel(channel: str, expected: Optional[str], actual: str, evalua
     """
     if expected is None:
         return  # Nothing to do
-    report_update(po.StartTest(expected))
+    report_update(po.StartTest(evaluator.get_readable_input(expected)))
     if error:
-        # TODO: can we colour this output somehow?
         message = co.ExtendedMessage(error, format='code')
         report_update(po.AppendMessage(message))
         status = po.Status.RUNTIME_ERROR
@@ -205,7 +207,7 @@ class KernelJudge(Judge):
             return
 
         if needs_run(self.config.kernel):
-            run = ""#create_run(self.config.kernel, test.runArgs)
+            run = ""  # create_run(self.config.kernel, test.runArgs)
             submission += run
 
         result = self._execute_statement(submission, input_, context,
@@ -344,9 +346,9 @@ class GeneratorJudge(Judge):
 
     def _process_results(self, context: Context, results: ExecutionResult):
         # Process output
-        stdout_ = results.stdout.split(results.separator)
-        stderr_ = results.stderr.split(results.separator)
-        values = results.results.split(results.separator)
+        stdout_ = [None if x == "" else x for x in results.stdout.split(results.separator)]
+        stderr_ = [None if x == "" else x for x in results.stderr.split(results.separator)]
+        values = [None if x == "" else x for x in results.results.split(results.separator)]
 
         # There might be less output than testcase, which is an error. However, we process the
         # output we have, to ensure we send as much feedback as possible to the user.
@@ -357,6 +359,7 @@ class GeneratorJudge(Judge):
                 stdout_evaluator = _get_evaluator(testcase.evaluators.stdout)
                 stderr_evaluator = _get_evaluator(testcase.evaluators.stderr)
                 file_evaluator = _get_evaluator(testcase.evaluators.file)
+                result_evaluator = _get_evaluator(testcase.evaluators.result)
             except TestPlanError as e:
                 report_update(po.AppendMessage(co.ExtendedMessage(str(e), 'text', co.Permission.STAFF)))
                 break
@@ -369,7 +372,8 @@ class GeneratorJudge(Judge):
                     report_update(po.AppendMessage(co.ExtendedMessage(stderr_[i], 'text')))
                 else:
                     # TODO: what should we do here?
-                    error = "Could not execute"
+                    # error = "Could not execute"
+                    pass
                 break  # Stop now.
 
             readable_input = _get_readable_input(testcase, self.runner)
@@ -388,6 +392,10 @@ class GeneratorJudge(Judge):
             expected_file = getattr(testcase.output.file, 'expected', None)
             actual_file = getattr(testcase.output.file, 'expected', None)
             _evaluate_channel("file", expected_file, actual_file, file_evaluator, error_text)
-            # TODO: evaluate the return channel.
+            try:
+                actual_return = json.loads(values[i])
+            except (ValueError, TypeError):
+                actual_return = None
+            _evaluate_channel("return", testcase.output.result, actual_return, result_evaluator, error_text)
 
             report_update(po.CloseTestcase())

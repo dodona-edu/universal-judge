@@ -39,7 +39,7 @@ class Evaluators implements WithClosureResolver {
     Evaluator stdout = new Evaluator()
     Evaluator stderr = new Evaluator()
     Evaluator file = new Evaluator(name: "fileComparator")
-    Evaluator function
+    Evaluator result = new Evaluator(name: "valueComparator")
 
     def stdout(@DelegatesTo(value = Evaluator, strategy = Closure.DELEGATE_FIRST) Closure<?> cl) {
         this.stdout = resolve(Evaluator, cl)
@@ -53,12 +53,16 @@ class Evaluators implements WithClosureResolver {
         this.file = resolve(Evaluator, cl)
     }
 
+    def result(@DelegatesTo(value = Evaluator, strategy = Closure.DELEGATE_FIRST) Closure<?> cl) {
+        this.result = resolve(Evaluator, cl)
+    }
+
     Object toJson() {
         def builder = new JsonBuilder()
         builder stdout: stdout,
                 stderr: stderr,
                 file: file,
-                function: function
+                result: result
         return builder.content
     }
 }

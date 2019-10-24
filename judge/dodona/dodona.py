@@ -6,6 +6,9 @@ from .full_output import Feedback
 import dataclasses, json
 
 
+# TODO: only ignore null if the field is optional, don't do it always!
+
+
 def _clean_dictionary(d):
     if not isinstance(d, dict):
         return d

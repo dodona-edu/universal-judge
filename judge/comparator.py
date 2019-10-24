@@ -9,6 +9,9 @@ class Comparator:
     def evaluate(self, expected, actual) -> bool:
         raise NotImplementedError
 
+    def get_readable_input(self, expected) -> str:
+        raise NotImplementedError
+
 
 def _is_number(string: str) -> Optional[float]:
     try:
@@ -47,6 +50,13 @@ class TextComparator(Comparator):
         else:
             return actual == expected
 
+    def get_readable_input(self, expected) -> str:
+        if self.ignore_whitespace:
+            expected = expected.strip()
+        if self.case_insensitive:
+            expected = expected.lower()
+        return expected
+
 
 class FileComparator(Comparator):
     """
@@ -80,6 +90,9 @@ class FileComparator(Comparator):
 
         return actual == expected
 
+    def get_readable_input(self, expected) -> str:
+        return expected
+
 
 def _definition_to_type(definition):
     if isinstance(definition, dict):
@@ -91,7 +104,7 @@ def _definition_to_type(definition):
     elif definition.type == ValueType.text:
         return definition.data
     else:
-        raise TestPlanError(f"Unknown data type {definition.type}.")
+        raise TestPlanError(f"Unknown data type {definition.type} for {definition}.")
 
 
 class ValueComparator(Comparator):
@@ -100,6 +113,9 @@ class ValueComparator(Comparator):
         pass
 
     def evaluate(self, expected, actual) -> bool:
-        expected = _definition_to_type(expected)
-        actual = _definition_to_type(actual)
-        return expected == actual
+        expected_v = None if expected is None else _definition_to_type(expected)
+        actual_v = None if actual is None else _definition_to_type(actual)
+        return expected_v == actual_v and expected.type == actual.type
+
+    def get_readable_input(self, expected) -> str:
+        return _definition_to_type(expected)

@@ -55,7 +55,6 @@ class FunctionCall:
     name: Optional[str]
     object: str
     arguments: List[FunctionArg]
-    result: Optional[Value]
 # endregion
 
 
@@ -105,6 +104,7 @@ class Output:
     stdout: Union[ChannelData, OutputChannelState]
     stderr: Union[ChannelData, OutputChannelState]
     file: Optional[FileOutput]
+    result: Optional[Value]
 # endregion
 
 
@@ -136,7 +136,7 @@ class Evaluators:
     stdout: Evaluator
     stderr: Evaluator
     file: Evaluator
-    function: Evaluator
+    result: Evaluator
 # endregion
 
 

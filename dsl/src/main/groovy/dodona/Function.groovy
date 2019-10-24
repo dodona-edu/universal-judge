@@ -107,7 +107,6 @@ class FunctionCall implements WithClosureResolver, WithEnums, WithArguments {
     FunctionType type
     String name
     String object = "Main"
-    Value result
 
     def name(String name) {
         this.name = name
@@ -126,25 +125,8 @@ class FunctionCall implements WithClosureResolver, WithEnums, WithArguments {
         builder type: type.toJson(),
                 name: name,
                 object: object,
-                arguments: this.arguments*.toJson(),
-                result: result?.toJson()
+                arguments: this.arguments*.toJson()
         return builder.content
-    }
-
-    def result(String text) {
-        this.result = new Value(Type.TEXT, text)
-    }
-
-    def result(int value) {
-        this.result = new Value(Type.INTEGER, value)
-    }
-
-    def result(double value) {
-        this.result = new Value(Type.RATIONAL, value)
-    }
-
-    def result(float value) {
-        this.result(value as double)
     }
 
     static FunctionCall main(String object, List<FunctionArg> args) {

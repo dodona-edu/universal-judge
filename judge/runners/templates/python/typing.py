@@ -5,7 +5,7 @@ import json
 def send(stream, value):
     """Send a value to the given stream."""
     if value is None:
-        pass
+        return
     if isinstance(value, str):
         json.dump({
             "data": value,
