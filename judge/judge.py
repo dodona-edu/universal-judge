@@ -2,7 +2,7 @@
 from dataclasses import dataclass
 from typing import List, Optional
 
-from comparator import Comparator, FileComparator, TextComparator
+from comparator import Comparator, FileComparator, TextComparator, ValueComparator
 from dodona import common as co, partial_output as po
 from dodona.common import ExtendedMessage
 from dodona.common import supports_input_highlighting
@@ -12,7 +12,7 @@ from runners.common import Runner, ExecutionResult
 from runners.python import PythonRunner
 from tested import Config
 from testplan import _get_stdin, _get_stderr, _get_stdout, Evaluator, EvaluatorType, Plan, TestPlanError, \
-    TEXT_COMPARATOR, Context, Testcase, FunctionType, OutputChannelState
+    TEXT_COMPARATOR, Context, Testcase, FunctionType, OutputChannelState, FILE_COMPARATOR, VALUE_COMPARATOR
 from utils.ascii_to_html import ansi2html
 
 
@@ -21,8 +21,10 @@ def _get_evaluator(evaluator: Evaluator) -> Comparator:
     if evaluator.type == EvaluatorType.builtin:
         if evaluator.name == TEXT_COMPARATOR:
             return TextComparator(arguments=evaluator.options)
-        elif evaluator.name == "fileComparator":
+        elif evaluator.name == FILE_COMPARATOR:
             return FileComparator(arguments=evaluator.options)
+        elif evaluator.name == VALUE_COMPARATOR:
+            return ValueComparator(arguments=evaluator.options)
         else:
             raise TestPlanError(f"Unknown buil-in evaluator: {evaluator.name}")
     elif evaluator.type == 'external':

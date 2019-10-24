@@ -116,6 +116,8 @@ class EvaluatorType(Enum):
 
 TEXT_COMPARATOR = "textComparator"
 TEXT_ARGUMENTS = ["ignoreWhitespace"]
+FILE_COMPARATOR = "fileComparator"
+VALUE_COMPARATOR = "valueComparator"
 
 
 @dataclass_json

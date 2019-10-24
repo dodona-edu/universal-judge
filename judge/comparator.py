@@ -1,12 +1,12 @@
 import math
-from typing import Optional, Tuple
+from typing import Optional
 
-from testplan import TestPlanError
+from testplan import TestPlanError, Value, ValueType
 
 
 class Comparator:
 
-    def evaluate(self, expected: str, actual: str) -> bool:
+    def evaluate(self, expected, actual) -> bool:
         raise NotImplementedError
 
 
@@ -32,7 +32,7 @@ class TextComparator(Comparator):
         self.allow_floating_point = "allowFloating_point" in arguments
         self.case_insensitive = "caseInsensitive" in arguments
 
-    def evaluate(self, expected: str, actual: str) -> bool:
+    def evaluate(self, expected, actual) -> bool:
         if self.ignore_whitespace:
             expected = expected.strip()
             actual = actual.strip()
@@ -61,7 +61,7 @@ class FileComparator(Comparator):
         self.ignore_whitespace = "ignore_whitespace" in arguments
         self.case_insensitive = "case_insensitive" in arguments
 
-    def evaluate(self, expected: str, actual: str) -> bool:
+    def evaluate(self, expected, actual) -> bool:
         try:
             with open(expected, "r") as file:
                 expected = file.read()
@@ -79,3 +79,27 @@ class FileComparator(Comparator):
             actual = actual.lower()
 
         return actual == expected
+
+
+def _definition_to_type(definition):
+    if isinstance(definition, dict):
+        definition = Value.from_dict(definition)
+    if definition.type == ValueType.integer:
+        return int(definition.data)
+    elif definition.type == ValueType.rational:
+        return float(definition.data)
+    elif definition.type == ValueType.text:
+        return definition.data
+    else:
+        raise TestPlanError(f"Unknown data type {definition.type}.")
+
+
+class ValueComparator(Comparator):
+
+    def __init__(self, arguments=None):
+        pass
+
+    def evaluate(self, expected, actual) -> bool:
+        expected = _definition_to_type(expected)
+        actual = _definition_to_type(actual)
+        return expected == actual
