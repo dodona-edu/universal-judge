@@ -5,7 +5,7 @@ import sys
 import typing as {{ code_identifier }}_typing
 
 {# A third "channel", used to communicate with the runner #}
-{{ code_identifier }}_file = open("{{ output_file }}", "w")
+{{ code_identifier }}_file = open(r"{{ output_file }}", "w")
 
 {# Set the arguments #}
 {%- if execution.args %}
@@ -28,3 +28,4 @@ sys.stdout.write("--{{ code_identifier }}-- SEP")
   submission.{% include "function.jinja2" %})
 {% endwith %}
 {%- endfor %}
+{{ code_identifier }}_file.close()

@@ -1,5 +1,6 @@
 """Code generators for the testplans."""
 from dataclasses import dataclass
+from pathlib import Path
 from typing import List
 
 import jinja2
@@ -59,12 +60,12 @@ class Runner:
         """
         raise NotImplementedError
 
-    def _path_to_templates(self) -> str:
-        return f"{self.config.judge}/judge/runners/templates/{self.config.programming_language}"
+    def _path_to_templates(self) -> Path:
+        return Path(self.config.judge, 'judge', 'runners', 'templates', self.config.programming_language)
 
     def _get_environment(self) -> jinja2.Environment:
         """Get the environment for the templates."""
-        loader = jinja2.FileSystemLoader(self._path_to_templates())
+        loader = jinja2.FileSystemLoader(str(self._path_to_templates()))
         return jinja2.Environment(loader=loader, undefined=jinja2.StrictUndefined)
 
     # def argument_template(self, argument: FunctionArg) -> str:

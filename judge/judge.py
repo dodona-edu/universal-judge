@@ -63,6 +63,8 @@ def _evaluate_channel(channel: str, expected, actual, evaluator: Comparator,
     else:
         success = evaluator.evaluate(expected, actual)
         status = po.Status.CORRECT if success else po.Status.WRONG
+    if actual is None:
+        actual = ""
 
     report_update(po.CloseTest(actual, po.StatusMessage(status), data=po.TestData(channel)))
 
@@ -341,8 +343,7 @@ class GeneratorJudge(Judge):
                         format='text',
                         permission=co.Permission.STAFF
                     )))
-                    report_update(po.CloseTest("Internal error",
-                                               po.StatusMessage(po.Status.INTERNAL_ERROR)))
+                    report_update(po.CloseTest("", po.StatusMessage(po.Status.INTERNAL_ERROR)))
                     continue
                 self._process_results(context, result)
                 report_update(po.CloseContext())
