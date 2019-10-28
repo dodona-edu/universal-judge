@@ -427,3 +427,8 @@ class GeneratorJudge(Judge):
             _evaluate_channel("return", testcase.output.result, actual_return, result_evaluator, error_message)
 
             report_update(po.CloseTestcase())
+
+            # If this was the "main" test case and we encountered errors, stop the testing.
+            # TODO: configurable?
+            if i == 0 and error_message:
+                break
