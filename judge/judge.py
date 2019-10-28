@@ -67,7 +67,9 @@ def _evaluate_channel(channel: str, expected, actual, evaluator: Comparator,
     if actual is None:
         actual = ""
 
-    report_update(po.CloseTest(actual, po.StatusMessage(status), data=po.TestData(channel)))
+    report_update(po.CloseTest(generated=evaluator.get_readable_input(actual),
+                               status=po.StatusMessage(status),
+                               data=po.TestData(channel)))
 
 
 RUN_KERNELS = {
