@@ -64,10 +64,12 @@ def _evaluate_channel(channel: str, expected, actual, evaluator: Comparator,
     else:
         success = evaluator.evaluate(expected, actual)
         status = po.Status.CORRECT if success else po.Status.WRONG
-    if actual is None:
+    if actual:
+        actual = evaluator.get_readable_input(actual)
+    else:
         actual = ""
 
-    report_update(po.CloseTest(generated=evaluator.get_readable_input(actual),
+    report_update(po.CloseTest(generated=actual,
                                status=po.StatusMessage(status),
                                data=po.TestData(channel)))
 
