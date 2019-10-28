@@ -1,5 +1,6 @@
 # Executor for exercises where stdin expects input and receives output in stdout.
 import json
+import traceback
 from dataclasses import dataclass
 from os import path
 from typing import List
@@ -411,9 +412,9 @@ class GeneratorJudge(Judge):
             # Evaluate value channel
             try:
                 actual_return = json.loads(values[i]) if i < len(stdout_) else None
-            except (ValueError, TypeError) as e:
+            except (ValueError, TypeError):
                 actual_return = None
-                # error_message.append(co.ExtendedMessage(e, 'code', Permission.STAFF))
+                error_message.append(co.ExtendedMessage(traceback.format_exc(), 'code', Permission.STAFF))
                 error_message.append(co.ExtendedMessage("Internal error while reading return value.", 'text'))
 
             _evaluate_channel("return", testcase.output.result, actual_return, result_evaluator, error_message)
