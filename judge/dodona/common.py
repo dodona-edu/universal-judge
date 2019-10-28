@@ -10,7 +10,7 @@ def supports_input_highlighting(language: str) -> bool:
     return language in LANGUAGE_WITH_HIGHLIGHTING
 
 
-class Permission(Enum):
+class Permission(str, Enum):
     """To which level of user this message is visible."""
     STAFF = "staff"
     STUDENT = "student"
