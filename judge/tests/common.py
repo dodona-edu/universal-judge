@@ -48,8 +48,9 @@ def validate_output(exercise, plan):
         errors = []
         for result in results:
             try:
-                result = json.loads(result)
-                jsonschema.validate(result, schema)
+                if result:
+                    result = json.loads(result)
+                    jsonschema.validate(result, schema)
             except ValidationError as e:
                 errors.append(e)
         for error in errors:

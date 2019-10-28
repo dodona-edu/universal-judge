@@ -27,7 +27,7 @@ def read_config() -> Config:
         "programming_language": 'python',
         "natural_language": 'nl',
         "resources": '../exercise',
-        "source": './tests/python/not_enough_output.py',
+        "source": './tests/python/runtime_error.py',
         "judge": '../',
         "workdir": './workdir',
     }
