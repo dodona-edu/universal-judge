@@ -404,6 +404,7 @@ class GeneratorJudge(Judge):
             if testcase.output.stderr == OutputChannelState.none:
                 # Use it as an error message, if it exists.
                 if actual_stderr:
+                    error_message.clear()  # We assume this is the actual cause of the early termination.
                     error_message.append(co.ExtendedMessage(actual_stderr, 'code'))
             else:
                 # Use it as a normal channel.
