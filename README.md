@@ -1,4 +1,4 @@
-# Universel judge
+# TESTed: universal judge for testing code in education
 
 Organisation of the repository:
 
