@@ -1,25 +1,12 @@
 #
-# Main file of the TESTed framework.
-#
-# For now, this only handles running the execution kernel.
+# Run things manually.
 #
 import json
 import sys
 from typing import NamedTuple
 
+from tested import Config
 from testplan import parse_test_plan
-
-
-class Config(NamedTuple):
-    resources: str
-    source: str
-    time_limit: str
-    memory_limit: str
-    natural_language: str
-    programming_language: str
-    workdir: str
-    judge: str
-    kernel: str
 
 
 LANGUAGE_TO_KERNEL = {
@@ -40,12 +27,10 @@ def read_config() -> Config:
         "programming_language": 'python',
         "natural_language": 'nl',
         "resources": '../exercise',
-        "source": '../exercise/test.py',
+        "source": './tests/python/deliberate_stop.py',
         "judge": '../',
         "workdir": './workdir',
     }
-    config_json = sys.stdin.read()
-    config_ = json.loads(config_json)
     needed_config = {x: config_[x] for x in Config._fields if x in config_}
     needed_config['kernel'] = LANGUAGE_TO_KERNEL.get(config_["programming_language"], config_["programming_language"])
     return Config(**needed_config)
@@ -60,11 +45,7 @@ if __name__ == '__main__':
     #    - Check the output for each element.
     # 3. Finish
 
-    # Read test plano
-    #p = Popen(['java', '-jar', f'{config.judge}/dsl/dsl.jar', '-d', f"{config.resources}/plan.groovy"], stdout=PIPE, stderr=PIPE)
-    #json_string = p.stdout.read()
     json_string = open(f"{config.resources}/basic.json").read()
-    #print(f"JSON is {json_string}")
     plan = parse_test_plan(json_string)
 
     # Run it.
