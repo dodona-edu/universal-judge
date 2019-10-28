@@ -411,13 +411,13 @@ class GeneratorJudge(Judge):
 
             # Evaluate value channel
             try:
-                actual_return = json.loads(values[i]) if i < len(stdout_) else None
+                value = values[i] if i < len(stdout_) else None
+                actual_return = json.loads(value) if value else None
             except (ValueError, TypeError):
                 actual_return = None
                 # Only if there are no errors yet.
-                if not error_message:
-                    error_message.append(co.ExtendedMessage(traceback.format_exc(), 'code', Permission.STAFF))
-                    error_message.append(co.ExtendedMessage("Internal error while reading return value.", 'text'))
+                error_message.append(co.ExtendedMessage(traceback.format_exc(), 'code', Permission.STAFF))
+                error_message.append(co.ExtendedMessage("Internal error while reading return value.", 'text'))
 
             _evaluate_channel("return", testcase.output.result, actual_return, result_evaluator, error_message)
 
