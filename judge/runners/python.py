@@ -50,7 +50,7 @@ class PythonRunner(Runner):
                 with open(Path(self.config.workdir, f"context-{id_}.py"), "w") as file:
                     file.write(context_result)
                 context_ids.append(id_)
-        typing_file = self._path_to_templates() / 'typing.py'
+        typing_file = self._path_to_templates() / 'values.py'
         # noinspection PyTypeChecker
         shutil.copy2(typing_file, self.config.workdir)
         return context_ids

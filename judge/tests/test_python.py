@@ -16,4 +16,16 @@ def test_everything_ok():
 def test_deliberate_stop():
     code = FOLDER / "deliberate_stop.py"
     validate_output(code, PLAN)
-    validate_result(code, PLAN, FOLDER / "everything_ok.result")
+    validate_result(code, PLAN, FOLDER / "deliberate_stop.result")
+
+
+def test_wrong_main():
+    code = FOLDER / "wrong_main.py"
+    validate_output(code, PLAN)
+    validate_result(code, PLAN, FOLDER / "wrong_main.result")
+
+
+def test_wrong_second():
+    code = FOLDER / "wrong_second.py"
+    validate_output(code, PLAN)
+    validate_result(code, PLAN, FOLDER / "wrong_second.result")

@@ -1,5 +1,5 @@
 i = input()
-print(i)
+print(f"{i}-wrong")
 
 
 def echo(a, b):

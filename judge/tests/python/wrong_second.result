@@ -7,7 +7,7 @@
 {"command": "close-testcase"}
 {"description": {"description": "echo(\"test\", 25)", "format": "python"}, "command": "start-testcase"}
 {"expected": "test-25", "command": "start-test"}
-{"generated": "test-25", "status": {"enum": "correct"}, "data": {"channel": "stdout"}, "command": "close-test"}
+{"generated": "test-25-", "status": {"enum": "wrong"}, "data": {"channel": "stdout"}, "command": "close-test"}
 {"expected": "test-25", "command": "start-test"}
 {"generated": "test-25", "status": {"enum": "correct"}, "data": {"channel": "return"}, "command": "close-test"}
 {"command": "close-testcase"}

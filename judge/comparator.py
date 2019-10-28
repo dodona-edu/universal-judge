@@ -119,8 +119,8 @@ class ValueComparator(Comparator):
         self.case_insensitive = "case_insensitive" in arguments
 
     def evaluate(self, expected, actual) -> bool:
-        expected_v, expected_t = None if expected is None else _definition_to_type(expected)
-        actual_v, actual_t = None if actual is None else _definition_to_type(actual)
+        expected_v, expected_t = None, None if expected is None else _definition_to_type(expected)
+        actual_v, actual_t = None, None if actual is None else _definition_to_type(actual)
         return expected_v == actual_v and expected_t == actual_t
 
     def get_readable_input(self, expected) -> str:

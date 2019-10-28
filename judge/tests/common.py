@@ -83,6 +83,6 @@ def validate_result(exercise, plan, expected):
         p = subprocess.run(['python', f"{JUDGE_DIR}/judge/tested.py"],
                            input=stdin_, text=True, capture_output=True)
         actual_output = p.stdout.strip()
-        expected_output = expected_output.read().strip()
+        expected_output = "".join(expected_output.read().splitlines())
 
         assert actual_output == expected_output
