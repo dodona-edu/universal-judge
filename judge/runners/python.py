@@ -1,19 +1,11 @@
-import random
 import shutil
-import string
 import subprocess
 from pathlib import Path
 from typing import List
 
-from runners.common import ExecutionResult, Runner
+from runners.common import _get_identifier, ExecutionResult, Runner
 from tested import Config
 from testplan import _get_stdin, Context, FunctionType, Plan, ValueType
-
-
-def _get_identifier() -> str:
-    letter = random.choice(string.ascii_letters)
-    rest = random.sample(string.ascii_letters + string.digits, 8)
-    return letter + ''.join(rest)
 
 
 class PythonRunner(Runner):
@@ -38,14 +30,16 @@ class PythonRunner(Runner):
                 id_ = f"{tab_idx}-{context_idx}"
                 context_template = environment.get_template("context.jinja2")
                 # Variables for the main test case
-                execution = self.execution_args(context)
+                execution = self.get_execution(context)
                 context_result = context_template.render(
                     execution=execution,
                     code_identifier=self.identifier,
                     output_file=str(Path(self.config.workdir, 'output.txt')),
                     additionals=context.additional,
                     FunctionType=FunctionType,
-                    ValueType=ValueType
+                    ValueType=ValueType,
+                    context_id=id_,
+                    has_top_level=self.has_top_level()
                 )
                 with open(Path(self.config.workdir, f"context-{id_}.py"), "w") as file:
                     file.write(context_result)

@@ -1,0 +1,10 @@
+{# This function generates a function call in Java. #}
+{%- if function.type == FunctionType.top and has_top_level -%}
+  {{ function.name }}
+{%- elif function.type == FunctionType.static or function.type == FunctionType.instance or (function.type == FunctionType.top and not has_top_level) -%}
+  {{ function.object }}.{{ function.name }}
+{%- endif -%}(
+{%- for argument in function.arguments -%}
+  {%- include "argument.jinja2" -%}{{ ", " if not loop.last else "" }}
+{%- endfor -%}
+)

@@ -24,10 +24,10 @@ def read_config() -> Config:
     config_ = {
         "memory_limit": 536870912,
         "time_limit": 10000000,
-        "programming_language": 'python',
+        "programming_language": 'java',
         "natural_language": 'nl',
         "resources": '../exercise',
-        "source": './tests/python/runtime_error.py',
+        "source": '../exercise/test.java',
         "judge": '../',
         "workdir": './workdir',
     }

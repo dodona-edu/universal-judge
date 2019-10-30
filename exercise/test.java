@@ -8,4 +8,9 @@ public class Main {
         String name = reader.readLine();
         System.out.println(name);
     }
+
+    public static String echo(String a, int b) {
+        System.out.println(a + "-" + b);
+        return a + "-" + b;
+    }
 }

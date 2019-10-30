@@ -12,6 +12,7 @@ from dodona.dodona import report_update
 from jupyter import JupyterContext, KernelQueue
 from runners.common import ExecutionResult, Runner
 from runners.python import PythonRunner
+from runners.java import JavaRunner
 from tested import Config
 from testplan import _get_stderr, _get_stdin, _get_stdout, Context, Evaluator, EvaluatorType, FILE_COMPARATOR, \
     FunctionType, OutputChannelState, Plan, Testcase, TestPlanError, TEXT_COMPARATOR, VALUE_COMPARATOR
@@ -323,18 +324,37 @@ def _get_readable_input(case: Testcase, runner: Runner) -> ExtendedMessage:
     return ExtendedMessage(description=text, format=format_)
 
 
+RUNNERS = {
+    'python': PythonRunner,
+    'java': JavaRunner
+}
+
+
 class GeneratorJudge(Judge):
 
     runner: Runner
 
     def __init__(self, config: Config):
         super().__init__(config)
-        self.runner = PythonRunner(self.config)
+        self.runner = RUNNERS[config.programming_language](self.config)
 
     def _execute_test_plan(self, submission: str, test_plan: Plan):
         report_update(po.StartJudgment())
+
         # Generate test files.
         ids = self.runner.generate_code(submission, test_plan)
+
+        # Compile the code if needed.
+        # If a compilation error occurs, we stop the execution right now, and report the error.
+        if self.runner.needs_compilation():
+            compilation_result = self.runner.compile()
+            if compilation_result.stdout:
+                # Append compiler messages to the output.
+                report_update(po.AppendMessage(co.ExtendedMessage(compilation_result.stdout, 'code')))
+            if compilation_result.stderr:
+                report_update(po.AppendMessage(co.ExtendedMessage(compilation_result.stderr, 'code')))
+                report_update(po.CloseJudgment(accepted=False, status=po.StatusMessage(co.Status.COMPILATION_ERROR)))
+                return
 
         for tab in test_plan.tabs:
             report_update(po.StartTab(title=tab.name))

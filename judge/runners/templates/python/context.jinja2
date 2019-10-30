@@ -10,7 +10,7 @@ import values as {{ code_identifier }}_values
 {# Set the arguments #}
 {%- if execution.args %}
 sys.argv.extend([
-{%- for argument in execution.args -%}
+{%- for argument in execution.arguments -%}
   {%- include "argument.jinja2" -%}{{ ", " if not loop.last else "" }}
 {%- endfor -%}
 ])
