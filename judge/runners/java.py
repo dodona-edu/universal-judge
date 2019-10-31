@@ -1,12 +1,14 @@
 from pathlib import Path
 from typing import List
 
-from runners.common import _get_identifier, ConfigurableRunner, LanguageConfig
-from tested import Config
+from runners.config import LanguageConfig
 from testplan import Plan
 
 
 class JavaConfig(LanguageConfig):
+
+    def needs_main(self):
+        return True
 
     def supports_top_level_functions(self) -> bool:
         return False
@@ -19,6 +21,9 @@ class JavaConfig(LanguageConfig):
 
     def file_extension(self) -> str:
         return "java"
+
+    def compilation_command(self, files: List[str]) -> List[str]:
+        return ["javac", *files]
 
     def submission_name(self, plan: Plan) -> str:
         # In Java, there can be only one class per file. This means the class name
@@ -37,10 +42,3 @@ class JavaConfig(LanguageConfig):
 
     def additional_files(self) -> List[str]:
         return ["Values.java"]
-
-
-class JavaRunner(ConfigurableRunner):
-
-    def __init__(self, config: Config):
-        super().__init__(config, JavaConfig())
-        self.identifier = _get_identifier()

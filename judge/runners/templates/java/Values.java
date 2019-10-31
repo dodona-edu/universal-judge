@@ -4,16 +4,17 @@ import java.io.OutputStreamWriter;
 /**
  * Minimal RPC language in JSON to send data from the tests to the judge.
  */
-
 class Values {
 
     public static void send(OutputStreamWriter writer, Object value) throws IOException {
         if (value == null) {
             return;
         }
+        String data = value.toString();
         String type;
         if (value instanceof CharSequence) {
             type = "text";
+            data = "\"" + value + "\"";
         } else if (value instanceof Integer) {
             type = "integer";
         } else if (value instanceof Double || value instanceof Float) {
@@ -24,8 +25,8 @@ class Values {
             type = "unknown";
         }
 
-        String result = "{\"data\": %s, \"type\": %s}";
-        String filled = String.format(result, value.toString(), type);
+        String result = "{\"data\": %s, \"type\": \"%s\"}";
+        String filled = String.format(result, data, type);
         writer.write(filled);
     }
 }

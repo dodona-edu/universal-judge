@@ -3,8 +3,12 @@
   {{ function.name }}
 {%- elif function.type == FunctionType.static or function.type == FunctionType.instance or (function.type == FunctionType.top and not has_top_level) -%}
   {{ function.object }}.{{ function.name }}
+{%- elif function.type == FunctionType.main -%}
+  {{ function.object }}.main
 {%- endif -%}(
+{%- if function.type == FunctionType.main -%}new String[]{% raw %}{{% endraw %}{%- endif -%}
 {%- for argument in function.arguments -%}
   {%- include "argument.jinja2" -%}{{ ", " if not loop.last else "" }}
 {%- endfor -%}
+{%- if function.type == FunctionType.main -%}}{%- endif -%}
 )

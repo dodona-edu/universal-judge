@@ -1,17 +1,22 @@
 """Code generators for the testplans."""
+import os
 import random
 import shutil
 import string
 import subprocess
 from dataclasses import dataclass
-from enum import Enum
+from glob import glob
 from pathlib import Path
-from typing import List, Set, Optional
+from typing import List
 
 import jinja2
+from jinja2 import TemplateNotFound
 
+from runners.config import LanguageConfig
+from runners.java import JavaConfig
+from runners.python import PythonConfig
 from tested import Config
-from testplan import Context, FunctionCall, FunctionType, Plan, TestPlanError, ValueType, _get_stdin
+from testplan import _get_stdin, Context, FunctionCall, FunctionType, Plan, TestPlanError, ValueType
 
 
 def _get_identifier() -> str:
@@ -74,49 +79,19 @@ class BaseRunner:
         raise NotImplementedError
 
     def compile(self) -> ExecutionResult:
+        """Will be called if `needs_compilation` is True."""
         raise NotImplementedError
 
     def needs_compilation(self) -> bool:
+        """True if the language needs an implementation step."""
         raise NotImplementedError
 
-
-class LanguageConfig:
-    """
-    Configuration for the runner
-    """
-
-    # TODO: proper support for language features.
-    def supports_top_level_functions(self) -> bool:
-        """If the language supports top level functions."""
+    def function_call(self, call: FunctionCall) -> str:
+        """Create a textual representation of a function call, to display to the user."""
         raise NotImplementedError
 
-    def needs_compilation(self) -> bool:
-        """If the language needs compilation."""
-        raise NotImplementedError
-
-    def compilation_command(self, file_argument: str) -> List[str]:
-        """Compile some files."""
-        if self.needs_compilation():
-            raise NotImplementedError
-        else:
-            return []
-
-    def execution_command(self, context_id: str, path: Path) -> List[str]:
-        raise NotImplementedError
-
-    def file_extension(self) -> str:
-        """The file extension for this language."""
-        raise NotImplementedError
-
-    def submission_name(self, plan: Plan) -> str:
-        """Produce a name for the submission file, without extension."""
-        raise NotImplementedError
-
-    def context_name(self, context_id: str) -> str:
-        """Produce a name for the context file, without extension."""
-        raise NotImplementedError
-
-    def additional_files(self) -> List[str]:
+    def needs_main(self):
+        """True if the language needs a main function call to run."""
         raise NotImplementedError
 
 
@@ -168,9 +143,9 @@ class ConfigurableRunner(BaseRunner):
         return context_ids
 
     def compile(self) -> ExecutionResult:
-        file_argument = f"*.{self.language_config.file_extension()}"
+        file_argument = [os.path.basename(x) for x in glob(f"{self.config.workdir}/*.{self.language_config.file_extension()}")]
         command = self.language_config.compilation_command(file_argument)
-        p = subprocess.run(command, text=True, capture_output=True)
+        p = subprocess.run(command, text=True, capture_output=True, cwd=self.config.workdir)
         return ExecutionResult("", p.stdout, p.stderr, "", p.returncode)
 
     def _context_name(self, context_id: str) -> str:
@@ -207,17 +182,6 @@ class ConfigurableRunner(BaseRunner):
         loader = jinja2.FileSystemLoader(str(self._path_to_templates()))
         return jinja2.Environment(loader=loader, undefined=jinja2.StrictUndefined)
 
-    def function_call(self, call: FunctionCall) -> str:
-        """Produce code for a single function call."""
-        env = self._get_environment()
-        template = env.get_template("function.jinja2")
-        return template.render(
-            function=call,
-            FunctionType=FunctionType,
-            FunctionCall=FunctionCall,
-            ValueType=ValueType
-        )
-
     # noinspection PyMethodMayBeStatic
     def get_execution(self, c: Context) -> FunctionCall:
         if c.execution.input.function.type != FunctionType.main:
@@ -229,6 +193,31 @@ class ConfigurableRunner(BaseRunner):
         """Find a template with a name."""
         try:
             return environment.get_template(f"{name}.{self.language_config.file_extension()}")
-        except FileNotFoundError:
+        except TemplateNotFound:
             return environment.get_template(f"{name}.jinja2")
 
+    def function_call(self, call: FunctionCall) -> str:
+        """Produce code for a single function call."""
+        env = self._get_environment()
+        template = env.get_template("function.jinja2")
+        return template.render(
+            function=call,
+            FunctionType=FunctionType,
+            FunctionCall=FunctionCall,
+            ValueType=ValueType,
+            has_top_level=self.language_config.supports_top_level_functions()
+        )
+
+    def needs_main(self):
+        return self.language_config.needs_main()
+
+
+CONFIGS = {
+    'python': PythonConfig,
+    'java': JavaConfig
+}
+
+
+def get_runner(config: Config) -> BaseRunner:
+    """Get the runner for the specified language."""
+    return ConfigurableRunner(config, CONFIGS[config.programming_language]())

@@ -8,7 +8,7 @@ import values as {{ code_identifier }}_values
 {{ code_identifier }}_file = open(r"{{ output_file }}", "w")
 
 {# Set the arguments #}
-{%- if execution.args %}
+{%- if execution.arguments %}
 sys.argv.extend([
 {%- for argument in execution.arguments -%}
   {%- include "argument.jinja2" -%}{{ ", " if not loop.last else "" }}

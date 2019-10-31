@@ -3,6 +3,7 @@
 #
 import json
 import sys
+from pathlib import Path
 from typing import NamedTuple
 
 from tested import Config
@@ -24,12 +25,12 @@ def read_config() -> Config:
     config_ = {
         "memory_limit": 536870912,
         "time_limit": 10000000,
-        "programming_language": 'java',
+        "programming_language": 'python',
         "natural_language": 'nl',
         "resources": '../exercise',
-        "source": '../exercise/test.java',
+        "source": '../exercise/test.py',
         "judge": '../',
-        "workdir": './workdir',
+        "workdir": str(Path('./workdir').resolve()),
     }
     needed_config = {x: config_[x] for x in Config._fields if x in config_}
     needed_config['kernel'] = LANGUAGE_TO_KERNEL.get(config_["programming_language"], config_["programming_language"])

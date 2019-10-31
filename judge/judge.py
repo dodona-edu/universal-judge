@@ -1,4 +1,3 @@
-# Executor for exercises where stdin expects input and receives output in stdout.
 import json
 import traceback
 from dataclasses import dataclass
@@ -10,9 +9,7 @@ from dodona import common as co, partial_output as po
 from dodona.common import ExtendedMessage, Permission, supports_input_highlighting
 from dodona.dodona import report_update
 from jupyter import JupyterContext, KernelQueue
-from runners.common import ExecutionResult, Runner
-from runners.python import PythonRunner
-from runners.java import JavaRunner
+from runners.common import BaseRunner, ExecutionResult, get_runner
 from tested import Config
 from testplan import _get_stderr, _get_stdin, _get_stdout, Context, Evaluator, EvaluatorType, FILE_COMPARATOR, \
     FunctionType, OutputChannelState, Plan, Testcase, TestPlanError, TEXT_COMPARATOR, VALUE_COMPARATOR
@@ -286,7 +283,7 @@ class KernelJudge(Judge):
         current_kernel.clean()
 
 
-def _get_readable_input(case: Testcase, runner: Runner) -> ExtendedMessage:
+def _get_readable_input(case: Testcase, runner: BaseRunner) -> ExtendedMessage:
     """
     Get human readable input for a testcase. This function will use, in order of availability:
 
@@ -324,19 +321,13 @@ def _get_readable_input(case: Testcase, runner: Runner) -> ExtendedMessage:
     return ExtendedMessage(description=text, format=format_)
 
 
-RUNNERS = {
-    'python': PythonRunner,
-    'java': JavaRunner
-}
-
-
 class GeneratorJudge(Judge):
 
-    runner: Runner
+    runner: BaseRunner
 
     def __init__(self, config: Config):
         super().__init__(config)
-        self.runner = RUNNERS[config.programming_language](self.config)
+        self.runner = get_runner(config)
 
     def _execute_test_plan(self, submission: str, test_plan: Plan):
         report_update(po.StartJudgment())

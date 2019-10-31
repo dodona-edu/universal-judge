@@ -1,69 +1,34 @@
-import shutil
-import subprocess
 from pathlib import Path
 from typing import List
 
-from runners.common import _get_identifier, ExecutionResult, Runner
-from tested import Config
-from testplan import _get_stdin, Context, FunctionType, Plan, ValueType
+from runners.common import LanguageConfig
+from testplan import Plan
 
 
-class PythonRunner(Runner):
+class PythonConfig(LanguageConfig):
 
-    def __init__(self, config: Config):
-        super().__init__(config)
-        self.identifier = _get_identifier()
+    def supports_top_level_functions(self) -> bool:
+        return True
 
-    def generate_code(self, submission: str, plan: Plan) -> List[str]:
-        environment = self._get_environment()
+    def needs_compilation(self) -> bool:
+        return False
 
-        submission_template = environment.get_template("submission.jinja2")
-        submission_result = submission_template.render(code=submission)
-        submission_file = Path(self.config.workdir, 'submission.py')
-        with open(submission_file, "w") as file:
-            file.write(submission_result)
+    # TODO: fix broken path when executing
+    def execution_command(self, context_id: str, path: Path) -> List[str]:
+        context = path / f"{self.context_name(context_id)}.{self.file_extension()}"
+        return ["python", str(context)]
 
-        # We generate a new file for each context.
-        context_ids = []
-        for tab_idx, tab in enumerate(plan.tabs):
-            for context_idx, context in enumerate(tab.contexts):
-                id_ = f"{tab_idx}-{context_idx}"
-                context_template = environment.get_template("context.jinja2")
-                # Variables for the main test case
-                execution = self.get_execution(context)
-                context_result = context_template.render(
-                    execution=execution,
-                    code_identifier=self.identifier,
-                    output_file=str(Path(self.config.workdir, 'output.txt')),
-                    additionals=context.additional,
-                    FunctionType=FunctionType,
-                    ValueType=ValueType,
-                    context_id=id_,
-                    has_top_level=self.has_top_level()
-                )
-                with open(Path(self.config.workdir, f"context-{id_}.py"), "w") as file:
-                    file.write(context_result)
-                context_ids.append(id_)
-        typing_file = self._path_to_templates() / 'values.py'
-        # noinspection PyTypeChecker
-        shutil.copy2(typing_file, self.config.workdir)
-        return context_ids
+    def file_extension(self) -> str:
+        return "py"
 
-    def execute(self, context_id: str, context: Context, timeout=None) -> ExecutionResult:
-        file = self.config.workdir + f"/context-{context_id}.py"
+    def submission_name(self, plan: Plan) -> str:
+        return "submission"
 
-        stdin_ = []
-        for testcase in context.all_testcases():
-            stdin_.append(_get_stdin(testcase))
-        stdin_ = "\n".join(stdin_)
+    def context_name(self, context_id: str) -> str:
+        return f"context_{context_id}"
 
-        p = subprocess.run(['python', file], input=stdin_, timeout=timeout, text=True, capture_output=True)
-        identifier = f"--{self.identifier}-- SEP"
+    def additional_files(self) -> List[str]:
+        return ["values.py"]
 
-        try:
-            with open(f"{self.config.workdir}/output.txt", "r") as f:
-                values = f.read()
-        except FileNotFoundError:
-            values = ""
-
-        return ExecutionResult(identifier, p.stdout, p.stderr, values, p.returncode)
+    def needs_main(self):
+        return False
