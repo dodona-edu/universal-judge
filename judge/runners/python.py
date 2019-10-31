@@ -13,7 +13,6 @@ class PythonConfig(LanguageConfig):
     def needs_compilation(self) -> bool:
         return False
 
-    # TODO: fix broken path when executing
     def execution_command(self, context_id: str, path: Path) -> List[str]:
         context = path / f"{self.context_name(context_id)}.{self.file_extension()}"
         return ["python", str(context)]
