@@ -8,8 +8,6 @@ import groovy.transform.CompileStatic
 import org.codehaus.groovy.control.CompilerConfiguration
 import org.codehaus.groovy.runtime.typehandling.GroovyCastException
 
-import java.util.stream.Collectors
-
 @CompileStatic
 interface JsonEnabled {
     Object toJson()
@@ -100,7 +98,7 @@ class TestPlanException extends Exception {
 }
 
 @CompileStatic
-class Plan implements WithClosureResolver {
+abstract class PlanScript extends Script implements WithClosureResolver {
     List<Tab> tabs = []
 
     void tab(@DelegatesTo(value = Tab, strategy = Closure.DELEGATE_FIRST) Closure<?> spec) {
@@ -119,20 +117,6 @@ class Plan implements WithClosureResolver {
         def builder = new JsonBuilder()
         builder tabs: this.tabs.collect { it.toJson() }
         return builder.content
-    }
-}
-
-@CompileStatic
-abstract class PlanScript extends Script implements WithClosureResolver {
-    Plan plan
-
-    void plan(@DelegatesTo(value = Plan, strategy = Closure.DELEGATE_FIRST) Closure<?> cl) {
-        if (this.plan != null) {
-            throw new IllegalStateException("You can only have one plan per file!")
-        }
-        this.plan = resolve(Plan, cl)
-        // Propagate defaults to children.
-        // this.plan.propagate()
     }
 }
 
@@ -157,7 +141,7 @@ class Converter {
         def shell = new GroovyShell(this.class.classLoader, new Binding(), config)
         PlanScript script = shell.parse(new File(path)) as PlanScript
         script.run()
-        def json = JsonOutput.toJson(script.plan.toJson())
+        def json = JsonOutput.toJson(script.toJson())
         println(JsonOutput.prettyPrint(json))
     }
 }
