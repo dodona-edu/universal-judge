@@ -26,7 +26,7 @@ class LanguageConfig:
         else:
             return []
 
-    def execution_command(self, context_id: str, path: Path) -> List[str]:
+    def execution_command(self, context_id: str) -> List[str]:
         raise NotImplementedError
 
     def file_extension(self) -> str:

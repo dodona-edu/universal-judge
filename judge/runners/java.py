@@ -16,8 +16,8 @@ class JavaConfig(LanguageConfig):
     def needs_compilation(self) -> bool:
         return True
 
-    def execution_command(self, context_id: str, path: Path) -> List[str]:
-        return ["java", "-cp", str(path), self.context_name(context_id)]
+    def execution_command(self, context_id: str) -> List[str]:
+        return ["java", "-cp", ".", self.context_name(context_id)]
 
     def file_extension(self) -> str:
         return "java"

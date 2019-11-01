@@ -161,8 +161,9 @@ class ConfigurableRunner(BaseRunner):
             stdin_.append(_get_stdin(testcase))
         stdin_ = "\n".join(stdin_)
 
-        command = self.language_config.execution_command(context_id, Path(self.config.workdir))
-        p = subprocess.run(command, input=stdin_, timeout=timeout, text=True, capture_output=True)
+        command = self.language_config.execution_command(context_id)
+        p = subprocess.run(command, input=stdin_, timeout=timeout, text=True, capture_output=True,
+                           cwd=self.config.workdir)
         identifier = f"--{self.identifier}-- SEP"
 
         try:

@@ -11,10 +11,13 @@ class PythonConfig(LanguageConfig):
         return True
 
     def needs_compilation(self) -> bool:
-        return False
+        return True
 
-    def execution_command(self, context_id: str, path: Path) -> List[str]:
-        context = path / f"{self.context_name(context_id)}.{self.file_extension()}"
+    def compilation_command(self, files: List[str]) -> List[str]:
+        return ["python", "-m", "py_compile", *files]
+
+    def execution_command(self, context_id: str) -> List[str]:
+        context = f"{self.context_name(context_id)}.{self.file_extension()}"
         return ["python", str(context)]
 
     def file_extension(self) -> str:
