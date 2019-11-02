@@ -333,12 +333,12 @@ class GeneratorJudge(Judge):
         report_update(po.StartJudgment())
 
         # Generate test files.
-        ids = self.runner.generate_code(submission, test_plan)
+        ids, ordered_files = self.runner.generate_code(submission, test_plan)
 
         # Compile the code if needed.
         # If a compilation error occurs, we stop the execution right now, and report the error.
         if self.runner.needs_compilation():
-            compilation_result = self.runner.compile()
+            compilation_result = self.runner.compile(ordered_files)
             if compilation_result.stdout:
                 # Append compiler messages to the output.
                 report_update(po.AppendMessage(co.ExtendedMessage(compilation_result.stdout, 'code')))

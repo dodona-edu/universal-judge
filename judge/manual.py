@@ -2,6 +2,8 @@
 # Run things manually.
 #
 import json
+import os
+import shutil
 import sys
 from pathlib import Path
 from typing import NamedTuple
@@ -25,10 +27,10 @@ def read_config() -> Config:
     config_ = {
         "memory_limit": 536870912,
         "time_limit": 10000000,
-        "programming_language": 'python',
+        "programming_language": 'haskell',
         "natural_language": 'nl',
         "resources": '../exercise',
-        "source": '../exercise/test.py',
+        "source": '../exercise/test.hs',
         "judge": '../',
         "workdir": str(Path('./workdir').resolve()),
     }
@@ -48,6 +50,13 @@ if __name__ == '__main__':
 
     json_string = open(f"{config.resources}/basic.json").read()
     plan = parse_test_plan(json_string)
+
+    # Delete content in work dir
+    for root, dirs, files in os.walk(config.workdir):
+        for f in files:
+            os.unlink(os.path.join(root, f))
+        for d in dirs:
+            shutil.rmtree(os.path.join(root, d))
 
     # Run it.
     from judge import GeneratorJudge

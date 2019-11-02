@@ -7,12 +7,13 @@ import subprocess
 from dataclasses import dataclass
 from glob import glob
 from pathlib import Path
-from typing import List
+from typing import List, Tuple
 
 import jinja2
 from jinja2 import TemplateNotFound
 
 from runners.config import LanguageConfig
+from runners.haskell import HaskellConfig
 from runners.java import JavaConfig
 from runners.python import PythonConfig
 from tested import Config
@@ -52,7 +53,7 @@ class BaseRunner:
     def __init__(self, config: Config):
         self.config = config
 
-    def generate_code(self, submission: str, plan: Plan) -> List[str]:
+    def generate_code(self, submission: str, plan: Plan) -> Tuple[List[str], List[str]]:
         """
         Generate the code necessary for execution. All code should be generated for the whole
         testplan.
@@ -62,7 +63,7 @@ class BaseRunner:
 
         :param submission: The code that must be tested.
         :param plan: The test plan to execute for the given submission.
-        :return: A list of context ids.
+        :return: A list of context ids and an ordered list of files.
         """
         raise NotImplementedError
 
@@ -78,7 +79,7 @@ class BaseRunner:
         """
         raise NotImplementedError
 
-    def compile(self) -> ExecutionResult:
+    def compile(self, ordered_files) -> ExecutionResult:
         """Will be called if `needs_compilation` is True."""
         raise NotImplementedError
 
@@ -101,15 +102,30 @@ class ConfigurableRunner(BaseRunner):
         self.language_config = language_config
         self.identifier = _get_identifier()
 
-    def generate_code(self, submission: str, plan: Plan) -> List[str]:
+    def generate_code(self, submission: str, plan: Plan) -> Tuple[List[str], List[str]]:
         environment = self._get_environment()
 
+        ordered_files = []
+
+        # Copy additional files we might need.
+        for file in self.language_config.additional_files():
+            result = self._path_to_templates() / file
+            # noinspection PyTypeChecker
+            shutil.copy2(result, self.config.workdir)
+        ordered_files.extend(self.language_config.additional_files())
+
         # Generate a file containing the submitted code.
-        submission_name = f"{self.language_config.submission_name(plan)}.{self.language_config.file_extension()}"
+        name = self.language_config.submission_name(plan)
+        submission_name = self._submission_name(plan, name)
         submission_template = self._find_template("submission", environment)
-        submission_result = submission_template.render(code=submission)
+        submission_result = submission_template.render(
+            code=submission,
+            name=name
+        )
         with open(Path(self.config.workdir, submission_name), "w") as file:
             file.write(submission_result)
+
+        ordered_files.append(submission_name)
 
         # Each context gets its own file.
         # We generate a new file for each context.
@@ -128,23 +144,21 @@ class ConfigurableRunner(BaseRunner):
                     FunctionType=FunctionType,
                     ValueType=ValueType,
                     context_id=id_,
-                    has_top_level=self.language_config.supports_top_level_functions()
+                    has_top_level=self.language_config.supports_top_level_functions(),
+                    name=name
                 )
                 with open(Path(self.config.workdir, self._context_name(id_)), "w") as file:
                     file.write(context_result)
+                ordered_files.append(self._context_name(id_))
                 context_ids.append(id_)
 
-                # Copy additional files we might need.
-        for file in self.language_config.additional_files():
-            result = self._path_to_templates() / file
-            # noinspection PyTypeChecker
-            shutil.copy2(result, self.config.workdir)
+        return context_ids, ordered_files
 
-        return context_ids
+    def _submission_name(self, plan, name):
+        return f"{name}.{self.language_config.file_extension()}"
 
-    def compile(self) -> ExecutionResult:
-        file_argument = [os.path.basename(x) for x in glob(f"{self.config.workdir}/*.{self.language_config.file_extension()}")]
-        command = self.language_config.compilation_command(file_argument)
+    def compile(self, ordered_files) -> ExecutionResult:
+        command = self.language_config.compilation_command(ordered_files)
         p = subprocess.run(command, text=True, capture_output=True, cwd=self.config.workdir)
         return ExecutionResult("", p.stdout, p.stderr, "", p.returncode)
 
@@ -215,7 +229,8 @@ class ConfigurableRunner(BaseRunner):
 
 CONFIGS = {
     'python': PythonConfig,
-    'java': JavaConfig
+    'java': JavaConfig,
+    'haskell': HaskellConfig
 }
 
 
