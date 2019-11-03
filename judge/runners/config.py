@@ -1,5 +1,4 @@
 """Configuration for languages, making implementing runners fairly easy."""
-from pathlib import Path
 from typing import List
 
 from testplan import Plan
