@@ -1,30 +1,18 @@
-#
-# Run things manually.
-#
-import json
+"""
+Run the judge manually from code. In this mode, the config is hardcoded into this file, allowing
+rapid testing (and, most importantly, debugging).
+"""
 import os
 import shutil
-import sys
 from pathlib import Path
-from typing import NamedTuple
 
 from tested import Config
 from testplan import parse_test_plan
 
 
-LANGUAGE_TO_KERNEL = {
-    'python': 'python3',
-    'python3': 'python3',
-    'r': 'ir',
-    'julia': 'julia-1.2',
-    'haskell': 'ihaskell',
-    'javascript': 'javascript'
-}
-
-
 def read_config() -> Config:
     """Read the configuration from stdout"""
-    config_ = {
+    return Config(**{
         "memory_limit": 536870912,
         "time_limit": 10000000,
         "programming_language": 'haskell',
@@ -33,10 +21,7 @@ def read_config() -> Config:
         "source": '../exercise/test.hs',
         "judge": '../',
         "workdir": str(Path('./workdir').resolve()),
-    }
-    needed_config = {x: config_[x] for x in Config._fields if x in config_}
-    needed_config['kernel'] = LANGUAGE_TO_KERNEL.get(config_["programming_language"], config_["programming_language"])
-    return Config(**needed_config)
+    })
 
 
 if __name__ == '__main__':
@@ -60,5 +45,6 @@ if __name__ == '__main__':
 
     # Run it.
     from judge import GeneratorJudge
+
     tester = GeneratorJudge(config)
     tester.judge(plan)

@@ -2,10 +2,11 @@ from pathlib import Path
 from typing import List
 
 from runners.common import LanguageConfig
-from testplan import Plan
+from testplan import Plan, Context
 
 
 class PythonConfig(LanguageConfig):
+    """Configuration for the Python language."""
 
     def supports_top_level_functions(self) -> bool:
         return True
@@ -23,8 +24,8 @@ class PythonConfig(LanguageConfig):
     def file_extension(self) -> str:
         return "py"
 
-    def submission_name(self, plan: Plan) -> str:
-        return "submission"
+    def submission_name(self, context_id: str, context: Context) -> str:
+        return f"submission_{context_id}"
 
     def context_name(self, context_id: str) -> str:
         return f"context_{context_id}"

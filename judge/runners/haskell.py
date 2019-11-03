@@ -11,10 +11,11 @@ yet, such as:
 from typing import List
 
 from runners.config import LanguageConfig
-from testplan import Plan
+from testplan import Context
 
 
 class HaskellConfig(LanguageConfig):
+    """Configuration for the Haskell language, with limitation (see module docs)."""
 
     def needs_main(self):
         return True
@@ -39,17 +40,9 @@ class HaskellConfig(LanguageConfig):
         f = [x for x in files if "Context" not in x]
         return ["ghc", "-c", *f, "-no-hs-main"]
 
-    def submission_name(self, plan: Plan) -> str:
-        # In Java, there can be only one class per file. This means the class name
-        # specified in all main functions should be the same. Right now we take the name of
-        # the first context.
-        try:
-            name = plan.tabs[0].contexts[0].execution.input.function.object
-        except IndexError:
-            # There are no tabs or no contexts. In that case we use "Main" as default, but it
-            # isn't relevant, as there will be no tests.
-            name = "Main"
-        return name
+    def submission_name(self, context_id: str, context: Context) -> str:
+        # In Haskell, the code is the same for all contexts.
+        return context.execution.input.function.object
 
     def context_name(self, context_id: str) -> str:
         return f"Context{context_id}"

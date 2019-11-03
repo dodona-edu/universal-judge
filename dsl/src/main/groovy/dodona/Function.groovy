@@ -115,7 +115,7 @@ trait WithArguments {
 class FunctionCall implements WithClosureResolver, WithEnums, WithArguments {
     FunctionType type
     String name
-    String object = "Main"
+    String object
 
     def name(String name) {
         this.name = name

@@ -1,14 +1,16 @@
 {# This function generates a function call in Java. #}
-{%- if function.type == FunctionType.top and has_top_level -%}
-  {{ function.name }}
-{%- elif function.type == FunctionType.static or function.type == FunctionType.instance or (function.type == FunctionType.top and not has_top_level) -%}
-  {{ function.object }}.{{ function.name }}
+{%- if function.type == FunctionType.static or function.type == FunctionType.instance or function.type == FunctionType.top -%}
+    {#- The main object is prepended automatically. -#}
+    {%- if function.object -%}
+        {{ function.object }}.
+    {%- endif -%}
+    {{ function.name }}
 {%- elif function.type == FunctionType.main -%}
-  {{ function.object }}.main
+    {{ function.object }}.main
 {%- endif -%}(
 {%- if function.type == FunctionType.main -%}new String[]{% raw %}{{% endraw %}{%- endif -%}
 {%- for argument in function.arguments -%}
-  {%- include "argument.jinja2" -%}{{ ", " if not loop.last else "" }}
+    {%- include "argument.jinja2" -%}{{ ", " if not loop.last else "" }}
 {%- endfor -%}
 {%- if function.type == FunctionType.main -%}}{%- endif -%}
 )

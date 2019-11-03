@@ -19,7 +19,6 @@ class Config(NamedTuple):
     programming_language: str
     workdir: str
     judge: str
-    kernel: str
 
 
 LANGUAGE_TO_KERNEL = {

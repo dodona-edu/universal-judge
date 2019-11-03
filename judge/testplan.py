@@ -6,7 +6,7 @@ unless noted, the judge will not provide default values for missing fields.
 """
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Dict
 from dataclasses_json import dataclass_json
 
 
@@ -54,7 +54,7 @@ class FunctionCall:
     """Represents a function call"""
     type: FunctionType
     name: Optional[str]
-    object: str
+    object: Optional[str]
     arguments: List[FunctionArg]
 # endregion
 
@@ -141,6 +141,10 @@ class Evaluators:
 # endregion
 
 
+# Represents custom code. This is a mapping of the programming language to the actual code.
+Code = Dict[str, str]
+
+
 @dataclass_json
 @dataclass
 class Testcase:
@@ -161,6 +165,8 @@ class Context:
     execution: Testcase
     additional: List[Testcase]
     description: Optional[str] = None
+    before: Optional[Code] = None
+    after: Optional[Code] = None
 
     def all_testcases(self) -> List[Testcase]:
         return [self.execution] + self.additional

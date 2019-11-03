@@ -1,11 +1,9 @@
 """Code generators for the testplans."""
-import os
 import random
 import shutil
 import string
 import subprocess
 from dataclasses import dataclass
-from glob import glob
 from pathlib import Path
 from typing import List, Tuple
 
@@ -50,6 +48,7 @@ class BaseRunner:
     For most language, it is enough to define a :class:`LanguageConfig`, and use the pre-made
     :class:`ConfigurableRunner`.
     """
+
     def __init__(self, config: Config):
         self.config = config
 
@@ -114,27 +113,31 @@ class ConfigurableRunner(BaseRunner):
             shutil.copy2(result, self.config.workdir)
         ordered_files.extend(self.language_config.additional_files())
 
-        # Generate a file containing the submitted code.
-        name = self.language_config.submission_name(plan)
-        submission_name = self._submission_name(plan, name)
-        submission_template = self._find_template("submission", environment)
-        submission_result = submission_template.render(
-            code=submission,
-            name=name
-        )
-        with open(Path(self.config.workdir, submission_name), "w") as file:
-            file.write(submission_result)
-
-        ordered_files.append(submission_name)
-
-        # Each context gets its own file.
-        # We generate a new file for each context.
+        # Each context gets two files: the file containing the user code, and the file containing
+        # the actual tests we run on the user code.
+        # TODO: in many cases, the user code is identical for each context. In that case, only
+        #  generate one file.
         context_ids = []
         for tab_idx, tab in enumerate(plan.tabs):
             for context_idx, context in enumerate(tab.contexts):
                 id_ = f"{tab_idx}_{context_idx}"
                 context_template = self._find_template("context", environment)
-                # Variables for the main test case
+
+                # Create the submission file.
+                submission_name = self.language_config.submission_name(id_, context)
+                submission_template = self._find_template("submission", environment)
+                submission_result = submission_template.render(
+                    code=submission,
+                    name=submission_name,
+                    before=context.before.get(self.config.programming_language),
+                    after=context.after.get(self.config.programming_language)
+                )
+                submission_file = f"{submission_name}.{self.language_config.file_extension()}"
+                with open(Path(self.config.workdir, submission_file), "w") as file:
+                    file.write(submission_result)
+                ordered_files.append(submission_file)
+
+                # Create the test file.
                 execution = self.get_execution(context)
                 context_result = context_template.render(
                     execution=execution,
@@ -145,7 +148,9 @@ class ConfigurableRunner(BaseRunner):
                     ValueType=ValueType,
                     context_id=id_,
                     has_top_level=self.language_config.supports_top_level_functions(),
-                    name=name
+                    name=submission_name,
+                    before=context.before.get(self.config.programming_language),
+                    after=context.after.get(self.config.programming_language)
                 )
                 with open(Path(self.config.workdir, self._context_name(id_)), "w") as file:
                     file.write(context_result)
@@ -154,7 +159,7 @@ class ConfigurableRunner(BaseRunner):
 
         return context_ids, ordered_files
 
-    def _submission_name(self, plan, name):
+    def _submission_name(self, name):
         return f"{name}.{self.language_config.file_extension()}"
 
     def compile(self, ordered_files) -> ExecutionResult:

@@ -118,7 +118,7 @@
                                 "function": {
                                     "type": "top",
                                     "name": "echo",
-                                    "object": "Main",
+                                    "object": null,
                                     "arguments": [
                                         {
                                             "name": null,

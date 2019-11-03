@@ -1,11 +1,11 @@
-from pathlib import Path
 from typing import List
 
 from runners.config import LanguageConfig
-from testplan import Plan
+from testplan import Context
 
 
 class JavaConfig(LanguageConfig):
+    """Configuration for the Java language."""
 
     def needs_main(self):
         return True
@@ -25,17 +25,9 @@ class JavaConfig(LanguageConfig):
     def compilation_command(self, files: List[str]) -> List[str]:
         return ["javac", *files]
 
-    def submission_name(self, plan: Plan) -> str:
-        # In Java, there can be only one class per file. This means the class name
-        # specified in all main functions should be the same. Right now we take the name of
-        # the first context.
-        try:
-            name = plan.tabs[0].contexts[0].execution.input.function.object
-        except IndexError:
-            # There are no tabs or no contexts. In that case we use "Main" as default, but it
-            # isn't relevant, as there will be no tests.
-            name = "Main"
-        return name
+    def submission_name(self, context_id: str, context: Context) -> str:
+        # In Java, the code is the same for all contexts.
+        return context.execution.input.function.object
 
     def context_name(self, context_id: str) -> str:
         return f"Context{context_id}"

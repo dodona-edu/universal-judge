@@ -8,6 +8,8 @@ import System.IO (hPutStr, stderr)
       This will be difficult: if no stdout/stderr is expected, we will have to lift it into the monad.
 -#}
 main = do
+    {#- In Haskell we do the before/after inside the main (?) #}
+    {{ before or "" }}
     {#- Call main function #}
     {% with function=execution -%}
     {{ name }}.{%- include "function.jinja2" -%}
@@ -21,3 +23,4 @@ main = do
     send v{{ loop.index }} "{{ output_file }}"
     {%- endwith -%}
     {%- endfor %}
+    {{ after or "" }}
