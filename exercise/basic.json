@@ -1,134 +1,149 @@
 {
-  "tabs": [
-    {
-      "name": "Correctheid",
-      "contexts": [
+    "tabs": [
         {
-          "description": "Beschrijving van de context",
-          "execution": {
-            "description": null,
-            "output": {
-              "stdout": {
-                "data": "invoertekst",
-                "type": "text"
-              },
-              "stderr": "none",
-              "file": null,
-              "result": null
-            },
-            "evaluators": {
-              "stdout": {
-                "type": "builtin",
-                "language": null,
-                "options": [
-                ],
-                "name": "textComparator"
-              },
-              "stderr": {
-                "type": "builtin",
-                "language": null,
-                "options": [
-                ],
-                "name": "textComparator"
-              },
-              "file": {
-                "type": "builtin",
-                "language": null,
-                "options": [
-                ],
-                "name": "fileComparator"
-              },
-              "result": {
-                "type": "builtin",
-                "language": null,
-                "options": [
-                ],
-                "name": "valueComparator"
-              }
-            },
-            "input": {
-              "function": {
-                "type": "main",
-                "name": null,
-                "object": "Main",
-                "arguments": [
-                ]
-              },
-              "stdin": {
-                "data": "invoertekst",
-                "type": "text"
-              }
-            }
-          },
-          "additional": [
-            {
-              "description": null,
-              "output": {
-                "stdout": {
-                  "data": "test-25",
-                  "type": "text"
-                },
-                "stderr": "none",
-                "file": null,
-                "result": {
-                  "type": "text",
-                  "data": "test-25"
-                }
-              },
-              "evaluators": {
-                "stdout": {
-                  "type": "builtin",
-                  "language": null,
-                  "options": [
-                  ],
-                  "name": "textComparator"
-                },
-                "stderr": {
-                  "type": "builtin",
-                  "language": null,
-                  "options": [
-                  ],
-                  "name": "textComparator"
-                },
-                "file": {
-                  "type": "builtin",
-                  "language": null,
-                  "options": [
-                  ],
-                  "name": "fileComparator"
-                },
-                "result": {
-                  "type": "builtin",
-                  "language": null,
-                  "options": [
-                  ],
-                  "name": "valueComparator"
-                }
-              },
-              "input": {
-                "function": {
-                  "type": "top",
-                  "name": "echo",
-                  "object": "Main",
-                  "arguments": [
-                    {
-                      "name": null,
-                      "type": "text",
-                      "data": "test"
+            "name": "Correctheid",
+            "contexts": [
+                {
+                    "description": "Beschrijving van de context",
+                    "execution": {
+                        "description": null,
+                        "output": {
+                            "stdout": {
+                                "data": "invoertekst",
+                                "type": "text"
+                            },
+                            "stderr": "none",
+                            "file": null,
+                            "result": null
+                        },
+                        "evaluators": {
+                            "stdout": {
+                                "type": "builtin",
+                                "language": null,
+                                "options": [
+                                    
+                                ],
+                                "name": "textComparator"
+                            },
+                            "stderr": {
+                                "type": "builtin",
+                                "language": null,
+                                "options": [
+                                    
+                                ],
+                                "name": "textComparator"
+                            },
+                            "file": {
+                                "type": "builtin",
+                                "language": null,
+                                "options": [
+                                    
+                                ],
+                                "name": "fileComparator"
+                            },
+                            "result": {
+                                "type": "builtin",
+                                "language": null,
+                                "options": [
+                                    
+                                ],
+                                "name": "valueComparator"
+                            }
+                        },
+                        "input": {
+                            "function": {
+                                "type": "main",
+                                "name": null,
+                                "object": "Main",
+                                "arguments": [
+                                    
+                                ]
+                            },
+                            "stdin": {
+                                "data": "invoertekst",
+                                "type": "text"
+                            }
+                        }
                     },
-                    {
-                      "name": null,
-                      "type": "integer",
-                      "data": 25
+                    "additional": [
+                        {
+                            "description": null,
+                            "output": {
+                                "stdout": {
+                                    "data": "test-25",
+                                    "type": "text"
+                                },
+                                "stderr": "none",
+                                "file": null,
+                                "result": {
+                                    "type": "text",
+                                    "data": "test-25"
+                                }
+                            },
+                            "evaluators": {
+                                "stdout": {
+                                    "type": "builtin",
+                                    "language": null,
+                                    "options": [
+                                        
+                                    ],
+                                    "name": "textComparator"
+                                },
+                                "stderr": {
+                                    "type": "builtin",
+                                    "language": null,
+                                    "options": [
+                                        
+                                    ],
+                                    "name": "textComparator"
+                                },
+                                "file": {
+                                    "type": "builtin",
+                                    "language": null,
+                                    "options": [
+                                        
+                                    ],
+                                    "name": "fileComparator"
+                                },
+                                "result": {
+                                    "type": "builtin",
+                                    "language": null,
+                                    "options": [
+                                        
+                                    ],
+                                    "name": "valueComparator"
+                                }
+                            },
+                            "input": {
+                                "function": {
+                                    "type": "top",
+                                    "name": "echo",
+                                    "object": "Main",
+                                    "arguments": [
+                                        {
+                                            "name": null,
+                                            "type": "text",
+                                            "data": "test"
+                                        },
+                                        {
+                                            "name": null,
+                                            "type": "integer",
+                                            "data": 25
+                                        }
+                                    ]
+                                },
+                                "stdin": "none"
+                            }
+                        }
+                    ],
+                    "before": {
+                        
+                    },
+                    "after": {
+                        
                     }
-                  ]
-                },
-                "stdin": "none"
-              }
-            }
-          ]
+                }
+            ]
         }
-      ]
-    }
-  ]
+    ]
 }
