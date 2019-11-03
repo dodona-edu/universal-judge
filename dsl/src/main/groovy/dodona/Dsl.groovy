@@ -8,6 +8,8 @@ import groovy.transform.CompileStatic
 import org.codehaus.groovy.control.CompilerConfiguration
 import org.codehaus.groovy.runtime.typehandling.GroovyCastException
 
+import java.nio.charset.StandardCharsets
+
 @CompileStatic
 interface JsonEnabled {
     Object toJson()
@@ -127,21 +129,31 @@ class Converter {
     static void main(String[] args) {
         def cli = new CliBuilder()
         cli.d(type: File, longOpt: 'dsl', 'Path to DSL')
+        cli.o(type: File, longOpt: 'out', 'Output path, default is stdout')
         def options = cli.parse(args)
         if (!options.d || !(options.d as File).exists()) {
             System.err.println("ERROR: Script requires valid path to DSL.")
             System.exit(-1)
         }
-        parseDsl((options.d as File).getAbsolutePath() as String)
+        String output = null
+        if (options.o instanceof File) {
+            output = (options.o as File).getAbsolutePath()
+        }
+        parseDsl((options.d as File).getAbsolutePath() as String, output)
     }
 
-    static void parseDsl(String path) {
+    static void parseDsl(String path, String outputPath) {
         def config = new CompilerConfiguration()
         config.scriptBaseClass = PlanScript.class.name
         def shell = new GroovyShell(this.class.classLoader, new Binding(), config)
         PlanScript script = shell.parse(new File(path)) as PlanScript
         script.run()
         def json = JsonOutput.toJson(script.toJson())
-        println(JsonOutput.prettyPrint(json))
+        def pretty = JsonOutput.prettyPrint(json)
+        if (outputPath == null) {
+            println(pretty)
+        } else {
+            new File(outputPath).write(pretty, StandardCharsets.UTF_8.name())
+        }
     }
 }
