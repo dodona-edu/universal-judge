@@ -115,8 +115,9 @@ class ConfigurableRunner(BaseRunner):
 
         # Each context gets two files: the file containing the user code, and the file containing
         # the actual tests we run on the user code.
-        # TODO: in many cases, the user code is identical for each context. In that case, only
-        #  generate one file.
+        # Language that have the same user code for all contexts can return the same name each time,
+        # which causes the files to be overridden. This will be faster if compilation is needed.
+        # TODO: In the future, we might not generate different files if the name is the same.
         context_ids = []
         for tab_idx, tab in enumerate(plan.tabs):
             for context_idx, context in enumerate(tab.contexts):
