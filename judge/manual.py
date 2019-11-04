@@ -27,12 +27,6 @@ def read_config() -> Config:
 if __name__ == '__main__':
     config = read_config()
 
-    # For now, the action plano is as follows:
-    # 1. Load the student user_code in the kernel
-    # 2. Process the input line-by-line
-    #    - Check the output for each element.
-    # 3. Finish
-
     json_string = open(f"{config.resources}/basic.json").read()
     plan = parse_test_plan(json_string)
 
