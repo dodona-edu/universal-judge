@@ -14,6 +14,7 @@ from runners.config import LanguageConfig
 from runners.haskell import HaskellConfig
 from runners.java import JavaConfig
 from runners.python import PythonConfig
+from runners.javascripted import JavaScriptedConfig
 from tested import Config
 from testplan import _get_stdin, Context, FunctionCall, FunctionType, Plan, TestPlanError, ValueType
 
@@ -124,24 +125,26 @@ class ConfigurableRunner(BaseRunner):
                 id_ = f"{tab_idx}_{context_idx}"
                 context_template = self._find_template("context", environment)
 
-                # Create the submission file.
+                # Create the submission file, if it must be done.
                 submission_name = self.language_config.submission_name(id_, context)
-                submission_template = self._find_template("submission", environment)
-                submission_result = submission_template.render(
-                    code=submission,
-                    name=submission_name,
-                    before=context.before.get(self.config.programming_language),
-                    after=context.after.get(self.config.programming_language)
-                )
-                submission_file = f"{submission_name}.{self.language_config.file_extension()}"
-                with open(Path(self.config.workdir, submission_file), "w") as file:
-                    file.write(submission_result)
-                ordered_files.append(submission_file)
+                if submission_name:
+                    submission_template = self._find_template("submission", environment)
+                    submission_result = submission_template.render(
+                        code=submission,
+                        name=submission_name,
+                        before=context.before.get(self.config.programming_language),
+                        after=context.after.get(self.config.programming_language)
+                    )
+                    submission_file = f"{submission_name}.{self.language_config.file_extension()}"
+                    with open(Path(self.config.workdir, submission_file), "w") as file:
+                        file.write(submission_result)
+                    ordered_files.append(submission_file)
 
                 # Create the test file.
                 execution = self.get_execution(context)
                 context_result = context_template.render(
                     execution=execution,
+                    code=submission,
                     code_identifier=self.identifier,
                     output_file=str(Path(self.config.workdir, 'output.txt')).replace("\\", "/"),
                     additionals=context.additional,
@@ -236,7 +239,8 @@ class ConfigurableRunner(BaseRunner):
 CONFIGS = {
     'python': PythonConfig,
     'java': JavaConfig,
-    'haskell': HaskellConfig
+    'haskell': HaskellConfig,
+    'java-scripted': JavaScriptedConfig
 }
 
 

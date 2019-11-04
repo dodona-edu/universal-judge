@@ -1,5 +1,5 @@
 """Configuration for languages, making implementing runners fairly easy."""
-from typing import List
+from typing import List, Optional
 
 from testplan import Plan, Context
 
@@ -37,7 +37,7 @@ class LanguageConfig:
         """The file extension for this language, without dot."""
         raise NotImplementedError
 
-    def submission_name(self, context_id: str, context: Context) -> str:
+    def submission_name(self, context_id: str, context: Context) -> Optional[str]:
         """
         Produce a name for the submission file.
 
@@ -48,7 +48,8 @@ class LanguageConfig:
                         code in a class, to name one example.
         :return: The name of the file. Must be a valid filename without extension, and also satisfy
                  language specific limitations on file names. For example, in Java, the name of the
-                 file must match the name of the class.
+                 file must match the name of the class. Return None if this language does not need
+                 a separate submission file.
         """
         raise NotImplementedError
 
