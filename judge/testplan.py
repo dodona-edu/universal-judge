@@ -6,7 +6,7 @@ unless noted, the judge will not provide default values for missing fields.
 """
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import List, Optional, Union, Dict, Any
+from typing import List, Optional, Union, Dict, Any, TypeVar, Type
 
 from dataclasses_json import config, DataClassJsonMixin
 
@@ -61,10 +61,16 @@ class FunctionCall(DataClassJsonMixin):
 # endregion
 
 
-# region Channels
 class ChannelType(str, Enum):
     text = "text"  # Literal values
     file = "file"  # Path to a file
+
+
+@dataclass
+class ChannelData(DataClassJsonMixin):
+    """Describes the data on channel (stdin or stdout)"""
+    data: str
+    type: ChannelType
 
 
 class ChannelState(str, Enum):
@@ -76,38 +82,6 @@ class OutputChannelState(str, Enum):
     ignored = "ignored"  # Ignore everything on this channel, i.e. doesn't matter what you use.
 
 
-@dataclass
-class ChannelData(DataClassJsonMixin):
-    """Describes the data on channel (stdin or stdout)"""
-    data: str
-    type: ChannelType
-
-
-@dataclass
-class FileOutput(DataClassJsonMixin):
-    """Describes output where the code should produce a file."""
-    expected: str  # Path to the expected file
-    actual: str  # Path to the generated file (by the users code)
-
-
-@dataclass
-class Input(DataClassJsonMixin):
-    """Describes the input channels for a test"""
-    stdin: Union[ChannelData, ChannelState]
-    function: FunctionCall
-
-
-@dataclass
-class Output(DataClassJsonMixin):
-    """Describes the output channels for a test"""
-    stdout: Union[ChannelData, OutputChannelState]
-    stderr: Union[ChannelData, OutputChannelState]
-    file: Optional[FileOutput]
-    result: Optional[Value]
-# endregion
-
-
-# region Evaluators
 class EvaluatorType(str, Enum):
     """
     Evaluator types.
@@ -157,7 +131,7 @@ class EvaluatorType(str, Enum):
 
 @dataclass
 class BaseEvaluator(DataClassJsonMixin):
-    """Base evaluator, not used directly."""
+    """Base evaluator, not used directly. Used to retrieve the type, and is then discarded."""
     type: EvaluatorType
 
 
@@ -169,26 +143,26 @@ class Builtin(str, Enum):
 
 
 @dataclass
-class BuiltinEvaluator(BaseEvaluator, DataClassJsonMixin):
+class BuiltinEvaluator(DataClassJsonMixin):
     """Built-in evaluators"""
     name: Builtin
     options: Dict[str, Any]  # Options for the evaluator
 
 
 @dataclass
-class CustomEvaluator(BaseEvaluator, DataClassJsonMixin):
+class CustomEvaluator(DataClassJsonMixin):
     """Evaluator using custom code."""
     language: str
     code: str
 
 
 @dataclass
-class SpecificEvaluator(BaseEvaluator, DataClassJsonMixin):
+class SpecificEvaluator(DataClassJsonMixin):
     """Evaluator using own evaluators."""
     evaluators: Code
 
 
-def evaluator_parser(values: dict) -> Union[BuiltinEvaluator, CustomEvaluator]:
+def _evaluator_parser(values: dict) -> Union[BuiltinEvaluator, CustomEvaluator]:
     base_type: BaseEvaluator = BaseEvaluator.from_dict(values)
     if base_type.type == EvaluatorType.builtin:
         return BuiltinEvaluator.from_dict(values)
@@ -199,23 +173,75 @@ def evaluator_parser(values: dict) -> Union[BuiltinEvaluator, CustomEvaluator]:
         raise TestPlanError(f"Unknown evaluator type {values}, should be one of {allowed}")
 
 
-def specific_evaluator_parser(values: dict) -> Union[BuiltinEvaluator, CustomEvaluator, SpecificEvaluator]:
+def _specific_evaluator_parser(values: dict) -> Union[BuiltinEvaluator, CustomEvaluator, SpecificEvaluator]:
     base_type: BaseEvaluator = BaseEvaluator.from_dict(values)
     if base_type.type == EvaluatorType.specific:
         return SpecificEvaluator.from_dict(values)
     else:
-        return evaluator_parser(values)
+        return _evaluator_parser(values)
 
 
 @dataclass
-class Evaluators(DataClassJsonMixin):
-    stdout: Union[BuiltinEvaluator, CustomEvaluator] = field(metadata=config(decoder=evaluator_parser))
-    stderr: Union[BuiltinEvaluator, CustomEvaluator] = field(metadata=config(decoder=evaluator_parser))
-    file: Union[BuiltinEvaluator, CustomEvaluator] = field(metadata=config(decoder=evaluator_parser))
-    result: Union[BuiltinEvaluator, CustomEvaluator, SpecificEvaluator] = field(
-        metadata=config(decoder=specific_evaluator_parser)
+class TextOutputChannel(ChannelData, DataClassJsonMixin):
+    """Describes the output for textual channels."""
+    evaluator: Union[BuiltinEvaluator, CustomEvaluator] = field(metadata=config(decoder=_evaluator_parser))
+
+
+@dataclass
+class FileOutputChannel(DataClassJsonMixin):
+    """Describes the output for files."""
+    evaluator: Union[BuiltinEvaluator, CustomEvaluator] = field(metadata=config(decoder=_evaluator_parser))
+    expected_path: str  # Path to the file to compare to.
+    actual_path: str  # Path to the generated file (by the users code)
+
+
+@dataclass
+class ReturnOutputChannel(DataClassJsonMixin):
+    """Handles return values of function calls."""
+    evaluator: Union[BuiltinEvaluator, CustomEvaluator, SpecificEvaluator] = field(
+        metadata=config(decoder=_specific_evaluator_parser)
     )
-# endregion
+    value: str  # TODO
+
+
+_O = TypeVar('_O', bound=DataClassJsonMixin)
+
+
+def _output_parser(value: Union[str, dict], r_type: Type[_O]) -> Union[_O, OutputChannelState]:
+    if isinstance(value, str):
+        return OutputChannelState[value]
+    else:
+        return r_type.from_dict(value)
+
+
+def _input_parser(value: Union[str, dict]) -> Union[ChannelData, ChannelState]:
+    if isinstance(value, str):
+        return ChannelState[value]
+    else:
+        return ChannelData.from_dict(value)
+
+
+# TODO: keep Input and Output classes or not?
+@dataclass
+class Input(DataClassJsonMixin):
+    function: FunctionCall
+    stdin: Union[ChannelData, ChannelState] = field(metadata=config(decoder=_input_parser))
+
+
+@dataclass
+class Output(DataClassJsonMixin):
+    stdout: Union[TextOutputChannel, OutputChannelState] = field(
+        metadata=config(decoder=lambda x: _output_parser(x, TextOutputChannel))
+    )
+    stderr: Union[TextOutputChannel, OutputChannelState] = field(
+        metadata=config(decoder=lambda x: _output_parser(x, TextOutputChannel))
+    )
+    file: Union[FileOutputChannel, OutputChannelState] = field(
+        metadata=config(decoder=lambda x: _output_parser(x, FileOutputChannel))
+    )
+    result: Union[ReturnOutputChannel, OutputChannelState] = field(
+        metadata=config(decoder=lambda x: _output_parser(x, ReturnOutputChannel))
+    )
 
 
 @dataclass
@@ -223,7 +249,6 @@ class Testcase(DataClassJsonMixin):
     """A test case is defined by an input and a set of tests."""
     input: Input
     output: Output
-    evaluators: Evaluators
     description: Optional[str]  # Will be generated if None.
 
 
@@ -265,23 +290,6 @@ def parse_test_plan(json_string) -> Plan:
 
     plan: Plan = Plan.from_json(json_string)
     plan.name = "Deprecated, will be removed."
-
-    # Fix union types.
-    for tab in plan.tabs:
-        for context in tab.contexts:
-            for testcase in context.all_testcases():
-                if isinstance(testcase.input.stdin, dict):
-                    testcase.input.stdin = ChannelData.from_dict(testcase.input.stdin)
-                elif isinstance(testcase.input.stdin, str):
-                    testcase.input.stdin = ChannelState[testcase.input.stdin]
-                if isinstance(testcase.output.stdout, dict):
-                    testcase.output.stdout = ChannelData.from_dict(testcase.output.stdout)
-                elif isinstance(testcase.output.stdout, str):
-                    testcase.output.stdout = OutputChannelState[testcase.output.stdout]
-                if isinstance(testcase.output.stderr, dict):
-                    testcase.output.stderr = ChannelData.from_dict(testcase.output.stderr)
-                elif isinstance(testcase.output.stderr, str):
-                    testcase.output.stderr = OutputChannelState[testcase.output.stderr]
 
     return plan
 

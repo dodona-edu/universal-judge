@@ -10,33 +10,16 @@
             "output": {
               "stdout": {
                 "data": "invoertekst",
-                "type": "text"
+                "type": "text",
+                "evaluator": {
+                  "type": "builtin",
+                  "options": {},
+                  "name": "textEvaluator"
+                }
               },
               "stderr": "none",
-              "file": null,
-              "result": null
-            },
-            "evaluators": {
-              "stdout": {
-                "type": "builtin",
-                "options": {},
-                "name": "textEvaluator"
-              },
-              "stderr": {
-                "type": "builtin",
-                "options": {},
-                "name": "textEvaluator"
-              },
-              "file": {
-                "type": "builtin",
-                "options": {},
-                "name": "fileEvaluator"
-              },
-              "result": {
-                "type": "builtin",
-                "options": {},
-                "name": "valueEvaluator"
-              }
+              "file": "ignored",
+              "result": "ignored"
             },
             "input": {
               "function": {
@@ -52,65 +35,7 @@
               }
             }
           },
-          "additional": [
-            {
-              "description": null,
-              "output": {
-                "stdout": {
-                  "data": "test-25",
-                  "type": "text"
-                },
-                "stderr": "none",
-                "file": null,
-                "result": {
-                  "type": "text",
-                  "data": "test-25"
-                }
-              },
-              "evaluators": {
-                "stdout": {
-                  "type": "builtin",
-                  "options": {},
-                  "name": "textEvaluator"
-                },
-                "stderr": {
-                  "type": "builtin",
-                  "options": {},
-                  "name": "textEvaluator"
-                },
-                "file": {
-                  "type": "builtin",
-                  "options": {},
-                  "name": "fileEvaluator"
-                },
-                "result": {
-                  "type": "builtin",
-                  "options": {},
-                  "name": "valueEvaluator"
-                }
-              },
-              "input": {
-                "function": {
-                  "type": "top",
-                  "name": "echo",
-                  "object": null,
-                  "arguments": [
-                    {
-                      "name": null,
-                      "type": "text",
-                      "data": "test"
-                    },
-                    {
-                      "name": null,
-                      "type": "integer",
-                      "data": 25
-                    }
-                  ]
-                },
-                "stdin": "none"
-              }
-            }
-          ],
+          "additional": [],
           "before": {
           },
           "after": {
