@@ -1,8 +1,7 @@
 import json
 import traceback
-from dataclasses import dataclass
 from os import path
-from typing import List, Union, Optional, Any
+from typing import List, Union, Optional
 
 from comparator import Comparator, FileComparator, TextComparator, ValueComparator, NoComparator
 from dodona import common as co, partial_output as po
@@ -12,7 +11,7 @@ from runners.common import BaseRunner, ExecutionResult, get_runner
 from tested import Config
 from testplan import _get_stderr, _get_stdin, _get_stdout, Context, FunctionType, OutputChannelState, Plan, Testcase, \
     TestPlanError, BuiltinEvaluator, CustomEvaluator, \
-    SpecificEvaluator, Builtin, ChannelData, OutputChannel, FileChannelState
+    SpecificEvaluator, Builtin, OutputChannel, FileChannelState
 
 
 def _get_or_default(seq, i, default):
@@ -89,23 +88,6 @@ def _evaluate_channel(channel: str, expected, actual, evaluator: Comparator,
     report_update(po.CloseTest(generated=actual,
                                status=po.StatusMessage(status),
                                data=po.TestData(channel)))
-
-
-RUN_KERNELS = {
-    'java': '\n{}.execution(new String[]{{}})'
-}
-
-
-def needs_run(kernel: str) -> bool:
-    return kernel in RUN_KERNELS
-
-
-@dataclass
-class KernelResult:
-    stdout: List[str]
-    stderr: List[str]
-    errors: List[po.Status]
-    messages: List[po.Message]
 
 
 class Judge:
