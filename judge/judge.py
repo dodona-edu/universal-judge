@@ -290,7 +290,6 @@ class GeneratorJudge(Judge):
 
             report_update(po.CloseTestcase())
 
-            # If this was the "main" test case and we encountered errors, stop the testing.
-            # TODO: configurable?
-            if i == 0 and error_message:
+            # If this was an essential testcase with an error, stop testing now.
+            if testcase.essential and error_message:
                 break

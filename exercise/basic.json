@@ -6,6 +6,7 @@
         {
           "description": "Beschrijving van de context",
           "execution": {
+            "essential": true,
             "description": null,
             "output": {
               "stdout": {
@@ -37,6 +38,7 @@
           },
           "additional": [
             {
+              "essential": false,
               "description": null,
               "output": {
                 "stdout": {

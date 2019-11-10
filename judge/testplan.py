@@ -265,6 +265,7 @@ class Testcase(DataClassJsonMixin):
     input: Input
     output: Output
     description: Optional[str]  # Will be generated if None.
+    essential: bool
 
 
 @dataclass
