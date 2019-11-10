@@ -82,6 +82,10 @@ class OutputChannelState(str, Enum):
     ignored = "ignored"  # Ignore everything on this channel, i.e. doesn't matter what you use.
 
 
+class FileChannelState(str, Enum):
+    ignored = "ignored"
+
+
 class EvaluatorType(str, Enum):
     """
     Evaluator types.
@@ -182,13 +186,18 @@ def _specific_evaluator_parser(values: dict) -> Union[BuiltinEvaluator, CustomEv
 
 
 @dataclass
-class TextOutputChannel(ChannelData, DataClassJsonMixin):
+class OutputChannel(DataClassJsonMixin):
+    evaluator: Any
+
+
+@dataclass
+class TextOutputChannel(ChannelData, OutputChannel, DataClassJsonMixin):
     """Describes the output for textual channels."""
     evaluator: Union[BuiltinEvaluator, CustomEvaluator] = field(metadata=config(decoder=_evaluator_parser))
 
 
 @dataclass
-class FileOutputChannel(DataClassJsonMixin):
+class FileOutputChannel(OutputChannel, DataClassJsonMixin):
     """Describes the output for files."""
     evaluator: Union[BuiltinEvaluator, CustomEvaluator] = field(metadata=config(decoder=_evaluator_parser))
     expected_path: str  # Path to the file to compare to.
@@ -196,12 +205,11 @@ class FileOutputChannel(DataClassJsonMixin):
 
 
 @dataclass
-class ReturnOutputChannel(DataClassJsonMixin):
+class ReturnOutputChannel(Value, OutputChannel, DataClassJsonMixin):
     """Handles return values of function calls."""
     evaluator: Union[BuiltinEvaluator, CustomEvaluator, SpecificEvaluator] = field(
         metadata=config(decoder=_specific_evaluator_parser)
     )
-    value: str  # TODO
 
 
 _O = TypeVar('_O', bound=DataClassJsonMixin)
@@ -212,6 +220,13 @@ def _output_parser(value: Union[str, dict], r_type: Type[_O]) -> Union[_O, Outpu
         return OutputChannelState[value]
     else:
         return r_type.from_dict(value)
+
+
+def _file_output_parser(value: Union[str, dict]) -> Union[ReturnOutputChannel, FileChannelState]:
+    if isinstance(value, str):
+        return FileChannelState[value]
+    else:
+        return ReturnOutputChannel.from_dict(value)
 
 
 def _input_parser(value: Union[str, dict]) -> Union[ChannelData, ChannelState]:
@@ -239,8 +254,8 @@ class Output(DataClassJsonMixin):
     file: Union[FileOutputChannel, OutputChannelState] = field(
         metadata=config(decoder=lambda x: _output_parser(x, FileOutputChannel))
     )
-    result: Union[ReturnOutputChannel, OutputChannelState] = field(
-        metadata=config(decoder=lambda x: _output_parser(x, ReturnOutputChannel))
+    result: Union[ReturnOutputChannel, FileChannelState] = field(
+        metadata=config(decoder=_file_output_parser)
     )
 
 
@@ -298,7 +313,7 @@ if __name__ == '__main__':
     import os
     cwd = os.getcwd()
     print(cwd)
-    with open('../exercise/advanced.json', 'r') as f:
+    with open('../exercise/basic.json', 'r') as f:
         r = parse_test_plan(f.read())
         print(r)
         print(r.to_json())

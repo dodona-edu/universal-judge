@@ -125,3 +125,12 @@ class ValueComparator(Comparator):
 
     def get_readable_input(self, expected) -> str:
         return _definition_to_type(expected)[0]
+
+
+class NoComparator(Comparator):
+    """Comparator for no output."""
+    def evaluate(self, expected, actual) -> bool:
+        return expected == actual
+
+    def get_readable_input(self, expected) -> str:
+        return ""

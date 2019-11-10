@@ -2,18 +2,17 @@ import json
 import traceback
 from dataclasses import dataclass
 from os import path
-from typing import List
+from typing import List, Union, Optional, Any
 
-from comparator import Comparator, FileComparator, TextComparator, ValueComparator
+from comparator import Comparator, FileComparator, TextComparator, ValueComparator, NoComparator
 from dodona import common as co, partial_output as po
 from dodona.common import ExtendedMessage, Permission, supports_input_highlighting
 from dodona.dodona import report_update
-from jupyter import JupyterContext, KernelQueue
 from runners.common import BaseRunner, ExecutionResult, get_runner
 from tested import Config
-from testplan import _get_stderr, _get_stdin, _get_stdout, Context, Evaluator, EvaluatorType, FILE_COMPARATOR, \
-    FunctionType, OutputChannelState, Plan, Testcase, TestPlanError, TEXT_COMPARATOR, VALUE_COMPARATOR
-from utils.ascii_to_html import ansi2html
+from testplan import _get_stderr, _get_stdin, _get_stdout, Context, FunctionType, OutputChannelState, Plan, Testcase, \
+    TestPlanError, BuiltinEvaluator, CustomEvaluator, \
+    SpecificEvaluator, Builtin, ChannelData, OutputChannel, FileChannelState
 
 
 def _get_or_default(seq, i, default):
@@ -23,19 +22,33 @@ def _get_or_default(seq, i, default):
         return default
 
 
-def _get_evaluator(evaluator: Evaluator) -> Comparator:
-    """Get the evaluator instance from a test plan."""
-    if evaluator.type == EvaluatorType.builtin:
-        if evaluator.name == TEXT_COMPARATOR:
+def _get_comparator(output: Union[OutputChannel, OutputChannelState]) -> Optional[Comparator]:
+    """
+    Get the comparator for a given output.
+    :param output: The output.
+    :return: The comparator, or None if there is no comparator.
+    """
+    if output == OutputChannelState.none:
+        return NoComparator()
+    if output == OutputChannelState.ignored:
+        return None
+    assert isinstance(output, OutputChannel)
+    evaluator = output.evaluator
+    if isinstance(evaluator, BuiltinEvaluator):
+        if evaluator.name == Builtin.text:
             return TextComparator(arguments=evaluator.options)
-        elif evaluator.name == FILE_COMPARATOR:
+        elif evaluator.name == Builtin.file:
             return FileComparator(arguments=evaluator.options)
-        elif evaluator.name == VALUE_COMPARATOR:
+        elif evaluator.name == Builtin.value:
             return ValueComparator(arguments=evaluator.options)
         else:
-            raise TestPlanError(f"Unknown buil-in evaluator: {evaluator.name}")
-    elif evaluator.type == 'external':
+            raise TestPlanError(f"Unknown built-in evaluator: {evaluator.name}")
+    elif isinstance(evaluator, CustomEvaluator):
         raise NotImplementedError()
+    elif isinstance(evaluator, SpecificEvaluator):
+        raise NotImplementedError()
+    else:
+        raise TestPlanError(f"Unknown evaluator type: {type(evaluator)}")
 
 
 def _evaluate_channel(channel: str, expected, actual, evaluator: Comparator,
@@ -43,6 +56,10 @@ def _evaluate_channel(channel: str, expected, actual, evaluator: Comparator,
     """
     Evaluate the output on a given channel. This function will output the appropriate messages
     to start and end a new test in Dodona.
+
+    If expected is a :class:`OutputChannelState`, it will be handled according to the state;
+    if the state is "ignored", this function will do nothing. When it is "none", the actual value
+    should be empty.
 
     If errors is given, the test will end with a runtime error.
 
@@ -52,7 +69,9 @@ def _evaluate_channel(channel: str, expected, actual, evaluator: Comparator,
     :param evaluator: The evaluator to use.
     :param error_message: The potential errors.
     """
-    if expected is None:
+    if expected == OutputChannelState.ignored:
+        return  # Nothing to do.
+    if expected == OutputChannelState.none:
         return  # Nothing to do
     report_update(po.StartTest(evaluator.get_readable_input(expected)))
     if error_message:
@@ -111,176 +130,6 @@ class Judge:
             submission_code = file.read()
 
         self._execute_test_plan(submission_code, plan)
-
-
-class KernelJudge(Judge):
-    """
-    Execute exercises using Jupyter kernels.
-    """
-
-    @staticmethod
-    def _execute_statement(code, input_, context: JupyterContext, timeout, memory_limit) -> KernelResult:
-        """Execute user_code."""
-        # print("Running:")
-        # print(code)
-        # print(input_)
-        messages = context.execute_statements(code, timeout, memory_limit, std_input=input_)
-        # Collect stdout from messages.
-        stdout_ = []
-        errors_ = []
-        error_codes = []
-
-        # Handle messages from the kernel.
-        for message in messages['iopub']:
-            type_ = message['header']['msg_type']
-            if type_ == 'stream':
-                stream = message['content']['name']
-                if stream == 'stdout':
-                    stdout_.append(message['content']['text'])
-                elif stream == 'stderr':
-                    errors_.append({
-                        'ename': 'StdError',
-                        'evalue': message['content']['text']
-                    })
-                else:
-                    raise ValueError(f"Unknown type {stream}")
-            elif type_ == 'error' and message['content']['traceback']:
-                errors_.append({
-                    'ename': 'RuntimeError',
-                    'evalue': message['content']['traceback']
-                })
-            else:
-                print()
-                print(f"Unknown message: {message}")
-
-        # Handle messages from the client.
-        for message in messages['client']:
-            if message['msg_type'] == 'error':
-                errors_.append(message['content'])
-            else:
-                print()
-                print(f"Unknown message: {message}")
-
-        stderr_ = []
-        messages = []
-
-        # Process error messages.
-        for error in errors_:
-            if error['ename'] == 'TimeoutError':
-                error_codes.append(po.Status.TIME_LIMIT_EXCEEDED)
-            elif error['ename'] == 'RuntimeError':
-                error_codes.append(po.Status.RUNTIME_ERROR)
-                coloured = [ansi2html(x) for x in error['evalue']]
-                messages.append(
-                    co.ExtendedMessage(description='<pre>' + '<br>'.join(coloured) + '</pre>', format='html'))
-            elif error['ename'] in ('StdError', 'TooMuchInput'):
-                stderr_.append(error['evalue'])
-                error_codes.append(po.Status.WRONG)
-            else:
-                print()
-                print(f"Unknown error: {error}")
-
-        return KernelResult(stdout_, stderr_, error_codes, messages)
-
-    def _execute_test(self, submission: str, test: Testcase, context: JupyterContext):
-        """
-        Run a single test.
-        :param submission: The code to run the test against.
-        :param test: The test to run.
-        :param context: The context to run it in.
-        :return: If the context should be restarted (i.e. cannot be re-used).
-        """
-        # Get the expected input for a test.
-        try:
-            input_ = _get_stdin(test)
-        except TestPlanError as e:
-            report_update(po.StartTest(""))
-            report_update(po.AppendMessage(co.ExtendedMessage(
-                description=str(e),
-                format='text',
-                permission=co.Permission.STAFF
-            )))
-            report_update(po.CloseTest("Internal error", po.StatusMessage(po.Status.INTERNAL_ERROR)))
-            return
-        report_update(po.StartTest("\n".join(input_)))
-        try:
-            stdout_evaluator = _get_evaluator(test.evaluators.stdout)
-            stderr_evaluator = _get_evaluator(test.evaluators.stderr)
-            file_evaluator = _get_evaluator(test.evaluators.file)
-        except TestPlanError as e:
-            report_update(po.AppendMessage(co.ExtendedMessage(
-                description=str(e),
-                format='text',
-                permission=co.Permission.STAFF
-            )))
-            report_update(po.CloseTest("Internal error", po.StatusMessage(po.Status.INTERNAL_ERROR)))
-            return
-
-        if needs_run(self.config.kernel):
-            run = ""  # create_run(self.config.kernel, test.runArgs)
-            submission += run
-
-        result = self._execute_statement(submission, input_, context,
-                                         timeout=self.config.time_limit,
-                                         memory_limit=self.config.memory_limit)
-
-        if result.errors:
-            actual = ""
-            status = result.errors.pop()
-            stderr = "\n".join(result.stderr)
-            if stderr:
-                result.messages.append(co.ExtendedMessage(description=stderr, format='text'))
-        else:
-            actual = ""
-            success = True
-            # Evaluate the stdout channel
-            stdout_ = _get_stdout(test)
-            if stdout_ is not None:  # We evaluate the stdout
-                success = stdout_evaluator.evaluate(stdout_, "\n".join(result.stdout))
-
-            # Evaluate the stderr channel
-            stderr_ = _get_stderr(test)
-            if stderr_ is not None:  # Check stderr
-                success = success and stderr_evaluator.evaluate(stderr_, "\n".join(result.stderr))
-
-            # Evaluate the file channel (if present)
-            if test.output.file:
-                actual = test.output.file.actual
-                success = success and file_evaluator.evaluate(test.output.file.expected, actual)
-
-            status = po.Status.CORRECT if success else po.Status.WRONG
-
-        # Write messages
-        for message in result.messages:
-            report_update(po.AppendMessage(message=message))
-
-        report_update(po.CloseTest(actual, po.StatusMessage(status), data=po.TestData(channel="stdout")))
-
-    def _execute_test_plan(self, submission: str, test_plan: Plan):
-        """Execute a test plano"""
-
-        # Start a pool of kernels.
-        kernels = KernelQueue(kernel=self.config.kernel)
-        current_kernel = kernels.get_kernel(None)
-
-        # TODO: when should contexts be cleared?
-        report_update(po.StartJudgment())
-        for tab in test_plan.tabs:
-            report_update(po.StartTab(title=tab.name))
-            for context in tab.contexts:
-                report_update(po.StartContext(context.description))
-                for testcase in context.testcases:
-                    report_update(po.StartTestcase(testcase.description))
-                    for test in testcase.tests:
-                        self._execute_test(submission, test, current_kernel)
-                    report_update(po.CloseTestcase())
-                report_update(po.CloseContext())
-                current_kernel = kernels.get_kernel(current_kernel)
-            report_update(po.CloseTab())
-        report_update(po.CloseJudgment())
-
-        kernels.clean()
-        current_kernel.clean()
 
 
 def _get_readable_input(case: Testcase, runner: BaseRunner) -> ExtendedMessage:
@@ -374,14 +223,13 @@ class GeneratorJudge(Judge):
 
         # There might be less output than testcase, which is an error. However, we process the
         # output we have, to ensure we send as much feedback as possible to the user.
-
         for i, testcase in enumerate(context.all_testcases()):
-
+            # Get the evaluators
             try:
-                stdout_evaluator = _get_evaluator(testcase.evaluators.stdout)
-                stderr_evaluator = _get_evaluator(testcase.evaluators.stderr)
-                file_evaluator = _get_evaluator(testcase.evaluators.file)
-                result_evaluator = _get_evaluator(testcase.evaluators.result)
+                stdout_evaluator = _get_comparator(testcase.output.stdout)
+                stderr_evaluator = _get_comparator(testcase.output.stderr)
+                file_evaluator = _get_comparator(testcase.output.file)
+                result_evaluator = _get_comparator(testcase.output.result)
             except TestPlanError as e:
                 report_update(po.AppendMessage(co.ExtendedMessage(str(e), 'text', co.Permission.STAFF)))
                 break
@@ -393,15 +241,18 @@ class GeneratorJudge(Judge):
 
             # Evaluate the file channel.
             # We evaluate this channel early, since it is separate from the other channels.
-            expected_file = getattr(testcase.output.file, 'expected', None)
-            actual_file = getattr(testcase.output.file, 'expected', None)
-            if expected_file and not path.exists(expected_file):
-                raise TestPlanError(f"Expected file {expected_file} not found.")
-            if actual_file and not path.exists(actual_file):
-                error_message.append(co.ExtendedMessage(f"File {actual_file} does not exist.", 'text'))
-            _evaluate_channel("file", expected_file, actual_file, file_evaluator, error_message)
+            if testcase.output.file != FileChannelState.ignored:
+                expected_file = testcase.output.file.expected_path
+                actual_file = testcase.output.file.actual_path
+                if expected_file and not path.exists(expected_file):
+                    raise TestPlanError(f"Expected file {expected_file} not found.")
+                if actual_file and not path.exists(actual_file):
+                    error_message.append(co.ExtendedMessage(f"File {actual_file} does not exist.", 'text'))
+                _evaluate_channel("file", expected_file, actual_file, file_evaluator, error_message)
 
-            error_message.clear()  # Reset, since there might be file errors.
+            # The errors in the file channel have nothing to do with the other channels,
+            # so reset them.
+            error_message.clear()
 
             # Check if there is early termination.
             if i >= len(stdout_) or i >= len(stderr_) or i >= len(values):
