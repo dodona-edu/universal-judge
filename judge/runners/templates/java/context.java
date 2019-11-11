@@ -22,7 +22,7 @@ class Context${context_id} {
     public static void main(String[] a) throws Exception {
 
         ## Open our file we use to write.
-        FileWriter ${code_identifier}_writer = new FileWriter("${output_file}");
+        FileWriter ${secret_id}_writer = new FileWriter("${output_file}");
 
         ## In Java, we must execute the before and after code in the context.
         ${before}
@@ -31,14 +31,14 @@ class Context${context_id} {
         <%include file="function.mako" args="function=execution" />;
 
         % for additional in additionals:
-            System.err.print("--${code_identifier}-- SEP");
-            System.out.print("--${code_identifier}-- SEP");
-            ${code_identifier}_writer.write("--${code_identifier}-- SEP");
-            eval_${context_id}_${loop.index}(${code_identifier}_writer, ${name}.<%include file="function.mako" args="function=additional.input.function" />);
+            System.err.print("--${secret_id}-- SEP");
+            System.out.print("--${secret_id}-- SEP");
+            ${secret_id}_writer.write("--${secret_id}-- SEP");
+            eval_${context_id}_${loop.index}(${secret_id}_writer, ${submission_name}.<%include file="function.mako" args="function=additional.input.function" />);
         % endfor
 
         ${after}
 
-        ${code_identifier}_writer.close();
+        ${secret_id}_writer.close();
     }
 }

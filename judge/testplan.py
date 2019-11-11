@@ -251,10 +251,10 @@ class Output(DataClassJsonMixin):
     stderr: Union[TextOutputChannel, OutputChannelState] = field(
         metadata=config(decoder=lambda x: _output_parser(x, TextOutputChannel))
     )
-    file: Union[FileOutputChannel, OutputChannelState] = field(
+    file: Union[FileOutputChannel, FileChannelState] = field(
         metadata=config(decoder=lambda x: _output_parser(x, FileOutputChannel))
     )
-    result: Union[ReturnOutputChannel, FileChannelState] = field(
+    result: Union[ReturnOutputChannel, OutputChannel] = field(
         metadata=config(decoder=_file_output_parser)
     )
 
@@ -276,9 +276,9 @@ class Context(DataClassJsonMixin):
     """
     execution: Testcase
     additional: List[Testcase]
+    before: Code
+    after: Code
     description: Optional[str] = None
-    before: Optional[Code] = None
-    after: Optional[Code] = None
 
     def all_testcases(self) -> List[Testcase]:
         return [self.execution] + self.additional

@@ -1,3 +1,3 @@
-module ${name} where
+module ${submission_name} where
 
-${code}
+${submission}

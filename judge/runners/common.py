@@ -4,11 +4,11 @@ import shutil
 import string
 import subprocess
 from dataclasses import dataclass
+from functools import cached_property
 from pathlib import Path
-from typing import List, Tuple
+from typing import Tuple, List
 
-from jinja2 import TemplateNotFound
-from mako.exceptions import TopLevelLookupException, TemplateLookupException
+from mako.exceptions import TemplateLookupException
 from mako.lookup import TemplateLookup
 
 from runners.config import LanguageConfig
@@ -18,7 +18,7 @@ from runners.javascripted import JavaScriptedConfig
 from runners.python import PythonConfig
 from runners.utils import remove_indents, remove_newline
 from tested import Config
-from testplan import _get_stdin, Context, FunctionCall, FunctionType, Plan, TestPlanError, ValueType
+from testplan import Plan, Context, _get_stdin, FunctionCall, FunctionType, TestPlanError
 
 
 def _get_identifier() -> str:
@@ -41,7 +41,6 @@ class ExecutionResult:
     stdout: str
     stderr: str
     results: str
-    specifics: str
     exit: int  # The return value.
 
 
@@ -100,13 +99,94 @@ class BaseRunner:
 
 
 class ConfigurableRunner(BaseRunner):
+    """Base runner working with language configurations."""
+
     def __init__(self, config: Config, language_config: LanguageConfig):
         super().__init__(config)
         self.language_config = language_config
         self.identifier = _get_identifier()
 
+    def _write_submission_template(self,
+                                   submission: str,
+                                   submission_name: str,
+                                   before: str,
+                                   after: str) -> List[str]:
+        """
+        Write the submission template to file.
+
+        The parameters of this function are available to the template. Note that just because they
+        are available, does not mean they need to be used. For example, the before and after should
+        be executed where it makes sense for the language. For example, in Python, this is in the
+        module of the user's code, but in Java, this is in the main of the context.
+
+        :param submission: The submitted code.
+        :param submission_name: The name of the container for the submitted code. For example, in
+                                Java this will be the class, in Haskell the module.
+        :param before: The "before" code for the user's code.
+        :param after: The "after" code for the user's code.
+        :return: The files that were generated, in order of dependencies.
+        """
+        submission_template = self._find_template("submission", self._get_environment)
+        submission_result = submission_template.render(
+            submission=submission,
+            submission_name=submission_name,
+            before=before,
+            after=after
+        )
+
+        submission_file = f"{submission_name}.{self.language_config.file_extension()}"
+        with open(Path(self.config.workdir, submission_file), "w") as file:
+            file.write(submission_result)
+
+        return [submission_file]
+
+    def _write_context_template(self,
+                                context: Context,
+                                submission: str,
+                                context_id: str,
+                                submission_name: str,
+                                before: str,
+                                after: str) -> List[str]:
+        """
+        Write the context template to file.
+
+        The parameters of this function are available to the template. Note that just because they
+        are available, does not mean they need to be used. For example, the before and after should
+        be executed where it makes sense for the language. For example, in Python, this is in the
+        module of the user's code, but in Java, this is in the main of the context.
+
+        :param context: The context to execute.
+        :param submission: The submitted code.
+        :param context_id: The id of the context.
+        :param submission_name: The name of the container for the submitted code. For example, in
+                                Java this will be the class, in Haskell the module.
+        :param before: The "before" code for the user's code.
+        :param after: The "after" code for the user's code.
+        :return: The files that were generated, in order of dependencies.
+        """
+        context_template = self._find_template("context", self._get_environment)
+        return_file = str(self._result_file()).replace("\\", "/")
+        # Create the test file.
+        execution = self.get_execution(context)
+        context_result = context_template.render(
+            execution=execution,
+            submission=submission,
+            secret_id=self.identifier,
+            output_file=return_file,
+            additionals=context.additional,
+            context_id=context_id,
+            has_top_level=self.language_config.supports_top_level_functions(),
+            submission_name=submission_name,
+            before=before,
+            after=after,
+        )
+        with open(Path(self.config.workdir, self._context_name(context_id)), "w") as file:
+            file.write(context_result)
+
+        return [self._context_name(context_id)]
+
     def generate_code(self, submission: str, plan: Plan) -> Tuple[List[str], List[str]]:
-        environment = self._get_environment()
+        environment = self._get_environment
 
         ordered_files = []
 
@@ -122,48 +202,23 @@ class ConfigurableRunner(BaseRunner):
         # Language that have the same user code for all contexts can return the same name each time,
         # which causes the files to be overridden. This will be faster if compilation is needed.
         # TODO: In the future, we might not generate different files if the name is the same.
-        # TODO: clean this up, pass strict object to mako.
         context_ids = []
         for tab_idx, tab in enumerate(plan.tabs):
             for context_idx, context in enumerate(tab.contexts):
+                # The ID for this context.
                 id_ = f"{tab_idx}_{context_idx}"
-                context_template = self._find_template("context", environment)
-
-                # Create the submission file, if it must be done.
+                # The before and after.
+                before = context.before.get(self.config.programming_language, "")
+                after = context.after.get(self.config.programming_language, "")
                 submission_name = self.language_config.submission_name(id_, context)
+
+                # Create the submission file if necessary.
                 if submission_name:
-                    submission_template = self._find_template("submission", environment)
-                    submission_result = submission_template.render(
-                        code=submission,
-                        name=submission_name,
-                        before=context.before.get(self.config.programming_language, ""),
-                        after=context.after.get(self.config.programming_language, "")
-                    )
-                    submission_file = f"{submission_name}.{self.language_config.file_extension()}"
-                    with open(Path(self.config.workdir, submission_file), "w") as file:
-                        file.write(submission_result)
-                    ordered_files.append(submission_file)
+                    submission_files = self._write_submission_template(submission, submission_name, before, after)
+                    ordered_files.extend(submission_files)
 
-                # Create the test file.
-                execution = self.get_execution(context)
-                context_result = context_template.render(
-                    execution=execution,
-                    code=submission,
-                    code_identifier=self.identifier,
-                    output_file=str(Path(self.config.workdir, 'output.txt')).replace("\\", "/"),
-                    additionals=context.additional,
-                    FunctionType=FunctionType,
-                    ValueType=ValueType,
-                    context_id=id_,
-                    has_top_level=self.language_config.supports_top_level_functions(),
-                    name=submission_name,
-                    before=context.before.get(self.config.programming_language, ""),
-                    after=context.after.get(self.config.programming_language, "")
-                )
-                with open(Path(self.config.workdir, self._context_name(id_)), "w") as file:
-                    file.write(context_result)
-
-                ordered_files.append(self._context_name(id_))
+                context_files = self._write_context_template(context, submission, id_, submission_name, before, after)
+                ordered_files.extend(context_files)
                 context_ids.append(id_)
 
         return context_ids, ordered_files
@@ -171,10 +226,13 @@ class ConfigurableRunner(BaseRunner):
     def _submission_name(self, name):
         return f"{name}.{self.language_config.file_extension()}"
 
+    def _result_file(self):
+        return Path(self.config.workdir, f"{self.identifier}_out.txt")
+
     def compile(self, ordered_files) -> ExecutionResult:
         command = self.language_config.compilation_command(ordered_files)
         p = subprocess.run(command, text=True, capture_output=True, cwd=self.config.workdir)
-        return ExecutionResult("", p.stdout, p.stderr, "", "", p.returncode)
+        return ExecutionResult("", p.stdout, p.stderr, "", p.returncode)
 
     def _context_name(self, context_id: str) -> str:
         return f"{self.language_config.context_name(context_id)}.{self.language_config.file_extension()}"
@@ -195,23 +253,18 @@ class ConfigurableRunner(BaseRunner):
         identifier = f"--{self.identifier}-- SEP"
 
         try:
-            with open(f"{self.config.workdir}/output.txt", "r") as f:
+            with open(self._result_file(), "r") as f:
                 values = f.read()
         except FileNotFoundError:
             values = ""
 
-        try:
-            with open(f"{self.config.workdir}/specifics.txt", "r") as f:
-                specifics = f.read()
-        except FileNotFoundError:
-            specifics = ""
-
-        return ExecutionResult(identifier, p.stdout, p.stderr, values, specifics, p.returncode)
+        return ExecutionResult(identifier, p.stdout, p.stderr, values, p.returncode)
 
     def _path_to_templates(self) -> Path:
         """The path to the templates and additional files."""
         return Path(self.config.judge) / 'judge' / 'runners' / 'templates' / self.config.programming_language
 
+    @cached_property
     def _get_environment(self) -> TemplateLookup:
         """Get the environment for the templates."""
         path = str(self._path_to_templates())
@@ -234,13 +287,10 @@ class ConfigurableRunner(BaseRunner):
 
     def function_call(self, call: FunctionCall) -> str:
         """Produce code for a single function call."""
-        env = self._get_environment()
+        env = self._get_environment
         template = self._find_template("function", env)
         return template.render(
             function=call,
-            FunctionType=FunctionType,
-            FunctionCall=FunctionCall,
-            ValueType=ValueType,
             has_top_level=self.language_config.supports_top_level_functions()
         )
 

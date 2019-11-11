@@ -10,7 +10,7 @@ class Context{{ context_id }} {
     public static void main(String[] a) throws Exception {
          ## In scripted Java, we just execute the code, nothing else.
         ${before}
-        ${code}
+        ${submission}
         ${after}
     }
 }

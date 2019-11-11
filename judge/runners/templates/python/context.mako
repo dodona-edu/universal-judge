@@ -4,15 +4,15 @@
 <%! from testplan import BuiltinEvaluator %>
 
 ## Import the default handler for functions.
-import values as ${code_identifier}_values
+import values as ${secret_id}_values
 
 ## Output channel for evaluation results.
-${code_identifier}_file = open(r"${output_file}", "w")
+${secret_id}_file = open(r"${output_file}", "w")
 
 % for additional in additionals:
     def eval_${context_id}_${loop.index}(value):
         % if isinstance(additional.output.result.evaluator, BuiltinEvaluator):
-            ${code_identifier}_values.send(${code_identifier}_file, value)
+            ${secret_id}_values.send(${secret_id}_file, value)
         % endif
 % endfor
 
@@ -26,14 +26,14 @@ sys.argv.extend([\
 ])
 
 ## Import the code for the first time
-import ${name}
+import ${submission_name}
 
 ## Handle test cases
 % for additional in additionals:
-    sys.stderr.write("--${code_identifier}-- SEP")
-    sys.stdout.write("--${code_identifier}-- SEP")
-    ${code_identifier}_file.write("--${code_identifier}-- SEP")
-    eval_${context_id}_${loop.index}(${name}.<%include file="function.mako" args="function=additional.input.function" />)
+    sys.stderr.write("--${secret_id}-- SEP")
+    sys.stdout.write("--${secret_id}-- SEP")
+    ${secret_id}_file.write("--${secret_id}-- SEP")
+    eval_${context_id}_${loop.index}(${submission_name}.<%include file="function.mako" args="function=additional.input.function" />)
 % endfor
 
-${code_identifier}_file.close()
+${secret_id}_file.close()
