@@ -7,14 +7,16 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Tuple
 
-import jinja2
 from jinja2 import TemplateNotFound
+from mako.exceptions import TopLevelLookupException, TemplateLookupException
+from mako.lookup import TemplateLookup
 
 from runners.config import LanguageConfig
 from runners.haskell import HaskellConfig
 from runners.java import JavaConfig
-from runners.python import PythonConfig
 from runners.javascripted import JavaScriptedConfig
+from runners.python import PythonConfig
+from runners.utils import remove_indents, remove_newline
 from tested import Config
 from testplan import _get_stdin, Context, FunctionCall, FunctionType, Plan, TestPlanError, ValueType
 
@@ -39,7 +41,8 @@ class ExecutionResult:
     stdout: str
     stderr: str
     results: str
-    value: int  # The return value.
+    specifics: str
+    exit: int  # The return value.
 
 
 class BaseRunner:
@@ -119,6 +122,7 @@ class ConfigurableRunner(BaseRunner):
         # Language that have the same user code for all contexts can return the same name each time,
         # which causes the files to be overridden. This will be faster if compilation is needed.
         # TODO: In the future, we might not generate different files if the name is the same.
+        # TODO: clean this up, pass strict object to mako.
         context_ids = []
         for tab_idx, tab in enumerate(plan.tabs):
             for context_idx, context in enumerate(tab.contexts):
@@ -132,8 +136,8 @@ class ConfigurableRunner(BaseRunner):
                     submission_result = submission_template.render(
                         code=submission,
                         name=submission_name,
-                        before=context.before.get(self.config.programming_language),
-                        after=context.after.get(self.config.programming_language)
+                        before=context.before.get(self.config.programming_language, ""),
+                        after=context.after.get(self.config.programming_language, "")
                     )
                     submission_file = f"{submission_name}.{self.language_config.file_extension()}"
                     with open(Path(self.config.workdir, submission_file), "w") as file:
@@ -153,11 +157,12 @@ class ConfigurableRunner(BaseRunner):
                     context_id=id_,
                     has_top_level=self.language_config.supports_top_level_functions(),
                     name=submission_name,
-                    before=context.before.get(self.config.programming_language),
-                    after=context.after.get(self.config.programming_language)
+                    before=context.before.get(self.config.programming_language, ""),
+                    after=context.after.get(self.config.programming_language, "")
                 )
                 with open(Path(self.config.workdir, self._context_name(id_)), "w") as file:
                     file.write(context_result)
+
                 ordered_files.append(self._context_name(id_))
                 context_ids.append(id_)
 
@@ -169,7 +174,7 @@ class ConfigurableRunner(BaseRunner):
     def compile(self, ordered_files) -> ExecutionResult:
         command = self.language_config.compilation_command(ordered_files)
         p = subprocess.run(command, text=True, capture_output=True, cwd=self.config.workdir)
-        return ExecutionResult("", p.stdout, p.stderr, "", p.returncode)
+        return ExecutionResult("", p.stdout, p.stderr, "", "", p.returncode)
 
     def _context_name(self, context_id: str) -> str:
         return f"{self.language_config.context_name(context_id)}.{self.language_config.file_extension()}"
@@ -195,16 +200,23 @@ class ConfigurableRunner(BaseRunner):
         except FileNotFoundError:
             values = ""
 
-        return ExecutionResult(identifier, p.stdout, p.stderr, values, p.returncode)
+        try:
+            with open(f"{self.config.workdir}/specifics.txt", "r") as f:
+                specifics = f.read()
+        except FileNotFoundError:
+            specifics = ""
+
+        return ExecutionResult(identifier, p.stdout, p.stderr, values, specifics, p.returncode)
 
     def _path_to_templates(self) -> Path:
         """The path to the templates and additional files."""
         return Path(self.config.judge) / 'judge' / 'runners' / 'templates' / self.config.programming_language
 
-    def _get_environment(self) -> jinja2.Environment:
+    def _get_environment(self) -> TemplateLookup:
         """Get the environment for the templates."""
-        loader = jinja2.FileSystemLoader(str(self._path_to_templates()))
-        return jinja2.Environment(loader=loader, undefined=jinja2.StrictUndefined)
+        path = str(self._path_to_templates())
+        preprocessors = [remove_indents, remove_newline]
+        return TemplateLookup(directories=[path], preprocessor=preprocessors)
 
     # noinspection PyMethodMayBeStatic
     def get_execution(self, c: Context) -> FunctionCall:
@@ -217,13 +229,13 @@ class ConfigurableRunner(BaseRunner):
         """Find a template with a name."""
         try:
             return environment.get_template(f"{name}.{self.language_config.file_extension()}")
-        except TemplateNotFound:
-            return environment.get_template(f"{name}.jinja2")
+        except TemplateLookupException:
+            return environment.get_template(f"{name}.mako")
 
     def function_call(self, call: FunctionCall) -> str:
         """Produce code for a single function call."""
         env = self._get_environment()
-        template = env.get_template("function.jinja2")
+        template = self._find_template("function", env)
         return template.render(
             function=call,
             FunctionType=FunctionType,

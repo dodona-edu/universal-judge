@@ -1,39 +1,44 @@
-{#
-This file represents all code that will be executed for one context.
-#}
+## Code to execute one test context.
+## The The first part of this file contains the evluation functions.
+## The second part is responsible for actually running the tests.
+<%! from testplan import BuiltinEvaluator %>
+
 import java.io.FileWriter;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-class Context{{ context_id }} {
+class Context${context_id} {
+
+    % for additional in additionals:
+        public static void eval_${context_id}_${loop.index}(FileWriter output, Object value) throws Exception {
+            % if isinstance(additional.output.result.evaluator, BuiltinEvaluator):
+                Values.send(output, value);
+            % endif
+        }
+    % endfor
 
     public static void main(String[] a) throws Exception {
 
-        {# Open our file we use to write. -#}
-        FileWriter {{ code_identifier }}_writer = new FileWriter("{{ output_file }}" );
+        ## Open our file we use to write.
+        FileWriter ${code_identifier}_writer = new FileWriter("${output_file}");
 
-        {# In Java, we must execute the before and after code in the context. #}
-        {{ before or "" }}
+        ## In Java, we must execute the before and after code in the context.
+        ${before}
 
-        {# Call the main fucnction. #}
-        {%- with function=execution %}
-        {%- include "function.jinja2" -%};
-        {%- endwith %}
+        ## Call the main fucnction.
+        <%include file="function.mako" args="function=execution" />;
 
-        {% for additional in additionals -%}
-        System.err.print("--{{ code_identifier }}-- SEP" );
-        System.out.print("--{{ code_identifier }}-- SEP" );
-        {{ code_identifier }}_writer.write("--{{ code_identifier }}-- SEP" );
+        % for additional in additionals:
+            System.err.print("--${code_identifier}-- SEP");
+            System.out.print("--${code_identifier}-- SEP");
+            ${code_identifier}_writer.write("--${code_identifier}-- SEP");
+            eval_${context_id}_${loop.index}(${code_identifier}_writer, ${name}.<%include file="function.mako" args="function=additional.input.function" />);
+        % endfor
 
-        {%- with function=additional.input.function %}
-        Values.send({{ code_identifier }}_writer, {{ name }}.{% include "function.jinja2" %});
-        {%- endwith -%}
-        {%- endfor %}
+        ${after}
 
-        {{ after or "" }}
-
-        {{ code_identifier }}_writer.close();
+        ${code_identifier}_writer.close();
     }
 }

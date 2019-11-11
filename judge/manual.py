@@ -19,7 +19,7 @@ def read_config() -> Config:
         "natural_language": 'nl',
         "resources": '../exercise',
         "source": '../exercise/test.hs',
-        "judge": '../',
+        "judge": str(Path('../').resolve()),
         "workdir": str(Path('./workdir').resolve()),
     })
 

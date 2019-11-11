@@ -1,3 +1,3 @@
-module {{ name }} where
+module ${name} where
 
-{{ code }}
+${code}
