@@ -1,12 +1,14 @@
-from pathlib import Path
 from typing import List
 
 from runners.common import LanguageConfig
-from testplan import Plan, Context
+from testplan import Context
 
 
 class PythonConfig(LanguageConfig):
     """Configuration for the Python language."""
+
+    def value_writer(self):
+        return "values.send(output, value)"
 
     def supports_top_level_functions(self) -> bool:
         return True

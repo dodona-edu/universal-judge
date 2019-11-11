@@ -69,3 +69,7 @@ class LanguageConfig:
     def additional_files(self) -> List[str]:
         """Additional files that will be available to the context tests."""
         raise NotImplementedError
+
+    def value_writer(self):
+        """Return the code needed to write functions to the file."""
+        raise NotImplementedError

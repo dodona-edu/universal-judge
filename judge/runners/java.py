@@ -7,6 +7,9 @@ from testplan import Context
 class JavaConfig(LanguageConfig):
     """Configuration for the Java language."""
 
+    def value_writer(self):
+        return "Values.send(output, value);"
+
     def needs_main(self):
         return True
 

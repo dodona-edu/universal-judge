@@ -29,4 +29,10 @@ class Values {
         String filled = String.format(result, data, type);
         writer.write(filled);
     }
+
+    public static void evaluated(OutputStreamWriter writer, boolean value, String string) throws IOException {
+        String result = "{\"string\": \"%s\", \"type\": \"evaluated\", \"accepted\": %b}";
+        String filled = String.format(result, string, value);
+        writer.write(filled);
+    }
 }

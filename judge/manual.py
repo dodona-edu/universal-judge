@@ -15,10 +15,10 @@ def read_config() -> Config:
     return Config(**{
         "memory_limit": 536870912,
         "time_limit": 10000000,
-        "programming_language": 'python',
+        "programming_language": 'haskell',
         "natural_language": 'nl',
         "resources": '../exercise',
-        "source": '../exercise/test.py',
+        "source": '../exercise/test.hs',
         "judge": str(Path('../').resolve()),
         "workdir": str(Path('./workdir').resolve()),
     })

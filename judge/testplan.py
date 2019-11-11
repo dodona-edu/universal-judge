@@ -222,7 +222,7 @@ def _output_parser(value: Union[str, dict], r_type: Type[_O]) -> Union[_O, Outpu
         return r_type.from_dict(value)
 
 
-def _file_output_parser(value: Union[str, dict]) -> Union[ReturnOutputChannel, FileChannelState]:
+def _return_output_parser(value: Union[str, dict]) -> Union[ReturnOutputChannel, FileChannelState]:
     if isinstance(value, str):
         return FileChannelState[value]
     else:
@@ -254,8 +254,8 @@ class Output(DataClassJsonMixin):
     file: Union[FileOutputChannel, FileChannelState] = field(
         metadata=config(decoder=lambda x: _output_parser(x, FileOutputChannel))
     )
-    result: Union[ReturnOutputChannel, OutputChannel] = field(
-        metadata=config(decoder=_file_output_parser)
+    result: Union[ReturnOutputChannel, FileChannelState] = field(
+        metadata=config(decoder=_return_output_parser)
     )
 
 

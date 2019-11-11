@@ -11,11 +11,13 @@ import java.util.List;
 
 class Context${context_id} {
 
+    public static void evaluated(FileWriter output, boolean result, String string) throws Exception {
+        Values.evaluated(output, result, string);
+    }
+
     % for additional in additionals:
         public static void eval_${context_id}_${loop.index}(FileWriter output, Object value) throws Exception {
-            % if isinstance(additional.output.result.evaluator, BuiltinEvaluator):
-                Values.send(output, value);
-            % endif
+            ${additional.output.value_code}
         }
     % endfor
 

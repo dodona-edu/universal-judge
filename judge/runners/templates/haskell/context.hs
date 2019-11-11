@@ -1,8 +1,13 @@
 module Context${context_id} where
 
 import qualified ${submission_name}
-import Values
+import Values (send, evaluated)
 import System.IO (hPutStr, stderr)
+
+## Create custom evaluation functions
+% for additional in additionals:
+    eval_${context_id}_${loop.index} output value = ${additional.output.value_code}
+% endfor
 
 
 main = do
@@ -15,6 +20,6 @@ main = do
     putStr "--${secret_id}-- SEP"
     appendFile "${output_file}" "--${secret_id}-- SEP"
     v${loop.index} <- ${submission_name}.<%include file="function.mako" args="function=additional.input.function" />
-    send v${loop.index} "${output_file}"
+    eval_${context_id}_${loop.index} "${output_file}" v${loop.index}
     % endfor
     ${after}

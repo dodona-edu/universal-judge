@@ -8,7 +8,7 @@
 % elif function.type == FunctionType.main:
     main\
 % endif
-\
+ \
 % for argument in function.arguments:
     <%include file="argument.mako" args="argument=argument"/>
     % if not loop.last:

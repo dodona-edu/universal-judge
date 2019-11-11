@@ -1,5 +1,8 @@
 import math
+from dataclasses import dataclass
 from typing import Optional, Union, Tuple, Any
+
+from dataclasses_json import DataClassJsonMixin
 
 from testplan import TestPlanError, Value, ValueType
 
@@ -134,3 +137,31 @@ class NoComparator(Comparator):
 
     def get_readable_input(self, expected) -> str:
         return ""
+
+
+@dataclass
+class EvaluationResult(DataClassJsonMixin):
+    type: str
+    accepted: bool
+    string: str
+
+
+def _result_to_type(value: dict) -> EvaluationResult:
+    try:
+        r = EvaluationResult.from_dict(value)
+        if r.type != "evaluated":
+            raise ValueError(f"Don't try to cheat!")
+        return r
+    except Exception:
+        raise ValueError(f"No! Don't cheat!")
+
+
+class SpecificComparator(Comparator):
+    """Compare result of custom evaluation code."""
+
+    def evaluate(self, expected, actual) -> bool:
+        a = _result_to_type(actual)
+        return a.accepted
+
+    def get_readable_input(self, expected) -> str:
+        return expected

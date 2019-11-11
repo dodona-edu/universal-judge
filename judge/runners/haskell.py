@@ -17,6 +17,9 @@ from testplan import Context
 class HaskellConfig(LanguageConfig):
     """Configuration for the Haskell language, with limitation (see module docs)."""
 
+    def value_writer(self):
+        return "send value output"
+
     def needs_main(self):
         return True
 

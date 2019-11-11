@@ -61,30 +61,30 @@ def remove_indents(code):
     next_line_strip = False
     last_control_indent = 0
 
-    print("Beginning handling.")
+    # print("Beginning handling.")
     for line in lines:
-        print(f"Handling line: {line}")
+        # print(f"Handling line: {line}")
         if is_control_end(line):
-            print(f"-> is end of control, removing {last_added_strip}")
+            # print(f"-> is end of control, removing {last_added_strip}")
             total_strip -= last_added_strip
         elif next_line_strip:
             max_strip = min(4, count_indent(line) - last_control_indent)
-            print(f"-> previous was control, adding {max_strip}")
+            # print(f"-> previous was control, adding {max_strip}")
             next_line_strip = False
             total_strip += max_strip
             last_added_strip = max_strip
         # Strip indent from line
         if is_control_start(line):
-            print(f"-> is control start, next will strip to {count_indent(line)}")
+            # print(f"-> is control start, next will strip to {count_indent(line)}")
             next_line_strip = True
             last_control_indent = count_indent(line)
 
-        print(f"-> stripping max {total_strip} from line")
+        # print(f"-> stripping max {total_strip} from line")
         line = strip(line, total_strip)
         resulting_lines.append(line)
 
     r = "\n".join(resulting_lines)
-    print(r)
+    # print(r)
     return r
 
 
@@ -108,5 +108,5 @@ def remove_newline(code):
             resulting_output.append(line)
 
     r = "\n".join(resulting_output)
-    print(r)
+    # print(r)
     return r

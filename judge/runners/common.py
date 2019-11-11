@@ -16,9 +16,11 @@ from runners.haskell import HaskellConfig
 from runners.java import JavaConfig
 from runners.javascripted import JavaScriptedConfig
 from runners.python import PythonConfig
+from runners.templates import SubmissionData, write_template, ContextData, TestcaseData, OutputData
 from runners.utils import remove_indents, remove_newline
 from tested import Config
-from testplan import Plan, Context, _get_stdin, FunctionCall, FunctionType, TestPlanError
+from testplan import Plan, Context, _get_stdin, FunctionCall, FunctionType, TestPlanError, OutputChannel, \
+    SpecificEvaluator, Testcase, FileChannelState
 
 
 def _get_identifier() -> str:
@@ -127,17 +129,9 @@ class ConfigurableRunner(BaseRunner):
         :return: The files that were generated, in order of dependencies.
         """
         submission_template = self._find_template("submission", self._get_environment)
-        submission_result = submission_template.render(
-            submission=submission,
-            submission_name=submission_name,
-            before=before,
-            after=after
-        )
-
+        data = SubmissionData(submission=submission, submission_name=submission_name, before=before, after=after)
         submission_file = f"{submission_name}.{self.language_config.file_extension()}"
-        with open(Path(self.config.workdir, submission_file), "w") as file:
-            file.write(submission_result)
-
+        write_template(data, submission_template, Path(self.config.workdir, submission_file))
         return [submission_file]
 
     def _write_context_template(self,
@@ -168,25 +162,23 @@ class ConfigurableRunner(BaseRunner):
         return_file = str(self._result_file()).replace("\\", "/")
         # Create the test file.
         execution = self.get_execution(context)
-        context_result = context_template.render(
+        data = ContextData(
             execution=execution,
             submission=submission,
             secret_id=self.identifier,
             output_file=return_file,
-            additionals=context.additional,
+            additionals=self.get_additional(context.additional),
             context_id=context_id,
             has_top_level=self.language_config.supports_top_level_functions(),
             submission_name=submission_name,
             before=before,
             after=after,
         )
-        with open(Path(self.config.workdir, self._context_name(context_id)), "w") as file:
-            file.write(context_result)
+        write_template(data, context_template, Path(self.config.workdir, self._context_name(context_id)))
 
         return [self._context_name(context_id)]
 
     def generate_code(self, submission: str, plan: Plan) -> Tuple[List[str], List[str]]:
-        environment = self._get_environment
 
         ordered_files = []
 
@@ -293,6 +285,19 @@ class ConfigurableRunner(BaseRunner):
             function=call,
             has_top_level=self.language_config.supports_top_level_functions()
         )
+
+    def get_additional(self, additionals: List[Testcase]) -> List[TestcaseData]:
+        result = []
+        for testcase in additionals:
+            has_specific = not isinstance(testcase.output.result, FileChannelState)
+            if has_specific and isinstance(testcase.output.result.evaluator, SpecificEvaluator):
+                custom_code = testcase.output.result.evaluator.evaluators[self.config.programming_language]
+            else:
+                # Get value function call.
+                custom_code = self.language_config.value_writer()
+            output = OutputData(custom_code)
+            result.append(TestcaseData(testcase.input, output))
+        return result
 
     def needs_main(self):
         return self.language_config.needs_main()

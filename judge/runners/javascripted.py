@@ -11,6 +11,9 @@ class JavaScriptedConfig(LanguageConfig):
     TODO: system for indicating required/supported features.
     """
 
+    def value_writer(self):
+        return ""
+
     def needs_main(self):
         return False
 

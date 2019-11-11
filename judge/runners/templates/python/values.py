@@ -20,3 +20,11 @@ def send(stream, value):
         "data": value,
         "type": type_
     }, stream)
+
+
+def evaluated(stream, result, string):
+    json.dump({
+        "string": string,
+        "accepted": result,
+        "type": "evaluated"
+    }, stream)

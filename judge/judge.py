@@ -3,7 +3,7 @@ import traceback
 from os import path
 from typing import List, Union, Optional
 
-from comparator import Comparator, FileComparator, TextComparator, ValueComparator, NoComparator
+from comparator import Comparator, FileComparator, TextComparator, ValueComparator, NoComparator, SpecificComparator
 from dodona import common as co, partial_output as po
 from dodona.common import ExtendedMessage, Permission, supports_input_highlighting
 from dodona.dodona import report_update
@@ -45,7 +45,7 @@ def _get_comparator(output: Union[OutputChannel, OutputChannelState]) -> Optiona
     elif isinstance(evaluator, CustomEvaluator):
         raise NotImplementedError()
     elif isinstance(evaluator, SpecificEvaluator):
-        raise NotImplementedError()
+        return SpecificComparator()
     else:
         raise TestPlanError(f"Unknown evaluator type: {type(evaluator)}")
 
@@ -262,11 +262,12 @@ class GeneratorJudge(Judge):
             try:
                 value = values[i] if i < len(stdout_) else None
                 actual_return = json.loads(value) if value else None
-            except (ValueError, TypeError):
+            except (ValueError, TypeError) as e:
                 actual_return = None
                 # Only if there are no errors yet.
                 error_message.append(co.ExtendedMessage(traceback.format_exc(), 'code', Permission.STAFF))
                 error_message.append(co.ExtendedMessage("Internal error while reading return value.", 'text'))
+                raise e
 
             _evaluate_channel("return", testcase.output.result, actual_return, result_evaluator, error_message)
 

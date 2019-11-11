@@ -82,6 +82,55 @@
                 },
                 "stdin": "none"
               }
+            },
+            {
+              "essential": false,
+              "description": null,
+              "output": {
+                "stdout": {
+                  "data": "test-25",
+                  "type": "text",
+                  "evaluator": {
+                    "type": "builtin",
+                    "options": {},
+                    "name": "textEvaluator"
+                  }
+                },
+                "stderr": "none",
+                "file": "ignored",
+                "result": {
+                  "type": "text",
+                  "data": "test-25",
+                  "evaluator": {
+                    "type": "specific",
+                    "evaluators": {
+                      "python": "evaluated(output, True, \"hallo\")",
+                      "java": "evaluated(output, true, \"hallo\");",
+                      "haskell": "evaluated output True \"hallo\""
+                    }
+                  }
+                }
+              },
+              "input": {
+                "function": {
+                  "type": "top",
+                  "name": "echo",
+                  "object": null,
+                  "arguments": [
+                    {
+                      "name": null,
+                      "type": "text",
+                      "data": "test"
+                    },
+                    {
+                      "name": null,
+                      "type": "integer",
+                      "data": 25
+                    }
+                  ]
+                },
+                "stdin": "none"
+              }
             }
           ],
           "before": {
