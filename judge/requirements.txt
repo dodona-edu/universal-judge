@@ -1,6 +1,5 @@
-jsonschema
 psutil
 jinja2
 pytest
-dataclasses-json
 mako
+pydantic
