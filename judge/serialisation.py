@@ -22,6 +22,11 @@ from pydantic.schema import schema, default_prefix
 from typing_inspect import get_args
 
 
+# TODO: should we replace the enums with Literal types?
+#   That would reduce the size of the code here, but on the other hand the json schema
+#   will be a lot uglier.
+
+
 class SerialisationError(ValueError):
     def __init__(self, message, additional_errors=None):
         ValueError.__init__(self, message)
