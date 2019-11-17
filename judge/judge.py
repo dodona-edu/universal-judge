@@ -6,7 +6,7 @@ from typing import List, Union, Optional
 from comparator import Comparator, FileComparator, TextComparator, ValueComparator, NoComparator, SpecificComparator
 from dodona import common as co, partial_output as po
 from dodona.common import ExtendedMessage, Permission, supports_input_highlighting
-from dodona.dodona import report_update
+from dodona import report_update
 from runners.common import BaseRunner, ExecutionResult, get_runner
 from tested import Config
 from testplan import _get_stderr, _get_stdin, _get_stdout, Context, FunctionType, OutputChannelState, Plan, Testcase, \

@@ -17,6 +17,7 @@ import json
 from enum import Enum
 from typing import Union, List, Dict
 
+from pydantic import BaseModel
 from pydantic.dataclasses import dataclass
 from pydantic.schema import schema, default_prefix
 from typing_inspect import get_args
@@ -96,18 +97,16 @@ ObjectType.__pydantic_model__.update_forward_refs()
 SequenceType.__pydantic_model__.update_forward_refs()
 
 
+class _SerialisationSchema(BaseModel):
+    """The schema for serialising data."""
+    __root__: Value
+
+
 def generate_schema():
     """
     Generate a json schema for the serialisation type. It will be printed on stdout.
     """
-    models = [x.__pydantic_model__ for x in get_args(Value)]
-    # This will generate the definitions. We still need to indicate the possibility to actually
-    # use the schema.
-    sc = schema(models)
-    all_types = sc['definitions'].keys()
-    definitions = [{"$ref": f"{default_prefix}/{x}"} for x in all_types]
-    # Use anyOf for consistency with pydantic and actual implementation.
-    sc['anyOf'] = definitions
+    sc = _SerialisationSchema.schema()
     sc['$id'] = "universal-judge/serialisation"
     sc['$schema'] = "http://json-schema.org/schema#"
     print(json.dumps(sc, indent=2))
