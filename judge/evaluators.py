@@ -1,17 +1,42 @@
-"""Built-in evaluators."""
+"""Evaluators actually compare values to determine the result of a test."""
 
 import math
 from dataclasses import field
-from typing import Optional, List
+from typing import Optional, List, Union, Dict, Any
 
 from pydantic.dataclasses import dataclass
 
 import serialisation
-from dodona.common import Status, ExtendedMessage, Permission
-from dodona.partial_output import StatusMessage
-from evaluators.common import Evaluator, EvaluationResult
-from testplan import TestPlanError
+from dodona import Status, ExtendedMessage, Permission, StatusMessage, Message
 from serialisation import get_readable_representation, NumericTypes, SequenceTypes, SerialisationError
+from testplan import SpecificEvaluator as TestplanSpecificEvaluator
+from testplan import TestPlanError, TextOutputChannel, FileOutputChannel, ReturnOutputChannel, NoneChannelState, \
+    IgnoredChannelState, OutputChannel, AnyChannelState, BuiltinEvaluator, Builtin, CustomEvaluator
+
+
+@dataclass
+class EvaluationResult:
+    """Provides the result of an evaluation for a specific output channel."""
+    result: StatusMessage  # The result of the evaluation.
+    readable_expected: str  # A human-friendly version of what the channel should have been.
+    readable_actual: str  # A human-friendly version (best effort at least) of what the channel is.
+    messages: List[Message] = field(default_factory=list)
+
+
+class Evaluator:
+    """Base evaluator containing minimal functionality."""
+
+    def __init__(self, arguments: Dict[str, Any] = None):
+        self.arguments = arguments or {}
+
+    def evaluate(self, output_channel, actual) -> EvaluationResult:
+        """
+        Evaluate the result.
+        :param output_channel: The output channel, from the testplan.
+        :param actual: The actual result, produced by the user's code.
+        :return: The result of the evaluation.
+        """
+        raise NotImplementedError
 
 
 def _is_number(string: str) -> Optional[float]:
@@ -47,12 +72,14 @@ class TextEvaluator(Evaluator):
             'roundTo': 3
         })
 
-    def evaluate(self, expected, actual) -> EvaluationResult:
-        if not isinstance(expected, str):
-            raise ValueError("Expected value must be string.")
+    def evaluate(self, output_channel, actual) -> EvaluationResult:
+        assert isinstance(output_channel, TextOutputChannel)
+
+        expected = output_channel.get_data_as_string()
+
         if not isinstance(actual, str):
             return EvaluationResult(
-                result=StatusMessage(Status.WRONG),
+                result=StatusMessage(enum=Status.WRONG),
                 readable_expected=expected,
                 readable_actual=""
             )
@@ -78,7 +105,7 @@ class TextEvaluator(Evaluator):
             result = actual == expected
 
         return EvaluationResult(
-            result=StatusMessage(Status.CORRECT if result else Status.WRONG),
+            result=StatusMessage(enum=Status.CORRECT if result else Status.WRONG),
             readable_expected=str(expected),
             readable_actual=str(actual)
         )
@@ -106,7 +133,13 @@ class FileEvaluator(Evaluator):
         if self.arguments["mode"] not in {"exact", "lines", "values"}:
             raise TestPlanError(f"Unknown mode for file evaluator: {self.arguments['mode']}")
 
-    def evaluate(self, expected, actual) -> EvaluationResult:
+    def evaluate(self, output_channel, actual) -> EvaluationResult:
+        assert isinstance(output_channel, FileOutputChannel)
+        assert actual is None
+
+        expected = output_channel.expected_path
+        actual = output_channel.actual_path
+
         try:
             with open(expected, "r") as file:
                 expected = file.read()
@@ -118,20 +151,20 @@ class FileEvaluator(Evaluator):
                 actual = file.read()
         except FileNotFoundError:
             return EvaluationResult(
-                result=StatusMessage(Status.RUNTIME_ERROR, "Required output file not found."),
+                result=StatusMessage(enum=Status.RUNTIME_ERROR, human="Required output file not found."),
                 readable_expected=expected,
                 readable_actual=actual,
             )
 
         if self.arguments["mode"] == "exact":
-            result = StatusMessage(Status.CORRECT if actual == expected else Status.WRONG)
+            result = StatusMessage(enum=Status.CORRECT if actual == expected else Status.WRONG)
         elif self.arguments["mode"] == "lines":
             expected_lines = expected.splitlines()
             actual_lines = actual.splitlines()
             correct = len(actual_lines) == len(expected_lines)
             for (expected_line, actual_line) in zip(expected_lines, actual_lines):
                 correct = correct and expected_line == actual_line
-            result = StatusMessage(Status.CORRECT if correct else Status.WRONG)
+            result = StatusMessage(enum=Status.CORRECT if correct else Status.WRONG)
         else:
             assert self.arguments["mode"] == "values"
             text_evaluator = TextEvaluator(self.arguments)
@@ -147,16 +180,16 @@ class FileEvaluator(Evaluator):
                 expected.append(r.readable_expected)
                 actual.append(r.readable_actual)
                 correct = correct and r.result.enum == Status.CORRECT
-            result = StatusMessage(Status.CORRECT if correct else Status.WRONG)
+            result = StatusMessage(enum=Status.CORRECT if correct else Status.WRONG)
 
         return EvaluationResult(
-            result=StatusMessage(Status.CORRECT if result else Status.WRONG),
+            result=StatusMessage(enum=Status.CORRECT if result else Status.WRONG),
             readable_expected=expected,
             readable_actual=actual
         )
 
 
-class ValueComparator(Evaluator):
+class ValueEvaluator(Evaluator):
     """
     Evaluate two values. The values must match exact. Currently, this evaluator has no options,
     but it might receive them in the future (e.g. options on how to deal with strings or floats).
@@ -165,19 +198,11 @@ class ValueComparator(Evaluator):
     def __init__(self, arguments):
         super().__init__(arguments)
 
-    def evaluate(self, expected, actual) -> EvaluationResult:
-        # A crash here indicates a problem with the testplan.
-        try:
-            expected = None if expected is None else serialisation.parse(expected)
-            readable_expected = get_readable_representation(expected)
-        except SerialisationError as e:
-            message = ExtendedMessage(str(e), "text", Permission.STAFF)
-            return EvaluationResult(
-                result=StatusMessage(Status.INTERNAL_ERROR, "There is an error with this exercise."),
-                readable_expected=str(expected),
-                readable_actual=str(actual),
-                messages=[message]
-            )
+    def evaluate(self, output_channel, actual) -> EvaluationResult:
+        assert isinstance(output_channel, ReturnOutputChannel)
+
+        expected = output_channel.value
+        readable_expected = get_readable_representation(expected)
 
         # A crash here indicates a problem with one of the language implementations, or a student
         # is trying to cheat.
@@ -185,11 +210,11 @@ class ValueComparator(Evaluator):
             actual = None if actual is None else serialisation.parse(actual)
             readable_actual = get_readable_representation(actual)
         except SerialisationError as e:
-            message = ExtendedMessage(str(e), "text", Permission.STAFF)
+            message = ExtendedMessage(description=str(e), format="text", permission=Permission.STAFF)
             student = "Your return value was wrong; additionally Dodona didn't recognize it. " \
                       "Contact staff for more information."
             return EvaluationResult(
-                result=StatusMessage(Status.WRONG, student),
+                result=StatusMessage(enum=Status.WRONG, human=student),
                 readable_expected=readable_expected,
                 readable_actual=str(actual),
                 messages=[message]
@@ -201,7 +226,7 @@ class ValueComparator(Evaluator):
         if not (expected is None and actual is None) and (
                 expected is None or actual is None or expected.type != actual.type):
             return EvaluationResult(
-                result=StatusMessage(Status.WRONG, "Value is of wrong type."),
+                result=StatusMessage(enum=Status.WRONG, human="Value is of wrong type."),
                 readable_expected=readable_expected,
                 readable_actual=readable_actual
             )
@@ -216,19 +241,32 @@ class ValueComparator(Evaluator):
             correct = expected.data == actual.data
 
         return EvaluationResult(
-            result=StatusMessage(Status.CORRECT if correct else Status.WRONG),
+            result=StatusMessage(enum=Status.CORRECT if correct else Status.WRONG),
             readable_expected=readable_expected,
             readable_actual=readable_actual
         )
 
 
-class NoComparator(Evaluator):
+class NoneEvaluator(Evaluator):
     """Comparator for no output."""
 
     def evaluate(self, expected, actual) -> EvaluationResult:
-        assert expected is None
+        assert expected == NoneChannelState.NONE
+        is_none = actual is None or actual == ""
         return EvaluationResult(
-            result=StatusMessage(Status.CORRECT if actual is None else Status.WRONG),
+            result=StatusMessage(enum=Status.CORRECT if is_none else Status.WRONG),
+            readable_expected="",
+            readable_actual="" if is_none else str(actual)
+        )
+
+
+class IgnoredEvaluator(Evaluator):
+    """Comparator for ignored output."""
+
+    def evaluate(self, output_channel, actual) -> EvaluationResult:
+        assert output_channel == IgnoredChannelState.IGNORED
+        return EvaluationResult(
+            result=StatusMessage(enum=Status.CORRECT),
             readable_expected="",
             readable_actual="" if actual is None else str(actual)
         )
@@ -248,12 +286,12 @@ class SpecificEvaluator(Evaluator):
     Compare result of custom evaluation code. This evaluator has no options.
     """
 
-    def evaluate(self, expected, actual) -> EvaluationResult:
-        assert expected is None
+    def evaluate(self, output_channel, actual) -> EvaluationResult:
+        assert output_channel.value is None
 
         if actual is None:
             return EvaluationResult(
-                result=StatusMessage(Status.INTERNAL_ERROR, "Received no output."),
+                result=StatusMessage(enum=Status.INTERNAL_ERROR, human="Received no output."),
                 readable_expected="",
                 readable_actual=""
             )
@@ -261,18 +299,47 @@ class SpecificEvaluator(Evaluator):
         try:
             actual: SpecificResult = SpecificResult.__pydantic_model__.parse_raw(actual)
         except (TypeError, ValueError) as e:
-            message = ExtendedMessage(str(e), "text", Permission.STAFF)
+            message = ExtendedMessage(description=str(e), format="text", permission=Permission.STAFF)
             student = "Something went wrong while receiving the test result. Contact staff."
             return EvaluationResult(
-                result=StatusMessage(Status.INTERNAL_ERROR, student),
+                result=StatusMessage(enum=Status.INTERNAL_ERROR, human=student),
                 readable_expected="",
                 readable_actual="",
                 messages=[message]
             )
 
         return EvaluationResult(
-            result=StatusMessage(Status.CORRECT if actual.result else Status.WRONG),
+            result=StatusMessage(enum=Status.CORRECT if actual.result else Status.WRONG),
             readable_expected=actual.readable_expected,
             readable_actual=actual.readable_actual,
             messages=actual.messages
         )
+
+
+def get_evaluator(output: Union[OutputChannel, AnyChannelState]) -> Evaluator:
+    """
+    Get the evaluator for a given output channel.
+    """
+    # Handle channel states.
+    if output == NoneChannelState.NONE:
+        return NoneEvaluator()
+    if output == IgnoredChannelState.IGNORED:
+        return IgnoredEvaluator()
+
+    # Handle actual evaluators.
+    evaluator = output.evaluator
+    if isinstance(evaluator, BuiltinEvaluator):
+        if evaluator.name == Builtin.TEXT:
+            return TextEvaluator(arguments=evaluator.options)
+        elif evaluator.name == Builtin.FILE:
+            return FileEvaluator(arguments=evaluator.options)
+        elif evaluator.name == Builtin.VALUE:
+            return ValueEvaluator(arguments=evaluator.options)
+        else:
+            raise AssertionError(f"Unknown built-in enum value: {evaluator.name}")
+    elif isinstance(evaluator, CustomEvaluator):
+        raise NotImplementedError()
+    elif isinstance(evaluator, TestplanSpecificEvaluator):
+        return SpecificEvaluator()
+    else:
+        raise AssertionError(f"Unknown evaluator type: {type(evaluator)}")

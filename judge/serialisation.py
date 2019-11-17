@@ -11,7 +11,8 @@ The encoding and decoding of instances of values in this format are done in the 
 implementations itself.
 
 A json-schema can be generated from this format by executing the module on the command line. The
-schema will be printed to stdout.
+schema will be printed to stdout. This can be used to generate classes for implementations in
+other languages.
 """
 import json
 from enum import Enum

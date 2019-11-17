@@ -16,11 +16,11 @@ from runners.haskell import HaskellConfig
 from runners.java import JavaConfig
 from runners.javascripted import JavaScriptedConfig
 from runners.python import PythonConfig
-from runners.templates import SubmissionData, write_template, ContextData, TestcaseData, OutputData
+from runners.templates import SubmissionData, write_template, ContextData, TestcaseData
 from runners.utils import remove_indents, remove_newline
 from tested import Config
-from testplan import Plan, Context, _get_stdin, FunctionCall, FunctionType, TestPlanError, OutputChannel, \
-    SpecificEvaluator, Testcase, FileChannelState
+from testplan import Plan, Context, FunctionCall, FunctionType, TestPlanError, SpecificEvaluator, Testcase, \
+    IgnoredChannelState
 
 
 def _get_identifier() -> str:
@@ -236,7 +236,8 @@ class ConfigurableRunner(BaseRunner):
 
         stdin_ = []
         for testcase in context.all_testcases():
-            stdin_.append(_get_stdin(testcase))
+            if (input_ := testcase.get_input()) is not None:
+                stdin_.append(input_)
         stdin_ = "\n".join(stdin_)
 
         command = self.language_config.execution_command(context_id)
@@ -265,10 +266,10 @@ class ConfigurableRunner(BaseRunner):
 
     # noinspection PyMethodMayBeStatic
     def get_execution(self, c: Context) -> FunctionCall:
-        if c.execution.input.function.type != FunctionType.MAIN:
+        if c.execution.function.type != FunctionType.MAIN:
             raise TestPlanError("Main function must have type main")
 
-        return c.execution.input.function
+        return c.execution.function
 
     def _find_template(self, name, environment):
         """Find a template with a name."""
@@ -289,14 +290,13 @@ class ConfigurableRunner(BaseRunner):
     def get_additional(self, additionals: List[Testcase]) -> List[TestcaseData]:
         result = []
         for testcase in additionals:
-            has_specific = not isinstance(testcase.output.result, FileChannelState)
-            if has_specific and isinstance(testcase.output.result.evaluator, SpecificEvaluator):
-                custom_code = testcase.output.result.evaluator.evaluators[self.config.programming_language]
+            has_specific = not isinstance(testcase.result, IgnoredChannelState)
+            if has_specific and isinstance(testcase.result.evaluator, SpecificEvaluator):
+                custom_code = testcase.result.evaluator.evaluators[self.config.programming_language]
             else:
                 # Get value function call.
                 custom_code = self.language_config.value_writer()
-            output = OutputData(custom_code)
-            result.append(TestcaseData(testcase.input, output))
+            result.append(TestcaseData(testcase.function, testcase.stdin, custom_code))
         return result
 
     def needs_main(self):

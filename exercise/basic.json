@@ -8,9 +8,36 @@
           "execution": {
             "essential": true,
             "description": null,
-            "output": {
+            "stdout": {
+              "data": "invoertekst",
+              "type": "text",
+              "evaluator": {
+                "type": "builtin",
+                "options": {},
+                "name": "text"
+              }
+            },
+            "stderr": "none",
+            "file": "ignored",
+            "result": "ignored",
+            "function": {
+              "type": "main",
+              "name": null,
+              "object": "Main",
+              "arguments": [
+              ]
+            },
+            "stdin": {
+              "data": "invoertekst",
+              "type": "text"
+            }
+          },
+          "additional": [
+            {
+              "essential": false,
+              "description": null,
               "stdout": {
-                "data": "invoertekst",
+                "data": "test-25",
                 "type": "text",
                 "evaluator": {
                   "type": "builtin",
@@ -20,117 +47,74 @@
               },
               "stderr": "none",
               "file": "ignored",
-              "result": "ignored"
-            },
-            "input": {
+              "result": {
+                "value": {
+                  "type": "text",
+                  "data": "test-25"
+                },
+                "evaluator": {
+                  "type": "builtin",
+                  "options": {},
+                  "name": "value"
+                }
+              },
               "function": {
-                "type": "main",
-                "name": null,
-                "object": "Main",
+                "type": "top",
+                "name": "echo",
+                "object": null,
                 "arguments": [
+                  {
+                    "type": "text",
+                    "data": "test"
+                  },
+                  {
+                    "type": "integer",
+                    "data": 25
+                  }
                 ]
               },
-              "stdin": {
-                "data": "invoertekst",
-                "type": "text"
-              }
-            }
-          },
-          "additional": [
-            {
-              "essential": false,
-              "description": null,
-              "output": {
-                "stdout": {
-                  "data": "test-25",
-                  "type": "text",
-                  "evaluator": {
-                    "type": "builtin",
-                    "options": {},
-                    "name": "text"
-                  }
-                },
-                "stderr": "none",
-                "file": "ignored",
-                "result": {
-                  "value": {
-                    "type": "text",
-                    "data": "test-25"
-                  },
-                  "evaluator": {
-                    "type": "builtin",
-                    "options": {},
-                    "name": "value"
-                  }
-                }
-              },
-              "input": {
-                "function": {
-                  "type": "top",
-                  "name": "echo",
-                  "object": null,
-                  "arguments": [
-                    {
-                      "type": "text",
-                      "data": "test"
-                    },
-                    {
-                      "type": "integer",
-                      "data": 25
-                    }
-                  ]
-                },
-                "stdin": "none"
-              }
+              "stdin": "none"
             },
             {
               "essential": false,
               "description": null,
-              "output": {
-                "stdout": {
-                  "data": "test-25",
-                  "type": "text",
-                  "evaluator": {
-                    "type": "builtin",
-                    "options": {},
-                    "name": "text"
-                  }
-                },
-                "stderr": "none",
-                "file": "ignored",
-                "result": {
-                  "value": {
-                    "type": "text",
-                    "data": "test-25"
-                  },
-                  "evaluator": {
-                    "type": "specific",
-                    "evaluators": {
-                      "python": "evaluated(output, True, \"hallo\")",
-                      "java": "evaluated(output, true, \"hallo\");",
-                      "haskell": "evaluated output True \"hallo\""
-                    }
+              "stdout": {
+                "data": "test-25",
+                "type": "text",
+                "evaluator": {
+                  "type": "builtin",
+                  "options": {},
+                  "name": "text"
+                }
+              },
+              "stderr": "none",
+              "file": "ignored",
+              "result": {
+                "evaluator": {
+                  "type": "specific",
+                  "evaluators": {
+                    "python": "evaluated(output, True, \"hallo\")",
+                    "java": "evaluated(output, true, \"hallo\");",
+                    "haskell": "evaluated output True \"hallo\""
                   }
                 }
               },
-              "input": {
-                "function": {
-                  "type": "top",
-                  "name": "echo",
-                  "object": null,
-                  "arguments": [
-                    {
-                      "type": "text",
-                      "data": "test"
-                    },
-                    {
-                      "type": "integer",
-                      "data": 25
-                    }
-                  ]
-                },
-                "stdin": "none"
-              }
+              "function": {
+                "type": "top",
+                "name": "echo",
+                "object": null,
+                "arguments": [
+                  {
+                    "type": "text",
+                    "data": "test"
+                  },
+                  {
+                    "type": "integer",
+                    "data": 25
+                  }
+                ]
+              },
+              "stdin": "none"
             }
           ],
           "before": {

@@ -30,7 +30,7 @@ BadgeCount = int
 Index = int
 
 
-class Severity(Enum):
+class Severity(str, Enum):
     ERROR = "error"
     INFO = "info"
     WARNING = "warning"

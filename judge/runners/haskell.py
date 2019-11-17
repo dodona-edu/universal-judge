@@ -45,7 +45,7 @@ class HaskellConfig(LanguageConfig):
 
     def submission_name(self, context_id: str, context: Context) -> str:
         # In Haskell, the code is the same for all contexts.
-        return context.execution.input.function.object
+        return context.execution.function.object
 
     def context_name(self, context_id: str) -> str:
         return f"Context{context_id}"

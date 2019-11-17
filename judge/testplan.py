@@ -108,6 +108,18 @@ class ChannelData:
     type: ChannelType
     data: str
 
+    def get_data_as_string(self):
+        if self.type == ChannelType.TEXT:
+            return self.data
+        elif self.type == ChannelType.FILE:
+            try:
+                with open(self.data, 'r') as f:
+                    return f.read()
+            except FileNotFoundError as e:
+                raise TestPlanError(f"File not found: {e}")
+        else:
+            raise AssertionError(f"Unknown enum type {self.type}")
+
 
 @dataclass
 class TextOutputChannel(ChannelData):
@@ -127,46 +139,46 @@ class FileOutputChannel:
 class ReturnOutputChannel:
     """Handles return values of function calls."""
     evaluator: Union[BuiltinEvaluator, CustomEvaluator, SpecificEvaluator]
-    value: Value
+    value: Optional[Value] = None
 
 
-class ChannelState(str, Enum):
+class NoneChannelState(str, Enum):
     NONE = "none"  # There is nothing on this channel, i.e. completely empty.
 
 
-# TODO: keep Input and Output classes or not?
-@dataclass
-class Input:
-    function: FunctionCall
-    stdin: Union[ChannelData, ChannelState]
-
-
-class FileChannelState(str, Enum):
+class IgnoredChannelState(str, Enum):
     """A file channel is ignored by default."""
     IGNORED = "ignored"
 
 
-class OutputChannelState(str, Enum):
-    """Output channels must be empty or be ignored."""
-    NONE = "none"
-    IGNORED = "ignored"
+AnyChannelState = Union[NoneChannelState, IgnoredChannelState]
 
 
-@dataclass
-class Output:
-    stdout: Union[TextOutputChannel, OutputChannelState]
-    stderr: Union[TextOutputChannel, OutputChannelState]
-    file: Union[FileOutputChannel, FileChannelState]
-    result: Union[ReturnOutputChannel, FileChannelState]
+OutputChannel = Union[TextOutputChannel, FileOutputChannel, ReturnOutputChannel]
+
+
+TextOutput = Union[TextOutputChannel, AnyChannelState]
 
 
 @dataclass
 class Testcase:
     """A test case is defined by an input and a set of tests."""
-    input: Input
-    output: Output
     description: Optional[str]  # Will be generated if None.
     essential: bool
+    # Inputs
+    function: FunctionCall
+    stdin: Union[ChannelData, NoneChannelState]
+    # Outputs
+    stdout: TextOutput
+    stderr: TextOutput
+    file: Union[FileOutputChannel, IgnoredChannelState]
+    result: Union[ReturnOutputChannel, IgnoredChannelState]
+
+    def get_input(self):
+        if self.stdin == NoneChannelState.NONE:
+            return None
+        else:
+            return self.stdin.get_data_as_string()
 
 
 @dataclass
@@ -208,46 +220,3 @@ if __name__ == '__main__':
     with open('../exercise/basic.json', 'r') as f:
         r = parse_test_plan(f.read())
         print(r)
-
-
-def _get_stdin(test: Testcase) -> str:
-    """Get the input for of a test as text."""
-    if test.input.stdin == ChannelState.NONE:
-        return ""
-    elif test.input.stdin.type == ChannelType.TEXT:
-        return test.input.stdin.data
-    elif test.input.stdin.type == ChannelType.FILE:
-        with open(test.input.stdin.data[0], "r") as file:
-            return file.read()
-    else:
-        raise TestPlanError(f"Unknown input type in test plano: {test.input.stdin.type}")
-
-
-def _get_stdout(test: Testcase) -> Optional[str]:
-    """Get the stdout value of a test as text."""
-    if test.output.stdout == OutputChannelState.IGNORED:
-        return None
-    elif test.output.stdout == OutputChannelState.NONE:
-        return ""
-    elif test.output.stdout.type == ChannelType.TEXT:
-        return test.output.stdout.data
-    elif test.output.stdout.type == ChannelType.FILE:
-        with open(test.output.stdout.data[0], "r") as file:
-            return file.read()
-    else:
-        raise TestPlanError(f"Unknown output type in test plano: {test.output.stdout.type}")
-
-
-def _get_stderr(test: Testcase) -> Optional[str]:
-    """Get the stderr value of a test as text."""
-    if test.output.stderr == OutputChannelState.IGNORED:
-        return None
-    elif test.output.stderr == OutputChannelState.NONE:
-        return ""
-    elif test.output.stderr.type == ChannelType.TEXT:
-        return test.output.stderr.data
-    elif test.output.stderr.type == ChannelType.FILE:
-        with open(test.output.stderr.data[0], "r") as file:
-            return file.read()
-    else:
-        raise TestPlanError(f"Unknown stderr type in test plano: {test.output.stderr.type}")

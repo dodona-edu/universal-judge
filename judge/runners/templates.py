@@ -2,11 +2,11 @@
 import dataclasses
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List
+from typing import List, Union
 
 from mako.template import Template
 
-from testplan import Input, FunctionCall
+from testplan import FunctionCall, ChannelData, NoneChannelState
 
 
 @dataclass
@@ -18,14 +18,10 @@ class SubmissionData:
 
 
 @dataclass
-class OutputData:
-    value_code: str
-
-
-@dataclass
 class TestcaseData:
-    input: Input
-    output: OutputData
+    function: FunctionCall
+    stdin: Union[ChannelData, NoneChannelState]
+    value_code: str
 
 
 @dataclass
