@@ -51,7 +51,7 @@ class NumberType:
 
 
 class StringTypes(str, Enum):
-    string = "string"
+    string = "text"
     unknown = "unknown"
 
 

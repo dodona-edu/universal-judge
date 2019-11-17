@@ -1,14 +1,17 @@
-"""Testplan
+"""
+Data format for the testplan.
 
 This module is the authoritative source on the format and behaviour of the
 testplan. Note that the implementation in the judge is kept simple by design;
 unless noted, the judge will not provide default values for missing fields.
 """
-from dataclasses import dataclass, field
+from dataclasses import field
 from enum import Enum
-from typing import List, Optional, Union, Dict, Any, TypeVar, Type
+from typing import List, Optional, Union, Dict, Any, Literal
 
-from dataclasses_json import config, DataClassJsonMixin
+from pydantic.dataclasses import dataclass
+
+from serialisation import Value
 
 
 class TestPlanError(ValueError):
@@ -20,30 +23,6 @@ class TestPlanError(ValueError):
 Code = Dict[str, str]
 
 
-# region Functions
-class ValueType(str, Enum):
-    # Primitive types
-    integer = "integer"  # Represents all integers
-    rational = "rational"  # Represents all rational numbers
-    text = "text"  # Represents textual data
-    boolean = "boolean"
-    # Others
-    unknown = "unknown"  # We don't know the type of this value
-
-
-@dataclass
-class Value(DataClassJsonMixin):
-    """Represents a value, which consists of the data and a type."""
-    data: str
-    type: ValueType
-
-
-@dataclass
-class FunctionArg(Value, DataClassJsonMixin):
-    """Argument of a function"""
-    name: Optional[str]  # Name of the argument, ignored if not supported by the language
-
-
 class FunctionType(str, Enum):
     top = "top"  # top level function
     static = "static"  # static function
@@ -52,65 +31,52 @@ class FunctionType(str, Enum):
 
 
 @dataclass
-class FunctionCall(DataClassJsonMixin):
+class FunctionCall:
     """Represents a function call"""
     type: FunctionType
     name: Optional[str]
     object: Optional[str]
-    arguments: List[FunctionArg]
-# endregion
+    arguments: List[Value]
 
 
-class ChannelType(str, Enum):
-    text = "text"  # Literal values
-    file = "file"  # Path to a file
+class Builtin(str, Enum):
+    """List of built-in evaluators"""
+    text = "text"
+    file = "file"
+    value = "value"
 
 
 @dataclass
-class ChannelData(DataClassJsonMixin):
-    """Describes the data on channel (stdin or stdout)"""
-    data: str
-    type: ChannelType
-
-
-class ChannelState(str, Enum):
-    none = "none"  # There is nothing on this channel, i.e. completely empty.
-
-
-class OutputChannelState(str, Enum):
-    none = "none"  # There is nothing on this channel, i.e. completely empty.
-    ignored = "ignored"  # Ignore everything on this channel, i.e. doesn't matter what you use.
-
-
-class FileChannelState(str, Enum):
-    ignored = "ignored"
-
-
-class EvaluatorType(str, Enum):
+class BuiltinEvaluator:
     """
-    Evaluator types.
-
-    Built-in
-    --------
     Built-in evaluator in the judge. Some basic evaluators are available, as enumerated by
-    :class:`Builtin`. These are useful for things like:
+    :class:`Builtin`. These are useful for things like comparing text, files or values.
 
-    - Comparing text
-    - Comparing files
-    - Comparing values (TODO)
+    This is the recommended and default evaluator, since it is a) the least amount of work and
+    b) the most language independent.
+    """
+    # noinspection PyUnresolvedReferences
+    type: Literal["builtin"]
+    name: Builtin
+    options: Dict[str, Any]  # Options for the evaluator
 
-    When using this type, you must supply a config of type :class:`BuiltinEvaluator`.
 
-    Custom
-    ------
+@dataclass
+class CustomEvaluator:
+    """
     Evaluate the responses with custom code. This is still a language-independent method; the
     evaluator is run as part of the judge and receives its values from that judge. This type is
     useful, for example, when doing exercises on sequence alignments.
+    """
+    # noinspection PyUnresolvedReferences
+    type: Literal["custom"]
+    language: str
+    code: str
 
-    When using this type, you must supply a config of type :class:`CustomEvaluator`.
 
-    Specific
-    --------
+@dataclass
+class SpecificEvaluator:
+    """
     Provide language-specific code that will be run in the same environment as the user's code.
     While this is very powerful and allows you to test language-specific constructs, there are a few
     caveats:
@@ -125,142 +91,77 @@ class EvaluatorType(str, Enum):
     The code you must write should be a function that accepts the result of a user call.
     Note: this type of evaluator is only supported when using function calls. If you want to
     evaluate, say stdout, you should use the custom evaluator instead.
-
-    When using this type, you must supply a config of type :class:`SpecificEvaluator`.
     """
-    builtin = "builtin"
-    custom = "custom"
-    specific = "specific"
-
-
-@dataclass
-class BaseEvaluator(DataClassJsonMixin):
-    """Base evaluator, not used directly. Used to retrieve the type, and is then discarded."""
-    type: EvaluatorType
-
-
-class Builtin(str, Enum):
-    """List of built-in evaluators"""
-    text = "textEvaluator"
-    file = "fileEvaluator"
-    value = "valueEvaluator"
-
-
-@dataclass
-class BuiltinEvaluator(DataClassJsonMixin):
-    """Built-in evaluators"""
-    name: Builtin
-    options: Dict[str, Any]  # Options for the evaluator
-
-
-@dataclass
-class CustomEvaluator(DataClassJsonMixin):
-    """Evaluator using custom code."""
-    language: str
-    code: str
-
-
-@dataclass
-class SpecificEvaluator(DataClassJsonMixin):
-    """Evaluator using own evaluators."""
+    # noinspection PyUnresolvedReferences
+    type: Literal["specific"]
     evaluators: Code
 
 
-def _evaluator_parser(values: dict) -> Union[BuiltinEvaluator, CustomEvaluator]:
-    base_type: BaseEvaluator = BaseEvaluator.from_dict(values)
-    if base_type.type == EvaluatorType.builtin:
-        return BuiltinEvaluator.from_dict(values)
-    elif base_type.type == EvaluatorType.custom:
-        return CustomEvaluator.from_dict(values)
-    else:
-        allowed = [x for x in EvaluatorType]
-        raise TestPlanError(f"Unknown evaluator type {values}, should be one of {allowed}")
-
-
-def _specific_evaluator_parser(values: dict) -> Union[BuiltinEvaluator, CustomEvaluator, SpecificEvaluator]:
-    base_type: BaseEvaluator = BaseEvaluator.from_dict(values)
-    if base_type.type == EvaluatorType.specific:
-        return SpecificEvaluator.from_dict(values)
-    else:
-        return _evaluator_parser(values)
+class ChannelType(str, Enum):
+    text = "text"  # Literal values
+    file = "file"  # Path to a file
 
 
 @dataclass
-class OutputChannel(DataClassJsonMixin):
-    evaluator: Any
+class ChannelData:
+    """Describes the data on channel (stdin or stdout)"""
+    type: ChannelType
+    data: str
 
 
 @dataclass
-class TextOutputChannel(ChannelData, OutputChannel, DataClassJsonMixin):
+class TextOutputChannel(ChannelData):
     """Describes the output for textual channels."""
-    evaluator: Union[BuiltinEvaluator, CustomEvaluator] = field(metadata=config(decoder=_evaluator_parser))
+    evaluator: Union[BuiltinEvaluator, CustomEvaluator]
 
 
 @dataclass
-class FileOutputChannel(OutputChannel, DataClassJsonMixin):
+class FileOutputChannel:
     """Describes the output for files."""
-    evaluator: Union[BuiltinEvaluator, CustomEvaluator] = field(metadata=config(decoder=_evaluator_parser))
+    evaluator: Union[BuiltinEvaluator, CustomEvaluator]
     expected_path: str  # Path to the file to compare to.
     actual_path: str  # Path to the generated file (by the users code)
 
 
 @dataclass
-class ReturnOutputChannel(Value, OutputChannel, DataClassJsonMixin):
+class ReturnOutputChannel:
     """Handles return values of function calls."""
-    evaluator: Union[BuiltinEvaluator, CustomEvaluator, SpecificEvaluator] = field(
-        metadata=config(decoder=_specific_evaluator_parser)
-    )
+    evaluator: Union[BuiltinEvaluator, CustomEvaluator, SpecificEvaluator]
+    value: Value
 
 
-_O = TypeVar('_O', bound=DataClassJsonMixin)
-
-
-def _output_parser(value: Union[str, dict], r_type: Type[_O]) -> Union[_O, OutputChannelState]:
-    if isinstance(value, str):
-        return OutputChannelState[value]
-    else:
-        return r_type.from_dict(value)
-
-
-def _return_output_parser(value: Union[str, dict]) -> Union[ReturnOutputChannel, FileChannelState]:
-    if isinstance(value, str):
-        return FileChannelState[value]
-    else:
-        return ReturnOutputChannel.from_dict(value)
-
-
-def _input_parser(value: Union[str, dict]) -> Union[ChannelData, ChannelState]:
-    if isinstance(value, str):
-        return ChannelState[value]
-    else:
-        return ChannelData.from_dict(value)
+class ChannelState(str, Enum):
+    none = "none"  # There is nothing on this channel, i.e. completely empty.
 
 
 # TODO: keep Input and Output classes or not?
 @dataclass
-class Input(DataClassJsonMixin):
+class Input:
     function: FunctionCall
-    stdin: Union[ChannelData, ChannelState] = field(metadata=config(decoder=_input_parser))
+    stdin: Union[ChannelData, ChannelState]
+
+
+class FileChannelState(str, Enum):
+    """A file channel is ignored by default."""
+    ignored = "ignored"
+
+
+class OutputChannelState(str, Enum):
+    """Output channels must be empty or be ignored."""
+    none = "none"
+    ignored = "ignored"
 
 
 @dataclass
-class Output(DataClassJsonMixin):
-    stdout: Union[TextOutputChannel, OutputChannelState] = field(
-        metadata=config(decoder=lambda x: _output_parser(x, TextOutputChannel))
-    )
-    stderr: Union[TextOutputChannel, OutputChannelState] = field(
-        metadata=config(decoder=lambda x: _output_parser(x, TextOutputChannel))
-    )
-    file: Union[FileOutputChannel, FileChannelState] = field(
-        metadata=config(decoder=lambda x: _output_parser(x, FileOutputChannel))
-    )
-    result: Union[ReturnOutputChannel, FileChannelState] = field(
-        metadata=config(decoder=_return_output_parser)
-    )
+class Output:
+    stdout: Union[TextOutputChannel, OutputChannelState]
+    stderr: Union[TextOutputChannel, OutputChannelState]
+    file: Union[FileOutputChannel, FileChannelState]
+    result: Union[ReturnOutputChannel, FileChannelState]
 
 
 @dataclass
-class Testcase(DataClassJsonMixin):
+class Testcase:
     """A test case is defined by an input and a set of tests."""
     input: Input
     output: Output
@@ -269,7 +170,7 @@ class Testcase(DataClassJsonMixin):
 
 
 @dataclass
-class Context(DataClassJsonMixin):
+class Context:
     """A context is what the name implies: executes things in the same context.
     As such, the context consists of three main things: the preparation, the
     execution and the post-processing.
@@ -285,39 +186,28 @@ class Context(DataClassJsonMixin):
 
 
 @dataclass
-class Tab(DataClassJsonMixin):
-    # noinspection PyUnresolvedReferences
-    """Represents a tab on Dodona.
-
-    :param name: OK
-    """
+class Tab:
+    """Represents a tab on Dodona."""
     name: str
     contexts: List[Context]
 
 
 @dataclass
-class Plan(DataClassJsonMixin):
+class Plan:
     """General test plan, which is used to run tests of some code."""
     tabs: List[Tab] = field(default_factory=list)
 
 
 def parse_test_plan(json_string) -> Plan:
     """Parse a test plan into the structures."""
-
-    plan: Plan = Plan.from_json(json_string)
-    plan.name = "Deprecated, will be removed."
-
+    plan = Plan.__pydantic_model__.parse_raw(json_string)
     return plan
 
 
 if __name__ == '__main__':
-    import os
-    cwd = os.getcwd()
-    print(cwd)
     with open('../exercise/basic.json', 'r') as f:
         r = parse_test_plan(f.read())
         print(r)
-        print(r.to_json())
 
 
 def _get_stdin(test: Testcase) -> str:
