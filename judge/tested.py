@@ -3,14 +3,16 @@
 #
 # For now, this only handles running the execution kernel.
 #
+import dataclasses
 import json
 import sys
-from typing import NamedTuple
+from dataclasses import dataclass
 
 from testplan import parse_test_plan
 
 
-class Config(NamedTuple):
+@dataclass
+class Config:
     resources: str
     source: str
     time_limit: str
@@ -19,16 +21,6 @@ class Config(NamedTuple):
     programming_language: str
     workdir: str
     judge: str
-
-
-LANGUAGE_TO_KERNEL = {
-    'python': 'python3',
-    'python3': 'python3',
-    'r': 'ir',
-    'julia': 'julia-1.2',
-    'haskell': 'ihaskell',
-    'javascript': 'javascript'
-}
 
 
 def read_config() -> Config:
@@ -45,28 +37,20 @@ def read_config() -> Config:
     }
     config_json = sys.stdin.read()
     config_ = json.loads(config_json)
-    needed_config = {x: config_[x] for x in Config._fields if x in config_}
-    needed_config['kernel'] = LANGUAGE_TO_KERNEL.get(config_["programming_language"], config_["programming_language"])
+    required = [x.name for x in dataclasses.fields(Config)]
+    needed_config = {x: config_[x] for x in required if x in config_}
     return Config(**needed_config)
 
 
 if __name__ == '__main__':
     config = read_config()
 
-    # For now, the action plano is as follows:
-    # 1. Load the student user_code in the kernel
-    # 2. Process the input line-by-line
-    #    - Check the output for each element.
-    # 3. Finish
-
-    # Read test plano
-    #p = Popen(['java', '-jar', f'{config.judge}/dsl/dsl.jar', '-d', f"{config.resources}/plan.groovy"], stdout=PIPE, stderr=PIPE)
-    #json_string = p.stdout.read()
+    # Read test plan
     json_string = open(f"{config.resources}/basic.json").read()
-    #print(f"JSON is {json_string}")
     plan = parse_test_plan(json_string)
 
     # Run it.
     from judge import GeneratorJudge
+
     tester = GeneratorJudge(config)
     tester.judge(plan)

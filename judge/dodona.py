@@ -2,11 +2,10 @@
 import dataclasses
 import json
 import sys
-
 from enum import Enum
-from typing import Optional, Union, ClassVar, Literal
+from typing import Optional, Union, Literal
 
-from pydantic import BaseModel, Schema, Field
+from pydantic import BaseModel
 from pydantic.dataclasses import dataclass
 
 
@@ -51,21 +50,6 @@ class Status(str, Enum):
 class TestData:
     """This is not documented, but used nonetheless"""
     channel: Optional[str] = None
-
-
-class _Commands(str, Enum):
-    ANNOTATE_CODE = "annotate-user_code"
-    APPEND_MESSAGE = "append-message"
-    CLOSE_CONTEXT = "close-context"
-    CLOSE_JUDGEMENT = "close-judgement"
-    CLOSE_TAB = "close-tab"
-    CLOSE_TEST = "close-test"
-    CLOSE_TESTCASE = "close-testcase"
-    START_CONTEXT = "start-context"
-    START_JUDGEMENT = "start-judgement"
-    START_TAB = "start-tab"
-    START_TEST = "start-test"
-    START_TESTCASE = "start-testcase"
 
 
 @dataclass

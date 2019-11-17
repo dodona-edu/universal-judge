@@ -19,7 +19,6 @@ from typing import Union, List, Dict
 
 from pydantic import BaseModel
 from pydantic.dataclasses import dataclass
-from pydantic.schema import schema, default_prefix
 from typing_inspect import get_args
 
 
@@ -28,7 +27,6 @@ class SerialisationError(ValueError):
         ValueError.__init__(self, message)
         self.additional_errors = additional_errors or []
 
-# TODO: keep this?
     def __str__(self):
         original = super().__str__()
         additional_lines = "\n".join(f"* {error}" for error in self.additional_errors)
