@@ -22,11 +22,6 @@ from pydantic.schema import schema, default_prefix
 from typing_inspect import get_args
 
 
-# TODO: should we replace the enums with Literal types?
-#   That would reduce the size of the code here, but on the other hand the json schema
-#   will be a lot uglier.
-
-
 class SerialisationError(ValueError):
     def __init__(self, message, additional_errors=None):
         ValueError.__init__(self, message)
@@ -40,8 +35,8 @@ class SerialisationError(ValueError):
 
 
 class NumericTypes(str, Enum):
-    integer = "integer"
-    real = "real"
+    INTEGER = "integer"
+    REAL = "real"
 
 
 @dataclass
@@ -51,8 +46,8 @@ class NumberType:
 
 
 class StringTypes(str, Enum):
-    string = "text"
-    unknown = "unknown"
+    TEXT = "text"
+    UNKNOWN = "unknown"
 
 
 @dataclass
@@ -62,7 +57,7 @@ class StringType:
 
 
 class BooleanTypes(str, Enum):
-    boolean = "boolean"
+    BOOLEAN = "boolean"
 
 
 @dataclass
@@ -72,8 +67,8 @@ class BooleanType:
 
 
 class SequenceTypes(str, Enum):
-    list = "list"
-    set = "set"
+    LIST = "list"
+    SET = "set"
 
 
 @dataclass
@@ -83,7 +78,7 @@ class SequenceType:
 
 
 class ObjectTypes(str, Enum):
-    object = "object"
+    OBJECT = "object"
 
 
 @dataclass
@@ -153,9 +148,9 @@ def get_readable_representation(value: Value):
         return ""
     if isinstance(value, SequenceType):
         values = [get_readable_representation(x) for x in value.data]
-        if value.type == SequenceTypes.list:
+        if value.type == SequenceTypes.LIST:
             return str(values)
-        elif value.type == SequenceTypes.set:
+        elif value.type == SequenceTypes.SET:
             return str(set(values))
         else:
             raise AssertionError("Forgot a type?")

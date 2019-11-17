@@ -206,11 +206,11 @@ class ValueComparator(Evaluator):
                 readable_actual=readable_actual
             )
 
-        if expected.data == NumericTypes.real:
+        if expected.data == NumericTypes.REAL:
             correct = math.isclose(expected.data, actual.data)
-        elif expected.data == SequenceTypes.list:
+        elif expected.data == SequenceTypes.LIST:
             correct = list(expected.data) == list(actual.data)
-        elif expected.data == SequenceTypes.set:
+        elif expected.data == SequenceTypes.SET:
             correct = set(expected.data) == set(actual.data)
         else:
             correct = expected.data == actual.data
