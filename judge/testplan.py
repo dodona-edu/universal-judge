@@ -24,10 +24,10 @@ Code = Dict[str, str]
 
 
 class FunctionType(str, Enum):
-    top = "top"  # top level function
-    static = "static"  # static function
-    instance = "instance"  # instance function
-    main = "main"  # Main function for running code
+    TOP = "top"  # top level function
+    STATIC = "static"  # static function
+    INSTANCE = "instance"  # instance function
+    MAIN = "main"  # Main function for running code
 
 
 @dataclass
@@ -41,9 +41,9 @@ class FunctionCall:
 
 class Builtin(str, Enum):
     """List of built-in evaluators"""
-    text = "text"
-    file = "file"
-    value = "value"
+    TEXT = "text"
+    FILE = "file"
+    VALUE = "value"
 
 
 @dataclass
@@ -98,8 +98,8 @@ class SpecificEvaluator:
 
 
 class ChannelType(str, Enum):
-    text = "text"  # Literal values
-    file = "file"  # Path to a file
+    TEXT = "text"  # Literal values
+    FILE = "file"  # Path to a file
 
 
 @dataclass
@@ -131,7 +131,7 @@ class ReturnOutputChannel:
 
 
 class ChannelState(str, Enum):
-    none = "none"  # There is nothing on this channel, i.e. completely empty.
+    NONE = "none"  # There is nothing on this channel, i.e. completely empty.
 
 
 # TODO: keep Input and Output classes or not?
@@ -143,13 +143,13 @@ class Input:
 
 class FileChannelState(str, Enum):
     """A file channel is ignored by default."""
-    ignored = "ignored"
+    IGNORED = "ignored"
 
 
 class OutputChannelState(str, Enum):
     """Output channels must be empty or be ignored."""
-    none = "none"
-    ignored = "ignored"
+    NONE = "none"
+    IGNORED = "ignored"
 
 
 @dataclass
@@ -212,11 +212,11 @@ if __name__ == '__main__':
 
 def _get_stdin(test: Testcase) -> str:
     """Get the input for of a test as text."""
-    if test.input.stdin == ChannelState.none:
+    if test.input.stdin == ChannelState.NONE:
         return ""
-    elif test.input.stdin.type == ChannelType.text:
+    elif test.input.stdin.type == ChannelType.TEXT:
         return test.input.stdin.data
-    elif test.input.stdin.type == ChannelType.file:
+    elif test.input.stdin.type == ChannelType.FILE:
         with open(test.input.stdin.data[0], "r") as file:
             return file.read()
     else:
@@ -225,13 +225,13 @@ def _get_stdin(test: Testcase) -> str:
 
 def _get_stdout(test: Testcase) -> Optional[str]:
     """Get the stdout value of a test as text."""
-    if test.output.stdout == OutputChannelState.ignored.value:
+    if test.output.stdout == OutputChannelState.IGNORED:
         return None
-    elif test.output.stdout == OutputChannelState.none.value:
+    elif test.output.stdout == OutputChannelState.NONE:
         return ""
-    elif test.output.stdout.type == ChannelType.text:
+    elif test.output.stdout.type == ChannelType.TEXT:
         return test.output.stdout.data
-    elif test.output.stdout.type == ChannelType.file:
+    elif test.output.stdout.type == ChannelType.FILE:
         with open(test.output.stdout.data[0], "r") as file:
             return file.read()
     else:
@@ -240,13 +240,13 @@ def _get_stdout(test: Testcase) -> Optional[str]:
 
 def _get_stderr(test: Testcase) -> Optional[str]:
     """Get the stderr value of a test as text."""
-    if test.output.stderr == OutputChannelState.ignored:
+    if test.output.stderr == OutputChannelState.IGNORED:
         return None
-    elif test.output.stderr == OutputChannelState.none:
+    elif test.output.stderr == OutputChannelState.NONE:
         return ""
-    elif test.output.stderr.type == ChannelType.text:
+    elif test.output.stderr.type == ChannelType.TEXT:
         return test.output.stderr.data
-    elif test.output.stderr.type == ChannelType.file:
+    elif test.output.stderr.type == ChannelType.FILE:
         with open(test.output.stderr.data[0], "r") as file:
             return file.read()
     else:

@@ -1,16 +1,16 @@
 <%! from testplan import FunctionType %>
 <%page args="function" />
 ## This generates a function call in Java.
-% if function.type == FunctionType.static or function.type == FunctionType.instance or function.type == FunctionType.top:
+% if function.type == FunctionType.STATIC or function.type == FunctionType.INSTANCE or function.type == FunctionType.TOP:
     % if function.object:
         ${function.object}.\
     % endif
     ${function.name}\
-% elif function.type == FunctionType.main:
+% elif function.type == FunctionType.MAIN:
     ${function.object}.main\
 % endif
 (\
-% if function.type == FunctionType.main:
+% if function.type == FunctionType.MAIN:
     new String[]{\
 % endif
 % for argument in function.arguments:
@@ -19,7 +19,7 @@
         , \
     % endif
 % endfor
-% if function.type == FunctionType.main:
+% if function.type == FunctionType.MAIN:
     }\
 % endif
 )

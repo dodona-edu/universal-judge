@@ -27,18 +27,18 @@ def _get_comparator(output: Union[OutputChannel, OutputChannelState]) -> Optiona
     :param output: The output.
     :return: The comparator, or None if there is no comparator.
     """
-    if output == OutputChannelState.none:
+    if output == OutputChannelState.NONE:
         return NoComparator()
-    if output == OutputChannelState.ignored:
+    if output == OutputChannelState.IGNORED:
         return None
     assert isinstance(output, OutputChannel)
     evaluator = output.evaluator
     if isinstance(evaluator, BuiltinEvaluator):
-        if evaluator.name == Builtin.text:
+        if evaluator.name == Builtin.TEXT:
             return TextComparator(arguments=evaluator.options)
-        elif evaluator.name == Builtin.file:
+        elif evaluator.name == Builtin.FILE:
             return FileComparator(arguments=evaluator.options)
-        elif evaluator.name == Builtin.value:
+        elif evaluator.name == Builtin.VALUE:
             return ValueComparator(arguments=evaluator.options)
         else:
             raise TestPlanError(f"Unknown built-in evaluator: {evaluator.name}")
@@ -68,9 +68,9 @@ def _evaluate_channel(channel: str, expected, actual, evaluator: Comparator,
     :param evaluator: The evaluator to use.
     :param error_message: The potential errors.
     """
-    if expected == OutputChannelState.ignored:
+    if expected == OutputChannelState.IGNORED:
         return  # Nothing to do.
-    if expected == OutputChannelState.none:
+    if expected == OutputChannelState.NONE:
         return  # Nothing to do
     report_update(po.StartTest(evaluator.get_readable_input(expected)))
     if error_message:
@@ -134,7 +134,7 @@ def _get_readable_input(case: Testcase, runner: BaseRunner) -> ExtendedMessage:
     format_ = 'text'  # By default, we use text as input.
     if case.description:
         text = case.description
-    elif input_.function and (input_.function.type != FunctionType.main or runner.needs_main()):
+    elif input_.function and (input_.function.type != FunctionType.MAIN or runner.needs_main()):
         text = runner.function_call(input_.function)
         if supports_input_highlighting(runner.config.programming_language):
             format_ = runner.config.programming_language
@@ -145,7 +145,7 @@ def _get_readable_input(case: Testcase, runner: BaseRunner) -> ExtendedMessage:
     else:
         # If there is no stdin, but there is a main function but we end up here, this means the
         # language does not use main functions. In that case, we use a placeholder.
-        if input_.function and input_.function.type == FunctionType.main:
+        if input_.function and input_.function.type == FunctionType.MAIN:
             text = "Code execution"
         else:
             raise TestPlanError("Testcase without either description, stdin or function is not allowed.")
@@ -223,7 +223,7 @@ class GeneratorJudge(Judge):
 
             # Evaluate the file channel.
             # We evaluate this channel early, since it is separate from the other channels.
-            if testcase.output.file != FileChannelState.ignored:
+            if testcase.output.file != FileChannelState.IGNORED:
                 expected_file = testcase.output.file.expected_path
                 actual_file = testcase.output.file.actual_path
                 if expected_file and not path.exists(expected_file):
@@ -245,7 +245,7 @@ class GeneratorJudge(Judge):
             # If we expect no errors, we produce an error message, which is used in subsequent checks.
             # However, if we do expected something on this channel, we treat it as a normal channel.
             actual_stderr = stderr_[i] if i < len(stderr_) else None
-            if testcase.output.stderr == OutputChannelState.none:
+            if testcase.output.stderr == OutputChannelState.NONE:
                 # Use it as an error message, if it exists.
                 if actual_stderr:
                     error_message.clear()  # We assume this is the actual cause of the early termination.

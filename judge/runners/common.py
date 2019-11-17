@@ -265,7 +265,7 @@ class ConfigurableRunner(BaseRunner):
 
     # noinspection PyMethodMayBeStatic
     def get_execution(self, c: Context) -> FunctionCall:
-        if c.execution.input.function.type != FunctionType.main:
+        if c.execution.input.function.type != FunctionType.MAIN:
             raise TestPlanError("Main function must have type main")
 
         return c.execution.input.function

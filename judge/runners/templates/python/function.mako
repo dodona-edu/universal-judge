@@ -1,9 +1,9 @@
 <%! from testplan import FunctionType %>
 <%page args="function" />
 ## This generates a function call in Python.
-% if function.type == FunctionType.top:
+% if function.type == FunctionType.TOP:
     ${function.name}\
-% elif function.type == FunctionType.static or function.type == FunctionType.instance:
+% elif function.type == FunctionType.STATIC or function.type == FunctionType.INSTANCE:
     ${function.object}.${function.name}\
 % endif
 (\
