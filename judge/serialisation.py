@@ -144,5 +144,27 @@ def parse(value: str) -> Value:
     raise SerialisationError(f"Could not find valid type for {value}.", additional_errors=errors)
 
 
+def get_readable_representation(value: Value):
+    """
+    Get a readable representation of the data. In many cases, this is just the Python type
+    that will be returned as a string.
+    """
+    if value is None:
+        return ""
+    if isinstance(value, SequenceType):
+        values = [get_readable_representation(x) for x in value.data]
+        if value.type == SequenceTypes.list:
+            return str(values)
+        elif value.type == SequenceTypes.set:
+            return str(set(values))
+        else:
+            raise AssertionError("Forgot a type?")
+    elif isinstance(value, ObjectType):
+        values = {x: get_readable_representation(y) for x, y in value.data}
+        return str(values)
+    else:
+        return str(value.data)
+
+
 if __name__ == '__main__':
     generate_schema()
