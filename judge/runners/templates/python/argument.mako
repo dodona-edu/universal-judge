@@ -1,12 +1,9 @@
-<%! from testplan import ValueType %>
+<%! from serialisation import StringTypes %>
 <%page args="argument" />
-% if argument.name:
-    ${argument.name}=\
-% endif
-% if argument.type == ValueType.text:
+% if argument.type == StringTypes.TEXT:
     "\
 % endif
 ${argument.data}\
-% if argument.type == ValueType.text:
+% if argument.type == StringTypes.TEXT:
     "\
 % endif

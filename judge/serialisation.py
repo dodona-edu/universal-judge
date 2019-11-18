@@ -126,7 +126,6 @@ def parse(value: str) -> Value:
         raise SerialisationError(f"Could not parse {value} as valid json.")
 
     # We try each value until we find one that works, or we throw an error.
-    print(parsed_json)
     errors = []
     for clazz in get_args(Value):
         try:

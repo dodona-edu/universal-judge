@@ -2,29 +2,52 @@
 import json
 
 
-def send(stream, value):
-    """Send a value to the given stream."""
+def __encode(value):
     if value is None:
-        return
+        return None
+
     if isinstance(value, str):
         type_ = "text"
+        data_ = value
     elif isinstance(value, int):
         type_ = "integer"
+        data_ = value
     elif isinstance(value, float):
         type_ = "rational"
+        data_ = value
     elif isinstance(value, bool):
         type_ = "boolean"
+        data_ = value
+    elif isinstance(value, list) or isinstance(value, tuple):
+        type_ = "list"
+        data_ = [__encode(x) for x in value]
+    elif isinstance(value, set):
+        type_ = "set"
+        data_ = [__encode(x) for x in value]
+    elif isinstance(value, dict):
+        type_ = "object"
+        data_ = {str(k): __encode(v) for k, v in value.items()}
     else:
         type_ = "unknown"
-    json.dump({
-        "data": value,
-        "type": type_
-    }, stream)
+        data_ = str(value)
+
+    return type_, data_
 
 
-def evaluated(stream, result, string):
+def send_value(stream, value):
+    """Send a value to the given stream."""
+    if (encoded := __encode(value)) is not None:
+        json.dump({
+            "data": encoded[1],
+            "type": encoded[0]
+        }, stream)
+
+
+# noinspection PyDefaultArgument
+def send_evaluated(stream, result, expected, actual, messages):
     json.dump({
-        "string": string,
-        "accepted": result,
-        "type": "evaluated"
+        "result": result,
+        "readable_expected": expected,
+        "readable_actual": actual,
+        "messages": messages
     }, stream)

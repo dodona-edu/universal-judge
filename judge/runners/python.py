@@ -8,7 +8,7 @@ class PythonConfig(LanguageConfig):
     """Configuration for the Python language."""
 
     def value_writer(self):
-        return "values.send(output, value)"
+        return "send(value)"
 
     def supports_top_level_functions(self) -> bool:
         return True

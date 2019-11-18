@@ -39,7 +39,7 @@ def _evaluate_channel(channel_name: str,
     if error_message:
         for m in error_message:
             report_update(AppendMessage(message=m))
-        status = Status.RUNTIME_ERROR
+        status = StatusMessage(enum=Status.RUNTIME_ERROR)
 
     # Report any other messages we received.
     for message in evaluation_result.messages:

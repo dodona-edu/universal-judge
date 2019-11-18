@@ -93,7 +93,7 @@
                 "evaluator": {
                   "type": "specific",
                   "evaluators": {
-                    "python": "evaluated(output, True, \"hallo\")",
+                    "python": "evaluated(True, \"LOL\", str(value))",
                     "java": "evaluated(output, true, \"hallo\");",
                     "haskell": "evaluated output True \"hallo\""
                   }
