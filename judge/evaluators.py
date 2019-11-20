@@ -8,7 +8,7 @@ from pydantic.dataclasses import dataclass
 
 import serialisation
 from dodona import Status, ExtendedMessage, Permission, StatusMessage, Message
-from runners.common import get_runner
+from runners.runner import get_runner
 from serialisation import get_readable_representation, SerialisationError
 from tested import Config
 from testplan import CustomEvaluator as TestplanCustomEvaluator

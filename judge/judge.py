@@ -1,6 +1,6 @@
 from dodona import *
 from evaluators import get_evaluator, Evaluator
-from runners.common import BaseRunner, ExecutionResult, get_runner
+from runners.runner import BaseRunner, ExecutionResult, get_runner
 from tested import Config
 from testplan import *
 

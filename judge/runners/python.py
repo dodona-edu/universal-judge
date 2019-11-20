@@ -2,7 +2,7 @@ from typing import List
 
 from humps import decamelize
 
-from runners.common import LanguageConfig
+from runners.runner import LanguageConfig
 from testplan import Context
 
 
