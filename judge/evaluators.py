@@ -1,18 +1,18 @@
 """Evaluators actually compare values to determine the result of a test."""
 
-from dataclasses import field
-
 import math
+from dataclasses import field
+from typing import Optional, List, Union, Dict, Any, Tuple
+
 from pydantic.dataclasses import dataclass
-from typing import Optional, List, Union, Dict, Any
 
 import serialisation
 from dodona import Status, ExtendedMessage, Permission, StatusMessage, Message
-from runners.common import BaseRunner, get_runner
+from runners.common import get_runner
 from serialisation import get_readable_representation, SerialisationError
 from tested import Config
-from testplan import SpecificEvaluator as TestplanSpecificEvaluator
 from testplan import CustomEvaluator as TestplanCustomEvaluator
+from testplan import SpecificEvaluator as TestplanSpecificEvaluator
 from testplan import TestPlanError, TextOutputChannel, FileOutputChannel, ReturnOutputChannel, NoneChannelState, \
     IgnoredChannelState, OutputChannel, AnyChannelState, BuiltinEvaluator, Builtin
 
@@ -193,32 +193,44 @@ class FileEvaluator(Evaluator):
         )
 
 
+def _get_values(output_channel, actual) \
+        -> Union[EvaluationResult, Tuple[serialisation.Value, str, serialisation.Value, str]]:
+    expected = output_channel.value
+    readable_expected = get_readable_representation(expected)
+
+    # A crash here indicates a problem with one of the language implementations, or a student
+    # is trying to cheat.
+    try:
+        actual = None if actual is None else serialisation.parse(actual)
+        readable_actual = get_readable_representation(actual)
+    except SerialisationError as e:
+        message = ExtendedMessage(description=str(e), format="text", permission=Permission.STAFF)
+        student = "Your return value was wrong; additionally Dodona didn't recognize it. " \
+                  "Contact staff for more information."
+        return EvaluationResult(
+            result=StatusMessage(enum=Status.WRONG, human=student),
+            readable_expected=readable_expected,
+            readable_actual=str(actual),
+            messages=[message]
+        )
+
+    return expected, readable_expected, actual, readable_actual
+
+
 class ValueEvaluator(Evaluator):
     """
     Evaluate two values. The values must match exact. Currently, this evaluator has no options,
     but it might receive them in the future (e.g. options on how to deal with strings or floats).
     """
+
     def evaluate(self, output_channel, actual) -> EvaluationResult:
         assert isinstance(output_channel, ReturnOutputChannel)
 
-        expected = output_channel.value
-        readable_expected = get_readable_representation(expected)
-
-        # A crash here indicates a problem with one of the language implementations, or a student
-        # is trying to cheat.
-        try:
-            actual = None if actual is None else serialisation.parse(actual)
-            readable_actual = get_readable_representation(actual)
-        except SerialisationError as e:
-            message = ExtendedMessage(description=str(e), format="text", permission=Permission.STAFF)
-            student = "Your return value was wrong; additionally Dodona didn't recognize it. " \
-                      "Contact staff for more information."
-            return EvaluationResult(
-                result=StatusMessage(enum=Status.WRONG, human=student),
-                readable_expected=readable_expected,
-                readable_actual=str(actual),
-                messages=[message]
-            )
+        result = _get_values(output_channel, actual)
+        if isinstance(result, EvaluationResult):
+            return result
+        else:
+            expected, readable_expected, actual, readable_actual = result
 
         # If one of the types is None, but not both, this is not correct.
         if (expected is None and actual is not None) or (expected is not None and actual is None):
@@ -320,7 +332,7 @@ class CustomEvaluator(Evaluator):
     """
     Compare the result of a custom evaluator.  This evaluator has no options.
     """
-    # noinspection DuplicatedCode
+
     def evaluate(self, output_channel, actual) -> EvaluationResult:
         assert isinstance(output_channel.evaluator, TestplanCustomEvaluator)
         # In all cases except when dealing with a return value, we manually convert
@@ -350,21 +362,11 @@ class CustomEvaluator(Evaluator):
             readable_actual = actual
         elif isinstance(output_channel, ReturnOutputChannel):
             assert output_channel.value is not None
-            expected = output_channel.value
-            readable_expected = get_readable_representation(expected)
-            try:
-                actual = None if actual is None else serialisation.parse(actual)
-                readable_actual = get_readable_representation(actual)
-            except SerialisationError as e:
-                message = ExtendedMessage(description=str(e), format="text", permission=Permission.STAFF)
-                student = "Your return value was wrong; additionally Dodona didn't recognize it. " \
-                          "Contact staff for more information."
-                return EvaluationResult(
-                    result=StatusMessage(enum=Status.WRONG, human=student),
-                    readable_expected=readable_expected,
-                    readable_actual=str(actual),
-                    messages=[message]
-                )
+            result = _get_values(output_channel, actual)
+            if isinstance(result, EvaluationResult):
+                return result
+            else:
+                expected, readable_expected, actual, readable_actual = result
         else:
             raise AssertionError(f"Unknown type of output channel: {output_channel}")
 
