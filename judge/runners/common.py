@@ -4,7 +4,7 @@ import shutil
 import string
 import subprocess
 import tempfile
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from functools import cached_property
 from pathlib import Path
 from typing import Tuple, List
@@ -169,7 +169,7 @@ class ConfigurableRunner(BaseRunner):
         context_template = self._find_template("context", self._get_environment)
         return_file = str(self._result_file()).replace("\\", "/")
         # Create the test file.
-        additionals = self.get_additional(context_id, context.additional)
+        additionals = self.get_additional(context_id, context)
         data = ContextData(
             main_arguments=context.execution.arguments,
             submission=submission,
@@ -187,7 +187,8 @@ class ConfigurableRunner(BaseRunner):
         evaluator_template = self._find_template("evaluators", self._get_environment)
         evaluator_data = EvaluatorData(
             additionals=additionals,
-            output_file=return_file
+            output_file=return_file,
+            context_id=context_id,
         )
         write_template(evaluator_data, evaluator_template,
                        Path(self.config.workdir, self._evaluator_name(context_id)))
@@ -295,9 +296,9 @@ class ConfigurableRunner(BaseRunner):
         template = self._find_template("function", self._get_environment)
         return template.render(function=call)
 
-    def get_additional(self, context_id: str, additionals: List[Testcase]) -> List[TestcaseData]:
+    def get_additional(self, context_id: str, context: Context) -> List[TestcaseData]:
         result = []
-        for i, testcase in enumerate(additionals):
+        for i, testcase in enumerate(context.additional):
             eval_function_name = f"evaluate_{context_id}_{i}"
             has_specific = not isinstance(testcase.result, IgnoredChannelState)
             if has_specific and isinstance(testcase.result.evaluator, SpecificEvaluator):
@@ -308,12 +309,19 @@ class ConfigurableRunner(BaseRunner):
                 # Get value function call.
                 custom_code = self.language_config.value_writer(eval_function_name)
             # Convert the function call.
-            result.append(TestcaseData(testcase.function, testcase.stdin, custom_code))
+            submission_name = self.language_config.submission_name(context_id, context)
+            result.append(TestcaseData(self.prepare_function_call(submission_name, testcase.function), testcase.stdin, custom_code))
         return result
 
-    def prepare_function_call(self, function_call: FunctionCall) -> FunctionCall:
+    def prepare_function_call(self, submission_name: str, function_call: FunctionCall) -> FunctionCall:
         """Prepare the function call for execution."""
-
+        object_ = function_call.object or submission_name
+        return FunctionCall(
+            type=function_call.type,
+            arguments=function_call.arguments,
+            name=self.language_config.conventionalise(function_call.name),
+            object=object_
+        )
 
     def evaluate_specific(self, code: str, expected: Value, actual: Value) -> BaseExecutionResult:
         # Create the template.
@@ -353,4 +361,5 @@ def get_runner(config: Config, language: str = None) -> BaseRunner:
     """Get the runner for the specified language."""
     if language is None:
         language = config.programming_language
-    return ConfigurableRunner(config, CONFIGS[language]())
+    adjusted_config = replace(config, programming_language=language)
+    return ConfigurableRunner(adjusted_config, CONFIGS[language]())

@@ -1,15 +1,10 @@
 <%! from testplan import FunctionType %>
 <%page args="function" />
 ## This generates a function call in Java.
-% if function.type == FunctionType.OBJECT or function.type == FunctionType.TOP:
-    % if function.object:
-        ${function.object}.\
-    % endif
-    ${function.name}\
-% endif
+${function.object}.${function.name}\
 (\
 % for argument in function.arguments:
-    <%include file="argument.mako" args="argument=argument"/>
+    <%include file="value.mako" args="value=argument"/>
     % if not loop.last:
         , \
     % endif

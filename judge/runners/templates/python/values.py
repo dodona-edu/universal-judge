@@ -31,16 +31,15 @@ def __encode(value):
         type_ = "unknown"
         data_ = str(value)
 
-    return type_, data_
+    return {
+        "data": data_,
+        "type": type_
+    }
 
 
 def send_value(stream, value):
     """Send a value to the given stream."""
-    if (encoded := __encode(value)) is not None:
-        json.dump({
-            "data": encoded[1],
-            "type": encoded[0]
-        }, stream)
+    json.dump(__encode(value), stream)
 
 
 # noinspection PyDefaultArgument

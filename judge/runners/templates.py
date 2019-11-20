@@ -43,6 +43,7 @@ class ContextData:
 class EvaluatorData:
     additionals: List[TestcaseData]
     output_file: str
+    context_id: str
 
 
 @dataclass

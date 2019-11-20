@@ -3,7 +3,7 @@
 <%page args="function" />
 % if function.type == FunctionType.TOP:
     ${function.name}\
-% elif function.type == FunctionType.STATIC or function.type == FunctionType.INSTANCE:
+% elif function.type == FunctionType.OBJECT:
     ${function.object}.${function.name}\
 % endif
 (\
