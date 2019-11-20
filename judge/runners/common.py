@@ -21,7 +21,7 @@ from runners.templates import SubmissionData, write_template, ContextData, Testc
 from runners.utils import remove_indents, remove_newline
 from serialisation import Value
 from tested import Config
-from testplan import Plan, Context, FunctionCall, SpecificEvaluator, Testcase, IgnoredChannelState
+from testplan import Plan, Context, FunctionCall, SpecificEvaluator, IgnoredChannelState
 
 
 def _get_identifier() -> str:
@@ -310,7 +310,11 @@ class ConfigurableRunner(BaseRunner):
                 custom_code = self.language_config.value_writer(eval_function_name)
             # Convert the function call.
             submission_name = self.language_config.submission_name(context_id, context)
-            result.append(TestcaseData(self.prepare_function_call(submission_name, testcase.function), testcase.stdin, custom_code))
+            result.append(TestcaseData(
+                function=self.prepare_function_call(submission_name, testcase.function),
+                stdin=testcase.stdin,
+                value_code=custom_code
+            ))
         return result
 
     def prepare_function_call(self, submission_name: str, function_call: FunctionCall) -> FunctionCall:
