@@ -11,6 +11,8 @@ from os import path
 
 from typing import List, Optional, Union, Dict, Any, Literal
 
+from humps import is_camelcase
+from pydantic import validator
 from pydantic.dataclasses import dataclass
 
 from serialisation import Value
@@ -58,24 +60,25 @@ class TextData:
             raise AssertionError(f"Unknown enum type {self.type}")
 
 
-# Represents custom code. This is a mapping of the programming language to the actual code.
-Code = Dict[str, TextData]
-
-
 class FunctionType(str, Enum):
     TOP = "top"  # top level function
-    STATIC = "static"  # static function
-    INSTANCE = "instance"  # instance function
-    MAIN = "main"  # Main function for running code
+    OBJECT = "static"  # function on an object or class
 
 
 @dataclass
 class FunctionCall:
     """Represents a function call"""
     type: FunctionType
-    name: Optional[str]
+    name: str
     object: Optional[str]
     arguments: List[Value]
+
+    @staticmethod
+    @validator('name')
+    def is_camelcase(cls, value):
+        if not is_camelcase(value):
+            return ValueError(f"Function {value} should be in camelCase.")
+        return value
 
 
 class Builtin(str, Enum):
@@ -111,6 +114,10 @@ class CustomEvaluator:
     type: Literal["custom"]
     language: str
     code: TextData
+
+
+# Represents custom code. This is a mapping of the programming language to the actual code.
+Code = Dict[str, TextData]
 
 
 @dataclass
@@ -181,7 +188,6 @@ class Testcase:
     description: Optional[str]  # Will be generated if None.
     essential: bool
     # Inputs
-    function: FunctionCall
     stdin: Union[TextData, NoneChannelState]
     # Outputs
     stdout: TextOutput
@@ -197,18 +203,32 @@ class Testcase:
 
 
 @dataclass
+class ExecutionTestcase(Testcase):
+    """Main testcase for a context."""
+    arguments: List[Value]  # Main args of the program.
+
+
+@dataclass
+class AdditionalTestcase(Testcase):
+    """Additional test case."""
+    function: FunctionCall  # Function call for the testcase.
+
+
+@dataclass
 class Context:
     """A context is what the name implies: executes things in the same context.
     As such, the context consists of three main things: the preparation, the
     execution and the post-processing.
     """
-    execution: Testcase
-    additional: List[Testcase]
+    execution: ExecutionTestcase
+    additional: List[AdditionalTestcase]
     before: Code
     after: Code
+    object: str  # Used for e.g. Java and Haskell.
     description: Optional[str] = None
 
     def all_testcases(self) -> List[Testcase]:
+        # noinspection PyTypeChecker
         return [self.execution] + self.additional
 
 

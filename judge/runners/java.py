@@ -30,7 +30,7 @@ class JavaConfig(LanguageConfig):
 
     def submission_name(self, context_id: str, context: Context) -> str:
         # In Java, the code is the same for all contexts.
-        return context.execution.function.object
+        return context.object
 
     def context_name(self, context_id: str) -> str:
         return f"Context{context_id}"

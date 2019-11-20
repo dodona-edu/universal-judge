@@ -14,11 +14,6 @@ class LanguageConfig:
         """If the language supports top level functions."""
         raise NotImplementedError
 
-    # TODO: proper support for language features.
-    def needs_main(self):
-        """If the language needs a main function."""
-        raise NotImplementedError
-
     def needs_compilation(self) -> bool:
         """If the language needs compilation."""
         raise NotImplementedError
@@ -88,4 +83,8 @@ class LanguageConfig:
 
     def value_writer(self, name):
         """Return the code needed to write functions to the file."""
+        raise NotImplementedError
+
+    def conventionalise(self, function_name: str) -> str:
+        """Apply a language's conventions to function name."""
         raise NotImplementedError

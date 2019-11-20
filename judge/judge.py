@@ -80,10 +80,9 @@ def get_readable_input(config: Config, case: Testcase, runner: BaseRunner) -> Ex
     Get human readable input for a testcase. This function will use, in order of availability:
 
     1. A description on the testcase.
-    2. A function call. If the function call is the main function, only use the main function if
-       the language requires a main function. However, if there is no stdin but there is a main
-       function for a language that does not use it, a placeholder will be used.
+    2. A function call.
     3. The stdin.
+    4. Program arguments, if any.
 
     If the input is code, the message type will be set to code or the language's name,
     if Dodona has support for the language.
@@ -95,19 +94,19 @@ def get_readable_input(config: Config, case: Testcase, runner: BaseRunner) -> Ex
     format_ = 'text'  # By default, we use text as input.
     if case.description:
         text = case.description
-    elif case.function and (case.function.type != FunctionType.MAIN or runner.needs_main()):
+    elif isinstance(case, AdditionalTestcase) and case.function:
         text = runner.function_call(case.function)
         format_ = runner.config.programming_language
     elif case.stdin != NoneChannelState.NONE:
         assert isinstance(case.stdin, TextData)
         text = case.stdin.get_data_as_string(config.resources)
     else:
-        # If there is no stdin, but there is a main function but we end up here, this means the
-        # language does not use main functions. In that case, we use a placeholder.
-        if case.function and case.function.type == FunctionType.MAIN:
-            text = "Code execution"
+        assert isinstance(case, ExecutionTestcase)
+        if case.arguments:
+            variable_part = str(case.arguments)
         else:
-            raise TestPlanError("Testcase without either description, stdin or function is not allowed.")
+            variable_part = "without arguments"
+        text = f"Program execution {variable_part}"
     return ExtendedMessage(description=text, format=format_)
 
 

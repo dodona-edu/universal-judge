@@ -20,9 +20,6 @@ class HaskellConfig(LanguageConfig):
     def value_writer(self):
         return "send value output"
 
-    def needs_main(self):
-        return True
-
     def supports_top_level_functions(self) -> bool:
         return True
 
@@ -45,7 +42,7 @@ class HaskellConfig(LanguageConfig):
 
     def submission_name(self, context_id: str, context: Context) -> str:
         # In Haskell, the code is the same for all contexts.
-        return context.execution.function.object
+        return context.object
 
     def context_name(self, context_id: str) -> str:
         return f"Context{context_id}"

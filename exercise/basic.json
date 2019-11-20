@@ -5,6 +5,7 @@
       "contexts": [
         {
           "description": "Beschrijving van de context",
+          "object": "Main",
           "execution": {
             "essential": true,
             "description": null,
@@ -20,13 +21,7 @@
             "stderr": "none",
             "file": "ignored",
             "result": "ignored",
-            "function": {
-              "type": "main",
-              "name": null,
-              "object": "Main",
-              "arguments": [
-              ]
-            },
+            "arguments": [],
             "stdin": {
               "data": "invoertekst",
               "type": "text"

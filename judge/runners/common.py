@@ -7,7 +7,7 @@ import tempfile
 from dataclasses import dataclass
 from functools import cached_property
 from pathlib import Path
-from typing import Tuple, List, Union
+from typing import Tuple, List
 
 from mako.exceptions import TemplateLookupException
 from mako.lookup import TemplateLookup
@@ -21,8 +21,7 @@ from runners.templates import SubmissionData, write_template, ContextData, Testc
 from runners.utils import remove_indents, remove_newline
 from serialisation import Value
 from tested import Config
-from testplan import Plan, Context, FunctionCall, FunctionType, TestPlanError, SpecificEvaluator, Testcase, \
-    IgnoredChannelState
+from testplan import Plan, Context, FunctionCall, SpecificEvaluator, Testcase, IgnoredChannelState
 
 
 def _get_identifier() -> str:
@@ -104,10 +103,6 @@ class BaseRunner:
         """Create a textual representation of a function call, to display to the user."""
         raise NotImplementedError
 
-    def needs_main(self):
-        """True if the language needs a main function call to run."""
-        raise NotImplementedError
-
     def evaluate_specific(self, code: str, expected: Value, actual: Value) -> BaseExecutionResult:
         """Evaluate two values with code provided by the test plan."""
         raise NotImplementedError
@@ -174,10 +169,9 @@ class ConfigurableRunner(BaseRunner):
         context_template = self._find_template("context", self._get_environment)
         return_file = str(self._result_file()).replace("\\", "/")
         # Create the test file.
-        execution = self.get_execution(context)
         additionals = self.get_additional(context_id, context.additional)
         data = ContextData(
-            execution=execution,
+            main_arguments=context.execution.arguments,
             submission=submission,
             secret_id=self.identifier,
             output_file=return_file,
@@ -290,13 +284,6 @@ class ConfigurableRunner(BaseRunner):
         preprocessors = [remove_indents, remove_newline]
         return TemplateLookup(directories=[path], preprocessor=preprocessors)
 
-    # noinspection PyMethodMayBeStatic
-    def get_execution(self, c: Context) -> FunctionCall:
-        if c.execution.function.type != FunctionType.MAIN:
-            raise TestPlanError("Main function must have type main")
-
-        return c.execution.function
-
     def _find_template(self, name, environment):
         """Find a template with a name."""
         try:
@@ -305,31 +292,28 @@ class ConfigurableRunner(BaseRunner):
             return environment.get_template(f"{name}.mako")
 
     def function_call(self, call: FunctionCall) -> str:
-        """Produce code for a single function call."""
-        env = self._get_environment
-        template = self._find_template("function", env)
-        return template.render(
-            function=call,
-            has_top_level=self.language_config.supports_top_level_functions()
-        )
+        template = self._find_template("function", self._get_environment)
+        return template.render(function=call)
 
     def get_additional(self, context_id: str, additionals: List[Testcase]) -> List[TestcaseData]:
         result = []
         for i, testcase in enumerate(additionals):
-            function_name = f"evaluate_{context_id}_{i}"
+            eval_function_name = f"evaluate_{context_id}_{i}"
             has_specific = not isinstance(testcase.result, IgnoredChannelState)
             if has_specific and isinstance(testcase.result.evaluator, SpecificEvaluator):
                 custom_code = testcase.result.evaluator.evaluators[self.config.programming_language] \
                     .get_data_as_string(self.config.resources) \
-                    .replace("evaluate", function_name, 1)
+                    .replace("evaluate", eval_function_name, 1)
             else:
                 # Get value function call.
-                custom_code = self.language_config.value_writer(function_name)
+                custom_code = self.language_config.value_writer(eval_function_name)
+            # Convert the function call.
             result.append(TestcaseData(testcase.function, testcase.stdin, custom_code))
         return result
 
-    def needs_main(self):
-        return self.language_config.needs_main()
+    def prepare_function_call(self, function_call: FunctionCall) -> FunctionCall:
+        """Prepare the function call for execution."""
+
 
     def evaluate_specific(self, code: str, expected: Value, actual: Value) -> BaseExecutionResult:
         # Create the template.

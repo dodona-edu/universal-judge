@@ -1,5 +1,7 @@
 from typing import List
 
+from humps import decamelize
+
 from runners.common import LanguageConfig
 from testplan import Context
 
@@ -42,5 +44,5 @@ class PythonConfig(LanguageConfig):
     def additional_files(self) -> List[str]:
         return ["values.py"]
 
-    def needs_main(self):
-        return False
+    def conventionalise(self, function_name: str) -> str:
+        return decamelize(function_name)

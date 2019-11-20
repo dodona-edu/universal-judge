@@ -34,7 +34,7 @@ class ContextData:
     context_id: str
     has_top_level: bool
     submission_name: str
-    execution: FunctionCall
+    main_arguments: List[Value]
     output_file: str
     additionals: List[TestcaseData]
 

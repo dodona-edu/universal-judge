@@ -13,7 +13,7 @@ import evaluator_${context_id}
 
 ## Set the main arguments.
 sys.argv.extend([\
-% for argument in execution.arguments:
+% for argument in main_arguments:
     <%include file="argument.mako" args="argument=argument"/>\
 % endfor
 ])
