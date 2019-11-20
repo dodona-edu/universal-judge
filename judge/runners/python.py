@@ -7,8 +7,8 @@ from testplan import Context
 class PythonConfig(LanguageConfig):
     """Configuration for the Python language."""
 
-    def value_writer(self):
-        return "send(value)"
+    def value_writer(self, name):
+        return f"def {name}(value):\n    send(value)"
 
     def supports_top_level_functions(self) -> bool:
         return True
@@ -21,7 +21,11 @@ class PythonConfig(LanguageConfig):
 
     def execution_command(self, context_id: str) -> List[str]:
         context = f"{self.context_name(context_id)}.{self.file_extension()}"
-        return ["python", str(context)]
+        return ["python", context]
+
+    def execute_evaluator(self, evaluator_name: str) -> List[str]:
+        file = f"{self.evaluator_name('eval')}.{self.file_extension()}"
+        return ["python", file]
 
     def file_extension(self) -> str:
         return "py"
@@ -31,6 +35,9 @@ class PythonConfig(LanguageConfig):
 
     def context_name(self, context_id: str) -> str:
         return f"context_{context_id}"
+
+    def evaluator_name(self, context_id: str) -> str:
+        return f"evaluator_{context_id}"
 
     def additional_files(self) -> List[str]:
         return ["values.py"]

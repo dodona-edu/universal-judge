@@ -93,9 +93,63 @@
                 "evaluator": {
                   "type": "specific",
                   "evaluators": {
-                    "python": "evaluated(True, \"LOL\", str(value))",
-                    "java": "evaluated(output, true, \"hallo\");",
-                    "haskell": "evaluated output True \"hallo\""
+                    "python": {
+                      "type": "file",
+                      "data": "./specific_evaluator.py"
+                    },
+                    "java": {
+                      "type": "text",
+                      "data": "def evaluate(value): evaluated(true, \"expected\", \"hallo\");"
+                    },
+                    "haskell": {
+                      "type": "text",
+                      "data": "evaluate value = evaluated output True \"hallo\""
+                    }
+                  }
+                }
+              },
+              "function": {
+                "type": "top",
+                "name": "echo",
+                "object": null,
+                "arguments": [
+                  {
+                    "type": "text",
+                    "data": "test"
+                  },
+                  {
+                    "type": "integer",
+                    "data": 25
+                  }
+                ]
+              },
+              "stdin": "none"
+            },
+            {
+              "essential": false,
+              "description": null,
+              "stdout": {
+                "data": "test-50",
+                "type": "text",
+                "evaluator": {
+                  "type": "builtin",
+                  "options": {},
+                  "name": "text"
+                }
+              },
+              "stderr": "none",
+              "file": "ignored",
+              "result": {
+                "value": {
+                  "type": "text",
+                  "data": "HALLO"
+                },
+                "evaluator": {
+                  "type": "custom",
+                  "language": "python",
+                  "code": {
+                    "type": "file",
+                    "data": "./custom_evaluator.py"
                   }
                 }
               },

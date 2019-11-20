@@ -1,7 +1,7 @@
 """Configuration for languages, making implementing runners fairly easy."""
 from typing import List, Optional
 
-from testplan import Plan, Context
+from testplan import Context
 
 
 class LanguageConfig:
@@ -31,6 +31,9 @@ class LanguageConfig:
             return []
 
     def execution_command(self, context_id: str) -> List[str]:
+        raise NotImplementedError
+
+    def execute_evaluator(self, evaluator_name: str) -> List[str]:
         raise NotImplementedError
 
     def file_extension(self) -> str:
@@ -66,10 +69,23 @@ class LanguageConfig:
         """
         raise NotImplementedError
 
+    def evaluator_name(self, context_id: str) -> str:
+        """
+        Produce a name for the evaluator file.
+
+        :param context_id: he ID that has been assigned to this context, to be able to uniquely
+                           define this context. Note that the context file must be identifiable
+                           with only the context ID.
+        :return: The name of the file. Must be a valid filename without extension, and also satisfy
+                 language specific limitations on file names. For example, in Java, the name of the
+                 file must match the name of the class.
+        """
+        raise NotImplementedError
+
     def additional_files(self) -> List[str]:
         """Additional files that will be available to the context tests."""
         raise NotImplementedError
 
-    def value_writer(self):
+    def value_writer(self, name):
         """Return the code needed to write functions to the file."""
         raise NotImplementedError

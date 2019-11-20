@@ -7,6 +7,8 @@ unless noted, the judge will not provide default values for missing fields.
 """
 from dataclasses import field
 from enum import Enum
+from os import path
+
 from typing import List, Optional, Union, Dict, Any, Literal
 
 from pydantic.dataclasses import dataclass
@@ -19,8 +21,45 @@ class TestPlanError(ValueError):
     pass
 
 
+class ChannelType(str, Enum):
+    TEXT = "text"  # Literal values
+    FILE = "file"  # Path to a file
+
+
+@dataclass
+class TextData:
+    """Describes textual data: either directly or in a file."""
+    type: ChannelType
+    data: str
+
+    @staticmethod
+    def __resolve_path(working_directory, file_path):
+        """
+        Resolve a path to an absolute path. Relative paths will be resolved against the given
+        ``working_directory``, not the actual working directory.
+        """
+        if path.isabs(file_path):
+            return path.abspath(file_path)
+        else:
+            return path.abspath(path.join(working_directory, file_path))
+
+    def get_data_as_string(self, working_directory):
+        """Get the data as a string, reading the file if necessary."""
+        if self.type == ChannelType.TEXT:
+            return self.data
+        elif self.type == ChannelType.FILE:
+            try:
+                file_path = self.__resolve_path(working_directory, self.data)
+                with open(file_path, 'r') as file:
+                    return file.read()
+            except FileNotFoundError as e:
+                raise TestPlanError(f"File not found: {e}")
+        else:
+            raise AssertionError(f"Unknown enum type {self.type}")
+
+
 # Represents custom code. This is a mapping of the programming language to the actual code.
-Code = Dict[str, str]
+Code = Dict[str, TextData]
 
 
 class FunctionType(str, Enum):
@@ -71,7 +110,7 @@ class CustomEvaluator:
     # noinspection PyUnresolvedReferences
     type: Literal["custom"]
     language: str
-    code: str
+    code: TextData
 
 
 @dataclass
@@ -97,32 +136,8 @@ class SpecificEvaluator:
     evaluators: Code
 
 
-class ChannelType(str, Enum):
-    TEXT = "text"  # Literal values
-    FILE = "file"  # Path to a file
-
-
 @dataclass
-class ChannelData:
-    """Describes the data on channel (stdin or stdout)"""
-    type: ChannelType
-    data: str
-
-    def get_data_as_string(self):
-        if self.type == ChannelType.TEXT:
-            return self.data
-        elif self.type == ChannelType.FILE:
-            try:
-                with open(self.data, 'r') as f:
-                    return f.read()
-            except FileNotFoundError as e:
-                raise TestPlanError(f"File not found: {e}")
-        else:
-            raise AssertionError(f"Unknown enum type {self.type}")
-
-
-@dataclass
-class TextOutputChannel(ChannelData):
+class TextOutputChannel(TextData):
     """Describes the output for textual channels."""
     evaluator: Union[BuiltinEvaluator, CustomEvaluator]
 
@@ -167,18 +182,18 @@ class Testcase:
     essential: bool
     # Inputs
     function: FunctionCall
-    stdin: Union[ChannelData, NoneChannelState]
+    stdin: Union[TextData, NoneChannelState]
     # Outputs
     stdout: TextOutput
     stderr: TextOutput
     file: Union[FileOutputChannel, IgnoredChannelState]
     result: Union[ReturnOutputChannel, IgnoredChannelState]
 
-    def get_input(self):
+    def get_input(self, working_directory):
         if self.stdin == NoneChannelState.NONE:
             return None
         else:
-            return self.stdin.get_data_as_string()
+            return self.stdin.get_data_as_string(working_directory)
 
 
 @dataclass

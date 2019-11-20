@@ -4,9 +4,9 @@ import json
 
 def __encode(value):
     if value is None:
-        return None
-
-    if isinstance(value, str):
+        type_ = "nothing"
+        data_ = value
+    elif isinstance(value, str):
         type_ = "text"
         data_ = value
     elif isinstance(value, int):

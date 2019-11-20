@@ -3,10 +3,11 @@ import random
 import shutil
 import string
 import subprocess
+import tempfile
 from dataclasses import dataclass
 from functools import cached_property
 from pathlib import Path
-from typing import Tuple, List
+from typing import Tuple, List, Union
 
 from mako.exceptions import TemplateLookupException
 from mako.lookup import TemplateLookup
@@ -16,8 +17,9 @@ from runners.haskell import HaskellConfig
 from runners.java import JavaConfig
 from runners.javascripted import JavaScriptedConfig
 from runners.python import PythonConfig
-from runners.templates import SubmissionData, write_template, ContextData, TestcaseData
+from runners.templates import SubmissionData, write_template, ContextData, TestcaseData, EvaluatorData, CustomData
 from runners.utils import remove_indents, remove_newline
+from serialisation import Value
 from tested import Config
 from testplan import Plan, Context, FunctionCall, FunctionType, TestPlanError, SpecificEvaluator, Testcase, \
     IgnoredChannelState
@@ -31,7 +33,17 @@ def _get_identifier() -> str:
 
 
 @dataclass
-class ExecutionResult:
+class BaseExecutionResult:
+    """
+    The result of an execution.
+    """
+    stdout: str
+    stderr: str
+    exit: int  # The return value.
+
+
+@dataclass
+class ExecutionResult(BaseExecutionResult):
     """
     The result of an execution.
 
@@ -40,10 +52,7 @@ class ExecutionResult:
     testcase at position 0 in the context.
     """
     separator: str
-    stdout: str
-    stderr: str
     results: str
-    exit: int  # The return value.
 
 
 class BaseRunner:
@@ -76,14 +85,14 @@ class BaseRunner:
         Execute the tests for a given context.
 
         :param timeout: Time-out for the evaluation of the context.
-        :param context_id: The ID of the context. This is an element returned in the list by the
+        :param context_id: The ID of the context. This is an element returned to the list by the
         generation function.
         :param context: The actual context instance.
         :return: The result of the execution, which allows judging of the results.
         """
         raise NotImplementedError
 
-    def compile(self, ordered_files) -> ExecutionResult:
+    def compile(self, ordered_files) -> BaseExecutionResult:
         """Will be called if `needs_compilation` is True."""
         raise NotImplementedError
 
@@ -97,6 +106,10 @@ class BaseRunner:
 
     def needs_main(self):
         """True if the language needs a main function call to run."""
+        raise NotImplementedError
+
+    def evaluate_specific(self, code: str, expected: Value, actual: Value) -> BaseExecutionResult:
+        """Evaluate two values with code provided by the test plan."""
         raise NotImplementedError
 
 
@@ -162,12 +175,13 @@ class ConfigurableRunner(BaseRunner):
         return_file = str(self._result_file()).replace("\\", "/")
         # Create the test file.
         execution = self.get_execution(context)
+        additionals = self.get_additional(context_id, context.additional)
         data = ContextData(
             execution=execution,
             submission=submission,
             secret_id=self.identifier,
             output_file=return_file,
-            additionals=self.get_additional(context.additional),
+            additionals=additionals,
             context_id=context_id,
             has_top_level=self.language_config.supports_top_level_functions(),
             submission_name=submission_name,
@@ -176,7 +190,15 @@ class ConfigurableRunner(BaseRunner):
         )
         write_template(data, context_template, Path(self.config.workdir, self._context_name(context_id)))
 
-        return [self._context_name(context_id)]
+        evaluator_template = self._find_template("evaluators", self._get_environment)
+        evaluator_data = EvaluatorData(
+            additionals=additionals,
+            output_file=return_file
+        )
+        write_template(evaluator_data, evaluator_template,
+                       Path(self.config.workdir, self._evaluator_name(context_id)))
+
+        return [self._evaluator_name(context_id), self._context_name(context_id)]
 
     def generate_code(self, submission: str, plan: Plan) -> Tuple[List[str], List[str]]:
 
@@ -191,8 +213,8 @@ class ConfigurableRunner(BaseRunner):
 
         # Each context gets two files: the file containing the user code, and the file containing
         # the actual tests we run on the user code.
-        # Language that have the same user code for all contexts can return the same name each time,
-        # which causes the files to be overridden. This will be faster if compilation is needed.
+        # Language that have the same user code for all contexts can return the same name each
+        # time, which causes the files to be overridden. This will be faster if compilation is needed.
         # TODO: In the future, we might not generate different files if the name is the same.
         context_ids = []
         for tab_idx, tab in enumerate(plan.tabs):
@@ -221,13 +243,17 @@ class ConfigurableRunner(BaseRunner):
     def _result_file(self):
         return Path(self.config.workdir, f"{self.identifier}_out.txt")
 
-    def compile(self, ordered_files) -> ExecutionResult:
+    def compile(self, ordered_files, cwd=None) -> BaseExecutionResult:
+        cwd = cwd or self.config.workdir
         command = self.language_config.compilation_command(ordered_files)
-        p = subprocess.run(command, text=True, capture_output=True, cwd=self.config.workdir)
-        return ExecutionResult("", p.stdout, p.stderr, "", p.returncode)
+        p = subprocess.run(command, text=True, capture_output=True, cwd=cwd)
+        return BaseExecutionResult(p.stdout, p.stderr, p.returncode)
 
     def _context_name(self, context_id: str) -> str:
         return f"{self.language_config.context_name(context_id)}.{self.language_config.file_extension()}"
+
+    def _evaluator_name(self, context_id: str) -> str:
+        return f"{self.language_config.evaluator_name(context_id)}.{self.language_config.file_extension()}"
 
     def needs_compilation(self) -> bool:
         return self.language_config.needs_compilation()
@@ -236,7 +262,7 @@ class ConfigurableRunner(BaseRunner):
 
         stdin_ = []
         for testcase in context.all_testcases():
-            if (input_ := testcase.get_input()) is not None:
+            if (input_ := testcase.get_input(self.config.resources)) is not None:
                 stdin_.append(input_)
         stdin_ = "\n".join(stdin_)
 
@@ -251,7 +277,7 @@ class ConfigurableRunner(BaseRunner):
         except FileNotFoundError:
             values = ""
 
-        return ExecutionResult(identifier, p.stdout, p.stderr, values, p.returncode)
+        return ExecutionResult(p.stdout, p.stderr, p.returncode, identifier, values)
 
     def _path_to_templates(self) -> Path:
         """The path to the templates and additional files."""
@@ -287,20 +313,48 @@ class ConfigurableRunner(BaseRunner):
             has_top_level=self.language_config.supports_top_level_functions()
         )
 
-    def get_additional(self, additionals: List[Testcase]) -> List[TestcaseData]:
+    def get_additional(self, context_id: str, additionals: List[Testcase]) -> List[TestcaseData]:
         result = []
-        for testcase in additionals:
+        for i, testcase in enumerate(additionals):
+            function_name = f"evaluate_{context_id}_{i}"
             has_specific = not isinstance(testcase.result, IgnoredChannelState)
             if has_specific and isinstance(testcase.result.evaluator, SpecificEvaluator):
-                custom_code = testcase.result.evaluator.evaluators[self.config.programming_language]
+                custom_code = testcase.result.evaluator.evaluators[self.config.programming_language] \
+                    .get_data_as_string(self.config.resources) \
+                    .replace("evaluate", function_name, 1)
             else:
                 # Get value function call.
-                custom_code = self.language_config.value_writer()
+                custom_code = self.language_config.value_writer(function_name)
             result.append(TestcaseData(testcase.function, testcase.stdin, custom_code))
         return result
 
     def needs_main(self):
         return self.language_config.needs_main()
+
+    def evaluate_specific(self, code: str, expected: Value, actual: Value) -> BaseExecutionResult:
+        # Create the template.
+        template = self._find_template("evaluator_custom", self._get_environment)
+        data = CustomData(evaluator_code=code, expected=expected, actual=actual)
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / self._evaluator_name("eval")
+            write_template(data, template, path)
+
+            files = self.language_config.additional_files()
+            # Copy necessary files to the temporary directory.
+            for file in self.language_config.additional_files():
+                result = self._path_to_templates() / file
+                # noinspection PyTypeChecker
+                shutil.copy2(result, directory)
+
+            files.append(self._evaluator_name("eval"))
+
+            # Compile the evaluator
+            # TODO: handle errors!
+            c = self.compile(files, directory)
+            # Execute the evaluator
+            command = self.language_config.execute_evaluator("eval")
+            p = subprocess.run(command, text=True, capture_output=True, cwd=directory)
+            return BaseExecutionResult(p.stdout, p.stderr, p.returncode)
 
 
 CONFIGS = {
@@ -311,6 +365,8 @@ CONFIGS = {
 }
 
 
-def get_runner(config: Config) -> BaseRunner:
+def get_runner(config: Config, language: str = None) -> BaseRunner:
     """Get the runner for the specified language."""
-    return ConfigurableRunner(config, CONFIGS[config.programming_language]())
+    if language is None:
+        language = config.programming_language
+    return ConfigurableRunner(config, CONFIGS[language]())

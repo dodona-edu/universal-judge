@@ -8,7 +8,7 @@ class JavaConfig(LanguageConfig):
     """Configuration for the Java language."""
 
     def value_writer(self):
-        return "Values.send(output, value);"
+        return "send(value);"
 
     def needs_main(self):
         return True
@@ -30,7 +30,7 @@ class JavaConfig(LanguageConfig):
 
     def submission_name(self, context_id: str, context: Context) -> str:
         # In Java, the code is the same for all contexts.
-        return context.execution.input.function.object
+        return context.execution.function.object
 
     def context_name(self, context_id: str) -> str:
         return f"Context{context_id}"

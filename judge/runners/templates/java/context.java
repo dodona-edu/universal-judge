@@ -8,24 +8,36 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Collections;
+import java.util.Collection;
 
 class Context${context_id} {
 
-    public static void evaluated(FileWriter output, boolean result, String string) throws Exception {
-        Values.evaluated(output, result, string);
+    private final FileWriter ${secret_id}_writer;
+
+    private Context${context_id}(FileWriter writer) {
+        this.${secret_id}_writer = writer;
+    }
+
+    private void evaluated(boolean result, String expected, String actual, Collection<String> messages) throws Exception {
+        Values.evaluated(this.${secret_id}_writer, result, expected, actual, messages);
+    }
+
+    private void evaluated(boolean result, String expected, String actual) throws Exception {
+        this.evaluated(result, expected, actual, Collections.emptyList());
+    }
+
+    private void send(Object value) throws Exception {
+        Values.send(this.${secret_id}_writer, value);
     }
 
     % for additional in additionals:
-        public static void eval_${context_id}_${loop.index}(FileWriter output, Object value) throws Exception {
-            ${additional.output.value_code}
+        private void eval_${context_id}_${loop.index}(Object value) throws Exception {
+            ${additional.value_code}
         }
     % endfor
 
-    public static void main(String[] a) throws Exception {
-
-        ## Open our file we use to write.
-        FileWriter ${secret_id}_writer = new FileWriter("${output_file}");
-
+    private void execute() throws Exception {
         ## In Java, we must execute the before and after code in the context.
         ${before}
 
@@ -36,11 +48,16 @@ class Context${context_id} {
             System.err.print("--${secret_id}-- SEP");
             System.out.print("--${secret_id}-- SEP");
             ${secret_id}_writer.write("--${secret_id}-- SEP");
-            eval_${context_id}_${loop.index}(${secret_id}_writer, ${submission_name}.<%include file="function.mako" args="function=additional.input.function" />);
+            eval_${context_id}_${loop.index}(${submission_name}.<%include file="function.mako" args="function=additional.function" />);
         % endfor
 
         ${after}
+    }
 
+    public static void main(String[] a) throws Exception {
+        ## Open our file we use to write.
+        FileWriter ${secret_id}_writer = new FileWriter("${output_file}");
+        new Context${context_id}(${secret_id}_writer).execute();
         ${secret_id}_writer.close();
     }
 }

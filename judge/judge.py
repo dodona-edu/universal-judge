@@ -75,7 +75,7 @@ class Judge:
         self._execute_test_plan(submission_code, plan)
 
 
-def get_readable_input(case: Testcase, runner: BaseRunner) -> ExtendedMessage:
+def get_readable_input(config: Config, case: Testcase, runner: BaseRunner) -> ExtendedMessage:
     """
     Get human readable input for a testcase. This function will use, in order of availability:
 
@@ -88,6 +88,7 @@ def get_readable_input(case: Testcase, runner: BaseRunner) -> ExtendedMessage:
     If the input is code, the message type will be set to code or the language's name,
     if Dodona has support for the language.
 
+    :param config: The configuration of the judge.
     :param case: The testcase to get the input from.
     :param runner: Used to generate a function if the input is a function.
     """
@@ -96,11 +97,10 @@ def get_readable_input(case: Testcase, runner: BaseRunner) -> ExtendedMessage:
         text = case.description
     elif case.function and (case.function.type != FunctionType.MAIN or runner.needs_main()):
         text = runner.function_call(case.function)
-        # TODO: should we check if highlighting is supported or not?
         format_ = runner.config.programming_language
     elif case.stdin != NoneChannelState.NONE:
-        assert isinstance(case.stdin, ChannelData)
-        text = case.stdin.get_data_as_string()
+        assert isinstance(case.stdin, TextData)
+        text = case.stdin.get_data_as_string(config.resources)
     else:
         # If there is no stdin, but there is a main function but we end up here, this means the
         # language does not use main functions. In that case, we use a placeholder.
@@ -172,10 +172,10 @@ class GeneratorJudge(Judge):
         for i, testcase in enumerate(context.all_testcases()):
             # Get the evaluators
             try:
-                stdout_evaluator = get_evaluator(testcase.stdout)
-                stderr_evaluator = get_evaluator(testcase.stderr)
-                file_evaluator = get_evaluator(testcase.file)
-                result_evaluator = get_evaluator(testcase.result)
+                stdout_evaluator = get_evaluator(self.config, testcase.stdout)
+                stderr_evaluator = get_evaluator(self.config, testcase.stderr)
+                file_evaluator = get_evaluator(self.config, testcase.file)
+                result_evaluator = get_evaluator(self.config, testcase.result)
             except TestPlanError as e:
                 report_update(AppendMessage(message=ExtendedMessage(
                     description=str(e),
@@ -184,7 +184,7 @@ class GeneratorJudge(Judge):
                 )))
                 break
 
-            readable_input = get_readable_input(testcase, self.runner)
+            readable_input = get_readable_input(self.config, testcase, self.runner)
             report_update(StartTestcase(description=readable_input))
 
             error_message: List[ExtendedMessage] = []

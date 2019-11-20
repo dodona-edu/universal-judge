@@ -15,8 +15,9 @@ schema will be printed to stdout. This can be used to generate classes for imple
 other languages.
 """
 import json
+import math
 from enum import Enum
-from typing import Union, List, Dict
+from typing import Union, List, Dict, Literal, Optional
 
 from pydantic import BaseModel
 from pydantic.dataclasses import dataclass
@@ -36,7 +37,7 @@ class SerialisationError(ValueError):
 
 class NumericTypes(str, Enum):
     INTEGER = "integer"
-    REAL = "real"
+    RATIONAL = "rational"
 
 
 @dataclass
@@ -87,8 +88,18 @@ class ObjectType:
     data: Dict[str, 'Value']
 
 
+class NothingTypes(str, Enum):
+    NOTHING = "nothing"
+
+
+@dataclass
+class NothingType:
+    type: NothingTypes.NOTHING
+    data: Literal[None] = None
+
+
 # A value is one of the preceding types.
-Value = Union[SequenceType, BooleanType, StringType, NumberType, ObjectType]
+Value = Union[SequenceType, BooleanType, StringType, NumberType, ObjectType, NothingType]
 
 # Update the forward references, which fixes the schema generation.
 # See https://pydantic-docs.helpmanual.io/usage/postponed_annotations/#self-referencing-models
@@ -154,8 +165,60 @@ def get_readable_representation(value: Value):
     elif isinstance(value, ObjectType):
         values = {x: get_readable_representation(y) for x, y in value.data}
         return str(values)
+    elif isinstance(value, NothingType):
+        return ""
     else:
         return str(value.data)
+
+
+class ComparableFloat:
+    __slots__ = ["value"]
+
+    def __init__(self, value):
+        self.value = value
+
+    def __eq__(self, other):
+        # noinspection PyBroadException
+        try:
+            return math.isclose(self.value, other.value)
+        except Exception:
+            return False
+
+    def __str__(self):
+        return str(self.value)
+
+    def __repr__(self):
+        return repr(self.value)
+
+    def __bool__(self):
+        return bool(self.value)
+
+
+def to_python_comparable(value: Optional[Value]):
+    """
+    Convert the value into a comparable Python value. Most values are just converted to their
+    builtin Python variant. Some, however, are not: floats are converted into a wrapper class, that
+    allows comparison.
+
+    Note that this means that the types in the return value can be different from what is expected;
+    the returning types are only guaranteed to support eq, str, repr and bool.
+    """
+    if value is None:
+        return None
+    if value.type == SequenceTypes.LIST:
+        return [to_python_comparable(x) for x in value.data]
+    if value.type == SequenceTypes.SET:
+        return {to_python_comparable(x) for x in value.data}
+    if value.type == ObjectTypes.OBJECT:
+        return {key: to_python_comparable(val) for key, val in value.data.items()}
+    if value.type == NumericTypes.RATIONAL:
+        return ComparableFloat(float(value.data))
+    if value.type == NumericTypes.INTEGER:
+        return int(value.data)
+    if value.type in (BooleanTypes.BOOLEAN, StringTypes.TEXT, NothingTypes.NOTHING):
+        return value.data
+
+    raise AssertionError(f"Unknown value type: {value}")
 
 
 if __name__ == '__main__':

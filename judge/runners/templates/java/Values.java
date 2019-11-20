@@ -1,5 +1,6 @@
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.Collection;
 
 /**
  * Minimal RPC language in JSON to send data from the tests to the judge.
@@ -30,9 +31,10 @@ class Values {
         writer.write(filled);
     }
 
-    public static void evaluated(OutputStreamWriter writer, boolean value, String string) throws IOException {
-        String result = "{\"string\": \"%s\", \"type\": \"evaluated\", \"accepted\": %b}";
-        String filled = String.format(result, string, value);
-        writer.write(filled);
+    public static void evaluated(OutputStreamWriter writer,
+                                 boolean result, String expected, String actual, Collection<String> messages) throws IOException {
+//         String result = "{\"string\": \"%s\", \"type\": \"evaluated\", \"accepted\": %b}";
+//         String filled = String.format(result, string, value);
+//         writer.write(filled);
     }
 }

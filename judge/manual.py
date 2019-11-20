@@ -17,7 +17,7 @@ def read_config() -> Config:
         "time_limit": 10000000,
         "programming_language": 'python',
         "natural_language": 'nl',
-        "resources": '../exercise',
+        "resources": str(Path('../exercise').resolve()),
         "source": '../exercise/test.py',
         "judge": str(Path('../').resolve()),
         "workdir": str(Path('./workdir').resolve()),

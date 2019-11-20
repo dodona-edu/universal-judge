@@ -6,7 +6,8 @@ from typing import List, Union
 
 from mako.template import Template
 
-from testplan import FunctionCall, ChannelData, NoneChannelState
+from serialisation import Value
+from testplan import FunctionCall, TextData, NoneChannelState
 
 
 @dataclass
@@ -20,7 +21,7 @@ class SubmissionData:
 @dataclass
 class TestcaseData:
     function: FunctionCall
-    stdin: Union[ChannelData, NoneChannelState]
+    stdin: Union[TextData, NoneChannelState]
     value_code: str
 
 
@@ -36,6 +37,19 @@ class ContextData:
     execution: FunctionCall
     output_file: str
     additionals: List[TestcaseData]
+
+
+@dataclass
+class EvaluatorData:
+    additionals: List[TestcaseData]
+    output_file: str
+
+
+@dataclass
+class CustomData:
+    evaluator_code: str
+    expected: Value
+    actual: Value
 
 
 def write_template(arguments, template: Template, path: Path):

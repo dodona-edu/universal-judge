@@ -3,24 +3,13 @@
 ## The second part is responsible for actually running the tests.
 <%! from testplan import BuiltinEvaluator, SpecificEvaluator %>
 
-## Import the default handler for functions.
-import values
-
-## Output channel for evaluation results.
-${secret_id}_file = open(r"${output_file}", "w")
-
-def evaluated(result, expected, actual, messages=[]):
-    values.send_evaluated(${secret_id}_file, result, expected, actual, messages)
-
-def send(value):
-    values.send_value(${secret_id}_file, value)
-
-% for additional in additionals:
-    def eval_${context_id}_${loop.index}(value):
-        ${additional.value_code}
-% endfor
-
+## Imports.
 import sys
+import values
+import evaluator_${context_id}
+% for additional in additionals:
+    from evaluator_${context_id} import evaluate_${context_id}_${loop.index}
+% endfor
 
 ## Set the main arguments.
 sys.argv.extend([\
@@ -29,15 +18,19 @@ sys.argv.extend([\
 % endfor
 ])
 
-## Import the code for the first time
+## Open the output files.
+evaluator_${context_id}.open_outputs()
+
+## Import the code for the first time.
 import ${submission_name}
 
-## Handle test cases
+## Handle test cases.
 % for additional in additionals:
     sys.stderr.write("--${secret_id}-- SEP")
     sys.stdout.write("--${secret_id}-- SEP")
-    ${secret_id}_file.write("--${secret_id}-- SEP")
-    eval_${context_id}_${loop.index}(${submission_name}.<%include file="function.mako" args="function=additional.function" />)
+    evaluator_${context_id}.value_write("--${secret_id}-- SEP")
+    evaluate_${context_id}_${loop.index}(${submission_name}.<%include file="function.mako" args="function=additional.function" />)
 % endfor
 
-${secret_id}_file.close()
+## Close output files.
+evaluator_${context_id}.close_outputs()

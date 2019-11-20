@@ -1,4 +1,4 @@
-<%! from serialisation import Value, StringTypes %>
+<%! from serialisation import StringTypes %>
 <%page args="argument" />
 % if argument.type == StringTypes.TEXT:
     "\
