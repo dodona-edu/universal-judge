@@ -17,8 +17,14 @@ from testplan import Context
 class HaskellConfig(LanguageConfig):
     """Configuration for the Haskell language, with limitation (see module docs)."""
 
-    def value_writer(self):
-        return "send value output"
+    def evaluator_name(self, context_id: str) -> str:
+        return f"Evaluator{context_id}"
+
+    def conventionalise(self, function_name: str) -> str:
+        return function_name
+
+    def value_writer(self, name):
+        return f"{name} = send value"
 
     def supports_top_level_functions(self) -> bool:
         return True
@@ -31,6 +37,10 @@ class HaskellConfig(LanguageConfig):
         #   Perhaps we could estimate if compilation is worthwhile based on the amount of code?
         name = self.context_name(context_id) + "." + self.file_extension()
         return ["runhaskell", name, "-main-is", self.context_name(context_id)]
+
+    def execute_evaluator(self, evaluator_name: str) -> List[str]:
+        file = f"{self.evaluator_name('eval')}.{self.file_extension()}"
+        return ["runhaskell", file]
 
     def file_extension(self) -> str:
         return "hs"

@@ -9,7 +9,7 @@ evaluated = sendCustomEvaluated "${output_file}"
 
 ${evaluator_code}
 
-evaluate \
+main = evaluate \
 <%include file="value.mako" args="value=expected" />
  \
 <%include file="value.mako" args="value=actual" />
