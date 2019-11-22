@@ -1,16 +1,14 @@
 <%! from testplan import FunctionType %>
 <%page args="function" />
-## This generates a function call in Python.
-% if function.type == FunctionType.TOP and has_top_level:
+## This generates a function call in Haskell.
+% if function.type == FunctionType.TOP:
     ${function.name}\
-% elif function.type == FunctionType.STATIC or function.type == FunctionType.INSTANCE or (function.type == FunctionType.TOP and not has_top_level):
+% elif function.type == FunctionType.OBJECT:
     ${function.object}.${function.name}
-% elif function.type == FunctionType.MAIN:
-    main\
 % endif
  \
 % for argument in function.arguments:
-    <%include file="argument.mako" args="argument=argument"/>
+    <%include file="value.mako" args="value=argument"/>
     % if not loop.last:
          \
     % endif

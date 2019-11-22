@@ -1,9 +1,4 @@
 ## Code to execute one test context.
-## The The first part of this file contains the evluation functions.
-## The second part is responsible for actually running the tests.
-<%! from testplan import BuiltinEvaluator, SpecificEvaluator %>
-
-## Imports.
 import sys
 import values
 import evaluator_${context_id}
@@ -11,7 +6,7 @@ import evaluator_${context_id}
 ## Set the main arguments.
 sys.argv.extend([\
 % for argument in main_arguments:
-    <%include file="argument.mako" args="argument=argument"/>\
+    <%include file="value.mako" args="value=argument"/>\
 % endfor
 ])
 
