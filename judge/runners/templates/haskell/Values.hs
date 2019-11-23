@@ -10,10 +10,10 @@ import qualified Data.ByteString.Lazy as LBS
 
 
 class ToJSON a => Typeable a where
-toType :: a -> Text
-toType a = "unknown"
-toJson :: a -> Value
-toJson = toJSON
+    toType :: a -> String
+    toType a = "unknown"
+    toJson :: a -> Value
+    toJson = toJSON
 
 
 -- We support maybe as the null value
@@ -40,24 +40,24 @@ instance Typeable a => Typeable (Set a) where
 
 sendValue :: Typeable a => FilePath -> a -> IO ()
 sendValue file value = LBS.appendFile file (encode (object [
-    "type" .= toJSON (toType value),
-    "data" .= toJson value
-]))
+        "type" .= toJSON (toType value),
+        "data" .= toJson value
+    ]))
 
 
-sendSpecificEvaluated :: FilePath -> Bool -> Text -> Text -> [Text] -> IO ()
+sendSpecificEvaluated :: FilePath -> Bool -> String -> String -> [String] -> IO ()
 sendSpecificEvaluated file result expected actual messages =
-LBS.appendFile file (encode (object [
-    "result" .= toJSON result,
-    "readable_expected" .= toJSON expected,
-    "readable_actual" .= toJSON actual,
-    "messages" .= toJSON messages
-]))
+    LBS.appendFile file (encode (object [
+        "result" .= toJSON result,
+        "readable_expected" .= toJSON expected,
+        "readable_actual" .= toJSON actual,
+        "messages" .= toJSON messages
+    ]))
 
 
-sendCustomEvaluated :: FilePath -> Bool -> [Text] -> IO ()
+sendCustomEvaluated :: FilePath -> Bool -> [String] -> IO ()
 sendCustomEvaluated file result messages =
-LBS.appendFile file (encode (object [
-    "result" .= toJSON result,
-    "messages" .= toJSON messages
-]))
+    LBS.appendFile file (encode (object [
+        "result" .= toJSON result,
+        "messages" .= toJSON messages
+    ]))

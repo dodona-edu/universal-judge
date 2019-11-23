@@ -24,7 +24,7 @@ class HaskellConfig(LanguageConfig):
         return function_name
 
     def value_writer(self, name):
-        return f"{name} = send value"
+        return f"{name} :: Typeable a => a -> IO ()\n{name} = send"
 
     def supports_top_level_functions(self) -> bool:
         return True
@@ -48,6 +48,7 @@ class HaskellConfig(LanguageConfig):
     def compilation_command(self, files: List[str]) -> List[str]:
         # Don't want to compile contexts, since they need recompilation.
         f = [x for x in files if "Context" not in x]
+        print(["ghc", "-c", *f, "-no-hs-main"])
         return ["ghc", "-c", *f, "-no-hs-main"]
 
     def submission_name(self, context_id: str, context: Context) -> str:
@@ -59,3 +60,6 @@ class HaskellConfig(LanguageConfig):
 
     def additional_files(self) -> List[str]:
         return ["Values.hs"]
+
+    def rename_evaluator(self, code, name):
+        return code.replace("evaluate", name, 2)

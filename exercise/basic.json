@@ -97,8 +97,8 @@
                       "data": "./specific_evaluator.jsh"
                     },
                     "haskell": {
-                      "type": "text",
-                      "data": "evaluate value = evaluated output True \"hallo\""
+                      "type": "file",
+                      "data": "./specific_evaluator.hs"
                     }
                   }
                 }

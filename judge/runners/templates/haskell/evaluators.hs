@@ -1,14 +1,16 @@
+{-# LANGUAGE FlexibleInstances, OverloadedStrings #-}
 module Evaluator${context_id} where
 
 import Values
+import Control.Monad.Trans.Class
 
 ##
 ## def value_write(value):
 ##     value_file.write(value)
 
 
-evaluated :: Bool -> Text -> Text -> [Text] -> IO ()
-evaluated result expected actual messages = sendSpecificEvaluated "${output_file}"
+evaluated :: Bool -> String -> String -> [String] -> IO ()
+evaluated = sendSpecificEvaluated "${output_file}"
 
 
 send :: Typeable a => a -> IO ()

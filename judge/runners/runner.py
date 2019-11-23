@@ -303,8 +303,8 @@ class ConfigurableRunner(BaseRunner):
             has_specific = not isinstance(testcase.result, IgnoredChannelState)
             if has_specific and isinstance(testcase.result.evaluator, SpecificEvaluator):
                 custom_code = testcase.result.evaluator.evaluators[self.config.programming_language] \
-                    .get_data_as_string(self.config.resources) \
-                    .replace("evaluate", eval_function_name, 1)
+                    .get_data_as_string(self.config.resources)
+                custom_code = self.language_config.rename_evaluator(custom_code, eval_function_name)
             else:
                 # Get value function call.
                 custom_code = self.language_config.value_writer(eval_function_name)

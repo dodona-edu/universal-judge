@@ -15,6 +15,6 @@ main = do
     putStr "--${secret_id}-- SEP"
     appendFile "${output_file}" "--${secret_id}-- SEP"
     v${loop.index} <- ${submission_name}.<%include file="function.mako" args="function=additional.function" />
-    Evaluator${context_id}.evaluate_${context_id}_${loop.index} "${output_file}" v${loop.index}
+    Evaluator${context_id}.evaluate_${context_id}_${loop.index} v${loop.index}
     % endfor
     ${after}
