@@ -15,7 +15,7 @@ from humps import is_camelcase
 from pydantic import validator
 from pydantic.dataclasses import dataclass
 
-from serialisation import Value
+from serialisation import Value, ExceptionValue
 
 
 class TestPlanError(ValueError):
@@ -81,15 +81,25 @@ class FunctionCall:
         return value
 
 
-class Builtin(str, Enum):
+class TextBuiltin(str, Enum):
     """List of built-in evaluators"""
     TEXT = "text"
     FILE = "file"
+
+
+class ValueBuiltin(str, Enum):
     VALUE = "value"
 
 
+class ExceptionBuiltin(str, Enum):
+    EXCEPTION = "exception"
+
+
+Builtin = Union[TextBuiltin, ValueBuiltin, ExceptionBuiltin]
+
+
 @dataclass
-class BuiltinEvaluator:
+class BaseBuiltinEvaluator:
     """
     Built-in evaluator in the judge. Some basic evaluators are available, as enumerated by
     :class:`Builtin`. These are useful for things like comparing text, files or values.
@@ -99,8 +109,22 @@ class BuiltinEvaluator:
     """
     # noinspection PyUnresolvedReferences
     type: Literal["builtin"]
-    name: Builtin
     options: Dict[str, Any]  # Options for the evaluator
+
+
+@dataclass
+class TextBuiltinEvaluator(BaseBuiltinEvaluator):
+    name: TextBuiltin
+
+
+@dataclass
+class ValueBuiltinEvaluator(BaseBuiltinEvaluator):
+    name: ValueBuiltin
+
+
+@dataclass
+class ExceptionBuiltinEvaluator(BaseBuiltinEvaluator):
+    name: ExceptionBuiltin
 
 
 @dataclass
@@ -146,22 +170,29 @@ class SpecificEvaluator:
 @dataclass
 class TextOutputChannel(TextData):
     """Describes the output for textual channels."""
-    evaluator: Union[BuiltinEvaluator, CustomEvaluator]
+    evaluator: Union[TextBuiltinEvaluator, CustomEvaluator]
 
 
 @dataclass
 class FileOutputChannel:
     """Describes the output for files."""
-    evaluator: Union[BuiltinEvaluator, CustomEvaluator]
+    evaluator: Union[TextBuiltinEvaluator, CustomEvaluator]
     expected_path: str  # Path to the file to compare to.
     actual_path: str  # Path to the generated file (by the users code)
 
 
 @dataclass
-class ReturnOutputChannel:
+class ValueOutputChannel:
     """Handles return values of function calls."""
-    evaluator: Union[BuiltinEvaluator, CustomEvaluator, SpecificEvaluator]
+    evaluator: Union[ValueBuiltinEvaluator, CustomEvaluator, SpecificEvaluator]
     value: Optional[Value] = None
+
+
+@dataclass
+class ExceptionOutputChannel:
+    """Handles exceptions of user code if needed."""
+    evaluator: Union[ExceptionBuiltinEvaluator, CustomEvaluator, SpecificEvaluator]
+    exception: ExceptionValue
 
 
 class NoneChannelState(str, Enum):
@@ -176,7 +207,7 @@ class IgnoredChannelState(str, Enum):
 AnyChannelState = Union[NoneChannelState, IgnoredChannelState]
 
 
-OutputChannel = Union[TextOutputChannel, FileOutputChannel, ReturnOutputChannel]
+OutputChannel = Union[TextOutputChannel, FileOutputChannel, ValueOutputChannel]
 
 
 TextOutput = Union[TextOutputChannel, AnyChannelState]
@@ -193,6 +224,7 @@ class Testcase:
     stdout: TextOutput
     stderr: TextOutput
     file: Union[FileOutputChannel, IgnoredChannelState]
+    exception: Union[ExceptionOutputChannel, AnyChannelState]
 
     def get_input(self, working_directory):
         if self.stdin == NoneChannelState.NONE:
@@ -212,7 +244,7 @@ class ExecutionTestcase(Testcase):
 class AdditionalTestcase(Testcase):
     """Additional test case."""
     function: FunctionCall  # Function call for the testcase.
-    result: Union[ReturnOutputChannel, IgnoredChannelState, NoneChannelState]
+    result: Union[ValueOutputChannel, IgnoredChannelState, NoneChannelState]
 
 
 @dataclass
