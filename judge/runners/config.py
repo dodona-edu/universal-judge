@@ -46,6 +46,12 @@ class LanguageConfig:
         """
         raise NotImplementedError
 
+    def user_friendly_submission_name(self, context: Context):
+        if context.object:
+            return context.object
+        else:
+            return ""
+
     def context_name(self, context_id: str) -> str:
         """
         Produce a name for the context file.

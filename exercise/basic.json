@@ -21,6 +21,7 @@
             "stderr": "none",
             "file": "ignored",
             "arguments": [],
+            "exception": "ignored",
             "stdin": {
               "data": "invoertekst",
               "type": "text"
@@ -41,6 +42,7 @@
               },
               "stderr": "none",
               "file": "ignored",
+              "exception": "ignored",
               "result": {
                 "value": {
                   "type": "text",
@@ -83,6 +85,7 @@
               },
               "stderr": "none",
               "file": "ignored",
+              "exception": "ignored",
               "result": {
                 "evaluator": {
                   "type": "specific",
@@ -133,6 +136,7 @@
               },
               "stderr": "none",
               "file": "ignored",
+              "exception": "ignored",
               "result": {
                 "value": {
                   "type": "text",
@@ -171,6 +175,7 @@
               "stderr": "none",
               "file": "ignored",
               "result": "none",
+              "exception": "ignored",
               "function": {
                 "type": "top",
                 "name": "echo2",

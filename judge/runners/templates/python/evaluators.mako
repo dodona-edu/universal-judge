@@ -5,7 +5,7 @@ value_file = None
 
 def open_outputs():
     global value_file
-    value_file = open(r"${output_file}", "w")
+    value_file = open(r"${value_file}", "w")
 
 
 def close_outputs():

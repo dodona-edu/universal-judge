@@ -10,11 +10,11 @@ import Control.Monad.Trans.Class
 
 
 evaluated :: Bool -> String -> String -> [String] -> IO ()
-evaluated = sendSpecificEvaluated "${output_file}"
+evaluated = sendSpecificEvaluated "${value_file}"
 
 
 send :: Typeable a => a -> IO ()
-send = sendValue "${output_file}"
+send = sendValue "${value_file}"
 
 
 % for additional in additionals:

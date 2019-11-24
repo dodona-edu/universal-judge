@@ -95,9 +95,6 @@ class ExceptionBuiltin(str, Enum):
     EXCEPTION = "exception"
 
 
-Builtin = Union[TextBuiltin, ValueBuiltin, ExceptionBuiltin]
-
-
 @dataclass
 class BaseBuiltinEvaluator:
     """
@@ -247,13 +244,17 @@ class AdditionalTestcase(Testcase):
     result: Union[ValueOutputChannel, IgnoredChannelState, NoneChannelState]
 
 
+class NoExecutionTestcase(str, Enum):
+    NONE = "none"
+
+
 @dataclass
 class Context:
     """A context is what the name implies: executes things in the same context.
     As such, the context consists of three main things: the preparation, the
     execution and the post-processing.
     """
-    execution: ExecutionTestcase
+    execution: Union[ExecutionTestcase, NoExecutionTestcase]
     additional: List[AdditionalTestcase]
     before: Code
     after: Code
@@ -261,8 +262,11 @@ class Context:
     description: Optional[str] = None
 
     def all_testcases(self) -> List[Testcase]:
-        # noinspection PyTypeChecker
-        return [self.execution] + self.additional
+        if self.execution == NoExecutionTestcase.NONE:
+            return self.additional
+        else:
+            # noinspection PyTypeChecker
+            return [self.execution] + self.additional
 
 
 @dataclass

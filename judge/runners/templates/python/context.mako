@@ -3,12 +3,14 @@ import sys
 import values
 import evaluator_${context_id}
 
-## Set the main arguments.
-sys.argv.extend([\
-% for argument in main_arguments:
-    <%include file="value.mako" args="value=argument"/>\
-% endfor
-])
+## Set the main arguments, if needed.
+% if execution.exists:
+    sys.argv.extend([\
+        % for argument in execution.arguments:
+            <%include file="value.mako" args="value=argument"/>\
+        % endfor
+    ])
+% endif
 
 ## Open the output files.
 evaluator_${context_id}.open_outputs()

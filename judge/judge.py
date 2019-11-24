@@ -52,9 +52,10 @@ def _evaluate_channel(channel_name: str,
                                 data=TestData(channel=channel_name)))
 
     # print(f"\nStatus: {status}")
-    if not (expected_output in (NoneChannelState.NONE, IgnoredChannelState.IGNORED) and status.enum == Status.CORRECT):
-        for element in send_queue:
-            report_update(element)
+    # if not (expected_output in (NoneChannelState.NONE, IgnoredChannelState.IGNORED) and status.enum == Status.CORRECT):
+    # TODO: sometimes, this will result in a test case without any tests.
+    for element in send_queue:
+        report_update(element)
 
 
 class Judge:
@@ -79,41 +80,6 @@ class Judge:
             submission_code = file.read()
 
         self._execute_test_plan(submission_code, plan)
-
-
-def get_readable_input(config: Config, case: Testcase, runner: BaseRunner) -> ExtendedMessage:
-    """
-    Get human readable input for a testcase. This function will use, in order of availability:
-
-    1. A description on the testcase.
-    2. A function call.
-    3. The stdin.
-    4. Program arguments, if any.
-
-    If the input is code, the message type will be set to code or the language's name,
-    if Dodona has support for the language.
-
-    :param config: The configuration of the judge.
-    :param case: The testcase to get the input from.
-    :param runner: Used to generate a function if the input is a function.
-    """
-    format_ = 'text'  # By default, we use text as input.
-    if case.description:
-        text = case.description
-    elif isinstance(case, AdditionalTestcase) and case.function:
-        text = runner.function_call(case.function)
-        format_ = runner.config.programming_language
-    elif case.stdin != NoneChannelState.NONE:
-        assert isinstance(case.stdin, TextData)
-        text = case.stdin.get_data_as_string(config.resources)
-    else:
-        assert isinstance(case, ExecutionTestcase)
-        if case.arguments:
-            variable_part = str(case.arguments)
-        else:
-            variable_part = "without arguments"
-        text = f"Program execution {variable_part}"
-    return ExtendedMessage(description=text, format=format_)
 
 
 class GeneratorJudge(Judge):
@@ -189,7 +155,7 @@ class GeneratorJudge(Judge):
                 )))
                 break
 
-            readable_input = get_readable_input(self.config, testcase, self.runner)
+            readable_input = self.runner.get_readable_input(context, testcase)
             report_update(StartTestcase(description=readable_input))
 
             error_message: List[ExtendedMessage] = []

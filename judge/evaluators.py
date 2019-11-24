@@ -12,8 +12,8 @@ from runners.runner import get_runner
 from serialisation import get_readable_representation, SerialisationError, SpecificResult, CustomResult, ExceptionValue
 from tested import Config
 from testplan import TestPlanError, TextOutputChannel, FileOutputChannel, ValueOutputChannel, NoneChannelState, \
-    IgnoredChannelState, OutputChannel, AnyChannelState, Builtin, TextBuiltinEvaluator, ValueBuiltinEvaluator, \
-    ExceptionBuiltinEvaluator, ExceptionOutputChannel
+    IgnoredChannelState, OutputChannel, AnyChannelState, TextBuiltinEvaluator, ValueBuiltinEvaluator, \
+    ExceptionBuiltinEvaluator, ExceptionOutputChannel, TextBuiltin, ValueBuiltin, ExceptionBuiltin
 from testplan import CustomEvaluator as TestplanCustomEvaluator
 from testplan import SpecificEvaluator as TestplanSpecificEvaluator
 
@@ -439,17 +439,17 @@ def get_evaluator(config: Config, output: Union[OutputChannel, AnyChannelState])
     # Handle actual evaluators.
     evaluator = output.evaluator
     if isinstance(evaluator, TextBuiltinEvaluator):
-        if evaluator.name == Builtin.TEXT:
+        if evaluator.name == TextBuiltin.TEXT:
             return TextEvaluator(config, arguments=evaluator.options)
-        elif evaluator.name == Builtin.FILE:
+        elif evaluator.name == TextBuiltin.FILE:
             return FileEvaluator(config, arguments=evaluator.options)
         else:
             return ExceptionEvaluator(config, arguments=evaluator.options)
     elif isinstance(evaluator, ValueBuiltinEvaluator):
-        assert evaluator.name == Builtin.VALUE
+        assert evaluator.name == ValueBuiltin.VALUE
         return ValueEvaluator(config, arguments=evaluator.options)
     elif isinstance(evaluator, ExceptionBuiltinEvaluator):
-        assert evaluator.name == Builtin.EXCEPTION
+        assert evaluator.name == ExceptionBuiltin.EXCEPTION
         raise NotImplementedError("Exception evaluators are not yet supported.")
     elif isinstance(evaluator, TestplanCustomEvaluator):
         return CustomEvaluator(config)

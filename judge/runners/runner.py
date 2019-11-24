@@ -12,17 +12,19 @@ from typing import Tuple, List
 from mako.exceptions import TemplateLookupException
 from mako.lookup import TemplateLookup
 
+from dodona import ExtendedMessage
 from runners.config import LanguageConfig
 from runners.haskell import HaskellConfig
 from runners.java import JavaConfig
 from runners.javascripted import JavaScriptedConfig
 from runners.python import PythonConfig
-from runners.templates import SubmissionData, write_template, ContextData, TestcaseData, EvaluatorData, CustomData
+from runners.templates import SubmissionData, write_template, ContextData, TestcaseData, EvaluatorData, CustomData, \
+    ExecutionTestcaseData
 from runners.utils import remove_indents, remove_newline
 from serialisation import Value
 from tested import Config
 from testplan import Plan, Context, FunctionCall, SpecificEvaluator, IgnoredChannelState, NoneChannelState, \
-    TestPlanError
+    TestPlanError, NoExecutionTestcase, Testcase, AdditionalTestcase, TextData, ExecutionTestcase
 
 
 def _get_identifier() -> str:
@@ -101,12 +103,16 @@ class BaseRunner:
         """True if the language needs an implementation step."""
         raise NotImplementedError
 
-    def function_call(self, call: FunctionCall) -> str:
+    def function_call(self, submission_name: str, call: FunctionCall) -> str:
         """Create a textual representation of a function call, to display to the user."""
         raise NotImplementedError
 
     def evaluate_specific(self, code: str, expected: Value, actual: Value) -> BaseExecutionResult:
         """Evaluate two values with code provided by the test plan."""
+        raise NotImplementedError
+
+    def get_readable_input(self, context: Context, case: Testcase) -> ExtendedMessage:
+        """Get the input for a testcase. See the implementations for more details on what is used."""
         raise NotImplementedError
 
 
@@ -172,9 +178,9 @@ class ConfigurableRunner(BaseRunner):
         value_file = str(self._value_file()).replace("\\", "/")
         exception_file = str(self._exception_file()).replace("\\", "/")
         # Create the test file.
-        additionals = self.get_additional(context_id, context)
+        additionals = self._get_additional(context_id, context)
         data = ContextData(
-            main_arguments=context.execution.arguments,
+            execution=self._get_execution(context_id, context),
             submission=submission,
             secret_id=self.identifier,
             value_file=value_file,
@@ -305,11 +311,12 @@ class ConfigurableRunner(BaseRunner):
         except TemplateLookupException:
             return environment.get_template(f"{name}.mako")
 
-    def function_call(self, call: FunctionCall) -> str:
+    def function_call(self, submission_name: str, call: FunctionCall) -> str:
+        call = self.prepare_function_call(submission_name, call)
         template = self._find_template("function", self._get_environment)
         return template.render(function=call)
 
-    def get_additional(self, context_id: str, context: Context) -> List[TestcaseData]:
+    def _get_additional(self, context_id: str, context: Context) -> List[TestcaseData]:
         result = []
         for i, testcase in enumerate(context.additional):
             eval_function_name = f"evaluate_{context_id}_{i}"
@@ -330,6 +337,12 @@ class ConfigurableRunner(BaseRunner):
                 has_return=testcase.result != NoneChannelState.NONE
             ))
         return result
+
+    def _get_execution(self, context_id: str, context: Context) -> ExecutionTestcaseData:
+        if context.execution == NoExecutionTestcase.NONE:
+            return ExecutionTestcaseData(exists=False, arguments=[])
+        else:
+            return ExecutionTestcaseData(exists=True, arguments=context.execution.arguments)
 
     def prepare_function_call(self, submission_name: str, function_call: FunctionCall) -> FunctionCall:
         """Prepare the function call for execution."""
@@ -366,6 +379,40 @@ class ConfigurableRunner(BaseRunner):
             command = self.language_config.execute_evaluator("eval")
             p = subprocess.run(command, text=True, capture_output=True, cwd=directory)
             return BaseExecutionResult(p.stdout, p.stderr, p.returncode)
+
+    def get_readable_input(self, context: Context, case: Testcase) -> ExtendedMessage:
+        """
+        Get human readable input for a testcase. This function will use, in order of availability:
+
+        1. A description on the testcase.
+        2. A function call.
+        3. The stdin.
+        4. Program arguments, if any.
+
+        If the input is code, the message type will be set to code or the language's name,
+        if Dodona has support for the language.
+
+        :param context: The context of the testcase.
+        :param case: The testcase to get the input from.
+        """
+        format_ = 'text'  # By default, we use text as input.
+        if case.description:
+            text = case.description
+        elif isinstance(case, AdditionalTestcase) and isinstance(case.function, FunctionCall):
+            name = self.language_config.user_friendly_submission_name(context)
+            text = self.function_call(name, case.function)
+            format_ = self.config.programming_language
+        elif case.stdin != NoneChannelState.NONE:
+            assert isinstance(case.stdin, TextData)
+            text = case.stdin.get_data_as_string(self.config.resources)
+        else:
+            assert isinstance(case, ExecutionTestcase)
+            if case.arguments:
+                variable_part = str(case.arguments)
+            else:
+                variable_part = "without arguments"
+            text = f"Program execution {variable_part}"
+        return ExtendedMessage(description=text, format=format_)
 
 
 CONFIGS = {

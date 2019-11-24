@@ -1,9 +1,11 @@
 """Code related to working with templates"""
 import dataclasses
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Union
 
+from mako import exceptions
 from mako.template import Template
 
 from serialisation import Value
@@ -27,6 +29,12 @@ class TestcaseData:
 
 
 @dataclass
+class ExecutionTestcaseData:
+    exists: bool
+    arguments: List[Value]
+
+
+@dataclass
 class ContextData:
     submission: str
     before: str
@@ -34,7 +42,7 @@ class ContextData:
     secret_id: str
     context_id: str
     submission_name: str
-    main_arguments: List[Value]
+    execution: ExecutionTestcaseData
     value_file: str
     exception_file: str
     additionals: List[TestcaseData]
@@ -58,7 +66,11 @@ class CustomData:
 def write_template(arguments, template: Template, path: Path):
     fields = dataclasses.fields(arguments)
     values = {field.name: getattr(arguments, field.name) for field in fields}
-    result = template.render(**values)
+    try:
+        result = template.render(**values)
+    except Exception as e:
+        print(exceptions.text_error_template().render(), file=sys.stderr)
+        raise e
     # noinspection PyTypeChecker
     with open(path, "w") as file:
         file.write(result)

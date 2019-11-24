@@ -9,7 +9,9 @@ main = do
     ## In Haskell we do the before/after inside the main (?)
     ${before}
     ## Call main function
-    ${submission_name}.main
+    % if execution.exists:
+        ${submission_name}.main
+    % endif
     % for additional in additionals:
         hPutStr stderr "--${secret_id}-- SEP"
         putStr "--${secret_id}-- SEP"

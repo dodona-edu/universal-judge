@@ -15,7 +15,7 @@ class Evaluator${context_id} {
     private final FileWriter valueWriter;
 
     public Evaluator${context_id}() throws Exception {
-        this.valueWriter = new FileWriter("${output_file}");
+        this.valueWriter = new FileWriter("${value_file}");
     }
 
     void close() throws Exception {

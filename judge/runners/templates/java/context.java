@@ -1,8 +1,6 @@
 ## Code to execute one test context.
 ## The The first part of this file contains the evluation functions.
 ## The second part is responsible for actually running the tests.
-<%! from testplan import BuiltinEvaluator %>
-
 class Context${context_id} {
 
     private final Evaluator${context_id} evaluator;
@@ -15,15 +13,17 @@ class Context${context_id} {
         ## In Java, we must execute the before and after code in the context.
         ${before}
 
-        ## Call the main fucnction.
-        ${submission_name}.main(new String[]{
-            % for argument in main_arguments:
+        ## Call the main fucnction if necessary
+        % if execution.exists:
+            ${submission_name}.main(new String[]{
+            % for argument in execution.arguments:
                 <%include file="value.mako" args="value=argument"/>
                 % if not loop.last:
                     , \
                 % endif
             % endfor
-        });
+            });
+        % endif
 
         % for additional in additionals:
             System.err.print("--${secret_id}-- SEP");
