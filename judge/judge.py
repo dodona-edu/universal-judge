@@ -1,3 +1,5 @@
+from pprint import pprint
+
 from dodona import *
 from evaluators import get_evaluator, Evaluator
 from runners.runner import BaseRunner, ExecutionResult, get_runner

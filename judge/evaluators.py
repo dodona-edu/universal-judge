@@ -263,7 +263,6 @@ class NoneEvaluator(Evaluator):
 
     def evaluate(self, expected, actual) -> EvaluationResult:
         assert expected == NoneChannelState.NONE
-        print(f"Evaluating none with {actual}")
         is_none = actual is None or actual == ""
         return EvaluationResult(
             result=StatusMessage(enum=Status.CORRECT if is_none else Status.WRONG),

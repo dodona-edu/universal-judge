@@ -31,10 +31,11 @@ except Exception as e:
         % if additional.has_return:
             evaluator_${context_id}.v_evaluate_${context_id}_${loop.index}(${submission_name}.<%include file="function.mako" args="function=additional.function" />)
         % else:
-            ${submission_name}.<%include file="function.mako" args="function=additional.function" />;
+            ${submission_name}.<%include file="function.mako" args="function=additional.function" />
         % endif
     except Exception as e:
         evaluator_${context_id}.e_evaluate_${context_id}_${loop.index}(e)
+
 % endfor
 
 ## Close output files.

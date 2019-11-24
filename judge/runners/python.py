@@ -13,7 +13,7 @@ class PythonConfig(LanguageConfig):
         return f"def {name}(value): send(value)"
 
     def exception_writer(self, name):
-        return f"def {name}(exception): send_exception(value)"
+        return f"def {name}(exception): send_exception(exception)"
 
     def needs_compilation(self) -> bool:
         return True

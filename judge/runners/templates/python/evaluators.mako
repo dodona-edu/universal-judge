@@ -5,7 +5,7 @@ exception_file = None
 
 
 def open_outputs():
-    global value_file
+    global value_file, exception_file
     value_file = open(r"${value_file}", "w")
     exception_file = open(r"${exception_file}", "w")
 
@@ -29,7 +29,7 @@ def send(value):
 
 
 def send_exception(exception):
-    values.send_exception(value_file, value)
+    values.send_exception(exception_file, exception)
 
 
 ${execution.exception_code}
