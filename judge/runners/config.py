@@ -9,11 +9,6 @@ class LanguageConfig:
     Configuration for the runner
     """
 
-    # TODO: proper support for language features.
-    def supports_top_level_functions(self) -> bool:
-        """If the language supports top level functions."""
-        raise NotImplementedError
-
     def needs_compilation(self) -> bool:
         """If the language needs compilation."""
         raise NotImplementedError

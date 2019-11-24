@@ -16,6 +16,7 @@ other languages.
 """
 import json
 import math
+from dataclasses import field
 from enum import Enum
 from typing import Union, List, Dict, Literal, Optional
 
@@ -219,6 +220,29 @@ def to_python_comparable(value: Optional[Value]):
         return value.data
 
     raise AssertionError(f"Unknown value type: {value}")
+
+
+@dataclass
+class SpecificResult:
+    """Result of an evaluation by a language specific evaluator."""
+    result: bool  # The result of the evaluation.
+    readable_expected: str  # A human-friendly version of what the channel should have been.
+    readable_actual: str  # A human-friendly version (best effort at least) of what the channel is.
+    messages: List[str] = field(default_factory=list)
+
+
+@dataclass
+class CustomResult:
+    """Result of an evaluation by a language-independent custom evaluator."""
+    result: bool  # The result of the evaluation.
+    messages: List[str] = field(default_factory=list)
+
+
+@dataclass
+class ExceptionValue:
+    """An exception that was thrown while executing the user context."""
+    message: str
+    stacktrace: Optional[str]
 
 
 if __name__ == '__main__':

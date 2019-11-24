@@ -26,9 +26,6 @@ class HaskellConfig(LanguageConfig):
     def value_writer(self, name):
         return f"{name} :: Typeable a => a -> IO ()\n{name} = send"
 
-    def supports_top_level_functions(self) -> bool:
-        return True
-
     def needs_compilation(self) -> bool:
         return True
 

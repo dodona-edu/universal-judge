@@ -11,13 +11,10 @@ class JavaScriptedConfig(LanguageConfig):
     TODO: system for indicating required/supported features.
     """
 
-    def value_writer(self):
+    def value_writer(self, name):
         return ""
 
     def needs_main(self):
-        return False
-
-    def supports_top_level_functions(self) -> bool:
         return False
 
     def needs_compilation(self) -> bool:

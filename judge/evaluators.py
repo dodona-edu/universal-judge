@@ -9,7 +9,7 @@ from pydantic.dataclasses import dataclass
 import serialisation
 from dodona import Status, ExtendedMessage, Permission, StatusMessage, Message
 from runners.runner import get_runner
-from serialisation import get_readable_representation, SerialisationError
+from serialisation import get_readable_representation, SerialisationError, SpecificResult, CustomResult
 from tested import Config
 from testplan import CustomEvaluator as TestplanCustomEvaluator
 from testplan import SpecificEvaluator as TestplanSpecificEvaluator
@@ -277,15 +277,6 @@ class IgnoredEvaluator(Evaluator):
         )
 
 
-@dataclass
-class SpecificResult:
-    """Result of an evaluation by a language specific evaluator."""
-    result: bool  # The result of the evaluation.
-    readable_expected: str  # A human-friendly version of what the channel should have been.
-    readable_actual: str  # A human-friendly version (best effort at least) of what the channel is.
-    messages: List[str] = field(default_factory=list)
-
-
 class SpecificEvaluator(Evaluator):
     """
     Compare the result of a specific evaluator. This evaluator has no options.
@@ -319,13 +310,6 @@ class SpecificEvaluator(Evaluator):
             readable_actual=actual.readable_actual,
             messages=actual.messages
         )
-
-
-@dataclass
-class CustomResult:
-    """Result of an evaluation by a language specific evaluator."""
-    result: bool  # The result of the evaluation.
-    messages: List[str] = field(default_factory=list)
 
 
 class CustomEvaluator(Evaluator):

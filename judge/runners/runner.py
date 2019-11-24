@@ -53,6 +53,7 @@ class ExecutionResult(BaseExecutionResult):
     """
     separator: str
     results: str
+    exceptions: str
 
 
 class BaseRunner:
@@ -168,14 +169,16 @@ class ConfigurableRunner(BaseRunner):
         :return: The files that were generated, in order of dependencies.
         """
         context_template = self._find_template("context", self._get_environment)
-        return_file = str(self._result_file()).replace("\\", "/")
+        value_file = str(self._value_file()).replace("\\", "/")
+        exception_file = str(self._exception_file()).replace("\\", "/")
         # Create the test file.
         additionals = self.get_additional(context_id, context)
         data = ContextData(
             main_arguments=context.execution.arguments,
             submission=submission,
             secret_id=self.identifier,
-            output_file=return_file,
+            value_file=value_file,
+            exception_file=exception_file,
             additionals=additionals,
             context_id=context_id,
             submission_name=submission_name,
@@ -187,7 +190,8 @@ class ConfigurableRunner(BaseRunner):
         evaluator_template = self._find_template("evaluators", self._get_environment)
         evaluator_data = EvaluatorData(
             additionals=additionals,
-            output_file=return_file,
+            value_file=value_file,
+            exception_file=exception_file,
             context_id=context_id,
         )
         write_template(evaluator_data, evaluator_template,
@@ -235,8 +239,11 @@ class ConfigurableRunner(BaseRunner):
     def _submission_name(self, name):
         return f"{name}.{self.language_config.file_extension()}"
 
-    def _result_file(self):
-        return Path(self.config.workdir, f"{self.identifier}_out.txt")
+    def _value_file(self):
+        return Path(self.config.workdir, f"{self.identifier}_values.txt")
+
+    def _exception_file(self):
+        return Path(self.config.workdir, f"{self.identifier}_exceptions.txt")
 
     def compile(self, ordered_files, cwd=None) -> BaseExecutionResult:
         cwd = cwd or self.config.workdir
@@ -267,12 +274,18 @@ class ConfigurableRunner(BaseRunner):
         identifier = f"--{self.identifier}-- SEP"
 
         try:
-            with open(self._result_file(), "r") as f:
+            with open(self._value_file(), "r") as f:
                 values = f.read()
         except FileNotFoundError:
             values = ""
 
-        return ExecutionResult(p.stdout, p.stderr, p.returncode, identifier, values)
+        try:
+            with open(self._exception_file(), "r") as f:
+                exceptions = f.read()
+        except FileNotFoundError:
+            exceptions = ""
+
+        return ExecutionResult(p.stdout, p.stderr, p.returncode, identifier, values, exceptions)
 
     def _path_to_templates(self) -> Path:
         """The path to the templates and additional files."""

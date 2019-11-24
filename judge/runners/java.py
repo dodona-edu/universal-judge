@@ -20,9 +20,6 @@ class JavaConfig(LanguageConfig):
     def value_writer(self, name):
         return f"public void {name}(Object value) throws Exception {{send(value);}}"
 
-    def supports_top_level_functions(self) -> bool:
-        return False
-
     def needs_compilation(self) -> bool:
         return True
 

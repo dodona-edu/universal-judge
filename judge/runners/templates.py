@@ -35,14 +35,16 @@ class ContextData:
     context_id: str
     submission_name: str
     main_arguments: List[Value]
-    output_file: str
+    value_file: str
+    exception_file: str
     additionals: List[TestcaseData]
 
 
 @dataclass
 class EvaluatorData:
     additionals: List[TestcaseData]
-    output_file: str
+    value_file: str
+    exception_file: str
     context_id: str
 
 

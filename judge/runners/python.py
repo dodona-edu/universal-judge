@@ -12,9 +12,6 @@ class PythonConfig(LanguageConfig):
     def value_writer(self, name):
         return f"def {name}(value):\n    send(value)"
 
-    def supports_top_level_functions(self) -> bool:
-        return True
-
     def needs_compilation(self) -> bool:
         return True
 
