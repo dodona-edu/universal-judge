@@ -179,8 +179,9 @@ class ConfigurableRunner(BaseRunner):
         exception_file = str(self._exception_file()).replace("\\", "/")
         # Create the test file.
         additionals = self._get_additional(context_id, context)
+        execution = self._get_execution(context_id, context)
         data = ContextData(
-            execution=self._get_execution(context_id, context),
+            execution=execution,
             submission=submission,
             secret_id=self.identifier,
             value_file=value_file,
@@ -195,6 +196,7 @@ class ConfigurableRunner(BaseRunner):
 
         evaluator_template = self._find_template("evaluators", self._get_environment)
         evaluator_data = EvaluatorData(
+            execution=execution,
             additionals=additionals,
             value_file=value_file,
             exception_file=exception_file,
@@ -319,30 +321,46 @@ class ConfigurableRunner(BaseRunner):
     def _get_additional(self, context_id: str, context: Context) -> List[TestcaseData]:
         result = []
         for i, testcase in enumerate(context.additional):
-            eval_function_name = f"evaluate_{context_id}_{i}"
-            has_specific = not isinstance(testcase.result, (IgnoredChannelState, NoneChannelState))
-            if has_specific and isinstance(testcase.result.evaluator, SpecificEvaluator):
-                custom_code = testcase.result.evaluator.evaluators[self.config.programming_language] \
+            v_eval_function_name = f"v_evaluate_{context_id}_{i}"
+            e_eval_function_name = f"e_evaluate_{context_id}_{i}"
+            has_specific_v = not isinstance(testcase.result, (IgnoredChannelState, NoneChannelState))
+            if has_specific_v and isinstance(testcase.result.evaluator, SpecificEvaluator):
+                custom_v_code = testcase.result.evaluator.evaluators[self.config.programming_language] \
                     .get_data_as_string(self.config.resources)
-                custom_code = self.language_config.rename_evaluator(custom_code, eval_function_name)
+                custom_v_code = self.language_config.rename_evaluator(custom_v_code, v_eval_function_name)
             else:
-                # Get value function call.
-                custom_code = self.language_config.value_writer(eval_function_name)
+                custom_v_code = self.language_config.value_writer(v_eval_function_name)
+            has_specific_e = not isinstance(testcase.exception, (IgnoredChannelState, NoneChannelState))
+            if has_specific_e and isinstance(testcase.exception.evaluator, SpecificEvaluator):
+                custom_e_code = testcase.exception.evaluator.evaluators[self.config.programming_language] \
+                    .get_data_as_string(self.config.resources)
+                custom_e_code = self.language_config.rename_evaluator(custom_e_code, e_eval_function_name)
+            else:
+                custom_e_code = self.language_config.exception_writer(e_eval_function_name)
             # Convert the function call.
             submission_name = self.language_config.submission_name(context_id, context)
             result.append(TestcaseData(
                 function=self.prepare_function_call(submission_name, testcase.function),
                 stdin=testcase.stdin,
-                value_code=custom_code,
+                value_code=custom_v_code,
+                exception_code=custom_e_code,
                 has_return=testcase.result != NoneChannelState.NONE
             ))
         return result
 
     def _get_execution(self, context_id: str, context: Context) -> ExecutionTestcaseData:
         if context.execution == NoExecutionTestcase.NONE:
-            return ExecutionTestcaseData(exists=False, arguments=[])
+            return ExecutionTestcaseData(exists=False, exception_code="", arguments=[])
         else:
-            return ExecutionTestcaseData(exists=True, arguments=context.execution.arguments)
+            eval_function_name = f"e_evaluate_execution"
+            has_specific = not isinstance(context.execution.exception, (IgnoredChannelState, NoneChannelState))
+            if has_specific and isinstance(context.execution.exception.evaluator, SpecificEvaluator):
+                custom_code = context.execution.exception.evaluator.evaluators[self.config.programming_language] \
+                    .get_data_as_string(self.config.resources)
+                custom_code = self.language_config.rename_evaluator(custom_code, eval_function_name)
+            else:
+                custom_code = self.language_config.exception_writer(eval_function_name)
+            return ExecutionTestcaseData(exists=True, arguments=context.execution.arguments, exception_code=custom_code)
 
     def prepare_function_call(self, submission_name: str, function_call: FunctionCall) -> FunctionCall:
         """Prepare the function call for execution."""

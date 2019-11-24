@@ -13,17 +13,21 @@ import java.util.stream.*;
 class Evaluator${context_id} {
 
     private final FileWriter valueWriter;
+    private final FileWriter exceptionWriter;
 
     public Evaluator${context_id}() throws Exception {
         this.valueWriter = new FileWriter("${value_file}");
+        this.exceptionWriter = new FileWriter("${exception_file}");
     }
 
     void close() throws Exception {
         this.valueWriter.close();
+        this.exceptionWriter.close();
     }
 
-    void valueWrite(String value) throws Exception {
+    void writeDelimiter(String value) throws Exception {
         valueWriter.write(value);
+        exceptionWriter.write(value);
     }
 
     void evaluated(boolean result, String expected, String actual, Collection<String> messages) throws Exception {
@@ -38,10 +42,18 @@ class Evaluator${context_id} {
         Values.send(valueWriter, value);
     }
 
+    void sendException(Exception exception) throws Exception {
+        Values.sendException(exceptionWriter, exception);
+    }
+
+    ${execution.exception_code}
+
     % for additional in additionals:
         % if additional.has_return:
             ${additional.value_code}
         % endif
+
+        ${additional.exception_code}
 
     % endfor
 }

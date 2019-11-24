@@ -1,5 +1,7 @@
 """Minimal RPC language in JSON to send data from the tests to the judge."""
+import io
 import json
+import traceback
 
 
 def __encode(value):
@@ -40,6 +42,16 @@ def __encode(value):
 def send_value(stream, value):
     """Send a value to the given stream."""
     json.dump(__encode(value), stream)
+
+
+def send_exception(stream, exception):
+    tracer = io.StringIO()
+    traceback.print_tb(exception.__traceback__, file=tracer)
+    data = {
+        "message": str(exception),
+        "stacktrace": tracer.getvalue()
+    }
+    json.dump(data, stream)
 
 
 # noinspection PyDefaultArgument

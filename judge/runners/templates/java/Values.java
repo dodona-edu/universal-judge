@@ -3,6 +3,8 @@ import com.github.cliftonlabs.json_simple.Jsonable;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.StringWriter;
+import java.io.PrintWriter;
 import java.util.*;
 
 /**
@@ -69,6 +71,15 @@ class Values {
 
     public static void send(OutputStreamWriter writer, Object value) throws IOException {
         Jsonable object = encode(value);
+        object.toJson(writer);
+    }
+
+    public static void sendException(OutputStreamWriter writer, Exception exception) throws IOException {
+        var sw = new StringWriter();
+        exception.printStackTrace(new PrintWriter(sw));
+        JsonObject object = new JsonObject();
+        object.put("message", exception.getMessage());
+        object.put("stacktrace", sw.toString());
         object.toJson(writer);
     }
 

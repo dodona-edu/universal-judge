@@ -25,12 +25,14 @@ class TestcaseData:
     function: FunctionCall
     stdin: Union[TextData, NoneChannelState]
     value_code: str
+    exception_code: str
     has_return: bool
 
 
 @dataclass
 class ExecutionTestcaseData:
     exists: bool
+    exception_code: str
     arguments: List[Value]
 
 
@@ -50,6 +52,7 @@ class ContextData:
 
 @dataclass
 class EvaluatorData:
+    execution: ExecutionTestcaseData
     additionals: List[TestcaseData]
     value_file: str
     exception_file: str

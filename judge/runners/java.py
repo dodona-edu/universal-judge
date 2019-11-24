@@ -19,6 +19,9 @@ class JavaConfig(LanguageConfig):
 
     def value_writer(self, name):
         return f"public void {name}(Object value) throws Exception {{send(value);}}"
+    
+    def exception_writer(self, name):
+        return f"public void {name}(Exception e) throws Exception {{sendException(e);}}"
 
     def needs_compilation(self) -> bool:
         return True

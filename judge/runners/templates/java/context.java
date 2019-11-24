@@ -15,25 +15,33 @@ class Context${context_id} {
 
         ## Call the main fucnction if necessary
         % if execution.exists:
-            ${submission_name}.main(new String[]{
-            % for argument in execution.arguments:
-                <%include file="value.mako" args="value=argument"/>
-                % if not loop.last:
-                    , \
-                % endif
-            % endfor
-            });
+            try {
+                ${submission_name}.main(new String[]{
+                % for argument in execution.arguments:
+                    <%include file="value.mako" args="value=argument"/>
+                    % if not loop.last:
+                        , \
+                    % endif
+                % endfor
+                });
+            } catch (Exception e) {
+                evaluator.e_evaluate_execution(e);
+            }
         % endif
 
         % for additional in additionals:
             System.err.print("--${secret_id}-- SEP");
             System.out.print("--${secret_id}-- SEP");
-            evaluator.valueWrite("--${secret_id}-- SEP");
-            % if additional.has_return:
-                evaluator.evaluate_${context_id}_${loop.index}(<%include file="function.mako" args="function=additional.function" />);
-            % else:
-                <%include file="function.mako" args="function=additional.function" />;
-            % endif
+            evaluator.writeDelimiter("--${secret_id}-- SEP");
+            try {
+                % if additional.has_return:
+                    evaluator.v_evaluate_${context_id}_${loop.index}(<%include file="function.mako" args="function=additional.function" />);
+                % else:
+                    <%include file="function.mako" args="function=additional.function" />;
+                % endif
+            } catch (Exception e) {
+                evaluator.e_evaluate_${context_id}_${loop.index}(e);
+            }
 
         % endfor
 

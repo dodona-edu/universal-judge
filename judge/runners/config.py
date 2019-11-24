@@ -83,7 +83,11 @@ class LanguageConfig:
         raise NotImplementedError
 
     def value_writer(self, name):
-        """Return the code needed to write functions to the file."""
+        """Return the code needed to write values to the file."""
+        raise NotImplementedError
+
+    def exception_writer(self, name):
+        """Return the code needed to write exceptions to the file."""
         raise NotImplementedError
 
     def conventionalise(self, function_name: str) -> str:

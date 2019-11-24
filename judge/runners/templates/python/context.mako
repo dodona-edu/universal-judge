@@ -16,18 +16,25 @@ import evaluator_${context_id}
 evaluator_${context_id}.open_outputs()
 
 ## Import the code for the first time.
-import ${submission_name}
+try:
+    import ${submission_name}
+except Exception as e:
+    evaluator_${context_id}.e_evaluate_execution(e)
+
 
 ## Handle test cases.
 % for additional in additionals:
     sys.stderr.write("--${secret_id}-- SEP")
     sys.stdout.write("--${secret_id}-- SEP")
-    evaluator_${context_id}.value_write("--${secret_id}-- SEP")
-    % if additional.has_return:
-        evaluator_${context_id}.evaluate_${context_id}_${loop.index}(${submission_name}.<%include file="function.mako" args="function=additional.function" />)
-    % else:
-        ${submission_name}.<%include file="function.mako" args="function=additional.function" />;
-    % endif
+    evaluator_${context_id}.write_delimiter("--${secret_id}-- SEP")
+    try:
+        % if additional.has_return:
+            evaluator_${context_id}.v_evaluate_${context_id}_${loop.index}(${submission_name}.<%include file="function.mako" args="function=additional.function" />)
+        % else:
+            ${submission_name}.<%include file="function.mako" args="function=additional.function" />;
+        % endif
+    except Exception as e:
+        evaluator_${context_id}.e_evaluate_${context_id}_${loop.index}(e)
 % endfor
 
 ## Close output files.

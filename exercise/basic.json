@@ -21,7 +21,7 @@
             "stderr": "none",
             "file": "ignored",
             "arguments": [],
-            "exception": "ignored",
+            "exception": "none",
             "stdin": {
               "data": "invoertekst",
               "type": "text"

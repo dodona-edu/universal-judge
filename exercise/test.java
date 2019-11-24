@@ -7,6 +7,7 @@ public class Main {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         String name = reader.readLine();
         System.out.println(name);
+        throw new IllegalArgumentException();
     }
 
     public static String echo(String a, int b) {

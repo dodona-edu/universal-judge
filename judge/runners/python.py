@@ -10,7 +10,10 @@ class PythonConfig(LanguageConfig):
     """Configuration for the Python language."""
 
     def value_writer(self, name):
-        return f"def {name}(value):\n    send(value)"
+        return f"def {name}(value): send(value)"
+
+    def exception_writer(self, name):
+        return f"def {name}(exception): send_exception(value)"
 
     def needs_compilation(self) -> bool:
         return True

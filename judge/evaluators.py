@@ -263,6 +263,7 @@ class NoneEvaluator(Evaluator):
 
     def evaluate(self, expected, actual) -> EvaluationResult:
         assert expected == NoneChannelState.NONE
+        print(f"Evaluating none with {actual}")
         is_none = actual is None or actual == ""
         return EvaluationResult(
             result=StatusMessage(enum=Status.CORRECT if is_none else Status.WRONG),
@@ -294,6 +295,9 @@ class ExceptionEvaluator(Evaluator):
                 readable_expected="",
                 readable_actual=""
             )
+
+        print(f"Actual is {actual}")
+        print(f"Expected is something else.")
 
         try:
             actual: ExceptionValue = ExceptionValue.__pydantic_model__.parse_raw(actual)

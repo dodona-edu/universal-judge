@@ -242,7 +242,7 @@ class CustomResult:
 class ExceptionValue:
     """An exception that was thrown while executing the user context."""
     message: str
-    stacktrace: Optional[str]
+    stacktrace: str
 
 
 if __name__ == '__main__':

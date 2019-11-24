@@ -137,6 +137,7 @@ class GeneratorJudge(Judge):
         stdout_ = results.stdout.split(results.separator)
         stderr_ = results.stderr.split(results.separator)
         values = results.results.split(results.separator)
+        exceptions = results.exceptions.split(results.separator)
 
         # There might be less output than testcase, which is an error. However, we process the
         # output we have, to ensure we send as much feedback as possible to the user.
@@ -146,7 +147,8 @@ class GeneratorJudge(Judge):
                 stdout_evaluator = get_evaluator(self.config, testcase.stdout)
                 stderr_evaluator = get_evaluator(self.config, testcase.stderr)
                 file_evaluator = get_evaluator(self.config, testcase.file)
-                result_evaluator = get_evaluator(self.config, testcase.result)
+                value_evaluator = get_evaluator(self.config, testcase.result)
+                exception_evaluator = get_evaluator(self.config, testcase.exception)
             except TestPlanError as e:
                 report_update(AppendMessage(message=ExtendedMessage(
                     description=str(e),
@@ -169,8 +171,8 @@ class GeneratorJudge(Judge):
             error_message.clear()
 
             # Check if there is early termination.
-            if i >= len(stdout_) or i >= len(stderr_) or i >= len(values):
-                assert i >= len(stdout_) and i >= len(stderr_) and i >= len(values)
+            if i >= len(stdout_) or i >= len(stderr_) or i >= len(values) or i >= len(exceptions):
+                assert i >= len(stdout_) and i >= len(stderr_) and i >= len(values) and i >= len(exceptions)
                 error_message.append(ExtendedMessage(description="Tests were terminated early.", format='text'))
 
             # Evaluate the error channel.
@@ -186,6 +188,21 @@ class GeneratorJudge(Judge):
                 # Use it as a normal channel.
                 _evaluate_channel("stderr", testcase.stdout, actual_stderr, stderr_evaluator, error_message)
 
+            # Evaluate the exception channel in a similar manner as the stderr channel.
+            # If we expect no errors, use the channel as error messages for the other channels.
+            # Else, we expected certain output on the channel, evaluate it as a normal channel.
+            actual_exception = exceptions[i] if i < len(exceptions) else None
+            try:
+                parsed_exception = ExceptionValue.__pydantic_model__.parse_raw(actual_exception)
+                readable_exception = parsed_exception.stacktrace
+            except (TypeError, ValueError) as e:
+                readable_exception = str(actual_exception)
+            if testcase.exception == NoneChannelState.NONE:
+                if readable_exception:
+                    error_message.append(ExtendedMessage(description=readable_exception, format='code'))
+            else:
+                _evaluate_channel("exception", testcase.exception, actual_exception, exception_evaluator, error_message)
+
             # Evaluate the stdout channel.
             actual_stdout = stdout_[i] if i < len(stdout_) else None
             _evaluate_channel("stdout", testcase.stdout, actual_stdout, stdout_evaluator, error_message)
@@ -193,7 +210,7 @@ class GeneratorJudge(Judge):
             # Evaluate value channel
             if i > 0:
                 actual_value = values[i] if i < len(values) else None
-                _evaluate_channel("return", testcase.result, actual_value, result_evaluator, error_message)
+                _evaluate_channel("return", testcase.result, actual_value, value_evaluator, error_message)
 
             report_update(CloseTestcase())
 
