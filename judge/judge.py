@@ -21,7 +21,8 @@ def _evaluate_channel(channel_name: str,
     Evaluate the output on a given channel. This function will output the appropriate messages
     to start and end a new test in Dodona.
 
-    If errors is given, the test will end with a runtime error.
+    If errors is given, the test will end with a runtime error. Note that if the expected output
+    is None, the test will not be written to Dodona if everything is correct.
 
     :param channel_name: The name of the channel being evaluated. Will be displayed in Dodona.
     :param expected_output: The output channel from the test case.
@@ -32,23 +33,28 @@ def _evaluate_channel(channel_name: str,
     evaluation_result = evaluator.evaluate(expected_output, actual_result)
     status = evaluation_result.result
 
-    # Start the test.
-    report_update(StartTest(expected=evaluation_result.readable_expected))
+    # Send values only after we determine if they should be sent or not.
+    send_queue: List[Update] = [StartTest(expected=evaluation_result.readable_expected)]
 
     # Report any errors we got.
     if error_message:
         for m in error_message:
-            report_update(AppendMessage(message=m))
+            send_queue.append(AppendMessage(message=m))
         status = StatusMessage(enum=Status.RUNTIME_ERROR)
 
     # Report any other messages we received.
     for message in evaluation_result.messages:
-        report_update(AppendMessage(message=message))
+        send_queue.append(AppendMessage(message=message))
 
     # Close the test.
-    report_update(CloseTest(generated=evaluation_result.readable_actual,
-                            status=status,
-                            data=TestData(channel=channel_name)))
+    send_queue.append(CloseTest(generated=evaluation_result.readable_actual,
+                                status=status,
+                                data=TestData(channel=channel_name)))
+
+    # print(f"\nStatus: {status}")
+    if not (expected_output in (NoneChannelState.NONE, IgnoredChannelState.IGNORED) and status.enum == Status.CORRECT):
+        for element in send_queue:
+            report_update(element)
 
 
 class Judge:
@@ -219,8 +225,9 @@ class GeneratorJudge(Judge):
             _evaluate_channel("stdout", testcase.stdout, actual_stdout, stdout_evaluator, error_message)
 
             # Evaluate value channel
-            actual_value = values[i] if i < len(values) else None
-            _evaluate_channel("return", testcase.result, actual_value, result_evaluator, error_message)
+            if i > 0:
+                actual_value = values[i] if i < len(values) else None
+                _evaluate_channel("return", testcase.result, actual_value, result_evaluator, error_message)
 
             report_update(CloseTestcase())
 

@@ -193,7 +193,6 @@ class Testcase:
     stdout: TextOutput
     stderr: TextOutput
     file: Union[FileOutputChannel, IgnoredChannelState]
-    result: Union[ReturnOutputChannel, IgnoredChannelState]
 
     def get_input(self, working_directory):
         if self.stdin == NoneChannelState.NONE:
@@ -206,12 +205,14 @@ class Testcase:
 class ExecutionTestcase(Testcase):
     """Main testcase for a context."""
     arguments: List[Value]  # Main args of the program.
+    result: IgnoredChannelState = IgnoredChannelState.IGNORED
 
 
 @dataclass
 class AdditionalTestcase(Testcase):
     """Additional test case."""
     function: FunctionCall  # Function call for the testcase.
+    result: Union[ReturnOutputChannel, IgnoredChannelState, NoneChannelState]
 
 
 @dataclass

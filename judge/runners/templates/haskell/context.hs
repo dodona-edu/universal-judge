@@ -11,10 +11,14 @@ main = do
     ## Call main function
     ${submission_name}.main
     % for additional in additionals:
-    hPutStr stderr "--${secret_id}-- SEP"
-    putStr "--${secret_id}-- SEP"
-    appendFile "${output_file}" "--${secret_id}-- SEP"
-    v${loop.index} <- ${submission_name}.<%include file="function.mako" args="function=additional.function" />
-    Evaluator${context_id}.evaluate_${context_id}_${loop.index} v${loop.index}
+        hPutStr stderr "--${secret_id}-- SEP"
+        putStr "--${secret_id}-- SEP"
+        appendFile "${output_file}" "--${secret_id}-- SEP"
+        % if additional.has_return:
+            v${loop.index} <- ${submission_name}.<%include file="function.mako" args="function=additional.function" />
+            Evaluator${context_id}.evaluate_${context_id}_${loop.index} v${loop.index}
+        % else:
+            ${submission_name}.<%include file="function.mako" args="function=additional.function" />
+        % endif
     % endfor
     ${after}

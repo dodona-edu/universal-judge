@@ -169,12 +169,12 @@ class CloseJudgment:
     command: Literal["close-judgement"] = "close-judgement"
 
 
-_Update = Union[StartJudgment, StartTab, StartContext, StartTestcase, StartTest, AppendMessage, AnnotateCode,
-                CloseTest, CloseTestcase, CloseContext, CloseTab, CloseJudgment]
+Update = Union[StartJudgment, StartTab, StartContext, StartTestcase, StartTest, AppendMessage, AnnotateCode,
+               CloseTest, CloseTestcase, CloseContext, CloseTab, CloseJudgment]
 
 
 class DodonaUpdate(BaseModel):
-    __root__: _Update
+    __root__: Update
 
 
 def _clean_dictionary(d):
@@ -190,7 +190,7 @@ class _EnhancedJSONEncoder(json.JSONEncoder):
         return super().default(o)
 
 
-def report_update(update: _Update):
+def report_update(update: Update):
     """
     Send an update to stdout.
     """

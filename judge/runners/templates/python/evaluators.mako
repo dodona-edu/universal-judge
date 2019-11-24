@@ -25,6 +25,8 @@ def send(value):
 
 
 % for additional in additionals:
-    ${additional.value_code}
+    % if additional.has_return:
+        ${additional.value_code}
+    % endif
 
 % endfor

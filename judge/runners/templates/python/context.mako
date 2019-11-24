@@ -21,7 +21,11 @@ import ${submission_name}
     sys.stderr.write("--${secret_id}-- SEP")
     sys.stdout.write("--${secret_id}-- SEP")
     evaluator_${context_id}.value_write("--${secret_id}-- SEP")
-    evaluator_${context_id}.evaluate_${context_id}_${loop.index}(${submission_name}.<%include file="function.mako" args="function=additional.function" />)
+    % if additional.has_return:
+        evaluator_${context_id}.evaluate_${context_id}_${loop.index}(${submission_name}.<%include file="function.mako" args="function=additional.function" />)
+    % else:
+        ${submission_name}.<%include file="function.mako" args="function=additional.function" />;
+    % endif
 % endfor
 
 ## Close output files.

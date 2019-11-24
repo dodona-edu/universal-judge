@@ -7,3 +7,6 @@ echo a b = do
 main = do
     s <- getLine
     putStrLn s
+
+
+echo2 a b = putStrLn (a ++ "-" ++ (show b))

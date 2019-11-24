@@ -23,6 +23,7 @@ class TestcaseData:
     function: FunctionCall
     stdin: Union[TextData, NoneChannelState]
     value_code: str
+    has_return: bool
 
 
 @dataclass
@@ -32,7 +33,6 @@ class ContextData:
     after: str
     secret_id: str
     context_id: str
-    has_top_level: bool
     submission_name: str
     main_arguments: List[Value]
     output_file: str

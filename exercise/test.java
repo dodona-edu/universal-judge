@@ -13,4 +13,9 @@ public class Main {
         System.out.println(a + "-" + b);
         return a + "-" + b;
     }
+
+    public static void echo2(String a, int b) {
+        System.out.println(a + "-" + b);
+        var c = a + "-" + b;
+    }
 }

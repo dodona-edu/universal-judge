@@ -21,7 +21,8 @@ from runners.templates import SubmissionData, write_template, ContextData, Testc
 from runners.utils import remove_indents, remove_newline
 from serialisation import Value
 from tested import Config
-from testplan import Plan, Context, FunctionCall, SpecificEvaluator, IgnoredChannelState
+from testplan import Plan, Context, FunctionCall, SpecificEvaluator, IgnoredChannelState, NoneChannelState, \
+    TestPlanError
 
 
 def _get_identifier() -> str:
@@ -177,7 +178,6 @@ class ConfigurableRunner(BaseRunner):
             output_file=return_file,
             additionals=additionals,
             context_id=context_id,
-            has_top_level=self.language_config.supports_top_level_functions(),
             submission_name=submission_name,
             before=before,
             after=after,
@@ -300,7 +300,7 @@ class ConfigurableRunner(BaseRunner):
         result = []
         for i, testcase in enumerate(context.additional):
             eval_function_name = f"evaluate_{context_id}_{i}"
-            has_specific = not isinstance(testcase.result, IgnoredChannelState)
+            has_specific = not isinstance(testcase.result, (IgnoredChannelState, NoneChannelState))
             if has_specific and isinstance(testcase.result.evaluator, SpecificEvaluator):
                 custom_code = testcase.result.evaluator.evaluators[self.config.programming_language] \
                     .get_data_as_string(self.config.resources)
@@ -313,7 +313,8 @@ class ConfigurableRunner(BaseRunner):
             result.append(TestcaseData(
                 function=self.prepare_function_call(submission_name, testcase.function),
                 stdin=testcase.stdin,
-                value_code=custom_code
+                value_code=custom_code,
+                has_return=testcase.result != NoneChannelState.NONE
             ))
         return result
 
@@ -345,8 +346,9 @@ class ConfigurableRunner(BaseRunner):
             files.append(self._evaluator_name("eval"))
 
             # Compile the evaluator
-            # TODO: handle errors!
             c = self.compile(files, directory)
+            if c.stderr:
+                raise TestPlanError(f"Error while compiling specific test case: {c.stderr}")
             # Execute the evaluator
             command = self.language_config.execute_evaluator("eval")
             p = subprocess.run(command, text=True, capture_output=True, cwd=directory)

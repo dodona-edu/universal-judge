@@ -29,7 +29,12 @@ class Context${context_id} {
             System.err.print("--${secret_id}-- SEP");
             System.out.print("--${secret_id}-- SEP");
             evaluator.valueWrite("--${secret_id}-- SEP");
-            evaluator.evaluate_${context_id}_${loop.index}(<%include file="function.mako" args="function=additional.function" />);
+            % if additional.has_return:
+                evaluator.evaluate_${context_id}_${loop.index}(<%include file="function.mako" args="function=additional.function" />);
+            % else:
+                <%include file="function.mako" args="function=additional.function" />;
+            % endif
+
         % endfor
 
         ${after}

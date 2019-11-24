@@ -20,7 +20,6 @@
             },
             "stderr": "none",
             "file": "ignored",
-            "result": "ignored",
             "arguments": [],
             "stdin": {
               "data": "invoertekst",
@@ -151,6 +150,30 @@
               "function": {
                 "type": "top",
                 "name": "echo",
+                "object": null,
+                "arguments": [
+                  {
+                    "type": "text",
+                    "data": "test"
+                  },
+                  {
+                    "type": "integer",
+                    "data": 25
+                  }
+                ]
+              },
+              "stdin": "none"
+            },
+            {
+              "essential": false,
+              "description": null,
+              "stdout": "ignored",
+              "stderr": "none",
+              "file": "ignored",
+              "result": "none",
+              "function": {
+                "type": "top",
+                "name": "echo2",
                 "object": null,
                 "arguments": [
                   {

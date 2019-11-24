@@ -77,7 +77,7 @@ class Values {
         JsonObject object = new JsonObject();
         object.put("result", result);
         object.put("readable_expected", expected);
-        object.put("actual_expected", actual);
+        object.put("readable_actual", actual);
         object.put("messages", messages);
         object.toJson(writer);
     }

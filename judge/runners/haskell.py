@@ -48,7 +48,6 @@ class HaskellConfig(LanguageConfig):
     def compilation_command(self, files: List[str]) -> List[str]:
         # Don't want to compile contexts, since they need recompilation.
         f = [x for x in files if "Context" not in x]
-        print(["ghc", "-c", *f, "-no-hs-main"])
         return ["ghc", "-c", *f, "-no-hs-main"]
 
     def submission_name(self, context_id: str, context: Context) -> str:
