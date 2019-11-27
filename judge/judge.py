@@ -209,10 +209,9 @@ class GeneratorJudge(Judge):
             actual_stdout = stdout_[i] if i < len(stdout_) else None
             _evaluate_channel("stdout", testcase.stdout, actual_stdout, stdout_evaluator, error_message)
 
-            # Evaluate value channel
-            if i > 0:
-                actual_value = values[i] if i < len(values) else None
-                _evaluate_channel("return", testcase.result, actual_value, value_evaluator, error_message)
+            # Evaluate value channel, but not in case of the execution channel.
+            actual_value = values[i] if i < len(values) else None
+            _evaluate_channel("return", testcase.result, actual_value, value_evaluator, error_message)
 
             report_update(CloseTestcase())
 

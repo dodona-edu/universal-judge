@@ -1,9 +1,9 @@
-FROM python:3.7-buster
+FROM python:3.8-buster
 
 # First, install all necessary packages for running things.
 RUN apt-get update && apt-get install -y default-jdk
 
-RUN pip install psutil jupyter-client ipykernel ansi2html dataclasses-json jinja2
+RUN pip install psutil pydantic mako pyhumps typing_inspect
 
 RUN chmod 711 /mnt
 

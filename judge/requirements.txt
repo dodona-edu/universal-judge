@@ -1,6 +1,6 @@
 psutil
-jinja2
 pytest
 mako
 pydantic
 pyhumps
+typing_inspect
