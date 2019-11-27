@@ -207,8 +207,8 @@ def _get_values(output_channel: ValueOutputChannel, actual) \
     # A crash here indicates a problem with one of the language implementations, or a student
     # is trying to cheat.
     try:
-        actual = None if actual is None else serialisation.parse(actual)
-        readable_actual = get_readable_representation(actual)
+        actual = serialisation.parse(actual) if actual else None
+        readable_actual = get_readable_representation(actual) if actual else ""
     except SerialisationError as e:
         message = ExtendedMessage(description=str(e), format="text", permission=Permission.STAFF)
         student = "Your return value was wrong; additionally Dodona didn't recognize it. " \
@@ -264,6 +264,9 @@ class NoneEvaluator(Evaluator):
     def evaluate(self, expected, actual) -> EvaluationResult:
         assert expected == NoneChannelState.NONE
         is_none = actual is None or actual == ""
+        # TODO: support values here.
+        if isinstance(actual, ExceptionValue):
+            actual = actual.stacktrace
         return EvaluationResult(
             result=StatusMessage(enum=Status.CORRECT if is_none else Status.WRONG),
             readable_expected="",
@@ -276,6 +279,8 @@ class IgnoredEvaluator(Evaluator):
 
     def evaluate(self, output_channel, actual) -> EvaluationResult:
         assert output_channel == IgnoredChannelState.IGNORED
+        if isinstance(actual, ExceptionValue):
+            actual = actual.stacktrace
         return EvaluationResult(
             result=StatusMessage(enum=Status.CORRECT),
             readable_expected="",
@@ -294,9 +299,6 @@ class ExceptionEvaluator(Evaluator):
                 readable_expected="",
                 readable_actual=""
             )
-
-        print(f"Actual is {actual}")
-        print(f"Expected is something else.")
 
         try:
             actual: ExceptionValue = ExceptionValue.__pydantic_model__.parse_raw(actual)
@@ -394,6 +396,13 @@ class CustomEvaluator(Evaluator):
                 expected, readable_expected, actual, readable_actual = result
         else:
             raise AssertionError(f"Unknown type of output channel: {output_channel}")
+
+        if actual is None:
+            return EvaluationResult(
+                result=StatusMessage(enum=Status.WRONG, human="Received nothing."),
+                readable_expected=readable_expected,
+                readable_actual=readable_actual
+            )
 
         runner = get_runner(self.config, output_channel.evaluator.language)
         code = output_channel.evaluator.code.get_data_as_string(self.config.resources)
