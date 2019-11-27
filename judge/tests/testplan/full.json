@@ -1,0 +1,205 @@
+{
+  "tabs": [
+    {
+      "name": "Correctheid",
+      "contexts": [
+        {
+          "description": "Beschrijving van de context",
+          "object": "Main",
+          "execution": {
+            "essential": true,
+            "description": null,
+            "stdout": {
+              "data": "invoertekst",
+              "type": "text",
+              "evaluator": {
+                "type": "builtin",
+                "options": {},
+                "name": "text"
+              }
+            },
+            "stderr": "none",
+            "file": "ignored",
+            "arguments": [],
+            "exception": "none",
+            "stdin": {
+              "data": "invoertekst",
+              "type": "text"
+            }
+          },
+          "additional": [
+            {
+              "essential": false,
+              "description": null,
+              "stdout": {
+                "data": "test-25",
+                "type": "text",
+                "evaluator": {
+                  "type": "builtin",
+                  "options": {},
+                  "name": "text"
+                }
+              },
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "ignored",
+              "result": {
+                "value": {
+                  "type": "text",
+                  "data": "test-25"
+                },
+                "evaluator": {
+                  "type": "builtin",
+                  "options": {},
+                  "name": "value"
+                }
+              },
+              "function": {
+                "type": "top",
+                "name": "echo",
+                "object": null,
+                "arguments": [
+                  {
+                    "type": "text",
+                    "data": "test"
+                  },
+                  {
+                    "type": "integer",
+                    "data": 25
+                  }
+                ]
+              },
+              "stdin": "none"
+            },
+            {
+              "essential": false,
+              "description": null,
+              "stdout": {
+                "data": "test-25",
+                "type": "text",
+                "evaluator": {
+                  "type": "builtin",
+                  "options": {},
+                  "name": "text"
+                }
+              },
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "ignored",
+              "result": {
+                "evaluator": {
+                  "type": "specific",
+                  "evaluators": {
+                    "python": {
+                      "type": "file",
+                      "data": "./specific_evaluator.py"
+                    },
+                    "java": {
+                      "type": "file",
+                      "data": "./specific_evaluator.jsh"
+                    },
+                    "haskell": {
+                      "type": "file",
+                      "data": "./specific_evaluator.hs"
+                    }
+                  }
+                }
+              },
+              "function": {
+                "type": "top",
+                "name": "echo",
+                "object": null,
+                "arguments": [
+                  {
+                    "type": "text",
+                    "data": "test"
+                  },
+                  {
+                    "type": "integer",
+                    "data": 25
+                  }
+                ]
+              },
+              "stdin": "none"
+            },
+            {
+              "essential": false,
+              "description": null,
+              "stdout": {
+                "data": "test-50",
+                "type": "text",
+                "evaluator": {
+                  "type": "builtin",
+                  "options": {},
+                  "name": "text"
+                }
+              },
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "ignored",
+              "result": {
+                "value": {
+                  "type": "text",
+                  "data": "HALLO"
+                },
+                "evaluator": {
+                  "type": "custom",
+                  "language": "python",
+                  "code": {
+                    "type": "file",
+                    "data": "./custom_evaluator.py"
+                  }
+                }
+              },
+              "function": {
+                "type": "top",
+                "name": "echo",
+                "object": null,
+                "arguments": [
+                  {
+                    "type": "text",
+                    "data": "test"
+                  },
+                  {
+                    "type": "integer",
+                    "data": 25
+                  }
+                ]
+              },
+              "stdin": "none"
+            },
+            {
+              "essential": false,
+              "description": null,
+              "stdout": "ignored",
+              "stderr": "none",
+              "file": "ignored",
+              "result": "none",
+              "exception": "ignored",
+              "function": {
+                "type": "top",
+                "name": "echo2",
+                "object": null,
+                "arguments": [
+                  {
+                    "type": "text",
+                    "data": "test"
+                  },
+                  {
+                    "type": "integer",
+                    "data": 25
+                  }
+                ]
+              },
+              "stdin": "none"
+            }
+          ],
+          "before": {
+          },
+          "after": {
+          }
+        }
+      ]
+    }
+  ]
+}

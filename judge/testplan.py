@@ -12,7 +12,7 @@ from os import path
 from typing import List, Optional, Union, Dict, Any, Literal
 
 from humps import is_camelcase
-from pydantic import validator
+from pydantic import validator, root_validator
 from pydantic.dataclasses import dataclass
 
 from serialisation import Value, ExceptionValue
@@ -31,8 +31,8 @@ class ChannelType(str, Enum):
 @dataclass
 class TextData:
     """Describes textual data: either directly or in a file."""
-    type: ChannelType
     data: str
+    type: ChannelType = ChannelType.TEXT
 
     @staticmethod
     def __resolve_path(working_directory, file_path):
@@ -70,8 +70,8 @@ class FunctionCall:
     """Represents a function call"""
     type: FunctionType
     name: str
-    object: Optional[str]
-    arguments: List[Value]
+    object: Optional[str] = None
+    arguments: List[Value] = field(default_factory=list)
 
     @staticmethod
     @validator('name')
@@ -105,23 +105,23 @@ class BaseBuiltinEvaluator:
     b) the most language independent.
     """
     # noinspection PyUnresolvedReferences
-    type: Literal["builtin"]
-    options: Dict[str, Any]  # Options for the evaluator
+    type: Literal["builtin"] = "builtin"
+    options: Dict[str, Any] = field(default_factory=dict)  # Options for the evaluator
 
 
 @dataclass
 class TextBuiltinEvaluator(BaseBuiltinEvaluator):
-    name: TextBuiltin
+    name: TextBuiltin = TextBuiltin.TEXT
 
 
 @dataclass
 class ValueBuiltinEvaluator(BaseBuiltinEvaluator):
-    name: ValueBuiltin
+    name: ValueBuiltin = ValueBuiltin.VALUE
 
 
 @dataclass
 class ExceptionBuiltinEvaluator(BaseBuiltinEvaluator):
-    name: ExceptionBuiltin
+    name: ExceptionBuiltin = ExceptionBuiltin.EXCEPTION
 
 
 @dataclass
@@ -131,10 +131,10 @@ class CustomEvaluator:
     evaluator is run as part of the judge and receives its values from that judge. This type is
     useful, for example, when doing exercises on sequence alignments.
     """
-    # noinspection PyUnresolvedReferences
-    type: Literal["custom"]
     language: str
     code: TextData
+    # noinspection PyUnresolvedReferences
+    type: Literal["custom"] = "custom"
 
 
 # Represents custom code. This is a mapping of the programming language to the actual code.
@@ -159,37 +159,37 @@ class SpecificEvaluator:
     Note: this type of evaluator is only supported when using function calls. If you want to
     evaluate, say stdout, you should use the custom evaluator instead.
     """
-    # noinspection PyUnresolvedReferences
-    type: Literal["specific"]
     evaluators: Code
+    # noinspection PyUnresolvedReferences
+    type: Literal["specific"] = "specific"
 
 
 @dataclass
 class TextOutputChannel(TextData):
     """Describes the output for textual channels."""
-    evaluator: Union[TextBuiltinEvaluator, CustomEvaluator]
+    evaluator: Union[TextBuiltinEvaluator, CustomEvaluator] = TextBuiltinEvaluator()
 
 
 @dataclass
 class FileOutputChannel:
     """Describes the output for files."""
-    evaluator: Union[TextBuiltinEvaluator, CustomEvaluator]
     expected_path: str  # Path to the file to compare to.
     actual_path: str  # Path to the generated file (by the users code)
+    evaluator: Union[TextBuiltinEvaluator, CustomEvaluator] = TextBuiltinEvaluator(name=TextBuiltin.FILE)
 
 
 @dataclass
 class ValueOutputChannel:
     """Handles return values of function calls."""
-    evaluator: Union[ValueBuiltinEvaluator, CustomEvaluator, SpecificEvaluator]
     value: Optional[Value] = None
+    evaluator: Union[ValueBuiltinEvaluator, CustomEvaluator, SpecificEvaluator] = ValueBuiltinEvaluator()
 
 
 @dataclass
 class ExceptionOutputChannel:
     """Handles exceptions of user code if needed."""
-    evaluator: Union[ExceptionBuiltinEvaluator, CustomEvaluator, SpecificEvaluator]
     exception: ExceptionValue
+    evaluator: Union[ExceptionBuiltinEvaluator, CustomEvaluator, SpecificEvaluator] = ExceptionBuiltinEvaluator()
 
 
 class NoneChannelState(str, Enum):
@@ -213,15 +213,16 @@ TextOutput = Union[TextOutputChannel, AnyChannelState]
 @dataclass
 class Testcase:
     """A test case is defined by an input and a set of tests."""
-    description: Optional[str]  # Will be generated if None.
-    essential: bool
+    # General stuff
+    description: Optional[str] = None  # Will be generated if None.
+    essential: bool = True
     # Inputs
-    stdin: Union[TextData, NoneChannelState]
+    stdin: Union[TextData, NoneChannelState] = NoneChannelState.NONE
     # Outputs
-    stdout: TextOutput
-    stderr: TextOutput
-    file: Union[FileOutputChannel, IgnoredChannelState]
-    exception: Union[ExceptionOutputChannel, AnyChannelState]
+    stdout: TextOutput = IgnoredChannelState.IGNORED
+    stderr: TextOutput = NoneChannelState.NONE
+    file: Union[FileOutputChannel, IgnoredChannelState] = IgnoredChannelState.IGNORED
+    exception: Union[ExceptionOutputChannel, AnyChannelState] = NoneChannelState.NONE
 
     def get_input(self, working_directory):
         if self.stdin == NoneChannelState.NONE:
@@ -231,17 +232,23 @@ class Testcase:
 
 
 @dataclass
-class ExecutionTestcase(Testcase):
-    """Main testcase for a context."""
-    arguments: List[Value]  # Main args of the program.
-    result: IgnoredChannelState = IgnoredChannelState.IGNORED
+class _RequiredAdditional:
+    """Internal helper, needed to work around MRO issues."""
+    function: FunctionCall  # Function call for the testcase.
+    result: Union[ValueOutputChannel, IgnoredChannelState, NoneChannelState]  # Result of the testcase.
 
 
 @dataclass
-class AdditionalTestcase(Testcase):
+class ExecutionTestcase(Testcase):
+    """Main testcase for a context."""
+    arguments: List[Value] = field(default_factory=list)  # Main args of the program.
+    result: IgnoredChannelState = IgnoredChannelState.IGNORED  # Needed internally.
+
+
+@dataclass
+class AdditionalTestcase(Testcase, _RequiredAdditional):
     """Additional test case."""
-    function: FunctionCall  # Function call for the testcase.
-    result: Union[ValueOutputChannel, IgnoredChannelState, NoneChannelState]
+    pass
 
 
 class NoExecutionTestcase(str, Enum):
@@ -250,15 +257,15 @@ class NoExecutionTestcase(str, Enum):
 
 @dataclass
 class Context:
-    """A context is what the name implies: executes things in the same context.
-    As such, the context consists of three main things: the preparation, the
-    execution and the post-processing.
     """
-    execution: Union[ExecutionTestcase, NoExecutionTestcase]
-    additional: List[AdditionalTestcase]
-    before: Code
-    after: Code
-    object: str  # Used for e.g. Java and Haskell.
+    A context corresponds to a context as defined by the Dodona test format.
+    It is a collection of testcases that are run together, without isolation.
+    """
+    execution: Union[ExecutionTestcase, NoExecutionTestcase] = NoExecutionTestcase.NONE
+    additional: List[AdditionalTestcase] = field(default_factory=list)
+    before: Code = field(default_factory=dict)
+    after: Code = field(default_factory=dict)
+    object: str = "Main"
     description: Optional[str] = None
 
     def all_testcases(self) -> List[Testcase]:
@@ -267,6 +274,14 @@ class Context:
         else:
             # noinspection PyTypeChecker
             return [self.execution] + self.additional
+
+    @root_validator
+    def check_testcases_exist(cls, values):
+        execution = values.get('execution')
+        additional = values.get('additional')
+        if execution == NoExecutionTestcase.NONE and not additional:
+            raise ValueError("Either execution or additional test cases must be defined.")
+        return values
 
 
 @dataclass
@@ -289,6 +304,10 @@ def parse_test_plan(json_string) -> Plan:
 
 
 if __name__ == '__main__':
-    with open('../exercise/basic.json', 'r') as f:
+    with open('../exercise/full.json', 'r') as f:
+        original = parse_test_plan(f.read())
+
+    with open('../exercise/short.json', 'r') as f:
         r = parse_test_plan(f.read())
         print(r)
+        print(f"IS CORRECT? {original == r}")

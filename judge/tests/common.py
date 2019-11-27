@@ -34,7 +34,7 @@ def validate_output(exercise, plan):
             "workdir": work_directory,
         }
 
-        shutil.copy2(plan, resource_folder + "/basic.json")
+        shutil.copy2(plan, resource_folder + "/full.json")
 
         stdin_ = json.dumps(config_)
 
@@ -79,7 +79,7 @@ def validate_result(exercise, plan, expected):
             "workdir": work_directory,
         }
 
-        shutil.copy2(plan, resource_folder + "/basic.json")
+        shutil.copy2(plan, resource_folder + "/full.json")
         stdin_ = json.dumps(config_)
         p = subprocess.run(['python', f"{JUDGE_DIR}/judge/tested.py"],
                            input=stdin_, text=True, capture_output=True)
