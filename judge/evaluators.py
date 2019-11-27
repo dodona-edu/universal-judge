@@ -265,8 +265,11 @@ class NoneEvaluator(Evaluator):
         assert expected == NoneChannelState.NONE
         is_none = actual is None or actual == ""
         # TODO: support values here.
-        if isinstance(actual, ExceptionValue):
+        try:
+            actual = ExceptionValue.__pydantic_model__.parse_raw(actual)
             actual = actual.stacktrace
+        except (TypeError, ValueError):
+            pass
         return EvaluationResult(
             result=StatusMessage(enum=Status.CORRECT if is_none else Status.WRONG),
             readable_expected="",
@@ -279,8 +282,12 @@ class IgnoredEvaluator(Evaluator):
 
     def evaluate(self, output_channel, actual) -> EvaluationResult:
         assert output_channel == IgnoredChannelState.IGNORED
-        if isinstance(actual, ExceptionValue):
+        # TODO: support values here.
+        try:
+            actual = ExceptionValue.__pydantic_model__.parse_raw(actual)
             actual = actual.stacktrace
+        except (TypeError, ValueError):
+            pass
         return EvaluationResult(
             result=StatusMessage(enum=Status.CORRECT),
             readable_expected="",
@@ -399,9 +406,10 @@ class CustomEvaluator(Evaluator):
 
         if actual is None:
             return EvaluationResult(
-                result=StatusMessage(enum=Status.WRONG, human="Received nothing."),
+                result=StatusMessage(enum=Status.WRONG),
                 readable_expected=readable_expected,
-                readable_actual=readable_actual
+                readable_actual=readable_actual,
+                messages=["Received nothing."]
             )
 
         runner = get_runner(self.config, output_channel.evaluator.language)
