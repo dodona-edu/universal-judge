@@ -1,0 +1,2124 @@
+{
+  "tabs": [
+    {
+      "name": "Correctheid",
+      "contexts": [
+        {
+          "additional": [
+            {
+              "result": {
+                "value": {
+                  "type": "list",
+                  "data": [
+                    {
+                      "type": "text",
+                      "data": "2 - 3 - 5 - 6 - 8 - 9 - 11 - 12 - 13 - 17 - 21 - 23 - 24 - 25"
+                    },
+                    {
+                      "type": "integer",
+                      "data": 14
+                    },
+                    {
+                      "type": "integer",
+                      "data": 26
+                    }
+                  ]
+                },
+                "evaluator": {
+                  "type": "custom",
+                  "language": "python",
+                  "code": {
+                    "type": "file",
+                    "data": "./evaluator.py"
+                  }
+                }
+              },
+              "function": {
+                "type": "top",
+                "name": "lottery",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 14
+                  },
+                  {
+                    "type": "integer",
+                    "data": 26
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "additional": [
+            {
+              "result": {
+                "value": {
+                  "type": "list",
+                  "data": [
+                    {
+                      "type": "text",
+                      "data": "1 - 2 - 6 - 11 - 12 - 13 - 14 - 16 - 17 - 19 - 20 - 22 - 24 - 26 - 32 - 33 - 34 - 37 - 40 - 41"
+                    },
+                    {
+                      "type": "integer",
+                      "data": 20
+                    },
+                    {
+                      "type": "integer",
+                      "data": 42
+                    }
+                  ]
+                },
+                "evaluator": {
+                  "type": "custom",
+                  "language": "python",
+                  "code": {
+                    "type": "file",
+                    "data": "./evaluator.py"
+                  }
+                }
+              },
+              "function": {
+                "type": "top",
+                "name": "lottery",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 20
+                  },
+                  {
+                    "type": "integer",
+                    "data": 42
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "additional": [
+            {
+              "result": {
+                "value": {
+                  "type": "list",
+                  "data": [
+                    {
+                      "type": "text",
+                      "data": "11 - 12"
+                    },
+                    {
+                      "type": "integer",
+                      "data": 2
+                    },
+                    {
+                      "type": "integer",
+                      "data": 42
+                    }
+                  ]
+                },
+                "evaluator": {
+                  "type": "custom",
+                  "language": "python",
+                  "code": {
+                    "type": "file",
+                    "data": "./evaluator.py"
+                  }
+                }
+              },
+              "function": {
+                "type": "top",
+                "name": "lottery",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 2
+                  },
+                  {
+                    "type": "integer",
+                    "data": 42
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "additional": [
+            {
+              "result": {
+                "value": {
+                  "type": "list",
+                  "data": [
+                    {
+                      "type": "text",
+                      "data": "12 - 17 - 18 - 27 - 34 - 36"
+                    },
+                    {
+                      "type": "integer",
+                      "data": 6
+                    },
+                    {
+                      "type": "integer",
+                      "data": 42
+                    }
+                  ]
+                },
+                "evaluator": {
+                  "type": "custom",
+                  "language": "python",
+                  "code": {
+                    "type": "file",
+                    "data": "./evaluator.py"
+                  }
+                }
+              },
+              "function": {
+                "type": "top",
+                "name": "lottery",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 6
+                  },
+                  {
+                    "type": "integer",
+                    "data": 42
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "additional": [
+            {
+              "result": {
+                "value": {
+                  "type": "list",
+                  "data": [
+                    {
+                      "type": "text",
+                      "data": "2 - 11 - 13 - 25 - 30 - 38"
+                    },
+                    {
+                      "type": "integer",
+                      "data": 6
+                    },
+                    {
+                      "type": "integer",
+                      "data": 42
+                    }
+                  ]
+                },
+                "evaluator": {
+                  "type": "custom",
+                  "language": "python",
+                  "code": {
+                    "type": "file",
+                    "data": "./evaluator.py"
+                  }
+                }
+              },
+              "function": {
+                "type": "top",
+                "name": "lottery",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 6
+                  },
+                  {
+                    "type": "integer",
+                    "data": 42
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "additional": [
+            {
+              "result": {
+                "value": {
+                  "type": "list",
+                  "data": [
+                    {
+                      "type": "text",
+                      "data": "4 - 6 - 10 - 14 - 19 - 22 - 31 - 37 - 41 - 44 - 46 - 52 - 54 - 55 - 58 - 59 - 61 - 65 - 70"
+                    },
+                    {
+                      "type": "integer",
+                      "data": 19
+                    },
+                    {
+                      "type": "integer",
+                      "data": 72
+                    }
+                  ]
+                },
+                "evaluator": {
+                  "type": "custom",
+                  "language": "python",
+                  "code": {
+                    "type": "file",
+                    "data": "./evaluator.py"
+                  }
+                }
+              },
+              "function": {
+                "type": "top",
+                "name": "lottery",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 19
+                  },
+                  {
+                    "type": "integer",
+                    "data": 72
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "additional": [
+            {
+              "result": {
+                "value": {
+                  "type": "list",
+                  "data": [
+                    {
+                      "type": "text",
+                      "data": "9 - 11"
+                    },
+                    {
+                      "type": "integer",
+                      "data": 2
+                    },
+                    {
+                      "type": "integer",
+                      "data": 12
+                    }
+                  ]
+                },
+                "evaluator": {
+                  "type": "custom",
+                  "language": "python",
+                  "code": {
+                    "type": "file",
+                    "data": "./evaluator.py"
+                  }
+                }
+              },
+              "function": {
+                "type": "top",
+                "name": "lottery",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 2
+                  },
+                  {
+                    "type": "integer",
+                    "data": 12
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "additional": [
+            {
+              "result": {
+                "value": {
+                  "type": "list",
+                  "data": [
+                    {
+                      "type": "text",
+                      "data": "3"
+                    },
+                    {
+                      "type": "integer",
+                      "data": 1
+                    },
+                    {
+                      "type": "integer",
+                      "data": 7
+                    }
+                  ]
+                },
+                "evaluator": {
+                  "type": "custom",
+                  "language": "python",
+                  "code": {
+                    "type": "file",
+                    "data": "./evaluator.py"
+                  }
+                }
+              },
+              "function": {
+                "type": "top",
+                "name": "lottery",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 1
+                  },
+                  {
+                    "type": "integer",
+                    "data": 7
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "additional": [
+            {
+              "result": {
+                "value": {
+                  "type": "list",
+                  "data": [
+                    {
+                      "type": "text",
+                      "data": "24 - 46 - 60 - 65 - 113 - 115"
+                    },
+                    {
+                      "type": "integer",
+                      "data": 6
+                    },
+                    {
+                      "type": "integer",
+                      "data": 116
+                    }
+                  ]
+                },
+                "evaluator": {
+                  "type": "custom",
+                  "language": "python",
+                  "code": {
+                    "type": "file",
+                    "data": "./evaluator.py"
+                  }
+                }
+              },
+              "function": {
+                "type": "top",
+                "name": "lottery",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 6
+                  },
+                  {
+                    "type": "integer",
+                    "data": 116
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "additional": [
+            {
+              "result": {
+                "value": {
+                  "type": "list",
+                  "data": [
+                    {
+                      "type": "text",
+                      "data": "27 - 42 - 65 - 115 - 130 - 150"
+                    },
+                    {
+                      "type": "integer",
+                      "data": 6
+                    },
+                    {
+                      "type": "integer",
+                      "data": 172
+                    }
+                  ]
+                },
+                "evaluator": {
+                  "type": "custom",
+                  "language": "python",
+                  "code": {
+                    "type": "file",
+                    "data": "./evaluator.py"
+                  }
+                }
+              },
+              "function": {
+                "type": "top",
+                "name": "lottery",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 6
+                  },
+                  {
+                    "type": "integer",
+                    "data": 172
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "additional": [
+            {
+              "result": {
+                "value": {
+                  "type": "list",
+                  "data": [
+                    {
+                      "type": "text",
+                      "data": "2 - 4 - 7 - 15 - 30 - 34"
+                    },
+                    {
+                      "type": "integer",
+                      "data": 6
+                    },
+                    {
+                      "type": "integer",
+                      "data": 42
+                    }
+                  ]
+                },
+                "evaluator": {
+                  "type": "custom",
+                  "language": "python",
+                  "code": {
+                    "type": "file",
+                    "data": "./evaluator.py"
+                  }
+                }
+              },
+              "function": {
+                "type": "top",
+                "name": "lottery",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 6
+                  },
+                  {
+                    "type": "integer",
+                    "data": 42
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "additional": [
+            {
+              "result": {
+                "value": {
+                  "type": "list",
+                  "data": [
+                    {
+                      "type": "text",
+                      "data": "6 - 8 - 9 - 14 - 20 - 24"
+                    },
+                    {
+                      "type": "integer",
+                      "data": 6
+                    },
+                    {
+                      "type": "integer",
+                      "data": 42
+                    }
+                  ]
+                },
+                "evaluator": {
+                  "type": "custom",
+                  "language": "python",
+                  "code": {
+                    "type": "file",
+                    "data": "./evaluator.py"
+                  }
+                }
+              },
+              "function": {
+                "type": "top",
+                "name": "lottery",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 6
+                  },
+                  {
+                    "type": "integer",
+                    "data": 42
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "additional": [
+            {
+              "result": {
+                "value": {
+                  "type": "list",
+                  "data": [
+                    {
+                      "type": "text",
+                      "data": "1 - 5 - 15 - 28 - 34"
+                    },
+                    {
+                      "type": "integer",
+                      "data": 5
+                    },
+                    {
+                      "type": "integer",
+                      "data": 38
+                    }
+                  ]
+                },
+                "evaluator": {
+                  "type": "custom",
+                  "language": "python",
+                  "code": {
+                    "type": "file",
+                    "data": "./evaluator.py"
+                  }
+                }
+              },
+              "function": {
+                "type": "top",
+                "name": "lottery",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 5
+                  },
+                  {
+                    "type": "integer",
+                    "data": 38
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "additional": [
+            {
+              "result": {
+                "value": {
+                  "type": "list",
+                  "data": [
+                    {
+                      "type": "text",
+                      "data": "4 - 5 - 8"
+                    },
+                    {
+                      "type": "integer",
+                      "data": 3
+                    },
+                    {
+                      "type": "integer",
+                      "data": 10
+                    }
+                  ]
+                },
+                "evaluator": {
+                  "type": "custom",
+                  "language": "python",
+                  "code": {
+                    "type": "file",
+                    "data": "./evaluator.py"
+                  }
+                }
+              },
+              "function": {
+                "type": "top",
+                "name": "lottery",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 3
+                  },
+                  {
+                    "type": "integer",
+                    "data": 10
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "additional": [
+            {
+              "result": {
+                "value": {
+                  "type": "list",
+                  "data": [
+                    {
+                      "type": "text",
+                      "data": "3 - 11 - 15 - 17 - 21 - 27 - 31 - 78 - 89 - 90"
+                    },
+                    {
+                      "type": "integer",
+                      "data": 10
+                    },
+                    {
+                      "type": "integer",
+                      "data": 97
+                    }
+                  ]
+                },
+                "evaluator": {
+                  "type": "custom",
+                  "language": "python",
+                  "code": {
+                    "type": "file",
+                    "data": "./evaluator.py"
+                  }
+                }
+              },
+              "function": {
+                "type": "top",
+                "name": "lottery",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 10
+                  },
+                  {
+                    "type": "integer",
+                    "data": 97
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "additional": [
+            {
+              "result": {
+                "value": {
+                  "type": "list",
+                  "data": [
+                    {
+                      "type": "text",
+                      "data": "7 - 17 - 29 - 30 - 36 - 39"
+                    },
+                    {
+                      "type": "integer",
+                      "data": 6
+                    },
+                    {
+                      "type": "integer",
+                      "data": 42
+                    }
+                  ]
+                },
+                "evaluator": {
+                  "type": "custom",
+                  "language": "python",
+                  "code": {
+                    "type": "file",
+                    "data": "./evaluator.py"
+                  }
+                }
+              },
+              "function": {
+                "type": "top",
+                "name": "lottery",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 6
+                  },
+                  {
+                    "type": "integer",
+                    "data": 42
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "additional": [
+            {
+              "result": {
+                "value": {
+                  "type": "list",
+                  "data": [
+                    {
+                      "type": "text",
+                      "data": "2 - 3 - 4 - 6 - 9 - 20 - 22 - 34"
+                    },
+                    {
+                      "type": "integer",
+                      "data": 8
+                    },
+                    {
+                      "type": "integer",
+                      "data": 42
+                    }
+                  ]
+                },
+                "evaluator": {
+                  "type": "custom",
+                  "language": "python",
+                  "code": {
+                    "type": "file",
+                    "data": "./evaluator.py"
+                  }
+                }
+              },
+              "function": {
+                "type": "top",
+                "name": "lottery",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 8
+                  },
+                  {
+                    "type": "integer",
+                    "data": 42
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "additional": [
+            {
+              "result": {
+                "value": {
+                  "type": "list",
+                  "data": [
+                    {
+                      "type": "text",
+                      "data": "2 - 11 - 14 - 15 - 17 - 19"
+                    },
+                    {
+                      "type": "integer",
+                      "data": 6
+                    },
+                    {
+                      "type": "integer",
+                      "data": 42
+                    }
+                  ]
+                },
+                "evaluator": {
+                  "type": "custom",
+                  "language": "python",
+                  "code": {
+                    "type": "file",
+                    "data": "./evaluator.py"
+                  }
+                }
+              },
+              "function": {
+                "type": "top",
+                "name": "lottery",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 6
+                  },
+                  {
+                    "type": "integer",
+                    "data": 42
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "additional": [
+            {
+              "result": {
+                "value": {
+                  "type": "list",
+                  "data": [
+                    {
+                      "type": "text",
+                      "data": "3 - 6 - 19 - 30 - 33 - 37"
+                    },
+                    {
+                      "type": "integer",
+                      "data": 6
+                    },
+                    {
+                      "type": "integer",
+                      "data": 42
+                    }
+                  ]
+                },
+                "evaluator": {
+                  "type": "custom",
+                  "language": "python",
+                  "code": {
+                    "type": "file",
+                    "data": "./evaluator.py"
+                  }
+                }
+              },
+              "function": {
+                "type": "top",
+                "name": "lottery",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 6
+                  },
+                  {
+                    "type": "integer",
+                    "data": 42
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "additional": [
+            {
+              "result": {
+                "value": {
+                  "type": "list",
+                  "data": [
+                    {
+                      "type": "text",
+                      "data": "2 - 7 - 8 - 10 - 14 - 16"
+                    },
+                    {
+                      "type": "integer",
+                      "data": 6
+                    },
+                    {
+                      "type": "integer",
+                      "data": 16
+                    }
+                  ]
+                },
+                "evaluator": {
+                  "type": "custom",
+                  "language": "python",
+                  "code": {
+                    "type": "file",
+                    "data": "./evaluator.py"
+                  }
+                }
+              },
+              "function": {
+                "type": "top",
+                "name": "lottery",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 6
+                  },
+                  {
+                    "type": "integer",
+                    "data": 16
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "additional": [
+            {
+              "result": {
+                "value": {
+                  "type": "list",
+                  "data": [
+                    {
+                      "type": "text",
+                      "data": "1 - 2 - 5 - 8 - 10 - 14 - 22 - 23 - 30 - 37 - 38 - 40"
+                    },
+                    {
+                      "type": "integer",
+                      "data": 12
+                    },
+                    {
+                      "type": "integer",
+                      "data": 42
+                    }
+                  ]
+                },
+                "evaluator": {
+                  "type": "custom",
+                  "language": "python",
+                  "code": {
+                    "type": "file",
+                    "data": "./evaluator.py"
+                  }
+                }
+              },
+              "function": {
+                "type": "top",
+                "name": "lottery",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 12
+                  },
+                  {
+                    "type": "integer",
+                    "data": 42
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "additional": [
+            {
+              "result": {
+                "value": {
+                  "type": "list",
+                  "data": [
+                    {
+                      "type": "text",
+                      "data": "7 - 10 - 11 - 21 - 22 - 24 - 29 - 32 - 33 - 42"
+                    },
+                    {
+                      "type": "integer",
+                      "data": 10
+                    },
+                    {
+                      "type": "integer",
+                      "data": 42
+                    }
+                  ]
+                },
+                "evaluator": {
+                  "type": "custom",
+                  "language": "python",
+                  "code": {
+                    "type": "file",
+                    "data": "./evaluator.py"
+                  }
+                }
+              },
+              "function": {
+                "type": "top",
+                "name": "lottery",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 10
+                  },
+                  {
+                    "type": "integer",
+                    "data": 42
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "additional": [
+            {
+              "result": {
+                "value": {
+                  "type": "list",
+                  "data": [
+                    {
+                      "type": "text",
+                      "data": "2 - 5 - 10 - 16 - 27 - 28 - 33 - 34 - 49 - 52 - 61 - 62 - 65 - 67 - 69 - 72 - 74"
+                    },
+                    {
+                      "type": "integer",
+                      "data": 17
+                    },
+                    {
+                      "type": "integer",
+                      "data": 76
+                    }
+                  ]
+                },
+                "evaluator": {
+                  "type": "custom",
+                  "language": "python",
+                  "code": {
+                    "type": "file",
+                    "data": "./evaluator.py"
+                  }
+                }
+              },
+              "function": {
+                "type": "top",
+                "name": "lottery",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 17
+                  },
+                  {
+                    "type": "integer",
+                    "data": 76
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "additional": [
+            {
+              "result": {
+                "value": {
+                  "type": "list",
+                  "data": [
+                    {
+                      "type": "text",
+                      "data": "3 - 9 - 11 - 14 - 25 - 31"
+                    },
+                    {
+                      "type": "integer",
+                      "data": 6
+                    },
+                    {
+                      "type": "integer",
+                      "data": 42
+                    }
+                  ]
+                },
+                "evaluator": {
+                  "type": "custom",
+                  "language": "python",
+                  "code": {
+                    "type": "file",
+                    "data": "./evaluator.py"
+                  }
+                }
+              },
+              "function": {
+                "type": "top",
+                "name": "lottery",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 6
+                  },
+                  {
+                    "type": "integer",
+                    "data": 42
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "additional": [
+            {
+              "result": {
+                "value": {
+                  "type": "list",
+                  "data": [
+                    {
+                      "type": "text",
+                      "data": "17 - 22 - 23 - 27 - 35 - 36"
+                    },
+                    {
+                      "type": "integer",
+                      "data": 6
+                    },
+                    {
+                      "type": "integer",
+                      "data": 42
+                    }
+                  ]
+                },
+                "evaluator": {
+                  "type": "custom",
+                  "language": "python",
+                  "code": {
+                    "type": "file",
+                    "data": "./evaluator.py"
+                  }
+                }
+              },
+              "function": {
+                "type": "top",
+                "name": "lottery",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 6
+                  },
+                  {
+                    "type": "integer",
+                    "data": 42
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "additional": [
+            {
+              "result": {
+                "value": {
+                  "type": "list",
+                  "data": [
+                    {
+                      "type": "text",
+                      "data": "2 - 7 - 11 - 12 - 15 - 19 - 21 - 23 - 24 - 25 - 27 - 28 - 32 - 34 - 35 - 38 - 41"
+                    },
+                    {
+                      "type": "integer",
+                      "data": 17
+                    },
+                    {
+                      "type": "integer",
+                      "data": 42
+                    }
+                  ]
+                },
+                "evaluator": {
+                  "type": "custom",
+                  "language": "python",
+                  "code": {
+                    "type": "file",
+                    "data": "./evaluator.py"
+                  }
+                }
+              },
+              "function": {
+                "type": "top",
+                "name": "lottery",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 17
+                  },
+                  {
+                    "type": "integer",
+                    "data": 42
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "additional": [
+            {
+              "result": {
+                "value": {
+                  "type": "list",
+                  "data": [
+                    {
+                      "type": "text",
+                      "data": "2 - 7 - 11 - 13 - 56 - 62"
+                    },
+                    {
+                      "type": "integer",
+                      "data": 6
+                    },
+                    {
+                      "type": "integer",
+                      "data": 66
+                    }
+                  ]
+                },
+                "evaluator": {
+                  "type": "custom",
+                  "language": "python",
+                  "code": {
+                    "type": "file",
+                    "data": "./evaluator.py"
+                  }
+                }
+              },
+              "function": {
+                "type": "top",
+                "name": "lottery",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 6
+                  },
+                  {
+                    "type": "integer",
+                    "data": 66
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "additional": [
+            {
+              "result": {
+                "value": {
+                  "type": "list",
+                  "data": [
+                    {
+                      "type": "text",
+                      "data": "7 - 19 - 33 - 35"
+                    },
+                    {
+                      "type": "integer",
+                      "data": 4
+                    },
+                    {
+                      "type": "integer",
+                      "data": 42
+                    }
+                  ]
+                },
+                "evaluator": {
+                  "type": "custom",
+                  "language": "python",
+                  "code": {
+                    "type": "file",
+                    "data": "./evaluator.py"
+                  }
+                }
+              },
+              "function": {
+                "type": "top",
+                "name": "lottery",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 4
+                  },
+                  {
+                    "type": "integer",
+                    "data": 42
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "additional": [
+            {
+              "result": {
+                "value": {
+                  "type": "list",
+                  "data": [
+                    {
+                      "type": "text",
+                      "data": "7 - 30 - 32 - 34 - 35 - 40"
+                    },
+                    {
+                      "type": "integer",
+                      "data": 6
+                    },
+                    {
+                      "type": "integer",
+                      "data": 42
+                    }
+                  ]
+                },
+                "evaluator": {
+                  "type": "custom",
+                  "language": "python",
+                  "code": {
+                    "type": "file",
+                    "data": "./evaluator.py"
+                  }
+                }
+              },
+              "function": {
+                "type": "top",
+                "name": "lottery",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 6
+                  },
+                  {
+                    "type": "integer",
+                    "data": 42
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "additional": [
+            {
+              "result": {
+                "value": {
+                  "type": "list",
+                  "data": [
+                    {
+                      "type": "text",
+                      "data": "2 - 3 - 22 - 31"
+                    },
+                    {
+                      "type": "integer",
+                      "data": 4
+                    },
+                    {
+                      "type": "integer",
+                      "data": 42
+                    }
+                  ]
+                },
+                "evaluator": {
+                  "type": "custom",
+                  "language": "python",
+                  "code": {
+                    "type": "file",
+                    "data": "./evaluator.py"
+                  }
+                }
+              },
+              "function": {
+                "type": "top",
+                "name": "lottery",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 4
+                  },
+                  {
+                    "type": "integer",
+                    "data": 42
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "additional": [
+            {
+              "result": {
+                "value": {
+                  "type": "list",
+                  "data": [
+                    {
+                      "type": "text",
+                      "data": "4 - 5 - 6 - 7 - 18 - 19 - 21 - 26 - 31 - 42"
+                    },
+                    {
+                      "type": "integer",
+                      "data": 10
+                    },
+                    {
+                      "type": "integer",
+                      "data": 42
+                    }
+                  ]
+                },
+                "evaluator": {
+                  "type": "custom",
+                  "language": "python",
+                  "code": {
+                    "type": "file",
+                    "data": "./evaluator.py"
+                  }
+                }
+              },
+              "function": {
+                "type": "top",
+                "name": "lottery",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 10
+                  },
+                  {
+                    "type": "integer",
+                    "data": 42
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "additional": [
+            {
+              "result": {
+                "value": {
+                  "type": "list",
+                  "data": [
+                    {
+                      "type": "text",
+                      "data": "2 - 6 - 7 - 8 - 11 - 13 - 14 - 16 - 17 - 19 - 21 - 22 - 24 - 26 - 31 - 34 - 38 - 41"
+                    },
+                    {
+                      "type": "integer",
+                      "data": 18
+                    },
+                    {
+                      "type": "integer",
+                      "data": 42
+                    }
+                  ]
+                },
+                "evaluator": {
+                  "type": "custom",
+                  "language": "python",
+                  "code": {
+                    "type": "file",
+                    "data": "./evaluator.py"
+                  }
+                }
+              },
+              "function": {
+                "type": "top",
+                "name": "lottery",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 18
+                  },
+                  {
+                    "type": "integer",
+                    "data": 42
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "additional": [
+            {
+              "result": {
+                "value": {
+                  "type": "list",
+                  "data": [
+                    {
+                      "type": "text",
+                      "data": "3 - 6 - 14 - 18 - 39"
+                    },
+                    {
+                      "type": "integer",
+                      "data": 5
+                    },
+                    {
+                      "type": "integer",
+                      "data": 42
+                    }
+                  ]
+                },
+                "evaluator": {
+                  "type": "custom",
+                  "language": "python",
+                  "code": {
+                    "type": "file",
+                    "data": "./evaluator.py"
+                  }
+                }
+              },
+              "function": {
+                "type": "top",
+                "name": "lottery",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 5
+                  },
+                  {
+                    "type": "integer",
+                    "data": 42
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "additional": [
+            {
+              "result": {
+                "value": {
+                  "type": "list",
+                  "data": [
+                    {
+                      "type": "text",
+                      "data": "6 - 16 - 23 - 32 - 36 - 38"
+                    },
+                    {
+                      "type": "integer",
+                      "data": 6
+                    },
+                    {
+                      "type": "integer",
+                      "data": 40
+                    }
+                  ]
+                },
+                "evaluator": {
+                  "type": "custom",
+                  "language": "python",
+                  "code": {
+                    "type": "file",
+                    "data": "./evaluator.py"
+                  }
+                }
+              },
+              "function": {
+                "type": "top",
+                "name": "lottery",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 6
+                  },
+                  {
+                    "type": "integer",
+                    "data": 40
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "additional": [
+            {
+              "result": {
+                "value": {
+                  "type": "list",
+                  "data": [
+                    {
+                      "type": "text",
+                      "data": "11 - 16 - 22 - 36"
+                    },
+                    {
+                      "type": "integer",
+                      "data": 4
+                    },
+                    {
+                      "type": "integer",
+                      "data": 42
+                    }
+                  ]
+                },
+                "evaluator": {
+                  "type": "custom",
+                  "language": "python",
+                  "code": {
+                    "type": "file",
+                    "data": "./evaluator.py"
+                  }
+                }
+              },
+              "function": {
+                "type": "top",
+                "name": "lottery",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 4
+                  },
+                  {
+                    "type": "integer",
+                    "data": 42
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "additional": [
+            {
+              "result": {
+                "value": {
+                  "type": "list",
+                  "data": [
+                    {
+                      "type": "text",
+                      "data": "1 - 2 - 3 - 4 - 5 - 6"
+                    },
+                    {
+                      "type": "integer",
+                      "data": 6
+                    },
+                    {
+                      "type": "integer",
+                      "data": 6
+                    }
+                  ]
+                },
+                "evaluator": {
+                  "type": "custom",
+                  "language": "python",
+                  "code": {
+                    "type": "file",
+                    "data": "./evaluator.py"
+                  }
+                }
+              },
+              "function": {
+                "type": "top",
+                "name": "lottery",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 6
+                  },
+                  {
+                    "type": "integer",
+                    "data": 6
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "additional": [
+            {
+              "result": {
+                "value": {
+                  "type": "list",
+                  "data": [
+                    {
+                      "type": "text",
+                      "data": "6"
+                    },
+                    {
+                      "type": "integer",
+                      "data": 1
+                    },
+                    {
+                      "type": "integer",
+                      "data": 42
+                    }
+                  ]
+                },
+                "evaluator": {
+                  "type": "custom",
+                  "language": "python",
+                  "code": {
+                    "type": "file",
+                    "data": "./evaluator.py"
+                  }
+                }
+              },
+              "function": {
+                "type": "top",
+                "name": "lottery",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 1
+                  },
+                  {
+                    "type": "integer",
+                    "data": 42
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "additional": [
+            {
+              "result": {
+                "value": {
+                  "type": "list",
+                  "data": [
+                    {
+                      "type": "text",
+                      "data": "11 - 24 - 33 - 35"
+                    },
+                    {
+                      "type": "integer",
+                      "data": 4
+                    },
+                    {
+                      "type": "integer",
+                      "data": 39
+                    }
+                  ]
+                },
+                "evaluator": {
+                  "type": "custom",
+                  "language": "python",
+                  "code": {
+                    "type": "file",
+                    "data": "./evaluator.py"
+                  }
+                }
+              },
+              "function": {
+                "type": "top",
+                "name": "lottery",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 4
+                  },
+                  {
+                    "type": "integer",
+                    "data": 39
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "additional": [
+            {
+              "result": {
+                "value": {
+                  "type": "list",
+                  "data": [
+                    {
+                      "type": "text",
+                      "data": "3 - 4 - 6 - 7 - 10 - 11 - 12 - 14 - 15 - 16 - 17 - 18"
+                    },
+                    {
+                      "type": "integer",
+                      "data": 12
+                    },
+                    {
+                      "type": "integer",
+                      "data": 22
+                    }
+                  ]
+                },
+                "evaluator": {
+                  "type": "custom",
+                  "language": "python",
+                  "code": {
+                    "type": "file",
+                    "data": "./evaluator.py"
+                  }
+                }
+              },
+              "function": {
+                "type": "top",
+                "name": "lottery",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 12
+                  },
+                  {
+                    "type": "integer",
+                    "data": 22
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "additional": [
+            {
+              "result": {
+                "value": {
+                  "type": "list",
+                  "data": [
+                    {
+                      "type": "text",
+                      "data": "2 - 3 - 6 - 9 - 10 - 11 - 12 - 13 - 19 - 20 - 22 - 23 - 24 - 25 - 29 - 30 - 37 - 38"
+                    },
+                    {
+                      "type": "integer",
+                      "data": 18
+                    },
+                    {
+                      "type": "integer",
+                      "data": 42
+                    }
+                  ]
+                },
+                "evaluator": {
+                  "type": "custom",
+                  "language": "python",
+                  "code": {
+                    "type": "file",
+                    "data": "./evaluator.py"
+                  }
+                }
+              },
+              "function": {
+                "type": "top",
+                "name": "lottery",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 18
+                  },
+                  {
+                    "type": "integer",
+                    "data": 42
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "additional": [
+            {
+              "result": {
+                "value": {
+                  "type": "list",
+                  "data": [
+                    {
+                      "type": "text",
+                      "data": "2 - 4 - 10 - 11 - 14 - 18"
+                    },
+                    {
+                      "type": "integer",
+                      "data": 6
+                    },
+                    {
+                      "type": "integer",
+                      "data": 18
+                    }
+                  ]
+                },
+                "evaluator": {
+                  "type": "custom",
+                  "language": "python",
+                  "code": {
+                    "type": "file",
+                    "data": "./evaluator.py"
+                  }
+                }
+              },
+              "function": {
+                "type": "top",
+                "name": "lottery",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 6
+                  },
+                  {
+                    "type": "integer",
+                    "data": 18
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "additional": [
+            {
+              "result": {
+                "value": {
+                  "type": "list",
+                  "data": [
+                    {
+                      "type": "text",
+                      "data": "1 - 5 - 13 - 14 - 15 - 23"
+                    },
+                    {
+                      "type": "integer",
+                      "data": 6
+                    },
+                    {
+                      "type": "integer",
+                      "data": 26
+                    }
+                  ]
+                },
+                "evaluator": {
+                  "type": "custom",
+                  "language": "python",
+                  "code": {
+                    "type": "file",
+                    "data": "./evaluator.py"
+                  }
+                }
+              },
+              "function": {
+                "type": "top",
+                "name": "lottery",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 6
+                  },
+                  {
+                    "type": "integer",
+                    "data": 26
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "additional": [
+            {
+              "result": {
+                "value": {
+                  "type": "list",
+                  "data": [
+                    {
+                      "type": "text",
+                      "data": "21 - 23 - 27 - 31 - 41 - 46 - 48"
+                    },
+                    {
+                      "type": "integer",
+                      "data": 7
+                    },
+                    {
+                      "type": "integer",
+                      "data": 56
+                    }
+                  ]
+                },
+                "evaluator": {
+                  "type": "custom",
+                  "language": "python",
+                  "code": {
+                    "type": "file",
+                    "data": "./evaluator.py"
+                  }
+                }
+              },
+              "function": {
+                "type": "top",
+                "name": "lottery",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 7
+                  },
+                  {
+                    "type": "integer",
+                    "data": 56
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "additional": [
+            {
+              "result": {
+                "value": {
+                  "type": "list",
+                  "data": [
+                    {
+                      "type": "text",
+                      "data": "12 - 18 - 22 - 31 - 35 - 42"
+                    },
+                    {
+                      "type": "integer",
+                      "data": 6
+                    },
+                    {
+                      "type": "integer",
+                      "data": 42
+                    }
+                  ]
+                },
+                "evaluator": {
+                  "type": "custom",
+                  "language": "python",
+                  "code": {
+                    "type": "file",
+                    "data": "./evaluator.py"
+                  }
+                }
+              },
+              "function": {
+                "type": "top",
+                "name": "lottery",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 6
+                  },
+                  {
+                    "type": "integer",
+                    "data": 42
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "additional": [
+            {
+              "result": {
+                "value": {
+                  "type": "list",
+                  "data": [
+                    {
+                      "type": "text",
+                      "data": "2 - 5 - 7 - 8 - 9 - 10 - 11 - 12 - 14 - 23 - 28 - 30 - 34 - 36 - 37 - 42"
+                    },
+                    {
+                      "type": "integer",
+                      "data": 16
+                    },
+                    {
+                      "type": "integer",
+                      "data": 42
+                    }
+                  ]
+                },
+                "evaluator": {
+                  "type": "custom",
+                  "language": "python",
+                  "code": {
+                    "type": "file",
+                    "data": "./evaluator.py"
+                  }
+                }
+              },
+              "function": {
+                "type": "top",
+                "name": "lottery",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 16
+                  },
+                  {
+                    "type": "integer",
+                    "data": 42
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
