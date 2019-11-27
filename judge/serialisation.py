@@ -232,13 +232,6 @@ class SpecificResult:
 
 
 @dataclass
-class CustomResult:
-    """Result of an evaluation by a language-independent custom evaluator."""
-    result: bool  # The result of the evaluation.
-    messages: List[str] = field(default_factory=list)
-
-
-@dataclass
 class ExceptionValue:
     """An exception that was thrown while executing the user context."""
     message: str

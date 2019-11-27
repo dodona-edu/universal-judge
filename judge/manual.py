@@ -17,8 +17,8 @@ def read_config() -> Config:
         "time_limit": 10000000,
         "programming_language": 'python',
         "natural_language": 'nl',
-        "resources": str(Path('../exercise').resolve()),
-        "source": '../exercise/test.py',
+        "resources": str(Path('../lotto').resolve()),
+        "source": '../lotto/correct.py',
         "judge": str(Path('../').resolve()),
         "workdir": str(Path('./workdir').resolve()),
     })
@@ -27,7 +27,7 @@ def read_config() -> Config:
 if __name__ == '__main__':
     config = read_config()
 
-    json_string = open(f"{config.resources}/basic.json").read()
+    json_string = open(f"{config.resources}/plan.json").read()
     plan = parse_test_plan(json_string)
 
     # Delete content in work dir

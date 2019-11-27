@@ -2,8 +2,8 @@ import sys
 import values
 
 
-def evaluated(result, messages=[]):
-    values.send_evaluated(sys.stdout, result, None, None, messages)
+def evaluated(result, expected=None, messages=[]):
+    values.send_evaluated(sys.stdout, result, expected, None, messages)
 
 
 ${evaluator_code}

@@ -9,7 +9,7 @@ from pydantic.dataclasses import dataclass
 import serialisation
 from dodona import Status, ExtendedMessage, Permission, StatusMessage, Message
 from runners.runner import get_runner
-from serialisation import get_readable_representation, SerialisationError, SpecificResult, CustomResult, ExceptionValue
+from serialisation import get_readable_representation, SerialisationError, SpecificResult, ExceptionValue
 from tested import Config
 from testplan import TestPlanError, TextOutputChannel, FileOutputChannel, ValueOutputChannel, NoneChannelState, \
     IgnoredChannelState, OutputChannel, AnyChannelState, TextBuiltinEvaluator, ValueBuiltinEvaluator, \
@@ -410,7 +410,7 @@ class CustomEvaluator(Evaluator):
             )
 
         try:
-            evaluation_result: CustomResult = CustomResult.__pydantic_model__.parse_raw(result.stdout)
+            evaluation_result: SpecificResult = SpecificResult.__pydantic_model__.parse_raw(result.stdout)
         except (TypeError, ValueError) as e:
             message = ExtendedMessage(description=str(e), format="text", permission=Permission.STAFF)
             student = "Something went wrong while receiving the test result. Contact staff."
@@ -420,6 +420,9 @@ class CustomEvaluator(Evaluator):
                 readable_actual=readable_actual,
                 messages=[message]
             )
+
+        if evaluation_result.readable_expected:
+            readable_expected = evaluation_result.readable_expected
 
         return EvaluationResult(
             result=StatusMessage(enum=Status.CORRECT if evaluation_result.result else Status.WRONG),

@@ -304,10 +304,6 @@ def parse_test_plan(json_string) -> Plan:
 
 
 if __name__ == '__main__':
-    with open('../exercise/full.json', 'r') as f:
-        original = parse_test_plan(f.read())
-
-    with open('../exercise/short.json', 'r') as f:
+    with open('../lotto/plan.json', 'r') as f:
         r = parse_test_plan(f.read())
         print(r)
-        print(f"IS CORRECT? {original == r}")

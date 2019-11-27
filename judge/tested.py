@@ -25,16 +25,6 @@ class Config:
 
 def read_config() -> Config:
     """Read the configuration from stdout"""
-    config_ = {
-        "memory_limit": 536870912,
-        "time_limit": 10000000,
-        "programming_language": 'python',
-        "natural_language": 'nl',
-        "resources": '../exercise',
-        "source": '../exercise/test.py',
-        "judge": '../',
-        "workdir": './workdir',
-    }
     config_json = sys.stdin.read()
     config_ = json.loads(config_json)
     required = [x.name for x in dataclasses.fields(Config)]
@@ -46,7 +36,7 @@ if __name__ == '__main__':
     config = read_config()
 
     # Read test plan
-    json_string = open(f"{config.resources}/basic.json").read()
+    json_string = open(f"{config.resources}/plan.json").read()
     plan = parse_test_plan(json_string)
 
     # Run it.
