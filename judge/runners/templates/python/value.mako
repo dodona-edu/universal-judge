@@ -4,7 +4,7 @@
 % if value.type == SequenceTypes.LIST:
     [\
     % for item in value.data:
-        <%include file="value.mako" args="item" />
+        <%include file="value.mako" args="value=item" />
         % if not loop.last:
             , \
         % endif
@@ -13,7 +13,7 @@
 % elif value.type == SequenceTypes.SET:
     {\
     % for item in value.data:
-        <%include file="value.mako" args="item" />
+        <%include file="value.mako" args="value=item" />
         % if not loop.last:
             , \
         % endif
@@ -29,7 +29,7 @@
     {\
     % for key, item in value.data.items():
         "${key}": \
-        <%include file="value.mako" args="item" />
+        <%include file="value.mako" args="value=item" />
         % if not loop.last:
             , \
         % endif

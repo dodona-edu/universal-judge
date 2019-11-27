@@ -141,6 +141,13 @@ class GeneratorJudge(Judge):
         values = results.results.split(results.separator)
         exceptions = results.exceptions.split(results.separator)
 
+        # TODO: clean solution for this problem
+        if context.execution == NoExecutionTestcase.NONE:
+            stdout_ = stdout_[1:]
+            stderr_ = stderr_[1:]
+            values = values[1:]
+            exceptions = exceptions[1:]
+
         # There might be less output than testcase, which is an error. However, we process the
         # output we have, to ensure we send as much feedback as possible to the user.
         for i, testcase in enumerate(context.all_testcases()):
@@ -181,29 +188,13 @@ class GeneratorJudge(Judge):
             # If we expect no errors, we produce an error message, which is used in subsequent checks.
             # However, if we do expected something on this channel, we treat it as a normal channel.
             actual_stderr = stderr_[i] if i < len(stderr_) else None
-            if testcase.stderr == NoneChannelState.NONE:
-                # Use it as an error message, if it exists.
-                if actual_stderr:
-                    error_message.clear()  # We assume this is the actual cause of the early termination.
-                    error_message.append(ExtendedMessage(description=actual_stderr, format='code'))
-            else:
-                # Use it as a normal channel.
-                _evaluate_channel("stderr", testcase.stdout, actual_stderr, stderr_evaluator, error_message)
+            _evaluate_channel("stderr", testcase.stderr, actual_stderr, stderr_evaluator, error_message)
 
             # Evaluate the exception channel in a similar manner as the stderr channel.
             # If we expect no errors, use the channel as error messages for the other channels.
             # Else, we expected certain output on the channel, evaluate it as a normal channel.
             actual_exception = exceptions[i] if i < len(exceptions) else None
-            try:
-                parsed_exception = ExceptionValue.__pydantic_model__.parse_raw(actual_exception)
-                readable_exception = parsed_exception.stacktrace
-            except (TypeError, ValueError) as e:
-                readable_exception = str(actual_exception)
-            if testcase.exception == NoneChannelState.NONE:
-                if readable_exception:
-                    error_message.append(ExtendedMessage(description=readable_exception, format='code'))
-            else:
-                _evaluate_channel("exception", testcase.exception, actual_exception, exception_evaluator, error_message)
+            _evaluate_channel("exception", testcase.exception, actual_exception, exception_evaluator, error_message)
 
             # Evaluate the stdout channel.
             actual_stdout = stdout_[i] if i < len(stdout_) else None

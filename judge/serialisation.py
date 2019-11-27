@@ -226,8 +226,8 @@ def to_python_comparable(value: Optional[Value]):
 class SpecificResult:
     """Result of an evaluation by a language specific evaluator."""
     result: bool  # The result of the evaluation.
-    readable_expected: str  # A human-friendly version of what the channel should have been.
-    readable_actual: str  # A human-friendly version (best effort at least) of what the channel is.
+    readable_expected: Optional[str] = None  # A human-friendly version of what the channel should have been.
+    readable_actual: Optional[str] = None  # A human-friendly version (best effort at least) of what the channel is.
     messages: List[str] = field(default_factory=list)
 
 
