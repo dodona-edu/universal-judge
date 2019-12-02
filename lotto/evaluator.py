@@ -46,7 +46,11 @@ def evaluate(expected, actual):
         if isinstance(numbers, str):
             lottery_numbers = numbers
         else:
-            raise AssertionError('generated return value must either be generated or given')
+            return (
+                numbers,
+                False,
+                'lottery numbers must be a string'
+            )
 
         if not re.match('^(-?(0|-?[1-9][0-9]*) - )*(0|-?[1-9][0-9]*)$', lottery_numbers):
             return (

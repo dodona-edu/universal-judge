@@ -35,7 +35,7 @@
               },
               "function": {
                 "type": "top",
-                "name": "lottery",
+                "name": "loterij",
                 "arguments": [
                   {
                     "type": "integer",
@@ -82,7 +82,7 @@
               },
               "function": {
                 "type": "top",
-                "name": "lottery",
+                "name": "loterij",
                 "arguments": [
                   {
                     "type": "integer",
@@ -129,7 +129,7 @@
               },
               "function": {
                 "type": "top",
-                "name": "lottery",
+                "name": "loterij",
                 "arguments": [
                   {
                     "type": "integer",
@@ -176,7 +176,7 @@
               },
               "function": {
                 "type": "top",
-                "name": "lottery",
+                "name": "loterij",
                 "arguments": [
                   {
                     "type": "integer",
@@ -223,7 +223,7 @@
               },
               "function": {
                 "type": "top",
-                "name": "lottery",
+                "name": "loterij",
                 "arguments": [
                   {
                     "type": "integer",
@@ -270,7 +270,7 @@
               },
               "function": {
                 "type": "top",
-                "name": "lottery",
+                "name": "loterij",
                 "arguments": [
                   {
                     "type": "integer",
@@ -317,7 +317,7 @@
               },
               "function": {
                 "type": "top",
-                "name": "lottery",
+                "name": "loterij",
                 "arguments": [
                   {
                     "type": "integer",
@@ -364,7 +364,7 @@
               },
               "function": {
                 "type": "top",
-                "name": "lottery",
+                "name": "loterij",
                 "arguments": [
                   {
                     "type": "integer",
@@ -411,7 +411,7 @@
               },
               "function": {
                 "type": "top",
-                "name": "lottery",
+                "name": "loterij",
                 "arguments": [
                   {
                     "type": "integer",
@@ -458,7 +458,7 @@
               },
               "function": {
                 "type": "top",
-                "name": "lottery",
+                "name": "loterij",
                 "arguments": [
                   {
                     "type": "integer",
@@ -505,7 +505,7 @@
               },
               "function": {
                 "type": "top",
-                "name": "lottery",
+                "name": "loterij",
                 "arguments": [
                   {
                     "type": "integer",
@@ -552,7 +552,7 @@
               },
               "function": {
                 "type": "top",
-                "name": "lottery",
+                "name": "loterij",
                 "arguments": [
                   {
                     "type": "integer",
@@ -599,7 +599,7 @@
               },
               "function": {
                 "type": "top",
-                "name": "lottery",
+                "name": "loterij",
                 "arguments": [
                   {
                     "type": "integer",
@@ -646,7 +646,7 @@
               },
               "function": {
                 "type": "top",
-                "name": "lottery",
+                "name": "loterij",
                 "arguments": [
                   {
                     "type": "integer",
@@ -693,7 +693,7 @@
               },
               "function": {
                 "type": "top",
-                "name": "lottery",
+                "name": "loterij",
                 "arguments": [
                   {
                     "type": "integer",
@@ -740,7 +740,7 @@
               },
               "function": {
                 "type": "top",
-                "name": "lottery",
+                "name": "loterij",
                 "arguments": [
                   {
                     "type": "integer",
@@ -787,7 +787,7 @@
               },
               "function": {
                 "type": "top",
-                "name": "lottery",
+                "name": "loterij",
                 "arguments": [
                   {
                     "type": "integer",
@@ -834,7 +834,7 @@
               },
               "function": {
                 "type": "top",
-                "name": "lottery",
+                "name": "loterij",
                 "arguments": [
                   {
                     "type": "integer",
@@ -881,7 +881,7 @@
               },
               "function": {
                 "type": "top",
-                "name": "lottery",
+                "name": "loterij",
                 "arguments": [
                   {
                     "type": "integer",
@@ -928,7 +928,7 @@
               },
               "function": {
                 "type": "top",
-                "name": "lottery",
+                "name": "loterij",
                 "arguments": [
                   {
                     "type": "integer",
@@ -975,7 +975,7 @@
               },
               "function": {
                 "type": "top",
-                "name": "lottery",
+                "name": "loterij",
                 "arguments": [
                   {
                     "type": "integer",
@@ -1022,7 +1022,7 @@
               },
               "function": {
                 "type": "top",
-                "name": "lottery",
+                "name": "loterij",
                 "arguments": [
                   {
                     "type": "integer",
@@ -1069,7 +1069,7 @@
               },
               "function": {
                 "type": "top",
-                "name": "lottery",
+                "name": "loterij",
                 "arguments": [
                   {
                     "type": "integer",
@@ -1116,7 +1116,7 @@
               },
               "function": {
                 "type": "top",
-                "name": "lottery",
+                "name": "loterij",
                 "arguments": [
                   {
                     "type": "integer",
@@ -1163,7 +1163,7 @@
               },
               "function": {
                 "type": "top",
-                "name": "lottery",
+                "name": "loterij",
                 "arguments": [
                   {
                     "type": "integer",
@@ -1210,7 +1210,7 @@
               },
               "function": {
                 "type": "top",
-                "name": "lottery",
+                "name": "loterij",
                 "arguments": [
                   {
                     "type": "integer",
@@ -1257,7 +1257,7 @@
               },
               "function": {
                 "type": "top",
-                "name": "lottery",
+                "name": "loterij",
                 "arguments": [
                   {
                     "type": "integer",
@@ -1304,7 +1304,7 @@
               },
               "function": {
                 "type": "top",
-                "name": "lottery",
+                "name": "loterij",
                 "arguments": [
                   {
                     "type": "integer",
@@ -1351,7 +1351,7 @@
               },
               "function": {
                 "type": "top",
-                "name": "lottery",
+                "name": "loterij",
                 "arguments": [
                   {
                     "type": "integer",
@@ -1398,7 +1398,7 @@
               },
               "function": {
                 "type": "top",
-                "name": "lottery",
+                "name": "loterij",
                 "arguments": [
                   {
                     "type": "integer",
@@ -1445,7 +1445,7 @@
               },
               "function": {
                 "type": "top",
-                "name": "lottery",
+                "name": "loterij",
                 "arguments": [
                   {
                     "type": "integer",
@@ -1492,7 +1492,7 @@
               },
               "function": {
                 "type": "top",
-                "name": "lottery",
+                "name": "loterij",
                 "arguments": [
                   {
                     "type": "integer",
@@ -1539,7 +1539,7 @@
               },
               "function": {
                 "type": "top",
-                "name": "lottery",
+                "name": "loterij",
                 "arguments": [
                   {
                     "type": "integer",
@@ -1586,7 +1586,7 @@
               },
               "function": {
                 "type": "top",
-                "name": "lottery",
+                "name": "loterij",
                 "arguments": [
                   {
                     "type": "integer",
@@ -1633,7 +1633,7 @@
               },
               "function": {
                 "type": "top",
-                "name": "lottery",
+                "name": "loterij",
                 "arguments": [
                   {
                     "type": "integer",
@@ -1680,7 +1680,7 @@
               },
               "function": {
                 "type": "top",
-                "name": "lottery",
+                "name": "loterij",
                 "arguments": [
                   {
                     "type": "integer",
@@ -1727,7 +1727,7 @@
               },
               "function": {
                 "type": "top",
-                "name": "lottery",
+                "name": "loterij",
                 "arguments": [
                   {
                     "type": "integer",
@@ -1774,7 +1774,7 @@
               },
               "function": {
                 "type": "top",
-                "name": "lottery",
+                "name": "loterij",
                 "arguments": [
                   {
                     "type": "integer",
@@ -1821,7 +1821,7 @@
               },
               "function": {
                 "type": "top",
-                "name": "lottery",
+                "name": "loterij",
                 "arguments": [
                   {
                     "type": "integer",
@@ -1868,7 +1868,7 @@
               },
               "function": {
                 "type": "top",
-                "name": "lottery",
+                "name": "loterij",
                 "arguments": [
                   {
                     "type": "integer",
@@ -1915,7 +1915,7 @@
               },
               "function": {
                 "type": "top",
-                "name": "lottery",
+                "name": "loterij",
                 "arguments": [
                   {
                     "type": "integer",
@@ -1962,7 +1962,7 @@
               },
               "function": {
                 "type": "top",
-                "name": "lottery",
+                "name": "loterij",
                 "arguments": [
                   {
                     "type": "integer",
@@ -2009,7 +2009,7 @@
               },
               "function": {
                 "type": "top",
-                "name": "lottery",
+                "name": "loterij",
                 "arguments": [
                   {
                     "type": "integer",
@@ -2056,7 +2056,7 @@
               },
               "function": {
                 "type": "top",
-                "name": "lottery",
+                "name": "loterij",
                 "arguments": [
                   {
                     "type": "integer",
@@ -2103,7 +2103,7 @@
               },
               "function": {
                 "type": "top",
-                "name": "lottery",
+                "name": "loterij",
                 "arguments": [
                   {
                     "type": "integer",

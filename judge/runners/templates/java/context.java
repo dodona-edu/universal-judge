@@ -27,14 +27,15 @@ class Context${context_id} {
             } catch (Exception e) {
                 evaluator.e_evaluate_execution(e);
             }
-        % endif
-
-        % for additional in additionals:
             System.err.print("--${secret_id}-- SEP");
             System.out.print("--${secret_id}-- SEP");
             evaluator.writeDelimiter("--${secret_id}-- SEP");
+        % endif
+
+        % for additional in additionals:
             try {
                 % if additional.has_return:
+                    System.out.println("Hallo");
                     evaluator.v_evaluate_${context_id}_${loop.index}(<%include file="function.mako" args="function=additional.function" />);
                 % else:
                     <%include file="function.mako" args="function=additional.function" />;
@@ -42,6 +43,9 @@ class Context${context_id} {
             } catch (Exception e) {
                 evaluator.e_evaluate_${context_id}_${loop.index}(e);
             }
+            System.err.print("--${secret_id}-- SEP");
+            System.out.print("--${secret_id}-- SEP");
+            evaluator.writeDelimiter("--${secret_id}-- SEP");
 
         % endfor
 

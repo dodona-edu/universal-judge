@@ -417,13 +417,14 @@ class CustomEvaluator(Evaluator):
         result = runner.evaluate_specific(code, expected, actual)
 
         if not result.stdout:
-            message = ExtendedMessage(description=result.stdout, format="text")
+            stdout = ExtendedMessage(description=result.stdout, format="text")
+            stderr = ExtendedMessage(description=result.stderr, format="text")
             student = "An error occurred while evaluating your exercise."
             return EvaluationResult(
                 result=StatusMessage(enum=Status.WRONG, human=student),
                 readable_expected=readable_expected,
                 readable_actual=readable_actual,
-                messages=[message]
+                messages=[stdout, stderr]
             )
 
         try:

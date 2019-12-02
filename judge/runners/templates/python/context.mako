@@ -20,13 +20,15 @@ try:
     import ${submission_name}
 except Exception as e:
     evaluator_${context_id}.e_evaluate_execution(e)
+% if execution.exists:
+    sys.stderr.write("--${secret_id}-- SEP")
+    sys.stdout.write("--${secret_id}-- SEP")
+    evaluator_${context_id}.write_delimiter("--${secret_id}-- SEP")
+% endif
 
 
 ## Handle test cases.
 % for additional in additionals:
-    sys.stderr.write("--${secret_id}-- SEP")
-    sys.stdout.write("--${secret_id}-- SEP")
-    evaluator_${context_id}.write_delimiter("--${secret_id}-- SEP")
     try:
         % if additional.has_return:
             evaluator_${context_id}.v_evaluate_${context_id}_${loop.index}(${submission_name}.<%include file="function.mako" args="function=additional.function" />)
@@ -35,7 +37,9 @@ except Exception as e:
         % endif
     except Exception as e:
         evaluator_${context_id}.e_evaluate_${context_id}_${loop.index}(e)
-
+    sys.stderr.write("--${secret_id}-- SEP")
+    sys.stdout.write("--${secret_id}-- SEP")
+    evaluator_${context_id}.write_delimiter("--${secret_id}-- SEP")
 % endfor
 
 ## Close output files.

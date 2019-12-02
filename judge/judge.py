@@ -17,8 +17,7 @@ def _get_or_default(seq, i, default):
 def _evaluate_channel(channel_name: str,
                       expected_output: Union[OutputChannel, AnyChannelState],
                       actual_result: Optional[str],
-                      evaluator: Evaluator,
-                      error_message: List[ExtendedMessage]):
+                      evaluator: Evaluator) -> bool:
     """
     Evaluate the output on a given channel. This function will output the appropriate messages
     to start and end a new test in Dodona.
@@ -30,34 +29,23 @@ def _evaluate_channel(channel_name: str,
     :param expected_output: The output channel from the test case.
     :param actual_result: The actual output. Can be None, depending on the evaluator.
     :param evaluator: The evaluator to use.
-    :param error_message: The potential errors.
+    :return: True if successful, otherwise False.
     """
     evaluation_result = evaluator.evaluate(expected_output, actual_result)
     status = evaluation_result.result
 
-    # Send values only after we determine if they should be sent or not.
-    send_queue: List[Update] = [StartTest(expected=evaluation_result.readable_expected)]
+    report_update(StartTest(expected=evaluation_result.readable_expected))
 
-    # Report any errors we got.
-    if error_message:
-        for m in error_message:
-            send_queue.append(AppendMessage(message=m))
-        status = StatusMessage(enum=Status.RUNTIME_ERROR)
-
-    # Report any other messages we received.
+    # Report any messages we received.
     for message in evaluation_result.messages:
-        send_queue.append(AppendMessage(message=message))
+        report_update(AppendMessage(message=message))
 
     # Close the test.
-    send_queue.append(CloseTest(generated=evaluation_result.readable_actual,
-                                status=status,
-                                data=TestData(channel=channel_name)))
+    report_update(CloseTest(generated=evaluation_result.readable_actual,
+                            status=status,
+                            data=TestData(channel=channel_name)))
 
-    # print(f"\nStatus: {status}")
-    # if not (expected_output in (NoneChannelState.NONE, IgnoredChannelState.IGNORED) and status.enum == Status.CORRECT):
-    # TODO: sometimes, this will result in a test case without any tests.
-    for element in send_queue:
-        report_update(element)
+    return status == Status.CORRECT
 
 
 class Judge:
@@ -141,13 +129,6 @@ class GeneratorJudge(Judge):
         values = results.results.split(results.separator)
         exceptions = results.exceptions.split(results.separator)
 
-        # TODO: clean solution for this problem
-        if context.execution == NoExecutionTestcase.NONE:
-            stdout_ = stdout_[1:]
-            stderr_ = stderr_[1:]
-            values = values[1:]
-            exceptions = exceptions[1:]
-
         # There might be less output than testcase, which is an error. However, we process the
         # output we have, to ensure we send as much feedback as possible to the user.
         for i, testcase in enumerate(context.all_testcases()):
@@ -169,43 +150,30 @@ class GeneratorJudge(Judge):
             readable_input = self.runner.get_readable_input(context, testcase)
             report_update(StartTestcase(description=readable_input))
 
-            error_message: List[ExtendedMessage] = []
-
             # Evaluate the file channel.
-            # We evaluate this channel early, since it is separate from the other channels.
-            _evaluate_channel("file", testcase.file, None, file_evaluator, error_message)
+            results = [_evaluate_channel("file", testcase.file, None, file_evaluator)]
 
-            # The errors in the file channel have nothing to do with the other channels,
-            # so reset them.
-            error_message.clear()
+            # Evaluate the stderr channel
+            actual_stderr = stderr_[i] if i < len(stderr_) else None
+            results.append(_evaluate_channel("stderr", testcase.stderr, actual_stderr, stderr_evaluator))
+
+            actual_exception = exceptions[i] if i < len(exceptions) else None
+            results.append(_evaluate_channel("exception", testcase.exception, actual_exception, exception_evaluator))
+
+            actual_stdout = stdout_[i] if i < len(stdout_) else None
+            results.append(_evaluate_channel("stdout", testcase.stdout, actual_stdout, stdout_evaluator))
+
+            actual_value = values[i] if i < len(values) else None
+            results.append(_evaluate_channel("return", testcase.result, actual_value, value_evaluator))
 
             # Check if there is early termination.
             if i >= len(stdout_) or i >= len(stderr_) or i >= len(values) or i >= len(exceptions):
-                assert i >= len(stdout_) and i >= len(stderr_) and i >= len(values) and i >= len(exceptions)
-                error_message.append(ExtendedMessage(description="Tests were terminated early.", format='text'))
-
-            # Evaluate the error channel.
-            # If we expect no errors, we produce an error message, which is used in subsequent checks.
-            # However, if we do expected something on this channel, we treat it as a normal channel.
-            actual_stderr = stderr_[i] if i < len(stderr_) else None
-            _evaluate_channel("stderr", testcase.stderr, actual_stderr, stderr_evaluator, error_message)
-
-            # Evaluate the exception channel in a similar manner as the stderr channel.
-            # If we expect no errors, use the channel as error messages for the other channels.
-            # Else, we expected certain output on the channel, evaluate it as a normal channel.
-            actual_exception = exceptions[i] if i < len(exceptions) else None
-            _evaluate_channel("exception", testcase.exception, actual_exception, exception_evaluator, error_message)
-
-            # Evaluate the stdout channel.
-            actual_stdout = stdout_[i] if i < len(stdout_) else None
-            _evaluate_channel("stdout", testcase.stdout, actual_stdout, stdout_evaluator, error_message)
-
-            # Evaluate value channel, but not in case of the execution channel.
-            actual_value = values[i] if i < len(values) else None
-            _evaluate_channel("return", testcase.result, actual_value, value_evaluator, error_message)
+                report_update(AppendMessage(message=ExtendedMessage(
+                    description="Tests were terminated early.", format='text'
+                )))
 
             report_update(CloseTestcase())
 
             # If this was an essential testcase with an error, stop testing now.
-            if testcase.essential and error_message:
+            if testcase.essential and not all(results):
                 break
