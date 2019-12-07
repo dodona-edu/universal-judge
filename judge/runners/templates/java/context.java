@@ -25,7 +25,7 @@ class Context {
                 % endfor
                 });
             } catch (Exception e) {
-                evaluator.e_evaluate_execution(e);
+                evaluator.e_evaluate_main(e);
             }
             System.err.print("--${secret_id}-- SEP");
             System.out.print("--${secret_id}-- SEP");
