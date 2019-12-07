@@ -9,6 +9,4 @@
 
 DIR="$(dirname $0)"
 cd "$DIR/judge/"
-echo "Dir is now"
-echo "$DIR"
 python "./tested.py"

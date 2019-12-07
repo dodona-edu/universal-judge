@@ -267,7 +267,7 @@ class NoneEvaluator(Evaluator):
         # TODO: support values here.
         try:
             actual = ExceptionValue.__pydantic_model__.parse_raw(actual)
-            actual = actual.stacktrace
+            actual = actual.message + '\n' + actual.stacktrace
         except (TypeError, ValueError):
             pass
         return EvaluationResult(
@@ -285,7 +285,7 @@ class IgnoredEvaluator(Evaluator):
         # TODO: support values here.
         try:
             actual = ExceptionValue.__pydantic_model__.parse_raw(actual)
-            actual = actual.stacktrace
+            actual = actual.message + '\n' + actual.stacktrace
         except (TypeError, ValueError):
             pass
         return EvaluationResult(

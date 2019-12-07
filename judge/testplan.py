@@ -277,10 +277,10 @@ class Context:
 
     @root_validator
     def check_testcases_exist(cls, values):
-        execution = values.get('execution')
+        execution = values.get('main_testcase')
         additional = values.get('additional')
         if execution == NoExecutionTestcase.NONE and not additional:
-            raise ValueError("Either execution or additional test cases must be defined.")
+            raise ValueError("Either main_testcase or additional test cases must be defined.")
         return values
 
 

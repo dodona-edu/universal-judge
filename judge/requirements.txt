@@ -1,6 +1,6 @@
 psutil
 pytest
 mako
-pydantic
+pydantic==v1.2
 pyhumps
 typing_inspect

@@ -20,8 +20,8 @@ class JavaScriptedConfig(LanguageConfig):
     def needs_compilation(self) -> bool:
         return True
 
-    def execution_command(self, context_id: str) -> List[str]:
-        return ["java", "-cp", ".", self.context_name(context_id)]
+    def execution_command(self) -> List[str]:
+        return ["java", "-cp", ".", self.context_name()]
 
     def file_extension(self) -> str:
         return "java"
@@ -29,11 +29,11 @@ class JavaScriptedConfig(LanguageConfig):
     def compilation_command(self, files: List[str]) -> List[str]:
         return ["javac", *files]
 
-    def submission_name(self, context_id: str, context: Context) -> Optional[str]:
-        return None
+    def submission_name(self, context: Context) -> Optional[str]:
+        return "Script"
 
-    def context_name(self, context_id: str) -> str:
-        return f"Context{context_id}"
+    def context_name(self) -> str:
+        return "Context"
 
     def additional_files(self) -> List[str]:
         return []

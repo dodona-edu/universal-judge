@@ -32,10 +32,10 @@ def send_exception(exception):
     values.send_exception(exception_file, exception)
 
 
-${execution.exception_code}
+${main_testcase.exception_code}
 
 
-% for additional in additionals:
+% for additional in additional_testcases:
     % if additional.has_return:
         ${additional.value_code}
     % endif

@@ -1,7 +1,7 @@
 #
 # Main file of the TESTed framework.
 #
-# For now, this only handles running the execution kernel.
+# For now, this only handles running the main_testcase kernel.
 #
 import dataclasses
 import json

@@ -35,7 +35,7 @@ def remove_indents(code):
     For example, consider following template:
 
     .. code-block:: mako
-       % for additional in additionals:
+       % for additional in additional_testcases:
            function ${context_id}_${i}_eval(value):
                % if isinstance(additional.output.result.evaluator, BuiltinEvaluator):
                ${code_identifier}_values.send(${code_identifier}_file, value)
@@ -45,7 +45,7 @@ def remove_indents(code):
     Will result in:
 
     .. code-block:: mako
-       % for additional in additionals:
+       % for additional in additional_testcases:
        function ${context_id}_${i}_eval(value):
            % if isinstance(additional.output.result.evaluator, BuiltinEvaluator):
            ${code_identifier}_values.send(${code_identifier}_file, value)

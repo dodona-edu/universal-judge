@@ -1,8 +1,9 @@
+from pathlib import Path
 from pprint import pprint
 
 from dodona import *
 from evaluators import get_evaluator, Evaluator
-from runners.runner import BaseRunner, ExecutionResult, get_runner
+from runners.runner import BaseRunner, ExecutionResult, get_runner, BaseExecutionResult
 from tested import Config
 from testplan import *
 
@@ -72,6 +73,14 @@ class Judge:
         self._execute_test_plan(submission_code, plan)
 
 
+@dataclass
+class MetaContext:
+    """Contains a context and some metadata about the context."""
+    tab_index: int  # The index of the tab this context belongs to.
+    context_index: int  # The index of this context in its tab.
+    context: Context  # The actual context.
+
+
 class GeneratorJudge(Judge):
     runner: BaseRunner
 
@@ -82,33 +91,33 @@ class GeneratorJudge(Judge):
     def _execute_test_plan(self, submission: str, test_plan: Plan):
         report_update(StartJudgment())
 
-        # Generate test files.
-        ids, ordered_files = self.runner.generate_code(submission, test_plan)
-
         # Compile the code if needed.
-        # If a compilation error occurs, we stop the execution right now, and report the error.
-        if self.runner.needs_compilation():
-            compilation_result = self.runner.compile(ordered_files)
-            if compilation_result.stdout:
-                # Append compiler messages to the output.
-                report_update(AppendMessage(message=ExtendedMessage(
-                    description=compilation_result.stdout,
-                    format='code'
-                )))
-            if compilation_result.stderr:
-                report_update(AppendMessage(message=ExtendedMessage(
-                    description=compilation_result.stderr,
-                    format='code'
-                )))
-                report_update(CloseJudgment(status=StatusMessage(enum=Status.COMPILATION_ERROR)))
-                return
+        # If a compilation error occurs, we stop the main_testcase right now, and report the error.
+        # compilation_result = self.runner.compile(ordered_files)
+        # if compilation_result.stdout:
+        #     # Append compiler messages to the output.
+        #     report_update(AppendMessage(message=ExtendedMessage(
+        #         description=compilation_result.stdout,
+        #         format='code'
+        #     )))
+        # if compilation_result.stderr:
+        #     report_update(AppendMessage(message=ExtendedMessage(
+        #         description=compilation_result.stderr,
+        #         format='code'
+        #     )))
+        #     report_update(CloseJudgment(status=StatusMessage(enum=Status.COMPILATION_ERROR)))
+        #     return
 
-        for tab in test_plan.tabs:
+        for tab_index, tab in enumerate(test_plan.tabs):
             report_update(StartTab(title=tab.name))
-            for id_, context in zip(ids, tab.contexts):
+            for context_index, context in enumerate(tab.contexts):
+                # TODO: detect and copy resources.
+                # Create a working directory for the context.
+                directory = Path(self.config.workdir, f"{tab_index}-{context_index}")
+                directory.mkdir()
                 report_update(StartContext(description=context.description))
                 try:
-                    result = self.runner.execute(id_, context)
+                    compile_result, result = self.runner.execute(context, directory)
                 except TestPlanError as e:
                     report_update(AppendMessage(message=ExtendedMessage(
                         description=str(e),
@@ -117,10 +126,39 @@ class GeneratorJudge(Judge):
                     )))
                     report_update(CloseJudgment(status=StatusMessage(enum=Status.INTERNAL_ERROR)))
                     continue
-                self._process_results(context, result)
+                if self._process_compile_results(compile_result) == Status.CORRECT:
+                    assert result is not None, "Since compilation succeeded, there must be a test result."
+                    self._process_results(context, result)
                 report_update(CloseContext())
             report_update(CloseTab())
         report_update(CloseJudgment())
+
+    def _process_compile_results(self, results: BaseExecutionResult) -> Status:
+        """Process compilation output. This is called inside a context."""
+
+        # Report stdout.
+        if results.stdout:
+            # Append compiler messages to the output.
+            report_update(AppendMessage(message="The compiler produced the following output on stdout:"))
+            report_update(AppendMessage(message=ExtendedMessage(
+                description=results.stdout,
+                format='code'
+            )))
+
+        # Report stderr.
+        if results.stderr:
+            # Append compiler messages to the output.
+            report_update(AppendMessage(message="The compiler produced the following output on stderr:"))
+            report_update(AppendMessage(message=ExtendedMessage(
+                description=results.stderr,
+                format='code'
+            )))
+
+        # Report errors if needed.
+        if results.exit != 0:
+            return Status.COMPILATION_ERROR
+        else:
+            return Status.CORRECT
 
     def _process_results(self, context: Context, results: ExecutionResult):
         # Process output

@@ -10,12 +10,12 @@ import java.util.prefs.*;
 import java.util.regex.*;
 import java.util.stream.*;
 
-class Evaluator${context_id} {
+class Evaluator {
 
     private final FileWriter valueWriter;
     private final FileWriter exceptionWriter;
 
-    public Evaluator${context_id}() throws Exception {
+    public Evaluator() throws Exception {
         this.valueWriter = new FileWriter("${value_file}");
         this.exceptionWriter = new FileWriter("${exception_file}");
     }
@@ -46,9 +46,9 @@ class Evaluator${context_id} {
         Values.sendException(exceptionWriter, exception);
     }
 
-    ${execution.exception_code}
+    ${main_testcase.exception_code}
 
-    % for additional in additionals:
+    % for additional in additional_testcases:
         % if additional.has_return:
             ${additional.value_code}
         % endif

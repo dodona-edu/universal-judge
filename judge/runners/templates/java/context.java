@@ -1,11 +1,11 @@
 ## Code to execute one test context.
 ## The The first part of this file contains the evluation functions.
 ## The second part is responsible for actually running the tests.
-class Context${context_id} {
+class Context {
 
-    private final Evaluator${context_id} evaluator;
+    private final Evaluator evaluator;
 
-    private Context${context_id}(Evaluator${context_id} evaluator) {
+    private Context(Evaluator evaluator) {
         this.evaluator = evaluator;
     }
 
@@ -14,10 +14,10 @@ class Context${context_id} {
         ${before}
 
         ## Call the main fucnction if necessary
-        % if execution.exists:
+        % if main_testcase.exists:
             try {
                 ${submission_name}.main(new String[]{
-                % for argument in execution.arguments:
+                % for argument in main_testcase.arguments:
                     <%include file="value.mako" args="value=argument"/>
                     % if not loop.last:
                         , \
@@ -32,16 +32,16 @@ class Context${context_id} {
             evaluator.writeDelimiter("--${secret_id}-- SEP");
         % endif
 
-        % for additional in additionals:
+        % for additional in additional_testcases:
             try {
                 % if additional.has_return:
                     System.out.println("Hallo");
-                    evaluator.v_evaluate_${context_id}_${loop.index}(<%include file="function.mako" args="function=additional.function" />);
+                    evaluator.v_evaluate_${loop.index}(<%include file="function.mako" args="function=additional.function" />);
                 % else:
                     <%include file="function.mako" args="function=additional.function" />;
                 % endif
             } catch (Exception e) {
-                evaluator.e_evaluate_${context_id}_${loop.index}(e);
+                evaluator.e_evaluate_${loop.index}(e);
             }
             System.err.print("--${secret_id}-- SEP");
             System.out.print("--${secret_id}-- SEP");
@@ -54,8 +54,8 @@ class Context${context_id} {
 
     public static void main(String[] a) throws Exception {
         ## Open our file we use to write.
-        Evaluator${context_id} evaluator = new Evaluator${context_id}();
-        new Context${context_id}(evaluator).execute();
+        Evaluator evaluator = new Evaluator();
+        new Context(evaluator).execute();
         evaluator.close();
     }
 }

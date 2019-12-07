@@ -13,14 +13,6 @@ from testplan import FunctionCall, TextData, NoneChannelState
 
 
 @dataclass
-class SubmissionData:
-    submission: str
-    submission_name: str
-    before: str
-    after: str
-
-
-@dataclass
 class TestcaseData:
     function: FunctionCall
     stdin: Union[TextData, NoneChannelState]
@@ -30,7 +22,7 @@ class TestcaseData:
 
 
 @dataclass
-class ExecutionTestcaseData:
+class MainTestcaseData:
     exists: bool
     exception_code: str
     arguments: List[Value]
@@ -38,25 +30,22 @@ class ExecutionTestcaseData:
 
 @dataclass
 class ContextData:
-    submission: str
     before: str
     after: str
     secret_id: str
-    context_id: str
     submission_name: str
-    execution: ExecutionTestcaseData
     value_file: str
     exception_file: str
-    additionals: List[TestcaseData]
+    main_testcase: MainTestcaseData
+    additional_testcases: List[TestcaseData]
 
 
 @dataclass
 class EvaluatorData:
-    execution: ExecutionTestcaseData
-    additionals: List[TestcaseData]
+    main_testcase: MainTestcaseData
+    additional_testcases: List[TestcaseData]
     value_file: str
     exception_file: str
-    context_id: str
 
 
 @dataclass

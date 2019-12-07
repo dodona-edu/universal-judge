@@ -11,15 +11,15 @@ class JavaConfig(LanguageConfig):
         cp = ":".join(self._get_classpath())
         return ["java", "-cp", f"{cp}:.", evaluator_name]
 
-    def evaluator_name(self, context_id: str) -> str:
-        return f"Evaluator{context_id}"
+    def evaluator_name(self) -> str:
+        return f"Evaluator"
 
     def conventionalise(self, function_name: str) -> str:
         return function_name
 
     def value_writer(self, name):
         return f"public void {name}(Object value) throws Exception {{send(value);}}"
-    
+
     def exception_writer(self, name):
         return f"public void {name}(Exception e) throws Exception {{sendException(e);}}"
 
@@ -29,9 +29,9 @@ class JavaConfig(LanguageConfig):
     def _get_classpath(self):
         return [x for x in self.additional_files() if x.endswith(".jar")]
 
-    def execution_command(self, context_id: str) -> List[str]:
+    def execution_command(self) -> List[str]:
         cp = ";".join(self._get_classpath() + ["."])
-        return ["java", "-cp", cp, self.context_name(context_id)]
+        return ["java", "-cp", cp, self.context_name()]
 
     def file_extension(self) -> str:
         return "java"
@@ -41,12 +41,12 @@ class JavaConfig(LanguageConfig):
         jar_argument = ";".join(self._get_classpath())
         return ["javac", "-cp", jar_argument, *others]
 
-    def submission_name(self, context_id: str, context: Context) -> str:
+    def submission_name(self, context: Context) -> str:
         # In Java, the code is the same for all contexts.
         return context.object
 
-    def context_name(self, context_id: str) -> str:
-        return f"Context{context_id}"
+    def context_name(self) -> str:
+        return f"Context"
 
     def additional_files(self) -> List[str]:
         return ["Values.java", "json-simple-3.1.0.jar"]
