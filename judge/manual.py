@@ -17,8 +17,8 @@ def read_config() -> Config:
         "time_limit": 10000000,
         "programming_language": 'java',
         "natural_language": 'nl',
-        "resources": str(Path('../exercise').resolve()),
-        "source": '../exercise/test.java',
+        "resources": str(Path('../lotto').resolve()),
+        "source": '../lotto/correct.java',
         "judge": str(Path('../').resolve()),
         "workdir": str(Path('./workdir').resolve()),
     })

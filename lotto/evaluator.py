@@ -74,4 +74,4 @@ def evaluate(expected, actual):
     if message:
         messages.append('Error: ' + message)
 
-    evaluated(valid, expected_value, messages)
+    evaluated(valid, expected_value, messages=messages)
