@@ -1,3 +1,4 @@
+import os
 from typing import List
 
 from runners.config import LanguageConfig
@@ -26,8 +27,14 @@ class JavaConfig(LanguageConfig):
     def _get_classpath(self):
         return [x for x in self.additional_files() if x.endswith(".jar")]
 
+    def _classpath_separator(self):
+        if os.name == 'nt':
+            return ";"
+        else:
+            return ":"
+
     def execution_command(self, files: List[str]) -> List[str]:
-        cp = ";".join(self._get_classpath() + ["."])
+        cp = self._classpath_separator().join(self._get_classpath() + ["."])
         return ["java", "-cp", cp, self.context_name()]
 
     def file_extension(self) -> str:
@@ -35,7 +42,7 @@ class JavaConfig(LanguageConfig):
 
     def compilation_command(self, files: List[str]) -> List[str]:
         others = [x for x in files if not x.endswith(".jar")]
-        jar_argument = ";".join(self._get_classpath())
+        jar_argument = self._classpath_separator().join(self._get_classpath())
         return ["javac", "-cp", jar_argument, *others]
 
     def submission_name(self, context: Context) -> str:
