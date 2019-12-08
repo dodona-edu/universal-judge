@@ -1,5 +1,7 @@
 """Configuration for languages, making implementing runners fairly easy."""
-from typing import List
+import shutil
+from pathlib import Path
+from typing import List, Union
 
 from testplan import Context
 
@@ -16,6 +18,11 @@ class LanguageConfig:
     def execution_command(self) -> List[str]:
         """Get the command for executing the code."""
         raise NotImplementedError
+
+    def create_submission_code(self, context: Context, source: Union[Path, str], destination: Path):
+        """Create the submission code"""
+        # noinspection PyTypeChecker
+        shutil.copy2(source, destination)
 
     def execute_evaluator(self, evaluator_name: str) -> List[str]:
         """Get the command for evaluating an evaluator."""

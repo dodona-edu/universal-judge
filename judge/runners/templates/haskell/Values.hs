@@ -8,7 +8,7 @@ import Data.Text (Text)
 import qualified Data.Set as Set
 import qualified Data.ByteString.Lazy as LBS
 
-
+-- Typeable things are convertible to our format
 class ToJSON a => Typeable a where
     toType :: a -> String
     toType a = "unknown"

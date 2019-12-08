@@ -189,8 +189,7 @@ class ConfigurableRunner(BaseRunner):
         submission_name = self.language_config.submission_name(context)
         submission = f"{submission_name}.{self.language_config.file_extension()}"
         destination = working_directory / submission
-        # noinspection PyTypeChecker
-        shutil.copy2(self.config.source, destination)
+        self.language_config.create_submission_code(context, self.config.source, destination)
 
         # All files we've generated, starting with the submission.
         generated_files = [submission]
