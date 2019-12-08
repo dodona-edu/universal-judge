@@ -1,0 +1,16 @@
+{
+    "visibility": "private",
+    "description": {
+        "handler": "default",
+        "difficulty": 1.0
+    },
+    "submission": {
+        "handler": "default",
+        "supported_programming_languages": ["python", "java", "haskell", "jshell"]
+    },
+    "evaluation": {
+		"handler": "universal",
+        "time_limit": 600,
+        "memory_limit": 1073741824
+    }
+}

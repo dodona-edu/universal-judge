@@ -2,7 +2,14 @@ import json
 
 from random import randint
 
-from correct import loterij
+import sys
+sys.path.append("../solution/")
+
+try:
+    from ..solution.correct import loterij
+except:
+    # noinspection PyUnresolvedReferences
+    from correct import loterij
 
 
 def generate_data():
@@ -90,5 +97,5 @@ if __name__ == '__main__':
         ]
     }
 
-    with open("plan.json", "w") as f:
+    with open("../evaluation/plan.json", "w") as f:
         json.dump(plan, f)

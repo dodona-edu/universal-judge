@@ -1,0 +1,20 @@
+{
+  "description": {
+    "difficulty": 0.5,
+    "names": {
+      "en": "Echo [UNIVERSELE TEST]",
+      "nl": "Echo [UNIVERSELE TEST]"
+    }
+  },
+  "evaluation": {
+    "memory_limit": 500000000
+  },
+  "access": "public",
+  "internals": {
+    "token": "T2OqBkwPHiRDNdbogLYdeJ5FDUt8YQf4rHZXjyqTOO2UjKzpkpBUBqjsOvmUXoSh",
+    "_info": "These fields are used for internal bookkeeping in Dodona, please do not change them."
+  },
+  "labels": [
+
+  ]
+}

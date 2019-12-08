@@ -1,0 +1,21 @@
+{
+  "description": {
+    "difficulty": 0.5,
+    "names": {
+      "en": "pyLotto [Universele test]",
+      "nl": "pyLotto [Universele test]"
+    }
+  },
+  "evaluation": {
+    "memory_limit": 500000000
+  },
+  "access": "public",
+  "labels": [
+
+  ],
+  "programming_language": "python",
+  "internals": {
+    "token": "A1AuTXp33YZ16YFPF0nXKng971MpzP8cq3rBihGhqwgHALHgX8KkFh7UYZftb59h",
+    "_info": "These fields are used for internal bookkeeping in Dodona, please do not change them."
+  }
+}

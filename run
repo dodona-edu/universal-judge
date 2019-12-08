@@ -6,7 +6,6 @@
 #   - stdout: evaluation results (JSON)
 #   - stderr: should be empty
 #   - exit status: should be zero
-
 DIR="$(dirname $0)"
 cd "$DIR/judge/"
 python "./tested.py"

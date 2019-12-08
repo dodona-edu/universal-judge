@@ -1,0 +1,49 @@
+<p>De <span style="font-weight: bold;">lotto</span>
+      is een vorm van loterij die voornamelijk bekend is vanwege de genummerde
+      balletjes, waarvan er een aantal getrokken worden. Deelnemers mogen zelf
+      hun eigen nummers aankruisen op een lottoformulier. Hoe groter het aantal
+      overeenkomstige nummers tussen het formulier en de getrokken balletjes,
+      hoe groter de geldprijs.</p>
+<p>Diverse Europese landen hebben elk hun eigen
+      lottosysteem, waarbij de verschillen voornamelijk zitten in het aantal
+      genummerde balletjes, het aantal balletjes dat getrokken wordt en het
+      aantal nummers dat op een formulier mag aangekruist worden. Zo kan men in
+      Nederland en Belgi&#235; (vanaf oktober 2011) 6 nummers aankruisen uit de
+      nummers 1 tot en met 45. In de jaren '80 en '90 werd er in Nederland nog
+      met 40 balletjes gespeeld en tot september 2011 werd er in Belgi&#235;
+      slechts met 42 balletjes gespeeld. In het Verenigd Koninkrijk en Duitsland
+      heeft men de keuze uit de nummers 1 tot en met 49. In onder andere de
+      Belgische lotto worden er zeven balletjes getrokken. Dit was tot 2 maart
+      2008 in Nederland ook het geval. Vanaf deze datum is het systeem veranderd
+      en worden er maar zes balletjes meer getrokken.</p>
+<h3>Opgave</h3>
+<p>Schrijf een functie <samp>loterij</samp>
+      waarmee een lottotrekking kan gesimuleerd worden. De functie moet twee
+      optionele parameters <samp>aantal</samp>
+      en <samp>maximum</samp> hebben. Aan de
+      parameter <samp>aantal</samp> kan
+      doorgegeven worden hoeveel balletjes $$a$$ er moeten getrokken worden
+      (standaardwaarde 6). Aan de parameter <samp>maximum</samp>
+      kan doorgegeven worden uit hoeveel balletjes $$m$$ er moet getrokken worden
+      (standaardwaarde 42). De balletjes zijn daarbij dus genummerd van 1 tot en
+      met $$m$$. Je mag ervan uitgaan dat $$a \leq m$$. De functie moet een string
+      teruggeven die een strikt stijgende lijst van $$a$$ natuurlijke getallen
+      beschrijft, waarbij de getallen van elkaar gescheiden zijn door een
+      spatie, een koppelteken (<samp>-</samp>)
+      en nog een spatie. Voor elk getal $$n$$ moet gelden dat $$1 \leq n \leq m$$.
+      Zorg ervoor dat elk van de $$m$$ balletjes evenveel kans maakt om door de
+      functie getrokken te worden.</p>
+<h3>Voorbeeld</h3>
+<div class="highlighter-rouge language-python">
+<pre class="highlight">
+<code><span class="gp">&gt;&gt;&gt; </span><span class="n">loterij</span><span class="p">()</span>
+<span class="go">'2 - 17 - 22 - 27 - 35 - 40'</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">loterij</span><span class="p">(</span><span class="n">aantal</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+<span class="go">'5 - 13 - 15 - 31 - 34 - 36 - 39 - 40'</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">loterij</span><span class="p">(</span><span class="n">maximum</span><span class="o">=</span><span class="mi">21</span><span class="p">)</span>
+<span class="go">'1 - 5 - 6 - 8 - 17 - 20'</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">loterij</span><span class="p">(</span><span class="n">aantal</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">maximum</span><span class="o">=</span><span class="mi">38</span><span class="p">)</span>
+<span class="go">'16 - 20 - 35 - 37'</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">loterij</span><span class="p">(</span><span class="n">maximum</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span> <span class="n">aantal</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+<span class="go">'6 - 12 - 39 - 47 - 87 - 132 - 179 - 208 - 213 - 231 - 240 - 249'</span></code></pre>
+</div>
