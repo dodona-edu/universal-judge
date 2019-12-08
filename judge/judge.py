@@ -156,14 +156,15 @@ class GeneratorJudge(Judge):
 
         # There might be less output than testcase, which is an error. However, we process the
         # output we have, to ensure we send as much feedback as possible to the user.
+        testcase: Testcase  # Type hint for pycharm.
         for i, testcase in enumerate(context.all_testcases()):
             # Get the evaluators
             try:
-                stdout_evaluator = get_evaluator(self.config, testcase.stdout)
-                stderr_evaluator = get_evaluator(self.config, testcase.stderr)
-                file_evaluator = get_evaluator(self.config, testcase.file)
-                value_evaluator = get_evaluator(self.config, testcase.result)
-                exception_evaluator = get_evaluator(self.config, testcase.exception)
+                stdout_evaluator = get_evaluator(self.config, testcase.output.stdout)
+                stderr_evaluator = get_evaluator(self.config, testcase.output.stderr)
+                file_evaluator = get_evaluator(self.config, testcase.output.file)
+                value_evaluator = get_evaluator(self.config, testcase.output.result)
+                exception_evaluator = get_evaluator(self.config, testcase.output.exception)
             except TestPlanError as e:
                 report_update(AppendMessage(message=ExtendedMessage(
                     description=str(e),
@@ -176,20 +177,20 @@ class GeneratorJudge(Judge):
             report_update(StartTestcase(description=readable_input))
 
             # Evaluate the file channel.
-            results = [_evaluate_channel("file", testcase.file, None, file_evaluator)]
+            results = [_evaluate_channel("file", testcase.output.file, None, file_evaluator)]
 
             # Evaluate the stderr channel
             actual_stderr = stderr_[i] if i < len(stderr_) else None
-            results.append(_evaluate_channel("stderr", testcase.stderr, actual_stderr, stderr_evaluator))
+            results.append(_evaluate_channel("stderr", testcase.output.stderr, actual_stderr, stderr_evaluator))
 
             actual_exception = exceptions[i] if i < len(exceptions) else None
-            results.append(_evaluate_channel("exception", testcase.exception, actual_exception, exception_evaluator))
+            results.append(_evaluate_channel("exception", testcase.output.exception, actual_exception, exception_evaluator))
 
             actual_stdout = stdout_[i] if i < len(stdout_) else None
-            results.append(_evaluate_channel("stdout", testcase.stdout, actual_stdout, stdout_evaluator))
+            results.append(_evaluate_channel("stdout", testcase.output.stdout, actual_stdout, stdout_evaluator))
 
             actual_value = values[i] if i < len(values) else None
-            results.append(_evaluate_channel("return", testcase.result, actual_value, value_evaluator))
+            results.append(_evaluate_channel("return", testcase.output.result, actual_value, value_evaluator))
 
             # Check if there is early termination.
             if i >= len(stdout_) or i >= len(stderr_) or i >= len(values) or i >= len(exceptions):

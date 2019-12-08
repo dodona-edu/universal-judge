@@ -24,7 +24,7 @@ from runners.utils import remove_indents, remove_newline
 from serialisation import Value
 from tested import Config
 from testplan import Context, FunctionCall, SpecificEvaluator, IgnoredChannelState, NoneChannelState, \
-    TestPlanError, NoExecutionTestcase, Testcase, AdditionalTestcase, TextData, ExecutionTestcase
+    TestPlanError, NoMainTestcase, Testcase, NormalTestcase, TextData, MainTestcase
 
 
 def _get_identifier() -> str:
@@ -37,7 +37,7 @@ def _get_identifier() -> str:
 @dataclass
 class BaseExecutionResult:
     """
-    The result of an main_testcase.
+    The result of an main.
     """
     stdout: str
     stderr: str
@@ -47,7 +47,7 @@ class BaseExecutionResult:
 @dataclass
 class ExecutionResult(BaseExecutionResult):
     """
-    The result of an main_testcase.
+    The result of an main.
 
     All output streams are divided per testcase, in the same order as the context that was used to
     execute the test. E.g. the string at position 0 in stdout is the result of executing the
@@ -87,9 +87,9 @@ class BaseRunner:
         :param working_directory: The working directory in which the context must be executed. While
                read access outside this directory is not a problem, write access is not guaranteed.
         :param context: The context that must be evaluated.
-        :return: A tuple containing the compiler results and optionally the main_testcase results. If
-                 the compilation was not successful (exit code non 0), the main_testcase results will
-                 not be available. Else the result of the main_testcase, which allows judging of the
+        :return: A tuple containing the compiler results and optionally the main results. If
+                 the compilation was not successful (exit code non 0), the main results will
+                 not be available. Else the result of the main, which allows judging of the
                  results.
         """
         raise NotImplementedError
@@ -169,7 +169,7 @@ class ConfigurableRunner(BaseRunner):
         return [self._evaluator_name(), self._context_name()]
 
     def _copy_additional_files(self, destination: Path) -> List[Path]:
-        """Copy the additional files to the given directory"""
+        """Copy the normal files to the given directory"""
         files = []
         for file in self.language_config.additional_files():
             origin = self._find_file_path(file)
@@ -194,7 +194,7 @@ class ConfigurableRunner(BaseRunner):
         # All files we've generated, starting with the submission.
         generated_files = [submission]
 
-        # Copy additional files we might need.
+        # Copy normal files we might need.
         for file in self.language_config.additional_files():
             result = self._find_file_path(file)
             # noinspection PyTypeChecker
@@ -251,7 +251,7 @@ class ConfigurableRunner(BaseRunner):
 
         stdin_ = []
         for testcase in context.all_testcases():
-            if (input_ := testcase.get_input(self.config.resources)) is not None:
+            if (input_ := testcase.input.get_as_string(self.config.resources)) is not None:
                 stdin_.append(input_)
         stdin_ = "\n".join(stdin_)
 
@@ -277,7 +277,7 @@ class ConfigurableRunner(BaseRunner):
         return compile_result, ExecutionResult(p.stdout, p.stderr, p.returncode, identifier, values, exceptions)
 
     def _path_to_templates(self) -> List[Path]:
-        """The path to the templates and additional files."""
+        """The path to the templates and normal files."""
         result = []
         for end in self.language_config.template_folders(self.config):
             result.append(Path(self.config.judge) / 'judge' / 'runners' / 'templates' / end)
@@ -307,50 +307,49 @@ class ConfigurableRunner(BaseRunner):
 
     def _get_additional_testcases(self, context: Context) -> List[TestcaseData]:
         result = []
-        for i, testcase in enumerate(context.additional):
+        testcase: NormalTestcase  # Type hint for PyCharm
+        for i, testcase in enumerate(context.normal):
             v_eval_function_name = f"v_evaluate_{i}"
             e_eval_function_name = f"e_evaluate_{i}"
-            has_specific_v = not isinstance(testcase.result, (IgnoredChannelState, NoneChannelState))
-            if has_specific_v and isinstance(testcase.result.evaluator, SpecificEvaluator):
-                custom_v_code = testcase.result.evaluator.evaluators[self.config.programming_language] \
+            has_specific_v = not isinstance(testcase.output.result, (IgnoredChannelState, NoneChannelState))
+            if has_specific_v and isinstance(testcase.output.result.evaluator, SpecificEvaluator):
+                custom_v_code = testcase.output.result.evaluator.evaluators[self.config.programming_language] \
                     .get_data_as_string(self.config.resources)
                 custom_v_code = self.language_config.rename_evaluator(custom_v_code, v_eval_function_name)
             else:
                 custom_v_code = self.language_config.value_writer(v_eval_function_name)
-            has_specific_e = not isinstance(testcase.exception, (IgnoredChannelState, NoneChannelState))
-            if has_specific_e and isinstance(testcase.exception.evaluator, SpecificEvaluator):
-                custom_e_code = testcase.exception.evaluator.evaluators[self.config.programming_language] \
-                    .get_data_as_string(self.config.resources)
-                custom_e_code = self.language_config.rename_evaluator(custom_e_code, e_eval_function_name)
-            else:
-                custom_e_code = self.language_config.exception_writer(e_eval_function_name)
+            custom_e_code = self._get_custom_code(testcase, e_eval_function_name)
             # Convert the function call.
             submission_name = self.language_config.submission_name(context)
             result.append(TestcaseData(
-                function=self.prepare_function_call(submission_name, testcase.function),
-                stdin=testcase.stdin,
+                function=self.prepare_function_call(submission_name, testcase.input.function),
+                stdin=testcase.input.stdin,
                 value_code=custom_v_code,
                 exception_code=custom_e_code,
-                has_return=testcase.result != NoneChannelState.NONE
+                has_return=testcase.output.result != NoneChannelState.NONE
             ))
         return result
 
+    def _get_custom_code(self, testcase: Testcase, function_name: str) -> str:
+        """Get the custom code from a context."""
+        has_specific = not isinstance(testcase.output.exception, (IgnoredChannelState, NoneChannelState))
+        if has_specific and isinstance(testcase.output.exception.evaluator, SpecificEvaluator):
+            custom_code = testcase.output.exception.evaluator.evaluators[self.config.programming_language] \
+                .get_data_as_string(self.config.resources)
+            return self.language_config.rename_evaluator(custom_code, function_name)
+        else:
+            return self.language_config.exception_writer(function_name)
+
     def _get_main_testcase(self, context: Context) -> MainTestcaseData:
-        if context.execution == NoExecutionTestcase.NONE:
+        if context.main == NoMainTestcase.NONE:
             return MainTestcaseData(exists=False, exception_code="", arguments=[])
         else:
             eval_function_name = f"e_evaluate_main"
-            has_specific = not isinstance(context.execution.exception, (IgnoredChannelState, NoneChannelState))
-            if has_specific and isinstance(context.execution.exception.evaluator, SpecificEvaluator):
-                custom_code = context.execution.exception.evaluator.evaluators[self.config.programming_language] \
-                    .get_data_as_string(self.config.resources)
-                custom_code = self.language_config.rename_evaluator(custom_code, eval_function_name)
-            else:
-                custom_code = self.language_config.exception_writer(eval_function_name)
-            return MainTestcaseData(exists=True, arguments=context.execution.arguments, exception_code=custom_code)
+            custom_code = self._get_custom_code(context.main, eval_function_name)
+            return MainTestcaseData(exists=True, arguments=context.main.input.arguments, exception_code=custom_code)
 
     def prepare_function_call(self, submission_name: str, function_call: FunctionCall) -> FunctionCall:
-        """Prepare the function call for main_testcase."""
+        """Prepare the function call for main."""
         object_ = function_call.object or submission_name
         return FunctionCall(
             type=function_call.type,
@@ -400,20 +399,20 @@ class ConfigurableRunner(BaseRunner):
         format_ = 'text'  # By default, we use text as input.
         if case.description:
             text = case.description
-        elif isinstance(case, AdditionalTestcase) and isinstance(case.function, FunctionCall):
+        elif isinstance(case, NormalTestcase) and isinstance(case.input.function, FunctionCall):
             name = self.language_config.user_friendly_submission_name(context)
-            text = self.function_call(name, case.function)
+            text = self.function_call(name, case.input.function)
             format_ = self.config.programming_language
-        elif case.stdin != NoneChannelState.NONE:
-            assert isinstance(case.stdin, TextData)
-            text = case.stdin.get_data_as_string(self.config.resources)
+        elif case.input.stdin != NoneChannelState.NONE:
+            assert isinstance(case.input.stdin, TextData)
+            text = case.input.stdin.get_data_as_string(self.config.resources)
         else:
-            assert isinstance(case, ExecutionTestcase)
-            if case.arguments:
-                variable_part = str(case.arguments)
+            assert isinstance(case, MainTestcase)
+            if case.input.arguments:
+                variable_part = str(case.input.arguments)
             else:
                 variable_part = "without arguments"
-            text = f"Program main_testcase {variable_part}"
+            text = f"Program main {variable_part}"
         return ExtendedMessage(description=text, format=format_)
 
 

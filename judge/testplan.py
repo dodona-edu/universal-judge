@@ -211,20 +211,11 @@ TextOutput = Union[TextOutputChannel, AnyChannelState]
 
 
 @dataclass
-class Testcase:
-    """A test case is defined by an input and a set of tests."""
-    # General stuff
-    description: Optional[str] = None  # Will be generated if None.
-    essential: bool = True
-    # Inputs
+class Input:
+    """The input channels for a testcase."""
     stdin: Union[TextData, NoneChannelState] = NoneChannelState.NONE
-    # Outputs
-    stdout: TextOutput = IgnoredChannelState.IGNORED
-    stderr: TextOutput = NoneChannelState.NONE
-    file: Union[FileOutputChannel, IgnoredChannelState] = IgnoredChannelState.IGNORED
-    exception: Union[ExceptionOutputChannel, AnyChannelState] = NoneChannelState.NONE
 
-    def get_input(self, working_directory):
+    def get_as_string(self, working_directory):
         if self.stdin == NoneChannelState.NONE:
             return None
         else:
@@ -232,26 +223,61 @@ class Testcase:
 
 
 @dataclass
-class _RequiredAdditional:
+class Output:
+    """The output channels for a testcase."""
+    stdout: TextOutput = IgnoredChannelState.IGNORED
+    stderr: TextOutput = NoneChannelState.NONE
+    file: Union[FileOutputChannel, IgnoredChannelState] = IgnoredChannelState.IGNORED
+    exception: Union[ExceptionOutputChannel, AnyChannelState] = NoneChannelState.NONE
+    result: Union[ValueOutputChannel, IgnoredChannelState, NoneChannelState] = IgnoredChannelState.IGNORED
+
+
+@dataclass
+class MainInput(Input):
+    """Input for the main testcase."""
+    arguments: List[Value] = field(default_factory=list)  # Main args of the program.
+
+
+@dataclass
+class _RequiredNormalInput:
     """Internal helper, needed to work around MRO issues."""
     function: FunctionCall  # Function call for the testcase.
-    result: Union[ValueOutputChannel, IgnoredChannelState, NoneChannelState]  # Result of the testcase.
 
 
 @dataclass
-class ExecutionTestcase(Testcase):
-    """Main testcase for a context."""
-    arguments: List[Value] = field(default_factory=list)  # Main args of the program.
-    result: IgnoredChannelState = IgnoredChannelState.IGNORED  # Needed internally.
-
-
-@dataclass
-class AdditionalTestcase(Testcase, _RequiredAdditional):
-    """Additional test case."""
+class NormalInput(Input, _RequiredNormalInput):
+    """Input channels for an normal testcase."""
     pass
 
 
-class NoExecutionTestcase(str, Enum):
+@dataclass
+class Testcase:
+    """A testcase is defined by an input channel and an output channel"""
+    description: Optional[str] = None  # Will be generated if None.
+    essential: bool = True
+    input: Input = Input()  # This value is never used, it is useful for MRO issues only.
+    output: Output = Output()
+
+
+@dataclass
+class MainTestcase(Testcase):
+    """
+    The main testcase for a context. Responsible for calling a main function if necessary, but also
+    for providing the main arguments, and the stdin for scripts.
+    """
+    input: MainInput = MainInput()
+
+
+@dataclass
+class NormalTestcase(Testcase):
+    """
+    A normal testcase for a context. This testcase is responsible for calling functions and running
+    code to test.
+    """
+    input: NormalInput
+
+
+class NoMainTestcase(str, Enum):
     NONE = "none"
 
 
@@ -260,27 +286,33 @@ class Context:
     """
     A context corresponds to a context as defined by the Dodona test format.
     It is a collection of testcases that are run together, without isolation.
+
+    A context should consist of at least one testcase: either the main testcase, or if needed,
+    normal testcases.
+
+    Note that in many cases, there might be just one testcase. For example, if the context is used
+    to test one function, the context will contain one function testcase, and nothing more.
     """
-    execution: Union[ExecutionTestcase, NoExecutionTestcase] = NoExecutionTestcase.NONE
-    additional: List[AdditionalTestcase] = field(default_factory=list)
+    main: Union[MainTestcase, NoMainTestcase] = NoMainTestcase.NONE
+    normal: List[NormalTestcase] = field(default_factory=list)
     before: Code = field(default_factory=dict)
     after: Code = field(default_factory=dict)
     object: str = "Main"
     description: Optional[str] = None
 
     def all_testcases(self) -> List[Testcase]:
-        if self.execution == NoExecutionTestcase.NONE:
-            return self.additional
+        if self.main == NoMainTestcase.NONE:
+            return self.normal
         else:
             # noinspection PyTypeChecker
-            return [self.execution] + self.additional
+            return [self.main] + self.normal
 
     @root_validator
     def check_testcases_exist(cls, values):
-        execution = values.get('main_testcase')
-        additional = values.get('additional')
-        if execution == NoExecutionTestcase.NONE and not additional:
-            raise ValueError("Either main_testcase or additional test cases must be defined.")
+        execution = values.get('main')
+        additional = values.get('normal')
+        if execution == NoMainTestcase.NONE and not additional:
+            raise ValueError("Either main or normal testcases must be defined.")
         return values
 
 

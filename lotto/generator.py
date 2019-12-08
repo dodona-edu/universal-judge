@@ -2,7 +2,7 @@ import json
 
 from random import randint
 
-from correct import lottery
+from correct import loterij
 
 
 def generate_data():
@@ -24,7 +24,7 @@ def generate_data():
         elif case == 3:
             a = count
             m = maximum
-        s = lottery(a, m)
+        s = loterij(a, m)
         return s, a, m
 
 
@@ -33,15 +33,41 @@ if __name__ == '__main__':
     tuples = [generate_data() for _ in range(45)]
     for data in tuples:
         print(data)
-        contexts.append({"additional": [{
-            "result": {
-                "value": {
-                    "type": "list",
-                    "data": [
-                        {
-                            "type": "text",
-                            "data": data[0]
-                        },
+        contexts.append({"normal": [{
+            "output": {
+                "result": {
+                    "value": {
+                        "type": "list",
+                        "data": [
+                            {
+                                "type": "text",
+                                "data": data[0]
+                            },
+                            {
+                                "type": "integer",
+                                "data": data[1]
+                            },
+                            {
+                                "type": "integer",
+                                "data": data[2]
+                            }
+                        ]
+                    },
+                    "evaluator": {
+                        "type": "custom",
+                        "language": "python",
+                        "code": {
+                            "type": "file",
+                            "data": "./evaluator.py"
+                        }
+                    }
+                }
+            },
+            "input": {
+                "function": {
+                    "type": "top",
+                    "name": "loterij",
+                    "arguments": [
                         {
                             "type": "integer",
                             "data": data[1]
@@ -51,36 +77,14 @@ if __name__ == '__main__':
                             "data": data[2]
                         }
                     ]
-                },
-                "evaluator": {
-                    "type": "custom",
-                    "language": "python",
-                    "code": {
-                        "type": "file",
-                        "data": "./evaluator.py"
-                    }
                 }
-            },
-            "function": {
-                "type": "top",
-                "name": "lottery",
-                "arguments": [
-                    {
-                        "type": "integer",
-                        "data": data[1]
-                    },
-                    {
-                        "type": "integer",
-                        "data": data[2]
-                    }
-                ]
             }
         }]})
 
     plan = {
         "tabs": [
             {
-                "name": "Correctheid",
+                "name": "Feedback",
                 "contexts": contexts
             }
         ]
