@@ -1,7 +1,7 @@
 {
   "tabs": [
     {
-      "name": "Correctheid",
+      "name": "Feedback",
       "contexts": [
         {
           "description": "Beschrijving van de context",
@@ -101,6 +101,10 @@
                     "haskell": {
                       "type": "file",
                       "data": "./specific_evaluator.hs"
+                    },
+                    "jshell": {
+                      "type": "file",
+                      "data": "./specific_evaluator.jsh"
                     }
                   }
                 }

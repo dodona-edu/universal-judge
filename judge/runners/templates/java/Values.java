@@ -10,7 +10,7 @@ import java.util.*;
 /**
  * Minimal RPC language in JSON to send data from the tests to the judge.
  */
-class Values {
+public class Values {
 
     @SuppressWarnings("unchecked")
     private static Jsonable encode(Object value) {

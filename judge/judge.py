@@ -1,18 +1,10 @@
 from pathlib import Path
-from pprint import pprint
 
 from dodona import *
 from evaluators import get_evaluator, Evaluator
 from runners.runner import BaseRunner, ExecutionResult, get_runner, BaseExecutionResult
 from tested import Config
 from testplan import *
-
-
-def _get_or_default(seq, i, default):
-    try:
-        return seq[i]
-    except IndexError:
-        return default
 
 
 def _evaluate_channel(channel_name: str,
@@ -91,23 +83,6 @@ class GeneratorJudge(Judge):
     def _execute_test_plan(self, submission: str, test_plan: Plan):
         report_update(StartJudgment())
 
-        # Compile the code if needed.
-        # If a compilation error occurs, we stop the main_testcase right now, and report the error.
-        # compilation_result = self.runner.compile(ordered_files)
-        # if compilation_result.stdout:
-        #     # Append compiler messages to the output.
-        #     report_update(AppendMessage(message=ExtendedMessage(
-        #         description=compilation_result.stdout,
-        #         format='code'
-        #     )))
-        # if compilation_result.stderr:
-        #     report_update(AppendMessage(message=ExtendedMessage(
-        #         description=compilation_result.stderr,
-        #         format='code'
-        #     )))
-        #     report_update(CloseJudgment(status=StatusMessage(enum=Status.COMPILATION_ERROR)))
-        #     return
-
         for tab_index, tab in enumerate(test_plan.tabs):
             report_update(StartTab(title=tab.name))
             for context_index, context in enumerate(tab.contexts):
@@ -133,8 +108,12 @@ class GeneratorJudge(Judge):
             report_update(CloseTab())
         report_update(CloseJudgment())
 
-    def _process_compile_results(self, results: BaseExecutionResult) -> Status:
+    def _process_compile_results(self, results: Optional[BaseExecutionResult]) -> Status:
         """Process compilation output. This is called inside a context."""
+
+        # There was no compilation
+        if results is None:
+            return Status.CORRECT
 
         # Report stdout.
         if results.stdout:

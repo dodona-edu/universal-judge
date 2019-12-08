@@ -16,7 +16,7 @@ from dodona import ExtendedMessage
 from runners.config import LanguageConfig
 from runners.haskell import HaskellConfig
 from runners.java import JavaConfig
-from runners.javascripted import JavaScriptedConfig
+from runners.jshell import JshellConfig
 from runners.python import PythonConfig
 from runners.templates import write_template, ContextData, TestcaseData, EvaluatorData, CustomData, \
     MainTestcaseData
@@ -172,7 +172,7 @@ class ConfigurableRunner(BaseRunner):
         """Copy the additional files to the given directory"""
         files = []
         for file in self.language_config.additional_files():
-            origin = self._path_to_templates() / file
+            origin = self._find_file_path(file)
             result = destination / file
             # noinspection PyTypeChecker
             shutil.copy2(origin, result)
@@ -196,7 +196,7 @@ class ConfigurableRunner(BaseRunner):
 
         # Copy additional files we might need.
         for file in self.language_config.additional_files():
-            result = self._path_to_templates() / file
+            result = self._find_file_path(file)
             # noinspection PyTypeChecker
             shutil.copy2(result, working_directory)
             generated_files.append(file)
@@ -206,16 +206,27 @@ class ConfigurableRunner(BaseRunner):
 
         return generated_files
 
+    def _find_file_path(self, base_name: str) -> Path:
+        looked = []
+        for potential in self._path_to_templates():
+            if (p := potential / base_name).exists():
+                return p
+            looked.append(str(potential))
+        raise FileNotFoundError(f"Did not find {base_name}, considered {looked}")
+
     def _value_file(self, working_directory: Path):
         return working_directory / f"{self.identifier}_values.txt"
 
     def _exception_file(self, working_directory: Path):
         return working_directory / f"{self.identifier}_exceptions.txt"
 
-    def _compile(self, ordered_files, working_directory) -> BaseExecutionResult:
+    def _compile(self, ordered_files, working_directory) -> Optional[BaseExecutionResult]:
         command = self.language_config.compilation_command(ordered_files)
-        p = subprocess.run(command, text=True, capture_output=True, cwd=working_directory)
-        return BaseExecutionResult(p.stdout, p.stderr, p.returncode)
+        if command:
+            p = subprocess.run(command, text=True, capture_output=True, cwd=working_directory)
+            return BaseExecutionResult(p.stdout, p.stderr, p.returncode)
+        else:
+            return None
 
     def _context_name(self) -> str:
         return f"{self.language_config.context_name()}.{self.language_config.file_extension()}"
@@ -225,7 +236,7 @@ class ConfigurableRunner(BaseRunner):
 
     def execute(self,
                 context: Context,
-                working_directory: Path) -> Tuple[BaseExecutionResult, Optional[ExecutionResult]]:
+                working_directory: Path) -> Tuple[Optional[BaseExecutionResult], Optional[ExecutionResult]]:
 
         # Generate the code we need to execute this context.
         files = self._generate_code(context, working_directory)
@@ -233,7 +244,7 @@ class ConfigurableRunner(BaseRunner):
         # Compile the code. If the language does not need compilation, this should do nothing.
         compile_result = self._compile(files, working_directory)
 
-        if compile_result.exit != 0:
+        if compile_result is not None and compile_result.exit != 0:
             return compile_result, None
 
         # Actually execute the testcode.
@@ -244,7 +255,7 @@ class ConfigurableRunner(BaseRunner):
                 stdin_.append(input_)
         stdin_ = "\n".join(stdin_)
 
-        command = self.language_config.execution_command()
+        command = self.language_config.execution_command(files)
         # noinspection PyTypeChecker
         p = subprocess.run(command, input=stdin_, text=True, capture_output=True, cwd=working_directory)
         identifier = f"--{self.identifier}-- SEP"
@@ -265,23 +276,29 @@ class ConfigurableRunner(BaseRunner):
 
         return compile_result, ExecutionResult(p.stdout, p.stderr, p.returncode, identifier, values, exceptions)
 
-    def _path_to_templates(self) -> Path:
+    def _path_to_templates(self) -> List[Path]:
         """The path to the templates and additional files."""
-        return Path(self.config.judge) / 'judge' / 'runners' / 'templates' / self.config.programming_language
+        result = []
+        for end in self.language_config.template_folders(self.config):
+            result.append(Path(self.config.judge) / 'judge' / 'runners' / 'templates' / end)
+        return result
 
     @cached_property
     def _get_environment(self) -> TemplateLookup:
         """Get the environment for the templates."""
-        path = str(self._path_to_templates())
         preprocessors = [remove_indents, remove_newline]
-        return TemplateLookup(directories=[path], preprocessor=preprocessors)
+        paths = [str(x) for x in self._path_to_templates()]
+        return TemplateLookup(directories=paths, preprocessor=preprocessors)
 
     def _find_template(self, name, environment):
         """Find a template with a name."""
-        try:
-            return environment.get_template(f"{name}.{self.language_config.file_extension()}")
-        except TemplateLookupException:
-            return environment.get_template(f"{name}.mako")
+        last_error = None
+        for extension in self.language_config.template_extensions():
+            try:
+                return environment.get_template(f"{name}.{extension}")
+            except TemplateLookupException as e:
+                last_error = e
+        raise last_error
 
     def function_call(self, submission_name: str, call: FunctionCall) -> str:
         call = self.prepare_function_call(submission_name, call)
@@ -353,7 +370,7 @@ class ConfigurableRunner(BaseRunner):
             files = self.language_config.additional_files()
             # Copy necessary files to the temporary directory.
             for file in self.language_config.additional_files():
-                result = self._path_to_templates() / file
+                result = self._find_file_path(file)
                 # noinspection PyTypeChecker
                 shutil.copy2(result, directory)
 
@@ -404,7 +421,7 @@ CONFIGS = {
     'python': PythonConfig,
     'java': JavaConfig,
     'haskell': HaskellConfig,
-    'java-scripted': JavaScriptedConfig
+    'jshell': JshellConfig
 }
 
 

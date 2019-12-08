@@ -21,7 +21,7 @@ class PythonConfig(LanguageConfig):
     def compilation_command(self, files: List[str]) -> List[str]:
         return ["python", "-m", "py_compile", *files]
 
-    def execution_command(self) -> List[str]:
+    def execution_command(self, files: List[str]) -> List[str]:
         context = f"{self.context_name()}.{self.file_extension()}"
         return ["python", context]
 

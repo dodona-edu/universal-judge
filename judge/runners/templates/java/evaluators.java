@@ -10,7 +10,7 @@ import java.util.prefs.*;
 import java.util.regex.*;
 import java.util.stream.*;
 
-class Evaluator {
+public class Evaluator {
 
     private final FileWriter valueWriter;
     private final FileWriter exceptionWriter;

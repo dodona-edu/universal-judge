@@ -23,13 +23,10 @@ class JavaConfig(LanguageConfig):
     def exception_writer(self, name):
         return f"public void {name}(Exception e) throws Exception {{sendException(e);}}"
 
-    def needs_compilation(self) -> bool:
-        return True
-
     def _get_classpath(self):
         return [x for x in self.additional_files() if x.endswith(".jar")]
 
-    def execution_command(self) -> List[str]:
+    def execution_command(self, files: List[str]) -> List[str]:
         cp = ";".join(self._get_classpath() + ["."])
         return ["java", "-cp", cp, self.context_name()]
 

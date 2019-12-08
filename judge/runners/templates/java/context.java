@@ -1,7 +1,7 @@
 ## Code to execute one test context.
 ## The The first part of this file contains the evluation functions.
 ## The second part is responsible for actually running the tests.
-class Context {
+public class Context {
 
     private final Evaluator evaluator;
 

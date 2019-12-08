@@ -3,6 +3,7 @@ import shutil
 from pathlib import Path
 from typing import List, Union
 
+from tested import Config
 from testplan import Context
 
 
@@ -15,7 +16,7 @@ class LanguageConfig:
         """Compile some files."""
         return []
 
-    def execution_command(self) -> List[str]:
+    def execution_command(self, files: List[str]) -> List[str]:
         """Get the command for executing the code."""
         raise NotImplementedError
 
@@ -69,3 +70,15 @@ class LanguageConfig:
     def rename_evaluator(self, code, name):
         """Replace the evaluate function name"""
         return code.replace("evaluate", name, 1)
+
+    def template_folders(self, config: Config) -> List[str]:
+        """The name of the template folders to search."""
+        return [config.programming_language]
+
+    def template_extensions(self) -> List[str]:
+        """Extensions a template can be in."""
+        return [self.file_extension(), "mako"]
+
+    def get_all_testcases(self, context: Context):
+        """Get all testcases. Scripts may use this to inject a main testcase if needed."""
+        return context.all_testcases()
