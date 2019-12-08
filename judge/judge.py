@@ -27,6 +27,14 @@ def _evaluate_channel(channel_name: str,
     evaluation_result = evaluator.evaluate(expected_output, actual_result)
     status = evaluation_result.result
 
+    # If the actual value is empty and the expected output is None or ignored, don't
+    # report the update.
+    is_correct = status.enum == Status.CORRECT
+    has_no_result = actual_result is None or actual_result == ""
+    has_no_expected = expected_output == NoneChannelState.NONE or expected_output == IgnoredChannelState.IGNORED
+    if is_correct and has_no_result and has_no_expected:
+        return True
+
     report_update(StartTest(expected=evaluation_result.readable_expected))
 
     # Report any messages we received.
@@ -38,7 +46,7 @@ def _evaluate_channel(channel_name: str,
                             status=status,
                             data=TestData(channel=channel_name)))
 
-    return status == Status.CORRECT
+    return is_correct
 
 
 class Judge:
