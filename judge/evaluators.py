@@ -210,7 +210,8 @@ def _get_values(output_channel: ValueOutputChannel, actual) \
         actual = serialisation.parse(actual) if actual else None
         readable_actual = get_readable_representation(actual) if actual else ""
     except SerialisationError as e:
-        message = ExtendedMessage(description=str(e), format="text", permission=Permission.STAFF)
+        raw_message = f"Received {actual}, which caused {e}."
+        message = ExtendedMessage(description=raw_message, format="text", permission=Permission.STAFF)
         student = "Your return value was wrong; additionally Dodona didn't recognize it. " \
                   "Contact staff for more information."
         return EvaluationResult(
@@ -310,7 +311,8 @@ class ExceptionEvaluator(Evaluator):
         try:
             actual: ExceptionValue = ExceptionValue.__pydantic_model__.parse_raw(actual)
         except (TypeError, ValueError) as e:
-            message = ExtendedMessage(description=str(e), format="text", permission=Permission.STAFF)
+            raw_message = f"Received {actual}, which caused {e}."
+            message = ExtendedMessage(description=raw_message, format="text", permission=Permission.STAFF)
             student = "Something went wrong while receiving the exception. Contact staff."
             return EvaluationResult(
                 result=StatusMessage(enum=Status.INTERNAL_ERROR, human=student),
@@ -345,7 +347,8 @@ class SpecificEvaluator(Evaluator):
         try:
             actual: SpecificResult = SpecificResult.__pydantic_model__.parse_raw(actual)
         except (TypeError, ValueError) as e:
-            message = ExtendedMessage(description=str(e), format="text", permission=Permission.STAFF)
+            raw_message = f"Received {actual}, which caused {e}."
+            message = ExtendedMessage(description=raw_message, format="text", permission=Permission.STAFF)
             student = "Something went wrong while receiving the test result. Contact staff."
             return EvaluationResult(
                 result=StatusMessage(enum=Status.INTERNAL_ERROR, human=student),
@@ -430,7 +433,8 @@ class CustomEvaluator(Evaluator):
         try:
             evaluation_result: SpecificResult = SpecificResult.__pydantic_model__.parse_raw(result.stdout)
         except (TypeError, ValueError) as e:
-            message = ExtendedMessage(description=str(e), format="text", permission=Permission.STAFF)
+            raw_message = f"Received {result}, which caused {e}."
+            message = ExtendedMessage(description=raw_message, format="text", permission=Permission.STAFF)
             student = "Something went wrong while receiving the test result. Contact staff."
             return EvaluationResult(
                 result=StatusMessage(enum=Status.INTERNAL_ERROR, human=student),
