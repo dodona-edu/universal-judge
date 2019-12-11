@@ -35,7 +35,6 @@ public class Context {
         % for additional in additional_testcases:
             try {
                 % if additional.has_return:
-                    System.out.println("Hallo");
                     evaluator.v_evaluate_${loop.index}(<%include file="function.mako" args="function=additional.function" />);
                 % else:
                     <%include file="function.mako" args="function=additional.function" />;
