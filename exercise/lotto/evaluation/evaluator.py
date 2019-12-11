@@ -1,5 +1,6 @@
+# noinspection DuplicatedCode
 def evaluate(expected, actual):
-
+    # noinspection DuplicatedCode
     def valid_lottery_numbers(numbers='', count=6, maximum=42):
 
         def listing(numbers):
@@ -9,59 +10,40 @@ def evaluate(expected, actual):
             if len(numbers) == 1:
                 return str(numbers[0])
             else:
-                return '{} and {}'.format(
-                    ', '.join(str(x) for x in numbers[:-1]),
-                    numbers[-1]
-                )
+                return f"{', '.join(str(x) for x in numbers[:-1])} en {numbers[-1]}"
 
         import re
 
-        if isinstance(numbers, str):
-            lottery_numbers = numbers
-        else:
-            return (
-                numbers,
-                False,
-                'lottery numbers must be a string'
-            )
+        if not isinstance(numbers, str):
+            return numbers, False, 'lottogetallen moet een string zijn'
 
-        if not re.match('^(-?(0|-?[1-9][0-9]*) - )*(0|-?[1-9][0-9]*)$', lottery_numbers):
-            return (
-                lottery_numbers,
-                False,
-                'lottery numbers are not listed in the correct format'
-            )
+        if not re.match('^(-?(0|-?[1-9][0-9]*) - )*(0|-?[1-9][0-9]*)$', numbers):
+            return numbers, False, 'lottogetallen worden niet in het correcte formaat teruggegeven'
 
-        number_list = list(int(x) for x in lottery_numbers.split(' - '))
+        number_list = list(int(x) for x in numbers.split(' - '))
 
         if len(number_list) != count:
-            return (
-                lottery_numbers,
-                False,
-                'expected {} instead of {} lottery numbers'.format(
-                    count, len(number_list)
-                )
-            )
+            return numbers, False, f"verwachtte {count} in plaats van {len(number_list)} lottogetallen"
 
         wrong = [number for number in number_list if number > maximum]
         if wrong:
-            return lottery_numbers, False, 'the following lottery numbers exceed the maximum value of {}: {}'.format(
-                maximum, listing(wrong))
+            return (
+                numbers, False,
+                f'volgende lottogetallen zijn groter dan de maximale waarde {maximum}: {listing(wrong)}'
+            )
 
         wrong = [number for number in number_list if number < 1]
         if wrong:
-            return lottery_numbers, False, 'the following lottery numbers are smaller than the minimum value of 1: {}'.format(
-                listing(wrong))
+            return numbers, False, f'volgende lottogetallen zijn kleiner dan de minimale waarde 1: {listing(wrong)}'
 
         wrong = list(sorted({number for number in number_list if number_list.count(number) > 1}))
         if wrong:
-            return lottery_numbers, False, 'the following lottery numbers occur more than once: {}'.format(
-                listing(wrong))
+            return numbers, False, f'volgende lottogetallen komen meer dan één keer voor: {listing(wrong)}'
 
         if list(sorted(number_list)) != number_list:
-            return lottery_numbers, False, 'lottery numbers are not listed in increasing order'
+            return numbers, False, 'lottogetallen worden niet in stijgende volgorde opgelijst'
 
-        return lottery_numbers, True, ''
+        return numbers, True, ''
 
     expected_value = expected[0]
     count = expected[1]
@@ -72,6 +54,6 @@ def evaluate(expected, actual):
 
     messages = []
     if message:
-        messages.append('Error: ' + message)
+        messages.append('Fout: ' + message)
 
     evaluated(valid, expected_value, messages=messages)
