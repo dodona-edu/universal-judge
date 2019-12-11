@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Tuple
 
 from dodona import *
 from evaluators import get_evaluator, Evaluator
@@ -94,7 +95,6 @@ class GeneratorJudge(Judge):
         for tab_index, tab in enumerate(test_plan.tabs):
             report_update(StartTab(title=tab.name))
             for context_index, context in enumerate(tab.contexts):
-                # TODO: detect and copy resources.
                 # Create a working directory for the context.
                 directory = Path(self.config.workdir, f"{tab_index}-{context_index}")
                 directory.mkdir()
@@ -107,57 +107,71 @@ class GeneratorJudge(Judge):
                         format='text',
                         permission=Permission.STAFF
                     )))
+                    # TODO: close context?
                     report_update(CloseJudgment(status=StatusMessage(enum=Status.INTERNAL_ERROR)))
                     continue
-                if self._process_compile_results(compile_result) == Status.CORRECT:
-                    assert result is not None, "Since compilation succeeded, there must be a test result."
-                    self._process_results(context, result)
+                compiler_results = self._process_compile_results(compile_result)
+                self._process_results(context, result, compiler_results)
                 report_update(CloseContext())
             report_update(CloseTab())
         report_update(CloseJudgment())
 
-    def _process_compile_results(self, results: Optional[BaseExecutionResult]) -> Status:
+    def _process_compile_results(self, results: Optional[BaseExecutionResult]) -> Tuple[List[Message], Status]:
         """Process compilation output. This is called inside a context."""
+
+        messages = []
 
         # There was no compilation
         if results is None:
-            return Status.CORRECT
+            return messages, Status.CORRECT
 
         # Report stdout.
         if results.stdout:
             # Append compiler messages to the output.
-            report_update(AppendMessage(message="The compiler produced the following output on stdout:"))
-            report_update(AppendMessage(message=ExtendedMessage(
-                description=results.stdout,
-                format='code'
-            )))
+            messages.append("De compiler produceerde volgende uitvoer op stdout:")
+            messages.append(ExtendedMessage(description=results.stdout, format='code'))
 
         # Report stderr.
         if results.stderr:
             # Append compiler messages to the output.
-            report_update(AppendMessage(message="The compiler produced the following output on stderr:"))
-            report_update(AppendMessage(message=ExtendedMessage(
-                description=results.stderr,
-                format='code'
-            )))
+            messages.append("De compiler produceerde volgende uitvoer op stderr:")
+            messages.append(ExtendedMessage(description=results.stderr, format='code'))
 
         # Report errors if needed.
         if results.exit != 0:
-            return Status.COMPILATION_ERROR
+            messages.append(f"Het compilatieproces eindigde met exitcode {results.exit}")
+            return messages, Status.COMPILATION_ERROR
         else:
-            return Status.CORRECT
+            return messages, Status.CORRECT
 
-    def _process_results(self, context: Context, results: ExecutionResult):
+    def _process_results(self,
+                         context: Context,
+                         results: ExecutionResult,
+                         compiler_results: Tuple[List[Message], Status]):
         # Process output
-        stdout_ = results.stdout.split(results.separator)
-        stderr_ = results.stderr.split(results.separator)
-        values = results.results.split(results.separator)
-        exceptions = results.exceptions.split(results.separator)
+        stdout_ = results.stdout.split(results.separator) if results is not None else []
+        stderr_ = results.stderr.split(results.separator) if results is not None else []
+        values = results.results.split(results.separator) if results is not None else []
+        exceptions = results.exceptions.split(results.separator) if results is not None else []
 
         # There might be less output than testcase, which is an error. However, we process the
         # output we have, to ensure we send as much feedback as possible to the user.
         testcase: Testcase  # Type hint for pycharm.
         for i, testcase in enumerate(context.all_testcases()):
+
+            readable_input = self.runner.get_readable_input(context, testcase)
+            report_update(StartTestcase(description=readable_input))
+
+            # Handle compiler results
+            if compiler_results[1] != Status.CORRECT:
+                for message in compiler_results[0]:
+                    report_update(AppendMessage(message=message))
+                report_update(EscalateStatus(status=StatusMessage(enum=compiler_results[1])))
+                report_update(CloseTestcase(accepted=False))
+                break
+            else:
+                assert results is not None
+
             # Get the evaluators
             try:
                 stdout_evaluator = get_evaluator(self.config, testcase.output.stdout)
@@ -172,9 +186,6 @@ class GeneratorJudge(Judge):
                     permission=Permission.STAFF
                 )))
                 break
-
-            readable_input = self.runner.get_readable_input(context, testcase)
-            report_update(StartTestcase(description=readable_input))
 
             # Evaluate the file channel.
             results = [_evaluate_channel("file", testcase.output.file, None, file_evaluator)]

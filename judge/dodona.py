@@ -96,9 +96,16 @@ class StartTest:
     """Start on a new test with given expected answer."""
     expected: str
     description: Optional[Message] = None
-    data: Optional[TestData] = None
     # noinspection PyUnresolvedReferences
     command: Literal["start-test"] = "start-test"
+
+
+@dataclass
+class EscalateStatus:
+    """Escalate a status for the worse."""
+    status: StatusMessage
+    # noinspection PyUnresolvedReferences
+    command: Literal["escalate-status"] = "escalate-status"
 
 
 @dataclass
@@ -170,7 +177,7 @@ class CloseJudgment:
 
 
 Update = Union[StartJudgment, StartTab, StartContext, StartTestcase, StartTest, AppendMessage, AnnotateCode,
-               CloseTest, CloseTestcase, CloseContext, CloseTab, CloseJudgment]
+               CloseTest, CloseTestcase, CloseContext, CloseTab, CloseJudgment, EscalateStatus]
 
 
 class DodonaUpdate(BaseModel):
