@@ -1,138 +1,166 @@
 {
   "tabs": [
     {
-      "name": "Correctheid",
+      "name": "Feedback",
       "contexts": [
         {
           "description": "Beschrijving van de context",
-          "execution": {
-            "stdout": {
-              "data": "invoertekst"
+          "main": {
+            "description": "Testgeval voor oproep main-functie",
+            "output": {
+              "stdout": {
+                "data": "invoertekst",
+                "type": "text"
+              }
             },
-            "stdin": {
-              "data": "invoertekst"
+            "input": {
+              "stdin": {
+                "data": "invoertekst",
+                "type": "text"
+              }
             }
           },
-          "additional": [
+          "normal": [
             {
               "essential": false,
-              "stdout": {
-                "data": "test-25"
-              },
-              "exception": "ignored",
-              "result": {
-                "value": {
-                  "type": "text",
+              "output": {
+                "stdout": {
                   "data": "test-25"
+                },
+                "exception": "ignored",
+                "result": {
+                  "value": {
+                    "type": "text",
+                    "data": "test-25"
+                  }
                 }
               },
-              "function": {
-                "type": "top",
-                "name": "echo",
-                "arguments": [
-                  {
-                    "type": "text",
-                    "data": "test"
-                  },
-                  {
-                    "type": "integer",
-                    "data": 25
-                  }
-                ]
+              "input": {
+                "function": {
+                  "type": "top",
+                  "name": "echo",
+                  "arguments": [
+                    {
+                      "type": "text",
+                      "data": "test"
+                    },
+                    {
+                      "type": "integer",
+                      "data": 25
+                    }
+                  ]
+                }
               }
             },
             {
               "essential": false,
-              "stdout": {
-                "data": "test-25"
-              },
-              "exception": "ignored",
-              "result": {
-                "evaluator": {
-                  "type": "specific",
-                  "evaluators": {
-                    "python": {
-                      "type": "file",
-                      "data": "./specific_evaluator.py"
-                    },
-                    "java": {
-                      "type": "file",
-                      "data": "./specific_evaluator.jsh"
-                    },
-                    "haskell": {
-                      "type": "file",
-                      "data": "./specific_evaluator.hs"
+              "output": {
+                "stdout": {
+                  "data": "test-25",
+                  "type": "text"
+                },
+                "exception": "ignored",
+                "result": {
+                  "evaluator": {
+                    "type": "specific",
+                    "evaluators": {
+                      "python": {
+                        "type": "file",
+                        "data": "./specific_evaluator.py"
+                      },
+                      "java": {
+                        "type": "file",
+                        "data": "./specific_evaluator.jsh"
+                      },
+                      "haskell": {
+                        "type": "file",
+                        "data": "./specific_evaluator.hs"
+                      },
+                      "jshell": {
+                        "type": "file",
+                        "data": "./specific_evaluator.jsh"
+                      }
                     }
                   }
                 }
               },
-              "function": {
-                "type": "top",
-                "name": "echo",
-                "arguments": [
-                  {
-                    "type": "text",
-                    "data": "test"
-                  },
-                  {
-                    "type": "integer",
-                    "data": 25
-                  }
-                ]
+              "input": {
+                "function": {
+                  "type": "top",
+                  "name": "echo",
+                  "arguments": [
+                    {
+                      "type": "text",
+                      "data": "test"
+                    },
+                    {
+                      "type": "integer",
+                      "data": 25
+                    }
+                  ]
+                }
               }
             },
             {
               "essential": false,
-              "stdout": {
-                "data": "test-50"
-              },
-              "exception": "ignored",
-              "result": {
-                "value": {
-                  "type": "text",
-                  "data": "HALLO"
+              "output": {
+                "stdout": {
+                  "data": "test-50"
                 },
-                "evaluator": {
-                  "type": "custom",
-                  "language": "python",
-                  "code": {
-                    "type": "file",
-                    "data": "./custom_evaluator.py"
+                "exception": "ignored",
+                "result": {
+                  "value": {
+                    "type": "text",
+                    "data": "HALLO"
+                  },
+                  "evaluator": {
+                    "type": "custom",
+                    "language": "python",
+                    "code": {
+                      "type": "file",
+                      "data": "./custom_evaluator.py"
+                    }
                   }
                 }
               },
-              "function": {
-                "type": "top",
-                "name": "echo",
-                "arguments": [
-                  {
-                    "type": "text",
-                    "data": "test"
-                  },
-                  {
-                    "type": "integer",
-                    "data": 25
-                  }
-                ]
+              "input": {
+                "function": {
+                  "type": "top",
+                  "name": "echo",
+                  "arguments": [
+                    {
+                      "type": "text",
+                      "data": "test"
+                    },
+                    {
+                      "type": "integer",
+                      "data": 25
+                    }
+                  ]
+                }
               }
             },
             {
               "essential": false,
-              "result": "none",
-              "exception": "ignored",
-              "function": {
-                "type": "top",
-                "name": "echo2",
-                "arguments": [
-                  {
-                    "type": "text",
-                    "data": "test"
-                  },
-                  {
-                    "type": "integer",
-                    "data": 25
-                  }
-                ]
+              "output": {
+                "result": "none",
+                "exception": "ignored"
+              },
+              "input": {
+                "function": {
+                  "type": "top",
+                  "name": "echo2",
+                  "arguments": [
+                    {
+                      "type": "text",
+                      "data": "test"
+                    },
+                    {
+                      "type": "integer",
+                      "data": 25
+                    }
+                  ]
+                }
               }
             }
           ]
