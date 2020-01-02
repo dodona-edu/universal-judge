@@ -1,3 +1,5 @@
+from multiprocessing.dummy import Pool
+
 from pathlib import Path
 from typing import Tuple
 
@@ -96,23 +98,25 @@ class GeneratorJudge(Judge):
     def _execute_test_plan(self, submission: str, test_plan: Plan):
         report_update(self.out, StartJudgment())
 
+        pool = Pool(1)
+
         for tab_index, tab in enumerate(test_plan.tabs):
             report_update(self.out, StartTab(title=tab.name))
+            # Create a list of arguments to execute (in threads)
+            executions = []
             for context_index, context in enumerate(tab.contexts):
                 # Create a working directory for the context.
                 directory = Path(self.config.workdir, f"{tab_index}-{context_index}")
                 directory.mkdir()
+                executions.append((context, directory))
+
+            # Do the executions in parallel
+            results = pool.map(lambda a: self.runner.execute(*a), executions)
+
+            # Handle the results
+            for context_index, context in enumerate(tab.contexts):
                 report_update(self.out, StartContext(description=context.description))
-                try:
-                    compile_result, result = self.runner.execute(context, directory)
-                except TestPlanError as e:
-                    report_update(self.out, AppendMessage(message=ExtendedMessage(
-                        description=str(e),
-                        format='text',
-                        permission=Permission.STAFF
-                    )))
-                    report_update(self.out, CloseJudgment(status=StatusMessage(enum=Status.INTERNAL_ERROR)))
-                    continue
+                compile_result, result = results[context_index]
                 compiler_results = self._process_compile_results(compile_result)
                 self._process_results(context, result, compiler_results)
                 report_update(self.out, CloseContext())

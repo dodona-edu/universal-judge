@@ -1,0 +1,25 @@
+Resultaten van multi-threading:
+
+# Lotto in Java
+
+Threads      tijd
+1            48s
+4            36s
+
+# Lotto in Python
+Threads     tijd
+1           12.5s
+4           8.6s
+
+Conclusie: helpt een beetje.
+
+Te onderzoeken: hoe lang duurt elke stap
+-> code genereren (1)
+-> uitvoeren (2)
+-> afhandelen resultaten (3)
+
+Alle verbeteringen in (1) en (2) zijn direct voor alle talen.
+
+Andere opties om te overwegen:
+- Ondersteuning voor partiële compilatie.
+  Bv. in Java de submission 1x compileren en dan de class file kopiëren naar elke map.
