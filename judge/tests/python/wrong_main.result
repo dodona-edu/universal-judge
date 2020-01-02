@@ -5,12 +5,6 @@
 {"expected": "invoertekst", "command": "start-test"}
 {"generated": "invoertekst-wrong", "status": {"enum": "wrong"}, "data": {"channel": "stdout"}, "command": "close-test"}
 {"command": "close-testcase"}
-{"description": {"description": "echo(\"test\", 25)", "format": "python"}, "command": "start-testcase"}
-{"expected": "test-25", "command": "start-test"}
-{"generated": "test-25", "status": {"enum": "correct"}, "data": {"channel": "stdout"}, "command": "close-test"}
-{"expected": "test-25", "command": "start-test"}
-{"generated": "test-25", "status": {"enum": "correct"}, "data": {"channel": "return"}, "command": "close-test"}
-{"command": "close-testcase"}
 {"command": "close-context"}
 {"command": "close-tab"}
 {"command": "close-judgement"}
