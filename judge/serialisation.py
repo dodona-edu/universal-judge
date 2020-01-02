@@ -95,7 +95,7 @@ class NothingTypes(str, Enum):
 
 @dataclass
 class NothingType:
-    type: NothingTypes.NOTHING
+    type: NothingTypes
     data: Literal[None] = None
 
 
@@ -106,6 +106,7 @@ Value = Union[SequenceType, BooleanType, StringType, NumberType, ObjectType, Not
 # See https://pydantic-docs.helpmanual.io/usage/postponed_annotations/#self-referencing-models
 ObjectType.__pydantic_model__.update_forward_refs()
 SequenceType.__pydantic_model__.update_forward_refs()
+ObjectType.__pydantic_model__.update_forward_refs()
 
 
 class _SerialisationSchema(BaseModel):
