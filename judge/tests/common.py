@@ -44,9 +44,8 @@ def validate_output(exercise, plan):
                            input=stdin_, text=True, capture_output=True)
 
         stdout_ = p.stdout
-        with open("result.json", "w") as r:
-            r.write(stdout_)
-        # Split into jsons
+
+        # Split the result into fragments, which are valid json.
         results = re.compile('(?<=})\\s*(?={)').split(stdout_)
         if p.stderr:
             sys.stderr.write(p.stderr)
