@@ -3,7 +3,7 @@ import dataclasses
 import json
 import sys
 from enum import Enum
-from typing import Optional, Union, Literal
+from typing import Optional, Union, Literal, IO
 
 from pydantic import BaseModel
 from pydantic.dataclasses import dataclass
@@ -144,7 +144,6 @@ class CloseTest:
 class CloseTestcase:
     """Close the current testcase. Accepted iff all tests are accepted, but you can overwrite this."""
     accepted: Optional[bool] = None
-    # noinspection PyUnresolvedReferences
     command: Literal["close-testcase"] = "close-testcase"
 
 
@@ -152,15 +151,13 @@ class CloseTestcase:
 class CloseContext:
     """Close the current context. Accepted iff all testcases are accepted, but you can overwrite this."""
     accepted: Optional[bool] = None
-    # noinspection PyUnresolvedReferences
     command: Literal["close-context"] = "close-context"
 
 
 @dataclass
 class CloseTab:
-    """Close the current tab. Badgecount is the number of not-accepted tests, but you can overwrite this."""
+    """Close the current tab."""
     badge_count: Optional[BadgeCount] = None
-    # noinspection PyUnresolvedReferences
     command: Literal["close-tab"] = "close-tab"
 
 
@@ -172,7 +169,6 @@ class CloseJudgment:
     """
     accepted: Optional[bool] = None
     status: Optional[StatusMessage] = None
-    # noinspection PyUnresolvedReferences
     command: Literal["close-judgement"] = "close-judgement"
 
 
@@ -197,17 +193,18 @@ class _EnhancedJSONEncoder(json.JSONEncoder):
         return super().default(o)
 
 
-def report_update(update: Update):
+def report_update(to: IO, update: Update):
     """
-    Send an update to stdout.
+    Write the given update to the given output stream.
+    :param to: Where to write to. Will not be closed.
+    :param update: The update to write.
     """
-    json.dump(update, sys.stdout, cls=_EnhancedJSONEncoder)
-    # print()
+    json.dump(update, to, cls=_EnhancedJSONEncoder)
 
 
 if __name__ == '__main__':
     sc = DodonaUpdate.schema()
-    print(json.dumps(sc, indent=2))
+    #print(json.dumps(sc, indent=2))
 
     v = CloseTab()
-    report_update(v)
+    report_update(sys.stdout, v)

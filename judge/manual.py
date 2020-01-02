@@ -4,9 +4,11 @@ rapid testing (and, most importantly, debugging).
 """
 import os
 import shutil
+import time
+import sys
 from pathlib import Path
 
-from tested import Config
+from tested import Config, run
 from testplan import parse_test_plan
 
 
@@ -21,14 +23,12 @@ def read_config() -> Config:
         "source": '../exercise/lotto/solution/correct.py',
         "judge": str(Path('../').resolve()),
         "workdir": str(Path('./workdir').resolve()),
+        "plan_name": "plan.json"
     })
 
 
 if __name__ == '__main__':
     config = read_config()
-
-    json_string = open(f"{config.resources}/plan.json").read()
-    plan = parse_test_plan(json_string)
 
     # Delete content in work dir
     for root, dirs, files in os.walk(config.workdir):
@@ -37,8 +37,8 @@ if __name__ == '__main__':
         for d in dirs:
             shutil.rmtree(os.path.join(root, d))
 
-    # Run it.
-    from judge import GeneratorJudge
-
-    tester = GeneratorJudge(config)
-    tester.judge(plan)
+    start = time.time()
+    run(config, sys.stdout)
+    end = time.time()
+    print()
+    print(f"Judging took {end - start} seconds (real time)")

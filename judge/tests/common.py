@@ -49,7 +49,7 @@ def validate_output(exercise, plan):
         results = re.compile('(?<=})\\s*(?={)').split(stdout_)
         if p.stderr:
             sys.stderr.write(p.stderr)
-            assert False, "Stderr was not empty."
+            assert p.stderr == "", "Stderr should be empty."
         schema = json.load(schema_file)
         errors = []
         for result in results:
