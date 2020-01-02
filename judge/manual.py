@@ -3,13 +3,12 @@ Run the judge manually from code. In this mode, the config is hardcoded into thi
 rapid testing (and, most importantly, debugging).
 """
 import os
+
 import shutil
 import time
-import sys
 from pathlib import Path
 
 from tested import Config, run
-from testplan import parse_test_plan
 
 
 def read_config() -> Config:
@@ -38,7 +37,7 @@ if __name__ == '__main__':
             shutil.rmtree(os.path.join(root, d))
 
     start = time.time()
-    run(config, sys.stdout)
+    run(config, open(os.devnull, "w"))
     end = time.time()
     print()
     print(f"Judging took {end - start} seconds (real time)")
