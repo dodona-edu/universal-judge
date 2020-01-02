@@ -1,6 +1,7 @@
+jsonschema
 psutil
 pytest
 mako
-pydantic==v1.2
+pydantic
 pyhumps
 typing_inspect

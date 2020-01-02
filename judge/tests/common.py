@@ -1,6 +1,8 @@
 """Common utilities to test the judge output."""
 import json
 import os
+import sys
+
 import re
 import subprocess
 import tempfile
@@ -34,7 +36,7 @@ def validate_output(exercise, plan):
             "workdir": work_directory,
         }
 
-        shutil.copy2(plan, resource_folder + "/full.json")
+        shutil.copy2(plan, resource_folder + "/plan.json")
 
         stdin_ = json.dumps(config_)
 
@@ -42,8 +44,13 @@ def validate_output(exercise, plan):
                            input=stdin_, text=True, capture_output=True)
 
         stdout_ = p.stdout
+        with open("result.json", "w") as r:
+            r.write(stdout_)
         # Split into jsons
         results = re.compile('(?<=})\\s*(?={)').split(stdout_)
+        if p.stderr:
+            sys.stderr.write(p.stderr)
+            assert False, "Stderr was not empty."
         schema = json.load(schema_file)
         errors = []
         for result in results:
@@ -79,11 +86,21 @@ def validate_result(exercise, plan, expected):
             "workdir": work_directory,
         }
 
-        shutil.copy2(plan, resource_folder + "/full.json")
+        shutil.copy2(plan, resource_folder + "/plan.json")
         stdin_ = json.dumps(config_)
         p = subprocess.run(['python', f"{JUDGE_DIR}/judge/tested.py"],
                            input=stdin_, text=True, capture_output=True)
-        actual_output = p.stdout.strip()
-        expected_output = "".join(expected_output.read().splitlines())
+        if p.stderr:
+            sys.stderr.write(p.stderr)
+            assert False, "Stderr was not empty."
+        actual_results = re.compile('(?<=})\\s*(?={)').split(p.stdout)
+        expected_results = results = re.compile('(?<=})\\s*(?={)').split(expected_output.read())
+        actual = ""
+        expected = ""
+        # Parse as JSON and convert back to string to account for formatting.
+        for actual_result in actual_results:
+            actual += json.dumps(json.loads(actual_result))
+        for expected_result in expected_results:
+            expected += json.dumps(json.loads(expected_result))
 
-        assert actual_output == expected_output
+        assert actual == expected

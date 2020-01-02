@@ -1,4 +1,4 @@
-"""Test the judge using Python code."""
+"""Test the judge using the Python runner."""
 from pathlib import Path
 
 from tests.common import validate_result, validate_output

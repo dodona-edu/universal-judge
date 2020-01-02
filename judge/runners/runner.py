@@ -37,7 +37,7 @@ def _get_identifier() -> str:
 @dataclass
 class BaseExecutionResult:
     """
-    The result of an main.
+    Base result of a testcase execution.
     """
     stdout: str
     stderr: str
@@ -47,7 +47,7 @@ class BaseExecutionResult:
 @dataclass
 class ExecutionResult(BaseExecutionResult):
     """
-    The result of an main.
+    The result of a main testcase execution.
 
     All output streams are divided per testcase, in the same order as the context that was used to
     execute the test. E.g. the string at position 0 in stdout is the result of executing the
