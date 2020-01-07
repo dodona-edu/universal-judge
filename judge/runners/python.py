@@ -15,9 +15,6 @@ class PythonConfig(LanguageConfig):
     def exception_writer(self, name):
         return f"def {name}(exception): send_exception(exception)"
 
-    def needs_compilation(self) -> bool:
-        return True
-
     def compilation_command(self, files: List[str]) -> List[str]:
         return ["python", "-m", "py_compile", *files]
 
