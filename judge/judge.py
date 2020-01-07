@@ -55,31 +55,6 @@ def _evaluate_channel(
     return is_correct
 
 
-class Judge:
-    """Will evaluate an exercise."""
-    config: Config
-
-    def __init__(self, config: Config, output: IO):
-        self.config = config
-        self.out = output
-
-    def _execute_test_plan(self, submission: str, test_plan: Plan):
-        """
-        Execute a test plano.
-
-        :param test_plan: The plano to execute.
-        :param submission: The code submitted by the user.
-        """
-        raise NotImplementedError()
-
-    def judge(self, plan):
-        """Get and execute the test plano for an exercise, resulting in a judgment."""
-        with open(self.config.source, 'r') as file:
-            submission_code = file.read()
-
-        self._execute_test_plan(submission_code, plan)
-
-
 @dataclass
 class MetaContext:
     """Contains a context and some metadata about the context."""
@@ -88,17 +63,24 @@ class MetaContext:
     context: Context  # The actual context.
 
 
-class GeneratorJudge(Judge):
+class GeneratorJudge:
     runner: BaseRunner
 
     def __init__(self, config: Config, output: IO):
-        super().__init__(config, output)
+        self.config = config
+        self.out = output
         self.runner = get_runner(config)
 
     def _execute_test_plan(self, submission: str, test_plan: Plan):
+        """
+        Execute a test plano.
+
+        :param test_plan: The plano to execute.
+        :param submission: The code submitted by the user.
+        """
         report_update(self.out, StartJudgment())
 
-        pool = Pool(1)
+        pool = Pool(4)
 
         for tab_index, tab in enumerate(test_plan.tabs):
             report_update(self.out, StartTab(title=tab.name))
@@ -227,3 +209,10 @@ class GeneratorJudge(Judge):
             # If this was an essential testcase with an error, stop testing now.
             if testcase.essential and not all(results):
                 break
+
+    def judge(self, plan):
+        """Get and execute the test plano for an exercise, resulting in a judgment."""
+        with open(self.config.source, 'r') as file:
+            submission_code = file.read()
+
+        self._execute_test_plan(submission_code, plan)
