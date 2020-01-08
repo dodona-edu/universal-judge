@@ -7,9 +7,17 @@ Threads      tijd
 4            36s
 
 # Lotto in Python
+
+Volledig:
+
 Threads     tijd
 1           12.5s
 4           8.6s
+
+Partieel:
+
+1           9s
+4           6s
 
 Conclusie: helpt een beetje.
 
@@ -19,7 +27,3 @@ Te onderzoeken: hoe lang duurt elke stap
 -> afhandelen resultaten (3)
 
 Alle verbeteringen in (1) en (2) zijn direct voor alle talen.
-
-Andere opties om te overwegen:
-- Ondersteuning voor partiële compilatie.
-  Bv. in Java de submission 1x compileren en dan de class file kopiëren naar elke map.

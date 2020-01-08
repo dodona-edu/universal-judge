@@ -1,47 +1,67 @@
-"""Configuration for languages, making implementing runners fairly easy."""
-import shutil
-from pathlib import Path
-from typing import List, Union
+"""
+Module containing the base class with the expected methods for a language configuration. To support
+a new language, it is often enough to subclass the LanguageConfig class and implement the required
+templates.
+
+For very exotic languages, it is possible to create a custom runner subclass, but that will be a lot
+more work.
+"""
+from typing import List, Tuple
 
 from tested import Config
-from testplan import Context
+from testplan import Plan
+
+CallbackResult = Tuple[List[str], List[str]]
 
 
 class LanguageConfig:
     """
-    Configuration for the runner
+    Configuration for the runner.
     """
 
-    def compilation_command(self, files: List[str]) -> List[str]:
-        """Compile some files."""
-        return []
+    def pre_compilation_callback(self, files: List[str]) -> CallbackResult:
+        """
+        Called to do the precompilation step. This function is responsible for returning the
+        precompilation command, and a list of new dependencies. An implementation might abstract
+        this logic and put it in a separate function, to re-use it in the compilation callback.
+        By default, nothing is done here, and the dependencies are returned unchanged.
+        :param files: The files that are destined for precompilation. These were removed from the
+                      general dependencies. There are relative filenames to the current directory.
+        :return: A tuple, containing 1) the compilation command. If no compilation is needed, an
+                 empty command may be used. Secondly, the new dependencies, which are a list of
+                 names.
+        """
+        return [], files
+
+    def compilation_callback(self, files: List[str]) -> CallbackResult:
+        """
+        Called to do the compilation step. This function is responsible for returning the
+        compilation command, and a list of new dependencies. An implementation might abstract this
+        logic and put it in a separate function, to re-use it in the compilation callback.
+        By default, nothing is done here, and the dependencies are returned unchanged.
+        :param files: The files that are destined for compilation. These were removed from the
+                      general dependencies. There are relative filenames to the current directory.
+        :return: A tuple, containing 1) the compilation command. If no compilation is needed, an
+                 empty command may be used. Secondly, the new dependencies, which are a list of
+                 names.
+        """
+        return [], files
 
     def execution_command(self, files: List[str]) -> List[str]:
         """Get the command for executing the code."""
         raise NotImplementedError
 
-    def create_submission_code(self, context: Context, source: Union[Path, str], destination: Path):
-        """Create the submission code"""
-        # noinspection PyTypeChecker
-        shutil.copy2(source, destination)
-
     def execute_evaluator(self, evaluator_name: str) -> List[str]:
-        """Get the command for evaluating an evaluator."""
+        """Get the command for executing an evaluator."""
         raise NotImplementedError
 
     def file_extension(self) -> str:
-        """The file extension for this language, without dot."""
+        """The file extension for this language, without the dot."""
         raise NotImplementedError
 
-    def submission_name(self, context: Context) -> str:
+    def submission_name(self, plan: Plan) -> str:
         """The name for the submission file."""
         raise NotImplementedError
-
-    def user_friendly_submission_name(self, context: Context):
-        if context.object:
-            return context.object
-        else:
-            return ""
 
     def context_name(self) -> str:
         """The name of the context file."""
@@ -49,10 +69,6 @@ class LanguageConfig:
 
     def evaluator_name(self) -> str:
         """The name for the evaluator file."""
-        raise NotImplementedError
-
-    def additional_files(self) -> List[str]:
-        """Additional files that will be available to the context tests."""
         raise NotImplementedError
 
     def value_writer(self, name):
@@ -79,6 +95,8 @@ class LanguageConfig:
         """Extensions a template can be in."""
         return [self.file_extension(), "mako"]
 
-    def get_all_testcases(self, context: Context):
-        """Get all testcases. Scripts may use this to inject a main testcase if needed."""
-        return context.all_testcases()
+    def initial_dependencies(self) -> List[str]:
+        """
+        Return the initial dependencies. These are filenames, relative to the templates directory.
+        """
+        raise NotImplementedError

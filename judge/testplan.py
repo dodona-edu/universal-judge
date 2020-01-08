@@ -297,7 +297,6 @@ class Context:
     normal: List[NormalTestcase] = field(default_factory=list)
     before: Code = field(default_factory=dict)
     after: Code = field(default_factory=dict)
-    object: str = "Main"
     description: Optional[str] = None
 
     def all_testcases(self) -> List[Testcase]:
@@ -327,6 +326,7 @@ class Tab:
 class Plan:
     """General test plan, which is used to run tests of some code."""
     tabs: List[Tab] = field(default_factory=list)
+    object: str = "Main"
 
 
 def parse_test_plan(json_string) -> Plan:

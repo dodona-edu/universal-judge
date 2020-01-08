@@ -3,6 +3,7 @@ Run the judge manually from code. In this mode, the config is hardcoded into thi
 rapid testing (and, most importantly, debugging).
 """
 import os
+import sys
 
 import shutil
 import time
@@ -34,10 +35,10 @@ if __name__ == '__main__':
         for f in files:
             os.unlink(os.path.join(root, f))
         for d in dirs:
-            shutil.rmtree(os.path.join(root, d))
+            shutil.rmtree(os.path.join(root, d), ignore_errors=True)
 
     start = time.time()
-    run(config, open(os.devnull, "w"))
+    run(config, sys.stdout)
     end = time.time()
     print()
     print(f"Judging took {end - start} seconds (real time)")

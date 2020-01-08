@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Tuple
 
 from dodona import *
+from dodona import report_update, StartJudgment, StartTab, StartContext, CloseContext, CloseTab, CloseJudgment
 from evaluators import get_evaluator, Evaluator
 from runners.runner import BaseRunner, ExecutionResult, get_runner, BaseExecutionResult
 from tested import Config
@@ -71,40 +72,6 @@ class GeneratorJudge:
         self.out = output
         self.runner = get_runner(config)
 
-    def _execute_test_plan(self, submission: str, test_plan: Plan):
-        """
-        Execute a test plano.
-
-        :param test_plan: The plano to execute.
-        :param submission: The code submitted by the user.
-        """
-        report_update(self.out, StartJudgment())
-
-        pool = Pool(4)
-
-        for tab_index, tab in enumerate(test_plan.tabs):
-            report_update(self.out, StartTab(title=tab.name))
-            # Create a list of arguments to execute (in threads)
-            executions = []
-            for context_index, context in enumerate(tab.contexts):
-                # Create a working directory for the context.
-                directory = Path(self.config.workdir, f"{tab_index}-{context_index}")
-                directory.mkdir()
-                executions.append((context, directory))
-
-            # Do the executions in parallel
-            results = pool.map(lambda a: self.runner.execute(*a), executions)
-
-            # Handle the results
-            for context_index, context in enumerate(tab.contexts):
-                report_update(self.out, StartContext(description=context.description))
-                compile_result, result = results[context_index]
-                compiler_results = self._process_compile_results(compile_result)
-                self._process_results(context, result, compiler_results)
-                report_update(self.out, CloseContext())
-            report_update(self.out, CloseTab())
-        report_update(self.out, CloseJudgment())
-
     def _process_compile_results(self, results: Optional[BaseExecutionResult]) -> Tuple[List[Message], Status]:
         """Process compilation output. This is called inside a context."""
 
@@ -134,6 +101,7 @@ class GeneratorJudge:
             return messages, Status.CORRECT
 
     def _process_results(self,
+                         plan: Plan,
                          context: Context,
                          results: ExecutionResult,
                          compiler_results: Tuple[List[Message], Status]):
@@ -148,7 +116,7 @@ class GeneratorJudge:
         testcase: Testcase  # Type hint for pycharm.
         for i, testcase in enumerate(context.all_testcases()):
 
-            readable_input = self.runner.get_readable_input(context, testcase)
+            readable_input = self.runner.get_readable_input(plan, context, testcase)
             report_update(self.out, StartTestcase(description=readable_input))
 
             # Handle compiler results
@@ -210,9 +178,32 @@ class GeneratorJudge:
             if testcase.essential and not all(results):
                 break
 
-    def judge(self, plan):
-        """Get and execute the test plano for an exercise, resulting in a judgment."""
-        with open(self.config.source, 'r') as file:
-            submission_code = file.read()
+    def judge(self, plan: Plan):
+        """Execute the test plan for an exercise, resulting in a judgment."""
+        report_update(self.out, StartJudgment())
+        common_dir = Path(self.config.workdir, f"common")
+        common_dir.mkdir()
+        self.runner.pre_execute(common_dir, plan)
+        pool = Pool()
+        for tab_index, tab in enumerate(plan.tabs):
+            report_update(self.out, StartTab(title=tab.name))
+            # Create a list of arguments to execute (in threads)
+            executions = []
+            for context_index, context in enumerate(tab.contexts):
+                # Create a working directory for the context.
+                directory = Path(self.config.workdir, f"{tab_index}-{context_index}")
+                directory.mkdir()
+                executions.append((plan, context, common_dir, directory))
 
-        self._execute_test_plan(submission_code, plan)
+            # Do the executions in parallel
+            results = pool.map(lambda a: self.runner.execute(*a), executions)
+
+            # Handle the results
+            for context_index, context in enumerate(tab.contexts):
+                report_update(self.out, StartContext(description=context.description))
+                compile_result, result = results[context_index]
+                compiler_results = self._process_compile_results(compile_result)
+                self._process_results(plan, context, result, compiler_results)
+                report_update(self.out, CloseContext())
+            report_update(self.out, CloseTab())
+        report_update(self.out, CloseJudgment())

@@ -200,6 +200,7 @@ def report_update(to: IO, update: Update):
     :param update: The update to write.
     """
     json.dump(update, to, cls=_EnhancedJSONEncoder)
+    print()
 
 
 if __name__ == '__main__':
