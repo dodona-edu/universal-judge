@@ -49,7 +49,7 @@ class JshellConfig(JavaConfig):
         return super().template_folders(config) + ["java"]
 
     def additional_files(self) -> List[str]:
-        return super().additional_files() + ["exit.jsh"]
+        return super().initial_dependencies() + ["exit.jsh"]
 
     def template_extensions(self) -> List[str]:
         return super().template_extensions() + ["java"]
