@@ -6,6 +6,11 @@ Threads      tijd
 1            48s
 4            36s
 
+Partieel:
+
+1           46s
+4           27s
+
 # Lotto in Python
 
 Volledig:

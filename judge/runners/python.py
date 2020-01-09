@@ -22,9 +22,8 @@ class PythonConfig(LanguageConfig):
         return ["python", "-m", "compileall", "-b"], [f.replace(".py", '.pyc') for f in files]
 
     def execution_command(self, files: List[str]) -> List[str]:
-        file = [x for x in files if x.startswith(self.context_name())]
-        assert len(file) == 1, f"Python must have ONE file to execute, got {files}"
-        return ["python", *file]
+        main = self._get_main_file(files)
+        return ["python", main]
 
     def execute_evaluator(self, evaluator_name: str) -> List[str]:
         return ["python", f"{self.evaluator_name()}.{self.file_extension()}"]

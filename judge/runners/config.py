@@ -100,3 +100,9 @@ class LanguageConfig:
         Return the initial dependencies. These are filenames, relative to the templates directory.
         """
         raise NotImplementedError
+
+    def _get_main_file(self, files: List[str]) -> str:
+        files = [x for x in files if x.startswith(self.context_name())]
+        if len(files) != 1:
+            raise AssertionError(f"The files must contain one main file, but got {len(files)} from {files}.")
+        return files[0]

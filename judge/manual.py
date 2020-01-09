@@ -17,10 +17,10 @@ def read_config() -> Config:
     return Config(**{
         "memory_limit": 536870912,
         "time_limit": 10000000,
-        "programming_language": 'python',
+        "programming_language": 'java',
         "natural_language": 'nl',
-        "resources": str(Path('../exercise/lotto/evaluation').resolve()),
-        "source": '../exercise/lotto/solution/correct.py',
+        "resources": str(Path('../exercise/lotto-java/evaluation').resolve()),
+        "source": '../exercise/lotto-java/solution/correct.java',
         "judge": str(Path('../').resolve()),
         "workdir": str(Path('./workdir').resolve()),
         "plan_name": "plan.json"
@@ -38,7 +38,7 @@ if __name__ == '__main__':
             shutil.rmtree(os.path.join(root, d), ignore_errors=True)
 
     start = time.time()
-    run(config, sys.stdout)
+    run(config, open(os.devnull, "w"))
     end = time.time()
     print()
     print(f"Judging took {end - start} seconds (real time)")

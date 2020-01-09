@@ -1,5 +1,6 @@
 from typing import List, Optional
 
+from runners.config import CallbackResult
 from runners.java import JavaConfig
 from tested import Config
 from testplan import Context
@@ -38,8 +39,8 @@ class JshellConfig(JavaConfig):
     def file_extension(self) -> str:
         return "jsh"
 
-    def compilation_command(self, files: List[str]) -> List[str]:
-        return []
+    def compilation_callback(self, files: List[str]) -> CallbackResult:
+        return [], files
 
     def submission_name(self, context: Context) -> Optional[str]:
         return "script"
