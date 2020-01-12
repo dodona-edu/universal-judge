@@ -1,11 +1,11 @@
 {
+  "object": "Main",
   "tabs": [
     {
       "name": "Feedback",
       "contexts": [
         {
           "description": "Beschrijving van de context",
-          "object": "Main",
           "main": {
             "essential": true,
             "description": "Testgeval voor oproep main-functie",
@@ -213,6 +213,23 @@
                       "data": 25
                     }
                   ]
+                },
+                "stdin": "none"
+              }
+            },
+            {
+              "input": {
+                "assignment": {
+                  "name": "test",
+                  "expression": {
+                    "type": "identity",
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "hallo"
+                      }
+                    ]
+                  }
                 },
                 "stdin": "none"
               }

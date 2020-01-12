@@ -9,13 +9,13 @@ from dataclasses import field
 from enum import Enum
 from os import path
 
-from typing import List, Optional, Union, Dict, Any, Literal
-
 from humps import is_camelcase
 from pydantic import validator, root_validator
 from pydantic.dataclasses import dataclass
+from typing import List, Optional, Union, Dict, Any, Literal
 
-from serialisation import Value, ExceptionValue
+from serialisation import Value, ExceptionValue, NumericTypes, StringTypes, BooleanTypes, ObjectTypes, SequenceTypes, \
+    NothingTypes, InstanceTypes
 
 
 class TestPlanError(ValueError):
@@ -63,13 +63,15 @@ class TextData:
 class FunctionType(str, Enum):
     TOP = "top"  # top level function
     OBJECT = "static"  # function on an object or class
+    CONSTRUCTOR = "constructor"  # Will be a constructor; the "object" is ignored.
+    IDENTITY = "identity"  # Must have one argument, cannot have object
 
 
 @dataclass
 class FunctionCall:
     """Represents a function call"""
     type: FunctionType
-    name: str
+    name: Optional[str] = None
     object: Optional[str] = None
     arguments: List[Value] = field(default_factory=list)
 
@@ -79,6 +81,96 @@ class FunctionCall:
         if not is_camelcase(value):
             return ValueError(f"Function {value} should be in camelCase.")
         return value
+
+    @root_validator
+    def identity_cannot_have_object(cls, values):
+        type_ = values.get("type")
+        object_ = values.get("object")
+        if type_ == FunctionType.CONSTRUCTOR and object_ is not None:
+            raise ValueError(f"A constructor cannot have an object, but got {object_}")
+        elif type_ == FunctionType.IDENTITY and object_ is not None:
+            raise ValueError(f"An identity call cannot have an object, but got {object_}")
+        return values
+
+    @root_validator
+    def identity_needs_one_argument(cls, values):
+        arguments = values.get("arguments")
+        type_ = values.get("type")
+        if type_ == FunctionType.IDENTITY and len(arguments) != 1:
+            raise ValueError(f"Identity call requires exactly one argument, but got {arguments}")
+        return values
+
+    @root_validator
+    def constructor_needs_class_name(cls, values):
+        object_ = values.get("object")
+        type_ = values.get("type")
+        if type_ == FunctionType.CONSTRUCTOR and object_ is None:
+            raise ValueError(f"Constructor call needs object as class name.")
+        return values
+
+    @root_validator
+    def non_identity_needs_name(cls, values):
+        type_ = values.get("type")
+        name_ = values.get("name")
+        if type_ != FunctionType.IDENTITY and not name_:
+            raise ValueError("Non-identity functions must have a name.")
+        return values
+
+
+VariableTypes = Union[
+    # Types from the serialization format
+    NumericTypes,
+    StringTypes,
+    BooleanTypes,
+    SequenceTypes,
+    ObjectTypes,
+    NothingTypes,
+    # Allow instance types
+    InstanceTypes
+]
+
+
+@dataclass
+class VariableType:
+    type: VariableTypes
+    data: Optional[str] = None
+
+
+@dataclass
+class Assignment:
+    """
+    Assigns the return value of a function to a variable. Because the expression part is pretty
+    simple, the type of the value is determined by looking at the expression. It is also possible
+    to define the type. If the type cannot be determined and it is not specified, this is an error.
+    """
+    name: str
+    expression: FunctionCall
+    type: Optional[VariableType] = None
+
+    def get_type(self) -> VariableType:
+        """
+        Get the type of the variable. If a type is specified, it will be returned. Otherwise, this
+        functions tries to determine type in a best-efforts manner. Currently, expressions with a
+        function of type "identity" or "constructor" can be determined. This function does not check
+        the given type against a determined type; if the given type is incompatible, this will lead
+        to a crash during the execution.
+
+        :return: The type, and optionally some data about the type. The data is currently only used
+        when the type is an instance, which will then contain the name of the instance.
+        """
+        if self.type:
+            return self.type
+        if self.expression.type == FunctionType.IDENTITY:
+            arg = self.expression.arguments[0]
+            return VariableType(arg.type)
+        if self.expression.type == FunctionType.CONSTRUCTOR:
+            class_name = self.expression.arguments[0].data
+            return VariableType(InstanceTypes.INSTANCE, class_name)
+
+        raise TestPlanError(f"Could not determine type of variable {self.name}")
+
+    def replace_function(self, function: FunctionCall) -> 'Assignment':
+        return Assignment(name=self.name, expression=function, type=self.type)
 
 
 class TextBuiltin(str, Enum):
@@ -98,7 +190,7 @@ class ExceptionBuiltin(str, Enum):
 @dataclass
 class BaseBuiltinEvaluator:
     """
-    Built-in evaluator in the judge. Some basic evaluators are available, as enumerated by
+    A built-in evaluator in the judge. Some basic evaluators are available, as enumerated by
     :class:`Builtin`. These are useful for things like comparing text, files or values.
 
     This is the recommended and default evaluator, since it is a) the least amount of work and
@@ -239,15 +331,28 @@ class MainInput(Input):
 
 
 @dataclass
-class _RequiredNormalInput:
-    """Internal helper, needed to work around MRO issues."""
-    function: FunctionCall  # Function call for the testcase.
+class _RequiredFunctionInput:
+    function: FunctionCall
 
 
 @dataclass
-class NormalInput(Input, _RequiredNormalInput):
-    """Input channels for an normal testcase."""
+class FunctionInput(Input, _RequiredFunctionInput):
+    """Input channel where there is a function call as input."""
     pass
+
+
+@dataclass
+class _RequiredAssignmentInput:
+    assignment: Assignment
+
+
+@dataclass
+class AssignmentInput(Input, _RequiredAssignmentInput):
+    """Input channel where there is an assignment as input."""
+    pass
+
+
+NormalInput = Union[FunctionInput, AssignmentInput]
 
 
 @dataclass
@@ -275,6 +380,15 @@ class NormalTestcase(Testcase):
     code to test.
     """
     input: NormalInput
+
+    @root_validator
+    def no_return_with_assignment(cls, values):
+        input_ = values.get("input")
+        output_ = values.get("output")
+        if isinstance(input_, AssignmentInput) \
+                and not (output_.result == IgnoredChannelState.IGNORED or output_.result == NoneChannelState.NONE):
+            raise ValueError(f"An assignment cannot have a return value.")
+        return values
 
 
 class NoMainTestcase(str, Enum):

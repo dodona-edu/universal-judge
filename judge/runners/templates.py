@@ -1,4 +1,12 @@
-"""Code related to working with templates"""
+"""
+Code related to working with templates.
+
+The vast majority of code in this module is simplified versions of the testplan datastructures, that
+are used inside the templates.
+
+By defining the datastructures here explicitly, it allows for better control and checks that we did
+not forget some attributes when implementing a language.
+"""
 import dataclasses
 import sys
 from dataclasses import dataclass
@@ -9,12 +17,12 @@ from mako import exceptions
 from mako.template import Template
 
 from serialisation import Value
-from testplan import FunctionCall, TextData, NoneChannelState
+from testplan import TextData, NoneChannelState, Assignment, FunctionCall
 
 
 @dataclass
 class TestcaseData:
-    function: FunctionCall
+    statement: Union[FunctionCall, Assignment]
     stdin: Union[TextData, NoneChannelState]
     value_code: str
     exception_code: str

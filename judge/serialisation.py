@@ -49,6 +49,7 @@ class NumberType:
 
 class StringTypes(str, Enum):
     TEXT = "text"
+    LITERAL = "literal"
     UNKNOWN = "unknown"
 
 
@@ -97,6 +98,14 @@ class NothingTypes(str, Enum):
 class NothingType:
     type: NothingTypes
     data: Literal[None] = None
+
+
+class InstanceTypes(str, Enum):
+    """
+    Represents the instance of a class. Currently, only used by assignments, not by the
+    serialisation processes.
+    """
+    INSTANCE = "instance"
 
 
 # A value is one of the preceding types.

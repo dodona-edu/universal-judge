@@ -26,7 +26,8 @@ from runners.utils import remove_indents, remove_newline
 from serialisation import Value
 from tested import Config
 from testplan import Context, FunctionCall, SpecificEvaluator, IgnoredChannelState, NoneChannelState, \
-    TestPlanError, NoMainTestcase, Testcase, NormalTestcase, TextData, MainTestcase, Plan
+    TestPlanError, NoMainTestcase, Testcase, NormalTestcase, TextData, MainTestcase, Plan, Assignment, FunctionInput, \
+    AssignmentInput, FunctionType
 
 
 def _get_identifier() -> str:
@@ -327,6 +328,11 @@ class ConfigurableRunner(BaseRunner):
         template = self._find_template("function", self._get_environment)
         return template.render(function=call)
 
+    def assignment(self, submission_name: str, assignment: Assignment) -> str:
+        assignment = assignment.replace_function(self.prepare_function_call(submission_name, assignment.expression))
+        template = self._find_template("assignment", self._get_environment)
+        return template.render(assignment=assignment)
+
     def _get_additional_testcases(self, plan: Plan, context: Context) -> List[TestcaseData]:
         result = []
         testcase: NormalTestcase  # Type hint for PyCharm
@@ -343,12 +349,22 @@ class ConfigurableRunner(BaseRunner):
             custom_e_code = self._get_custom_code(testcase, e_eval_function_name)
             # Convert the function call.
             submission_name = self.language_config.submission_name(plan)
+            has_return = testcase.output.result != NoneChannelState.NONE and isinstance(testcase.input, FunctionInput)
+            if has_return or isinstance(testcase.input, FunctionInput):
+                statement = self.prepare_function_call(submission_name, testcase.input.function)
+            else:
+                assert isinstance(testcase.input, AssignmentInput)
+                statement = testcase.input.assignment.replace_function(self.prepare_function_call(
+                    submission_name,
+                    testcase.input.assignment.expression
+                ))
+
             result.append(TestcaseData(
-                function=self.prepare_function_call(submission_name, testcase.input.function),
+                statement=statement,
                 stdin=testcase.input.stdin,
                 value_code=custom_v_code,
                 exception_code=custom_e_code,
-                has_return=testcase.output.result != NoneChannelState.NONE
+                has_return=has_return
             ))
         return result
 
@@ -372,6 +388,8 @@ class ConfigurableRunner(BaseRunner):
 
     def prepare_function_call(self, submission_name: str, function_call: FunctionCall) -> FunctionCall:
         """Prepare the function call for main."""
+        if function_call.type == FunctionType.IDENTITY:
+            return function_call
         object_ = function_call.object or submission_name
         return FunctionCall(
             type=function_call.type,
@@ -409,7 +427,7 @@ class ConfigurableRunner(BaseRunner):
         Get human readable input for a testcase. This function will use, in order of availability:
 
         1. A description on the testcase.
-        2. A function call.
+        2. A function call or assignment.
         3. The stdin.
         4. Program arguments, if any.
 
@@ -420,9 +438,13 @@ class ConfigurableRunner(BaseRunner):
         format_ = 'text'  # By default, we use text as input.
         if case.description:
             text = case.description
-        elif isinstance(case, NormalTestcase) and isinstance(case.input.function, FunctionCall):
+        elif isinstance(case, NormalTestcase) and isinstance(case.input, FunctionInput):
             name = plan.object
             text = self.function_call(name, case.input.function)
+            format_ = self.config.programming_language
+        elif isinstance(case, NormalTestcase) and isinstance(case.input, AssignmentInput):
+            name = plan.object
+            text = self.assignment(name, case.input.assignment)
             format_ = self.config.programming_language
         elif case.input.stdin != NoneChannelState.NONE:
             assert isinstance(case.input.stdin, TextData)

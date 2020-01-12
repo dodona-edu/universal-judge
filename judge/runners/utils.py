@@ -83,9 +83,7 @@ def remove_indents(code):
         line = strip(line, total_strip)
         resulting_lines.append(line)
 
-    r = "\n".join(resulting_lines)
-    # print(r)
-    return r
+    return "\n".join(resulting_lines)
 
 
 def remove_newline(code):

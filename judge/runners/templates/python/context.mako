@@ -1,4 +1,5 @@
 ## Code to execute one test context.
+<%! from testplan import Assignment %>
 import sys
 import evaluator
 
@@ -31,11 +32,18 @@ except Exception as e:
 ## Handle test cases.
 % for additional in additional_testcases:
     try:
-        % if additional.has_return:
-            evaluator.v_evaluate_${loop.index}(${submission_name}.<%include file="function.mako" args="function=additional.function" />)
+        % if isinstance(additional.statement, Assignment):
+            <%include file="assignment.mako" args="assignment=additional.statement" />
         % else:
-            ${submission_name}.<%include file="function.mako" args="function=additional.function" />
+            % if additional.has_return:
+                evaluator.v_evaluate_${loop.index}(\
+            % endif
+            ${submission_name}.<%include file="function.mako" args="function=additional.statement" />\
+            % if additional.has_return:
+                )\
+            % endif
         % endif
+
     except Exception as e:
         evaluator.e_evaluate_${loop.index}(e)
     sys.stderr.write("--${secret_id}-- SEP")
