@@ -61,8 +61,7 @@ class TextData:
 
 
 class FunctionType(str, Enum):
-    TOP = "top"  # top level function
-    OBJECT = "static"  # function on an object or class
+    FUNCTION = "function"  # Normal function call.
     CONSTRUCTOR = "constructor"  # Will be a constructor; the "object" is ignored.
     IDENTITY = "identity"  # Must have one argument, cannot have object
 
@@ -86,9 +85,7 @@ class FunctionCall:
     def identity_cannot_have_object(cls, values):
         type_ = values.get("type")
         object_ = values.get("object")
-        if type_ == FunctionType.CONSTRUCTOR and object_ is not None:
-            raise ValueError(f"A constructor cannot have an object, but got {object_}")
-        elif type_ == FunctionType.IDENTITY and object_ is not None:
+        if type_ == FunctionType.IDENTITY and object_ is not None:
             raise ValueError(f"An identity call cannot have an object, but got {object_}")
         return values
 
@@ -98,14 +95,6 @@ class FunctionCall:
         type_ = values.get("type")
         if type_ == FunctionType.IDENTITY and len(arguments) != 1:
             raise ValueError(f"Identity call requires exactly one argument, but got {arguments}")
-        return values
-
-    @root_validator
-    def constructor_needs_class_name(cls, values):
-        object_ = values.get("object")
-        type_ = values.get("type")
-        if type_ == FunctionType.CONSTRUCTOR and object_ is None:
-            raise ValueError(f"Constructor call needs object as class name.")
         return values
 
     @root_validator

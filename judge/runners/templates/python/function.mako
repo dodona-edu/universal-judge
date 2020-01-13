@@ -1,16 +1,11 @@
 ## This generates a function call in Python.
 <%! from testplan import FunctionType %>
 <%page args="function" />
-% if function.type == FunctionType.CONSTRUCTOR:
-    <%include file="value.mako" args="value=function.object"/>
-% else:
-    % if function.type == FunctionType.TOP:
-        ${function.name}\
-    % elif function.type == FunctionType.OBJECT:
-        ${function.object}.${function.name}\
-    % endif
-% endif
 % if function.type != FunctionType.IDENTITY:
+    % if function.object:
+        ${function.object}.\
+    % endif
+    ${function.name}\
     (\
 % endif
 % for argument in function.arguments:

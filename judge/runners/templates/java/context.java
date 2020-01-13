@@ -1,6 +1,5 @@
 ## Code to execute one test context.
-## The The first part of this file contains the evluation functions.
-## The second part is responsible for actually running the tests.
+<%! from testplan import Assignment %>
 public class Context {
 
     private final Evaluator evaluator;
@@ -34,10 +33,17 @@ public class Context {
 
         % for additional in additional_testcases:
             try {
-                % if additional.has_return:
-                    evaluator.v_evaluate_${loop.index}(<%include file="function.mako" args="function=additional.function" />);
+                % if isinstance(additional.statement, Assignment):
+                    <%include file="assignment.mako" args="assignment=additional.statement" />
                 % else:
-                    <%include file="function.mako" args="function=additional.function" />;
+                    % if additional.has_return:
+                        evaluator.v_evaluate_${loop.index}(\
+                    % endif
+                    <%include file="function.mako" args="function=additional.statement" />\
+                    % if additional.has_return:
+                        )\
+                    % endif
+                    ;
                 % endif
             } catch (Exception e) {
                 evaluator.e_evaluate_${loop.index}(e);

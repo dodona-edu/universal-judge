@@ -19,7 +19,7 @@ ${before}
 
 ## Import the code for the first time.
 try:
-    import ${submission_name}
+    from ${submission_name} import *
 except Exception as e:
     evaluator.e_evaluate_main(e)
 % if main_testcase.exists:
@@ -38,7 +38,7 @@ except Exception as e:
             % if additional.has_return:
                 evaluator.v_evaluate_${loop.index}(\
             % endif
-            ${submission_name}.<%include file="function.mako" args="function=additional.statement" />\
+            <%include file="function.mako" args="function=additional.statement" />\
             % if additional.has_return:
                 )\
             % endif
