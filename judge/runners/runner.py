@@ -331,7 +331,7 @@ class ConfigurableRunner(BaseRunner):
     def assignment(self, submission_name: str, assignment: Assignment) -> str:
         assignment = assignment.replace_function(self.prepare_function_call(submission_name, assignment.expression))
         template = self._find_template("assignment", self._get_environment)
-        return template.render(assignment=assignment)
+        return template.render(assignment=assignment, full=True)
 
     def _get_additional_testcases(self, plan: Plan, context: Context) -> List[TestcaseData]:
         result = []

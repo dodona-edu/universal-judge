@@ -2,7 +2,7 @@
 <%! from testplan import FunctionType %>
 <%page args="function" />
 % if function.type != FunctionType.IDENTITY:
-    % if function.object:
+    % if function.type == FunctionType.OBJECT:
         ${function.object}.\
     % endif
     ${function.name}\

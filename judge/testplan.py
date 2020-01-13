@@ -61,7 +61,8 @@ class TextData:
 
 
 class FunctionType(str, Enum):
-    FUNCTION = "function"  # Normal function call.
+    TOP = "top"  # Normal function call.
+    OBJECT = "object"
     CONSTRUCTOR = "constructor"  # Will be a constructor; the "object" is ignored.
     IDENTITY = "identity"  # Must have one argument, cannot have object
 

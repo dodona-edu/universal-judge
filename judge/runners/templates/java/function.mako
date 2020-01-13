@@ -4,7 +4,7 @@
 % if function.type == FunctionType.CONSTRUCTOR:
     new
 % elif function.type != FunctionType.IDENTITY:
-    % if function.object:
+    % if function.type == FunctionType.OBJECT or function.type == FunctionType.TOP:
         ${function.object}.\
     % endif
     ${function.name}\
