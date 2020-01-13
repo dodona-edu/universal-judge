@@ -32,6 +32,9 @@ public class Context {
         % endif
 
         % for additional in additional_testcases:
+            % if isinstance(additional.statement, Assignment):
+                <%include file="declaration.mako" args="value=additional.statement.get_type()" /> ${additional.statement.name};
+            % endif
             try {
                 % if isinstance(additional.statement, Assignment):
                     <%include file="assignment.mako" args="assignment=additional.statement" />

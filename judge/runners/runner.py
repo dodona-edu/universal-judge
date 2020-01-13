@@ -395,7 +395,7 @@ class ConfigurableRunner(BaseRunner):
             type=function_call.type,
             arguments=function_call.arguments,
             name=self.language_config.conventionalise(function_call.name),
-            object=function_call.object
+            object=object_
         )
 
     def evaluate_specific(self, code: str, expected: Value, actual: Value) -> BaseExecutionResult:
