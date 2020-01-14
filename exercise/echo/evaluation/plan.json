@@ -233,6 +233,44 @@
                 },
                 "stdin": "none"
               }
+            },
+            {
+              "input": {
+                "assignment": {
+                  "name": "result",
+                  "type": {
+                    "type": "text"
+                  },
+                  "expression": {
+                    "type": "top",
+                    "name": "echo",
+                    "arguments": [
+                      {
+                        "type": "literal",
+                        "data": "test"
+                      },
+                      {
+                        "type": "integer",
+                        "data": 15
+                      }
+                    ]
+                  }
+                },
+                "stdin": "none"
+              }
+            },
+            {
+              "input": {
+                "function": {
+                    "type": "identity",
+                    "arguments": [
+                      {
+                        "type": "literal",
+                        "data": "str(test)"
+                      }
+                    ]
+                  }
+                }
             }
           ],
           "before": {
