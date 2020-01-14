@@ -288,7 +288,12 @@ class IgnoredEvaluator(Evaluator):
             actual = ExceptionValue.__pydantic_model__.parse_raw(actual)
             actual = actual.message + '\n' + actual.stacktrace
         except (TypeError, ValueError):
-            pass
+            # print(f"Actual is {actual}")
+            try:
+                actual = serialisation.parse(actual)
+                actual = get_readable_representation(actual)
+            except (TypeError, ValueError):
+                pass
         return EvaluationResult(
             result=StatusMessage(enum=Status.CORRECT),
             readable_expected="",
