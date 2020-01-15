@@ -5,15 +5,17 @@ This module is the authoritative source on the format and behaviour of the
 testplan. Note that the implementation in the judge is kept simple by design;
 unless noted, the judge will not provide default values for missing fields.
 """
+from abc import ABC, abstractmethod
 from dataclasses import field
 from enum import Enum
 from os import path
+from typing import List, Optional, Union, Dict, Any, Literal, Iterable
 
 from humps import is_camelcase
-from pydantic import validator, root_validator
+from pydantic import validator, root_validator, BaseModel
 from pydantic.dataclasses import dataclass
-from typing import List, Optional, Union, Dict, Any, Literal
 
+from features import Features, reduce_features
 from serialisation import Value, ExceptionValue, NumericTypes, StringTypes, BooleanTypes, ObjectTypes, SequenceTypes, \
     NothingTypes, InstanceTypes
 
@@ -21,6 +23,13 @@ from serialisation import Value, ExceptionValue, NumericTypes, StringTypes, Bool
 class TestPlanError(ValueError):
     """Error when the test plan is not valid."""
     pass
+
+
+class WithFeatures(ABC):
+
+    @abstractmethod
+    def get_used_features(self) -> Features:
+        raise NotImplementedError()
 
 
 class ChannelType(str, Enum):
@@ -68,14 +77,13 @@ class FunctionType(str, Enum):
 
 
 @dataclass
-class FunctionCall:
+class FunctionCall(WithFeatures):
     """Represents a function call"""
     type: FunctionType
     name: Optional[str] = None
     object: Optional[str] = None
     arguments: List[Value] = field(default_factory=list)
 
-    @staticmethod
     @validator('name')
     def is_camelcase(cls, value):
         if not is_camelcase(value):
@@ -106,6 +114,12 @@ class FunctionCall:
             raise ValueError("Non-identity functions must have a name.")
         return values
 
+    def get_used_features(self) -> Features:
+        features = Features.FUNCTION_CALL
+        if self.type == FunctionType.OBJECT or self.type == FunctionType.CONSTRUCTOR:
+            features |= Features.OBJECTS
+        return features | reduce_features(x.type.feature for x in self.arguments)
+
 
 VariableTypes = Union[
     # Types from the serialization format
@@ -127,7 +141,7 @@ class VariableType:
 
 
 @dataclass
-class Assignment:
+class Assignment(WithFeatures):
     """
     Assigns the return value of a function to a variable. Because the expression part is pretty
     simple, the type of the value is determined by looking at the expression. It is also possible
@@ -161,6 +175,12 @@ class Assignment:
 
     def replace_function(self, function: FunctionCall) -> 'Assignment':
         return Assignment(name=self.name, expression=function, type=self.type)
+
+    def get_used_features(self) -> Features:
+        features = Features.ASSIGNMENT | self.expression.get_used_features()
+        if self.type:
+            features |= self.type.type.feature
+        return features
 
 
 class TextBuiltin(str, Enum):
@@ -269,7 +289,7 @@ class ValueOutputChannel:
 
 @dataclass
 class ExceptionOutputChannel:
-    """Handles exceptions of user code if needed."""
+    """Handles exceptions caused by the submission."""
     exception: ExceptionValue
     evaluator: Union[ExceptionBuiltinEvaluator, CustomEvaluator, SpecificEvaluator] = ExceptionBuiltinEvaluator()
 
@@ -293,7 +313,7 @@ TextOutput = Union[TextOutputChannel, AnyChannelState]
 
 
 @dataclass
-class Input:
+class Input(WithFeatures, ABC):
     """The input channels for a testcase."""
     stdin: Union[TextData, NoneChannelState] = NoneChannelState.NONE
 
@@ -305,19 +325,31 @@ class Input:
 
 
 @dataclass
-class Output:
+class Output(WithFeatures):
     """The output channels for a testcase."""
+
     stdout: TextOutput = IgnoredChannelState.IGNORED
     stderr: TextOutput = NoneChannelState.NONE
     file: Union[FileOutputChannel, IgnoredChannelState] = IgnoredChannelState.IGNORED
     exception: Union[ExceptionOutputChannel, AnyChannelState] = NoneChannelState.NONE
-    result: Union[ValueOutputChannel, IgnoredChannelState, NoneChannelState] = IgnoredChannelState.IGNORED
+    result: Union[ValueOutputChannel, AnyChannelState] = IgnoredChannelState.IGNORED
+
+    def get_used_features(self) -> Features:
+        start = Features.NOTHING
+        if isinstance(self.result, ValueOutputChannel):
+            start |= Features.FUNCTION_CALL
+        if isinstance(self.exception, ExceptionOutputChannel):
+            start |= Features.EXCEPTIONS
+        return start
 
 
 @dataclass
 class MainInput(Input):
     """Input for the main testcase."""
     arguments: List[Value] = field(default_factory=list)  # Main args of the program.
+
+    def get_used_features(self) -> Features:
+        return super(self).get_used_features() | reduce_features([x.type.feature for x in self.arguments])
 
 
 @dataclass
@@ -328,7 +360,9 @@ class _RequiredFunctionInput:
 @dataclass
 class FunctionInput(Input, _RequiredFunctionInput):
     """Input channel where there is a function call as input."""
-    pass
+
+    def get_used_features(self) -> Features:
+        return self.function.get_used_features()
 
 
 @dataclass
@@ -339,19 +373,24 @@ class _RequiredAssignmentInput:
 @dataclass
 class AssignmentInput(Input, _RequiredAssignmentInput):
     """Input channel where there is an assignment as input."""
-    pass
+
+    def get_used_features(self) -> Features:
+        return self.assignment.get_used_features()
 
 
 NormalInput = Union[FunctionInput, AssignmentInput]
 
 
 @dataclass
-class Testcase:
+class Testcase(WithFeatures):
     """A testcase is defined by an input channel and an output channel"""
+    input: Input  # This value is never used, it is useful for MRO issues only.
     description: Optional[str] = None  # Will be generated if None.
     essential: bool = True
-    input: Input = Input()  # This value is never used, it is useful for MRO issues only.
     output: Output = Output()
+
+    def get_used_features(self) -> Features:
+        return self.input.get_used_features() | self.output.get_used_features()
 
 
 @dataclass
@@ -361,6 +400,9 @@ class MainTestcase(Testcase):
     for providing the main arguments, and the stdin for scripts.
     """
     input: MainInput = MainInput()
+
+    def get_used_features(self) -> Features:
+        return Features.MAIN | super(self).get_used_features()
 
 
 @dataclass
@@ -386,7 +428,7 @@ class NoMainTestcase(str, Enum):
 
 
 @dataclass
-class Context:
+class Context(WithFeatures):
     """
     A context corresponds to a context as defined by the Dodona test format.
     It is a collection of testcases that are run together, without isolation.
@@ -418,28 +460,47 @@ class Context:
             raise ValueError("Either main or normal testcases must be defined.")
         return values
 
+    def get_used_features(self) -> Features:
+        main = Features.NOTHING
+        if self.main != NoMainTestcase.NONE:
+            main |= self.main.get_used_features()
+        return main | _reduce_with_feature(self.normal)
+
 
 @dataclass
-class Tab:
+class Tab(WithFeatures):
     """Represents a tab on Dodona."""
     name: str
     contexts: List[Context]
 
+    def get_used_features(self) -> Features:
+        return _reduce_with_feature(self.contexts)
+
 
 @dataclass
-class Plan:
+class Plan(WithFeatures):
     """General test plan, which is used to run tests of some code."""
     tabs: List[Tab] = field(default_factory=list)
     object: str = "Main"
 
+    def get_used_features(self) -> Features:
+        return _reduce_with_feature(self.tabs)
+
+
+def _reduce_with_feature(iterable: Iterable[WithFeatures]) -> Features:
+    return reduce_features(x.get_used_features() for x in iterable)
+
+
+class _PlanModel(BaseModel):
+    __root__: Plan
+
 
 def parse_test_plan(json_string) -> Plan:
     """Parse a test plan into the structures."""
-    plan = Plan.__pydantic_model__.parse_raw(json_string)
-    return plan
+    return _PlanModel.parse_raw(json_string).__root__
 
 
 if __name__ == '__main__':
-    with open('../lotto/plan.json', 'r') as f:
+    with open('../exercise/lotto/evaluation/plan.json', 'r') as f:
         r = parse_test_plan(f.read())
         print(r)

@@ -6,7 +6,7 @@ from typing import Tuple
 from dodona import *
 from dodona import report_update, StartJudgment, StartTab, StartContext, CloseContext, CloseTab, CloseJudgment
 from evaluators import get_evaluator, Evaluator
-from runners.runner import BaseRunner, ExecutionResult, get_runner, BaseExecutionResult
+from runners.runner import BaseRunner, ExecutionResult, get_runner, BaseExecutionResult, get_supporting_languages
 from tested import Config
 from testplan import *
 
@@ -34,8 +34,7 @@ def _evaluate_channel(
     evaluation_result = evaluator.evaluate(expected_output, actual_result)
     status = evaluation_result.result
 
-    # If the actual value is empty and the expected output is None or ignored, don't
-    # report the update.
+    # If the actual value is empty and the expected output is None or ignored, don't report it.
     is_correct = status.enum == Status.CORRECT
     has_no_result = actual_result is None or actual_result == ""
     has_no_expected = expected_output == NoneChannelState.NONE or expected_output == IgnoredChannelState.IGNORED
@@ -54,6 +53,19 @@ def _evaluate_channel(
                                  data=TestData(channel=channel_name)))
 
     return is_correct
+
+
+def _check_features(plan: Plan, language: str):
+    """
+    Check if a language supports all features needed by a certain testplan.
+    In the future, we might also want to determine which languages support all required features,
+    but that is currently not needed.
+    :param plan:
+    :param language: The programming language.
+    """
+    supported = get_supporting_languages(plan)
+    if language not in supported:
+        raise TestPlanError(f"The chosen language {language} does not support all required features for the testplan.")
 
 
 @dataclass
@@ -180,6 +192,8 @@ class GeneratorJudge:
 
     def judge(self, plan: Plan):
         """Execute the test plan for an exercise, resulting in a judgment."""
+        # Check we have the required features.
+        _check_features(plan, self.config.programming_language)
         report_update(self.out, StartJudgment())
         common_dir = Path(self.config.workdir, f"common")
         common_dir.mkdir()

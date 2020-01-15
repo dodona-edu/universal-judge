@@ -8,6 +8,7 @@ yet, such as:
 """
 from typing import List
 
+from features import Features
 from runners.config import LanguageConfig
 from testplan import Plan
 
@@ -51,3 +52,10 @@ class HaskellConfig(LanguageConfig):
 
     def rename_evaluator(self, code, name):
         return code.replace("evaluate", name, 2)
+
+    def supported_features(self) -> Features:
+        return (
+                Features.MAIN | Features.FUNCTION_CALL | Features.ASSIGNMENT |
+                Features.LISTS | Features.SETS | Features.MAPS |
+                Features.INTEGERS | Features.RATIONALS | Features.STRINGS | Features.BOOLEANS
+        )

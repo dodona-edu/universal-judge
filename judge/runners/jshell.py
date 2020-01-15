@@ -1,5 +1,6 @@
 from typing import List, Optional
 
+from features import Features
 from runners.config import CallbackResult
 from runners.java import JavaConfig
 from tested import Config
@@ -48,8 +49,15 @@ class JshellConfig(JavaConfig):
     def template_folders(self, config: Config) -> List[str]:
         return super().template_folders(config) + ["java"]
 
-    def additional_files(self) -> List[str]:
+    def initial_dependencies(self) -> List[str]:
         return super().initial_dependencies() + ["exit.jsh"]
 
     def template_extensions(self) -> List[str]:
         return super().template_extensions() + ["java"]
+
+    def supported_features(self) -> Features:
+        return (
+                Features.OBJECTS | Features.EXCEPTIONS | Features.FUNCTION_CALL | Features.ASSIGNMENT |
+                Features.LISTS | Features.SETS | Features.MAPS |
+                Features.INTEGERS | Features.RATIONALS | Features.STRINGS | Features.BOOLEANS | Features.NULL
+        )

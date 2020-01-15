@@ -8,6 +8,7 @@ more work.
 """
 from typing import List, Tuple
 
+from features import Features
 from tested import Config
 from testplan import Plan
 
@@ -106,3 +107,18 @@ class LanguageConfig:
         if len(files) != 1:
             raise AssertionError(f"The files must contain one main file, but got {len(files)} from {files}.")
         return files[0]
+
+    def supported_features(self) -> Features:
+        """
+        The features supported by this language. The default implementation returns all features. If
+        a language supports only a subset, it is recommended to explicitly enumerate the supported
+        features instead (whitelist) instead of removing non-supported features (blacklist). This
+        allows new features to be added without having to update the language.
+        :return: The features supported by this language.
+        """
+        return (Features.OBJECTS | Features.EXCEPTIONS | Features.MAIN | Features.FUNCTION_CALL | Features.ASSIGNMENT
+                | Features.LISTS | Features.SETS | Features.MAPS
+                | Features.INTEGERS | Features.RATIONALS
+                | Features.STRINGS
+                | Features.BOOLEANS
+                | Features.NULL)

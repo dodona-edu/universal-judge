@@ -11,7 +11,7 @@ from functools import cached_property
 from mako.exceptions import TemplateLookupException
 from mako.lookup import TemplateLookup
 from pathlib import Path
-from typing import Tuple, List, Optional
+from typing import Tuple, List, Optional, Set
 
 from dodona import ExtendedMessage
 from runners.config import LanguageConfig
@@ -465,6 +465,27 @@ CONFIGS = {
     'haskell': HaskellConfig,
     'jshell': JshellConfig
 }
+
+
+def get_languages() -> Set[str]:
+    """
+    :return: Languages supported by the judge.
+    """
+    return set(CONFIGS.keys())
+
+
+def get_supporting_languages(plan: Plan) -> Set[str]:
+    """
+    :param plan: The testplan.
+    :return: The languages that have the required features to execute the testplan.
+    """
+    required = plan.get_used_features()
+    supported_languages = set()
+    for language, config in CONFIGS.items():
+        supported_features = config.supported_features()
+        if supported_features & required != 0:
+            supported_languages.add(language)
+    return supported_languages
 
 
 def get_runner(config: Config, language: str = None) -> BaseRunner:

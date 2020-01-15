@@ -24,6 +24,8 @@ from pydantic import BaseModel
 from pydantic.dataclasses import dataclass
 from typing_inspect import get_args
 
+from features import Features
+
 
 class SerialisationError(ValueError):
     def __init__(self, message, additional_errors=None):
@@ -116,6 +118,28 @@ Value = Union[SequenceType, BooleanType, StringType, NumberType, ObjectType, Not
 ObjectType.__pydantic_model__.update_forward_refs()
 SequenceType.__pydantic_model__.update_forward_refs()
 ObjectType.__pydantic_model__.update_forward_refs()
+
+# Add features to the various enums.
+# This is the best way according to https://stackoverflow.com/questions/33008401
+NumericTypes.INTEGER.feature = Features.INTEGERS
+NumericTypes.RATIONAL.feature = Features.RATIONALS
+StringTypes.TEXT.feature = Features.STRINGS
+StringTypes.LITERAL.feature = Features.NOTHING  # Not relevant
+StringTypes.UNKNOWN.feature = Features.NOTHING  # Not relevant
+BooleanTypes.BOOLEAN.feature = Features.BOOLEANS
+SequenceTypes.LIST.feature = Features.LISTS
+SequenceTypes.SET.feature = Features.SETS
+ObjectTypes.OBJECT.feature = Features.MAPS
+NothingTypes.NOTHING.feature = Features.NULL
+InstanceTypes.INSTANCE.feature = Features.NOTHING  # Not relevant
+# Finally, assert that we have added it to all relevant values.
+assert all(
+    all(
+        hasattr(value, "feature") and value.feature is not None
+        for value in type_.__annotations__["type"]
+    )
+    for type_ in Value.__args__
+), "All useful serialization types need a feature field."
 
 
 class _SerialisationSchema(BaseModel):
