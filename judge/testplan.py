@@ -349,7 +349,7 @@ class MainInput(Input):
     arguments: List[Value] = field(default_factory=list)  # Main args of the program.
 
     def get_used_features(self) -> Features:
-        return super(self).get_used_features() | reduce_features([x.type.feature for x in self.arguments])
+        return reduce_features([x.type.feature for x in self.arguments])
 
 
 @dataclass
@@ -402,7 +402,7 @@ class MainTestcase(Testcase):
     input: MainInput = MainInput()
 
     def get_used_features(self) -> Features:
-        return Features.MAIN | super(self).get_used_features()
+        return Features.MAIN | super(MainTestcase, self).get_used_features()
 
 
 @dataclass

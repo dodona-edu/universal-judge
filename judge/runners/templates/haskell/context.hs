@@ -1,4 +1,5 @@
 ## Code to execute one test context.
+<%! from testplan import Assignment %>
 module Context where
 
 import System.IO (hPutStr, stderr)
@@ -9,9 +10,8 @@ import qualified Evaluator
 
 
 main = do
-    ## In Haskell we do the before/after inside the main (?)
     ${before}
-    ## Call main function
+
     % if main_testcase.exists:
         let mainArgs = [\
             % for argument in main_testcase.arguments:
@@ -19,18 +19,25 @@ main = do
             % endfor
         ]
         withArgs mainArgs ${submission_name}.main
-    % endif
-
-    % for additional in additional_testcases:
         hPutStr stderr "--${secret_id}-- SEP"
         putStr "--${secret_id}-- SEP"
         Evaluator.writeDelimiter "--${secret_id}-- SEP"
-        % if additional.has_return:
-            v${loop.index} <- ${submission_name}.<%include file="function.mako" args="function=additional.function" />
-            Evaluator.v_evaluate_${loop.index} v${loop.index}
+    % endif
+
+    % for additional in additional_testcases:
+        % if isinstance(additional.statement, Assignment):
+            <%include file="assignment.mako" args="assignment=additional.statement,root=False" />
         % else:
-            ${submission_name}.<%include file="function.mako" args="function=additional.function" />
+            % if additional.has_return:
+                v${loop.index} <- <%include file="function.mako" args="function=additional.statement" />
+                Evaluator.v_evaluate_${loop.index} v${loop.index}
+            % else:
+                <%include file="function.mako" args="function=additional.statement" />
+            % endif
         % endif
 
+        hPutStr stderr "--${secret_id}-- SEP"
+        putStr "--${secret_id}-- SEP"
+        Evaluator.writeDelimiter "--${secret_id}-- SEP"
     % endfor
     ${after}

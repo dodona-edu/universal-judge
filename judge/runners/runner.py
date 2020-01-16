@@ -482,7 +482,7 @@ def get_supporting_languages(plan: Plan) -> Set[str]:
     required = plan.get_used_features()
     supported_languages = set()
     for language, config in CONFIGS.items():
-        supported_features = config.supported_features()
+        supported_features = config().supported_features()
         if supported_features & required != 0:
             supported_languages.add(language)
     return supported_languages

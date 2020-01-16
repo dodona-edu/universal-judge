@@ -266,7 +266,7 @@
                     "arguments": [
                       {
                         "type": "literal",
-                        "data": "str(test)"
+                        "data": "test"
                       }
                     ]
                   }

@@ -23,7 +23,7 @@
     ${str(value.data)}\
 % elif value.type == StringTypes.TEXT:
     "${value.data}"\
-% elif value.type == NumericTypes.INTEGER or value.type == NumericTypes.RATIONAL:
+% elif value.type == NumericTypes.INTEGER or value.type == NumericTypes.RATIONAL or value.type == StringTypes.LITERAL:
     ${value.data}\
 % elif value.type == ObjectTypes.OBJECT:
     [\
