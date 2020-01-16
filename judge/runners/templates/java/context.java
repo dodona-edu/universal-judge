@@ -61,7 +61,6 @@ public class Context {
     }
 
     public static void main(String[] a) throws Exception {
-        ## Open our file we use to write.
         Evaluator evaluator = new Evaluator();
         new Context(evaluator).execute();
         evaluator.close();
