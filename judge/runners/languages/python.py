@@ -18,7 +18,7 @@ class PythonConfig(LanguageConfig):
     def exception_writer(self, name):
         return f"def {name}(exception): send_exception(exception)"
 
-    def pre_compilation_callback(self, files: List[str]) -> CallbackResult:
+    def generation_callback(self, files: List[str]) -> CallbackResult:
         return ["python", "-m", "compileall", "-b"], [f.replace(".py", '.pyc') for f in files]
 
     def execution_command(self, files: List[str]) -> List[str]:

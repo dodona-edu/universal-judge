@@ -8,7 +8,7 @@ from pydantic.dataclasses import dataclass
 
 import serialisation
 from dodona import Status, ExtendedMessage, Permission, StatusMessage, Message
-from runners.runner import get_runner
+from runners.runner import get_generator
 from serialisation import get_readable_representation, SerialisationError, SpecificResult, ExceptionValue
 from tested import Config
 from testplan import TestPlanError, TextOutputChannel, FileOutputChannel, ValueOutputChannel, NoneChannelState, \
@@ -420,9 +420,9 @@ class CustomEvaluator(Evaluator):
                 messages=["Received nothing."]
             )
 
-        runner = get_runner(self.config, output_channel.evaluator.language)
+        runner = get_generator(self.config, output_channel.evaluator.language)
         code = output_channel.evaluator.code.get_data_as_string(self.config.resources)
-        result = runner.evaluate_specific(code, expected, actual)
+        result = runner.evaluate_custom(code, expected, actual)
 
         if not result.stdout:
             stdout = ExtendedMessage(description=result.stdout, format="text")

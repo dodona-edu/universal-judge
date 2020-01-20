@@ -14,7 +14,7 @@ from testplan import parse_test_plan
 from utils import smart_close
 
 
-@dataclass
+@dataclass(frozen=True)
 class Config:
     resources: str
     source: str

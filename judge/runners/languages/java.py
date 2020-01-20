@@ -45,7 +45,7 @@ class JavaConfig(LanguageConfig):
     def file_extension(self) -> str:
         return "java"
 
-    def pre_compilation_callback(self, files: List[str]) -> CallbackResult:
+    def generation_callback(self, files: List[str]) -> CallbackResult:
         return self.compilation_callback(files)
 
     def compilation_callback(self, files: List[str]) -> CallbackResult:

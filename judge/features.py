@@ -26,7 +26,6 @@ class Features(Flag):
     NULL = auto()
 
 
-
 def reduce_features(iterable: Iterable[Features]) -> Features:
     """
     Reduce a list of features to a single feature. This will "OR" all features in the iterable.

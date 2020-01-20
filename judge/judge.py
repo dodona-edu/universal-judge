@@ -6,7 +6,7 @@ from typing import Tuple
 from dodona import *
 from dodona import report_update, StartJudgment, StartTab, StartContext, CloseContext, CloseTab, CloseJudgment
 from evaluators import get_evaluator, Evaluator
-from runners.runner import BaseRunner, ExecutionResult, get_runner, BaseExecutionResult, get_supporting_languages
+from runners.runner import Runner, ExecutionResult, get_generator, BaseExecutionResult, get_supporting_languages
 from tested import Config
 from testplan import *
 
@@ -77,12 +77,12 @@ class MetaContext:
 
 
 class GeneratorJudge:
-    runner: BaseRunner
+    runner: Runner
 
     def __init__(self, config: Config, output: IO):
         self.config = config
         self.out = output
-        self.runner = get_runner(config)
+        self.runner = get_generator(config)
 
     def _process_compile_results(self, results: Optional[BaseExecutionResult]) -> Tuple[List[Message], Status]:
         """Process compilation output. This is called inside a context."""
@@ -197,7 +197,7 @@ class GeneratorJudge:
         report_update(self.out, StartJudgment())
         common_dir = Path(self.config.workdir, f"common")
         common_dir.mkdir()
-        self.runner.pre_execute(common_dir, plan)
+        self.runner.generate(common_dir, plan)
         pool = Pool()
         for tab_index, tab in enumerate(plan.tabs):
             report_update(self.out, StartTab(title=tab.name))

@@ -46,8 +46,8 @@ class JshellConfig(JavaConfig):
     def submission_name(self, context: Context) -> Optional[str]:
         return "script"
 
-    def template_folders(self, config: Config) -> List[str]:
-        return super().template_folders(config) + ["java"]
+    def template_folders(self, programming_language: str) -> List[str]:
+        return super().template_folders(programming_language) + ["java"]
 
     def initial_dependencies(self) -> List[str]:
         return super().initial_dependencies() + ["exit.jsh"]

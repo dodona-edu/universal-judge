@@ -3,7 +3,6 @@ import values
 value_file = None
 exception_file = None
 
-
 def open_outputs():
     global value_file, exception_file
     value_file = open(r"${value_file}", "w")
@@ -32,14 +31,15 @@ def send_exception(exception):
     values.send_exception(exception_file, exception)
 
 
-${main_testcase.exception_code}
+% for c in contexts:
+    ${c.main_testcase.exception_code}
 
+    % for additional in c.additional_testcases:
+        % if additional.has_return:
+            ${additional.value_code}
+        % endif
 
-% for additional in additional_testcases:
-    % if additional.has_return:
-        ${additional.value_code}
-    % endif
+        ${additional.exception_code}
 
-    ${additional.exception_code}
-
+    % endfor
 % endfor
