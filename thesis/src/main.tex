@@ -1,0 +1,62 @@
+%! Author = strij
+%! Date = 12/01/2020
+
+% Preamble
+\documentclass[12pt,parskip=half]{ugent2016-report}
+
+% Packages
+\usepackage{amsmath}
+\usepackage[dutch]{babel}
+\usepackage{csquotes}
+\usepackage{unicode-math}
+\usepackage{lettrine}
+\usepackage{microtype}
+\usepackage{biblatex}
+
+\title{TESTed: one judge to rule them all}
+\author{\large Niko Strijbol}
+\studentnumber{01404620}
+
+\academicyear{2019 -- 2020}
+
+\titletext{%
+Promotoren: prof.\ dr.\ Peter Dawyndt, Bart Mesuere \\%
+Begeleiding: Charlotte Van Petegem\\%
+\\%
+{\small Masterproef ingediend tot het behalen van de academische graad van\\%
+Master of Science in de informatica%
+}%
+}
+
+\setlength{\parindent}{1em}
+
+\newfontfamily\lsi[Scale=2.6]{Libertinus Serif Initials}
+\renewcommand*{\LettrineFont}{\lsi}
+
+%\MakeInnerQuote{"}
+\MakeOuterQuote{"}
+
+\addbibresource{main.bib}
+
+% Document
+\begin{document}
+
+    \setmainfont{UGent Panno Text}
+
+    \maketitle
+
+    \setmainfont[Ligatures=TeX,Ligatures=Rare,Numbers=OldStyle,Contextuals=Alternate]{Libertinus Serif}
+    \setsansfont[Ligatures=TeX,Ligatures=Rare,Numbers=OldStyle,Contextuals=Alternate]{Libertinus Sans}
+    \setmonofont[Scale=MatchLowercase]{Libertinus Mono}
+    \setmathfont{Libertinus Math}
+
+    \include{inleiding}
+
+    \marginpar{Hallo}
+    Hallo
+
+    Questionable tastes are not provided in this document. fidelity Thank you! IJzer, ijzer.~\cite{goossens1993}
+
+    \printbibliography
+
+\end{document}

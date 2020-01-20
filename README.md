@@ -8,3 +8,4 @@ Organisation of the repository:
 - `judge`: Python project containing the code of the actual judge that will be run by Dodona
 - `prototype`: Charlotte's prototype code
 - `run` (file): Needed for the Docker image, starts the judge
+- `thesis`: LaTeX files for the actual text. See the readme in that folder for compilation instructions.
