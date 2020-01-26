@@ -142,3 +142,5 @@ TSWLatexianTemp*
 *-tags.tex
 *.sta
 *.lpz
+*.filtered
+src/_markdown_main
