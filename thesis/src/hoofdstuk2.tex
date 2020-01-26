@@ -11,7 +11,7 @@ Zoals reeds vermeld worden de oplossingen van studenten geëvalueerd door een ze
 In wezen is dit een eenvoudig programma: het krijgt de configuratie via de standaardinvoerstroom (stdin) en schrijft de resultaten van de evaluatie naar de standaarduitvoerstroom (stdout).
 Zowel de invoer als de uitvoer van de judge zijn json.
 Het formaat van deze uitwisseling ligt vast in een json-schema, dat publiekelijk beschikbaar is.
-\footnote{Een tekstuele beschrijving is te vinden in de handleiding~\cite{dodona2020}.}
+\footnote{Een tekstuele beschrijving is te vinden in de handleiding~\autocite{dodona2020}.}
 
 Een judge ondersteunt één programmeertaal.
 In de praktijk ondersteunt elke judge oplossingen in de programmeertaal waarin hij geschreven is, m.a.w.\ de Java-judge ondersteunt Java, de Python-judge Python, enz.
@@ -62,8 +62,7 @@ Ook bij ingewikkeldere oefeningen die zich concentreren op algoritmen, waar de u
 Een voorbeeld hiervan is het vak "Algoritmen en Datastructuren" dat gegeven wordt door prof.\ Fack aan de wiskunde\footnote{De studiefiche is voor de geïnteresseerden beschikbaar op \url{https://studiegids.ugent.be/2019/NL/studiefiches/C002794.pdf}}.
 Daar zijn de meeste opgaven vandaag al beschikbaar in Java en Python op Dodona, maar dan als afzonderlijke oefeningen.
 
-Een oplossing voor de Lotto-oefening is minder eenvoudige te evalueren, doordat er met willekeurige getallen gewerkt wordt.
-Hierdoor volstaat het niet om de uitvoer te vergelijken met een verwachte uitvoer.
+Het evalueren van een oplossing voor de Lotto-oefening is minder eenvoudig, daar er met willekeurige getallen gewerkt wordt: het volstaat niet om de uitvoer gegenereerd door de oplossing te vergelijken met een op voorhand vastgelegde verwachte uitvoer.
 De geproduceerde uitvoer zal moeten gecontroleerd worden met code, specifiek gericht op deze oefening, die de verwachte vereisten van de oplossing controleert.
 Deze evaluatiecode moet momenteel voor elke programmeertaal en dus elke judge opnieuw geschreven worden.
 In de context van ons voorbeeld controleert deze code bijvoorbeeld of de gegeven getallen binnen het bereik liggen en of ze gesorteerd zijn.
@@ -84,4 +83,20 @@ Het probleem hierboven beschreven laat zich samenvatten als volgende onderzoeksv
     Is het mogelijk om een judge zo te implementeren, dat de opgave en evaluatiecode van een oefening slechts eenmaal opgesteld dienen te worden, waarna de oefening beschikbaar is in alle talen die de judge ondersteunt?
 \end{quote}
 
-Of het eenvoudiger is om een programmeertaal toe te voegen aan deze nieuwe judge in vergelijking met het maken van een volledig nieuwe judge is niet de focus in deze thesis.
+Enkele zaken zijn expliciet buiten de focus van deze thesis gehouden, zoals:
+
+\begin{enumerate}
+    \item of de nieuwe judge het eenvoudiger maakt om nieuwe talen toe te voegen in vergelijking met het maken van een volledig nieuwe judge,
+    \item de \english{front end} van Dodona, waaronder
+        \begin{enumerate}
+                  \item het automatisch aanpassen van codefragmenten in een opgave naar de taal de van oplossing,
+                  \item het kiezen van een taal van indienen.
+        \end{enumerate}
+\end{enumerate}
+
+\section{Opbouw}\label{sec:opbouw}
+
+Het volgende hoofdstuk van deze thesis handelt over het antwoord op bovenstaande vraag.
+Daarna volgt ter illustratie van het gebruik van de judge een gedetailleerde beschrijving van hoe een nieuwe taal moet toegevoegd worden aan de thesis.
+Dat hoofdstuk heeft ook ten doel te dienen als documentatie voor zij die de judge willen gebruiken.
+Tot slot wordt afgesloten met een hoofdstuk over beperkingen van de huidige implementaties, en waar er verbeteringen mogelijk zijn (het "toekomstige werk").

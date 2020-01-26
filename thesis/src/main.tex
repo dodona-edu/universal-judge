@@ -18,6 +18,13 @@
 \usepackage{hyperref} % Load hyperref before cleverref.
 \usepackage[dutch]{cleveref}
 
+\hypersetup{
+    linkcolor  = ugent-blue,
+    citecolor  = ugent-blue,
+    urlcolor   = ugent-blue,
+    colorlinks = true,
+}
+
 \markdownSetup{
     renderers = {
         headingOne = {\chapter*{#1}},
@@ -69,6 +76,7 @@ Master of Science in de informatica%
 % Commando's voor termen
 \newcommand*{\term}[1]{#1\index{#1}}
 \newcommand*{\termen}[1]{\foreignlanguage{british}{\textit{#1}}\index{#1}}
+\newcommand*{\english}[1]{\foreignlanguage{british}{\textit{#1}}}
 
 \makeindex
 
@@ -81,12 +89,12 @@ Master of Science in de informatica%
 
     \setmainfont[Ligatures=TeX,Ligatures=Rare,Numbers=OldStyle,Contextuals=Alternate]{Libertinus Serif}
     \setsansfont[Ligatures=TeX,Ligatures=Rare,Numbers=OldStyle,Contextuals=Alternate]{Libertinus Sans}
-    \setmonofont[Scale=MatchLowercase]{Libertinus Mono}
+    \setmonofont[Scale=MatchLowercase]{Jetbrains Mono}
     \setmathfont{Libertinus Math}
 
-    \include{test}
     \include{hoofdstuk1}
     \include{hoofdstuk2}
+    \include{hoofdstuk3}
 
     Hallo
 
