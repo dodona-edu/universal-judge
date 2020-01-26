@@ -6,8 +6,8 @@ import java.util.stream.Collectors;
 class Main {
 
     public static String loterij(int aantal, int maximum) {
-        ThreadLocalRandom r = ThreadLocalRandom.current();
-        Set<Integer> result = new HashSet<>();
+        var r = ThreadLocalRandom.current();
+        var result = new HashSet<Integer>();
         while (result.size() < aantal) {
             result.add(r.nextInt(1, maximum + 1));
         }

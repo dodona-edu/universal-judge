@@ -5,13 +5,35 @@
 \documentclass[12pt,parskip=half]{ugent2016-report}
 
 % Packages
-\usepackage{amsmath}
-\usepackage[dutch]{babel}
-\usepackage{csquotes}
+% Babel uses the last language as main language of the file.
+\usepackage[british,dutch]{babel}
 \usepackage{unicode-math}
 \usepackage{lettrine}
 \usepackage{microtype}
-\usepackage{biblatex}
+\usepackage[backend=biber,dateabbrev=false,citestyle=authoryear,style=authoryear]{biblatex}
+\usepackage{imakeidx}
+\usepackage{markdown}
+\usepackage[newfloat]{minted}
+\usepackage{csquotes}
+\usepackage{hyperref} % Load hyperref before cleverref.
+\usepackage[dutch]{cleveref}
+
+\markdownSetup{
+    renderers = {
+        headingOne = {\chapter*{#1}},
+        headingTwo = {\section*{#1}},
+        headingThree = {\subsection*{#1}},
+    },
+    headerAttributes = true,
+    hybrid = true,
+}
+
+% Processes Markdown files with MathJax
+\newcommand{\MJmarkdown}[1]{\directlua{
+    filename = "#1"
+    local result = dofile("scripts/mathjax.lua")
+    tex.print(result)
+}}
 
 \title{TESTed: one judge to rule them all}
 \author{\large Niko Strijbol}
@@ -33,10 +55,22 @@ Master of Science in de informatica%
 \newfontfamily\lsi[Scale=2.6]{Libertinus Serif Initials}
 \renewcommand*{\LettrineFont}{\lsi}
 
-%\MakeInnerQuote{"}
+%%%%%%
+% Taalgerelateerde zaken
+%%%%%%
+% Zorg ervoor dat aanhalingstekens correct zijn.
 \MakeOuterQuote{"}
+% Vertaal "listings" als codefragmenten, niet als listing.
+\SetupFloatingEnvironment{listing}{name=Codefragment}
+\crefname{listing}{codefragment}{codefragmenten}
 
 \addbibresource{main.bib}
+
+% Commando's voor termen
+\newcommand*{\term}[1]{#1\index{#1}}
+\newcommand*{\termen}[1]{\foreignlanguage{british}{\textit{#1}}\index{#1}}
+
+\makeindex
 
 % Document
 \begin{document}
@@ -50,14 +84,17 @@ Master of Science in de informatica%
     \setmonofont[Scale=MatchLowercase]{Libertinus Mono}
     \setmathfont{Libertinus Math}
 
-    \include{inleiding}
+    \include{test}
+    \include{hoofdstuk1}
+    \include{hoofdstuk2}
 
-    \marginpar{Hallo}
     Hallo
 
     Questionable tastes are not provided in this document.
     fidelity Thank you!
     IJzer, ijzer~\cite{goossens1993}.
+
+    \printindex
 
     \printbibliography
 
