@@ -79,7 +79,6 @@ acs-*.bib
 *.xref
 *.brf
 *-concordance.tex
-*.tikz
 *-tikzDictionary
 *.lol
 *.ltjruby

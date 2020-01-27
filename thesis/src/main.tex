@@ -1,9 +1,12 @@
+%! Suppress = MultipleIncludes
 %! Author = strij
 %! Date = 12/01/2020
 
 % Preamble
 \documentclass[12pt,parskip=half]{ugent2016-report}
 
+% Subfigures
+\usepackage[subpreambles=true]{standalone}
 % Packages
 % Babel uses the last language as main language of the file.
 \usepackage[british,dutch]{babel}
@@ -17,6 +20,7 @@
 \usepackage{csquotes}
 \usepackage{hyperref} % Load hyperref before cleverref.
 \usepackage[dutch]{cleveref}
+\usepackage{adjustbox}
 
 \hypersetup{
     linkcolor  = ugent-blue,
@@ -74,11 +78,12 @@ Master of Science in de informatica%
 \addbibresource{main.bib}
 
 % Commando's voor termen
-\newcommand*{\term}[1]{#1\index{#1}}
+\newcommand*{\term}[1]{\textit{#1}\index{#1}}
 \newcommand*{\termen}[1]{\foreignlanguage{british}{\textit{#1}}\index{#1}}
 \newcommand*{\english}[1]{\foreignlanguage{british}{\textit{#1}}}
 
-\makeindex
+% Enable for index generation
+%\makeindex
 
 % Document
 \begin{document}
@@ -92,17 +97,15 @@ Master of Science in de informatica%
     \setmonofont[Scale=MatchLowercase]{Jetbrains Mono}
     \setmathfont{Libertinus Math}
 
+    % TODO: dankwoord
+
+    \tableofcontents
+
     \include{hoofdstuk1}
     \include{hoofdstuk2}
     \include{hoofdstuk3}
-
-    Hallo
-
-    Questionable tastes are not provided in this document.
-    fidelity Thank you!
-    IJzer, ijzer~\cite{goossens1993}.
-
-    \printindex
+    \include{hoofdstuk4}
+    \include{hoofdstuk5}
 
     \printbibliography
 

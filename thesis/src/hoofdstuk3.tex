@@ -1,8 +1,37 @@
 \chapter{De universele judge}\label{ch:de-universele-judge}
 
-\section{Overzicht}
+\lettrine{H}{et} antwoord op de onderzoeksvraag uit het vorige hoofdstuk manifesteert zich als de \term{universele judge}.
+Deze judge voor het Dodona-platform kan dezelfde oefening in meerdere talen evalueren.
+Dit hoofdstuk licht de werking en implementatie van deze judge toe, beginnend met een algemeen overzicht, waarna elk onderdeel in meer detail besproken wordt.
+
+TODO: terminologie uitleggen (oplossing, evaluatie, \ldots)
+Een groot deel hiervan zal waarschijnlijk uitgelegd zijn bij de werking van Dodona.
+
+\section{Overzicht}\label{sec:overzicht}
+
+\begin{figure}
+    \begin{adjustbox}{width=\textwidth}
+        \input{figures/architecture.tikz}
+    \end{adjustbox}
+    \caption{Schematische voorstelling van de opbouw van de universele judge.}
+    \label{fig:universal-judge}
+\end{figure}
+
+\Cref{fig:universal-judge} toont de opbouw van de judge op schematische wijze.
+De judge kan worden opgedeeld in drie gebieden, volgens hun verantwoordelijkheid:
+
+\begin{enumerate}
+    \item Het evaluatieproces, dat de verkregen resultaten interpreteert en beoordeelt.
+    \item Het kernproces, dat zorgt voor de coördinatie tussen de andere processen, alsook de basistaken vervult.
+          Dit proces is dan ook het start- en eindpunt van een evaluatie.
+    \item Het uitvoeringsproces, dat de code van de student uitvoert om zo resultaten te bekomen.
+\end{enumerate}
+
+Daarnaast is het \term{testplan} ook van belang, dat de evaluatiecode definieert.
 
 \section{Beschrijving van een oefening}
+
+Uitleg over het testplan.
 
 \section{Uitvoeren van de oplossing}
 
