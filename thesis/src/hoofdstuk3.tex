@@ -1,6 +1,6 @@
 \chapter{De universele judge}\label{ch:de-universele-judge}
 
-\lettrine{H}{et} antwoord op de onderzoeksvraag uit het vorige hoofdstuk manifesteert zich als de \term{universele judge}.
+\lettrine{H}{et antwoord} op de onderzoeksvraag uit het vorige hoofdstuk manifesteert zich als de \term{universele judge}.
 Deze judge voor het Dodona-platform kan dezelfde oefening in meerdere talen evalueren.
 Dit hoofdstuk licht de werking en implementatie van deze judge toe, beginnend met een algemeen overzicht, waarna elk onderdeel in meer detail besproken wordt.
 
@@ -27,11 +27,169 @@ De judge kan worden opgedeeld in drie gebieden, volgens hun verantwoordelijkheid
     \item Het uitvoeringsproces, dat de code van de student uitvoert om zo resultaten te bekomen.
 \end{enumerate}
 
-Daarnaast is het \term{testplan} ook van belang, dat de evaluatiecode definieert.
+\section{Beschrijven van een oefening}\label{sec:beschrijven-van-een-oefening}
 
-\section{Beschrijving van een oefening}
+Naast de drie delen die hierboven beschreven zijn, is er ook nog het \term{testplan}.
+Dit is een document dat de oefening beschrijft en de evaluatietesten bevat.
+Het vervangt de taalspecifieke testen van de bestaande judges (dus de jUnit-tests of de doctests in respectievelijk Java en Python).
 
-Uitleg over het testplan.
+\subsection{Het testplan}\label{subsec:het-testplan}
+
+Het testplan neemt de vorm aan van een json-bestand.
+Bij de keuze voor het formaat van het testplan zijn er enkele doelen vooropgesteld.
+Het testplan moet:
+
+\begin{itemize}
+    \item leesbaar zijn voor mensen,
+    \item geschreven kunnen worden door mensen met minimale informatica-kennis, met andere woorden de syntaxis dient eenvoudig te zijn, en
+    \item taalonafhankelijk zijn.
+\end{itemize}
+
+Json voldoet aan deze vereisten: het is geen binair formaat en de syntaxis is eenvoudig.
+Een bijkomend voordeel is dat json door veel talen ondersteund wordt.
+
+Er zijn ook enkele nadelen aan het gebruik van json.
+Een nadeel is dat json geen beknopte taal is voor het met de hand schrijven.
+Een oplossing hiervoor gebruikt de eigenschap dat veel talen json kunnen produceren: andere programma's of gereedschappen kunnen desgewenst het testplan in het json-formaat genereren, waardoor het niet met de hand geschreven moet worden.
+Hiervoor is waarschijnlijk een \termen{DSL} (\english{domain specific language}) geschikt, maar dit valt buiten de thesis en wordt verder besproken in \cref{ch:beperkingen-en-toekomstig-werk}.
+
+Een ander nadeel is dat json geen programmeertaal is.
+Terwijl dit de implementatie wel eenvoudiger maakt, is het tevens beperkend: beslissen of een testgeval moet uitgevoerd worden op basis van het resultaat van een vorig testgeval is bij wijze als voorbeeld niet mogelijk.
+Ook deze beperking wordt uitgebreider besproken in \cref{ch:beperkingen-en-toekomstig-werk}.
+
+Qua structuur lijkt het testplan op de structuur opgelegd door Dodona, aangezien dat de verschillen tussen het opstellen van een oefening en hoe ze gebruikt zal worden minimaliseert.
+Bij het beschrijven van de structuur is zoveel mogelijk gebruik gemaakt van de bestaande terminologie, zoals die gebruikt wordt door Dodona.
+Een overzicht van de structuur op Dodona is \autocite{dodona2020}.
+
+\begin{description}
+    \item[Tab] Een testplan bestaat uit verschillende \termen{tab}s of tabbladen.
+               Dit komt overeen met een tabblad in de gebruikersinterface van Dodona.
+               Een tabblad kan een naam hebben, die zichtbaar is voor de gebruikers.
+    \item[Context] Elk tabblad bestaat uit een of meerdere \termen{context}en.
+                   Een context is een onafhankelijke uitvoering van een evaluatie.
+                   De nadruk ligt op de "onafhankelijkheid".
+                   Vaak wordt elke context in een nieuw proces uitgevoerd, zodat er geen informatie tussen contexten kan uitgewisseld worden.
+    \item[Testcase] Een context bestaat uit een of meerdere \termen{testcase}s of testgevallen.
+                    Een testgeval bestaat uit invoer en een aantal tests.
+                    Een context bevat twee soorten testgevallen:
+                    \begin{description}
+                        \item[Main testcase] of hoofdtestgeval.
+                        Van deze soort is er maximaal één per context.
+                        Dit testgeval is voor het uitvoeren van de main-functie (of gewoon de code als het gaat om een scripttaal zoals Bash of Python).
+                        Als invoer voor dit testgeval kan enkel het standaardinvoerkanaal en de programma-argumenten meegegeven worden.
+                        \item[Normal testcase] of normaal testgeval.
+                        Hiervan kunnen er nul of meer zijn per context.
+                        Deze testgevallen zijn voor andere dingen te testen, nadat de code van de gebruiker met success ingeladen is.
+                        De invoer is dan ook uitgebreider: het kan gaan om het standaardinvoerkanaal, functieoproepen en variabeletoekenningen.
+                        Een functieoproep of variabeletoekenning is verplicht.
+                    \end{description}
+    \item[Test] Een testcase bestaat uit meerdere \term{test}s, die elk één aspect van een testcase controleren.
+                In het testplan kan voor elke soort uitvoer in een testcase het verwachte resultaat of de gewenste controleactie aangegeven worden.
+                Het gaat om het standaarduitvoerkanaal, het standaardfoutkanaal, opgevangen uitzonderingen, de teruggegeven waarden van een functieoproep en de inhoud van een bestand.
+\end{description}
+
+\subsection{Dataserialisatie}\label{subsec:dataserialisatie}
+
+In de paragraaf hiervoor wordt bij de beschrijving van het testplan gewag gemaakt van de teruggegeven waarden van een functieoproep.
+Aangezien het testplan taalonafhankelijk is, moet er dus een manier zijn om data uit de verschillende programmeertalen voor te stellen.
+
+Bij het kiezen van een serialisatieformaat, waren er enkele vereisten waaraan voldaan moest worden.
+Het formaat moet:
+
+\begin{itemize}
+    \item de types ondersteunen die we willen aanbieden in het taalonafhankelijke deel van het testplan,
+    \item het formaat moet eenvoudig te schrijven zijn vanuit meerdere programmeertalen (dus liever niet binair),
+    \item toelaten op redelijk eenvoudige wijze ondersteuning voor nieuwe programmeertalen toe te voegen.
+\end{itemize}
+
+In de eerste plaats is gekeken of een bestaand formaat kan voldoen aan deze vereisten.
+Hiervoor is gestart van een overzicht op Wikipedia, zie \autocite{wiki2020}.
+Een alternatief is zelf een formaat vast te leggen om waarden te encoderen als json.
+Voor dit alternatief is uiteindelijk gekozen.
+Samenvattend zijn de redenen waarom niet gekozen is voor een bestaande oplossing:
+
+\begin{itemize}
+    \item Het is een binair formaat.
+    Hoewel dit vaak voordelen oplevert op het vlak van geheugengebruik en snelheid, wordt het encoderen naar en decoderen van het formaat een stuk ingewikkelder om te implementeren in andere programmeertalen.
+    Sommige bestaande oplossing zijn weliswaar reeds beschikbaar in een hoeveelheid talen, maar er is toch gekozen om het zelf implementeren zo gemakkelijk mogelijk te houden, daar de judge misschien talen wilt ondersteunen waarvoor er nog niets bestaat.
+    \item De bestaande oplossing is niet uitbreidbaar met eigen types.
+    Sommige oplossingen hebben een breed arsenaal aan ingebouwde types, maar de judge vereist soms zeer specifieke types.
+    \item De bestaande oplossing is omslachtig in gebruik voor ons doel.
+    Dit is het geval wanneer een oplossing veel meer doet dan vereist voor ons doel.
+    \item De bestaande oplossing heeft geen voordelen tegenover een eigen oplossing in json, terwijl er wel het nadeel van een bijkomende taal is.
+\end{itemize}
+
+Hieronder volgt nu per overwogen serialisatie-oplossing een korte beschrijving en de grootste min- of pluspunten.
+
+\begin{description}
+    \item[Apache Avro] Een volledig "systeem voor dataserialisatie".
+    De specificatie van het formaat gebeurt in json, terwijl de eigenlijke data binair geëncodeerd wordt.
+    Heeft uitbreidbare types, met veel ingebouwde types \autocite{avro}.
+    \item[Apache Parquet] Minder relevant, dit is een bestandsformaat voor Hadoop \autocite{parquet}.
+    \item[ASN.1] Staat voor \english{Abstract Syntax Notation One}, een ouder formaat uit de telecommunicatie.
+    De hoofdstandaard beschrijft enkel de notatie voor een dataformaat.
+    Andere standaarden beschrijven dan de serialisatie, in bv.\ binair formaat, json of xml.
+    De meerdere serialisatievormen zijn in theorie aantrekkelijk: elke taal moet er slechts één ondersteunen, terwijl de judge ze allemaal kan ondersteunen.
+    In de praktijk blijkt echter dat voor veel talen, er slechts een serialisatieformaat is, en dat dit vaak het binaire formaat is \autocite{x680}.
+    \item[Bencode] Schema gebruikt in BitTorrent.
+    Het is gedeeltelijk binair, gedeeltelijk in text.
+    Beperkte hoeveelheid ingebouwde types, uitbreidbaar met eigen types via een omweg \autocite{cohen2017}.
+    \item[Binn] Binair dataformaat.
+    Ondersteunt redelijk wat ingebouwde types, alsook zelfgedefinieerde types \autocite{ramos2019}.
+    \item[BSON] Een binaire variant op json, geschreven voor en door MongoDB.
+    Heeft geen voordelen tegenover json, alleen nadelen, aangezien het binair is \autocite{bson}.
+    \item[CBOR] Een lichtjes op json gebaseerd formaat, ook binair.
+    Heeft een goede standaard, ondersteunt redelijk wat talen.
+    De hoeveelheid ingebouwde types is redelijk groot, en eigen types zijn mogelijk \autocite{rfc7049}.
+    \item[FlatBuffers] Lijkt op ProtocolBuffers, allebei geschreven door Google, maar verschilt wat in implementatie van ProtocolBuffers.
+    De encodering is binair.
+    Met een schema op te stellen kunnen eigen types eenvoudig samengesteld worden vanuit de ingebouwde basistypes \autocite{flatbuffers}.
+    \item[Fast Infoset] Is eigenlijk een manier om xml binair te encoderen (te beschouwen als een soort compressie voor xml), waardoor het niet bruikbaar is \autocite{x981}.
+    \item[Ion] Een superset van json, ontwikkeld door Amazon.
+    Het heeft zowel een tekstuele als binaire voorstelling.
+    Naast de gebruikelijke json-types, bevat het enkele uitbreidingen.
+    Het encoderen van bijkomende, eigen types is mogelijk door S-expressies, al is dat minder elegant \autocite{ion}.
+    \item[MessagePack] Nog een binair formaat dat lichtjes op json gebaseerd is.
+    Lijkt qua types sterk op json.
+    Heeft implementaties in zeer veel talen \autocite{messagepack}.
+    \item[OGDL] Afkorting voor \english{Ordered Graph Data Language}.
+    Daar het om een serialisatieformaat voor grafen gaat, is het niet nuttig voor ons doel \autocite{ogdl}.
+    \item[OPC Unified Architecture] Een protocol voor intermachinecommunicatie.
+    Zeer complex: de specificatie bevat 14 documenten, met ongeveer 1250 pagina's \autocite{tr62541}.
+    \item[OpenDLL] Afkorting voor de \english{Open Data Description Language}.
+    Een tekstueel formaat, bedoeld om arbitraire data voor te stellen.
+    Nieuwe type's kunnen gedefinieerd worden.
+    Wordt niet veel programmeertalen ondersteunen dit.
+    Qua functionaliteit zelfs iets boven json;
+    door de mogelijkheid om zelf types te definiëren, maar de grote ondersteuning voor json in andere talen zorgt ervoor dat json toch de voorkeur geniet \autocite{openddl}.
+    \item[ProtocolBuffers] Lijkt zoals vermeld sterk op FlatBuffers, maar heeft nog extra stappen nodig bij het encoderen en decoderen, wat het minder geschikt maakt \autocite{protobuf}.
+    \item[Smile] Nog een binaire variant van json \autocite{smile}.
+    \item[SOAP] Afkorting voor \english{Simple Object Access Protocol}.
+    Niet bedoeld als formaat voor dataserialisatie, maar voor communicatie tussen systemen over een netwerk \autocite{soap}.
+    \item[SDXF] Binair formaat voor data-uitwisseling.
+    Weinig talen ondersteunen dit formaat.
+    Er zijn weinig ingebouwde types, maar complexere types maken uit de basistypes is mogelijk \autocite{rfc3072}.
+    \item[Thrift] Lijkt sterk op ProtocolBuffers, maar geschreven door Facebook \autocite{slee2007}.
+    \item[UBJSON] Nog een binaire variant van json \autocite{ubjson}.
+
+\end{description}
+
+Door de redenen hierboven voldoen geen van alle hiervoor genoemde oplossingen aan alle vereisten.
+Zoals al vermeld is dan gekozen om zelf een formaat op te stellen.
+Uiteindelijk is hierbij gekozen om data te serialiseren in json.
+Er is niet gekozen voor xml, omdat het testplan al json gebruikt, en xml geen meerwaarde biedt om het introduceren van een nieuwe taal te rechtvaardigen.
+Ook is niet gekozen voor een variant, zoals yaml, om het zo eenvoudig mogelijk te maken het formaat te implementeren.
+
+Het serialisatieformaat beschrijft voor elke data welk type het is.
+Dit vormt een json-object bestaande uit het type en de waarde.
+\Cref{lst:serialisation-format} toont hoe dit er uit ziet voor een voorbeeld van een lijst van twee getallen.
+Een formelere definitie van het formaat is BIJLAGE X.
+
+\begin{listing}[h]
+    \inputminted{json}{code/format.json}
+    \caption{Voorbeeld van een lijst van twee getallen in het serialisatieformaat.}
+    \label{lst:serialisation-format}
+\end{listing}
 
 \section{Uitvoeren van de oplossing}
 
