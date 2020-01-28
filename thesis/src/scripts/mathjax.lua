@@ -1,7 +1,6 @@
--- Filter MathJax double dollars $$ to single dollars for use in LaTeX and friends.
-
-print("HALLO")
-print(filename)
+---
+--- Filter MathJax double dollars $$ to single dollars for use in LaTeX and friends.
+---
 
 local f = io.open(filename, "r")
 local contents = f:read("*all")

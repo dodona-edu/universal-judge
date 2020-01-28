@@ -136,7 +136,7 @@ Hieronder volgt nu per overwogen serialisatie-oplossing een korte beschrijving e
     Beperkte hoeveelheid ingebouwde types, uitbreidbaar met eigen types via een omweg \autocite{cohen2017}.
     \item[Binn] Binair dataformaat.
     Ondersteunt redelijk wat ingebouwde types, alsook zelfgedefinieerde types \autocite{ramos2019}.
-    \item[BSON] Een binaire variant op json, geschreven voor en door MongoDB.
+    \item[BSON] Een binaire variant op json, geschreven voor en door MongoDB\@.
     Heeft geen voordelen tegenover json, alleen nadelen, aangezien het binair is \autocite{bson}.
     \item[CBOR] Een lichtjes op json gebaseerd formaat, ook binair.
     Heeft een goede standaard, ondersteunt redelijk wat talen.
@@ -183,7 +183,7 @@ Ook is niet gekozen voor een variant, zoals yaml, om het zo eenvoudig mogelijk t
 Het serialisatieformaat beschrijft voor elke data welk type het is.
 Dit vormt een json-object bestaande uit het type en de waarde.
 \Cref{lst:serialisation-format} toont hoe dit er uit ziet voor een voorbeeld van een lijst van twee getallen.
-Een formelere definitie van het formaat is BIJLAGE X.
+Een formelere definitie van het formaat is \cref{ch:specificatie-van-het-serialisatieformaat}.
 
 \begin{listing}[h]
     \inputminted{json}{code/format.json}
@@ -191,7 +191,79 @@ Een formelere definitie van het formaat is BIJLAGE X.
     \label{lst:serialisation-format}
 \end{listing}
 
-\section{Uitvoeren van de oplossing}
+Het serialisatieformaat wordt zowel gebruikt in het testplan zelf om waarden te encoderen, als los ervan om resultaten van functieoproepen te encoderen.
 
-\section{Evalueren van een oplossing}
+\subsection{Functieoproepen en assignments}\label{subsec:functieoproepen}
 
+Een ander onderdeel van het testplan verdient ook speciale aandacht: het toekennen van variabelen (\english{assignment}) en de functieoproepen.
+
+In heel wat oefeningen, en zeker in objectgerichte programmeertalen, is het toekennen van een waarde aan een variabele om deze later te gebruiken onmisbaar.
+Bijvoorbeeld zou een opgave kunnen bestaan uit het implementeren van een klasse.
+Bij de evaluatie dient dan een instantie van die klasse aangemaakt te worden, waarna er methoden kunnen aangeroepen worden, zoals geïllustreerd in \cref{lst:assignment-example}.
+Dit voorbeeld illustreert meteen dat functieoproepen ook zeker ondersteunt moeten worden.
+
+\begin{listing}
+    \begin{minted}{java}
+        var variabele = new DoorDeStudentGemaakteKlasse();
+        assert variabele.testfunctie2();
+        assert variabele.testfunctie2();
+    \end{minted}
+    \caption{Een kort conceptueel voorbeeld van het soort oefeningen waar een assignment nodig is.}
+    \label{lst:assignment-example}
+\end{listing}
+
+Concreet is ervoor gekozen om het testplan niet uit te breiden met generieke statements of expressions, maar de ondersteuning te beperken tot assignments en functieoproepen.
+Dit om de implementatie van de vertaling van het testplan naar de ondersteunde programmeertalen niet nodeloos ingewikkeld te maken.
+
+Conceptueel ondersteunt het testplan het toekennen van een naam aan het resultaat van een functieoproep.
+Vertaalt naar json wordt dat dan:
+
+\inputminted{json}{code/assignment.json}
+
+De naam is de naam die aan de variabele gegeven zal worden.
+Het veldje \texttt{expression} moet een object zijn dat een functieoproep voorstelt (zie hierna).
+Ook is er de mogelijk om een optioneel type mee te geven;
+in eenvoudige gevallen kan de judge dit afleiden, maar bij complexere gevallen niet meer.
+Dit type moet een van de ondersteunde types zijn uit het serialisatieformaat, dat hiervoor beschreven werd.
+Een functie ziet er als volgt uit:
+
+\inputminted{json}{code/function.json}
+
+Het type van de functie geeft aan welk soort functie het is.
+Mogelijke waarden zijn momenteel \texttt{top}, \texttt{object}, \texttt{constructor} en \texttt{identity}.
+De laatste soort is een speciaal geval, waarbij geen functienaam moet gegeven worden en slechts één argument toegelaten is.
+Die functie zal dan dat ene argument teruggeven.
+De naam van de functie benoemt eenvoudig welke functie opgeroepen moet worden.
+Het object van de functie laat toe om functies op objecten op te roepen.
+De lijst van argumenten kan nul of meer waarden bevatten.
+Deze waarden moeten in het formaat zijn zoals aangegeven in het vorige deel over de serialisatie van waarden.
+
+
+\section{Uitvoeren van de oplossing}\label{sec:uitvoeren-van-de-oplossing}
+
+Nadat de student een oplossing heeft ingediend en de judge is opgestart, begint de evaluatie van de oplossing.
+Eerst wordt de uit te voeren code gegenereerd, waarna de uitvoering van die code volgt.
+
+\subsection{Genereren van code}\label{subsec:genereren-van-code}
+
+Het genereren van de code gebeurt met een sjabloonsysteem, genaamd Mako \autocite{mako}.
+Dit sjabloonsysteem wordt traditioneel gebruikt bij webapplicaties (zoals Ruby on Rails met \textsc{erb}, Phoenix met \textsc{eex}, Laravel met Blade, enz.) om een html-pagina te genereren.
+In ons geval zijn de sjablonen verantwoordelijk voor de vertaling van taalonafhankelijke concepten naar implementaties in specifieke talen.
+Voorbeelden hiervan zijn functieoproepen, toekennen van variabelen, enz.
+Ook zijn de sjablonen verantwoordelijk voor het genereren van de code die de oplossing van de student zal oproepen en evalueren.
+
+Voor elke ondersteunde programmeertaal dienen een aantal sjablonen geïmplementeerd te worden, die elk een functie voor zich nemen.
+
+TODO blablabla
+
+\subsection{Uitvoeren van de code}\label{subsec:uitvoeren-van-de-code}
+
+Nadat alle code voorhanden is, wordt deze per context uit het testplan uitgevoerd en wordt de uitvoer verzameld.
+Het uitvoeren zelf gebeurt op de normale manier dat de programmeertaal uitgevoerd wordt via de commandoregel.
+Dit is een voordeel van onze aanpak: er is geen verschil tussen hoe de judge de code van de student uitvoert en hoe de student zijn code zelf uitvoert op zijn eigen computer.
+Dit voorkomt dat er subtiele verschillen zouden insluipen.
+
+\section{Evalueren van een oplossing}\label{sec:evalueren-van-een-oplossing2}
+
+Na de uitvoering van elke context heeft de judge alle relevant uitvoer verzamelt, zoals de standaardkanalen.
+Deze uitvoer moet vervolgens beoordeeld worden om na te gaan in hoeverre deze uitvoer voldoet aan de verwachte uitvoer.
