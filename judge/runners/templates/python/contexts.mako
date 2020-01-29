@@ -1,7 +1,7 @@
 ## Code to execute one test context.
 <%! from testplan import Assignment %>
 import sys
-import evaluator
+import evaluators
 
 ## Get which context we are currently testing.
 number = int(sys.argv[1])
@@ -19,7 +19,7 @@ number = int(sys.argv[1])
 % endfor
 
 ## Open the output files.
-evaluator.open_outputs()
+evaluators.open_outputs()
 
 ## Depending on the context, there might be a "before".
 % for c in contexts:
@@ -31,22 +31,23 @@ evaluator.open_outputs()
 
 ## Import the code for the first time.
 try:
-    from ${c.submission_name} import *
+    from ${submission_name} import *
 except Exception as e:
-    evaluator.e_evaluate_main(e)
     % for c in contexts:
         % if c.main_testcase.exists:
             if ${loop.index} == number:
+                evaluators.e_evaluate_main_${loop.index}(e)
                 sys.stderr.write("--${secret_id}-- SEP")
                 sys.stdout.write("--${secret_id}-- SEP")
-                evaluator.write_delimiter("--${secret_id}-- SEP")
+                evaluators.write_delimiter("--${secret_id}-- SEP")
         % endif
     % endfor
 
 
 ## Generate the actual tests based on the context.
 % for c in contexts:
-    if ${loop.index} == number:
+    <% c_number = loop.index %>
+    if ${c_number} == number:
         ## Handle test cases.
         % for additional in c.additional_testcases:
             try:
@@ -54,7 +55,7 @@ except Exception as e:
                     <%include file="assignment.mako" args="assignment=additional.statement" />\
                 % else:
                     % if additional.has_return:
-                        evaluator.v_evaluate_${loop.index}(\
+                        evaluators.v_evaluate_${c_number}_${loop.index}(\
                     % endif
                     <%include file="function.mako" args="function=additional.statement" />\
                     % if additional.has_return:
@@ -63,10 +64,10 @@ except Exception as e:
                 % endif
 
             except Exception as e:
-                evaluator.e_evaluate_${loop.index}(e)
+                evaluators.e_evaluate_${loop.index}(e)
                 sys.stderr.write("--${secret_id}-- SEP")
                 sys.stdout.write("--${secret_id}-- SEP")
-                evaluator.write_delimiter("--${secret_id}-- SEP")
+                evaluators.write_delimiter("--${secret_id}-- SEP")
 
         % endfor
 % endfor
@@ -80,4 +81,4 @@ except Exception as e:
 % endfor
 
 ## Close output files.
-evaluator.close_outputs()
+evaluators.close_outputs()

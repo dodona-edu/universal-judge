@@ -10,24 +10,23 @@ Broadly speaking, the responsibilities can be divided into a few stages:
 
 """
 import random
+import shutil
 import string
+import subprocess
 import tempfile
 from dataclasses import dataclass, replace
-
-import shutil
-import subprocess
 from pathlib import Path
-from runners.languages.haskell import HaskellConfig
-from runners.languages.java import JavaConfig
-from runners.languages.jshell import JshellConfig
-from runners.languages.python import PythonConfig
 from typing import Tuple, List, Optional, Set
 
 from dodona import ExtendedMessage
 from runners.config import LanguageConfig
 from runners.dependencies import Destination, File, Dependencies
-from runners.generator import ContextArguments, EvaluatorArguments, Translator, PlanContextArguments, \
+from runners.translator import ContextArguments, EvaluatorArguments, Translator, PlanContextArguments, \
     PlanEvaluatorArguments, TestcaseArguments, MainTestcaseArguments
+from runners.languages.haskell import HaskellConfig
+from runners.languages.java import JavaConfig
+from runners.languages.jshell import JshellConfig
+from runners.languages.python import PythonConfig
 from runners.templates import CustomData
 from serialisation import Value
 from tested import Config
@@ -132,6 +131,9 @@ class Runner:
         """Evaluate two values with code provided by the test plan."""
         raise NotImplementedError
 
+    def get_readable_input(self, case: Testcase) -> ExtendedMessage:
+        raise NotImplementedError
+
 
 class ConfigurableRunner(Runner):
     """A runner implementation based on a language config."""
@@ -149,7 +151,7 @@ class ConfigurableRunner(Runner):
                                  plan: Plan,
                                  contexts: List[Context],
                                  submission_name: str,
-                                 destination: Path):
+                                 destination: Path) -> List[str]:
         """
         Write the context template to file.
 
@@ -168,13 +170,13 @@ class ConfigurableRunner(Runner):
         evaluator_arguments = []
         value_file = str(self._value_file(destination)).replace("\\", "/")
         exception_file = str(self._exception_file(destination)).replace("\\", "/")
-        for context in contexts:
+        for i, context in enumerate(contexts):
             # The code for before and after the context.
             before_code = context.before.get(self.config.programming_language, "")
             after_code = context.after.get(self.config.programming_language, "")
 
-            additional_testcases = self._get_additional_testcases(plan, context)
-            main_testcase = self._get_main_testcase(context)
+            additional_testcases = self._get_additional_testcases(plan, context, i)
+            main_testcase = self._get_main_testcase(context, i)
 
             context_arguments.append(ContextArguments(
                 before=before_code,
@@ -187,7 +189,7 @@ class ConfigurableRunner(Runner):
                 additional_testcases=additional_testcases
             ))
 
-        self.translator.write_plan_context_template(
+        context_file = self.translator.write_plan_context_template(
             PlanContextArguments(
                 secret_id=self.identifier,
                 contexts=context_arguments,
@@ -198,7 +200,7 @@ class ConfigurableRunner(Runner):
             destination
         )
 
-        self.translator.write_plan_evaluator_template(
+        evaluator_file = self.translator.write_plan_evaluator_template(
             PlanEvaluatorArguments(
                 value_file=value_file,
                 exception_file=exception_file,
@@ -207,6 +209,8 @@ class ConfigurableRunner(Runner):
             ),
             destination
         )
+
+        return [evaluator_file, context_file]
 
     def _value_file(self, working_directory: Path):
         return working_directory / f"{self.identifier}_values.txt"
@@ -229,7 +233,8 @@ class ConfigurableRunner(Runner):
 
     def generate(self, plan: Plan, working_directory: Path) -> Tuple[Optional[BaseExecutionResult], List[str]]:
         # Write the submission file to the correct location.
-        submission = self.language_config.submission_name(plan) + "." + self.language_config.file_extension()
+        submission_name = self.language_config.submission_name(plan)
+        submission = submission_name + "." + self.language_config.file_extension()
         # noinspection PyTypeChecker
         shutil.copy2(self.config.source, working_directory / submission)
 
@@ -238,45 +243,36 @@ class ConfigurableRunner(Runner):
         # Copy files to the common directory.
         files_to_copy = []
         paths = self.translator.path_to_templates()
-        for file in self.translator.path_to_templates():
+        for file in self.language_config.initial_dependencies():
             for potential_path in paths:
                 if (full_file := potential_path / file).exists():
                     files_to_copy.append(full_file)
                     dependencies.append(file)
                     break
-            # We did not find the file!
-            raise ValueError(f"Could not find dependency file {file}, looked in {paths}")
+            else:  # no break
+                raise ValueError(f"Could not find dependency file {file}, looked in {paths}")
         for file in files_to_copy:
             # noinspection PyTypeChecker
             shutil.copy2(file, working_directory)
 
         # Generate all relevant files.
         c = [c for tab in plan.tabs for c in tab.contexts]
-        self._write_contexts_template(plan, c, submission, working_directory)
+        generated_files = self._write_contexts_template(plan, c, submission_name, working_directory)
+        dependencies.extend(generated_files)
 
         command, files = self.language_config.generation_callback(dependencies)
-
+        print(f"Generation command is {command}, files are {files}, dependencies are {dependencies}")
         result = self._compile(command, working_directory)
-
-        # Add the files to the dependencies.
-        self.files.add([File(x, Destination.COMPILATION) for x in files])
 
         return result, files
 
-    def execute(self, arguments: ContextExecution) -> Tuple[Optional[BaseExecutionResult], Optional[ExecutionResult]]:
+    def execute(self, arguments: ContextExecution) -> ExecutionResult:
 
         # Copy the files we need to our own directory, to make them independent.
         for file in arguments.files:
+            print(f"Copying {arguments.common_directory / file} to {arguments.working_directory}")
             # noinspection PyTypeChecker
             shutil.copy2(arguments.common_directory / file, arguments.working_directory)
-
-        command, execution_files = self.language_config.compilation_callback(arguments.files)
-
-        # Compile the code. If the language does not need compilation, this should do nothing.
-        compile_result = self._compile(command, arguments.working_directory)
-
-        if compile_result is not None and compile_result.exit != 0:
-            return compile_result, None
 
         # Actually execute the testcode.
         stdin_ = []
@@ -285,7 +281,8 @@ class ConfigurableRunner(Runner):
                 stdin_.append(input_)
         stdin_ = "\n".join(stdin_)
 
-        command = self.language_config.execution_command(execution_files)
+        command = self.language_config.execution_command(arguments.files)
+        print(f"Executing with command {command}\n")
         # noinspection PyTypeChecker
         p = subprocess.run(command, input=stdin_, text=True, capture_output=True, cwd=arguments.working_directory)
         identifier = f"--{self.identifier}-- SEP"
@@ -304,14 +301,14 @@ class ConfigurableRunner(Runner):
         except FileNotFoundError:
             exceptions = ""
 
-        return compile_result, ExecutionResult(p.stdout, p.stderr, p.returncode, identifier, values, exceptions)
+        return ExecutionResult(p.stdout, p.stderr, p.returncode, identifier, values, exceptions)
 
-    def _get_additional_testcases(self, plan: Plan, context: Context) -> List[TestcaseArguments]:
+    def _get_additional_testcases(self, plan: Plan, context: Context, number: int) -> List[TestcaseArguments]:
         result = []
         testcase: NormalTestcase  # Type hint for PyCharm
         for i, testcase in enumerate(context.normal):
-            v_eval_function_name = f"v_evaluate_{i}"
-            e_eval_function_name = f"e_evaluate_{i}"
+            v_eval_function_name = f"v_evaluate_{number}_{i}"
+            e_eval_function_name = f"e_evaluate_{number}_{i}"
             has_specific_v = not isinstance(testcase.output.result, (IgnoredChannelState, NoneChannelState))
             if has_specific_v and isinstance(testcase.output.result.evaluator, SpecificEvaluator):
                 custom_v_code = testcase.output.result.evaluator.evaluators[self.config.programming_language] \
@@ -351,11 +348,11 @@ class ConfigurableRunner(Runner):
         else:
             return self.language_config.exception_writer(function_name)
 
-    def _get_main_testcase(self, context: Context) -> MainTestcaseArguments:
+    def _get_main_testcase(self, context: Context, number: int) -> MainTestcaseArguments:
         if context.main == NoMainTestcase.NONE:
             return MainTestcaseArguments(exists=False, exception_code="", arguments=[])
         else:
-            eval_function_name = f"e_evaluate_main"
+            eval_function_name = f"e_evaluate_main_{number}"
             custom_code = self._get_custom_code(context.main, eval_function_name)
             return MainTestcaseArguments(exists=True, arguments=context.main.input.arguments, exception_code=custom_code)
 
@@ -395,6 +392,9 @@ class ConfigurableRunner(Runner):
             p = subprocess.run(command, text=True, capture_output=True, cwd=directory)
             return BaseExecutionResult(p.stdout, p.stderr, p.returncode)
 
+    def get_readable_input(self, case: Testcase) -> ExtendedMessage:
+        return self.translator.get_readable_input(case)
+
 
 CONFIGS = {
     'python':  PythonConfig,
@@ -430,4 +430,5 @@ def get_generator(config: Config, language: str = None) -> Runner:
     if language is None:
         language = config.programming_language
     adjusted_config = replace(config, programming_language=language)
-    return ConfigurableRunner(adjusted_config, CONFIGS[language]())
+    language_config = CONFIGS[language]()
+    return ConfigurableRunner(adjusted_config, language_config, Translator(config, language_config))

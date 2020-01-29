@@ -12,7 +12,7 @@ from mako.exceptions import TemplateLookupException
 from mako.lookup import TemplateLookup
 from mako.template import Template
 from pathlib import Path
-from typing import List, Union
+from typing import List, Union, Any
 
 from dodona import ExtendedMessage
 from runners.config import LanguageConfig
@@ -175,10 +175,14 @@ class Translator:
         template = self.find_template("assignment")
         return template.render(assignment=assignment, full=True)
 
-    def write_plan_context_template(self, args: PlanContextArguments, destination: Union[PathLike, Path]):
-        template = self.find_template("contexts")
-        write_template(args, template, destination)
+    def _find_and_write_template(self, args: Any, destination: Union[PathLike, Path], name: str) -> str:
+        template = self.find_template(name)
+        destination_name = f"{name}.{self.language_config.file_extension()}"
+        write_template(args, template, destination / destination_name)
+        return destination_name
 
-    def write_plan_evaluator_template(self, args: PlanEvaluatorArguments, destination: Union[PathLike, Path]):
-        template = self.find_template("evaluators")
-        write_template(args, template, destination)
+    def write_plan_context_template(self, args: PlanContextArguments, destination: Union[PathLike, Path]) -> str:
+        return self._find_and_write_template(args, destination, "contexts")
+
+    def write_plan_evaluator_template(self, args: PlanEvaluatorArguments, destination: Union[PathLike, Path]) -> str:
+        return self._find_and_write_template(args, destination, "evaluators")

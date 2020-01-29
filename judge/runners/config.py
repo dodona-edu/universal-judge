@@ -9,7 +9,6 @@ but that will be a lot more work.
 from typing import List, Tuple
 
 from features import Features
-from tested import Config
 from testplan import Plan
 
 CallbackResult = Tuple[List[str], List[str]]
@@ -28,22 +27,6 @@ class LanguageConfig:
         function, to re-use it in the compilation callback. By default, nothing
         is done here, and the dependencies are returned unchanged.
         :param files: The files that are destined for precompilation. These were
-                      removed from the general dependencies. There are relative
-                      filenames to the current directory.
-        :return: A tuple, containing 1) the compilation command. If no
-                 compilation is needed, an empty command may be used. Secondly,
-                 the new dependencies, which are a list of names.
-        """
-        return [], files
-
-    def compilation_callback(self, files: List[str]) -> CallbackResult:
-        """
-        Called to do the compilation step. This function is responsible for
-        returning the compilation command, and a list of new dependencies. An
-        implementation might abstract this logic and put it in a separate
-        function, to re-use it in the compilation callback. By default, nothing
-        is done here, and the dependencies are returned unchanged.
-        :param files: The files that are destined for compilation. These were
                       removed from the general dependencies. There are relative
                       filenames to the current directory.
         :return: A tuple, containing 1) the compilation command. If no

@@ -31,10 +31,10 @@ def send_exception(exception):
     values.send_exception(exception_file, exception)
 
 
-% for c in contexts:
-    ${c.main_testcase.exception_code}
+% for evaluator in evaluators:
+    ${evaluator.main_testcase.exception_code}
 
-    % for additional in c.additional_testcases:
+    % for additional in evaluator.additional_testcases:
         % if additional.has_return:
             ${additional.value_code}
         % endif

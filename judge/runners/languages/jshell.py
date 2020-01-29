@@ -2,8 +2,7 @@ from typing import List, Optional
 
 from features import Features
 from runners.config import CallbackResult
-from runners.java import JavaConfig
-from tested import Config
+from runners.languages.java import JavaConfig
 from testplan import Context
 
 EXECUTE_SCRIPT = "exit.jsh"

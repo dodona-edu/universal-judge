@@ -6,7 +6,8 @@ from typing import Tuple
 from dodona import *
 from dodona import report_update, StartJudgment, StartTab, StartContext, CloseContext, CloseTab, CloseJudgment
 from evaluators import get_evaluator, Evaluator
-from runners.runner import Runner, ExecutionResult, get_generator, BaseExecutionResult, get_supporting_languages
+from runners.runner import Runner, ExecutionResult, get_generator, BaseExecutionResult, get_supporting_languages, \
+    ContextExecution
 from tested import Config
 from testplan import *
 
@@ -128,7 +129,7 @@ class GeneratorJudge:
         testcase: Testcase  # Type hint for pycharm.
         for i, testcase in enumerate(context.all_testcases()):
 
-            readable_input = self.runner.get_readable_input(plan, context, testcase)
+            readable_input = self.runner.get_readable_input(testcase)
             report_update(self.out, StartTestcase(description=readable_input))
 
             # Handle compiler results
@@ -197,7 +198,9 @@ class GeneratorJudge:
         report_update(self.out, StartJudgment())
         common_dir = Path(self.config.workdir, f"common")
         common_dir.mkdir()
-        self.runner.generate(common_dir, plan)
+        result, files = self.runner.generate(plan, common_dir)
+        compiler_results = self._process_compile_results(result)
+        # TODO: check result of precompilation and halt if necessary.
         pool = Pool()
         for tab_index, tab in enumerate(plan.tabs):
             report_update(self.out, StartTab(title=tab.name))
@@ -207,17 +210,16 @@ class GeneratorJudge:
                 # Create a working directory for the context.
                 directory = Path(self.config.workdir, f"{tab_index}-{context_index}")
                 directory.mkdir()
-                executions.append((plan, context, common_dir, directory))
+                executions.append(ContextExecution(plan, context, context_index, directory, common_dir, files))
 
             # Do the executions in parallel
-            results = pool.map(lambda a: self.runner.execute(*a), executions)
+            results = pool.map(lambda a: self.runner.execute(a), executions)
 
             # Handle the results
             for context_index, context in enumerate(tab.contexts):
                 report_update(self.out, StartContext(description=context.description))
-                compile_result, result = results[context_index]
-                compiler_results = self._process_compile_results(compile_result)
-                self._process_results(plan, context, result, compiler_results)
+                execution_result = results[context_index]
+                self._process_results(plan, context, execution_result, compiler_results)
                 report_update(self.out, CloseContext())
             report_update(self.out, CloseTab())
         report_update(self.out, CloseJudgment())
