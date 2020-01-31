@@ -4,7 +4,7 @@ import json
 import traceback
 
 
-def __encode(value):
+def _encode(value):
     if value is None:
         type_ = "nothing"
         data_ = value
@@ -22,13 +22,13 @@ def __encode(value):
         data_ = value
     elif isinstance(value, list) or isinstance(value, tuple):
         type_ = "list"
-        data_ = [__encode(x) for x in value]
+        data_ = [_encode(x) for x in value]
     elif isinstance(value, set):
         type_ = "set"
-        data_ = [__encode(x) for x in value]
+        data_ = [_encode(x) for x in value]
     elif isinstance(value, dict):
         type_ = "object"
-        data_ = {str(k): __encode(v) for k, v in value.items()}
+        data_ = {str(k): _encode(v) for k, v in value.items()}
     else:
         type_ = "unknown"
         data_ = str(value)
@@ -41,7 +41,7 @@ def __encode(value):
 
 def send_value(stream, value):
     """Send a value to the given stream."""
-    json.dump(__encode(value), stream)
+    json.dump(_encode(value), stream)
 
 
 def send_exception(stream, exception):

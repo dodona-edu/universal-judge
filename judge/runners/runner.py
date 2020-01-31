@@ -9,12 +9,12 @@ Broadly speaking, the responsibilities can be divided into a few stages:
 2. Execute the generated code.
 
 """
+import logging
 import random
 import shutil
 import string
 import subprocess
 import tempfile
-import logging
 from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Tuple, List, Optional, Set
@@ -22,14 +22,13 @@ from typing import Tuple, List, Optional, Set
 from dodona import ExtendedMessage
 from runners.config import LanguageConfig
 from runners.dependencies import Destination, File, Dependencies
-from runners.translator import ContextArguments, EvaluatorArguments, Translator, PlanContextArguments, \
-    PlanEvaluatorArguments, TestcaseArguments, MainTestcaseArguments
 from runners.languages.haskell import HaskellConfig
 from runners.languages.java import JavaConfig
 from runners.languages.jshell import JshellConfig
 from runners.languages.python import PythonConfig
-from runners.templates import CustomData
-from serialisation import Value
+from runners.translator import ContextArguments, EvaluatorArguments, Translator, PlanContextArguments, \
+    PlanEvaluatorArguments, TestcaseArguments, MainTestcaseArguments, CustomEvaluatorArguments
+from serialisation import Value, NothingType, NothingTypes
 from tested import Config
 from testplan import Context, FunctionCall, SpecificEvaluator, IgnoredChannelState, NoneChannelState, \
     TestPlanError, NoMainTestcase, Testcase, NormalTestcase, Plan, FunctionInput, \
@@ -118,20 +117,36 @@ class Runner:
 
     def execute(self, arguments: ContextExecution) -> ExecutionResult:
         """
-        Execute the tests for a given context. This function typically implements following steps:
+        Execute the tests for a given context.
 
-        1. Generate the code necessary for executing the tests for this context.
-        2. (Optional) Compile the code.
-        3. Run the code and report back the result.
-
-        Note that this method should be thread-safe: multiple context may be evaluated in parallel.
+        Note that this method must be thread-safe: multiple contexts are
+        evaluated in parallel.
 
         :param arguments: The arguments for this execution.
         """
         raise NotImplementedError
 
-    def evaluate_custom(self, code: str, expected: Value, actual: Value) -> BaseExecutionResult:
-        """Evaluate two values with code provided by the test plan."""
+    def evaluate_custom(self,
+                        path: str,
+                        expected: Optional[Value],
+                        actual: Optional[Value],
+                        arguments: List[Value]) -> BaseExecutionResult:
+        """
+        Run a custom evaluator. Implementations of this function will probably
+        be very similar to the execution method, with one big exception: there
+        is no generation step for custom evaluators. If code needs to be
+        generated or compiled, it should all happen in this method.
+
+        Additionally, in contrast to the execution method, the runner is
+        responsible for executing in its own directory. It is recommended to
+        use a temporary directory, to ensure this method is thread safe.
+
+        :param path: The path to the code of the custom evaluator.
+        :param expected: The expected value from the testplan.
+        :param actual: The actual value from the testplan.
+        :param arguments: Arguments to be passed to the custom evaluator.
+        :return: The result of the evaluation.
+        """
         raise NotImplementedError
 
     def get_readable_input(self, case: Testcase) -> ExtendedMessage:
@@ -163,7 +178,7 @@ class ConfigurableRunner(Runner):
         be executed where it makes sense for the language. For example, in Python, this is in the
         module of the user's code, but in Java, this is in the main of the context.
 
-        :param context: The context to execute.
+        :param contexts: The context to execute.
         :param submission_name: The name of the container for the submitted code. For example, in
                                 Java this will be the class, in Haskell the module.
         :param destination: The path where the files should be generated.
@@ -234,6 +249,21 @@ class ConfigurableRunner(Runner):
     def _evaluator_name(self) -> str:
         return f"{self.language_config.evaluator_name()}.{self.language_config.file_extension()}"
 
+    def _find_paths_to_template_folder(self, files: List[str], destination: Path):
+        # Copy files to the common directory.
+        files_to_copy = []
+        paths = self.translator.path_to_templates()
+        for file in files:
+            for potential_path in paths:
+                if (full_file := potential_path / file).exists():
+                    files_to_copy.append(full_file)
+                    break
+            else:  # no break
+                raise ValueError(f"Could not find dependency file {file}, looked in {paths}")
+        for file in files_to_copy:
+            # noinspection PyTypeChecker
+            shutil.copy2(file, destination)
+
     def generate(self, plan: Plan, working_directory: Path) -> Tuple[Optional[BaseExecutionResult], List[str]]:
         # Write the submission file to the correct location.
         submission_name = self.language_config.submission_name(plan)
@@ -244,19 +274,8 @@ class ConfigurableRunner(Runner):
         dependencies = [submission]
 
         # Copy files to the common directory.
-        files_to_copy = []
-        paths = self.translator.path_to_templates()
-        for file in self.language_config.initial_dependencies():
-            for potential_path in paths:
-                if (full_file := potential_path / file).exists():
-                    files_to_copy.append(full_file)
-                    dependencies.append(file)
-                    break
-            else:  # no break
-                raise ValueError(f"Could not find dependency file {file}, looked in {paths}")
-        for file in files_to_copy:
-            # noinspection PyTypeChecker
-            shutil.copy2(file, working_directory)
+        dependencies.extend(self.language_config.initial_dependencies())
+        self._find_paths_to_template_folder(self.language_config.initial_dependencies(), working_directory)
 
         # Generate all relevant files.
         c = [c for tab in plan.tabs for c in tab.contexts]
@@ -285,7 +304,7 @@ class ConfigurableRunner(Runner):
                 stdin_.append(input_)
         stdin_ = "\n".join(stdin_)
 
-        command = self.language_config.execution_command(arguments.files, arguments.number)
+        command = self.language_config.execute_context(arguments.files, arguments.number)
         logger.debug("Executing with command %s in directory %s", command, arguments.working_directory)
         # noinspection PyTypeChecker
         p = subprocess.run(command, input=stdin_, text=True, capture_output=True, cwd=arguments.working_directory)
@@ -360,7 +379,11 @@ class ConfigurableRunner(Runner):
         else:
             eval_function_name = f"e_evaluate_main_{number}"
             custom_code = self._get_custom_code(context.main, eval_function_name)
-            return MainTestcaseArguments(exists=True, arguments=context.main.input.arguments, exception_code=custom_code)
+            return MainTestcaseArguments(
+                exists=True,
+                arguments=context.main.input.arguments,
+                exception_code=custom_code
+            )
 
     def prepare_function_call(self, submission_name: str, function_call: FunctionCall) -> FunctionCall:
         """Prepare the function call for main."""
@@ -374,27 +397,36 @@ class ConfigurableRunner(Runner):
             object=object_
         )
 
-    def evaluate_custom(self, code: str, expected: Value, actual: Value) -> BaseExecutionResult:
-        # Create the template.
-        template = self._find_template("evaluator_custom", self._get_environment)
-        data = CustomData(evaluator_code=code, expected=expected, actual=actual)
-        # directory = Path(self.config.workdir, f"specific")
-        # directory.mkdir()
+    def evaluate_custom(self,
+                        path: str,
+                        expected: Optional[Value],
+                        actual: Optional[Value],
+                        arguments: List[Value]) -> BaseExecutionResult:
         with tempfile.TemporaryDirectory() as directory:
-            path = Path(directory) / self._evaluator_name()
-            write_template(data, template, path)
-            self.files.copy_to(self._path_to_templates(), directory)
-            files = [x.name for x in self.files.files]
-            files.append(self._evaluator_name())
 
-            command, _ = self.language_config.compilation_callback(files)
+            # Copy dependencies to the directory.
+            dependencies = self.language_config.initial_dependencies() + self.language_config.evaluator_dependencies()
+            self._find_paths_to_template_folder(dependencies, directory)
 
-            # Compile the evaluator
-            c = self._compile(command, directory)
-            if c and c.stderr:
-                raise TestPlanError(f"Error while compiling specific test case: {c.stderr}")
-            # Execute the evaluator
-            command = self.language_config.execute_evaluator("eval")
+            # Generate the custom evaluator code.
+            data = CustomEvaluatorArguments(
+                evaluator=path,
+                expected=expected or NothingType(NothingTypes.NOTHING),
+                actual=actual or NothingType(NothingTypes.NOTHING),
+                arguments=arguments
+            )
+            name = self.translator.custom_evaluator(data, directory)
+
+            # Do compilation for those languages that require it.
+            command, files = self.language_config.generation_callback(dependencies)
+            logger.debug("Compiling custom evaluator with command %s", command)
+            result = self._compile(command, directory)
+            if result and result.stderr:
+                raise TestPlanError(f"Error while compiling specific test case: {result.stderr}")
+
+            # Execute the custom evaluator.
+            command, files = self.language_config.execute_evaluator(name, files)
+            logger.debug("Executing custom evaluator with command %s", command)
             p = subprocess.run(command, text=True, capture_output=True, cwd=directory)
             return BaseExecutionResult(p.stdout, p.stderr, p.returncode)
 

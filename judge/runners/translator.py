@@ -12,7 +12,7 @@ from mako.exceptions import TemplateLookupException
 from mako.lookup import TemplateLookup
 from mako.template import Template
 from pathlib import Path
-from typing import List, Union, Any
+from typing import List, Union, Any, Optional
 
 from dodona import ExtendedMessage
 from runners.config import LanguageConfig
@@ -71,6 +71,14 @@ class PlanEvaluatorArguments:
     exception_file: str
     secret_id: str
     evaluators: List[EvaluatorArguments]
+
+
+@dataclass
+class CustomEvaluatorArguments:
+    evaluator: str
+    expected: Value
+    actual: Value
+    arguments: List[Value]
 
 
 def write_template(arguments, template: Template, path: PathLike):
@@ -174,6 +182,9 @@ class Translator:
         assignment = assignment.replace_function(assignment.expression)
         template = self.find_template("assignment")
         return template.render(assignment=assignment, full=True)
+
+    def custom_evaluator(self, args: CustomEvaluatorArguments, destination: Union[PathLike, Path]) -> str:
+        return self._find_and_write_template(args, destination, "custom_evaluator")
 
     def _find_and_write_template(self, args: Any, destination: Union[PathLike, Path], name: str) -> str:
         template = self.find_template(name)

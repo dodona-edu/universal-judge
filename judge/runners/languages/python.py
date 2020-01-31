@@ -12,6 +12,9 @@ class PythonConfig(LanguageConfig):
     def initial_dependencies(self) -> List[str]:
         return ["values.py"]
 
+    def evaluator_dependencies(self) -> List[str]:
+        return ["evaluation_utils.py"]
+
     def value_writer(self, name):
         return f"def {name}(value): send(value)"
 
@@ -21,12 +24,8 @@ class PythonConfig(LanguageConfig):
     def generation_callback(self, files: List[str]) -> CallbackResult:
         return ["python", "-m", "compileall", "-b", "."], [f.replace(".py", '.pyc') for f in files]
 
-    def execution_command(self, files: List[str], context_number: int) -> List[str]:
-        main = self._get_main_file(files)
-        return ["python", main, str(context_number)]
-
-    def execute_evaluator(self, evaluator_name: str) -> List[str]:
-        return ["python", f"{self.evaluator_name()}.{self.file_extension()}"]
+    def execution_command(self, file: str, dependencies: List[str], arguments: List[str]) -> List[str]:
+        return ["python", file, *arguments]
 
     def file_extension(self) -> str:
         return "py"

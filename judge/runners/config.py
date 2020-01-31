@@ -35,13 +35,28 @@ class LanguageConfig:
         """
         return [], files
 
-    def execution_command(self, files: List[str], context_number: int) -> List[str]:
-        """Get the command for executing the code."""
+    def execution_command(self, file: str, dependencies: List[str], arguments: List[str]) -> List[str]:
+        """
+        Get the command for executing a file with some arguments.
+        :param file: The file to be executed.
+        :param dependencies: A list of other available files.
+        :param arguments: The arguments, e.g. other dependencies.
+        :return: The command.
+        """
         raise NotImplementedError
 
-    def execute_evaluator(self, evaluator_name: str) -> List[str]:
+    def execute_context(self, files: List[str], context_number: int) -> List[str]:
+        """Get the command for executing a context."""
+        files = files.copy()
+        main_files = [x for x in files if x.startswith(self.context_name())]
+        if len(main_files) != 1:
+            raise AssertionError(f"The files must contain one main file, but got {main_files}.")
+        files.remove(main_files[0])
+        return self.execution_command(main_files[0], files, [str(context_number)])
+
+    def execute_evaluator(self, evaluator_name: str, dependencies: List[str]) -> List[str]:
         """Get the command for executing an evaluator."""
-        raise NotImplementedError
+        return self.execution_command(evaluator_name, dependencies, [])
 
     def file_extension(self) -> str:
         """The file extension for this language, without the dot."""
@@ -90,11 +105,13 @@ class LanguageConfig:
         """
         raise NotImplementedError
 
-    def _get_main_file(self, files: List[str]) -> str:
-        files = [x for x in files if x.startswith(self.context_name())]
-        if len(files) != 1:
-            raise AssertionError(f"The files must contain one main file, but got {len(files)} from {files}.")
-        return files[0]
+    def evaluator_dependencies(self) -> List[str]:
+        """
+        Additional dependencies for running a custom evaluator in this language.
+        These dependencies are also relative to the "templates" directory, and
+        are loaded after the regular dependencies.
+        """
+        return []
 
     def supported_features(self) -> Features:
         """
