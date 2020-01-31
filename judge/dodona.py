@@ -193,6 +193,7 @@ class _EnhancedJSONEncoder(json.JSONEncoder):
         return super().default(o)
 
 
+# noinspection PyUnreachableCode
 def report_update(to: IO, update: Update):
     """
     Write the given update to the given output stream.
@@ -200,11 +201,12 @@ def report_update(to: IO, update: Update):
     :param update: The update to write.
     """
     json.dump(update, to, cls=_EnhancedJSONEncoder)
+    if __debug__:
+        print("")
 
 
 if __name__ == '__main__':
     sc = DodonaUpdate.schema()
-    #print(json.dumps(sc, indent=2))
 
     v = CloseTab()
     report_update(sys.stdout, v)

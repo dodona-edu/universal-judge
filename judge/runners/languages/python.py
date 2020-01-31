@@ -19,11 +19,11 @@ class PythonConfig(LanguageConfig):
         return f"def {name}(exception): send_exception(exception)"
 
     def generation_callback(self, files: List[str]) -> CallbackResult:
-        return ["python", "-m", "compileall", "-b"], [f.replace(".py", '.pyc') for f in files]
+        return ["python", "-m", "compileall", "-b", "."], [f.replace(".py", '.pyc') for f in files]
 
-    def execution_command(self, files: List[str]) -> List[str]:
+    def execution_command(self, files: List[str], context_number: int) -> List[str]:
         main = self._get_main_file(files)
-        return ["python", main]
+        return ["python", main, str(context_number)]
 
     def execute_evaluator(self, evaluator_name: str) -> List[str]:
         return ["python", f"{self.evaluator_name()}.{self.file_extension()}"]

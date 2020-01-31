@@ -2,6 +2,7 @@
 Run the judge manually from code. In this mode, the config is hardcoded into this file, allowing
 rapid testing (and, most importantly, debugging).
 """
+import logging
 import os
 import sys
 
@@ -29,6 +30,18 @@ def read_config() -> Config:
 
 if __name__ == '__main__':
     config = read_config()
+
+    # Enable logging
+    log = logging.getLogger()
+    log.setLevel(logging.DEBUG)
+    ch = logging.StreamHandler(stream=sys.stdout)
+    ch.setLevel(logging.DEBUG)
+    # create formatter
+    formatter = logging.Formatter('%(name)s:%(levelname)s:%(message)s')
+
+    # add formatter to ch
+    ch.setFormatter(formatter)
+    log.addHandler(ch)
 
     # Delete content in work dir
     for root, dirs, files in os.walk(config.workdir):

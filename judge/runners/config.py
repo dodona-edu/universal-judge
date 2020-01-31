@@ -35,7 +35,7 @@ class LanguageConfig:
         """
         return [], files
 
-    def execution_command(self, files: List[str]) -> List[str]:
+    def execution_command(self, files: List[str], context_number: int) -> List[str]:
         """Get the command for executing the code."""
         raise NotImplementedError
 

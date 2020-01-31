@@ -1,3 +1,5 @@
+import logging
+import os, stat
 from multiprocessing.dummy import Pool
 
 from pathlib import Path
@@ -10,6 +12,8 @@ from runners.runner import Runner, ExecutionResult, get_generator, BaseExecution
     ContextExecution
 from tested import Config
 from testplan import *
+
+logger = logging.getLogger(__name__)
 
 
 def _evaluate_channel(
@@ -194,13 +198,16 @@ class GeneratorJudge:
     def judge(self, plan: Plan):
         """Execute the test plan for an exercise, resulting in a judgment."""
         # Check we have the required features.
+        logger.info("Checking supported features...")
         _check_features(plan, self.config.programming_language)
         report_update(self.out, StartJudgment())
         common_dir = Path(self.config.workdir, f"common")
         common_dir.mkdir()
+        logger.info("Start generating code...")
         result, files = self.runner.generate(plan, common_dir)
         compiler_results = self._process_compile_results(result)
-        # TODO: check result of precompilation and halt if necessary.
+        self._protect_common_dir(common_dir)
+        logger.info("Start judging code...")
         pool = Pool()
         for tab_index, tab in enumerate(plan.tabs):
             report_update(self.out, StartTab(title=tab.name))
@@ -208,9 +215,9 @@ class GeneratorJudge:
             executions = []
             for context_index, context in enumerate(tab.contexts):
                 # Create a working directory for the context.
-                directory = Path(self.config.workdir, f"{tab_index}-{context_index}")
+                directory = Path(self.config.workdir, f"context-{tab_index + context_index}")
                 directory.mkdir()
-                executions.append(ContextExecution(plan, context, context_index, directory, common_dir, files))
+                executions.append(ContextExecution(plan, context, tab_index + context_index, directory, common_dir, files))
 
             # Do the executions in parallel
             results = pool.map(lambda a: self.runner.execute(a), executions)
@@ -223,3 +230,12 @@ class GeneratorJudge:
                 report_update(self.out, CloseContext())
             report_update(self.out, CloseTab())
         report_update(self.out, CloseJudgment())
+        self._unprotect_common_dir(common_dir)
+
+    def _protect_common_dir(self, directory):
+        logger.debug("Protecting directory %s", directory)
+        os.chmod(directory, stat.S_IREAD)  # Disable write access
+
+    def _unprotect_common_dir(self, directory):
+        logger.debug("Unprotecting directory %s", directory)
+        os.chmod(directory, stat.S_IREAD | stat.S_IWRITE)

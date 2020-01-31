@@ -14,6 +14,7 @@ import shutil
 import string
 import subprocess
 import tempfile
+import logging
 from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Tuple, List, Optional, Set
@@ -33,6 +34,8 @@ from tested import Config
 from testplan import Context, FunctionCall, SpecificEvaluator, IgnoredChannelState, NoneChannelState, \
     TestPlanError, NoMainTestcase, Testcase, NormalTestcase, Plan, FunctionInput, \
     AssignmentInput, FunctionType
+
+logger = logging.getLogger(__name__)
 
 
 def _get_identifier() -> str:
@@ -168,8 +171,8 @@ class ConfigurableRunner(Runner):
         """
         context_arguments = []
         evaluator_arguments = []
-        value_file = str(self._value_file(destination)).replace("\\", "/")
-        exception_file = str(self._exception_file(destination)).replace("\\", "/")
+        value_file = self._value_file(destination).name
+        exception_file = self._exception_file(destination).name
         for i, context in enumerate(contexts):
             # The code for before and after the context.
             before_code = context.before.get(self.config.programming_language, "")
@@ -261,16 +264,17 @@ class ConfigurableRunner(Runner):
         dependencies.extend(generated_files)
 
         command, files = self.language_config.generation_callback(dependencies)
-        print(f"Generation command is {command}, files are {files}, dependencies are {dependencies}")
+        logger.debug("Generating files with command %s in directory %s", command, working_directory)
         result = self._compile(command, working_directory)
 
         return result, files
 
     def execute(self, arguments: ContextExecution) -> ExecutionResult:
 
+        logger.info("Starting execution on context %d", arguments.number)
         # Copy the files we need to our own directory, to make them independent.
         for file in arguments.files:
-            print(f"Copying {arguments.common_directory / file} to {arguments.working_directory}")
+            logger.debug(f"Copying %s to %s", arguments.common_directory / file, arguments.working_directory)
             # noinspection PyTypeChecker
             shutil.copy2(arguments.common_directory / file, arguments.working_directory)
 
@@ -281,8 +285,8 @@ class ConfigurableRunner(Runner):
                 stdin_.append(input_)
         stdin_ = "\n".join(stdin_)
 
-        command = self.language_config.execution_command(arguments.files)
-        print(f"Executing with command {command}\n")
+        command = self.language_config.execution_command(arguments.files, arguments.number)
+        logger.debug("Executing with command %s in directory %s", command, arguments.working_directory)
         # noinspection PyTypeChecker
         p = subprocess.run(command, input=stdin_, text=True, capture_output=True, cwd=arguments.working_directory)
         identifier = f"--{self.identifier}-- SEP"
@@ -292,6 +296,7 @@ class ConfigurableRunner(Runner):
             with open(self._value_file(arguments.working_directory), "r") as f:
                 values = f.read()
         except FileNotFoundError:
+            logger.warning("Value file not found, looked in %s", self._value_file(arguments.working_directory))
             values = ""
 
         try:
@@ -299,6 +304,7 @@ class ConfigurableRunner(Runner):
             with open(self._exception_file(arguments.working_directory), "r") as f:
                 exceptions = f.read()
         except FileNotFoundError:
+            logger.warning("Exception file not found, looked in %s", self._exception_file(arguments.working_directory))
             exceptions = ""
 
         return ExecutionResult(p.stdout, p.stderr, p.returncode, identifier, values, exceptions)
