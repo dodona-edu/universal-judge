@@ -372,13 +372,18 @@ class SpecificEvaluator(Evaluator):
 
 class CustomEvaluator(Evaluator):
     """
-    Compare the result of a custom evaluator.  This evaluator has no options.
+    Compare the result of a custom evaluator. This evaluator has no options, but
+    it does have parameters that are passed to the evaluator.
     """
+    def __init__(self, config, values: List[serialisation.Value]):
+        super().__init__(config)
+        self.values = values
 
     def evaluate(self, output_channel, actual) -> EvaluationResult:
         assert isinstance(output_channel.evaluator, TestplanCustomEvaluator)
-        # In all cases except when dealing with a return value, we manually convert
-        # the string to a Value, since that makes our life much easier later on.
+        # In all cases except when dealing with a return value, we manually
+        # convert the string to a Value, since that makes our life much easier
+        # later on.
         if isinstance(output_channel, TextOutputChannel):
             expected = serialisation.StringType(
                 serialisation.StringTypes.TEXT,
@@ -422,7 +427,7 @@ class CustomEvaluator(Evaluator):
 
         runner = get_generator(self.config, output_channel.evaluator.language)
         code = output_channel.evaluator.code.get_data_as_string(self.config.resources)
-        result = runner.evaluate_custom(code, expected, actual)
+        result = runner.evaluate_custom(code, expected, actual, self.values)
 
         if not result.stdout:
             stdout = ExtendedMessage(description=result.stdout, format="text")
@@ -485,7 +490,7 @@ def get_evaluator(config: Config, output: Union[OutputChannel, AnyChannelState])
         assert evaluator.name == ExceptionBuiltin.EXCEPTION
         raise NotImplementedError("Exception evaluators are not yet supported.")
     elif isinstance(evaluator, TestplanCustomEvaluator):
-        return CustomEvaluator(config)
+        return CustomEvaluator(config, evaluator.arguments)
     elif isinstance(evaluator, TestplanSpecificEvaluator):
         return SpecificEvaluator(config)
     else:

@@ -28,7 +28,7 @@ from runners.languages.jshell import JshellConfig
 from runners.languages.python import PythonConfig
 from runners.translator import ContextArguments, EvaluatorArguments, Translator, PlanContextArguments, \
     PlanEvaluatorArguments, TestcaseArguments, MainTestcaseArguments, CustomEvaluatorArguments
-from serialisation import Value, NothingType, NothingTypes
+from serialisation import Value, NothingType, NothingTypes, SequenceType, SequenceTypes
 from tested import Config
 from testplan import Context, FunctionCall, SpecificEvaluator, IgnoredChannelState, NoneChannelState, \
     TestPlanError, NoMainTestcase, Testcase, NormalTestcase, Plan, FunctionInput, \
@@ -413,9 +413,9 @@ class ConfigurableRunner(Runner):
                 evaluator=path,
                 expected=expected or NothingType(NothingTypes.NOTHING),
                 actual=actual or NothingType(NothingTypes.NOTHING),
-                arguments=arguments
+                arguments=SequenceType(SequenceTypes.LIST, arguments)
             )
-            name = self.translator.custom_evaluator(data, directory)
+            name = self.translator.custom_evaluator(data, Path(directory))
 
             # Do compilation for those languages that require it.
             command, files = self.language_config.generation_callback(dependencies)
@@ -425,7 +425,7 @@ class ConfigurableRunner(Runner):
                 raise TestPlanError(f"Error while compiling specific test case: {result.stderr}")
 
             # Execute the custom evaluator.
-            command, files = self.language_config.execute_evaluator(name, files)
+            command = self.language_config.execute_evaluator(name, files)
             logger.debug("Executing custom evaluator with command %s", command)
             p = subprocess.run(command, text=True, capture_output=True, cwd=directory)
             return BaseExecutionResult(p.stdout, p.stderr, p.returncode)

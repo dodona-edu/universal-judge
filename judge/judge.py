@@ -1,7 +1,7 @@
 import logging
-import os, stat
+import os
+import stat
 from multiprocessing.dummy import Pool
-
 from pathlib import Path
 from typing import Tuple
 
@@ -118,7 +118,6 @@ class GeneratorJudge:
             return messages, Status.CORRECT
 
     def _process_results(self,
-                         plan: Plan,
                          context: Context,
                          results: ExecutionResult,
                          compiler_results: Tuple[List[Message], Status]):
@@ -207,35 +206,46 @@ class GeneratorJudge:
         result, files = self.runner.generate(plan, common_dir)
         compiler_results = self._process_compile_results(result)
         self._protect_common_dir(common_dir)
-        logger.info("Start judging code...")
-        pool = Pool()
-        for tab_index, tab in enumerate(plan.tabs):
-            report_update(self.out, StartTab(title=tab.name))
-            # Create a list of arguments to execute (in threads)
-            executions = []
-            for context_index, context in enumerate(tab.contexts):
-                # Create a working directory for the context.
-                directory = Path(self.config.workdir, f"context-{tab_index + context_index}")
-                directory.mkdir()
-                executions.append(ContextExecution(plan, context, tab_index + context_index, directory, common_dir, files))
+        try:
+            logger.info("Start judging code...")
+            pool = Pool()
+            for tab_index, tab in enumerate(plan.tabs):
+                report_update(self.out, StartTab(title=tab.name))
+                # Create a list of arguments to execute (in threads)
+                executions = []
+                for context_index, context in enumerate(tab.contexts):
+                    # Create a working directory for the context.
+                    directory = Path(self.config.workdir, f"context-{tab_index + context_index}")
+                    directory.mkdir()
+                    executions.append(ContextExecution(
+                        plan,
+                        context,
+                        tab_index + context_index,
+                        directory,
+                        common_dir,
+                        files
+                    ))
 
-            # Do the executions in parallel
-            results = pool.map(lambda a: self.runner.execute(a), executions)
+                # Do the executions in parallel
+                results = pool.map(lambda a: self.runner.execute(a), executions)
 
-            # Handle the results
-            for context_index, context in enumerate(tab.contexts):
-                report_update(self.out, StartContext(description=context.description))
-                execution_result = results[context_index]
-                self._process_results(plan, context, execution_result, compiler_results)
-                report_update(self.out, CloseContext())
-            report_update(self.out, CloseTab())
-        report_update(self.out, CloseJudgment())
-        self._unprotect_common_dir(common_dir)
+                # Handle the results
+                for context_index, context in enumerate(tab.contexts):
+                    report_update(self.out, StartContext(description=context.description))
+                    execution_result = results[context_index]
+                    self._process_results(context, execution_result, compiler_results)
+                    report_update(self.out, CloseContext())
+                report_update(self.out, CloseTab())
+            report_update(self.out, CloseJudgment())
+        finally:
+            self._unprotect_common_dir(common_dir)
 
     def _protect_common_dir(self, directory):
-        logger.debug("Protecting directory %s", directory)
+        # Make the common folder read-only, making it more difficult to mess
+        # with the code.
+        logger.info("Making %s read-only", directory)
         os.chmod(directory, stat.S_IREAD)  # Disable write access
 
     def _unprotect_common_dir(self, directory):
-        logger.debug("Unprotecting directory %s", directory)
+        logger.info("Giving write-access to %s", directory)
         os.chmod(directory, stat.S_IREAD | stat.S_IWRITE)

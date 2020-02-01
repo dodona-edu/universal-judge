@@ -235,6 +235,7 @@ class CustomEvaluator:
     """
     language: str
     code: TextData
+    arguments: List[Value] = field(default_factory=list)
     # noinspection PyUnresolvedReferences
     type: Literal["custom"] = "custom"
 
