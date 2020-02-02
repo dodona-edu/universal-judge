@@ -173,16 +173,18 @@ class ConfigurableRunner(Runner):
         """
         Write the context template to file.
 
-        The parameters of this function are available to the template. Note that just because they
-        are available, does not mean they need to be used. For example, the before and after should
-        be executed where it makes sense for the language. For example, in Python, this is in the
-        module of the user's code, but in Java, this is in the main of the context.
+        The parameters of this function are available to the template. Note that
+        just because they are available, does not mean they need to be used. For
+        example, the before and after should be executed where it makes sense
+        for the language. For example, in Python, this is in the module of the
+        user's code, but in Java, this is in the main of the context.
 
         :param contexts: The context to execute.
-        :param submission_name: The name of the container for the submitted code. For example, in
-                                Java this will be the class, in Haskell the module.
+        :param submission_name: The name of the container for the submitted
+                                code. For example, in Java this will be the
+                                class, in Haskell the module.
         :param destination: The path where the files should be generated.
-        :return: The files (base names) that were generated, in order of dependencies.
+        :return: The file names that were generated, in order of dependencies.
         """
         context_arguments = []
         evaluator_arguments = []
@@ -452,7 +454,8 @@ def get_languages() -> Set[str]:
 def get_supporting_languages(plan: Plan) -> Set[str]:
     """
     :param plan: The testplan.
-    :return: The languages that have the required features to execute the testplan.
+    :return: The languages that have the required features to execute the
+             testplan.
     """
     required = plan.get_used_features()
     supported_languages = set()
