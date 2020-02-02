@@ -53,8 +53,9 @@ def _is_number(string: str) -> Optional[float]:
 
 class TextEvaluator(Evaluator):
     """
-    The base evaluator, used to compare two strings. As this evaluator is intended for evaluating
-    stdout, it supports various options to make life easier:
+    The base evaluator, used to compare two strings. As this evaluator is
+    intended for evaluating stdout, it supports various options to make life
+    easier:
 
     - ``ignoreWhitespace``: whitespace before and after will be stripped
     - ``caseInsensitive``: all comparisons will be in lower-case
@@ -84,8 +85,8 @@ class TextEvaluator(Evaluator):
 
     def compare(self, expected: str, actual: str) -> EvaluationResult:
         """
-        Compare the actual values. This is a private method and should not be used outside
-        the module of the class.
+        Compare the actual values. This is a private method and should not be
+        used outside the module of the class.
         """
         if not isinstance(actual, str):
             return EvaluationResult(
@@ -123,14 +124,15 @@ class TextEvaluator(Evaluator):
 
 class FileEvaluator(Evaluator):
     """
-    Evaluate the contents of two files. The file evaluator supports one option, ``mode``, used to
-    define in which mode the evaluator should operate:
+    Evaluate the contents of two files. The file evaluator supports one option,
+    ``mode``, used to define in which mode the evaluator should operate:
 
     1. ``exact``: Both files must be exactly the same, including line separators.
-    2. ``lines``: Each line is evaluated against the corresponding line in the other file. The
-                 evaluation itself is exact.
-    3. ``values``: Each line is evaluated as a textual value, using the :class:`TextEvaluator`.
-                   In this mode, options from this evaluator are passed to the text evaluator.
+    2. ``lines``: Each line is evaluated against the corresponding line in the
+                  other file. The evaluation itself is exact.
+    3. ``values``: Each line is evaluated as a textual value, using the
+                   :class:`TextEvaluator`. In this mode, options from this
+                   evaluator are passed to the text evaluator.
 
     When no mode is passed, the evaluator will default to exact.
     """
@@ -204,8 +206,8 @@ def _get_values(output_channel: ValueOutputChannel, actual) \
     expected = output_channel.value
     readable_expected = get_readable_representation(expected)
 
-    # A crash here indicates a problem with one of the language implementations, or a student
-    # is trying to cheat.
+    # A crash here indicates a problem with one of the language implementations,
+    # or a student is trying to cheat.
     try:
         actual = serialisation.parse(actual) if actual else None
         readable_actual = get_readable_representation(actual) if actual else ""
@@ -226,8 +228,9 @@ def _get_values(output_channel: ValueOutputChannel, actual) \
 
 class ValueEvaluator(Evaluator):
     """
-    Evaluate two values. The values must match exact. Currently, this evaluator has no options,
-    but it might receive them in the future (e.g. options on how to deal with strings or floats).
+    Evaluate two values. The values must match exact. Currently, this evaluator
+    has no options, but it might receive them in the future (e.g. options on how
+    to deal with strings or floats).
     """
 
     def evaluate(self, output_channel, actual) -> EvaluationResult:
@@ -426,8 +429,8 @@ class CustomEvaluator(Evaluator):
             )
 
         runner = get_generator(self.config, output_channel.evaluator.language)
-        code = output_channel.evaluator.code.get_data_as_string(self.config.resources)
-        result = runner.evaluate_custom(code, expected, actual, self.values)
+        path = output_channel.evaluator.path
+        result = runner.evaluate_custom(path, expected, actual, self.values)
 
         if not result.stdout:
             stdout = ExtendedMessage(description=result.stdout, format="text")

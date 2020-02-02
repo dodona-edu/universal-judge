@@ -404,20 +404,29 @@ class ConfigurableRunner(Runner):
                         expected: Optional[Value],
                         actual: Optional[Value],
                         arguments: List[Value]) -> BaseExecutionResult:
+
         with tempfile.TemporaryDirectory() as directory:
+            directory = Path(directory)
+            logger.info("Creating custom evaluator with in %s", directory)
 
             # Copy dependencies to the directory.
             dependencies = self.language_config.initial_dependencies() + self.language_config.evaluator_dependencies()
             self._find_paths_to_template_folder(dependencies, directory)
 
-            # Generate the custom evaluator code.
+            # Copy the custom evaluator to the execution folder.
+            name = self.language_config.evaluator_name()
+            destination = directory / (name + "." + self.language_config.file_extension())
+            source = Path(self.config.resources) / path
+            shutil.copy2(source, destination)
+            logger.debug("Copying custom logger %s to %s", source, destination)
+
             data = CustomEvaluatorArguments(
-                evaluator=path,
+                evaluator=name,
                 expected=expected or NothingType(NothingTypes.NOTHING),
                 actual=actual or NothingType(NothingTypes.NOTHING),
                 arguments=SequenceType(SequenceTypes.LIST, arguments)
             )
-            name = self.translator.custom_evaluator(data, Path(directory))
+            name = self.translator.custom_evaluator(data, directory)
 
             # Do compilation for those languages that require it.
             command, files = self.language_config.generation_callback(dependencies)

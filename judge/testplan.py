@@ -234,9 +234,8 @@ class CustomEvaluator:
     useful, for example, when doing exercises on sequence alignments.
     """
     language: str
-    code: TextData
+    path: str
     arguments: List[Value] = field(default_factory=list)
-    # noinspection PyUnresolvedReferences
     type: Literal["custom"] = "custom"
 
 
@@ -263,7 +262,6 @@ class SpecificEvaluator:
     evaluate, say stdout, you should use the custom evaluator instead.
     """
     evaluators: Code
-    # noinspection PyUnresolvedReferences
     type: Literal["specific"] = "specific"
 
 

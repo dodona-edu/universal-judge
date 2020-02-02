@@ -6,4 +6,5 @@ def evaluate(expected, actual, arguments):
         False,
         str(expected),
         str(actual),
-        ["Hallo custom!", f"Actual is {actual}", f"Expected is {expected}"])
+        ["Hallo custom!", f"Actual is {actual}", f"Expected is {expected}"]
+    )

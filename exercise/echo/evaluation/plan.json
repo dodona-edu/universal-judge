@@ -162,10 +162,7 @@
                   "evaluator": {
                     "type": "custom",
                     "language": "python",
-                    "code": {
-                      "type": "file",
-                      "data": "./custom_evaluator.py"
-                    }
+                    "path": "./custom_evaluator.py"
                   }
                 }
               },
