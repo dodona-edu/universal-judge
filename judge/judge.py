@@ -208,7 +208,7 @@ class GeneratorJudge:
         self._protect_common_dir(common_dir)
         try:
             logger.info("Start judging code...")
-            pool = Pool()
+            pool = Pool(1)
             for tab_index, tab in enumerate(plan.tabs):
                 report_update(self.out, StartTab(title=tab.name))
                 # Create a list of arguments to execute (in threads)
