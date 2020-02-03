@@ -16,7 +16,9 @@ CallbackResult = Tuple[List[str], List[str]]
 
 class LanguageConfig:
     """
-    Configuration for the runner.
+    Configuration for the runner. Most of the language dependent options are
+    collected in this class. More involved language dependent changes, such as
+    code generation, are handled by the templates.
     """
 
     def generation_callback(self, files: List[str]) -> CallbackResult:
@@ -38,10 +40,11 @@ class LanguageConfig:
     def execution_command(self, file: str, dependencies: List[str], arguments: List[str]) -> List[str]:
         """
         Get the command for executing a file with some arguments.
-        :param file: The file to be executed.
+        :param file: The "main" file to be executed.
         :param dependencies: A list of other available files.
-        :param arguments: The arguments, e.g. other dependencies.
-        :return: The command.
+        :param arguments: The arguments, e.g. other dependencies or execution
+                          arguments.
+        :return: A command that can be passed to the subprocess package.
         """
         raise NotImplementedError
 
