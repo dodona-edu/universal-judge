@@ -39,6 +39,7 @@ except Exception as e:
                 evaluators.e_evaluate_main_${loop.index}(e)
         % endif
     % endfor
+    pass
 
 sys.stderr.write("--${secret_id}-- SEP")
 sys.stdout.write("--${secret_id}-- SEP")

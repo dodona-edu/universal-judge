@@ -1,5 +1,8 @@
+import evaluation_utils
+
+
 # noinspection DuplicatedCode
-def evaluate(expected, actual):
+def evaluate(expected, actual, arguments):
     # noinspection DuplicatedCode
     def valid_lottery_numbers(numbers='', count=6, maximum=42):
 
@@ -45,9 +48,8 @@ def evaluate(expected, actual):
 
         return numbers, True, ''
 
-    expected_value = expected[0]
-    count = expected[1]
-    maximum = expected[2]
+    count = arguments[0]
+    maximum = arguments[2]
 
     # at least check the value that was already generated
     numbers, valid, message = valid_lottery_numbers(actual, count=count, maximum=maximum)
@@ -56,4 +58,4 @@ def evaluate(expected, actual):
     if message:
         messages.append('Fout: ' + message)
 
-    evaluated(valid, expected_value, messages=messages)
+    evaluation_utils.evaluated(valid, messages=messages)

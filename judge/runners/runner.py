@@ -127,7 +127,7 @@ class Runner:
         raise NotImplementedError
 
     def evaluate_custom(self,
-                        path: str,
+                        path: Path,
                         expected: Optional[Value],
                         actual: Optional[Value],
                         arguments: List[Value]) -> BaseExecutionResult:
@@ -400,7 +400,7 @@ class ConfigurableRunner(Runner):
         )
 
     def evaluate_custom(self,
-                        path: str,
+                        path: Path,
                         expected: Optional[Value],
                         actual: Optional[Value],
                         arguments: List[Value]) -> BaseExecutionResult:

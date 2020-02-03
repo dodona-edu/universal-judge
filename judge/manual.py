@@ -20,8 +20,8 @@ def read_config() -> Config:
         "time_limit": 10000000,
         "programming_language": 'python',
         "natural_language": 'nl',
-        "resources": str(Path('../exercise/echo/evaluation').resolve()),
-        "source": '../exercise/echo/solutions/test.py',
+        "resources": str(Path('../exercise/lotto/evaluation').resolve()),
+        "source": '../exercise/lotto/solution/correct.py',
         "judge": str(Path('../').resolve()),
         "workdir": str(Path('./workdir').resolve()),
         "plan_name": "plan.json"

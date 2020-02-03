@@ -5,10 +5,12 @@ This module is the authoritative source on the format and behaviour of the
 testplan. Note that the implementation in the judge is kept simple by design;
 unless noted, the judge will not provide default values for missing fields.
 """
+import json
 from abc import ABC, abstractmethod
 from dataclasses import field
 from enum import Enum
 from os import path
+from pathlib import Path
 from typing import List, Optional, Union, Dict, Any, Literal, Iterable
 
 from humps import is_camelcase
@@ -234,7 +236,7 @@ class CustomEvaluator:
     useful, for example, when doing exercises on sequence alignments.
     """
     language: str
-    path: str
+    path: Path
     arguments: List[Value] = field(default_factory=list)
     type: Literal["custom"] = "custom"
 
@@ -499,7 +501,19 @@ def parse_test_plan(json_string) -> Plan:
     return _PlanModel.parse_raw(json_string).__root__
 
 
+def generate_schema():
+    """
+    Generate a json schema for the serialisation type. It will be printed on stdout.
+    """
+    sc = _PlanModel.schema()
+    sc['$id'] = "universal-judge/testplan"
+    sc['$schema'] = "http://json-schema.org/schema#"
+    sc['title'] = "Testplan"
+    print(json.dumps(sc, indent=2))
+
+
 if __name__ == '__main__':
-    with open('../exercise/lotto/evaluation/plan.json', 'r') as f:
-        r = parse_test_plan(f.read())
-        print(r)
+    # with open('../exercise/lotto/evaluation/plan.json', 'r') as f:
+    #     r = parse_test_plan(f.read())
+    #     print(r)
+    generate_schema()
