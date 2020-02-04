@@ -1,4 +1,8 @@
 import os
+from pathlib import Path
+
+from humps import pascalize, camelize
+
 
 from typing import List
 
@@ -20,7 +24,7 @@ class JavaConfig(LanguageConfig):
         return ["Values.java", "json-simple-3.1.0.jar"]
 
     def evaluator_dependencies(self) -> List[str]:
-        return ["Evaluator.java"]
+        return ["AbstractCustomEvaluator.java"]
 
     def value_writer(self, name):
         return f"public void {name}(Object value) throws Exception {{send(value);}}"
@@ -29,14 +33,15 @@ class JavaConfig(LanguageConfig):
         return f"public void {name}(Exception e) throws Exception {{sendException(e);}}"
 
     def generation_callback(self, files: List[str]) -> CallbackResult:
-        others = [x for x in files if not x.endswith(".jar")]
+        others = [self.conventionalise_object(x) for x in files if not x.endswith(".jar")]
         jar_argument = self._classpath_separator().join(self._get_classpath() + ["."])
         c = ["javac", "-cp", jar_argument, *others]
         return c, [x.replace(".java", ".class") for x in files]
 
     def execution_command(self, file: str, dependencies: List[str], arguments: List[str]) -> List[str]:
         cp = self._classpath_separator().join(self._get_classpath() + ["."])
-        return ["java", "-cp", cp, self.context_name(), *arguments]
+        name = Path(file).stem
+        return ["java", "-cp", cp, self.conventionalise_object(name), *arguments]
 
     def file_extension(self) -> str:
         return "java"
@@ -45,13 +50,16 @@ class JavaConfig(LanguageConfig):
         return plan.object
 
     def context_name(self) -> str:
-        return f"Context"
+        return f"Contexts"
 
     def evaluator_name(self) -> str:
         return f"Evaluator"
 
     def conventionalise(self, function_name: str) -> str:
-        return function_name
+        return camelize(function_name)
+
+    def conventionalise_object(self, class_name: str) -> str:
+        return pascalize(class_name)
 
     def _get_classpath(self):
         return [x for x in self.initial_dependencies() if x.endswith(".jar")]

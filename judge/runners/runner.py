@@ -406,6 +406,7 @@ class ConfigurableRunner(Runner):
                         arguments: List[Value]) -> BaseExecutionResult:
 
         with tempfile.TemporaryDirectory() as directory:
+            directory = "custom-dir"
             directory = Path(directory)
             logger.info("Creating custom evaluator with in %s", directory)
 
@@ -417,8 +418,8 @@ class ConfigurableRunner(Runner):
             name = self.language_config.evaluator_name()
             destination = directory / (name + "." + self.language_config.file_extension())
             source = Path(self.config.resources) / path
-            shutil.copy2(source, destination)
             logger.debug("Copying custom logger %s to %s", source, destination)
+            shutil.copy2(source, destination)
 
             data = CustomEvaluatorArguments(
                 evaluator=name,
@@ -429,7 +430,7 @@ class ConfigurableRunner(Runner):
             name = self.translator.custom_evaluator(data, directory)
 
             # Do compilation for those languages that require it.
-            command, files = self.language_config.generation_callback(dependencies)
+            command, files = self.language_config.generation_callback(dependencies + [name])
             logger.debug("Compiling custom evaluator with command %s", command)
             result = self._compile(command, directory)
             if result and result.stderr:
@@ -481,4 +482,4 @@ def get_generator(config: Config, language: str = None) -> Runner:
         language = config.programming_language
     adjusted_config = replace(config, programming_language=language)
     language_config = CONFIGS[language]()
-    return ConfigurableRunner(adjusted_config, language_config, Translator(config, language_config))
+    return ConfigurableRunner(adjusted_config, language_config, Translator(adjusted_config, language_config))

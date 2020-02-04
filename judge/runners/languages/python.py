@@ -41,3 +41,6 @@ class PythonConfig(LanguageConfig):
 
     def conventionalise(self, function_name: str) -> str:
         return decamelize(function_name)
+
+    def conventionalise_object(self, class_name: str) -> str:
+        return decamelize(class_name)

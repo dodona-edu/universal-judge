@@ -89,6 +89,10 @@ class LanguageConfig:
         """Apply a language's conventions to function name."""
         raise NotImplementedError
 
+    def conventionalise_object(self, class_name: str) -> str:
+        """Apply a language's conventions to function name."""
+        raise NotImplementedError
+
     def rename_evaluator(self, code, name):
         """Replace the evaluate function name"""
         return code.replace("evaluate", name, 1)

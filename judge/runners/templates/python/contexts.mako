@@ -37,13 +37,17 @@ except Exception as e:
         % if c.main_testcase.exists:
             if ${loop.index} == number:
                 evaluators.e_evaluate_main_${loop.index}(e)
-            sys.stderr.write("--${secret_id}-- SEP")
-            sys.stdout.write("--${secret_id}-- SEP")
-            evaluators.write_delimiter("--${secret_id}-- SEP")
         % endif
     % endfor
     pass
-
+% for c in contexts:
+    % if c.main_testcase.exists:
+        if ${loop.index} == number:
+            sys.stderr.write("--${secret_id}-- SEP")
+            sys.stdout.write("--${secret_id}-- SEP")
+            evaluators.write_delimiter("--${secret_id}-- SEP")
+    % endif
+% endfor
 
 ## Generate the actual tests based on the context.
 % for c in contexts:

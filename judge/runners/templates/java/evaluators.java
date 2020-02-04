@@ -46,14 +46,17 @@ public class Evaluator {
         Values.sendException(exceptionWriter, exception);
     }
 
-    ${main_testcase.exception_code}
+    % for evaluator in evaluators:
+        ${evaluator.main_testcase.exception_code}
 
-    % for additional in additional_testcases:
-        % if additional.has_return:
-            ${additional.value_code}
-        % endif
+        % for additional in evaluator.additional_testcases:
+            % if additional.has_return:
+                ${additional.value_code}
+            % endif
 
-        ${additional.exception_code}
+            ${additional.exception_code}
+
+        % endfor
 
     % endfor
 }

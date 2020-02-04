@@ -184,12 +184,12 @@ class Translator:
         return template.render(assignment=assignment, full=True)
 
     def custom_evaluator(self, args: CustomEvaluatorArguments, destination: Path) -> str:
-        return self._find_and_write_template(args, destination, "custom_evaluator")
+        return self._find_and_write_template(args, destination, "evaluator_executor")
 
     def _find_and_write_template(self, args: Any, destination: Union[PathLike, Path], name: str) -> str:
         template = self.find_template(name)
         destination_name = f"{name}.{self.language_config.file_extension()}"
-        write_template(args, template, destination / destination_name)
+        write_template(args, template, destination / self.language_config.conventionalise_object(destination_name))
         return destination_name
 
     def write_plan_context_template(self, args: PlanContextArguments, destination: Path) -> str:

@@ -7,7 +7,7 @@
         {
           "description": "Beschrijving van de context",
           "main": {
-            "essential": true,
+            "essential": false,
             "description": "Testgeval voor oproep main-functie",
             "output": {
               "stdout": {
@@ -161,8 +161,8 @@
                   },
                   "evaluator": {
                     "type": "custom",
-                    "language": "python",
-                    "path": "./custom_evaluator.py"
+                    "language": "java",
+                    "path": "./Evaluator.java"
                   }
                 }
               },

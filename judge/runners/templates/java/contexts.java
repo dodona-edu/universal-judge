@@ -1,11 +1,11 @@
 ## Code to execute one test context.
 <%! from testplan import Assignment %>
 
-public class Context {
+public class Contexts {
 
     private final Evaluator evaluator;
 
-    private Context(Evaluator evaluator) {
+    private Contexts(Evaluator evaluator) {
         this.evaluator = evaluator;
     }
 
