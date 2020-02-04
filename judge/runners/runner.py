@@ -406,7 +406,7 @@ class ConfigurableRunner(Runner):
                         arguments: List[Value]) -> BaseExecutionResult:
 
         with tempfile.TemporaryDirectory() as directory:
-            directory = "custom-dir"
+            # directory = "custom-dir"
             directory = Path(directory)
             logger.info("Creating custom evaluator with in %s", directory)
 
