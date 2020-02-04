@@ -408,7 +408,7 @@ class ConfigurableRunner(Runner):
         with tempfile.TemporaryDirectory() as directory:
             # directory = "custom-dir"
             directory = Path(directory)
-            logger.info("Creating custom evaluator with in %s", directory)
+            logger.info("Will do custom evaluation in %s", directory)
 
             # Copy dependencies to the directory.
             dependencies = self.language_config.initial_dependencies() + self.language_config.evaluator_dependencies()
@@ -418,7 +418,7 @@ class ConfigurableRunner(Runner):
             name = self.language_config.evaluator_name()
             destination = directory / (name + "." + self.language_config.file_extension())
             source = Path(self.config.resources) / path
-            logger.debug("Copying custom logger %s to %s", source, destination)
+            logger.debug("Copying custom evaluator %s to %s", source, destination)
             shutil.copy2(source, destination)
 
             data = CustomEvaluatorArguments(
@@ -440,6 +440,9 @@ class ConfigurableRunner(Runner):
             command = self.language_config.execute_evaluator(name, files)
             logger.debug("Executing custom evaluator with command %s", command)
             p = subprocess.run(command, text=True, capture_output=True, cwd=directory)
+            logger.debug("Custom evaluator exited with code %d", p.returncode)
+            logger.debug("  Stdout was %s", p.stdout)
+            logger.debug("  Stderr was %s", p.stderr)
             return BaseExecutionResult(p.stdout, p.stderr, p.returncode)
 
     def get_readable_input(self, case: Testcase) -> ExtendedMessage:
