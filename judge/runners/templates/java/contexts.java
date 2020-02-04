@@ -9,7 +9,7 @@ public class Contexts {
         this.evaluator = evaluator;
     }
 
-    % for c in contexs:
+    % for c in contexts:
         private void execute_${loop.index}() throws Exception {
             ## In Java, we must execute the before and after code in the context.
             ${c.before}
