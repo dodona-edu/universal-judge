@@ -57,8 +57,8 @@
             \draw[->] (custom evaluation) -- (feedback);
             \draw[->] (execution evaluation) -- (feedback);
 
-            \path[draw,dashed,very thick,gray] (-3.5,0.5) -- (-3.5,-14.6);
-            \path[draw,dashed,very thick,gray] (3.5,0.5) -- (3.5,-14.6);
+            \path[draw,dashed,very thick,lightgray] (-3.5,0.5) -- (-3.5,-14.6);
+            \path[draw,dashed,very thick,lightgray] (3.5,0.5) -- (3.5,-14.6);
 
         \end{scope}
 

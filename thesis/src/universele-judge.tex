@@ -1,7 +1,6 @@
 \chapter{De universele judge}\label{ch:de-universele-judge}
 
-\lettrine{H}{et antwoord} op de onderzoeksvraag uit het vorige hoofdstuk manifesteert zich als de \term{universele judge}.
-Deze judge voor het Dodona-platform kan dezelfde oefening in meerdere talen evalueren.
+\lettrine{H}{et antwoord} op de onderzoeksvraag uit het vorige hoofdstuk neemt de vorm van een nieuwe judge voor het Dodona-platform aan, de \term{universele judge}, die oplossingen voor een opgave in meerdere programmeertalen kan evalueren.
 Dit hoofdstuk licht de werking en implementatie van deze judge toe, beginnend met een algemeen overzicht, waarna elk onderdeel in meer detail besproken wordt.
 
 TODO: terminologie uitleggen (oplossing, evaluatie, \ldots)
@@ -30,12 +29,12 @@ De judge kan worden opgedeeld in drie gebieden, volgens hun verantwoordelijkheid
 \section{Beschrijven van een oefening}\label{sec:beschrijven-van-een-oefening}
 
 Naast de drie delen die hierboven beschreven zijn, is er ook nog het \term{testplan}.
-Dit is een document dat de oefening beschrijft en de evaluatietesten bevat.
-Het vervangt de taalspecifieke testen van de bestaande judges (dus de jUnit-tests of de doctests in respectievelijk Java en Python).
+Dit is een document dat de opgave beschrijft en de evaluatietesten bevat.
+Het vervangt de taalspecifieke testen van de bestaande judges (ie.\ de jUnit-tests of de doctests in respectievelijk Java en Python).
 
 \subsection{Het testplan}\label{subsec:het-testplan}
 
-Het testplan neemt de vorm aan van een json-bestand.
+Bij het ontwerpen van het testplan is een belangrijke beslissing welk formaat (json, xml, \ldots) het zal aannemen.
 Bij de keuze voor het formaat van het testplan zijn er enkele doelen vooropgesteld.
 Het testplan moet:
 
@@ -45,7 +44,8 @@ Het testplan moet:
     \item taalonafhankelijk zijn.
 \end{itemize}
 
-Json voldoet aan deze vereisten: het is geen binair formaat en de syntaxis is eenvoudig.
+De keuze viel uiteindelijk op json.
+Het voldoet aan deze vereisten: het is geen binair formaat en de syntaxis is eenvoudig.
 Een bijkomend voordeel is dat json door veel talen ondersteund wordt.
 
 Er zijn ook enkele nadelen aan het gebruik van json.
@@ -75,7 +75,7 @@ Een overzicht van de structuur op Dodona is \autocite{dodona2020}.
                     \begin{description}
                         \item[Main testcase] of hoofdtestgeval.
                         Van deze soort is er maximaal één per context.
-                        Dit testgeval is voor het uitvoeren van de main-functie (of gewoon de code als het gaat om een scripttaal zoals Bash of Python).
+                        Dit testgeval is voor het uitvoeren van de main-functie (of de code zelf als het gaat om een scripttaal zoals Bash of Python).
                         Als invoer voor dit testgeval kan enkel het standaardinvoerkanaal en de programma-argumenten meegegeven worden.
                         \item[Normal testcase] of normaal testgeval.
                         Hiervan kunnen er nul of meer zijn per context.
