@@ -20,10 +20,10 @@ Een groot deel hiervan zal waarschijnlijk uitgelegd zijn bij de werking van Dodo
 De judge kan worden opgedeeld in drie gebieden, volgens hun verantwoordelijkheid:
 
 \begin{enumerate}
-    \item Het evaluatieproces, dat de verkregen resultaten interpreteert en beoordeelt.
-    \item Het kernproces, dat zorgt voor de coördinatie tussen de andere processen, alsook de basistaken vervult.
+    \item Het \term{evaluatieproces}, dat de verkregen resultaten interpreteert en beoordeelt.
+    \item Het \term{kernproces}, dat zorgt voor de coördinatie tussen de andere processen, alsook de basistaken vervult.
           Dit proces is dan ook het start- en eindpunt van een evaluatie.
-    \item Het uitvoeringsproces, dat de code van de student uitvoert om zo resultaten te bekomen.
+    \item Het \term{uitvoeringsproces}, dat de code van de student uitvoert om zo resultaten te bekomen.
 \end{enumerate}
 
 \section{Beschrijven van een oefening}\label{sec:beschrijven-van-een-oefening}
@@ -57,7 +57,7 @@ Een ander nadeel is dat json geen programmeertaal is.
 Terwijl dit de implementatie wel eenvoudiger maakt, is het tevens beperkend: beslissen of een testgeval moet uitgevoerd worden op basis van het resultaat van een vorig testgeval is bij wijze als voorbeeld niet mogelijk.
 Ook deze beperking wordt uitgebreider besproken in \cref{ch:beperkingen-en-toekomstig-werk}.
 
-Qua structuur lijkt het testplan op de structuur opgelegd door Dodona, aangezien dat de verschillen tussen het opstellen van een oefening en hoe ze gebruikt zal worden minimaliseert.
+Qua structuur lijkt het testplan op de structuur opgelegd door Dodona, aangezien zo de verschillen tussen het opstellen van een opgave en hoe ze gebruikt zal worden minimaal zijn.
 Bij het beschrijven van de structuur is zoveel mogelijk gebruik gemaakt van de bestaande terminologie, zoals die gebruikt wordt door Dodona.
 Een overzicht van de structuur op Dodona is \autocite{dodona2020}.
 
@@ -74,16 +74,16 @@ Een overzicht van de structuur op Dodona is \autocite{dodona2020}.
                     Een context bevat twee soorten testgevallen:
                     \begin{description}
                         \item[Main testcase] of hoofdtestgeval.
-                        Van deze soort is er maximaal één per context.
+                        Van deze soort is er maximaal een per context.
                         Dit testgeval is voor het uitvoeren van de main-functie (of de code zelf als het gaat om een scripttaal zoals Bash of Python).
                         Als invoer voor dit testgeval kan enkel het standaardinvoerkanaal en de programma-argumenten meegegeven worden.
                         \item[Normal testcase] of normaal testgeval.
                         Hiervan kunnen er nul of meer zijn per context.
-                        Deze testgevallen zijn voor andere dingen te testen, nadat de code van de gebruiker met success ingeladen is.
+                        Deze testgevallen zijn voor andere aspecten te testen, nadat de code van de gebruiker met success ingeladen is.
                         De invoer is dan ook uitgebreider: het kan gaan om het standaardinvoerkanaal, functieoproepen en variabeletoekenningen.
                         Een functieoproep of variabeletoekenning is verplicht.
                     \end{description}
-    \item[Test] Een testcase bestaat uit meerdere \term{test}s, die elk één aspect van een testcase controleren.
+    \item[Test] Een testcase bestaat uit meerdere \term{test}s, die elk een aspect van een testcase controleren.
                 In het testplan kan voor elke soort uitvoer in een testcase het verwachte resultaat of de gewenste controleactie aangegeven worden.
                 Het gaat om het standaarduitvoerkanaal, het standaardfoutkanaal, opgevangen uitzonderingen, de teruggegeven waarden van een functieoproep en de inhoud van een bestand.
 \end{description}
@@ -113,7 +113,7 @@ Samenvattend zijn de redenen waarom niet gekozen is voor een bestaande oplossing
     Hoewel dit vaak voordelen oplevert op het vlak van geheugengebruik en snelheid, wordt het encoderen naar en decoderen van het formaat een stuk ingewikkelder om te implementeren in andere programmeertalen.
     Sommige bestaande oplossing zijn weliswaar reeds beschikbaar in een hoeveelheid talen, maar er is toch gekozen om het zelf implementeren zo gemakkelijk mogelijk te houden, daar de judge misschien talen wilt ondersteunen waarvoor er nog niets bestaat.
     \item De bestaande oplossing is niet uitbreidbaar met eigen types.
-    Sommige oplossingen hebben een breed arsenaal aan ingebouwde types, maar de judge vereist soms zeer specifieke types.
+    Sommige oplossingen hebben een breed arsenaal aan ingebouwde types, maar de judge vereist soms specifieke types.
     \item De bestaande oplossing is omslachtig in gebruik voor ons doel.
     Dit is het geval wanneer een oplossing veel meer doet dan vereist voor ons doel.
     \item De bestaande oplossing heeft geen voordelen tegenover een eigen oplossing in json, terwijl er wel het nadeel van een bijkomende taal is.
@@ -129,7 +129,7 @@ Hieronder volgt nu per overwogen serialisatie-oplossing een korte beschrijving e
     \item[ASN.1] Staat voor \english{Abstract Syntax Notation One}, een ouder formaat uit de telecommunicatie.
     De hoofdstandaard beschrijft enkel de notatie voor een dataformaat.
     Andere standaarden beschrijven dan de serialisatie, in bv.\ binair formaat, json of xml.
-    De meerdere serialisatievormen zijn in theorie aantrekkelijk: elke taal moet er slechts één ondersteunen, terwijl de judge ze allemaal kan ondersteunen.
+    De meerdere serialisatievormen zijn in theorie aantrekkelijk: elke taal moet er slechts een ondersteunen, terwijl de judge ze allemaal kan ondersteunen.
     In de praktijk blijkt echter dat voor veel talen, er slechts een serialisatieformaat is, en dat dit vaak het binaire formaat is \autocite{x680}.
     \item[Bencode] Schema gebruikt in BitTorrent.
     Het is gedeeltelijk binair, gedeeltelijk in text.
@@ -151,11 +151,11 @@ Hieronder volgt nu per overwogen serialisatie-oplossing een korte beschrijving e
     Het encoderen van bijkomende, eigen types is mogelijk door S-expressies, al is dat minder elegant \autocite{ion}.
     \item[MessagePack] Nog een binair formaat dat lichtjes op json gebaseerd is.
     Lijkt qua types sterk op json.
-    Heeft implementaties in zeer veel talen \autocite{messagepack}.
+    Heeft implementaties in veel talen \autocite{messagepack}.
     \item[OGDL] Afkorting voor \english{Ordered Graph Data Language}.
     Daar het om een serialisatieformaat voor grafen gaat, is het niet nuttig voor ons doel \autocite{ogdl}.
     \item[OPC Unified Architecture] Een protocol voor intermachinecommunicatie.
-    Zeer complex: de specificatie bevat 14 documenten, met ongeveer 1250 pagina's \autocite{tr62541}.
+    Complex: de specificatie bevat 14 documenten, met ongeveer 1250 pagina's \autocite{tr62541}.
     \item[OpenDLL] Afkorting voor de \english{Open Data Description Language}.
     Een tekstueel formaat, bedoeld om arbitraire data voor te stellen.
     Nieuwe type's kunnen gedefinieerd worden.
@@ -232,7 +232,7 @@ De naam is de naam die aan de variabele gegeven zal worden.
 Het veldje \texttt{expression} moet een object zijn dat een functieoproep voorstelt (zie hierna).
 Ook is er de mogelijk om een optioneel type mee te geven;
 in eenvoudige gevallen kan de judge dit afleiden, maar bij complexere gevallen niet meer.
-Dit type moet een van de ondersteunde types zijn uit het serialisatieformaat, dat hiervoor beschreven werd.
+Dit type moet een van de ondersteunde types zijn uit het serialisatieformaat dat hiervoor beschreven werd.
 Een functie ziet er als volgt uit:
 
 \inputminted{json}{code/function.json}
@@ -260,9 +260,23 @@ In ons geval zijn de sjablonen verantwoordelijk voor de vertaling van taalonafha
 Voorbeelden hiervan zijn functieoproepen, toekennen van variabelen, enz.
 Ook zijn de sjablonen verantwoordelijk voor het genereren van de code die de oplossing van de student zal oproepen en evalueren.
 
-Voor elke ondersteunde programmeertaal dienen een aantal sjablonen geïmplementeerd te worden, die elk een functie voor zich nemen.
+Het aantal sjablonen en hoe ze geïmplementeerd worden is redelijk vrij.
+De judge vereist wel enkele standaardsjablonen, waaraan vastgelegde parameters meegegeven worden.
+Deze sjablonen stellen elk een aparte functie voor, die de judge nodig heeft.
+De verplichte sjablonen zijn:
+\begin{description}
+    \item[\texttt{assignment}] Vertaalt een assignment uit het testplan naar code.
+    \item[\texttt{contexts}] Het centrale sjabloon, genereert de code nodig om alle contexten uit een testplan uit te voeren.
+    Om performantieredenen (zie ook~\cref{ch:beperkingen-en-toekomstig-werk}) wordt de code van alle contexten uit een testplan in een bestand genereert.
+    Aan de hand van een parameter bij uitvoeren (een getal dat de context aangeeft), wordt bij het uitvoeren de code voor de juiste context gekozen.
+    \item[\texttt{evaluator\_executor}] Genereert code om een aangepaste evaluator te starten.
+    \item[\texttt{evaluators}] Genereert de evaluatiecode voor alle testgevallen.
+    \item[\texttt{function}] Vertaalt een functie-oproep naar code.
+    \item[\texttt{value}] Vertaalt een waarde uit het serialisatieformaat naar code.
+\end{description}
 
-TODO blablabla
+Daarnaast moet het encoderen naar serialisatieformaat ook geïmplementeerd worden in elke taal.
+Veel talen hebben dus nog enkele bijkomende bestanden met code.
 
 \subsection{Uitvoeren van de code}\label{subsec:uitvoeren-van-de-code}
 

@@ -28,7 +28,7 @@ Zowel de invoer als de uitvoer van de judge zijn json, waarvan de betekenis vast
 
 De interface opgelegd vanuit Dodona waaraan een judge moet voldoen legt geen beperkingen of vereisten op die verband houden met de programmeertaal.
 Via de configuratie krijgt de judge van Dodona enkel in welke programmeertaal de opgave en oplossing zijn.
-In de praktijk ondersteunen alle bestaande judges ondersteunen slechts één programmeertaal.
+In de praktijk ondersteunen alle bestaande judges ondersteunen slechts een programmeertaal.
 Elke judge ondersteunt oplossingen in de programmeertaal waarin hij geschreven is, m.a.w.\ de Java-judge ondersteunt Java, de Python-judge Python, enz.
 Ook heeft elke judge een eigen manier waarop de testen voor een oplossing opgesteld moeten worden.
 Zo worden in de Java-judge jUnit-testen gebruikt, terwijl de Python-judge doctests en een eigen formaat ondersteunt.
@@ -68,13 +68,13 @@ Oplossingen voor deze opgave staan in \cref{lst:java-solution,lst:python-solutio
     \label{lst:python-solution}
 \end{listing}
 
-Het belangrijkste nadeel aan de huidige werking is het bijkomende werk voor lesgevers indien zij hun oefeningen in meerdere programmeertalen willen aanbieden.
+Het belangrijkste nadeel aan de huidige werking is het bijkomende werk voor lesgevers, indien zij hun oefeningen in meerdere programmeertalen willen aanbieden.
 De Lotto-oefening heeft een eenvoudige opgave en oplossing.
 Bovendien zijn de verschillen tussen de versie in Python en Java minimaal, zij het dat de Java-versie wat langer is.
 Deze opgave zou zonder problemen in nog vele andere programmeertalen geïmplementeerd kunnen worden.
 Deze eenvoudige programmeeroefeningen zijn voornamelijk nuttig in twee gevallen: studenten die voor het eerst leren programmeren en studenten die een nieuwe programmeertaal leren.
 In het eerste geval is de eigenlijke programmeertaal minder relevant: het zijn vooral de concepten die belangrijk zijn.
-In het tweede geval is de programmeertaal wel van belang, maar moeten gelijkaardige oefeningen gemaakt worden voor elke programmeertaal die aangeleerd moet worden.
+In het tweede geval is de programmeertaal wel van belang, maar moeten soortgelijke oefeningen gemaakt worden voor elke programmeertaal die aangeleerd moet worden.
 
 We kunnen tot eenzelfde constatatie komen bij ingewikkeldere opgaves die zich concentreren op algoritmen: ook daar zijn de concepten belangrijker dan in welke programmeertaal een algoritme uiteindelijk geïmplementeerd wordt.
 Een voorbeeld hiervan is het vak "Algoritmen en Datastructuren" dat gegeven wordt door prof.\ Fack aan de wiskunde\footnote{De studiefiche is voor de geïnteresseerden beschikbaar op \url{https://studiegids.ugent.be/2019/NL/studiefiches/C002794.pdf}}.
@@ -92,7 +92,7 @@ In twee talen duurt dit al twee uur, tien talen vraagt tien uur, enz.
 Het probleem hierboven beschreven laat zich samenvatten als volgende onderzoeksvraag, waarop deze thesis een antwoord wil bieden:
 
 \begin{quote}
-    Is het mogelijk om een judge zo te implementeren, dat de opgave en evaluatiecode van een oefening slechts eenmaal opgesteld dienen te worden, waarna de oefening beschikbaar is in alle talen die de judge ondersteunt?
+    Is het mogelijk om een judge zo te implementeren dat de opgave en evaluatiecode van een oefening slechts eenmaal opgesteld dienen te worden, waarna de oefening beschikbaar is in alle talen die de judge ondersteunt?
     Hierbij willen we dat eens een oefening opgesteld is, deze niet meer gewijzigd moet worden wanneer talen toegevoegd worden aan de judge.
 \end{quote}
 
