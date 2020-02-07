@@ -195,11 +195,31 @@ Het formaat ondersteunt de meeste basistypes die in bijna elke programmeertaal b
 Hieronder volgt een korte omschrijving van de ondersteunde types:
 
 \begin{description}
-    \item[TODO] TODO
+    \item[\texttt{integer}] Gehele getallen.
+    \item[\texttt{rational}] Rationale getallen.
+    \item[\texttt{text}] Een tekenreeks of string.
+    \item[\texttt{literal}] Een tekstuele waarde die rechtstreeks in de taal zelf beschikbaar is.
+    Deze waarde wordt gebruikt om het type van functie-argumenten aan te duiden als het gaat om eigen klassen (bv.\  een klasse geïmplementeerd door de student).
+    \item[\texttt{unknown}] Dit type wordt gebruikt als er onbekende types zijn bij het encoderen van een waarde.
+    Bij het omzetten van een waarde uit het serialisatieformaat naar een taal, worden waarden van dit type genegeerd.
+    \item[\texttt{boolean}] Een Boolese waarde (of boolean).
+    \item[\texttt{list}] Een wiskundige rij, wat wil zeggen dat de volgorde belangrijk is en dat dubbele elementen toegelaten zijn.
+    Merk op dat sommige talen meerdere implementaties hebben voor het concept van lijst.
+    Het is de implementatie vrij om te kiezen welk concept gebruikt wordt.
+    Zo wordt bijvoorbeeld in de Java-implementatie \texttt{List} in plaats van \texttt{array} gebruikt, om consistent te zijn met de implementatie van \texttt{set} en \texttt{object}.
+    \item[\texttt{set}] Een wiskundige verzameling, wat wil zeggen dat de volgorde niet belangrijk is en dat dubbele elementen niet toegelaten zijn.
+    \item[\texttt{object}] Een wiskundige afbeelding: elk element wordt afgebeeld op een ander element.
+    In Java is dit bijvoorbeeld een \texttt{Map}, in Python een \texttt{dict} en in Javascript een \texttt{object}.
+    \item[\texttt{nothing}] Geeft aan dat er geen waarde is, ook wel \texttt{null}, \texttt{None} of \texttt{nil} genoemd.
+    \item[\texttt{instance}] Duidt aan dat een waarde van een aangepast type is.
+    Dit wordt enkel gebruikt bij de toekenning van variabelen.
 \end{description}
 
+Het serialisatieformaat bestaat eigenlijk uit twee delen: een deel om het type van een waarde aan te geven en een tweede deel om een waarde te encoderen als een type.
+Zoals duidelijk is uit de beschrijving hierboven, is het deel om types aan te geven uitgebreider dan het deel om waarden te encoderen.
+Zo is het niet mogelijk waarden te encoderen met types \texttt{literal} of \texttt{instance}.
+Deze types worden gebruikt bij het aangeven van het type van argumenten bij functieoproepen of het type van een variabele waaraan een waarde wordt toegekend.
 
-Het serialisatieformaat wordt zowel gebruikt in het testplan zelf om waarden te encoderen, als los ervan om resultaten van functieoproepen te encoderen.
 
 \subsection{Functieoproepen en assignments}\label{subsec:functieoproepen}
 
@@ -207,28 +227,18 @@ Een ander onderdeel van het testplan verdient ook speciale aandacht: het toekenn
 
 In heel wat oefeningen, en zeker in objectgerichte programmeertalen, is het toekennen van een waarde aan een variabele om deze later te gebruiken onmisbaar.
 Bijvoorbeeld zou een opgave kunnen bestaan uit het implementeren van een klasse.
-Bij de evaluatie dient dan een instantie van die klasse aangemaakt te worden, waarna er methoden kunnen aangeroepen worden, zoals geïllustreerd in \cref{lst:assignment-example}.
-Dit voorbeeld illustreert meteen dat functieoproepen ook zeker ondersteunt moeten worden.
+Bij de evaluatie dient dan een instantie van die klasse aangemaakt te worden, waarna er methoden kunnen aangeroepen worden, zoals hieronder geïllustreerd in een conceptueel voorbeeld van het soort oefeningen waar assignments en functieoproepen nodig zijn.
 
-\begin{listing}
-    \begin{minted}{java}
-        var variabele = new DoorDeStudentGemaakteKlasse();
-        assert variabele.testfunctie2();
-        assert variabele.testfunctie2();
-    \end{minted}
-    \caption{Een kort conceptueel voorbeeld van het soort oefeningen waar een assignment nodig is.}
-    \label{lst:assignment-example}
-\end{listing}
+\inputminted{java}{code/assignment.jshell}
 
 Concreet is ervoor gekozen om het testplan niet uit te breiden met generieke statements of expressions, maar de ondersteuning te beperken tot assignments en functieoproepen.
 Dit om de implementatie van de vertaling van het testplan naar de ondersteunde programmeertalen niet nodeloos ingewikkeld te maken.
-
-Conceptueel ondersteunt het testplan het toekennen van een naam aan het resultaat van een functieoproep.
-Vertaalt naar json wordt dat dan:
+Het testplan ondersteunt het toekennen van een naam aan het resultaat van een functieoproep.
+Vertaald naar json wordt dat dan:
 
 \inputminted{json}{code/assignment.json}
 
-De naam is de naam die aan de variabele gegeven zal worden.
+De \texttt{name} is de naam die aan de variabele gegeven zal worden.
 Het veldje \texttt{expression} moet een object zijn dat een functieoproep voorstelt (zie hierna).
 Ook is er de mogelijk om een optioneel type mee te geven;
 in eenvoudige gevallen kan de judge dit afleiden, maar bij complexere gevallen niet meer.
@@ -239,13 +249,12 @@ Een functie ziet er als volgt uit:
 
 Het type van de functie geeft aan welk soort functie het is.
 Mogelijke waarden zijn momenteel \texttt{top}, \texttt{object}, \texttt{constructor} en \texttt{identity}.
-De laatste soort is een speciaal geval, waarbij geen functienaam moet gegeven worden en slechts één argument toegelaten is.
+De laatste soort is een speciaal geval, waarbij geen functienaam moet gegeven worden en slechts een argument toegelaten is.
 Die functie zal dan dat ene argument teruggeven.
 De naam van de functie benoemt eenvoudig welke functie opgeroepen moet worden.
 Het object van de functie laat toe om functies op objecten op te roepen.
 De lijst van argumenten kan nul of meer waarden bevatten.
 Deze waarden moeten in het formaat zijn zoals aangegeven in het vorige deel over de serialisatie van waarden.
-
 
 \section{Uitvoeren van de oplossing}\label{sec:uitvoeren-van-de-oplossing}
 
@@ -256,7 +265,7 @@ Eerst wordt de uit te voeren code gegenereerd, waarna de uitvoering van die code
 
 Het genereren van de code gebeurt met een sjabloonsysteem, genaamd Mako \autocite{mako}.
 Dit sjabloonsysteem wordt traditioneel gebruikt bij webapplicaties (zoals Ruby on Rails met \textsc{erb}, Phoenix met \textsc{eex}, Laravel met Blade, enz.) om een html-pagina te genereren.
-In ons geval zijn de sjablonen verantwoordelijk voor de vertaling van taalonafhankelijke concepten naar implementaties in specifieke talen.
+In ons geval zijn de sjablonen verantwoordelijk voor de vertaling van programmeertaalonafhankelijke concepten naar implementaties in specifieke talen.
 Voorbeelden hiervan zijn functieoproepen, toekennen van variabelen, enz.
 Ook zijn de sjablonen verantwoordelijk voor het genereren van de code die de oplossing van de student zal oproepen en evalueren.
 
