@@ -141,5 +141,7 @@ TSWLatexianTemp*
 *-tags.tex
 *.sta
 *.lpz
-*.filtered
-src/_markdown_main
+_markdown*
+
+# Generated, pre-processed files.
+src/generated
