@@ -9,7 +9,7 @@
 \usepackage[subpreambles=true]{standalone}
 % Packages
 % Babel uses the last language as main language of the file.
-\usepackage[british,dutch]{babel}
+\usepackage[british,dutch,shorthands=off]{babel}
 \usepackage{unicode-math}
 \usepackage{lettrine}
 \usepackage{microtype}
@@ -18,9 +18,16 @@
 \usepackage{markdown}
 \usepackage[newfloat]{minted}
 \usepackage{csquotes}
-\usepackage{hyperref} % Load hyperref before cleverref.
+\usepackage{hyperref} % Laad hyperref voor cleverref.
 \usepackage[dutch]{cleveref}
 \usepackage{adjustbox}
+
+% Gebruik dit om de afbreekpatronen zichtbaar te maken.
+\usepackage{showhyphens}
+
+% Engelse bastaardwoorden die geen patroon hebben.
+% De Nederlandse afbreekpatronen zijn sowieso oud.
+\hyphenation{judge} % Geen afbreekpunten in het Engels.
 
 \hypersetup{
     linkcolor  = ugent-blue,
@@ -54,9 +61,7 @@ Master of Science in de informatica%
 }%
 }
 
-\setlength{\parindent}{1em}
-
-\newfontfamily\lsi[Scale=2.6]{Libertinus Serif Initials}
+\newfontfamily\lsi[Scale=2.5]{Libertinus Serif Initials}
 \renewcommand*{\LettrineFont}{\lsi}
 
 %%%%%%
@@ -101,7 +106,7 @@ Master of Science in de informatica%
 
     \appendix
 
-    \include{bijlage1}
+    \include{appendix-serialisation}
 
     \printbibliography
 

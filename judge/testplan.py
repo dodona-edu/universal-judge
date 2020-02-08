@@ -306,9 +306,7 @@ class IgnoredChannelState(str, Enum):
 
 AnyChannelState = Union[NoneChannelState, IgnoredChannelState]
 
-
 OutputChannel = Union[TextOutputChannel, FileOutputChannel, ValueOutputChannel]
-
 
 TextOutput = Union[TextOutputChannel, AnyChannelState]
 
@@ -479,10 +477,24 @@ class Tab(WithFeatures):
 
 
 @dataclass
+class Configuration:
+    """
+    The configuration options for the judge.
+    """
+    parallel: bool = True
+    """
+    Indicate that the contexts should be executed in parallel. It is recommended
+    to disable this for exercises that already are multithreaded. It may also be
+    worth investigating if the exercise is computationally heady.
+    """
+
+
+@dataclass
 class Plan(WithFeatures):
     """General test plan, which is used to run tests of some code."""
     tabs: List[Tab] = field(default_factory=list)
     object: str = "Main"
+    configuration: Configuration = Configuration()
 
     def get_used_features(self) -> Features:
         return _reduce_with_feature(self.tabs)

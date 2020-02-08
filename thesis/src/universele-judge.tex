@@ -3,8 +3,25 @@
 \lettrine{H}{et antwoord} op de onderzoeksvraag uit het vorige hoofdstuk neemt de vorm van een nieuwe judge voor het Dodona-platform aan, de \term{universele judge}, die oplossingen voor een opgave in meerdere programmeertalen kan evalueren.
 Dit hoofdstuk licht de werking en implementatie van deze judge toe, beginnend met een algemeen overzicht, waarna elk onderdeel in meer detail besproken wordt.
 
-TODO: terminologie uitleggen (oplossing, evaluatie, \ldots)
-Een groot deel hiervan zal waarschijnlijk uitgelegd zijn bij de werking van Dodona.
+%TODO: terminologie uitleggen (oplossing, evaluatie, \ldots)
+%Een groot deel hiervan zal waarschijnlijk uitgelegd zijn bij de werking van Dodona.
+%
+%Plan voor dit hoofdstuk:
+%
+%1. Testplan                                    OK
+%1.1 Formaat testplan zelf                      OK
+%1.2 Formaat serialisatie                       OK
+%1.3 Formaat functie-oproep en assignment       OK
+%1.4 Vereiste features                          OK
+%2. Uitvoeren van een oplossing
+%2.1 Genereren van de code
+%2.2 Uitvoeren van de code
+%3. Evalueren van een oplossing
+%3.1 Ingebouwde evaluatie
+%3.2 Aangepaste evaluatie
+%3.3 Taalspecifieke evaluatie
+%4. Resultaten verwerken
+
 
 \section{Overzicht}\label{sec:overzicht}
 
@@ -17,109 +34,137 @@ Een groot deel hiervan zal waarschijnlijk uitgelegd zijn bij de werking van Dodo
 \end{figure}
 
 \Cref{fig:universal-judge} toont de opbouw van de judge op schematische wijze.
-De judge kan worden opgedeeld in drie gebieden, volgens hun verantwoordelijkheid:
+In meer detail is het stappenplan voor het evalueren van een oefening als volgt:
 
 \begin{enumerate}
-    \item Het \term{evaluatieproces}, dat de verkregen resultaten interpreteert en beoordeelt.
-    \item Het \term{kernproces}, dat zorgt voor de coördinatie tussen de andere processen, alsook de basistaken vervult.
-          Dit proces is dan ook het start- en eindpunt van een evaluatie.
-    \item Het \term{uitvoeringsproces}, dat de code van de student uitvoert om zo resultaten te bekomen.
+    \item De judge wordt opgestart en het testplan wordt geladen.
+    Het gestarte proces noemen we het \term{kernproces}
+    \item Het testplan wordt gecontroleerd op vereiste functies, met andere woorden: ondersteunt de opgave de gewenste taal?
+    Als de opgave bijvoorbeeld programmeertaalspecifieke code bevat die enkel voor Java gegeven is, zal de opgave niet in Python gemaakt kunnen worden.
+    \item De code voor het evalueren van de oplossing wordt gegenereerd en gecompileerd.
+    Alle code wordt in een keer gecompileerd voor het eigenlijke uitvoeren.
+    Dit gebeurt in het \term{uitvoeringsproces}.
+    Na deze stap is alle code beschikbaar om te evalueren, met uitzondering van aangepaste evaluatoren.
+    \item Elke context uit het testplan wordt afzonderlijk uitgevoerd in een nieuw proces.
+    Aangezien deze contexten onafhankelijk zijn van elkaar, worden ze in parallel uitgevoerd, indien de configuratie van de judge dit toelaat.
+    \item De resultaten van een uitvoering van een context worden beoordeeld.
+    Hiervoor zijn drie mogelijke manieren:
+    \begin{enumerate}
+        \item Programmeertaalspecifieke evaluatie.
+        Hierbij wordt de evaluatie gedaan na de uitvoering, in hetzelfde proces als de uitvoering, het uitvoeringsproces.
+        \item Aangepaste evaluator.
+        Hierbij is er evaluatiecode geschreven die los staat van de oplossing.
+        De evaluatiecode kan in een andere programmeertaal geschreven zijn dan de oplossing.
+        De aangepaste evaluator wordt gegenereerd, gecompileerd en uitgevoerd na het uitvoeren van de oplossing, in een nieuw proces: het \term{evaluatieproces}.
+        \item Ingebouwde evaluatie.
+        Hierbij is het de judge zelf die evalueert, waardoor dit vooral eenvoudige evaluaties betreft, zoals het vergelijken van geproduceerde uitvoer en verwachte uitvoer.
+        Dit gebeurt dan in het kernproces.
+    \end{enumerate}
+    \item Tot slot verzamelt de judge alle evaluatieresultaten en stuurt ze door naar Dodona, waarna ze getoond worden aan de gebruiker.
 \end{enumerate}
 
-\section{Beschrijven van een oefening}\label{sec:beschrijven-van-een-oefening}
 
-Naast de drie delen die hierboven beschreven zijn, is er ook nog het \term{testplan}.
-Dit is een document dat de opgave beschrijft en de evaluatietesten bevat.
+\section{Beschrijven van een opgave}\label{sec:testplan}
+
+Elke evaluatie begint met het \term{testplan}, een document dat beschrijft hoe een oplossing voor een opgave geëvalueerd moet worden.
 Het vervangt de taalspecifieke testen van de bestaande judges (ie.\ de jUnit-tests of de doctests in respectievelijk Java en Python).
+Het bestaat uit verschillende onderdelen, die hierna besproken worden.
 
 \subsection{Het testplan}\label{subsec:het-testplan}
 
-Bij het ontwerpen van het testplan is een belangrijke beslissing welk formaat (json, xml, \ldots) het zal aannemen.
-Bij de keuze voor het formaat van het testplan zijn er enkele doelen vooropgesteld.
-Het testplan moet:
+Het eigenlijke testplan beschrijft de structuur van een evaluatie van een oplossing voor een opgave.
+Qua structuur lijkt dit sterk op de structuur van de feedback zoals gebruikt door Dodona.
+Deze aanpak heeft als voordeel dat eenvoudiger is om een testplan op te stellen: er moet geen mentale afbeelding tussen de structuur van het testplan en dat van Dodona bijgehouden worden.
+
+Bij de keuze voor een formaat voor het testplan (bv.\ json of xml), hebben we vooraf enkele vereisten geformuleerd waaraan het gekozen formaat moet voldoen.
+Het moet:
 
 \begin{itemize}
     \item leesbaar zijn voor mensen,
-    \item geschreven kunnen worden door mensen met minimale informatica-kennis, met andere woorden de syntaxis dient eenvoudig te zijn, en
-    \item taalonafhankelijk zijn.
+    \item geschreven kunnen worden met minimale inspanning, met andere woorden de syntaxis dient eenvoudig te zijn, en
+    \item programmeertaalonafhankelijk zijn.
 \end{itemize}
 
-De keuze viel uiteindelijk op json.
-Het voldoet aan deze vereisten: het is geen binair formaat en de syntaxis is eenvoudig.
-Een bijkomend voordeel is dat json door veel talen ondersteund wordt.
+Uiteindelijk is gekozen om het op te stellen in json.
+Niet alleen voldoet json aan de vooropgestelde voorwaarden, het wordt ook door veel talen ondersteund.
 
-Er zijn ook enkele nadelen aan het gebruik van json.
-Een nadeel is dat json geen beknopte taal is voor het met de hand schrijven.
-Een oplossing hiervoor gebruikt de eigenschap dat veel talen json kunnen produceren: andere programma's of gereedschappen kunnen desgewenst het testplan in het json-formaat genereren, waardoor het niet met de hand geschreven moet worden.
-Hiervoor is waarschijnlijk een \termen{DSL} (\english{domain specific language}) geschikt, maar dit valt buiten de thesis en wordt verder besproken in \cref{ch:beperkingen-en-toekomstig-werk}.
+Toch zijn er ook enkele nadelen aan het gebruik van json.
+Zo is json geen beknopte of compacte taal om met de hand te schrijven.
+Een oplossing hiervoor gebruikt de eigenschap dat veel talen json kunnen produceren: andere programma's kunnen desgewenst het testplan in het json-formaat genereren, waardoor het niet met de hand geschreven moet worden.
+Hiervoor denken we aan een \termen{DSL} (\english{domain specific language}), maar dit valt buiten de thesis en wordt verder besproken in \cref{ch:beperkingen-en-toekomstig-werk}.
 
-Een ander nadeel is dat json geen programmeertaal is.
-Terwijl dit de implementatie wel eenvoudiger maakt, is het tevens beperkend: beslissen of een testgeval moet uitgevoerd worden op basis van het resultaat van een vorig testgeval is bij wijze als voorbeeld niet mogelijk.
+Een tweede nadeel is dat json geen programmeertaal is.
+Terwijl dit de implementatie van de judge bij het interpreteren van het testplan weliswaar eenvoudiger maakt, is het tevens beperkend: beslissen of een testgeval moet uitgevoerd worden op basis van het resultaat van een vorig testgeval is bij wijze als voorbeeld niet mogelijk.
 Ook deze beperking wordt uitgebreider besproken in \cref{ch:beperkingen-en-toekomstig-werk}.
 
-Qua structuur lijkt het testplan op de structuur opgelegd door Dodona, aangezien zo de verschillen tussen het opstellen van een opgave en hoe ze gebruikt zal worden minimaal zijn.
-Bij het beschrijven van de structuur is zoveel mogelijk gebruik gemaakt van de bestaande terminologie, zoals die gebruikt wordt door Dodona.
-Een overzicht van de structuur op Dodona is \autocite{dodona2020}.
+De structuur van het testplan vertaalt zich in json naar een reeks json-objecten, die hieronder beschreven worden.
 
 \begin{description}
     \item[Tab] Een testplan bestaat uit verschillende \termen{tab}s of tabbladen.
-               Dit komt overeen met een tabblad in de gebruikersinterface van Dodona.
-               Een tabblad kan een naam hebben, die zichtbaar is voor de gebruikers.
+    Deze komen overeen met de tabbladen in de gebruikersinterface van Dodona.
+    Een tabblad kan een naam hebben, die zichtbaar is voor de gebruikers.
     \item[Context] Elk tabblad bestaat uit een of meerdere \termen{context}en.
-                   Een context is een onafhankelijke uitvoering van een evaluatie.
-                   De nadruk ligt op de "onafhankelijkheid".
-                   Vaak wordt elke context in een nieuw proces uitgevoerd, zodat er geen informatie tussen contexten kan uitgewisseld worden.
+    Een context is een onafhankelijke uitvoering van een evaluatie.
+    De nadruk ligt op de "onafhankelijkheid".
+    Elke context wordt in een nieuw proces uitgevoerd, zodat er geen informatie tussen contexten kan uitgewisseld worden.
     \item[Testcase] Een context bestaat uit een of meerdere \termen{testcase}s of testgevallen.
-                    Een testgeval bestaat uit invoer en een aantal tests.
-                    Een context bevat twee soorten testgevallen:
-                    \begin{description}
-                        \item[Main testcase] of hoofdtestgeval.
-                        Van deze soort is er maximaal een per context.
-                        Dit testgeval is voor het uitvoeren van de main-functie (of de code zelf als het gaat om een scripttaal zoals Bash of Python).
-                        Als invoer voor dit testgeval kan enkel het standaardinvoerkanaal en de programma-argumenten meegegeven worden.
-                        \item[Normal testcase] of normaal testgeval.
-                        Hiervan kunnen er nul of meer zijn per context.
-                        Deze testgevallen zijn voor andere aspecten te testen, nadat de code van de gebruiker met success ingeladen is.
-                        De invoer is dan ook uitgebreider: het kan gaan om het standaardinvoerkanaal, functieoproepen en variabeletoekenningen.
-                        Een functieoproep of variabeletoekenning is verplicht.
-                    \end{description}
+    Een testgeval bestaat uit invoer en een aantal tests.
+    Een context bevat twee soorten testgevallen:
+    \begin{description}
+        \item[Main testcase] of hoofdtestgeval.
+        Van deze soort is er maximaal een per context.
+        Dit testgeval is voor het uitvoeren van de main-functie (of de code zelf als het gaat om een scripttaal zoals Bash of Python).
+        Als invoer voor dit testgeval kunnen enkel het standaardinvoerkanaal en de programma-argumenten meegegeven worden.
+        \item[Normal testcase] of normaal testgeval.
+        Hiervan kunnen er nul of meer zijn per context.
+        Deze testgevallen zijn voor andere aspecten te testen, nadat de code van de gebruiker met success ingeladen is.
+        De invoer is dan ook uitgebreider: het kan gaan om het standaardinvoerkanaal, functieoproepen en variabeletoekenningen.
+        Een functieoproep of variabeletoekenning is verplicht.
+    \end{description}
     \item[Test] Een testcase bestaat uit meerdere \term{test}s, die elk een aspect van een testcase controleren.
-                In het testplan kan voor elke soort uitvoer in een testcase het verwachte resultaat of de gewenste controleactie aangegeven worden.
-                Het gaat om het standaarduitvoerkanaal, het standaardfoutkanaal, opgevangen uitzonderingen, de teruggegeven waarden van een functieoproep en de inhoud van een bestand.
+    Er zijn dus aparte tests voor het standaarduitvoerkanaal, het standaardfoutkanaal, opgevangen uitzonderingen (\english{exceptions}), de teruggegeven waarden van een functieoproep (returnwaarde) en de inhoud van een bestand.
+    Elke test bevat de verwachte uitvoer om mee te vergelijken of de code om het resultaat te evalueren.
 \end{description}
 
 \subsection{Dataserialisatie}\label{subsec:dataserialisatie}
 
-In de paragraaf hiervoor wordt bij de beschrijving van het testplan gewag gemaakt van de teruggegeven waarden van een functieoproep.
-Aangezien het testplan taalonafhankelijk is, moet er dus een manier zijn om data uit de verschillende programmeertalen voor te stellen.
-
-Bij het kiezen van een serialisatieformaat, waren er enkele vereisten waaraan voldaan moest worden.
+In het testplan, zoals beschreven in de paragraaf hierboven, wordt gewag gemaakt van returnwaarden.
+Aangezien het testplan programmeertaalonafhankelijk is, moet er dus een manier zijn om data uit de verschillende programmeertalen voor te stellen: het \term{serialisatieformaat}.
+Ook hier is een keuze voor een bepaald formaat gemaakt.
+Daarvoor zijn er ook enkele voorwaarden vooropgesteld, waaraan het serialisatieformaat moet voldoen.
 Het formaat moet:
 
 \begin{itemize}
-    \item de types ondersteunen die we willen aanbieden in het taalonafhankelijke deel van het testplan,
-    \item het formaat moet eenvoudig te schrijven zijn vanuit meerdere programmeertalen (dus liever niet binair),
-    \item toelaten op redelijk eenvoudige wijze ondersteuning voor nieuwe programmeertalen toe te voegen.
+    \item door mensen geschreven kunnen worden,
+    \item niet binair zijn, aangezien het een onderdeel van het json-testplan moet worden,
+    \item in meerdere programmeertalen bruikbaar zijn, en
+    \item de types ondersteunen die we willen aanbieden in het programmeertaalonafhankelijke deel van het testplan.
 \end{itemize}
 
-In de eerste plaats is gekeken of een bestaand formaat kan voldoen aan deze vereisten.
+Een voor de hand liggende oplossing is ook hiervoor json gebruiken, en zelf in json een structuur op te stellen voor de waarden.
+In tegenstelling tot het testplan bestaan er al een resem aan dataserialisatieformaten, waardoor het de moeite is om na te gaan of er geen bestaand formaat voldoet aan de vereisten.
 Hiervoor is gestart van een overzicht op Wikipedia, zie \autocite{wiki2020}.
-Een alternatief is zelf een formaat vast te leggen om waarden te encoderen als json.
-Voor dit alternatief is uiteindelijk gekozen.
-Samenvattend zijn de redenen waarom niet gekozen is voor een bestaande oplossing:
+Uiteindelijk is niet gekozen voor een bestaand formaat, maar voor de json-oplossing.
+De redenen hiervoor zijn samen te vatten als:
 
 \begin{itemize}
-    \item Het is een binair formaat.
-    Hoewel dit vaak voordelen oplevert op het vlak van geheugengebruik en snelheid, wordt het encoderen naar en decoderen van het formaat een stuk ingewikkelder om te implementeren in andere programmeertalen.
-    Sommige bestaande oplossing zijn weliswaar reeds beschikbaar in een hoeveelheid talen, maar er is toch gekozen om het zelf implementeren zo gemakkelijk mogelijk te houden, daar de judge misschien talen wilt ondersteunen waarvoor er nog niets bestaat.
-    \item De bestaande oplossing is niet uitbreidbaar met eigen types.
-    Sommige oplossingen hebben een breed arsenaal aan ingebouwde types, maar de judge vereist soms specifieke types.
-    \item De bestaande oplossing is omslachtig in gebruik voor ons doel.
-    Dit is het geval wanneer een oplossing veel meer doet dan vereist voor ons doel.
-    \item De bestaande oplossing heeft geen voordelen tegenover een eigen oplossing in json, terwijl er wel het nadeel van een bijkomende taal is.
+    \item Het gaat om een binair formaat.
+    Hoewel binaire formaten vaak beter zijn op het vak van geheugengebruik en snelheid, zijn er nadelen aan verbonden voor ons gebruik:
+    \begin{itemize}
+        \item Het formaat moet in elke ondersteunde taal geïmplementeerd worden, en binaire data is minder eenvoudig te implementeren dan een op tekst gebaseerd formaat.
+        \item Het is niet mogelijk om het met de hand te schrijven.
+        \item Het inbedden in het json-testplan is niet triviaal: waarschijnlijk is een encodering als base64 nodig.
+    \end{itemize}
+    \item Het formaat ondersteunt niet alle gewenste types.
+    Sommige formaten hebben ondersteuning voor complexere datatypes, maar niet voor alle complexere datatypes die wij nodig hebben.
+    Uiteraard kunnen de eigen types samengesteld worden uit basistypes, maar dan biedt de ondersteuning voor de complexere types weinig voordeel, aangezien er toch een eigen encodering van die complexere types opgesteld zal moeten worden.
+    \item Sommige formaten zijn omslachtig in gebruik.
+    Vaak ondersteunen dit soort formaten meer dan wat wij nodig hebben.
+    \item Het formaat is niet eenvoudig te implementeren in een programmeertaal waarvoor geen ondersteuning is.
+    Sommige dezer formaten ondersteunen weliswaar veel talen, maar we willen niet dat het serialisatieformaat een beperkende factor wordt in welke talen door de judge ondersteund worden.
 \end{itemize}
 
-Hieronder volgt nu per overwogen serialisatie-oplossing een korte beschrijving en de grootste min- of pluspunten.
+Een lijst van de overwogen formaten met een korte beschrijving volgt:
 
 \begin{description}
     \item[Apache Avro] Een volledig "systeem voor dataserialisatie".
@@ -130,25 +175,19 @@ Hieronder volgt nu per overwogen serialisatie-oplossing een korte beschrijving e
     De hoofdstandaard beschrijft enkel de notatie voor een dataformaat.
     Andere standaarden beschrijven dan de serialisatie, in bv.\ binair formaat, json of xml.
     De meerdere serialisatievormen zijn in theorie aantrekkelijk: elke taal moet er slechts een ondersteunen, terwijl de judge ze allemaal kan ondersteunen.
-    In de praktijk blijkt echter dat voor veel talen, er slechts een serialisatieformaat is, en dat dit vaak het binaire formaat is \autocite{x680}.
+    In de praktijk blijkt echter dat voor veel talen er slechts een serialisatieformaat is, en dat dit vaak het binaire formaat is \autocite{x680}.
     \item[Bencode] Schema gebruikt in BitTorrent.
-    Het is gedeeltelijk binair, gedeeltelijk in text.
-    Beperkte hoeveelheid ingebouwde types, uitbreidbaar met eigen types via een omweg \autocite{cohen2017}.
-    \item[Binn] Binair dataformaat.
-    Ondersteunt redelijk wat ingebouwde types, alsook zelfgedefinieerde types \autocite{ramos2019}.
-    \item[BSON] Een binaire variant op json, geschreven voor en door MongoDB\@.
-    Heeft geen voordelen tegenover json, alleen nadelen, aangezien het binair is \autocite{bson}.
+    Het is gedeeltelijk binair, gedeeltelijk in text \autocite{cohen2017}.
+    \item[Binn] Binair dataformaat \autocite{ramos2019}.
+    \item[BSON] Een binaire variant op json, geschreven voor en door MongoDB \autocite{bson}.
     \item[CBOR] Een lichtjes op json gebaseerd formaat, ook binair.
-    Heeft een goede standaard, ondersteunt redelijk wat talen.
-    De hoeveelheid ingebouwde types is redelijk groot, en eigen types zijn mogelijk \autocite{rfc7049}.
+    Heeft een goede standaard, ondersteunt redelijk wat talen \autocite{rfc7049}.
     \item[FlatBuffers] Lijkt op ProtocolBuffers, allebei geschreven door Google, maar verschilt wat in implementatie van ProtocolBuffers.
-    De encodering is binair.
-    Met een schema op te stellen kunnen eigen types eenvoudig samengesteld worden vanuit de ingebouwde basistypes \autocite{flatbuffers}.
-    \item[Fast Infoset] Is eigenlijk een manier om xml binair te encoderen (te beschouwen als een soort compressie voor xml), waardoor het niet bruikbaar is \autocite{x981}.
+    De encodering is binair \autocite{flatbuffers}.
+    \item[Fast Infoset] Is eigenlijk een manier om xml binair te encoderen (te beschouwen als een soort compressie voor xml), waardoor het minder geschikt voor ons gebruik wordt \autocite{x981}.
     \item[Ion] Een superset van json, ontwikkeld door Amazon.
     Het heeft zowel een tekstuele als binaire voorstelling.
-    Naast de gebruikelijke json-types, bevat het enkele uitbreidingen.
-    Het encoderen van bijkomende, eigen types is mogelijk door S-expressies, al is dat minder elegant \autocite{ion}.
+    Naast de gebruikelijke json-types, bevat het enkele uitbreidingen. \autocite{ion}.
     \item[MessagePack] Nog een binair formaat dat lichtjes op json gebaseerd is.
     Lijkt qua types sterk op json.
     Heeft implementaties in veel talen \autocite{messagepack}.
@@ -158,38 +197,27 @@ Hieronder volgt nu per overwogen serialisatie-oplossing een korte beschrijving e
     Complex: de specificatie bevat 14 documenten, met ongeveer 1250 pagina's \autocite{tr62541}.
     \item[OpenDLL] Afkorting voor de \english{Open Data Description Language}.
     Een tekstueel formaat, bedoeld om arbitraire data voor te stellen.
-    Nieuwe type's kunnen gedefinieerd worden.
-    Wordt niet veel programmeertalen ondersteunen dit.
-    Qua functionaliteit zelfs iets boven json;
-    door de mogelijkheid om zelf types te definiëren, maar de grote ondersteuning voor json in andere talen zorgt ervoor dat json toch de voorkeur geniet \autocite{openddl}.
+    Wordt niet ondersteunt in veel programmeertalen, in vergelijking met bv.\ json \autocite{openddl}.
     \item[ProtocolBuffers] Lijkt zoals vermeld sterk op FlatBuffers, maar heeft nog extra stappen nodig bij het encoderen en decoderen, wat het minder geschikt maakt \autocite{protobuf}.
     \item[Smile] Nog een binaire variant van json \autocite{smile}.
     \item[SOAP] Afkorting voor \english{Simple Object Access Protocol}.
     Niet bedoeld als formaat voor dataserialisatie, maar voor communicatie tussen systemen over een netwerk \autocite{soap}.
     \item[SDXF] Binair formaat voor data-uitwisseling.
-    Weinig talen ondersteunen dit formaat.
-    Er zijn weinig ingebouwde types, maar complexere types maken uit de basistypes is mogelijk \autocite{rfc3072}.
+    Weinig talen ondersteunen dit formaat \autocite{rfc3072}.
     \item[Thrift] Lijkt sterk op ProtocolBuffers, maar geschreven door Facebook \autocite{slee2007}.
     \item[UBJSON] Nog een binaire variant van json \autocite{ubjson}.
 
 \end{description}
 
-Door de redenen hierboven voldoen geen van alle hiervoor genoemde oplossingen aan alle vereisten.
-Zoals al vermeld is dan gekozen om zelf een formaat op te stellen.
-Uiteindelijk is hierbij gekozen om data te serialiseren in json.
-Er is niet gekozen voor xml, omdat het testplan al json gebruikt, en xml geen meerwaarde biedt om het introduceren van een nieuwe taal te rechtvaardigen.
-Ook is niet gekozen voor een variant, zoals yaml, om het zo eenvoudig mogelijk te maken het formaat te implementeren.
+Geen enkel overwogen formaat heeft grote voordelen tegenover een eigen structuur in json.
+Meer zelfs, de meeste formaten hebben het nadeel dat ze geen json zijn, waardoor we een nieuwe taal moeten inbedden in het bestaande json-testplan.
+Hiervoor viel de keuze uiteindelijk op json.
+Zoals bij het testplan definieert het serialisatieformaat een structuur die gevolgd moet worden.
+Concreet wordt een waarde voorgesteld als een json-object dat bestaat uit de (geëncodeerde) waarde en het type van die waarde.
+Hieronder staat een voorbeeld van lijst van twee getallen in het serialisatieformaat.
+Een formelere definitie van het formaat in json-schema is \cref{ch:specificatie-van-het-serialisatieformaat}.
 
-Het serialisatieformaat beschrijft voor elke data welk type het is.
-Dit vormt een json-object bestaande uit het type en de waarde.
-\Cref{lst:serialisation-format} toont hoe dit er uit ziet voor een voorbeeld van een lijst van twee getallen.
-Een formelere definitie van het formaat is \cref{ch:specificatie-van-het-serialisatieformaat}.
-
-\begin{listing}[h]
-    \inputminted{json}{code/format.json}
-    \caption{Voorbeeld van een lijst van twee getallen in het serialisatieformaat.}
-    \label{lst:serialisation-format}
-\end{listing}
+\inputminted{json}{code/format.json}
 
 Het formaat ondersteunt de meeste basistypes die in bijna elke programmeertaal beschikbaar zijn.
 Hieronder volgt een korte omschrijving van de ondersteunde types:
@@ -220,21 +248,34 @@ Zoals duidelijk is uit de beschrijving hierboven, is het deel om types aan te ge
 Zo is het niet mogelijk waarden te encoderen met types \texttt{literal} of \texttt{instance}.
 Deze types worden gebruikt bij het aangeven van het type van argumenten bij functieoproepen of het type van een variabele waaraan een waarde wordt toegekend.
 
-
 \subsection{Functieoproepen en assignments}\label{subsec:functieoproepen}
 
 Een ander onderdeel van het testplan verdient ook speciale aandacht: het toekennen van variabelen (\english{assignment}) en de functieoproepen.
 
 In heel wat oefeningen, en zeker in objectgerichte programmeertalen, is het toekennen van een waarde aan een variabele om deze later te gebruiken onmisbaar.
 Bijvoorbeeld zou een opgave kunnen bestaan uit het implementeren van een klasse.
-Bij de evaluatie dient dan een instantie van die klasse aangemaakt te worden, waarna er methoden kunnen aangeroepen worden, zoals hieronder geïllustreerd in een conceptueel voorbeeld van het soort oefeningen waar assignments en functieoproepen nodig zijn.
+Bij de evaluatie dient dan een instantie van die klasse aangemaakt te worden, waarna er methoden kunnen aangeroepen worden, zoals hieronder geïllustreerd in een fictief voorbeeld.
 
 \inputminted{java}{code/assignment.jshell}
 
 Concreet is ervoor gekozen om het testplan niet uit te breiden met generieke statements of expressions, maar de ondersteuning te beperken tot assignments en functieoproepen.
 Dit om de implementatie van de vertaling van het testplan naar de ondersteunde programmeertalen niet nodeloos ingewikkeld te maken.
-Het testplan ondersteunt het toekennen van een naam aan het resultaat van een functieoproep.
-Vertaald naar json wordt dat dan:
+Een functieoproep ziet er als volgt uit:
+
+\inputminted{json}{code/function.json}
+
+Het type van de functie geeft aan welk soort functie het is.
+Mogelijke waarden zijn momenteel \texttt{top}, \texttt{object}, \texttt{constructor} en \texttt{identity}.
+De laatste soort is een speciaal geval, waarbij geen functienaam moet gegeven worden en exact één argument toegelaten is.
+Die functie zal dan dat ene argument teruggeven.
+De naam van de functie benoemt eenvoudig welke functie opgeroepen moet worden.
+Het object van de functie laat toe om functies op objecten op te roepen.
+De lijst van argumenten kan nul of meer waarden bevatten.
+Deze waarden moeten in het formaat zijn zoals aangegeven in het vorige deel over de serialisatie van waarden.
+Het is niet mogelijk om een functie-oproep als argument mee te geven.
+Als dit nodig is, zal moeten gewerkt worden met een assignment als tussenstap.
+
+Aan het resultaat van een functieoproep kan een naam gegeven worden, wat ons bij een assignment brengt:
 
 \inputminted{json}{code/assignment.json}
 
@@ -242,19 +283,20 @@ De \texttt{name} is de naam die aan de variabele gegeven zal worden.
 Het veldje \texttt{expression} moet een object zijn dat een functieoproep voorstelt (zie hierna).
 Ook is er de mogelijk om een optioneel type mee te geven;
 in eenvoudige gevallen kan de judge dit afleiden, maar bij complexere gevallen niet meer.
-Dit type moet een van de ondersteunde types zijn uit het serialisatieformaat dat hiervoor beschreven werd.
-Een functie ziet er als volgt uit:
+Dit type moet een van de ondersteunde types zijn uit het serialisatieformaat.
 
-\inputminted{json}{code/function.json}
+Een gecombineerd voorbeeld staat hieronder.
+Hier wordt de string \texttt{'Dodona'} toegekend aan een variabele met naam \texttt{name}.
+De judge kan het type afleiden, dus we moeten niet opgeven dat \texttt{name} een \texttt{str} is.
 
-Het type van de functie geeft aan welk soort functie het is.
-Mogelijke waarden zijn momenteel \texttt{top}, \texttt{object}, \texttt{constructor} en \texttt{identity}.
-De laatste soort is een speciaal geval, waarbij geen functienaam moet gegeven worden en slechts een argument toegelaten is.
-Die functie zal dan dat ene argument teruggeven.
-De naam van de functie benoemt eenvoudig welke functie opgeroepen moet worden.
-Het object van de functie laat toe om functies op objecten op te roepen.
-De lijst van argumenten kan nul of meer waarden bevatten.
-Deze waarden moeten in het formaat zijn zoals aangegeven in het vorige deel over de serialisatie van waarden.
+\inputminted{json}{code/assign-variable.json}
+
+\subsection{Vereiste functies}\label{subsec:vereiste-functies}
+
+Voor elk onderdeel van het testplan wordt afgeleid welke functies een taal moet ondersteunen om van het testplan gebruik te kunnen maken.
+Bevat het testplan bijvoorbeeld waarden met als type \texttt{set}, dan kunnen enkel programmeertalen die een verzameling ondersteunen gebruikt worden.
+Dat zijn bijvoorbeeld Python en Java, maar geen Bash.
+Het testplan is zo opgebouwd dat het afleiden van de vereiste functies geen tussenkomst van de persoon die het testplan opstelt vereist.
 
 \section{Uitvoeren van de oplossing}\label{sec:uitvoeren-van-de-oplossing}
 
@@ -293,6 +335,7 @@ Nadat alle code voorhanden is, wordt deze per context uit het testplan uitgevoer
 Het uitvoeren zelf gebeurt op de normale manier dat de programmeertaal uitgevoerd wordt via de commandoregel.
 Dit is een voordeel van onze aanpak: er is geen verschil tussen hoe de judge de code van de student uitvoert en hoe de student zijn code zelf uitvoert op zijn eigen computer.
 Dit voorkomt dat er subtiele verschillen zouden insluipen.
+
 
 \section{Evalueren van een oplossing}\label{sec:evalueren-van-een-oplossing2}
 
