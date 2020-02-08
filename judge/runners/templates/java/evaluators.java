@@ -10,12 +10,12 @@ import java.util.prefs.*;
 import java.util.regex.*;
 import java.util.stream.*;
 
-public class Evaluator {
+public class Evaluators {
 
     private final FileWriter valueWriter;
     private final FileWriter exceptionWriter;
 
-    public Evaluator() throws Exception {
+    public Evaluators() throws Exception {
         this.valueWriter = new FileWriter("${value_file}");
         this.exceptionWriter = new FileWriter("${exception_file}");
     }

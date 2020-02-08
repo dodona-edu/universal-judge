@@ -37,6 +37,13 @@ class LanguageConfig:
         """
         return [], files
 
+    def evaluator_generation_callback(self, files: List[str]) -> CallbackResult:
+        """
+        Same as the generation_callback, but used for evaluators. By default,
+        this function just calls generation_callback.
+        """
+        return self.generation_callback(files)
+
     def execution_command(self, file: str, dependencies: List[str], arguments: List[str]) -> List[str]:
         """
         Get the command for executing a file with some arguments.
@@ -53,7 +60,7 @@ class LanguageConfig:
         files = files.copy()
         main_files = [x for x in files if x.startswith(self.context_name())]
         if len(main_files) != 1:
-            raise AssertionError(f"The files must contain one main file, but got {main_files}.")
+            raise AssertionError(f"The files must contain one main file, but got {main_files} from {files}.")
         files.remove(main_files[0])
         return self.execution_command(main_files[0], files, [str(context_number)])
 

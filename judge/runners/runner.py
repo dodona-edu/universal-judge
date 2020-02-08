@@ -30,9 +30,9 @@ from runners.translator import ContextArguments, EvaluatorArguments, Translator,
     PlanEvaluatorArguments, TestcaseArguments, MainTestcaseArguments, CustomEvaluatorArguments
 from serialisation import Value, NothingType, NothingTypes, SequenceType, SequenceTypes
 from tested import Config
-from testplan import Context, FunctionCall, SpecificEvaluator, IgnoredChannelState, NoneChannelState, \
+from testplan import Context, SpecificEvaluator, IgnoredChannelState, NoneChannelState, \
     TestPlanError, NoMainTestcase, Testcase, NormalTestcase, Plan, FunctionInput, \
-    AssignmentInput, FunctionType
+    AssignmentInput
 
 logger = logging.getLogger(__name__)
 
@@ -149,7 +149,7 @@ class Runner:
         """
         raise NotImplementedError
 
-    def get_readable_input(self, case: Testcase) -> ExtendedMessage:
+    def get_readable_input(self, plan: Plan, case: Testcase) -> ExtendedMessage:
         raise NotImplementedError
 
 
@@ -345,16 +345,16 @@ class ConfigurableRunner(Runner):
                 custom_v_code = self.language_config.value_writer(v_eval_function_name)
             custom_e_code = self._get_custom_code(testcase, e_eval_function_name)
             # Convert the function call.
-            submission_name = self.language_config.submission_name(plan)
             has_return = testcase.output.result != NoneChannelState.NONE and isinstance(testcase.input, FunctionInput)
             if has_return or isinstance(testcase.input, FunctionInput):
-                statement = self.prepare_function_call(submission_name, testcase.input.function)
+                statement = self.translator.prepare_function_call(plan, testcase.input.function)
             else:
                 assert isinstance(testcase.input, AssignmentInput)
-                statement = testcase.input.assignment.replace_function(self.prepare_function_call(
-                    submission_name,
-                    testcase.input.assignment.expression
-                ))
+                statement = testcase.input.assignment.replace_function(
+                    self.translator.prepare_function_call(
+                        plan,
+                        testcase.input.assignment.expression
+                    ))
 
             result.append(TestcaseArguments(
                 statement=statement,
@@ -387,18 +387,6 @@ class ConfigurableRunner(Runner):
                 exception_code=custom_code
             )
 
-    def prepare_function_call(self, submission_name: str, function_call: FunctionCall) -> FunctionCall:
-        """Prepare the function call for main."""
-        if function_call.type == FunctionType.IDENTITY:
-            return function_call
-        object_ = function_call.object or submission_name
-        return FunctionCall(
-            type=function_call.type,
-            arguments=function_call.arguments,
-            name=self.language_config.conventionalise(function_call.name),
-            object=object_
-        )
-
     def evaluate_custom(self,
                         path: Path,
                         expected: Optional[Value],
@@ -430,7 +418,7 @@ class ConfigurableRunner(Runner):
             name = self.translator.custom_evaluator(data, directory)
 
             # Do compilation for those languages that require it.
-            command, files = self.language_config.generation_callback(dependencies + [name])
+            command, files = self.language_config.evaluator_generation_callback(dependencies + [name])
             logger.debug("Compiling custom evaluator with command %s", command)
             result = self._compile(command, directory)
             if result and result.stderr:
@@ -445,8 +433,8 @@ class ConfigurableRunner(Runner):
             logger.debug("  Stderr was %s", p.stderr)
             return BaseExecutionResult(p.stdout, p.stderr, p.returncode)
 
-    def get_readable_input(self, case: Testcase) -> ExtendedMessage:
-        return self.translator.get_readable_input(case)
+    def get_readable_input(self, plan: Plan, case: Testcase) -> ExtendedMessage:
+        return self.translator.get_readable_input(plan, case)
 
 
 CONFIGS = {

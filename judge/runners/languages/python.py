@@ -24,6 +24,9 @@ class PythonConfig(LanguageConfig):
     def generation_callback(self, files: List[str]) -> CallbackResult:
         return ["python", "-m", "compileall", "-b", "."], [f.replace(".py", '.pyc') for f in files]
 
+    def evaluator_generation_callback(self, files: List[str]) -> CallbackResult:
+        return [], files
+
     def execution_command(self, file: str, dependencies: List[str], arguments: List[str]) -> List[str]:
         return ["python", file, *arguments]
 

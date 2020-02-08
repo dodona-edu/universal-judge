@@ -20,7 +20,7 @@ from runners.utils import remove_indents, remove_newline
 from serialisation import Value
 from tested import Config
 from testplan import Testcase, NormalTestcase, AssignmentInput, NoneChannelState, TextData, MainTestcase, \
-    FunctionInput, FunctionCall, Assignment
+    FunctionInput, FunctionCall, Assignment, FunctionType, Plan
 
 
 @dataclass
@@ -111,7 +111,7 @@ class Translator:
         self.language_config = language_config
         self.judge_config = judge_config
 
-    def get_readable_input(self, case: Testcase) -> ExtendedMessage:
+    def get_readable_input(self, plan: Plan, case: Testcase) -> ExtendedMessage:
         """
         Get human readable input for a testcase. This function will use, in
         order of availability:
@@ -122,12 +122,13 @@ class Translator:
         4. Program arguments, if any.
 
         :param case: The testcase to get the input from.
+        :param plan: The plan.
         """
         format_ = 'text'  # By default, we use text as input.
         if case.description:
             text = case.description
         elif isinstance(case, NormalTestcase) and isinstance(case.input, FunctionInput):
-            text = self.function_call(case.input.function)
+            text = self.function_call(plan, case.input.function)
             format_ = self.judge_config.programming_language
         elif isinstance(case, NormalTestcase) and isinstance(case.input, AssignmentInput):
             text = self.assignment(case.input.assignment)
@@ -172,8 +173,21 @@ class Translator:
                 last_error = e
         raise last_error
 
-    def function_call(self, call: FunctionCall) -> str:
+    def prepare_function_call(self, plan: Plan, function_call: FunctionCall) -> FunctionCall:
+        """Prepare the function call for main."""
+        if function_call.type == FunctionType.IDENTITY:
+            return function_call
+        object_ = function_call.object or self.language_config.submission_name(plan)
+        return FunctionCall(
+            type=function_call.type,
+            arguments=function_call.arguments,
+            name=self.language_config.conventionalise(function_call.name),
+            object=object_
+        )
+
+    def function_call(self, plan: Plan, call: FunctionCall) -> str:
         """Translate a function to code."""
+        call = self.prepare_function_call(plan, call)
         template = self.find_template("function")
         return template.render(function=call)
 
@@ -187,9 +201,10 @@ class Translator:
         return self._find_and_write_template(args, destination, "evaluator_executor")
 
     def _find_and_write_template(self, args: Any, destination: Union[PathLike, Path], name: str) -> str:
+        name = self.language_config.conventionalise_object(name)
         template = self.find_template(name)
         destination_name = f"{name}.{self.language_config.file_extension()}"
-        write_template(args, template, destination / self.language_config.conventionalise_object(destination_name))
+        write_template(args, template, destination / destination_name)
         return destination_name
 
     def write_plan_context_template(self, args: PlanContextArguments, destination: Path) -> str:

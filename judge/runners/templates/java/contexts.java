@@ -3,10 +3,10 @@
 
 public class Contexts {
 
-    private final Evaluator evaluator;
+    private final Evaluators evaluators;
 
-    private Contexts(Evaluator evaluator) {
-        this.evaluator = evaluator;
+    private Contexts(Evaluators evaluators) {
+        this.evaluators = evaluators;
     }
 
     % for c in contexts:
@@ -15,7 +15,7 @@ public class Contexts {
             ${c.before}
 
             ## Call the main fucnction if necessary
-            % if main_testcase.exists:
+            % if c.main_testcase.exists:
                 try {
                     ${submission_name}.main(new String[]{
                     % for argument in c.main_testcase.arguments:
@@ -26,11 +26,11 @@ public class Contexts {
                     % endfor
                     });
                 } catch (Exception e) {
-                    evaluator.e_evaluate_main_${loop.index}(e);
+                    evaluators.e_evaluate_main_${loop.index}(e);
                 }
                 System.err.print("--${secret_id}-- SEP");
                 System.out.print("--${secret_id}-- SEP");
-                evaluator.writeDelimiter("--${secret_id}-- SEP");
+                evaluators.writeDelimiter("--${secret_id}-- SEP");
             % endif
 
             <% c_number = loop.index %>
@@ -43,7 +43,7 @@ public class Contexts {
                         <%include file="assignment.mako" args="assignment=additional.statement" />
                     % else:
                         % if additional.has_return:
-                            evaluator.v_evaluate_${c_number}_${loop.index}(\
+                            evaluators.v_evaluate_${c_number}_${loop.index}(\
                         % endif
                         <%include file="function.mako" args="function=additional.statement" />\
                         % if additional.has_return:
@@ -52,11 +52,11 @@ public class Contexts {
                         ;
                     % endif
                 } catch (Exception e) {
-                    evaluator.e_evaluate_${c_number}_${loop.index}(e);
+                    evaluators.e_evaluate_${c_number}_${loop.index}(e);
                 }
                 System.err.print("--${secret_id}-- SEP");
                 System.out.print("--${secret_id}-- SEP");
-                evaluator.writeDelimiter("--${secret_id}-- SEP");
+                evaluators.writeDelimiter("--${secret_id}-- SEP");
 
             % endfor
 
@@ -65,16 +65,17 @@ public class Contexts {
     % endfor
 
     public static void main(String[] a) throws Exception {
-        var number = Integer.parse(a[1])
-        var evaluator = new Evaluator();
-        var context = new Context(evaluator);
+        var number = Integer.parseInt(a[0]);
+        var evaluators = new Evaluators();
+        var contexts = new Contexts(evaluators);
+        // TODO: this could be shorter with reflection.
         switch (number) {
             % for c in contexts:
                 case ${loop.index}:
-                    context.evaluate_${loop.index}();
+                    contexts.execute_${loop.index}();
                     break;
             % endfor
         }
-        evaluator.close();
+        evaluators.close();
     }
 }

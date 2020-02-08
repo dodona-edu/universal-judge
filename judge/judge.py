@@ -103,12 +103,14 @@ class GeneratorJudge:
             # Append compiler messages to the output.
             messages.append("De compiler produceerde volgende uitvoer op stdout:")
             messages.append(ExtendedMessage(description=results.stdout, format='code'))
+            logger.debug("Received stdout from compiler: " + results.stderr)
 
         # Report stderr.
         if results.stderr:
             # Append compiler messages to the output.
             messages.append("De compiler produceerde volgende uitvoer op stderr:")
             messages.append(ExtendedMessage(description=results.stderr, format='code'))
+            logger.debug("Received stderr from compiler: " + results.stderr)
 
         # Report errors if needed.
         if results.exit != 0:
@@ -118,6 +120,7 @@ class GeneratorJudge:
             return messages, Status.CORRECT
 
     def _process_results(self,
+                         plan: Plan,
                          context: Context,
                          results: ExecutionResult,
                          compiler_results: Tuple[List[Message], Status]):
@@ -132,7 +135,7 @@ class GeneratorJudge:
         testcase: Testcase  # Type hint for pycharm.
         for i, testcase in enumerate(context.all_testcases()):
 
-            readable_input = self.runner.get_readable_input(testcase)
+            readable_input = self.runner.get_readable_input(plan, testcase)
             report_update(self.out, StartTestcase(description=readable_input))
 
             # Handle compiler results
@@ -208,7 +211,7 @@ class GeneratorJudge:
         self._protect_common_dir(common_dir)
         try:
             logger.info("Start judging code...")
-            pool = Pool(1)
+            pool = Pool(4)
             for tab_index, tab in enumerate(plan.tabs):
                 report_update(self.out, StartTab(title=tab.name))
                 # Create a list of arguments to execute (in threads)
@@ -233,7 +236,7 @@ class GeneratorJudge:
                 for context_index, context in enumerate(tab.contexts):
                     report_update(self.out, StartContext(description=context.description))
                     execution_result = results[context_index]
-                    self._process_results(context, execution_result, compiler_results)
+                    self._process_results(plan, context, execution_result, compiler_results)
                     report_update(self.out, CloseContext())
                 report_update(self.out, CloseTab())
             report_update(self.out, CloseJudgment())
