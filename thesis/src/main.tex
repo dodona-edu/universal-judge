@@ -39,13 +39,6 @@
     hybrid = true,
 }
 
-% Processes Markdown files with MathJax
-\newcommand{\MJmarkdown}[1]{\directlua{
-    filename = "#1"
-    local result = dofile("scripts/mathjax.lua")
-    tex.print(result)
-}}
-
 \title{TESTed: one judge to rule them all}
 \author{\large Niko Strijbol}
 \studentnumber{01404620}
