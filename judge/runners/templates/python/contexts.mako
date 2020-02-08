@@ -40,42 +40,42 @@ except Exception as e:
         % endif
     % endfor
     pass
-% for c in contexts:
-    % if c.main_testcase.exists:
-        if ${loop.index} == number:
-            sys.stderr.write("--${secret_id}-- SEP")
-            sys.stdout.write("--${secret_id}-- SEP")
-            evaluators.write_delimiter("--${secret_id}-- SEP")
-    % endif
-% endfor
+
+<% with_main = (i for i,c in enumerate(contexts) if c.main_testcase.exists) %>
+if number in ${tuple(with_main)}:
+    sys.stderr.write("--${secret_id}-- SEP")
+    sys.stdout.write("--${secret_id}-- SEP")
+    evaluators.write_delimiter("--${secret_id}-- SEP")
 
 ## Generate the actual tests based on the context.
 % for c in contexts:
     <% c_number = loop.index %>
-    if ${c_number} == number:
-        ## Handle test cases.
-        % for additional in c.additional_testcases:
-            try:
-                % if isinstance(additional.statement, Assignment):
-                    <%include file="assignment.mako" args="assignment=additional.statement" />\
-                % else:
-                    % if additional.has_return:
-                        evaluators.v_evaluate_${c_number}_${loop.index}(\
+    % if c.additional_testcases:
+        if ${c_number} == number:
+            ## Handle test cases.
+            % for additional in c.additional_testcases:
+                try:
+                    % if isinstance(additional.statement, Assignment):
+                        <%include file="assignment.mako" args="assignment=additional.statement" />\
+                    % else:
+                        % if additional.has_return:
+                            evaluators.v_evaluate_${c_number}_${loop.index}(\
+                        % endif
+                        <%include file="function.mako" args="function=additional.statement" />\
+                        % if additional.has_return:
+                            )\
+                        % endif
                     % endif
-                    <%include file="function.mako" args="function=additional.statement" />\
-                    % if additional.has_return:
-                        )\
-                    % endif
-                % endif
 
-            except Exception as e:
-                evaluators.e_evaluate_${c_number}_${loop.index}(e)
+                except Exception as e:
+                    evaluators.e_evaluate_${c_number}_${loop.index}(e)
 
-            sys.stderr.write("--${secret_id}-- SEP")
-            sys.stdout.write("--${secret_id}-- SEP")
-            evaluators.write_delimiter("--${secret_id}-- SEP")
+                sys.stderr.write("--${secret_id}-- SEP")
+                sys.stdout.write("--${secret_id}-- SEP")
+                evaluators.write_delimiter("--${secret_id}-- SEP")
 
-        % endfor
+            % endfor
+    % endif
 % endfor
 
 ## Depending on the context, there might be an "after".

@@ -20,8 +20,8 @@ def read_config() -> Config:
         "time_limit": 10000000,
         "programming_language": 'java',
         "natural_language": 'nl',
-        "resources": str(Path('../exercise/lotto/evaluation').resolve()),
-        "source": '../exercise/lotto/solution/correct.java',
+        "resources": str(Path('../exercise/big-echo/evaluation').resolve()),
+        "source": '../exercise/big-echo/solutions/test.java',
         "judge": str(Path('../').resolve()),
         "workdir": str(Path('./workdir').resolve()),
         "plan_name": "plan.json"
@@ -35,7 +35,6 @@ if __name__ == '__main__':
     log = logging.getLogger()
     log.setLevel(logging.WARNING)
     ch = logging.StreamHandler(stream=sys.stdout)
-    ch.setLevel(logging.WARNING)
     formatter = logging.Formatter('%(name)s:%(levelname)s:%(message)s')
     ch.setFormatter(formatter)
     log.addHandler(ch)
