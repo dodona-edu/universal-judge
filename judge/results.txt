@@ -1,23 +1,25 @@
 Performantie
 ------------
 
-# Lotto
+# Java
 
-## Java
+                 | 1 thread           4 threads |
+-----------------|------------------------------|
+LOTTO: volledig  | 48s                36s       |
+       partieel  | 46s                25s       |
+       verbeterd | 14s                10s       |
+-----------------|------------------------------|
+ECHO:  verbeterd | 8s                 5s        |
 
-Type           | single (1)         multi (4) |
----------------|------------------------------|
-Volledig       | 48s                36s       |
-Partieel       | 46s                25s       |
-Extra partieel | 14s                10s       |
+# Python
 
-## Python
-
-Type           | single (1)         multi (4) |
----------------|------------------------------|
-Volledig       | 13s                9s        |
-Partieel       | 9s                 6s        |
-Extra partieel | 8s                 6s        |
+                 | 1 thread           4 threads |
+-----------------|------------------------------|
+LOTTO: volledig  | 13s                9s        |
+       partieel  | 9s                 6s        |
+       verbeterd | 8s                 6s        |
+-----------------|------------------------------|
+ECHO:  verbeterd | 5s                 3s        |
 
 
 Volledig:       elke context afzonderlijk gecompileerd en uitgevoerd.
