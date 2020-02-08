@@ -1,2 +1,0 @@
-// Apply our superclass.
-scriptSuperClass(pattern: "plan.groovy", superClass: "dodona.PlanScript")

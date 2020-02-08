@@ -1,5 +1,0 @@
-root = true
-
-[plan.groovy]
-indent_size = 3
-indent_style = tab
