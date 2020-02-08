@@ -1,0 +1,794 @@
+{
+  "object": "Main",
+  "tabs": [
+    {
+      "name": "Feedback",
+      "contexts": [
+        {
+          "main": {
+            "output": {
+              "stdout": {
+                "data": "invoertekst-1",
+                "type": "text"
+              }
+            },
+            "input": {
+              "stdin": {
+                "data": "invoertekst-1",
+                "type": "text"
+              }
+            }
+          }
+        },
+        {
+          "main": {
+            "output": {
+              "stdout": {
+                "data": "invoertekst-2",
+                "type": "text"
+              }
+            },
+            "input": {
+              "stdin": {
+                "data": "invoertekst-2",
+                "type": "text"
+              }
+            }
+          }
+        },
+        {
+          "main": {
+            "output": {
+              "stdout": {
+                "data": "invoertekst-3",
+                "type": "text"
+              }
+            },
+            "input": {
+              "stdin": {
+                "data": "invoertekst-3",
+                "type": "text"
+              }
+            }
+          }
+        },
+        {
+          "main": {
+            "output": {
+              "stdout": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            },
+            "input": {
+              "stdin": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            }
+          }
+        },
+        {
+          "main": {
+            "output": {
+              "stdout": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            },
+            "input": {
+              "stdin": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            }
+          }
+        },
+        {
+          "main": {
+            "output": {
+              "stdout": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            },
+            "input": {
+              "stdin": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            }
+          }
+        },
+        {
+          "main": {
+            "output": {
+              "stdout": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            },
+            "input": {
+              "stdin": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            }
+          }
+        },
+        {
+          "main": {
+            "output": {
+              "stdout": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            },
+            "input": {
+              "stdin": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            }
+          }
+        },
+        {
+          "main": {
+            "output": {
+              "stdout": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            },
+            "input": {
+              "stdin": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            }
+          }
+        },
+        {
+          "main": {
+            "output": {
+              "stdout": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            },
+            "input": {
+              "stdin": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            }
+          }
+        },
+        {
+          "main": {
+            "output": {
+              "stdout": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            },
+            "input": {
+              "stdin": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            }
+          }
+        },
+        {
+          "main": {
+            "output": {
+              "stdout": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            },
+            "input": {
+              "stdin": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            }
+          }
+        },
+        {
+          "main": {
+            "output": {
+              "stdout": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            },
+            "input": {
+              "stdin": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            }
+          }
+        },
+        {
+          "main": {
+            "output": {
+              "stdout": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            },
+            "input": {
+              "stdin": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            }
+          }
+        },
+        {
+          "main": {
+            "output": {
+              "stdout": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            },
+            "input": {
+              "stdin": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            }
+          }
+        },
+        {
+          "main": {
+            "output": {
+              "stdout": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            },
+            "input": {
+              "stdin": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            }
+          }
+        },
+        {
+          "main": {
+            "output": {
+              "stdout": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            },
+            "input": {
+              "stdin": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            }
+          }
+        },
+        {
+          "main": {
+            "output": {
+              "stdout": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            },
+            "input": {
+              "stdin": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            }
+          }
+        },
+        {
+          "main": {
+            "output": {
+              "stdout": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            },
+            "input": {
+              "stdin": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            }
+          }
+        },
+        {
+          "main": {
+            "output": {
+              "stdout": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            },
+            "input": {
+              "stdin": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            }
+          }
+        },
+        {
+          "main": {
+            "output": {
+              "stdout": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            },
+            "input": {
+              "stdin": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            }
+          }
+        },
+        {
+          "main": {
+            "output": {
+              "stdout": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            },
+            "input": {
+              "stdin": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            }
+          }
+        },
+        {
+          "main": {
+            "output": {
+              "stdout": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            },
+            "input": {
+              "stdin": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            }
+          }
+        },
+        {
+          "main": {
+            "output": {
+              "stdout": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            },
+            "input": {
+              "stdin": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            }
+          }
+        },
+        {
+          "main": {
+            "output": {
+              "stdout": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            },
+            "input": {
+              "stdin": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            }
+          }
+        },
+        {
+          "main": {
+            "output": {
+              "stdout": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            },
+            "input": {
+              "stdin": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            }
+          }
+        },
+        {
+          "main": {
+            "output": {
+              "stdout": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            },
+            "input": {
+              "stdin": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            }
+          }
+        },
+        {
+          "main": {
+            "output": {
+              "stdout": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            },
+            "input": {
+              "stdin": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            }
+          }
+        },
+        {
+          "main": {
+            "output": {
+              "stdout": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            },
+            "input": {
+              "stdin": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            }
+          }
+        },
+        {
+          "main": {
+            "output": {
+              "stdout": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            },
+            "input": {
+              "stdin": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            }
+          }
+        },
+        {
+          "main": {
+            "output": {
+              "stdout": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            },
+            "input": {
+              "stdin": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            }
+          }
+        },
+        {
+          "main": {
+            "output": {
+              "stdout": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            },
+            "input": {
+              "stdin": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            }
+          }
+        },
+        {
+          "main": {
+            "output": {
+              "stdout": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            },
+            "input": {
+              "stdin": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            }
+          }
+        },
+        {
+          "main": {
+            "output": {
+              "stdout": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            },
+            "input": {
+              "stdin": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            }
+          }
+        },
+        {
+          "main": {
+            "output": {
+              "stdout": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            },
+            "input": {
+              "stdin": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            }
+          }
+        },
+        {
+          "main": {
+            "output": {
+              "stdout": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            },
+            "input": {
+              "stdin": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            }
+          }
+        },
+        {
+          "main": {
+            "output": {
+              "stdout": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            },
+            "input": {
+              "stdin": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            }
+          }
+        },
+        {
+          "main": {
+            "output": {
+              "stdout": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            },
+            "input": {
+              "stdin": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            }
+          }
+        },
+        {
+          "main": {
+            "output": {
+              "stdout": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            },
+            "input": {
+              "stdin": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            }
+          }
+        },
+        {
+          "main": {
+            "output": {
+              "stdout": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            },
+            "input": {
+              "stdin": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            }
+          }
+        },
+        {
+          "main": {
+            "output": {
+              "stdout": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            },
+            "input": {
+              "stdin": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            }
+          }
+        },
+        {
+          "main": {
+            "output": {
+              "stdout": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            },
+            "input": {
+              "stdin": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            }
+          }
+        },
+        {
+          "main": {
+            "output": {
+              "stdout": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            },
+            "input": {
+              "stdin": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            }
+          }
+        },
+        {
+          "main": {
+            "output": {
+              "stdout": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            },
+            "input": {
+              "stdin": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            }
+          }
+        },
+        {
+          "main": {
+            "output": {
+              "stdout": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            },
+            "input": {
+              "stdin": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            }
+          }
+        },
+        {
+          "main": {
+            "output": {
+              "stdout": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            },
+            "input": {
+              "stdin": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            }
+          }
+        },
+        {
+          "main": {
+            "output": {
+              "stdout": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            },
+            "input": {
+              "stdin": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            }
+          }
+        },
+        {
+          "main": {
+            "output": {
+              "stdout": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            },
+            "input": {
+              "stdin": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            }
+          }
+        },
+        {
+          "main": {
+            "output": {
+              "stdout": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            },
+            "input": {
+              "stdin": {
+                "data": "invoertekst",
+                "type": "text"
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

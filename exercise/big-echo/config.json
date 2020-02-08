@@ -1,0 +1,21 @@
+{
+  "description": {
+    "difficulty": 0.5,
+    "names": {
+      "en": "Grote echo [Universele test]",
+      "nl": "Grote echo [Universele test"
+    }
+  },
+  "evaluation": {
+    "memory_limit": 500000000
+  },
+  "programming_language": "python",
+  "access": "public",
+  "labels": [
+
+  ],
+  "internals": {
+    "token": "VAjjfKZI3i79WuTvZY3u2UGsuaCtpV2h5d52u8UQmtupjwtYt3e2gZvUt9aKEZPh",
+    "_info": "These fields are used for internal bookkeeping in Dodona, please do not change them."
+  }
+}
