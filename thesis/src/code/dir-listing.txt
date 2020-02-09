@@ -1,0 +1,28 @@
+workdir                          //Werkmap van de judge
+├── common                       //Gemeenschappelijke code
+│   ├── Contexts.class
+│   ├── Contexts.java            //Code voor alle contexten
+│   ├── Evaluators.class
+│   ├── Evaluators.java          //Evaluatiecode voor alle contexten
+│   ├── Main.class
+│   ├── Main.java                //Oplossing van de student
+│   ├── Values.class
+│   ├── Values.java              //Values-module
+│   └── json-simple-3.1.0.jar    //Dependency voor json-uitvoer
+├── context-0                    //Map voor context 0 van testplan
+│   ├── Contexts.class
+│   ├── Evaluators.class
+│   ├── IL0IaCxwr_exceptions.txt //Uitzonderingenkanaal
+│   ├── IL0IaCxwr_values.txt     //Returnkanaal
+│   ├── Main.class
+│   ├── Values.class
+│   └── json-simple-3.1.0.jar
+├── context-1
+│   ├── Contexts.class
+│   ├── Evaluators.class
+│   ├── IL0IaCxwr_exceptions.txt
+│   ├── IL0IaCxwr_values.txt
+│   ├── Main.class
+│   ├── Values.class
+│   └── json-simple-3.1.0.jar
+...

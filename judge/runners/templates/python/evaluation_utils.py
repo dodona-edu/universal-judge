@@ -1,8 +1,3 @@
-"""
-Module with helper functions that are available to the language specific
-evaluators. These help convert results to the correct output format.
-This module is also available from the custom evaluator.
-"""
 import values
 import sys
 
@@ -24,10 +19,10 @@ def evaluated(result: bool,
     :param readable_expected: A string version of the expected value. Optional;
                               if not given, the judge will produce one on a
                               best-efforts basis.
-    :param result: The result of the evaluation. True if accepted, false
-                   otherwise.
+    :param result: The result of the evaluation.
     """
     if messages is None:
         messages = []
 
-    values.send_evaluated(sys.stdout, result, readable_expected, readable_actual, messages)
+    values.send_evaluated(sys.stdout,
+                          result, readable_expected, readable_actual, messages)

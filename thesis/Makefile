@@ -18,7 +18,7 @@ clean:
 	latexmk -cd -pdflua -use-make -c src/main.tex
 
 # Generate dependencies needed for the main file.
-dependencies: src/generated/description.md
+dependencies: src/generated/description.md src/generated/serialisation.json
 
 # Generate the json schema of the serialisation format.
 src/generated/serialisation.json:

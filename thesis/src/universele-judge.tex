@@ -13,9 +13,9 @@ Dit hoofdstuk licht de werking en implementatie van deze judge toe, beginnend me
 %1.2 Formaat serialisatie                       OK
 %1.3 Formaat functie-oproep en assignment       OK
 %1.4 Vereiste features                          OK
-%2. Uitvoeren van een oplossing
-%2.1 Genereren van de code
-%2.2 Uitvoeren van de code
+%2. Uitvoeren van een oplossing                 OK
+%2.1 Genereren van de code                      OK
+%2.2 Uitvoeren van de code                      OK
 %3. Evalueren van een oplossing
 %3.1 Ingebouwde evaluatie
 %3.2 Aangepaste evaluatie
@@ -308,18 +308,16 @@ Eerst wordt de uit te voeren code gegenereerd, waarna de uitvoering van die code
 Het genereren van de code gebeurt met een sjabloonsysteem, genaamd Mako \autocite{mako}.
 Dit sjabloonsysteem wordt traditioneel gebruikt bij webapplicaties (zoals Ruby on Rails met \textsc{erb}, Phoenix met \textsc{eex}, Laravel met Blade, enz.) om een html-pagina te genereren.
 In ons geval zijn de sjablonen verantwoordelijk voor de vertaling van programmeertaalonafhankelijke concepten naar implementaties in specifieke talen.
-Voorbeelden hiervan zijn functieoproepen, toekennen van variabelen, enz.
+Voorbeelden hiervan zijn functieoproepen, assignments, enz.
 Ook zijn de sjablonen verantwoordelijk voor het genereren van de code die de oplossing van de student zal oproepen en evalueren.
 
-Het aantal sjablonen en hoe ze geïmplementeerd worden is redelijk vrij.
-De judge vereist wel enkele standaardsjablonen, waaraan vastgelegde parameters meegegeven worden.
-Deze sjablonen stellen elk een aparte functie voor, die de judge nodig heeft.
-De verplichte sjablonen zijn:
+Het aantal sjablonen en hoe ze geïmplementeerd worden is in principe vrij, zij het dat de judge wel enkele standaardsjablonen nodig heeft, waaraan vastgelegde parameters meegegeven worden.
+Deze verplichte sjablonen zijn:
 \begin{description}
     \item[\texttt{assignment}] Vertaalt een assignment uit het testplan naar code.
     \item[\texttt{contexts}] Het centrale sjabloon, genereert de code nodig om alle contexten uit een testplan uit te voeren.
-    Om performantieredenen (zie ook~\cref{ch:beperkingen-en-toekomstig-werk}) wordt de code van alle contexten uit een testplan in een bestand genereert.
-    Aan de hand van een parameter bij uitvoeren (een getal dat de context aangeeft), wordt bij het uitvoeren de code voor de juiste context gekozen.
+    Om performantieredenen (zie ook~\cref{ch:beperkingen-en-toekomstig-werk}) wordt de code van alle contexten uit een testplan in een bestand gegenereerd.
+    Aan de hand van een parameter (een getal dat de context aangeeft), wordt bij het uitvoeren de code voor de juiste context gekozen.
     \item[\texttt{evaluator\_executor}] Genereert code om een aangepaste evaluator te starten.
     \item[\texttt{evaluators}] Genereert de evaluatiecode voor alle testgevallen.
     \item[\texttt{function}] Vertaalt een functie-oproep naar code.
@@ -328,16 +326,135 @@ De verplichte sjablonen zijn:
 
 Daarnaast moet het encoderen naar serialisatieformaat ook geïmplementeerd worden in elke taal.
 Veel talen hebben dus nog enkele bijkomende bestanden met code.
+In alle bestaande implementaties is dit geïmplementeerd als een module of klasse met naam \texttt{Value}.
+
+\subsection{Communicatie tussen uitvoering en judge}\label{subsec:communicatie-tussen-uitvoering-en-judge}
+
+De uitvoering van een oplossing genereert resultaten die door de judge geïnterpreteerd moeten worden.
+Er zijn verschillende soorten uitvoerresultaten (zoals vermeld heeft elke soort uitvoer een aparte test in het testplan).
+We noemen de verschillende soorten uitvoer de \term{uitvoerkanalen}.
+Twee ervan, het standaarduitvoer- en standaardfoutkanaal komen overeen met de standaarduitvoer- en standaardfoutstroom van het proces dat de code uitvoert.
+Uitvoer naar een bestand (het bestandskanaal) resulteert in een bestand en vormt ook geen probleem.
+De overige uitvoerkanalen, het kanaal voor exceptions (uitzonderingenkanaal) en het returnkanaal (voor returnwaarden) worden geschreven naar een bestand.
+Het is namelijk niet in elke taal mogelijk om nieuwe kanalen te openen.
+De sjablonen krijgen de verwachte namen van die bestanden mee van de judge, maar zijn wel verantwoordelijk voor het openen, schrijven en sluiten van deze bestanden.
+Deze naam bevat willekeurige tekens, zodat de kans dat deze bestanden overschreven worden door de oplossing minimaal is.
+De bestanden waar de exceptions and returnwaarden naartoe geschreven worden, worden na de uitvoering gelezen door de judge.
+Hierna worden alle kanalen op dezelfde manier behandeld door de judge.
+
+
+In de bestaande implementaties ligt de verantwoordelijkheid om naar deze bestanden te schrijven bij de \texttt{Value}-module van hierboven.
 
 \subsection{Uitvoeren van de code}\label{subsec:uitvoeren-van-de-code}
 
-Nadat alle code voorhanden is, wordt deze per context uit het testplan uitgevoerd en wordt de uitvoer verzameld.
+Na het genereren van de code wordt alle code gecompileerd (bij de talen die daar behoeft aan hebben).
+Vervolgens wordt deze per context uit het testplan uitgevoerd en wordt de uitvoer verzameld.
 Het uitvoeren zelf gebeurt op de normale manier dat de programmeertaal uitgevoerd wordt via de commandoregel.
 Dit is een voordeel van onze aanpak: er is geen verschil tussen hoe de judge de code van de student uitvoert en hoe de student zijn code zelf uitvoert op zijn eigen computer.
 Dit voorkomt dat er subtiele verschillen zouden insluipen.
 
+Indien de configuratie het toelaat, worden de contexten in parallel uitgevoerd.
+Om te vermijden dat bestanden of uitvoer overschreven wordt, wordt de gecompileerde code gekopieerd naar een aparte map, waar de uitvoer gebeurt.
+\Cref{lst:mapstructuur} illustreert dit met een voorbeeld voor een oplossing in Java.
+Deze figuur stelt de toestand van de werkmap voor na het uitvoeren van de code.
+In de map \texttt{common} zit alle code en de gecompileerde bestanden.
+Voor elke context worden de gecompileerde bestanden gekopieerd naar een andere map, bv.\ \texttt{context-1}, wat de map is voor context \texttt{1} van het testplan.
+
+\begin{listing}
+    \inputminted{text}{code/dir-listing.txt}
+    \caption{Mapstructuur na het uitvoeren van de code, met twee contexten.}
+    \label{lst:mapstructuur}
+\end{listing}
 
 \section{Evalueren van een oplossing}\label{sec:evalueren-van-een-oplossing2}
 
 Na de uitvoering van elke context heeft de judge alle relevant uitvoer verzamelt, zoals de standaardkanalen.
 Deze uitvoer moet vervolgens beoordeeld worden om na te gaan in hoeverre deze uitvoer voldoet aan de verwachte uitvoer.
+Dit kan op drie manieren:
+\begin{enumerate}
+    \item Ingebouwde evaluator: de oplossing wordt geëvalueerd in de judge zelf.
+    \item Aangepaste evaluator: de oplossing wordt geëvalueerd door eigen code, maar dezelfde wordt gebruikt voor alle programmeertalen, in het evaluatieproces.
+    \item Taalspecifieke evaluator: de oplossing wordt onmiddellijk na de uitvoering geëvalueerd in het uitvoeringsproces.
+\end{enumerate}
+
+\subsection{Ingebouwde evaluator}\label{subsec:ingebouwde-evaluator}
+
+Voor eenvoudige evaluaties volstaat de ingebouwde evaluator van de judge.
+Momenteel zijn er drie soorten ingebouwde evaluatoren, die hieronder besproken worden.
+
+\subsubsection{Tekstevaluator}
+
+Deze evaluator vergelijkt de verkregen uitvoer van een uitvoerkanaal (standaarduitvoer, returnwaarde, \ldots) met de verwachte uitvoer uit het testplan.
+Alle data worden als string behandeld.
+Deze evaluator biedt enkele opties om het gedrag aan te passen:
+
+\begin{description}
+    \item[\texttt{ignoreWhitespace}] Witruimte voor en na het resultaat wordt genegeerd.
+    \item[\texttt{caseInsensitive}] Er wordt geen rekening gehouden met het verschil tussen hoofdletters en kleine letters.
+    \item[\texttt{tryFloatingPoint}] De waarde moet geïnterpreteerd worden als een zwevendekommagetal (\english{floating point}), waarbij rekening gehouden wordt met de foutmarge.
+    \item[\texttt{applyRounding}] Of zwevendekommagetallen afgrond moeten worden.
+    Indien wel wordt het aantal cijfers genomen van de optie \texttt{roundTo}.
+    \item[\texttt{roundTo}] Het aantal cijfers na de komma.
+    Enkel nuttig als \texttt{applyRounding} waar is.
+\end{description}
+
+\subsubsection{Bestandsevaluator}
+
+Hiermee kan een geproduceerd bestand vergeleken worden met een gegeven bestand uit het testplan.
+Het gaat om tekstuele bestanden.
+Deze evaluator kan werken in drie modi:
+
+\begin{description}
+    \item[\texttt{exact}] Beide bestanden moet exact hetzelfde zijn, inclusief regeleindes.
+    \item[\texttt{lines}] Elke regel wordt vergeleken met overeenkomstige regel in het andere bestand.
+    De evaluatie van de lijnen is exact, maar zonder de regeleindes.
+    \item[\texttt{values}] Elke regel wordt geïnterpreteerd als een tekstuele waarde en vergeleken met de tekstevaluator.
+    In deze modus worden kunnen ook alle opties van de tekstevaluator gebruikt worden.
+\end{description}
+
+\subsubsection{Waarde-evaluator}
+
+Deze evaluator vergelijkt twee waarden, zoals gedefinieerd door het serialisatieformaat.
+De twee waarden moeten exact overeenkomen, met uitzondering van zwevendekommagetallen.
+
+
+\subsection{Aangepaste evaluator}\label{subsec:aangepaste-evaluator}
+
+Voor de aangepaste evaluator moet een bestand geschreven worden in een programmeertaal naar keuze.
+Het resultaat van de uitvoering wordt vervolgens geserialiseerd en gedeserialiseerd naar het evaluatieproces.
+Hoe een evaluator moet geïmplementeerd worden, hangt af van de programmeertaal.
+
+In Python bestaat de aangepaste evaluator uit een module met een functie die voldoet aan de definitie, zoals gegeven in het eerste fragment van \cref{lst:evaluation-util-python}.
+De judge stelt ook een module \texttt{evaluation\_utils} ter beschikking.
+De functie van hierboven moet dan één oproep doen naar de functie \texttt{evaluation\_utils.evaluated()}.
+Deze module is redelijk eenvoudig, zoals te zien in \cref{lst:evaluation-util-python}.
+
+\begin{listing}
+    \inputminted{python}{code/signature.py}
+    \inputminted{python}{../../judge/runners/templates/python/evaluation_utils.py}
+    \caption{De definitie van de aangepaste evaluator en de implementatie van de module \texttt{evaluation\_utils}}
+    \label{lst:evaluation-util-python}
+\end{listing}
+
+In de Java-implementatie is de situatie gelijkaardig: het gaat om het implementeren van een abstracte klasse, die ook dienst doet als de module van Python.
+Deze staat in \cref{lst:evaluation-util-java}.
+
+\begin{listing}
+    \inputminted{java}{../../judge/runners/templates/java/AbstractCustomEvaluator.java}
+    \caption{De implementatie van de klasse \texttt{AbstractCustomEvaluator}.}
+    \label{lst:evaluation-util-java}
+\end{listing}
+
+\subsubsection{Taalspecifieke evaluator}
+
+De taalspecifieke evaluator is de eenvoudigste: deze neemt een codefragment met daarin één functie \texttt{evaluate}, die één argument aanvaardt, de geproduceerde waarde.
+Waar de geproduceerde waarde bij de aangepaste evaluator in het serialisatieformaat moet kunnen, is dit hier niet het geval: de functie wordt rechtstreeks opgeroepen tijdens de uitvoering.
+Om het resultaat aan te geven moet ook één functieoproep komen naar een functie met dezelfde definitie als de \texttt{evaluated}-functie van de aangepaste evaluator.
+In Python is dit bijvoorbeeld:
+
+\begin{minted}{python}
+def evaluated(result, expected, actual, messages=None):
+    pass
+\end{minted}
+
+Deze evaluator is het minst flexibel: er kunnen in bepaalde talen, zoals Java, geen import-statements gedaan worden.

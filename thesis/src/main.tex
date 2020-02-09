@@ -21,9 +21,10 @@
 \usepackage{hyperref} % Laad hyperref voor cleverref.
 \usepackage[dutch]{cleveref}
 \usepackage{adjustbox}
+\usepackage{listings}
 
 % Gebruik dit om de afbreekpatronen zichtbaar te maken.
-\usepackage{showhyphens}
+%\usepackage{showhyphens}
 
 % Engelse bastaardwoorden die geen patroon hebben.
 % De Nederlandse afbreekpatronen zijn sowieso oud.
@@ -44,6 +45,12 @@
     },
     headerAttributes = true,
     hybrid = true,
+}
+
+\definecolor{bg}{rgb}{0.98,0.98,0.98}
+\setminted{
+    bgcolor=bg,
+    linenos
 }
 
 \title{TESTed: one judge to rule them all}
@@ -92,7 +99,7 @@ Master of Science in de informatica%
 
     \setmainfont[Ligatures=TeX,Ligatures=Rare,Numbers=OldStyle,Contextuals=Alternate]{Libertinus Serif}
     \setsansfont[Ligatures=TeX,Ligatures=Rare,Numbers=OldStyle,Contextuals=Alternate]{Libertinus Sans}
-    \setmonofont[Scale=MatchLowercase]{Jetbrains Mono}
+    \setmonofont[Scale=MatchLowercase,Contextuals={Alternate}]{Jetbrains Mono}
     \setmathfont{Libertinus Math}
 
     \tableofcontents

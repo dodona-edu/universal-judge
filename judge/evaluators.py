@@ -1,4 +1,9 @@
-"""Evaluators actually compare values to determine the result of a test."""
+"""
+Evaluators actually compare values to determine the result of a test.
+
+Note: the class docs of the built-in evaluators is used verbatim in the
+text of the thesis, which is way they are in Dutch.
+"""
 
 import math
 from dataclasses import field

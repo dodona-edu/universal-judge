@@ -34,9 +34,8 @@ abstract class AbstractCustomEvaluator implements Closeable {
                 result, readableExpected, readableActual, messages);
     }
 
-    protected void evaluated(boolean result, String readableExpected,
+    protected void evaluated(boolean r, String readableExpected,
                              String readableActual) throws IOException {
-        Values.evaluated(writer,
-                result, readableExpected, readableActual, List.of());
+        Values.evaluated(writer, r, readableExpected, readableActual, List.of());
     }
 }
