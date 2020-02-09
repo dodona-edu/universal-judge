@@ -347,11 +347,11 @@ In de bestaande implementaties ligt de verantwoordelijkheid om naar deze bestand
 
 \subsection{Uitvoeren van de code}\label{subsec:uitvoeren-van-de-code}
 
-Na het genereren van de code wordt alle code gecompileerd (bij de talen die daar behoeft aan hebben).
-Vervolgens wordt deze per context uit het testplan uitgevoerd en wordt de uitvoer verzameld.
-Het uitvoeren zelf gebeurt op de normale manier dat de programmeertaal uitgevoerd wordt via de commandoregel.
-Dit is een voordeel van onze aanpak: er is geen verschil tussen hoe de judge de code van de student uitvoert en hoe de student zijn code zelf uitvoert op zijn eigen computer.
-Dit voorkomt dat er subtiele verschillen zouden insluipen.
+Na het genereren wordt alle code gecompileerd (bij de talen die daar behoeft aan hebben).
+Vervolgens wordt elke context uit het testplan uitgevoerd en wordt de uitvoer verzameld.
+Het uitvoeren zelf gebeurt op de normale manier dat een programmeertaal uitgevoerd wordt: via de commandoregel.
+Deze aanpak heeft een voordeel: er is geen verschil tussen hoe de judge de code van de student uitvoert en hoe de student zijn code zelf uitvoert op zijn eigen computer.
+Dit voorkomt dat er subtiele verschillen in de resultaten sluipen.
 
 Indien de configuratie het toelaat, worden de contexten in parallel uitgevoerd.
 Om te vermijden dat bestanden of uitvoer overschreven wordt, wordt de gecompileerde code gekopieerd naar een aparte map, waar de uitvoer gebeurt.
