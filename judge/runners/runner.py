@@ -24,7 +24,6 @@ from runners.config import LanguageConfig
 from runners.dependencies import Destination, File, Dependencies
 from runners.languages.haskell import HaskellConfig
 from runners.languages.java import JavaConfig
-from runners.languages.jshell import JshellConfig
 from runners.languages.python import PythonConfig
 from runners.translator import ContextArguments, EvaluatorArguments, Translator, PlanContextArguments, \
     PlanEvaluatorArguments, TestcaseArguments, MainTestcaseArguments, CustomEvaluatorArguments
@@ -440,8 +439,7 @@ class ConfigurableRunner(Runner):
 CONFIGS = {
     'python':  PythonConfig,
     'java':    JavaConfig,
-    'haskell': HaskellConfig,
-    'jshell':  JshellConfig
+    'haskell': HaskellConfig
 }
 
 
