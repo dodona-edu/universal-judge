@@ -1,68 +1,55 @@
-\documentclass{standalone}
+% Define the styles for various components in the architectural diagram.
+\tikzstyle{node}=[draw, minimum height=1cm, text width=4cm, align=center, fill=white]
+\tikzstyle{state}=[node, rectangle]
+\tikzstyle{process}=[node, rectangle, rounded corners=0.5cm]
+\tikzstyle{named}=[text=ugent-blue,font=\sffamily\scshape,align=center,text width=4cm]
 
-\usepackage{tikz}
-\usetikzlibrary{shapes,arrows,positioning,backgrounds,calc,intersections}
+\begin{tikzpicture}[node distance=1cm and 2.5cm]
 
-\begin{document}
+    \node[state] (input) at (0,0) {Start};
+    \node[process, below = of input] (generation) {Genereren \\ van code};
+    % Special node to connect the arrow.
+    \node[right = of generation,minimum height=1cm,xshift=-3.5cm] (gen1) {};
+    \node[left = of generation,minimum height=1cm,xshift=3.5cm] (gen2) {};
+    \node[state, right = of generation] (code) {Uitvoeringscode};
+    \node[process, below = of code] (execution) {Uitvoeren code};
+    \node[state, below = of execution] (execution state){Uitvoer};
+    \node[state, left = of execution state] (core state) {Uitvoer};
+    \node[state, left = of core state] (evaluation state) {Uitvoer};
+    \node[state, below = of evaluation state] (custom evaluation code) {Evaluatiecode};
+    \node[process, below = of custom evaluation code] (custom evaluation) {Evaluatie};
+    \node[process, right = of custom evaluation] (core evaluation) {Evaluatie};
+    \node[state, below = of execution state] (execution evaluation code) {Evaluatiecode};
+    \node[process, below = of execution evaluation code] (execution evaluation) {Evaluatie};
+    \node[state, below = of core evaluation] (feedback) {Resultaat};
 
-    % Define the styles for various components in the architectural diagram.
-    \tikzstyle{node}=[draw, minimum height=1cm, text width=4cm, align=center, fill=white]
-    \tikzstyle{state}=[node, rectangle]
-    \tikzstyle{process}=[node, rectangle, rounded corners=0.5cm]
-    \tikzstyle{named}=[text=ugent-blue,font=\sffamily\scshape,align=center,text width=4cm]
+    \node[named, below = of feedback] (core name) {kernproces};
+    \node[named, left = of core name] (evaluation name) {evaluatieproces};
+    \node[named, right = of core name] (execution name) {uitvoeringsproces};
 
-    %    \tikzstyle{kern}=[]
-    %    \tikzstyle{evaluation}=[]
-    %    \tikzstyle{execution}=[]
+    \begin{scope}[on background layer]
+        \draw [->] (input) -- (generation);
+        \draw[->] (generation) -- (code);
+        \draw[->, dashed] (gen2) |- (custom evaluation code);
+        \draw[->, dashed] (gen1) |- (execution evaluation code);
+        \draw[->] (code) -- (execution);
+        \draw[->] (execution) -- (execution state);
+        \draw[->] (execution state) -- node[above] {Serialisatie} ++ (core state);
+        \draw[->] (core state) -- node[above] {Serialisatie} ++ (evaluation state);
+        \draw[->] (core state) -- (core evaluation);
+        \draw[->] (evaluation state) -- (custom evaluation code);
+        \draw[->] (execution state) -- (execution evaluation code);
+        \draw[->] (custom evaluation code) -- (custom evaluation);
+        \draw[->] (execution evaluation code) -- (execution evaluation);
 
-    \begin{tikzpicture}[node distance=1cm and 2.5cm]
+        \draw[->] (core evaluation) -- (feedback);
+        \draw[->] (custom evaluation) -- (feedback);
+        \draw[->] (execution evaluation) -- (feedback);
 
-        \node[state] (input) at (0,0) {Start};
-        \node[process, below = of input] (generation) {Genereren \\ van code};
-        % Special node to connect the arrow.
-        \node[right = of generation,minimum height=1cm,xshift=-3.5cm] (gen1) {};
-        \node[left = of generation,minimum height=1cm,xshift=3.5cm] (gen2) {};
-        \node[state, right = of generation] (code) {Uitvoeringscode};
-        \node[process, below = of code] (execution) {Uitvoeren code};
-        \node[state, below = of execution] (execution state){Uitvoer};
-        \node[state, left = of execution state] (core state) {Uitvoer};
-        \node[state, left = of core state] (evaluation state) {Uitvoer};
-        \node[state, below = of evaluation state] (custom evaluation code) {Evaluatiecode};
-        \node[process, below = of custom evaluation code] (custom evaluation) {Evaluatie};
-        \node[process, right = of custom evaluation] (core evaluation) {Evaluatie};
-        \node[state, below = of execution state] (execution evaluation code) {Evaluatiecode};
-        \node[process, below = of execution evaluation code] (execution evaluation) {Evaluatie};
-        \node[state, below = of core evaluation] (feedback) {Resultaat};
+        \path[draw,dashed,very thick,lightgray] (-3.5,0.5) -- (-3.5,-14.6);
+        \path[draw,dashed,very thick,lightgray] (3.5,0.5) -- (3.5,-14.6);
 
-        \node[named, below = of feedback] (core name) {kernproces};
-        \node[named, left = of core name] (evaluation name) {evaluatieproces};
-        \node[named, right = of core name] (execution name) {uitvoeringsproces};
-
-        \begin{scope}[on background layer]
-            \draw [->] (input) -- (generation);
-            \draw[->] (generation) -- (code);
-            \draw[->, dashed] (gen2) |- (custom evaluation code);
-            \draw[->, dashed] (gen1) |- (execution evaluation code);
-            \draw[->] (code) -- (execution);
-            \draw[->] (execution) -- (execution state);
-            \draw[->] (execution state) -- node[above] {Serialisatie} ++ (core state);
-            \draw[->] (core state) -- node[above] {Serialisatie} ++ (evaluation state);
-            \draw[->] (core state) -- (core evaluation);
-            \draw[->] (evaluation state) -- (custom evaluation code);
-            \draw[->] (execution state) -- (execution evaluation code);
-            \draw[->] (custom evaluation code) -- (custom evaluation);
-            \draw[->] (execution evaluation code) -- (execution evaluation);
-
-            \draw[->] (core evaluation) -- (feedback);
-            \draw[->] (custom evaluation) -- (feedback);
-            \draw[->] (execution evaluation) -- (feedback);
-
-            \path[draw,dashed,very thick,lightgray] (-3.5,0.5) -- (-3.5,-14.6);
-            \path[draw,dashed,very thick,lightgray] (3.5,0.5) -- (3.5,-14.6);
-
-        \end{scope}
+    \end{scope}
 
 
-    \end{tikzpicture}
-
-\end{document}
+\end{tikzpicture}

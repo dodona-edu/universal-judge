@@ -9,7 +9,7 @@ but that will be a lot more work.
 from typing import List, Tuple
 
 from features import Features
-from testplan import Plan
+from testplan import Plan, Context
 
 CallbackResult = Tuple[List[str], List[str]]
 
@@ -44,7 +44,10 @@ class LanguageConfig:
         """
         return self.generation_callback(files)
 
-    def execution_command(self, file: str, dependencies: List[str], arguments: List[str]) -> List[str]:
+    def execution_command(self,
+                          file: str,
+                          dependencies: List[str],
+                          arguments: List[str]) -> List[str]:
         """
         Get the command for executing a file with some arguments.
         :param file: The "main" file to be executed.
@@ -55,16 +58,19 @@ class LanguageConfig:
         """
         raise NotImplementedError
 
-    def execute_context(self, files: List[str], context_number: int) -> List[str]:
+    def execute_precompiled_context(self,
+                                    dependencies: List[str],
+                                    context: Context,
+                                    context_number: int) -> List[str]:
         """Get the command for executing a context."""
-        files = files.copy()
-        main_files = [x for x in files if x.startswith(self.context_name())]
-        if len(main_files) != 1:
-            raise AssertionError(f"The files must contain one main file, but got {main_files} from {files}.")
-        files.remove(main_files[0])
-        return self.execution_command(main_files[0], files, [str(context_number)])
+        main_file, =\
+            [x for x in dependencies if x.startswith(self.selector_name())]
+        actual_files = [x for x in dependencies if x != main_file]
+        argument = [str(context_number)]
+        return self.execution_command(main_file, actual_files, argument)
 
-    def execute_evaluator(self, evaluator_name: str, dependencies: List[str]) -> List[str]:
+    def execute_evaluator(self, evaluator_name: str, dependencies: List[str])\
+            -> List[str]:
         """Get the command for executing an evaluator."""
         return self.execution_command(evaluator_name, dependencies, [])
 
@@ -76,8 +82,12 @@ class LanguageConfig:
         """The name for the submission file."""
         raise NotImplementedError
 
-    def context_name(self) -> str:
+    def context_name(self, context: Context) -> str:
         """The name of the context file."""
+        raise NotImplementedError
+
+    def selector_name(self) -> str:
+        """The name of the selector module."""
         raise NotImplementedError
 
     def evaluator_name(self) -> str:

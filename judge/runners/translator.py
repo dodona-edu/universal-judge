@@ -42,35 +42,19 @@ class MainTestcaseArguments:
 
 
 @dataclass
-class EvaluatorArguments:
-    main_testcase: MainTestcaseArguments
-    additional_testcases: List[TestcaseArguments]
-
-
-@dataclass
-class ContextArguments(EvaluatorArguments):
-    """Arguments for a context template."""
+class ContextArguments:
+    """Arguments for a plan template for the contexts."""
+    context_name: str
     before: str
     after: str
-
-
-@dataclass
-class PlanContextArguments:
-    """Arguments for a plan template for the contexts."""
-    secret_id: str
-    contexts: List[ContextArguments]
+    main_testcase: MainTestcaseArguments
+    additional_testcases: List[TestcaseArguments]
     value_file: str
     exception_file: str
     submission_name: str
-
-
-@dataclass
-class PlanEvaluatorArguments:
-    """Arguments for a plan template for the evaluators"""
     value_file: str
     exception_file: str
     secret_id: str
-    evaluators: List[EvaluatorArguments]
 
 
 @dataclass
@@ -79,6 +63,11 @@ class CustomEvaluatorArguments:
     expected: Value
     actual: Value
     arguments: Value
+
+
+@dataclass
+class SelectorArguments:
+    context_names: List[str]
 
 
 def write_template(arguments, template: Template, path: PathLike):
@@ -111,7 +100,7 @@ class Translator:
         self.language_config = language_config
         self.judge_config = judge_config
 
-    def get_readable_input(self, plan: Plan, case: Testcase) -> ExtendedMessage:
+    def get_readable_input(self, submission_name: str, case: Testcase) -> ExtendedMessage:
         """
         Get human readable input for a testcase. This function will use, in
         order of availability:
@@ -122,13 +111,13 @@ class Translator:
         4. Program arguments, if any.
 
         :param case: The testcase to get the input from.
-        :param plan: The plan.
+        :param submission_name: The name of the submission.
         """
         format_ = 'text'  # By default, we use text as input.
         if case.description:
             text = case.description
         elif isinstance(case, NormalTestcase) and isinstance(case.input, FunctionInput):
-            text = self.function_call(plan, case.input.function)
+            text = self.function_call(submission_name, case.input.function)
             format_ = self.judge_config.programming_language
         elif isinstance(case, NormalTestcase) and isinstance(case.input, AssignmentInput):
             text = self.assignment(case.input.assignment)
@@ -173,11 +162,11 @@ class Translator:
                 last_error = e
         raise last_error
 
-    def prepare_function_call(self, plan: Plan, function_call: FunctionCall) -> FunctionCall:
+    def prepare_function_call(self, submission_name: str, function_call: FunctionCall) -> FunctionCall:
         """Prepare the function call for main."""
         if function_call.type == FunctionType.IDENTITY:
             return function_call
-        object_ = function_call.object or self.language_config.submission_name(plan)
+        object_ = function_call.object or submission_name
         return FunctionCall(
             type=function_call.type,
             arguments=function_call.arguments,
@@ -185,9 +174,9 @@ class Translator:
             object=object_
         )
 
-    def function_call(self, plan: Plan, call: FunctionCall) -> str:
+    def function_call(self, submission_name: str, call: FunctionCall) -> str:
         """Translate a function to code."""
-        call = self.prepare_function_call(plan, call)
+        call = self.prepare_function_call(submission_name, call)
         template = self.find_template("function")
         return template.render(function=call)
 
@@ -207,8 +196,8 @@ class Translator:
         write_template(args, template, destination / destination_name)
         return destination_name
 
-    def write_plan_context_template(self, args: PlanContextArguments, destination: Path) -> str:
-        return self._find_and_write_template(args, destination, "contexts")
+    def write_context_template(self, args: ContextArguments, destination: Path) -> str:
+        return self._find_and_write_template(args, destination, "context")
 
-    def write_plan_evaluator_template(self, args: PlanEvaluatorArguments, destination: Path) -> str:
-        return self._find_and_write_template(args, destination, "evaluators")
+    def write_selector_template(self, args: SelectorArguments, destination: Path) -> str:
+        return self._find_and_write_template(args, destination, "selector")

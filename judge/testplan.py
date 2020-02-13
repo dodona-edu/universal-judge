@@ -18,8 +18,8 @@ from pydantic import validator, root_validator, BaseModel
 from pydantic.dataclasses import dataclass
 
 from features import Features, reduce_features
-from serialisation import Value, ExceptionValue, NumericTypes, StringTypes, BooleanTypes, ObjectTypes, SequenceTypes, \
-    NothingTypes, InstanceTypes
+from serialisation import Value, ExceptionValue, NumericTypes, StringTypes, \
+    BooleanTypes, ObjectTypes, SequenceTypes, NothingTypes, InstanceTypes
 
 
 class TestPlanError(ValueError):
@@ -48,8 +48,9 @@ class TextData:
     @staticmethod
     def __resolve_path(working_directory, file_path):
         """
-        Resolve a path to an absolute path. Relative paths will be resolved against the given
-        ``working_directory``, not the actual working directory.
+        Resolve a path to an absolute path. Relative paths will be resolved
+        against the given ``working_directory``, not the actual working
+        directory.
         """
         if path.isabs(file_path):
             return path.abspath(file_path)
@@ -72,10 +73,14 @@ class TextData:
 
 
 class FunctionType(str, Enum):
-    TOP = "top"  # Normal function call.
+    # Normal function call.
+    TOP = "top"
+    # Call on a function
     OBJECT = "object"
-    CONSTRUCTOR = "constructor"  # Will be a constructor; the "object" is ignored.
-    IDENTITY = "identity"  # Must have one argument, cannot have object
+    # Will be a constructor; the "object" is ignored.
+    CONSTRUCTOR = "constructor"
+    # Must have one argument, cannot have object
+    IDENTITY = "identity"
 
 
 @dataclass
@@ -97,7 +102,9 @@ class FunctionCall(WithFeatures):
         type_ = values.get("type")
         object_ = values.get("object")
         if type_ == FunctionType.IDENTITY and object_ is not None:
-            raise ValueError(f"An identity call cannot have an object, but got {object_}")
+            raise ValueError(
+                f"An identity call cannot have an object, but got {object_}"
+            )
         return values
 
     @root_validator
@@ -105,7 +112,10 @@ class FunctionCall(WithFeatures):
         arguments = values.get("arguments")
         type_ = values.get("type")
         if type_ == FunctionType.IDENTITY and len(arguments) != 1:
-            raise ValueError(f"Identity call requires exactly one argument, but got {arguments}")
+            raise ValueError(
+                f"Identity call requires exactly one argument,"
+                f" but got {arguments}"
+            )
         return values
 
     @root_validator
@@ -118,9 +128,11 @@ class FunctionCall(WithFeatures):
 
     def get_used_features(self) -> Features:
         features = Features.FUNCTION_CALL
-        if self.type == FunctionType.OBJECT or self.type == FunctionType.CONSTRUCTOR:
+        if self.type == FunctionType.OBJECT or \
+                self.type == FunctionType.CONSTRUCTOR:
             features |= Features.OBJECTS
-        return features | reduce_features(x.type.feature for x in self.arguments)
+        return features | reduce_features(
+            x.type.feature for x in self.arguments)
 
 
 VariableTypes = Union[
@@ -145,9 +157,10 @@ class VariableType:
 @dataclass
 class Assignment(WithFeatures):
     """
-    Assigns the return value of a function to a variable. Because the expression part is pretty
-    simple, the type of the value is determined by looking at the expression. It is also possible
-    to define the type. If the type cannot be determined and it is not specified, this is an error.
+    Assigns the return value of a function to a variable. Because the expression
+    part is pretty simple, the type of the value is determined by looking at the
+    expression. It is also possible to define the type. If the type cannot be
+    determined and it is not specified, this is an error.
     """
     name: str
     expression: FunctionCall
@@ -155,14 +168,16 @@ class Assignment(WithFeatures):
 
     def get_type(self) -> VariableType:
         """
-        Get the type of the variable. If a type is specified, it will be returned. Otherwise, this
-        functions tries to determine type in a best-efforts manner. Currently, expressions with a
-        function of type "identity" or "constructor" can be determined. This function does not check
-        the given type against a determined type; if the given type is incompatible, this will lead
-        to a crash during the execution.
+        Get the type of the variable. If a type is specified, it will be
+        returned. Otherwise, this functions tries to determine type on a
+        best-efforts basis. Currently, expressions with a function of type
+        "identity" or "constructor" can be determined. This function does not
+        check the given type against a determined type; if the given type is
+        incompatible, this will lead to a crash during the execution.
 
-        :return: The type, and optionally some data about the type. The data is currently only used
-        when the type is an instance, which will then contain the name of the instance.
+        :return: The type, and optionally some data about the type. The data is
+        currently only used when the type is an instance, which will then
+        contain the name of the instance.
         """
         if self.type:
             return self.type
@@ -202,15 +217,17 @@ class ExceptionBuiltin(str, Enum):
 @dataclass
 class BaseBuiltinEvaluator:
     """
-    A built-in evaluator in the judge. Some basic evaluators are available, as enumerated by
-    :class:`Builtin`. These are useful for things like comparing text, files or values.
+    A built-in evaluator in the judge. Some basic evaluators are available, as
+    enumerated by :class:`Builtin`. These are useful for things like comparing
+    text, files or values.
 
-    This is the recommended and default evaluator, since it is a) the least amount of work and
-    b) the most language independent.
+    This is the recommended and default evaluator, since it is a) the least
+    amount of work and b) the most language independent.
     """
     # noinspection PyUnresolvedReferences
     type: Literal["builtin"] = "builtin"
-    options: Dict[str, Any] = field(default_factory=dict)  # Options for the evaluator
+    options: Dict[str, Any] = field(
+        default_factory=dict)  # Options for the evaluator
 
 
 @dataclass
@@ -231,9 +248,10 @@ class ExceptionBuiltinEvaluator(BaseBuiltinEvaluator):
 @dataclass
 class CustomEvaluator:
     """
-    Evaluate the responses with custom code. This is still a language-independent method; the
-    evaluator is run as part of the judge and receives its values from that judge. This type is
-    useful, for example, when doing exercises on sequence alignments.
+    Evaluate the responses with custom code. This is still a
+    language-independent method; the evaluator is run as part of the judge and
+    receives its values from that judge. This type is useful, for example, when
+    doing exercises on sequence alignments.
     """
     language: str
     path: Path
@@ -241,27 +259,29 @@ class CustomEvaluator:
     type: Literal["custom"] = "custom"
 
 
-# Represents custom code. This is a mapping of the programming language to the actual code.
+# Represents custom code. This is a mapping of the programming language to the
+# actual code.
 Code = Dict[str, TextData]
 
 
 @dataclass
 class SpecificEvaluator:
     """
-    Provide language-specific code that will be run in the same environment as the user's code.
-    While this is very powerful and allows you to test language-specific constructs, there are a few
-    caveats:
+    Provide language-specific code that will be run in the same environment as
+    the user's code. While this is very powerful and allows you to test
+    language-specific constructs, there are a few caveats:
 
-    1. The code is run alongside the user code. This means the user can potentially take control of
-       the code.
-    2. This will limit the number of language an exercise is available in, since you need to provide
-       tests for all languages you want to support.
-    3. It is a lot of work. You need to return the correct values, since the judge needs to
-       understand what the result was.
+    1. The code is run alongside the user code. This means the user can
+       potentially take control of the code.
+    2. This will limit the number of language an exercise is available in, since
+       you need to provide tests for all languages you want to support.
+    3. It is a lot of work. You need to return the correct values, since the
+       judge needs to understand what the result was.
 
-    The code you must write should be a function that accepts the result of a user call.
-    Note: this type of evaluator is only supported when using function calls. If you want to
-    evaluate, say stdout, you should use the custom evaluator instead.
+    The code you must write should be a function that accepts the result of a
+    user call. Note: this type of evaluator is only supported when using
+    function calls. If you want to evaluate, say stdout, you should use the
+    custom evaluator instead.
     """
     evaluators: Code
     type: Literal["specific"] = "specific"
@@ -270,7 +290,8 @@ class SpecificEvaluator:
 @dataclass
 class TextOutputChannel(TextData):
     """Describes the output for textual channels."""
-    evaluator: Union[TextBuiltinEvaluator, CustomEvaluator] = TextBuiltinEvaluator()
+    evaluator: Union[
+        TextBuiltinEvaluator, CustomEvaluator] = TextBuiltinEvaluator()
 
 
 @dataclass
@@ -278,21 +299,27 @@ class FileOutputChannel:
     """Describes the output for files."""
     expected_path: str  # Path to the file to compare to.
     actual_path: str  # Path to the generated file (by the users code)
-    evaluator: Union[TextBuiltinEvaluator, CustomEvaluator] = TextBuiltinEvaluator(name=TextBuiltin.FILE)
+    evaluator: Union[
+        TextBuiltinEvaluator, CustomEvaluator] = TextBuiltinEvaluator(
+        name=TextBuiltin.FILE)
 
 
 @dataclass
 class ValueOutputChannel:
     """Handles return values of function calls."""
     value: Optional[Value] = None
-    evaluator: Union[ValueBuiltinEvaluator, CustomEvaluator, SpecificEvaluator] = ValueBuiltinEvaluator()
+    evaluator: Union[
+        ValueBuiltinEvaluator, CustomEvaluator, SpecificEvaluator
+    ] = ValueBuiltinEvaluator()
 
 
 @dataclass
 class ExceptionOutputChannel:
     """Handles exceptions caused by the submission."""
     exception: ExceptionValue
-    evaluator: Union[ExceptionBuiltinEvaluator, CustomEvaluator, SpecificEvaluator] = ExceptionBuiltinEvaluator()
+    evaluator: Union[
+        ExceptionBuiltinEvaluator, CustomEvaluator, SpecificEvaluator
+    ] = ExceptionBuiltinEvaluator()
 
 
 class NoneChannelState(str, Enum):
@@ -329,9 +356,15 @@ class Output(WithFeatures):
 
     stdout: TextOutput = IgnoredChannelState.IGNORED
     stderr: TextOutput = NoneChannelState.NONE
-    file: Union[FileOutputChannel, IgnoredChannelState] = IgnoredChannelState.IGNORED
-    exception: Union[ExceptionOutputChannel, AnyChannelState] = NoneChannelState.NONE
-    result: Union[ValueOutputChannel, AnyChannelState] = IgnoredChannelState.IGNORED
+    file: Union[
+        FileOutputChannel, IgnoredChannelState
+    ] = IgnoredChannelState.IGNORED
+    exception: Union[
+        ExceptionOutputChannel, AnyChannelState
+    ] = NoneChannelState.NONE
+    result: Union[
+        ValueOutputChannel, AnyChannelState
+    ] = IgnoredChannelState.IGNORED
 
     def get_used_features(self) -> Features:
         start = Features.NOTHING
@@ -345,7 +378,8 @@ class Output(WithFeatures):
 @dataclass
 class MainInput(Input):
     """Input for the main testcase."""
-    arguments: List[Value] = field(default_factory=list)  # Main args of the program.
+    arguments: List[Value] = field(
+        default_factory=list)  # Main args of the program.
 
     def get_used_features(self) -> Features:
         return reduce_features([x.type.feature for x in self.arguments])
@@ -395,8 +429,9 @@ class Testcase(WithFeatures):
 @dataclass
 class MainTestcase(Testcase):
     """
-    The main testcase for a context. Responsible for calling a main function if necessary, but also
-    for providing the main arguments, and the stdin for scripts.
+    The main testcase for a context. Responsible for calling a main function if
+    necessary, but also for providing the main arguments, and the stdin for
+    scripts.
     """
     input: MainInput = MainInput()
 
@@ -407,8 +442,8 @@ class MainTestcase(Testcase):
 @dataclass
 class NormalTestcase(Testcase):
     """
-    A normal testcase for a context. This testcase is responsible for calling functions and running
-    code to test.
+    A normal testcase for a context. This testcase is responsible for calling
+    functions and running code to test.
     """
     input: NormalInput
 
@@ -416,8 +451,10 @@ class NormalTestcase(Testcase):
     def no_return_with_assignment(cls, values):
         input_ = values.get("input")
         output_ = values.get("output")
-        if isinstance(input_, AssignmentInput) \
-                and not (output_.result == IgnoredChannelState.IGNORED or output_.result == NoneChannelState.NONE):
+        if isinstance(input_, AssignmentInput) and not (
+                output_.result == IgnoredChannelState.IGNORED
+                or output_.result == NoneChannelState.NONE
+        ):
             raise ValueError(f"An assignment cannot have a return value.")
         return values
 
@@ -432,11 +469,12 @@ class Context(WithFeatures):
     A context corresponds to a context as defined by the Dodona test format.
     It is a collection of testcases that are run together, without isolation.
 
-    A context should consist of at least one testcase: either the main testcase, or if needed,
-    normal testcases.
+    A context should consist of at least one testcase: either the main testcase,
+    or if needed, normal testcases.
 
-    Note that in many cases, there might be just one testcase. For example, if the context is used
-    to test one function, the context will contain one function testcase, and nothing more.
+    Note that in many cases, there might be just one testcase. For example, if
+    the context is used to test one function, the context will contain one
+    function testcase, and nothing more.
     """
     main: Union[MainTestcase, NoMainTestcase] = NoMainTestcase.NONE
     normal: List[NormalTestcase] = field(default_factory=list)
@@ -499,6 +537,12 @@ class Plan(WithFeatures):
     def get_used_features(self) -> Features:
         return _reduce_with_feature(self.tabs)
 
+    def get_contexts(self) -> List[Context]:
+        contexts = []
+        for tab in self.tabs:
+            contexts.extend(tab.contexts)
+        return contexts
+
 
 def _reduce_with_feature(iterable: Iterable[WithFeatures]) -> Features:
     return reduce_features(x.get_used_features() for x in iterable)
@@ -515,7 +559,8 @@ def parse_test_plan(json_string) -> Plan:
 
 def generate_schema():
     """
-    Generate a json schema for the serialisation type. It will be printed on stdout.
+    Generate a json schema for the serialisation type. It will be printed on
+    stdout.
     """
     sc = _PlanModel.schema()
     sc['$id'] = "universal-judge/testplan"

@@ -2,7 +2,6 @@ import logging
 import os
 import stat
 from multiprocessing.dummy import Pool
-from pathlib import Path
 from typing import Tuple
 
 from dodona import *
