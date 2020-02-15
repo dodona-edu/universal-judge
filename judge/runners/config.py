@@ -107,7 +107,7 @@ class LanguageConfig:
         raise NotImplementedError
 
     def conventionalise_object(self, class_name: str) -> str:
-        """Apply a language's conventions to function name."""
+        """Apply a language's conventions to a module name."""
         raise NotImplementedError
 
     def rename_evaluator(self, code, name):

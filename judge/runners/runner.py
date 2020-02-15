@@ -14,20 +14,25 @@ import random
 import shutil
 import string
 import subprocess
+import tempfile
 from dataclasses import dataclass, replace
-from enum import Enum
 from pathlib import Path
 from typing import Tuple, List, Optional, Set, Protocol
 
+from dodona import Message, Status, ExtendedMessage
 from runners.config import LanguageConfig
 from runners.languages.haskell import HaskellConfig
 from runners.languages.java import JavaConfig
 from runners.languages.python import PythonConfig
 from runners.translator import Translator, TestcaseArguments, SelectorArguments, \
-    MainTestcaseArguments, ContextArguments
+    MainTestcaseArguments, ContextArguments, CustomEvaluatorArguments
+from serialisation import Value, NothingType, NothingTypes, SequenceTypes, \
+    SequenceType
 from tested import Config
-from testplan import Context, Testcase, Plan, IgnoredChannelState, NoneChannelState, \
-    SpecificEvaluator, NormalTestcase, FunctionInput, NoMainTestcase, AssignmentInput
+from testplan import Context, Testcase, Plan, IgnoredChannelState, \
+    NoneChannelState, \
+    SpecificEvaluator, NormalTestcase, FunctionInput, NoMainTestcase, \
+    AssignmentInput, ExecutionMode, TestPlanError
 
 logger = logging.getLogger(__name__)
 
@@ -68,12 +73,12 @@ class ContextExecution:
     """
     Arguments used to execute a single context of the testplan.
     """
-    testplan: Plan
     context: Context
     number: int
-    working_directory: Path
+    mode: ExecutionMode
     common_directory: Path
     files: List[str]
+    precompilation_result: Optional[Tuple[List[Message], Status]]
 
 
 @dataclass
@@ -82,11 +87,6 @@ class GenerationArguments:
     context: Context
     context_name: str
     submission_name: str
-
-
-class ExecutionMode(Enum, str):
-    PRECOMPILATION = "precompilation"
-    INDIVIDUAL = "individual"
 
 
 @dataclass
@@ -110,10 +110,12 @@ class SupportsRunner(Protocol):
                    mode: ExecutionMode) -> List[str]:
         """
         The generation step is responsible for generating the code using the
-        templates for the programming language. Only generation is expected from this
-        step; compilation is handled in other steps.
+        templates for the programming language. Only generation is expected from
+        this step; compilation is handled in other steps.
+
         :param plan: The testplan to generate files for.
-        :param working_directory: The directory in which the files must be generated.
+        :param working_directory: The directory in which the files must be
+                                  generated.
         :param dependencies: A list of files that will be made available in the
                              working directory.
         :param mode: For which execution mode files must be generated. In
@@ -130,21 +132,27 @@ class SupportsRunner(Protocol):
                     ) -> Tuple[Optional[BaseExecutionResult], List[str]]:
         """
         The compilation step in the pipeline. This callback is used in both the
-        precompilation and individual mode. The implementation may only depend on the
+        precompilation and individual mode. The implementation may only depend on
+        the
         arguments.
 
         In individual compilation mode, this function may be called in a multi-
-        threaded environment. Since the implementation is obvious to which mode it is
+        threaded environment. Since the implementation is obvious to which mode
+        it is
         operating in, it must be thread-safe.
 
-        In individual mode, this function is responsible for compiling the code, such
-        that a single context can be executed for evaluation. The compilation happens
+        In individual mode, this function is responsible for compiling the code,
+        such
+        that a single context can be executed for evaluation. The compilation
+        happens
         for each context, just before execution.
 
-        In precompilation mode, the function is responsible for compiling all code at
+        In precompilation mode, the function is responsible for compiling all
+        code at
         once. In some languages, this means the compilation will fail if one context
         is not correct. For those languages, the judge will fallback to individual
-        compilation. This fallback does come with a heavy execution speed penalty, so
+        compilation. This fallback does come with a heavy execution speed
+        penalty, so
         disabling the fallback if not needed is recommended.
         :param working_directory: The directory in which the dependencies are
                                   available and in which the compilation results
@@ -165,7 +173,7 @@ class SupportsRunner(Protocol):
                 working_directory: Path,
                 dependencies: List[str],
                 stdin: str,
-                context_argument: Optional[str]) -> ExecutionResult:
+                context_argument: Optional[str] = None) -> ExecutionResult:
         """
         Execute a file.
 
@@ -180,6 +188,11 @@ class SupportsRunner(Protocol):
         :param executable_file: The executable that should be executed. This file
                                 will not be present in the dependency list.
         """
+        pass
+
+    def get_readable_input(self,
+                           submission_name: str,
+                           case: Testcase) -> ExtendedMessage:
         pass
 
 
@@ -201,7 +214,7 @@ class ConfigurableRunner(SupportsRunner):
 
         submission_name = self.language_config.submission_name(plan)
         logger.debug(f"Generating files with submission name {submission_name}")
-        generated_files = []
+        generated_files = dependencies.copy()
         context_names = []
         for context in plan.get_contexts():
             name = self.language_config.context_name(context)
@@ -240,8 +253,8 @@ class ConfigurableRunner(SupportsRunner):
                 executable_file: str,
                 working_directory: Path,
                 dependencies: List[str],
-                context_argument: Optional[str],
-                stdin: str) -> ExecutionResult:
+                stdin: str,
+                context_argument: Optional[str] = None) -> ExecutionResult:
         logger.info("Starting execution on file %s", executable_file)
 
         command = self.language_config.execution_command(
@@ -295,7 +308,7 @@ class ConfigurableRunner(SupportsRunner):
         """
 
         return self.translator.write_selector_template(
-            SelectorArguments(context_names=context_names),
+            SelectorArguments(contexts=context_names),
             destination
         )
 
@@ -399,56 +412,57 @@ class ConfigurableRunner(SupportsRunner):
             # noinspection PyTypeChecker
             shutil.copy2(file, destination)
 
-    # def evaluate_custom(self,
-    #                     path: Path,
-    #                     expected: Optional[Value],
-    #                     actual: Optional[Value],
-    #                     arguments: List[Value]) -> BaseExecutionResult:
-    #
-    #     with tempfile.TemporaryDirectory() as directory:
-    #         # directory = "custom-dir"
-    #         directory = Path(directory)
-    #         logger.info("Will do custom evaluation in %s", directory)
-    #
-    #         # Copy dependencies to the directory.
-    #         dependencies = self.language_config.initial_dependencies() + self.language_config.evaluator_dependencies()
-    #         self._find_paths_to_template_folder(dependencies, directory)
-    #
-    #         # Copy the custom evaluator to the execution folder.
-    #         name = self.language_config.evaluator_name()
-    #         destination = directory / (
-    #                 name + "." + self.language_config.file_extension())
-    #         source = Path(self.config.resources) / path
-    #         logger.debug("Copying custom evaluator %s to %s", source,
-    #                      destination)
-    #         shutil.copy2(source, destination)
-    #
-    #         data = CustomEvaluatorArguments(
-    #             evaluator=name,
-    #             expected=expected or NothingType(NothingTypes.NOTHING),
-    #             actual=actual or NothingType(NothingTypes.NOTHING),
-    #             arguments=SequenceType(SequenceTypes.LIST, arguments)
-    #         )
-    #         name = self.translator.custom_evaluator(data, directory)
-    #
-    #         # Do compilation for those languages that require it.
-    #         command, files = self.language_config.evaluator_generation_callback(
-    #             dependencies + [name])
-    #         logger.debug("Compiling custom evaluator with command %s", command)
-    #         result = self._compile(command, directory)
-    #         if result and result.stderr:
-    #             raise TestPlanError(
-    #                 f"Error while compiling specific test case: {result.stderr}")
-    #
-    #         # Execute the custom evaluator.
-    #         command = self.language_config.execute_evaluator(name, files)
-    #         logger.debug("Executing custom evaluator with command %s", command)
-    #         p = subprocess.run(command, text=True, capture_output=True,
-    #                            cwd=directory)
-    #         logger.debug("Custom evaluator exited with code %d", p.returncode)
-    #         logger.debug("  Stdout was %s", p.stdout)
-    #         logger.debug("  Stderr was %s", p.stderr)
-    #         return BaseExecutionResult(p.stdout, p.stderr, p.returncode)
+    def evaluate_custom(self,
+                        path: Path,
+                        expected: Optional[Value],
+                        actual: Optional[Value],
+                        arguments: List[Value]) -> BaseExecutionResult:
+
+        with tempfile.TemporaryDirectory() as directory:
+            # directory = "custom-dir"
+            directory = Path(directory)
+            logger.info("Will do custom evaluation in %s", directory)
+
+            # Copy dependencies to the directory.
+            dependencies = self.language_config.initial_dependencies() \
+                + self.language_config.evaluator_dependencies()
+            self._find_paths_to_template_folder(dependencies, directory)
+
+            # Copy the custom evaluator to the execution folder.
+            name = self.language_config.evaluator_name()
+            destination = directory / (
+                    name + "." + self.language_config.file_extension())
+            source = Path(self.config.resources) / path
+            logger.debug("Copying custom evaluator %s to %s", source,
+                         destination)
+            shutil.copy2(source, destination)
+
+            data = CustomEvaluatorArguments(
+                evaluator=name,
+                expected=expected or NothingType(NothingTypes.NOTHING),
+                actual=actual or NothingType(NothingTypes.NOTHING),
+                arguments=SequenceType(SequenceTypes.LIST, arguments)
+            )
+            name = self.translator.custom_evaluator(data, directory)
+
+            # Do compilation for those languages that require it.
+            command, files = self.language_config.evaluator_generation_callback(
+                dependencies + [name])
+            logger.debug("Compiling custom evaluator with command %s", command)
+            result = self._compile(command, directory)
+            if result and result.stderr:
+                raise TestPlanError(f"Error while compiling specific "
+                                    f"test case: {result.stderr}")
+
+            # Execute the custom evaluator.
+            command = self.language_config.execute_evaluator(name, files)
+            logger.debug("Executing custom evaluator with command %s", command)
+            p = subprocess.run(command, text=True, capture_output=True,
+                               cwd=directory)
+            logger.debug("Custom evaluator exited with code %d", p.returncode)
+            logger.debug("  Stdout was %s", p.stdout)
+            logger.debug("  Stderr was %s", p.stderr)
+            return BaseExecutionResult(p.stdout, p.stderr, p.returncode)
 
     def generate_context(self, destination: Path,
                          context: Context,
@@ -509,6 +523,11 @@ class ConfigurableRunner(SupportsRunner):
             destination
         )
 
+    def get_readable_input(self,
+                           submission_name: str,
+                           case: Testcase) -> ExtendedMessage:
+        return self.translator.get_readable_input(submission_name, case)
+
 
 CONFIGS = {
     'python':  PythonConfig,
@@ -538,12 +557,16 @@ def get_supporting_languages(plan: Plan) -> Set[str]:
     return supported_languages
 
 
+def get_language_config(language: str) -> LanguageConfig:
+    return CONFIGS[language]()
+
+
 def get_generator(config: Config, language: str = None) -> SupportsRunner:
     """Get the runner for the specified language."""
     if language is None:
         language = config.programming_language
     adjusted_config = replace(config, programming_language=language)
-    language_config = CONFIGS[language]()
+    language_config = get_language_config(language)
     return ConfigurableRunner(
         config=adjusted_config,
         language_config=language_config,

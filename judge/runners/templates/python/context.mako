@@ -1,6 +1,7 @@
 ## Code to execute one test context.
 <%! from testplan import Assignment %>
 import values
+import sys
 
 
 ## Prepare some code for the evaluation.
@@ -53,8 +54,8 @@ ${main_testcase.exception_code}
 try:
     from ${submission_name} import *
 except Exception as e:
-    % if c.main_testcase.exists:
-        evaluators.e_evaluate_main(e)
+    % if main_testcase.exists:
+        e_evaluate_main(e)
     % else:
         raise e
     % endif
@@ -63,7 +64,8 @@ except Exception as e:
 % if main_testcase.exists:
     sys.stderr.write("--${secret_id}-- SEP")
     sys.stdout.write("--${secret_id}-- SEP")
-    evaluators.write_delimiter("--${secret_id}-- SEP")
+    write_delimiter("--${secret_id}-- SEP")
+% endif
 
 ## Generate the actual tests based on the context.
 % for additional in additional_testcases:
@@ -72,7 +74,7 @@ except Exception as e:
             <%include file="assignment.mako" args="assignment=additional.statement" />\
         % else:
             % if additional.has_return:
-                evaluators.v_evaluate_${c_number}_${loop.index}(\
+                v_evaluate_${loop.index}(\
             % endif
             <%include file="function.mako" args="function=additional.statement" />\
             % if additional.has_return:
@@ -81,11 +83,11 @@ except Exception as e:
         % endif
 
     except Exception as e:
-        evaluators.e_evaluate_${c_number}_${loop.index}(e)
+        e_evaluate_${loop.index}(e)
 
     sys.stderr.write("--${secret_id}-- SEP")
     sys.stdout.write("--${secret_id}-- SEP")
-    evaluators.write_delimiter("--${secret_id}-- SEP")
+    write_delimiter("--${secret_id}-- SEP")
 
 % endfor
 

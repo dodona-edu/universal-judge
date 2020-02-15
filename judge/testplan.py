@@ -1,9 +1,9 @@
 """
 Data format for the testplan.
 
-This module is the authoritative source on the format and behaviour of the
-testplan. Note that the implementation in the judge is kept simple by design;
-unless noted, the judge will not provide default values for missing fields.
+This module is the authoritative source on the format and behaviour of the testplan.
+When executing this module, a json-schema is generated for the format, which can be
+of assistance when checking existing testplans.
 """
 import json
 from abc import ABC, abstractmethod
@@ -48,9 +48,8 @@ class TextData:
     @staticmethod
     def __resolve_path(working_directory, file_path):
         """
-        Resolve a path to an absolute path. Relative paths will be resolved
-        against the given ``working_directory``, not the actual working
-        directory.
+        Resolve a path to an absolute path. Relative paths will be resolved against
+        the given ``working_directory``, not the actual working directory.
         """
         if path.isabs(file_path):
             return path.abspath(file_path)
@@ -102,9 +101,8 @@ class FunctionCall(WithFeatures):
         type_ = values.get("type")
         object_ = values.get("object")
         if type_ == FunctionType.IDENTITY and object_ is not None:
-            raise ValueError(
-                f"An identity call cannot have an object, but got {object_}"
-            )
+            raise ValueError(f"An identity call cannot have an object, "
+                             f"but got {object_}")
         return values
 
     @root_validator
@@ -112,10 +110,8 @@ class FunctionCall(WithFeatures):
         arguments = values.get("arguments")
         type_ = values.get("type")
         if type_ == FunctionType.IDENTITY and len(arguments) != 1:
-            raise ValueError(
-                f"Identity call requires exactly one argument,"
-                f" but got {arguments}"
-            )
+            raise ValueError(f"Identity call requires exactly one argument, "
+                             f"but got {arguments}")
         return values
 
     @root_validator
@@ -168,12 +164,12 @@ class Assignment(WithFeatures):
 
     def get_type(self) -> VariableType:
         """
-        Get the type of the variable. If a type is specified, it will be
-        returned. Otherwise, this functions tries to determine type on a
-        best-efforts basis. Currently, expressions with a function of type
-        "identity" or "constructor" can be determined. This function does not
-        check the given type against a determined type; if the given type is
-        incompatible, this will lead to a crash during the execution.
+        Get the type of the variable. If a type is specified, it will be returned.
+        Otherwise, this functions tries to determine type on a best-efforts basis.
+        Currently, expressions with a function of type "identity" or "constructor"
+        can be determined. This function does not check the given type against a
+        determined type; if the given type is incompatible, this will lead to a
+        crash during the execution.
 
         :return: The type, and optionally some data about the type. The data is
         currently only used when the type is an instance, which will then
@@ -218,13 +214,12 @@ class ExceptionBuiltin(str, Enum):
 class BaseBuiltinEvaluator:
     """
     A built-in evaluator in the judge. Some basic evaluators are available, as
-    enumerated by :class:`Builtin`. These are useful for things like comparing
-    text, files or values.
+    enumerated by :class:`Builtin`. These are useful for things like comparing text,
+    files or values.
 
-    This is the recommended and default evaluator, since it is a) the least
-    amount of work and b) the most language independent.
+    This is the recommended and default evaluator, since it is a) the least amount
+    of work and b) the most language independent.
     """
-    # noinspection PyUnresolvedReferences
     type: Literal["builtin"] = "builtin"
     options: Dict[str, Any] = field(
         default_factory=dict)  # Options for the evaluator
@@ -248,10 +243,10 @@ class ExceptionBuiltinEvaluator(BaseBuiltinEvaluator):
 @dataclass
 class CustomEvaluator:
     """
-    Evaluate the responses with custom code. This is still a
-    language-independent method; the evaluator is run as part of the judge and
-    receives its values from that judge. This type is useful, for example, when
-    doing exercises on sequence alignments.
+    Evaluate the responses with custom code. This is still a language-independent
+    method; the evaluator is run as part of the judge and receives its values from
+    that judge. This type is useful, for example, when doing exercises on sequence
+    alignments.
     """
     language: str
     path: Path
@@ -267,21 +262,20 @@ Code = Dict[str, TextData]
 @dataclass
 class SpecificEvaluator:
     """
-    Provide language-specific code that will be run in the same environment as
-    the user's code. While this is very powerful and allows you to test
-    language-specific constructs, there are a few caveats:
+    Provide language-specific code that will be run in the same environment as the
+    user's code. While this is very powerful and allows you to test language-
+    specific constructs, there are a few caveats:
 
-    1. The code is run alongside the user code. This means the user can
-       potentially take control of the code.
+    1. The code is run alongside the user code. This means the user can potentially
+       take control of the code.
     2. This will limit the number of language an exercise is available in, since
        you need to provide tests for all languages you want to support.
-    3. It is a lot of work. You need to return the correct values, since the
-       judge needs to understand what the result was.
+    3. It is a lot of work. You need to return the correct values, since the judge
+       needs to understand what the result was.
 
-    The code you must write should be a function that accepts the result of a
-    user call. Note: this type of evaluator is only supported when using
-    function calls. If you want to evaluate, say stdout, you should use the
-    custom evaluator instead.
+    The code you must write should be a function that accepts the result of a user
+    call. Note: this type of evaluator is only supported when using function calls.
+    If you want to evaluate stdout you should use the custom evaluator instead.
     """
     evaluators: Code
     type: Literal["specific"] = "specific"
@@ -308,18 +302,16 @@ class FileOutputChannel:
 class ValueOutputChannel:
     """Handles return values of function calls."""
     value: Optional[Value] = None
-    evaluator: Union[
-        ValueBuiltinEvaluator, CustomEvaluator, SpecificEvaluator
-    ] = ValueBuiltinEvaluator()
+    evaluator: Union[ValueBuiltinEvaluator, CustomEvaluator, SpecificEvaluator]\
+        = ValueBuiltinEvaluator()
 
 
 @dataclass
 class ExceptionOutputChannel:
     """Handles exceptions caused by the submission."""
     exception: ExceptionValue
-    evaluator: Union[
-        ExceptionBuiltinEvaluator, CustomEvaluator, SpecificEvaluator
-    ] = ExceptionBuiltinEvaluator()
+    evaluator: Union[ExceptionBuiltinEvaluator, CustomEvaluator, SpecificEvaluator]\
+        = ExceptionBuiltinEvaluator()
 
 
 class NoneChannelState(str, Enum):
@@ -356,15 +348,12 @@ class Output(WithFeatures):
 
     stdout: TextOutput = IgnoredChannelState.IGNORED
     stderr: TextOutput = NoneChannelState.NONE
-    file: Union[
-        FileOutputChannel, IgnoredChannelState
-    ] = IgnoredChannelState.IGNORED
-    exception: Union[
-        ExceptionOutputChannel, AnyChannelState
-    ] = NoneChannelState.NONE
-    result: Union[
-        ValueOutputChannel, AnyChannelState
-    ] = IgnoredChannelState.IGNORED
+    file: Union[FileOutputChannel, IgnoredChannelState]\
+        = IgnoredChannelState.IGNORED
+    exception: Union[ExceptionOutputChannel, AnyChannelState]\
+        = NoneChannelState.NONE
+    result: Union[ValueOutputChannel, AnyChannelState]\
+        = IgnoredChannelState.IGNORED
 
     def get_used_features(self) -> Features:
         start = Features.NOTHING
@@ -430,8 +419,7 @@ class Testcase(WithFeatures):
 class MainTestcase(Testcase):
     """
     The main testcase for a context. Responsible for calling a main function if
-    necessary, but also for providing the main arguments, and the stdin for
-    scripts.
+    necessary, but also for providing the main arguments, and the stdin for scripts.
     """
     input: MainInput = MainInput()
 
@@ -466,15 +454,15 @@ class NoMainTestcase(str, Enum):
 @dataclass
 class Context(WithFeatures):
     """
-    A context corresponds to a context as defined by the Dodona test format.
-    It is a collection of testcases that are run together, without isolation.
+    A context corresponds to a context as defined by the Dodona test format. It is a
+    collection of testcases that are run together, without isolation.
 
-    A context should consist of at least one testcase: either the main testcase,
-    or if needed, normal testcases.
+    A context should consist of at least one testcase: either the main testcase, or
+    if needed, normal testcases.
 
-    Note that in many cases, there might be just one testcase. For example, if
-    the context is used to test one function, the context will contain one
-    function testcase, and nothing more.
+    Note that in many cases, there might be just one testcase. For example, if the
+    context is used to test one function, the context will contain one function
+    testcase, and nothing more.
     """
     main: Union[MainTestcase, NoMainTestcase] = NoMainTestcase.NONE
     normal: List[NormalTestcase] = field(default_factory=list)
@@ -503,6 +491,13 @@ class Context(WithFeatures):
             main |= self.main.get_used_features()
         return main | _reduce_with_feature(self.normal)
 
+    def get_stdin(self, resources: str):
+        stdin_ = []
+        for testcase in self.all_testcases():
+            if (input_ := testcase.input.get_as_string(resources)) is not None:
+                stdin_.append(input_)
+        return "\n".join(stdin_)
+
 
 @dataclass
 class Tab(WithFeatures):
@@ -514,6 +509,11 @@ class Tab(WithFeatures):
         return _reduce_with_feature(self.contexts)
 
 
+class ExecutionMode(str, Enum):
+    PRECOMPILATION = "precompilation"
+    INDIVIDUAL = "individual"
+
+
 @dataclass
 class Configuration:
     """
@@ -521,9 +521,19 @@ class Configuration:
     """
     parallel: bool = True
     """
-    Indicate that the contexts should be executed in parallel. It is recommended
-    to disable this for exercises that already are multithreaded. It may also be
-    worth investigating if the exercise is computationally heady.
+    Indicate that the contexts should be executed in parallel. It is recommended to
+    disable this for exercises that already are multithreaded. It may also be worth
+    investigating if the exercise is computationally heady.
+    """
+    mode: ExecutionMode = ExecutionMode.PRECOMPILATION
+    """
+    The default mode for the judge.
+    """
+    allow_fallback: Optional[bool] = None
+    """
+    Indicate if the judge should attempt individual mode if the precompilation mode
+    fails. If nothing is given, the language-dependent default is used. If a boolean
+    is given, this value is used, regardless of the language default.
     """
 
 
@@ -559,8 +569,7 @@ def parse_test_plan(json_string) -> Plan:
 
 def generate_schema():
     """
-    Generate a json schema for the serialisation type. It will be printed on
-    stdout.
+    Generate a json schema for the serialisation type. It will be printed on stdout.
     """
     sc = _PlanModel.schema()
     sc['$id'] = "universal-judge/testplan"

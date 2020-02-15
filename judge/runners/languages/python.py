@@ -1,9 +1,9 @@
-from humps import decamelize
+from humps import decamelize, depascalize
 from typing import List
 
 from runners.config import CallbackResult
 from runners.runner import LanguageConfig
-from testplan import Plan
+from testplan import Plan, Context
 
 
 class PythonConfig(LanguageConfig):
@@ -34,16 +34,19 @@ class PythonConfig(LanguageConfig):
         return "py"
 
     def submission_name(self, plan: Plan) -> str:
-        return f"submission"
+        return "submission"
 
-    def context_name(self) -> str:
-        return f"context"
+    def context_name(self, context: Context) -> str:
+        return "context"
 
     def evaluator_name(self) -> str:
-        return f"evaluator"
+        return "evaluator"
+
+    def selector_name(self) -> str:
+        return "selector"
 
     def conventionalise(self, function_name: str) -> str:
         return decamelize(function_name)
 
     def conventionalise_object(self, class_name: str) -> str:
-        return decamelize(class_name)
+        return depascalize(class_name)

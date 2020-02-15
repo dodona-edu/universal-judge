@@ -67,7 +67,7 @@ class CustomEvaluatorArguments:
 
 @dataclass
 class SelectorArguments:
-    context_names: List[str]
+    contexts: List[str]
 
 
 def write_template(arguments, template: Template, path: PathLike):

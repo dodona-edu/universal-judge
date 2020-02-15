@@ -18,10 +18,10 @@ def read_config() -> Config:
     return Config(**{
         "memory_limit": 536870912,
         "time_limit": 10000000,
-        "programming_language": 'java',
+        "programming_language": 'python',
         "natural_language": 'nl',
-        "resources": str(Path('../exercise/big-echo/evaluation').resolve()),
-        "source": '../exercise/big-echo/solutions/test.java',
+        "resources": str(Path('../exercise/echo/evaluation').resolve()),
+        "source": '../exercise/echo/solutions/test.py',
         "judge": str(Path('../').resolve()),
         "workdir": str(Path('./workdir').resolve()),
         "plan_name": "plan.json"
@@ -33,7 +33,7 @@ if __name__ == '__main__':
 
     # Enable logging
     log = logging.getLogger()
-    log.setLevel(logging.WARNING)
+    log.setLevel(logging.DEBUG)
     ch = logging.StreamHandler(stream=sys.stdout)
     formatter = logging.Formatter('%(name)s:%(levelname)s:%(message)s')
     ch.setFormatter(formatter)
