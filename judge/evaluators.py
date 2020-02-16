@@ -11,6 +11,7 @@ from typing import Optional, List, Union, Dict, Any, Tuple
 
 from pydantic.dataclasses import dataclass
 
+import judge
 import serialisation
 from dodona import Status, ExtendedMessage, Permission, StatusMessage, Message
 from serialisation import get_readable_representation, SerialisationError, \
@@ -432,9 +433,11 @@ class CustomEvaluator(Evaluator):
     it does have parameters that are passed to the evaluator.
     """
 
-    def __init__(self, config, values: List[serialisation.Value]):
+    def __init__(self,
+                 config,
+                 judge_instance: 'judge.GeneratorJudge'):
         super().__init__(config)
-        self.values = values
+        self.judge = judge_instance
 
     def evaluate(self, output_channel, actual) -> EvaluationResult:
         assert isinstance(output_channel.evaluator, TestplanCustomEvaluator)
@@ -483,11 +486,11 @@ class CustomEvaluator(Evaluator):
                 messages=["Received nothing."]
             )
 
-        raise Exception("TODO: not implemented")
-        # TODO
-        #runner = GeneratorJudge(self.config, None, output_channel.evaluator.language)
-        path = output_channel.evaluator.path
-        result = runner.evaluate_custom(path, expected, actual, self.values)
+        result = self.judge.evaluate_custom(
+            evaluator=output_channel.evaluator,
+            expected=expected,
+            actual=actual
+        )
 
         if not result.stdout:
             stdout = ExtendedMessage(description=result.stdout, format="text")
@@ -532,11 +535,12 @@ class CustomEvaluator(Evaluator):
         )
 
 
-def get_evaluator(config: Config,
+def get_evaluator(judge_instance: 'judge.GeneratorJudge',
                   output: Union[OutputChannel, AnyChannelState]) -> Evaluator:
     """
     Get the evaluator for a given output channel.
     """
+    config = judge_instance.config
     # Handle channel states.
     if output == NoneChannelState.NONE:
         return NoneEvaluator(config)
@@ -559,7 +563,7 @@ def get_evaluator(config: Config,
         assert evaluator.name == ExceptionBuiltin.EXCEPTION
         raise NotImplementedError("Exception evaluators are not yet supported.")
     elif isinstance(evaluator, TestplanCustomEvaluator):
-        return CustomEvaluator(config, evaluator.arguments)
+        return CustomEvaluator(config, judge_instance)
     elif isinstance(evaluator, TestplanSpecificEvaluator):
         return SpecificEvaluator(config)
     else:

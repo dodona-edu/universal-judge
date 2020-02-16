@@ -18,11 +18,12 @@ import utils
 from dodona import ExtendedMessage
 from runners.config import LanguageConfig
 from runners.utils import remove_indents, remove_newline
-from serialisation import Value, StringType, StringTypes
+from serialisation import Value, StringType, StringTypes, SequenceType, \
+    SequenceTypes
 from tested import Config
 from testplan import Testcase, NormalTestcase, AssignmentInput, NoneChannelState, \
     TextData, MainTestcase, FunctionInput, FunctionCall, Assignment, FunctionType, \
-    Context, NoMainTestcase, IgnoredChannelState, SpecificEvaluator
+    Context, NoMainTestcase, IgnoredChannelState, SpecificEvaluator, CustomEvaluator
 
 
 @dataclass
@@ -486,3 +487,33 @@ class Generator:
             destination=destination,
             name="selector"
         )
+
+    def generate_custom_evaluator(self,
+                                  destination: Path,
+                                  evaluator: CustomEvaluator,
+                                  actual: Value,
+                                  expected: Value) -> str:
+        """
+        Generate the code for the custom evaluator.
+        :param destination: The folder to generate in.
+        :param evaluator: The evaluator data.
+        :param actual: The actual data, received from the code.
+        :param expected: The expected data, from the testplan.
+        :return: The generated file.
+        """
+        evaluator_name = self.language_config.conventionalize_evaluator_name(
+            evaluator.path.stem
+        )
+        arguments = SequenceType(
+            type=SequenceTypes.LIST,
+            data=evaluator.arguments
+        )
+
+        args = CustomEvaluatorArguments(
+            evaluator=evaluator_name,
+            expected=expected,
+            actual=actual,
+            arguments=arguments
+        )
+
+        return self.custom_evaluator(args, destination)

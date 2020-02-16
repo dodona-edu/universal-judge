@@ -3,7 +3,7 @@ import random
 import shutil
 import string
 import subprocess
-import tempfile
+import humps
 from dataclasses import replace
 from multiprocessing.dummy import Pool
 from typing import Tuple
@@ -11,12 +11,11 @@ from typing import Tuple
 import utils
 from dodona import *
 from evaluators import get_evaluator, Evaluator
-from runners.generator import Generator, CustomEvaluatorArguments, \
-    path_to_templates, value_file, exception_file
+from runners.generator import (Generator, path_to_templates, value_file,
+                               exception_file)
 from runners.languages.haskell import HaskellConfig
 from runners.languages.java import JavaConfig
 from runners.languages.python import PythonConfig
-from serialisation import NothingType, SequenceType
 from tested import Config
 from testplan import *
 
@@ -114,8 +113,8 @@ def _evaluate_channel(
     # don't report it.
     is_correct = status.enum == Status.CORRECT
     has_no_result = actual_result is None or actual_result == ""
-    has_no_expected = expected_output == NoneChannelState.NONE or expected_output \
-                      == IgnoredChannelState.IGNORED
+    has_no_expected = (expected_output == NoneChannelState.NONE
+                       or expected_output == IgnoredChannelState.IGNORED)
     if is_correct and has_no_result and has_no_expected:
         return True
 
@@ -207,12 +206,12 @@ class GeneratorJudge:
     """
 
     def __init__(self, config: Config, output: IO, language: Optional[str] = None):
-        self.config = config
         self.out = output
         if language is None:
             language = config.programming_language
         adjusted_config = replace(config, programming_language=language)
         language_config = CONFIGS[language]()
+        self.config = adjusted_config
         self.language_config = language_config
         self.identifier = _get_identifier()
         self.translator = Generator(adjusted_config, language_config)
@@ -353,26 +352,11 @@ class GeneratorJudge:
 
             # Get the evaluators
             try:
-                stdout_evaluator = get_evaluator(
-                    self.config,
-                    testcase.output.stdout
-                )
-                stderr_evaluator = get_evaluator(
-                    self.config,
-                    testcase.output.stderr
-                )
-                file_evaluator = get_evaluator(
-                    self.config,
-                    testcase.output.file
-                )
-                value_evaluator = get_evaluator(
-                    self.config,
-                    testcase.output.result
-                )
-                exception_evaluator = get_evaluator(
-                    self.config,
-                    testcase.output.exception
-                )
+                stdout_evaluator = get_evaluator(self, testcase.output.stdout)
+                stderr_evaluator = get_evaluator(self, testcase.output.stderr)
+                file_evaluator = get_evaluator(self, testcase.output.file)
+                value_evaluator = get_evaluator(self, testcase.output.result)
+                exception_evaluator = get_evaluator(self, testcase.output.exception)
             except TestPlanError as e:
                 report_update(self.out, AppendMessage(message=ExtendedMessage(
                     description=str(e),
@@ -530,15 +514,20 @@ class GeneratorJudge:
             files.remove(executable)
             stdin = args.context.get_stdin(self.config.resources)
 
-            result = self.execute_module(
+            base_result = self.execute_file(
                 executable_name=executable,
                 working_directory=context_directory,
                 dependencies=files,
                 stdin=stdin
             )
-            return result, messages, status
         else:
             result, files = None, args.files
+            if args.precompilation_result:
+                logger.debug("Substituting precompilation results.")
+                messages, status = args.precompilation_result
+            else:
+                logger.debug("No precompilation results found, using default.")
+                messages, status = [], Status.CORRECT
 
             logger.info("Executing context %d in PRECOMPILATION mode...",
                         args.number)
@@ -547,64 +536,17 @@ class GeneratorJudge:
             files.remove(executable)
             stdin = args.context.get_stdin(self.config.resources)
 
-            result = self.execute_module(
+            base_result = self.execute_file(
                 executable_name=executable,
                 working_directory=context_directory,
                 dependencies=files,
                 stdin=stdin,
-                context_argument=str(args.number)
+                argument=str(args.number)
             )
-            return result, [], Status.CORRECT
 
-    def find_main_file(self, files: List[str], name: str) -> str:
-        return [x for x in files if x.startswith(name)][0]
-
-    def run_compilation_command(self,
-                                command: List[str],
-                                working_directory
-                                ) -> Optional[BaseExecutionResult]:
-        if command:
-            p = subprocess.run(command, text=True, capture_output=True,
-                               cwd=working_directory)
-            return BaseExecutionResult(p.stdout, p.stderr, p.returncode)
-        else:
-            return None
-
-    def execute_module(self,
-                       executable_name: str,
-                       working_directory: Path,
-                       dependencies: List[str],
-                       stdin: str,
-                       context_argument: Optional[str] = None) -> ExecutionResult:
-        """
-        Execute a file.
-
-        Note that this method must be thread-safe.
-
-        :param dependencies: A list of files that are available in the given working
-                             directory. The
-        :param working_directory: The working directory, in which the execution must
-                                  take place.
-        :param context_argument: Argument for the executable, optional.
-        :param stdin: The stdin for the execution.
-        :param executable_name: The executable that should be executed. This file
-                                will not be present in the dependency list.
-        """
-        logger.info("Starting execution on file %s", executable_name)
-
-        command = self.language_config.execution_command(
-            file=executable_name,
-            dependencies=dependencies,
-            arguments=[context_argument] if context_argument else []
-        )
-        logger.debug("Executing with command %s in directory %s", command,
-                     working_directory)
-        # noinspection PyTypeChecker
-        p = subprocess.run(command, input=stdin, text=True,
-                           capture_output=True, cwd=working_directory)
         identifier = f"--{self.identifier}-- SEP"
 
-        value_file_path = value_file(working_directory, self.identifier)
+        value_file_path = value_file(context_directory, self.identifier)
         try:
             # noinspection PyTypeChecker
             with open(value_file_path, "r") as f:
@@ -613,7 +555,7 @@ class GeneratorJudge:
             logger.warning("Value file not found, looked in %s", value_file_path)
             values = ""
 
-        exception_file_path = exception_file(working_directory, self.identifier)
+        exception_file_path = exception_file(context_directory, self.identifier)
         try:
             # noinspection PyTypeChecker
             with open(exception_file_path, "r") as f:
@@ -623,13 +565,72 @@ class GeneratorJudge:
                            exception_file_path)
             exceptions = ""
 
-        return ExecutionResult(
-            stdout=p.stdout,
-            stderr=p.stderr,
-            exit=p.returncode,
+        result = ExecutionResult(
+            stdout=base_result.stdout,
+            stderr=base_result.stderr,
+            exit=base_result.exit,
             separator=identifier,
             results=values,
             exceptions=exceptions
+        )
+
+        return result, messages, status
+
+    def find_main_file(self, files: List[str], name: str) -> str:
+        return [x for x in files if x.startswith(name)][0]
+
+    def run_compilation_command(
+            self,
+            command: List[str],
+            working_directory: Path
+    ) -> Optional[BaseExecutionResult]:
+        if command:
+            # noinspection PyTypeChecker
+            p = subprocess.run(command, text=True, capture_output=True,
+                               cwd=working_directory)
+            return BaseExecutionResult(p.stdout, p.stderr, p.returncode)
+        else:
+            return None
+
+    def execute_file(
+            self,
+            executable_name: str,
+            working_directory: Path,
+            dependencies: List[str],
+            stdin: Optional[str] = None,
+            argument: Optional[str] = None
+    ) -> BaseExecutionResult:
+        """
+        Execute a file.
+
+        Note that this method must be thread-safe.
+
+        :param dependencies: A list of files that are available in the given working
+                             directory. The
+        :param working_directory: The working directory, in which the execution must
+                                  take place.
+        :param argument: Argument for the executable, optional.
+        :param stdin: The stdin for the execution.
+        :param executable_name: The executable that should be executed. This file
+                                will not be present in the dependency list.
+        """
+        logger.info("Starting execution on file %s", executable_name)
+
+        command = self.language_config.execution_command(
+            file=executable_name,
+            dependencies=dependencies,
+            arguments=[argument] if argument else []
+        )
+        logger.debug("Executing with command %s in directory %s", command,
+                     working_directory)
+        # noinspection PyTypeChecker
+        p = subprocess.run(command, input=stdin, text=True,
+                           capture_output=True, cwd=working_directory)
+
+        return BaseExecutionResult(
+            stdout=p.stdout,
+            stderr=p.stderr,
+            exit=p.returncode
         )
 
     def compilation(self,
@@ -674,54 +675,70 @@ class GeneratorJudge:
         return result, files
 
     def evaluate_custom(self,
-                        path: Path,
+                        evaluator: CustomEvaluator,
                         expected: Optional[Value],
-                        actual: Optional[Value],
-                        arguments: List[Value]) -> BaseExecutionResult:
+                        actual: Optional[Value]) -> BaseExecutionResult:
+        """
+        Run the custom evaluation. Concerning structure and execution, the custom
+        evaluator is very similar to the execution of the whole evaluation. It a
+        mini-evaluation if you will.
 
-        with tempfile.TemporaryDirectory() as directory:
-            # directory = "custom-dir"
-            directory = Path(directory)
-            logger.info("Will do custom evaluation in %s", directory)
+        TODO: considering implementing a precompilation mode as well for custom
+          evaluators. One difficulty is that there is currently no runtime support
+          to decode values, only compile time support.
+        """
 
-            # Copy dependencies to the directory.
-            dependencies = self.language_config.initial_dependencies() \
-                           + self.language_config.evaluator_dependencies()
-            origin = path_to_templates(self.language_config, self.config)
-            utils.copy_from_paths_to_path(origin, dependencies, directory)
+        # Create a directory for this evaluator. If one exists, delete it first.
+        evaluator_dir_name = humps.decamelize(evaluator.path.stem)
+        custom_directory_name = f"evaluator_{evaluator_dir_name}"
+        custom_path = Path(self.config.workdir, custom_directory_name)
+        if custom_path.exists():
+            logger.debug("Removing existing directory for custom evaluator.")
+            shutil.rmtree(custom_path, ignore_errors=True)
+        custom_path.mkdir(parents=True)
 
-            # Copy the custom evaluator to the execution folder.
-            name = self.language_config.evaluator_name()
-            destination = directory / (
-                    name + "." + self.language_config.file_extension())
-            source = Path(self.config.resources) / path
-            logger.debug("Copying custom evaluator %s to %s", source,
-                         destination)
-            shutil.copy2(source, destination)
+        logger.info("Will do custom evaluation in %s", custom_path)
 
-            data = CustomEvaluatorArguments(
-                evaluator=name,
-                expected=expected or NothingType(NothingTypes.NOTHING),
-                actual=actual or NothingType(NothingTypes.NOTHING),
-                arguments=SequenceType(SequenceTypes.LIST, arguments)
-            )
-            name = self.translator.custom_evaluator(data, directory)
+        # Get the language config & translator for the language of the evaluator.
+        eval_judge = GeneratorJudge(self.config, self.out, evaluator.language)
+        eval_lang_config = eval_judge.language_config
+        eval_config = eval_judge.config
+        eval_translator = eval_judge.translator
 
-            # Do compilation for those languages that require it.
-            command, files = self.language_config.evaluator_generation_callback(
-                dependencies + [name])
-            logger.debug("Compiling custom evaluator with command %s", command)
-            result = self.run_compilation_command(command, directory)
-            if result and result.stderr:
-                raise TestPlanError(f"Error while compiling specific "
-                                    f"test case: {result.stderr}")
+        # Copy the dependencies to the folder.
+        dependencies = eval_lang_config.initial_dependencies()
+        dependencies.extend(eval_lang_config.evaluator_dependencies())
+        origin = path_to_templates(eval_lang_config, eval_config)
+        utils.copy_from_paths_to_path(origin, dependencies, custom_path)
 
-            # Execute the custom evaluator.
-            command = self.language_config.execute_evaluator(name, files)
-            logger.debug("Executing custom evaluator with command %s", command)
-            p = subprocess.run(command, text=True, capture_output=True,
-                               cwd=directory)
-            logger.debug("Custom evaluator exited with code %d", p.returncode)
-            logger.debug("  Stdout was %s", p.stdout)
-            logger.debug("  Stderr was %s", p.stderr)
-            return BaseExecutionResult(p.stdout, p.stderr, p.returncode)
+        # Generate the evaluator.
+        logger.debug("Generating custom evaluator.")
+        evaluator_name = eval_translator.generate_custom_evaluator(
+            destination=custom_path,
+            evaluator=evaluator,
+            actual=actual,
+            expected=expected
+        )
+        dependencies.append(evaluator_name)
+        logger.debug("Generated evaluator as %s", evaluator_name)
+
+        # Do compilation for those languages that require it.
+        command, files = eval_lang_config.evaluator_generation_callback(
+            dependencies
+        )
+        logger.debug("Compiling custom evaluator with command %s", command)
+        result = self.run_compilation_command(command, custom_path)
+        if result and result.stderr:
+            raise TestPlanError(f"Error while compiling specific "
+                                f"test case: {result.stderr}")
+
+        # Execute the custom evaluator.
+        executable = self.find_main_file(files, evaluator_name)
+        files.remove(executable)
+
+        return self.execute_file(
+            executable_name=executable,
+            working_directory=custom_path,
+            dependencies=files,
+            stdin=None
+        )

@@ -59,17 +59,6 @@ class LanguageConfig:
         """
         raise NotImplementedError
 
-    def execute_precompiled_context(self,
-                                    dependencies: List[str],
-                                    context: Context,
-                                    context_number: int) -> List[str]:
-        """Get the command for executing a context."""
-        main_file, =\
-            [x for x in dependencies if x.startswith(self.selector_name())]
-        actual_files = [x for x in dependencies if x != main_file]
-        argument = [str(context_number)]
-        return self.execution_command(main_file, actual_files, argument)
-
     def execute_evaluator(self, evaluator_name: str, dependencies: List[str])\
             -> List[str]:
         """Get the command for executing an evaluator."""
@@ -83,24 +72,8 @@ class LanguageConfig:
         """The name for the submission file."""
         raise NotImplementedError
 
-    def context_name(self, context: Context) -> str:
-        """The name of the context file."""
-        raise NotImplementedError
-
     def selector_name(self) -> str:
         """The name of the selector module."""
-        raise NotImplementedError
-
-    def evaluator_name(self) -> str:
-        """The name for the evaluator file."""
-        raise NotImplementedError
-
-    def value_writer(self, name):
-        """Return the code needed to write values to the file."""
-        raise NotImplementedError
-
-    def exception_writer(self, name):
-        """Return the code needed to write exceptions to the file."""
         raise NotImplementedError
 
     def conventionalise(self, function_name: str) -> str:
