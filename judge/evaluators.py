@@ -13,12 +13,14 @@ from pydantic.dataclasses import dataclass
 
 import serialisation
 from dodona import Status, ExtendedMessage, Permission, StatusMessage, Message
-from runners.runner import get_generator
-from serialisation import get_readable_representation, SerialisationError, SpecificResult, ExceptionValue
+from serialisation import get_readable_representation, SerialisationError, \
+    SpecificResult, ExceptionValue
 from tested import Config
-from testplan import TestPlanError, TextOutputChannel, FileOutputChannel, ValueOutputChannel, NoneChannelState, \
-    IgnoredChannelState, OutputChannel, AnyChannelState, TextBuiltinEvaluator, ValueBuiltinEvaluator, \
-    ExceptionBuiltinEvaluator, ExceptionOutputChannel, TextBuiltin, ValueBuiltin, ExceptionBuiltin
+from testplan import TestPlanError, TextOutputChannel, FileOutputChannel, \
+    ValueOutputChannel, NoneChannelState, IgnoredChannelState, OutputChannel, \
+    AnyChannelState, TextBuiltinEvaluator, ValueBuiltinEvaluator, \
+    ExceptionBuiltinEvaluator, ExceptionOutputChannel, TextBuiltin, ValueBuiltin, \
+    ExceptionBuiltin
 from testplan import CustomEvaluator as TestplanCustomEvaluator
 from testplan import SpecificEvaluator as TestplanSpecificEvaluator
 
@@ -27,8 +29,14 @@ from testplan import SpecificEvaluator as TestplanSpecificEvaluator
 class EvaluationResult:
     """Provides the result of an evaluation for a specific output channel."""
     result: StatusMessage  # The result of the evaluation.
-    readable_expected: str  # A human-friendly version of what the channel should have been.
-    readable_actual: str  # A human-friendly version (on a best-efforts basis) of what the channel is.
+    readable_expected: str
+    """
+    A human-friendly version of what the channel should have been.
+    """
+    readable_actual: str
+    """
+    A human-friendly version (on a best-efforts basis) of what the channel is.
+    """
     messages: List[Message] = field(default_factory=list)
 
 
@@ -76,11 +84,11 @@ class TextEvaluator(Evaluator):
         self.arguments.update({
             # Options for textual comparison
             'ignoreWhitespace': True,
-            'caseInsensitive': False,
+            'caseInsensitive':  False,
             # Options for numerical comparison
             'tryFloatingPoint': False,
-            'applyRounding': False,
-            'roundTo': 3
+            'applyRounding':    False,
+            'roundTo':          3
         })
 
     def evaluate(self, output_channel, actual) -> EvaluationResult:
@@ -108,7 +116,8 @@ class TextEvaluator(Evaluator):
             expected = expected.lower()
             actual = actual.lower()
 
-        if self.arguments['tryFloatingPoint'] and (actual_float := _is_number(actual)):
+        if self.arguments['tryFloatingPoint'] \
+                and (actual_float := _is_number(actual)):
             expected_float = float(expected)
             if self.arguments['applyRounding']:
                 numbers = int(self.arguments['roundTo'])
@@ -148,7 +157,8 @@ class FileEvaluator(Evaluator):
             "mode": "exact"
         })
         if self.arguments["mode"] not in {"exact", "lines", "values"}:
-            raise TestPlanError(f"Unknown mode for file evaluator: {self.arguments['mode']}")
+            raise TestPlanError(f"Unknown mode for file "
+                                f"evaluator: {self.arguments['mode']}")
 
     def evaluate(self, output_channel, actual) -> EvaluationResult:
         assert isinstance(output_channel, FileOutputChannel)
@@ -161,20 +171,26 @@ class FileEvaluator(Evaluator):
             with open(expected, "r") as file:
                 expected = file.read()
         except FileNotFoundError:
-            raise TestPlanError(f"File containing expected data {expected} not found.")
+            raise TestPlanError(f"File containing expected "
+                                f"data {expected} not found.")
 
         try:
             with open(actual, "r") as file:
                 actual = file.read()
         except FileNotFoundError:
             return EvaluationResult(
-                result=StatusMessage(enum=Status.RUNTIME_ERROR, human="Required output file not found."),
+                result=StatusMessage(
+                    enum=Status.RUNTIME_ERROR,
+                    human="Required output file not found."
+                ),
                 readable_expected=expected,
                 readable_actual=actual,
             )
 
         if self.arguments["mode"] == "exact":
-            result = StatusMessage(enum=Status.CORRECT if actual == expected else Status.WRONG)
+            result = StatusMessage(
+                enum=Status.CORRECT if actual == expected else Status.WRONG
+            )
         elif self.arguments["mode"] == "lines":
             expected_lines = expected.splitlines()
             actual_lines = actual.splitlines()
@@ -188,8 +204,8 @@ class FileEvaluator(Evaluator):
             expected_lines = expected.splitlines()
             actual_lines = actual.splitlines()
             correct = len(actual_lines) == len(expected_lines)
-            # Overwrite the expected and actual with the values from the text evaluator.
-            # This will give a more consistent output in Dodona.
+            # Overwrite the expected and actual with the values from the text
+            # evaluator. This will give a more consistent output in Dodona.
             expected = []
             actual = []
             for (expected_line, actual_line) in zip(expected_lines, actual_lines):
@@ -207,7 +223,8 @@ class FileEvaluator(Evaluator):
 
 
 def _get_values(output_channel: ValueOutputChannel, actual) \
-        -> Union[EvaluationResult, Tuple[serialisation.Value, str, serialisation.Value, str]]:
+        -> Union[EvaluationResult,
+                 Tuple[serialisation.Value, str, serialisation.Value, str]]:
     expected = output_channel.value
     readable_expected = get_readable_representation(expected)
 
@@ -218,8 +235,13 @@ def _get_values(output_channel: ValueOutputChannel, actual) \
         readable_actual = get_readable_representation(actual) if actual else ""
     except SerialisationError as e:
         raw_message = f"Received {actual}, which caused {e} for get_values."
-        message = ExtendedMessage(description=raw_message, format="text", permission=Permission.STAFF)
-        student = "Your return value was wrong; additionally Dodona didn't recognize it. " \
+        message = ExtendedMessage(
+            description=raw_message,
+            format="text",
+            permission=Permission.STAFF
+        )
+        student = "Your return value was wrong; additionally Dodona didn't " \
+                  "recognize it. " \
                   "Contact staff for more information."
         return EvaluationResult(
             result=StatusMessage(enum=Status.WRONG, human=student),
@@ -248,9 +270,13 @@ class ValueEvaluator(Evaluator):
             expected, readable_expected, actual, readable_actual = result
 
         # If one of the types is None, but not both, this is not correct.
-        if (expected is None and actual is not None) or (expected is not None and actual is None):
+        if (expected is None and actual is not None) \
+                or (expected is not None and actual is None):
             return EvaluationResult(
-                result=StatusMessage(enum=Status.WRONG, human="One of the values is nothing."),
+                result=StatusMessage(
+                    enum=Status.WRONG,
+                    human="One of the values is nothing."
+                ),
                 readable_expected=readable_expected,
                 readable_actual=readable_actual
             )
@@ -316,17 +342,25 @@ class ExceptionEvaluator(Evaluator):
         assert isinstance(output_channel, ExceptionOutputChannel)
         if actual is None:
             return EvaluationResult(
-                result=StatusMessage(enum=Status.INTERNAL_ERROR, human="Received no output."),
+                result=StatusMessage(
+                    enum=Status.INTERNAL_ERROR,
+                    human="Received no output."
+                ),
                 readable_expected="",
                 readable_actual=""
             )
 
         try:
-            actual: ExceptionValue = ExceptionValue.__pydantic_model__.parse_raw(actual)
+            actual: ExceptionValue = ExceptionValue.__pydantic_model__\
+                .parse_raw(actual)
         except (TypeError, ValueError) as e:
-            raw_message = f"Received {actual}, which caused {e} for exception."
-            message = ExtendedMessage(description=raw_message, format="text", permission=Permission.STAFF)
-            student = "Something went wrong while receiving the exception. Contact staff."
+            message = ExtendedMessage(
+                description=f"Received {actual}, which caused {e} for exception.",
+                format="text",
+                permission=Permission.STAFF
+            )
+            student = "Something went wrong while receiving the exception. " \
+                      "Contact staff."
             return EvaluationResult(
                 result=StatusMessage(enum=Status.INTERNAL_ERROR, human=student),
                 readable_expected="",
@@ -337,7 +371,10 @@ class ExceptionEvaluator(Evaluator):
         expected = output_channel.exception
 
         return EvaluationResult(
-            result=StatusMessage(enum=Status.CORRECT if expected.message == actual.message else Status.WRONG),
+            result=StatusMessage(
+                enum=Status.CORRECT if expected.message == actual.message else
+                Status.WRONG
+            ),
             readable_expected=expected.message,
             readable_actual=actual.message
         )
@@ -352,17 +389,26 @@ class SpecificEvaluator(Evaluator):
         assert isinstance(output_channel.evaluator, TestplanSpecificEvaluator)
         if actual is None:
             return EvaluationResult(
-                result=StatusMessage(enum=Status.INTERNAL_ERROR, human="Received no output."),
+                result=StatusMessage(
+                    enum=Status.INTERNAL_ERROR,
+                    human="Received no output."
+                ),
                 readable_expected="",
                 readable_actual=""
             )
 
         try:
-            actual: SpecificResult = SpecificResult.__pydantic_model__.parse_raw(actual)
+            actual: SpecificResult = SpecificResult.__pydantic_model__\
+                .parse_raw(actual)
         except (TypeError, ValueError) as e:
             raw_message = f"Received {actual}, which caused {e} for specific."
-            message = ExtendedMessage(description=raw_message, format="text", permission=Permission.STAFF)
-            student = "Something went wrong while receiving the test result. Contact staff."
+            message = ExtendedMessage(
+                description=raw_message,
+                format="text",
+                permission=Permission.STAFF
+            )
+            student = "Something went wrong while receiving the test result. " \
+                      "Contact staff."
             return EvaluationResult(
                 result=StatusMessage(enum=Status.INTERNAL_ERROR, human=student),
                 readable_expected="",
@@ -371,7 +417,9 @@ class SpecificEvaluator(Evaluator):
             )
 
         return EvaluationResult(
-            result=StatusMessage(enum=Status.CORRECT if actual.result else Status.WRONG),
+            result=StatusMessage(
+                enum=Status.CORRECT if actual.result else Status.WRONG
+            ),
             readable_expected=actual.readable_expected,
             readable_actual=actual.readable_actual,
             messages=actual.messages
@@ -383,6 +431,7 @@ class CustomEvaluator(Evaluator):
     Compare the result of a custom evaluator. This evaluator has no options, but
     it does have parameters that are passed to the evaluator.
     """
+
     def __init__(self, config, values: List[serialisation.Value]):
         super().__init__(config)
         self.values = values
@@ -423,7 +472,8 @@ class CustomEvaluator(Evaluator):
             else:
                 expected, readable_expected, actual, readable_actual = result
         else:
-            raise AssertionError(f"Unknown type of output channel: {output_channel}")
+            raise AssertionError(f"Unknown type of output channel"
+                                 f": {output_channel}")
 
         if actual is None:
             return EvaluationResult(
@@ -433,7 +483,9 @@ class CustomEvaluator(Evaluator):
                 messages=["Received nothing."]
             )
 
-        runner = get_generator(self.config, output_channel.evaluator.language)
+        raise Exception("TODO: not implemented")
+        # TODO
+        #runner = GeneratorJudge(self.config, None, output_channel.evaluator.language)
         path = output_channel.evaluator.path
         result = runner.evaluate_custom(path, expected, actual, self.values)
 
@@ -449,11 +501,17 @@ class CustomEvaluator(Evaluator):
             )
 
         try:
-            evaluation_result: SpecificResult = SpecificResult.__pydantic_model__.parse_raw(result.stdout)
+            evaluation_result: SpecificResult = \
+                SpecificResult.__pydantic_model__.parse_raw(result.stdout)
         except (TypeError, ValueError) as e:
             raw_message = f"Received {result}, which caused {e} for custom."
-            message = ExtendedMessage(description=raw_message, format="text", permission=Permission.STAFF)
-            student = "Something went wrong while receiving the test result. Contact staff."
+            message = ExtendedMessage(
+                description=raw_message,
+                format="text",
+                permission=Permission.STAFF
+            )
+            student = "Something went wrong while receiving the test result. " \
+                      "Contact staff."
             return EvaluationResult(
                 result=StatusMessage(enum=Status.INTERNAL_ERROR, human=student),
                 readable_expected=readable_expected,
@@ -465,14 +523,17 @@ class CustomEvaluator(Evaluator):
             readable_expected = evaluation_result.readable_expected
 
         return EvaluationResult(
-            result=StatusMessage(enum=Status.CORRECT if evaluation_result.result else Status.WRONG),
+            result=StatusMessage(
+                enum=Status.CORRECT if evaluation_result.result else Status.WRONG
+            ),
             readable_expected=readable_expected,
             readable_actual=readable_actual,
             messages=evaluation_result.messages
         )
 
 
-def get_evaluator(config: Config, output: Union[OutputChannel, AnyChannelState]) -> Evaluator:
+def get_evaluator(config: Config,
+                  output: Union[OutputChannel, AnyChannelState]) -> Evaluator:
     """
     Get the evaluator for a given output channel.
     """

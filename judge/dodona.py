@@ -1,7 +1,6 @@
 """Use typed classes to communicate to Dodona."""
 import dataclasses
 import json
-import sys
 from enum import Enum
 from typing import Optional, Union, Literal, IO
 
@@ -62,16 +61,17 @@ class StatusMessage:
 @dataclass
 class StartJudgment:
     """Start on a new judgement."""
-    # noinspection PyUnresolvedReferences
     command: Literal["start-judgement"] = "start-judgement"
 
 
 @dataclass
 class StartTab:
-    """Start on a new tab with given title. Hidden if all contexts are accepted iff hidden."""
+    """
+    Start on a new tab with given title. Hidden if all contexts are accepted iff
+    hidden.
+    """
     title: str
     hidden: Optional[bool] = None
-    # noinspection PyUnresolvedReferences
     command: Literal["start-tab"] = "start-tab"
 
 
@@ -79,7 +79,6 @@ class StartTab:
 class StartContext:
     """Start on a new context."""
     description: Optional[Message] = None
-    # noinspection PyUnresolvedReferences
     command: Literal["start-context"] = "start-context"
 
 
@@ -87,7 +86,6 @@ class StartContext:
 class StartTestcase:
     """Start on a new testcase with given description"""
     description: Message
-    # noinspection PyUnresolvedReferences
     command: Literal["start-testcase"] = "start-testcase"
 
 
@@ -96,7 +94,6 @@ class StartTest:
     """Start on a new test with given expected answer."""
     expected: str
     description: Optional[Message] = None
-    # noinspection PyUnresolvedReferences
     command: Literal["start-test"] = "start-test"
 
 
@@ -104,7 +101,6 @@ class StartTest:
 class EscalateStatus:
     """Escalate a status for the worse."""
     status: StatusMessage
-    # noinspection PyUnresolvedReferences
     command: Literal["escalate-status"] = "escalate-status"
 
 
@@ -112,7 +108,6 @@ class EscalateStatus:
 class AppendMessage:
     """Append a message to the open object."""
     message: Message
-    # noinspection PyUnresolvedReferences
     command: Literal["append-message"] = "append-message"
 
 
@@ -125,31 +120,38 @@ class AnnotateCode:
     type: Optional[Severity] = None
     rows: Optional[Index] = None
     columns: Optional[Index] = None
-    # noinspection PyUnresolvedReferences
     command: Literal["annotate-code"] = "annotate-code"
 
 
 @dataclass
 class CloseTest:
-    """Close the current test. Accepted iff status is correct, but you can overwrite this."""
+    """
+    Close the current test. Accepted iff status is correct, but you can overwrite
+    this.
+    """
     generated: str
     status: StatusMessage
     accepted: Optional[bool] = None
     data: Optional[TestData] = None
-    # noinspection PyUnresolvedReferences
     command: Literal["close-test"] = "close-test"
 
 
 @dataclass
 class CloseTestcase:
-    """Close the current testcase. Accepted iff all tests are accepted, but you can overwrite this."""
+    """
+    Close the current testcase. Accepted iff all tests are accepted, but you can
+    overwrite this.
+    """
     accepted: Optional[bool] = None
     command: Literal["close-testcase"] = "close-testcase"
 
 
 @dataclass
 class CloseContext:
-    """Close the current context. Accepted iff all testcases are accepted, but you can overwrite this."""
+    """
+    Close the current context. Accepted iff all testcases are accepted, but you can
+    overwrite this.
+    """
     accepted: Optional[bool] = None
     command: Literal["close-context"] = "close-context"
 
@@ -164,16 +166,19 @@ class CloseTab:
 @dataclass
 class CloseJudgment:
     """
-    Close the current judgement. Accepted iff all contexts are accepted, status is the worst (highest in description) of
-    all tests, summary is the last of all tests, but you can overwrite this.
+    Close the current judgement. Accepted iff all contexts are accepted, status is
+    the worst (highest in description) of all tests, summary is the last of all
+    tests, but you can overwrite this.
     """
     accepted: Optional[bool] = None
     status: Optional[StatusMessage] = None
     command: Literal["close-judgement"] = "close-judgement"
 
 
-Update = Union[StartJudgment, StartTab, StartContext, StartTestcase, StartTest, AppendMessage, AnnotateCode,
-               CloseTest, CloseTestcase, CloseContext, CloseTab, CloseJudgment, EscalateStatus]
+Update = Union[
+    StartJudgment, StartTab, StartContext, StartTestcase, StartTest,
+    AppendMessage, AnnotateCode,
+    CloseTest, CloseTestcase, CloseContext, CloseTab, CloseJudgment, EscalateStatus]
 
 
 class DodonaUpdate(BaseModel):
@@ -207,6 +212,4 @@ def report_update(to: IO, update: Update):
 
 if __name__ == '__main__':
     sc = DodonaUpdate.schema()
-
-    v = CloseTab()
-    report_update(sys.stdout, v)
+    print(sc)

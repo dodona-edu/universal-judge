@@ -342,6 +342,20 @@ class Input(WithFeatures, ABC):
             return self.stdin.get_data_as_string(working_directory)
 
 
+def _get_evaluator(output: Union[OutputChannel, AnyChannelState])\
+        -> Optional[CustomEvaluator]:
+    # Handle channel states.
+    if output == NoneChannelState.NONE:
+        return None
+    if output == IgnoredChannelState.IGNORED:
+        return None
+
+    if isinstance(output.evaluator, CustomEvaluator):
+        return output.evaluator
+    else:
+        return None
+
+
 @dataclass
 class Output(WithFeatures):
     """The output channels for a testcase."""
@@ -362,6 +376,20 @@ class Output(WithFeatures):
         if isinstance(self.exception, ExceptionOutputChannel):
             start |= Features.EXCEPTIONS
         return start
+
+    def get_custom_evaluators(self) -> List[CustomEvaluator]:
+        evaluators = []
+        if evaluator := _get_evaluator(self.stdout):
+            evaluators.append(evaluator)
+        if evaluator := _get_evaluator(self.stderr):
+            evaluators.append(evaluator)
+        if evaluator := _get_evaluator(self.file):
+            evaluators.append(evaluator)
+        if evaluator := _get_evaluator(self.exception):
+            evaluators.append(evaluator)
+        if evaluator := _get_evaluator(self.result):
+            evaluators.append(evaluator)
+        return evaluators
 
 
 @dataclass
@@ -552,6 +580,14 @@ class Plan(WithFeatures):
         for tab in self.tabs:
             contexts.extend(tab.contexts)
         return contexts
+
+    def get_custom_evaluators(self) -> List[CustomEvaluator]:
+        evaluators = []
+        for tab in self.tabs:
+            for context in tab.contexts:
+                for testcase in context.all_testcases():
+                    evaluators.extend(testcase.output.get_custom_evaluators())
+        return evaluators
 
 
 def _reduce_with_feature(iterable: Iterable[WithFeatures]) -> Features:
