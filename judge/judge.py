@@ -441,8 +441,8 @@ class GeneratorJudge:
         # The names of the contexts in the testplan.
         context_names = []
         # Generate the files for each context.
-        for context in plan.get_contexts():
-            context_name = self.language_config.context_name(context)
+        for i, context in enumerate(plan.get_contexts()):
+            context_name = self.language_config.context_name(i)
             logger.debug(f"Generating file for context {context_name}")
             generated, evaluators = self.translator.generate_context(
                 destination=common_dir,
@@ -457,8 +457,8 @@ class GeneratorJudge:
                 logger.debug("Copying evaluator from %s to %s",
                              source, common_dir)
                 shutil.copy2(source, common_dir)
-            dependencies.append(generated)
             dependencies.extend(evaluators)
+            dependencies.append(generated)
             context_names.append(context_name)
 
         if mode == ExecutionMode.PRECOMPILATION:
@@ -509,7 +509,7 @@ class GeneratorJudge:
 
             logger.debug("Executing context %d in INDIVIDUAL mode...", args.number)
             # Execute the individual files.
-            context_name = self.language_config.context_name(args.context)
+            context_name = self.language_config.context_name(args.number)
             executable = self.find_main_file(files, context_name)
             files.remove(executable)
             stdin = args.context.get_stdin(self.config.resources)

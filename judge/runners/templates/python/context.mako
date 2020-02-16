@@ -13,6 +13,7 @@ import sys
 value_file = open(r"${value_file}", "w")
 exception_file = open(r"${exception_file}", "w")
 
+
 def write_delimiter(delimiter):
     value_file.write(delimiter)
     exception_file.write(delimiter)

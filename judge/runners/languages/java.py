@@ -16,7 +16,8 @@ class JavaConfig(LanguageConfig):
     """
 
     def initial_dependencies(self) -> List[str]:
-        return ["Values.java", "json-simple-3.1.0.jar"]
+        return ["Values.java", "json-simple-3.1.0.jar", "AbstractEvaluator.java",
+                "AbstractSpecificEvaluator.java"]
 
     def evaluator_dependencies(self) -> List[str]:
         return ["AbstractCustomEvaluator.java"]
@@ -47,11 +48,11 @@ class JavaConfig(LanguageConfig):
     def conventionalise_object(self, class_name: str) -> str:
         return pascalize(class_name)
 
-    def conventionalize_evaluator_name(self, filename: str) -> str:
-        return camelize(filename)
-
     def selector_name(self) -> str:
         return "Selector"
+
+    def context_name(self, number: int) -> str:
+        return f"Context{number}"
 
     def _get_classpath(self):
         return [x for x in self.initial_dependencies() if x.endswith(".jar")]

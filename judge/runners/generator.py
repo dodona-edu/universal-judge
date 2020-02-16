@@ -174,7 +174,7 @@ def get_exception_function(
                 programming_language
             ]
             # We can assume the class is already imported.
-            evaluator_name = language_config.conventionalize_evaluator_name(
+            evaluator_name = language_config.conventionalise_object(
                 utils.basename(evaluator)
             )
             return FunctionCall(
@@ -189,7 +189,6 @@ def get_exception_function(
     return FunctionCall(
         type=FunctionType.TOP,
         name="send_exception",
-        object="Nothing",
         arguments=[StringType(type=StringTypes.LITERAL, data="value")]
     ), None
 
@@ -226,7 +225,7 @@ def prepare_testcase(
             programming_language
         ]
         # We can assume the class is already imported.
-        evaluator_name = language_config.conventionalize_evaluator_name(
+        evaluator_name = language_config.conventionalise_object(
             utils.basename(evaluator)
         )
         value_function_call = FunctionCall(
@@ -240,7 +239,6 @@ def prepare_testcase(
         value_function_call = FunctionCall(
             type=FunctionType.TOP,
             name="send",
-            object="Nothing",
             arguments=[StringType(type=StringTypes.LITERAL, data="value")]
         )
 
@@ -367,10 +365,12 @@ class Generator:
 
     def _find_and_write_template(self, args: Any,
                                  destination: Union[PathLike, Path],
-                                 name: str) -> str:
+                                 name: str, result: Optional[str] = None) -> str:
         name = self.language_config.conventionalise_object(name)
+        if not result:
+            result = name
         template = self.find_template(name)
-        destination_name = f"{name}.{self.language_config.file_extension()}"
+        destination_name = f"{result}.{self.language_config.file_extension()}"
         write_template(args, template, destination / destination_name)
         return destination_name
 
@@ -423,7 +423,8 @@ class Generator:
         return self._find_and_write_template(
             args=context_argument,
             destination=destination,
-            name="context"
+            name="context",
+            result=context_name
         ), evaluator_files
 
     def prepare_normal_testcases(
@@ -501,7 +502,7 @@ class Generator:
         :param expected: The expected data, from the testplan.
         :return: The generated file.
         """
-        evaluator_name = self.language_config.conventionalize_evaluator_name(
+        evaluator_name = self.language_config.conventionalise_object(
             evaluator.path.stem
         )
         arguments = SequenceType(

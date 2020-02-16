@@ -76,6 +76,9 @@ class LanguageConfig:
         """The name of the selector module."""
         raise NotImplementedError
 
+    def context_name(self, number: int) -> str:
+        raise NotImplementedError
+
     def conventionalise(self, function_name: str) -> str:
         """Apply a language's conventions to function name."""
         raise NotImplementedError
@@ -83,15 +86,6 @@ class LanguageConfig:
     def conventionalise_object(self, class_name: str) -> str:
         """Apply a language's conventions to a module name."""
         raise NotImplementedError
-
-    def conventionalize_evaluator_name(self, filename: str) -> str:
-        """
-        Conventionalize the name for an evaluator. In most languages this is just
-        the file name, but e.g. Java has different needs.
-        :param filename: The filename without extension.
-        :return: The conventionalized name.
-        """
-        return filename
 
     def rename_evaluator(self, code, name):
         """Replace the evaluate function name"""

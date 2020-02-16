@@ -34,6 +34,9 @@ class PythonConfig(LanguageConfig):
     def selector_name(self) -> str:
         return "selector"
 
+    def context_name(self, number: int) -> str:
+        return f"context_{number}"
+
     def conventionalise(self, function_name: str) -> str:
         return decamelize(function_name)
 
