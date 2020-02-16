@@ -13,8 +13,7 @@ from os import path
 from pathlib import Path
 from typing import List, Optional, Union, Dict, Any, Literal, Iterable
 
-from humps import is_camelcase
-from pydantic import validator, root_validator, BaseModel
+from pydantic import root_validator, BaseModel
 from pydantic.dataclasses import dataclass
 
 from features import Features, reduce_features
@@ -89,12 +88,6 @@ class FunctionCall(WithFeatures):
     name: Optional[str] = None
     object: Optional[str] = None
     arguments: List[Value] = field(default_factory=list)
-
-    @validator('name')
-    def is_camelcase(cls, value):
-        if not is_camelcase(value):
-            return ValueError(f"Function {value} should be in camelCase.")
-        return value
 
     @root_validator
     def identity_cannot_have_object(cls, values):
@@ -277,7 +270,7 @@ class SpecificEvaluator:
     call. Note: this type of evaluator is only supported when using function calls.
     If you want to evaluate stdout you should use the custom evaluator instead.
     """
-    evaluators: Code
+    evaluators: Dict[str, Path]
     type: Literal["specific"] = "specific"
 
 

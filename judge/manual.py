@@ -1,6 +1,6 @@
 """
-Run the judge manually from code. In this mode, the config is hardcoded into this file, allowing
-rapid testing (and, most importantly, debugging).
+Run the judge manually from code. In this mode, the config is hardcoded into this
+file, allowing rapid testing (and, most importantly, debugging).
 """
 import logging
 import os

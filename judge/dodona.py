@@ -1,4 +1,14 @@
-"""Use typed classes to communicate to Dodona."""
+"""
+Class hierarchy for the partial Dodona format.
+
+Most concepts of the format map directly to class in this module. Besides the
+modeling of the data, this module provides a serializer, which writes a Dodona
+update to a given output stream. See :func:`report_update`.
+
+When running the module from the command line, a json-schema of the structure will
+be printed to stdout. This might be useful to test this implementation against
+the authoritative json-schema, provided by Dodona.
+"""
 import dataclasses
 import json
 from enum import Enum
@@ -24,7 +34,9 @@ class ExtendedMessage:
 
 Message = Union[ExtendedMessage, str]
 
+
 BadgeCount = int
+
 
 Index = int
 
@@ -178,10 +190,11 @@ class CloseJudgment:
 Update = Union[
     StartJudgment, StartTab, StartContext, StartTestcase, StartTest,
     AppendMessage, AnnotateCode,
-    CloseTest, CloseTestcase, CloseContext, CloseTab, CloseJudgment, EscalateStatus]
+    CloseTest, CloseTestcase, CloseContext, CloseTab, CloseJudgment, EscalateStatus
+]
 
 
-class DodonaUpdate(BaseModel):
+class _DodonaUpdate(BaseModel):
     __root__: Update
 
 
@@ -198,7 +211,6 @@ class _EnhancedJSONEncoder(json.JSONEncoder):
         return super().default(o)
 
 
-# noinspection PyUnreachableCode
 def report_update(to: IO, update: Update):
     """
     Write the given update to the given output stream.
@@ -206,10 +218,11 @@ def report_update(to: IO, update: Update):
     :param update: The update to write.
     """
     json.dump(update, to, cls=_EnhancedJSONEncoder)
+    # noinspection PyUnreachableCode
     if __debug__:
         print("")
 
 
 if __name__ == '__main__':
-    sc = DodonaUpdate.schema()
+    sc = _DodonaUpdate.schema()
     print(sc)

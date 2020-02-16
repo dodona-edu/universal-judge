@@ -1,18 +1,19 @@
 """
 The serialization format.
 
-This is the authoritative source of the format. For example, json-schema is generated from this
-code.
+This is the authoritative source of the format. For example, json-schema is
+generated from this code.
 
-This module does not concern itself with actual decoding or encoding; it is purely concerned about
-the format itself and parsing of the format itself (some might call this the meta-concerns).
+This module does not concern itself with actual decoding or encoding; it is purely
+concerned about the format itself and parsing of the format itself (some might call
+this the meta-concerns).
 
-The encoding and decoding of instances of values in this format are done in the language
-implementations itself.
+The encoding and decoding of instances of values in this format are done in the
+language implementations itself.
 
-A json-schema can be generated from this format by executing the module on the command line. The
-schema will be printed to stdout. This can be used to generate classes for implementations in
-other languages.
+A json-schema can be generated from this format by executing the module on the
+command line. The schema will be printed to stdout. This can be used to generate
+classes for implementations in other languages.
 """
 import json
 import math

@@ -30,7 +30,8 @@ class Config:
 
 def read_config(config_in: IO) -> Config:
     """
-    Read the configuration from the given file. If the file is not stdin, it will be closed.
+    Read the configuration from the given file. If the file is not stdin, it will be
+    closed.
     """
     with smart_close(config_in) as input_:
         config_json = input_.read()

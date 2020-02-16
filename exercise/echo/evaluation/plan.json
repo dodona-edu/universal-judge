@@ -99,22 +99,10 @@
                   "evaluator": {
                     "type": "specific",
                     "evaluators": {
-                      "python": {
-                        "type": "file",
-                        "data": "./specific_evaluator.py"
-                      },
-                      "java": {
-                        "type": "file",
-                        "data": "./specific_evaluator.jsh"
-                      },
-                      "haskell": {
-                        "type": "file",
-                        "data": "./specific_evaluator.hs"
-                      },
-                      "jshell": {
-                        "type": "file",
-                        "data": "./specific_evaluator.jsh"
-                      }
+                      "python":  "./specific_evaluator.py",
+                      "java": "./specific_evaluator.jsh",
+                      "haskell": "./specific_evaluator.hs",
+                      "jshell": "./specific_evaluator.jsh"
                     }
                   }
                 }

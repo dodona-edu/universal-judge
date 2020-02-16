@@ -1,4 +1,4 @@
-## Code to execute one test context.
+## Code to execute_module one test context.
 <%! from testplan import Assignment %>
 import sys
 

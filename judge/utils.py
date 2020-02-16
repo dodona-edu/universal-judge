@@ -62,3 +62,20 @@ def protected_directory(directory: Union[PathLike, Path]
     finally:
         logger.info("Giving write-access to %s", directory)
         os.chmod(directory, stat.S_IREAD | stat.S_IWRITE)
+
+
+def basename(file: Union[str, Path]) -> str:
+    """
+    Get the basename of a file.
+
+    :param file: The file or path.
+    :return: The basename.
+
+    >>> basename("test.py")
+    'test'
+    >>> basename("very/nice/path.java")
+    'path'
+    """
+    if isinstance(file, str):
+        file = Path(file)
+    return file.stem

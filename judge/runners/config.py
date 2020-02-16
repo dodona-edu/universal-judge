@@ -6,6 +6,7 @@ LanguageConfig class and implement the required templates.
 For very exotic languages, it is possible to create a custom runner subclass,
 but that will be a lot more work.
 """
+from pathlib import Path
 from typing import List, Tuple
 
 from features import Features
@@ -110,6 +111,15 @@ class LanguageConfig:
         """Apply a language's conventions to a module name."""
         raise NotImplementedError
 
+    def conventionalize_evaluator_name(self, filename: str) -> str:
+        """
+        Conventionalize the name for an evaluator. In most languages this is just
+        the file name, but e.g. Java has different needs.
+        :param filename: The filename without extension.
+        :return: The conventionalized name.
+        """
+        return filename
+
     def rename_evaluator(self, code, name):
         """Replace the evaluate function name"""
         return code.replace("evaluate", name, 1)
@@ -146,9 +156,20 @@ class LanguageConfig:
         allows new features to be added without having to update the language.
         :return: The features supported by this language.
         """
-        return (Features.OBJECTS | Features.EXCEPTIONS | Features.MAIN | Features.FUNCTION_CALL | Features.ASSIGNMENT
+        return (Features.OBJECTS | Features.EXCEPTIONS | Features.MAIN
+                | Features.FUNCTION_CALL | Features.ASSIGNMENT
                 | Features.LISTS | Features.SETS | Features.MAPS
                 | Features.INTEGERS | Features.RATIONALS
                 | Features.STRINGS
                 | Features.BOOLEANS
                 | Features.NULL)
+
+    def supports(self, plan: Plan) -> bool:
+        """
+        Check if the given testplan is supported by this language.
+        :param plan: The testplan to check.
+        :return: True if supported.
+        """
+        required = plan.get_used_features()
+        supported_features = self.supported_features()
+        return supported_features & required != 0

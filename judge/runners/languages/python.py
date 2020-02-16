@@ -1,8 +1,7 @@
 from humps import decamelize, depascalize
 from typing import List
 
-from runners.config import CallbackResult
-from runners.runner import LanguageConfig
+from runners.config import CallbackResult, LanguageConfig
 from testplan import Plan, Context
 
 

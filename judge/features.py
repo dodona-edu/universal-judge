@@ -28,7 +28,8 @@ class Features(Flag):
 
 def reduce_features(iterable: Iterable[Features]) -> Features:
     """
-    Reduce a list of features to a single feature. This will "OR" all features in the iterable.
+    Reduce a list of features to a single feature. This will "OR" all features in
+    the iterable.
     :param iterable: The list of features.
     :return: The combined features.
     """

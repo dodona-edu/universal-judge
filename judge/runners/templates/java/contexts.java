@@ -1,4 +1,4 @@
-## Code to execute one test context.
+## Code to execute_module one test context.
 <%! from testplan import Assignment %>
 
 public class Contexts {
@@ -11,7 +11,7 @@ public class Contexts {
 
     % for c in contexts:
         private void execute_${loop.index}() throws Exception {
-            ## In Java, we must execute the before and after code in the context.
+            ## In Java, we must execute_module the before and after code in the context.
             ${c.before}
 
             ## Call the main fucnction if necessary

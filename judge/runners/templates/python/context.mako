@@ -1,7 +1,12 @@
-## Code to execute one test context.
+## Code to execute_module one test context.
 <%! from testplan import Assignment %>
 import values
 import sys
+
+## Import the language specific evaluators we will need.
+% for name in evaluator_names:
+    import ${name}
+% endfor
 
 
 ## Prepare some code for the evaluation.
@@ -13,10 +18,6 @@ def write_delimiter(delimiter):
     exception_file.write(delimiter)
 
 
-def evaluated(result, expected, actual, messages=[]):
-    values.send_evaluated(value_file, result, expected, actual, messages)
-
-
 def send(value):
     values.send_value(value_file, value)
 
@@ -24,14 +25,17 @@ def send(value):
 def send_exception(exception):
     values.send_exception(exception_file, exception)
 
-${main_testcase.exception_code}
+def e_evaluate_main(value):
+    <%include file="function.mako" args="function=main_testcase.exception_function"/>
 
 % for additional in additional_testcases:
     % if additional.has_return:
-        ${additional.value_code}
+        def v_evaluate_${loop.index}(value):
+            <%include file="function.mako" args="function=additional.value_function"/>
     % endif
 
-    ${additional.exception_code}
+    def e_evaluate_${loop.index}(value):
+        <%include file="function.mako" args="function=additional.exception_function"/>
 % endfor
 
 
