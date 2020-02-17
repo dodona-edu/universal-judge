@@ -577,6 +577,7 @@ class GeneratorJudge:
         return result, messages, status
 
     def find_main_file(self, files: List[str], name: str) -> str:
+        logger.debug("Finding %s in %s", name, files)
         return [x for x in files if x.startswith(name)][0]
 
     def run_compilation_command(
@@ -705,11 +706,18 @@ class GeneratorJudge:
         eval_config = eval_judge.config
         eval_translator = eval_judge.translator
 
+        # Copy the evaluator
+        origin_path = Path(self.config.resources, evaluator.path)
+        logger.debug("Copying %s to %s", origin_path, custom_path)
+        shutil.copy2(origin_path, custom_path)
+
         # Copy the dependencies to the folder.
         dependencies = eval_lang_config.initial_dependencies()
         dependencies.extend(eval_lang_config.evaluator_dependencies())
         origin = path_to_templates(eval_lang_config, eval_config)
         utils.copy_from_paths_to_path(origin, dependencies, custom_path)
+        # Include the actual evaluator in the dependencies.
+        dependencies.append(evaluator.path.name)
 
         # Generate the evaluator.
         logger.debug("Generating custom evaluator.")
@@ -720,7 +728,7 @@ class GeneratorJudge:
             expected=expected
         )
         dependencies.append(evaluator_name)
-        logger.debug("Generated evaluator as %s", evaluator_name)
+        logger.debug("Generated evaluator executor %s", evaluator_name)
 
         # Do compilation for those languages that require it.
         command, files = eval_lang_config.evaluator_generation_callback(
@@ -733,6 +741,7 @@ class GeneratorJudge:
                                 f"test case: {result.stderr}")
 
         # Execute the custom evaluator.
+        evaluator_name = Path(evaluator_name).stem
         executable = self.find_main_file(files, evaluator_name)
         files.remove(executable)
 

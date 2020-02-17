@@ -18,7 +18,7 @@ public class ${context_name} {
     ## Generate the evaluators we need.
     % for name in evaluator_names:
         <% var_name = humps.camelize(name) %>
-        private ${name} ${var_name} = ${name}();
+        private final ${name} ${var_name} = new ${name}();
     % endfor
 
     ## Prepare the evaluator files.
@@ -30,44 +30,44 @@ public class ${context_name} {
         this.exceptionWriter = new FileWriter("${exception_file}");
     }
 
-    void writeDelimiter(String value) throws Exception {
+    private void writeDelimiter(String value) throws Exception {
         valueWriter.write(value);
         exceptionWriter.write(value);
     }
 
-    void evaluated(boolean result, String expected, String actual, Collection<String> messages) throws Exception {
+    private void evaluated(boolean result, String expected, String actual, Collection<String> messages) throws Exception {
         Values.evaluated(valueWriter, result, expected, actual, messages);
     }
 
-    void evaluated(boolean result, String expected, String actual) throws Exception {
+    private void evaluated(boolean result, String expected, String actual) throws Exception {
         Values.evaluated(valueWriter, result, expected, actual, Collections.emptyList());
     }
 
-    void send(Object value) throws Exception {
+    private void send(Object value) throws Exception {
         Values.send(valueWriter, value);
     }
 
-    void sendException(Exception exception) throws Exception {
+    private void sendException(Exception exception) throws Exception {
         Values.sendException(exceptionWriter, exception);
     }
 
-    void e_evaluate_main(Object value) {
+    private void eEvaluateMain(Exception value) throws Exception {
         <%include file="function.mako" args="function=main_testcase.exception_function"/>;
     }
 
     % for additional in additional_testcases:
         % if additional.has_return:
-            void v_evaluate_${loop.index}(Object value) {
+            private void vEvaluate${loop.index}(Object value) throws Exception {
                 <%include file="function.mako" args="function=additional.value_function"/>;
             }
         % endif
 
-        void e_evaluate_${loop.index}(Object value) {
+        private void eEvaluate${loop.index}(Exception value) throws Exception {
             <%include file="function.mako" args="function=additional.exception_function"/>;
         }
     % endfor
 
-    private void execute() throws Exception {
+    void execute() throws Exception {
         ## In Java, we must execute_module the before and after code in the context.
         ${before}
 
@@ -83,7 +83,7 @@ public class ${context_name} {
                 % endfor
                 });
             } catch (Exception e) {
-                this.e_evaluate_main(e);
+                this.eEvaluateMain(e);
             }
             System.err.print("--${secret_id}-- SEP");
             System.out.print("--${secret_id}-- SEP");
@@ -92,14 +92,14 @@ public class ${context_name} {
 
         % for additional in additional_testcases:
             % if isinstance(additional.statement, Assignment):
-                <%include file="declaration.mako" args="value=additional.statement.get_type()" /> ${additional.statement.name};
+                <%include file="declaration.mako" args="value=additional.statement.get_type()" /> ${additional.statement.name} = null;
             % endif
             try {
                 % if isinstance(additional.statement, Assignment):
                     <%include file="assignment.mako" args="assignment=additional.statement" />
                 % else:
                     % if additional.has_return:
-                        this.v_evaluate_${loop.index}(\
+                        this.vEvaluate${loop.index}(\
                     % endif
                     <%include file="function.mako" args="function=additional.statement" />\
                     % if additional.has_return:
@@ -108,7 +108,7 @@ public class ${context_name} {
                     ;
                 % endif
             } catch (Exception e) {
-                this.e_evaluate_${loop.index}(e);
+                this.eEvaluate${loop.index}(e);
             }
             System.err.print("--${secret_id}-- SEP");
             System.out.print("--${secret_id}-- SEP");

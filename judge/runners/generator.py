@@ -188,7 +188,7 @@ def get_exception_function(
     # exception to the judge for further processing.
     return FunctionCall(
         type=FunctionType.TOP,
-        name="send_exception",
+        name=language_config.conventionalise("send_exception"),
         arguments=[StringType(type=StringTypes.LITERAL, data="value")]
     ), None
 
@@ -230,8 +230,8 @@ def prepare_testcase(
         )
         value_function_call = FunctionCall(
             type=FunctionType.OBJECT,
-            name="evaluate",
-            object=evaluator_name,
+            name=language_config.conventionalise("evaluate"),
+            object=language_config.conventionalise(evaluator_name),
             arguments=[StringType(type=StringTypes.LITERAL, data="value")]
         )
         names.append(evaluator_name)

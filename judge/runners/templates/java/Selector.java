@@ -3,7 +3,7 @@ class Selector {
         var number = Integer.parseInt(a[0]);
         % for c in contexts:
             if (${loop.index} == number) {
-                var context = ${c}();
+                var context = new ${c}();
                 context.execute();
                 context.close();
             }
