@@ -27,9 +27,11 @@ In wezen is dit een eenvoudig programma: het krijgt de configuratie via de stand
 Zowel de invoer als de uitvoer van de judge zijn json, waarvan de betekenis vastligt in een json-schema.\footnote{Dit schema en een tekstuele beschrijving is te vinden in de handleiding in~\autocite{dodona2020}.}
 
 De interface opgelegd vanuit Dodona waaraan een judge moet voldoen legt geen beperkingen of vereisten op die verband houden met de programmeertaal.
-Via de configuratie krijgt de judge van Dodona enkel in welke programmeertaal de opgave en oplossing zijn.
-In de praktijk ondersteunen alle bestaande judges ondersteunen slechts een programmeertaal.
-Elke judge ondersteunt oplossingen in de programmeertaal waarin hij geschreven is, m.a.w.\ de Java-judge ondersteunt Java, de Python-judge Python, enz.
+Via de configuratie krijgt de judge van Dodona enkel in welke programmeertaal de oefening is.
+Momenteel heeft Dodona een andere judge voor elke ondersteunde programmeertaal.
+Door de vrijheid die Dodona geeft aan de judges, zijn de manieren waarop de bestaande judges geïmplementeerd zijn uiteenlopend.
+Sommige judges zijn geschreven in dezelfde taal als de taal die ze beoordelen (bv.\ de Python- en Java-judge).
+Bij andere judges is dat niet het geval (bv.\ de Bash-judge is ook in Python geschreven).
 Ook heeft elke judge een eigen manier waarop de testen voor een oplossing opgesteld moeten worden.
 Zo worden in de Java-judge jUnit-testen gebruikt, terwijl de Python-judge doctests en een eigen formaat ondersteunt.
 
@@ -77,7 +79,7 @@ In het eerste geval is de eigenlijke programmeertaal minder relevant: het zijn v
 In het tweede geval is de programmeertaal wel van belang, maar moeten soortgelijke oefeningen gemaakt worden voor elke programmeertaal die aangeleerd moet worden.
 
 We kunnen tot eenzelfde constatatie komen bij ingewikkeldere opgaves die zich concentreren op algoritmen: ook daar zijn de concepten belangrijker dan in welke programmeertaal een algoritme uiteindelijk geïmplementeerd wordt.
-Een voorbeeld hiervan is het vak "Algoritmen en Datastructuren" dat gegeven wordt door prof.\ Fack aan de wiskunde\footnote{De studiefiche is voor de geïnteresseerden beschikbaar op \url{https://studiegids.ugent.be/2019/NL/studiefiches/C002794.pdf}}.
+Een voorbeeld hiervan is het vak "Algoritmen en Datastructuren" dat gegeven wordt door prof.\ Fack binnen de opleiding wiskunde\footnote{De studiefiche is beschikbaar op \url{https://studiegids.ugent.be/2019/NL/studiefiches/C002794.pdf}}.
 Daar zijn de meeste opgaven vandaag al beschikbaar in Java en Python op Dodona, maar dan als afzonderlijke oefeningen.
 
 Het evalueren van een oplossing voor de Lotto-oefening is minder eenvoudig, daar er met willekeurige getallen gewerkt wordt: het volstaat niet om de uitvoer gegenereerd door de oplossing te vergelijken met een op voorhand vastgelegde verwachte uitvoer.
@@ -85,9 +87,10 @@ De geproduceerde uitvoer zal moeten gecontroleerd worden met code, specifiek ger
 Deze evaluatiecode moet momenteel voor elke programmeertaal en dus elke judge opnieuw geschreven worden.
 In de context van ons voorbeeld controleert deze code bijvoorbeeld of de gegeven getallen binnen het bereik liggen en of ze gesorteerd zijn.
 
-Voor de lesgevers is het opnieuw opstellen van deze evaluatiecode veel en repetitief werk.
-Duurt het twee minuten om deze code te schrijven en heeft een vak 30 oefeningen, dan duurt het een uur om alle opgaven op te stellen.
-In twee talen duurt dit al twee uur, tien talen vraagt tien uur, enz.
+We vermoeden dat voor lesgevers het opstellen van de opgave het meeste tijd in beslag neemt.
+Toch mag het vertalen van deze code naar andere programmeertalen niet onderschat worden.
+Dit zal minder tijd in beslag nemen, maar deze kost is niet te verwaarlozen.
+Bovendien is dit vertalen vooral repetitief en saai werk.
 
 Het probleem hierboven beschreven laat zich samenvatten als volgende onderzoeksvraag, waarop deze thesis een antwoord wil bieden:
 
