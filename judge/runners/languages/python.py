@@ -1,8 +1,9 @@
-from humps import decamelize, depascalize
 from typing import List
 
+from humps import decamelize, depascalize
+
 from runners.config import CallbackResult, LanguageConfig
-from testplan import Plan, Context
+from testplan import Plan
 
 
 class PythonConfig(LanguageConfig):
@@ -21,7 +22,7 @@ class PythonConfig(LanguageConfig):
     def evaluator_generation_callback(self, files: List[str]) -> CallbackResult:
         return [], files
 
-    def execution_command(self, file: str, dependencies: List[str],
+    def execution_command(self, cwd: str, file: str, dependencies: List[str],
                           arguments: List[str]) -> List[str]:
         return ["python", file, *arguments]
 

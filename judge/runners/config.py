@@ -6,13 +6,22 @@ LanguageConfig class and implement the required templates.
 For very exotic languages, it is possible to create a custom runner subclass,
 but that will be a lot more work.
 """
-from pathlib import Path
+import os
 from typing import List, Tuple
+from pathlib import Path
 
 from features import Features
-from testplan import Plan, Context
+from testplan import Plan, FunctionCall
 
 CallbackResult = Tuple[List[str], List[str]]
+
+
+def executable_name(basename: str) -> str:
+    """Append .exe on Windows only."""
+    if os.name == 'nt':
+        return f"{basename}.exe"
+    else:
+        return basename
 
 
 class LanguageConfig:
@@ -25,10 +34,8 @@ class LanguageConfig:
     def generation_callback(self, files: List[str]) -> CallbackResult:
         """
         Called to do the generation step. This function is responsible for
-        returning the precompilation command, and a list of new dependencies. An
-        implementation might abstract this logic and put it in a separate
-        function, to re-use it in the compilation callback. By default, nothing
-        is done here, and the dependencies are returned unchanged.
+        returning the precompilation command, and a list of new dependencies. By
+        default, nothing is done here, and the dependencies are returned unchanged.
         :param files: The files that are destined for precompilation. These were
                       removed from the general dependencies. There are relative
                       filenames to the current directory.
@@ -46,11 +53,15 @@ class LanguageConfig:
         return self.generation_callback(files)
 
     def execution_command(self,
+                          cwd: Path,
                           file: str,
                           dependencies: List[str],
                           arguments: List[str]) -> List[str]:
         """
         Get the command for executing a file with some arguments.
+        :param cwd: The directory where the command will be execute. This must only
+                    be used to specify the path the executable (first item in the
+                    returned command). Files MUST NOT be prepended with the cwd.
         :param file: The "main" file to be executed.
         :param dependencies: A list of other available files.
         :param arguments: The arguments, e.g. other dependencies or execution
@@ -58,11 +69,6 @@ class LanguageConfig:
         :return: A command that can be passed to the subprocess package.
         """
         raise NotImplementedError
-
-    def execute_evaluator(self, evaluator_name: str, dependencies: List[str])\
-            -> List[str]:
-        """Get the command for executing an evaluator."""
-        return self.execution_command(evaluator_name, dependencies, [])
 
     def file_extension(self) -> str:
         """The file extension for this language, without the dot."""
@@ -86,10 +92,6 @@ class LanguageConfig:
     def conventionalise_object(self, class_name: str) -> str:
         """Apply a language's conventions to a module name."""
         raise NotImplementedError
-
-    def rename_evaluator(self, code, name):
-        """Replace the evaluate function name"""
-        return code.replace("evaluate", name, 1)
 
     def template_folders(self, programming_language: str) -> List[str]:
         """The name of the template folders to search."""
@@ -140,3 +142,14 @@ class LanguageConfig:
         required = plan.get_used_features()
         supported_features = self.supported_features()
         return supported_features & required != 0
+
+    def solution_callback(self, solution: Path, plan: Plan):
+        """
+        An opportunity to modify the solution. By default, this does nothing.
+        :param solution: Path to the solution and path for the modified solution.
+        :param plan: The testplan.
+        """
+        pass
+
+    def specific_evaluator_callback(self, function: FunctionCall) -> FunctionCall:
+        return function

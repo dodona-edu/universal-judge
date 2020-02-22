@@ -2,7 +2,7 @@
 <%! from testplan import FunctionType %>
 <%page args="function,lifting=True" />
 % if function.type != FunctionType.IDENTITY:
-    % if function.type == FunctionType.OBJECT or function.type == FunctionType.TOP:
+    % if function.type == FunctionType.OBJECT or (function.type == FunctionType.TOP and function.object):
         ${function.object}.\
     % endif
     ${function.name} \

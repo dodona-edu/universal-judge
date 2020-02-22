@@ -16,6 +16,7 @@ from runners.generator import (Generator, path_to_templates, value_file,
 from runners.languages.haskell import HaskellConfig
 from runners.languages.java import JavaConfig
 from runners.languages.python import PythonConfig
+from runners.config import LanguageConfig
 from tested import Config
 from testplan import *
 
@@ -212,7 +213,7 @@ class GeneratorJudge:
         adjusted_config = replace(config, programming_language=language)
         language_config = CONFIGS[language]()
         self.config = adjusted_config
-        self.language_config = language_config
+        self.language_config: LanguageConfig = language_config
         self.identifier = _get_identifier()
         self.translator = Generator(adjusted_config, language_config)
 
@@ -242,9 +243,14 @@ class GeneratorJudge:
         report_update(self.out, StartJudgment())
 
         logger.info("Start generating code...")
-        common_dir, files = self.generate_files(plan, mode)
+        common_dir, files, selector = self.generate_files(plan, mode)
+
+        # Add the selector to the dependencies.
+        if selector:
+            files.append(selector)
 
         if mode == ExecutionMode.PRECOMPILATION:
+            assert selector is not None
             # Compile all code in one go.
             logger.info("Running precompilation step...")
             result, compilation_files = self.compilation(common_dir, files)
@@ -256,6 +262,9 @@ class GeneratorJudge:
             if status != Status.CORRECT and plan.configuration.allow_fallback:
                 mode = ExecutionMode.INDIVIDUAL
                 logger.info("Compilation error, falling back to individual mode")
+                # Remove the selector file from the dependencies.
+                # Otherwise, it will keep being compiled, which we want to avoid.
+                files.remove(selector)
             else:
                 files = compilation_files
                 # Report messages.
@@ -412,7 +421,7 @@ class GeneratorJudge:
 
     def generate_files(self,
                        plan: Plan,
-                       mode: ExecutionMode) -> Tuple[Path, List[str]]:
+                       mode: ExecutionMode) -> Tuple[Path, List[str], Optional[str]]:
         """
         Generate all necessary files, using the templates. This creates a common
         directory, copies all dependencies to that folder and runs the generation.
@@ -435,8 +444,12 @@ class GeneratorJudge:
         # Copy the submission file.
         submission_file = f"{submission_name}" \
                           f".{self.language_config.file_extension()}"
-        shutil.copy2(self.config.source, common_dir / submission_file)
+        submission_path = common_dir / submission_file
+        shutil.copy2(self.config.source, submission_path)
         dependencies.append(submission_file)
+
+        # Allow modifications of the submission file.
+        self.language_config.solution_callback(submission_path, plan)
 
         # The names of the contexts in the testplan.
         context_names = []
@@ -467,8 +480,9 @@ class GeneratorJudge:
                 destination=common_dir,
                 context_names=context_names
             )
-            dependencies.append(generated)
-        return common_dir, dependencies
+        else:
+            generated = None
+        return common_dir, dependencies, generated
 
     def execute_context(self,
                         args: ContextExecution
@@ -618,11 +632,12 @@ class GeneratorJudge:
         logger.info("Starting execution on file %s", executable_name)
 
         command = self.language_config.execution_command(
+            cwd=working_directory,
             file=executable_name,
             dependencies=dependencies,
             arguments=[argument] if argument else []
         )
-        logger.debug("Executing with command %s in directory %s", command,
+        logger.debug("Executing command %s in directory %s", command,
                      working_directory)
         # noinspection PyTypeChecker
         p = subprocess.run(command, input=stdin, text=True,
@@ -659,8 +674,10 @@ class GeneratorJudge:
         :param working_directory: The directory in which the dependencies are
                                   available and in which the compilation results
                                   should be stored.
-        :param dependencies: A list of files available for compilation. This list
-                             will contain the results
+        :param dependencies: A list of files available for compilation. Some
+                             languages might need a main file. By convention, the
+                             last file is the main file.
+                             TODO: make this explicit?
         :return: A tuple containing an optional compilation result, and a list of
                  files, intended for further processing in the pipeline. For
                  languages without compilation, the dependencies can be returned
@@ -735,17 +752,17 @@ class GeneratorJudge:
             dependencies
         )
         logger.debug("Compiling custom evaluator with command %s", command)
-        result = self.run_compilation_command(command, custom_path)
+        result = eval_judge.run_compilation_command(command, custom_path)
         if result and result.stderr:
             raise TestPlanError(f"Error while compiling specific "
                                 f"test case: {result.stderr}")
 
         # Execute the custom evaluator.
         evaluator_name = Path(evaluator_name).stem
-        executable = self.find_main_file(files, evaluator_name)
+        executable = eval_judge.find_main_file(files, evaluator_name)
         files.remove(executable)
 
-        return self.execute_file(
+        return eval_judge.execute_file(
             executable_name=executable,
             working_directory=custom_path,
             dependencies=files,

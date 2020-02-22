@@ -550,11 +550,16 @@ class Configuration:
     """
     The default mode for the judge.
     """
-    allow_fallback: Optional[bool] = None
+    allow_fallback: Optional[bool] = True
     """
     Indicate if the judge should attempt individual mode if the precompilation mode
     fails. If nothing is given, the language-dependent default is used. If a boolean
     is given, this value is used, regardless of the language default.
+    """
+    language: Dict[str, Dict[str, Any]] = field(default_factory=dict)
+    """
+    Language-specific options for the judge. These depend on the language
+    implementation; the judge itself does nothing with it.
     """
 
 
@@ -581,6 +586,9 @@ class Plan(WithFeatures):
                 for testcase in context.all_testcases():
                     evaluators.extend(testcase.output.get_custom_evaluators())
         return evaluators
+
+    def language_config(self, language: str) -> dict:
+        return self.configuration.language.get(language, dict())
 
 
 def _reduce_with_feature(iterable: Iterable[WithFeatures]) -> Features:

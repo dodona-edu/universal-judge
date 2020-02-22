@@ -4,7 +4,7 @@ Evaluators actually compare values to determine the result of a test.
 Note: the class docs of the built-in evaluators is used verbatim in the
 text of the thesis, which is way they are in Dutch.
 """
-
+import logging
 import math
 from dataclasses import field
 from typing import Optional, List, Union, Dict, Any, Tuple
@@ -24,6 +24,8 @@ from testplan import TestPlanError, TextOutputChannel, FileOutputChannel, \
     ExceptionBuiltin
 from testplan import CustomEvaluator as TestplanCustomEvaluator
 from testplan import SpecificEvaluator as TestplanSpecificEvaluator
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass

@@ -51,7 +51,7 @@ def e_evaluate_main(value):
 
 ## Run the "before" code for the main testcase if needed.
 % if main_testcase.exists and before:
-    ${c.before}
+    ${before}
 % endif
 
 
@@ -96,9 +96,8 @@ except Exception as e:
 
 % endfor
 
-## Run the "after" code for the main testcase if needed.
-% if main_testcase.exists and before:
-    ${c.before}
+% if after:
+    ${after}
 % endif
 
 ## Close output files.

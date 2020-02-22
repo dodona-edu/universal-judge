@@ -228,12 +228,13 @@ def prepare_testcase(
         evaluator_name = language_config.conventionalise_object(
             utils.basename(evaluator)
         )
-        value_function_call = FunctionCall(
+        call = FunctionCall(
             type=FunctionType.OBJECT,
             name=language_config.conventionalise("evaluate"),
             object=language_config.conventionalise(evaluator_name),
             arguments=[StringType(type=StringTypes.LITERAL, data="value")]
         )
+        value_function_call = language_config.specific_evaluator_callback(call)
         names.append(evaluator_name)
     else:
         value_function_call = FunctionCall(

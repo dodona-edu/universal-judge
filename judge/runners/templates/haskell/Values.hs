@@ -45,6 +45,16 @@ sendValue file value = LBS.appendFile file (encode (object [
     ]))
 
 
+sendCustomEvaluated :: Bool -> Maybe String -> Maybe String -> [String] -> IO ()
+sendCustomEvaluated result expected actual messages =
+    LBS.putStr (encode (object [
+        "result" .= toJSON result,
+        "readable_expected" .= toJSON expected,
+        "readable_actual" .= toJSON actual,
+        "messages" .= toJSON messages
+    ]))
+
+
 sendSpecificEvaluated :: FilePath -> Bool -> String -> String -> [String] -> IO ()
 sendSpecificEvaluated file result expected actual messages =
     LBS.appendFile file (encode (object [
@@ -54,10 +64,3 @@ sendSpecificEvaluated file result expected actual messages =
         "messages" .= toJSON messages
     ]))
 
-
-sendCustomEvaluated :: FilePath -> Bool -> [String] -> IO ()
-sendCustomEvaluated file result messages =
-    LBS.appendFile file (encode (object [
-        "result" .= toJSON result,
-        "messages" .= toJSON messages
-    ]))

@@ -1,16 +1,40 @@
 ## Code to execute one test context.
 <%! from testplan import Assignment %>
-module Context where
+module ${context_name} where
 
 import System.IO (hPutStr, stderr)
 import System.Environment
+import Values
+import Control.Monad.Trans.Class
+
+## Import the language specific evaluators we will need.
+% for name in evaluator_names:
+    import qualified ${name}
+% endfor
 
 import qualified ${submission_name}
-import qualified Evaluator
+
+
+value_file = "${value_file}"
+exception_file = "${exception_file}"
+
+writeDelimiter :: FilePath -> String -> IO ()
+writeDelimiter = appendFile
+
+
+send :: Typeable a => a -> IO ()
+send = sendValue value_file
+
+
+% for additional in additional_testcases:
+    v_evaluate_${loop.index} value = <%include file="function.mako" args="function=additional.value_function"/>
+% endfor
 
 
 main = do
-    ${before}
+    % if before:
+        ${before}
+    % endif
 
     % if main_testcase.exists:
         let mainArgs = [\
@@ -21,7 +45,8 @@ main = do
         withArgs mainArgs ${submission_name}.main
         hPutStr stderr "--${secret_id}-- SEP"
         putStr "--${secret_id}-- SEP"
-        Evaluator.writeDelimiter "--${secret_id}-- SEP"
+        writeDelimiter value_file "--${secret_id}-- SEP"
+        writeDelimiter exception_file "--${secret_id}-- SEP"
     % endif
 
     % for additional in additional_testcases:
@@ -30,7 +55,7 @@ main = do
         % else:
             % if additional.has_return:
                 v${loop.index} <- <%include file="function.mako" args="function=additional.statement" />
-                Evaluator.v_evaluate_${loop.index} v${loop.index}
+                v_evaluate_${loop.index} v${loop.index}
             % else:
                 <%include file="function.mako" args="function=additional.statement" />
             % endif
@@ -38,6 +63,10 @@ main = do
 
         hPutStr stderr "--${secret_id}-- SEP"
         putStr "--${secret_id}-- SEP"
-        Evaluator.writeDelimiter "--${secret_id}-- SEP"
+        writeDelimiter value_file "--${secret_id}-- SEP"
+        writeDelimiter exception_file "--${secret_id}-- SEP"
     % endfor
-    ${after}
+
+    % if after:
+        ${after}
+    % endif
