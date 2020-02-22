@@ -240,6 +240,9 @@ class CustomEvaluator:
     method; the evaluator is run as part of the judge and receives its values from
     that judge. This type is useful, for example, when doing exercises on sequence
     alignments.
+
+    TODO: the custom evaluator should be able to access the input of the testcase.
+      How should we handle functions? Stdin? Stdout?
     """
     language: str
     path: Path
@@ -616,7 +619,7 @@ def generate_schema():
 
 
 if __name__ == '__main__':
-    # with open('../exercise/lotto/evaluation/plan.json', 'r') as f:
-    #     r = parse_test_plan(f.read())
-    #     print(r)
-    generate_schema()
+    with open('../exercise/zoemzinnen/preparation/plan.json', 'r') as f:
+        r = parse_test_plan(f.read())
+        print(r)
+    # generate_schema()

@@ -492,24 +492,23 @@ class GeneratorJudge:
         Execute a context.
         """
         # Create a working directory for the context.
-        context_directory = Path(self.config.workdir, f"context-{args.number}")
-        context_directory.mkdir()
+        context_dir = Path(self.config.workdir, f"context-{args.number}")
+        context_dir.mkdir()
 
-        logger.info("Executing context %d in path %s",
-                    args.number, context_directory)
+        logger.info("Executing context %d in path %s", args.number, context_dir)
 
         # Copy files from the common directory to the context directory.
         for file in args.files:
             origin = args.common_directory / file
-            logger.debug("Copying %s to %s", origin, context_directory)
+            logger.debug("Copying %s to %s", origin, context_dir)
             # noinspection PyTypeChecker
-            shutil.copy2(origin, context_directory)
+            shutil.copy2(origin, context_dir)
 
         # If needed, do a compilation.
         if args.mode == ExecutionMode.INDIVIDUAL:
             logger.info("Compiling context %d in INDIVIDUAL mode...", args.number)
             result, files = self.compilation(
-                working_directory=context_directory,
+                working_directory=context_dir,
                 dependencies=args.files
             )
 
@@ -530,7 +529,7 @@ class GeneratorJudge:
 
             base_result = self.execute_file(
                 executable_name=executable,
-                working_directory=context_directory,
+                working_directory=context_dir,
                 dependencies=files,
                 stdin=stdin
             )
@@ -552,7 +551,7 @@ class GeneratorJudge:
 
             base_result = self.execute_file(
                 executable_name=executable,
-                working_directory=context_directory,
+                working_directory=context_dir,
                 dependencies=files,
                 stdin=stdin,
                 argument=str(args.number)
@@ -560,7 +559,7 @@ class GeneratorJudge:
 
         identifier = f"--{self.identifier}-- SEP"
 
-        value_file_path = value_file(context_directory, self.identifier)
+        value_file_path = value_file(context_dir, self.identifier)
         try:
             # noinspection PyTypeChecker
             with open(value_file_path, "r") as f:
@@ -569,7 +568,7 @@ class GeneratorJudge:
             logger.warning("Value file not found, looked in %s", value_file_path)
             values = ""
 
-        exception_file_path = exception_file(context_directory, self.identifier)
+        exception_file_path = exception_file(context_dir, self.identifier)
         try:
             # noinspection PyTypeChecker
             with open(exception_file_path, "r") as f:
