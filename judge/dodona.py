@@ -220,7 +220,7 @@ def report_update(to: IO, update: Update):
     json.dump(update, to, cls=_EnhancedJSONEncoder)
     # noinspection PyUnreachableCode
     if __debug__:
-        print("")
+        print("", file=to)
 
 
 if __name__ == '__main__':

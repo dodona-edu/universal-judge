@@ -287,7 +287,7 @@ class GeneratorJudge:
             precompilation_result = None
 
         logger.info("Starting judgement...")
-        pool = Pool(1 if plan.configuration.parallel else 1)
+        pool = Pool(4 if plan.configuration.parallel else 1)
 
         with utils.protected_directory(common_dir) as common_dir:
 
@@ -308,8 +308,11 @@ class GeneratorJudge:
                         precompilation_result=precompilation_result
                     ))
 
+                results = []
+                for execution in executions:
+                    results.append(self.execute_context(execution))
                 # Do the executions in parallel
-                results = pool.map(self.execute_context, executions)
+                # results = pool.map(self.execute_context, executions)
 
                 # Handle the results
                 for context_index, context in enumerate(tab.contexts):
