@@ -82,7 +82,7 @@ class LanguageConfig:
         """The name of the selector module."""
         raise NotImplementedError
 
-    def context_name(self, number: int) -> str:
+    def context_name(self, tab_number: int, context_number: int) -> str:
         raise NotImplementedError
 
     def conventionalise(self, function_name: str) -> str:
@@ -152,4 +152,27 @@ class LanguageConfig:
         pass
 
     def specific_evaluator_callback(self, function: FunctionCall) -> FunctionCall:
+        """
+        An opportunity to modify the function call used to call the language-
+        specific evaluator. This allows injecting language dependent parameters.
+        TODO: this is fairly ugly, is there a better way?
+        By default, this does nothing.
+        :param function: The function as produced by the judge.
+        :return: The new function.
+        """
         return function
+
+    def context_dependencies_callback(self,
+                                      context_name: str,
+                                      dependencies: List[str]) -> List[str]:
+        """
+        An opportunity to modify the list of dependencies that is copied to the
+        context-specific directory when executing. This can be used to, for example,
+        not copy files for all contexts, but only those specific for the given
+        context. By default, this does nothing.
+        :param tab_number: The tab that is being executed.
+        :param context_number: The context that is being executed.
+        :param dependencies: The dependencies. Read-only: copy before modifying.
+        :return: The new dependencies.
+        """
+        return dependencies

@@ -49,8 +49,8 @@ class HaskellConfig(LanguageConfig):
     def submission_name(self, plan: Plan) -> str:
         return plan.object
 
-    def context_name(self, number: int) -> str:
-        return f"Context{number}"
+    def context_name(self, tab_number: int, context_number: int) -> str:
+        return f"Context_{tab_number}_{context_number}"
 
     def supported_features(self) -> Features:
         return (Features.MAIN | Features.FUNCTION_CALL | Features.ASSIGNMENT

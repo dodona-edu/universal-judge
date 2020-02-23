@@ -264,7 +264,7 @@ class SpecificEvaluator:
 
     1. The code is run alongside the user code. This means the user can potentially
        take control of the code.
-    2. This will limit the number of language an exercise is available in, since
+    2. This will limit the context_number of language an exercise is available in, since
        you need to provide tests for all languages you want to support.
     3. It is a lot of work. You need to return the correct values, since the judge
        needs to understand what the result was.
@@ -575,12 +575,6 @@ class Plan(WithFeatures):
 
     def get_used_features(self) -> Features:
         return _reduce_with_feature(self.tabs)
-
-    def get_contexts(self) -> List[Context]:
-        contexts = []
-        for tab in self.tabs:
-            contexts.extend(tab.contexts)
-        return contexts
 
     def get_custom_evaluators(self) -> List[CustomEvaluator]:
         evaluators = []

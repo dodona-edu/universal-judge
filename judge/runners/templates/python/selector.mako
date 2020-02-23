@@ -3,10 +3,11 @@
 import sys
 
 ## Get which context we are currently testing.
-number = int(sys.argv[1])
+context_name = sys.argv[1]
 
 ## Depending on the context, there may be some arguments
+## TODO: dynamically import the context?
 % for c in contexts:
-    if ${loop.index} == number:
+    if "${c}" == context_name:
         import ${c}
 % endfor

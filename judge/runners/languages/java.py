@@ -51,8 +51,8 @@ class JavaConfig(LanguageConfig):
     def selector_name(self) -> str:
         return "Selector"
 
-    def context_name(self, number: int) -> str:
-        return f"Context{number}"
+    def context_name(self, tab_number: int, context_number: int) -> str:
+        return f"Context_{tab_number}_{context_number}"
 
     def _get_classpath(self):
         return [x for x in self.initial_dependencies() if x.endswith(".jar")]

@@ -13,13 +13,6 @@ def ordinal(index):
         return '{}th'.format(index + 1)
 
 
-def highlight(words, index=-1):
-    def hl(word, index1, index2):
-        return '<span>{}</span>'.format(word) if index1 == index2 else word
-
-    return ' '.join(hl(html.escape(w), i, index) for i, w in enumerate(words))
-
-
 def evaluate(expected, actual, arguments):
     """
     Checks whether a buzz-generated generators always produces a string that is a
@@ -30,8 +23,7 @@ def evaluate(expected, actual, arguments):
     :param arguments: A list with one element: the input.
     :return:
     """
-    wordlists = arguments[0]
-    wordlists = [set() for _ in range(len(wordlists))]
+    wordlists = [set(words) for words in arguments[0]]
 
     words = actual.split()
     # check if actual has same number of words as there are word lists
@@ -50,8 +42,8 @@ def evaluate(expected, actual, arguments):
             message = f'"{word} does not belong to {ordinal(index)} word list"'
             evaluation_utils.evaluated(
                 result=False,
-                readable_expected=html.escape(repr(expected)),
-                readable_actual=repr(highlight(words, index)),
+                readable_expected=repr(expected),
+                readable_actual=repr(' '.join(words)),
                 messages=[message]
             )
             return
@@ -64,14 +56,14 @@ def evaluate(expected, actual, arguments):
 
         evaluation_utils.evaluated(
             result=False,
-            readable_expected=html.escape(' '.join(words)),
-            readable_actual=html.escape(actual),
+            readable_expected=repr(' '.join(words)),
+            readable_actual=repr(actual),
             messages=[message]
         )
         return
 
     evaluation_utils.evaluated(
         result=True,
-        readable_expected=html.escape(actual),
-        readable_actual=html.escape(actual)
+        readable_expected=repr(actual),
+        readable_actual=repr(actual)
     )

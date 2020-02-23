@@ -33,7 +33,7 @@ if __name__ == '__main__':
 
     # Enable logging
     log = logging.getLogger()
-    log.setLevel(logging.DEBUG)
+    log.setLevel(logging.ERROR)
     ch = logging.StreamHandler(stream=sys.stdout)
     formatter = logging.Formatter('%(name)s:%(levelname)s:%(message)s')
     ch.setFormatter(formatter)

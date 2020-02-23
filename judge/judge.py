@@ -54,8 +54,7 @@ class ContextExecution:
     Arguments used to execute_module a single context of the testplan.
     """
     context: Context
-    tab_number: int
-    number: int
+    context_name: str
     mode: ExecutionMode
     common_directory: Path
     files: List[str]
@@ -143,22 +142,13 @@ def _process_compile_results(
     the messages and status may be passed to Dodona unchanged. Alternatively, they
     can be kept to show them with the first context.
     """
-
     messages = []
 
     # There was no compilation
     if results is None:
         return messages, Status.CORRECT
 
-    # Report stdout.
-    if results.stdout:
-        # Append compiler messages to the output.
-        messages.append("De compiler produceerde volgende uitvoer op stdout:")
-        messages.append(ExtendedMessage(
-            description=results.stdout,
-            format='code'
-        ))
-        logger.debug("Received stdout from compiler: " + results.stderr)
+    show_stdout = False
 
     # Report stderr.
     if results.stderr:
@@ -169,6 +159,17 @@ def _process_compile_results(
             format='code'
         ))
         logger.debug("Received stderr from compiler: " + results.stderr)
+        show_stdout = True
+
+    # Report stdout.
+    if results.stdout and (show_stdout or results.exit != 0):
+        # Append compiler messages to the output.
+        messages.append("De compiler produceerde volgende uitvoer op stdout:")
+        messages.append(ExtendedMessage(
+            description=results.stdout,
+            format='code'
+        ))
+        logger.debug("Received stdout from compiler: " + results.stderr)
 
     # Report errors if needed.
     if results.exit != 0:
@@ -286,7 +287,7 @@ class GeneratorJudge:
             precompilation_result = None
 
         logger.info("Starting judgement...")
-        pool = Pool(4 if plan.configuration.parallel else 1)
+        pool = Pool(1 if plan.configuration.parallel else 1)
 
         with utils.protected_directory(common_dir) as common_dir:
 
@@ -297,8 +298,10 @@ class GeneratorJudge:
                 for context_index, context in enumerate(tab.contexts):
                     executions.append(ContextExecution(
                         context=context,
-                        tab_number=tab_index,
-                        number=context_index,
+                        context_name=self.language_config.context_name(
+                            tab_number=tab_index,
+                            context_number=context_index
+                        ),
                         mode=mode,
                         common_directory=common_dir,
                         files=files,
@@ -456,25 +459,26 @@ class GeneratorJudge:
         # The names of the contexts in the testplan.
         context_names = []
         # Generate the files for each context.
-        for i, context in enumerate(plan.get_contexts()):
-            context_name = self.language_config.context_name(i)
-            logger.debug(f"Generating file for context {context_name}")
-            generated, evaluators = self.translator.generate_context(
-                destination=common_dir,
-                context=context,
-                context_name=context_name,
-                submission_name=submission_name,
-                secret=self.identifier
-            )
-            # Copy evaluators to the directory.
-            for evaluator in evaluators:
-                source = Path(self.config.resources) / evaluator
-                logger.debug("Copying evaluator from %s to %s",
-                             source, common_dir)
-                shutil.copy2(source, common_dir)
-            dependencies.extend(evaluators)
-            dependencies.append(generated)
-            context_names.append(context_name)
+        for tab_i, tab in enumerate(plan.tabs):
+            for context_i, context in enumerate(tab.contexts):
+                context_name = self.language_config.context_name(tab_i, context_i)
+                logger.debug(f"Generating file for context {context_name}")
+                generated, evaluators = self.translator.generate_context(
+                    destination=common_dir,
+                    context=context,
+                    context_name=context_name,
+                    submission_name=submission_name,
+                    secret=self.identifier
+                )
+                # Copy evaluators to the directory.
+                for evaluator in evaluators:
+                    source = Path(self.config.resources) / evaluator
+                    logger.debug("Copying evaluator from %s to %s",
+                                 source, common_dir)
+                    shutil.copy2(source, common_dir)
+                dependencies.extend(evaluators)
+                dependencies.append(generated)
+                context_names.append(context_name)
 
         if mode == ExecutionMode.PRECOMPILATION:
             logger.debug("Generating selector for PRECOMPILATION mode.")
@@ -486,25 +490,28 @@ class GeneratorJudge:
             generated = None
         return common_dir, dependencies, generated
 
-    def execute_context(self,
-                        args: ContextExecution
-                        ) -> Tuple[Optional[ExecutionResult],
-                                   List[Message], Status]:
+    def execute_context(self, args: ContextExecution) \
+            -> Tuple[Optional[ExecutionResult], List[Message], Status]:
         """
         Execute a context.
         """
         # Create a working directory for the context.
         context_dir = Path(
             self.config.workdir,
-            f"tab-{args.tab_number}",
-            f"context-{args.number}"
+            args.context_name
         )
-        context_dir.mkdir(parents=True, exist_ok=True)
+        context_dir.mkdir()
 
-        logger.info("Executing context %d in path %s", args.number, context_dir)
+        logger.info("Executing context %s in path %s",
+                    args.context_name, context_dir)
+
+        dependencies = self.language_config.context_dependencies_callback(
+            args.context_name,
+            args.files
+        )
 
         # Copy files from the common directory to the context directory.
-        for file in args.files:
+        for file in dependencies:
             origin = args.common_directory / file
             logger.debug("Copying %s to %s", origin, context_dir)
             # noinspection PyTypeChecker
@@ -512,10 +519,11 @@ class GeneratorJudge:
 
         # If needed, do a compilation.
         if args.mode == ExecutionMode.INDIVIDUAL:
-            logger.info("Compiling context %d in INDIVIDUAL mode...", args.number)
+            logger.info("Compiling context %d in INDIVIDUAL mode...",
+                        args.context_number)
             result, files = self.compilation(
                 working_directory=context_dir,
-                dependencies=args.files
+                dependencies=dependencies
             )
 
             # Process compilation results.
@@ -526,10 +534,9 @@ class GeneratorJudge:
                 logger.debug("Aborting executing of this context.")
                 return None, messages, status
 
-            logger.debug("Executing context %d in INDIVIDUAL mode...", args.number)
-            # Execute the individual files.
-            context_name = self.language_config.context_name(args.number)
-            executable = self.find_main_file(files, context_name)
+            logger.debug("Executing context %s in INDIVIDUAL mode...",
+                         args.context_name)
+            executable = self.find_main_file(files, args.context_name)
             files.remove(executable)
             stdin = args.context.get_stdin(self.config.resources)
 
@@ -540,7 +547,7 @@ class GeneratorJudge:
                 stdin=stdin
             )
         else:
-            result, files = None, args.files
+            result, files = None, dependencies
             if args.precompilation_result:
                 logger.debug("Substituting precompilation results.")
                 messages, status = args.precompilation_result
@@ -548,8 +555,8 @@ class GeneratorJudge:
                 logger.debug("No precompilation results found, using default.")
                 messages, status = [], Status.CORRECT
 
-            logger.info("Executing context %d in PRECOMPILATION mode...",
-                        args.number)
+            logger.info("Executing context %s in PRECOMPILATION mode...",
+                        args.context_name)
             selector_name = self.language_config.selector_name()
             executable = self.find_main_file(files, selector_name)
             files.remove(executable)
@@ -560,7 +567,7 @@ class GeneratorJudge:
                 working_directory=context_dir,
                 dependencies=files,
                 stdin=stdin,
-                argument=str(args.number)
+                argument=args.context_name
             )
 
         identifier = f"--{self.identifier}-- SEP"
