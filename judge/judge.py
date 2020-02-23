@@ -54,6 +54,7 @@ class ContextExecution:
     Arguments used to execute_module a single context of the testplan.
     """
     context: Context
+    tab_number: int
     number: int
     mode: ExecutionMode
     common_directory: Path
@@ -296,7 +297,8 @@ class GeneratorJudge:
                 for context_index, context in enumerate(tab.contexts):
                     executions.append(ContextExecution(
                         context=context,
-                        number=tab_index + context_index,
+                        tab_number=tab_index,
+                        number=context_index,
                         mode=mode,
                         common_directory=common_dir,
                         files=files,
@@ -492,8 +494,12 @@ class GeneratorJudge:
         Execute a context.
         """
         # Create a working directory for the context.
-        context_dir = Path(self.config.workdir, f"context-{args.number}")
-        context_dir.mkdir()
+        context_dir = Path(
+            self.config.workdir,
+            f"tab-{args.tab_number}",
+            f"context-{args.number}"
+        )
+        context_dir.mkdir(parents=True, exist_ok=True)
 
         logger.info("Executing context %d in path %s", args.number, context_dir)
 
@@ -707,8 +713,8 @@ class GeneratorJudge:
 
         # Create a directory for this evaluator. If one exists, delete it first.
         evaluator_dir_name = humps.decamelize(evaluator.path.stem)
-        custom_directory_name = f"evaluator_{evaluator_dir_name}"
-        custom_path = Path(self.config.workdir, custom_directory_name)
+        custom_directory_name = f"{evaluator_dir_name}_{_get_identifier()}"
+        custom_path = Path(self.config.workdir, "evaluators", custom_directory_name)
         if custom_path.exists():
             logger.debug("Removing existing directory for custom evaluator.")
             shutil.rmtree(custom_path, ignore_errors=True)

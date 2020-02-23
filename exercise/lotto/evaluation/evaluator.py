@@ -51,7 +51,7 @@ def evaluate(expected, actual, arguments):
     count = arguments[0]
     maximum = arguments[1]
 
-    # at least check the value that was already generated
+    # at least check the value that was already actual
     numbers, valid, message = valid_lottery_numbers(actual, count=count, maximum=maximum)
 
     messages = []
