@@ -526,6 +526,8 @@ class CustomEvaluator(Evaluator):
 
         if evaluation_result.readable_expected:
             readable_expected = evaluation_result.readable_expected
+        if evaluation_result.readable_actual:
+            readable_actual = evaluation_result.readable_actual
 
         return EvaluationResult(
             result=StatusMessage(
