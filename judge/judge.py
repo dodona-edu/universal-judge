@@ -252,7 +252,7 @@ class GeneratorJudge:
             files.append(selector)
 
         if mode == ExecutionMode.PRECOMPILATION:
-            assert selector is not None
+            assert not self.language_config.needs_selector() or selector is not None
             # Compile all code in one go.
             logger.info("Running precompilation step...")
             result, compilation_files = self.compilation(common_dir, files)
@@ -266,7 +266,8 @@ class GeneratorJudge:
                 logger.info("Compilation error, falling back to individual mode")
                 # Remove the selector file from the dependencies.
                 # Otherwise, it will keep being compiled, which we want to avoid.
-                files.remove(selector)
+                if self.language_config.needs_selector():
+                    files.remove(selector)
             else:
                 files = compilation_files
                 # Report messages.
@@ -483,7 +484,8 @@ class GeneratorJudge:
                 dependencies.append(generated)
                 context_names.append(context_name)
 
-        if mode == ExecutionMode.PRECOMPILATION:
+        if mode == ExecutionMode.PRECOMPILATION \
+                and self.language_config.needs_selector():
             logger.debug("Generating selector for PRECOMPILATION mode.")
             generated = self.translator.generate_selector(
                 destination=common_dir,
@@ -560,18 +562,34 @@ class GeneratorJudge:
 
             logger.info("Executing context %s in PRECOMPILATION mode...",
                         args.context_name)
-            selector_name = self.language_config.selector_name()
-            executable = self.find_main_file(files, selector_name)
-            files.remove(executable)
-            stdin = args.context.get_stdin(self.config.resources)
 
-            base_result = self.execute_file(
-                executable_name=executable,
-                working_directory=context_dir,
-                dependencies=files,
-                stdin=stdin,
-                argument=args.context_name
-            )
+            if self.language_config.needs_selector():
+                logger.debug("Selector is needed, using it.")
+
+                selector_name = self.language_config.selector_name()
+                executable = self.find_main_file(files, selector_name)
+                files.remove(executable)
+                stdin = args.context.get_stdin(self.config.resources)
+
+                base_result = self.execute_file(
+                    executable_name=executable,
+                    working_directory=context_dir,
+                    dependencies=files,
+                    stdin=stdin,
+                    argument=args.context_name
+                )
+            else:
+                logger.debug("Selector is not needed, using individual execution.")
+                executable = self.find_main_file(files, args.context_name)
+                files.remove(executable)
+                stdin = args.context.get_stdin(self.config.resources)
+
+                base_result = self.execute_file(
+                    executable_name=executable,
+                    working_directory=context_dir,
+                    dependencies=files,
+                    stdin=stdin
+                )
 
         identifier = f"--{self.identifier}-- SEP"
 

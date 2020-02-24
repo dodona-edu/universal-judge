@@ -176,3 +176,6 @@ class LanguageConfig:
         :return: The new dependencies.
         """
         return dependencies
+
+    def needs_selector(self):
+        raise NotImplementedError

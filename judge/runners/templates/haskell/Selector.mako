@@ -12,8 +12,8 @@ getIntArg :: IO Int
 getIntArg = fmap (read . head) getArgs
 
 main = do
-    n <- getIntArg
+    n <- head getArgs
     case n of
         % for c in contexts:
-            ${loop.index} -> ${c}.main
+            "${c}" -> ${c}.main
         % endfor

@@ -484,6 +484,7 @@ class Generator:
         :param context_names: The names of the contexts.
         :return: The name of the generated file in the given destination.
         """
+        assert self.language_config.needs_selector()
         return self._find_and_write_template(
             args=SelectorArguments(contexts=context_names),
             destination=destination,

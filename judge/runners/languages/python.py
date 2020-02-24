@@ -51,3 +51,6 @@ class PythonConfig(LanguageConfig):
         not_allowed = "context"
         return [x for x in dependencies
                 if not x.startswith(not_allowed) or x.startswith(allowed)]
+
+    def needs_selector(self):
+        return False
