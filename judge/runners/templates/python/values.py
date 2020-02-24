@@ -11,14 +11,14 @@ def _encode(value):
     elif isinstance(value, str):
         type_ = "text"
         data_ = value
+    elif isinstance(value, bool):
+        type_ = "boolean"
+        data_ = value
     elif isinstance(value, int):
         type_ = "integer"
         data_ = value
     elif isinstance(value, float):
         type_ = "rational"
-        data_ = value
-    elif isinstance(value, bool):
-        type_ = "boolean"
         data_ = value
     elif isinstance(value, list) or isinstance(value, tuple):
         type_ = "list"
