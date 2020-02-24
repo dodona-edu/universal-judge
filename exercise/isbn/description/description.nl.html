@@ -40,7 +40,7 @@
         </p>
       </li>
       <li>
-        <p>Schrijf een functie <samp>zijnISBN</samp> waaraan een lijst (<samp>list</samp>)
+        <p>Schrijf een functie <samp>areISBN</samp> waaraan een lijst (<samp>list</samp>)
           met $$n \in \mathbb{N}$$ codes moet doorgegeven worden. De functie
           moet voor alle codes uit de gegeven lijst aangegeven of ze geldige
           ISBN-codes voorstellen. De functie heeft ook nog een tweede optionele
@@ -91,14 +91,14 @@ class="mi">5</span><span class="p">,</span> <span class="bp">True</span><span cl
 class="s1">'The Practice of Computing Using Python'</span><span class="p">,</span> <span
 class="s1">'9789027439642'</span><span class="p">,</span> <span class="s1">'5486948320146'</span><span
 class="p">]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">zijnISBN</span><span class="p">(</span><span
+<span class="gp">&gt;&gt;&gt; </span><span class="n">areISBN</span><span class="p">(</span><span
 class="n">codes</span><span class="p">)</span>
 <span class="go">[False, True, True, True, False, False, False, True, False]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">zijnISBN</span><span class="p">(</span><span
+<span class="gp">&gt;&gt;&gt; </span><span class="n">areISBN</span><span class="p">(</span><span
 class="n">codes</span><span class="p">,</span> <span class="bp">True</span><span
 class="p">)</span>
 <span class="go">[False, False, False, False, False, False, False, True, False]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">zijnISBN</span><span class="p">(</span><span
+<span class="gp">&gt;&gt;&gt; </span><span class="n">areISBN</span><span class="p">(</span><span
 class="n">codes</span><span class="p">,</span> <span class="bp">False</span><span
 class="p">)</span>
 <span class="go">[False, True, True, True, False, False, False, False, False]</span>
