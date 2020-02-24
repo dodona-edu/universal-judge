@@ -1,0 +1,6 @@
+---------------------------------------------------
+tab name: isISBN
+<LANGUAGE code="nl">
+  <function from="areISBN" to="zijnISBN" />
+  <token from="digit" to="cijfer" detect="false" />
+</LANGUAGE>

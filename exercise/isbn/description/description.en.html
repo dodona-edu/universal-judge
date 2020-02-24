@@ -1,0 +1,114 @@
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  </head>
+  <body>
+    <p>In the ISBN-10 (<em>International Standard Book Numbering</em>) system
+      that was used until the end of 2006, each book is assigned a unique
+      10-digit code. The first nine digits uniquely identify the book itself,
+      whereas the last digit merely serves as a check digit to detect invalid
+      ISBN-10 codes.</p>
+    <div class="dodona-centered-group"> <img alt="ISBN" data-caption="ISBN in text and as a barcode."
+        src="media/ISBN.gif" title="ISBN" height="140"> </div>
+    <p>If $$x_1, \ldots, x_9$$ represent the first nine digits of an ISBN-10
+      code, the check digit $$x_{10}$$ is calculated as \[ x_{10} = (x_1+ 2x_2+
+      3x_3+ 4x_4+ 5x_5+ 6x_6+ 7x_7+ 8x_8+ 9x_9)\!\!\!\!\mod{11} \] As a result,
+      the check digit $$x_{10}$$ always takes a value in between 0 and 10. If
+      the check digit is equal to 10, it is represented by the uppercase letter
+      X in the ISBN-10 code. As such, only a single character is needed to
+      represent the check digit.</p>
+    <p>In the new ISBN-13 system, each book is assigned a unique 13-digit code.
+      The first twelve digits identify the book itself, whereas the last digit
+      merely serves as a check digit to detect invalid ISBN-13 codes. If $$x_1,
+      \ldots, x_{12}$$ represent the first twelve digits of an ISBN-13 code, the
+      check digit $$x_{13}$$ is calculated as \[\begin{align} o &amp;= x_1 + x_3
+      + x_5 + x_7 + x_9 + x_{11} \\ e &amp;= x_2 + x_4 + x_6 + x_8 + x_{10} +
+      x_{12} \\ x_{13} &amp;= (10 - (o +
+      3e)\!\!\!\!\mod{10})\!\!\!\!\!\mod{10}\end{align}\] As a result,
+      $$x_{13}$$ always takes a value in between 0 and 9, so that ISBN-13 codes
+      only contain digits.</p>
+    <h3>Assignment</h3>
+    <ul>
+      <li>
+        <p>Write a function <samp>isISBN</samp> that takes a string $$c$$ (<samp>str</samp>).
+          The function must return a Boolean value (<samp>bool</samp>) that
+          indicates whether $$c$$ is a valid ISBN code. The function also has an
+          optional second parameter <samp>isbn13</samp> that may take a Boolean
+          value (<samp>bool</samp>) indicating whether the function must check
+          for an ISBN-10 code (<samp>False</samp>) or for an ISBN-13 code (<samp>True</samp>,
+          default value). </p>
+      </li>
+      <li>
+        <p>Write a function <samp>areISBN</samp> that takes a <samp>list</samp>
+          containing $$n \in \mathbb{N}$$ codes. The function must check whether
+          each code in the given list is a valid ISBN code. The function also
+          has an optional second parameter <samp>isbn13</samp> that may take a
+          Boolean value (<samp>bool</samp>) indicating whether the function must
+          check for ISBN-10 codes (<samp>False</samp>) or for ISBN-13 codes (<samp>True</samp>).</p>
+        <p>If no value is explicitly passed to the parameter <samp>isbn13</samp>,
+          the type of the code must be derived from its length. Codes that are
+          no strings (<samp>str</samp>) are considered to be invalid by
+          definition. Codes having length 13 must be checked as ISBN-13 codes
+          and codes having length 10 must be checked as ISBN-10 codes. Codes
+          having a length that deviates from 10 and 13 are considered to be
+          invalid by definition.</p>
+        <p>The function must return a new <samp>list</samp> containing $$n$$
+          Boolean values (<samp>bool</samp>) that indicate whether the code at
+          the corresponding position in the given list is a valid ISBN code.</p>
+      </li>
+    </ul>
+    <h3>Example</h3>
+    <div class="highlighter-rouge language-python">
+      <div class="syntax">
+        <pre><span class="gp">&gt;&gt;&gt; </span><span class="n">isISBN</span><span
+class="p">(</span><span class="s1">'9789027439642'</span><span class="p">,</span> <span
+class="bp">False</span><span class="p">)</span>
+<span class="go">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">isISBN</span><span class="p">(</span><span
+class="s1">'9789027439642'</span><span class="p">,</span> <span class="bp">True</span><span
+class="p">)</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">isISBN</span><span class="p">(</span><span
+class="s1">'9789027439642'</span><span class="p">)</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">isISBN</span><span class="p">(</span><span
+class="s1">'080442957X'</span><span class="p">)</span>
+<span class="go">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">isISBN</span><span class="p">(</span><span
+class="s1">'080442957X'</span><span class="p">,</span> <span class="bp">False</span><span
+class="p">)</span>
+<span class="go">True</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">codes</span> <span class="o">=</span> <span
+class="p">[</span><span class="s1">'0012345678'</span><span class="p">,</span> <span
+class="s1">'0012345679'</span><span class="p">,</span> <span class="s1">'9971502100'</span><span
+class="p">,</span> <span class="s1">'080442957X'</span><span class="p">,</span> <span
+class="mi">5</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span
+class="s1">'The Practice of Computing Using Python'</span><span class="p">,</span> <span
+class="s1">'9789027439642'</span><span class="p">,</span> <span class="s1">'5486948320146'</span><span
+class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">areISBN</span><span class="p">(</span><span
+class="n">codes</span><span class="p">)</span>
+<span class="go">[False, True, True, True, False, False, False, True, False]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">areISBN</span><span class="p">(</span><span
+class="n">codes</span><span class="p">,</span> <span class="bp">True</span><span
+class="p">)</span>
+<span class="go">[False, False, False, False, False, False, False, True, False]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">areISBN</span><span class="p">(</span><span
+class="n">codes</span><span class="p">,</span> <span class="bp">False</span><span
+class="p">)</span>
+<span class="go">[False, True, True, True, False, False, False, False, False]</span>
+</pre></div>
+    </div>
+    <div class="hidden-print">
+      <h3>Ask Pythia &#8230;</h3>
+      <p>In the following instruction video, Pythia explains how to tackle this
+        assignment. Watch this video as a stepping stone to solve other
+        exercises about <a href="https://dodona.ugent.be/en/exercises/?filter=opgaven/reeks07">advanced
+          functions and modules</a>.</p>
+      <div class="dodona-centered-group"><iframe src="https://www.youtube.com/embed/BVchG1WSJk4"
+          allow="autoplay; encrypted-media" allowfullscreen="" height="315" frameborder="0"
+          width="560"></iframe></div>
+    </div>
+  </body>
+</html>

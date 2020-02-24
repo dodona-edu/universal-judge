@@ -1,0 +1,150 @@
+>>> isISBN('9789027439642', False)
+False
+
+>>> isISBN('9789027439642', True)
+True
+
+>>> isISBN('9789027439642')
+True
+
+>>> isISBN('080442957X')
+False
+
+>>> isISBN('080442957X', False)
+True
+
+>>> isISBN(9789027439642)
+False
+
+>>> isISBN('8964768567830', True)
+False
+
+>>> isISBN('0925794147', False)
+True
+
+>>> isISBN('0168109840', True)
+False
+
+>>> isISBN('7044330485', True)
+False
+
+>>> isISBN('3825158586', False)
+True
+
+>>> isISBN('3429866681470', False)
+False
+
+>>> isISBN('9468218407804', True)
+False
+
+>>> isISBN('0943854644', False)
+True
+
+>>> isISBN('1434767558', True)
+False
+
+>>> isISBN('7938800166', True)
+False
+
+>>> isISBN('8397833414060', False)
+False
+
+>>> isISBN('8078643299904', True)
+False
+
+>>> isISBN('0506416943028', False)
+False
+
+>>> isISBN('9722715530', True)
+False
+
+>>> isISBN('4791748022')
+False
+
+>>> isISBN('3840271479', False)
+True
+
+>>> isISBN('0375624463778', True)
+True
+
+>>> isISBN('9080865796', True)
+False
+
+>>> isISBN('9432069044')
+False
+
+>>> isISBN('8250605502140')
+False
+
+>>> isISBN('5511109770')
+False
+
+>>> isISBN('1932082166', False)
+True
+
+>>> isISBN('6570736566', True)
+False
+
+>>> isISBN('5699924763554', True)
+False
+
+>>> isISBN('8748973067355', False)
+False
+
+>>> isISBN('1844757447', False)
+True
+
+>>> isISBN('5059901866', False)
+True
+
+>>> isISBN('7206012892')
+False
+
+>>> isISBN('1549249548595', False)
+False
+
+>>> isISBN('5741262171', True)
+False
+
+>>> isISBN('6987894817', True)
+False
+
+>>> isISBN('7712609248282', True)
+False
+
+>>> isISBN('8990446177012', False)
+False
+
+>>> isISBN('7428012262', True)
+False
+
+>>> isISBN('8877602177971', False)
+False
+
+>>> isISBN('9035233784203', True)
+False
+
+>>> isISBN('4067339749495', True)
+True
+
+>>> isISBN('3124274830', True)
+False
+
+>>> isISBN('0362781866')
+False
+
+>>> isISBN('6826988163398', True)
+False
+
+>>> isISBN('6767750436932', True)
+False
+
+>>> isISBN('4017727677', True)
+False
+
+>>> isISBN('9324782062052', False)
+False
+
+>>> isISBN('2837162051', False)
+True
+
