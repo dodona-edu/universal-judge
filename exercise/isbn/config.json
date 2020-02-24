@@ -10,5 +10,8 @@
   "programming_language": "python",
   "labels": [
 
-  ]
+  ],
+  "evaluation": {
+    "memory_limit": 500000000
+  }
 }
