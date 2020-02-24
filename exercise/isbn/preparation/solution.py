@@ -1,11 +1,10 @@
-def isISBN10(code):
-
+def is_isbn10(code):
     """
     Checks whether the given ISBN-10 code is valid.
 
-    >>> isISBN10('9971502100')
+    >>> is_isbn10('9971502100')
     True
-    >>> isISBN10('9971502108')
+    >>> is_isbn10('9971502108')
     False
     """
 
@@ -33,16 +32,16 @@ def isISBN10(code):
     # check the check digit
     return check_digit(code) == code[-1]
 
-def isISBN13(code):
 
+def is_isbn13(code):
     """
     Checks whether the given ISBN-13 code is valid.
 
-    >>> isISBN13('9789743159664')
+    >>> is_isbn13('9789743159664')
     True
-    >>> isISBN13('9787954527409')
+    >>> is_isbn13('9787954527409')
     False
-    >>> isISBN13('8799743159665')
+    >>> is_isbn13('8799743159665')
     False
     """
 
@@ -70,32 +69,32 @@ def isISBN13(code):
     # check the check digit
     return check_digit(code) == code[-1]
 
-def isISBN(code, isbn13=True):
 
+def is_isbn(code, isbn13=True):
     """
-    >>> isISBN('9789027439642', False)
+    >>> is_isbn('9789027439642', False)
     False
-    >>> isISBN('9789027439642', True)
+    >>> is_isbn('9789027439642', True)
     True
-    >>> isISBN('9789027439642')
+    >>> is_isbn('9789027439642')
     True
-    >>> isISBN('080442957X')
+    >>> is_isbn('080442957X')
     False
-    >>> isISBN('080442957X', False)
+    >>> is_isbn('080442957X', False)
     True
     """
+    return is_isbn13(code) if isbn13 else is_isbn10(code)
 
-    return isISBN13(code) if isbn13 else isISBN10(code)
 
-def areISBN(codes, isbn13=None):
-
+def are_isbn(codes, isbn13=None):
     """
-    >>> codes = ['0012345678', '0012345679', '9971502100', '080442957X', 5, True, 'The Practice of Computing Using Python', '9789027439642', '5486948320146']
-    >>> areISBN(codes)
+    >>> codes = ['0012345678', '0012345679', '9971502100', '080442957X', 5, True,
+    'The Practice of Computing Using Python', '9789027439642', '5486948320146']
+    >>> are_isbn(codes)
     [False, True, True, True, False, False, False, True, False]
-    >>> areISBN(codes, True)
+    >>> are_isbn(codes, True)
     [False, False, False, False, False, False, False, True, False]
-    >>> areISBN(codes, False)
+    >>> are_isbn(codes, False)
     [False, True, True, True, False, False, False, False, False]
     """
 
@@ -108,9 +107,9 @@ def areISBN(codes, isbn13=None):
         if isinstance(code, str):
 
             if isbn13 is None:
-                checks.append(isISBN(code, len(code) == 13))
+                checks.append(is_isbn(code, len(code) == 13))
             else:
-                checks.append(isISBN(code, isbn13))
+                checks.append(is_isbn(code, isbn13))
 
         else:
 
@@ -118,6 +117,7 @@ def areISBN(codes, isbn13=None):
 
     # return list of checks
     return checks
+
 
 if __name__ == '__main__':
     import doctest

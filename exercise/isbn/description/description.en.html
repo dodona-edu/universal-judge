@@ -30,7 +30,7 @@
     <h3>Assignment</h3>
     <ul>
       <li>
-        <p>Write a function <samp>isISBN</samp> that takes a string $$c$$ (<samp>str</samp>).
+        <p>Write a function <samp>is_isbn</samp> that takes a string $$c$$ (<samp>str</samp>).
           The function must return a Boolean value (<samp>bool</samp>) that
           indicates whether $$c$$ is a valid ISBN code. The function also has an
           optional second parameter <samp>isbn13</samp> that may take a Boolean
@@ -39,7 +39,7 @@
           default value). </p>
       </li>
       <li>
-        <p>Write a function <samp>areISBN</samp> that takes a <samp>list</samp>
+        <p>Write a function <samp>are_isbn</samp> that takes a <samp>list</samp>
           containing $$n \in \mathbb{N}$$ codes. The function must check whether
           each code in the given list is a valid ISBN code. The function also
           has an optional second parameter <samp>isbn13</samp> that may take a
@@ -60,21 +60,21 @@
     <h3>Example</h3>
     <div class="highlighter-rouge language-python">
       <div class="syntax">
-        <pre><span class="gp">&gt;&gt;&gt; </span><span class="n">isISBN</span><span
+        <pre><span class="gp">&gt;&gt;&gt; </span><span class="n">is_isbn</span><span
 class="p">(</span><span class="s1">'9789027439642'</span><span class="p">,</span> <span
 class="bp">False</span><span class="p">)</span>
 <span class="go">False</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">isISBN</span><span class="p">(</span><span
+<span class="gp">&gt;&gt;&gt; </span><span class="n">is_isbn</span><span class="p">(</span><span
 class="s1">'9789027439642'</span><span class="p">,</span> <span class="bp">True</span><span
 class="p">)</span>
 <span class="go">True</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">isISBN</span><span class="p">(</span><span
+<span class="gp">&gt;&gt;&gt; </span><span class="n">is_isbn</span><span class="p">(</span><span
 class="s1">'9789027439642'</span><span class="p">)</span>
 <span class="go">True</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">isISBN</span><span class="p">(</span><span
+<span class="gp">&gt;&gt;&gt; </span><span class="n">is_isbn</span><span class="p">(</span><span
 class="s1">'080442957X'</span><span class="p">)</span>
 <span class="go">False</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">isISBN</span><span class="p">(</span><span
+<span class="gp">&gt;&gt;&gt; </span><span class="n">is_isbn</span><span class="p">(</span><span
 class="s1">'080442957X'</span><span class="p">,</span> <span class="bp">False</span><span
 class="p">)</span>
 <span class="go">True</span>
@@ -87,14 +87,14 @@ class="mi">5</span><span class="p">,</span> <span class="bp">True</span><span cl
 class="s1">'The Practice of Computing Using Python'</span><span class="p">,</span> <span
 class="s1">'9789027439642'</span><span class="p">,</span> <span class="s1">'5486948320146'</span><span
 class="p">]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">areISBN</span><span class="p">(</span><span
+<span class="gp">&gt;&gt;&gt; </span><span class="n">are_isbn</span><span class="p">(</span><span
 class="n">codes</span><span class="p">)</span>
 <span class="go">[False, True, True, True, False, False, False, True, False]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">areISBN</span><span class="p">(</span><span
+<span class="gp">&gt;&gt;&gt; </span><span class="n">are_isbn</span><span class="p">(</span><span
 class="n">codes</span><span class="p">,</span> <span class="bp">True</span><span
 class="p">)</span>
 <span class="go">[False, False, False, False, False, False, False, True, False]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">areISBN</span><span class="p">(</span><span
+<span class="gp">&gt;&gt;&gt; </span><span class="n">are_isbn</span><span class="p">(</span><span
 class="n">codes</span><span class="p">,</span> <span class="bp">False</span><span
 class="p">)</span>
 <span class="go">[False, True, True, True, False, False, False, False, False]</span>

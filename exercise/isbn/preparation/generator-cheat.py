@@ -50,19 +50,20 @@ def _encode(value):
         "type": type_
     }
 
+
 def check_digit10(code):
     """helper function for computing the ISBN-10 check digit"""
-    
+
     # compute the check digit
     check = sum((i + 1) * int(code[i]) for i in range(9)) % 11
-    
+
     # convert the check digit into string representation
     return 'X' if check == 10 else str(check)
 
 
 def check_digit13(code):
     """helper function for computing the ISBN-13 check digit"""
-    
+
     # compute the check digit
     check = sum((3 if i % 2 else 1) * int(code[i]) for i in range(12))
 
@@ -80,10 +81,12 @@ try:
 except:
     import solution
 
-contexts = []
+testcases = []
 is_isbn = {
-    "name": "isISBN",
-    "contexts": contexts
+    "name":     "isISBN",
+    "contexts": [{
+        "normal": testcases
+    }]
 }
 plan = {
     "tabs": [is_isbn]
@@ -140,14 +143,11 @@ for code, isbn13 in args:
         "output": output_
     }
 
-    context = {
-        "normal": [testcase]
-    }
-
-    contexts.append(context)
+    testcases.append(testcase)
 
 # generate test cases for function areISBN
-codes = ['0012345678', '0012345679', '9971502100', '080442957X', 5, True, 'The Practice of Computing Using Python', '9789027439642', '5486948320146']
+codes = ['0012345678', '0012345679', '9971502100', '080442957X', 5, True,
+         'The Practice of Computing Using Python', '9789027439642', '5486948320146']
 codes2 = ['012345678' + str(digit) for digit in range(10)]
 args = [
     (codes, None),
@@ -158,11 +158,11 @@ args = [
     (codes2, False),
 ]
 while len(args) < 50:
-    
+
     codes = []
-    
+
     for _ in range(random.randint(4, 10)):
-     
+
         length = random.choice([10, 13])
         code = random_characters(length - 1, string.digits)
         if length == 10:
@@ -177,13 +177,15 @@ while len(args) < 50:
                 code += random.choice(string.digits)
         codes.append(code)
 
-    args.append((codes, random.choice([None, True, False])))    
+    args.append((codes, random.choice([None, True, False])))
 
 # generate unit tests for function areISBN
-contexts = []
+testcases = []
 are_isbn = {
-    "name": "areISBN",
-    "contexts": contexts
+    "name":     "areISBN",
+    "contexts": [{
+        "normal": testcases
+    }]
 }
 plan["tabs"].append(are_isbn)
 for index, (codes, isbn13) in enumerate(args):
@@ -191,9 +193,9 @@ for index, (codes, isbn13) in enumerate(args):
     assignment_testcase = {
         "input": {
             "assignment": {
-                "name": f"codes{index:02d}",
+                "name":       f"codes{index:02d}",
                 "expression": {
-                    "type": "identity",
+                    "type":      "identity",
                     "arguments": [
                         _encode(codes)
                     ]
@@ -231,12 +233,8 @@ for index, (codes, isbn13) in enumerate(args):
         "output": output_
     }
 
-    context = {
-        "normal": [assignment_testcase, testcase]
-    }
-
-    contexts.append(context)
-
+    testcases.append(assignment_testcase)
+    testcases.append(testcase)
 
 with open(testplan_name, 'w') as fp:
     json.dump(plan, fp, indent=2)

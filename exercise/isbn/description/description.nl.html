@@ -30,7 +30,7 @@
     <h3>Opgave</h3>
     <ul>
       <li>
-        <p>Schrijf een functie <samp>isISBN</samp> waaraan een string $$c$$ (<samp>str</samp>)
+        <p>Schrijf een functie <samp>is_isbn</samp> waaraan een string $$c$$ (<samp>str</samp>)
           moet doorgegeven worden. De functie moet een Booleaanse
           waarde (<samp>bool</samp>) teruggeven, die aangeeft of
           $$c$$ een geldige ISBN-code is. De functie heeft ook nog een optionele
@@ -40,7 +40,7 @@
         </p>
       </li>
       <li>
-        <p>Schrijf een functie <samp>areISBN</samp> waaraan een lijst (<samp>list</samp>)
+        <p>Schrijf een functie <samp>are_isbn</samp> waaraan een lijst (<samp>list</samp>)
           met $$n \in \mathbb{N}$$ codes moet doorgegeven worden. De functie
           moet voor alle codes uit de gegeven lijst aangegeven of ze geldige
           ISBN-codes voorstellen. De functie heeft ook nog een tweede optionele
@@ -64,21 +64,21 @@
     <h3>Voorbeeld</h3>
     <div class="highlighter-rouge language-python">
       <div class="syntax">
-        <pre><span class="gp">&gt;&gt;&gt; </span><span class="n">isISBN</span><span
+        <pre><span class="gp">&gt;&gt;&gt; </span><span class="n">is_isbn</span><span
 class="p">(</span><span class="s1">'9789027439642'</span><span class="p">,</span> <span
 class="bp">False</span><span class="p">)</span>
 <span class="go">False</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">isISBN</span><span class="p">(</span><span
+<span class="gp">&gt;&gt;&gt; </span><span class="n">is_isbn</span><span class="p">(</span><span
 class="s1">'9789027439642'</span><span class="p">,</span> <span class="bp">True</span><span
 class="p">)</span>
 <span class="go">True</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">isISBN</span><span class="p">(</span><span
+<span class="gp">&gt;&gt;&gt; </span><span class="n">is_isbn</span><span class="p">(</span><span
 class="s1">'9789027439642'</span><span class="p">)</span>
 <span class="go">True</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">isISBN</span><span class="p">(</span><span
+<span class="gp">&gt;&gt;&gt; </span><span class="n">is_isbn</span><span class="p">(</span><span
 class="s1">'080442957X'</span><span class="p">)</span>
 <span class="go">False</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">isISBN</span><span class="p">(</span><span
+<span class="gp">&gt;&gt;&gt; </span><span class="n">is_isbn</span><span class="p">(</span><span
 class="s1">'080442957X'</span><span class="p">,</span> <span class="bp">False</span><span
 class="p">)</span>
 <span class="go">True</span>
@@ -91,14 +91,14 @@ class="mi">5</span><span class="p">,</span> <span class="bp">True</span><span cl
 class="s1">'The Practice of Computing Using Python'</span><span class="p">,</span> <span
 class="s1">'9789027439642'</span><span class="p">,</span> <span class="s1">'5486948320146'</span><span
 class="p">]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">areISBN</span><span class="p">(</span><span
+<span class="gp">&gt;&gt;&gt; </span><span class="n">are_isbn</span><span class="p">(</span><span
 class="n">codes</span><span class="p">)</span>
 <span class="go">[False, True, True, True, False, False, False, True, False]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">areISBN</span><span class="p">(</span><span
+<span class="gp">&gt;&gt;&gt; </span><span class="n">are_isbn</span><span class="p">(</span><span
 class="n">codes</span><span class="p">,</span> <span class="bp">True</span><span
 class="p">)</span>
 <span class="go">[False, False, False, False, False, False, False, True, False]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">areISBN</span><span class="p">(</span><span
+<span class="gp">&gt;&gt;&gt; </span><span class="n">are_isbn</span><span class="p">(</span><span
 class="n">codes</span><span class="p">,</span> <span class="bp">False</span><span
 class="p">)</span>
 <span class="go">[False, True, True, True, False, False, False, False, False]</span>
