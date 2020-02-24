@@ -20,11 +20,11 @@ def read_config() -> Config:
         "time_limit": 10000000,
         "programming_language": 'python',
         "natural_language": 'nl',
-        "resources": str(Path('../exercise/zoemzinnen/evaluation').resolve()),
-        "source": '../exercise/zoemzinnen/solution/solution.nl.py',
+        "resources": str(Path('../exercise/isbn/evaluation').resolve()),
+        "source": '../exercise/isbn/preparation/solution.py',
         "judge": str(Path('../').resolve()),
         "workdir": str(Path('./workdir').resolve()),
-        "plan_name": "plan.json"
+        "plan_name": "plan.cheat.json"
     })
 
 
