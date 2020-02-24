@@ -3,26 +3,6 @@
 \lettrine{H}{et antwoord} op de onderzoeksvraag uit het vorige hoofdstuk neemt de vorm van een nieuwe judge voor het Dodona-platform aan, de \term{universele judge}, die oplossingen voor een opgave in meerdere programmeertalen kan evalueren.
 Dit hoofdstuk licht de werking en implementatie van deze judge toe, beginnend met een algemeen overzicht, waarna elk onderdeel in meer detail besproken wordt.
 
-%TODO: terminologie uitleggen (oplossing, evaluatie, \ldots)
-%Een groot deel hiervan zal waarschijnlijk uitgelegd zijn bij de werking van Dodona.
-%
-%Plan voor dit hoofdstuk:
-%
-%1. Testplan                                    OK
-%1.1 Formaat testplan zelf                      OK
-%1.2 Formaat serialisatie                       OK
-%1.3 Formaat functie-oproep en assignment       OK
-%1.4 Vereiste features                          OK
-%2. Uitvoeren van een oplossing                 OK
-%2.1 Genereren van de code                      OK
-%2.2 Uitvoeren van de code                      OK
-%3. Evalueren van een oplossing
-%3.1 Ingebouwde evaluatie
-%3.2 Aangepaste evaluatie
-%3.3 Taalspecifieke evaluatie
-%4. Resultaten verwerken
-
-
 \section{Overzicht}\label{sec:overzicht}
 
 \begin{figure}
@@ -362,7 +342,8 @@ Voor elke context worden de gecompileerde bestanden gekopieerd naar een andere m
 
 \begin{listing}
     \inputminted{text}{code/dir-listing.txt}
-    \caption{Mapstructuur na het uitvoeren van de code, met twee contexten.}
+    \caption{Mapstructuur na het uitvoeren van de evaluatie van een oplossing in Python.
+    Context 0-0 staat voor de eerste context van het eerste tabblad.}
     \label{lst:mapstructuur}
 \end{listing}
 
@@ -447,7 +428,8 @@ Deze staat in \cref{lst:evaluation-util-java}.
 
 \subsubsection{Taalspecifieke evaluator}
 
-De taalspecifieke evaluator is de eenvoudigste: deze neemt een codefragment met daarin één functie \texttt{evaluate}, die één argument aanvaardt, de geproduceerde waarde.
+De taalspecifieke evaluator lijkt sterk op de aangepaste evaluator.
+is de eenvoudigste: deze neemt een codefragment met daarin één functie \texttt{evaluate}, die één argument aanvaardt, de geproduceerde waarde.
 Waar de geproduceerde waarde bij de aangepaste evaluator in het serialisatieformaat moet kunnen, is dit hier niet het geval: de functie wordt rechtstreeks opgeroepen tijdens de uitvoering.
 Om het resultaat aan te geven moet ook één functieoproep komen naar een functie met dezelfde definitie als de \texttt{evaluated}-functie van de aangepaste evaluator.
 In Python is dit bijvoorbeeld:
