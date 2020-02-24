@@ -1,7 +1,7 @@
 {
   "tabs": [
     {
-      "name": "isISBN",
+      "name": "is_isbn",
       "contexts": [
         {
           "normal": [
@@ -1274,7 +1274,7 @@
       ]
     },
     {
-      "name": "areISBN",
+      "name": "are_isbn",
       "contexts": [
         {
           "normal": [
