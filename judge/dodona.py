@@ -58,12 +58,6 @@ class Status(str, Enum):
 
 
 @dataclass
-class TestData:
-    """This is not documented, but used nonetheless"""
-    channel: Optional[str] = None
-
-
-@dataclass
 class StatusMessage:
     """Describes the outcome of the judgement."""
     enum: Status
@@ -105,6 +99,7 @@ class StartTestcase:
 class StartTest:
     """Start on a new test with given expected answer."""
     expected: str
+    channel: Optional[str] = None
     description: Optional[Message] = None
     command: Literal["start-test"] = "start-test"
 
@@ -144,7 +139,6 @@ class CloseTest:
     generated: str
     status: StatusMessage
     accepted: Optional[bool] = None
-    data: Optional[TestData] = None
     command: Literal["close-test"] = "close-test"
 
 

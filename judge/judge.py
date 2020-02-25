@@ -5,7 +5,6 @@ import string
 import subprocess
 import humps
 from dataclasses import replace
-from multiprocessing.dummy import Pool
 from typing import Tuple
 
 import utils
@@ -119,16 +118,20 @@ def _evaluate_channel(
     if is_correct and has_no_result and has_no_expected:
         return True
 
-    report_update(out, StartTest(expected=evaluation_result.readable_expected))
+    report_update(out, StartTest(
+        expected=evaluation_result.readable_expected,
+        channel=channel_name
+    ))
 
     # Report any messages we received.
     for message in evaluation_result.messages:
         report_update(out, AppendMessage(message=message))
 
     # Close the test.
-    report_update(out, CloseTest(generated=evaluation_result.readable_actual,
-                                 status=status,
-                                 data=TestData(channel=channel_name)))
+    report_update(out, CloseTest(
+        generated=evaluation_result.readable_actual,
+        status=status
+    ))
 
     return is_correct
 
@@ -288,7 +291,7 @@ class GeneratorJudge:
             precompilation_result = None
 
         logger.info("Starting judgement...")
-        pool = Pool(4 if plan.configuration.parallel else 1)
+        # pool = Pool(4 if plan.configuration.parallel else 1)
 
         with utils.protected_directory(common_dir) as common_dir:
 
@@ -430,7 +433,8 @@ class GeneratorJudge:
 
     def generate_files(self,
                        plan: Plan,
-                       mode: ExecutionMode) -> Tuple[Path, List[str], Optional[str]]:
+                       mode: ExecutionMode
+                       ) -> Tuple[Path, List[str], Optional[str]]:
         """
         Generate all necessary files, using the templates. This creates a common
         directory, copies all dependencies to that folder and runs the generation.
