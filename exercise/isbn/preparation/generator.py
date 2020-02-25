@@ -12,7 +12,10 @@ random.seed(123456789)
 with open("../config.json", "r") as config_file:
     config = json.load(config_file)
 
-testplan_name = config.get("plan_name", "plan.full.json")
+testplan_name = config["evaluation"].get("plan_name", "plan.json")
+
+# If all tests should go into one context?
+ONE_CONTEXT = False
 
 
 def _encode(value):
@@ -82,7 +85,7 @@ except:
 
 contexts = []
 is_isbn = {
-    "name": "isISBN",
+    "name": "is_isbn",
     "contexts": contexts
 }
 plan = {
@@ -182,7 +185,7 @@ while len(args) < 50:
 # generate unit tests for function areISBN
 contexts = []
 are_isbn = {
-    "name": "areISBN",
+    "name": "are_isbn",
     "contexts": contexts
 }
 plan["tabs"].append(are_isbn)
@@ -238,5 +241,21 @@ for index, (codes, isbn13) in enumerate(args):
     contexts.append(context)
 
 
-with open(testplan_name, 'w') as fp:
+def flatten_contexts(contexts):
+    testcases = [context["normal"] for context in contexts]
+    flat = [item for sublist in testcases for item in sublist]
+    new_context = {
+        "normal": flat
+    }
+    return new_context
+
+
+if ONE_CONTEXT:
+    new_tab1_context = flatten_contexts(plan["tabs"][0]["contexts"])
+    plan["tabs"][0]["contexts"] = [new_tab1_context]
+    new_tab2_context = flatten_contexts(plan["tabs"][1]["contexts"])
+    plan["tabs"][1]["contexts"] = [new_tab2_context]
+
+
+with open(f"../evaluation/{testplan_name}", 'w') as fp:
     json.dump(plan, fp, indent=2)
