@@ -137,8 +137,9 @@ def _evaluate_channel(
 
 
 def _process_compile_results(
+        language_config: LanguageConfig,
         results: Optional[BaseExecutionResult]
-) -> Tuple[List[Message], Status]:
+) -> Tuple[List[Message], Status, List[AnnotateCode]]:
     """
     Process the output of a compilation step. It will convert the result of the
     command into a list of messages and a status. If the status is not correct,
@@ -149,9 +150,13 @@ def _process_compile_results(
 
     # There was no compilation
     if results is None:
-        return messages, Status.CORRECT
+        return messages, Status.CORRECT, []
 
     show_stdout = False
+    annotations = language_config.process_compiler_output(
+        results.stdout, results.stderr
+    )
+    shown_messages = bool(annotations)
 
     # Report stderr.
     if results.stderr:
@@ -163,6 +168,7 @@ def _process_compile_results(
         ))
         logger.debug("Received stderr from compiler: " + results.stderr)
         show_stdout = True
+        shown_messages = True
 
     # Report stdout.
     if results.stdout and (show_stdout or results.exit != 0):
@@ -173,14 +179,16 @@ def _process_compile_results(
             format='code'
         ))
         logger.debug("Received stdout from compiler: " + results.stderr)
+        shown_messages = True
 
     # Report errors if needed.
     if results.exit != 0:
-        messages.append(f"Het compilatieproces eindigde met "
-                        f"exitcode {results.exit}")
-        return messages, Status.COMPILATION_ERROR
+        if not shown_messages:
+            # TODO: perhaps this should be the status message?
+            messages.append(f"Exitcode {results.exit}.")
+        return messages, Status.COMPILATION_ERROR, annotations
     else:
-        return messages, Status.CORRECT
+        return messages, Status.CORRECT, annotations
 
 
 @dataclass
@@ -260,7 +268,10 @@ class GeneratorJudge:
             logger.info("Running precompilation step...")
             result, compilation_files = self.compilation(common_dir, files)
 
-            messages, status = _process_compile_results(result)
+            messages, status, annotations = _process_compile_results(
+                self.language_config,
+                result
+            )
             precompilation_result = (messages, status)
 
             # If we have fallback, discard all results.
@@ -276,13 +287,15 @@ class GeneratorJudge:
                 # Report messages.
                 for message in messages:
                     report_update(self.out, AppendMessage(message=message))
+                for annotation in annotations:
+                    report_update(self.out, annotation)
 
                 if status != Status.CORRECT:
                     report_update(self.out, CloseJudgment(
                         accepted=False,
                         status=StatusMessage(
                             enum=status,
-                            human="Fout tijdens compilatie van de code."
+                            human="Ongeldige broncode"
                         )
                     ))
                     logger.info("Compilation error without fallback")
@@ -528,15 +541,21 @@ class GeneratorJudge:
 
         # If needed, do a compilation.
         if args.mode == ExecutionMode.INDIVIDUAL:
-            logger.info("Compiling context %d in INDIVIDUAL mode...",
-                        args.context_number)
+            logger.info("Compiling context %s in INDIVIDUAL mode...",
+                        args.context_name)
             result, files = self.compilation(
                 working_directory=context_dir,
                 dependencies=dependencies
             )
 
             # Process compilation results.
-            messages, status = _process_compile_results(result)
+            messages, status, annotations = _process_compile_results(
+                self.language_config,
+                result
+            )
+
+            for annotation in annotations:
+                report_update(self.out, annotation)
 
             if status != Status.CORRECT:
                 logger.debug("Compilation of individual context failed.")

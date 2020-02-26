@@ -6722,5 +6722,8 @@
         }
       ]
     }
-  ]
+  ],
+  "configuration": {
+    "allow_fallback": false
+  }
 }

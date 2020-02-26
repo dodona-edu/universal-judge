@@ -278,7 +278,7 @@ class ValueEvaluator(Evaluator):
             return EvaluationResult(
                 result=StatusMessage(
                     enum=Status.WRONG,
-                    human="One of the values is nothing."
+                    human="Geen returnwaarde."
                 ),
                 readable_expected=readable_expected,
                 readable_actual=readable_actual

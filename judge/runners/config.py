@@ -12,6 +12,7 @@ from pathlib import Path
 
 from features import Features
 from testplan import Plan, FunctionCall
+from dodona import AnnotateCode
 
 CallbackResult = Tuple[List[str], List[str]]
 
@@ -179,3 +180,11 @@ class LanguageConfig:
 
     def needs_selector(self):
         raise NotImplementedError
+
+    def process_compiler_output(
+            self,
+            stdout: str,
+            stderr: str
+    ) -> List[AnnotateCode]:
+        """Allows parsing error message to annotate the code."""
+        return []

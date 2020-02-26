@@ -1,0 +1,5 @@
+{"command": "start-judgement"}
+{"message": "De compiler produceerde volgende uitvoer op stdout:", "command": "append-message"}
+{"message": {"description": "*** Error compiling '.\\\\submission.py'...\n  File \".\\submission.py\", line 1\n    is_isbn(code, isbn13=True):\n                              ^\nSyntaxError: invalid syntax\n\n", "format": "code"}, "command": "append-message"}
+{"row": 0, "text": "SyntaxError: invalid syntax", "column": 30, "type": "error", "command": "annotate-code"}
+{"accepted": false, "status": {"enum": "compilation error", "human": "Ongeldige broncode"}, "command": "close-judgement"}

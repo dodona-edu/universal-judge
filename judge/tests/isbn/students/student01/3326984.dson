@@ -1,0 +1,5 @@
+{"command": "start-judgement"}
+{"message": "De compiler produceerde volgende uitvoer op stdout:", "command": "append-message"}
+{"message": {"description": "*** Error compiling '.\\\\submission.py'...\nSorry: IndentationError: unindent does not match any outer indentation level (submission.py, line 6)\n", "format": "code"}, "command": "append-message"}
+{"row": 6, "text": "IndentationError: unindent does not match any outer indentation level", "type": "error", "command": "annotate-code"}
+{"accepted": false, "status": {"enum": "compilation error", "human": "Ongeldige broncode"}, "command": "close-judgement"}

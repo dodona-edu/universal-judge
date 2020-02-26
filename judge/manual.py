@@ -12,6 +12,9 @@ from pathlib import Path
 
 from tested import Config, run
 
+STUDENT = "01"
+EXERCISE = "4928230"
+
 
 def read_config() -> Config:
     """Read the configuration from stdout"""
@@ -21,10 +24,10 @@ def read_config() -> Config:
         "programming_language": 'python',
         "natural_language": 'nl',
         "resources": str(Path('../exercise/isbn/evaluation').resolve()),
-        "source": '../exercise/isbn/preparation/solution.py',
+        "source": f'tests/isbn/students/student{STUDENT}/{EXERCISE}.py',
         "judge": str(Path('../').resolve()),
         "workdir": str(Path('./workdir').resolve()),
-        "plan_name": "plan.cheat.json"
+        "plan_name": "plan.json"
     })
 
 
@@ -48,7 +51,8 @@ if __name__ == '__main__':
 
     start = time.time()
     # run(config, open(os.devnull, "w"))
-    run(config, sys.stdout)
+    f = open(f"tests/isbn/students/student{STUDENT}/{EXERCISE}.dson", 'w')
+    run(config, f)
     end = time.time()
     print()
     print(f"Judging took {end - start} seconds (real time)")

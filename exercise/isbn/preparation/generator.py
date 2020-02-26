@@ -256,6 +256,9 @@ if ONE_CONTEXT:
     new_tab2_context = flatten_contexts(plan["tabs"][1]["contexts"])
     plan["tabs"][1]["contexts"] = [new_tab2_context]
 
+plan["configuration"] = {
+    "allow_fallback": False
+}
 
 with open(f"../evaluation/{testplan_name}", 'w') as fp:
     json.dump(plan, fp, indent=2)
