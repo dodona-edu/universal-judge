@@ -21,12 +21,16 @@ clean:
 dependencies: src/generated/description.md src/generated/serialisation.json
 
 # Generate the json schema of the serialisation format.
-src/generated/serialisation.json:
-	python ../judge/serialisation.py > src/generated/serialisation.json
+#src/generated/serialisation.json:
+#	python ../judge/serialisation.py > src/generated/serialisation.json
+# TODO: do we need this?
 
-# Generate this file.
+# Generated dependencies
 src/generated/description.md:
-	python scripts/mathjax.py ../exercise/lotto/description/description.nl.md src/generated/description.md
+	python scripts/mathjax.py ../exercise/lotto/description/description.nl.md $@
+
+src/generated/generation.tikz:
+	dia --nosplash -e $@ -t tex src/figures/generation.dia
 
 # Do the main file.
 src/main.pdf: dependencies

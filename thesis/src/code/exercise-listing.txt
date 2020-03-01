@@ -1,0 +1,22 @@
+isbn
+├── config.json
+├── description/
+
+│   ├── FaLd6WGRN_exceptions.txt //Uitzonderingskanaal
+│   ├── FaLd6WGRN_values.txt     //Kanaal voor returnwaarden
+│   ├── context_0_0.pyc          //Code voor context 0-0
+│   ├── submission.pyc
+│   └── values.pyc
+...
+└── evaluators                   //Aangepaste evaluatoren
+    ├── buzzchecker_Aao9H18Ve    //Map voor elke context
+    │   ├── buzzchecker.py       //Code aangepaste evaluator
+    │   ├── evaluation_utils.py
+    │   ├── evaluator_executor.py
+    │   └── values.py
+    ├── buzzchecker_B5WViK0zQ
+    │   ├── buzzchecker.py
+    │   ├── evaluation_utils.py
+    │   ├── evaluator_executor.py
+    │   └── values.py
+    ...

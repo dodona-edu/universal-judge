@@ -299,21 +299,24 @@ Eerst wordt de uit te voeren code gegenereerd, waarna de uitvoering van die code
 
 \subsection{Genereren van code}\label{subsec:genereren-van-code}
 
-Het genereren van de code gebeurt met een sjabloonsysteem, genaamd Mako \autocite{mako}.
-Dit sjabloonsysteem wordt traditioneel gebruikt bij webapplicaties (zoals Ruby on Rails met \textsc{erb}, Phoenix met \textsc{eex}, Laravel met Blade, enz.) om een html-pagina te genereren.
+Het genereren van de code gebeurt met een sjabloonsysteem genaamd Mako \autocite{mako}.
+Dit soort systemen wordt traditioneel gebruikt bij webapplicaties (zoals Ruby on Rails met \textsc{erb}, Phoenix met \textsc{eex}, Laravel met Blade, enz.) om een html-pagina te genereren.
 In ons geval zijn de sjablonen verantwoordelijk voor de vertaling van programmeertaalonafhankelijke concepten naar implementaties in specifieke talen.
 Voorbeelden hiervan zijn functieoproepen, assignments, enz.
 Ook zijn de sjablonen verantwoordelijk voor het genereren van de code die de oplossing van de student zal oproepen en evalueren.
+
+\subsubsection{Sjablonen}
 
 Het aantal sjablonen en hoe ze geïmplementeerd worden is in principe vrij, zij het dat de judge wel enkele standaardsjablonen nodig heeft, waaraan vastgelegde parameters meegegeven worden.
 Deze verplichte sjablonen zijn:
 \begin{description}
     \item[\texttt{assignment}] Vertaalt een assignment uit het testplan naar code.
-    \item[\texttt{contexts}] Het centrale sjabloon, genereert de code nodig om alle contexten uit een testplan uit te voeren.
-    Om performantieredenen (zie ook~\cref{ch:beperkingen-en-toekomstig-werk}) wordt de code van alle contexten uit een testplan in een bestand gegenereerd.
-    Aan de hand van een parameter (een getal dat de context aangeeft), wordt bij het uitvoeren de code voor de juiste context gekozen.
+    \item[\texttt{context}] Het sjabloon dat de code genereert om een context te evalueren.
+    Deze code moet uitvoerbaar zijn (d.w.z.\ een main-functie bevatten of een script zijn).
+    \item[\texttt{selector}] Het sjabloon de code genereert om een bepaalde context uit te voeren.
+    Om performantieredenen (later hierover meer) wordt de code van alle contexten soms uit een keer gegenereerd en gecompileerd.
+    Aan de hand van een parameter (de naam van de context), wordt bij het uitvoeren de code voor de juiste context gekozen.
     \item[\texttt{evaluator\_executor}] Genereert code om een aangepaste evaluator te starten.
-    \item[\texttt{evaluators}] Genereert de evaluatiecode voor alle testgevallen.
     \item[\texttt{function}] Vertaalt een functie-oproep naar code.
     \item[\texttt{value}] Vertaalt een waarde uit het serialisatieformaat naar code.
 \end{description}
@@ -322,7 +325,67 @@ Daarnaast moet het encoderen naar serialisatieformaat ook geïmplementeerd worde
 Veel talen hebben dus nog enkele bijkomende bestanden met code.
 In alle bestaande implementaties is dit geïmplementeerd als een module of klasse met naam \texttt{Value}.
 
-\subsection{Communicatie tussen uitvoering en judge}\label{subsec:communicatie-tussen-uitvoering-en-judge}
+\subsubsection{Modus}\label{sss:modus}
+
+De judge ondersteunt twee uitvoeringsmodi:
+\begin{description}
+    \item[Precompilatiemodus] In deze modus wordt de code voor alle contexten in een keer gecompileerd.
+    Dit wordt gedaan om performantieredenen.
+    In talen die resulteren in een uitvoerbaar bestand (zoals Haskell, C/C++), resulteert deze modus in één uitvoerbaar bestand voor alle contexten.
+    Bij het uitvoeren wordt dan aan de hand van een parameter de juiste context uitgevoerd (met het \texttt{selector}-sjabloon van hierboven).
+    \item[Individuele modus] Hierbij wordt elke context afzonderlijk gecompileerd.
+\end{description}
+
+Een flowchart van het generen van de code is \cref{fig:generation}, met een testplan met vier contexten.
+In dit diagram zijn de stappen voor de individuele modus in het \textcolor{ugent-we}{aquablauw}.
+De stappen van de precompilatiemodus zijn in het \textcolor{ugent-blue}{UGent-blauw}.
+De gemeenschappelijke stappen zijn in het zwart.
+
+Dit gedrag is configureerbaar in het testplan, maar standaard wordt de precompilatiemodus gebruikt, zij het met terugval op de individuele modus.
+Deze terugval is handig voor talen met sterke compilatie.
+Een voorbeeldscenario is als volgt: stel een oefening waarbij de student twee functies moet implementeren.
+De student implementeert de eerste functie en dient in om al feedback te krijgen.
+Bij talen als Java of Haskell zal dit niet lukken: daar alle contexten in een keer gecompileerd worden, zal de ontbrekende tweede functie ervoor zorgen dat de volledige compilatie faalt.
+In individuele modus is dit geen probleem: de contexten die de eerste functie testen zullen compileren en kunnen uitgevoerd worden.
+De individuele modus brengt wel een niet te onderschatten kost qua uitvoeringstijd met zich mee (zie ook \cref{ch:beperkingen-en-toekomstig-werk}).
+
+\begin{figure}
+    \begin{adjustbox}{width=\textwidth}
+        \input{generated/generation.tikz}
+    \end{adjustbox}
+    \caption{
+        Schematische voorstelling van het genereren van de code.
+        Gemeenschappelijke stappen zijn zwart, stappen voor de individuele modus \textcolor{ugent-we}{aquablauw} en stappen voor de precompilatiemodus \textcolor{ugent-blue}{UGent-blauw}.
+    }
+    \label{fig:generation}
+\end{figure}
+
+\subsection{Uitvoeren van de code}\label{subsec:uitvoeren-van-de-code}
+
+Na het genereren wordt alle code gecompileerd (bij de talen waar dit mogelijk is).
+Dit gebeurt ofwel eenmaal voor alle contexten afzonderlijk, ofwel eenmaal voor alle contexten samen, afhankelijk van de modus.
+De werking hiervan wordt behandeld in \cref{sss:modus} en \cref{fig:generation}.
+
+Vervolgens wordt elke context uit het testplan uitgevoerd en wordt de uitvoer verzameld.
+Het uitvoeren zelf gebeurt op de normale manier dat een programmeertaal uitgevoerd wordt: via de commandoregel.
+Deze aanpak heeft een voordeel: er is geen verschil tussen hoe de judge de code van de student uitvoert en hoe de student zijn code zelf uitvoert op zijn eigen computer.
+Dit voorkomt dat er subtiele verschillen in de resultaten sluipen.
+
+Indien de configuratie het toelaat, worden de contexten in parallel uitgevoerd.
+Om te vermijden dat bestanden of uitvoer overschreven wordt, wordt de gecompileerde code gekopieerd naar een aparte map, waar de uitvoer gebeurt.
+\Cref{lst:mapstructuur} illustreert dit met een voorbeeld voor een oplossing in Java.
+Deze mapstructuur stelt de toestand van de werkmap voor na het uitvoeren van de code.
+In de map \texttt{common} zit alle code en de gecompileerde bestanden.
+Voor elke context worden de gecompileerde bestanden gekopieerd naar een andere map, bv.\ \texttt{context-1}, wat de map is voor context \texttt{1} van het testplan.
+
+\begin{listing}
+    \inputminted{text}{code/dir-listing.txt}
+    \caption{Mapstructuur na het uitvoeren van de evaluatie van een oplossing in Python.
+    Context 0-0 staat voor de eerste context van het eerste tabblad.}
+    \label{lst:mapstructuur}
+\end{listing}
+
+\subsection{Verzamelen van resultaten}\label{subsec:verzamelen-van-resultaten}
 
 De uitvoering van een oplossing genereert resultaten die door de judge geïnterpreteerd moeten worden.
 Er zijn verschillende soorten uitvoerresultaten (zoals vermeld heeft elke soort uitvoer een aparte test in het testplan).
@@ -336,30 +399,7 @@ Deze naam bevat willekeurige tekens, zodat de kans dat deze bestanden overschrev
 De bestanden waar de exceptions and returnwaarden naartoe geschreven worden, worden na de uitvoering gelezen door de judge.
 Hierna worden alle kanalen op dezelfde manier behandeld door de judge.
 
-
 In de bestaande implementaties ligt de verantwoordelijkheid om naar deze bestanden te schrijven bij de \texttt{Value}-module van hierboven.
-
-\subsection{Uitvoeren van de code}\label{subsec:uitvoeren-van-de-code}
-
-Na het genereren wordt alle code gecompileerd (bij de talen die daar behoeft aan hebben).
-Vervolgens wordt elke context uit het testplan uitgevoerd en wordt de uitvoer verzameld.
-Het uitvoeren zelf gebeurt op de normale manier dat een programmeertaal uitgevoerd wordt: via de commandoregel.
-Deze aanpak heeft een voordeel: er is geen verschil tussen hoe de judge de code van de student uitvoert en hoe de student zijn code zelf uitvoert op zijn eigen computer.
-Dit voorkomt dat er subtiele verschillen in de resultaten sluipen.
-
-Indien de configuratie het toelaat, worden de contexten in parallel uitgevoerd.
-Om te vermijden dat bestanden of uitvoer overschreven wordt, wordt de gecompileerde code gekopieerd naar een aparte map, waar de uitvoer gebeurt.
-\Cref{lst:mapstructuur} illustreert dit met een voorbeeld voor een oplossing in Java.
-Deze figuur stelt de toestand van de werkmap voor na het uitvoeren van de code.
-In de map \texttt{common} zit alle code en de gecompileerde bestanden.
-Voor elke context worden de gecompileerde bestanden gekopieerd naar een andere map, bv.\ \texttt{context-1}, wat de map is voor context \texttt{1} van het testplan.
-
-\begin{listing}
-    \inputminted{text}{code/dir-listing.txt}
-    \caption{Mapstructuur na het uitvoeren van de evaluatie van een oplossing in Python.
-    Context 0-0 staat voor de eerste context van het eerste tabblad.}
-    \label{lst:mapstructuur}
-\end{listing}
 
 \section{Evalueren van een oplossing}\label{sec:evalueren-van-een-oplossing2}
 
@@ -419,25 +459,36 @@ Voor de aangepaste evaluator moet een bestand geschreven worden in een programme
 Het resultaat van de uitvoering wordt vervolgens geserialiseerd en gedeserialiseerd naar het evaluatieproces.
 Hoe een evaluator moet geïmplementeerd worden, hangt af van de programmeertaal.
 
-In Python bestaat de aangepaste evaluator uit een module met een functie die voldoet aan de definitie, zoals gegeven in het eerste fragment van \cref{lst:evaluation-util-python}.
+In Python bestaat de aangepaste evaluator uit een module met een functie die voldoet aan de definitie, zoals gegeven in \cref{lst:evaluation-python-custom}.
 De judge stelt ook een module \texttt{evaluation\_utils} ter beschikking.
-De functie van hierboven moet dan één oproep doen naar de functie \texttt{evaluation\_utils.evaluated()}.
+De functie van hierboven moet dan één oproep doen naar de functie \texttt{evaluated()}.
 Deze module is redelijk eenvoudig, zoals te zien in \cref{lst:evaluation-util-python}.
 
 \begin{listing}
-    \inputminted{python}{code/signature.py}
+    \inputminted{python}{code/custom_signature.py}
+    \caption{De definitie van de aangepaste evaluator.}
+    \label{lst:evaluation-python-custom}
+\end{listing}
+
+\begin{listing}
     \inputminted{python}{../../judge/runners/templates/python/evaluation_utils.py}
-    \caption{De definitie van de aangepaste evaluator en de implementatie van de module \texttt{evaluation\_utils}}
+    \caption{De implementatie van de module \texttt{evaluation\_utils}}
     \label{lst:evaluation-util-python}
 \end{listing}
 
 In de Java-implementatie is de situatie gelijkaardig: het gaat om het implementeren van een abstracte klasse, die ook dienst doet als de module van Python.
-Deze staat in \cref{lst:evaluation-util-java}.
+Deze klassen en haar ouder staan in \cref{lst:evaluation-util-java,lst:evaluation-java-custom}.
+
+\begin{listing}
+    \inputminted{java}{../../judge/runners/templates/java/AbstractEvaluator.java}
+    \caption{De implementatie van de klasse \texttt{AbstractEvaluator}.}
+    \label{lst:evaluation-util-java}
+\end{listing}
 
 \begin{listing}
     \inputminted{java}{../../judge/runners/templates/java/AbstractCustomEvaluator.java}
     \caption{De implementatie van de klasse \texttt{AbstractCustomEvaluator}.}
-    \label{lst:evaluation-util-java}
+    \label{lst:evaluation-java-custom}
 \end{listing}
 
 \subsubsection{Taalspecifieke evaluator}
@@ -445,12 +496,17 @@ Deze staat in \cref{lst:evaluation-util-java}.
 De taalspecifieke evaluator lijkt sterk op de aangepaste evaluator.
 is de eenvoudigste: deze neemt een codefragment met daarin één functie \texttt{evaluate}, die één argument aanvaardt, de geproduceerde waarde.
 Waar de geproduceerde waarde bij de aangepaste evaluator in het serialisatieformaat moet kunnen, is dit hier niet het geval: de functie wordt rechtstreeks opgeroepen tijdens de uitvoering.
-Om het resultaat aan te geven moet ook één functieoproep komen naar een functie met dezelfde definitie als de \texttt{evaluated}-functie van de aangepaste evaluator.
-In Python is dit bijvoorbeeld:
+In Python wordt dit \cref{lst:evaluation-python-specific}, in Java \cref{lst:evaluation-java-specific}.
+Om het resultaat van de evaluatie aan de judge te geven, wordt dezelfde \texttt{evaluated}-functie als bij de aangepaste evaluator gebruikt (respectievelijk \cref{lst:evaluation-util-python,lst:evaluation-util-java})
 
-\begin{minted}{python}
-def evaluated(result, expected, actual, messages=None):
-    pass
-\end{minted}
+\begin{listing}
+    \inputminted{python}{code/specific_signature.py}
+    \caption{De definitie van de taalspecifieke evaluator.}
+    \label{lst:evaluation-python-specific}
+\end{listing}
 
-Deze evaluator is het minst flexibel: er kunnen in bepaalde talen, zoals Java, geen import-statements gedaan worden.
+\begin{listing}
+    \inputminted{java}{../../judge/runners/templates/java/AbstractSpecificEvaluator.java}
+    \caption{De implementatie van de klasse \texttt{AbstractSpecificEvaluator}.}
+    \label{lst:evaluation-java-specific}
+\end{listing}
