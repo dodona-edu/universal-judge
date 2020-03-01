@@ -18,7 +18,7 @@ from pydantic.dataclasses import dataclass
 
 from features import Features, reduce_features
 from serialisation import Value, ExceptionValue, NumericTypes, StringTypes, \
-    BooleanTypes, ObjectTypes, SequenceTypes, NothingTypes, InstanceTypes
+    BooleanTypes, ObjectTypes, SequenceTypes, NothingTypes
 
 
 class TestPlanError(ValueError):
@@ -122,6 +122,14 @@ class FunctionCall(WithFeatures):
             features |= Features.OBJECTS
         return features | reduce_features(
             x.type.feature for x in self.arguments)
+
+
+class InstanceTypes(str, Enum):
+    """
+    Represents the instance of a class. Currently, only used by assignments, not by the
+    serialisation processes.
+    """
+    INSTANCE = "instance"
 
 
 VariableTypes = Union[

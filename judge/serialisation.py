@@ -103,14 +103,6 @@ class NothingType:
     data: Literal[None] = None
 
 
-class InstanceTypes(str, Enum):
-    """
-    Represents the instance of a class. Currently, only used by assignments, not by the
-    serialisation processes.
-    """
-    INSTANCE = "instance"
-
-
 # A value is one of the preceding types.
 Value = Union[SequenceType, BooleanType, StringType, NumberType, ObjectType, NothingType]
 
@@ -132,7 +124,6 @@ SequenceTypes.LIST.feature = Features.LISTS
 SequenceTypes.SET.feature = Features.SETS
 ObjectTypes.OBJECT.feature = Features.MAPS
 NothingTypes.NOTHING.feature = Features.NULL
-InstanceTypes.INSTANCE.feature = Features.NOTHING  # Not relevant
 # Finally, assert that we have added it to all relevant values.
 assert all(
     all(
