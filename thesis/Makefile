@@ -26,7 +26,7 @@ src/generated/serialisation.json:
 
 # Generate this file.
 src/generated/description.md:
-	python scripts/mathjax.py src/code/description.md src/generated/description.md
+	python scripts/mathjax.py ../exercise/lotto/description/description.nl.md src/generated/description.md
 
 # Do the main file.
 src/main.pdf: dependencies

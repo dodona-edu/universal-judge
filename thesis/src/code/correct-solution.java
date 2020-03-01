@@ -1,1 +1,0 @@
-C:/Users/strij/Ontwikkeling/Dodona/universal-judge/exercise/lotto/solution/correct.java
