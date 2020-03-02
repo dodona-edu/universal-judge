@@ -29,6 +29,9 @@ dependencies: src/generated/description.md src/generated/serialisation.json
 src/generated/description.md:
 	python scripts/mathjax.py ../exercise/lotto/description/description.nl.md $@
 
+src/generated/isbn_description.md:
+	python scripts/mathjax.py ../exercise/isbn/description/description_clean.nl.md $@
+
 src/generated/generation.tikz:
 	dia --nosplash -e $@ -t tex src/figures/generation.dia
 

@@ -15,7 +15,7 @@ with open(args.input, "r") as f_in:
 
 filtered = contents.replace("$$", "$")
 
-os.makedirs(os.path.dirname(args.output))
+os.makedirs(os.path.dirname(args.output), exist_ok=True)
 
 with open(args.output, "w") as f_out:
     f_out.write(filtered)

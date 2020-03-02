@@ -1,0 +1,14 @@
+{
+  "description": {
+    "difficulty": 2.0,
+    "names": {
+      "en": "ISBN",
+      "nl": "ISBN"
+    }
+  },
+  "access": "public",
+  "programming_language": "python",
+  "evaluation": {
+    "plan_name": "plan.json"
+  }
+}

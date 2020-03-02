@@ -2,24 +2,50 @@
 
 \lettrine{I}{n dit hoofdstuk} behandelen we het toevoegen van drie oefeningen in handleidingsstijl.
 Elke oefening gebruikt een andere evaluatiemethode uit \cref{sec:evalueren-van-een-oplossing2}.
-
-\subsection{Voorbereiding}\label{subsec:voorbereiding}
-
 We gaan er van uit dat de map voor de repo voor deze oefeningencollectie al bestaat.
 Deze moet voldoen aan de mappenstructuur voor oefeningen, opgelegd door Dodona\footnote{Hier beschikbaar: \url{https://dodona-edu.github.io/en/references/exercise-directory-structure/}}.
 
-\subsection{ISBN}\label{subsec:isbn}
+\section{ISBN}\label{sec:isbn}
 
 Bij de eerste oefening gebruiken we enkel ingebouwde evaluators.
 
-\subsubsection{Voorbereiding}
+\subsection{Voorbereiding}\label{subsec:voorbereiding}
 
 We beginnen met het maken van een nieuwe map \texttt{isbn} in onze map voor de oefeningencollectie.
 Vervolgens maken we in deze map een configuratiebestand \texttt{config.json} voor onze oefening, met deze inhoud:
 
 \inputminted{json}{../../exercise/isbn/config.json}
 
-\subsubsection{Opgave}
+In dit bestand doen we drie belangrijke dingen:
+\begin{enumerate}
+    \item We geven onze oefening een naam.
+    \item We duiden aan dat het om een Python-oefening gaat (zie \cref{ch:beperkingen-en-toekomstig-werk} voor waarom we dit doen).
+    \item We zeggen dat ons testplan als naam \texttt{plan.json} heeft.
+\end{enumerate}
+
+\subsection{Opgave}\label{subsec:opgave}
+
+In deze stap stellen we de opgave op.
+Om dit deel kort te houden, gaan we er van uit dat de opgave al bestaat.
+Maak een map \texttt{description} in onze oefeningenmap, en kopieer de opgavebestanden naar deze map.
+Uiteindelijk moet deze map er zo uitzien:
+
+\begin{minted}{text}
+isbn
+└── description
+    ├── description.en.html
+    ├── description.nl.html
+    └── media
+        └── ISBN.gif
+\end{minted}
+
+Om toch een idee te krijgen van waarover de oefening gaat, is hieronder een samenvatting van de opgave:
+
+\begin{quote}
+    \markdownInput{generated/isbn_description.md}
+\end{quote}
 
 
-Laten we be
+\section{Testplan}\label{sec:isbn-testplan}
+
+TODO
