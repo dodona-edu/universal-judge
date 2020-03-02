@@ -51,8 +51,8 @@ if __name__ == '__main__':
 
     start = time.time()
     # run(config, open(os.devnull, "w"))
-    f = open(f"tests/isbn/students/student{STUDENT}/{EXERCISE}.dson", 'w')
-    run(config, f)
+    # f = open(f"tests/isbn/students/student{STUDENT}/{EXERCISE}.dson", 'w')
+    run(config, sys.stdout)
     end = time.time()
     print()
     print(f"Judging took {end - start} seconds (real time)")

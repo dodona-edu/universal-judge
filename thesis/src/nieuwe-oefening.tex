@@ -48,4 +48,63 @@ Om toch een idee te krijgen van waarover de oefening gaat, is hieronder een same
 
 \section{Testplan}\label{sec:isbn-testplan}
 
-TODO
+Nu komen we aan het belangrijkste deel van het opstellen van een oefening: het testplan.
+Om te beginnen kunnen we even nadenken over hoe de structuur er zal uitzien.
+We hebben twee functies die getest moeten worden.
+Laten we de in- en uitvoer voor deze functies $X_i$ en $X_o$ noemen.
+Aangezien elke functieoproep onafhankelijk is, kiezen we ervoor om ze in aparte contexten van het testplan te steken.
+Verder kunnen we al zeggen dat elke context juist één testgeval zal hebben: de functieoproep.
+Elk testgeval zal ook maar één test hebben, waar we de returnwaarde controleren.
+Alle andere uitvoerkanalen mogen de standaardwaarde behouden (wat betekent dat er bv.\ geen exceptions mogen zijn, een lege standaardfoutstroom, de standaarduitvoerstroom wordt genegeerd, enz.).
+We verdelen de contexten bovendien in twee tabbladen, een voor elke functies.
+De structuur van het testplan ziet er dus als volgt uit:
+
+\begin{itemize}
+    \item Tabblad voor \texttt{is\_isbn}
+           \begin{itemize}
+               \item Context voor invoer $X_{i1}$ en uitvoer $X_{o1}$
+               \item Context voor invoer $X_{i2}$ en uitvoer $X_{o2}$
+               \item Context voor invoer $X_{i3}$ en uitvoer $X_{o3}$
+               \item Context voor invoer $X_{i4}$ en uitvoer $X_{o4}$
+               \item \ldots
+           \end{itemize}
+    \item Tabblad voor \texttt{are\_isbn}
+    \begin{itemize}
+        \item Context voor invoer $X_{i1}$ en uitvoer $X_{o1}$
+        \item Context voor invoer $X_{i2}$ en uitvoer $X_{o2}$
+        \item Context voor invoer $X_{i3}$ en uitvoer $X_{o3}$
+        \item Context voor invoer $X_{i4}$ en uitvoer $X_{o4}$
+        \item \ldots
+    \end{itemize}
+\end{itemize}
+
+In plaats van dit testplan manueel te schrijven, kiezen we ervoor om een Python-scriptje te schrijven, dat dit testplan voor ons genereert.
+Om te beginnen:
+\begin{itemize}
+    \item Kopieer \texttt{solution.py} naar de map \texttt{solution}.
+    Dit is de voorbeeldoplossing.
+    \item Kopieer \texttt{values.py} naar de map \texttt{preparation}.
+    Deze module encodeert waarden in het serialisatieformaat.
+    In de toekomst is dit misschien niet meer nodig, moest dit als Python-package gepubliceerd worden.
+\end{itemize}
+
+Maak nu een bestand in de map \texttt{preparation} genaamd \texttt{generator.py}.
+Hieronder volgt het script dat het testplan genereert.
+Het is rijkelijk voorzien van commentaar, zodat alles duidelijk is.
+
+\inputminted{python}{../../exercise/isbn/preparation/generator.py}
+
+\subsection{Afsluiting}\label{subsec:aflsuiting}
+
+Op dit moment is de oefening klaar.
+Ter controle: de complete mapstructuur van de uiteindelijke oefening wordt nog eens getoond in \cref{lst:mapstructuur-isbn}.
+Nu rest nog enkel de oefening importeren in Dodona.
+Is de oefening toegevoegd aan een bestaande repo, dan volstaat het om op de knop "Alle oefeningen opnieuw verwerken" te drukken.
+Gaat het om een nieuwe oefeningenrepo, dan moet deze toegevoegd worden\footnote{De handleiding hiervoor staat op \url{https://dodona-edu.github.io/en/guides/new-exercise-repo/}}.
+
+\begin{listing}
+    \inputminted{text}{code/exercise-listing.txt}
+    \caption{Finale mapstructuur van de oefening ISBN.}
+    \label{lst:mapstructuur-isbn}
+\end{listing}
+
