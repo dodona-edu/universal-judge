@@ -1,9 +1,8 @@
 import sys
 
-getallen = sys.argv[1:]
 som = 0
 
-for getal in getallen:
+for getal in sys.argv[1:]:
     try:
         som += int(getal)
     except ValueError:

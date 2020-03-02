@@ -2,8 +2,6 @@ import json
 import random
 import string
 
-from lotto.solution import correct
-
 # Met een vaste seed krijgen we deterministische resultaten.
 random.seed(123456789)
 
