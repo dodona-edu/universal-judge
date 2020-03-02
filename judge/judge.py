@@ -306,46 +306,46 @@ class GeneratorJudge:
         logger.info("Starting judgement...")
         # pool = Pool(4 if plan.configuration.parallel else 1)
 
-        with utils.protected_directory(common_dir) as common_dir:
+        # with utils.protected_directory(common_dir) as common_dir:
 
-            for tab_index, tab in enumerate(plan.tabs):
-                report_update(self.out, StartTab(title=tab.name))
-                # Create a list of arguments to execute_module (in threads)
-                executions = []
-                for context_index, context in enumerate(tab.contexts):
-                    executions.append(ContextExecution(
-                        context=context,
-                        context_name=self.language_config.context_name(
-                            tab_number=tab_index,
-                            context_number=context_index
-                        ),
-                        mode=mode,
-                        common_directory=common_dir,
-                        files=files,
-                        precompilation_result=precompilation_result
-                    ))
+        for tab_index, tab in enumerate(plan.tabs):
+            report_update(self.out, StartTab(title=tab.name))
+            # Create a list of arguments to execute_module (in threads)
+            executions = []
+            for context_index, context in enumerate(tab.contexts):
+                executions.append(ContextExecution(
+                    context=context,
+                    context_name=self.language_config.context_name(
+                        tab_number=tab_index,
+                        context_number=context_index
+                    ),
+                    mode=mode,
+                    common_directory=common_dir,
+                    files=files,
+                    precompilation_result=precompilation_result
+                ))
 
-                results = []
-                for execution in executions:
-                    results.append(self.execute_context(execution))
-                # Do the executions in parallel
-                # results = pool.map(self.execute_context, executions)
+            results = []
+            for execution in executions:
+                results.append(self.execute_context(execution))
+            # Do the executions in parallel
+            # results = pool.map(self.execute_context, executions)
 
-                # Handle the results
-                for context_index, context in enumerate(tab.contexts):
-                    report_update(self.out, StartContext(
-                        description=context.description
-                    ))
-                    execution_result, m, s = results[context_index]
-                    self.evaluate_results(
-                        plan=plan,
-                        context=context,
-                        results=execution_result,
-                        compiler_results=(m, s)
-                    )
-                    report_update(self.out, CloseContext())
-                report_update(self.out, CloseTab())
-            report_update(self.out, CloseJudgment())
+            # Handle the results
+            for context_index, context in enumerate(tab.contexts):
+                report_update(self.out, StartContext(
+                    description=context.description
+                ))
+                execution_result, m, s = results[context_index]
+                self.evaluate_results(
+                    plan=plan,
+                    context=context,
+                    results=execution_result,
+                    compiler_results=(m, s)
+                )
+                report_update(self.out, CloseContext())
+            report_update(self.out, CloseTab())
+        report_update(self.out, CloseJudgment())
 
     def evaluate_results(self,
                          plan: Plan,
