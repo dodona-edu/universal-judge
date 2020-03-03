@@ -255,6 +255,9 @@ class GeneratorJudge:
         mode = plan.configuration.mode
         report_update(self.out, StartJudgment())
 
+        # Run the linter.
+        self.run_linter()
+
         logger.info("Start generating code...")
         common_dir, files, selector = self.generate_files(plan, mode)
 
@@ -824,3 +827,22 @@ class GeneratorJudge:
             dependencies=files,
             stdin=None
         )
+
+    def run_linter(self):
+        """Run a linter"""
+        directory = Path(self.config.workdir) / "linter"
+        directory.mkdir()
+
+        logger.debug("Running linter in %s", directory)
+
+        # Copy the submission.
+        source_path = shutil.copy2(self.config.source, directory)
+        logger.debug("Copying %s to linter dir", self.config.source)
+
+        messages, annotations = \
+            self.language_config.run_linter(directory, source_path)
+
+        for message in messages:
+            report_update(self.out, AppendMessage(message=message))
+        for annotation in annotations:
+            report_update(self.out, annotation)

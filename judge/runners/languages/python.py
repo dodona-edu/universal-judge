@@ -1,12 +1,16 @@
 import re
 import os
-from typing import List
+from os import PathLike
+from pathlib import Path
+from typing import List, Tuple, Union
 
 from humps import decamelize, depascalize
 
 from runners.config import CallbackResult, LanguageConfig
 from testplan import Plan
-from dodona import AnnotateCode, Severity
+from dodona import AnnotateCode, Severity, Message
+
+import runners.languages.python_linter as linter
 
 
 class PythonConfig(LanguageConfig):
@@ -111,3 +115,7 @@ class PythonConfig(LanguageConfig):
             return None
 
         return line, column, message
+
+    def run_linter(self, path: Path, submission: Union[Path, PathLike])\
+            -> Tuple[List[Message], List[AnnotateCode]]:
+        return linter.run_linter(path, submission)

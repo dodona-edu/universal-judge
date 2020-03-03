@@ -13,7 +13,7 @@ from pathlib import Path
 from tested import Config, run
 
 STUDENT = "01"
-EXERCISE = "4928230"
+EXERCISE = "3326958"
 
 
 def read_config() -> Config:
