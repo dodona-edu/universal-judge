@@ -7,6 +7,7 @@ from typing import List, Tuple, Union
 from humps import decamelize, depascalize
 
 from runners.config import CallbackResult, LanguageConfig
+from tested import Config
 from testplan import Plan
 from dodona import AnnotateCode, Severity, Message
 
@@ -116,6 +117,10 @@ class PythonConfig(LanguageConfig):
 
         return line, column, message
 
-    def run_linter(self, path: Path, submission: Union[Path, PathLike])\
+    def run_linter(self,
+                   config: Config,
+                   path: Path,
+                   submission: Union[Path, PathLike]) \
             -> Tuple[List[Message], List[AnnotateCode]]:
-        return linter.run_linter(path, submission)
+
+        return linter.run_linter(config, path, submission)

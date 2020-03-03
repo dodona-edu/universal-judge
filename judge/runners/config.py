@@ -11,6 +11,7 @@ from typing import List, Tuple
 from pathlib import Path
 
 from features import Features
+from tested import Config
 from testplan import Plan, FunctionCall
 from dodona import AnnotateCode, Message
 
@@ -189,7 +190,7 @@ class LanguageConfig:
         """Allows parsing error message to annotate the code."""
         return []
 
-    def run_linter(self, path: Path, submission: Path)\
+    def run_linter(self, config: Config, path: Path, submission: Path)\
             -> Tuple[List[Message], List[AnnotateCode]]:
         """
         Run a linter or other code analysis tools on the submission.
@@ -197,6 +198,7 @@ class LanguageConfig:
         support for modifying the submission code; all changes will be discarded.
         By default, this does nothing.
 
+        :param config: The config.
         :param path: The path to the directory where the linter is run.
         :param submission: The path to the submission. The path is absolute, but
                            the submission will be in the directory where the linter

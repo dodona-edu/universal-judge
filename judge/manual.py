@@ -27,7 +27,7 @@ def read_config() -> Config:
         "source": f'tests/isbn/students/student{STUDENT}/{EXERCISE}.py',
         "judge": str(Path('../').resolve()),
         "workdir": str(Path('./workdir').resolve()),
-        "plan_name": "plan.json"
+        "plan_name": "plan.json",
     })
 
 

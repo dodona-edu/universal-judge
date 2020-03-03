@@ -5,10 +5,10 @@
 #
 import dataclasses
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from argparse import ArgumentParser, FileType
-from typing import IO
+from typing import IO, Dict, Optional
 
 from testplan import parse_test_plan
 from utils import smart_close
@@ -26,6 +26,7 @@ class Config:
     workdir: str
     judge: str
     plan_name: str = "plan.json"  # Name of the testplan file.
+    options: Optional[Dict[str, str]] = field(default_factory=dict)
 
 
 def read_config(config_in: IO) -> Config:

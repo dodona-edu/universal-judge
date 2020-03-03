@@ -840,7 +840,7 @@ class GeneratorJudge:
         logger.debug("Copying %s to linter dir", self.config.source)
 
         messages, annotations = \
-            self.language_config.run_linter(directory, source_path)
+            self.language_config.run_linter(self.config, directory, source_path)
 
         for message in messages:
             report_update(self.out, AppendMessage(message=message))
