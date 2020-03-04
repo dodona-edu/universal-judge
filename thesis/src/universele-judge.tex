@@ -1,7 +1,7 @@
 \chapter{De universele judge}\label{ch:de-universele-judge}
 
 \lettrine{H}{et antwoord} op de onderzoeksvraag uit het vorige hoofdstuk neemt de vorm aan van een nieuwe judge voor het Dodona-platform: de \term{universele judge}.
-Deze kan oplossingen voor een opgave in meerdere programmeertalen evalueren.
+Bij deze judge is de opgave programmeertaalonafhankelijk en kan de judge oplossingen in verschillende programmeertalen evalueren.
 Dit hoofdstuk licht de werking en implementatie van deze judge toe, beginnend met een algemeen overzicht, waarna elk onderdeel in meer detail besproken wordt.
 
 \section{Overzicht}\label{sec:overzicht}
@@ -15,28 +15,38 @@ Dit hoofdstuk licht de werking en implementatie van deze judge toe, beginnend me
 \end{figure}
 
 \Cref{fig:universal-judge} toont de opbouw van de judge op schematische wijze.
-De twee dikkere stippellijnen geven een programmeertaalbarrière aan.
-Dit betekent dat de programmeertaal kan verschillen in elk van de drie processen.
-In meer detail is het stappenplan voor het evalueren van een oefening als volgt:
+De twee dikkere stippellijnen geven de programmeertaalbarrières aan, die de judge ook logisch onderverdelen in drie contexten of processen, die we kaders noemen (om verwarring te vermijden met een computerproces en contexten uit het testplan, waarover later meer).
+De judge zelf is geschreven in Python, wat ook betekent dat in het \term{kernkader} enkel Python gebruikt wordt.
+De oplossing wordt uitgevoerd in het \term{uitvoeringskader}, waar de programmeertaal de programmeertaal van de oplossing is.
+Tot slot is er nog het \term{evaluatiekader}, waar door de lesgever geschreven evaluatiecode wordt uitgevoerd.
+Deze moet niet in dezelfde programmeertaal als de oplossing zijn.
+
+
+Het schema van hierboven kunnen we ook uitschrijven als een stappenplan, wat hieronder gebeurt.
 
 \begin{enumerate}
     \item De judge wordt opgestart en het testplan wordt geladen.
-    Het gestarte proces noemen we het \term{kernproces}.
-    \item Het testplan wordt gecontroleerd op vereiste functies, met andere woorden ondersteunt de oefening de gewenste taal?
-    Als de oefening bijvoorbeeld programmeertaalspecifieke code bevat die enkel voor Java gegeven is, zal een oplossing in Python niet geëvalueerd kunnen worden.
-    \item De code voor het evalueren van de oplossing wordt gegenereerd en eventueel gecompileerd, in wat we het \term{uitvoeringsproces} noemen.
-    \item Nog steeds in het uitvoeringsproces, wordt elke context uit het testplan afzonderlijk uitgevoerd.
-    Aangezien deze contexten onafhankelijk zijn van elkaar, kunnen ze in parallel worden uitgevoerd, indien de configuratie van de judge dit toelaat.
-    \item De resultaten van de uitvoering van een context worden beoordeeld.
+    Het gestarte proces noemen we het \term{kernkader}.
+    Het is vooral hier dat de code van de judge uitgevoerd wordt.
+    \item Er wordt gecontroleerd of het testplan de programmeertaal van de oplossing ondersteunt.
+    Als het testplan bijvoorbeeld programmeertaalspecifieke code bevat die enkel voor Java gegeven is, zal een oplossing in Python niet geëvalueerd kunnen worden.
+    Bevat het testplan een functie die een verzameling moet teruggeven, dan zullen talen als Bash niet in aanmerking komen.
+    \item De code voor het evalueren van de oplossing wordt gegenereerd en eventueel gecompileerd.
+    \item Nu kan het \term{uitvoeringskader} beginnen: de gegenereerde code wordt uitgevoerd.
+    Elke context uit he testplan wordt in een afzonderlijk subproces uitgevoerd, teneinde het delen van informatie tegen te gaan.
+    De onafhankelijkheid van de contexten laat ons ook toe om contexten in parallel uit te voeren.
+    Toch moeten we opmerken dat het parallel uitvoeren vooral een theoretische mogelijkheid is: in werkelijkheid gebruiken er meerdere gebruikers tegelijk Dodona, waardoor er ook meerdere oefeningen tegelijk beoordeeld worden, wat op zijn beurt ervoor zorgt dat er geen grote ruimte voor snelheidswinst door parallellisatie binnen de judge is.
+    \item De uitvoering in de vorige stap resulteert in enkele resultaten.
+    Deze worden verzameld en beoordeeld.
     Hiervoor zijn drie mogelijke manieren:
     \begin{enumerate}
         \item Programmeertaalspecifieke evaluatie.
         Hierbij wordt de evaluatie gedaan na de uitvoering gedaan in hetzelfde proces als de uitvoering.
-        In het schema zitten we nog steeds in het uitvoeringsproces.
+        In het schema zitten we nog steeds in het uitvoeringskader.
         \item Aangepaste evaluator.
         Hierbij is er evaluatiecode geschreven die los staat van de oplossing.
         De evaluatiecode kan in een andere programmeertaal geschreven zijn dan de oplossing.
-        De aangepaste evaluator wordt gegenereerd, gecompileerd en uitgevoerd na het uitvoeren van de oplossing, in een nieuw proces: het \term{evaluatieproces}.
+        De aangepaste evaluator wordt gegenereerd, gecompileerd en uitgevoerd na het uitvoeren van de oplossing, in het \term{evaluatiekader}.
         \item Ingebouwde evaluatie.
         Hierbij is het de judge zelf die evalueert, waardoor dit vooral eenvoudige evaluaties betreft, zoals het vergelijken van geproduceerde uitvoer en verwachte uitvoer.
         Dit gebeurt in het kernproces.
@@ -45,17 +55,47 @@ In meer detail is het stappenplan voor het evalueren van een oefening als volgt:
 \end{enumerate}
 
 
-\section{Beschrijven van een opgave}\label{sec:testplan}
+\section{Beschrijven van een oefening}\label{sec:testplan}
 
 Elke evaluatie begint met het \term{testplan}, een document dat beschrijft hoe een oplossing voor een oefening geëvalueerd moet worden.
 Het vervangt de taalspecifieke testen van de bestaande judges (ie.\ de jUnit-tests of de doctests in respectievelijk Java en Python).
-Het bestaat uit verschillende onderdelen, die hierna besproken worden.
+Het testplan sensu lato wordt opgedeeld in verschillende onderdelen, die hierna besproken worden.
 
 \subsection{Het testplan}\label{subsec:het-testplan}
 
-Het eigenlijke testplan beschrijft de structuur van een evaluatie van een oplossing voor een oefening.
-Qua structuur lijkt dit sterk op de structuur van de feedback zoals gebruikt door Dodona.
-Dat de structuur van de oplossing in Dodona en van het testplan op elkaar lijken heeft als voordeel dat er moet geen mentale afbeelding tussen de structuur van het testplan en dat van Dodona bijgehouden worden.
+Het testplan sensu stricto beschrijft de structuur van een evaluatie van een oplossing voor een oefening.
+Deze structuur lijkt qua opbouw sterk op de structuur van de feedback zoals gebruikt door Dodona.
+Dat de structuur van de oplossing in Dodona en van het testplan op elkaar lijken heeft als voordeel dat er geen mentale afbeelding tussen de structuur van het testplan en dat van Dodona moet bijgehouden worden.
+Concreet ziet de structuur er als volgt uit:
+
+\begin{description}
+    \item[Tab] Een testplan bestaat uit verschillende \termen{tab}s of tabbladen.
+    Deze komen overeen met de tabbladen in de gebruikersinterface van Dodona.
+    Een tabblad kan een naam hebben, die zichtbaar is voor de gebruikers.
+    \item[Context] Elk tabblad bestaat uit een of meerdere \termen{context}en.
+    Een context is een onafhankelijke uitvoering van een evaluatie.
+    De nadruk ligt op de "onafhankelijkheid", zoals al vermeld.
+    Elke context wordt in een nieuw proces en in een eigen map uitgevoerd, zodat de kans op het delen van informatie klein is.
+    Hierbij willen we vooral onbedoeld delen van informatie (zoals statische variabelen of het overschrijven van bestanden) vermijden.
+    De gemotiveerde student zal nog steeds informatie kunnen delen tussen de uitvoeringen, door bv.\ in een andere locatie een bestand aan te maken en later te lezen.
+    \item[Testcase] Een context bestaat uit een of meerdere \termen{testcase}s of testgevallen.
+    Een testgeval bestaat uit invoer en een aantal tests.
+    De testgevallen kunnen onderverdeeld worden in twee soorten:
+    \begin{description}
+        \item[Main testcase] of hoofdtestgeval.
+        Van deze soort is er maximaal een per context.
+        Dit testgeval heeft als doel het uitvoeren van de main-functie (of de code zelf als het gaat om een scripttaal zoals Bash of Python).
+        Als invoer voor dit testgeval kunnen enkel het standaardinvoerkanaal en de programma-argumenten meegegeven worden.
+        \item[Normal testcase] of normaal testgeval.
+        Hiervan kunnen er nul of meer zijn per context.
+        Deze testgevallen zijn voor andere aspecten te testen, nadat de code van de gebruiker met success ingeladen is.
+        De invoer is dan ook uitgebreider: het kan gaan om het standaardinvoerkanaal, functieoproepen en variabeletoekenningen.
+        Een functieoproep of variabeletoekenning is verplicht (zonder functieoproep of toekenning aan een variabele is er geen code om te testen).
+    \end{description}
+    \item[Test] De uitvoer van een testgeval bestaat uit meerdere \term{test}s, die elk een aspect van een dat testgeval controleren.
+    Met aspect bedoelen we het standaarduitvoerkanaal, het standaardfoutkanaal, opgevangen uitzonderingen (\english{exceptions}), de teruggegeven waarden van een functieoproep (returnwaarde) of de inhoud van een bestand.
+    Elke test bevat instructies om het resultaat te beoordelen, door een van de drie eerder beschreven evaluatiemogelijkheden te gebruiken.
+\end{description}
 
 Bij de keuze voor een formaat voor het testplan (json, xml, \ldots), hebben we vooraf enkele vereisten geformuleerd waaraan het gekozen formaat moet voldoen.
 Het moet:
@@ -77,37 +117,6 @@ Hiervoor denken we aan een \termen{DSL} (\english{domain specific language}), ma
 Een tweede nadeel is dat json geen programmeertaal is.
 Terwijl dit de implementatie van de judge bij het interpreteren van het testplan weliswaar eenvoudiger maakt, is het tevens beperkend: beslissen of een testgeval moet uitgevoerd worden op basis van het resultaat van een vorig testgeval is bij wijze als voorbeeld niet mogelijk.
 Ook deze beperking wordt uitgebreider besproken in \cref{ch:beperkingen-en-toekomstig-werk}.
-
-De structuur van het testplan vertaalt zich in json naar een reeks json-objecten, die hieronder beschreven worden.
-
-\begin{description}
-    \item[Tab] Een testplan bestaat uit verschillende \termen{tab}s of tabbladen.
-    Deze komen overeen met de tabbladen in de gebruikersinterface van Dodona.
-    Een tabblad kan een naam hebben, die zichtbaar is voor de gebruikers.
-    \item[Context] Elk tabblad bestaat uit een of meerdere \termen{context}en.
-    Een context is een onafhankelijke uitvoering van een evaluatie.
-    De nadruk ligt op de "onafhankelijkheid".
-    Elke context wordt in een nieuw proces en in een eigen map uitgevoerd, zodat de kans op het delen van informatie klein is.
-    Hierbij willen we vooral onbedoeld delen van informatie (zoals statische variabelen of het overschrijven van bestanden) vermijden.
-    De gemotiveerde student zal nog steeds informatie kunnen delen tussen de uitvoeringen, door bv.\ in een andere locatie een bestand aan te maken en later te lezen.
-    \item[Testcase] Een context bestaat uit een of meerdere \termen{testcase}s of testgevallen.
-    Een testgeval bestaat uit invoer en een aantal tests.
-    De testgevallen kunnen onderverdeeld worden in twee soorten:
-    \begin{description}
-        \item[Main testcase] of hoofdtestgeval.
-        Van deze soort is er maximaal een per context.
-        Dit testgeval heeft als doel het uitvoeren van de main-functie (of de code zelf als het gaat om een scripttaal zoals Bash of Python).
-        Als invoer voor dit testgeval kunnen enkel het standaardinvoerkanaal en de programma-argumenten meegegeven worden.
-        \item[Normal testcase] of normaal testgeval.
-        Hiervan kunnen er nul of meer zijn per context.
-        Deze testgevallen zijn voor andere aspecten te testen, nadat de code van de gebruiker met success ingeladen is.
-        De invoer is dan ook uitgebreider: het kan gaan om het standaardinvoerkanaal, functieoproepen en variabeletoekenningen.
-        Een functieoproep of variabeletoekenning is verplicht (zonder functieoproep of toekenning aan een variabele is er geen code om te testen).
-    \end{description}
-    \item[Test] De uitvoer van een testgeval bestaat uit meerdere \term{test}s, die elk een aspect van een testcase controleren.
-    Met aspect bedoelen we het standaarduitvoerkanaal, het standaardfoutkanaal, opgevangen uitzonderingen (\english{exceptions}), de teruggegeven waarden van een functieoproep (returnwaarde) en de inhoud van een bestand.
-    Elke test bevat de verwachte uitvoer om mee te vergelijken of de code om het resultaat te evalueren.
-\end{description}
 
 \subsection{Dataserialisatie}\label{subsec:dataserialisatie}
 
@@ -154,11 +163,11 @@ Een lijst van de overwogen formaten met een korte beschrijving volgt:
     De specificatie van het formaat gebeurt in json, terwijl de eigenlijke data binair geëncodeerd wordt.
     Heeft uitbreidbare types, met veel ingebouwde types \autocite{avro}.
     \item[Apache Parquet] Minder relevant, dit is een bestandsformaat voor Hadoop \autocite{parquet}.
-    \item[ASN.1] Staat voor \english{Abstract Syntax Notation One}, een ouder formaat uit de telecommunicatie.
+    \item[ASN.1] Staat voor \english{Abstract Syntax Notation One}, een formaat uit de telecommunicatie.
     De hoofdstandaard beschrijft enkel de notatie voor een dataformaat.
-    Andere standaarden beschrijven dan de serialisatie, in bv.\ binair formaat, json of xml.
+    Andere standaarden beschrijven dan de serialisatie, bv.\ een binair formaat, json of xml.
     De meerdere serialisatievormen zijn in theorie aantrekkelijk: elke taal moet er slechts een ondersteunen, terwijl de judge ze allemaal kan ondersteunen.
-    In de praktijk blijkt echter dat voor veel talen er slechts een serialisatieformaat is, en dat dit vaak het binaire formaat is \autocite{x680}.
+    In de praktijk blijkt echter dat voor veel talen er slechts één serialisatieformaat is, en dat dit vaak het binaire formaat is \autocite{x680}.
     \item[Bencode] Schema gebruikt in BitTorrent.
     Het is gedeeltelijk binair, gedeeltelijk in text \autocite{cohen2017}.
     \item[Binn] Binair dataformaat \autocite{ramos2019}.
@@ -215,7 +224,7 @@ Naast de encodering van de data is er een tweede aspect van het serialisatieform
 Het formaat ondersteunt de meeste basistypes die in bijna elke programmeertaal beschikbaar zijn.
 Hieronder volgt lijst met een korte omschrijving van de ondersteunde types.
 Hierbij is er een speciaal type, aangeduid met een ster (*), dat niet gebruikt wordt bij het encoderen van data.
-Het type \texttt{literal} bedoeld voor waarden die eigenlijk geen data zijn, maar verwijzingen naar bv.\ een variabele (een \english{identifier} in de programmeertaal).
+Het type \texttt{literal} is bedoeld voor waarden die eigenlijk geen data zijn, maar verwijzingen naar bv.\ een variabele (een \english{identifier} in de programmeertaal).
 Dit is nuttig bij functieargumenten (zo kunnen variabelen worden gebruikt bij een functieoproep).
 
 \begin{description}
@@ -225,7 +234,7 @@ Dit is nuttig bij functieargumenten (zo kunnen variabelen worden gebruikt bij ee
     \item[\texttt{literal*}] Een tekstuele waarde die rechtstreeks als \english{identifier} wordt gebruikt.
     Deze waarde wordt enkel gebruikt bij het aangeven van de types van functie-argumenten.
     \item[\texttt{unknown}] Dit type wordt gebruikt als er onbekende types zijn bij het encoderen van een waarde.
-    Bij het omzetten van een waarde uit het serialisatieformaat naar een taal, worden waarden van dit type genegeerd.
+    Bij het omzetten van een waarde uit het serialisatieformaat naar een programmeertaal (deserialisatie) worden waarden van dit type genegeerd.
     \item[\texttt{boolean}] Een Boolese waarde (of boolean).
     \item[\texttt{list}] Een wiskundige rij, wat wil zeggen dat de volgorde belangrijk is en dat dubbele elementen toegelaten zijn.
     Merk op dat sommige talen meerdere implementaties hebben voor het concept van lijst.
@@ -241,7 +250,7 @@ Dit is nuttig bij functieargumenten (zo kunnen variabelen worden gebruikt bij ee
 
 Een ander onderdeel van het testplan verdient ook speciale aandacht: het toekennen van variabelen (\english{assignments}) en de functieoproepen.
 
-In heel wat oefeningen, en zeker in objectgerichte programmeertalen, is het toekennen van een waarde aan een variabele om deze later te gebruiken onmisbaar.
+In heel wat oefeningen, en zeker in objectgerichte programmeertalen, is het toekennen van een waarde aan een variabele, om deze later te gebruiken, onmisbaar.
 Bijvoorbeeld zou een opgave kunnen bestaan uit het implementeren van een klasse.
 Bij de evaluatie dient dan een instantie van die klasse aangemaakt te worden, waarna er methoden kunnen aangeroepen worden, zoals hieronder geïllustreerd in een fictief voorbeeld.
 
@@ -253,14 +262,24 @@ Een functieoproep ziet er als volgt uit:
 
 \inputminted{json}{code/function.json}
 
-Het type van de functie geeft aan welk soort functie het is.
-Mogelijke waarden zijn momenteel \texttt{top}, \texttt{object}, \texttt{constructor} en \texttt{identity}.
-De laatste soort is een speciaal geval, waarbij geen functienaam moet gegeven worden en exact één argument toegelaten is.
-Die functie zal dan dat ene argument teruggeven.
-De naam van de functie benoemt eenvoudig welke functie opgeroepen moet worden.
-Het object van de functie laat toe om functies op objecten op te roepen.
-De lijst van argumenten kan nul of meer waarden bevatten.
-Deze waarden moeten in het formaat zijn zoals aangegeven in het vorige deel over de serialisatie van waarden.
+De lijst van argumenten is een lijst waarden, voorgesteld in het serialisatieformaat.
+Het type van de functie geeft aan welke soort functie het is.
+Mogelijke waarden zijn momenteel:
+\begin{description}
+    \item[\texttt{top}] Een \english{top-level} functie.
+    Afhankelijk van de programmeertaal zal deze functie toch omgezet worden naar een functie op een object (bv.\ naar een statische functie in Java).
+    \item[\texttt{object}] Een functie van een object.
+    De invulling hiervan is gedeeltelijk programmeertaalafhankelijk, en meer specifiek van welke invulling gegeven wordt aan een object.
+    Bij dit soort functies moet het \texttt{object} gegeven worden, wat het object is waaraan de functie vasthangt.
+    In de praktijk kan dit mechanisme ook gebruikt worden voor functies in bijvoorbeeld een namespace of een statische functie in Java.
+    \item[\texttt{constructor}] Deze soort heeft dezelfde semantiek als een top-level functie, met dien verstande dat het om een constructor gaat.
+    In Java zal bijvoorbeeld het keyword \texttt{new} vanzelf toegevoegd worden.
+    De functienaam doet dienst als naam van de klasse.
+    \item[\texttt{identity}] Dit is een speciaal geval: er mag geen functienaam gegeven worden en er moet exact één argument gegeven worden.
+    Dat ene argument zal de returnwaarde van de functie zijn.
+    In de implementaties wordt dit vaak ook niet vertaalt als een functie, maar wordt de waarde rechtstreeks gebruikt.
+    De bestaansreden van dit soort functies is het toekennen van waarden aan variabelen, om redenen die we later zullen bespreken.
+\end{description}
 
 Een beperking is dat het niet mogelijk is om rechtstreeks een functieoproep te doen als argument voor een andere functie,
 of toch niet op een programmeertaalonafhankelijke manier.
@@ -270,12 +289,14 @@ De aandachtige lezer zal opmerken dat met die functieargumenten van het type \te
 We raden deze omweg echter ten sterkste af: dit maakt het testplan taalafhankelijk, want niet elke programmeertaal implementeert functieoproepen op eenzelfde wijze.
 
 Dit brengt ons bij de variabeletoekenning of \english{assignment}.
-In ons testplan beperkt dit zich tot het toekennen van een naam aan het resultaat van een functieoproep:
+In ons testplan beperkt dit zich tot het toekennen van een naam aan het resultaat van een functieoproep.
+Dit is ook meteen de reden voor het bestaan van de functiesoort \texttt{identity}: via deze weg blijft het testplan eenvoudiger (de waarde van een assignment is altijd een functieoproep), maar toch kunnen gewoon waarden toegekend worden aan een variabelen.
+Concreet ziet een variabeletoekenning er als volgt uit:
 
 \inputminted{json}{code/assignment.json}
 
 De \texttt{name} is de naam die aan de variabele gegeven zal worden.
-Het veldje \texttt{expression} moet een object zijn dat een functieoproep voorstelt (zie hierna).
+Het veldje \texttt{expression} moet een object zijn dat een functieoproep voorstelt, in het formaat zoals hiervoor besproken.
 In een beperkt aantal gevallen kan de judge het type van de variabele afleiden uit de functieoproep, maar in veel gevallen is het nodig om zelf het type mee te geven.
 Dit type moet een van de ondersteunde types zijn uit het serialisatieformaat, zij het dat er ondersteuning is voor eigen types (zoals een klasse die geïmplementeerd moest worden door de student).
 
@@ -287,22 +308,22 @@ De judge kan het type afleiden, dus we moeten niet opgeven dat \texttt{name} een
 
 \subsection{Vereiste functies}\label{subsec:vereiste-functies}
 
-Voor elk onderdeel van een testplan wordt afgeleid welke functies een taal moet ondersteunen om van dat testplan gebruik te kunnen maken.
-Bevat een testplan bijvoorbeeld waarden met als type \texttt{set}, dan kunnen enkel programmeertalen die een verzameling ondersteunen gebruikt worden.
+We hebben in het overzicht al vermeld dat voor de evaluatie gecontroleerd wordt of een testplan de programmeertaal van gegeven oplossing ondersteunt.
+Concreet gebeurt dit door voor elk item in het testplan af te leiden welke functies nodig zijn in een programmeertaal om dat item te ondersteunen.
+Bevat een testplan bijvoorbeeld waarden met als type \texttt{set} (de verzameling), dan kunnen enkel programmeertalen die een verzameling ondersteunen gebruikt worden.
 Dat zijn bijvoorbeeld Python en Java, maar geen Bash.
-Het testplan is zo opgebouwd dat het afleiden van de vereiste functies geen tussenkomst van de persoon die het testplan opstelt vereist.
+Het afleiden van de vereiste functies gebeurt volledig automatisch aan de hand van het testplan.
 
 \section{Uitvoeren van de oplossing}\label{sec:uitvoeren-van-de-oplossing}
 
-Nadat de student een oplossing heeft ingediend en de judge is opgestart, begint de evaluatie van de oplossing.
-Eerst wordt de uit te voeren code gegenereerd, waarna de uitvoering van die code volgt.
+De eerste stap die wordt uitgevoerd bij de evaluatie van de oplossing is het genereren van de code, die de code van de student zal uitvoeren.
 
 \subsection{Genereren van code}\label{subsec:genereren-van-code}
 
 Het genereren van de code gebeurt met een sjabloonsysteem genaamd Mako \autocite{mako}.
-Dit soort systemen wordt traditioneel gebruikt bij webapplicaties (zoals Ruby on Rails met \textsc{erb}, Phoenix met \textsc{eex}, Laravel met Blade, enz.) om een html-pagina te genereren.
-In ons geval zijn de sjablonen verantwoordelijk voor de vertaling van programmeertaalonafhankelijke concepten naar implementaties in specifieke talen.
-Voorbeelden hiervan zijn functieoproepen, assignments, enz.
+Dit soort systemen wordt traditioneel gebruikt bij webapplicaties (zoals Ruby on Rails met \textsc{erb}, Phoenix met \textsc{eex}, Laravel met Blade, enz.) om html-pagina's te genereren.
+In ons geval zijn de sjablonen verantwoordelijk voor de vertaling van de programmeertaalonafhankelijke concepten in het testplan naar eigenlijke code in de programmeertaal van de oplossing.
+Hierbij denken we aan de functieoproepen, assignments, enz.
 Ook zijn de sjablonen verantwoordelijk voor het genereren van de code die de oplossing van de student zal oproepen en evalueren.
 
 \subsubsection{Sjablonen}
@@ -321,7 +342,7 @@ Deze verplichte sjablonen zijn:
     \item[\texttt{value}] Vertaalt een waarde uit het serialisatieformaat naar code.
 \end{description}
 
-Daarnaast moet het encoderen naar serialisatieformaat ook geïmplementeerd worden in elke taal.
+Daarnaast moet het encoderen naar het serialisatieformaat ook geïmplementeerd worden in elke taal.
 Veel talen hebben dus nog enkele bijkomende bestanden met code.
 In alle bestaande implementaties is dit geïmplementeerd als een module of klasse met naam \texttt{Value}.
 

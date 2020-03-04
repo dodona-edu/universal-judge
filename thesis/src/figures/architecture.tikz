@@ -23,11 +23,16 @@
     \node[process, below = of execution evaluation code] (execution evaluation) {Evaluatie};
     \node[state, below = of core evaluation] (feedback) {Resultaat};
 
-    \node[named, below = of feedback] (core name) {kernproces};
-    \node[named, left = of core name] (evaluation name) {evaluatieproces};
-    \node[named, right = of core name] (execution name) {uitvoeringsproces};
+    \node[named, below = of feedback] (core name) {kernkader};
+    \node[named, left = of core name] (evaluation name) {evaluatiekader};
+    \node[named, right = of core name] (execution name) {uitvoeringskader};
 
     \begin{scope}[on background layer]
+
+        % Draw these first to ensure they are in the background.
+        \path[draw,dashed,very thick,lightgray] (-3.5,0.5) -- (-3.5,-14.6);
+        \path[draw,dashed,very thick,lightgray] (3.5,0.5) -- (3.5,-14.6);
+
         \draw [->] (input) -- (generation);
         \draw[->] (generation) -- (code);
         \draw[->, dashed] (gen2) |- (custom evaluation code);
@@ -35,7 +40,7 @@
         \draw[->] (code) -- (execution);
         \draw[->] (execution) -- (execution state);
         \draw[->] (execution state) -- node[above] {Serialisatie} ++ (core state);
-        \draw[->] (core state) -- node[above] {Serialisatie} ++ (evaluation state);
+        \draw[->] (core state) -- node[above] {Deserialisatie} ++ (evaluation state);
         \draw[->] (core state) -- (core evaluation);
         \draw[->] (evaluation state) -- (custom evaluation code);
         \draw[->] (execution state) -- (execution evaluation code);
@@ -45,9 +50,6 @@
         \draw[->] (core evaluation) -- (feedback);
         \draw[->] (custom evaluation) -- (feedback);
         \draw[->] (execution evaluation) -- (feedback);
-
-        \path[draw,dashed,very thick,lightgray] (-3.5,0.5) -- (-3.5,-14.6);
-        \path[draw,dashed,very thick,lightgray] (3.5,0.5) -- (3.5,-14.6);
 
     \end{scope}
 
