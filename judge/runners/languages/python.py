@@ -122,5 +122,4 @@ class PythonConfig(LanguageConfig):
                    path: Path,
                    submission: Union[Path, PathLike]) \
             -> Tuple[List[Message], List[AnnotateCode]]:
-
         return linter.run_linter(config, path, submission)

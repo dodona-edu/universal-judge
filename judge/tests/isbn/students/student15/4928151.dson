@@ -1,4 +1,10 @@
 {"command": "start-judgement"}
+{"row": 0, "text": "Module name \"4928151\" doesn't conform to snake_case naming style (C0103)", "column": 0, "type": "info", "command": "annotate-code"}
+{"row": 3, "text": "Too many branches (15/12) (R0912)", "column": 0, "type": "info", "command": "annotate-code"}
+{"row": 3, "text": "No space allowed around keyword argument assignment\ndef is_isbn(s, dertien = True):\n                       ^ (C0326)", "column": 22, "type": "info", "command": "annotate-code"}
+{"row": 4, "text": "Unnecessary \"else\" after \"return\" (R1705)", "column": 3, "type": "info", "command": "annotate-code"}
+{"row": 37, "text": "The if statement can be replaced with 'return bool(test)' (R1703)", "column": 7, "type": "info", "command": "annotate-code"}
+{"row": 37, "text": "Unnecessary \"else\" after \"return\" (R1705)", "column": 7, "type": "info", "command": "annotate-code"}
 {"title": "is_isbn", "command": "start-tab"}
 {"command": "start-context"}
 {"description": {"description": "is_isbn(\"9789027439642\", False)", "format": "python"}, "command": "start-testcase"}
@@ -310,7 +316,7 @@
 {"description": {"description": "are_isbn(codes01)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "exception", "command": "start-test"}
 {"generated": "name 'are_isbn' is not defined\n  File \".\\context_1_0.py\", line 55, in <module>\n", "status": {"enum": "wrong"}, "command": "close-test"}
-{"expected": "['False', 'True', 'True', 'True', 'False', 'False', 'False', 'True', 'False']", "channel": "return", "command": "start-test"}
+{"expected": "[False, True, True, True, False, False, False, True, False]", "channel": "return", "command": "start-test"}
 {"generated": "", "status": {"enum": "wrong", "human": "Geen returnwaarde."}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
@@ -320,7 +326,7 @@
 {"description": {"description": "are_isbn(codes02, True)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "exception", "command": "start-test"}
 {"generated": "name 'are_isbn' is not defined\n  File \".\\context_1_1.py\", line 55, in <module>\n", "status": {"enum": "wrong"}, "command": "close-test"}
-{"expected": "['False', 'False', 'False', 'False', 'False', 'False', 'False', 'True', 'False']", "channel": "return", "command": "start-test"}
+{"expected": "[False, False, False, False, False, False, False, True, False]", "channel": "return", "command": "start-test"}
 {"generated": "", "status": {"enum": "wrong", "human": "Geen returnwaarde."}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
@@ -330,7 +336,7 @@
 {"description": {"description": "are_isbn(codes03, False)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "exception", "command": "start-test"}
 {"generated": "name 'are_isbn' is not defined\n  File \".\\context_1_2.py\", line 55, in <module>\n", "status": {"enum": "wrong"}, "command": "close-test"}
-{"expected": "['False', 'True', 'True', 'True', 'False', 'False', 'False', 'False', 'False']", "channel": "return", "command": "start-test"}
+{"expected": "[False, True, True, True, False, False, False, False, False]", "channel": "return", "command": "start-test"}
 {"generated": "", "status": {"enum": "wrong", "human": "Geen returnwaarde."}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
@@ -340,7 +346,7 @@
 {"description": {"description": "are_isbn(codes04)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "exception", "command": "start-test"}
 {"generated": "name 'are_isbn' is not defined\n  File \".\\context_1_3.py\", line 55, in <module>\n", "status": {"enum": "wrong"}, "command": "close-test"}
-{"expected": "['False', 'False', 'False', 'False', 'False', 'False', 'False', 'False', 'False', 'True']", "channel": "return", "command": "start-test"}
+{"expected": "[False, False, False, False, False, False, False, False, False, True]", "channel": "return", "command": "start-test"}
 {"generated": "", "status": {"enum": "wrong", "human": "Geen returnwaarde."}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
@@ -350,7 +356,7 @@
 {"description": {"description": "are_isbn(codes05, True)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "exception", "command": "start-test"}
 {"generated": "name 'are_isbn' is not defined\n  File \".\\context_1_4.py\", line 55, in <module>\n", "status": {"enum": "wrong"}, "command": "close-test"}
-{"expected": "['False', 'False', 'False', 'False', 'False', 'False', 'False', 'False', 'False', 'False']", "channel": "return", "command": "start-test"}
+{"expected": "[False, False, False, False, False, False, False, False, False, False]", "channel": "return", "command": "start-test"}
 {"generated": "", "status": {"enum": "wrong", "human": "Geen returnwaarde."}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
@@ -360,7 +366,7 @@
 {"description": {"description": "are_isbn(codes06, False)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "exception", "command": "start-test"}
 {"generated": "name 'are_isbn' is not defined\n  File \".\\context_1_5.py\", line 55, in <module>\n", "status": {"enum": "wrong"}, "command": "close-test"}
-{"expected": "['False', 'False', 'False', 'False', 'False', 'False', 'False', 'False', 'False', 'True']", "channel": "return", "command": "start-test"}
+{"expected": "[False, False, False, False, False, False, False, False, False, True]", "channel": "return", "command": "start-test"}
 {"generated": "", "status": {"enum": "wrong", "human": "Geen returnwaarde."}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
@@ -370,7 +376,7 @@
 {"description": {"description": "are_isbn(codes07)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "exception", "command": "start-test"}
 {"generated": "name 'are_isbn' is not defined\n  File \".\\context_1_6.py\", line 55, in <module>\n", "status": {"enum": "wrong"}, "command": "close-test"}
-{"expected": "['False', 'True', 'True', 'True', 'False', 'True', 'True', 'True', 'True']", "channel": "return", "command": "start-test"}
+{"expected": "[False, True, True, True, False, True, True, True, True]", "channel": "return", "command": "start-test"}
 {"generated": "", "status": {"enum": "wrong", "human": "Geen returnwaarde."}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
@@ -380,7 +386,7 @@
 {"description": {"description": "are_isbn(codes08)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "exception", "command": "start-test"}
 {"generated": "name 'are_isbn' is not defined\n  File \".\\context_1_7.py\", line 55, in <module>\n", "status": {"enum": "wrong"}, "command": "close-test"}
-{"expected": "['False', 'True', 'False', 'False', 'True', 'False', 'True', 'False', 'True']", "channel": "return", "command": "start-test"}
+{"expected": "[False, True, False, False, True, False, True, False, True]", "channel": "return", "command": "start-test"}
 {"generated": "", "status": {"enum": "wrong", "human": "Geen returnwaarde."}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
@@ -390,7 +396,7 @@
 {"description": {"description": "are_isbn(codes09, True)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "exception", "command": "start-test"}
 {"generated": "name 'are_isbn' is not defined\n  File \".\\context_1_8.py\", line 55, in <module>\n", "status": {"enum": "wrong"}, "command": "close-test"}
-{"expected": "['False', 'False', 'False', 'False', 'False', 'False', 'False']", "channel": "return", "command": "start-test"}
+{"expected": "[False, False, False, False, False, False, False]", "channel": "return", "command": "start-test"}
 {"generated": "", "status": {"enum": "wrong", "human": "Geen returnwaarde."}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
@@ -400,7 +406,7 @@
 {"description": {"description": "are_isbn(codes10, False)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "exception", "command": "start-test"}
 {"generated": "name 'are_isbn' is not defined\n  File \".\\context_1_9.py\", line 55, in <module>\n", "status": {"enum": "wrong"}, "command": "close-test"}
-{"expected": "['False', 'False', 'False', 'True']", "channel": "return", "command": "start-test"}
+{"expected": "[False, False, False, True]", "channel": "return", "command": "start-test"}
 {"generated": "", "status": {"enum": "wrong", "human": "Geen returnwaarde."}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
@@ -410,7 +416,7 @@
 {"description": {"description": "are_isbn(codes11)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "exception", "command": "start-test"}
 {"generated": "name 'are_isbn' is not defined\n  File \".\\context_1_10.py\", line 55, in <module>\n", "status": {"enum": "wrong"}, "command": "close-test"}
-{"expected": "['True', 'True', 'False', 'True', 'True']", "channel": "return", "command": "start-test"}
+{"expected": "[True, True, False, True, True]", "channel": "return", "command": "start-test"}
 {"generated": "", "status": {"enum": "wrong", "human": "Geen returnwaarde."}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
@@ -420,7 +426,7 @@
 {"description": {"description": "are_isbn(codes12, True)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "exception", "command": "start-test"}
 {"generated": "name 'are_isbn' is not defined\n  File \".\\context_1_11.py\", line 55, in <module>\n", "status": {"enum": "wrong"}, "command": "close-test"}
-{"expected": "['False', 'False', 'False', 'False', 'False', 'False', 'False']", "channel": "return", "command": "start-test"}
+{"expected": "[False, False, False, False, False, False, False]", "channel": "return", "command": "start-test"}
 {"generated": "", "status": {"enum": "wrong", "human": "Geen returnwaarde."}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
@@ -430,7 +436,7 @@
 {"description": {"description": "are_isbn(codes13, False)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "exception", "command": "start-test"}
 {"generated": "name 'are_isbn' is not defined\n  File \".\\context_1_12.py\", line 55, in <module>\n", "status": {"enum": "wrong"}, "command": "close-test"}
-{"expected": "['True', 'False', 'False', 'False', 'True', 'False', 'False', 'False']", "channel": "return", "command": "start-test"}
+{"expected": "[True, False, False, False, True, False, False, False]", "channel": "return", "command": "start-test"}
 {"generated": "", "status": {"enum": "wrong", "human": "Geen returnwaarde."}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
@@ -440,7 +446,7 @@
 {"description": {"description": "are_isbn(codes14)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "exception", "command": "start-test"}
 {"generated": "name 'are_isbn' is not defined\n  File \".\\context_1_13.py\", line 55, in <module>\n", "status": {"enum": "wrong"}, "command": "close-test"}
-{"expected": "['False', 'False', 'True', 'True', 'True', 'True']", "channel": "return", "command": "start-test"}
+{"expected": "[False, False, True, True, True, True]", "channel": "return", "command": "start-test"}
 {"generated": "", "status": {"enum": "wrong", "human": "Geen returnwaarde."}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
@@ -450,7 +456,7 @@
 {"description": {"description": "are_isbn(codes15, False)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "exception", "command": "start-test"}
 {"generated": "name 'are_isbn' is not defined\n  File \".\\context_1_14.py\", line 55, in <module>\n", "status": {"enum": "wrong"}, "command": "close-test"}
-{"expected": "['True', 'False', 'False', 'True', 'False', 'False', 'False', 'False', 'False']", "channel": "return", "command": "start-test"}
+{"expected": "[True, False, False, True, False, False, False, False, False]", "channel": "return", "command": "start-test"}
 {"generated": "", "status": {"enum": "wrong", "human": "Geen returnwaarde."}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
@@ -460,7 +466,7 @@
 {"description": {"description": "are_isbn(codes16, False)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "exception", "command": "start-test"}
 {"generated": "name 'are_isbn' is not defined\n  File \".\\context_1_15.py\", line 55, in <module>\n", "status": {"enum": "wrong"}, "command": "close-test"}
-{"expected": "['False', 'False', 'True', 'False']", "channel": "return", "command": "start-test"}
+{"expected": "[False, False, True, False]", "channel": "return", "command": "start-test"}
 {"generated": "", "status": {"enum": "wrong", "human": "Geen returnwaarde."}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
@@ -470,7 +476,7 @@
 {"description": {"description": "are_isbn(codes17, False)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "exception", "command": "start-test"}
 {"generated": "name 'are_isbn' is not defined\n  File \".\\context_1_16.py\", line 55, in <module>\n", "status": {"enum": "wrong"}, "command": "close-test"}
-{"expected": "['False', 'False', 'False', 'False', 'True', 'True', 'False', 'True']", "channel": "return", "command": "start-test"}
+{"expected": "[False, False, False, False, True, True, False, True]", "channel": "return", "command": "start-test"}
 {"generated": "", "status": {"enum": "wrong", "human": "Geen returnwaarde."}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
@@ -480,7 +486,7 @@
 {"description": {"description": "are_isbn(codes18)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "exception", "command": "start-test"}
 {"generated": "name 'are_isbn' is not defined\n  File \".\\context_1_17.py\", line 55, in <module>\n", "status": {"enum": "wrong"}, "command": "close-test"}
-{"expected": "['True', 'False', 'True', 'False', 'True', 'True', 'False', 'False', 'True']", "channel": "return", "command": "start-test"}
+{"expected": "[True, False, True, False, True, True, False, False, True]", "channel": "return", "command": "start-test"}
 {"generated": "", "status": {"enum": "wrong", "human": "Geen returnwaarde."}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
@@ -490,7 +496,7 @@
 {"description": {"description": "are_isbn(codes19, True)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "exception", "command": "start-test"}
 {"generated": "name 'are_isbn' is not defined\n  File \".\\context_1_18.py\", line 55, in <module>\n", "status": {"enum": "wrong"}, "command": "close-test"}
-{"expected": "['False', 'False', 'True', 'True', 'True', 'False', 'False', 'False']", "channel": "return", "command": "start-test"}
+{"expected": "[False, False, True, True, True, False, False, False]", "channel": "return", "command": "start-test"}
 {"generated": "", "status": {"enum": "wrong", "human": "Geen returnwaarde."}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
@@ -500,7 +506,7 @@
 {"description": {"description": "are_isbn(codes20, False)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "exception", "command": "start-test"}
 {"generated": "name 'are_isbn' is not defined\n  File \".\\context_1_19.py\", line 55, in <module>\n", "status": {"enum": "wrong"}, "command": "close-test"}
-{"expected": "['False', 'False', 'True', 'False', 'True']", "channel": "return", "command": "start-test"}
+{"expected": "[False, False, True, False, True]", "channel": "return", "command": "start-test"}
 {"generated": "", "status": {"enum": "wrong", "human": "Geen returnwaarde."}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
@@ -510,7 +516,7 @@
 {"description": {"description": "are_isbn(codes21, True)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "exception", "command": "start-test"}
 {"generated": "name 'are_isbn' is not defined\n  File \".\\context_1_20.py\", line 55, in <module>\n", "status": {"enum": "wrong"}, "command": "close-test"}
-{"expected": "['False', 'False', 'True', 'False']", "channel": "return", "command": "start-test"}
+{"expected": "[False, False, True, False]", "channel": "return", "command": "start-test"}
 {"generated": "", "status": {"enum": "wrong", "human": "Geen returnwaarde."}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
@@ -520,7 +526,7 @@
 {"description": {"description": "are_isbn(codes22, True)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "exception", "command": "start-test"}
 {"generated": "name 'are_isbn' is not defined\n  File \".\\context_1_21.py\", line 55, in <module>\n", "status": {"enum": "wrong"}, "command": "close-test"}
-{"expected": "['True', 'False', 'True', 'False', 'False', 'False', 'False', 'True']", "channel": "return", "command": "start-test"}
+{"expected": "[True, False, True, False, False, False, False, True]", "channel": "return", "command": "start-test"}
 {"generated": "", "status": {"enum": "wrong", "human": "Geen returnwaarde."}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
@@ -530,7 +536,7 @@
 {"description": {"description": "are_isbn(codes23, True)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "exception", "command": "start-test"}
 {"generated": "name 'are_isbn' is not defined\n  File \".\\context_1_22.py\", line 55, in <module>\n", "status": {"enum": "wrong"}, "command": "close-test"}
-{"expected": "['False', 'False', 'False', 'False', 'True', 'False', 'False', 'True', 'False']", "channel": "return", "command": "start-test"}
+{"expected": "[False, False, False, False, True, False, False, True, False]", "channel": "return", "command": "start-test"}
 {"generated": "", "status": {"enum": "wrong", "human": "Geen returnwaarde."}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
@@ -540,7 +546,7 @@
 {"description": {"description": "are_isbn(codes24, True)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "exception", "command": "start-test"}
 {"generated": "name 'are_isbn' is not defined\n  File \".\\context_1_23.py\", line 55, in <module>\n", "status": {"enum": "wrong"}, "command": "close-test"}
-{"expected": "['False', 'False', 'False', 'True']", "channel": "return", "command": "start-test"}
+{"expected": "[False, False, False, True]", "channel": "return", "command": "start-test"}
 {"generated": "", "status": {"enum": "wrong", "human": "Geen returnwaarde."}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
@@ -550,7 +556,7 @@
 {"description": {"description": "are_isbn(codes25)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "exception", "command": "start-test"}
 {"generated": "name 'are_isbn' is not defined\n  File \".\\context_1_24.py\", line 55, in <module>\n", "status": {"enum": "wrong"}, "command": "close-test"}
-{"expected": "['True', 'False', 'False', 'True']", "channel": "return", "command": "start-test"}
+{"expected": "[True, False, False, True]", "channel": "return", "command": "start-test"}
 {"generated": "", "status": {"enum": "wrong", "human": "Geen returnwaarde."}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
@@ -560,7 +566,7 @@
 {"description": {"description": "are_isbn(codes26)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "exception", "command": "start-test"}
 {"generated": "name 'are_isbn' is not defined\n  File \".\\context_1_25.py\", line 55, in <module>\n", "status": {"enum": "wrong"}, "command": "close-test"}
-{"expected": "['True', 'True', 'True', 'True']", "channel": "return", "command": "start-test"}
+{"expected": "[True, True, True, True]", "channel": "return", "command": "start-test"}
 {"generated": "", "status": {"enum": "wrong", "human": "Geen returnwaarde."}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
@@ -570,7 +576,7 @@
 {"description": {"description": "are_isbn(codes27, False)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "exception", "command": "start-test"}
 {"generated": "name 'are_isbn' is not defined\n  File \".\\context_1_26.py\", line 55, in <module>\n", "status": {"enum": "wrong"}, "command": "close-test"}
-{"expected": "['False', 'False', 'False', 'True', 'False', 'False', 'True']", "channel": "return", "command": "start-test"}
+{"expected": "[False, False, False, True, False, False, True]", "channel": "return", "command": "start-test"}
 {"generated": "", "status": {"enum": "wrong", "human": "Geen returnwaarde."}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
@@ -580,7 +586,7 @@
 {"description": {"description": "are_isbn(codes28, False)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "exception", "command": "start-test"}
 {"generated": "name 'are_isbn' is not defined\n  File \".\\context_1_27.py\", line 55, in <module>\n", "status": {"enum": "wrong"}, "command": "close-test"}
-{"expected": "['False', 'False', 'False', 'False']", "channel": "return", "command": "start-test"}
+{"expected": "[False, False, False, False]", "channel": "return", "command": "start-test"}
 {"generated": "", "status": {"enum": "wrong", "human": "Geen returnwaarde."}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
@@ -590,7 +596,7 @@
 {"description": {"description": "are_isbn(codes29, False)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "exception", "command": "start-test"}
 {"generated": "name 'are_isbn' is not defined\n  File \".\\context_1_28.py\", line 55, in <module>\n", "status": {"enum": "wrong"}, "command": "close-test"}
-{"expected": "['False', 'True', 'False', 'False', 'False', 'False', 'True']", "channel": "return", "command": "start-test"}
+{"expected": "[False, True, False, False, False, False, True]", "channel": "return", "command": "start-test"}
 {"generated": "", "status": {"enum": "wrong", "human": "Geen returnwaarde."}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
@@ -600,7 +606,7 @@
 {"description": {"description": "are_isbn(codes30, False)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "exception", "command": "start-test"}
 {"generated": "name 'are_isbn' is not defined\n  File \".\\context_1_29.py\", line 55, in <module>\n", "status": {"enum": "wrong"}, "command": "close-test"}
-{"expected": "['False', 'False', 'False', 'True', 'False', 'False', 'True', 'False', 'False', 'False']", "channel": "return", "command": "start-test"}
+{"expected": "[False, False, False, True, False, False, True, False, False, False]", "channel": "return", "command": "start-test"}
 {"generated": "", "status": {"enum": "wrong", "human": "Geen returnwaarde."}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
@@ -610,7 +616,7 @@
 {"description": {"description": "are_isbn(codes31, False)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "exception", "command": "start-test"}
 {"generated": "name 'are_isbn' is not defined\n  File \".\\context_1_30.py\", line 55, in <module>\n", "status": {"enum": "wrong"}, "command": "close-test"}
-{"expected": "['False', 'True', 'False', 'False', 'False', 'False', 'True', 'False', 'False', 'True']", "channel": "return", "command": "start-test"}
+{"expected": "[False, True, False, False, False, False, True, False, False, True]", "channel": "return", "command": "start-test"}
 {"generated": "", "status": {"enum": "wrong", "human": "Geen returnwaarde."}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
@@ -620,7 +626,7 @@
 {"description": {"description": "are_isbn(codes32, False)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "exception", "command": "start-test"}
 {"generated": "name 'are_isbn' is not defined\n  File \".\\context_1_31.py\", line 55, in <module>\n", "status": {"enum": "wrong"}, "command": "close-test"}
-{"expected": "['False', 'False', 'False', 'False', 'True', 'False', 'False', 'True', 'False']", "channel": "return", "command": "start-test"}
+{"expected": "[False, False, False, False, True, False, False, True, False]", "channel": "return", "command": "start-test"}
 {"generated": "", "status": {"enum": "wrong", "human": "Geen returnwaarde."}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
@@ -630,7 +636,7 @@
 {"description": {"description": "are_isbn(codes33, False)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "exception", "command": "start-test"}
 {"generated": "name 'are_isbn' is not defined\n  File \".\\context_1_32.py\", line 55, in <module>\n", "status": {"enum": "wrong"}, "command": "close-test"}
-{"expected": "['False', 'True', 'True', 'False', 'False', 'False', 'True', 'False']", "channel": "return", "command": "start-test"}
+{"expected": "[False, True, True, False, False, False, True, False]", "channel": "return", "command": "start-test"}
 {"generated": "", "status": {"enum": "wrong", "human": "Geen returnwaarde."}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
@@ -640,7 +646,7 @@
 {"description": {"description": "are_isbn(codes34, False)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "exception", "command": "start-test"}
 {"generated": "name 'are_isbn' is not defined\n  File \".\\context_1_33.py\", line 55, in <module>\n", "status": {"enum": "wrong"}, "command": "close-test"}
-{"expected": "['False', 'True', 'False', 'False', 'False', 'False', 'False']", "channel": "return", "command": "start-test"}
+{"expected": "[False, True, False, False, False, False, False]", "channel": "return", "command": "start-test"}
 {"generated": "", "status": {"enum": "wrong", "human": "Geen returnwaarde."}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
@@ -650,7 +656,7 @@
 {"description": {"description": "are_isbn(codes35)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "exception", "command": "start-test"}
 {"generated": "name 'are_isbn' is not defined\n  File \".\\context_1_34.py\", line 55, in <module>\n", "status": {"enum": "wrong"}, "command": "close-test"}
-{"expected": "['True', 'False', 'False', 'False', 'True', 'False', 'True', 'False', 'False', 'True']", "channel": "return", "command": "start-test"}
+{"expected": "[True, False, False, False, True, False, True, False, False, True]", "channel": "return", "command": "start-test"}
 {"generated": "", "status": {"enum": "wrong", "human": "Geen returnwaarde."}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
@@ -660,7 +666,7 @@
 {"description": {"description": "are_isbn(codes36)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "exception", "command": "start-test"}
 {"generated": "name 'are_isbn' is not defined\n  File \".\\context_1_35.py\", line 55, in <module>\n", "status": {"enum": "wrong"}, "command": "close-test"}
-{"expected": "['True', 'True', 'False', 'False', 'False']", "channel": "return", "command": "start-test"}
+{"expected": "[True, True, False, False, False]", "channel": "return", "command": "start-test"}
 {"generated": "", "status": {"enum": "wrong", "human": "Geen returnwaarde."}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
@@ -670,7 +676,7 @@
 {"description": {"description": "are_isbn(codes37, True)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "exception", "command": "start-test"}
 {"generated": "name 'are_isbn' is not defined\n  File \".\\context_1_36.py\", line 55, in <module>\n", "status": {"enum": "wrong"}, "command": "close-test"}
-{"expected": "['False', 'True', 'False', 'False', 'False', 'False', 'False', 'False']", "channel": "return", "command": "start-test"}
+{"expected": "[False, True, False, False, False, False, False, False]", "channel": "return", "command": "start-test"}
 {"generated": "", "status": {"enum": "wrong", "human": "Geen returnwaarde."}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
@@ -680,7 +686,7 @@
 {"description": {"description": "are_isbn(codes38, False)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "exception", "command": "start-test"}
 {"generated": "name 'are_isbn' is not defined\n  File \".\\context_1_37.py\", line 55, in <module>\n", "status": {"enum": "wrong"}, "command": "close-test"}
-{"expected": "['True', 'False', 'False', 'True', 'False', 'False', 'False', 'False', 'False']", "channel": "return", "command": "start-test"}
+{"expected": "[True, False, False, True, False, False, False, False, False]", "channel": "return", "command": "start-test"}
 {"generated": "", "status": {"enum": "wrong", "human": "Geen returnwaarde."}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
@@ -690,7 +696,7 @@
 {"description": {"description": "are_isbn(codes39, True)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "exception", "command": "start-test"}
 {"generated": "name 'are_isbn' is not defined\n  File \".\\context_1_38.py\", line 55, in <module>\n", "status": {"enum": "wrong"}, "command": "close-test"}
-{"expected": "['False', 'False', 'False', 'False', 'False']", "channel": "return", "command": "start-test"}
+{"expected": "[False, False, False, False, False]", "channel": "return", "command": "start-test"}
 {"generated": "", "status": {"enum": "wrong", "human": "Geen returnwaarde."}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
@@ -700,7 +706,7 @@
 {"description": {"description": "are_isbn(codes40, True)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "exception", "command": "start-test"}
 {"generated": "name 'are_isbn' is not defined\n  File \".\\context_1_39.py\", line 55, in <module>\n", "status": {"enum": "wrong"}, "command": "close-test"}
-{"expected": "['False', 'True', 'False', 'False', 'False']", "channel": "return", "command": "start-test"}
+{"expected": "[False, True, False, False, False]", "channel": "return", "command": "start-test"}
 {"generated": "", "status": {"enum": "wrong", "human": "Geen returnwaarde."}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
@@ -710,7 +716,7 @@
 {"description": {"description": "are_isbn(codes41)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "exception", "command": "start-test"}
 {"generated": "name 'are_isbn' is not defined\n  File \".\\context_1_40.py\", line 55, in <module>\n", "status": {"enum": "wrong"}, "command": "close-test"}
-{"expected": "['False', 'False', 'True', 'True', 'True', 'True', 'True', 'False']", "channel": "return", "command": "start-test"}
+{"expected": "[False, False, True, True, True, True, True, False]", "channel": "return", "command": "start-test"}
 {"generated": "", "status": {"enum": "wrong", "human": "Geen returnwaarde."}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
@@ -720,7 +726,7 @@
 {"description": {"description": "are_isbn(codes42)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "exception", "command": "start-test"}
 {"generated": "name 'are_isbn' is not defined\n  File \".\\context_1_41.py\", line 55, in <module>\n", "status": {"enum": "wrong"}, "command": "close-test"}
-{"expected": "['True', 'True', 'True', 'True', 'True', 'True', 'False', 'True']", "channel": "return", "command": "start-test"}
+{"expected": "[True, True, True, True, True, True, False, True]", "channel": "return", "command": "start-test"}
 {"generated": "", "status": {"enum": "wrong", "human": "Geen returnwaarde."}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
@@ -730,7 +736,7 @@
 {"description": {"description": "are_isbn(codes43, False)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "exception", "command": "start-test"}
 {"generated": "name 'are_isbn' is not defined\n  File \".\\context_1_42.py\", line 55, in <module>\n", "status": {"enum": "wrong"}, "command": "close-test"}
-{"expected": "['False', 'False', 'True', 'False', 'False', 'False', 'False', 'False', 'False']", "channel": "return", "command": "start-test"}
+{"expected": "[False, False, True, False, False, False, False, False, False]", "channel": "return", "command": "start-test"}
 {"generated": "", "status": {"enum": "wrong", "human": "Geen returnwaarde."}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
@@ -740,7 +746,7 @@
 {"description": {"description": "are_isbn(codes44, True)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "exception", "command": "start-test"}
 {"generated": "name 'are_isbn' is not defined\n  File \".\\context_1_43.py\", line 55, in <module>\n", "status": {"enum": "wrong"}, "command": "close-test"}
-{"expected": "['False', 'True', 'False', 'False', 'False', 'False', 'False', 'False']", "channel": "return", "command": "start-test"}
+{"expected": "[False, True, False, False, False, False, False, False]", "channel": "return", "command": "start-test"}
 {"generated": "", "status": {"enum": "wrong", "human": "Geen returnwaarde."}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
@@ -750,7 +756,7 @@
 {"description": {"description": "are_isbn(codes45)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "exception", "command": "start-test"}
 {"generated": "name 'are_isbn' is not defined\n  File \".\\context_1_44.py\", line 55, in <module>\n", "status": {"enum": "wrong"}, "command": "close-test"}
-{"expected": "['False', 'False', 'False', 'False', 'False', 'True']", "channel": "return", "command": "start-test"}
+{"expected": "[False, False, False, False, False, True]", "channel": "return", "command": "start-test"}
 {"generated": "", "status": {"enum": "wrong", "human": "Geen returnwaarde."}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
@@ -760,7 +766,7 @@
 {"description": {"description": "are_isbn(codes46, True)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "exception", "command": "start-test"}
 {"generated": "name 'are_isbn' is not defined\n  File \".\\context_1_45.py\", line 55, in <module>\n", "status": {"enum": "wrong"}, "command": "close-test"}
-{"expected": "['True', 'False', 'False', 'True', 'True', 'False', 'False', 'False']", "channel": "return", "command": "start-test"}
+{"expected": "[True, False, False, True, True, False, False, False]", "channel": "return", "command": "start-test"}
 {"generated": "", "status": {"enum": "wrong", "human": "Geen returnwaarde."}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
@@ -770,7 +776,7 @@
 {"description": {"description": "are_isbn(codes47, False)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "exception", "command": "start-test"}
 {"generated": "name 'are_isbn' is not defined\n  File \".\\context_1_46.py\", line 55, in <module>\n", "status": {"enum": "wrong"}, "command": "close-test"}
-{"expected": "['True', 'True', 'False', 'False', 'False', 'False']", "channel": "return", "command": "start-test"}
+{"expected": "[True, True, False, False, False, False]", "channel": "return", "command": "start-test"}
 {"generated": "", "status": {"enum": "wrong", "human": "Geen returnwaarde."}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
@@ -780,7 +786,7 @@
 {"description": {"description": "are_isbn(codes48)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "exception", "command": "start-test"}
 {"generated": "name 'are_isbn' is not defined\n  File \".\\context_1_47.py\", line 55, in <module>\n", "status": {"enum": "wrong"}, "command": "close-test"}
-{"expected": "['True', 'True', 'False', 'True', 'True', 'False']", "channel": "return", "command": "start-test"}
+{"expected": "[True, True, False, True, True, False]", "channel": "return", "command": "start-test"}
 {"generated": "", "status": {"enum": "wrong", "human": "Geen returnwaarde."}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
@@ -790,7 +796,7 @@
 {"description": {"description": "are_isbn(codes49)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "exception", "command": "start-test"}
 {"generated": "name 'are_isbn' is not defined\n  File \".\\context_1_48.py\", line 55, in <module>\n", "status": {"enum": "wrong"}, "command": "close-test"}
-{"expected": "['True', 'True', 'True', 'True', 'True', 'True', 'True']", "channel": "return", "command": "start-test"}
+{"expected": "[True, True, True, True, True, True, True]", "channel": "return", "command": "start-test"}
 {"generated": "", "status": {"enum": "wrong", "human": "Geen returnwaarde."}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
@@ -800,7 +806,7 @@
 {"description": {"description": "are_isbn(codes50, True)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "exception", "command": "start-test"}
 {"generated": "name 'are_isbn' is not defined\n  File \".\\context_1_49.py\", line 55, in <module>\n", "status": {"enum": "wrong"}, "command": "close-test"}
-{"expected": "['False', 'True', 'True', 'False', 'False', 'False']", "channel": "return", "command": "start-test"}
+{"expected": "[False, True, True, False, False, False]", "channel": "return", "command": "start-test"}
 {"generated": "", "status": {"enum": "wrong", "human": "Geen returnwaarde."}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}

@@ -256,7 +256,7 @@ class GeneratorJudge:
         report_update(self.out, StartJudgment())
 
         # Run the linter.
-        self.run_linter()
+        self.run_linter(plan)
 
         logger.info("Start generating code...")
         common_dir, files, selector = self.generate_files(plan, mode)
@@ -828,8 +828,14 @@ class GeneratorJudge:
             stdin=None
         )
 
-    def run_linter(self):
-        """Run a linter"""
+    def run_linter(self, plan: Plan):
+        """Run a linter if allowed."""
+        language_options = plan.language_config(self.config.programming_language)
+        # By default, we allow the linter to work.
+        if not language_options.get("linter", True):
+            logger.debug("Linter is disabled.")
+            return
+
         directory = Path(self.config.workdir) / "linter"
         directory.mkdir()
 

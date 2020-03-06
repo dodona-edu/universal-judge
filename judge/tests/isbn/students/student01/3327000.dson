@@ -1,4 +1,5 @@
 {"command": "start-judgement"}
+{"row": 19, "text": "unindent does not match any outer indentation level (&lt;unknown&gt;, line 20) (E0001)", "column": 71, "type": "error", "command": "annotate-code"}
 {"message": "De compiler produceerde volgende uitvoer op stdout:", "command": "append-message"}
 {"message": {"description": "*** Error compiling '.\\\\submission.py'...\nSorry: IndentationError: unindent does not match any outer indentation level (submission.py, line 20)\n", "format": "code"}, "command": "append-message"}
 {"row": 20, "text": "IndentationError: unindent does not match any outer indentation level", "type": "error", "command": "annotate-code"}

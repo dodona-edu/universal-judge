@@ -1,10 +1,7 @@
-#
-# Main file of the TESTed framework.
-#
-# For now, this only handles running the main kernel.
-#
 import dataclasses
 import json
+import os
+import shutil
 from dataclasses import dataclass, field
 
 from argparse import ArgumentParser, FileType
@@ -25,8 +22,9 @@ class Config:
     # noinspection SpellCheckingInspection
     workdir: str
     judge: str
+    linter: Optional[bool] = None
     plan_name: str = "plan.json"  # Name of the testplan file.
-    options: Optional[Dict[str, str]] = field(default_factory=dict)
+    options: Dict[str, str] = field(default_factory=dict)
 
 
 def read_config(config_in: IO) -> Config:
@@ -52,9 +50,27 @@ def run(config: Config, judge_output: IO):
         textual_plan = t.read()
 
     testplan = parse_test_plan(textual_plan)
+
+    # Merge config from config into testplan if needed.
+    if config.linter is not None:
+        existing = testplan.language_config(config.programming_language)
+        existing["linter"] = config.linter
+        testplan.configuration.language[config.programming_language] = existing
+
     from judge import GeneratorJudge
     tester = GeneratorJudge(config, judge_output)
     tester.judge(testplan)
+
+
+def clean_working_directory(config: Config):
+    """
+    Delete everything in the working directory.
+    """
+    for root, dirs, files in os.walk(config.workdir):
+        for f in files:
+            os.unlink(os.path.join(root, f))
+        for d in dirs:
+            shutil.rmtree(os.path.join(root, d), ignore_errors=True)
 
 
 if __name__ == '__main__':

@@ -1,4 +1,5 @@
 {"command": "start-judgement"}
+{"row": 49, "text": "invalid syntax (&lt;unknown&gt;, line 50) (E0001)", "column": 29, "type": "error", "command": "annotate-code"}
 {"message": "De compiler produceerde volgende uitvoer op stdout:", "command": "append-message"}
 {"message": {"description": "*** Error compiling '.\\\\submission.py'...\n  File \".\\submission.py\", line 50\n    if len(code) 13:\n                 ^\nSyntaxError: invalid syntax\n\n", "format": "code"}, "command": "append-message"}
 {"row": 49, "text": "SyntaxError: invalid syntax", "column": 17, "type": "error", "command": "annotate-code"}

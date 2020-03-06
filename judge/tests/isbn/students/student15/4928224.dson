@@ -1,4 +1,15 @@
 {"command": "start-judgement"}
+{"row": 0, "text": "Module name \"4928224\" doesn't conform to snake_case naming style (C0103)", "column": 0, "type": "info", "command": "annotate-code"}
+{"row": 3, "text": "Too many branches (15/12) (R0912)", "column": 0, "type": "info", "command": "annotate-code"}
+{"row": 4, "text": "Unnecessary \"else\" after \"return\" (R1705)", "column": 3, "type": "info", "command": "annotate-code"}
+{"row": 5, "text": "Using type() instead of isinstance() for a typecheck. (C0123)", "column": 14, "type": "info", "command": "annotate-code"}
+{"row": 22, "text": "Using type() instead of isinstance() for a typecheck. (C0123)", "column": 14, "type": "info", "command": "annotate-code"}
+{"row": 37, "text": "The if statement can be replaced with 'return bool(test)' (R1703)", "column": 7, "type": "info", "command": "annotate-code"}
+{"row": 37, "text": "Unnecessary \"else\" after \"return\" (R1705)", "column": 7, "type": "info", "command": "annotate-code"}
+{"row": 43, "text": "No space allowed around keyword argument assignment\ndef are_isbn(l, dertien = None):\n                        ^ (C0326)", "column": 23, "type": "info", "command": "annotate-code"}
+{"row": 45, "text": "Consider using enumerate instead of iterating with range and len (C0200)", "column": 3, "type": "info", "command": "annotate-code"}
+{"row": 47, "text": "Using type() instead of isinstance() for a typecheck. (C0123)", "column": 10, "type": "info", "command": "annotate-code"}
+{"row": 50, "text": "Comparison to None should be 'expr is None' (C0121)", "column": 24, "type": "info", "command": "annotate-code"}
 {"title": "is_isbn", "command": "start-tab"}
 {"command": "start-context"}
 {"description": {"description": "is_isbn(\"9789027439642\", False)", "format": "python"}, "command": "start-testcase"}
@@ -308,8 +319,8 @@
 {"description": {"description": "are_isbn(codes01)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "stdout", "command": "start-test"}
 {"generated": "0012345678\n0012345679\n9971502100\n080442957X\n5\nongeldig\nTrue\nongeldig\nThe Practice of Computing Using Python\n9789027439642\ndertien\n5486948320146\ndertien\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"expected": "['False', 'True', 'True', 'True', 'False', 'False', 'False', 'True', 'False']", "channel": "return", "command": "start-test"}
-{"generated": "['False', 'False', 'False', 'False', 'False', 'False', 'False', 'True', 'False']", "status": {"enum": "wrong"}, "command": "close-test"}
+{"expected": "[False, True, True, True, False, False, False, True, False]", "channel": "return", "command": "start-test"}
+{"generated": "[False, False, False, False, False, False, False, True, False]", "status": {"enum": "wrong"}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
 {"command": "start-context"}
@@ -318,8 +329,8 @@
 {"description": {"description": "are_isbn(codes02, True)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "stdout", "command": "start-test"}
 {"generated": "0012345678\ndertien\n0012345679\ndertien\n9971502100\ndertien\n080442957X\ndertien\n5\nongeldig\nTrue\nongeldig\nThe Practice of Computing Using Python\ndertien\n9789027439642\ndertien\n5486948320146\ndertien\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"expected": "['False', 'False', 'False', 'False', 'False', 'False', 'False', 'True', 'False']", "channel": "return", "command": "start-test"}
-{"generated": "['False', 'False', 'False', 'False', 'False', 'False', 'False', 'True', 'False']", "status": {"enum": "correct"}, "command": "close-test"}
+{"expected": "[False, False, False, False, False, False, False, True, False]", "channel": "return", "command": "start-test"}
+{"generated": "[False, False, False, False, False, False, False, True, False]", "status": {"enum": "correct"}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
 {"command": "start-context"}
@@ -328,8 +339,8 @@
 {"description": {"description": "are_isbn(codes03, False)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "stdout", "command": "start-test"}
 {"generated": "0012345678\n0012345679\n9971502100\n080442957X\n5\nongeldig\nTrue\nongeldig\nThe Practice of Computing Using Python\n9789027439642\n5486948320146\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"expected": "['False', 'True', 'True', 'True', 'False', 'False', 'False', 'False', 'False']", "channel": "return", "command": "start-test"}
-{"generated": "['False', 'False', 'False', 'False', 'False', 'False', 'False', 'True', 'False']", "status": {"enum": "wrong"}, "command": "close-test"}
+{"expected": "[False, True, True, True, False, False, False, False, False]", "channel": "return", "command": "start-test"}
+{"generated": "[False, False, False, False, False, False, False, True, False]", "status": {"enum": "wrong"}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
 {"command": "start-context"}
@@ -338,8 +349,8 @@
 {"description": {"description": "are_isbn(codes04)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "stdout", "command": "start-test"}
 {"generated": "0123456780\n0123456781\n0123456782\n0123456783\n0123456784\n0123456785\n0123456786\n0123456787\n0123456788\n0123456789\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"expected": "['False', 'False', 'False', 'False', 'False', 'False', 'False', 'False', 'False', 'True']", "channel": "return", "command": "start-test"}
-{"generated": "['False', 'False', 'False', 'False', 'False', 'False', 'False', 'False', 'False', 'False']", "status": {"enum": "wrong"}, "command": "close-test"}
+{"expected": "[False, False, False, False, False, False, False, False, False, True]", "channel": "return", "command": "start-test"}
+{"generated": "[False, False, False, False, False, False, False, False, False, False]", "status": {"enum": "wrong"}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
 {"command": "start-context"}
@@ -348,8 +359,8 @@
 {"description": {"description": "are_isbn(codes05, True)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "stdout", "command": "start-test"}
 {"generated": "0123456780\ndertien\n0123456781\ndertien\n0123456782\ndertien\n0123456783\ndertien\n0123456784\ndertien\n0123456785\ndertien\n0123456786\ndertien\n0123456787\ndertien\n0123456788\ndertien\n0123456789\ndertien\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"expected": "['False', 'False', 'False', 'False', 'False', 'False', 'False', 'False', 'False', 'False']", "channel": "return", "command": "start-test"}
-{"generated": "['False', 'False', 'False', 'False', 'False', 'False', 'False', 'False', 'False', 'False']", "status": {"enum": "correct"}, "command": "close-test"}
+{"expected": "[False, False, False, False, False, False, False, False, False, False]", "channel": "return", "command": "start-test"}
+{"generated": "[False, False, False, False, False, False, False, False, False, False]", "status": {"enum": "correct"}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
 {"command": "start-context"}
@@ -358,8 +369,8 @@
 {"description": {"description": "are_isbn(codes06, False)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "stdout", "command": "start-test"}
 {"generated": "0123456780\n0123456781\n0123456782\n0123456783\n0123456784\n0123456785\n0123456786\n0123456787\n0123456788\n0123456789\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"expected": "['False', 'False', 'False', 'False', 'False', 'False', 'False', 'False', 'False', 'True']", "channel": "return", "command": "start-test"}
-{"generated": "['False', 'False', 'False', 'False', 'False', 'False', 'False', 'False', 'False', 'False']", "status": {"enum": "wrong"}, "command": "close-test"}
+{"expected": "[False, False, False, False, False, False, False, False, False, True]", "channel": "return", "command": "start-test"}
+{"generated": "[False, False, False, False, False, False, False, False, False, False]", "status": {"enum": "wrong"}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
 {"command": "start-context"}
@@ -368,8 +379,8 @@
 {"description": {"description": "are_isbn(codes07)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "stdout", "command": "start-test"}
 {"generated": "8406490229\n9362255901\n3091699587\n334543850X\n0621027877\n3062167778533\ndertien\n4794101694\n6594301918\n8701528045222\ndertien\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"expected": "['False', 'True', 'True', 'True', 'False', 'True', 'True', 'True', 'True']", "channel": "return", "command": "start-test"}
-{"generated": "['False', 'False', 'False', 'False', 'False', 'True', 'False', 'False', 'True']", "status": {"enum": "wrong"}, "command": "close-test"}
+{"expected": "[False, True, True, True, False, True, True, True, True]", "channel": "return", "command": "start-test"}
+{"generated": "[False, False, False, False, False, True, False, False, True]", "status": {"enum": "wrong"}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
 {"command": "start-context"}
@@ -378,8 +389,8 @@
 {"description": {"description": "are_isbn(codes08)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "stdout", "command": "start-test"}
 {"generated": "2366921148\n0504050273\n4397690136799\ndertien\n0922884603\n6713790666\n6649324428770\ndertien\n3459054313333\ndertien\n1616641021385\ndertien\n2705453838849\ndertien\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"expected": "['False', 'True', 'False', 'False', 'True', 'False', 'True', 'False', 'True']", "channel": "return", "command": "start-test"}
-{"generated": "['False', 'False', 'False', 'False', 'False', 'False', 'True', 'False', 'True']", "status": {"enum": "wrong"}, "command": "close-test"}
+{"expected": "[False, True, False, False, True, False, True, False, True]", "channel": "return", "command": "start-test"}
+{"generated": "[False, False, False, False, False, False, True, False, True]", "status": {"enum": "wrong"}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
 {"command": "start-context"}
@@ -388,8 +399,8 @@
 {"description": {"description": "are_isbn(codes09, True)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "stdout", "command": "start-test"}
 {"generated": "8590899233\ndertien\n677615806X\ndertien\n8540235260774\ndertien\n9903515677\ndertien\n5353793692\ndertien\n4908254857\ndertien\n796436355X\ndertien\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"expected": "['False', 'False', 'False', 'False', 'False', 'False', 'False']", "channel": "return", "command": "start-test"}
-{"generated": "['False', 'False', 'False', 'False', 'False', 'False', 'False']", "status": {"enum": "correct"}, "command": "close-test"}
+{"expected": "[False, False, False, False, False, False, False]", "channel": "return", "command": "start-test"}
+{"generated": "[False, False, False, False, False, False, False]", "status": {"enum": "correct"}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
 {"command": "start-context"}
@@ -398,8 +409,8 @@
 {"description": {"description": "are_isbn(codes10, False)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "stdout", "command": "start-test"}
 {"generated": "3177886648093\n8886984683772\n3133421552760\n3773133898\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"expected": "['False', 'False', 'False', 'True']", "channel": "return", "command": "start-test"}
-{"generated": "['False', 'True', 'True', 'False']", "status": {"enum": "wrong"}, "command": "close-test"}
+{"expected": "[False, False, False, True]", "channel": "return", "command": "start-test"}
+{"generated": "[False, True, True, False]", "status": {"enum": "wrong"}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
 {"command": "start-context"}
@@ -408,8 +419,8 @@
 {"description": {"description": "are_isbn(codes11)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "stdout", "command": "start-test"}
 {"generated": "8911930505959\ndertien\n1448745818327\ndertien\n5691643071046\ndertien\n4325781484945\ndertien\n8029188943\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"expected": "['True', 'True', 'False', 'True', 'True']", "channel": "return", "command": "start-test"}
-{"generated": "['True', 'True', 'False', 'True', 'False']", "status": {"enum": "wrong"}, "command": "close-test"}
+{"expected": "[True, True, False, True, True]", "channel": "return", "command": "start-test"}
+{"generated": "[True, True, False, True, False]", "status": {"enum": "wrong"}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
 {"command": "start-context"}
@@ -418,8 +429,8 @@
 {"description": {"description": "are_isbn(codes12, True)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "stdout", "command": "start-test"}
 {"generated": "7606266531909\ndertien\n3064694487731\ndertien\n6511528143223\ndertien\n6607654290\ndertien\n6570020608380\ndertien\n1840985711\ndertien\n0037713291\ndertien\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"expected": "['False', 'False', 'False', 'False', 'False', 'False', 'False']", "channel": "return", "command": "start-test"}
-{"generated": "['False', 'False', 'False', 'False', 'False', 'False', 'False']", "status": {"enum": "correct"}, "command": "close-test"}
+{"expected": "[False, False, False, False, False, False, False]", "channel": "return", "command": "start-test"}
+{"generated": "[False, False, False, False, False, False, False]", "status": {"enum": "correct"}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
 {"command": "start-context"}
@@ -428,8 +439,8 @@
 {"description": {"description": "are_isbn(codes13, False)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "stdout", "command": "start-test"}
 {"generated": "9653467034\n7547861982890\n1683058273\n5804330443\n5019674702\n4580193541\n1222124323\n8412409714\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"expected": "['True', 'False', 'False', 'False', 'True', 'False', 'False', 'False']", "channel": "return", "command": "start-test"}
-{"generated": "['False', 'True', 'False', 'False', 'False', 'False', 'False', 'False']", "status": {"enum": "wrong"}, "command": "close-test"}
+{"expected": "[True, False, False, False, True, False, False, False]", "channel": "return", "command": "start-test"}
+{"generated": "[False, True, False, False, False, False, False, False]", "status": {"enum": "wrong"}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
 {"command": "start-context"}
@@ -438,8 +449,8 @@
 {"description": {"description": "are_isbn(codes14)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "stdout", "command": "start-test"}
 {"generated": "7392703990321\ndertien\n9691421907\n6523957403\n3542062263667\ndertien\n580422607X\n2213764738531\ndertien\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"expected": "['False', 'False', 'True', 'True', 'True', 'True']", "channel": "return", "command": "start-test"}
-{"generated": "['False', 'False', 'False', 'True', 'False', 'True']", "status": {"enum": "wrong"}, "command": "close-test"}
+{"expected": "[False, False, True, True, True, True]", "channel": "return", "command": "start-test"}
+{"generated": "[False, False, False, True, False, True]", "status": {"enum": "wrong"}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
 {"command": "start-context"}
@@ -448,8 +459,8 @@
 {"description": {"description": "are_isbn(codes15, False)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "stdout", "command": "start-test"}
 {"generated": "2081558440\n1030437058601\n1122094469957\n6667504198\n6174700024014\n1224903387706\n9878900579\n2537592672417\n8815444276759\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"expected": "['True', 'False', 'False', 'True', 'False', 'False', 'False', 'False', 'False']", "channel": "return", "command": "start-test"}
-{"generated": "['False', 'True', 'False', 'False', 'False', 'False', 'False', 'True', 'True']", "status": {"enum": "wrong"}, "command": "close-test"}
+{"expected": "[True, False, False, True, False, False, False, False, False]", "channel": "return", "command": "start-test"}
+{"generated": "[False, True, False, False, False, False, False, True, True]", "status": {"enum": "wrong"}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
 {"command": "start-context"}
@@ -458,8 +469,8 @@
 {"description": {"description": "are_isbn(codes16, False)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "stdout", "command": "start-test"}
 {"generated": "4974061275829\n1459056208738\n6337028058\n7123627519700\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"expected": "['False', 'False', 'True', 'False']", "channel": "return", "command": "start-test"}
-{"generated": "['True', 'True', 'False', 'True']", "status": {"enum": "wrong"}, "command": "close-test"}
+{"expected": "[False, False, True, False]", "channel": "return", "command": "start-test"}
+{"generated": "[True, True, False, True]", "status": {"enum": "wrong"}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
 {"command": "start-context"}
@@ -468,8 +479,8 @@
 {"description": {"description": "are_isbn(codes17, False)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "stdout", "command": "start-test"}
 {"generated": "0610687903\n8354525805032\n5360110936\n2826800064\n9429322303\n967274532X\n8426082018\n3901434623\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"expected": "['False', 'False', 'False', 'False', 'True', 'True', 'False', 'True']", "channel": "return", "command": "start-test"}
-{"generated": "['False', 'True', 'False', 'False', 'False', 'False', 'False', 'False']", "status": {"enum": "wrong"}, "command": "close-test"}
+{"expected": "[False, False, False, False, True, True, False, True]", "channel": "return", "command": "start-test"}
+{"generated": "[False, True, False, False, False, False, False, False]", "status": {"enum": "wrong"}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
 {"command": "start-context"}
@@ -478,8 +489,8 @@
 {"description": {"description": "are_isbn(codes18)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "stdout", "command": "start-test"}
 {"generated": "8121556342436\ndertien\n2949047536\n7903452540403\ndertien\n5741953779\n1494026821\n2899475366166\ndertien\n1747043742091\ndertien\n5028098466623\ndertien\n3686382450762\ndertien\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"expected": "['True', 'False', 'True', 'False', 'True', 'True', 'False', 'False', 'True']", "channel": "return", "command": "start-test"}
-{"generated": "['True', 'False', 'True', 'False', 'False', 'True', 'False', 'False', 'True']", "status": {"enum": "wrong"}, "command": "close-test"}
+{"expected": "[True, False, True, False, True, True, False, False, True]", "channel": "return", "command": "start-test"}
+{"generated": "[True, False, True, False, False, True, False, False, True]", "status": {"enum": "wrong"}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
 {"command": "start-context"}
@@ -488,8 +499,8 @@
 {"description": {"description": "are_isbn(codes19, True)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "stdout", "command": "start-test"}
 {"generated": "5575543975\ndertien\n3641555306\ndertien\n8375173091585\ndertien\n5886421133382\ndertien\n2183887442533\ndertien\n8867721692613\ndertien\n7668842458236\ndertien\n1653242932\ndertien\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"expected": "['False', 'False', 'True', 'True', 'True', 'False', 'False', 'False']", "channel": "return", "command": "start-test"}
-{"generated": "['False', 'False', 'True', 'True', 'True', 'False', 'False', 'False']", "status": {"enum": "correct"}, "command": "close-test"}
+{"expected": "[False, False, True, True, True, False, False, False]", "channel": "return", "command": "start-test"}
+{"generated": "[False, False, True, True, True, False, False, False]", "status": {"enum": "correct"}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
 {"command": "start-context"}
@@ -498,8 +509,8 @@
 {"description": {"description": "are_isbn(codes20, False)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "stdout", "command": "start-test"}
 {"generated": "7273249724\n5620505887927\n1971402869\n730605827X\n2873445815\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"expected": "['False', 'False', 'True', 'False', 'True']", "channel": "return", "command": "start-test"}
-{"generated": "['False', 'True', 'False', 'False', 'False']", "status": {"enum": "wrong"}, "command": "close-test"}
+{"expected": "[False, False, True, False, True]", "channel": "return", "command": "start-test"}
+{"generated": "[False, True, False, False, False]", "status": {"enum": "wrong"}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
 {"command": "start-context"}
@@ -508,8 +519,8 @@
 {"description": {"description": "are_isbn(codes21, True)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "stdout", "command": "start-test"}
 {"generated": "7301702477\ndertien\n211519935X\ndertien\n5417589574061\ndertien\n8495542031\ndertien\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"expected": "['False', 'False', 'True', 'False']", "channel": "return", "command": "start-test"}
-{"generated": "['False', 'False', 'True', 'False']", "status": {"enum": "correct"}, "command": "close-test"}
+{"expected": "[False, False, True, False]", "channel": "return", "command": "start-test"}
+{"generated": "[False, False, True, False]", "status": {"enum": "correct"}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
 {"command": "start-context"}
@@ -518,8 +529,8 @@
 {"description": {"description": "are_isbn(codes22, True)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "stdout", "command": "start-test"}
 {"generated": "4659347735388\ndertien\n1413792219\ndertien\n8468856757004\ndertien\n0931208662780\ndertien\n4847513622\ndertien\n9149700449621\ndertien\n5942374732\ndertien\n3483367828406\ndertien\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"expected": "['True', 'False', 'True', 'False', 'False', 'False', 'False', 'True']", "channel": "return", "command": "start-test"}
-{"generated": "['True', 'False', 'True', 'False', 'False', 'False', 'False', 'True']", "status": {"enum": "correct"}, "command": "close-test"}
+{"expected": "[True, False, True, False, False, False, False, True]", "channel": "return", "command": "start-test"}
+{"generated": "[True, False, True, False, False, False, False, True]", "status": {"enum": "correct"}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
 {"command": "start-context"}
@@ -528,8 +539,8 @@
 {"description": {"description": "are_isbn(codes23, True)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "stdout", "command": "start-test"}
 {"generated": "2682001120198\ndertien\n5572180911\ndertien\n0741514434825\ndertien\n8946932157630\ndertien\n6582169904503\ndertien\n9852696629\ndertien\n2674217219\ndertien\n2928532507928\ndertien\n0577326881\ndertien\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"expected": "['False', 'False', 'False', 'False', 'True', 'False', 'False', 'True', 'False']", "channel": "return", "command": "start-test"}
-{"generated": "['False', 'False', 'False', 'False', 'True', 'False', 'False', 'True', 'False']", "status": {"enum": "correct"}, "command": "close-test"}
+{"expected": "[False, False, False, False, True, False, False, True, False]", "channel": "return", "command": "start-test"}
+{"generated": "[False, False, False, False, True, False, False, True, False]", "status": {"enum": "correct"}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
 {"command": "start-context"}
@@ -538,8 +549,8 @@
 {"description": {"description": "are_isbn(codes24, True)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "stdout", "command": "start-test"}
 {"generated": "6462056724\ndertien\n0805291458\ndertien\n3973660233\ndertien\n6650589912917\ndertien\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"expected": "['False', 'False', 'False', 'True']", "channel": "return", "command": "start-test"}
-{"generated": "['False', 'False', 'False', 'True']", "status": {"enum": "correct"}, "command": "close-test"}
+{"expected": "[False, False, False, True]", "channel": "return", "command": "start-test"}
+{"generated": "[False, False, False, True]", "status": {"enum": "correct"}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
 {"command": "start-context"}
@@ -548,8 +559,8 @@
 {"description": {"description": "are_isbn(codes25)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "stdout", "command": "start-test"}
 {"generated": "8103905080848\ndertien\n7831809482407\ndertien\n9898421635\n238490597X\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"expected": "['True', 'False', 'False', 'True']", "channel": "return", "command": "start-test"}
-{"generated": "['True', 'False', 'False', 'False']", "status": {"enum": "wrong"}, "command": "close-test"}
+{"expected": "[True, False, False, True]", "channel": "return", "command": "start-test"}
+{"generated": "[True, False, False, False]", "status": {"enum": "wrong"}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
 {"command": "start-context"}
@@ -558,8 +569,8 @@
 {"description": {"description": "are_isbn(codes26)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "stdout", "command": "start-test"}
 {"generated": "6380821767\n0783072422\n0070436053918\ndertien\n4589420309\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"expected": "['True', 'True', 'True', 'True']", "channel": "return", "command": "start-test"}
-{"generated": "['False', 'False', 'True', 'False']", "status": {"enum": "wrong"}, "command": "close-test"}
+{"expected": "[True, True, True, True]", "channel": "return", "command": "start-test"}
+{"generated": "[False, False, True, False]", "status": {"enum": "wrong"}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
 {"command": "start-context"}
@@ -568,8 +579,8 @@
 {"description": {"description": "are_isbn(codes27, False)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "stdout", "command": "start-test"}
 {"generated": "3402568259\n8759242422682\n0839391591075\n9145963932\n9389740650\n1015343160433\n5782134372\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"expected": "['False', 'False', 'False', 'True', 'False', 'False', 'True']", "channel": "return", "command": "start-test"}
-{"generated": "['False', 'False', 'False', 'False', 'False', 'True', 'False']", "status": {"enum": "wrong"}, "command": "close-test"}
+{"expected": "[False, False, False, True, False, False, True]", "channel": "return", "command": "start-test"}
+{"generated": "[False, False, False, False, False, True, False]", "status": {"enum": "wrong"}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
 {"command": "start-context"}
@@ -578,8 +589,8 @@
 {"description": {"description": "are_isbn(codes28, False)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "stdout", "command": "start-test"}
 {"generated": "7907133432469\n0479990623184\n6764212509\n0618213765\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"expected": "['False', 'False', 'False', 'False']", "channel": "return", "command": "start-test"}
-{"generated": "['True', 'True', 'False', 'False']", "status": {"enum": "wrong"}, "command": "close-test"}
+{"expected": "[False, False, False, False]", "channel": "return", "command": "start-test"}
+{"generated": "[True, True, False, False]", "status": {"enum": "wrong"}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
 {"command": "start-context"}
@@ -588,8 +599,8 @@
 {"description": {"description": "are_isbn(codes29, False)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "stdout", "command": "start-test"}
 {"generated": "7377823118\n3411684615\n0883015636179\n0763544229322\n0924287999720\n1179112855\n4295881880\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"expected": "['False', 'True', 'False', 'False', 'False', 'False', 'True']", "channel": "return", "command": "start-test"}
-{"generated": "['False', 'False', 'False', 'False', 'True', 'False', 'False']", "status": {"enum": "wrong"}, "command": "close-test"}
+{"expected": "[False, True, False, False, False, False, True]", "channel": "return", "command": "start-test"}
+{"generated": "[False, False, False, False, True, False, False]", "status": {"enum": "wrong"}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
 {"command": "start-context"}
@@ -598,8 +609,8 @@
 {"description": {"description": "are_isbn(codes30, False)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "stdout", "command": "start-test"}
 {"generated": "633253272X\n3393937569\n0932280246291\n2812750081\n4096963594010\n5314666647\n1765780667\n8429702477191\n3467745128\n7194621751625\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"expected": "['False', 'False', 'False', 'True', 'False', 'False', 'True', 'False', 'False', 'False']", "channel": "return", "command": "start-test"}
-{"generated": "['False', 'False', 'True', 'False', 'True', 'False', 'False', 'False', 'False', 'True']", "status": {"enum": "wrong"}, "command": "close-test"}
+{"expected": "[False, False, False, True, False, False, True, False, False, False]", "channel": "return", "command": "start-test"}
+{"generated": "[False, False, True, False, True, False, False, False, False, True]", "status": {"enum": "wrong"}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
 {"command": "start-context"}
@@ -608,8 +619,8 @@
 {"description": {"description": "are_isbn(codes31, False)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "stdout", "command": "start-test"}
 {"generated": "5711700528\n990402765X\n0479210570830\n957588314X\n2034055782275\n4764131707821\n0815994540\n1155061072\n6021605726\n733187456X\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"expected": "['False', 'True', 'False', 'False', 'False', 'False', 'True', 'False', 'False', 'True']", "channel": "return", "command": "start-test"}
-{"generated": "['False', 'False', 'True', 'False', 'True', 'False', 'False', 'False', 'False', 'False']", "status": {"enum": "wrong"}, "command": "close-test"}
+{"expected": "[False, True, False, False, False, False, True, False, False, True]", "channel": "return", "command": "start-test"}
+{"generated": "[False, False, True, False, True, False, False, False, False, False]", "status": {"enum": "wrong"}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
 {"command": "start-context"}
@@ -618,8 +629,8 @@
 {"description": {"description": "are_isbn(codes32, False)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "stdout", "command": "start-test"}
 {"generated": "3001553386467\n3764045923\n2689602850798\n5249147481050\n1868862453\n6507744788699\n6514799461\n2699022675\n0015058261347\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"expected": "['False', 'False', 'False', 'False', 'True', 'False', 'False', 'True', 'False']", "channel": "return", "command": "start-test"}
-{"generated": "['False', 'False', 'False', 'True', 'False', 'True', 'False', 'False', 'False']", "status": {"enum": "wrong"}, "command": "close-test"}
+{"expected": "[False, False, False, False, True, False, False, True, False]", "channel": "return", "command": "start-test"}
+{"generated": "[False, False, False, True, False, True, False, False, False]", "status": {"enum": "wrong"}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
 {"command": "start-context"}
@@ -628,8 +639,8 @@
 {"description": {"description": "are_isbn(codes33, False)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "stdout", "command": "start-test"}
 {"generated": "5315918370\n0640843611\n5436230199\n4115570883\n9848712778761\n7929279298944\n3884088076\n838911574X\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"expected": "['False', 'True', 'True', 'False', 'False', 'False', 'True', 'False']", "channel": "return", "command": "start-test"}
-{"generated": "['False', 'False', 'False', 'False', 'False', 'False', 'False', 'False']", "status": {"enum": "wrong"}, "command": "close-test"}
+{"expected": "[False, True, True, False, False, False, True, False]", "channel": "return", "command": "start-test"}
+{"generated": "[False, False, False, False, False, False, False, False]", "status": {"enum": "wrong"}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
 {"command": "start-context"}
@@ -638,8 +649,8 @@
 {"description": {"description": "are_isbn(codes34, False)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "stdout", "command": "start-test"}
 {"generated": "5861070328844\n7552877391\n0815050204277\n0998370956556\n9464255266360\n1118598458239\n5517495969033\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"expected": "['False', 'True', 'False', 'False', 'False', 'False', 'False']", "channel": "return", "command": "start-test"}
-{"generated": "['False', 'False', 'False', 'True', 'False', 'True', 'True']", "status": {"enum": "wrong"}, "command": "close-test"}
+{"expected": "[False, True, False, False, False, False, False]", "channel": "return", "command": "start-test"}
+{"generated": "[False, False, False, True, False, True, True]", "status": {"enum": "wrong"}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
 {"command": "start-context"}
@@ -648,8 +659,8 @@
 {"description": {"description": "are_isbn(codes35)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "stdout", "command": "start-test"}
 {"generated": "7853970800889\ndertien\n5721073957\n7720252988\n208158960X\n0481053162042\ndertien\n3904161836\n0908787710252\ndertien\n4297544589\n0346719466\n7068650775\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"expected": "['True', 'False', 'False', 'False', 'True', 'False', 'True', 'False', 'False', 'True']", "channel": "return", "command": "start-test"}
-{"generated": "['True', 'False', 'False', 'False', 'True', 'False', 'True', 'False', 'False', 'False']", "status": {"enum": "wrong"}, "command": "close-test"}
+{"expected": "[True, False, False, False, True, False, True, False, False, True]", "channel": "return", "command": "start-test"}
+{"generated": "[True, False, False, False, True, False, True, False, False, False]", "status": {"enum": "wrong"}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
 {"command": "start-context"}
@@ -658,8 +669,8 @@
 {"description": {"description": "are_isbn(codes36)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "stdout", "command": "start-test"}
 {"generated": "7969245835026\ndertien\n7473778412\n5906149128\n1995892451972\ndertien\n6365545795195\ndertien\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"expected": "['True', 'True', 'False', 'False', 'False']", "channel": "return", "command": "start-test"}
-{"generated": "['True', 'False', 'False', 'False', 'False']", "status": {"enum": "wrong"}, "command": "close-test"}
+{"expected": "[True, True, False, False, False]", "channel": "return", "command": "start-test"}
+{"generated": "[True, False, False, False, False]", "status": {"enum": "wrong"}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
 {"command": "start-context"}
@@ -668,8 +679,8 @@
 {"description": {"description": "are_isbn(codes37, True)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "stdout", "command": "start-test"}
 {"generated": "6367430325\ndertien\n5654288408048\ndertien\n2886463959324\ndertien\n8563482019\ndertien\n2464247561\ndertien\n4266063109354\ndertien\n4932722869\ndertien\n7451075594\ndertien\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"expected": "['False', 'True', 'False', 'False', 'False', 'False', 'False', 'False']", "channel": "return", "command": "start-test"}
-{"generated": "['False', 'True', 'False', 'False', 'False', 'False', 'False', 'False']", "status": {"enum": "correct"}, "command": "close-test"}
+{"expected": "[False, True, False, False, False, False, False, False]", "channel": "return", "command": "start-test"}
+{"generated": "[False, True, False, False, False, False, False, False]", "status": {"enum": "correct"}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
 {"command": "start-context"}
@@ -678,8 +689,8 @@
 {"description": {"description": "are_isbn(codes38, False)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "stdout", "command": "start-test"}
 {"generated": "2315563585\n6921325280569\n9997209183\n3307805169\n8669618964\n6577814019533\n5745006743\n2072695456363\n5419518040945\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"expected": "['True', 'False', 'False', 'True', 'False', 'False', 'False', 'False', 'False']", "channel": "return", "command": "start-test"}
-{"generated": "['False', 'False', 'False', 'False', 'False', 'False', 'False', 'False', 'False']", "status": {"enum": "wrong"}, "command": "close-test"}
+{"expected": "[True, False, False, True, False, False, False, False, False]", "channel": "return", "command": "start-test"}
+{"generated": "[False, False, False, False, False, False, False, False, False]", "status": {"enum": "wrong"}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
 {"command": "start-context"}
@@ -688,8 +699,8 @@
 {"description": {"description": "are_isbn(codes39, True)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "stdout", "command": "start-test"}
 {"generated": "9619160533\ndertien\n7227430530\ndertien\n6182918381475\ndertien\n653436638X\ndertien\n1511545464369\ndertien\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"expected": "['False', 'False', 'False', 'False', 'False']", "channel": "return", "command": "start-test"}
-{"generated": "['False', 'False', 'False', 'False', 'False']", "status": {"enum": "correct"}, "command": "close-test"}
+{"expected": "[False, False, False, False, False]", "channel": "return", "command": "start-test"}
+{"generated": "[False, False, False, False, False]", "status": {"enum": "correct"}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
 {"command": "start-context"}
@@ -698,8 +709,8 @@
 {"description": {"description": "are_isbn(codes40, True)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "stdout", "command": "start-test"}
 {"generated": "9334532599\ndertien\n3875831130496\ndertien\n4053548165654\ndertien\n9790775873\ndertien\n8787603810\ndertien\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"expected": "['False', 'True', 'False', 'False', 'False']", "channel": "return", "command": "start-test"}
-{"generated": "['False', 'True', 'False', 'False', 'False']", "status": {"enum": "correct"}, "command": "close-test"}
+{"expected": "[False, True, False, False, False]", "channel": "return", "command": "start-test"}
+{"generated": "[False, True, False, False, False]", "status": {"enum": "correct"}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
 {"command": "start-context"}
@@ -708,8 +719,8 @@
 {"description": {"description": "are_isbn(codes41)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "stdout", "command": "start-test"}
 {"generated": "5680293010\n1188631223\n8964578120\n7830604657\n4503211250\n2953816255202\ndertien\n1570352348\n8289904964389\ndertien\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"expected": "['False', 'False', 'True', 'True', 'True', 'True', 'True', 'False']", "channel": "return", "command": "start-test"}
-{"generated": "['False', 'False', 'False', 'False', 'False', 'True', 'False', 'False']", "status": {"enum": "wrong"}, "command": "close-test"}
+{"expected": "[False, False, True, True, True, True, True, False]", "channel": "return", "command": "start-test"}
+{"generated": "[False, False, False, False, False, True, False, False]", "status": {"enum": "wrong"}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
 {"command": "start-context"}
@@ -718,8 +729,8 @@
 {"description": {"description": "are_isbn(codes42)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "stdout", "command": "start-test"}
 {"generated": "8024958740\n7670628081\n7009795726808\ndertien\n2903817898\n8679788554\n5234568539\n9672899402027\ndertien\n2039252575514\ndertien\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"expected": "['True', 'True', 'True', 'True', 'True', 'True', 'False', 'True']", "channel": "return", "command": "start-test"}
-{"generated": "['False', 'False', 'True', 'False', 'False', 'False', 'False', 'True']", "status": {"enum": "wrong"}, "command": "close-test"}
+{"expected": "[True, True, True, True, True, True, False, True]", "channel": "return", "command": "start-test"}
+{"generated": "[False, False, True, False, False, False, False, True]", "status": {"enum": "wrong"}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
 {"command": "start-context"}
@@ -728,8 +739,8 @@
 {"description": {"description": "are_isbn(codes43, False)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "stdout", "command": "start-test"}
 {"generated": "3261701303271\n0202767708803\n5579058543\n5862712370\n5447515153\n1469996690153\n9650034560764\n4332120781481\n2067778214634\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"expected": "['False', 'False', 'True', 'False', 'False', 'False', 'False', 'False', 'False']", "channel": "return", "command": "start-test"}
-{"generated": "['False', 'True', 'False', 'False', 'False', 'False', 'False', 'True', 'False']", "status": {"enum": "wrong"}, "command": "close-test"}
+{"expected": "[False, False, True, False, False, False, False, False, False]", "channel": "return", "command": "start-test"}
+{"generated": "[False, True, False, False, False, False, False, True, False]", "status": {"enum": "wrong"}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
 {"command": "start-context"}
@@ -738,8 +749,8 @@
 {"description": {"description": "are_isbn(codes44, True)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "stdout", "command": "start-test"}
 {"generated": "5303155838\ndertien\n9424895074488\ndertien\n3520235152799\ndertien\n4728557609\ndertien\n3814830261383\ndertien\n4649769701\ndertien\n9213509728\ndertien\n3861762641\ndertien\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"expected": "['False', 'True', 'False', 'False', 'False', 'False', 'False', 'False']", "channel": "return", "command": "start-test"}
-{"generated": "['False', 'True', 'False', 'False', 'False', 'False', 'False', 'False']", "status": {"enum": "correct"}, "command": "close-test"}
+{"expected": "[False, True, False, False, False, False, False, False]", "channel": "return", "command": "start-test"}
+{"generated": "[False, True, False, False, False, False, False, False]", "status": {"enum": "correct"}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
 {"command": "start-context"}
@@ -748,8 +759,8 @@
 {"description": {"description": "are_isbn(codes45)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "stdout", "command": "start-test"}
 {"generated": "7800060817\n2889797849\n5031372659762\ndertien\n3278586406\n2866344058\n5369684777758\ndertien\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"expected": "['False', 'False', 'False', 'False', 'False', 'True']", "channel": "return", "command": "start-test"}
-{"generated": "['False', 'False', 'False', 'False', 'False', 'True']", "status": {"enum": "correct"}, "command": "close-test"}
+{"expected": "[False, False, False, False, False, True]", "channel": "return", "command": "start-test"}
+{"generated": "[False, False, False, False, False, True]", "status": {"enum": "correct"}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
 {"command": "start-context"}
@@ -758,8 +769,8 @@
 {"description": {"description": "are_isbn(codes46, True)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "stdout", "command": "start-test"}
 {"generated": "6182269371429\ndertien\n3745134823415\ndertien\n9964141998\ndertien\n2725739904266\ndertien\n0246888776501\ndertien\n7507377113\ndertien\n6106935653\ndertien\n4183775275051\ndertien\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"expected": "['True', 'False', 'False', 'True', 'True', 'False', 'False', 'False']", "channel": "return", "command": "start-test"}
-{"generated": "['True', 'False', 'False', 'True', 'True', 'False', 'False', 'False']", "status": {"enum": "correct"}, "command": "close-test"}
+{"expected": "[True, False, False, True, True, False, False, False]", "channel": "return", "command": "start-test"}
+{"generated": "[True, False, False, True, True, False, False, False]", "status": {"enum": "correct"}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
 {"command": "start-context"}
@@ -768,8 +779,8 @@
 {"description": {"description": "are_isbn(codes47, False)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "stdout", "command": "start-test"}
 {"generated": "7045704127\n248622100X\n5445056292\n9130123745188\n6134661213581\n9355850521085\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"expected": "['True', 'True', 'False', 'False', 'False', 'False']", "channel": "return", "command": "start-test"}
-{"generated": "['False', 'False', 'False', 'False', 'False', 'True']", "status": {"enum": "wrong"}, "command": "close-test"}
+{"expected": "[True, True, False, False, False, False]", "channel": "return", "command": "start-test"}
+{"generated": "[False, False, False, False, False, True]", "status": {"enum": "wrong"}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
 {"command": "start-context"}
@@ -778,8 +789,8 @@
 {"description": {"description": "are_isbn(codes48)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "stdout", "command": "start-test"}
 {"generated": "4522958265769\ndertien\n0068912072591\ndertien\n7180158333\n8054200080937\ndertien\n3520588341762\ndertien\n2305830527\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"expected": "['True', 'True', 'False', 'True', 'True', 'False']", "channel": "return", "command": "start-test"}
-{"generated": "['True', 'True', 'False', 'True', 'True', 'False']", "status": {"enum": "correct"}, "command": "close-test"}
+{"expected": "[True, True, False, True, True, False]", "channel": "return", "command": "start-test"}
+{"generated": "[True, True, False, True, True, False]", "status": {"enum": "correct"}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
 {"command": "start-context"}
@@ -788,8 +799,8 @@
 {"description": {"description": "are_isbn(codes49)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "stdout", "command": "start-test"}
 {"generated": "5457870618395\ndertien\n289411334X\n5877904232494\ndertien\n0952807920633\ndertien\n179869221X\n2437719326\n0059766800485\ndertien\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"expected": "['True', 'True', 'True', 'True', 'True', 'True', 'True']", "channel": "return", "command": "start-test"}
-{"generated": "['True', 'False', 'True', 'True', 'False', 'False', 'True']", "status": {"enum": "wrong"}, "command": "close-test"}
+{"expected": "[True, True, True, True, True, True, True]", "channel": "return", "command": "start-test"}
+{"generated": "[True, False, True, True, False, False, True]", "status": {"enum": "wrong"}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
 {"command": "start-context"}
@@ -798,8 +809,8 @@
 {"description": {"description": "are_isbn(codes50, True)", "format": "python"}, "command": "start-testcase"}
 {"expected": "", "channel": "stdout", "command": "start-test"}
 {"generated": "0138479241952\ndertien\n8193812798714\ndertien\n0431810779594\ndertien\n8479912316\ndertien\n6093281703\ndertien\n9462745870\ndertien\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"expected": "['False', 'True', 'True', 'False', 'False', 'False']", "channel": "return", "command": "start-test"}
-{"generated": "['False', 'True', 'True', 'False', 'False', 'False']", "status": {"enum": "correct"}, "command": "close-test"}
+{"expected": "[False, True, True, False, False, False]", "channel": "return", "command": "start-test"}
+{"generated": "[False, True, True, False, False, False]", "status": {"enum": "correct"}, "command": "close-test"}
 {"command": "close-testcase"}
 {"command": "close-context"}
 {"command": "close-tab"}
