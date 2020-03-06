@@ -49,8 +49,8 @@ def e_evaluate_main(value):
     ])
 % endif
 
-## Run the "before" code for the main testcase if needed.
-% if main_testcase.exists and before:
+## Run the "before" code.
+% if before:
     ${before}
 % endif
 
