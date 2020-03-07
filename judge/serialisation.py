@@ -19,7 +19,7 @@ import json
 import math
 from dataclasses import field
 from enum import Enum
-from typing import Union, List, Dict, Literal, Optional
+from typing import Union, List, Dict, Literal, Optional, Any
 
 from pydantic import BaseModel
 from pydantic.dataclasses import dataclass
@@ -171,40 +171,47 @@ def parse(value: str) -> Value:
         except (TypeError, ValueError) as e:
             errors.append(e)
 
-    raise SerialisationError(f"Could not find valid type for {value}.", additional_errors=errors)
+    raise SerialisationError(
+        f"Could not find valid type for {value}.",
+        additional_errors=errors
+    )
 
 
-def get_readable_representation(value: Value, primitives=False):
-    """
-    Get a readable representation of the data. In many cases, this is just the Python type
-    that will be returned as a string.
-    """
+def _convert_to_python(value: Optional[Value]) -> Any:
     if value is None:
-        return ""
-    # Return primitives as primitive.
-    # This is done to prevent quotes in lists and other collections.
+        return None
+
     if value.type in (
             BooleanTypes.BOOLEAN,
             NumericTypes.INTEGER,
             NumericTypes.RATIONAL,
             StringTypes.TEXT
-    ) and primitives:
+    ):
         return value.data
+
     if isinstance(value, SequenceType):
-        values = [get_readable_representation(x, True) for x in value.data]
+        values = [_convert_to_python(x) for x in value.data]
         if value.type == SequenceTypes.LIST:
-            return str(values)
+            return values
         elif value.type == SequenceTypes.SET:
-            return str(set(values))
+            return set(values)
         else:
             raise AssertionError("Forgot a type?")
     elif isinstance(value, ObjectType):
-        values = {x: get_readable_representation(y, True) for x, y in value.data.items()}
-        return str(values)
+        values = {x: _convert_to_python(y) for x, y in value.data.items()}
+        return values
     elif isinstance(value, NothingType):
-        return ""
+        return None
     else:
         return str(value.data)
+
+
+def get_readable_representation(value: Value):
+    """
+    Get a readable representation of the data. In many cases, this is just the Python type
+    that will be returned as a string.
+    """
+    return repr(_convert_to_python(value))
 
 
 class ComparableFloat:
