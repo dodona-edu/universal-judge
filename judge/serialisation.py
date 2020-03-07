@@ -258,7 +258,8 @@ def to_python_comparable(value: Optional[Value]):
         return ComparableFloat(float(value.data))
     if value.type == NumericTypes.INTEGER:
         return int(value.data)
-    if value.type in (BooleanTypes.BOOLEAN, StringTypes.TEXT, NothingTypes.NOTHING):
+    if value.type in (BooleanTypes.BOOLEAN, StringTypes.TEXT, NothingTypes.NOTHING,
+                      StringTypes.UNKNOWN):
         return value.data
 
     raise AssertionError(f"Unknown value type: {value}")
