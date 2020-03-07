@@ -334,10 +334,21 @@ class NoneEvaluator(Evaluator):
             actual = actual.message + '\n' + actual.stacktrace
         except (TypeError, ValueError):
             pass
+        if is_none:
+            human = None
+        else:
+            human = "Te veel uitvoer."
+        messages = []
+        if not is_none:
+            messages.append("Er werd geen uitvoer verwacht, maar die was er toch.")
         return EvaluationResult(
-            result=StatusMessage(enum=Status.CORRECT if is_none else Status.WRONG),
+            result=StatusMessage(
+                human=human,
+                enum=Status.CORRECT if is_none else Status.WRONG
+            ),
             readable_expected="",
-            readable_actual="" if is_none else str(actual)
+            readable_actual="" if is_none else str(actual),
+            messages=messages
         )
 
 
