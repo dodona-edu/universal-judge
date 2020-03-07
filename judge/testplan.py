@@ -364,7 +364,7 @@ def _get_evaluator(output: Union[OutputChannel, AnyChannelState])\
 class Output(WithFeatures):
     """The output channels for a testcase."""
 
-    stdout: TextOutput = IgnoredChannelState.IGNORED
+    stdout: TextOutput = NoneChannelState.NONE
     stderr: TextOutput = NoneChannelState.NONE
     file: Union[FileOutputChannel, IgnoredChannelState]\
         = IgnoredChannelState.IGNORED
