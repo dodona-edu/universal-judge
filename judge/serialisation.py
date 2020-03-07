@@ -199,7 +199,7 @@ def get_readable_representation(value: Value, primitives=False):
         else:
             raise AssertionError("Forgot a type?")
     elif isinstance(value, ObjectType):
-        values = {x: get_readable_representation(y, True) for x, y in value.data}
+        values = {x: get_readable_representation(y, True) for x, y in value.data.items()}
         return str(values)
     elif isinstance(value, NothingType):
         return ""
