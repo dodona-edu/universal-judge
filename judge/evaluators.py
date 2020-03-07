@@ -272,27 +272,53 @@ class ValueEvaluator(Evaluator):
         else:
             expected, readable_expected, actual, readable_actual = result
 
-        # If one of the types is None, but not both, this is not correct.
-        if (expected is None and actual is not None) \
-                or (expected is not None and actual is None):
+        # If the expected value is None, and the actual value not, error.
+        if expected is None and actual is not None:
             return EvaluationResult(
                 result=StatusMessage(
                     enum=Status.WRONG,
-                    human="Geen returnwaarde."
+                    human="Verwachtte geen returnwaarde, maar er was er toch een."
                 ),
                 readable_expected=readable_expected,
                 readable_actual=readable_actual
             )
 
+        # If the expected value is not None, but actual is, error.
+        if expected is not None and actual is None:
+            return EvaluationResult(
+                result=StatusMessage(
+                    enum=Status.WRONG,
+                    human="Verwachtte een returnwaarde, maar er was er geen."
+                ),
+                readable_expected=readable_expected,
+                readable_actual=readable_actual
+            )
+
+        messages = []
+        type_check = True
+        type_message = None
+        # noinspection PyUnresolvedReferences
+        if (expected is not None and actual is not None) and (expected.type != actual.type):
+            type_message = "Returnwaarde heeft verkeerd type."
+            type_check = False
+            messages.append(
+                f"Verwachtte waarde van type {expected.type}, "
+                f"maar was type {actual.type}."
+            )
+
         expected = serialisation.to_python_comparable(expected)
         actual = serialisation.to_python_comparable(actual)
 
-        correct = expected == actual
+        correct = type_check and expected == actual
 
         return EvaluationResult(
-            result=StatusMessage(enum=Status.CORRECT if correct else Status.WRONG),
+            result=StatusMessage(
+                human=type_message,
+                enum=Status.CORRECT if correct else Status.WRONG
+            ),
             readable_expected=readable_expected,
-            readable_actual=readable_actual
+            readable_actual=readable_actual,
+            messages=messages
         )
 
 
