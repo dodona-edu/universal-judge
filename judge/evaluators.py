@@ -21,7 +21,7 @@ from testplan import TestPlanError, TextOutputChannel, FileOutputChannel, \
     ValueOutputChannel, NoneChannelState, IgnoredChannelState, OutputChannel, \
     AnyChannelState, TextBuiltinEvaluator, ValueBuiltinEvaluator, \
     ExceptionBuiltinEvaluator, ExceptionOutputChannel, TextBuiltin, ValueBuiltin, \
-    ExceptionBuiltin
+    ExceptionBuiltin, ExitCodeOutputChannel
 from testplan import CustomEvaluator as TestplanCustomEvaluator
 from testplan import SpecificEvaluator as TestplanSpecificEvaluator
 
@@ -576,6 +576,24 @@ class CustomEvaluator(Evaluator):
         )
 
 
+class ExitCodeEvaluator(Evaluator):
+    def evaluate(self,
+                 output_channel: ExitCodeOutputChannel,
+                 actual: int) -> EvaluationResult:
+        if output_channel.value != actual:
+            status = StatusMessage(
+                enum=Status.WRONG,
+                human="Verkeerde exitcode."
+            )
+        else:
+            status = StatusMessage(enum=Status.CORRECT)
+        return EvaluationResult(
+            result=status,
+            readable_expected=str(output_channel.value),
+            readable_actual=str(actual)
+        )
+
+
 def get_evaluator(judge_instance: 'judge.GeneratorJudge',
                   output: Union[OutputChannel, AnyChannelState]) -> Evaluator:
     """
@@ -587,6 +605,8 @@ def get_evaluator(judge_instance: 'judge.GeneratorJudge',
         return NoneEvaluator(config)
     if output == IgnoredChannelState.IGNORED:
         return IgnoredEvaluator(config)
+    if isinstance(output, ExitCodeOutputChannel):
+        return ExitCodeEvaluator(config)
 
     # Handle actual evaluators.
     evaluator = output.evaluator

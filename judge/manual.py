@@ -12,9 +12,6 @@ from pathlib import Path
 
 from tested import Config, run
 
-STUDENT = "01"
-EXERCISE = "3326958"
-
 
 def read_config() -> Config:
     """Read the configuration from stdout"""
@@ -24,7 +21,7 @@ def read_config() -> Config:
         "programming_language": 'python',
         "natural_language": 'nl',
         "resources": str(Path('../exercise/isbn/evaluation').resolve()),
-        "source": f'tests/isbn/students/student{STUDENT}/{EXERCISE}.py',
+        "source": f'../exercise/isbn/solution/solution.py',
         "judge": str(Path('../').resolve()),
         "workdir": str(Path('./workdir').resolve()),
         "plan_name": "plan.json",

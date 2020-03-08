@@ -318,6 +318,15 @@ class ExceptionOutputChannel:
         = ExceptionBuiltinEvaluator()
 
 
+@dataclass
+class ExitCodeOutputChannel:
+    """
+    Handles exit codes.
+    TODO: add to thesis text
+    """
+    value: int = 0
+
+
 class NoneChannelState(str, Enum):
     NONE = "none"  # There is nothing on this channel, i.e. completely empty.
 
@@ -329,7 +338,10 @@ class IgnoredChannelState(str, Enum):
 
 AnyChannelState = Union[NoneChannelState, IgnoredChannelState]
 
-OutputChannel = Union[TextOutputChannel, FileOutputChannel, ValueOutputChannel]
+OutputChannel = Union[TextOutputChannel,
+                      FileOutputChannel,
+                      ValueOutputChannel,
+                      ExitCodeOutputChannel]
 
 TextOutput = Union[TextOutputChannel, AnyChannelState]
 
@@ -372,6 +384,7 @@ class Output(WithFeatures):
         = NoneChannelState.NONE
     result: Union[ValueOutputChannel, AnyChannelState]\
         = IgnoredChannelState.IGNORED
+    exit_code: ExitCodeOutputChannel = ExitCodeOutputChannel()
 
     def get_used_features(self) -> Features:
         start = Features.NOTHING

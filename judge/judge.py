@@ -86,7 +86,7 @@ def _evaluate_channel(
         out: IO,
         channel_name: str,
         expected_output: Union[OutputChannel, AnyChannelState],
-        actual_result: Optional[str],
+        actual_result: Union[str, int, None],
         evaluator: Evaluator) -> bool:
     """
     Evaluate the output on a given channel. This function will output the
@@ -115,7 +115,8 @@ def _evaluate_channel(
     has_no_result = actual_result is None or actual_result == ""
     has_no_expected = (expected_output == NoneChannelState.NONE
                        or expected_output == IgnoredChannelState.IGNORED)
-    if is_correct and has_no_result and has_no_expected:
+    is_exit_code = isinstance(expected_output, ExitCodeOutputChannel)
+    if is_correct and ((has_no_result and has_no_expected) or is_exit_code):
         return True
 
     report_update(out, StartTest(
@@ -343,7 +344,7 @@ class GeneratorJudge:
                 self.evaluate_results(
                     plan=plan,
                     context=context,
-                    results=execution_result,
+                    exec_results=execution_result,
                     compiler_results=(m, s)
                 )
                 report_update(self.out, CloseContext())
@@ -353,17 +354,17 @@ class GeneratorJudge:
     def evaluate_results(self,
                          plan: Plan,
                          context: Context,
-                         results: ExecutionResult,
+                         exec_results: ExecutionResult,
                          compiler_results: Tuple[List[Message], Status]):
         # Process output
-        stdout_ = results.stdout.split(results.separator) \
-            if results is not None else []
-        stderr_ = results.stderr.split(results.separator) \
-            if results is not None else []
-        values = results.results.split(results.separator) \
-            if results is not None else []
-        exceptions = results.exceptions.split(results.separator) \
-            if results is not None else []
+        stdout_ = exec_results.stdout.split(exec_results.separator) \
+            if exec_results is not None else []
+        stderr_ = exec_results.stderr.split(exec_results.separator) \
+            if exec_results is not None else []
+        values = exec_results.results.split(exec_results.separator) \
+            if exec_results is not None else []
+        exceptions = exec_results.exceptions.split(exec_results.separator) \
+            if exec_results is not None else []
 
         # There might be less output than testcase, which is an error. However,
         # we process the
@@ -385,7 +386,16 @@ class GeneratorJudge:
                 report_update(self.out, CloseTestcase(accepted=False))
                 break
             else:
-                assert results is not None
+                assert exec_results is not None
+
+            # Handle exit code
+            exit_evaluator = get_evaluator(self, testcase.output.exit_code)
+            exit_result = _evaluate_channel(
+                self.out, "exit code", testcase.output.exit_code, exec_results.exit,
+                exit_evaluator
+            )
+            results = [exit_result]
+            # We don't stop if the exit code, to show the other issues.
 
             # Get the evaluators
             try:
@@ -403,9 +413,9 @@ class GeneratorJudge:
                 break
 
             # Evaluate the file channel.
-            results = [_evaluate_channel(
+            results.append(_evaluate_channel(
                 self.out, "file", testcase.output.file, None, file_evaluator
-            )]
+            ))
 
             # Evaluate the stderr channel
             actual_stderr = stderr_[i] if i < len(stderr_) else None
