@@ -1,8 +1,10 @@
 \chapter{TESTed}\label{ch:de-universele-judge}
 
-\lettrine{H}{et antwoord} op de onderzoeksvraag uit het vorige hoofdstuk neemt de vorm aan van een nieuwe judge voor het Dodona-platform: de \term{universele judge}.
-Bij deze judge is de opgave programmeertaalonafhankelijk en kan de judge oplossingen in verschillende programmeertalen evalueren.
-Dit hoofdstuk licht de werking en implementatie van deze judge toe, beginnend met een algemeen overzicht, waarna elk onderdeel in meer detail besproken wordt.
+\lettrine{I}{n het kader} van deze masterproef werd een prototype geïmplementeerd van een judge voor Dodona.
+Het doel hiervan is een antwoord te bieden aan de onderzoeksvraag uit het vorige hoofdstuk en de beperkingen van deze aanpak in kaart te brengen.
+Deze judge heeft de naam \term{TESTed} gekregen.
+Bij TESTed is een oefening programmeertaalonafhankelijk en kunnen oplossingen in verschillende programmeertalen beoordeeld worden aan de hand van een en dezelfde specificatie.
+Dit hoofdstuk licht het ontwerp en werking van deze judge toe, beginnend met een algemeen overzicht, waarna elk onderdeel in meer detail besproken wordt.
 
 \section{Overzicht}\label{sec:overzicht}
 
@@ -14,7 +16,7 @@ Dit hoofdstuk licht de werking en implementatie van deze judge toe, beginnend me
     \label{fig:universal-judge}
 \end{figure}
 
-\Cref{fig:universal-judge} toont de opbouw van de judge op schematische wijze.
+\Cref{fig:universal-judge} toont het globale ontwerp van de interne werking van TESTed.
 De twee dikkere stippellijnen geven de programmeertaalbarrières aan, die de judge ook logisch onderverdelen in drie contexten of processen, die we kaders noemen (om verwarring te vermijden met een computerproces en contexten uit het testplan, waarover later meer).
 De judge zelf is geschreven in Python, wat ook betekent dat in het \term{kernkader} enkel Python gebruikt wordt.
 De oplossing wordt uitgevoerd in het \term{uitvoeringskader}, waar de programmeertaal de programmeertaal van de oplossing is.
