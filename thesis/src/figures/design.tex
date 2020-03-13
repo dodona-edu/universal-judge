@@ -1,0 +1,114 @@
+\documentclass[class=scrreprt,crop=false,12pt]{standalone}
+
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,positioning,backgrounds,calc,intersections,calc}
+\usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
+
+
+
+\begin{document}
+
+    \tikzstyle{node}=[draw, minimum height=1cm, align=center, fill=white, text height=1.5ex, text depth=.25ex]
+    \tikzstyle{process}=[node, rectangle]
+    \tikzstyle{terminator}=[node, rectangle, rounded corners=0.5cm]
+    \tikzstyle{document}=[node,tape,tape bend top=none]
+    \tikzstyle{io}=[node,trapezium,trapezium left angle=70,trapezium right angle=-70]
+    \tikzstyle{nothing}=[align=center]
+    \tikzstyle{inner}=[process,draw=gray]
+    \tikzstyle{arrow}=[draw, -latex]
+
+    \begin{tikzpicture}
+        %\draw[step=1.0,black,thin] (0,0) grid (15,-25);
+
+        \node[io] at (4,0) (exercise) {Oefening};
+        \node[io] at (12,0) (dodonaIn) {Dodona};
+
+        % These needs to be drawn first, otherwise they are on top of the
+        % input node.
+        \node[process,minimum width=3cm,text height=4ex, minimum height=1.5cm] at (2.5,-7.25) (g1) {Genereren/ \\ compileren};
+        \node[process,minimum width=3cm,text height=4ex, minimum height=1.5cm] at (6.75,-7.25) (g2) {Genereren/ \\ compileren};
+        \node[process,minimum width=3cm,text height=4ex, minimum height=1.5cm] at (12.5,-7.25) (gn) {Genereren/ \\ compileren};
+
+        \draw[arrow] (0,-5-|g1.60) -- (g1.60);
+        \draw[arrow] (0,-5-|g2.60) -- (g2.60);
+        \draw[arrow] (0,-5-|gn.60) -- (gn.60);
+
+        % Input
+        \node[document, minimum width=14cm, minimum height=4.5cm,tape bend height=0.5cm] at (7.5, -3.25) (input) {};
+
+        \node[nothing] at (2,-1.75) {Invoer};
+
+        \node[inner,minimum width=8.75cm, minimum height=2.5cm] at (5.625,-3.5) (plan) {};
+        \node[nothing] at (2.5,-2.75) {Testplan};
+        \node[inner,minimum width=2.25cm] at (2.75,-3.75) (c1) {Context 1};
+        \node[inner,minimum width=2.25cm] at (5.25,-3.75) (c2) {Context 2};
+        \node[nothing,text height=1.5ex, text depth=.25ex] at (6.875,-3.75) {\ldots};
+        \node[inner,minimum width=2.25cm] at (8.5,-3.75) (cn) {Context $n$};
+
+        \draw[arrow] (exercise.south) -- (exercise|-plan.north);
+
+        \node[inner,minimum width=3.25cm, minimum height=1.5cm, text height=4ex] at (12.125,-4) (solution) {Ingediende \\ oplossing};
+
+        \draw[arrow] (dodonaIn.south east) -- (dodonaIn.south east|-solution.north east);
+
+        \node[inner,minimum width=3.25cm] at (12.125,-2.25) (config) {Configuratie};
+
+        \draw[arrow] (dodonaIn.south) -- (dodonaIn|-config.north);
+
+        \draw[arrow] (c1) |- (g1.120|-2,-6) -- (g1.120);
+        \draw[arrow] (c2) |- (g2.120|-6.75,-6) -- (g2.120);
+        \draw[arrow] (cn) |- (gn.120|-12.5,-6) -- (gn.120);
+
+        \node[document,minimum width=3cm] at (2.5,-9.25) (t1) {Testcode 1};
+        \node[document,minimum width=3cm] at (6.75,-9.25) (t2) {Testcode 2};
+        \node[document,minimum width=3cm] at (12.5,-9.25) (tn) {Testcode $n$};
+
+        \draw[arrow] (g1) --(t1);
+        \draw[arrow] (g2) --(t2);
+        \draw[arrow] (gn) --(tn);
+
+        \node[process,minimum width=3cm] at (2.5,-11) (u1) {Uitvoeren};
+        \node[process,minimum width=3cm] at (6.75,-11) (u2) {Uitvoeren};
+        \node[process,minimum width=3cm] at (12.5,-11) (un) {Uitvoeren};
+
+        \draw[arrow] (t1) --(u1);
+        \draw[arrow] (t2) --(u2);
+        \draw[arrow] (tn) --(un);
+
+        \node[document,minimum width=3cm] at (2.5,-12.75) (r1) {Resultaat 1};
+        \node[document,minimum width=3cm] at (6.75,-12.75) (r2) {Resultaat 2};
+        \node[document,minimum width=3cm] at (12.5,-12.75) (rn) {Resultaat $n$};
+
+        \draw[arrow] (u1) --(r1);
+        \draw[arrow] (u2) --(r2);
+        \draw[arrow] (un) --(rn);
+
+        \node[process,minimum width=3cm] at (2.5,-14.5) (e1) {Evaluatie};
+        \node[process,minimum width=3cm] at (6.75,-14.5) (e2) {Evaluatie};
+        \node[process,minimum width=3cm] at (12.5,-14.5) (en) {Evaluatie};
+
+        \draw[arrow] (r1) --(e1);
+        \draw[arrow] (r2) --(e2);
+        \draw[arrow] (rn) --(en);
+
+        \node[document, minimum width=14cm, minimum height=3.5cm,tape bend height=0.5cm] at (7.5,-17.25) (b) {};
+
+
+        \node[inner,minimum width=3cm,text height=4ex,minimum height=1.5cm] at (2.5,-17.75) (b1) {Beoordeling \\ context 1};
+        \node[inner,minimum width=3cm,text height=4ex,minimum height=1.5cm] at (6.75,-17.75) (b2) {Beoordeling \\ context 2};
+        \node[nothing,text height=1.5ex, text depth=.25ex] at (9.625,-17.75) {\ldots};
+        \node[inner,minimum width=3cm,text height=4ex,minimum height=1.5cm] at (12.5,-17.75) (bn) {Beoordeling \\ context $n$};
+
+        \draw[arrow] (e1) --(b1);
+        \draw[arrow] (e2) --(b2);
+        \draw[arrow] (en) --(bn);
+
+        \node[nothing,fill=white] at (2,-16.25) {Beoordeling};
+
+        \node[io] at (7.5,-20.5) (dodonaOut) {Dodona};
+
+        \draw[arrow] (b) -- (dodonaOut);
+
+    \end{tikzpicture}
+
+\end{document}
