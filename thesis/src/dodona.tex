@@ -1,4 +1,4 @@
-\chapter{Dodona}\label{ch:dodona}
+\chapter{Educational software testing}\label{ch:dodona}
 
 \section{Inleiding}\label{sec:inleiding}
 
@@ -20,43 +20,69 @@ Dodona:
 - Oplossingen, opgesteld door studenten
 - Judge beoordeelt oplossing van een opgave, door Dodona-team
 
-\section{Evalueren van een oplossing}\label{sec:evalueren-van-een-oplossing}
+\section{Beoordelen van oplossingen}\label{sec:evalueren-van-een-oplossing}
 
-Zoals vermeld worden de oplossingen van studenten geëvalueerd door een evaluatieprogramma, de \termen{judge}.
-In wezen is dit een eenvoudig programma: het krijgt de configuratie via de standaardinvoerstroom (stdin) en schrijft de resultaten van de evaluatie naar de standaarduitvoerstroom (stdout).
-Zowel de invoer als de uitvoer van de judge zijn json, waarvan de betekenis vastligt in een json-schema.\footnote{Dit schema en een tekstuele beschrijving is te vinden in de handleiding in~\autocite{dodona2020}.}
+\subsection{De judge}\label{subsec:de-judge}
 
-De interface opgelegd vanuit Dodona waaraan een judge moet voldoen legt geen beperkingen of vereisten op die verband houden met de programmeertaal.
-Via de configuratie krijgt de judge van Dodona enkel in welke programmeertaal de oefening is.
-Momenteel heeft Dodona een andere judge voor elke ondersteunde programmeertaal.
-Door de vrijheid die Dodona geeft aan de judges, zijn de manieren waarop de bestaande judges geïmplementeerd zijn uiteenlopend.
-Sommige judges zijn geschreven in dezelfde taal als de taal die ze beoordelen (bv.\ de Python- en Java-judge).
-Bij andere judges is dat niet het geval (bv.\ de Bash-judge is ook in Python geschreven).
+In Dodona wordt elke ingediende oplossing beoordeeld door een evaluatieprogramma, de \termen{judge}.
+In wezen is dit een eenvoudig programma: via de standaardinvoerstroom (\texttt{stdin}) krijgt het programma een configuratie binnen van Dodona.
+Deze configuratie bevat de invoer, bestaande uit onder andere de programmeertaal van de oplossing, het pad naar het oplossingsbestand en geheugen- en tijdslimieten.
+Het resultaat van de beoordeling wordt uitgeschreven naar de standaarduitvoerstroom (\texttt{stdout}).
+Zowel de invoer als de uitvoer van de judge zijn json, waarvan het formaat vastgelegd is in een json-schema.\footnote{Dit schema en een tekstuele beschrijving ervan is te vinden in de handleiding op \url{https://dodona-edu.github.io/en/guides/creating-a-judge/}.}
+
+Concreet wordt elke beoordeling uitgevoerd in een Docker-container.
+Deze Docker-container wordt gemaakt op basis van een Docker-image die bij de judge hoort, en alle dependencies bevat die de judge in kwestie nodig heeft.
+Bij het uitvoeren van de beoordeling zal Dodona een \english{bind mount}\footnote{Informatie over deze term vindt u op \url{https://docs.docker.com/storage/bind-mounts/}} voorzien, zodat de code van de judge zelf, de code van de oefening en de code van de student beschikbaar zijn in de container.
+Via de configuratie geeft Dodona aan de judge aan waar deze bestanden zich bevinden.
+
+Samenvattend bestaat interface tussen de judge en Dodona uit drie onderdelen:
+
+\begin{enumerate}
+    \item De judge zal uitgevoerd worden in een Docker-container, dus een Docker-image met alle dependencies moet voorzien worden.
+    Deze Docker-image moet ook de judge opstarten.
+    \item De judge stelt de invoer van een beoordeling ter beschikking voor de judge.
+    Bestanden worden via een bind mount aan de Docker-container gekoppeld.
+    De paden naar deze bestanden binnen de container en andere informatie (zoals programmeertaal van de oplossing of natuurlijke taal van de gebruiker) worden via de configuratie aan de judge gegeven (via standaardinvoer).
+    \item De judge moet het resultaat van zijn beoordeling uitschrijven naar standaarduitvoer, in een vastgelegd formaat.
+\end{enumerate}
+
+Buiten deze interface legt Dodona geen vereisten op aan de werking van judge.
+Door deze vrijheid lopen de manieren waarop de bestaande judges geïmplementeerd zijn uiteen.
+Sommige judges beoordelen oplossingen in dezelfde programmeertaal als de taal waarin ze geschreven zijn.
+Zo is de judge voor Python-oplossingen geschreven in Python en de judge voor Java-oplossingen in Java.
+Bij andere judges is dat niet het geval: de judges voor Bash en Prolog zijn bijvoorbeeld ook in Python geschreven.
 Ook heeft elke judge een eigen manier waarop de testen voor een oplossing opgesteld moeten worden.
 Zo worden in de Java-judge jUnit-testen gebruikt, terwijl de Python-judge doctests en een eigen formaat ondersteunt.
 
-In grote lijnen verloopt het evalueren van een oplossing van een student als volgt:
+\subsection{De beoordeling zelf}\label{subsec:de-beoordeling-zelf}
+
+De beoordeling van een oplossing van een student laat zich beschreven als het volgende stappenplan:
 
 \begin{enumerate}
     \item De student dient de oplossing in via de webinterface van Dodona.
-    \item Dodona start een Docker-image met de judge.
-    \item De judge wordt uitgevoerd, met als invoer de configuratie.
-    \item De judge evalueert de oplossing aan de evaluatiecode opgesteld door de lesgever (d.w.z.\ de jUnit-test, de doctests, \ldots).
-    \item De judge vertaalt het resultaat van deze evaluatie naar het Dodona-formaat en schrijft dat naar het standaarduitvoerkanaal.
-    \item Dodona vangt die uitvoer op, en toont het resultaat aan de student.
+    \item Dodona start een Docker-container voor de judge.
+    \item Dodona voorziet de container van de bestanden van de judge, de oefening en de ingediende oplossing.
+    \item De judge wordt uitgevoerd met de configuratie als invoer.
+    \item De judge beoordeelt de oplossing aan de beoordelingsmethodes opgesteld door de lesgever (d.w.z.\ de jUnit-test, de doctests, \ldots).
+    Sommige judges voeren ook bijkomende taken, zoals linting, beoordeling van de performantie of \english{grading} van de code van de oplossing.
+    \item De judge vertaalt zijn beoordeling naar het Dodona-formaat en schrijft het resultaat naar het standaarduitvoerkanaal.
+    \item Dodona slaat dat resultaat op in de databank.
+    \item Op de webinterface krijgt de student het resultaat te zien als feedback op de ingediende oplossing.
 \end{enumerate}
+
+
 
 \section{Probleemstelling}\label{sec:probleemstelling}
 
-De huidige manier waarop de judges werken resulteert in een belangrijk nadeel.
+De manier waarop de huidige judges werken, resulteert in twee belangrijke nadelen.
 Bij het bespreken hiervan is het nuttig een voorbeeld in het achterhoofd te houden, teneinde de nadelen te kunnen concretiseren.
-Als voorbeeld gebruiken we de "Lotto"-oefening\footnote{Vrij naar een oefening van prof.\ Dawyndt.}, met volgende opgave:
+Als voorbeeld gebruiken we de "Lotto"-oefening\footnote{Vrij naar een oefening van prof.\ Dawyndt. De originele oefening is beschikbaar op \url{https://dodona.ugent.be/nl/exercises/2025591548/}}, met volgende opgave:
 
-\begin{quotation}
-    \markdownInput[slice=^ ^voorbeeld]{generated/description.md}
-\end{quotation}
+\begin{quote}
+    \markdownInput{generated/description.md}
+\end{quote}
 
-Oplossingen voor deze opgave staan in \cref{lst:java-solution,lst:python-solution}, voor respectievelijk Python en Java.
+Oplossingen voor deze oefening staan in \cref{lst:java-solution,lst:python-solution}, voor respectievelijk Python en Java.
 
 \begin{listing}
     \inputminted{java}{../../exercise/lotto/solution/correct.java}
@@ -70,38 +96,60 @@ Oplossingen voor deze opgave staan in \cref{lst:java-solution,lst:python-solutio
     \label{lst:python-solution}
 \end{listing}
 
-Het belangrijkste nadeel aan de huidige werking is het bijkomende werk voor lesgevers, indien zij hun oefeningen in meerdere programmeertalen willen aanbieden.
-De Lotto-oefening heeft een eenvoudige opgave en oplossing.
-Bovendien zijn de verschillen tussen de versie in Python en Java minimaal, zij het dat de Java-versie wat langer is.
-Deze opgave zou zonder problemen in nog vele andere programmeertalen geïmplementeerd kunnen worden.
-Deze eenvoudige programmeeroefeningen zijn voornamelijk nuttig in twee gevallen: studenten die voor het eerst leren programmeren en studenten die een nieuwe programmeertaal leren.
+\subsubsection{Implementatie van oefeningen}
+
+Het eerste en belangrijkste nadeel aan de werking van de huidige judges heeft betrekking op de lesgevers en komt voor als zij een oefening willen aanbieden in meerdere programmeertalen.
+Enerzijds is dit een zware werklast: de oefening, en vooral de code voor de beoordeling, moet voor elke judge opnieuw geschreven worden.
+Voor de Python-judge zullen doctests nodig zijn, terwijl de Java-judge jUnit-testen vereist.
+Anderzijds lijdt dit ook tot verschillende versies van dezelfde oefening, wat het onderhouden van de oefeningen moelijker maakt.
+Als er bijvoorbeeld een fout sluipt in de beoordelingscode, zal de lesgever er aan moeten denken om de fout te verhelpen in alle varianten van de oefening.
+Bovendien geeft elke nieuwe versie van de oefening een nieuwe mogelijkheid voor het introduceren van fouten.
+
+Kijken we naar onze Lotto-oefening, merken we dat het gaat om een eenvoudige opgave en een eenvoudige oplossing.
+Bovendien zijn de verschillen tussen oplossingen in verschillende programmeertalen niet zo groot.
+In de voorbeeldoplossingen in Python en Java zijn de verschillen minimaal, zij het dat de Java-oplossing wat langer is.
+De Lotto-oefening zou zonder problemen in nog vele andere programmeertalen opgelost kunnen worden.
+Eenvoudige programmeeroefeningen, zoals de Lotto-oefening, zijn voornamelijk nuttig in twee gevallen: studenten die voor het eerst leren programmeren en studenten die een nieuwe programmeertaal leren.
 In het eerste geval is de eigenlijke programmeertaal minder relevant: het zijn vooral de concepten die belangrijk zijn.
 In het tweede geval is de programmeertaal wel van belang, maar moeten soortgelijke oefeningen gemaakt worden voor elke programmeertaal die aangeleerd moet worden.
+In beide gevallen is het dus een meerwaarde om de oefening in meerdere programmeertalen aan te bieden.
 
-We kunnen tot eenzelfde constatatie komen bij ingewikkeldere opgaves die zich concentreren op algoritmen: ook daar zijn de concepten belangrijker dan in welke programmeertaal een algoritme uiteindelijk geïmplementeerd wordt.
+We kunnen tot eenzelfde constatatie komen bij meer complexe oefeningen die zich concentreren op algoritmen: ook daar zijn de concepten belangrijker dan in welke programmeertaal een algoritme uiteindelijk geïmplementeerd wordt.
 Een voorbeeld hiervan is het vak "Algoritmen en Datastructuren" dat gegeven wordt door prof.\ Fack binnen de opleiding wiskunde\footnote{De studiefiche is beschikbaar op \url{https://studiegids.ugent.be/2019/NL/studiefiches/C002794.pdf}}.
 Daar zijn de meeste opgaven vandaag al beschikbaar in Java en Python op Dodona, maar dan als afzonderlijke oefeningen.
 
-Het evalueren van een oplossing voor de Lotto-oefening is minder eenvoudig, daar er met willekeurige getallen gewerkt wordt: het volstaat niet om de uitvoer gegenereerd door de oplossing te vergelijken met een op voorhand vastgelegde verwachte uitvoer.
+Een ander aspect is de beoordeling van een oefening.
+Voor de Lotto-oefening is de beoordeling niet triviaal, door het gebruik van niet-deterministische functies.
+Het volstaat voor dit soort oefeningen niet om de uitvoer gegenereerd door de oplossing te vergelijken met een op voorhand vastgelegde verwachte uitvoer.
 De geproduceerde uitvoer zal moeten gecontroleerd worden met code, specifiek gericht op deze oefening, die de verwachte vereisten van de oplossing controleert.
 Deze evaluatiecode moet momenteel voor elke programmeertaal en dus elke judge opnieuw geschreven worden.
-In de context van ons voorbeeld controleert deze code bijvoorbeeld of de gegeven getallen binnen het bereik liggen en of ze gesorteerd zijn.
+In de context van de Lotto-oefening controleert deze code bijvoorbeeld of de gegeven getallen binnen het bereik liggen en of ze gesorteerd zijn.
 
-We vermoeden dat voor lesgevers het opstellen van de opgave het meeste tijd in beslag neemt.
-Toch mag het vertalen van deze code naar andere programmeertalen niet onderschat worden.
-Dit zal minder tijd in beslag nemen, maar deze kost is niet te verwaarlozen.
-Bovendien is dit vertalen vooral repetitief en saai werk.
+\subsubsection{Implementatie van judges}
 
-Het probleem hierboven beschreven laat zich samenvatten als volgende onderzoeksvraag, waarop deze thesis een antwoord wil bieden:
+Een tweede nadeel aan de werking zijn de judges zelf: voor elke programmeertaal die men wil aanbieden in Dodona moet een nieuwe judge ontwikkeld worden.
+Ook hier is er dubbel werk: dezelfde concepten en features, die eigenlijk programmeertaalonafhankelijk zijn, moeten in elke judge opnieuw geïmplementeerd worden.
+Hierbij denken we aan bijvoorbeeld de logica om te bepalen wanneer een beoordeling positief of negatief moet zijn.
+
+\subsubsection{Onderzoeksvraag}
+
+We beschouwen het eerste nadeel als het belangrijkste nadeel, en vatten het samen als de onderzoeksvraag waarop deze thesis een antwoord wil bieden:
 
 \begin{quote}
-    Is het mogelijk om een judge zo te implementeren dat de opgave en evaluatiecode van een oefening slechts eenmaal opgesteld dienen te worden, waarna de oefening beschikbaar is in alle talen die de judge ondersteunt?
+    Is het mogelijk om een judge zo te implementeren dat de opgave en beoordelingsmethoden van een oefening slechts eenmaal opgesteld dienen te worden, waarna de oefening beschikbaar is in alle programmeertalen die de judge ondersteunt?
     Hierbij willen we dat eens een oefening opgesteld is, deze niet meer gewijzigd moet worden wanneer talen toegevoegd worden aan de judge.
 \end{quote}
 
-\section{Opbouw}\label{sec:opbouw}
+Als bijzaak zijn we ook geïnteresseerd of de judge uit de onderzoeksvraag een voordeel kan bieden voor het implementeren van judges zelf (het tweede nadeel).
 
-Het volgende hoofdstuk van deze thesis handelt over het antwoord op bovenstaande vraag.
-Daarna volgt ter illustratie een gedetailleerde beschrijving van hoe een nieuwe taal moet toegevoegd worden aan de judge en hoe een opgave kan opgesteld worden voor de judge.
+De aandachtige lezer zal opmerken dat de opgave voor de Lotto-oefening programmeertaalspecifieke en taalspecifieke elementen bevat.
+Zo zijn de voorbeelden in Python en zijn de namen van functies en argumenten in het Nederlands.
+Beide zaken worden voor deze thesis expliciet als \english{out-of-scope} gezien en zullen niet behandeld worden.
+
+\section{Opbouw van de thesis}\label{sec:opbouw}
+
+\Cref{ch:de-universele-judge} handelt over het antwoord op bovenstaande vraag, waar een prototype van een dergelijke judge wordt voorgesteld.
+Daarna volgt ter illustratie een gedetailleerde beschrijving van hoe een oefening opgesteld moet worden voor deze judge.
+Nadien volgt een beschrijving van hoe een nieuwe programmeertaal moet toegevoegd worden.
 Daar deze twee hoofdstukken voornamelijk ten doel hebben zij die met de judge moeten werken te informeren, nemen deze hoofdstukken de vorm aan van meer traditionele softwarehandleidingen.
-Tot slot wordt afgesloten met een hoofdstuk over beperkingen van de huidige implementaties, en waar er verbeteringen mogelijk zijn (het "toekomstige werk").
+Tot slot volgt met een hoofdstuk over beperkingen van de huidige implementaties, en waar er verbeteringen mogelijk zijn (het "toekomstige werk").

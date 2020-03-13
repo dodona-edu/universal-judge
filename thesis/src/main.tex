@@ -3,7 +3,13 @@
 %! Date = 12/01/2020
 
 % Preamble
-\documentclass[12pt,parskip=half]{ugent2016-report}
+\documentclass[
+    12pt,
+    parskip=half,
+    titleUppercase=false,
+    titleUnderline=false,
+    uppercase=false
+]{ugent2016-report}
 
 % Packages
 % Babel uses the last language as main language of the file.
@@ -47,6 +53,7 @@
     },
     headerAttributes = true,
     hybrid = true,
+    fencedCode = true
 }
 
 \definecolor{bg}{rgb}{0.98,0.98,0.98}
@@ -56,6 +63,7 @@
 }
 
 \title{TESTed: one judge to rule them all}
+\subtitle{Een universele judge voor het beoordelen van software in een educative context}
 \author{\large Niko Strijbol}
 \studentnumber{01404620}
 
