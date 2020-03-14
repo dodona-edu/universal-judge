@@ -4,56 +4,89 @@
 Het doel hiervan is een antwoord te bieden aan de onderzoeksvraag uit het vorige hoofdstuk en de beperkingen van deze aanpak in kaart te brengen.
 Deze judge heeft de naam \term{TESTed} gekregen.
 Bij TESTed is een oefening programmeertaalonafhankelijk en kunnen oplossingen in verschillende programmeertalen beoordeeld worden aan de hand van een en dezelfde specificatie.
-Dit hoofdstuk licht het ontwerp en werking van deze judge toe, beginnend met een algemeen overzicht, waarna elk onderdeel in meer detail besproken wordt.
+Dit hoofdstuk begint met het ontwerp van de judge toe te lichten, waarna elk onderdeel in meer detail besproken wordt.
+Tot slot wordt afgesloten met een samenvattend overzicht.
 
-\section{Overzicht}\label{sec:overzicht}
+\section{Overzicht}\label{sec:ontwerp}
+
+\subsection{Architecturaal ontwerp}\label{subsec:architecturaal-overzicht}
+
+\Cref{fig:universal-judge} toont het architecturaal ontwerp van TESTed.
+De twee stippellijnen geven programmeertaalbarrières aan, en verdelen TESTed in drie logisch omgevingen:
+
+\begin{enumerate}
+    \item TESTed zelf is geschreven in Python: in het middelste deel staat de programmeertaal dus vast.
+    Dit onderdeel is verantwoordelijk voor de regie van de beoordeling op basis van het testplan.
+    \item De ingediende oplossing wordt uitgevoerd in de \term{uitvoeringsomgeving}, waar de programmeertaal overeenkomt met de programmeertaal van de oplossing.
+    \item Tot slot is er nog de \term{evaluatieomgeving}, waar door de lesgever geschreven beoordelingscode wordt uitgevoerd.
+    Deze moet niet in dezelfde programmeertaal als de oplossing of TESTed geschreven zijn.
+\end{enumerate}
+
+\subsection{Stappenplan bij een beoordeling}\label{subsec:stappenplan-van-een-beoordeling}
+
+De rest van het hoofdstuk bespreekt alle onderdelen van en stappen die gebeuren bij een beoordeling van een ingediende oplossing in detail.
+In \cref{fig:tested-flow} zijn deze stappen gegeven als een flowchart, en een uitgeschreven versie volgt:
+
+\begin{enumerate}
+    \item De Docker-container voor TESTed wordt gestart.
+    Dodona stelt de invoer ter beschikking aan de container: het testplan komt uit de oefening, terwijl de ingediende oplossing en de configuratie uit Dodona komen.
+    \item Als eerste stap wordt gecontroleerd dat het testplan de programmeertaal van de ingediende oplossing ondersteunt.
+    De programmeertaal van de oplossing wordt gegeven via de configuratie uit Dodona.
+    Merk op dat de ingediende oplossing zelf hierbij niet nodig is: deze controle zou idealiter gebeuren bij het importeren van de oefening in Dodona, zodat Dodona weet in welke programmeertalen een bepaalde oefening aangeboden kan worden (zie \cref{ch:beperkingen-en-toekomstig-werk}).
+    Als het testplan bijvoorbeeld programmeertaalspecifieke code bevat die enkel in Java geschreven is, zal een oplossing in Python niet beoordeeld kunnen worden.
+    Bevat het testplan bijvoorbeeld een functie die een verzameling moet teruggeven, dan zullen talen als Bash niet in aanmerking komen.
+    \item De testcode wordt gegenereerd voor elke context uit het testplan, wat resulteert in de testcode voor elke context.
+    Deze stap is de overgang naar de \term{uitvoeringsomgeving}.
+    \item De code wordt optioneel gecompileerd.
+    Dit kan op twee manieren gebeuren (meer details in \cref{subsec:uitvoeren-van-de-code}):
+    \begin{enumerate}
+        \item Precompilatiemodus: hierbij wordt de testcode van alle contexten verzameld en gecompileerd tot één uitvoerbaar bestand (executable).
+        Dit heeft als voordeel dat er slechts een keer een compilatie nodig is, wat goed is voor de performantie.
+        \item Individuele modus: hierbij wordt de testcode voor elke context afzonderlijk gecompileerd tot een uitvoerbaar bestand.
+    \end{enumerate}
+    In talen die geen compilatie nodig hebben of ondersteunen, wordt deze stap overgeslagen.
+    \item Nu kan het uitvoeren van de beoordeling zelf beginnen: de gegenereerde code wordt uitgevoerd (nog steeds in de uitvoeringsomgeving).
+    Elke context uit he testplan wordt in een afzonderlijk subproces uitgevoerd, teneinde het delen van informatie tegen te gaan.
+    De onafhankelijkheid van de contexten laat ons ook toe om contexten in parallel uit te voeren.
+    Toch moeten we opmerken dat het parallel uitvoeren vooral een theoretische mogelijkheid is: in werkelijkheid gebruiken er meerdere gebruikers tegelijk Dodona, waardoor er ook meerdere oefeningen tegelijk beoordeeld worden, wat op zijn beurt ervoor zorgt dat er geen grote ruimte voor snelheidswinst door parallellisatie binnen een judge is.
+    \item De uitvoering van de executable in de vorige stap resulteert in resultaten (voor elke context), zoals de standaarduitvoerstroom, de standaardfoutstroom, returnwaardes, exceptions of exitcodes.
+    Deze bundel resultaten wordt nu geëvalueerd op juistheid.
+    Hiervoor zijn drie mogelijke manieren:
+    \begin{enumerate}
+        \item Programmeertaalspecifieke evaluatie (afgekort tot SE in de flowchart).
+        De code voor de evaluatie is opgenomen in de executable en wordt onmiddellijk uitgevoerd in hetzelfde proces.
+        Via deze mogelijkheid kunnen taalspecifieke aspecten gecontroleerd worden.
+        Daar de evaluatie in hetzelfde proces gebeurt, blijft dit in de uitvoeringsomgeving.
+        \item Geprogrammeerde evaluatie (afgekort tot PE in de flowchart).
+        Hierbij is er evaluatiecode geschreven die los staat van de oplossing, waardoor deze evaluatiecode ook in een andere programmeertaal geschreven kan zijn.
+        De code ter uitvoering van de geprogrammeerde evaluatiecode wordt gegenereerd en dan uitgevoerd.
+        Het doel van deze modus is om complexe evaluaties toe te laten op een programmeertaalonafhankelijke manier.
+        Deze stap vindt plaats in de evaluatieomgeving.
+        \item Generieke evaluatie.
+        Hierbij evalueert TESTed zelf het resultaat.
+        Deze modus is bedoeld voor gestandaardiseerde evaluaties, zoals het vergelijken van geproduceerde uitvoer en verwachte uitvoer.
+        Hier gebeurt de evaluatie binnen TESTed zelf.
+    \end{enumerate}
+    \item Tot slot verzamelt TESTed alle evaluatieresultaten en stuurt ze gebundeld door naar Dodona, waarna ze getoond worden aan de gebruiker.
+\end{enumerate}
 
 \begin{figure}
     \centering
-    \input{figures/design.tex}
-    \caption{Schematische voorstelling van de opbouw van de universele judge.}
+    \input{figures/architecture.tex}
+    \caption{Schematische voorstelling van het architecturale ontwerp van de TESTed.}
     \label{fig:universal-judge}
 \end{figure}
 
-\Cref{fig:universal-judge} toont het globale ontwerp van de interne werking van TESTed.
-De twee dikkere stippellijnen geven de programmeertaalbarrières aan, die de judge ook logisch onderverdelen in drie contexten of processen, die we kaders noemen (om verwarring te vermijden met een computerproces en contexten uit het testplan, waarover later meer).
-De judge zelf is geschreven in Python, wat ook betekent dat in het \term{kernkader} enkel Python gebruikt wordt.
-De oplossing wordt uitgevoerd in het \term{uitvoeringskader}, waar de programmeertaal de programmeertaal van de oplossing is.
-Tot slot is er nog het \term{evaluatiekader}, waar door de lesgever geschreven evaluatiecode wordt uitgevoerd.
-Deze moet niet in dezelfde programmeertaal als de oplossing zijn.
-
-
-Het schema van hierboven kunnen we ook uitschrijven als een stappenplan, wat hieronder gebeurt.
-
-\begin{enumerate}
-    \item De judge wordt opgestart en het testplan wordt geladen.
-    Het gestarte proces noemen we het \term{kernkader}.
-    Het is vooral hier dat de code van de judge uitgevoerd wordt.
-    \item Er wordt gecontroleerd of het testplan de programmeertaal van de oplossing ondersteunt.
-    Als het testplan bijvoorbeeld programmeertaalspecifieke code bevat die enkel voor Java gegeven is, zal een oplossing in Python niet geëvalueerd kunnen worden.
-    Bevat het testplan een functie die een verzameling moet teruggeven, dan zullen talen als Bash niet in aanmerking komen.
-    \item De code voor het evalueren van de oplossing wordt gegenereerd en eventueel gecompileerd.
-    \item Nu kan het \term{uitvoeringskader} beginnen: de gegenereerde code wordt uitgevoerd.
-    Elke context uit he testplan wordt in een afzonderlijk subproces uitgevoerd, teneinde het delen van informatie tegen te gaan.
-    De onafhankelijkheid van de contexten laat ons ook toe om contexten in parallel uit te voeren.
-    Toch moeten we opmerken dat het parallel uitvoeren vooral een theoretische mogelijkheid is: in werkelijkheid gebruiken er meerdere gebruikers tegelijk Dodona, waardoor er ook meerdere oefeningen tegelijk beoordeeld worden, wat op zijn beurt ervoor zorgt dat er geen grote ruimte voor snelheidswinst door parallellisatie binnen de judge is.
-    \item De uitvoering in de vorige stap resulteert in enkele resultaten.
-    Deze worden verzameld en beoordeeld.
-    Hiervoor zijn drie mogelijke manieren:
-    \begin{enumerate}
-        \item Programmeertaalspecifieke evaluatie.
-        Hierbij wordt de evaluatie gedaan na de uitvoering gedaan in hetzelfde proces als de uitvoering.
-        In het schema zitten we nog steeds in het uitvoeringskader.
-        \item Aangepaste evaluator.
-        Hierbij is er evaluatiecode geschreven die los staat van de oplossing.
-        De evaluatiecode kan in een andere programmeertaal geschreven zijn dan de oplossing.
-        De aangepaste evaluator wordt gegenereerd, gecompileerd en uitgevoerd na het uitvoeren van de oplossing, in het \term{evaluatiekader}.
-        \item Ingebouwde evaluatie.
-        Hierbij is het de judge zelf die evalueert, waardoor dit vooral eenvoudige evaluaties betreft, zoals het vergelijken van geproduceerde uitvoer en verwachte uitvoer.
-        Dit gebeurt in het kernproces.
-    \end{enumerate}
-    \item Tot slot verzamelt de judge alle evaluatieresultaten en stuurt ze door naar Dodona, waarna ze getoond worden aan de gebruiker.
-\end{enumerate}
+\begin{figure}
+    \centering
+    \input{figures/flow.tex}
+    \caption{
+        Flowchart van een beoordeling door TESTed.
+        In het schema worden kleuren gebruikt als er een keuze gemaakt moet worden, en slechts een van de mogelijkheden gebruikt wordt.
+        De afkortingen PE, GE en SE staan respectievelijk voor geprogrammeerde evaluatie, generieke evaluatie en (programmeertaal)specifieke evaluatie.
+    }
+    \label{fig:tested-flow}
+\end{figure}
 
 
 \section{Beschrijven van een oefening}\label{sec:testplan}

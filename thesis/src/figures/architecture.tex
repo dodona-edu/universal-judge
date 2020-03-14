@@ -1,0 +1,66 @@
+\documentclass[class=ugent2016-report,crop=false]{standalone}
+
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,positioning,backgrounds,calc,intersections,calc}
+\usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
+
+\begin{document}
+
+
+    % Define the styles for various components in the architectural diagram.
+    \tikzstyle{node}=[draw, minimum height=1cm, text width=3cm, align=center, fill=white]
+    \tikzstyle{state}=[node, rectangle]
+    \tikzstyle{process}=[node, rectangle, rounded corners=0.5cm]
+    \tikzstyle{named}=[text=ugent-blue,font=\sffamily\scshape,align=center,text width=3cm]
+
+    \begin{tikzpicture}
+
+        %\draw[step=1.0,gray,thin] (0,0) grid (15,-25);
+
+        \node[state] (input) at (7.5,2) {Invoer};
+
+        \node[process] (generation) at (7.5,0) {Genereren \\ testcode};
+
+        \node[state] (code) at (13.5,0) {Testcode};
+        \node[process] (execution) at (13.5,-2) {Uitvoeren};
+
+        \node[state] (execution state) at (13.5,-4) {Uitvoer};
+        \node[state] (core state) at (7.5,-4) {Uitvoer};
+        \node[state] (evaluation state) at (1.5,-4) {Uitvoer};
+
+        \node[process] (custom evaluation) at (1.5,-6) {Evaluatie};
+        \node[process] (core evaluation) at (7.5,-6) {Evaluatie};
+        \node[process] (execution evaluation) at (13.5,-6)  {Evaluatie};
+
+        \node[state] (feedback) at (7.5,-8) {Beoordeling};
+
+        \node[named] (core name) at (7.5,-10) {TESTed};
+        \node[named] (evaluation name) at (1.5,-10) {evaluatieomgeving};
+        \node[named] (execution name) at (13.5,-10) {uitvoeringsomgeving};
+
+        \begin{scope}[on background layer]
+
+            % Draw these first to ensure they are in the background.
+            \path[draw,dashed,very thick,lightgray] (4.5,3) -- (4.5,-11);
+            \path[draw,dashed,very thick,lightgray] (10.5,3) -- (10.5,-11);
+
+            \draw [->] (input) -- (generation);
+            \draw[->] (generation) -- (code);
+            \draw[->] (code) -- (execution);
+            \draw[->] (execution) -- (execution state);
+            \draw[->] (execution state) -- node[above] {Serialisatie} ++ (core state);
+            \draw[->] (core state) -- node[above] {Deserialisatie} ++ (evaluation state);
+            \draw[->] (core state) -- (core evaluation);
+            \draw[->] (evaluation state) -- (custom evaluation);
+            \draw[->] (execution state) -- (execution evaluation);
+
+            \draw[->] (core evaluation.south) -- (feedback);
+            \draw[->] (custom evaluation.south) -- (feedback.west);
+            \draw[->] (execution evaluation.south) -- (feedback.east);
+
+        \end{scope}
+
+
+    \end{tikzpicture}
+
+\end{document}
