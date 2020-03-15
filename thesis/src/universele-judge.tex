@@ -91,25 +91,29 @@ In \cref{fig:tested-flow} zijn deze stappen gegeven als een flowchart, en een ui
 
 \section{Beschrijven van een oefening}\label{sec:testplan}
 
-Elke evaluatie begint met het \term{testplan}, een document dat beschrijft hoe een oplossing voor een oefening geëvalueerd moet worden.
+De beoordeling van een ingediende oplossing van een oefening begint bij de invoer die TESTed krijgt.
+Centraal in deze invoer is een \term{testplan}, een specificatie die op een programmeertaalonafhankelijke manier beschrijft hoe een oplossing voor een oefening beoordeeld moet worden.
 Het vervangt de taalspecifieke testen van de bestaande judges (ie.\ de jUnit-tests of de doctests in respectievelijk Java en Python).
-Het testplan sensu lato wordt opgedeeld in verschillende onderdelen, die hierna besproken worden.
+Het testplan \latin{sensu lato} wordt opgedeeld in verschillende onderdelen, die hierna besproken worden.
 
 \subsection{Het testplan}\label{subsec:het-testplan}
 
-Het testplan sensu stricto beschrijft de structuur van een evaluatie van een oplossing voor een oefening.
+Het testplan \latin{sensu stricto} beschrijft de structuur van de beoordeling van een ingediende oplossing voor een oefening.
 Deze structuur lijkt qua opbouw sterk op de structuur van de feedback zoals gebruikt door Dodona.
-Dat de structuur van de oplossing in Dodona en van het testplan op elkaar lijken heeft als voordeel dat er geen mentale afbeelding tussen de structuur van het testplan en dat van Dodona moet bijgehouden worden.
-Concreet ziet de structuur er als volgt uit:
+Dat de structuur van de oplossing in Dodona en van het testplan op elkaar lijken, heeft als voordeel dat er geen mentale afbeelding moet gemaakt worden tussen de structuur van het testplan en dat van Dodona.
+Concreet is de structuur een hiërarchie met volgende elementen:
 
 \begin{description}
+    \item[Plan] Het top-level object van het testplan.
+    Dit object bevat twee belangrijke objecten: de tabbladen en de configuratie.
+    Deze configuratie is de plaats om opties aan TESTed mee te geven, zowel voor de TESTed zelf als voor programmeertaalspecifieke dingen.
     \item[Tab] Een testplan bestaat uit verschillende \termen{tab}s of tabbladen.
     Deze komen overeen met de tabbladen in de gebruikersinterface van Dodona.
     Een tabblad kan een naam hebben, die zichtbaar is voor de gebruikers.
     \item[Context] Elk tabblad bestaat uit een of meerdere \termen{context}en.
     Een context is een onafhankelijke uitvoering van een evaluatie.
     De nadruk ligt op de "onafhankelijkheid", zoals al vermeld.
-    Elke context wordt in een nieuw proces en in een eigen map uitgevoerd, zodat de kans op het delen van informatie klein is.
+    Elke context wordt in een nieuw proces en in een eigen map (directory) uitgevoerd, zodat de kans op het delen van informatie klein is.
     Hierbij willen we vooral onbedoeld delen van informatie (zoals statische variabelen of het overschrijven van bestanden) vermijden.
     De gemotiveerde student zal nog steeds informatie kunnen delen tussen de uitvoeringen, door bv.\ in een andere locatie een bestand aan te maken en later te lezen.
     \item[Testcase] Een context bestaat uit een of meerdere \termen{testcase}s of testgevallen.
@@ -117,18 +121,22 @@ Concreet ziet de structuur er als volgt uit:
     De testgevallen kunnen onderverdeeld worden in twee soorten:
     \begin{description}
         \item[Main testcase] of hoofdtestgeval.
-        Van deze soort is er maximaal een per context.
+        Van deze soort is er maximaal één per context (dus geen hoofdtestgeval is ook mogelijk).
         Dit testgeval heeft als doel het uitvoeren van de main-functie (of de code zelf als het gaat om een scripttaal zoals Bash of Python).
         Als invoer voor dit testgeval kunnen enkel het standaardinvoerkanaal en de programma-argumenten meegegeven worden.
+        De exitcode van een uitvoering kan ook enkel in het hoofdtestgeval gecontroleerd worden.
         \item[Normal testcase] of normaal testgeval.
         Hiervan kunnen er nul of meer zijn per context.
-        Deze testgevallen zijn voor andere aspecten te testen, nadat de code van de gebruiker met success ingeladen is.
+        Deze testgevallen dienen om andere aspecten van de ingediende oplossing te testen, nadat de code van de gebruiker met success ingeladen is.
         De invoer is dan ook uitgebreider: het kan gaan om het standaardinvoerkanaal, functieoproepen en variabeletoekenningen.
         Een functieoproep of variabeletoekenning is verplicht (zonder functieoproep of toekenning aan een variabele is er geen code om te testen).
     \end{description}
-    \item[Test] De uitvoer van een testgeval bestaat uit meerdere \term{test}s, die elk een aspect van een dat testgeval controleren.
+    Het hoofdtestgeval wordt altijd als eerste uitgevoerd.
+    Dit is verplicht omdat bepaalde programmeertalen (zoals Python en andere scripttalen) de code onmiddellijk uitvoeren bij het inladen.
+    Om te vermijden dat de volgorde van de testgevallen zou verschillen tussen de programmeertalen, wordt het hoofdtestgeval altijd eerst uitgevoerd.
+    \item[Test] De beoordeling van een testgeval bestaat uit meerdere \term{test}s, die elk een aspect van een dat testgeval controleren.
     Met aspect bedoelen we het standaarduitvoerkanaal, het standaardfoutkanaal, opgevangen uitzonderingen (\english{exceptions}), de teruggegeven waarden van een functieoproep (returnwaarde) of de inhoud van een bestand.
-    Elke test bevat instructies om het resultaat te beoordelen, door een van de drie eerder beschreven evaluatiemogelijkheden te gebruiken.
+    De exitcode is ook mogelijk, maar enkel in het hoofdtestgeval.
 \end{description}
 
 Bij de keuze voor een formaat voor het testplan (json, xml, \ldots), hebben we vooraf enkele vereisten geformuleerd waaraan het gekozen formaat moet voldoen.
@@ -149,29 +157,45 @@ Een oplossing hiervoor gebruikt de eigenschap dat veel talen json kunnen produce
 Hiervoor denken we aan een \termen{DSL} (\english{domain specific language}), maar dit valt buiten de thesis en wordt verder besproken in \cref{ch:beperkingen-en-toekomstig-werk}.
 
 Een tweede nadeel is dat json geen programmeertaal is.
-Terwijl dit de implementatie van de judge bij het interpreteren van het testplan weliswaar eenvoudiger maakt, is het tevens beperkend: beslissen of een testgeval moet uitgevoerd worden op basis van het resultaat van een vorig testgeval is bij wijze als voorbeeld niet mogelijk.
+Terwijl dit de implementatie van de judge bij het interpreteren van het testplan weliswaar eenvoudiger maakt, is het tevens beperkend: beslissen of een testgeval moet uitgevoerd worden op basis van het resultaat van een vorig testgeval is bijvoorbeeld niet mogelijk.
 Ook deze beperking wordt uitgebreider besproken in \cref{ch:beperkingen-en-toekomstig-werk}.
+
+Tot slot bevat \cref{lst:testplan} een testplan met één context voor de voorbeeldoefening Lotto uit \cref{ch:dodona}.
+
+\begin{listing}
+    \inputminted{python}{code/testplan.json}
+    \caption{
+        Een ingekorte versie van het testplan voor de voorbeeldoefening Lotto.
+        Het testplan bevat maar één context.
+    }
+    \label{lst:testplan}
+\end{listing}
 
 \subsection{Dataserialisatie}\label{subsec:dataserialisatie}
 
-In het testplan, zoals beschreven in de paragraaf hierboven, wordt gewag gemaakt van returnwaarden en variabeletoekenningen.
+Bij de beschrijving van het testplan wordt gewag gemaakt van returnwaarden en variabeletoekenningen.
 Aangezien het testplan programmeertaalonafhankelijk is, moet er dus een manier zijn om data uit de verschillende programmeertalen voor te stellen en te vertalen: het \term{serialisatieformaat}.
 
 \subsubsection{Keuze van het formaat}
 
-Zoals bij het testplan is een keuze voor een bepaald formaat gemaakt.
-Daarvoor zijn er opnieuw enkele voorwaarden vooropgesteld, waaraan het serialisatieformaat moet voldoen.
+Zoals bij het testplan, werd voor de voorstelling van waarden ook een keuze voor een bepaald formaat gemaakt.
+Daarvoor werden opnieuw enkele voorwaarden vooropgesteld, waaraan het serialisatieformaat moet voldoen.
 Het formaat moet:
 
 \begin{itemize}
     \item door mensen geschreven kunnen worden (\english{human writable}),
     \item onderdeel van het testplan kunnen zijn,
     \item in meerdere programmeertalen bruikbaar zijn, en
-    \item de types ondersteunen die we willen aanbieden in het programmeertaalonafhankelijke deel van het testplan.
+    \item de basisgegevenstypes ondersteunen die we willen aanbieden in het programmeertaalonafhankelijke deel van het testplan.
+    Deze gegevenstypes zijn:
+    \begin{itemize}
+        \item Primitieven: gehele getallen, reële getallen, Boolese waarden en tekenreeksen.
+        \item Collecties: rijen (eindige, geordende reeks; \texttt{list} of \texttt{array}), verzamelingen (eindige, ongeordende reeks zonder herhaling; \texttt{set}) en afbeeldingen (elk element wordt afgebeeld op een ander element; \texttt{map}, \texttt{dict} of \texttt{object}).
+    \end{itemize}
 \end{itemize}
 
-Een voor de hand liggende oplossing is ook hiervoor json gebruiken, en zelf in json een structuur op te stellen voor de waarden.
-In tegenstelling tot het testplan bestaan er al een resem aan dataserialisatieformaten, waardoor het de moeite is om na te gaan of er geen bestaand formaat voldoet aan de vereisten.
+Een voor de hand liggende oplossing is om ook hiervoor json te gebruiken, en zelf in json een structuur op te stellen voor de waarden.
+In tegenstelling tot het testplan bestaan er al een resem aan dataserialisatieformaten, waardoor het de moeite loont om na te gaan of er geen bestaand formaat voldoet aan de vereisten.
 Hiervoor is gestart van een overzicht op Wikipedia, \autocite{wiki2020}.
 Uiteindelijk is niet gekozen voor een bestaand formaat, maar voor de json-oplossing.
 De redenen hiervoor zijn samen te vatten als:
@@ -190,11 +214,11 @@ De redenen hiervoor zijn samen te vatten als:
     Het mag niet de bedoeling zijn dat het implementeren van het serialisatieformaat het meeste tijd in beslag neemt.
 \end{itemize}
 
-Een lijst van de overwogen formaten met een korte beschrijving volgt:
+Een lijst van de overwogen formaten met een korte beschrijving:
 
 \begin{description}
     \item[Apache Avro] Een volledig "systeem voor dataserialisatie".
-    De specificatie van het formaat gebeurt in json, terwijl de eigenlijke data binair geëncodeerd wordt.
+    De specificatie van het formaat gebeurt in json (vergelijkbaar met JSON Schema), terwijl de eigenlijke data binair geëncodeerd wordt.
     Heeft uitbreidbare types, met veel ingebouwde types \autocite{avro}.
     \item[Apache Parquet] Minder relevant, dit is een bestandsformaat voor Hadoop \autocite{parquet}.
     \item[ASN.1] Staat voor \english{Abstract Syntax Notation One}, een formaat uit de telecommunicatie.
@@ -223,7 +247,7 @@ Een lijst van de overwogen formaten met een korte beschrijving volgt:
     Complex: de specificatie bevat 14 documenten, met ongeveer 1250 pagina's \autocite{tr62541}.
     \item[OpenDLL] Afkorting voor de \english{Open Data Description Language}.
     Een tekstueel formaat, bedoeld om arbitraire data voor te stellen.
-    Wordt niet ondersteunt in veel programmeertalen, in vergelijking met bv.\ json \autocite{openddl}.
+    Wordt niet ondersteund in veel programmeertalen, in vergelijking met bv.\ json \autocite{openddl}.
     \item[ProtocolBuffers] Lijkt zoals vermeld sterk op FlatBuffers, maar heeft nog extra stappen nodig bij het encoderen en decoderen, wat het minder geschikt maakt \autocite{protobuf}.
     \item[Smile] Nog een binaire variant van json \autocite{smile}.
     \item[SOAP] Afkorting voor \english{Simple Object Access Protocol}.
@@ -236,7 +260,7 @@ Een lijst van de overwogen formaten met een korte beschrijving volgt:
 \end{description}
 
 Geen enkel overwogen formaat heeft grote voordelen tegenover een eigen structuur in json.
-Daarenboven hebben vele talen het nadeel dat ze geen json zijn, waardoor we een nieuwe taal moeten inbedden in het bestaande json-testplan.
+Daarenboven hebben veel talen het nadeel dat ze geen json zijn, waardoor we een nieuwe taal moeten inbedden in het bestaande json-testplan.
 Dit nadeel, gekoppeld met het ontbreken van voordelen, heeft geleid tot de keuze voor json.
 
 \subsubsection{Dataschema}
