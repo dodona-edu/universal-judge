@@ -73,7 +73,7 @@ class BooleanType:
 
 
 class SequenceTypes(str, Enum):
-    LIST = "list"
+    SEQUENCE = "sequence"
     SET = "set"
 
 
@@ -120,7 +120,7 @@ StringTypes.TEXT.feature = Features.STRINGS
 StringTypes.LITERAL.feature = Features.NOTHING  # Not relevant
 StringTypes.UNKNOWN.feature = Features.NOTHING  # Not relevant
 BooleanTypes.BOOLEAN.feature = Features.BOOLEANS
-SequenceTypes.LIST.feature = Features.LISTS
+SequenceTypes.SEQUENCE.feature = Features.LISTS
 SequenceTypes.SET.feature = Features.SETS
 ObjectTypes.OBJECT.feature = Features.MAPS
 NothingTypes.NOTHING.feature = Features.NULL
@@ -191,7 +191,7 @@ def _convert_to_python(value: Optional[Value]) -> Any:
 
     if isinstance(value, SequenceType):
         values = [_convert_to_python(x) for x in value.data]
-        if value.type == SequenceTypes.LIST:
+        if value.type == SequenceTypes.SEQUENCE:
             return values
         elif value.type == SequenceTypes.SET:
             return set(values)
@@ -248,7 +248,7 @@ def to_python_comparable(value: Optional[Value]):
     """
     if value is None:
         return None
-    if value.type == SequenceTypes.LIST:
+    if value.type == SequenceTypes.SEQUENCE:
         return [to_python_comparable(x) for x in value.data]
     if value.type == SequenceTypes.SET:
         return {to_python_comparable(x) for x in value.data}

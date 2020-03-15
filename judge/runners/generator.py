@@ -508,7 +508,7 @@ class Generator:
             evaluator.path.stem
         )
         arguments = SequenceType(
-            type=SequenceTypes.LIST,
+            type=SequenceTypes.SEQUENCE,
             data=evaluator.arguments
         )
 

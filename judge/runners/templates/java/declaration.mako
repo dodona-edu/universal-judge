@@ -1,7 +1,7 @@
 ## Convert a Value to a type.
 <%! from serialisation import SequenceTypes, BooleanTypes, StringTypes, NumericTypes, ObjectTypes, NothingTypes  %>
 <%page args="value" />
-% if value.type == SequenceTypes.LIST:
+% if value.type == SequenceTypes.SEQUENCE:
     List\
 % elif value.type == SequenceTypes.SET:
     Set\

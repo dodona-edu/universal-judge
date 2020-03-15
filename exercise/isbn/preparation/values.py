@@ -21,7 +21,7 @@ def encode(value):
         type_ = "rational"
         data_ = value
     elif isinstance(value, list) or isinstance(value, tuple):
-        type_ = "list"
+        type_ = "sequence"
         data_ = [encode(x) for x in value]
     elif isinstance(value, set):
         type_ = "set"

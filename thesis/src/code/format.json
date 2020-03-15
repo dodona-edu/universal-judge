@@ -1,5 +1,5 @@
 {
-  "type": "list",
+  "type": "sequence",
   "data": [
     {
       "type": "integer",

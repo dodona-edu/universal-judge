@@ -1,7 +1,7 @@
 ## Convert a Value to a literal type in Python.
 <%! from serialisation import SequenceTypes, BooleanTypes, StringTypes, NumericTypes, ObjectTypes, NothingTypes  %>
 <%page args="value" />
-% if value.type == SequenceTypes.LIST:
+% if value.type == SequenceTypes.SEQUENCE:
     [\
     % for item in value.data:
         <%include file="value.mako" args="item" />
