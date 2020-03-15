@@ -134,7 +134,7 @@ Concreet is de structuur een hiërarchie met volgende elementen:
     Het hoofdtestgeval wordt altijd als eerste uitgevoerd.
     Dit is verplicht omdat bepaalde programmeertalen (zoals Python en andere scripttalen) de code onmiddellijk uitvoeren bij het inladen.
     Om te vermijden dat de volgorde van de testgevallen zou verschillen tussen de programmeertalen, wordt het hoofdtestgeval altijd eerst uitgevoerd.
-    \item[Test] De beoordeling van een testgeval bestaat uit meerdere \term{test}s, die elk een aspect van een dat testgeval controleren.
+    \item[Test] De beoordeling van een testgeval bestaat uit meerdere \term{test}s, die elk één aspect van het testgeval controleren.
     Met aspect bedoelen we het standaarduitvoerkanaal, het standaardfoutkanaal, opgevangen uitzonderingen (\english{exceptions}), de teruggegeven waarden van een functieoproep (returnwaarde) of de inhoud van een bestand.
     De exitcode is ook mogelijk, maar enkel in het hoofdtestgeval.
 \end{description}
@@ -265,10 +265,16 @@ Dit nadeel, gekoppeld met het ontbreken van voordelen, heeft geleid tot de keuze
 
 \subsubsection{Dataschema}
 
-Het formaat is, zoals al vermeld, json.
-Het bijhorende dataschema is met opzet eenvoudig gehouden, om implementaties makkelijker te maken.
-Concreet wordt een waarde voorgesteld als een json-object dat bestaat uit de (geëncodeerde) waarde en het type van die waarde.
-Een voorbeeld is \cref{lst:serialisation}.
+Json is echter slechts een formaat en geeft geen semantische betekenis aan json-elementen.
+Hiervoor stellen we een dataschema op, dat uit twee onderdelen bestaat:
+
+\begin{itemize}
+    \item Het encoderen van waarden.
+    \item Het beschrijven van de gegevenstypes van deze waarden.
+\end{itemize}
+
+Elke waarde wordt in het serialisatieformaat voorgesteld als een object met twee elementen: de geëncodeerde waarde en het bijhorende gegevenstype.
+Een concreet voorbeeld is \cref{lst:serialisation}.
 
 \begin{listing}
     \inputminted{json}{code/format.json}
@@ -276,33 +282,104 @@ Een voorbeeld is \cref{lst:serialisation}.
     \label{lst:serialisation}
 \end{listing}
 
-\subsubsection{Datatypes}
 
-Naast de encodering van de data is er een tweede aspect van het serialisatieformaat: de datatypes.
-Het formaat ondersteunt de meeste basistypes die in bijna elke programmeertaal beschikbaar zijn.
-Hieronder volgt lijst met een korte omschrijving van de ondersteunde types.
-Hierbij is er een speciaal type, aangeduid met een ster (*), dat niet gebruikt wordt bij het encoderen van data.
-Het type \texttt{literal} is bedoeld voor waarden die eigenlijk geen data zijn, maar verwijzingen naar bv.\ een variabele (een \english{identifier} in de programmeertaal).
-Dit is nuttig bij functieargumenten (zo kunnen variabelen worden gebruikt bij een functieoproep).
+Het encoderen van waarden slaat op het voorstellen van waarden als json-waarden.
+Json heeft slechts een beperkt aantal gegevenstypes, dus worden alle waarden voorgesteld als een van deze types.
+Zo worden bijvoorbeeld zowel \texttt{array}s en \texttt{set}s voorgesteld als een json-lijst.
 
-\begin{description}
-    \item[\texttt{integer}] Gehele getallen.
-    \item[\texttt{rational}] Rationale getallen.
-    \item[\texttt{text}] Een tekenreeks of string.
-    \item[\texttt{literal*}] Een tekstuele waarde die rechtstreeks als \english{identifier} wordt gebruikt.
-    Deze waarde wordt enkel gebruikt bij het aangeven van de types van functie-argumenten.
-    \item[\texttt{unknown}] Dit type wordt gebruikt als er onbekende types zijn bij het encoderen van een waarde.
-    Bij het omzetten van een waarde uit het serialisatieformaat naar een programmeertaal (deserialisatie) worden waarden van dit type genegeerd.
-    \item[\texttt{boolean}] Een Boolese waarde (of boolean).
-    \item[\texttt{list}] Een wiskundige rij, wat wil zeggen dat de volgorde belangrijk is en dat dubbele elementen toegelaten zijn.
-    Merk op dat sommige talen meerdere implementaties hebben voor het concept van lijst.
-    Het is de implementatie vrij om te kiezen welk concept gebruikt wordt.
-    Zo wordt bijvoorbeeld in de Java-implementatie \texttt{List} in plaats van \texttt{array} gebruikt, om consistent te zijn met de implementatie van \texttt{set} en \texttt{object}.
-    \item[\texttt{set}] Een wiskundige verzameling, wat wil zeggen dat de volgorde niet belangrijk is en dat dubbele elementen niet toegelaten zijn.
-    \item[\texttt{object}] Een wiskundige afbeelding: elk element wordt afgebeeld op een ander element.
-    In Java is dit bijvoorbeeld een \texttt{Map}, in Python een \texttt{dict} en in Javascript een \texttt{object}.
-    \item[\texttt{nothing}] Geeft aan dat er geen waarde is, ook wel \texttt{null}, \texttt{None} of \texttt{nil} genoemd.
-\end{description}
+Het verschil tussen beiden wordt dan duidelijk gemaakt door het bijhorende gegevenstype.
+Er is dus nood aan een systeem om aan te geven wat het gegevenstype van een waarde is.
+
+Enerzijds vervult dit dataschema een gelijkaardige functie als JSON Schema (of XML Schema voor xml-bestanden): het dataschema legt de structuur van het serialisatieformaat vast.
+Anderzijds is er een belangrijk verschil: het dataschema schrijft geen verwachte gegevenstypes voor, maar beschrijft bestaande data.
+Het dataschema is dus altijd gekoppeld aan concrete data.
+Dit laatste zorgt ervoor dat het dataschema eenvoudig kan blijven, wat als voordeel heeft dat implementaties eenvoudiger zijn.
+Complexe types als \texttt{union[string, int]} zijn bijvoorbeeld niet mogelijk, maar ook niet nodig: concrete data kan niet zowel een \texttt{string} als een \texttt{int} zijn.
+
+\subsubsection{Gegevenstypes}
+
+Het systeem om de gegevenstypes aan te duiden vervult een dubbele functie:
+
+\begin{itemize}
+    \item Het wordt gebruikt om het gegevenstype van concrete data aan te duiden (beschrijvende modus).
+    \item Het wordt gebruikt om te beschrijven welke gegevenstype verwacht wordt (voorschrijvende modus).
+\end{itemize}
+
+Bij het ontwerp van het systeem voor de gegevenstypes zorgen deze twee functies soms voor tegenstrijdige belangen: voor het beschrijven van een waarde moet het systeem zo eenvoudig mogelijk zijn.
+Een waarde met bijhorend gegevenstype \texttt{union[string, int]} is niet bijster nuttig: een waarde kan nooit tegelijk een \texttt{string} en een \texttt{int} zijn.
+Aan de andere kant zijn dit soort complexe gegevenstypes wel nuttig bij het beschrijven van het verwachte gegevenstype van bijvoorbeeld een variabele.
+Daarnaast moet ook rekening gehouden worden met het feit dat deze gegevenstypes in veel programmeertalen implementeerbaar moeten zijn.
+Een gegevenstype als \texttt{union[string, int]} is eenvoudig te implementeren in Python, maar dat is niet het geval in bijvoorbeeld Java of C\@.
+Ook heeft elke taal een eigen niveau van details bij gegevenstypes.
+Python heeft bijvoorbeeld enkel \texttt{integer} voor gehele getallen, terwijl C beschikt over \texttt{int}, \texttt{unsigned}, \texttt{long}, enz.
+
+Om deze redenen zijn de gegevenstypes opgedeeld in vier categorieën:
+
+\begin{enumerate}
+    \item De basistypes.
+    Deze gegevenstypes zijn bruikbaar in zowel beschrijvende als voorschrijvende modus.
+    De lijst van basistypes omvat:
+    \begin{description}
+        \item[\texttt{integer}] Gehele getallen, zowel positief als negatief.
+        \item[\texttt{rational}] Rationale getallen.
+        \item[\texttt{text}] Een tekenreeks of string (alle vormen).
+        \item[\texttt{boolean}] Een Boolese waarde (of boolean).
+        \item[\texttt{sequence}] Een wiskundige rij, wat wil zeggen dat de volgorde belangrijk is en dat dubbele elementen toegelaten zijn.
+        \item[\texttt{set}] Een wiskundige verzameling, wat wil zeggen dat de volgorde niet belangrijk is en dat dubbele elementen niet toegelaten zijn.
+        \item[\texttt{map}] Een wiskundige afbeelding: elk element wordt afgebeeld op een ander element.
+        In Java is dit bijvoorbeeld een \texttt{Map}, in Python een \texttt{dict} en in Javascript een \texttt{object}.
+        \item[\texttt{nothing}] Geeft aan dat er geen waarde is, ook wel \texttt{null}, \texttt{None} of \texttt{nil} genoemd.
+    \end{description}
+    Elke implementatie van een programmeertaal moet een keuze maken wat de standaardimplementatie van deze types is.
+    Zo implementeert de Java-implementatie het gegevenstype \texttt{sequence} als een \texttt{List<>}, niet als een \texttt{array}.
+    Een implementatie in een programmeertaal kan ook aangeven dat een bepaald type niet ondersteund wordt, waardoor testplannen met dat type niet zullen werken.
+    \item De uitgebreide types.
+    Naast de basistypes van hierboven, bevat TESTed een hele reeks bijkomende types.
+    Deze gegevenstypes staan toe om meer details te gebruiken.
+    Een voorbeeld is de lijst van types in \cref{tab:vertaling}, dat voor een reeks gegevenstypes voor gehele getallen de concrete types in verschillende programmeertalen geeft.
+    Het grote verschil is dat deze uitgebreide types standaard vertaald worden naar een van de basistypes.
+    Voor talen die bijvoorbeeld geen \texttt{tuple} uit Python ondersteunen, zal het vanzelf omgezet worden naar een \texttt{list}.
+    Er is ook de mogelijk dat implementaties voor programmeertalen expliciet een bepaald type niet ondersteunen.
+    Zo zal de Java-implementatie geen \texttt{uint64} (een unsigned 64-bit integer) ondersteunen, omdat er geen equivalent bestaat in de taal.
+    \item De gegevenstypes worden ook gebruikt om de types van functie-argumenten aan te duiden.
+    Hier is er nood aan een bijkomend type:
+    \begin{description}
+        \item[identifier] Een verwijzing naar een eerder benoemd element (zoals variabelen of functies).
+        Bij het gebruik van dit gegevenstype stel de data de naam van de identifier voor.
+    \end{description}
+    Het is logisch dat dit type niet gebruikt kan worden voor het encoderen van data, daar dit bijvoorbeeld onmogelijk als returnwaarde kan voorkomen.
+    \item Voorschrijvende types.
+    Gegevenstypes in deze categorie kunnen enkel gebruikt worden bij het aangeven welk gegevenstype verwacht wordt, niet bij de eigenlijke encodering van waarden.
+    In de praktijk gaat het om het type van variabelen.
+    In deze categorie zouden gegevenstypes als \texttt{union[str, int]} komen.
+    Er is echt expliciet gekozen om dit soort types niet te ondersteunen, door de moeilijkheid om dit te implementeren in statisch getypeerde talen, zoals Java of C\@.
+    Een type dat wel ondersteund wordt is:
+    \begin{description}
+        \item[any] Het \texttt{any}-type geeft aan dat het type van een variabele onbekend is.
+        Merk op dat dit in sommige talen tot moeilijkheden zal leiden: zo zal dit in C-code als \texttt{long} beschouwd worden (want C heeft geen equivalent van een \texttt{any}-type).
+    \end{description}
+\end{enumerate}
+
+\begin{table}[h]
+    \centering
+    \caption{Voorbeeld van de implementatie van types voor gehele getallen, met als basistype \texttt{integer}.}
+    \label{tab:vertaling}
+    \begin{threeparttable}
+        \begin{tabular}{|l|llllllll|}
+            \hline
+                       & \texttt{int8} & \texttt{uint8} & \texttt{int16} & \texttt{uint16} & \texttt{int32} & \texttt{uint32} & \texttt{int64} & \texttt{uint64} \\
+            \hline
+            Python     & \texttt{int}  & \texttt{int}   & \texttt{int}   & \texttt{int}    & \texttt{int}   & \texttt{int}    & \texttt{int}   & \texttt{int}    \\
+            Java       & \texttt{byte} & \texttt{short} & \texttt{short} & \texttt{int}    & \texttt{int}   & \texttt{long}   & \texttt{long}  & -               \\
+            C\tnote{1} & \texttt{int8\_t} & \texttt{uint8\_t} & \texttt{int16\_t} & \texttt{uint16\_t} & \texttt{int32\_t} & \texttt{uint32\_t} & \texttt{int64\_t} & \texttt{uint64\_t} \\
+            Haskell    & \texttt{Integer} & \texttt{Integer} & \texttt{Integer} & \texttt{Integer} & \texttt{Integer} & \texttt{Integer} & \texttt{Integer} & \texttt{Integer} \\
+            \hline
+        \end{tabular}
+    \begin{tablenotes}
+        \item[1] Uiteraard met de gebruikelijke aliassen van \texttt{short}, \texttt{unsigned}, \ldots
+    \end{tablenotes}
+    \end{threeparttable}
+\end{table}
 
 \subsection{Functieoproepen en assignments}\label{subsec:functieoproepen}
 

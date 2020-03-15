@@ -1,3 +1,4 @@
+%! Suppress = Makeatletter
 %! Suppress = MultipleIncludes
 %! Author = strij
 %! Date = 12/01/2020
@@ -27,9 +28,11 @@
 \usepackage{adjustbox}
 \usepackage{amsfonts}
 \usepackage{tikz}
+\usepackage{threeparttable}
 %\usepackage{showframe}
 \usetikzlibrary{shapes,arrows,positioning,backgrounds,calc,intersections}
 \usepackage{standalone}
+\usepackage{newunicodechar}
 
 % Gebruik dit om de afbreekpatronen zichtbaar te maken.
 %\usepackage{showhyphens}
@@ -37,6 +40,11 @@
 % Engelse bastaardwoorden die geen patroon hebben.
 % De Nederlandse afbreekpatronen zijn sowieso oud.
 \hyphenation{judge} % Geen afbreekpunten in het Engels.
+
+% Fix woordafbrekingen met een trema.
+\makeatletter
+\newunicodechar{ë}{\@trema e}
+\makeatother
 
 \hypersetup{
     linkcolor  = ugent-blue,
