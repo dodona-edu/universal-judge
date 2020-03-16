@@ -10,16 +10,18 @@ def evaluated(result: bool,
               messages: Optional[List[str]] = None):
     """
     Report the result of an evaluation to the judge. This method should only
-    be called once, otherwise things will break.
+    be called once per evaluation. Calling this multiple times will result in
+    undefined behaviour.
 
-    :param messages: Optional list of messages to be shown to the student.
-    :param readable_actual: A string version of the actual value. Optional; if
-                            not given, the judge will produce one on a best-
-                            efforts basis.
+    :param result: The result of the evaluation (True or False).
+
     :param readable_expected: A string version of the expected value. Optional;
                               if not given, the judge will produce one on a
                               best-efforts basis.
-    :param result: The result of the evaluation.
+    :param readable_actual: A string version of the actual value. Optional; if
+                            not given, the judge will produce one on a best-
+                            efforts basis.
+    :param messages: Optional list of messages to be shown to the student.
     """
     if messages is None:
         messages = []

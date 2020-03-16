@@ -222,8 +222,8 @@ class BaseBuiltinEvaluator:
     of work and b) the most language independent.
     """
     type: Literal["builtin"] = "builtin"
-    options: Dict[str, Any] = field(
-        default_factory=dict)  # Options for the evaluator
+    options: Dict[str, Any] = field(default_factory=dict)
+    # Options for the evaluator
 
 
 @dataclass

@@ -1,61 +1,46 @@
+import re
 import evaluation_utils
 
+def listing(numbers):
+    if len(numbers) == 1:
+        return str(numbers[0])
+    else:
+        return f"{', '.join(str(x) for x in numbers[:-1])} en {numbers[-1]}"
 
-# noinspection DuplicatedCode
+def valid_lottery_numbers(number_str, count=6, maximum=42):
+    if not isinstance(number_str, str):
+        return False, "lottogetallen moet een string zijn"
+
+    if not re.match("^(-?(0|-?[1-9][0-9]*) - )*(0|-?[1-9][0-9]*)$", number_str):
+        return False, "lottogetallen worden niet in correct formaat teruggegeven"
+
+    nrs = [int(x) for x in number_str.split(" - ")]
+
+    if len(nrs) != count:
+        return False, f"verwachtte {count} in plaats van {len(nrs)} lottogetallen"
+
+    if wrong := [number for number in nrs if number > maximum]:
+        return False, f"volgende lottogetallen zijn groter dan de maximale " \
+                      f"waarde {maximum}: {listing(wrong)} "
+
+    if wrong := [number for number in nrs if number < 1]:
+        return False, f"volgende lottogetallen zijn kleiner dan de minimale " \
+                      f"waarde 1: {listing(wrong)}"
+
+    duplicates = {number for number in nrs if nrs.count(number) > 1}
+    if wrong := sorted(duplicates):
+        return False, f"volgende lottogetallen komen meer dan één keer " \
+                      f"voor: {listing(wrong)}"
+
+    if list(sorted(nrs)) != nrs:
+        return False, "lottogetallen worden niet in stijgende volgorde opgelijst"
+
+    return True, None
+
 def evaluate(expected, actual, arguments):
-    # noinspection DuplicatedCode
-    def valid_lottery_numbers(numbers='', count=6, maximum=42):
-
-        def listing(numbers):
-            """
-            Creates string representation of a given list of integers
-            """
-            if len(numbers) == 1:
-                return str(numbers[0])
-            else:
-                return f"{', '.join(str(x) for x in numbers[:-1])} en {numbers[-1]}"
-
-        import re
-
-        if not isinstance(numbers, str):
-            return numbers, False, 'lottogetallen moet een string zijn'
-
-        if not re.match('^(-?(0|-?[1-9][0-9]*) - )*(0|-?[1-9][0-9]*)$', numbers):
-            return numbers, False, 'lottogetallen worden niet in het correcte formaat teruggegeven'
-
-        number_list = list(int(x) for x in numbers.split(' - '))
-
-        if len(number_list) != count:
-            return numbers, False, f"verwachtte {count} in plaats van {len(number_list)} lottogetallen"
-
-        wrong = [number for number in number_list if number > maximum]
-        if wrong:
-            return (
-                numbers, False,
-                f'volgende lottogetallen zijn groter dan de maximale waarde {maximum}: {listing(wrong)}'
-            )
-
-        wrong = [number for number in number_list if number < 1]
-        if wrong:
-            return numbers, False, f'volgende lottogetallen zijn kleiner dan de minimale waarde 1: {listing(wrong)}'
-
-        wrong = list(sorted({number for number in number_list if number_list.count(number) > 1}))
-        if wrong:
-            return numbers, False, f'volgende lottogetallen komen meer dan één keer voor: {listing(wrong)}'
-
-        if list(sorted(number_list)) != number_list:
-            return numbers, False, 'lottogetallen worden niet in stijgende volgorde opgelijst'
-
-        return numbers, True, ''
-
     count = arguments[0]
     maximum = arguments[1]
-
-    # at least check the value that was already actual
-    numbers, valid, message = valid_lottery_numbers(actual, count=count, maximum=maximum)
-
-    messages = []
-    if message:
-        messages.append('Fout: ' + message)
-
-    evaluation_utils.evaluated(valid, str(actual), messages=messages)
+    valid, message = valid_lottery_numbers(actual, count, maximum)
+    messages = ["Fout: " + message] if message else []
+    # We geven geen verwachte waarde mee; TESTed neemt de waarde uit het testplan.
+    evaluation_utils.evaluated(valid, None, actual, messages=messages)

@@ -38,7 +38,7 @@ In \cref{fig:tested-flow} zijn deze stappen gegeven als een flowchart, en een ui
     \item De testcode wordt gegenereerd voor elke context uit het testplan, wat resulteert in de testcode voor elke context.
     Deze stap is de overgang naar de \term{uitvoeringsomgeving}.
     \item De code wordt optioneel gecompileerd.
-    Dit kan op twee manieren gebeuren (meer details in \cref{subsec:uitvoeren-van-de-code}):
+    Dit kan op twee manieren gebeuren (meer details in \cref{subsec:testcode-genereren}):
     \begin{enumerate}
         \item Batchcompilatie: hierbij wordt de testcode van alle contexten verzameld en gecompileerd tot één uitvoerbaar bestand (executable).
         Dit heeft als voordeel dat er slechts een keer een compilatie nodig is, wat goed is voor de performantie.
@@ -648,62 +648,130 @@ Dit kan op drie manieren:
 
 \subsection{Generieke evaluatie}\label{subsec:ingebouwde-evaluator}
 
-
-Voor eenvoudige beoordelingen volstaat de generieke evaluatie door TESTed.
+Voor eenvoudige beoordelingen (bijvoorbeeld tussen twee waarden) volstaat de generieke evaluatie binnen TESTed.
 Het is mogelijk om de verwachte resultaten in het testplan op te nemen.
 TESTed zal deze resultaten uit het testplan dan vergelijken met de resultaten geproduceerd door het uitvoeren van de testcode.
-Momenteel zijn er drie soorten ingebouwde evaluatiemethoden, die hieronder besproken worden.
+Als \english{proof of concept} zijn drie eenvoudige evaluatiemethoden ingebouwd in TESTed, die hieronder besproken worden.
 
 \subsubsection{Tekstevaluatie}
 
-Deze evaluator vergelijkt de verkregen uitvoer van een uitvoerkanaal (standaarduitvoer, returnwaarde, \ldots) met de verwachte uitvoer uit het testplan.
-Alle data worden als string behandeld.
+Deze evaluator vergelijkt de verkregen uitvoer van een uitvoerkanaal (standaarduitvoer, standaardfout, \ldots) met de verwachte uitvoer uit het testplan.
 Deze evaluator biedt enkele opties om het gedrag aan te passen:
 
 \begin{description}
-    \item[\texttt{ignoreWhitespace}] Witruimte voor en na het resultaat wordt genegeerd.
+    \item[\texttt{ignoreWhitespace}]
+    Witruimte voor en na het resultaat wordt genegeerd.
+    Dit gebeurt op de volledige tekst, niet regel per regel.
     \item[\texttt{caseInsensitive}] Er wordt geen rekening gehouden met het verschil tussen hoofdletters en kleine letters.
-    \item[\texttt{tryFloatingPoint}] De waarde moet geïnterpreteerd worden als een zwevendekommagetal (\english{floating point}), waarbij rekening gehouden wordt met de foutmarge.
-    \item[\texttt{applyRounding}] Of zwevendekommagetallen afgrond moeten worden.
+    \item[\texttt{tryFloatingPoint}]
+    De tekst zal geïnterpreteerd worden als een zwevendekommagetal (\english{floating point}).
+    Bij het vergelijken met de verwachte waarde zal de functie \mintinline{python}{math.isclose()}\footnote{Documentatie is hier te vinden: \url{https://docs.python.org/3/library/math.html\#math.isclose}} uit de standaardbibliotheek van Python gebruikt worden.
+    Deze functie controleert of twee zwevendekommagetallen "dicht bij elkaar" liggen.
+    De standaardfoutmarges van Python worden gebruikt.
+    Een punt voor de toekomst is het configureerbaar maken van deze foutmarges.
+    \item[\texttt{applyRounding}] Of zwevendekommagetallen afgrond moeten worden tijdens het vergelijken.
     Indien wel wordt het aantal cijfers genomen van de optie \texttt{roundTo}.
+    Na de afronding worden ze ook vergeleken met de functie \mintinline{python}{math.isclose()}.
+    Deze afronding is enkel van toepassing op het vergelijken, niet op de uitvoer.
     \item[\texttt{roundTo}] Het aantal cijfers na de komma.
     Enkel nuttig als \texttt{applyRounding} waar is.
 \end{description}
 
-\subsubsection{Bestandsevaluator}
+Deze configuratieopties worden op het niveau van de testen meegegeven.
+Dit laat toe om voor elke test (zelfs binnen eenzelfde testgeval) andere opties mee te geven.
+Een nadeel is wel dat dezelfde opties mogelijk veel herhaald moeten worden, bijvoorbeeld als een bepaalde oefening een optie voor elke test wil instellen.
+Echter wordt er verwacht dat dit soort zaken opgelost kunnen worden door een DSL of door het testplan te genereren.
 
-Hiermee kan een geproduceerd bestand vergeleken worden met een gegeven bestand uit het testplan.
-Het gaat om tekstuele bestanden.
-Deze evaluator kan werken in drie modi:
+Dit is de standaardevaluatievorm in het testplan als niets anders gegeven wordt.
+\Cref{lst:testplan-text} toont een fragment uit een testplan: de uitvoerspecificatie van een testgeval waarbij de tekstevaluatie gebruikt wordt.
+
+\begin{listing}
+    \inputminted{json}{code/testplan-text.json}
+    \caption{Fragment uit een testplan dat de uitvoerspecificatie van de standaarduitvoerstroom voor een testgeval toont, waarbij de tekstevaluatie gebruikt wordt.}
+    \label{lst:testplan-text}
+\end{listing}
+
+\subsubsection{Bestandsevaluatie}
+
+In deze evaluatievorm worden twee bestanden vergeleken met elkaar.
+Hiervoor bevat het testplan enerzijds een pad naar een bestand die met de oefening gegeven wordt met de verwachte inhoud en anderzijds de naam (of pad) van de locatie waar het verwachte bestand zich moet bevinden.
+De bestandsevaluatie ondersteunt enkel tekstuele bestanden, geen binaire bestanden.
+Het vergelijken van de bestanden gebeurt op één dezer manieren:
 
 \begin{description}
     \item[\texttt{exact}] Beide bestanden moet exact hetzelfde zijn, inclusief regeleindes.
     \item[\texttt{lines}] Elke regel wordt vergeleken met overeenkomstige regel in het andere bestand.
     De evaluatie van de lijnen is exact, maar zonder de regeleindes.
-    \item[\texttt{values}] Elke regel wordt geïnterpreteerd als een tekstuele waarde en vergeleken met de tekstevaluator.
-    In deze modus worden kunnen ook alle opties van de tekstevaluator gebruikt worden.
+    Dit betekent dat de witruimte bijvoorbeeld ook moet overeenkomen.
+    \item[\texttt{values}] Elke regel in het bestand wordt afzonderlijk vergeleken met de tekstevaluatie.
+    Indien deze modus gebruikt wordt, kunnen ook alle opties van de tekstevaluatie meegegeven worden.
 \end{description}
 
-\subsubsection{Waarde-evaluator}
+Een voorbeeld van hoe dit eruitziet is \cref{lst:testplan-file}.
+In dit fragment wordt de modus \texttt{values} gebruikt, en worden de opties van de tekstevaluatie ook meegegeven.
+Het bestand met de verwachte inhoud heeft als naam \texttt{bestand-uit-de-oefening.txt} gekregen, terwijl de ingediende oplossing een bestand moet schrijven naar \texttt{waar-het-verwachte-bestand-komt.txt}.
+Beide paden zijn relatief, maar ten opzichte van andere mappen: het bestand met verwachte inhoud is relatief tegenover de map van de oefening, terwijl het pad waar de ingediende oplossing naar moet schrijven relatief is ten opzichte van de werkmap van de context waarin de oplossing wordt uitgevoerd (zie \cref{lst:mapstructuur} voor een overzicht van de structuur).
 
-Deze evaluator vergelijkt twee waarden, zoals gedefinieerd door het serialisatieformaat.
-De twee waarden moeten exact overeenkomen, met uitzondering van zwevendekommagetallen.
+\begin{listing}
+    \inputminted{json}{code/testplan-file.json}
+    \caption{Fragment uit een testplan dat de uitvoerspecificatie van een bestand voor een testgeval toont, waarbij de bestandsevaluatie gebruikt wordt.}
+    \label{lst:testplan-file}
+\end{listing}
 
+\subsubsection{Waarde-evaluatie}
 
-\subsection{Aangepaste evaluator}\label{subsec:aangepaste-evaluator}
+Voor uitvoerkanalen zoals de returnwaarden moet meer dan alleen tekst met elkaar vergeleken kunnen worden.
+Staat er in het testplan welke waarde verwacht wordt (geëncodeerd in het serialisatieformaat), dan kan TESTed dit vergelijken met de eigenlijke waarde die geproduceerd werd door de ingediende oplossing.
 
-Voor de aangepaste evaluator moet een bestand geschreven worden in een programmeertaal naar keuze.
-Het resultaat van de uitvoering wordt vervolgens geserialiseerd en gedeserialiseerd naar het evaluatieproces.
-Hoe een evaluator moet geïmplementeerd worden, hangt af van de programmeertaal.
+Het vergelijken van een waarde bestaat uit twee stappen:
+\begin{enumerate}
+    \item Het gegevenstype wordt vergeleken, waarbij beide waarden (de verwachte waarde uit het testplan en de geproduceerde waarde uit de ingediende oplossing) hetzelfde type moeten hebben.
+    Hierbij wordt rekening gehouden met de vertalingen tussen de verschillende programmeertalen, waarbij twee gevallen onderscheiden kunnen worden:
+    \begin{enumerate}
+        \item Specifieert het testplan een basistype, dan zullen alle types die tot dit basistype herleid kunnen worden als hetzelfde beschouwd worden.
+        Is de verwachte waarde bijvoorbeeld \texttt{sequence}, zullen ook \texttt{array}s uit Java en \texttt{tuple}s uit Python goedgekeurd worden.
+        \item Specifieert het testplan een uitgebreid type, dan zal het uitgebreid type gebruikt worden voor talen die dat type ondersteunen, terwijl voor andere talen het basistype gebruikt zal worden.
+        Stel dat het testplan bijvoorbeeld een waarde met als gegevenstype \texttt{tuple} heeft.
+        In Python en Haskell (twee talen die dat gegevenstype ondersteunen) zullen enkel \texttt{tuple}s goedgekeurd worden.
+        Voor andere talen, zoals Java, worden alle gegevenstypes goedgekeurd die herleidbaar zijn tot het basistype.
+        Concreet zullen dus \texttt{List}s en \texttt{array}s goedgekeurd worden.
+        Merk op dat momenteel bij collecties (\texttt{sequence}s, \texttt{set}s en \texttt{map}s) enkel het type van de collectie gecontroleerd wordt.
+    \end{enumerate}
+    \item De twee waarden worden vergeleken op inhoud (indien de vergelijking van de gegevenstypes uit de vorige stap positief is).
+    Hierbij maakt TESTed gebruik van de ingebouwde vergelijking van Python om twee waarden te evalueren.
+    Dit betekent dat de regels voor \english{value comparisons} uit Python\footnote{Zie \url{https://docs.python.org/3/reference/expressions.html?highlight=comparison\#value-comparisons}} gevolgd worden.
+    Eén uitzondering is zwevendekommagetallen, waarvoor opnieuw \mintinline{python}{math.isclose()} gebruikt wordt in plaats van \mintinline{python}{==}.
+\end{enumerate}
 
-In Python bestaat de aangepaste evaluator uit een module met een functie die voldoet aan de definitie, zoals gegeven in \cref{lst:evaluation-python-custom}.
-De judge stelt ook een module \texttt{evaluation\_utils} ter beschikking.
+Bij deze evaluatievorm zijn geen configuratieopties.
+Een voorbeeld van het gebruik binnen een testplan is \cref{lst:testplan-value}.
+Hier wordt als returnwaarde een verzameling met drie elementen (5, 10 en 15) verwacht.
+
+\begin{listing}
+    \inputminted{json}{code/testplan-value.json}
+    \caption{Fragment uit een testplan dat de uitvoerspecificatie van de returnwaarde voor een testgeval toont, waarbij de waarde-evaluatie gebruikt wordt.}
+    \label{lst:testplan-value}
+\end{listing}
+
+\subsection{Geprogrammeerde evaluatie}\label{subsec:geprogrammeerde-evaluatie}
+
+Bij oefeningen, zoals de voorbeeldoefening Lotto, met niet-deterministische resultaten, kunnen de verwachte waarden niet in het testplan komen.
+Ook andere oefeningen waar geen directe vergelijking kan gemaakt worden, zoals het uitlijnen van sequenties (\english{sequence alignment}) uit de bio-informatica, volstaat een vergelijking met een verwachte waarde uit het testplan niet.
+
+Toch is deze evaluatie niet programmeertaalafhankelijk: de logica om een sequentie uit te lijnen is dezelfde ongeacht de programmeertaal waarin dit gebeurt.
+Voor dergelijke scenario's is geprogrammeerde evaluatie een oplossing: hierbij wordt code geschreven om de evaluatie te doen, maar deze evaluatiecode staat los van de ingediende oplossing en moet ook niet in dezelfde programmeertaal geschreven zijn.
+Binnen TESTed wordt dit mogelijk gemaakt door geproduceerde waarden uit de ingediende oplossing te serialiseren bij het uitvoeren van de testcode, en terug te deserialiseren bij het uitvoeren van de evaluatiecode.
+
+Deze evaluatiecode kan geschreven worden in een programmeertaal naar keuze, al moet de programmeertaal wel ondersteund worden door TESTed.
+De implementatie volgt in alle programmeertalen hetzelfde stramien, maar de implementatiedetails kunnen verschillen.
+In Python bestaat de evaluatiecode uit een module (een \texttt{.py}-bestand) met een functie die voldoet aan de definitie, zoals gegeven in \cref{lst:evaluation-python-custom}.
+TESTed stelt ook een module \texttt{evaluation\_utils} ter beschikking.
 De functie van hierboven moet dan één oproep doen naar de functie \texttt{evaluated()}.
 Deze module is redelijk eenvoudig, zoals te zien in \cref{lst:evaluation-util-python}.
 
 \begin{listing}
     \inputminted{python}{code/custom_signature.py}
-    \caption{De definitie van de aangepaste evaluator.}
+    \caption{De definitie van de functie die aanwezig moet zijn in de evaluatiecode voor een geprogrammeerde evaluatie geschreven in Python.}
     \label{lst:evaluation-python-custom}
 \end{listing}
 
@@ -728,17 +796,39 @@ Deze klassen en haar ouder staan in \cref{lst:evaluation-util-java,lst:evaluatio
     \label{lst:evaluation-java-custom}
 \end{listing}
 
-\subsubsection{Taalspecifieke evaluator}
 
-De taalspecifieke evaluator lijkt sterk op de aangepaste evaluator.
-is de eenvoudigste: deze neemt een codefragment met daarin één functie \texttt{evaluate}, die één argument aanvaardt, de geproduceerde waarde.
-Waar de geproduceerde waarde bij de aangepaste evaluator in het serialisatieformaat moet kunnen, is dit hier niet het geval: de functie wordt rechtstreeks opgeroepen tijdens de uitvoering.
+Een voorbeeld van een geprogrammeerde evaluatie is de voorbeeldoefening Lotto.
+De evaluatiecode is gegeven in \cref{lst:evaluation-lotto}.
+
+\begin{listing}
+    \inputminted{python}{../../exercise/lotto/evaluation/evaluator.py}
+    \caption{De evaluatiecode voor de geprogrammeerde evaluatie van de voorbeeldoefening Lotto.}
+    \label{lst:evaluation-lotto}
+\end{listing}
+
+\subsection{Programmeertaalspecifieke evaluatie}\label{subsec:programmeertaalspecifieke-evaluatie}
+
+In sommige scenario's moeten programmeertaalspecifieke concepten beoordeeld worden.
+Een mogelijkheid is deze oefeningen niet aanbieden in TESTed, maar in de programmeertaalspecifieke judges.
+Toch zijn er nog voordelen om ook deze oefeningen in TESTed aan te bieden:
+\begin{itemize}
+    \item Het bijkomende werk om meer programmeertalen te ondersteunen beperkt zich tot een minimum.
+    \item Het werk om een nieuwe programmeertaal toe te voegen aan TESTed is kleiner dan een volledig nieuwe judge te implementeren.
+\end{itemize}
+Het is desalniettemin het vermelden waard dat het niet zeker is of deze evaluatiemethode (en dit scenario meer algemeen) veel zal voorkomen.
+Oefeningen, die programmeertaalspecifieke aspecten moeten beoordelen, zijn, net door hun programmeertaalspecifieke aard, moeilijker aan te bieden in meerdere programmeertalen.
+Een oefening in de programmeertaal C die bijvoorbeeld beoordeelt op juist gebruik van pointers zal weinig nut hebben in Python.
+
+In gebruik lijkt de programmeertaalspecifieke evaluatie sterk op de geprogrammeerde evaluatie, met dat verschil dat het testplan niet evaluatiecode in één programmeertaal bevat, maar evaluatiecode in alle programmeertalen waarin de oefening aangeboden wordt, zoals geïllustreerd in X.
+Als de programmeertaalspecifieke evaluatie gebruikt wordt en er wordt geen evaluatiecode voor een bepaalde programmeertaal, zal de oefening niet opgelost kunnen worden in die programmeertaal.
+
+Ook de implementatie lijkt op de geprogrammeerde evaluatie, zij het dat de te implementeren functie afwijkt.
 In Python wordt dit \cref{lst:evaluation-python-specific}, in Java \cref{lst:evaluation-java-specific}.
-Om het resultaat van de evaluatie aan de judge te geven, wordt dezelfde \texttt{evaluated}-functie als bij de aangepaste evaluator gebruikt (respectievelijk \cref{lst:evaluation-util-python,lst:evaluation-util-java})
+Om het resultaat van de evaluatie aan de judge te geven, wordt dezelfde \texttt{evaluated}-functie als bij de aangepaste evaluator gebruikt (zie \cref{lst:evaluation-util-python,lst:evaluation-util-java})
 
 \begin{listing}
     \inputminted{python}{code/specific_signature.py}
-    \caption{De definitie van de taalspecifieke evaluator.}
+    \caption{De definitie van de functie die aanwezig moet zijn in de evaluatiecode voor een programmeertaalspecifieke evaluatie geschreven in Python.}
     \label{lst:evaluation-python-specific}
 \end{listing}
 
