@@ -767,7 +767,7 @@ De implementatie volgt in alle programmeertalen hetzelfde stramien, maar de impl
 In Python bestaat de evaluatiecode uit een module (een \texttt{.py}-bestand) met een functie die voldoet aan de definitie, zoals gegeven in \cref{lst:evaluation-python-custom}.
 TESTed stelt ook een module \texttt{evaluation\_utils} ter beschikking.
 De functie van hierboven moet dan één oproep doen naar de functie \texttt{evaluated()}.
-Deze module is redelijk eenvoudig, zoals te zien in \cref{lst:evaluation-util-python}.
+Deze module is redelijk eenvoudig, zoals te zien in \cref{lst:evaluation-util-python}
 
 \begin{listing}
     \inputminted{python}{code/custom_signature.py}
@@ -781,14 +781,9 @@ Deze module is redelijk eenvoudig, zoals te zien in \cref{lst:evaluation-util-py
     \label{lst:evaluation-util-python}
 \end{listing}
 
-In de Java-implementatie is de situatie gelijkaardig: het gaat om het implementeren van een abstracte klasse, die ook dienst doet als de module van Python.
-Deze klassen en haar ouder staan in \cref{lst:evaluation-util-java,lst:evaluation-java-custom}.
-
-\begin{listing}
-    \inputminted{java}{../../judge/runners/templates/java/AbstractEvaluator.java}
-    \caption{De implementatie van de klasse \texttt{AbstractEvaluator}.}
-    \label{lst:evaluation-util-java}
-\end{listing}
+In de Java-implementatie is de situatie gelijkaardig: het gaat om het implementeren van een abstracte klasse.
+Deze abstracte klasse biedt ook de functionaliteit aan van de module \texttt{evaluation\_utils} bij Python.
+De te implementeren klasse en haar ouderklasse staan in \cref{lst:evaluation-util-java,lst:evaluation-java-custom}.
 
 \begin{listing}
     \inputminted{java}{../../judge/runners/templates/java/AbstractCustomEvaluator.java}
@@ -796,9 +791,22 @@ Deze klassen en haar ouder staan in \cref{lst:evaluation-util-java,lst:evaluatio
     \label{lst:evaluation-java-custom}
 \end{listing}
 
+\begin{listing}
+    \inputminted{java}{../../judge/runners/templates/java/AbstractEvaluator.java}
+    \caption{De implementatie van de klasse \texttt{AbstractEvaluator}.}
+    \label{lst:evaluation-util-java}
+\end{listing}
 
-Een voorbeeld van een geprogrammeerde evaluatie is de voorbeeldoefening Lotto.
-De evaluatiecode is gegeven in \cref{lst:evaluation-lotto}.
+Een geprogrammeerde evaluatie wordt gebruikt in de voorbeeldoefening Lotto.
+Het gebruik in het testplan wordt getoond in \cref{lst:testplan-custom}, waar de evaluatiecode voor de aangepaste evaluatie in Python geschreven is.
+Er worden ook argumenten meegegeven aan deze code.
+De evaluatiecode zelf is gegeven in \cref{lst:evaluation-lotto}.
+
+\begin{listing}
+    \inputminted{java}{code/testplan-custom.json}
+    \caption{Fragment uit het testplan van de voorbeeldoefening Lotto, waar een geprogrammeerde evaluatie gebruikt wordt.}
+    \label{lst:testplan-custom}
+\end{listing}
 
 \begin{listing}
     \inputminted{python}{../../exercise/lotto/evaluation/evaluator.py}
@@ -824,7 +832,8 @@ Als de programmeertaalspecifieke evaluatie gebruikt wordt en er wordt geen evalu
 
 Ook de implementatie lijkt op de geprogrammeerde evaluatie, zij het dat de te implementeren functie afwijkt.
 In Python wordt dit \cref{lst:evaluation-python-specific}, in Java \cref{lst:evaluation-java-specific}.
-Om het resultaat van de evaluatie aan de judge te geven, wordt dezelfde \texttt{evaluated}-functie als bij de aangepaste evaluator gebruikt (zie \cref{lst:evaluation-util-python,lst:evaluation-util-java})
+Om het resultaat van de evaluatie aan de judge te geven, wordt dezelfde \texttt{evaluated}-functie als bij de aangepaste evaluator gebruikt (zie \cref{lst:evaluation-util-python,lst:evaluation-util-java}).
+Het gebruik in het testplan is \cref{lst:testplan-specific}.
 
 \begin{listing}
     \inputminted{python}{code/specific_signature.py}
@@ -836,4 +845,10 @@ Om het resultaat van de evaluatie aan de judge te geven, wordt dezelfde \texttt{
     \inputminted{java}{../../judge/runners/templates/java/AbstractSpecificEvaluator.java}
     \caption{De implementatie van de klasse \texttt{AbstractSpecificEvaluator}.}
     \label{lst:evaluation-java-specific}
+\end{listing}
+
+\begin{listing}
+    \inputminted{java}{code/testplan-specific.json}
+    \caption{Fragment uit een testplan, waar een programmeertaalspecifieke evaluatie gebruikt wordt.}
+    \label{lst:testplan-specific}
 \end{listing}
