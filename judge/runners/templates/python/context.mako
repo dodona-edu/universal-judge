@@ -44,7 +44,7 @@ def e_evaluate_main(value):
 % if main_testcase.exists and main_testcase.arguments:
     sys.argv.extend([\
         % for argument in main_testcase.arguments:
-            <%include file="value.mako" args="value=argument"/>\
+            <%include file="literal.mako" args="value=argument"/>\
         % endfor
     ])
 % endif

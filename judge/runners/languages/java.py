@@ -23,8 +23,7 @@ class JavaConfig(LanguageConfig):
         return ["AbstractCustomEvaluator.java"]
 
     def generation_callback(self, files: List[str]) -> CallbackResult:
-        others = [self.conventionalise_object(x) for x in files if
-                  not x.endswith(".jar")]
+        others = [x for x in files if not x.endswith(".jar")]
         jar_argument = self._classpath_separator().join(
             self._get_classpath() + ["."])
         c = ["javac", "-cp", jar_argument, *others]
@@ -62,3 +61,6 @@ class JavaConfig(LanguageConfig):
             return ";"
         else:
             return ":"
+
+    def needs_selector(self):
+        return True

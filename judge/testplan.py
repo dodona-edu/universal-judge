@@ -617,6 +617,10 @@ class _PlanModel(BaseModel):
     __root__: Plan
 
 
+class _Func(BaseModel):
+    __root__: FunctionCall
+
+
 def parse_test_plan(json_string) -> Plan:
     """Parse a test plan into the structures."""
     return _PlanModel.parse_raw(json_string).__root__
@@ -634,7 +638,7 @@ def generate_schema():
 
 
 if __name__ == '__main__':
-    with open('../exercise/zoemzinnen/preparation/plan.json', 'r') as f:
-        r = parse_test_plan(f.read())
-        print(r)
-    # generate_schema()
+    # with open('../exercise/zoemzinnen/preparation/plan.json', 'r') as f:
+    #     r = parse_test_plan(f.read())
+    #     print(r)
+    generate_schema()

@@ -1,9 +1,13 @@
 import json
 
-from random import randint
+import random
 
 import sys
+
 sys.path.append("../solution/")
+
+# Met een vaste seed krijgen we deterministische resultaten.
+random.seed(123456789)
 
 try:
     from ..solution.correct import loterij
@@ -15,9 +19,9 @@ except:
 def generate_data():
     for _ in range(45):
 
-        case = randint(0, 3)
-        count = randint(1, 20)
-        maximum = randint(max(6, count), 10 * count)
+        case = random.randint(0, 3)
+        count = random.randint(1, 20)
+        maximum = random.randint(max(6, count), 10 * count)
 
         a = 6
         m = 42
@@ -40,16 +44,36 @@ if __name__ == '__main__':
     tuples = [generate_data() for _ in range(45)]
     for data in tuples:
         print(data)
-        contexts.append({"normal": [{
-            "output": {
-                "result": {
-                    "value": {
-                        "type": "list",
-                        "data": [
-                            {
-                                "type": "text",
-                                "data": data[0]
-                            },
+        contexts.append({
+            "normal": [{
+                "output": {
+                    "result": {
+                        "value":     {
+                            "type": "text",
+                            "data": data[0]
+                        },
+                        "evaluator": {
+                            "type":      "custom",
+                            "language":  "python",
+                            "path":      "./evaluator.py",
+                            "arguments": [
+                                {
+                                    "type": "integer",
+                                    "data": data[1]
+                                },
+                                {
+                                    "type": "integer",
+                                    "data": data[2]
+                                }
+                            ]
+                        }
+                    }
+                },
+                "input":  {
+                    "function": {
+                        "type":      "top",
+                        "name":      "loterij",
+                        "arguments": [
                             {
                                 "type": "integer",
                                 "data": data[1]
@@ -59,43 +83,19 @@ if __name__ == '__main__':
                                 "data": data[2]
                             }
                         ]
-                    },
-                    "evaluator": {
-                        "type": "custom",
-                        "language": "python",
-                        "code": {
-                            "type": "file",
-                            "data": "./evaluator.py"
-                        }
                     }
                 }
-            },
-            "input": {
-                "function": {
-                    "type": "top",
-                    "name": "loterij",
-                    "arguments": [
-                        {
-                            "type": "integer",
-                            "data": data[1]
-                        },
-                        {
-                            "type": "integer",
-                            "data": data[2]
-                        }
-                    ]
-                }
-            }
-        }]})
+            }]
+        })
 
     plan = {
         "tabs": [
             {
-                "name": "Feedback",
+                "name":     "Feedback",
                 "contexts": contexts
             }
         ]
     }
 
     with open("../evaluation/plan.json", "w") as f:
-        json.dump(plan, f)
+        json.dump(plan, f, indent=2)

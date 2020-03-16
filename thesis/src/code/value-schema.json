@@ -1,0 +1,12 @@
+{
+  "type": "object",
+  "properties": {
+    "data": {
+      "type": ["number", "string", "boolean", "object", "array", "null"]
+    },
+    "type": {
+      "type": "string",
+      "enum": ["<types>"]
+    }
+  }
+}

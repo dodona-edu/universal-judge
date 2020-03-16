@@ -40,9 +40,9 @@ In \cref{fig:tested-flow} zijn deze stappen gegeven als een flowchart, en een ui
     \item De code wordt optioneel gecompileerd.
     Dit kan op twee manieren gebeuren (meer details in \cref{subsec:uitvoeren-van-de-code}):
     \begin{enumerate}
-        \item Precompilatiemodus: hierbij wordt de testcode van alle contexten verzameld en gecompileerd tot één uitvoerbaar bestand (executable).
+        \item Batchcompilatie: hierbij wordt de testcode van alle contexten verzameld en gecompileerd tot één uitvoerbaar bestand (executable).
         Dit heeft als voordeel dat er slechts een keer een compilatie nodig is, wat goed is voor de performantie.
-        \item Individuele modus: hierbij wordt de testcode voor elke context afzonderlijk gecompileerd tot een uitvoerbaar bestand.
+        \item Contextcompilatie: hierbij wordt de testcode voor elke context afzonderlijk gecompileerd tot een uitvoerbaar bestand.
     \end{enumerate}
     In talen die geen compilatie nodig hebben of ondersteunen, wordt deze stap overgeslagen.
     \item Nu kan het uitvoeren van de beoordeling zelf beginnen: de gegenereerde code wordt uitgevoerd (nog steeds in de uitvoeringsomgeving).
@@ -296,6 +296,18 @@ Het dataschema is dus altijd gekoppeld aan concrete data.
 Dit laatste zorgt ervoor dat het dataschema eenvoudig kan blijven, wat als voordeel heeft dat implementaties eenvoudiger zijn.
 Complexe types als \texttt{union[string, int]} zijn bijvoorbeeld niet mogelijk, maar ook niet nodig: concrete data kan niet zowel een \texttt{string} als een \texttt{int} zijn.
 
+\begin{listing}
+    \inputminted{json}{code/value-schema.json}
+    \caption{
+        Het schema voor een waarde in het serialisatieformaat, in een vereenvoudigde versie van JSON Schema.
+        Hierbij is \texttt{<type>} een van de gegevenstypes die besproken worden in subparagraaf \emph{Gegevenstypes} van \cref{subsec:dataserialisatie}.
+    }
+    \label{lst:value-schema}
+\end{listing}
+
+Tot slot bevat \cref{lst:value-schema} het schema van een waarde in het serialisatieformaat, in een vereenvoudigde versie van JSON Schema.
+Hierbij staat \texttt{<type>} voor een van de gegevenstypes die hierna besproken worden.
+
 \subsubsection{Gegevenstypes}
 
 Het systeem om de gegevenstypes aan te duiden vervult een dubbele functie:
@@ -383,39 +395,52 @@ Om deze redenen zijn de gegevenstypes opgedeeld in vier categorieën:
 
 \subsection{Functieoproepen en assignments}\label{subsec:functieoproepen}
 
-Een ander onderdeel van het testplan verdient ook speciale aandacht: het toekennen van variabelen (\english{assignments}) en de functieoproepen.
+Een ander onderdeel van het testplan verdient ook speciale aandacht: toekennen van waarden aan variabelen (\english{assignments}) en functieoproepen.
 
-In heel wat oefeningen, en zeker in objectgerichte programmeertalen, is het toekennen van een waarde aan een variabele, om deze later te gebruiken, onmisbaar.
+In heel wat oefeningen, en zeker bij objectgerichte en imperatieve programmeertalen, is het toekennen van een waarde aan een variabele, om deze later te gebruiken, onmisbaar.
 Bijvoorbeeld zou een opgave kunnen bestaan uit het implementeren van een klasse.
 Bij de evaluatie dient dan een instantie van die klasse aangemaakt te worden, waarna er methoden kunnen aangeroepen worden, zoals hieronder geïllustreerd in een fictief voorbeeld.
 
 \inputminted{java}{code/assignment.jshell}
 
-Concreet is ervoor gekozen om het testplan niet uit te breiden met generieke statements of expressions, maar de ondersteuning te beperken tot assignments en functieoproepen.
+Concreet is ervoor gekozen om het testplan niet uit te breiden met generieke statements of expressies, maar de ondersteuning te beperken tot assignments en functieoproepen.
 Dit om de implementatie van de vertaling van het testplan naar de ondersteunde programmeertalen niet nodeloos ingewikkeld te maken.
-Een functieoproep ziet er als volgt uit:
 
-\inputminted{json}{code/function.json}
+\begin{listing}
+    \inputminted{json}{code/value-schema.json}
+    \caption{
+        Het schema voor een functieoproep in het testplan.
+        Hierbij is \texttt{<waarde>} een waarde, zoals besproken in subparagraaf \emph{Dataschema} van \cref{subsec:dataserialisatie}.
+    }
+    \label{lst:function-schema}
+\end{listing}
 
-De lijst van argumenten is een lijst waarden, voorgesteld in het serialisatieformaat.
-Het type van de functie geeft aan welke soort functie het is.
-Mogelijke waarden zijn momenteel:
+\Cref{lst:function-schema} toont de structuur van een functieoproep in een vereenvoudigde versie van JSON Schema.
+Het bestaat uit volgende onderdelen:
 \begin{description}
-    \item[\texttt{top}] Een \english{top-level} functie.
-    Afhankelijk van de programmeertaal zal deze functie toch omgezet worden naar een functie op een object (bv.\ naar een statische functie in Java).
-    \item[\texttt{object}] Een functie van een object.
-    De invulling hiervan is gedeeltelijk programmeertaalafhankelijk, en meer specifiek van welke invulling gegeven wordt aan een object.
-    Bij dit soort functies moet het \texttt{object} gegeven worden, wat het object is waaraan de functie vasthangt.
-    In de praktijk kan dit mechanisme ook gebruikt worden voor functies in bijvoorbeeld een namespace of een statische functie in Java.
-    \item[\texttt{constructor}] Deze soort heeft dezelfde semantiek als een top-level functie, met dien verstande dat het om een constructor gaat.
-    In Java zal bijvoorbeeld het keyword \texttt{new} vanzelf toegevoegd worden.
-    De functienaam doet dienst als naam van de klasse.
-    \item[\texttt{identity}] Dit is een speciaal geval: er mag geen functienaam gegeven worden en er moet exact één argument gegeven worden.
-    Dat ene argument zal de returnwaarde van de functie zijn.
-    In de implementaties wordt dit vaak ook niet vertaalt als een functie, maar wordt de waarde rechtstreeks gebruikt.
-    De bestaansreden van dit soort functies is het toekennen van waarden aan variabelen, om redenen die we later zullen bespreken.
+    \item[\texttt{type}] Het soort functie.
+    Kan een van deze waarden zijn:
+    \begin{description}
+        \item[\texttt{function}] Een \english{top-level} functie.
+        Afhankelijk van de programmeertaal zal deze functie toch omgezet worden naar een functie op een object (bv.\ naar een statische functie in Java).
+        \item[\texttt{namespace}] Een methode (functie van een object) of een functie in een namespace.
+        De invulling hiervan is gedeeltelijk programmeertaalafhankelijk: in Java gaat het om methodes, terwijl het in Haskell om functies van een module gaat.
+        Bij dit soort functies moet de \texttt{namespace} gegeven worden.
+        \item[\texttt{constructor}] Deze soort heeft dezelfde semantiek als een top-level functie, met dien verstande dat het om een constructor gaat.
+        In Java zal bijvoorbeeld het keyword \texttt{new} vanzelf toegevoegd worden.
+        De functienaam doet dienst als naam van de klasse.
+        \item[\texttt{identity}] Dit is een speciaal geval: er mag geen functienaam gegeven worden en er moet exact één argument gegeven worden.
+        Dat ene argument zal de returnwaarde van de functie zijn.
+        In de implementaties wordt dit vaak ook niet vertaald als een functie, maar wordt de waarde rechtstreeks gebruikt.
+        De bestaansreden van dit soort functies is het toekennen van waarden aan variabelen, om redenen die we later zullen bespreken.
+    \end{description}
+    \item[\texttt{namespace}] De namespace voor functies van het type \texttt{namespace}.
+    \item[\texttt{name}] De naam van de functie.
+    \item[\texttt{arguments}] De argumenten van de functie.
+    Dit is een lijst van waarden, waarbij de waarden zijn zoals beschreven bij het serialisatieformaat in \cref{subsec:dataserialisatie}.
 \end{description}
 
+% TODO: herdenk heel deze zever.
 Een beperking is dat het niet mogelijk is om rechtstreeks een functieoproep te doen als argument voor een andere functie,
 of toch niet op een programmeertaalonafhankelijke manier.
 Een oproep als \texttt{oproep(hallo(), 5)} is niet mogelijk.
@@ -437,143 +462,199 @@ Dit type moet een van de ondersteunde types zijn uit het serialisatieformaat, zi
 
 Een gecombineerd voorbeeld staat hieronder.
 Hier wordt de string \texttt{'Dodona'} toegekend aan een variabele met naam \texttt{name}.
-De judge kan het type afleiden, dus we moeten niet opgeven dat \texttt{name} een \texttt{str} is.
+De judge kan het type afleiden, dus we moeten niet opgeven dat \texttt{name} een \texttt{text} is.
 
 \inputminted{json}{code/assign-variable.json}
 
-\subsection{Vereiste functies}\label{subsec:vereiste-functies}
+\subsection{Controle ondersteuning voor programmeertalen}\label{subsec:vereiste-functies}
 
-We hebben in het overzicht al vermeld dat voor de evaluatie gecontroleerd wordt of een testplan de programmeertaal van gegeven oplossing ondersteunt.
-Concreet gebeurt dit door voor elk item in het testplan af te leiden welke functies nodig zijn in een programmeertaal om dat item te ondersteunen.
-Bevat een testplan bijvoorbeeld waarden met als type \texttt{set} (de verzameling), dan kunnen enkel programmeertalen die een verzameling ondersteunen gebruikt worden.
+In het stappenplan uit \cref{sec:ontwerp} is al vermeld dat vóór een beoordeling start, een controle plaatsvindt om zeker te zijn dat het testplan uitgevoerd kan worden in de programmeertaal van de ingediende oplossing.
+Concreet gebeurt dit door voor elk item in het testplan af te leiden wat de programmeertaal dient te ondersteunen om met dat item uit het testplan te kunnen werken.
+Bevat een testplan bijvoorbeeld waarden met als type \texttt{set} (verzamelingen), dan kunnen enkel programmeertalen die verzamelingen ondersteunen gebruikt worden.
 Dat zijn bijvoorbeeld Python en Java, maar geen Bash.
-Het afleiden van de vereiste functies gebeurt volledig automatisch aan de hand van het testplan.
+Het afleiden van wat de programmeertaal moet ondersteunen gebeurt volledig automatisch aan de hand van het testplan.
 
-\section{Uitvoeren van de oplossing}\label{sec:uitvoeren-van-de-oplossing}
+\section{Oplossingen uitvoeren}\label{sec:oplossingen-uitvoeren}
 
-De eerste stap die wordt uitgevoerd bij de evaluatie van de oplossing is het genereren van de code, die de code van de student zal uitvoeren.
+De eerste stap die wordt uitgevoerd bij de beoordeling van een ingediende oplossing is het genereren van de testcode, die de ingediende oplossing zal beoordelen.
 
-\subsection{Genereren van code}\label{subsec:genereren-van-code}
+\subsection{Testcode genereren}\label{subsec:testcode-genereren}
 
-Het genereren van de code gebeurt met een sjabloonsysteem genaamd Mako \autocite{mako}.
-Dit soort systemen wordt traditioneel gebruikt bij webapplicaties (zoals Ruby on Rails met \textsc{erb}, Phoenix met \textsc{eex}, Laravel met Blade, enz.) om html-pagina's te genereren.
-In ons geval zijn de sjablonen verantwoordelijk voor de vertaling van de programmeertaalonafhankelijke concepten in het testplan naar eigenlijke code in de programmeertaal van de oplossing.
+Het genereren van de testcode gebeurt met een sjabloonsysteem genaamd Mako \autocite{mako}.
+Dit soort systemen wordt traditioneel gebruikt bij webapplicaties (zoals Ruby on Rails met \textsc{erb}, Phoenix met \textsc{eex}, Laravel met Blade, enz.) om bijvoorbeeld html-pagina's te genereren.
+In ons geval zijn de sjablonen verantwoordelijk voor de vertaling van programmeertaalonafhankelijke specificaties in het testplan naar concrete testcode in de programmeertaal van de ingediende oplossing.
 Hierbij denken we aan de functieoproepen, assignments, enz.
 Ook zijn de sjablonen verantwoordelijk voor het genereren van de code die de oplossing van de student zal oproepen en evalueren.
 
 \subsubsection{Sjablonen}
 
-Het aantal sjablonen en hoe ze geïmplementeerd worden is in principe vrij, zij het dat de judge wel enkele standaardsjablonen nodig heeft, waaraan vastgelegde parameters meegegeven worden.
+TESTed heeft een aantal standaardsjablonen nodig, waaraan vastgelegde parameters meegegeven worden en die een vaste functie moeten uitvoeren.
 Deze verplichte sjablonen zijn:
 \begin{description}
-    \item[\texttt{assignment}] Vertaalt een assignment uit het testplan naar code.
-    \item[\texttt{context}] Het sjabloon dat de code genereert om een context te evalueren.
-    Deze code moet uitvoerbaar zijn (d.w.z.\ een main-functie bevatten of een script zijn).
-    \item[\texttt{selector}] Het sjabloon de code genereert om een bepaalde context uit te voeren.
-    Om performantieredenen (later hierover meer) wordt de code van alle contexten soms uit een keer gegenereerd en gecompileerd.
-    Aan de hand van een parameter (de naam van de context), wordt bij het uitvoeren de code voor de juiste context gekozen.
-    \item[\texttt{evaluator\_executor}] Genereert code om een aangepaste evaluator te starten.
-    \item[\texttt{function}] Vertaalt een functie-oproep naar code.
-    \item[\texttt{value}] Vertaalt een waarde uit het serialisatieformaat naar code.
+    \item[\texttt{assignment}] Vertaalt een toekenningsopdracht uit het testplan naar code.
+    \item[\texttt{context}] Een sjabloon dat code genereert om een context te beoordelen.
+    Deze code moet uitvoerbaar zijn (dat wil zeggen een main-functie bevatten of een script zijn).
+    \item[\texttt{selector}] Een sjabloon dat code genereert om een bepaalde context uit te voeren.
+    Om performantieredenen (hierover later meer) wordt de code van alle contexten soms uit een keer gegenereerd en gecompileerd.
+    Aan de hand van een parameter (de naam van de context), wordt bij het uitvoeren van deze selectiecode de testcode voor de juiste context gekozen.
+    Dit sjabloon is enkel nodig indien batchcompilatie ondersteund wordt.
+    \item[\texttt{evaluator\_executor}] Een sjabloon dat code genereert om een geprogrammeerde evaluatie te starten.
+    \item[\texttt{function}] Vertaalt een functie-oproep naar testcode.
 \end{description}
 
-Daarnaast moet het encoderen naar het serialisatieformaat ook geïmplementeerd worden in elke taal.
-Veel talen hebben dus nog enkele bijkomende bestanden met code.
-In alle bestaande implementaties is dit geïmplementeerd als een module of klasse met naam \texttt{Value}.
+Daarnaast moet het encoderen naar het serialisatieformaat ook geïmplementeerd worden in elke programmeertaal.
+Veel programmeertalen hebben dus nog enkele bijkomende bestanden met code.
+In alle bestaande configuraties van programmeertalen is dit geïmplementeerd als een module of een klasse met naam \texttt{Value}.
+Dit wordt geïllustreerd in \cref{ch:nieuwe-taal}, dat het toevoegen van een nieuwe programmeertaal aan TESTed volledig uitwerkt.
 
-\subsubsection{Modus}\label{sss:modus}
+\subsubsection{Testcode compileren}
 
-De judge ondersteunt twee uitvoeringsmodi:
+TESTed ondersteunt twee modi waarin de code gecompileerd kan worden (bij programmeertalen die geen compilatie ondersteunen wordt deze stap overgeslagen):
+
 \begin{description}
-    \item[Precompilatiemodus] In deze modus wordt de code voor alle contexten in een keer gecompileerd.
+    \item[Batchcompilatie] In deze modus wordt de code voor alle contexten in een keer gecompileerd.
     Dit wordt gedaan om performantieredenen.
     In talen die resulteren in een uitvoerbaar bestand (zoals Haskell, C/C++), resulteert deze modus in één uitvoerbaar bestand voor alle contexten.
     Bij het uitvoeren wordt dan aan de hand van een parameter de juiste context uitgevoerd (met het \texttt{selector}-sjabloon van hierboven).
-    \item[Individuele modus] Hierbij wordt elke context afzonderlijk gecompileerd.
+    \item[Contextcompilatie] Hierbij wordt elke context afzonderlijk gecompileerd.
 \end{description}
 
-Een flowchart van het generen van de code is \cref{fig:generation}, met een testplan met vier contexten.
-In dit diagram zijn de stappen voor de individuele modus in het \textcolor{ugent-we}{aquablauw}.
-De stappen van de precompilatiemodus zijn in het \textcolor{ugent-blue}{UGent-blauw}.
-De gemeenschappelijke stappen zijn in het zwart.
+Dit wordt getoond in \cref{fig:tested-flow} uit \cref{sec:ontwerp} door twee kleuren te gebruiken: de stappen die enkel gebeuren bij batchcompilatie zijn in het \textcolor{ugent-ps}{groen}, terwijl stappen die enkel bij contextcompilatie gebeuren in het \textcolor{ugent-we}{blauw} staan.
+Stappen die altijd gebeuren staan in de flowchart in het zwart.
 
-Dit gedrag is configureerbaar in het testplan, maar standaard wordt de precompilatiemodus gebruikt, zij het met terugval op de individuele modus.
-Deze terugval is handig voor talen met sterke compilatie.
+Dit gedrag is configureerbaar in het testplan, maar standaard wordt de batchcompilatie gebruikt.
+Als er een compilatiefout optreed bij de compilatie in batchcompilatie, wordt valt TESTed terug op contextcompilatie.
+Deze terugval is handig voor programmeertalen waar de compilatie veel fouten ontdekt (vaak de meer statische programmeertalen).
 Een voorbeeldscenario is als volgt: stel een oefening waarbij de student twee functies moet implementeren.
-De student implementeert de eerste functie en dient in om al feedback te krijgen.
-Bij talen als Java of Haskell zal dit niet lukken: daar alle contexten in een keer gecompileerd worden, zal de ontbrekende tweede functie ervoor zorgen dat de volledige compilatie faalt.
+De student implementeert de eerste functie en dient een oplossing in om al feedback te krijgen.
+Bij programmeertalen als Java of Haskell zal dit niet lukken: daar alle contexten in één keer gecompileerd worden, zal de ontbrekende tweede functie ervoor zorgen dat de volledige compilatie faalt.
 In individuele modus is dit geen probleem: de contexten die de eerste functie testen zullen compileren en kunnen uitgevoerd worden.
-De individuele modus brengt wel een niet te onderschatten kost qua uitvoeringstijd met zich mee (zie ook \cref{ch:beperkingen-en-toekomstig-werk}).
+De individuele modus brengt wel een niet te verwaarlozen kost qua uitvoeringstijd met zich mee (zie ook \cref{ch:beperkingen-en-toekomstig-werk}).
+% TODO: referentie naar deel over performantie.
 
-\begin{figure}
-    \begin{adjustbox}{width=\textwidth}
-        \input{generated/generation.tikz}
-    \end{adjustbox}
+\Cref{lst:generated-context-python,lst:generated-context-java} bevatten de testcode gegenereerd voor een context uit de voorbeeldoefening Lotto (het gaat om dezelfde context uit het voorbeeld van het testplan in \cref{lst:testplan}), in respectievelijk Python en Java.
+Daarnaast bevat Z de code voor de \texttt{selector} in Java.
+Hiervan is geen versie in Python, daar Python selector nodig heeft in batchcompilatie (in Python kunnen meerdere onafhankelijke bestanden tegelijk gecompileerd worden).
+De selector bevat twee contexten om de werking duidelijk te maken.
+
+\begin{listing}
+    \inputminted{python}{code/generated-context-1.py}
     \caption{
-        Schematische voorstelling van het genereren van de code.
-        Gemeenschappelijke stappen zijn zwart, stappen voor de individuele modus \textcolor{ugent-we}{aquablauw} en stappen voor de precompilatiemodus \textcolor{ugent-blue}{UGent-blauw}.
+        Gegenereerde testcode in Python voor de eerste context uit het testplan van de voorbeeldoefening Lotto.
     }
-    \label{fig:generation}
-\end{figure}
+    \label{lst:generated-context-python}
+\end{listing}
 
-\subsection{Uitvoeren van de code}\label{subsec:uitvoeren-van-de-code}
+\begin{listing}
+    \inputminted{java}{code/generated-context-1.java}
+    \caption{
+        Gegenereerde testcode in Java voor de eerste context uit het testplan van de voorbeeldoefening Lotto.
+        Enkele hulpfuncties en imports zijn verwijderd om de code korter te maken.
+    }
+    \label{lst:generated-context-java}
+\end{listing}
 
-Na het genereren wordt alle code gecompileerd (bij de talen waar dit mogelijk is).
-Dit gebeurt ofwel eenmaal voor alle contexten afzonderlijk, ofwel eenmaal voor alle contexten samen, afhankelijk van de modus.
-De werking hiervan wordt behandeld in \cref{sss:modus} en \cref{fig:generation}.
+\begin{listing}
+    \inputminted{java}{code/Selector.java}
+    \caption{
+        Gegenereerde selector in Java voor twee contexten uit het testplan van de voorbeeldoefening Lotto.
+    }
+    \label{lst:selector-java}
+\end{listing}
 
-Vervolgens wordt elke context uit het testplan uitgevoerd en wordt de uitvoer verzameld.
-Het uitvoeren zelf gebeurt op de normale manier dat een programmeertaal uitgevoerd wordt: via de commandoregel.
-Deze aanpak heeft een voordeel: er is geen verschil tussen hoe de judge de code van de student uitvoert en hoe de student zijn code zelf uitvoert op zijn eigen computer.
+\subsection{Testcode uitvoeren}\label{subsec:testcode-uitvoeren}
+
+Vervolgens wordt de (gecompileerde) testcode voor elke context uit het testplan afzonderlijk uitgevoerd en worden de resultaten (het gedrag en de neveneffecten) verzameld.
+Het uitvoeren zelf gebeurt op de normale manier waarop code voor de programmeertaal uitgevoerd wordt: via de commandoregel.
+Deze aanpak heeft als voordeel dat er geen verschil is tussen hoe TESTed de ingediende code uitvoert en hoe de student zijn code zelf uitvoert op zijn eigen computer.
 Dit voorkomt dat er subtiele verschillen in de resultaten sluipen.
 
-Indien de configuratie het toelaat, worden de contexten in parallel uitgevoerd.
-Om te vermijden dat bestanden of uitvoer overschreven wordt, wordt de gecompileerde code gekopieerd naar een aparte map, waar de uitvoer gebeurt.
-\Cref{lst:mapstructuur} illustreert dit met een voorbeeld voor een oplossing in Java.
-Deze mapstructuur stelt de toestand van de werkmap voor na het uitvoeren van de code.
-In de map \texttt{common} zit alle code en de gecompileerde bestanden.
-Voor elke context worden de gecompileerde bestanden gekopieerd naar een andere map, bv.\ \texttt{context-1}, wat de map is voor context \texttt{1} van het testplan.
+Indien de configuratie het toelaat, worden de contexten parallel uitgevoerd.
+Om te vermijden dat bestanden of uitvoer overschreven worden, wordt alle relevante gecompileerde code voor een context gekopieerd naar een aparte map waar het uitvoeren gebeurt.
+\Cref{lst:mapstructuur} illustreert dit met een voorbeeld voor een ingediende oplossing in de programmeertaal Python.
+Deze mapstructuur stelt de toestand van de werkmap van TESTed voor na het uitvoeren van de code.
+In de map \texttt{common} zit alle testcode en de gecompileerde bestanden voor alle contexten.
+Voor elke context worden de gecompileerde bestanden gekopieerd naar een andere map, bv.\ \texttt{context\_0\_1}, wat de map is voor context \texttt{1} van tabblad \texttt{0} van het testplan.
 
 \begin{listing}
     \inputminted{text}{code/dir-listing.txt}
-    \caption{Mapstructuur na het uitvoeren van de evaluatie van een oplossing in Python.
-    Context 0-0 staat voor de eerste context van het eerste tabblad.}
+    \caption{Mapstructuur na het uitvoeren van de testcode van een oplossing in Python.
+    \texttt{context\_0\_0} staat voor de eerste context van het eerste tabblad.
+    }
     \label{lst:mapstructuur}
 \end{listing}
 
-\subsection{Verzamelen van resultaten}\label{subsec:verzamelen-van-resultaten}
+\subsection{Beoordelen van gedrag}\label{subsec:beoordelen-van-gedrag}
 
-De uitvoering van een oplossing genereert resultaten die door de judge geïnterpreteerd moeten worden.
-Er zijn verschillende soorten uitvoerresultaten (zoals vermeld heeft elke soort uitvoer een aparte test in het testplan).
-We noemen de verschillende soorten uitvoer de \term{uitvoerkanalen}.
-Twee ervan, het standaarduitvoer- en standaardfoutkanaal komen overeen met de standaarduitvoer- en standaardfoutstroom van het proces dat de code uitvoert.
-Uitvoer naar een bestand (het bestandskanaal) resulteert in een bestand en vormt ook geen probleem.
-De overige uitvoerkanalen, het kanaal voor exceptions (uitzonderingenkanaal) en het returnkanaal (voor returnwaarden) worden geschreven naar een bestand.
-Het is namelijk niet in elke taal mogelijk om nieuwe kanalen te openen.
-De sjablonen krijgen de verwachte namen van die bestanden mee van de judge, maar zijn wel verantwoordelijk voor het openen, schrijven en sluiten van deze bestanden.
-Deze naam bevat willekeurige tekens, zodat de kans dat deze bestanden overschreven worden door de oplossing minimaal is.
-De bestanden waar de exceptions and returnwaarden naartoe geschreven worden, worden na de uitvoering gelezen door de judge.
-Hierna worden alle kanalen op dezelfde manier behandeld door de judge.
+Het uitvoeren van de testcode genereert resultaten (gedrag en neveneffecten) die door TESTed beoordeeld moeten worden.
+Er zijn verschillende soorten gedragingen en neveneffecten die interessant zijn.
+Elke soort gedrag of neveneffect wordt een \term{uitvoerkanaal} genoemd.
+TESTed verzamelt volgende uitvoerkanalen:
+\begin{itemize}
+    \item De standaarduitvoerstroom.
+    Dit wordt verzameld als tekstuele uitvoer.
+    \item De standaardfoutstroom.
+    Ook dit wordt als tekst verzameld.
+    \item Fatale uitzonderingen.
+    Hiermee bedoelen we uitzonderingen die tot aan de testcode geraken.
+    Een uitzondering die afgehandeld wordt door de ingediende oplossing wordt niet verzameld.
+    De uitzonderingen worden verzameld in een bestand.
+    \item Returnwaarden.
+    Deze waarden worden geëncodeerd en ook verzameld in een bestand.
+    \item Exitcode.
+    Het gaat om de exitcode van de testcode voor een context.
+    Daar de code per context wordt uitgevoerd, wordt de exitcode ook verzameld per context (en niet per testcase, zoals de andere uitvoerkanalen).
+    \item Bestanden.
+    Tijdens het beoordelen van de verzamelde resultaten is het mogelijk de door de ingediende oplossing gemaakte bestanden te bekijken.
+\end{itemize}
 
-In de bestaande implementaties ligt de verantwoordelijkheid om naar deze bestanden te schrijven bij de \texttt{Value}-module van hierboven.
+De standaarduitvoer- en standaardfoutstroom worden rechtstreeks opgevangen door TESTed.
+De andere uitvoerkanalen (uitzonderingen en returnwaarden) worden naar een bestand geschreven.
+De reden dat deze niet naar een andere \term{file descriptor} geschreven worden is eenvoudig: niet alle talen (zoals Java) ondersteunen het openen van bijkomende file descriptors.
 
-\section{Evalueren van een oplossing}\label{sec:evalueren-van-een-oplossing2}
+Alle uitvoerkanalen (met uitzondering van de exitcode en de bestanden) worden per testcase verzameld.
+Aangezien de uitvoerkanalen pas verzameld worden na het uitvoeren van de context, moet er een manier zijn om de uitvoer van de verschillende testgevallen te onderscheiden.
+De testcode is hier verantwoordelijk voor, en schrijft een \english{separator} naar alle uitvoerkanalen tussen elk testgeval, zoals te zien is in \cref{lst:uitvoer}.
 
-Na de uitvoering van elke context heeft de judge alle relevant uitvoer verzamelt, zoals de standaardkanalen.
+\begin{listing}
+    \begin{minted}{text}
+    {"data":"1 - 3 - 6 - 8 - 10 - 15","type":"text"}--gL9koJNv3-- SEP
+    \end{minted}
+    \caption{Voorbeeld van het uitvoerkanaal voor returnwaarden na het uitvoeren van de eerste context uit de voorbeeldoefening Lotto.}
+    \label{lst:uitvoer}
+\end{listing}
+
+Tijdens het genereren van de code krijgen de sjablonen een reeks willekeurige tekens mee, de \english{secret}.
+Deze secret wordt gebruikt voor verschillende dingen, zoals:
+\begin{itemize}
+    \item De separator.
+    Door het gebruik van de willekeurige tekens is de kans dat de separator overeenkomt met een echt waarde praktisch onbestaand.
+    \item Bestandsnamen.
+    De testcode is verantwoordelijk voor het openen van de bestanden voor de uitvoerkanalen die naar een bestand geschreven worden.
+    Bij het openen zal de testcode de secret in de bestandsnaam gebruiken.
+    Dit is om het per abuis overschrijven van deze bestanden door de ingediende oplossing tegen te gaan.
+\end{itemize}
+
+\section{Oplossingen beoordelen}\label{sec:evalueren-van-een-oplossing2}
+
+Na het uitvoeren van de testcode voor elke context heeft TESTed alle relevante uitvoer gemeten en verzameld.
 Deze uitvoer moet vervolgens beoordeeld worden om na te gaan in hoeverre deze uitvoer voldoet aan de verwachte uitvoer.
 Dit kan op drie manieren:
 \begin{enumerate}
-    \item Ingebouwde evaluator: de oplossing wordt geëvalueerd in de judge zelf.
-    \item Aangepaste evaluator: de oplossing wordt geëvalueerd door eigen code, maar dezelfde wordt gebruikt voor alle programmeertalen, in het evaluatieproces.
-    \item Taalspecifieke evaluator: de oplossing wordt onmiddellijk na de uitvoering geëvalueerd in het uitvoeringsproces.
+    \item Generieke evaluatie: de uitvoer wordt beoordeeld door TESTed zelf.
+    \item Geprogrammeerde evaluatie: de uitvoer wordt beoordeeld door programmacode geschreven door degene die de oefening opgesteld heeft, in een aparte omgeving (de evaluatieomgeving).
+    \item Programmeertaalspecifieke evaluatie: de uitvoer wordt onmiddellijk na het uitvoeren van de testcode beoordeeld in het hetzelfde proces.
 \end{enumerate}
 
-\subsection{Ingebouwde evaluator}\label{subsec:ingebouwde-evaluator}
+\subsection{Generieke evaluatie}\label{subsec:ingebouwde-evaluator}
 
-Voor eenvoudige evaluaties volstaat de ingebouwde evaluator van de judge.
-Momenteel zijn er drie soorten ingebouwde evaluatoren, die hieronder besproken worden.
 
-\subsubsection{Tekstevaluator}
+Voor eenvoudige beoordelingen volstaat de generieke evaluatie door TESTed.
+Het is mogelijk om de verwachte resultaten in het testplan op te nemen.
+TESTed zal deze resultaten uit het testplan dan vergelijken met de resultaten geproduceerd door het uitvoeren van de testcode.
+Momenteel zijn er drie soorten ingebouwde evaluatiemethoden, die hieronder besproken worden.
+
+\subsubsection{Tekstevaluatie}
 
 Deze evaluator vergelijkt de verkregen uitvoer van een uitvoerkanaal (standaarduitvoer, returnwaarde, \ldots) met de verwachte uitvoer uit het testplan.
 Alle data worden als string behandeld.

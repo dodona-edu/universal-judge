@@ -3,9 +3,7 @@ class Selector {
         var name = a[0];
         % for c in contexts:
             if ("${c}".equals(name)) {
-                var context = new ${c}();
-                context.execute();
-                context.close();
+                ${c}.main(new String[]{});
             }
         % endfor
     }

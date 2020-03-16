@@ -4,34 +4,33 @@
       "name": "Feedback",
       "contexts": [
         {
-          "normal": [
-            {
-              "input": {
-                "function": {
-                  "type": "top",
-                  "name": "loterij",
-                  "arguments": [
-                    { "type": "integer", "data": 6 },
-                    { "type": "integer", "data": 117}
-                  ]
-                }
+          "input": {
+            "function": {
+              "type": "top",
+              "name": "loterij",
+              "arguments": [
+                { "type": "integer", "data": 6 },
+                { "type": "integer", "data": 15 }
+              ]
+            }
+          },
+          "output": {
+            "result": {
+              "value": {
+                "type": "text",
+                "data": "1 - 6 - 7 - 11 - 13 - 14"
               },
-              "output": {
-                "result": {
-                  "value": { "type": "text", "data": "3 - 5 - 11 - 24 - 58 - 115"},
-                  "evaluator": {
-                    "type": "custom",
-                    "language": "python",
-                    "path": "./evaluator.py",
-                    "arguments": [
-                      { "type": "integer", "data": 6 },
-                      { "type": "integer", "data": 117 }
-                    ]
-                  }
-                }
+              "evaluator": {
+                "type": "custom",
+                "language": "python",
+                "path": "./evaluator.py",
+                "arguments": [
+                  { "type": "integer", "data": 6 },
+                  { "type": "integer", "data": 15 }
+                ]
               }
             }
-          ]
+          }
         }
       ]
     }
