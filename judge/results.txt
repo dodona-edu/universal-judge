@@ -9,6 +9,8 @@ LOTTO: volledig  | 48s                36s       |
        partieel  | 46s                25s       |
        verbeterd | 14s                10s       |
 -----------------|------------------------------|
+       volledig  | 48s                28s       |
+       partieel  | 46s                26s       |
 ECHO:  verbeterd | 8s                 5s        |
 
 # Python
@@ -19,6 +21,8 @@ LOTTO: volledig  | 13s                9s        |
        partieel  | 9s                 6s        |
        verbeterd | 8s                 6s        |
 -----------------|------------------------------|
+       volledig  | 6s                 3s        |
+       partieel  | 5s                 3s        |
 ECHO:  verbeterd | 5s                 3s        |
 
 
