@@ -2,23 +2,77 @@
 
 \section{Inleiding}\label{sec:inleiding}
 
-TODO
-Programmeren -> steeds belangrijker en nuttigere kennis om te hebben
-Goed programmeren -> vereist veel oefening
-Zeker in cursussen met meer mensen -> goede ondersteuning lesgever -> veel tijd
-Automatiseren van beoordeling programmeeroefeningen -> Dodona
+\subsection{De digitale maatschappij}\label{subsec:de-digitale-maatschappij}
 
-\section{Wat is Dodona?}\label{sec:wat-is-dodona}
+\lettrine{D}{e evoluties} op technologisch vlak hebben ervoor gezorgd dat onze maatschappij de laatste decennia in hoge mate gedigitaliseerd is, een proces dat nog steeds aan de gang is.
+Bovendien kan, door de snelheid waarmee deze veranderingen vaak optreden, eerder gesproken worden van een revolutie dan een evolutie: de veranderingen zijn vaak ingrijpend en veranderen fundamentele aspecten van de sectoren waarin de digitalisering plaatsvindt.
+Dit gaat over nieuwe sectoren, zoals de deeleconomie, of ingrijpende veranderingen bij bestaande sectoren, zoals de opkomst van \english{ride sharing} in de taxisector.
+Ook de impact op maatschappelijk vlak, zoals de sociale media in de politiek, mag niet vergeten worden.
+Al deze uitdagingen vragen een gepast antwoord, zoals onder andere \autocite{hipeac2019}.
 
-TODO
-Intro over Dodona: korte geschiedenis, terminologie, hoe Dodona werkt (oefeningen, judges, enz.)
--> Over de judge wordt in het deel hierna meer verteld.
+Ook op educatief vlak heeft de digitalisering een grote impact.
+Enerzijds biedt digitalisering nieuwe mogelijkheden aan voor onderwijsdoeleinden, zoals het lesgeven op afstand, het online aanbieden van leermateriaal en het online indien en verbeteren van opdrachten.
 
-Dodona:
+Anderzijds biedt het ook uitdagingen: om studenten voor te bereiden op de steeds digitalere maatschappij is een basis van digitale geletterdheid nodig.
+Net door de snelle evolutie op technologisch vlak volstaat het niet om studenten te leren werken met de technologie van vandaag;
+een grondige kennis van de onderliggende werking van de technologie is onontbeerlijk.
 
-- Opgaves (of oefeningen), opgesteld door lesgevers
-- Oplossingen, opgesteld door studenten
-- Judge beoordeelt oplossing van een opgave, door Dodona-team
+Een belangrijk aspect hierin is het concept van \term{computationeel denken}.
+Dit concept gaat over het omvormen van problemen zodat de door een computer opgelost kunnen worden.
+Dat het aanleren van deze vaardigheden nodig is, bewijst ook de opname van computationeel denken in de eindtermen, bijvoorbeeld in het katholieke basisonderwijs \autocite{zinin2017} of in de onderwijsdoelen voor het secundair onderwijs als \term{Computationeel denken en handelen} \autocite{2019040867}.
+
+\subsection{Computationeel denken}\label{subsec:computationeel-denken}
+
+Over de vraag wat computationeel denken nu precies betekent lopen de antwoorden uiteen.
+Het Departement Onderwijs en Vorming van de Vlaams Overheid \autocite{bastiaensen2017} definieert de term als volgt:
+
+\begin{quote}
+    Computationeel denken verwijst dus naar het menselijke vermogen om complexe problemen op te lossen en daarbij computers als hulpmiddel te zien.
+    Met andere woorden, computationeel denken is het proces waarbij aspecten van informaticawetenschappen herkend worden in de ons omringende wereld, en waarbij de methodes en technieken uit de informaticawetenschappen toegepast worden om problemen uit de fysische en virtuele wereld te begrijpen en op te lossen.
+\end{quote}
+
+Computationeel denken is dus ruimer dan programmeren, maar programmeren vormt wel een uitstekende manier om het computationeel denken aan te leren en te oefenen.
+Bovendien is programmeren op zich ook een nuttige vaardigheid om studenten aan te leren.
+
+\subsection{Programmeeroefeningen}\label{subsec:programmeeroefeningen}
+
+Het aanleren van programmeren is niet eenvoudig en wordt door veel studenten als moeilijk ervaren \autocite{10.1145/3293881.3295779}.
+Het maken van oefeningen kan daarbij helpen, indachtig het spreekwoord "oefening baart kunst".
+De studenten veel oefeningen laten maken, resulteert wel in twee uitdagingen voor de lesgevers:
+\begin{enumerate}
+    \item De lesgevers moeten geschikte oefeningen opstellen, die rekening houden met welke programmeerconcepten studenten al kennen, tijdslimieten, moeilijkheidsgraden, enz.
+    Het opstellen van deze oefeningen vraagt veel tijd.
+    \item De oplossingen voor deze oefeningen moeten voorzien worden van kwalitatieve feedback.
+    Bij het aanleren van programmeren is feedback namelijk een belangrijk element om de programmeervaardigheden van de studenten te verbeteren \autocite{10.1145/2899415.2899422}.
+\end{enumerate}
+
+Deze thesis focust op de eerste uitdaging, al wordt ook met de tweede uitdaging rekening gehouden, onder andere in \cref{sec:robuustheid}.
+Hiervoor werkt de thesis binnen de context van Dodona, een online leerplatform dat sinds september 2016 beschikbaar is aan de Universiteit Gent.
+
+\section{Het leerplatform Dodona}\label{sec:wat-is-dodona}
+
+Sinds 2011 wordt aan de vakgroep Computationele Biologie aan de Universiteit Gent gewerkt met programmeeroefeningen die in een online systeem ingediend en beoordeeld worden.
+Oorspronkelijk werd hiervoor gebruik gemaakt van de \english{Sphere Online Judge} (SPOJ) \autocite{10.1007/978-3-540-78139-4_31}.
+Op basis van ervaringen met SPOJ ontwikkelde de vakgroep een eigen leerplatform, Dodona, dat in september 2016 beschikbaar werd.
+Het doel van Dodona is eenvoudig: lesgevers bijstaan om hun studenten niet alleen zo goed mogelijk te leren programmeren, maar dit ook op een zo efficiënt mogelijke manier te doen.
+
+Het online leerplatform Dodona kunnen we opdelen in verschillende onderdelen:
+\begin{enumerate}
+    \item Het platform zelf.
+    Dit is een webapplicatie, die verantwoordelijk is om alle modules samen te laten werken en ook de webinterface aanbiedt die de studenten en lesgevers gebruiken.
+    Het is via deze interface dat lesgevers oefeningen beschikbaar maken en dat studenten hun oplossingen indienen.
+    Het platform zelf is programmeertaalonafhankelijk geschreven.
+    \item Judges.
+    De judges binnen Dodona zijn verantwoordelijk voor het beoordelen van ingediende oplossingen.
+    Dit onderdeel wordt uitgebreid besproken in \cref{subsec:de-judge}.
+    \item Oefeningen.
+    Oefeningen worden niet in Dodona zelf opgeslagen, maar worden door de lesgever aangeleverd via een git-repository.
+    De oefeningen bevatten de opgave en de testen die uitgevoerd worden tijdens de beoordeling van een oplossing.
+\end{enumerate}
+
+Met Dodona kunnen lesgevers een leertraject opstellen door een reeks oefeningen te selecteren.
+Studenten die dit leertraject volgen, zien onmiddellijk hun voortgang binnen het traject.
+Bij het indienen van hun oplossingen ontvangen de studenten ook onmiddellijk feedback over hun oplossing: deze feedback bevat niet alleen de juistheid van de oplossing, maar kan ook andere aspecten belichten, zoals de kwaliteit en performantie van de oplossing.
 
 \section{Beoordelen van oplossingen}\label{sec:evalueren-van-een-oplossing}
 
