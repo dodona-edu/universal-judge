@@ -853,14 +853,14 @@ Het gebruik in het testplan is \cref{lst:testplan-specific}.
     \label{lst:testplan-specific}
 \end{listing}
 
-\subsection{Performantie}\label{subsec:performantie}
+\section{Performantie}\label{sec:performantie}
 
 Zoals reeds vermeld in onder andere \cref{subsec:testcode-uitvoeren}, wordt de testcode voor elke context afzonderlijk uitgevoerd.
 Dat de contexten strikt onafhankelijk van elkaar uitgevoerd worden, werd reeds in het begin als een doel vooropgesteld.
 Dit geeft wel enkele uitdagingen op het vlak van performantie.
 Deze subparagraaf beschrijft de evaluatie van de implementatie van TESTed vanuit het perspectief van de performantie.
 
-\subsubsection{Jupyter-kernels}
+\subsection{Jupyter-kernels}\label{subsec:jupyter-kernels}
 
 Het eerste prototype van TESTed gebruikte Jupyter-kernels voor het uitvoeren van de code.
 Jupyter-kernels zijn de achterliggende technologie bij de Jupyter Notebooks \autocite{jupyter2016}.
@@ -901,7 +901,7 @@ Op dit punt is besloten dat de overhead van de Jupyter-kernels niet naar tevrede
 Bovendien is een bijkomend nadeel van het gebruik van Jupyter-kernels ondervonden: de kernels voor andere programmeertalen dan Python zijn van gevarieerde kwaliteit.
 Zo printen de Java-kernel en Julia-kernel altijd uitvoer naar de standaarduitvoerstroom bij het opstarten, wat in bepaalde gevallen problemen gaf bij het verzamelen van de resultaten van de uitvoer van de testcode.
 
-\subsubsection{Sjablonen}
+\subsection{Sjablonen}\label{subsec:sjablonen}
 
 De keuze viel om verder te gaan met het systeem van sjablonen (zie ook \cref{subsec:testcode-genereren}).
 Hierbij wordt de code gegenereerd en vervolgens uitgevoerd via de commandoregel.
@@ -941,7 +941,46 @@ In batchcompilatie in bijvoorbeeld Java kan de student niet de oplossing voor de
 
 De laatste en huidige iteratie bevat de mogelijkheid om beide compilatiemanieren te gebruiken, waarbij TESTed terugvalt op de contextcompilatie indien er iets misgaat bij de batchcompilatie.
 
-Tot slot bevat X nog enkele tijdsmetingen van de verschillende implementaties van het systeem met sjablonen.
-In deze tabel is de tijd gemeten om een (juiste) ingediende oplossing voor twee oefeningen te beoordelen: de voorbeeldoefening Lotto en een eenvoudigere oefening Echo.
+Tot slot bevat \cref{tab:meting} nog enkele tijdsmetingen van de verschillende implementaties van het systeem met sjablonen, voor de programmeertalen Python en Java.
+In deze tabel is de tijd gemeten in seconden om een (juiste) ingediende oplossing voor twee oefeningen te beoordelen: de voorbeeldoefening Lotto en een eenvoudigere oefening Echo.
 Bij die laatste bestaat de opgave uit het implementeren van een functie die haar parameters naar de standaarduitvoerstroom schrijft.
 Elke beoordeling is uitgevoerd met contextcompilatie, partiële compilatie en batchcompilatie en met en zonder parallelle uitvoering.
+
+Zoals verwacht levert de batchcompilatie het meeste tijdswinst op bij Java: daar heeft de compilatiestap ook een veel groter aandeel in de uitvoeringstijd.
+By Python is de compilatie veel sneller en ook veel minder belangrijk (zelfs optioneel, de stap wordt enkel uitgevoerd om bepaalde syntaxisfouten vroeg op te vangen en als optimalisatie).
+
+\begin{table}
+    \centering
+    \begin{tabular}{ll|r|r|r|r|}
+        \cline{3-6}
+        & & \multicolumn{2}{c|}{Python (s)} & \multicolumn{2}{c|}{Java (s)}  \\
+        \hline
+        \multicolumn{1}{|l|}{Oefening}               & Compilatie & 1 thread & 4 threads & 1 thread & 4 threads \\
+        \hline
+        \multicolumn{1}{|l|}{\multirow{3}{*}{Lotto}} & Context    & 13       & 9         & 48       & 36        \\
+        \multicolumn{1}{|l|}{}                       & Partieel   & 9        & 6         & 46       & 25        \\
+        \multicolumn{1}{|l|}{}                       & Batch      & 8        & 5         & 14       & 10        \\
+        \hline
+        \multicolumn{1}{|l|}{\multirow{3}{*}{Echo}}  & Context    & 6        & 3         & 48       & 28        \\
+        \multicolumn{1}{|l|}{}                       & Partieel   & 5        & 3         & 46       & 26        \\
+        \multicolumn{1}{|l|}{}                       & Batch      & 5        & 3         & 8        & 5         \\
+        \hline
+    \end{tabular}
+    \caption{Tijdsmetingen voor de oefeningen Lotto en Echo, voor de programmeertalen Python en Java, in contextcompilatie, partiële compilatie en batchcompilatie.}
+    \label{tab:meting}
+\end{table}
+
+\section{Robuustheid}\label{sec:robuustheid}
+
+Een belangrijk aspect bij educative software testing is de feedback als het verkeerd loopt.
+De feedback bij een verkeerde oplossing is in veel gevallen zelfs belangrijker dan de feedback bij een juiste oplossing: het is namelijk de bedoeling dat als studenten een verkeerde oplossing indienen, de feedback die Dodona geeft ze op weg kan helpen om hun oplossing te verbeteren.
+De feedback die Dodona toont is afkomstig uit de judges: het is de taak van TESTed om kwalitatief hoogstaande feedback te voorzien.
+Met kwalitatief hoogstaand wordt bedoeld dat de feedback nuttige informatie bevat, maar ook geen verkeerde of misleidende informatie bevat.
+
+TESTed moet dus robuust zijn tegen allerlei vormen van fouten in de ingediende oplossingen.
+Hieronder volgt een lijst van (categorieën) van fouten waarvoor TESTed nuttige feedback geeft.
+TESTed is zo opgebouwd dat er altijd iets van feedback komt, ook in onvoorziene omstandigheden, maar voor de soorten fouten op onderstaande lijst is expliciet gecontroleerd wat de kwaliteit van de feedback is.
+
+% TODO: lijst van issues
+TODO: een lijst van issues (zie ook de issue van op GitHub).
+
