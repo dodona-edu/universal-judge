@@ -4,8 +4,7 @@
 Het doel hiervan is een antwoord te bieden aan de onderzoeksvraag uit het vorige hoofdstuk en de beperkingen van deze aanpak in kaart te brengen.
 Deze judge heeft de naam \term{TESTed} gekregen.
 Bij TESTed is een oefening programmeertaalonafhankelijk en kunnen oplossingen in verschillende programmeertalen beoordeeld worden aan de hand van een en dezelfde specificatie.
-Dit hoofdstuk begint met het ontwerp van de judge toe te lichten, waarna elk onderdeel in meer detail besproken wordt.
-Tot slot wordt afgesloten met een samenvattend overzicht.
+Dit hoofdstuk begint met het ontwerp en de algemene werking van de judge toe te lichten, waarna elk onderdeel in meer detail besproken wordt.
 
 \section{Overzicht}\label{sec:ontwerp}
 
@@ -18,11 +17,11 @@ De twee stippellijnen geven programmeertaalbarrières aan, en verdelen TESTed in
     \item TESTed zelf is geschreven in Python: in het middelste deel staat de programmeertaal dus vast.
     Dit onderdeel is verantwoordelijk voor de regie van de beoordeling op basis van het testplan.
     \item De ingediende oplossing wordt uitgevoerd in de \term{uitvoeringsomgeving}, waar de programmeertaal overeenkomt met de programmeertaal van de oplossing.
-    \item Tot slot is er nog de \term{evaluatieomgeving}, waar door de lesgever geschreven beoordelingscode wordt uitgevoerd.
+    \item Tot slot is er nog de \term{evaluatieomgeving}, waar door de lesgever geschreven evaluatiecode wordt uitgevoerd.
     Deze moet niet in dezelfde programmeertaal als de oplossing of TESTed geschreven zijn.
 \end{enumerate}
 
-\subsection{Stappenplan bij een beoordeling}\label{subsec:stappenplan-van-een-beoordeling}
+\subsection{Stappenplan van een beoordeling}\label{subsec:stappenplan-van-een-beoordeling}
 
 De rest van het hoofdstuk bespreekt alle onderdelen van en stappen die gebeuren bij een beoordeling van een ingediende oplossing in detail.
 In \cref{fig:tested-flow} zijn deze stappen gegeven als een flowchart, en een uitgeschreven versie volgt:
@@ -41,15 +40,16 @@ In \cref{fig:tested-flow} zijn deze stappen gegeven als een flowchart, en een ui
     Dit kan op twee manieren gebeuren (meer details in \cref{subsec:testcode-genereren}):
     \begin{enumerate}
         \item Batchcompilatie: hierbij wordt de testcode van alle contexten verzameld en gecompileerd tot één uitvoerbaar bestand (executable).
-        Dit heeft als voordeel dat er slechts een keer een compilatie nodig is, wat goed is voor de performantie.
+        Dit heeft als voordeel dat er slechts een keer een compilatie nodig is, wat voor een betere performantie zorgt.
+        Bij deze manier resulteert de compilatiestap in één uitvoerbaar bestand.
         \item Contextcompilatie: hierbij wordt de testcode voor elke context afzonderlijk gecompileerd tot een uitvoerbaar bestand.
+        Bij deze manier worden er $n$ uitvoerbare bestanden geproduceerd tijdens de compilatiestap.
     \end{enumerate}
     In talen die geen compilatie nodig hebben of ondersteunen, wordt deze stap overgeslagen.
     \item Nu kan het uitvoeren van de beoordeling zelf beginnen: de gegenereerde code wordt uitgevoerd (nog steeds in de uitvoeringsomgeving).
     Elke context uit he testplan wordt in een afzonderlijk subproces uitgevoerd, teneinde het delen van informatie tegen te gaan.
     De onafhankelijkheid van de contexten laat ons ook toe om contexten in parallel uit te voeren.
-    Toch moeten we opmerken dat het parallel uitvoeren vooral een theoretische mogelijkheid is: in werkelijkheid gebruiken er meerdere gebruikers tegelijk Dodona, waardoor er ook meerdere oefeningen tegelijk beoordeeld worden, wat op zijn beurt ervoor zorgt dat er geen grote ruimte voor snelheidswinst door parallellisatie binnen een judge is.
-    \item De uitvoering van de executable in de vorige stap resulteert in resultaten (voor elke context), zoals de standaarduitvoerstroom, de standaardfoutstroom, returnwaardes, exceptions of exitcodes.
+    \item De uitvoering van de executable in de vorige stap produceert resultaten (voor elke context), zoals de standaarduitvoerstroom, de standaardfoutstroom, returnwaardes, exceptions of exitcodes.
     Deze bundel resultaten wordt nu geëvalueerd op juistheid.
     Hiervoor zijn drie mogelijke manieren:
     \begin{enumerate}
@@ -82,7 +82,8 @@ In \cref{fig:tested-flow} zijn deze stappen gegeven als een flowchart, en een ui
     \input{figures/flow.tex}
     \caption{
         Flowchart van een beoordeling door TESTed.
-        In het schema worden kleuren gebruikt als er een keuze gemaakt moet worden, en slechts een van de mogelijkheden gebruikt wordt.
+        In het schema worden kleuren gebruikt als er een keuze gemaakt moet worden voor een volgende stap.
+        Er kan steeds slechts één mogelijkheid gekozen worden.
         De afkortingen PE, GE en SE staan respectievelijk voor geprogrammeerde evaluatie, generieke evaluatie en (programmeertaal)specifieke evaluatie.
     }
     \label{fig:tested-flow}
@@ -106,7 +107,7 @@ Concreet is de structuur een hiërarchie met volgende elementen:
 \begin{description}
     \item[Plan] Het top-level object van het testplan.
     Dit object bevat twee belangrijke objecten: de tabbladen en de configuratie.
-    Deze configuratie is de plaats om opties aan TESTed mee te geven, zowel voor de TESTed zelf als voor programmeertaalspecifieke dingen.
+    Deze configuratie is de plaats om opties aan TESTed mee te geven.
     \item[Tab] Een testplan bestaat uit verschillende \termen{tab}s of tabbladen.
     Deze komen overeen met de tabbladen in de gebruikersinterface van Dodona.
     Een tabblad kan een naam hebben, die zichtbaar is voor de gebruikers.
@@ -121,9 +122,9 @@ Concreet is de structuur een hiërarchie met volgende elementen:
     De testgevallen kunnen onderverdeeld worden in twee soorten:
     \begin{description}
         \item[Main testcase] of hoofdtestgeval.
-        Van deze soort is er maximaal één per context (dus geen hoofdtestgeval is ook mogelijk).
+        Van deze soort is er maximaal één per context (geen hoofdtestgeval is ook mogelijk).
         Dit testgeval heeft als doel het uitvoeren van de main-functie (of de code zelf als het gaat om een scripttaal zoals Bash of Python).
-        Als invoer voor dit testgeval kunnen enkel het standaardinvoerkanaal en de programma-argumenten meegegeven worden.
+        Als invoer voor dit testgeval kunnen enkel de standaardinvoerstroom en de programma-argumenten meegegeven worden.
         De exitcode van een uitvoering kan ook enkel in het hoofdtestgeval gecontroleerd worden.
         \item[Normal testcase] of normaal testgeval.
         Hiervan kunnen er nul of meer zijn per context.
@@ -135,11 +136,12 @@ Concreet is de structuur een hiërarchie met volgende elementen:
     Dit is verplicht omdat bepaalde programmeertalen (zoals Python en andere scripttalen) de code onmiddellijk uitvoeren bij het inladen.
     Om te vermijden dat de volgorde van de testgevallen zou verschillen tussen de programmeertalen, wordt het hoofdtestgeval altijd eerst uitgevoerd.
     \item[Test] De beoordeling van een testgeval bestaat uit meerdere \term{test}s, die elk één aspect van het testgeval controleren.
-    Met aspect bedoelen we het standaarduitvoerkanaal, het standaardfoutkanaal, opgevangen uitzonderingen (\english{exceptions}), de teruggegeven waarden van een functieoproep (returnwaarde) of de inhoud van een bestand.
+    Met aspect bedoelen we de standaarduitvoerstroom, de standaardfoutstroom, opgevangen uitzonderingen (\english{exceptions}), de teruggegeven waarden van een functieoproep (returnwaarden) of de inhoud van een bestand.
     De exitcode is ook mogelijk, maar enkel in het hoofdtestgeval.
+    Het beoordelen van de verschillende aspecten wordt in meer detail beschreven in \cref{sec:oplossingen-beoordelen}
 \end{description}
 
-Bij de keuze voor een formaat voor het testplan (json, xml, \ldots), hebben we vooraf enkele vereisten geformuleerd waaraan het gekozen formaat moet voldoen.
+Bij de keuze voor een formaat voor het testplan (json, xml, \ldots), zijn vooraf enkele vereisten geformuleerd waaraan het gekozen formaat moet voldoen.
 Het moet:
 
 \begin{itemize}
@@ -148,7 +150,7 @@ Het moet:
     \item programmeertaalonafhankelijk zijn.
 \end{itemize}
 
-Uiteindelijk is gekozen om het op te stellen in json.
+Uiteindelijk is gekozen om het testplan op te stellen in json.
 Niet alleen voldoet json aan de vooropgestelde voorwaarden, het wordt ook door veel talen ondersteund.
 
 Toch zijn er ook enkele nadelen aan het gebruik van json.
@@ -195,8 +197,8 @@ Het formaat moet:
 \end{itemize}
 
 Een voor de hand liggende oplossing is om ook hiervoor json te gebruiken, en zelf in json een structuur op te stellen voor de waarden.
-In tegenstelling tot het testplan bestaan er al een resem aan dataserialisatieformaten, waardoor het de moeite loont om na te gaan of er geen bestaand formaat voldoet aan de vereisten.
-Hiervoor is gestart van een overzicht op Wikipedia, \autocite{wiki2020}.
+In tegenstelling tot de situatie bij het testplan bestaan er al een resem aan dataserialisatieformaten, waardoor het de moeite loont om na te gaan of er geen bestaand formaat voldoet aan de vereisten.
+Hiervoor is gestart van een overzicht op Wikipedia \autocite{wiki2020}.
 Uiteindelijk is niet gekozen voor een bestaand formaat, maar voor de json-oplossing.
 De redenen hiervoor zijn samen te vatten als:
 
@@ -265,7 +267,7 @@ Dit nadeel, gekoppeld met het ontbreken van voordelen, heeft geleid tot de keuze
 
 \subsubsection{Dataschema}
 
-Json is echter slechts een formaat en geeft geen semantische betekenis aan json-elementen.
+Json is slechts een formaat en geeft geen semantische betekenis aan json-elementen.
 Hiervoor stellen we een dataschema op, dat uit twee onderdelen bestaat:
 
 \begin{itemize}
@@ -290,11 +292,8 @@ Zo worden bijvoorbeeld zowel \texttt{array}s en \texttt{set}s voorgesteld als ee
 Het verschil tussen beiden wordt dan duidelijk gemaakt door het bijhorende gegevenstype.
 Er is dus nood aan een systeem om aan te geven wat het gegevenstype van een waarde is.
 
-Enerzijds vervult dit dataschema een gelijkaardige functie als JSON Schema (of XML Schema voor xml-bestanden): het dataschema legt de structuur van het serialisatieformaat vast.
-Anderzijds is er een belangrijk verschil: het dataschema schrijft geen verwachte gegevenstypes voor, maar beschrijft bestaande data.
-Het dataschema is dus altijd gekoppeld aan concrete data.
-Dit laatste zorgt ervoor dat het dataschema eenvoudig kan blijven, wat als voordeel heeft dat implementaties eenvoudiger zijn.
-Complexe types als \texttt{union[string, int]} zijn bijvoorbeeld niet mogelijk, maar ook niet nodig: concrete data kan niet zowel een \texttt{string} als een \texttt{int} zijn.
+\Cref{lst:value-schema} bevat het dataschema van een waarde in het serialisatieformaat, in een vereenvoudigde versie van JSON Schema.
+Hierbij staat \texttt{<type>} voor een van de gegevenstypes die hierna besproken worden.
 
 \begin{listing}
     \inputminted{json}{code/value-schema.json}
@@ -304,9 +303,6 @@ Complexe types als \texttt{union[string, int]} zijn bijvoorbeeld niet mogelijk, 
     }
     \label{lst:value-schema}
 \end{listing}
-
-Tot slot bevat \cref{lst:value-schema} het schema van een waarde in het serialisatieformaat, in een vereenvoudigde versie van JSON Schema.
-Hierbij staat \texttt{<type>} voor een van de gegevenstypes die hierna besproken worden.
 
 \subsubsection{Gegevenstypes}
 
@@ -322,7 +318,7 @@ Een waarde met bijhorend gegevenstype \texttt{union[string, int]} is niet bijste
 Aan de andere kant zijn dit soort complexe gegevenstypes wel nuttig bij het beschrijven van het verwachte gegevenstype van bijvoorbeeld een variabele.
 Daarnaast moet ook rekening gehouden worden met het feit dat deze gegevenstypes in veel programmeertalen implementeerbaar moeten zijn.
 Een gegevenstype als \texttt{union[string, int]} is eenvoudig te implementeren in Python, maar dat is niet het geval in bijvoorbeeld Java of C\@.
-Ook heeft elke taal een eigen niveau van details bij gegevenstypes.
+Ook heeft elke programmeertaal een eigen niveau van details bij gegevenstypes.
 Python heeft bijvoorbeeld enkel \texttt{integer} voor gehele getallen, terwijl C beschikt over \texttt{int}, \texttt{unsigned}, \texttt{long}, enz.
 
 Om deze redenen zijn de gegevenstypes opgedeeld in vier categorieën:
@@ -348,16 +344,16 @@ Om deze redenen zijn de gegevenstypes opgedeeld in vier categorieën:
     \item De uitgebreide types.
     Naast de basistypes van hierboven, bevat TESTed een hele reeks bijkomende types.
     Deze gegevenstypes staan toe om meer details te gebruiken.
-    Een voorbeeld is de lijst van types in \cref{tab:vertaling}, dat voor een reeks gegevenstypes voor gehele getallen de concrete types in verschillende programmeertalen geeft.
+    Een voorbeeld is de lijst van types in \cref{tab:vertaling}, die voor een reeks gegevenstypes voor gehele getallen de concrete types in verschillende programmeertalen geeft.
     Het grote verschil is dat deze uitgebreide types standaard vertaald worden naar een van de basistypes.
-    Voor talen die bijvoorbeeld geen \texttt{tuple} uit Python ondersteunen, zal het vanzelf omgezet worden naar een \texttt{list}.
+    Voor talen die bijvoorbeeld geen \texttt{tuple} uit Python ondersteunen, zal het type omgezet worden naar \texttt{list}.
     Er is ook de mogelijk dat implementaties voor programmeertalen expliciet een bepaald type niet ondersteunen.
-    Zo zal de Java-implementatie geen \texttt{uint64} (een unsigned 64-bit integer) ondersteunen, omdat er geen equivalent bestaat in de taal.
+    Zo zal de Java-implementatie geen \texttt{uint64} (een unsigned 64-bit integer) ondersteunen, omdat er geen equivalent bestaat in de taal\footnote{Toch niet met de ingebouwde types van de taal. Een implementatie met \texttt{BigInteger} is mogelijk.}.
     \item De gegevenstypes worden ook gebruikt om de types van functie-argumenten aan te duiden.
     Hier is er nood aan een bijkomend type:
     \begin{description}
         \item[identifier] Een verwijzing naar een eerder benoemd element (zoals variabelen of functies).
-        Bij het gebruik van dit gegevenstype stel de data de naam van de identifier voor.
+        Bij het gebruik van dit gegevenstype stelt de data de naam van de identifier voor.
     \end{description}
     Het is logisch dat dit type niet gebruikt kan worden voor het encoderen van data, daar dit bijvoorbeeld onmogelijk als returnwaarde kan voorkomen.
     \item Voorschrijvende types.
@@ -422,7 +418,8 @@ Het bestaat uit volgende onderdelen:
     Kan een van deze waarden zijn:
     \begin{description}
         \item[\texttt{function}] Een \english{top-level} functie.
-        Afhankelijk van de programmeertaal zal deze functie toch omgezet worden naar een functie op een object (bv.\ naar een statische functie in Java).
+        Afhankelijk van de programmeertaal zal deze functie toch omgezet worden naar een \texttt{namespace}-functie.
+        Zo worden dit soort functies in Java omgezet naar statische functies.
         \item[\texttt{namespace}] Een methode (functie van een object) of een functie in een namespace.
         De invulling hiervan is gedeeltelijk programmeertaalafhankelijk: in Java gaat het om methodes, terwijl het in Haskell om functies van een module gaat.
         Bij dit soort functies moet de \texttt{namespace} gegeven worden.
@@ -570,6 +567,7 @@ Deze aanpak heeft als voordeel dat er geen verschil is tussen hoe TESTed de inge
 Dit voorkomt dat er subtiele verschillen in de resultaten sluipen.
 
 Indien de configuratie het toelaat, worden de contexten parallel uitgevoerd.
+Toch moeten we opmerken dat het parallel uitvoeren vooral een theoretische mogelijkheid is: in werkelijkheid gebruiken er meerdere gebruikers tegelijk Dodona, waardoor er ook meerdere oefeningen tegelijk beoordeeld worden, wat op zijn beurt ervoor zorgt dat er geen grote ruimte voor snelheidswinst door parallellisatie binnen een judge is.
 Om te vermijden dat bestanden of uitvoer overschreven worden, wordt alle relevante gecompileerde code voor een context gekopieerd naar een aparte map waar het uitvoeren gebeurt.
 \Cref{lst:mapstructuur} illustreert dit met een voorbeeld voor een ingediende oplossing in de programmeertaal Python.
 Deze mapstructuur stelt de toestand van de werkmap van TESTed voor na het uitvoeren van de code.
@@ -635,7 +633,7 @@ Deze secret wordt gebruikt voor verschillende dingen, zoals:
     Dit is om het per abuis overschrijven van deze bestanden door de ingediende oplossing tegen te gaan.
 \end{itemize}
 
-\section{Oplossingen beoordelen}\label{sec:evalueren-van-een-oplossing2}
+\section{Oplossingen beoordelen}\label{sec:oplossingen-beoordelen}
 
 Na het uitvoeren van de testcode voor elke context heeft TESTed alle relevante uitvoer gemeten en verzameld.
 Deze uitvoer moet vervolgens beoordeeld worden om na te gaan in hoeverre deze uitvoer voldoet aan de verwachte uitvoer.

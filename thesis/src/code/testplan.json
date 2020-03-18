@@ -6,7 +6,7 @@
         {
           "input": {
             "function": {
-              "type": "top",
+              "type": "function",
               "name": "loterij",
               "arguments": [
                 { "type": "integer", "data": 6 },

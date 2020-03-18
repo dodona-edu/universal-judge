@@ -1,6 +1,0 @@
-{
-  "type": "top|object|constructor|identity",
-  "name": "Naam van de functie",
-  "object": "Optioneel object bij de functie",
-  "arguments": ["Lijst van argumenten"]
-}
