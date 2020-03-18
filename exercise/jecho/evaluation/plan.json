@@ -1,5 +1,5 @@
 {
-  "object": "Main",
+  "namespace": "Main",
   "tabs": [
     {
       "name": "Feedback",
@@ -64,7 +64,7 @@
                 "function": {
                   "type": "function",
                   "name": "echo",
-                  "object": null,
+                  "namespace": null,
                   "arguments": [
                     {
                       "type": "text",
@@ -123,7 +123,7 @@
                 "function": {
                   "type": "function",
                   "name": "echo",
-                  "object": null,
+                  "namespace": null,
                   "arguments": [
                     {
                       "type": "text",
@@ -173,7 +173,7 @@
                 "function": {
                   "type": "function",
                   "name": "echo",
-                  "object": null,
+                  "namespace": null,
                   "arguments": [
                     {
                       "type": "text",
@@ -202,7 +202,7 @@
                 "function": {
                   "type": "function",
                   "name": "echo2",
-                  "object": null,
+                  "namespace": null,
                   "arguments": [
                     {
                       "type": "text",

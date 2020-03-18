@@ -442,7 +442,7 @@ Een beperking is dat het niet mogelijk is om rechtstreeks een functieoproep te d
 of toch niet op een programmeertaalonafhankelijke manier.
 Een oproep als \texttt{oproep(hallo(), 5)} is niet mogelijk.
 Bij dergelijke dingen zal de functieoproep eerst aan variabele moeten toegekend worden, bv.\ \texttt{var param = hallo()}, waarna deze variabele als argument met type \texttt{literal} kan gegeven worden aan de oorspronkelijke functie: \texttt{oproep(param, 5)}.
-De aandachtige lezer zal opmerken dat met die functieargumenten van het type \texttt{literal} rond deze beperking kan gewerkt worden, aangezien de tekstuele waarde van een dergelijk argument letterlijk in de taal komt.
+De aandachtige lezer zal opmerken dat met die functieargumenten van het type \texttt{identifier} rond deze beperking kan gewerkt worden, aangezien de tekstuele waarde van een dergelijk argument letterlijk in de taal komt.
 We raden deze omweg echter ten sterkste af: dit maakt het testplan taalafhankelijk, want niet elke programmeertaal implementeert functieoproepen op eenzelfde wijze.
 
 Dit brengt ons bij de variabeletoekenning of \english{assignment}.
@@ -494,7 +494,7 @@ Deze verplichte sjablonen zijn:
     \item[\texttt{selector}] Een sjabloon dat code genereert om een bepaalde context uit te voeren.
     Om performantieredenen (hierover later meer) wordt de code van alle contexten soms uit een keer gegenereerd en gecompileerd.
     Aan de hand van een parameter (de naam van de context), wordt bij het uitvoeren van deze selectiecode de testcode voor de juiste context gekozen.
-    Dit sjabloon is enkel nodig indien batchcompilatie ondersteund wordt.
+    Dit sjabloon is enkel nodig indien batchcompilatie ondersteund wordt en de programmeertaal dit nodig heeft (bijvoorbeeld niet nodig in Python, maar wel in Java).
     \item[\texttt{evaluator\_executor}] Een sjabloon dat code genereert om een geprogrammeerde evaluatie te starten.
     \item[\texttt{function}] Vertaalt een functie-oproep naar testcode.
 \end{description}
@@ -527,7 +527,6 @@ De student implementeert de eerste functie en dient een oplossing in om al feedb
 Bij programmeertalen als Java of Haskell zal dit niet lukken: daar alle contexten in één keer gecompileerd worden, zal de ontbrekende tweede functie ervoor zorgen dat de volledige compilatie faalt.
 In individuele modus is dit geen probleem: de contexten die de eerste functie testen zullen compileren en kunnen uitgevoerd worden.
 De individuele modus brengt wel een niet te verwaarlozen kost qua uitvoeringstijd met zich mee (zie ook \cref{ch:beperkingen-en-toekomstig-werk}).
-% TODO: referentie naar deel over performantie.
 
 \Cref{lst:generated-context-python,lst:generated-context-java} bevatten de testcode gegenereerd voor een context uit de voorbeeldoefening Lotto (het gaat om dezelfde context uit het voorbeeld van het testplan in \cref{lst:testplan}), in respectievelijk Python en Java.
 Daarnaast bevat Z de code voor de \texttt{selector} in Java.
@@ -554,7 +553,7 @@ De selector bevat twee contexten om de werking duidelijk te maken.
 \begin{listing}
     \inputminted{java}{code/Selector.java}
     \caption{
-        Gegenereerde selector in Java voor twee contexten uit het testplan van de voorbeeldoefening Lotto.
+        Gegenereerde selectiecode in Java voor twee contexten uit het testplan van de voorbeeldoefening Lotto.
     }
     \label{lst:selector-java}
 \end{listing}
@@ -626,7 +625,7 @@ Tijdens het genereren van de code krijgen de sjablonen een reeks willekeurige te
 Deze secret wordt gebruikt voor verschillende dingen, zoals:
 \begin{itemize}
     \item De separator.
-    Door het gebruik van de willekeurige tekens is de kans dat de separator overeenkomt met een echt waarde praktisch onbestaand.
+    Door het gebruik van de willekeurige tekens is de kans dat de separator overeenkomt met een echte waarde praktisch onbestaand.
     \item Bestandsnamen.
     De testcode is verantwoordelijk voor het openen van de bestanden voor de uitvoerkanalen die naar een bestand geschreven worden.
     Bij het openen zal de testcode de secret in de bestandsnaam gebruiken.
@@ -753,7 +752,7 @@ Hier wordt als returnwaarde een verzameling met drie elementen (5, 10 en 15) ver
 
 \subsection{Geprogrammeerde evaluatie}\label{subsec:geprogrammeerde-evaluatie}
 
-Bij oefeningen, zoals de voorbeeldoefening Lotto, met niet-deterministische resultaten, kunnen de verwachte waarden niet in het testplan komen.
+Bij oefeningen met niet-deterministische resultaten, zoals de voorbeeldoefening Lotto, kunnen de verwachte waarden niet in het testplan komen.
 Ook andere oefeningen waar geen directe vergelijking kan gemaakt worden, zoals het uitlijnen van sequenties (\english{sequence alignment}) uit de bio-informatica, volstaat een vergelijking met een verwachte waarde uit het testplan niet.
 
 Toch is deze evaluatie niet programmeertaalafhankelijk: de logica om een sequentie uit te lijnen is dezelfde ongeacht de programmeertaal waarin dit gebeurt.
@@ -822,10 +821,16 @@ Toch zijn er nog voordelen om ook deze oefeningen in TESTed aan te bieden:
     \item Het werk om een nieuwe programmeertaal toe te voegen aan TESTed is kleiner dan een volledig nieuwe judge te implementeren.
 \end{itemize}
 Het is desalniettemin het vermelden waard dat het niet zeker is of deze evaluatiemethode (en dit scenario meer algemeen) veel zal voorkomen.
-Oefeningen, die programmeertaalspecifieke aspecten moeten beoordelen, zijn, net door hun programmeertaalspecifieke aard, moeilijker aan te bieden in meerdere programmeertalen.
+Oefeningen die programmeertaalspecifieke aspecten moeten beoordelen zijn, net door hun programmeertaalspecifieke aard, moeilijker aan te bieden in meerdere programmeertalen.
 Een oefening in de programmeertaal C die bijvoorbeeld beoordeelt op juist gebruik van pointers zal weinig nut hebben in Python.
 
-In gebruik lijkt de programmeertaalspecifieke evaluatie sterk op de geprogrammeerde evaluatie, met dat verschil dat het testplan niet evaluatiecode in één programmeertaal bevat, maar evaluatiecode in alle programmeertalen waarin de oefening aangeboden wordt, zoals geïllustreerd in X.
+\begin{listing}
+    \inputminted{json}{code/testplan-specific.json}
+    \caption{Fragment uit een testplan waar een programmeertaalspecifieke evaluatie gebruikt wordt.}
+    \label{lst:testplan-specific}
+\end{listing}
+
+In gebruik lijkt de programmeertaalspecifieke evaluatie sterk op de geprogrammeerde evaluatie, met dat verschil dat het testplan niet evaluatiecode in één programmeertaal bevat, maar evaluatiecode in alle programmeertalen waarin de oefening aangeboden wordt, zoals geïllustreerd in \cref{lst:testplan-specific}.
 Als de programmeertaalspecifieke evaluatie gebruikt wordt en er wordt geen evaluatiecode voor een bepaalde programmeertaal, zal de oefening niet opgelost kunnen worden in die programmeertaal.
 
 Ook de implementatie lijkt op de geprogrammeerde evaluatie, zij het dat de te implementeren functie afwijkt.
@@ -845,24 +850,18 @@ Het gebruik in het testplan is \cref{lst:testplan-specific}.
     \label{lst:evaluation-java-specific}
 \end{listing}
 
-\begin{listing}
-    \inputminted{java}{code/testplan-specific.json}
-    \caption{Fragment uit een testplan, waar een programmeertaalspecifieke evaluatie gebruikt wordt.}
-    \label{lst:testplan-specific}
-\end{listing}
-
 \section{Performantie}\label{sec:performantie}
 
-Zoals reeds vermeld in onder andere \cref{subsec:testcode-uitvoeren}, wordt de testcode voor elke context afzonderlijk uitgevoerd.
+Zoals vermeld in onder andere \cref{subsec:testcode-uitvoeren}, wordt de testcode voor elke context afzonderlijk uitgevoerd.
 Dat de contexten strikt onafhankelijk van elkaar uitgevoerd worden, werd reeds in het begin als een doel vooropgesteld.
 Dit geeft wel enkele uitdagingen op het vlak van performantie.
-Deze subparagraaf beschrijft de evaluatie van de implementatie van TESTed vanuit het perspectief van de performantie.
+Deze paragraaf beschrijft de evolutie van de implementatie van TESTed vanuit het perspectief van de performantie.
 
 \subsection{Jupyter-kernels}\label{subsec:jupyter-kernels}
 
 Het eerste prototype van TESTed gebruikte Jupyter-kernels voor het uitvoeren van de code.
 Jupyter-kernels zijn de achterliggende technologie bij de Jupyter Notebooks \autocite{jupyter2016}.
-De werking van een Jupyter-kernel kan als volgt samengevat worden: een Jupyter-kernel is een lokale server, die code kan uitvoeren en de resultaten van die uitvoer teruggeeft.
+De werking van een Jupyter-kernel kan als volgt samengevat worden: een Jupyter-kernel is een lokaal proces, dat code kan uitvoeren en de resultaten van die uitvoer teruggeeft.
 Zo kan men naar de Python-kernel de expressie \mintinline{python}{5 + 9} sturen, waarop het antwoord \mintinline{python}{14} zal zijn.
 Een andere manier om een Jupyter-kernel te bekijken is als een programmeertaalonafhankelijk protocol bovenop een \term{REPL} (een \english{read-eval-print loop}).
 Deze keuze voor Jupyter-kernels als uitvoering was gebaseerd op volgende argumenten:
@@ -870,7 +869,8 @@ Deze keuze voor Jupyter-kernels als uitvoering was gebaseerd op volgende argumen
     \item Hergebruik van bestaande kernels.
     Hierdoor is het niet nodig voor elke taal veel implementatiewerk te verrichten: aangezien het protocol voor Jupyter-kernels programmeertaalonafhankelijk is, kunnen alle bestaande kernels gebruikt worden.
     \item De functionaliteit aangeboden door een Jupyter-kernel is de functionaliteit die nodig is voor TESTed: het uitvoeren van fragmenten code en het resultaat van die uitvoering verzamelen.
-    \item Eerde werk \autocite{petegem2018}, dat gebruik maakt van Jupyter-kernels voor een gelijkaardig doel, rapporteert geen problemen.
+    % TODO
+    \item (Eerde werk, dat gebruik maakt van Jupyter-kernels voor een gelijkaardig doel, rapporteert geen problemen.): TODO: wel of niet Charlotte's thesis citeren
 \end{itemize}
 
 Omdat contexten onafhankelijk van elkaar zijn, moet de gebruikte Jupyter-kernel gestopt en opnieuw gestart worden tussen elke context.
@@ -914,12 +914,13 @@ Voordelen tegenover de Jupyter-kernels zijn:
     \item Herbruikbaar, in die zin dat het genereren van code in een programmeertaal op basis van de programmeertaalonafhankelijke specificatie in het testplan sowieso nodig is.
 \end{itemize}
 
-Het mes snijdt aan twee kanten, dus zijn er ook nadelen:
+Elke medaille heeft een ook keerzijde:
 \begin{itemize}
-    \item Het gebruik van de sjablonen laat minder dynamische uitvoering van testcode toe.
+    \item Het gebruik van de sjablonen zorgt ervoor dat het uitvoeren van de testcode minder dynamische kan zijn.
     Daar de code eerst gegenereerd moet worden, moet vóór het uitvoeren bepaald worden welke code uitgevoerd zal moeten worden.
     \item Er moet meer zelf geïmplementeerd worden: het ecosysteem van Jupyter is redelijk groot, en er bestaan kernels voor veel talen (of in elk geval een begin van een kernel, waarop verder gewerkt zou kunnen worden)\footnote{Zie deze pagina voor een lijst van kernels: \url{https://github.com/jupyter/jupyter/wiki/Jupyter-kernels}.}.
-    \item Het uitvoeren op de commandoregel is wel trager indien er geen reset moet gebeuren tussen de verschillende uitvoeringen (hierover later meer).
+    \item Het uitvoeren op de commandoregel is wel trager indien er geen reset moet gebeuren tussen de verschillende uitvoeringen.
+    % TODO: optimisation?
 \end{itemize}
 
 Bij een eerste iteratie van het systeem met sjablonen bestond enkel de contextcompilatie (zie opnieuw \cref{subsec:testcode-genereren} voor een beschrijving van deze term).
@@ -943,9 +944,11 @@ Tot slot bevat \cref{tab:meting} nog enkele tijdsmetingen van de verschillende i
 In deze tabel is de tijd gemeten in seconden om een (juiste) ingediende oplossing voor twee oefeningen te beoordelen: de voorbeeldoefening Lotto en een eenvoudigere oefening Echo.
 Bij die laatste bestaat de opgave uit het implementeren van een functie die haar parameters naar de standaarduitvoerstroom schrijft.
 Elke beoordeling is uitgevoerd met contextcompilatie, partiële compilatie en batchcompilatie en met en zonder parallelle uitvoering.
+Deze meetingen zijn uitgevoerd op een standaardcomputer, niet op de Dodona-server en niet in een Docker-container.
+Die beide factoren kunnen ervoor zorgen dat de uitvoeringstijden op Dodona zelf sterk verschillen van deze metingen.
 
 Zoals verwacht levert de batchcompilatie het meeste tijdswinst op bij Java: daar heeft de compilatiestap ook een veel groter aandeel in de uitvoeringstijd.
-By Python is de compilatie veel sneller en ook veel minder belangrijk (zelfs optioneel, de stap wordt enkel uitgevoerd om bepaalde syntaxisfouten vroeg op te vangen en als optimalisatie).
+By Python is de compilatie veel sneller en ook veel minder belangrijk (zelfs optioneel, de stap wordt enkel uitgevoerd om bepaalde syntaxisfouten vroeg op te vangen).
 
 \begin{table}
     \centering

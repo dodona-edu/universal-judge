@@ -76,7 +76,7 @@ for wordlist in cases:
     }
 
     function_ = {
-        "type": "top",
+        "type": "function",
         "name": "zoemzin1",
         "arguments": [argument]
     }
@@ -132,7 +132,7 @@ for wordlist in cases:
         })
 
     function_ = {
-        "type": "top",
+        "type": "function",
         "name": "zoemzin2",
         "arguments": arguments
     }

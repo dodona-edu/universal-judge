@@ -47,7 +47,7 @@ class HaskellConfig(LanguageConfig):
         return "hs"
 
     def submission_name(self, plan: Plan) -> str:
-        return plan.object
+        return plan.namespace
 
     def context_name(self, tab_number: int, context_number: int) -> str:
         return f"Context_{tab_number}_{context_number}"
@@ -79,6 +79,6 @@ class HaskellConfig(LanguageConfig):
         return FunctionCall(
             type=function.type,
             name=function.name,
-            object=function.object,
+            namespace=function.namespace,
             arguments=arguments
         )

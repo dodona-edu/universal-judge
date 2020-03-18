@@ -3,7 +3,7 @@
 <%page args="function" />
 % if function.type != FunctionType.IDENTITY:
     % if function.type == FunctionType.NAMESPACE:
-        ${function.object}.\
+        ${function.namespace}.\
     % endif
     ${function.name}\
     (\

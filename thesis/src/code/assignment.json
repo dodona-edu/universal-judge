@@ -1,5 +1,5 @@
 {
   "name": "Naam van de variabele",
-  "expression": "<Object voor functieoproep>",
-  "type": "Optioneel type"
+  "expression": "<functieoproep>",
+  "type": "<gegevenstype>"
 }

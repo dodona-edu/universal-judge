@@ -18,12 +18,7 @@ clean:
 	latexmk -cd -pdflua -use-make -c src/main.tex
 
 # Generate dependencies needed for the main file.
-dependencies: src/generated/description.md src/generated/serialisation.json
-
-# Generate the json schema of the serialisation format.
-#src/generated/serialisation.json:
-#	python ../judge/serialisation.py > src/generated/serialisation.json
-# TODO: do we need this?
+dependencies:
 
 # Generated dependencies
 src/generated/description.md:
@@ -31,9 +26,6 @@ src/generated/description.md:
 
 src/generated/isbn_description.md:
 	python scripts/mathjax.py ../exercise/isbn/description/description_clean.nl.md $@
-
-src/generated/generation.tikz:
-	dia --nosplash -e $@ -t tex src/figures/generation.dia
 
 # Do the main file.
 src/main.pdf: dependencies

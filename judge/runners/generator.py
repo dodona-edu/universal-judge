@@ -144,7 +144,7 @@ def prepare_function_call(
         type=function_call.type,
         arguments=function_call.arguments,
         name=config.conventionalise(function_call.name),
-        object=function_call.object or submission_name
+        namespace=function_call.namespace or submission_name
     )
 
 
@@ -180,7 +180,7 @@ def get_exception_function(
             return FunctionCall(
                 type=FunctionType.NAMESPACE,
                 name="evaluate",
-                object=evaluator_name,
+                namespace=evaluator_name,
                 arguments=[StringType(type=StringTypes.LITERAL, data="value")]
             ), evaluator_name
 
@@ -231,7 +231,7 @@ def prepare_testcase(
         call = FunctionCall(
             type=FunctionType.NAMESPACE,
             name=language_config.conventionalise("evaluate"),
-            object=language_config.conventionalise(evaluator_name),
+            namespace=language_config.conventionalise(evaluator_name),
             arguments=[StringType(type=StringTypes.LITERAL, data="value")]
         )
         value_function_call = language_config.specific_evaluator_callback(call)

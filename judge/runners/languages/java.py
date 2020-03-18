@@ -39,7 +39,7 @@ class JavaConfig(LanguageConfig):
         return "java"
 
     def submission_name(self, plan: Plan) -> str:
-        return plan.object
+        return plan.namespace
 
     def conventionalise(self, function_name: str) -> str:
         return camelize(function_name)

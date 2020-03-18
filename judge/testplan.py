@@ -75,9 +75,9 @@ class FunctionType(str, Enum):
     FUNCTION = "function"
     # Call on a function
     NAMESPACE = "namespace"
-    # Will be a constructor; the "object" is ignored.
+    # Will be a constructor; the "namespace" is ignored.
     CONSTRUCTOR = "constructor"
-    # Must have one argument, cannot have object
+    # Must have one argument, cannot have namespace
     IDENTITY = "identity"
 
 
@@ -86,15 +86,15 @@ class FunctionCall(WithFeatures):
     """Represents a function call"""
     type: FunctionType
     name: Optional[str] = None
-    object: Optional[str] = None
+    namespace: Optional[str] = None
     arguments: List[Value] = field(default_factory=list)
 
     @root_validator
     def identity_cannot_have_object(cls, values):
         type_ = values.get("type")
-        object_ = values.get("object")
+        object_ = values.get("namespace")
         if type_ == FunctionType.IDENTITY and object_ is not None:
-            raise ValueError(f"An identity call cannot have an object, "
+            raise ValueError(f"An identity call cannot have an namespace, "
                              f"but got {object_}")
         return values
 
@@ -591,7 +591,7 @@ class Configuration:
 class Plan(WithFeatures):
     """General test plan, which is used to run tests of some code."""
     tabs: List[Tab] = field(default_factory=list)
-    object: str = "Main"
+    namespace: str = "Main"
     configuration: Configuration = Configuration()
 
     def get_used_features(self) -> Features:
