@@ -178,7 +178,7 @@ def get_exception_function(
                 utils.basename(evaluator)
             )
             return FunctionCall(
-                type=FunctionType.OBJECT,
+                type=FunctionType.NAMESPACE,
                 name="evaluate",
                 object=evaluator_name,
                 arguments=[StringType(type=StringTypes.LITERAL, data="value")]
@@ -187,7 +187,7 @@ def get_exception_function(
     # In all other cases, we return the default function, which sends the
     # exception to the judge for further processing.
     return FunctionCall(
-        type=FunctionType.TOP,
+        type=FunctionType.FUNCTION,
         name=language_config.conventionalise("send_exception"),
         arguments=[StringType(type=StringTypes.LITERAL, data="value")]
     ), None
@@ -229,7 +229,7 @@ def prepare_testcase(
             utils.basename(evaluator)
         )
         call = FunctionCall(
-            type=FunctionType.OBJECT,
+            type=FunctionType.NAMESPACE,
             name=language_config.conventionalise("evaluate"),
             object=language_config.conventionalise(evaluator_name),
             arguments=[StringType(type=StringTypes.LITERAL, data="value")]
@@ -238,7 +238,7 @@ def prepare_testcase(
         names.append(evaluator_name)
     else:
         value_function_call = FunctionCall(
-            type=FunctionType.TOP,
+            type=FunctionType.FUNCTION,
             name="send",
             arguments=[StringType(type=StringTypes.LITERAL, data="value")]
         )

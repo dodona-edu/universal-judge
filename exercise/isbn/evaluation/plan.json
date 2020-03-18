@@ -8,7 +8,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "is_isbn",
                   "arguments": [
                     {
@@ -38,7 +38,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "is_isbn",
                   "arguments": [
                     {
@@ -68,7 +68,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "is_isbn",
                   "arguments": [
                     {
@@ -94,7 +94,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "is_isbn",
                   "arguments": [
                     {
@@ -120,7 +120,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "is_isbn",
                   "arguments": [
                     {
@@ -150,7 +150,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "is_isbn",
                   "arguments": [
                     {
@@ -176,7 +176,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "is_isbn",
                   "arguments": [
                     {
@@ -206,7 +206,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "is_isbn",
                   "arguments": [
                     {
@@ -236,7 +236,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "is_isbn",
                   "arguments": [
                     {
@@ -266,7 +266,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "is_isbn",
                   "arguments": [
                     {
@@ -296,7 +296,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "is_isbn",
                   "arguments": [
                     {
@@ -326,7 +326,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "is_isbn",
                   "arguments": [
                     {
@@ -356,7 +356,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "is_isbn",
                   "arguments": [
                     {
@@ -386,7 +386,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "is_isbn",
                   "arguments": [
                     {
@@ -416,7 +416,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "is_isbn",
                   "arguments": [
                     {
@@ -446,7 +446,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "is_isbn",
                   "arguments": [
                     {
@@ -476,7 +476,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "is_isbn",
                   "arguments": [
                     {
@@ -506,7 +506,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "is_isbn",
                   "arguments": [
                     {
@@ -536,7 +536,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "is_isbn",
                   "arguments": [
                     {
@@ -566,7 +566,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "is_isbn",
                   "arguments": [
                     {
@@ -596,7 +596,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "is_isbn",
                   "arguments": [
                     {
@@ -622,7 +622,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "is_isbn",
                   "arguments": [
                     {
@@ -652,7 +652,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "is_isbn",
                   "arguments": [
                     {
@@ -682,7 +682,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "is_isbn",
                   "arguments": [
                     {
@@ -712,7 +712,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "is_isbn",
                   "arguments": [
                     {
@@ -738,7 +738,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "is_isbn",
                   "arguments": [
                     {
@@ -764,7 +764,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "is_isbn",
                   "arguments": [
                     {
@@ -790,7 +790,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "is_isbn",
                   "arguments": [
                     {
@@ -820,7 +820,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "is_isbn",
                   "arguments": [
                     {
@@ -850,7 +850,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "is_isbn",
                   "arguments": [
                     {
@@ -880,7 +880,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "is_isbn",
                   "arguments": [
                     {
@@ -910,7 +910,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "is_isbn",
                   "arguments": [
                     {
@@ -940,7 +940,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "is_isbn",
                   "arguments": [
                     {
@@ -970,7 +970,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "is_isbn",
                   "arguments": [
                     {
@@ -996,7 +996,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "is_isbn",
                   "arguments": [
                     {
@@ -1026,7 +1026,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "is_isbn",
                   "arguments": [
                     {
@@ -1056,7 +1056,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "is_isbn",
                   "arguments": [
                     {
@@ -1086,7 +1086,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "is_isbn",
                   "arguments": [
                     {
@@ -1116,7 +1116,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "is_isbn",
                   "arguments": [
                     {
@@ -1146,7 +1146,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "is_isbn",
                   "arguments": [
                     {
@@ -1176,7 +1176,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "is_isbn",
                   "arguments": [
                     {
@@ -1206,7 +1206,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "is_isbn",
                   "arguments": [
                     {
@@ -1236,7 +1236,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "is_isbn",
                   "arguments": [
                     {
@@ -1266,7 +1266,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "is_isbn",
                   "arguments": [
                     {
@@ -1296,7 +1296,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "is_isbn",
                   "arguments": [
                     {
@@ -1322,7 +1322,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "is_isbn",
                   "arguments": [
                     {
@@ -1352,7 +1352,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "is_isbn",
                   "arguments": [
                     {
@@ -1382,7 +1382,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "is_isbn",
                   "arguments": [
                     {
@@ -1412,7 +1412,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "is_isbn",
                   "arguments": [
                     {
@@ -1442,7 +1442,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "is_isbn",
                   "arguments": [
                     {
@@ -1530,7 +1530,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "are_isbn",
                   "arguments": [
                     {
@@ -1646,7 +1646,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "are_isbn",
                   "arguments": [
                     {
@@ -1766,7 +1766,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "are_isbn",
                   "arguments": [
                     {
@@ -1890,7 +1890,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "are_isbn",
                   "arguments": [
                     {
@@ -2014,7 +2014,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "are_isbn",
                   "arguments": [
                     {
@@ -2142,7 +2142,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "are_isbn",
                   "arguments": [
                     {
@@ -2266,7 +2266,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "are_isbn",
                   "arguments": [
                     {
@@ -2382,7 +2382,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "are_isbn",
                   "arguments": [
                     {
@@ -2490,7 +2490,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "are_isbn",
                   "arguments": [
                     {
@@ -2582,7 +2582,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "are_isbn",
                   "arguments": [
                     {
@@ -2666,7 +2666,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "are_isbn",
                   "arguments": [
                     {
@@ -2758,7 +2758,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "are_isbn",
                   "arguments": [
                     {
@@ -2866,7 +2866,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "are_isbn",
                   "arguments": [
                     {
@@ -2970,7 +2970,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "are_isbn",
                   "arguments": [
                     {
@@ -3074,7 +3074,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "are_isbn",
                   "arguments": [
                     {
@@ -3174,7 +3174,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "are_isbn",
                   "arguments": [
                     {
@@ -3270,7 +3270,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "are_isbn",
                   "arguments": [
                     {
@@ -3386,7 +3386,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "are_isbn",
                   "arguments": [
                     {
@@ -3498,7 +3498,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "are_isbn",
                   "arguments": [
                     {
@@ -3598,7 +3598,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "are_isbn",
                   "arguments": [
                     {
@@ -3682,7 +3682,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "are_isbn",
                   "arguments": [
                     {
@@ -3778,7 +3778,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "are_isbn",
                   "arguments": [
                     {
@@ -3894,7 +3894,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "are_isbn",
                   "arguments": [
                     {
@@ -3994,7 +3994,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "are_isbn",
                   "arguments": [
                     {
@@ -4074,7 +4074,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "are_isbn",
                   "arguments": [
                     {
@@ -4150,7 +4150,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "are_isbn",
                   "arguments": [
                     {
@@ -4238,7 +4238,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "are_isbn",
                   "arguments": [
                     {
@@ -4330,7 +4330,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "are_isbn",
                   "arguments": [
                     {
@@ -4422,7 +4422,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "are_isbn",
                   "arguments": [
                     {
@@ -4538,7 +4538,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "are_isbn",
                   "arguments": [
                     {
@@ -4666,7 +4666,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "are_isbn",
                   "arguments": [
                     {
@@ -4790,7 +4790,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "are_isbn",
                   "arguments": [
                     {
@@ -4906,7 +4906,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "are_isbn",
                   "arguments": [
                     {
@@ -5014,7 +5014,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "are_isbn",
                   "arguments": [
                     {
@@ -5130,7 +5130,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "are_isbn",
                   "arguments": [
                     {
@@ -5234,7 +5234,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "are_isbn",
                   "arguments": [
                     {
@@ -5330,7 +5330,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "are_isbn",
                   "arguments": [
                     {
@@ -5446,7 +5446,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "are_isbn",
                   "arguments": [
                     {
@@ -5550,7 +5550,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "are_isbn",
                   "arguments": [
                     {
@@ -5638,7 +5638,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "are_isbn",
                   "arguments": [
                     {
@@ -5738,7 +5738,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "are_isbn",
                   "arguments": [
                     {
@@ -5846,7 +5846,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "are_isbn",
                   "arguments": [
                     {
@@ -5958,7 +5958,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "are_isbn",
                   "arguments": [
                     {
@@ -6074,7 +6074,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "are_isbn",
                   "arguments": [
                     {
@@ -6178,7 +6178,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "are_isbn",
                   "arguments": [
                     {
@@ -6278,7 +6278,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "are_isbn",
                   "arguments": [
                     {
@@ -6382,7 +6382,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "are_isbn",
                   "arguments": [
                     {
@@ -6478,7 +6478,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "are_isbn",
                   "arguments": [
                     {
@@ -6574,7 +6574,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "are_isbn",
                   "arguments": [
                     {
@@ -6670,7 +6670,7 @@
             {
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "are_isbn",
                   "arguments": [
                     {

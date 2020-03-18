@@ -98,7 +98,7 @@ def generate_is_isbn():
         testcase = {
             "input":  {
                 "function": {
-                    "type":      "top",
+                    "type":      "function",
                     "name":      "is_isbn",
                     "arguments": function_arguments
                 }
@@ -186,7 +186,7 @@ def generate_are_isbn():
         testcase = {
             "input":  {
                 "function": {
-                    "type":      "top",
+                    "type":      "function",
                     "name":      "are_isbn",
                     "arguments": function_arguments
                 }

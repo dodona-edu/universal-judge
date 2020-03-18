@@ -37,7 +37,7 @@
               },
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "echo",
                   "arguments": [
                     {
@@ -86,7 +86,7 @@
               },
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "echo",
                   "arguments": [
                     {
@@ -125,7 +125,7 @@
               },
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "echo",
                   "arguments": [
                     {
@@ -148,7 +148,7 @@
               },
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "echo2",
                   "arguments": [
                     {

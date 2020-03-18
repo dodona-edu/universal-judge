@@ -72,9 +72,9 @@ class TextData:
 
 class FunctionType(str, Enum):
     # Normal function call.
-    TOP = "top"
+    FUNCTION = "function"
     # Call on a function
-    OBJECT = "object"
+    NAMESPACE = "namespace"
     # Will be a constructor; the "object" is ignored.
     CONSTRUCTOR = "constructor"
     # Must have one argument, cannot have object
@@ -117,7 +117,7 @@ class FunctionCall(WithFeatures):
 
     def get_used_features(self) -> Features:
         features = Features.FUNCTION_CALL
-        if self.type == FunctionType.OBJECT or \
+        if self.type == FunctionType.NAMESPACE or \
                 self.type == FunctionType.CONSTRUCTOR:
             features |= Features.OBJECTS
         return features | reduce_features(

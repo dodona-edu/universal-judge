@@ -62,7 +62,7 @@
               },
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "echo",
                   "object": null,
                   "arguments": [
@@ -109,7 +109,7 @@
               },
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "echo",
                   "object": null,
                   "arguments": [
@@ -156,7 +156,7 @@
               },
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "echo",
                   "object": null,
                   "arguments": [
@@ -185,7 +185,7 @@
               },
               "input": {
                 "function": {
-                  "type": "top",
+                  "type": "function",
                   "name": "echo2",
                   "object": null,
                   "arguments": [
@@ -227,7 +227,7 @@
                     "type": "text"
                   },
                   "expression": {
-                    "type": "top",
+                    "type": "function",
                     "name": "echo",
                     "arguments": [
                       {

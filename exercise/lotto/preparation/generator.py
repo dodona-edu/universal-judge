@@ -71,7 +71,7 @@ if __name__ == '__main__':
                 },
                 "input":  {
                     "function": {
-                        "type":      "top",
+                        "type":      "function",
                         "name":      "loterij",
                         "arguments": [
                             {
