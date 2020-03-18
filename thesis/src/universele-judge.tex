@@ -852,30 +852,30 @@ Het gebruik in het testplan is \cref{lst:testplan-specific}.
 
 \section{Performantie}\label{sec:performantie}
 
-Zoals vermeld in onder andere \cref{subsec:testcode-uitvoeren}, wordt de testcode voor elke context afzonderlijk uitgevoerd.
+Zoals eerder vermeld (\cref{subsec:testcode-uitvoeren}), wordt de testcode voor elke context afzonderlijk uitgevoerd.
 Dat de contexten strikt onafhankelijk van elkaar uitgevoerd worden, werd reeds in het begin als een doel vooropgesteld.
 Dit geeft wel enkele uitdagingen op het vlak van performantie.
+Het belang van performante judges in Dodona is niet te verwaarlozen, in die zin dat Dodona een interactief platform is, waar studenten verwachten dat de feedback op hun ingediende oplossing onmiddellijk beschikbaar is.
 Deze paragraaf beschrijft de evolutie van de implementatie van TESTed vanuit het perspectief van de performantie.
 
 \subsection{Jupyter-kernels}\label{subsec:jupyter-kernels}
 
-Het eerste prototype van TESTed gebruikte Jupyter-kernels voor het uitvoeren van de code.
-Jupyter-kernels zijn de achterliggende technologie bij de Jupyter Notebooks \autocite{jupyter2016}.
+Het eerste prototype van TESTed gebruikte Jupyter-kernels voor het uitvoeren van de testcode.
+Jupyter-kernels zijn de achterliggende technologie van Jupyter Notebooks \autocite{jupyter2016}.
 De werking van een Jupyter-kernel kan als volgt samengevat worden: een Jupyter-kernel is een lokaal proces, dat code kan uitvoeren en de resultaten van die uitvoer teruggeeft.
 Zo kan men naar de Python-kernel de expressie \mintinline{python}{5 + 9} sturen, waarop het antwoord \mintinline{python}{14} zal zijn.
 Een andere manier om een Jupyter-kernel te bekijken is als een programmeertaalonafhankelijk protocol bovenop een \term{REPL} (een \english{read-eval-print loop}).
 Deze keuze voor Jupyter-kernels als uitvoering was gebaseerd op volgende argumenten:
 \begin{itemize}
     \item Hergebruik van bestaande kernels.
-    Hierdoor is het niet nodig voor elke taal veel implementatiewerk te verrichten: aangezien het protocol voor Jupyter-kernels programmeertaalonafhankelijk is, kunnen alle bestaande kernels gebruikt worden.
+    Hierdoor is het niet nodig om voor elke programmeertaal veel tijd te besteden aan de implementatie of de configuratie: aangezien het protocol voor Jupyter-kernels programmeertaalonafhankelijk is, kunnen alle bestaande kernels gebruikt worden.
     \item De functionaliteit aangeboden door een Jupyter-kernel is de functionaliteit die nodig is voor TESTed: het uitvoeren van fragmenten code en het resultaat van die uitvoering verzamelen.
-    % TODO
-    \item (Eerde werk, dat gebruik maakt van Jupyter-kernels voor een gelijkaardig doel, rapporteert geen problemen.): TODO: wel of niet Charlotte's thesis citeren
+    \item Eerder werk \autocite{petegem2018}, dat gebruik maakt van Jupyter-kernels voor een gelijkaardig doel, rapporteert geen problemen met het gebruik van Jupyter-kernels.
 \end{itemize}
 
-Omdat contexten onafhankelijk van elkaar zijn, moet de gebruikte Jupyter-kernel gestopt en opnieuw gestart worden tussen elke context.
+Omdat contexten per definitie onafhankelijk van elkaar zijn, moet de gebruikte Jupyter-kernel gestopt en opnieuw gestart worden tussen elke context.
 Dit brengt een onaanvaardbare performantiekost met zich mee, daar de meeste oefeningen niet computationeel intensief zijn.
-Het uitvoeren van eenvoudige oefeningen, zoals de Lotto-oefening, duurde als snel meerdere minuten.
+Het beoordelen van eenvoudige oefeningen, zoals de Lotto-oefening, duurde als snel meerdere minuten.
 
 Enkele ideeën om de performantiekost te verkleinen waren:
 
@@ -884,71 +884,76 @@ Enkele ideeën om de performantiekost te verkleinen waren:
     De werkwijze is als volgt:
     \begin{enumerate}
         \item Bij de start van het beoordelen van een ingediende oplossing worden meerdere kernels gestart.
-        \item Bij elke context wordt voor de testcode uit te voeren een kernel uit de pool gehaald.
+        \item Bij elke context wordt een kernel uit de pool gehaald om de testcode uit te voeren.
         \item Na het uitvoeren wordt de kernel op een andere draad (\english{thread}) opnieuw opgestart en terug aan de pool toegevoegd.
     \end{enumerate}
-    Het idee achter deze werkwijze is dat door op een andere draad de kernels te herstarten, er altijd een kernel klaar staat om de testcode uit te voeren, en er dus niet gewacht moet worden op het opnieuw opstarten van die kernels.
+    Het idee achter deze werkwijze is dat door op een andere draad de kernels te herstarten, er altijd een kernel klaarstaat om de testcode uit te voeren, en er dus niet gewacht moet worden op het opnieuw opstarten van die kernels.
     In de praktijk bleek echter dat zelfs met een twintigtal kernels in de pool, het uitvoeren van de testcode van eenvoudige oefeningen dermate snel gaat in vergelijking met het opnieuw opstarten van de kernels, de kernels nooit op tijd herstart zijn.
     \item De kernels niet opnieuw opstarten, maar de interne toestand opnieuw instellen.
     In bepaalde kernels, zoals de Python-kernel, is dit mogelijk.
-    De Python-kernel (IPython) heeft bijvoorbeeld een magisch commando \texttt{\%reset}, dat alle toestand van de kernel reset.
-    Het probleem is echter dat slechts weinig kernels een gelijkaardig commando hebben.
+    De Python-kernel (IPython) heeft bijvoorbeeld een magisch commando \texttt{\%reset}, dat de toestand van de kernel opnieuw instelt.
+    Het probleem is er maar weinig kernels zijn die een gelijkaardig commando hebben.
 \end{itemize}
 
 Op dit punt is besloten dat de overhead van de Jupyter-kernels niet naar tevredenheid kon opgelost worden.
 Bovendien is een bijkomend nadeel van het gebruik van Jupyter-kernels ondervonden: de kernels voor andere programmeertalen dan Python zijn van gevarieerde kwaliteit.
-Zo printen de Java-kernel en Julia-kernel altijd uitvoer naar de standaarduitvoerstroom bij het opstarten, wat in bepaalde gevallen problemen gaf bij het verzamelen van de resultaten van de uitvoer van de testcode.
+Zo schrijven de Java-kernel en de Julia-kernel bij het opstarten altijd een boodschap naar de standaarduitvoerstroom, wat in bepaalde gevallen problemen gaf bij het verzamelen van de resultaten van de uitvoer van de testcode.
 
 \subsection{Sjablonen}\label{subsec:sjablonen}
 
-De keuze viel om verder te gaan met het systeem van sjablonen (zie ook \cref{subsec:testcode-genereren}).
+De keuze viel om verder te gaan met een systeem van sjablonen (zie ook \cref{subsec:testcode-genereren}).
 Hierbij wordt de code gegenereerd en vervolgens uitgevoerd via de commandoregel.
 
-Voordelen tegenover de Jupyter-kernels zijn:
+Voordelen ten opzichte van de Jupyter-kernels zijn:
 \begin{itemize}
     \item Het is sneller om twee onafhankelijke programma's uit te voeren op de commandolijn dan een Jupyter-kernel tweemaal te starten.
     \item Het laat meer vrijheid toe in hoe de resultaten (gedrag en neveneffecten) van het uitvoeren van de testcode verzameld worden.
-    \item Het is minder werk om de sjablonen voor TESTed te implementeren dan een nieuwe Jupyter-kernel te implementeren.
+    \item Het implementeren en configureren van een programmeertaal in TESTed met de basisfunctionaliteit is minder werk dan dan het implementeren van een nieuwe Jupyter-kernel.
+    Optionele functionaliteit, zoals linting, kan ervoor zorgen dat meer tijd en werk nodig is bij het toevoegen van een programmeertaal.
+    Het systeem met de sjablonen hanteert echter het designprincipe dat optionele functionaliteit geen bijkomend werk mag betekenen voor programmeertalen die er geen gebruik van maken.
     \item Er is geen verschil tussen hoe TESTed de ingediende oplossing uitvoert en hoe de student diezelfde oplossing uitvoert.
     Bij de Jupyter-kernels is dat soms wel het geval: bij de R-kernel zitten subtiele verschillen tussen het uitvoeren in de kernel en het uitvoeren op de commandoregel.
-    \item Herbruikbaar, in die zin dat het genereren van code in een programmeertaal op basis van de programmeertaalonafhankelijke specificatie in het testplan sowieso nodig is.
+    \item Herbruikbaar in die zin dat het genereren van testcode in een programmeertaal op basis van de programmeertaalonafhankelijke specificatie in het testplan sowieso nodig is.
+    \item De gegenereerde testcode bestaat uit normale codebestanden (bv.\ \texttt{.py}- of \texttt{.java}-bestanden), wat het toevoegen van een programmeertaal aan TESTed eenvoudiger te debuggen maakt: alle gegenereerde testcode is beschikbaar voor inspectie als een bestand.
 \end{itemize}
 
 Elke medaille heeft een ook keerzijde:
 \begin{itemize}
-    \item Het gebruik van de sjablonen zorgt ervoor dat het uitvoeren van de testcode minder dynamische kan zijn.
-    Daar de code eerst gegenereerd moet worden, moet vóór het uitvoeren bepaald worden welke code uitgevoerd zal moeten worden.
-    \item Er moet meer zelf geïmplementeerd worden: het ecosysteem van Jupyter is redelijk groot, en er bestaan kernels voor veel talen (of in elk geval een begin van een kernel, waarop verder gewerkt zou kunnen worden)\footnote{Zie deze pagina voor een lijst van kernels: \url{https://github.com/jupyter/jupyter/wiki/Jupyter-kernels}.}.
-    \item Het uitvoeren op de commandoregel is wel trager indien er geen reset moet gebeuren tussen de verschillende uitvoeringen.
-    % TODO: optimisation?
+    \item Het gebruik van sjablonen zorgt ervoor dat het uitvoeren van de testcode minder dynamische kan zijn.
+    Daar de testcode eerst gegenereerd moet worden, moet vóór het uitvoeren bepaald worden welke testcode zal uitgevoerd worden.
+    \item Er moet meer zelf geïmplementeerd worden: het ecosysteem van Jupyter is redelijk groot, en er bestaan kernels voor veel talen (of in elk geval een begin van een kernel, waarop verder zou kunnen gewerkt worden)\footnote{Zie deze pagina voor een lijst van kernels: \url{https://github.com/jupyter/jupyter/wiki/Jupyter-kernels}.}.
+    \item Het uitvoeren op de commandoregel is bij veel programmeertalen trager indien er geen reset moet gebeuren tussen de verschillende uitvoeringen.
+    Bij het uitvoeren op de commandoregel is er bij veel programmeertalen de performantiekost van het opstarten van de interpreter (zoals Python) of virtuele machine (zoals Java).
+    Bij een kernel is de opstartkost weliswaar groter, maar deze wordt maar één keer opgestart als er geen reset nodig is.
 \end{itemize}
 
 Bij een eerste iteratie van het systeem met sjablonen bestond enkel de contextcompilatie (zie opnieuw \cref{subsec:testcode-genereren} voor een beschrijving van deze term).
 Dit heeft een grote performantiekost bij alle programmeertalen, maar in het bijzonder bij talen zoals Java.
 Daar moest voor elke context eerst een compilatie plaatsvinden, waarna de gecompileerde testcode werd uitgevoerd.
-Bij een testplan met bijvoorbeeld 50 contexten vertaalt dit zich in 50 keer de compiler \texttt{javac} uitvoeren en ook 50 keer het uitvoeren van de code zelf met \texttt{java}.
+Bij een testplan met bijvoorbeeld 50 contexten vertaalt dit zich in 50 keer de \texttt{javac}-compiler uitvoeren en ook 50 keer het uitvoeren van de code zelf met \texttt{java}.
 
-In een tweede iteratie is een "partiële compilatie" geïmplementeerd.
-Het idee hier is dat er veel code is die hetzelfde blijft voor elke context (denk aan de ingediende oplossing en hulpbestanden van TESTed).
-In de partiële compilatie worden bij talen die dat ondersteunen, deze zaken eerst gecompileerd.
+In een tweede iteratie werd een "partiële compilatie" geïmplementeerd.
+Het idee hier is dat er veel testcode is die hetzelfde blijft voor elke context (denk aan de ingediende oplossing en hulpbestanden van TESTed).
+In de partiële compilatie wordt de gemeenschappelijke testcode eerst gecompileerd (bij programmeertalen die dat ondersteunen).
 Bij het beoordelen van een context werd dan enkel de testcode specifiek voor te beoordelen context gecompileerd.
 
-In een derde iteratie is de partiële compilatie uitgebreid naar de batchcompilatie.
-Hoewel dit een grote winst voor de uitvoeringstijd betekende, heeft deze modus wel een ander groot nadeel (zoals ook al vermeld in \cref{subsec:testcode-genereren}): bij statische talen zorgt een compilatiefout in één context ervoor dat geen enkele context beoordeeld kan worden, daar de compilatiefout ervoor zorgt dat er geen code gegenereerd wordt.
+In een derde iteratie werd de partiële compilatie uitgebreid naar batchcompilatie.
+Hoewel dit een grote winst voor de uitvoeringstijd betekende, heeft deze modus wel een ander groot nadeel (zoals reeds vermeld in \cref{subsec:testcode-genereren}): bij statische talen zorgen compilatiefouten in één context ervoor dat geen enkele context beoordeeld kan worden, daar de compilatiefout ervoor zorgt dat er geen code gegenereerd wordt.
 Dit wordt best geïllustreerd met het reeds vermelde scenario van een oefening waarbij de student twee functies dient te implementeren.
 In batchcompilatie in bijvoorbeeld Java kan de student niet de oplossing voor de eerste functie indienen en laten beoordelen: omdat de tweede functie ontbreekt zullen compilatiefouten optreden.
 
-De laatste en huidige iteratie bevat de mogelijkheid om beide compilatiemanieren te gebruiken, waarbij TESTed terugvalt op de contextcompilatie indien er iets misgaat bij de batchcompilatie.
+De laatste en huidige iteratie bevat de mogelijkheid om contextcompilatie en batchcompilatie te combineren, waarbij TESTed terugvalt op de contextcompilatie indien er iets misgaat bij de batchcompilatie.
 
 Tot slot bevat \cref{tab:meting} nog enkele tijdsmetingen van de verschillende implementaties van het systeem met sjablonen, voor de programmeertalen Python en Java.
-In deze tabel is de tijd gemeten in seconden om een (juiste) ingediende oplossing voor twee oefeningen te beoordelen: de voorbeeldoefening Lotto en een eenvoudigere oefening Echo.
+In deze tabel is de tijd gemeten in seconden om een (juiste) ingediende oplossing voor twee oefeningen te beoordelen: de voorbeeldoefening Lotto (met geprogrammeerde evaluatie) en een eenvoudigere oefening Echo (met enkel generieke evaluatie).
 Bij die laatste bestaat de opgave uit het implementeren van een functie die haar parameters naar de standaarduitvoerstroom schrijft.
-Elke beoordeling is uitgevoerd met contextcompilatie, partiële compilatie en batchcompilatie en met en zonder parallelle uitvoering.
-Deze meetingen zijn uitgevoerd op een standaardcomputer, niet op de Dodona-server en niet in een Docker-container.
-Die beide factoren kunnen ervoor zorgen dat de uitvoeringstijden op Dodona zelf sterk verschillen van deze metingen.
+Elke beoordeling is uitgevoerd met contextcompilatie, partiële compilatie en batchcompilatie.
+Elke combinatie van oefening en compilatiemanier is ook uitgevoerd met en zonder parallelle uitvoering van de contexten.
+Deze tijdsmetingen zijn uitgevoerd op een standaardcomputer (Windows 10, Intel \version{i7-8550U}, Python \version{3.8.1}, 64-bit), niet op de Dodona-server en niet in een Docker-container.
+Die laatste twee factoren kunnen ervoor zorgen dat uitvoeringstijden op Dodona sterk verschillen van deze metingen.
 
-Zoals verwacht levert de batchcompilatie het meeste tijdswinst op bij Java: daar heeft de compilatiestap ook een veel groter aandeel in de uitvoeringstijd.
-By Python is de compilatie veel sneller en ook veel minder belangrijk (zelfs optioneel, de stap wordt enkel uitgevoerd om bepaalde syntaxisfouten vroeg op te vangen).
+Zoals verwacht levert batchcompilatie het meeste tijdswinst op bij Java: daar heeft de compilatiestap ook een veel groter aandeel in de uitvoeringstijd.
+Bij Python is de compilatie veel sneller en ook veel minder belangrijk (zelfs optioneel, de stap wordt enkel uitgevoerd om bepaalde syntaxisfouten vroeg op te vangen).
 
 \begin{table}
     \centering

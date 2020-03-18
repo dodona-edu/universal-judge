@@ -20,17 +20,17 @@ def valid_lottery_numbers(number_str, count=6, maximum=42):
         return False, f"verwachtte {count} in plaats van {len(nrs)} lottogetallen"
 
     if wrong := [number for number in nrs if number > maximum]:
-        return False, f"volgende lottogetallen zijn groter dan de maximale " \
-                      f"waarde {maximum}: {listing(wrong)} "
+        return (False, "volgende lottogetallen zijn groter dan de maximale waarde "
+                       f"{maximum}: {listing(wrong)}")
 
     if wrong := [number for number in nrs if number < 1]:
-        return False, f"volgende lottogetallen zijn kleiner dan de minimale " \
-                      f"waarde 1: {listing(wrong)}"
+        return (False, "volgende lottogetallen zijn kleiner dan de minimale "
+                       f"waarde 1: {listing(wrong)}")
 
     duplicates = {number for number in nrs if nrs.count(number) > 1}
     if wrong := sorted(duplicates):
-        return False, f"volgende lottogetallen komen meer dan één keer " \
-                      f"voor: {listing(wrong)}"
+        return (False, "volgende lottogetallen komen meer dan één keer "
+                       f"voor: {listing(wrong)}")
 
     if list(sorted(nrs)) != nrs:
         return False, "lottogetallen worden niet in stijgende volgorde opgelijst"

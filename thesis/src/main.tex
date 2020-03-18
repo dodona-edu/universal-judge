@@ -35,6 +35,7 @@
 \usepackage{tikz}
 \usetikzlibrary{shapes,arrows,positioning,backgrounds,calc,intersections}
 
+\renewcommand{\mkbegdispquote}[2]{\itshape}
 
 % Gebruik dit om de afbreekpatronen zichtbaar te maken.
 %\usepackage{showhyphens}
@@ -72,6 +73,11 @@
     linenos
 }
 
+% Gebruik tabelcijfers in tabellen
+\AtBeginEnvironment{tabular}{\addfontfeature{Numbers={Lining,Monospaced}}}
+
+\newcommand*{\version}[1]{{\addfontfeature{Numbers={Lining,Monospaced}}#1}}
+
 \title{TESTed: one judge to rule them all}
 \subtitle{Een universele judge voor het beoordelen van software in een educative context}
 \author{\large Niko Strijbol}
@@ -90,6 +96,7 @@ Master of Science in de informatica%
 
 \newfontfamily\lsi[Scale=2.5]{Libertinus Serif Initials}
 \renewcommand*{\LettrineFont}{\lsi}
+\renewcommand{\lettrine}[3][]{#2#3}
 
 %%%%%%
 % Taalgerelateerde zaken
