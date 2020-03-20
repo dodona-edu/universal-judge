@@ -1,58 +1,28 @@
-import os
-import shutil
+"""
+The TESTed package is a universal judge for the Dodona platform.
+More information can be found in the thesis manuscript.
 
-from argparse import ArgumentParser, FileType
-from typing import IO
+If you are interested in running TESTed, you can:
 
-from tested import Config, Bundle
-from tested.config import Config, read_config, Bundle, create_bundle
-
-from .languages import get_language_config
-from .testplan import parse_test_plan
-from .utils import smart_close, _get_identifier
-
-
-def run(config: Config, judge_output: IO):
-    """
-    Run the universal judge.
-    :param config: The configuration, as received from Dodona.
-    :param judge_output: Where the judge output will be written to.
-    """
-    with open(f"{config.resources}/{config.plan_name}", "r") as t:
-        textual_plan = t.read()
-
-    testplan = parse_test_plan(textual_plan)
-
-    # Merge config from config into testplan if needed.
-    if config.linter is not None:
-        existing = testplan.config_for(config.programming_language)
-        existing["linter"] = config.linter
-        testplan.configuration.language[config.programming_language] = existing
-
-    from judge.__init__ import judge
-    pack = create_bundle(config, judge_output, testplan)
-    judge(pack)
-
-
-def clean_working_directory(config: Config):
-    """
-    Delete everything in the working directory.
-    """
-    for root, dirs, files in os.walk(config.workdir):
-        for f in files:
-            os.unlink(os.path.join(root, f))
-        for d in dirs:
-            shutil.rmtree(os.path.join(root, d), ignore_errors=True)
-
-
+1. Use this package as an executable module (python -m tested). This will use the
+   command line interface, which is also available to Dodona.
+2. Run it programmatically, by running the manual module (python -m tested.manual).
+   This should allow easier usage and illustrates programmatic use.
+"""
 if __name__ == '__main__':
+    from argparse import ArgumentParser, FileType
+    from .configs import read_config
+    from .utils import smart_close
+    from .main import run
+
     parser = ArgumentParser(
         description="The universal judge for Dodona."
     )
     parser.add_argument('-p', '--testplan', type=FileType('r'),
-                        help="Where to read the config from", default="-")
+                        help="Where to read the configs from", default="-")
     parser.add_argument('-o', '--output', type=FileType('w'),
-                        help="Where the judge output should be written to.", default="-")
+                        help="Where the judge output should be written to.",
+                        default="-")
     parser = parser.parse_args()
 
     configuration = read_config(parser.testplan)

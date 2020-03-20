@@ -7,7 +7,7 @@ cases.
 from enum import Enum
 from typing import Union
 
-from datatypes.basic import BasicNumericTypes, BasicSequenceTypes, BasicTypes, \
+from .basic import BasicNumericTypes, BasicSequenceTypes, BasicTypes, \
     BasicObjectTypes
 
 
@@ -32,7 +32,7 @@ class _AdvancedDataType(str, Enum):
 
 class AdvancedNumericTypes(_AdvancedDataType):
     """
-    The advanced numeric types. Programming config should be implemented using
+    The advanced numeric types. Programming configs should be implemented using
     the C/C++ rules: the size of the types is a minimum. For example, Python's ints
     are arbitrary precision, which means Python supports all integer types.
     On the other hand, C only supports up to 64 bits.
@@ -75,7 +75,7 @@ class AdvancedSequenceTypes(_AdvancedDataType):
     """
     An array is often a continuous piece of memory for elements of a fixed size.
     The difference is best described using Java, with its array and List types.
-    A lot of config only have LIST or ARRAY but not both.
+    A lot of configs only have LIST or ARRAY but not both.
     """
     LIST = "list", BasicSequenceTypes.SEQUENCE
     """

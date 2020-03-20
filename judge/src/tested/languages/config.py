@@ -1,20 +1,21 @@
 """
 Module containing the base class with the channel methods for a language
 configuration. To support a new language, it is often enough to subclass the
-LanguageConfig class and implement the required templates.
+Language class and implement the required templates.
 
-For very exotic config, it is possible to create a custom runner subclass,
+For very exotic configs, it is possible to create a custom runner subclass,
 but that will be a lot more work.
 """
 import os
-from typing import List, Tuple, Dict, Optional
 from pathlib import Path
+from typing import List, Tuple, Dict, Optional
 
-from datatypes import AdvancedTypes
-from features import Constructs
-from tested import Config
-from testplan import Plan, FunctionCall
-from dodona import AnnotateCode, Message
+from ..configs import Bundle
+from ..datatypes import AdvancedTypes
+from ..dodona import AnnotateCode, Message
+from ..features import Constructs
+from ..testplan import Plan
+from ..testplan.ast import FunctionCall
 
 CallbackResult = Tuple[List[str], List[str]]
 
@@ -27,7 +28,7 @@ def executable_name(basename: str) -> str:
         return basename
 
 
-class LanguageConfig:
+class Language:
     """
     Configuration for the runner. Most of the language dependent options are
     collected in this class. More involved language dependent changes, such as
@@ -215,7 +216,7 @@ class LanguageConfig:
         """Allows parsing error message to annotate the code."""
         return []
 
-    def run_linter(self, config: Config, path: Path, submission: Path) \
+    def run_linter(self, bundle: Bundle, path: Path, submission: Path) \
             -> Tuple[List[Message], List[AnnotateCode]]:
         """
         Run a linter or other code analysis tools on the submission.
@@ -223,11 +224,12 @@ class LanguageConfig:
         support for modifying the submission code; all changes will be discarded.
         By default, this does nothing.
 
-        :param config: The config.
+        :param bundle: The configuration bundle.
         :param path: The path to the directory where the linter is run.
         :param submission: The path to the submission. The path is absolute, but
                            the submission will be in the directory where the linter
                            is run.
+
         :return: A list of messages and annotations.
         """
         return [], []

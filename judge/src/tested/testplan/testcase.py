@@ -7,10 +7,11 @@ from typing import Union, List, Optional
 from pydantic import root_validator
 from pydantic.dataclasses import dataclass
 
-from datatypes import StringTypes
-from tested.features import FeatureSet, combine_features, Constructs, NOTHING, WithFeatures
-from testplan.ast import Expression, Statement
-from testplan.channels import TextData, EmptyChannel, TextOutputChannel, \
+from ..datatypes import StringTypes
+from ..features import FeatureSet, combine_features, Constructs, NOTHING, \
+    WithFeatures
+from .ast import Expression, Statement
+from .channels import TextData, EmptyChannel, TextOutputChannel, \
     SpecialOutputChannel, IgnoredChannel, FileOutputChannel, \
     ExceptionOutputChannel, ValueOutputChannel, ExitCodeOutputChannel
 

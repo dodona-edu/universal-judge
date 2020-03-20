@@ -4,9 +4,9 @@ from typing import List, Optional, Tuple
 from pydantic.dataclasses import dataclass
 
 from tested.dodona import Message, Status
-from judge import BaseExecutionResult, _logger, run_command
-from tested import Bundle
-from testplan import Context, ExecutionMode
+from . import BaseExecutionResult, _logger, run_command
+from ..configs import Bundle
+from ..testplan import Context, ExecutionMode
 
 
 @dataclass

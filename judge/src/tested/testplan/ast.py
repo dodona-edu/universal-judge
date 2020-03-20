@@ -14,9 +14,9 @@ from typing import Optional, List, Union
 from pydantic import root_validator
 from pydantic.dataclasses import dataclass
 
-from tested.features import Constructs, FeatureSet, combine_features, WithFeatures
-from datatypes import ExtendedTypes
-from tested.serialisation import Value
+from ..features import Constructs, FeatureSet, combine_features, WithFeatures
+from ..datatypes import ExtendedTypes
+from ..serialisation import Value
 
 
 class Identifier(str, WithFeatures):
@@ -29,7 +29,7 @@ class Identifier(str, WithFeatures):
 class FunctionType(str, Enum):
     FUNCTION = "function"
     """
-    A top-level function expression. In some config, this might be translated to a
+    A top-level function expression. In some configs, this might be translated to a
     NAMESPACE function (e.g. in Java, this is translated to a static method).
     """
     NAMESPACE = "namespace"

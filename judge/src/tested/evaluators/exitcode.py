@@ -1,9 +1,9 @@
 import logging
 from typing import Optional
 
-from tested.dodona import StatusMessage, Status
-from evaluators import EvaluationResult
-from testplan.channels import ExitCodeOutputChannel
+from ..dodona import StatusMessage, Status
+from . import EvaluationResult
+from ..testplan.channels import ExitCodeOutputChannel
 
 logger = logging.getLogger(__name__)
 

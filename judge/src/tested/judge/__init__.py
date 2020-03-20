@@ -1,6 +1,6 @@
 """
 The main judge package. Responsible for turning a configuration bundle (containing
-the config, testplan and solution) into output for Dodona.
+the configs, testplan and solution) into output for Dodona.
 
 The main module has two functions, which are the main interfaces to interact with
 the judge. All other modules might be useful, but are more for the internal code
@@ -13,24 +13,21 @@ from typing import Tuple, List
 
 import humps
 
-import utils
-from dodona import *
-from judge import _evaluate_channel, run_compilation, BaseExecutionResult, \
-    ExecutionResult, ContextExecution, execute_file
-from judge.compilation import run_compilation, \
+from ..dodona import *
+from .compilation import run_compilation, \
     _process_compile_results
-from judge.evaluation import _evaluate_channel, evaluate_results, execute_context
-from judge.execution import ExecutionResult, ContextExecution, execute_file
-from judge.linter import run_linter
-from judge.utils import BaseExecutionResult, run_command, find_main_file
-from languages.generator import generate_context, generate_selector, \
+from .evaluation import _evaluate_channel, evaluate_results, execute_context
+from .execution import ExecutionResult, ContextExecution, execute_file
+from .linter import run_linter
+from .utils import BaseExecutionResult, run_command, find_main_file
+from ..languages.generator import generate_context, generate_selector, \
     generate_custom_evaluator
-from languages.templates import path_to_templates
-from serialisation import Value
-from tested import Bundle, _get_identifier, create_bundle
-from testplan import ExecutionMode
-from testplan.evaluators import ProgrammedEvaluator
-from testplan.utils import TestPlanError
+from ..languages.templates import path_to_templates
+from ..serialisation import Value
+from ..configs import Bundle, _get_identifier, create_bundle
+from ..testplan import ExecutionMode
+from ..testplan.evaluators import ProgrammedEvaluator
+from ..testplan.utils import TestPlanError
 
 _logger = logging.getLogger(__name__)
 
@@ -244,7 +241,7 @@ def evaluate_programmed(bundle: Bundle,
 
     _logger.info("Will do custom evaluation in %s", custom_path)
 
-    # Create a config bundle for the language of the evaluator.
+    # Create a configs bundle for the language of the evaluator.
     eval_bundle = create_bundle(
         bundle.config, bundle.out, bundle.plan, evaluator.language
     )
@@ -274,7 +271,7 @@ def evaluate_programmed(bundle: Bundle,
     dependencies.append(evaluator_name)
     _logger.debug("Generated evaluator executor %s", evaluator_name)
 
-    # Do compilation for those config that require it.
+    # Do compilation for those configs that require it.
     command, files = eval_bundle.language_config.evaluator_generation_callback(
         dependencies
     )

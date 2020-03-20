@@ -6,21 +6,21 @@ needed to execute the templates.
 In short, if it has to do with the templates or is programming language specific,
 you will probably find it in this package.
 """
-from languages.config import LanguageConfig
-from languages.config.haskell import HaskellConfig
-from languages.config.java import JavaConfig
-from languages.config.python import PythonConfig
+from .config import Language
+from .configs.haskell import HaskellConfig
+from .configs.java import JavaConfig
+from .configs.python import Python
 
 
-LANGUAGE_CONFIGS = {
-    'python':  PythonConfig,
+LANGUAGES = {
+    'python':  Python,
     'java':    JavaConfig,
     'haskell': HaskellConfig
 }
 
 
-def get_language_config(language: str) -> LanguageConfig:
+def get_language(language: str) -> Language:
     """
     Get the configuration for a programming language.
     """
-    return LANGUAGE_CONFIGS[language]()
+    return LANGUAGES[language]()

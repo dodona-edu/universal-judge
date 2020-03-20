@@ -8,7 +8,7 @@ returns a result.
 
 The following parameters are passed to the function:
 
-- RawEvaluator config, consisting of:
+- RawEvaluator configs, consisting of:
   - The global configuration for the run of TESTed
   - The configuration for the evaluator instance
   - The judge instance
@@ -17,7 +17,7 @@ The following parameters are passed to the function:
 
 For example, such a function looks like this:
 
-   def evaluate_text(config, channel, actual):
+   def evaluate_text(configs, channel, actual):
         pass
 """
 import functools
@@ -28,14 +28,14 @@ from typing import Union, Callable, Optional
 
 from pydantic.dataclasses import dataclass
 
-from dodona import StatusMessage, Message
-from tested import Bundle
-from testplan.channels import SpecialOutputChannel, NormalOutputChannel, \
-    EmptyChannel, IgnoredChannel, ExitCodeOutputChannel, OutputChannel
-from testplan.evaluators import GenericTextEvaluator, TextBuiltin, \
+from .. import Bundle
+from ..dodona import StatusMessage, Message
+from ..testplan.channels import OutputChannel, NormalOutputChannel, \
+    SpecialOutputChannel, EmptyChannel, IgnoredChannel, ExitCodeOutputChannel
+from ..testplan.evaluators import GenericTextEvaluator, TextBuiltin, \
     GenericValueEvaluator, ValueBuiltin, GenericExceptionEvaluator, \
     ExceptionBuiltin, ProgrammedEvaluator, SpecificEvaluator
-from utils import Either
+from ..utils import Either
 
 
 @dataclass
@@ -85,8 +85,8 @@ def get_evaluator(
     """
     Get the evaluator for a given output channel.
     """
-    from evaluators import nothing, exitcode, text, value, exception, programmed, \
-        specific, ignored
+    from ..evaluators import nothing, exitcode, text, value, exception, \
+        programmed, specific, ignored
 
     currier = functools.partial(_curry_evaluator, bundle, context_dir)
 

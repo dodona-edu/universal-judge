@@ -9,9 +9,9 @@ from pydantic.dataclasses import dataclass
 from pydantic import root_validator
 
 from tested.features import FeatureSet, NOTHING, WithFeatures
-from testplan.evaluators import GenericTextEvaluator, ProgrammedEvaluator, \
+from .evaluators import GenericTextEvaluator, ProgrammedEvaluator, \
     TextBuiltin, GenericValueEvaluator, SpecificEvaluator, GenericExceptionEvaluator
-from testplan.utils import TestPlanError
+from .utils import TestPlanError
 
 from tested.serialisation import Value, ExceptionValue
 

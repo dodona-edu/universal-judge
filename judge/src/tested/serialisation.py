@@ -13,7 +13,7 @@ language implementations itself.
 
 A json-schema can be generated from this format by executing the module on the
 command line. The schema will be printed to stdout. This can be used to generate
-classes for implementations in other config.
+classes for implementations in other configs.
 """
 import json
 import logging
@@ -25,8 +25,8 @@ import math
 from pydantic import BaseModel
 from pydantic.dataclasses import dataclass
 
-from tested.features import FeatureSet, Constructs, combine_features, WithFeatures
-from datatypes import NumericTypes, StringTypes, BooleanTypes, \
+from .features import FeatureSet, Constructs, combine_features, WithFeatures
+from .datatypes import NumericTypes, StringTypes, BooleanTypes, \
     SequenceTypes, ObjectTypes, NothingTypes, SimpleTypes, resolve_to_basic
 
 logger = logging.getLogger(__name__)

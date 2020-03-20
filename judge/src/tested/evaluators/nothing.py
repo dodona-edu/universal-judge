@@ -3,8 +3,8 @@ RawEvaluator for channels without output.
 """
 
 from tested.dodona import StatusMessage, Status
-from evaluators import EvaluationResult, try_outputs, exception, value
-from testplan.channels import EmptyChannel, OutputChannel
+from . import EvaluationResult, try_outputs, exception, value
+from ..testplan.channels import EmptyChannel, OutputChannel
 
 
 def evaluate(_, channel: OutputChannel, actual: str) -> EvaluationResult:

@@ -26,34 +26,6 @@ def smart_close(file: IO):
     return contextlib.nullcontext(file)
 
 
-def copy_from_paths_to_path(origins: List[Path],
-                            files: List[str],
-                            destination: Path):
-    """
-    Copy a list of files from a list of source folders to a destination folder. The
-    source folders are searched in-order for the name of the file, which means that
-    if multiple folders contain a file with the same name, only the first one will
-    be used. Conversely, if no source folder contains a file with a requested name,
-    an error will be thrown.
-    :param origins: The source folders to copy from.
-    :param files: The files to copy.
-    :param destination: The destination folder to copy to.
-    """
-    # Copy files to the common directory.
-    files_to_copy = []
-    for file in files:
-        for potential_path in origins:
-            if (full_file := potential_path / file).exists():
-                files_to_copy.append(full_file)
-                break
-        else:  # no break
-            raise ValueError(f"Could not find dependency file {file}, "
-                             f"looked in {origins}")
-    for file in files_to_copy:
-        # noinspection PyTypeChecker
-        shutil.copy2(file, destination)
-
-
 @contextlib.contextmanager
 def protected_directory(directory: Union[PathLike, Path]
                         ) -> Generator[Path, None, None]:
@@ -102,8 +74,8 @@ class Either(Generic[T]):
         return self.value
 
 
-def _get_identifier() -> str:
-    """Generate a random secret valid in most config."""
+def get_identifier() -> str:
+    """Generate a random secret valid in most configs."""
     letter = random.choice(string.ascii_letters)
     rest = random.sample(string.ascii_letters + string.digits, 8)
     return letter + ''.join(rest)

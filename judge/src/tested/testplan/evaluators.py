@@ -83,7 +83,7 @@ class SpecificEvaluator:
     1. The code is run alongside the user code. This means the user can potentially
        take control of the code.
     2. This will limit the context_number of language an exercise is available in,
-       since you need to provide tests for all config you want to support.
+       since you need to provide tests for all configs you want to support.
     3. It is a lot of work. You need to return the correct values, since the judge
        needs to understand what the result was.
 

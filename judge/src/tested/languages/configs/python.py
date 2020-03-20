@@ -1,20 +1,19 @@
-import re
 import os
+import re
 from os import PathLike
 from pathlib import Path
 from typing import List, Tuple, Union
 
 from humps import decamelize, depascalize
 
-from runners.config import CallbackResult, LanguageConfig
+from . import python_linter
+from ..config import Language, CallbackResult
+from ...configs import Bundle
+from ...dodona import AnnotateCode, Severity, Message
+from ...testplan import Plan
 
-import judge.linter
-from tested import Config
-from testplan import Plan
-from tested.dodona import AnnotateCode, Severity, Message
 
-
-class PythonConfig(LanguageConfig):
+class Python(Language):
     """Configuration for the Python language."""
 
     def initial_dependencies(self) -> List[str]:
@@ -46,7 +45,7 @@ class PythonConfig(LanguageConfig):
     def context_name(self, tab_number: int, context_number: int) -> str:
         return f"context_{tab_number}_{context_number}"
 
-    def conventionalise(self, function_name: str) -> str:
+    def conventionalise_function(self, function_name: str) -> str:
         return decamelize(function_name)
 
     def conventionalise_object(self, class_name: str) -> str:
@@ -118,8 +117,8 @@ class PythonConfig(LanguageConfig):
         return line, column, message
 
     def run_linter(self,
-                   config: Config,
+                   bundle: Bundle,
                    path: Path,
                    submission: Union[Path, PathLike]) \
             -> Tuple[List[Message], List[AnnotateCode]]:
-        return judge.linter.run_linter(config, path, submission)
+        return python_linter.run_pylint(bundle, path, submission)

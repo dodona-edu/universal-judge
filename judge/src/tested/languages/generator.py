@@ -6,18 +6,19 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Union, Tuple, Optional, Set
 
-from tested.dodona import ExtendedMessage
-from languages.paths import value_file, exception_file
-from languages.templates import find_and_write_template, \
+from ..datatypes import SequenceTypes
+from ..dodona import ExtendedMessage
+from .paths import value_file, exception_file
+from .templates import find_and_write_template, \
     find_template
-from tested.serialisation import Value, SequenceType, SequenceTypes
-from tested import Bundle
-from testplan import TextData, Context
-from testplan.ast import Statement, FunctionCall, Expression, FunctionType, \
+from ..serialisation import Value, SequenceType
+from ..configs import Bundle
+from ..testplan import Context
+from ..testplan.ast import Statement, FunctionCall, Expression, FunctionType, \
     Identifier
-from testplan.channels import EmptyChannel, IgnoredChannel
-from testplan.evaluators import ProgrammedEvaluator, SpecificEvaluator
-from testplan.testcase import Testcase, ContextTestcase, ExpressionInput, \
+from ..testplan.channels import EmptyChannel, IgnoredChannel, TextData
+from ..testplan.evaluators import ProgrammedEvaluator, SpecificEvaluator
+from ..testplan.testcase import Testcase, ContextTestcase, ExpressionInput, \
     StatementInput
 
 _logger = logging.getLogger(__name__)

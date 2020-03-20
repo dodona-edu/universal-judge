@@ -1,11 +1,11 @@
 """
 Exception evaluator.
 """
-from tested.dodona import StatusMessage, Status, ExtendedMessage, Permission
-from evaluators import EvaluationResult
-from tested.serialisation import ExceptionValue
-from testplan.channels import ExceptionOutputChannel
-from tested.utils import Either
+from ..dodona import StatusMessage, Status, ExtendedMessage, Permission
+from . import EvaluationResult
+from ..serialisation import ExceptionValue
+from ..testplan.channels import ExceptionOutputChannel
+from ..utils import Either
 
 
 def try_as_exception(value: str) -> Either[ExceptionValue]:

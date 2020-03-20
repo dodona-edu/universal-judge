@@ -14,10 +14,9 @@ from typing import List, Optional, Dict, Any
 from pydantic import BaseModel, root_validator
 from pydantic.dataclasses import dataclass
 
-from features import FeatureSet, combine_features, WithFeatures
-from testplan import ContextTestcase, TextData
-from testplan.channels import TextData
-from testplan.testcase import ContextTestcase, Testcase
+from ..features import FeatureSet, combine_features, WithFeatures
+from .channels import TextData
+from .testcase import ContextTestcase, Testcase
 
 
 Code = Dict[str, TextData]

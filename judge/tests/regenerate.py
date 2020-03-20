@@ -4,7 +4,7 @@ Only do this if you are sure the results are correct!
 """
 import os
 
-from tested import Config, run, clean_working_directory
+from tested import DodonaConfig, run, clean_working_directory
 from pathlib import Path
 
 
@@ -26,9 +26,9 @@ def all_submissions():
 
 
 # noinspection PyShadowingNames
-def read_config(student: str, exercise: str, workdir: str) -> Config:
+def read_config(student: str, exercise: str, workdir: str) -> DodonaConfig:
     """Read the configuration from stdout"""
-    return Config(**{
+    return DodonaConfig(**{
         "memory_limit": 536870912,
         "time_limit": 10000000,
         "programming_language": 'python',

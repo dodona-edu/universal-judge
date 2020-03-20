@@ -4,16 +4,16 @@ Most of this code is taken from the code from Pythia.
 """
 import logging
 import shutil
+from io import StringIO
 from os import PathLike
 from pathlib import Path
 from typing import List, Tuple
-from io import StringIO
 
 from pylint import lint
 from pylint.reporters import JSONReporter
 
-from tested.dodona import *
-from tested import Config
+from ... import Bundle
+from ...dodona import *
 
 logger = logging.getLogger(__name__)
 
@@ -39,15 +39,16 @@ message_categories = {
 }
 
 
-def run_pylint(config: Config, path: Path, submission: Path) \
+def run_pylint(bundle: Bundle, path: Path, submission: Path) \
         -> Tuple[List[Message], List[AnnotateCode]]:
     """
     Calls pylint to annotate submitted source code and adds resulting score and
     annotations to tab.
     """
+    config = bundle.config
     pylint_config: Union[Path, PathLike] = path / 'pylint_config.rc'
     if config.options.get("custom_pylint"):
-        # If a custom pylint config exists, use it.
+        # If a custom pylint configs exists, use it.
         source = f"{config.resources}/{config.options['custom_pylint']}"
         shutil.copy2(source, pylint_config)
     else:
@@ -94,10 +95,3 @@ def run_pylint(config: Config, path: Path, submission: Path) \
     annotations.sort(key=lambda a: (a.row, a.column, a.text))
     # for now, reports are not processed
     return [], annotations
-
-
-def run_linter(config: Config, path: Path, submission: Union[Path, PathLike]) \
-        -> Tuple[List[Message], List[AnnotateCode]]:
-    logger.debug("Running py_lint...")
-    # run pylint to collect evaluation score and annotations
-    return run_pylint(config, path, submission)

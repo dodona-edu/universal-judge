@@ -1,5 +1,5 @@
 """
-Run the judge manually from code. In this mode, the config is hardcoded into this
+Run the judge manually from code. In this mode, the configs is hardcoded into this
 file, allowing rapid testing (and, most importantly, debugging).
 """
 import logging
@@ -10,12 +10,13 @@ import shutil
 import time
 from pathlib import Path
 
-from tested import Config, run
+from .configs import DodonaConfig
+from .main import run
 
 
-def read_config() -> Config:
+def read_config() -> DodonaConfig:
     """Read the configuration from stdout"""
-    return Config(**{
+    return DodonaConfig(**{
         "memory_limit": 536870912,
         "time_limit": 10000000,
         "programming_language": 'python',
@@ -47,7 +48,7 @@ if __name__ == '__main__':
             shutil.rmtree(os.path.join(root, d), ignore_errors=True)
 
     start = time.time()
-    # run(config, open(os.devnull, "w"))
+    # run(configs, open(os.devnull, "w"))
     # f = open(f"tests/isbn/students/student{STUDENT}/{EXERCISE}.dson", 'w')
     run(config, sys.stdout)
     end = time.time()

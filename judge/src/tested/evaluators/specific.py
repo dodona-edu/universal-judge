@@ -1,11 +1,11 @@
 """
 Specific evaluator
 """
-from tested.dodona import StatusMessage, Status, ExtendedMessage, Permission
-from evaluators import EvaluationResult
-from tested.serialisation import SpecificResult
-from testplan.channels import OutputChannel
-from testplan.evaluators import SpecificEvaluator
+from ..dodona import StatusMessage, Status, ExtendedMessage, Permission
+from . import EvaluationResult
+from ..serialisation import SpecificResult
+from ..testplan.channels import OutputChannel
+from ..testplan.evaluators import SpecificEvaluator
 
 
 def evaluate(_, channel: OutputChannel, actual: str) -> EvaluationResult:

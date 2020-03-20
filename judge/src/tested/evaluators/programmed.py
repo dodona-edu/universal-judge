@@ -3,15 +3,16 @@ Programmed evaluator.
 """
 from typing import get_args, Tuple, Optional
 
-from datatypes import StringTypes
-from tested.dodona import ExtendedMessage, StatusMessage, Status, Permission
-from evaluators import EvaluationResult, EvaluatorConfig, value
-from evaluators.value import get_values
-from tested.serialisation import StringType, SpecificResult, Value
-from testplan.channels import TextOutputChannel, FileOutputChannel, \
+from . import EvaluationResult, EvaluatorConfig, value
+from .value import get_values
+from ..datatypes import StringTypes
+from ..dodona import ExtendedMessage, StatusMessage, Status, Permission
+from ..judge import evaluate_programmed
+from ..serialisation import StringType, SpecificResult, Value
+from ..testplan.channels import TextOutputChannel, FileOutputChannel, \
     ValueOutputChannel, NormalOutputChannel, ExceptionOutputChannel
-from testplan.evaluators import ProgrammedEvaluator
-from tested.utils import Either
+from ..testplan.evaluators import ProgrammedEvaluator
+from ..utils import Either
 
 DEFAULT_STUDENT = ("Er ging iets fout op bij het evalueren van de oplossing. Meld "
                    "dit aan de lesgever!")
@@ -32,7 +33,7 @@ def expected_as_value(config: EvaluatorConfig,
                       channel: NormalOutputChannel,
                       actual: str) -> Tuple[Optional[Value], Either[Value]]:
     if isinstance(channel, TextOutputChannel):
-        expected = channel.get_data_as_string(config.config.resources)
+        expected = channel.get_data_as_string(config.bundle.config.resources)
         expected_value = _maybe_string(expected)
         actual_value = StringType(StringTypes.TEXT, expected)
         return expected_value, Either(actual_value)
@@ -98,7 +99,8 @@ def evaluate(config: EvaluatorConfig,
 
     readable_actual = repr(actual_value)  # TODO: fix this.
 
-    result = config.judge.evaluate_programmed(
+    result = evaluate_programmed(
+        config.bundle,
         evaluator=channel.evaluator,
         expected=expected_value,
         actual=actual_value

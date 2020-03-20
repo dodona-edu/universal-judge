@@ -8,9 +8,9 @@ from mako.exceptions import TemplateLookupException
 from mako.lookup import TemplateLookup
 from mako.template import Template
 
-from languages.generator import _logger
-from languages.templates._preprocessors import remove_indents, remove_newline
-from tested import Bundle
+from ..generator import _logger
+from ..templates._preprocessors import remove_indents, remove_newline
+from ...configs import Bundle
 
 
 def _write_template(arguments, template: Template, path: Path):
@@ -33,7 +33,7 @@ def _write_template(arguments, template: Template, path: Path):
 def path_to_templates(bundle: Bundle) -> List[Path]:
     """
     Construct the paths to the folder containing the templates files for a given
-    programming language (passed via the config pack).
+    programming language (passed via the configs pack).
 
     :param bundle: The configuration bundle.
 
@@ -43,7 +43,7 @@ def path_to_templates(bundle: Bundle) -> List[Path]:
     language = bundle.config.programming_language
     result = []
     for end in bundle.language_config.template_folders(language):
-        result.append(judge_root / 'judge' / 'config' / 'templates' / end)
+        result.append(judge_root / 'judge' / 'configs' / 'templates' / end)
     assert result, "At least one template folder is required."
     return result
 

@@ -1,9 +1,9 @@
 import shutil
 from pathlib import Path
 
-from tested.dodona import report_update, AppendMessage
-from judge import _logger
-from tested import Bundle
+from ..dodona import report_update, AppendMessage
+from . import _logger
+from ..configs import Bundle
 
 
 def run_linter(bundle: Bundle):

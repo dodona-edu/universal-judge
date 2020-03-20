@@ -5,16 +5,17 @@ from typing import IO, Union, Tuple, List, Optional
 from tested.dodona import Status, report_update, StartTest, AppendMessage, CloseTest, \
     Message, StartTestcase, EscalateStatus, StatusMessage, CloseTestcase, \
     ExtendedMessage, Permission
-from evaluators import Evaluator, get_evaluator
-from judge import ExecutionResult, ContextExecution, _logger, run_compilation, \
+from ..evaluators import Evaluator, get_evaluator
+from . import ExecutionResult, ContextExecution, _logger, run_compilation, \
     _process_compile_results, find_main_file, execute_file
-from languages.generator import get_readable_input
-from languages.paths import value_file, exception_file
-from tested import Bundle
-from testplan import Context, Testcase, ExecutionMode
-from testplan.channels import OutputChannel, EmptyChannel, IgnoredChannel, \
+from ..languages.generator import get_readable_input
+from ..languages.paths import value_file, exception_file
+from ..configs import Bundle
+from ..testplan import Context, ExecutionMode
+from ..testplan.channels import OutputChannel, EmptyChannel, IgnoredChannel, \
     ExitCodeOutputChannel
-from testplan.utils import TestPlanError
+from ..testplan.testcase import Testcase
+from ..testplan.utils import TestPlanError
 
 
 def _evaluate_channel(

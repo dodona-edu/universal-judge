@@ -5,7 +5,7 @@ import operator
 from enum import Flag, auto
 from functools import reduce
 from typing import Iterable, Set, NamedTuple
-from datatypes import AllTypes
+from .datatypes import AllTypes
 
 
 class Constructs(Flag):

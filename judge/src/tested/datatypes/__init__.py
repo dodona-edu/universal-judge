@@ -14,12 +14,12 @@ They are also split in "basic types" and "advanced types".
 """
 from typing import Union, get_args
 
-from datatypes.advanced import AdvancedNumericTypes, AdvancedSequenceTypes, \
+from .advanced import AdvancedNumericTypes, AdvancedSequenceTypes, \
     AdvancedObjectTypes, AdvancedTypes
-from datatypes.basic import BasicNumericTypes, BasicStringTypes, \
+from .basic import BasicNumericTypes, BasicStringTypes, \
     BasicBooleanTypes, BasicSequenceTypes, BasicObjectTypes, BasicNothingTypes, \
     BasicTypes
-from datatypes.code import CodeStringTypes
+from .code import CodeStringTypes
 
 NumericTypes = Union[BasicNumericTypes, AdvancedNumericTypes]
 StringTypes = BasicStringTypes

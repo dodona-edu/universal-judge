@@ -5,9 +5,9 @@ from typing import Optional, Dict, Any
 
 import math
 
-from tested.dodona import StatusMessage, Status
-from evaluators import EvaluationResult, EvaluatorConfig
-from testplan.channels import TextOutputChannel, FileOutputChannel, OutputChannel
+from ..dodona import StatusMessage, Status
+from . import EvaluationResult, EvaluatorConfig
+from ..testplan.channels import TextOutputChannel, FileOutputChannel, OutputChannel
 
 
 def _is_number(string: str) -> Optional[float]:
@@ -91,7 +91,7 @@ def evaluate_text(
     """
     assert isinstance(channel, TextOutputChannel)
     options = _text_options(config)
-    expected = channel.get_data_as_string(config.config.resources)
+    expected = channel.get_data_as_string(config.bundle.config.resources)
     return compare_text(options, expected, actual)
 
 
@@ -127,7 +127,7 @@ def evaluate_file(config: EvaluatorConfig,
             messages=[message]
         )
 
-    expected_path = f"{config.config.resources}/{channel.expected_path}"
+    expected_path = f"{config.bundle.config.resources}/{channel.expected_path}"
 
     try:
         with open(expected_path, "r") as file:

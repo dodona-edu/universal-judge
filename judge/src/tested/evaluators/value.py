@@ -4,12 +4,12 @@ Value evaluator.
 import logging
 from typing import Union, Tuple
 
-from tested.dodona import ExtendedMessage, Permission, StatusMessage, Status
-from evaluators import EvaluationResult
-from testplan.channels import ValueOutputChannel, OutputChannel
-from tested.serialisation import Value, get_readable_representation, \
-    parse_value, SerialisationError, to_python_comparable
-from tested.utils import Either
+from . import EvaluationResult
+from ..dodona import ExtendedMessage, Permission, StatusMessage, Status
+from ..serialisation import Value, get_readable_representation, parse_value, \
+    SerialisationError, to_python_comparable
+from ..testplan.channels import ValueOutputChannel, OutputChannel
+from ..utils import Either
 
 logger = logging.getLogger(__name__)
 

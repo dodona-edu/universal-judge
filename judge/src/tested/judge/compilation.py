@@ -6,9 +6,9 @@ from pathlib import Path
 from typing import List, Tuple, Optional
 
 from tested.dodona import Message, Status, AnnotateCode, ExtendedMessage
-from judge import BaseExecutionResult
-from judge.utils import run_command
-from languages import LanguageConfig
+from . import BaseExecutionResult
+from .utils import run_command
+from ..languages.config import Language
 from tested import Bundle
 
 _logger = logging.getLogger(__name__)
@@ -32,8 +32,8 @@ def run_compilation(bundle: Bundle,
     happens for each context, just before execution.
 
     In precompilation mode, the function is responsible for compiling all code
-    at once. In some config, this means the compilation will fail if one
-    context is not correct. For those config, the judge will fallback to
+    at once. In some configs, this means the compilation will fail if one
+    context is not correct. For those configs, the judge will fallback to
     individual compilation. This fallback does come with a heavy execution speed
     penalty, so disabling the fallback if not needed is recommended.
 
@@ -42,13 +42,13 @@ def run_compilation(bundle: Bundle,
                               available and in which the compilation results
                               should be stored.
     :param dependencies: A list of files available for compilation. Some
-                         config might need a context_testcase file. By convention,
+                         configs might need a context_testcase file. By convention,
                          the last file is the context_testcase file.
                          TODO: make this explicit?
 
     :return: A tuple containing an optional compilation result, and a list of
              files, intended for further processing in the pipeline. For
-             config without compilation, the dependencies can be returned
+             configs without compilation, the dependencies can be returned
              verbatim and without compilation results. Note that the judge might
              decide to fallback to individual mode if the compilation result is
              not positive.
@@ -61,7 +61,7 @@ def run_compilation(bundle: Bundle,
 
 
 def _process_compile_results(
-        language_config: LanguageConfig,
+        language_config: Language,
         results: Optional[BaseExecutionResult]
 ) -> Tuple[List[Message], Status, List[AnnotateCode]]:
     """
