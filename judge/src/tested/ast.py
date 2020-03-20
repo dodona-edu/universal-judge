@@ -14,9 +14,9 @@ from typing import Optional, List, Union
 from pydantic import root_validator
 from pydantic.dataclasses import dataclass
 
-from ..features import Constructs, FeatureSet, combine_features, WithFeatures
-from ..datatypes import ExtendedTypes
-from ..serialisation import Value
+from tested.features import Constructs, FeatureSet, combine_features, WithFeatures
+from tested.datatypes import ExtendedTypes
+from tested.serialisation import Value
 
 
 class Identifier(str, WithFeatures):

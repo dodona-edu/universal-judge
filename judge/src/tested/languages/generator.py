@@ -14,7 +14,7 @@ from .templates import find_and_write_template, \
 from ..serialisation import Value, SequenceType
 from ..configs import Bundle
 from ..testplan import Context
-from ..testplan.ast import Statement, FunctionCall, Expression, FunctionType, \
+from tested.ast import Statement, FunctionCall, Expression, FunctionType, \
     Identifier
 from ..testplan.channels import EmptyChannel, IgnoredChannel, TextData
 from ..testplan.evaluators import ProgrammedEvaluator, SpecificEvaluator

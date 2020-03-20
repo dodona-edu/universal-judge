@@ -15,7 +15,7 @@ from ..datatypes import AdvancedTypes
 from ..dodona import AnnotateCode, Message
 from ..features import Constructs
 from ..testplan import Plan
-from ..testplan.ast import FunctionCall
+from tested.ast import FunctionCall
 
 CallbackResult = Tuple[List[str], List[str]]
 
