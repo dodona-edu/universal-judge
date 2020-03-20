@@ -6,7 +6,7 @@
 {"row": 22, "text": "Using type() instead of isinstance() for a typecheck. (C0123)", "column": 14, "type": "info", "command": "annotate-code"}
 {"row": 37, "text": "The if statement can be replaced with 'return bool(test)' (R1703)", "column": 7, "type": "info", "command": "annotate-code"}
 {"row": 37, "text": "Unnecessary \"else\" after \"return\" (R1705)", "column": 7, "type": "info", "command": "annotate-code"}
-{"row": 43, "text": "No space allowed around keyword argument assignment\ndef are_isbn(l, dertien = None):\n                        ^ (C0326)", "column": 23, "type": "info", "command": "annotate-code"}
+{"row": 43, "text": "No space allowed around keyword argument convert_statement\ndef are_isbn(l, dertien = None):\n                        ^ (C0326)", "column": 23, "type": "info", "command": "annotate-code"}
 {"row": 45, "text": "Consider using enumerate instead of iterating with range and len (C0200)", "column": 3, "type": "info", "command": "annotate-code"}
 {"row": 46, "text": "Using type() instead of isinstance() for a typecheck. (C0123)", "column": 10, "type": "info", "command": "annotate-code"}
 {"row": 48, "text": "Comparison to None should be 'expr is None' (C0121)", "column": 24, "type": "info", "command": "annotate-code"}

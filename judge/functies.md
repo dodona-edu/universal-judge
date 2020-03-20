@@ -4,7 +4,7 @@ In het testplan hebben we op verschillende plaatsen een "universele" taal nodig,
 
 Functies die de taal moet kunnen (en best geen andere dingen kunnen):
 
-- Toekennen van een resultaat aan een variabele (assignment)
+- Toekennen van een resultaat aan een variabele (convert_statement)
 - Het resultaat van hierboven kan van drie mogelijkheden komen:
   - Gewone functie-oproep
   - Constructor call

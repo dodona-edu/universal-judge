@@ -1,7 +1,7 @@
 {"command": "start-judgement"}
 {"row": 0, "text": "Module name \"3327003\" doesn't conform to snake_case naming style (C0103)", "column": 0, "type": "info", "command": "annotate-code"}
 {"row": 8, "text": "Exactly one space required after comma\n    for i in range(2,10):\n                    ^ (C0326)", "column": 19, "type": "info", "command": "annotate-code"}
-{"row": 23, "text": "No space allowed around keyword argument assignment\ndef is_isbn(code, isbn13 = True):\n                         ^ (C0326)", "column": 24, "type": "info", "command": "annotate-code"}
+{"row": 23, "text": "No space allowed around keyword argument convert_statement\ndef is_isbn(code, isbn13 = True):\n                         ^ (C0326)", "column": 24, "type": "info", "command": "annotate-code"}
 {"row": 30, "text": "Redefining argument with the local name 'code' (R1704)", "column": 7, "type": "info", "command": "annotate-code"}
 {"row": 30, "text": "Undefined variable 'codes' (E0602)", "column": 15, "type": "error", "command": "annotate-code"}
 {"row": 32, "text": "Comparison to None should be 'expr is None' (C0121)", "column": 14, "type": "info", "command": "annotate-code"}

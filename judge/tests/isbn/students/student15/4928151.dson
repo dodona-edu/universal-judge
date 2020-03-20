@@ -1,7 +1,7 @@
 {"command": "start-judgement"}
 {"row": 0, "text": "Module name \"4928151\" doesn't conform to snake_case naming style (C0103)", "column": 0, "type": "info", "command": "annotate-code"}
 {"row": 3, "text": "Too many branches (15/12) (R0912)", "column": 0, "type": "info", "command": "annotate-code"}
-{"row": 3, "text": "No space allowed around keyword argument assignment\ndef is_isbn(s, dertien = True):\n                       ^ (C0326)", "column": 22, "type": "info", "command": "annotate-code"}
+{"row": 3, "text": "No space allowed around keyword argument convert_statement\ndef is_isbn(s, dertien = True):\n                       ^ (C0326)", "column": 22, "type": "info", "command": "annotate-code"}
 {"row": 4, "text": "Unnecessary \"else\" after \"return\" (R1705)", "column": 3, "type": "info", "command": "annotate-code"}
 {"row": 37, "text": "The if statement can be replaced with 'return bool(test)' (R1703)", "column": 7, "type": "info", "command": "annotate-code"}
 {"row": 37, "text": "Unnecessary \"else\" after \"return\" (R1705)", "column": 7, "type": "info", "command": "annotate-code"}

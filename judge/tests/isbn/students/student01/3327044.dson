@@ -1,7 +1,7 @@
 {"command": "start-judgement"}
 {"row": 0, "text": "Module name \"3327044\" doesn't conform to snake_case naming style (C0103)", "column": 0, "type": "info", "command": "annotate-code"}
 {"row": 8, "text": "Exactly one space required after comma\n    for i in range(2,10):\n                    ^ (C0326)", "column": 19, "type": "info", "command": "annotate-code"}
-{"row": 23, "text": "No space allowed around keyword argument assignment\ndef is_isbn(code, isbn13 = True):\n                         ^ (C0326)", "column": 24, "type": "info", "command": "annotate-code"}
+{"row": 23, "text": "No space allowed around keyword argument convert_statement\ndef is_isbn(code, isbn13 = True):\n                         ^ (C0326)", "column": 24, "type": "info", "command": "annotate-code"}
 {"title": "is_isbn", "command": "start-tab"}
 {"command": "start-context"}
 {"description": {"description": "is_isbn(\"9789027439642\", False)", "format": "python"}, "command": "start-testcase"}

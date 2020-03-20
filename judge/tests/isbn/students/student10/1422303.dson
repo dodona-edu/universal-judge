@@ -4,10 +4,10 @@
 {"row": 16, "text": "No space allowed after bracket\n    controlecijfer = sum( [(i+1)*int(cijfer) for i, cijfer in enumerate(code[:-1])]) % 11\n                        ^ (C0326)", "column": 23, "type": "info", "command": "annotate-code"}
 {"row": 18, "text": "Unnecessary \"else\" after \"return\" (R1705)", "column": 3, "type": "info", "command": "annotate-code"}
 {"row": 40, "text": "No space allowed before bracket\n    controlecijfer = sum([factor * int(cijfer) for factor, cijfer in zip(6*[1, 3], code [:-1]) ]) % 10\n                                                                                               ^ (C0326)", "column": 94, "type": "info", "command": "annotate-code"}
-{"row": 45, "text": "No space allowed around keyword argument assignment\ndef is_isbn(code, isbn13 = True):\n                         ^ (C0326)", "column": 24, "type": "info", "command": "annotate-code"}
+{"row": 45, "text": "No space allowed around keyword argument convert_statement\ndef is_isbn(code, isbn13 = True):\n                         ^ (C0326)", "column": 24, "type": "info", "command": "annotate-code"}
 {"row": 59, "text": "Unnecessary \"else\" after \"return\" (R1705)", "column": 3, "type": "info", "command": "annotate-code"}
 {"row": 65, "text": "Unnecessary \"else\" after \"return\" (R1705)", "column": 3, "type": "info", "command": "annotate-code"}
-{"row": 70, "text": "No space allowed around keyword argument assignment\ndef are_isbn(codes, isbn13 = None):\n                           ^ (C0326)", "column": 26, "type": "info", "command": "annotate-code"}
+{"row": 70, "text": "No space allowed around keyword argument convert_statement\ndef are_isbn(codes, isbn13 = None):\n                           ^ (C0326)", "column": 26, "type": "info", "command": "annotate-code"}
 {"row": 71, "text": "Unnecessary \"else\" after \"return\" (R1705)", "column": 3, "type": "info", "command": "annotate-code"}
 {"title": "is_isbn", "command": "start-tab"}
 {"command": "start-context"}
