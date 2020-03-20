@@ -9,7 +9,7 @@ from typing import Tuple
 
 import utils
 from dodona import *
-from evaluators import get_evaluator, Evaluator
+from evaluators.__init__ import get_evaluator, Evaluator
 from runners.generator import (Generator, path_to_templates, value_file,
                                exception_file)
 from runners.languages.haskell import HaskellConfig
@@ -35,7 +35,7 @@ class BaseExecutionResult:
 @dataclass
 class ExecutionResult(BaseExecutionResult):
     """
-    The result of a main testcase execution.
+    The result of a context_testcase testcase execution.
 
     All output streams are divided per testcase, in the same order as the
     context that was used to execute_module the test. E.g. the string at position
@@ -94,7 +94,7 @@ def _evaluate_channel(
     to start and end a new test in Dodona.
 
     If errors is given, the test will end with a runtime error. Note that if the
-    expected output
+    channel output
     is None, the test will not be written to Dodona if everything is correct.
 
     :param out: The output file for the judge.
@@ -109,7 +109,7 @@ def _evaluate_channel(
     evaluation_result = evaluator.evaluate(expected_output, actual_result)
     status = evaluation_result.result
 
-    # If the actual value is empty and the expected output is None or ignored,
+    # If the actual value is empty and the channel output is None or ignored,
     # don't report it.
     is_correct = status.enum == Status.CORRECT
     has_no_result = actual_result is None or actual_result == ""
@@ -216,7 +216,7 @@ class GeneratorJudge:
     Other classes of interest are:
 
     - :class:`Runner` for actually generating, compiling and executing code
-    - :class:`Evaluator` and implementations for comparing obtained and expected
+    - :class:`Evaluator` and implementations for comparing obtained and channel
        results.
     """
 
@@ -744,8 +744,8 @@ class GeneratorJudge:
                                   available and in which the compilation results
                                   should be stored.
         :param dependencies: A list of files available for compilation. Some
-                             languages might need a main file. By convention, the
-                             last file is the main file.
+                             languages might need a context_testcase file. By convention, the
+                             last file is the context_testcase file.
                              TODO: make this explicit?
         :return: A tuple containing an optional compilation result, and a list of
                  files, intended for further processing in the pipeline. For
@@ -764,7 +764,7 @@ class GeneratorJudge:
     def evaluate_custom(self,
                         evaluator: CustomEvaluator,
                         expected: Optional[Value],
-                        actual: Optional[Value]) -> BaseExecutionResult:
+                        actual: Value) -> BaseExecutionResult:
         """
         Run the custom evaluation. Concerning structure and execution, the custom
         evaluator is very similar to the execution of the whole evaluation. It a

@@ -1,5 +1,5 @@
 """
-Generate all expected values for the tests.
+Generate all channel values for the tests.
 Only do this if you are sure the results are correct!
 """
 import os
@@ -46,7 +46,7 @@ if __name__ == '__main__':
     final_data = all_submissions()
     total = len(final_data)
     for index, (student, exercise) in enumerate(final_data):
-        print(f"Updating expected for {student}, {exercise} [{index+1}/{total}]")
+        print(f"Updating channel for {student}, {exercise} [{index+1}/{total}]")
         config = read_config(student, exercise, str(Path('./workdir').resolve()))
         clean_working_directory(config)
         with open(f"tests/isbn/students/{student}/{exercise}.dson", 'w') as output_file:

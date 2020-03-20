@@ -1,5 +1,5 @@
 """
-Module containing the base class with the expected methods for a language
+Module containing the base class with the channel methods for a language
 configuration. To support a new language, it is often enough to subclass the
 LanguageConfig class and implement the required templates.
 
@@ -7,10 +7,11 @@ For very exotic languages, it is possible to create a custom runner subclass,
 but that will be a lot more work.
 """
 import os
-from typing import List, Tuple
+from typing import List, Tuple, Dict, Optional
 from pathlib import Path
 
-from features import Features
+from datatypes import AdvancedTypes
+from features import Constructs
 from tested import Config
 from testplan import Plan, FunctionCall
 from dodona import AnnotateCode, Message
@@ -64,7 +65,7 @@ class LanguageConfig:
         :param cwd: The directory where the command will be execute. This must only
                     be used to specify the path the executable (first item in the
                     returned command). Files MUST NOT be prepended with the cwd.
-        :param file: The "main" file to be executed.
+        :param file: The "context_testcase" file to be executed.
         :param dependencies: A list of other available files.
         :param arguments: The arguments, e.g. other dependencies or execution
                           arguments.
@@ -118,22 +119,20 @@ class LanguageConfig:
         """
         return []
 
-    def supported_features(self) -> Features:
+    def supported_features(self) -> Constructs:
         """
-        The features supported by this language. The default implementation
-        returns all features. If a language supports only a subset, it is
-        recommended to explicitly enumerate the supported features instead
-        (whitelist) instead of removing non-supported features (blacklist). This
-        allows new features to be added without having to update the language.
+        A flag representing which features this language supports. By default, all
+        features are returned.
+
+        Languages can declare missing support for features in one of two ways:
+
+        - Enumerating all supported features. This is safe against new features.
+        - Explicitly disallowing some features. This also means the language will
+          automatically support new features when they are added to TESTed.
+
         :return: The features supported by this language.
         """
-        return (Features.OBJECTS | Features.EXCEPTIONS | Features.MAIN
-                | Features.FUNCTION_CALL | Features.ASSIGNMENT
-                | Features.LISTS | Features.SETS | Features.MAPS
-                | Features.INTEGERS | Features.RATIONALS
-                | Features.STRINGS
-                | Features.BOOLEANS
-                | Features.NULL)
+        return Constructs.ALL
 
     def supports(self, plan: Plan) -> bool:
         """
@@ -144,6 +143,29 @@ class LanguageConfig:
         required = plan.get_used_features()
         supported_features = self.supported_features()
         return supported_features & required != 0
+
+    def type_support_map(self) -> Dict[AdvancedTypes, Optional[AdvancedTypes]]:
+        """
+        Return a map containing the support for advanced types. The returned dict
+        influences how types are used:
+
+        - If a type is not present in the keys of the dict, it will be mapped to
+          its basic type.
+        - If a type is mapped to another `AdvancedType` (often itself), it means
+          this language also supports the advanced type in question. There will be
+          no fallback to the basic types.
+        - If a type is mapped to None, the language does not support the advanced
+          type. Testplans which contain this advanced type will not be executable in
+          this language.
+
+        Note: support for basic types is not done with this method, but uses the
+        features functionality. If a language has no support for a basic type, all
+        advanced types that map to this basic type will also not be supported.
+
+        :return: The typing support dict. By default, all types are mapped to their
+                 basic type.
+        """
+        return dict()
 
     def solution_callback(self, solution: Path, plan: Plan):
         """

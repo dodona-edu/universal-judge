@@ -23,9 +23,9 @@
     ${str(value.data)}\
 % elif value.type == StringTypes.TEXT:
     "${value.data}"\
-% elif value.type == NumericTypes.INTEGER or value.type == NumericTypes.RATIONAL or value.type == StringTypes.LITERAL:
+% elif value.type == NumericTypes.INTEGER or value.type == NumericTypes.RATIONAL or value.type == StringTypes.IDENTIFIER:
     ${value.data}\
-% elif value.type == ObjectTypes.OBJECT:
+% elif value.type == ObjectTypes.MAP:
     [\
     % for key, item in value.data.items():
         ("${key}", <%include file="literal.mako" args="item" />

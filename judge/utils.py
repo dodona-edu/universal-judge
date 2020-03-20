@@ -7,7 +7,7 @@ from os import PathLike
 from pathlib import Path
 
 import sys
-from typing import IO, List, Union, Generator
+from typing import IO, List, Union, Generator, TypeVar, Generic, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -79,3 +79,24 @@ def basename(file: Union[str, Path]) -> str:
     if isinstance(file, str):
         file = Path(file)
     return file.stem
+
+
+T = TypeVar('T')
+
+
+class Either(Generic[T]):
+
+    def __init__(self, value: Union[T, Exception]):
+        self.value = value
+
+    def get(self) -> T:
+        if isinstance(self.value, Exception):
+            raise self.value
+        return self.value
+
+    def maybe(self) -> Optional[T]:
+        if isinstance(self.value, Exception):
+            return None
+        return self.value
+
+

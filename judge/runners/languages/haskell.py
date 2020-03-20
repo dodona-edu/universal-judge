@@ -4,7 +4,7 @@ from os import PathLike
 
 from humps import pascalize
 
-from features import Features
+from features import Constructs
 from runners.config import LanguageConfig, CallbackResult, executable_name
 from testplan import Plan, FunctionCall
 from serialisation import StringType, StringTypes
@@ -26,10 +26,10 @@ class HaskellConfig(LanguageConfig):
         return ["EvaluationUtils.hs"]
 
     def generation_callback(self, files: List[str]) -> CallbackResult:
-        # TODO: indicate the main file somehow?
+        # TODO: indicate the context_testcase file somehow?
         main_file = files[-1]
         exec_file = main_file.rstrip(".hs")
-        return (["ghc", main_file, "-main-is", exec_file],
+        return (["ghc", main_file, "-context_testcase-is", exec_file],
                 [executable_name(exec_file)])
 
     def conventionalise(self, function_name: str) -> str:
@@ -52,11 +52,11 @@ class HaskellConfig(LanguageConfig):
     def context_name(self, tab_number: int, context_number: int) -> str:
         return f"Context_{tab_number}_{context_number}"
 
-    def supported_features(self) -> Features:
-        return (Features.MAIN | Features.FUNCTION_CALL | Features.ASSIGNMENT
-                | Features.LISTS | Features.SETS | Features.MAPS
-                | Features.INTEGERS | Features.RATIONALS | Features.STRINGS
-                | Features.BOOLEANS)
+    def supported_features(self) -> Constructs:
+        return (Constructs.MAIN | Constructs.FUNCTION_CALL | Constructs.ASSIGNMENT
+                | Constructs.LISTS | Constructs.SETS | Constructs.MAPS
+                | Constructs.INTEGERS | Constructs.RATIONALS | Constructs.STRINGS
+                | Constructs.BOOLEANS)
 
     def solution_callback(self, solution: Union[Path, PathLike], plan: Plan):
         """Support implicit modules if needed."""
@@ -72,7 +72,7 @@ class HaskellConfig(LanguageConfig):
         """Inject file path to call to specific evaluator"""
         # Prepend value_file to front of arguments.
         value_file = StringType(
-            type=StringTypes.LITERAL,
+            type=StringTypes.IDENTIFIER,
             data="value_file"
         )
         arguments = [value_file] + function.arguments

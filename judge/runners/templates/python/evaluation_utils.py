@@ -15,7 +15,7 @@ def evaluated(result: bool,
 
     :param result: The result of the evaluation (True or False).
 
-    :param readable_expected: A string version of the expected value. Optional;
+    :param readable_expected: A string version of the channel value. Optional;
                               if not given, the judge will produce one on a
                               best-efforts basis.
     :param readable_actual: A string version of the actual value. Optional; if

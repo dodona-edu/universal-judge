@@ -71,7 +71,7 @@ public class ${context_name} {
         ## In Java, we must execute_module the before and after code in the context.
         ${before}
 
-        ## Call the main fucnction if necessary
+        ## Call the context_testcase fucnction if necessary
         % if main_testcase.exists:
             try {
                 ${submission_name}.main(new String[]{

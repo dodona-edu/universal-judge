@@ -16,16 +16,20 @@ command line. The schema will be printed to stdout. This can be used to generate
 classes for implementations in other languages.
 """
 import json
-import math
+import logging
 from dataclasses import field
-from enum import Enum
-from typing import Union, List, Dict, Literal, Optional, Any
+from decimal import Decimal
+from typing import Union, List, Dict, Literal, Optional, Any, get_args
 
+import math
 from pydantic import BaseModel
 from pydantic.dataclasses import dataclass
-from typing_inspect import get_args
 
-from features import Features
+from features import FeatureSet, Constructs, combine_features, WithFeatures
+from datatypes import NumericTypes, StringTypes, BooleanTypes, \
+    SequenceTypes, ObjectTypes, NothingTypes, SimpleTypes, resolve_to_basic
+
+logger = logging.getLogger(__name__)
 
 
 class SerialisationError(ValueError):
@@ -35,103 +39,78 @@ class SerialisationError(ValueError):
 
     def __str__(self):
         original = super().__str__()
-        additional_lines = "\n".join(f"* {error}" for error in self.additional_errors)
+        additional_lines = "\n".join(
+            f"* {error}" for error in self.additional_errors)
         return f"{original}\nAdditional errors:\n {additional_lines}"
 
 
-class NumericTypes(str, Enum):
-    INTEGER = "integer"
-    RATIONAL = "rational"
-
-
 @dataclass
-class NumberType:
+class NumberType(WithFeatures):
     type: NumericTypes
-    data: Union[int, float]
+    data: Union[int, Decimal]
 
-
-class StringTypes(str, Enum):
-    TEXT = "text"
-    LITERAL = "literal"
-    UNKNOWN = "unknown"
+    def get_used_features(self) -> FeatureSet:
+        return FeatureSet(Constructs.NOTHING, {self.type})
 
 
 @dataclass
-class StringType:
+class StringType(WithFeatures):
     type: StringTypes
     data: str
 
-
-class BooleanTypes(str, Enum):
-    BOOLEAN = "boolean"
+    def get_used_features(self) -> FeatureSet:
+        return FeatureSet(Constructs.NOTHING, {self.type})
 
 
 @dataclass
-class BooleanType:
+class BooleanType(WithFeatures):
     type: BooleanTypes
     data: bool
 
-
-class SequenceTypes(str, Enum):
-    SEQUENCE = "sequence"
-    SET = "set"
+    def get_used_features(self) -> FeatureSet:
+        return FeatureSet(Constructs.NOTHING, {self.type})
 
 
 @dataclass
-class SequenceType:
+class SequenceType(WithFeatures):
     type: SequenceTypes
     data: List['Value']
 
-
-class ObjectTypes(str, Enum):
-    OBJECT = "object"
+    def get_used_features(self) -> FeatureSet:
+        base_features = FeatureSet(Constructs.NOTHING, {self.type})
+        nested_features = [x.get_used_features() for x in self.data]
+        return combine_features([base_features] + nested_features)
 
 
 @dataclass
-class ObjectType:
+class ObjectType(WithFeatures):
     type: ObjectTypes
     data: Dict[str, 'Value']
 
-
-class NothingTypes(str, Enum):
-    NOTHING = "nothing"
+    def get_used_features(self) -> FeatureSet:
+        base_features = FeatureSet(Constructs.NOTHING, {self.type})
+        nested_features = [y.get_used_features() for x, y in self.data]
+        return combine_features([base_features] + nested_features)
 
 
 @dataclass
-class NothingType:
+class NothingType(WithFeatures):
     type: NothingTypes
     data: Literal[None] = None
 
+    def get_used_features(self) -> FeatureSet:
+        return FeatureSet(Constructs.NOTHING, {self.type})
+
 
 # A value is one of the preceding types.
-Value = Union[SequenceType, BooleanType, StringType, NumberType, ObjectType, NothingType]
+Value = Union[
+    NumberType, StringType, BooleanType, SequenceType, ObjectType, NothingType
+]
+
 
 # Update the forward references, which fixes the schema generation.
-# See https://pydantic-docs.helpmanual.io/usage/postponed_annotations/#self-referencing-models
 ObjectType.__pydantic_model__.update_forward_refs()
 SequenceType.__pydantic_model__.update_forward_refs()
-ObjectType.__pydantic_model__.update_forward_refs()
-
-# Add features to the various enums.
-# This is the best way according to https://stackoverflow.com/questions/33008401
-NumericTypes.INTEGER.feature = Features.INTEGERS
-NumericTypes.RATIONAL.feature = Features.RATIONALS
-StringTypes.TEXT.feature = Features.STRINGS
-StringTypes.LITERAL.feature = Features.NOTHING  # Not relevant
-StringTypes.UNKNOWN.feature = Features.NOTHING  # Not relevant
-BooleanTypes.BOOLEAN.feature = Features.BOOLEANS
-SequenceTypes.SEQUENCE.feature = Features.LISTS
-SequenceTypes.SET.feature = Features.SETS
-ObjectTypes.OBJECT.feature = Features.MAPS
-NothingTypes.NOTHING.feature = Features.NULL
-# Finally, assert that we have added it to all relevant values.
-assert all(
-    all(
-        hasattr(value, "feature") and value.feature is not None
-        for value in type_.__annotations__["type"]
-    )
-    for type_ in Value.__args__
-), "All useful serialization types need a feature field."
 
 
 class _SerialisationSchema(BaseModel):
@@ -149,7 +128,7 @@ def generate_schema():
     print(json.dumps(sc, indent=2))
 
 
-def parse(value: str) -> Value:
+def parse_value(value: str) -> Value:
     """
     Parse the json of a value into the relevant data structures.
 
@@ -161,7 +140,7 @@ def parse(value: str) -> Value:
     try:
         parsed_json = json.loads(value)
     except Exception as e:
-        raise SerialisationError(f"Could not parse {value} as valid json.")
+        raise ValueError(f"Could not parse {value} as valid json.", e)
 
     # We try each value until we find one that works, or we throw an error.
     errors = []
@@ -171,51 +150,77 @@ def parse(value: str) -> Value:
         except (TypeError, ValueError) as e:
             errors.append(e)
 
-    raise SerialisationError(
-        f"Could not find valid type for {value}.",
-        additional_errors=errors
+    logger.warning(f"Could not parse value, errors are {errors}")
+
+    raise TypeError(
+        f"Could not find valid type for {value}."
     )
 
 
-def _convert_to_python(value: Optional[Value]) -> Any:
+class PrintingDecimal:
+
+    def __init__(self, decimal: Decimal):
+        self.decimal = decimal
+
+    def __repr__(self):
+        return str(self.decimal)
+
+
+def _convert_to_python(value: Optional[Value], for_printing=False) -> Any:
+    """
+    Convert the parsed values into the proper Python type. This is basically
+    the same as de-serialising a value, but this function is currently not re-used
+    in the Python implementation, since run-time de-serialisation is not supported.
+    :param value: The parsed value.
+    :param for_printing: If the result will be used for printing or not.
+    :return: The Python value.
+    """
     if value is None:
         return None
 
-    if value.type in (
-            BooleanTypes.BOOLEAN,
-            NumericTypes.INTEGER,
-            NumericTypes.RATIONAL,
-            StringTypes.TEXT
-    ):
+    # If we have a type for which the data is usable in Python, use it.
+    if isinstance(value.type, get_args(SimpleTypes)):
+        # If we have floats or ints, convert them to Python.
+        if value.type in (NumericTypes.SINGLE_PRECISION,
+                          NumericTypes.DOUBLE_PRECISION):
+            return float(str(value.data))
+        if value.type != NumericTypes.FIXED_PRECISION:
+            return int(str(value.data))
+        if for_printing:
+            return PrintingDecimal(value.data)
+
         return value.data
 
-    if isinstance(value, SequenceType):
+    if isinstance(value.type, get_args(SequenceTypes)):
         values = [_convert_to_python(x) for x in value.data]
-        if value.type == SequenceTypes.SEQUENCE:
+        basic_type = resolve_to_basic(value.type)
+        if basic_type == SequenceTypes.SEQUENCE:
             return values
-        elif value.type == SequenceTypes.SET:
+        if basic_type == SequenceTypes.SET:
             return set(values)
-        else:
-            raise AssertionError("Forgot a type?")
-    elif isinstance(value, ObjectType):
+        raise AssertionError(f"Unknown basic sequence type {basic_type}.")
+
+    if isinstance(value.type, get_args(ObjectTypes)):
         values = {x: _convert_to_python(y) for x, y in value.data.items()}
         return values
-    elif isinstance(value, NothingType):
+
+    if isinstance(value, NothingType):
         return None
-    else:
-        return str(value.data)
+
+    # Unknown type.
+    logger.warning(f"Unknown data type {value.type} will be interpreted as string.")
+    return str(value.data)
 
 
 def get_readable_representation(value: Value):
     """
-    Get a readable representation of the data. In many cases, this is just the Python type
-    that will be returned as a string.
+    Get a readable representation of the data. In many cases, this is just the
+    Python type that will be returned as a string.
     """
-    return repr(_convert_to_python(value))
+    return repr(_convert_to_python(value, True))
 
 
 class ComparableFloat:
-    __slots__ = ["value"]
 
     def __init__(self, value):
         self.value = value
@@ -239,26 +244,30 @@ class ComparableFloat:
 
 def to_python_comparable(value: Optional[Value]):
     """
-    Convert the value into a comparable Python value. Most values are just converted to their
-    builtin Python variant. Some, however, are not: floats are converted into a wrapper class, that
+    Convert the value into a comparable Python value. Most values are just
+    converted to their
+    builtin Python variant. Some, however, are not: floats are converted into a
+    wrapper class, that
     allows comparison.
 
-    Note that this means that the types in the return value can be different from what is expected;
+    Note that this means that the types in the return value can be different from
+    what is channel;
     the returning types are only guaranteed to support eq, str, repr and bool.
     """
+    basic_type = resolve_to_basic(value.type)
     if value is None:
         return None
-    if value.type == SequenceTypes.SEQUENCE:
+    if basic_type == SequenceTypes.SEQUENCE:
         return [to_python_comparable(x) for x in value.data]
-    if value.type == SequenceTypes.SET:
+    if basic_type == SequenceTypes.SET:
         return {to_python_comparable(x) for x in value.data}
-    if value.type == ObjectTypes.OBJECT:
+    if basic_type == ObjectTypes.MAP:
         return {key: to_python_comparable(val) for key, val in value.data.items()}
-    if value.type == NumericTypes.RATIONAL:
+    if basic_type == NumericTypes.RATIONAL:
         return ComparableFloat(float(value.data))
-    if value.type == NumericTypes.INTEGER:
-        return int(value.data)
-    if value.type in (BooleanTypes.BOOLEAN, StringTypes.TEXT, NothingTypes.NOTHING,
+    if basic_type == NumericTypes.INTEGER:
+        return value.data
+    if basic_type in (BooleanTypes.BOOLEAN, StringTypes.TEXT, NothingTypes.NOTHING,
                       StringTypes.UNKNOWN):
         return value.data
 
@@ -269,16 +278,26 @@ def to_python_comparable(value: Optional[Value]):
 class SpecificResult:
     """Result of an evaluation by a language specific evaluator."""
     result: bool  # The result of the evaluation.
-    readable_expected: Optional[str] = None  # A human-friendly version of what the channel should have been.
-    readable_actual: Optional[str] = None  # A human-friendly version (best effort at least) of what the channel is.
+    readable_expected: Optional[str] = None
+    # A human-friendly version of what the channel should have
+    # been.
+    readable_actual: Optional[str] = None
+    # A human-friendly version (best effort at least) of what
+    # the channel is.
     messages: List[str] = field(default_factory=list)
 
 
 @dataclass
-class ExceptionValue:
+class ExceptionValue(WithFeatures):
     """An exception that was thrown while executing the user context."""
     message: str
     stacktrace: str
+
+    def get_used_features(self) -> FeatureSet:
+        return FeatureSet(Constructs.EXCEPTIONS, types=set())
+
+    def readable(self) -> str:
+        return f"Fout met boodschap: {self.message}\n{self.stacktrace}"
 
 
 if __name__ == '__main__':

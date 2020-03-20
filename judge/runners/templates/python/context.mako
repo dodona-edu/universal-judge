@@ -40,7 +40,7 @@ def e_evaluate_main(value):
 % endfor
 
 
-## Prepare arguments for main testcase if needed.
+## Prepare arguments for context_testcase testcase if needed.
 % if main_testcase.exists and main_testcase.arguments:
     sys.argv.extend([\
         % for argument in main_testcase.arguments:

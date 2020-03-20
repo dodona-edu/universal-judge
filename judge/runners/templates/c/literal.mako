@@ -5,7 +5,7 @@
     ${str(value.data).lower()}\
 % elif value.type == StringTypes.TEXT:
     "${value.data}"\
-% elif value.type == NumericTypes.INTEGER or value.type == NumericTypes.RATIONAL or value.type == StringTypes.LITERAL:
+% elif value.type == NumericTypes.INTEGER or value.type == NumericTypes.RATIONAL or value.type == StringTypes.IDENTIFIER:
     ${value.data}\
 % elif value.type == NothingTypes.NOTHING:
     NULL\

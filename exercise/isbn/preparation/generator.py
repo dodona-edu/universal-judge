@@ -97,7 +97,7 @@ def generate_is_isbn():
         # als verwachte uitvoer.
         testcase = {
             "input":  {
-                "function": {
+                "expression": {
                     "type":      "function",
                     "name":      "is_isbn",
                     "arguments": function_arguments
@@ -112,7 +112,7 @@ def generate_is_isbn():
 
         # Steek het testgeval in een context.
         context = {
-            "normal": [testcase]
+            "testcases": [testcase]
         }
         contexts.append(context)
 
@@ -153,13 +153,11 @@ def generate_are_isbn():
         # argument. Maak het testgeval voor de assignment.
         assignment_testcase = {
             "input": {
-                "assignment": {
+                "statement": {
                     "name": f"codes{index:02d}",
-                    "expression": {
-                        "type": "identity",
-                        "arguments": [
-                            values.encode(codes)
-                        ]
+                    "expression": values.encode(codes),
+                    "type": {
+                        "type": "list"
                     }
                 }
             }
@@ -168,10 +166,7 @@ def generate_are_isbn():
         # Stel de functieargumenten op. We geven opnieuw sowieso de variabele die
         # we eerst hebben aangemaakt mee als argument.
         function_arguments = [
-            {
-                "type": "literal",
-                "data": f"codes{index:02d}"
-            }
+            f"codes{index:02d}"
         ]
 
         # Voeg het tweede argument toe indien nodig.
@@ -185,7 +180,7 @@ def generate_are_isbn():
         # uitvoer de verwachte waarde.
         testcase = {
             "input":  {
-                "function": {
+                "expression": {
                     "type":      "function",
                     "name":      "are_isbn",
                     "arguments": function_arguments
@@ -204,7 +199,7 @@ def generate_are_isbn():
         # de assignment heeft enkel de standaardtests, wat wil zeggen dat er bv.
         # geen uitvoer op stderr mag zijn.
         context = {
-            "normal": [assignment_testcase, testcase]
+            "testcases": [assignment_testcase, testcase]
         }
 
         contexts.append(context)
@@ -216,7 +211,7 @@ def flatten_contexts(contexts):
     testcases = [context["normal"] for context in contexts]
     flat = [item for sublist in testcases for item in sublist]
     new_context = {
-        "normal": flat
+        "testcases": flat
     }
     return new_context
 

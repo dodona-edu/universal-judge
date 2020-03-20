@@ -97,7 +97,7 @@ class StartTestcase:
 
 @dataclass
 class StartTest:
-    """Start on a new test with given expected answer."""
+    """Start on a new test with given channel answer."""
     expected: str
     channel: Optional[str] = None
     description: Optional[Message] = None

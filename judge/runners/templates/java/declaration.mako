@@ -13,7 +13,7 @@
     int\
 % elif value.type == NumericTypes.RATIONAL:
     double\
-% elif value.type == ObjectTypes.OBJECT:
+% elif value.type == ObjectTypes.MAP:
     Map\
 % elif value.type == NothingTypes.NOTHING or value.type == StringTypes.UNKNOWN:
     Object\

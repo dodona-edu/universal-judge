@@ -22,13 +22,13 @@ from serialisation import Value, StringType, StringTypes, SequenceType, \
     SequenceTypes
 from tested import Config
 from testplan import Testcase, NormalTestcase, AssignmentInput, NoneChannelState, \
-    TextData, MainTestcase, FunctionInput, FunctionCall, Assignment, FunctionType, \
+    TextData, ContextTestcase, FunctionInput, FunctionCall, Assignment, FunctionType, \
     Context, NoMainTestcase, IgnoredChannelState, SpecificEvaluator, CustomEvaluator
 
 
 @dataclass
 class TestcaseArguments:
-    """Arguments for a normal testcase template."""
+    """Arguments for a testcases testcase template."""
     statement: Union[FunctionCall, Assignment]
     stdin: Union[TextData, NoneChannelState]
     has_return: bool
@@ -38,7 +38,7 @@ class TestcaseArguments:
 
 @dataclass
 class MainTestcaseArguments:
-    """Arguments for a main testcase template."""
+    """Arguments for a context_testcase testcase template."""
     exists: bool
     exception_function: FunctionCall
     arguments: List[Value]
@@ -179,9 +179,9 @@ def get_exception_function(
             )
             return FunctionCall(
                 type=FunctionType.NAMESPACE,
-                name="evaluate",
+                name="evaluate_text",
                 namespace=evaluator_name,
-                arguments=[StringType(type=StringTypes.LITERAL, data="value")]
+                arguments=[StringType(type=StringTypes.IDENTIFIER, data="value")]
             ), evaluator_name
 
     # In all other cases, we return the default function, which sends the
@@ -189,7 +189,7 @@ def get_exception_function(
     return FunctionCall(
         type=FunctionType.FUNCTION,
         name=language_config.conventionalise("send_exception"),
-        arguments=[StringType(type=StringTypes.LITERAL, data="value")]
+        arguments=[StringType(type=StringTypes.IDENTIFIER, data="value")]
     ), None
 
 
@@ -230,9 +230,9 @@ def prepare_testcase(
         )
         call = FunctionCall(
             type=FunctionType.NAMESPACE,
-            name=language_config.conventionalise("evaluate"),
+            name=language_config.conventionalise("evaluate_text"),
             namespace=language_config.conventionalise(evaluator_name),
-            arguments=[StringType(type=StringTypes.LITERAL, data="value")]
+            arguments=[StringType(type=StringTypes.IDENTIFIER, data="value")]
         )
         value_function_call = language_config.specific_evaluator_callback(call)
         names.append(evaluator_name)
@@ -240,7 +240,7 @@ def prepare_testcase(
         value_function_call = FunctionCall(
             type=FunctionType.FUNCTION,
             name="send",
-            arguments=[StringType(type=StringTypes.LITERAL, data="value")]
+            arguments=[StringType(type=StringTypes.IDENTIFIER, data="value")]
         )
 
     exception_function_call, exception_evaluator_name \
@@ -317,7 +317,7 @@ class Generator:
             assert isinstance(case.input.stdin, TextData)
             text = case.input.stdin.get_data_as_string(self.judge_config.resources)
         else:
-            assert isinstance(case, MainTestcase)
+            assert isinstance(case, ContextTestcase)
             if case.input.arguments:
                 variable_part = str(case.input.arguments)
             else:
@@ -434,14 +434,14 @@ class Generator:
             context: Context
     ) -> Tuple[List[TestcaseArguments], Set[str]]:
         """
-        Get a list of all normal testcases in a context.
+        Get a list of all testcases testcases in a context.
         :param submission_name:
         :param context:
         :return:
         """
         result = []
         names = set()
-        for i, testcase in enumerate(context.normal):
+        for i, testcase in enumerate(context.testcases):
             args, new_names = prepare_testcase(
                 language_config=self.language_config,
                 programming_language=self.judge_config.programming_language,
@@ -456,13 +456,13 @@ class Generator:
             self,
             context: Context
     ) -> Tuple[MainTestcaseArguments, Optional[str]]:
-        """Prepare the main testcase for use."""
+        """Prepare the context_testcase testcase for use."""
         exception_function, name = get_exception_function(
             language_config=self.language_config,
             programming_language=self.judge_config.programming_language,
-            testcase=context.main
+            testcase=context.context_testcase
         )
-        if context.main == NoMainTestcase.NONE:
+        if context.context_testcase == NoMainTestcase.NONE:
             return MainTestcaseArguments(
                 exists=False,
                 exception_function=exception_function,
@@ -471,7 +471,7 @@ class Generator:
         else:
             return MainTestcaseArguments(
                 exists=True,
-                arguments=context.main.input.arguments,
+                arguments=context.context_testcase.input.arguments,
                 exception_function=exception_function
             ), name
 
@@ -501,7 +501,7 @@ class Generator:
         :param destination: The folder to generate in.
         :param evaluator: The evaluator data.
         :param actual: The actual data, received from the code.
-        :param expected: The expected data, from the testplan.
+        :param expected: The channel data, from the testplan.
         :return: The generated file.
         """
         evaluator_name = self.language_config.conventionalise_object(
