@@ -4,8 +4,8 @@ Specific evaluator
 from ..dodona import StatusMessage, Status, ExtendedMessage, Permission
 from . import EvaluationResult
 from ..serialisation import SpecificResult
-from ..testplan.channels import OutputChannel
-from ..testplan.evaluators import SpecificEvaluator
+from ..testplan import OutputChannel
+from ..testplan import SpecificEvaluator
 
 
 def evaluate(_, channel: OutputChannel, actual: str) -> EvaluationResult:

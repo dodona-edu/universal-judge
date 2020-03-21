@@ -5,24 +5,19 @@ This module is the authoritative source on the format and behaviour of the testp
 When executing this module, a json-schema is generated for the format, which can be
 of assistance when checking existing testplans.
 """
-
-import json
 from dataclasses import field
 from enum import Enum
 from os import path
 from pathlib import Path
-from typing import List, Optional, Dict, Any
-from typing import Literal
-from typing import Union
+from typing import List, Optional, Dict, Any, Literal, Union
 
 from pydantic import BaseModel, root_validator
 from pydantic.dataclasses import dataclass
 
-from .ast import Expression, Statement
 from .datatypes import StringTypes
 from .features import (Constructs, FeatureSet, combine_features, WithFeatures,
                        NOTHING)
-from .serialisation import ExceptionValue, Value
+from .serialisation import ExceptionValue, Value, Expression, Statement
 
 
 class TestPlanError(ValueError):
@@ -403,7 +398,7 @@ class Context(WithFeatures):
 
     @root_validator
     def check_testcases_exist(cls, values):
-        context: ContextTestcase = values.get('context_testcase')
+        context = values.get('context_testcase')
         additional = values.get('testcases')
         if not context.input.main_call and not additional:
             raise ValueError("A context needs a context testcase or at least one "
@@ -490,6 +485,8 @@ def generate_schema():
     """
     Generate a json schema for the serialisation type. It will be printed on stdout.
     """
+    import json
+
     sc = _PlanModel.schema()
     sc['$schema'] = "http://json-schema.org/schema#"
     sc['title'] = "Testplan"

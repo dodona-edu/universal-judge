@@ -1,11 +1,27 @@
 {
-  "namespace": "Main",
   "tabs": [
     {
       "name": "Feedback",
       "contexts": [
         {
-          "main": {
+          "context_testcase": {
+            "output": {
+              "stdout": {
+                "data": "invoertekst-0",
+                "type": "text"
+              }
+            },
+            "input": {
+              "stdin": {
+                "data": "invoertekst-0",
+                "type": "text"
+              },
+              "main_call": true
+            }
+          }
+        },
+        {
+          "context_testcase": {
             "output": {
               "stdout": {
                 "data": "invoertekst-1",
@@ -16,12 +32,13 @@
               "stdin": {
                 "data": "invoertekst-1",
                 "type": "text"
-              }
+              },
+              "main_call": true
             }
           }
         },
         {
-          "main": {
+          "context_testcase": {
             "output": {
               "stdout": {
                 "data": "invoertekst-2",
@@ -32,12 +49,13 @@
               "stdin": {
                 "data": "invoertekst-2",
                 "type": "text"
-              }
+              },
+              "main_call": true
             }
           }
         },
         {
-          "main": {
+          "context_testcase": {
             "output": {
               "stdout": {
                 "data": "invoertekst-3",
@@ -48,743 +66,790 @@
               "stdin": {
                 "data": "invoertekst-3",
                 "type": "text"
-              }
+              },
+              "main_call": true
             }
           }
         },
         {
-          "main": {
+          "context_testcase": {
             "output": {
               "stdout": {
-                "data": "invoertekst",
+                "data": "invoertekst-4",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst",
+                "data": "invoertekst-4",
                 "type": "text"
-              }
+              },
+              "main_call": true
             }
           }
         },
         {
-          "main": {
+          "context_testcase": {
             "output": {
               "stdout": {
-                "data": "invoertekst",
+                "data": "invoertekst-5",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst",
+                "data": "invoertekst-5",
                 "type": "text"
-              }
+              },
+              "main_call": true
             }
           }
         },
         {
-          "main": {
+          "context_testcase": {
             "output": {
               "stdout": {
-                "data": "invoertekst",
+                "data": "invoertekst-6",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst",
+                "data": "invoertekst-6",
                 "type": "text"
-              }
+              },
+              "main_call": true
             }
           }
         },
         {
-          "main": {
+          "context_testcase": {
             "output": {
               "stdout": {
-                "data": "invoertekst",
+                "data": "invoertekst-7",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst",
+                "data": "invoertekst-7",
                 "type": "text"
-              }
+              },
+              "main_call": true
             }
           }
         },
         {
-          "main": {
+          "context_testcase": {
             "output": {
               "stdout": {
-                "data": "invoertekst",
+                "data": "invoertekst-8",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst",
+                "data": "invoertekst-8",
                 "type": "text"
-              }
+              },
+              "main_call": true
             }
           }
         },
         {
-          "main": {
+          "context_testcase": {
             "output": {
               "stdout": {
-                "data": "invoertekst",
+                "data": "invoertekst-9",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst",
+                "data": "invoertekst-9",
                 "type": "text"
-              }
+              },
+              "main_call": true
             }
           }
         },
         {
-          "main": {
+          "context_testcase": {
             "output": {
               "stdout": {
-                "data": "invoertekst",
+                "data": "invoertekst-10",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst",
+                "data": "invoertekst-10",
                 "type": "text"
-              }
+              },
+              "main_call": true
             }
           }
         },
         {
-          "main": {
+          "context_testcase": {
             "output": {
               "stdout": {
-                "data": "invoertekst",
+                "data": "invoertekst-11",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst",
+                "data": "invoertekst-11",
                 "type": "text"
-              }
+              },
+              "main_call": true
             }
           }
         },
         {
-          "main": {
+          "context_testcase": {
             "output": {
               "stdout": {
-                "data": "invoertekst",
+                "data": "invoertekst-12",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst",
+                "data": "invoertekst-12",
                 "type": "text"
-              }
+              },
+              "main_call": true
             }
           }
         },
         {
-          "main": {
+          "context_testcase": {
             "output": {
               "stdout": {
-                "data": "invoertekst",
+                "data": "invoertekst-13",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst",
+                "data": "invoertekst-13",
                 "type": "text"
-              }
+              },
+              "main_call": true
             }
           }
         },
         {
-          "main": {
+          "context_testcase": {
             "output": {
               "stdout": {
-                "data": "invoertekst",
+                "data": "invoertekst-14",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst",
+                "data": "invoertekst-14",
                 "type": "text"
-              }
+              },
+              "main_call": true
             }
           }
         },
         {
-          "main": {
+          "context_testcase": {
             "output": {
               "stdout": {
-                "data": "invoertekst",
+                "data": "invoertekst-15",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst",
+                "data": "invoertekst-15",
                 "type": "text"
-              }
+              },
+              "main_call": true
             }
           }
         },
         {
-          "main": {
+          "context_testcase": {
             "output": {
               "stdout": {
-                "data": "invoertekst",
+                "data": "invoertekst-16",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst",
+                "data": "invoertekst-16",
                 "type": "text"
-              }
+              },
+              "main_call": true
             }
           }
         },
         {
-          "main": {
+          "context_testcase": {
             "output": {
               "stdout": {
-                "data": "invoertekst",
+                "data": "invoertekst-17",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst",
+                "data": "invoertekst-17",
                 "type": "text"
-              }
+              },
+              "main_call": true
             }
           }
         },
         {
-          "main": {
+          "context_testcase": {
             "output": {
               "stdout": {
-                "data": "invoertekst",
+                "data": "invoertekst-18",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst",
+                "data": "invoertekst-18",
                 "type": "text"
-              }
+              },
+              "main_call": true
             }
           }
         },
         {
-          "main": {
+          "context_testcase": {
             "output": {
               "stdout": {
-                "data": "invoertekst",
+                "data": "invoertekst-19",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst",
+                "data": "invoertekst-19",
                 "type": "text"
-              }
+              },
+              "main_call": true
             }
           }
         },
         {
-          "main": {
+          "context_testcase": {
             "output": {
               "stdout": {
-                "data": "invoertekst",
+                "data": "invoertekst-20",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst",
+                "data": "invoertekst-20",
                 "type": "text"
-              }
+              },
+              "main_call": true
             }
           }
         },
         {
-          "main": {
+          "context_testcase": {
             "output": {
               "stdout": {
-                "data": "invoertekst",
+                "data": "invoertekst-21",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst",
+                "data": "invoertekst-21",
                 "type": "text"
-              }
+              },
+              "main_call": true
             }
           }
         },
         {
-          "main": {
+          "context_testcase": {
             "output": {
               "stdout": {
-                "data": "invoertekst",
+                "data": "invoertekst-22",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst",
+                "data": "invoertekst-22",
                 "type": "text"
-              }
+              },
+              "main_call": true
             }
           }
         },
         {
-          "main": {
+          "context_testcase": {
             "output": {
               "stdout": {
-                "data": "invoertekst",
+                "data": "invoertekst-23",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst",
+                "data": "invoertekst-23",
                 "type": "text"
-              }
+              },
+              "main_call": true
             }
           }
         },
         {
-          "main": {
+          "context_testcase": {
             "output": {
               "stdout": {
-                "data": "invoertekst",
+                "data": "invoertekst-24",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst",
+                "data": "invoertekst-24",
                 "type": "text"
-              }
+              },
+              "main_call": true
             }
           }
         },
         {
-          "main": {
+          "context_testcase": {
             "output": {
               "stdout": {
-                "data": "invoertekst",
+                "data": "invoertekst-25",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst",
+                "data": "invoertekst-25",
                 "type": "text"
-              }
+              },
+              "main_call": true
             }
           }
         },
         {
-          "main": {
+          "context_testcase": {
             "output": {
               "stdout": {
-                "data": "invoertekst",
+                "data": "invoertekst-26",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst",
+                "data": "invoertekst-26",
                 "type": "text"
-              }
+              },
+              "main_call": true
             }
           }
         },
         {
-          "main": {
+          "context_testcase": {
             "output": {
               "stdout": {
-                "data": "invoertekst",
+                "data": "invoertekst-27",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst",
+                "data": "invoertekst-27",
                 "type": "text"
-              }
+              },
+              "main_call": true
             }
           }
         },
         {
-          "main": {
+          "context_testcase": {
             "output": {
               "stdout": {
-                "data": "invoertekst",
+                "data": "invoertekst-28",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst",
+                "data": "invoertekst-28",
                 "type": "text"
-              }
+              },
+              "main_call": true
             }
           }
         },
         {
-          "main": {
+          "context_testcase": {
             "output": {
               "stdout": {
-                "data": "invoertekst",
+                "data": "invoertekst-29",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst",
+                "data": "invoertekst-29",
                 "type": "text"
-              }
+              },
+              "main_call": true
             }
           }
         },
         {
-          "main": {
+          "context_testcase": {
             "output": {
               "stdout": {
-                "data": "invoertekst",
+                "data": "invoertekst-30",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst",
+                "data": "invoertekst-30",
                 "type": "text"
-              }
+              },
+              "main_call": true
             }
           }
         },
         {
-          "main": {
+          "context_testcase": {
             "output": {
               "stdout": {
-                "data": "invoertekst",
+                "data": "invoertekst-31",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst",
+                "data": "invoertekst-31",
                 "type": "text"
-              }
+              },
+              "main_call": true
             }
           }
         },
         {
-          "main": {
+          "context_testcase": {
             "output": {
               "stdout": {
-                "data": "invoertekst",
+                "data": "invoertekst-32",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst",
+                "data": "invoertekst-32",
                 "type": "text"
-              }
+              },
+              "main_call": true
             }
           }
         },
         {
-          "main": {
+          "context_testcase": {
             "output": {
               "stdout": {
-                "data": "invoertekst",
+                "data": "invoertekst-33",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst",
+                "data": "invoertekst-33",
                 "type": "text"
-              }
+              },
+              "main_call": true
             }
           }
         },
         {
-          "main": {
+          "context_testcase": {
             "output": {
               "stdout": {
-                "data": "invoertekst",
+                "data": "invoertekst-34",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst",
+                "data": "invoertekst-34",
                 "type": "text"
-              }
+              },
+              "main_call": true
             }
           }
         },
         {
-          "main": {
+          "context_testcase": {
             "output": {
               "stdout": {
-                "data": "invoertekst",
+                "data": "invoertekst-35",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst",
+                "data": "invoertekst-35",
                 "type": "text"
-              }
+              },
+              "main_call": true
             }
           }
         },
         {
-          "main": {
+          "context_testcase": {
             "output": {
               "stdout": {
-                "data": "invoertekst",
+                "data": "invoertekst-36",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst",
+                "data": "invoertekst-36",
                 "type": "text"
-              }
+              },
+              "main_call": true
             }
           }
         },
         {
-          "main": {
+          "context_testcase": {
             "output": {
               "stdout": {
-                "data": "invoertekst",
+                "data": "invoertekst-37",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst",
+                "data": "invoertekst-37",
                 "type": "text"
-              }
+              },
+              "main_call": true
             }
           }
         },
         {
-          "main": {
+          "context_testcase": {
             "output": {
               "stdout": {
-                "data": "invoertekst",
+                "data": "invoertekst-38",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst",
+                "data": "invoertekst-38",
                 "type": "text"
-              }
+              },
+              "main_call": true
             }
           }
         },
         {
-          "main": {
+          "context_testcase": {
             "output": {
               "stdout": {
-                "data": "invoertekst",
+                "data": "invoertekst-39",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst",
+                "data": "invoertekst-39",
                 "type": "text"
-              }
+              },
+              "main_call": true
             }
           }
         },
         {
-          "main": {
+          "context_testcase": {
             "output": {
               "stdout": {
-                "data": "invoertekst",
+                "data": "invoertekst-40",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst",
+                "data": "invoertekst-40",
                 "type": "text"
-              }
+              },
+              "main_call": true
             }
           }
         },
         {
-          "main": {
+          "context_testcase": {
             "output": {
               "stdout": {
-                "data": "invoertekst",
+                "data": "invoertekst-41",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst",
+                "data": "invoertekst-41",
                 "type": "text"
-              }
+              },
+              "main_call": true
             }
           }
         },
         {
-          "main": {
+          "context_testcase": {
             "output": {
               "stdout": {
-                "data": "invoertekst",
+                "data": "invoertekst-42",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst",
+                "data": "invoertekst-42",
                 "type": "text"
-              }
+              },
+              "main_call": true
             }
           }
         },
         {
-          "main": {
+          "context_testcase": {
             "output": {
               "stdout": {
-                "data": "invoertekst",
+                "data": "invoertekst-43",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst",
+                "data": "invoertekst-43",
                 "type": "text"
-              }
+              },
+              "main_call": true
             }
           }
         },
         {
-          "main": {
+          "context_testcase": {
             "output": {
               "stdout": {
-                "data": "invoertekst",
+                "data": "invoertekst-44",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst",
+                "data": "invoertekst-44",
                 "type": "text"
-              }
+              },
+              "main_call": true
             }
           }
         },
         {
-          "main": {
+          "context_testcase": {
             "output": {
               "stdout": {
-                "data": "invoertekst",
+                "data": "invoertekst-45",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst",
+                "data": "invoertekst-45",
                 "type": "text"
-              }
+              },
+              "main_call": true
             }
           }
         },
         {
-          "main": {
+          "context_testcase": {
             "output": {
               "stdout": {
-                "data": "invoertekst",
+                "data": "invoertekst-46",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst",
+                "data": "invoertekst-46",
                 "type": "text"
-              }
+              },
+              "main_call": true
             }
           }
         },
         {
-          "main": {
+          "context_testcase": {
             "output": {
               "stdout": {
-                "data": "invoertekst",
+                "data": "invoertekst-47",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst",
+                "data": "invoertekst-47",
                 "type": "text"
-              }
+              },
+              "main_call": true
             }
           }
         },
         {
-          "main": {
+          "context_testcase": {
             "output": {
               "stdout": {
-                "data": "invoertekst",
+                "data": "invoertekst-48",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst",
+                "data": "invoertekst-48",
                 "type": "text"
-              }
+              },
+              "main_call": true
             }
           }
         },
         {
-          "main": {
+          "context_testcase": {
             "output": {
               "stdout": {
-                "data": "invoertekst",
+                "data": "invoertekst-49",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst",
+                "data": "invoertekst-49",
                 "type": "text"
-              }
+              },
+              "main_call": true
             }
           }
         }

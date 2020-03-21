@@ -1,10 +1,12 @@
 """
 Exception evaluator.
 """
+from typing import Optional
+
 from ..dodona import StatusMessage, Status, ExtendedMessage, Permission
 from . import EvaluationResult
 from ..serialisation import ExceptionValue
-from ..testplan.channels import ExceptionOutputChannel
+from ..testplan import ExceptionOutputChannel
 from ..utils import Either
 
 
@@ -14,6 +16,15 @@ def try_as_exception(value: str) -> Either[ExceptionValue]:
         return Either(actual)
     except (TypeError, ValueError) as e:
         return Either(e)
+
+
+def try_as_readable_exception(value: str) -> Optional[str]:
+    try:
+        actual = ExceptionValue.__pydantic_model__.parse_raw(value)
+    except (TypeError, ValueError):
+        return None
+    else:
+        return actual.readable()
 
 
 def evaluate(_, channel: ExceptionOutputChannel, actual: str) -> EvaluationResult:

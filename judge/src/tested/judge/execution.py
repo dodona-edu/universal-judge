@@ -1,12 +1,15 @@
+import logging
 from pathlib import Path
 from typing import List, Optional, Tuple
 
 from pydantic.dataclasses import dataclass
 
 from tested.dodona import Message, Status
-from . import BaseExecutionResult, _logger, run_command
+from .utils import BaseExecutionResult, run_command
 from ..configs import Bundle
 from ..testplan import Context, ExecutionMode
+
+_logger = logging.getLogger(__name__)
 
 
 @dataclass

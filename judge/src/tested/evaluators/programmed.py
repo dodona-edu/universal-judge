@@ -9,9 +9,9 @@ from ..datatypes import StringTypes
 from ..dodona import ExtendedMessage, StatusMessage, Status, Permission
 from ..judge import evaluate_programmed
 from ..serialisation import StringType, SpecificResult, Value
-from ..testplan.channels import TextOutputChannel, FileOutputChannel, \
-    ValueOutputChannel, NormalOutputChannel, ExceptionOutputChannel
-from ..testplan.evaluators import ProgrammedEvaluator
+from ..testplan import (TextOutputChannel, FileOutputChannel, ValueOutputChannel,
+                        NormalOutputChannel, ExceptionOutputChannel,
+                        ProgrammedEvaluator)
 from ..utils import Either
 
 DEFAULT_STUDENT = ("Er ging iets fout op bij het evalueren van de oplossing. Meld "

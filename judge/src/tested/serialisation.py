@@ -5,7 +5,8 @@ This is the authoritative source of the format. For example, json-schema is
 generated from this code.
 
 This module does not concern itself with actual decoding or encoding; it is purely
-concerned about the format itself and parsing of the format itself (some might expression
+concerned about the format itself and parsing of the format itself (some might
+expression
 this the meta-concerns).
 
 The encoding and decoding of instances of values in this format are done in the
@@ -17,31 +18,21 @@ classes for implementations in other configs.
 """
 import json
 import logging
-from dataclasses import field
+from dataclasses import field, replace
 from decimal import Decimal
+from enum import Enum
 from typing import Union, List, Dict, Literal, Optional, Any, get_args
 
 import math
-from pydantic import BaseModel
+from pydantic import BaseModel, root_validator
 from pydantic.dataclasses import dataclass
 
+from .datatypes import (NumericTypes, StringTypes, BooleanTypes,
+                        SequenceTypes, ObjectTypes, NothingTypes, SimpleTypes,
+                        resolve_to_basic, AllTypes)
 from .features import FeatureSet, Constructs, combine_features, WithFeatures
-from .datatypes import NumericTypes, StringTypes, BooleanTypes, \
-    SequenceTypes, ObjectTypes, NothingTypes, SimpleTypes, resolve_to_basic
 
 logger = logging.getLogger(__name__)
-
-
-class SerialisationError(ValueError):
-    def __init__(self, message, additional_errors=None):
-        ValueError.__init__(self, message)
-        self.additional_errors = additional_errors or []
-
-    def __str__(self):
-        original = super().__str__()
-        additional_lines = "\n".join(
-            f"* {error}" for error in self.additional_errors)
-        return f"{original}\nAdditional errors:\n {additional_lines}"
 
 
 @dataclass
@@ -74,7 +65,7 @@ class BooleanType(WithFeatures):
 @dataclass
 class SequenceType(WithFeatures):
     type: SequenceTypes
-    data: List['Value']
+    data: List['Expression']
 
     def get_used_features(self) -> FeatureSet:
         base_features = FeatureSet(Constructs.NOTHING, {self.type})
@@ -85,7 +76,7 @@ class SequenceType(WithFeatures):
 @dataclass
 class ObjectType(WithFeatures):
     type: ObjectTypes
-    data: Dict[str, 'Value']
+    data: Dict[str, 'Expression']
 
     def get_used_features(self) -> FeatureSet:
         base_features = FeatureSet(Constructs.NOTHING, {self.type})
@@ -108,9 +99,119 @@ Value = Union[
 ]
 
 
+class Identifier(str, WithFeatures):
+    """Represents an identifier."""
+
+    def get_used_features(self) -> FeatureSet:
+        return FeatureSet(Constructs.NOTHING, set())
+
+
+class FunctionType(str, Enum):
+    FUNCTION = "function"
+    """
+    A top-level function expression. In some configs, this might be translated to a
+    NAMESPACE function (e.g. in Java, this is translated to a static method).
+    """
+    NAMESPACE = "namespace"
+    """
+    A function in a namespace. The namespace can be an instance, in which case it
+    is a method (e.g. Java or Python), but it can also be a function inside a module
+    (e.g. Haskell).
+    """
+    CONSTRUCTOR = "constructor"
+    """
+    A constructor.
+    """
+    PROPERTY = "property"
+    """
+    Access a property on an object.
+    """
+
+
+@dataclass
+class FunctionCall(WithFeatures):
+    """
+    Represents a function expression.
+    """
+    type: FunctionType
+    name: str
+    namespace: Optional[str] = None
+    arguments: List['Expression'] = field(default_factory=list)
+
+    @root_validator
+    def namespace_requirements(cls, values):
+        type_ = values.get("type")
+        namespace_ = values.get("namespace")
+        if type_ == FunctionType.NAMESPACE and not namespace_:
+            raise ValueError("Namespace functions must have a namespace.")
+        if type_ == FunctionType.PROPERTY and not namespace_:
+            raise ValueError("Property functions must have a namespace.")
+        return values
+
+    @root_validator
+    def properties_have_no_args(cls, values):
+        type_ = values.get("type")
+        args = values.get("args")
+        if type_ == FunctionType.PROPERTY and args:
+            raise ValueError("You cannot have arguments for a property!")
+
+    def get_used_features(self) -> FeatureSet:
+        constructs = Constructs.FUNCTION_CALL
+
+        # Get OOP features.
+        if self.type in (FunctionType.PROPERTY, FunctionType.CONSTRUCTOR):
+            constructs |= Constructs.OBJECTS
+
+        base_features = FeatureSet(constructs=constructs, types=set())
+        argument_features = [x.get_used_features() for x in self.arguments]
+
+        return combine_features([base_features] + argument_features)
+
+
+@dataclass
+class VariableType:
+    data: str
+    type: Literal['custom'] = 'custom'
+
+
+Expression = Union[FunctionCall, Identifier, Value]
+
+
+@dataclass
+class Assignment(WithFeatures):
+    """
+    Assigns the return value of a function to a variable. Because the expression
+    part is pretty simple, the type of the value is determined by looking at the
+    expression. It is also possible to define the type. If the type cannot be
+    determined and it is not specified, this is an error.
+    """
+    name: str
+    expression: Expression
+    type: Union[AllTypes, VariableType]
+
+    def replace_expression(self, expression: Expression) -> 'Assignment':
+        return Assignment(name=self.name, expression=expression, type=self.type)
+
+    def get_used_features(self) -> FeatureSet:
+        base = FeatureSet(Constructs.ASSIGNMENT, set())
+        other = self.expression.get_used_features()
+
+        return combine_features([base, other])
+
+
+Statement = Assignment
+
 # Update the forward references, which fixes the schema generation.
 ObjectType.__pydantic_model__.update_forward_refs()
 SequenceType.__pydantic_model__.update_forward_refs()
+FunctionCall.__pydantic_model__.update_forward_refs()
+
+
+def as_basic_type(value: Value) -> Value:
+    """Convert a value's type to a basic type."""
+    new_type = resolve_to_basic(value.type)
+    # noinspection PyDataclass
+    return replace(value, type=new_type)
 
 
 class _SerialisationSchema(BaseModel):
@@ -210,14 +311,6 @@ def _convert_to_python(value: Optional[Value], for_printing=False) -> Any:
     # Unknown type.
     logger.warning(f"Unknown data type {value.type} will be interpreted as string.")
     return str(value.data)
-
-
-def get_readable_representation(value: Value):
-    """
-    Get a readable representation of the data. In many cases, this is just the
-    Python type that will be returned as a string.
-    """
-    return repr(_convert_to_python(value, True))
 
 
 class ComparableFloat:

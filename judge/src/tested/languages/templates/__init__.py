@@ -1,4 +1,5 @@
 import dataclasses
+import logging
 from functools import lru_cache
 from pathlib import Path
 from typing import List, Any
@@ -8,9 +9,10 @@ from mako.exceptions import TemplateLookupException
 from mako.lookup import TemplateLookup
 from mako.template import Template
 
-from ..generator import _logger
 from ..templates._preprocessors import remove_indents, remove_newline
 from ...configs import Bundle
+
+_logger = logging.getLogger(__name__)
 
 
 def _write_template(arguments, template: Template, path: Path):

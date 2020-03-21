@@ -42,7 +42,7 @@ def combine_features(iterable: Iterable[FeatureSet]) -> FeatureSet:
         Constructs.NOTHING
     )
     types = reduce(
-        operator.add,
+        operator.or_,
         (x.types for x in iterable),
         set()
     )

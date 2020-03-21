@@ -35,5 +35,5 @@ class BasicNothingTypes(str, Enum):
 
 BasicTypes = Union[
     BasicNumericTypes, BasicStringTypes, BasicBooleanTypes, BasicObjectTypes,
-    BasicNothingTypes
+    BasicNothingTypes, BasicSequenceTypes
 ]

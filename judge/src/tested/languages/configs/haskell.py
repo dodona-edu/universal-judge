@@ -1,20 +1,24 @@
-from typing import List, Union
-from pathlib import Path
 from os import PathLike
+from pathlib import Path
+from typing import List, Union
 
 from humps import pascalize
 
-from tested.features import Constructs
-from runners.config import LanguageConfig, CallbackResult, executable_name
-from testplan import Plan, FunctionCall
-from tested.serialisation import StringType, StringTypes
+from .. import Language
+from ..config import CallbackResult, executable_name
+from ...features import Constructs
+from ...serialisation import StringType, StringTypes, FunctionCall
+from ...testplan import Plan
 
 
-class HaskellConfig(LanguageConfig):
+class HaskellConfig(Language):
     """
     Configuration for the Haskell language, in compilation mode. This means that all
     code is first compiled with GHC, before it is executed.
     """
+
+    def needs_selector(self):
+        return True
 
     def selector_name(self) -> str:
         return "Selector"
@@ -32,7 +36,7 @@ class HaskellConfig(LanguageConfig):
         return (["ghc", main_file, "-context_testcase-is", exec_file],
                 [executable_name(exec_file)])
 
-    def conventionalise(self, function_name: str) -> str:
+    def conventionalise_function(self, function_name: str) -> str:
         return function_name
 
     def conventionalise_object(self, class_name: str) -> str:

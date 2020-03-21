@@ -28,14 +28,13 @@ from typing import Union, Callable, Optional
 
 from pydantic.dataclasses import dataclass
 
-from .. import Bundle
+from ..configs import Bundle
 from ..dodona import StatusMessage, Message
-from ..testplan.channels import OutputChannel, NormalOutputChannel, \
-    SpecialOutputChannel, EmptyChannel, IgnoredChannel, ExitCodeOutputChannel
-from ..testplan.evaluators import GenericTextEvaluator, TextBuiltin, \
+from ..testplan import GenericTextEvaluator, TextBuiltin, \
     GenericValueEvaluator, ValueBuiltin, GenericExceptionEvaluator, \
     ExceptionBuiltin, ProgrammedEvaluator, SpecificEvaluator
-from ..utils import Either
+from ..testplan import OutputChannel, NormalOutputChannel, \
+    SpecialOutputChannel, EmptyChannel, IgnoredChannel, ExitCodeOutputChannel
 
 
 @dataclass
@@ -127,14 +126,11 @@ def get_evaluator(
         raise AssertionError(f"Unknown evaluator type: {type(evaluator)}")
 
 
-def try_outputs(actual: str, parsers: List[Callable[[str], Either]]) -> str:
+def try_outputs(actual: str, parsers: List[Callable[[str], Optional[str]]]) -> str:
     if not actual:
         return actual
     for parser in parsers:
         possible = parser(actual)
-        try:
-            return str(possible.get())  # TODO: fix this, convert to string.
-        except (ValueError, TypeError):
-            pass
-
+        if possible is not None:
+            return possible
     return actual

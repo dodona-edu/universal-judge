@@ -4,7 +4,7 @@
 import ${evaluator}
 
 ${evaluator}.evaluate(
-    expected=<%include file="literal.mako" args="value=expected"/>,
-    actual=<%include file="literal.mako" args="value=actual"/>,
-    arguments=<%include file="literal.mako" args="value=arguments"/>
+    expected=<%include file="value.mako" args="value=expected"/>,
+    actual=<%include file="value.mako" args="value=actual"/>,
+    arguments=<%include file="value.mako" args="value=arguments"/>
 )

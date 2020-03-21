@@ -3,7 +3,7 @@ Methods for getting the paths to or name of various files.
 """
 from pathlib import Path
 
-from tested import Bundle
+from ..configs import Bundle
 
 
 def value_file(bundle: Bundle, directory: Path):

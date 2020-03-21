@@ -1,21 +1,20 @@
+import logging
 import shutil
 from pathlib import Path
-from typing import IO, Union, Tuple, List, Optional
+from typing import Tuple, List
 
-from tested.dodona import Status, report_update, StartTest, AppendMessage, CloseTest, \
-    Message, StartTestcase, EscalateStatus, StatusMessage, CloseTestcase, \
-    ExtendedMessage, Permission
+from .compilation import run_compilation, process_compile_results
+from .execution import ContextExecution, ExecutionResult, execute_file
+from .utils import find_main_file
+from ..configs import Bundle
+from ..dodona import *
 from ..evaluators import Evaluator, get_evaluator
-from . import ExecutionResult, ContextExecution, _logger, run_compilation, \
-    _process_compile_results, find_main_file, execute_file
 from ..languages.generator import get_readable_input
 from ..languages.paths import value_file, exception_file
-from ..configs import Bundle
-from ..testplan import Context, ExecutionMode
-from ..testplan.channels import OutputChannel, EmptyChannel, IgnoredChannel, \
-    ExitCodeOutputChannel
-from ..testplan.testcase import Testcase
-from ..testplan.utils import TestPlanError
+from ..testplan import Context, ExecutionMode, OutputChannel, EmptyChannel, \
+    IgnoredChannel, ExitCodeOutputChannel, Testcase, TestPlanError
+
+_logger = logging.getLogger(__name__)
 
 
 def _evaluate_channel(
@@ -116,11 +115,16 @@ def evaluate_results(bundle: Bundle,
 
         # Get the evaluators
         try:
-            stdout_evaluator = get_evaluator(bundle, context_dir, testcase.output.stdout)
-            stderr_evaluator = get_evaluator(bundle, context_dir, testcase.output.stderr)
-            file_evaluator = get_evaluator(bundle, context_dir, testcase.output.file)
-            value_evaluator = get_evaluator(bundle, context_dir, testcase.output.result)
-            exception_evaluator = get_evaluator(bundle, context_dir, testcase.output.exception)
+            stdout_evaluator = get_evaluator(bundle, context_dir,
+                                             testcase.output.stdout)
+            stderr_evaluator = get_evaluator(bundle, context_dir,
+                                             testcase.output.stderr)
+            file_evaluator = get_evaluator(bundle, context_dir,
+                                           testcase.output.file)
+            value_evaluator = get_evaluator(bundle, context_dir,
+                                            testcase.output.result)
+            exception_evaluator = get_evaluator(bundle, context_dir,
+                                                testcase.output.exception)
         except TestPlanError as e:
             report_update(bundle.out, AppendMessage(message=ExtendedMessage(
                 description=str(e),
@@ -211,7 +215,7 @@ def execute_context(bundle: Bundle, args: ContextExecution) \
         result, files = run_compilation(bundle, context_dir, dependencies)
 
         # Process compilation results.
-        messages, status, annotations = _process_compile_results(
+        messages, status, annotations = process_compile_results(
             lang_config,
             result
         )

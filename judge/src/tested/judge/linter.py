@@ -1,9 +1,11 @@
+import logging
 import shutil
 from pathlib import Path
 
-from ..dodona import report_update, AppendMessage
-from . import _logger
 from ..configs import Bundle
+from ..dodona import report_update, AppendMessage
+
+_logger = logging.getLogger(__name__)
 
 
 def run_linter(bundle: Bundle):

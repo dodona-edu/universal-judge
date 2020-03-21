@@ -9,17 +9,13 @@ from typing import List, Union, Tuple, Optional, Set
 from ..datatypes import SequenceTypes
 from ..dodona import ExtendedMessage
 from .paths import value_file, exception_file
-from .templates import find_and_write_template, \
-    find_template
-from ..serialisation import Value, SequenceType
+from .templates import find_and_write_template, find_template
+from ..serialisation import Value, SequenceType, Identifier, FunctionType, \
+    FunctionCall, Expression, Statement
 from ..configs import Bundle
-from ..testplan import Context
-from tested.ast import Statement, FunctionCall, Expression, FunctionType, \
-    Identifier
-from ..testplan.channels import EmptyChannel, IgnoredChannel, TextData
-from ..testplan.evaluators import ProgrammedEvaluator, SpecificEvaluator
-from ..testplan.testcase import Testcase, ContextTestcase, ExpressionInput, \
-    StatementInput
+from ..testplan import (EmptyChannel, IgnoredChannel, TextData, ProgrammedEvaluator,
+                        SpecificEvaluator, Testcase, ContextTestcase, Context,
+                        ExpressionInput, StatementInput)
 
 _logger = logging.getLogger(__name__)
 
@@ -311,7 +307,7 @@ def convert_statement(bundle: Bundle, statement: Statement) -> str:
     """
     prepared_expression = _prepare_expression(bundle, statement.expression)
     statement = statement.replace_expression(prepared_expression)
-    template = find_template(bundle, "convert_statement")
+    template = find_template(bundle, "statement")
     return template.render(statement=statement, full=True)
 
 

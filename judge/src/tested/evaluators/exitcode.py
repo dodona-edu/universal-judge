@@ -3,7 +3,7 @@ from typing import Optional
 
 from ..dodona import StatusMessage, Status
 from . import EvaluationResult
-from ..testplan.channels import ExitCodeOutputChannel
+from ..testplan import ExitCodeOutputChannel
 
 logger = logging.getLogger(__name__)
 

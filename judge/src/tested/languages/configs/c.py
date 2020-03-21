@@ -1,5 +1,5 @@
-from runners.config import CallbackResult, LanguageConfig
+from .. import Language
 
 
-class CConfig(LanguageConfig):
+class CConfig(Language):
     pass

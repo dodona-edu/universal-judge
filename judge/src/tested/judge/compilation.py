@@ -5,11 +5,10 @@ import logging
 from pathlib import Path
 from typing import List, Tuple, Optional
 
-from tested.dodona import Message, Status, AnnotateCode, ExtendedMessage
-from . import BaseExecutionResult
-from .utils import run_command
+from .utils import run_command, BaseExecutionResult
+from ..configs import Bundle
+from ..dodona import Message, Status, AnnotateCode, ExtendedMessage
 from ..languages.config import Language
-from tested import Bundle
 
 _logger = logging.getLogger(__name__)
 
@@ -60,7 +59,7 @@ def run_compilation(bundle: Bundle,
     return result, files
 
 
-def _process_compile_results(
+def process_compile_results(
         language_config: Language,
         results: Optional[BaseExecutionResult]
 ) -> Tuple[List[Message], Status, List[AnnotateCode]]:

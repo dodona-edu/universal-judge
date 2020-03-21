@@ -2,13 +2,16 @@ import os
 import re
 from os import PathLike
 from pathlib import Path
-from typing import List, Tuple, Union
+from typing import List, Tuple, Union, Dict, Optional
 
 from humps import decamelize, depascalize
 
 from . import python_linter
 from ..config import Language, CallbackResult
 from ...configs import Bundle
+from ...datatypes import AdvancedTypes
+from ...datatypes import AdvancedNumericTypes as ant
+from ...datatypes import AdvancedSequenceTypes as ast
 from ...dodona import AnnotateCode, Severity, Message
 from ...testplan import Plan
 
@@ -122,3 +125,10 @@ class Python(Language):
                    submission: Union[Path, PathLike]) \
             -> Tuple[List[Message], List[AnnotateCode]]:
         return python_linter.run_pylint(bundle, path, submission)
+
+    def type_support_map(self) -> Dict[AdvancedTypes, Optional[AdvancedTypes]]:
+        return {
+            ant.DOUBLE_EXTENDED: ant.DOUBLE_EXTENDED,
+            ant.FIXED_PRECISION: ant.FIXED_PRECISION,
+            ast.TUPLE:           ast.TUPLE
+        }

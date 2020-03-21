@@ -1,14 +1,15 @@
 import os
 from pathlib import Path
+from typing import List
 
 from humps import pascalize, camelize
 
-from typing import List
-from runners.config import LanguageConfig, CallbackResult
-from testplan import Plan
+from .. import Language
+from ..config import CallbackResult
+from ...testplan import Plan
 
 
-class JavaConfig(LanguageConfig):
+class JavaConfig(Language):
     """
     Configuration for the Java language.
     This configuration is for the traditional way of executing Java, meaning it
@@ -41,7 +42,7 @@ class JavaConfig(LanguageConfig):
     def submission_name(self, plan: Plan) -> str:
         return plan.namespace
 
-    def conventionalise(self, function_name: str) -> str:
+    def conventionalise_function(self, function_name: str) -> str:
         return camelize(function_name)
 
     def conventionalise_object(self, class_name: str) -> str:

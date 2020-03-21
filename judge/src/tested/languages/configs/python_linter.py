@@ -12,7 +12,7 @@ from typing import List, Tuple
 from pylint import lint
 from pylint.reporters import JSONReporter
 
-from ... import Bundle
+from ...configs import Bundle
 from ...dodona import *
 
 logger = logging.getLogger(__name__)
@@ -28,7 +28,6 @@ translations = {
         'TLE description': 'tijdslimiet overschreden',
     },
 }
-
 
 message_categories = {
     'fatal':      Severity.ERROR,

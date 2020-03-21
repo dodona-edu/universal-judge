@@ -7,7 +7,7 @@ import math
 
 from ..dodona import StatusMessage, Status
 from . import EvaluationResult, EvaluatorConfig
-from ..testplan.channels import TextOutputChannel, FileOutputChannel, OutputChannel
+from ..testplan import TextOutputChannel, FileOutputChannel, OutputChannel
 
 
 def _is_number(string: str) -> Optional[float]:

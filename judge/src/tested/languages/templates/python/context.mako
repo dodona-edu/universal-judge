@@ -27,16 +27,16 @@ def send_exception(exception):
     values.send_exception(exception_file, exception)
 
 def e_evaluate_main(value):
-    <%include file="function.mako" args="function=main_testcase.exception_function"/>
+    <%include file="expression.mako" args="function=main_testcase.exception_function"/>
 
 % for additional in additional_testcases:
     % if additional.has_return:
         def v_evaluate_${loop.index}(value):
-            <%include file="function.mako" args="function=additional.value_function"/>
+            <%include file="expression.mako" args="function=additional.value_function"/>
     % endif
 
     def e_evaluate_${loop.index}(value):
-        <%include file="function.mako" args="function=additional.exception_function"/>
+        <%include file="expression.mako" args="function=additional.exception_function"/>
 % endfor
 
 
@@ -44,7 +44,7 @@ def e_evaluate_main(value):
 % if main_testcase.exists and main_testcase.arguments:
     sys.argv.extend([\
         % for argument in main_testcase.arguments:
-            <%include file="literal.mako" args="value=argument"/>\
+            <%include file="value.mako" args="value=argument"/>\
         % endfor
     ])
 % endif
@@ -76,12 +76,12 @@ except Exception as e:
 % for additional in additional_testcases:
     try:
         % if isinstance(additional.statement, Assignment):
-            <%include file="assignment.mako" args="assignment=additional.statement" />\
+            <%include file="statement.mako" args="assignment=additional.statement" />\
         % else:
             % if additional.has_return:
                 v_evaluate_${loop.index}(\
             % endif
-            <%include file="function.mako" args="function=additional.statement" />\
+            <%include file="expression.mako" args="function=additional.statement" />\
             % if additional.has_return:
                 )\
             % endif

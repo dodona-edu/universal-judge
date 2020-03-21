@@ -12,30 +12,26 @@ As mentioned in the manuscript, the context_testcase use is scenario 1.
 Additionally, the types in this file are organised by their JSON encoding type.
 They are also split in "basic types" and "advanced types".
 """
-from typing import Union, get_args
+from typing import get_args
 
-from .advanced import AdvancedNumericTypes, AdvancedSequenceTypes, \
-    AdvancedObjectTypes, AdvancedTypes
-from .basic import BasicNumericTypes, BasicStringTypes, \
-    BasicBooleanTypes, BasicSequenceTypes, BasicObjectTypes, BasicNothingTypes, \
-    BasicTypes
-from .code import CodeStringTypes
+from .advanced import *
+from .basic import *
 
 NumericTypes = Union[BasicNumericTypes, AdvancedNumericTypes]
 StringTypes = BasicStringTypes
-ExtendedStringTypes = Union[StringTypes, CodeStringTypes]
 BooleanTypes = BasicBooleanTypes
+NothingTypes = BasicNothingTypes
 SequenceTypes = Union[BasicSequenceTypes, AdvancedSequenceTypes]
 ObjectTypes = Union[BasicObjectTypes, AdvancedObjectTypes]
-NothingTypes = BasicNothingTypes
+
 
 SimpleTypes = Union[NumericTypes, StringTypes, BooleanTypes, NothingTypes]
 ComplexTypes = Union[SequenceTypes, ObjectTypes]
 
 AllTypes = Union[BasicTypes, AdvancedTypes]
 
-ExtendedTypes = Union[
-    NumericTypes, ExtendedStringTypes, BooleanTypes, NothingTypes, ComplexTypes]
+# Test that our aliases are correct.
+assert set(get_args(AllTypes)) == set(get_args(Union[SimpleTypes, ComplexTypes]))
 
 
 def resolve_to_basic(type_: AllTypes) -> BasicTypes:

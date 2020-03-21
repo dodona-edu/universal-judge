@@ -2,13 +2,14 @@
 Value evaluator.
 """
 import logging
-from typing import Union, Tuple
+from typing import Union, Tuple, Optional
 
-from . import EvaluationResult
+from . import EvaluationResult, EvaluatorConfig
+from ..configs import Bundle
 from ..dodona import ExtendedMessage, Permission, StatusMessage, Status
-from ..serialisation import Value, get_readable_representation, parse_value, \
-    SerialisationError, to_python_comparable
-from ..testplan.channels import ValueOutputChannel, OutputChannel
+from ..languages.generator import convert_expression
+from ..serialisation import Value, parse_value, to_python_comparable
+from ..testplan import ValueOutputChannel, OutputChannel
 from ..utils import Either
 
 logger = logging.getLogger(__name__)
@@ -22,18 +23,26 @@ def try_as_value(value: str) -> Either[Value]:
         return Either(e)
 
 
-def get_values(output_channel: ValueOutputChannel, actual) \
+def try_as_readable_value(bundle: Bundle, value: str) -> Optional[str]:
+    try:
+        actual = parse_value(value)
+    except (ValueError, TypeError) as e:
+        return None
+    else:
+        return convert_expression(bundle, actual)
+
+
+def get_values(bundle: Bundle, output_channel: ValueOutputChannel, actual) \
         -> Union[EvaluationResult,
                  Tuple[Value, str, Value, str]]:
     expected = output_channel.value
-    readable_expected = get_readable_representation(expected)
+    readable_expected = convert_expression(bundle, expected)
 
     # A crash here indicates a problem with one of the language implementations,
     # or a student is trying to cheat.
     try:
-        actual = parse_value(actual) if actual else None
-        readable_actual = get_readable_representation(actual) if actual else ""
-    except SerialisationError as e:
+        actual = try_as_value(actual).get()
+    except (TypeError, ValueError) as e:
         raw_message = f"Received {actual}, which caused {e} for get_values."
         message = ExtendedMessage(
             description=raw_message,
@@ -49,10 +58,12 @@ def get_values(output_channel: ValueOutputChannel, actual) \
             messages=[message]
         )
 
+    readable_actual = convert_expression(bundle, actual)
     return expected, readable_expected, actual, readable_actual
 
 
-def evaluate(_, channel: OutputChannel, actual: str) -> EvaluationResult:
+def evaluate(config: EvaluatorConfig,
+             channel: OutputChannel, actual: str) -> EvaluationResult:
     """
     Evaluate two values. The values must match exact. Currently, this evaluator
     has no options, but it might receive them in the future (e.g. options on how
@@ -72,7 +83,7 @@ def evaluate(_, channel: OutputChannel, actual: str) -> EvaluationResult:
 
     # Try parsing the value as an actual Value.
 
-    result = get_values(channel, actual)
+    result = get_values(config.bundle, channel, actual)
     if isinstance(result, EvaluationResult):
         return result
     else:
