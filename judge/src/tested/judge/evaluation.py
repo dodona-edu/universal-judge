@@ -12,7 +12,7 @@ from ..evaluators import Evaluator, get_evaluator
 from ..languages.generator import get_readable_input
 from ..languages.paths import value_file, exception_file
 from ..testplan import Context, ExecutionMode, OutputChannel, EmptyChannel, \
-    IgnoredChannel, ExitCodeOutputChannel, Testcase, TestPlanError
+    IgnoredChannel, ExitCodeOutputChannel, Testcase
 
 _logger = logging.getLogger(__name__)
 
@@ -114,24 +114,12 @@ def evaluate_results(bundle: Bundle,
         # We don't stop if the exit code, to show the other issues.
 
         # Get the evaluators
-        try:
-            stdout_evaluator = get_evaluator(bundle, context_dir,
-                                             testcase.output.stdout)
-            stderr_evaluator = get_evaluator(bundle, context_dir,
-                                             testcase.output.stderr)
-            file_evaluator = get_evaluator(bundle, context_dir,
-                                           testcase.output.file)
-            value_evaluator = get_evaluator(bundle, context_dir,
-                                            testcase.output.result)
-            exception_evaluator = get_evaluator(bundle, context_dir,
-                                                testcase.output.exception)
-        except TestPlanError as e:
-            report_update(bundle.out, AppendMessage(message=ExtendedMessage(
-                description=str(e),
-                format='text',
-                permission=Permission.STAFF
-            )))
-            break
+        output = testcase.output
+        stdout_evaluator = get_evaluator(bundle, context_dir, output.stdout)
+        stderr_evaluator = get_evaluator(bundle, context_dir, output.stderr)
+        file_evaluator = get_evaluator(bundle, context_dir, output.file)
+        value_evaluator = get_evaluator(bundle, context_dir, output.result)
+        exception_evaluator = get_evaluator(bundle, context_dir, output.exception)
 
         # Evaluate the file channel.
         results.append(_evaluate_channel(

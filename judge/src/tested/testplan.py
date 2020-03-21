@@ -20,11 +20,6 @@ from .features import (Constructs, FeatureSet, combine_features, WithFeatures,
 from .serialisation import ExceptionValue, Value, Expression, Statement
 
 
-class TestPlanError(ValueError):
-    """Error when the test plan is not valid."""
-    pass
-
-
 class TextBuiltin(str, Enum):
     """Textual built in evaluators."""
     TEXT = "text"
@@ -141,12 +136,9 @@ class TextData(WithFeatures):
         if self.type == TextChannelType.TEXT:
             return self.data
         elif self.type == TextChannelType.FILE:
-            try:
-                file_path = self.__resolve_path(working_directory, self.data)
-                with open(file_path, 'r') as file:
-                    return file.read()
-            except FileNotFoundError as e:
-                raise TestPlanError(f"File not found: {e}")
+            file_path = self.__resolve_path(working_directory, self.data)
+            with open(file_path, 'r') as file:
+                return file.read()
         else:
             raise AssertionError(f"Unknown enum type {self.type}")
 

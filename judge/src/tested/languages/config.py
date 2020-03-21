@@ -123,7 +123,7 @@ class Language:
         """
         return []
 
-    def supported_features(self) -> Constructs:
+    def supported_constructs(self) -> Constructs:
         """
         A flag representing which features this language supports. By default, all
         features are returned.
@@ -137,16 +137,6 @@ class Language:
         :return: The features supported by this language.
         """
         return Constructs.ALL
-
-    def supports(self, plan: Plan) -> bool:
-        """
-        Check if the given testplan is supported by this language.
-        :param plan: The testplan to check.
-        :return: True if supported.
-        """
-        required = plan.get_used_features()
-        supported_features = self.supported_features()
-        return supported_features & required != 0
 
     def type_support_map(self) -> Dict[AdvancedTypes, Optional[AdvancedTypes]]:
         """

@@ -56,7 +56,7 @@ class HaskellConfig(Language):
     def context_name(self, tab_number: int, context_number: int) -> str:
         return f"Context_{tab_number}_{context_number}"
 
-    def supported_features(self) -> Constructs:
+    def supported_constructs(self) -> Constructs:
         return (Constructs.MAIN | Constructs.FUNCTION_CALL | Constructs.ASSIGNMENT
                 | Constructs.LISTS | Constructs.SETS | Constructs.MAPS
                 | Constructs.INTEGERS | Constructs.RATIONALS | Constructs.STRINGS

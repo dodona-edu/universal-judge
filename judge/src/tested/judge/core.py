@@ -13,20 +13,20 @@ from typing import Tuple, List
 
 import humps
 
-from ..dodona import *
 from .compilation import run_compilation, process_compile_results
-from .evaluation import _evaluate_channel, evaluate_results, execute_context
-from .execution import ExecutionResult, ContextExecution, execute_file
+from .evaluation import evaluate_results, execute_context
+from .execution import ContextExecution, execute_file
 from .linter import run_linter
-from .utils import BaseExecutionResult, run_command, find_main_file
+from .utils import BaseExecutionResult, run_command, find_main_file, \
+    copy_from_paths_to_path
+from ..configs import Bundle, create_bundle
+from ..dodona import *
+from ..features import is_supported
 from ..languages.generator import generate_context, generate_selector, \
     generate_custom_evaluator
 from ..languages.templates import path_to_templates
 from ..serialisation import Value
-from ..configs import Bundle, create_bundle
-from ..testplan import ExecutionMode
-from ..testplan import ProgrammedEvaluator
-from ..testplan import TestPlanError
+from ..testplan import ExecutionMode, ProgrammedEvaluator
 from ..utils import get_identifier
 
 _logger = logging.getLogger(__name__)
@@ -42,7 +42,7 @@ def judge(bundle: Bundle):
     """
     # Begin by checking if the given testplan is executable in this language.
     _logger.info("Checking supported features...")
-    if not bundle.language_config.supports(bundle.plan):
+    if not is_supported(bundle):
         report_update(bundle.out, StartJudgment())
         report_update(bundle.out, CloseJudgment(
             accepted=False,
@@ -170,7 +170,7 @@ def generate_files(bundle: Bundle,
 
     # Copy dependencies
     dependency_paths = path_to_templates(bundle)
-    utils.copy_from_paths_to_path(dependency_paths, dependencies, common_dir)
+    copy_from_paths_to_path(dependency_paths, dependencies, common_dir)
 
     submission_name = bundle.language_config.submission_name(bundle.plan)
 
@@ -255,7 +255,7 @@ def evaluate_programmed(bundle: Bundle,
     dependencies = eval_bundle.language_config.initial_dependencies()
     dependencies.extend(eval_bundle.language_config.evaluator_dependencies())
     origin = path_to_templates(eval_bundle)
-    utils.copy_from_paths_to_path(origin, dependencies, custom_path)
+    copy_from_paths_to_path(origin, dependencies, custom_path)
     # Include the actual evaluator in the dependencies.
     dependencies.append(evaluator.path.name)
 
@@ -278,8 +278,8 @@ def evaluate_programmed(bundle: Bundle,
     _logger.debug("Compiling custom evaluator with command %s", command)
     result = run_command(custom_path, command)
     if result and result.stderr:
-        raise TestPlanError(f"Error while compiling specific "
-                            f"test case: {result.stderr}")
+        raise ValueError("Error while compiling specific test case:" +
+                         result.stderr)
 
     # Execute the custom evaluator.
     evaluator_name = Path(evaluator_name).stem
