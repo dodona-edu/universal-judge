@@ -2,6 +2,7 @@
 import io
 import json
 import traceback
+import decimal
 
 
 def encode(value):
@@ -20,8 +21,14 @@ def encode(value):
     elif isinstance(value, float):
         type_ = "rational"
         data_ = value
-    elif isinstance(value, list) or isinstance(value, tuple):
+    elif isinstance(value, decimal.Decimal):
+        type_ = "fixed_precision"
+        data_ = str(value)
+    elif isinstance(value, list):
         type_ = "list"
+        data_ = [encode(x) for x in value]
+    elif isinstance(value, tuple):
+        type_ = "tuple"
         data_ = [encode(x) for x in value]
     elif isinstance(value, set):
         type_ = "set"

@@ -69,7 +69,7 @@ def get_values(bundle: Bundle, output_channel: ValueOutputChannel, actual) \
 
 def _check_type(
         bundle: Bundle, expected: Value, actual: Value
-) -> Tuple[bool, Value, Value]:
+) -> Tuple[bool, Value]:
     """
     Check if the type of the two values match. The following procedure is used:
 
@@ -90,8 +90,8 @@ def _check_type(
     :param expected: The expected type from the testplan.
     :param actual: The actual type produced by the plan.
 
-    :return: A tuple with the result, expected value and actual value with the type
-             that was used to do the check.
+    :return: A tuple with the result and expected value, the type that was used to
+             do the check.
     """
     supported_types = bundle.language_config.type_support_map()
 
@@ -103,7 +103,7 @@ def _check_type(
     if isinstance(expected.type, get_args(BasicTypes)):
         logger.debug(f"The expected type {expected.type} is advanced.")
         basic_actual = as_basic_type(actual)
-        return expected.type == basic_actual.type, expected, basic_actual
+        return expected.type == basic_actual.type, expected
 
     assert isinstance(expected.type, get_args(AdvancedTypes))
 
@@ -111,13 +111,12 @@ def _check_type(
     if expected.type not in supported_types:
         basic_expected = as_basic_type(expected)
         basic_actual = as_basic_type(actual)
-        return (basic_expected.type == basic_actual.type,
-                basic_expected, basic_actual)
+        return basic_expected.type == basic_actual.type, basic_expected
 
     # Case 2.a.
     assert supported_types[expected.type] is not None
 
-    return expected.type == actual.type, expected, actual
+    return expected.type == actual.type, expected
 
 
 def evaluate(config: EvaluatorConfig,
@@ -157,7 +156,7 @@ def evaluate(config: EvaluatorConfig,
             readable_actual=readable_actual
         )
 
-    type_check, expected, actual = _check_type(config.bundle, expected, actual)
+    type_check, expected = _check_type(config.bundle, expected, actual)
     messages = []
     type_message = None
     if not type_check:
