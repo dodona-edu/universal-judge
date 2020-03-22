@@ -19,12 +19,6 @@ def run(config: DodonaConfig, judge_output: IO):
 
     plan = parse_test_plan(textual_plan)
 
-    # Merge configs from configs into testplan if needed.
-    if config.linter is not None:
-        existing = plan.config_for(config.programming_language)
-        existing["linter"] = config.linter
-        plan.configuration.language[config.programming_language] = existing
-
     from .judge import judge
     pack = create_bundle(config, judge_output, plan)
     judge(pack)

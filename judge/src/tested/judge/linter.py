@@ -21,7 +21,7 @@ def run_linter(bundle: Bundle):
 
     language_options = bundle.plan.config_for(bundle.config.programming_language)
     # By default, we allow the linter to work.
-    if not language_options.get("linter", True):
+    if not language_options.get("linter", False):
         _logger.debug("Linter is disabled.")
         return
 

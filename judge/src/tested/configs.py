@@ -26,7 +26,6 @@ class DodonaConfig:
     # noinspection SpellCheckingInspection
     workdir: Path
     judge: Path
-    linter: Optional[bool] = None
     plan_name: str = "plan.json"  # Name of the testplan file.
     options: Dict[str, str] = field(default_factory=dict)
 
@@ -39,14 +38,28 @@ def read_config(config_in: IO) -> DodonaConfig:
     with utils.smart_close(config_in) as input_:
         config_json = input_.read()
     config_ = json.loads(config_json)
-    required = [x.name for x in dataclasses.fields(DodonaConfig)]
-    needed_config = {x: config_[x] for x in required if x in config_}
-    dodona = DodonaConfig(**needed_config)
+
+    # The configuration we receive from Dodona can contain additional fields that
+    # we don't use. To prevent errors, only take the fields we use. Additionally,
+    # convert some fields to Paths, since we like typed attributes in TESTed.
+    required = dict()
+    for field_ in dataclasses.fields(DodonaConfig):
+        if field_.name not in config_:
+            continue
+
+        # Special support for Paths
+        if field_.type == Path:
+            required[field_.name] = Path(config_[field_.name])
+        else:
+            # Just take in the value.
+            required[field_.name] = config_[field_.name]
+
+    dodona = DodonaConfig(**required)
     judge_dir = dodona.judge
     return dataclasses.replace(dodona, judge=judge_dir / 'judge' / 'src')
 
 
-@dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True)
 class Bundle:
     """A bundle of arguments and configs for running everything."""
     config: DodonaConfig
