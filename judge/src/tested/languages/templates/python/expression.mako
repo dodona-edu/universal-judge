@@ -4,7 +4,7 @@
 <%page args="expression" />
 % if isinstance(expression, Identifier):
     ## If the expression is an identifier, just echo it.
-    ${expression}
+    ${expression}\
 % elif isinstance(expression, FunctionCall):
     ## Delegate to the function template for function calls.
     <%include file="function.mako" args="function=expression"/>
