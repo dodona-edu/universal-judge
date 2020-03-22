@@ -52,7 +52,7 @@ def run_pylint(bundle: Bundle, path: Path, submission: Path) \
         shutil.copy2(source, pylint_config)
     else:
         # Use the default file.
-        source = f"{config.judge}/judge/languages/languages/pylint_config.rc"
+        source = f"{config.judge}/tested/languages/configs/pylint_config.rc"
         shutil.copy2(source, pylint_config)
 
     pylint_out = StringIO()

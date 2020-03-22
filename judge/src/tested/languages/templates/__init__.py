@@ -1,15 +1,14 @@
 import dataclasses
 import logging
-from functools import lru_cache
 from pathlib import Path
-from typing import List, Any
+from typing import List, Any, Dict
 
 from mako import exceptions
 from mako.exceptions import TemplateLookupException
 from mako.lookup import TemplateLookup
 from mako.template import Template
 
-from ..templates._preprocessors import remove_indents, remove_newline
+from ..templates.preprocessors import remove_indents, remove_newline
 from ...configs import Bundle
 
 _logger = logging.getLogger(__name__)
@@ -23,8 +22,12 @@ def _write_template(arguments, template: Template, path: Path):
     :param template: The template to write.
     :param path: Where to write the template to.
     """
+    # We cannot use dataclasses.asdict, since that will recurse, which
+    # won't work properly for functions and attributes.
+    fields = dataclasses.fields(arguments)
+    values = {field.name: getattr(arguments, field.name) for field in fields}
     try:
-        result = template.render(**dataclasses.asdict(arguments))
+        result = template.render(**values)
     except Exception as e:
         _logger.error(exceptions.text_error_template().render())
         raise e
@@ -45,17 +48,26 @@ def path_to_templates(bundle: Bundle) -> List[Path]:
     language = bundle.config.programming_language
     result = []
     for end in bundle.language_config.template_folders(language):
-        result.append(judge_root / 'judge' / 'configs' / 'templates' / end)
+        result.append(judge_root / 'tested' / 'languages' / 'templates' / end)
     assert result, "At least one template folder is required."
     return result
 
 
-@lru_cache
-def get_environment(bundle: Bundle) -> TemplateLookup:
+_env_cache: Dict[str, TemplateLookup] = {}
+
+
+def _get_environment(bundle: Bundle) -> TemplateLookup:
     """Get the templating environment for a given configuration bundle."""
-    processors = [remove_indents, remove_newline]
-    paths = [str(x) for x in path_to_templates(bundle)]
-    return TemplateLookup(directories=paths, preprocessor=processors)
+    if bundle.config.programming_language not in _env_cache:
+        _logger.debug("CACHE MISS: template environment will built.")
+        processors = [remove_indents, remove_newline]
+        paths = [str(x) for x in path_to_templates(bundle)]
+        template = TemplateLookup(directories=paths, preprocessor=processors)
+        _env_cache[bundle.config.programming_language] = template
+    else:
+        _logger.debug("CACHE HIT: existing template environment will be used.")
+
+    return _env_cache[bundle.config.programming_language]
 
 
 def find_and_write_template(bundle: Bundle,
@@ -101,7 +113,7 @@ def find_template(bundle: Bundle, template_name: str) -> Template:
     for extension in bundle.language_config.template_extensions():
         try:
             file_name = f"{template_name}.{extension}"
-            return get_environment(bundle).get_template(file_name)
+            return _get_environment(bundle).get_template(file_name)
         except TemplateLookupException as e:
             error = e
     raise LookupError(f"Could not find template with name {template_name}", error)

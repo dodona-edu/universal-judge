@@ -1,5 +1,5 @@
 ## Code to execute_module one test context.
-<%! from testplan import Assignment %>
+<%! from tested.serialisation import Assignment %>
 import values
 import sys
 
@@ -27,24 +27,24 @@ def send_exception(exception):
     values.send_exception(exception_file, exception)
 
 def e_evaluate_main(value):
-    <%include file="expression.mako" args="function=main_testcase.exception_function"/>
+    <%include file="expression.mako" args="expression=context_testcase.exception_function"/>
 
-% for additional in additional_testcases:
+% for additional in testcases:
     % if additional.has_return:
         def v_evaluate_${loop.index}(value):
-            <%include file="expression.mako" args="function=additional.value_function"/>
+            <%include file="expression.mako" args="expression=additional.value_function"/>
     % endif
 
     def e_evaluate_${loop.index}(value):
-        <%include file="expression.mako" args="function=additional.exception_function"/>
+        <%include file="expression.mako" args="expression=additional.exception_function"/>
 % endfor
 
 
 ## Prepare arguments for context_testcase testcase if needed.
-% if main_testcase.exists and main_testcase.arguments:
+% if context_testcase.exists and context_testcase.arguments:
     sys.argv.extend([\
-        % for argument in main_testcase.arguments:
-            <%include file="value.mako" args="value=argument"/>\
+        % for argument in context_testcase.arguments:
+            "${argument}", \
         % endfor
     ])
 % endif
@@ -59,21 +59,18 @@ def e_evaluate_main(value):
 try:
     from ${submission_name} import *
 except Exception as e:
-    % if main_testcase.exists:
+    % if context_testcase.exists:
         e_evaluate_main(e)
     % else:
         raise e
     % endif
 
-
-% if main_testcase.exists:
-    sys.stderr.write("--${secret_id}-- SEP")
-    sys.stdout.write("--${secret_id}-- SEP")
-    write_delimiter("--${secret_id}-- SEP")
-% endif
+sys.stderr.write("--${secret_id}-- SEP")
+sys.stdout.write("--${secret_id}-- SEP")
+write_delimiter("--${secret_id}-- SEP")
 
 ## Generate the actual tests based on the context.
-% for additional in additional_testcases:
+% for additional in testcases:
     try:
         % if isinstance(additional.statement, Assignment):
             <%include file="statement.mako" args="assignment=additional.statement" />\

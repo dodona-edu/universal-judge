@@ -21,10 +21,10 @@ def read_config() -> DodonaConfig:
         "time_limit": 10000000,
         "programming_language": 'python',
         "natural_language": 'nl',
-        "resources": str(Path('../exercise/big-echo/evaluation').resolve()),
-        "source": f'../exercise/big-echo/solutions/correct.py',
-        "judge": str(Path('../').resolve()),
-        "workdir": str(Path('./workdir').resolve()),
+        "resources": Path('../exercise/big-echo/evaluation').resolve(),
+        "source": Path('../exercise/big-echo/solutions/test.py').resolve(),
+        "judge": Path('../judge/src/').resolve(),
+        "workdir": Path('./workdir').resolve(),
         "plan_name": "plan.json",
     })
 

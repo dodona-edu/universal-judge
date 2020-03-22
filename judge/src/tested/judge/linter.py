@@ -35,7 +35,7 @@ def run_linter(bundle: Bundle):
     _logger.debug("Copying %s to linter dir", bundle.config.source)
 
     messages, annotations = \
-        bundle.language_config.run_linter(bundle.config, directory, source_path)
+        bundle.language_config.run_linter(bundle, directory, source_path)
 
     for message in messages:
         report_update(bundle.out, AppendMessage(message=message))

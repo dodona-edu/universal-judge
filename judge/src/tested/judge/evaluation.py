@@ -12,7 +12,7 @@ from ..evaluators import Evaluator, get_evaluator
 from ..languages.generator import get_readable_input
 from ..languages.paths import value_file, exception_file
 from ..testplan import Context, ExecutionMode, OutputChannel, EmptyChannel, \
-    IgnoredChannel, ExitCodeOutputChannel, Testcase
+    IgnoredChannel, ExitCodeOutputChannel, Testcase, ContextTestcase
 
 _logger = logging.getLogger(__name__)
 
@@ -21,7 +21,7 @@ def _evaluate_channel(
         out: IO,
         channel_name: str,
         expected_output: OutputChannel,
-        actual_result: Union[str, int, None],
+        actual_result: str,
         evaluator: Evaluator) -> bool:
     """
     Evaluate the output on a given channel. This function will output the
@@ -34,10 +34,9 @@ def _evaluate_channel(
 
     :param out: The output file for the judge.
     :param channel_name: The name of the channel being evaluated. Will be
-    displayed in Dodona.
+                         displayed in Dodona.
     :param expected_output: The output channel from the test case.
-    :param actual_result: The actual output. Can be None, depending on the
-    evaluator.
+    :param actual_result: The actual output.
     :param evaluator: The evaluator to use.
     :return: True if successful, otherwise False.
     """
@@ -74,44 +73,112 @@ def _evaluate_channel(
 
 def evaluate_results(bundle: Bundle,
                      context: Context,
-                     exec_results: ExecutionResult,
+                     exec_results: Optional[ExecutionResult],
                      compiler_results: Tuple[List[Message], Status],
                      context_dir: Path):
-    # Process output
-    stdout_ = exec_results.stdout.split(exec_results.separator) \
-        if exec_results is not None else []
-    stderr_ = exec_results.stderr.split(exec_results.separator) \
-        if exec_results is not None else []
-    values = exec_results.results.split(exec_results.separator) \
-        if exec_results is not None else []
-    exceptions = exec_results.exceptions.split(exec_results.separator) \
-        if exec_results is not None else []
 
-    # There might be less output than testcase, which is an error. However,
-    # we process the
-    # output we have, to ensure we send as much feedback as possible to the
-    # user.
-    testcase: Testcase  # Type hint for pycharm.
-    # TODO: handle context testcase
+    # Begin by processing the context testcase.
+    # Even if there is no main testcase, we can still proceed, since the defaults
+    # should take care of this.
+    testcase: ContextTestcase = context.context_testcase
+    readable_input = get_readable_input(bundle, testcase)
+    report_update(bundle.out, StartTestcase(description=readable_input))
+
+    # Handle the compiler output. If there is compiler output, there is no point in
+    # checking additional testcases, so stop early.
+    # Handle compiler results
+    if compiler_results[1] != Status.CORRECT:
+        # Report all compiler messages.
+        for message in compiler_results[0]:
+            report_update(bundle.out, AppendMessage(message=message))
+        # Escalate the compiler status to every testcase.
+        report_update(bundle.out, EscalateStatus(
+            status=StatusMessage(enum=compiler_results[1])))
+
+        # Finish evaluation, since there is nothing we can do.
+        report_update(bundle.out, CloseTestcase(accepted=False))
+        return
+
+    # There must be execution if compilation succeeded.
+    assert exec_results is not None
+
+    # Split the basic output channels.
+    # These channels should have one additional entry for the context testcase.
+    stdout_ = exec_results.stdout.split(exec_results.separator)
+    stderr_ = exec_results.stderr.split(exec_results.separator)
+    exceptions = exec_results.exceptions.split(exec_results.separator)
+    values = exec_results.results.split(exec_results.separator)
+
+    # Proceed with evaluating the context testcase.
+    # Get the evaluators. These take care of everything if there is no testcase.
+    output = testcase.output
+    stdout_evaluator = get_evaluator(bundle, context_dir, output.stdout)
+    stderr_evaluator = get_evaluator(bundle, context_dir, output.stderr)
+    file_evaluator = get_evaluator(bundle, context_dir, output.file)
+    exception_evaluator = get_evaluator(bundle, context_dir, output.exception)
+
+    # Collect some information for exit codes, which we evaluate as last.
+    exit_output = output.exit_code
+    exit_evaluator = get_evaluator(bundle, context_dir, exit_output)
+
+    # Get the values produced by the execution. If there are no values, we use an
+    # empty string at this time. We handle missing output later.
+    # We use pop here, since we want to remove the values. That way, all result
+    # arrays start at 0 for the normal testcases.
+    actual_stderr = stderr_.pop(0) if stderr_ else ""
+    actual_exception = exceptions.pop(0) if exceptions else ""
+    actual_stdout = stdout_.pop(0) if stdout_ else ""
+    # This is not actually evaluated, but for implementation reasons, the languages
+    # still write a delimiter to it.
+    _ = values.pop(0) if values else ""
+
+    # Actual do the evaluation.
+    results = [
+        _evaluate_channel(
+            bundle.out, "file", testcase.output.file, "", file_evaluator
+        ),
+        _evaluate_channel(
+            bundle.out, "stderr", testcase.output.stderr, actual_stderr,
+            stderr_evaluator
+        ),
+        _evaluate_channel(
+            bundle.out, "exception", testcase.output.exception, actual_exception,
+            exception_evaluator
+        ),
+        _evaluate_channel(
+            bundle.out, "stdout", testcase.output.stdout, actual_stdout,
+            stdout_evaluator
+        )
+    ]
+
+    # Check for missing values and stop if necessary.
+    if not stdout_ or not stderr_ or not exceptions or not values:
+        report_update(bundle.out, AppendMessage(
+            "Ontbrekende uitvoerresultaten in Dodona. Er ging iets verkeerd!"
+        ))
+        results.append(False)  # Ensure we stop.
+
+    must_stop = False
+    if not all(results):
+        # As last item, we evaluate the exit code of the context.
+        _evaluate_channel(bundle.out, "exitcode", exit_output,
+                          str(exec_results.exit), exit_evaluator)
+        must_stop = True
+
+    # Done with the context testcase.
+    report_update(bundle.out, CloseTestcase())
+
+    # Decide if we want to proceed.
+    if must_stop:
+        return  # Stop now.
+
+    # Begin processing the normal testcases.
     for i, testcase in enumerate(context.testcases):
+        # Type hint for PyCharm.
+        testcase: Testcase
 
-        name = bundle.language_config.submission_name(bundle.plan)
         readable_input = get_readable_input(bundle, testcase)
         report_update(bundle.out, StartTestcase(description=readable_input))
-
-        # Handle compiler results
-        if compiler_results[1] != Status.CORRECT:
-            for message in compiler_results[0]:
-                report_update(bundle.out, AppendMessage(message=message))
-            report_update(bundle.out, EscalateStatus(
-                status=StatusMessage(enum=compiler_results[1])))
-            report_update(bundle.out, CloseTestcase(accepted=False))
-            break
-        else:
-            assert exec_results is not None
-
-        results = []
-        # We don't stop if the exit code, to show the other issues.
 
         # Get the evaluators
         output = testcase.output
@@ -121,50 +188,58 @@ def evaluate_results(bundle: Bundle,
         value_evaluator = get_evaluator(bundle, context_dir, output.result)
         exception_evaluator = get_evaluator(bundle, context_dir, output.exception)
 
-        # Evaluate the file channel.
-        results.append(_evaluate_channel(
-            bundle.out, "file", testcase.output.file, None, file_evaluator
-        ))
+        # Get the values produced by the execution. If there are no values, we use
+        # an empty string at this time. We handle missing output later.
+        actual_stderr = stderr_[i] if i < len(stderr_) else ""
+        actual_exception = exceptions[i] if i < len(exceptions) else ""
+        actual_stdout = stdout_[i] if i < len(stdout_) else ""
+        actual_value = values[i] if i < len(values) else ""
 
-        # Evaluate the stderr channel
-        actual_stderr = stderr_[i] if i < len(stderr_) else None
-        results.append(_evaluate_channel(
-            bundle.out, "stderr", testcase.output.stderr, actual_stderr,
-            stderr_evaluator
-        ))
+        results = [
+            _evaluate_channel(
+                bundle.out, "file", testcase.output.file, "", file_evaluator
+            ),
+            _evaluate_channel(
+                bundle.out, "stderr", testcase.output.stderr, actual_stderr,
+                stderr_evaluator
+            ),
+            _evaluate_channel(
+                bundle.out, "exception", testcase.output.exception,
+                actual_exception, exception_evaluator
+            ),
+            _evaluate_channel(
+                bundle.out, "stdout", testcase.output.stdout, actual_stdout,
+                stdout_evaluator
+            ),
+            _evaluate_channel(
+                bundle.out, "return", testcase.output.result, actual_value,
+                value_evaluator
+            )
+        ]
 
-        actual_exception = exceptions[i] if i < len(exceptions) else None
-        results.append(_evaluate_channel(
-            bundle.out, "exception", testcase.output.exception, actual_exception,
-            exception_evaluator
-        ))
+        # Check for missing values and stop if necessary.
+        if (i >= len(stdout_)
+                or i >= len(stderr_)
+                or i >= len(values)
+                or i >= len(exceptions)):
+            report_update(bundle.out, AppendMessage(
+                "Ontbrekende uitvoerresultaten in Dodona. Er ging iets verkeerd!"
+            ))
+            super_stop = True
+        else:
+            super_stop = False
 
-        actual_stdout = stdout_[i] if i < len(stdout_) else None
-        results.append(_evaluate_channel(
-            bundle.out, "stdout", testcase.output.stdout, actual_stdout,
-            stdout_evaluator
-        ))
-
-        actual_value = values[i] if i < len(values) else None
-        results.append(
-            _evaluate_channel(bundle.out, "return", testcase.output.result,
-                              actual_value, value_evaluator)
-        )
-
-        # Check if there is early termination.
-        if i >= len(stdout_) \
-                or i >= len(stderr_) \
-                or i >= len(values) \
-                or i >= len(exceptions):
-            report_update(bundle.out, AppendMessage(message=ExtendedMessage(
-                description="Tests were terminated early.", format='text'
-            )))
+        # Decide if we want to proceed.
+        if (testcase.essential and not all(results)) or super_stop:
+            # As last item, we evaluate the exit code of the context.
+            _evaluate_channel(bundle.out, "exitcode", exit_output,
+                              str(exec_results.exit), exit_evaluator)
+            must_stop = True
 
         report_update(bundle.out, CloseTestcase())
 
-        # If this was an essential testcase with an error, stop testing now.
-        if testcase.essential and not all(results):
-            break
+        if must_stop:
+            return  # Stop evaluation now.
 
 
 def execute_context(bundle: Bundle, args: ContextExecution) \

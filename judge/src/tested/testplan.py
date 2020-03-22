@@ -279,7 +279,6 @@ class BaseOutput(WithFeatures):
     stdout: _TextOutput = EmptyChannel.NONE
     stderr: _TextOutput = EmptyChannel.NONE
     file: _FileOutput = IgnoredChannel.IGNORED
-
     exception: _ExceptionOutput = EmptyChannel.NONE
 
     def get_used_features(self) -> FeatureSet:
@@ -366,6 +365,7 @@ class ContextTestcase(WithFeatures):
     """
     input: ContextInput = ContextInput()
     output: ContextOutput = ContextOutput()
+    description: Optional[str] = None
 
     def get_used_features(self) -> FeatureSet:
         return combine_features([

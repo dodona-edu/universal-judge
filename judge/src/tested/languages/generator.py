@@ -268,7 +268,10 @@ def get_readable_input(bundle: Bundle,
             stdin = case.input.stdin.get_data_as_string(bundle.config.resources)
         else:
             stdin = ""
-        text = f"{args}\n{stdin}"
+        if case.input.arguments:
+            text = f"{args}\n{stdin}"
+        else:
+            text = stdin
     else:
         raise AssertionError("Unknown testcase type.")
     return ExtendedMessage(description=text, format=format_)

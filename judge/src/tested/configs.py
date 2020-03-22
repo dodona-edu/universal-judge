@@ -41,7 +41,9 @@ def read_config(config_in: IO) -> DodonaConfig:
     config_ = json.loads(config_json)
     required = [x.name for x in dataclasses.fields(DodonaConfig)]
     needed_config = {x: config_[x] for x in required if x in config_}
-    return DodonaConfig(**needed_config)
+    dodona = DodonaConfig(**needed_config)
+    judge_dir = dodona.judge
+    return dataclasses.replace(dodona, judge=judge_dir / 'judge' / 'src')
 
 
 @dataclass(frozen=True)
