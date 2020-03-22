@@ -34,10 +34,12 @@ In \cref{fig:tested-flow} zijn deze stappen gegeven als een flowchart, en een ui
     Merk op dat de ingediende oplossing zelf hierbij niet nodig is: deze controle zou idealiter gebeuren bij het importeren van de oefening in Dodona, zodat Dodona weet in welke programmeertalen een bepaalde oefening aangeboden kan worden (zie \cref{ch:beperkingen-en-toekomstig-werk}).
     Als het testplan bijvoorbeeld programmeertaalspecifieke code bevat die enkel in Java geschreven is, zal een oplossing in Python niet beoordeeld kunnen worden.
     Bevat het testplan bijvoorbeeld een functie die een verzameling moet teruggeven, dan zullen talen als Bash niet in aanmerking komen.
-    \item De testcode wordt gegenereerd voor elke context uit het testplan, wat resulteert in de testcode voor elke context.
+    \item Het testplan (details in \cref{subsec:het-testplan}) bestaat uit verschillende contexten.
+    Elke context is een onafhankelijke uitvoering van de ingediende oplossing en kan verschillende aspecten van die uitvoering beoordelen.
+    Voor elk van die contexten wordt in deze stap de testcode gegenereerd.
     Deze stap is de overgang naar de \term{uitvoeringsomgeving}.
-    \item De code wordt optioneel gecompileerd.
-    Dit kan op twee manieren gebeuren (meer details in \cref{subsec:testcode-genereren}):
+    \item De testcode wordt optioneel gecompileerd.
+    Dit kan op twee manieren gebeuren (details in \cref{subsec:testcode-genereren}):
     \begin{enumerate}
         \item Batchcompilatie: hierbij wordt de testcode van alle contexten verzameld en gecompileerd tot één uitvoerbaar bestand (executable).
         Dit heeft als voordeel dat er slechts een keer een compilatie nodig is, wat voor een betere performantie zorgt.
@@ -47,7 +49,7 @@ In \cref{fig:tested-flow} zijn deze stappen gegeven als een flowchart, en een ui
     \end{enumerate}
     In talen die geen compilatie nodig hebben of ondersteunen, wordt deze stap overgeslagen.
     \item Nu kan het uitvoeren van de beoordeling zelf beginnen: de gegenereerde code wordt uitgevoerd (nog steeds in de uitvoeringsomgeving).
-    Elke context uit he testplan wordt in een afzonderlijk subproces uitgevoerd, teneinde het delen van informatie tegen te gaan.
+    Elke context uit het testplan wordt in een afzonderlijk subproces uitgevoerd, teneinde het delen van informatie tegen te gaan.
     De onafhankelijkheid van de contexten laat ons ook toe om contexten in parallel uit te voeren.
     \item De uitvoering van de executable in de vorige stap produceert resultaten (voor elke context), zoals de standaarduitvoerstroom, de standaardfoutstroom, returnwaardes, exceptions of exitcodes.
     Deze bundel resultaten wordt nu geëvalueerd op juistheid.
@@ -919,7 +921,7 @@ Voordelen ten opzichte van de Jupyter-kernels zijn:
 
 Elke medaille heeft een ook keerzijde:
 \begin{itemize}
-    \item Het gebruik van sjablonen zorgt ervoor dat het uitvoeren van de testcode minder dynamische kan zijn.
+    \item Het gebruik van sjablonen zorgt ervoor dat het uitvoeren van de testcode minder dynamisch kan zijn.
     Daar de testcode eerst gegenereerd moet worden, moet vóór het uitvoeren bepaald worden welke testcode zal uitgevoerd worden.
     \item Er moet meer zelf geïmplementeerd worden: het ecosysteem van Jupyter is redelijk groot, en er bestaan kernels voor veel talen (of in elk geval een begin van een kernel, waarop verder zou kunnen gewerkt worden)\footnote{Zie deze pagina voor een lijst van kernels: \url{https://github.com/jupyter/jupyter/wiki/Jupyter-kernels}.}.
     \item Het uitvoeren op de commandoregel is bij veel programmeertalen trager indien er geen reset moet gebeuren tussen de verschillende uitvoeringen.
