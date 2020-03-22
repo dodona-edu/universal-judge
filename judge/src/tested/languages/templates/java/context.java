@@ -91,11 +91,11 @@ public class ${context_name} {
         % endif
 
         % for additional in additional_testcases:
-            % if isinstance(additional.statement, Assignment):
-                <%include file="declaration.mako" args="value=additional.statement.get_type()" /> ${additional.statement.name} = null;
+            % if isinstance(additional.command, Assignment):
+                <%include file="declaration.mako" args="value=additional.statement.get_type()" /> ${additional.command.name} = null;
             % endif
             try {
-                % if isinstance(additional.statement, Assignment):
+                % if isinstance(additional.command, Assignment):
                     <%include file="assignment.mako" args="assignment=additional.statement" />
                 % else:
                     % if additional.has_return:

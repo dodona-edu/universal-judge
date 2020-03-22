@@ -29,7 +29,9 @@ from pydantic.dataclasses import dataclass
 
 from .datatypes import (NumericTypes, StringTypes, BooleanTypes,
                         SequenceTypes, ObjectTypes, NothingTypes, SimpleTypes,
-                        resolve_to_basic, AllTypes)
+                        resolve_to_basic, AllTypes, BasicSequenceTypes,
+                        BasicObjectTypes, BasicNumericTypes, BasicBooleanTypes,
+                        BasicStringTypes, BasicNothingTypes)
 from .features import FeatureSet, Constructs, combine_features, WithFeatures
 
 logger = logging.getLogger(__name__)
@@ -105,6 +107,19 @@ class Identifier(str, WithFeatures):
     def get_used_features(self) -> FeatureSet:
         return FeatureSet(Constructs.NOTHING, set())
 
+    @classmethod
+    def __get_validators__(cls):
+        # one or more validators may be yielded which will be called in the
+        # order to validate the input, each validator will receive as an input
+        # the value returned from the previous validator
+        yield cls.validate
+
+    @classmethod
+    def validate(cls, v):
+        if not isinstance(v, str):
+            raise TypeError('string required')
+        return Identifier(v)
+
 
 class FunctionType(str, Enum):
     FUNCTION = "function"
@@ -175,7 +190,7 @@ class VariableType:
     type: Literal['custom'] = 'custom'
 
 
-Expression = Union[FunctionCall, Identifier, Value]
+Expression = Union[Identifier, FunctionCall, Value]
 
 
 @dataclass
@@ -351,18 +366,18 @@ def to_python_comparable(value: Optional[Value]):
     basic_type = resolve_to_basic(value.type)
     if value is None:
         return None
-    if basic_type == SequenceTypes.SEQUENCE:
+    if basic_type == BasicSequenceTypes.SEQUENCE:
         return [to_python_comparable(x) for x in value.data]
-    if basic_type == SequenceTypes.SET:
+    if basic_type == BasicSequenceTypes.SET:
         return {to_python_comparable(x) for x in value.data}
-    if basic_type == ObjectTypes.MAP:
+    if basic_type == BasicObjectTypes.MAP:
         return {key: to_python_comparable(val) for key, val in value.data.items()}
-    if basic_type == NumericTypes.RATIONAL:
+    if basic_type == BasicNumericTypes.RATIONAL:
         return ComparableFloat(float(value.data))
-    if basic_type == NumericTypes.INTEGER:
+    if basic_type == BasicNumericTypes.INTEGER:
         return value.data
-    if basic_type in (BooleanTypes.BOOLEAN, StringTypes.TEXT, NothingTypes.NOTHING,
-                      StringTypes.UNKNOWN):
+    if basic_type in (BasicBooleanTypes.BOOLEAN, BasicStringTypes.TEXT,
+                      BasicNothingTypes.NOTHING, BasicStringTypes.ANY):
         return value.data
 
     raise AssertionError(f"Unknown value type: {value}")

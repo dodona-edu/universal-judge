@@ -9,11 +9,11 @@
     ${str(value.data)}\
 % elif value.type == BasicNothingTypes.NOTHING:
     None\
-% elif value.type == SequenceTypes.SEQUENCE:
+% elif value.type == BasicSequenceTypes.SEQUENCE:
     [<%include file="value_arguments.mako" args="arguments=value.data" />]\
-% elif value.type == SequenceTypes.SET:
+% elif value.type == BasicSequenceTypes.SET:
     {<%include file="value_arguments.mako" args="arguments=value.data" />}\
-% elif value.type == ObjectTypes.MAP:
+% elif value.type == BasicObjectTypes.MAP:
     {\
     % for key, item in value.data.items():
         "${key}": <%include file="expression.mako" args="value=item" />\

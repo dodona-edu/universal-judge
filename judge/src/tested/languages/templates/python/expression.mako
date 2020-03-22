@@ -11,5 +11,5 @@
 % else:
     <% assert isinstance(expression, get_args(Value))%>
     ## We have a value, delegate to the value template.
-    <%include file="value.mako", args="value=argument" />
+    <%include file="value.mako", args="value=expression" />
 % endif

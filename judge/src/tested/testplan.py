@@ -259,7 +259,7 @@ class ExpressionInput(WithFeatures):
 
 @dataclass
 class StatementInput(WithFeatures):
-    """Input for a statement."""
+    """Input for a command."""
     statement: Statement
 
     def get_used_features(self) -> FeatureSet:

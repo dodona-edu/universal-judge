@@ -156,9 +156,7 @@ def generate_are_isbn():
                 "statement": {
                     "name": f"codes{index:02d}",
                     "expression": values.encode(codes),
-                    "type": {
-                        "type": "list"
-                    }
+                    "type": "sequence"
                 }
             }
         }

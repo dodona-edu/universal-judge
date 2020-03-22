@@ -1,5 +1,6 @@
 ## Code to execute_module one test context.
-<%! from tested.serialisation import Assignment %>
+<%! from tested.serialisation import Statement, Expression %>
+<%! from typing import get_args %>
 import values
 import sys
 
@@ -72,13 +73,14 @@ write_delimiter("--${secret_id}-- SEP")
 ## Generate the actual tests based on the context.
 % for additional in testcases:
     try:
-        % if isinstance(additional.statement, Assignment):
-            <%include file="statement.mako" args="assignment=additional.statement" />\
+        % if isinstance(additional.command, Statement):
+            <%include file="statement.mako" args="statement=additional.command" />\
         % else:
+            <% assert isinstance(additional.command, get_args(Expression)) %>
             % if additional.has_return:
                 v_evaluate_${loop.index}(\
             % endif
-            <%include file="expression.mako" args="function=additional.statement" />\
+            <%include file="expression.mako" args="expression=additional.command" />\
             % if additional.has_return:
                 )\
             % endif

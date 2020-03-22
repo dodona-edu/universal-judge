@@ -9,6 +9,6 @@
     Decimal("${value.data}")\
 % else:
     ## Handle the base types
-    <%! basic = as_basic_type(value.type) %>
+    <% basic = as_basic_type(value) %>
     <%include file="value_basic.mako" args="value=basic" />
 % endif

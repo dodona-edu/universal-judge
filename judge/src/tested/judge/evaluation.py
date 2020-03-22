@@ -18,7 +18,7 @@ _logger = logging.getLogger(__name__)
 
 
 def _evaluate_channel(
-        out: IO,
+        out: Union[UpdateCollector, IO],
         channel_name: str,
         expected_output: OutputChannel,
         actual_result: str,
@@ -43,6 +43,11 @@ def _evaluate_channel(
     evaluation_result = evaluator(expected_output, actual_result)
     status = evaluation_result.result
 
+    test_collector = UpdateCollector(StartTest(
+        expected=evaluation_result.readable_expected,
+        channel=channel_name
+    ))
+
     # If the actual value is empty and the channel output is None or ignored,
     # don't report it.
     is_correct = status.enum == Status.CORRECT
@@ -53,17 +58,17 @@ def _evaluate_channel(
     if is_correct and ((has_no_result and has_no_expected) or is_exit_code):
         return True
 
-    report_update(out, StartTest(
+    report_or_collect(out, StartTest(
         expected=evaluation_result.readable_expected,
         channel=channel_name
     ))
 
     # Report any messages we received.
     for message in evaluation_result.messages:
-        report_update(out, AppendMessage(message=message))
+        report_or_collect(out, AppendMessage(message=message))
 
     # Close the test.
-    report_update(out, CloseTest(
+    report_or_collect(out, CloseTest(
         generated=evaluation_result.readable_actual,
         status=status
     ))
@@ -82,7 +87,8 @@ def evaluate_results(bundle: Bundle,
     # should take care of this.
     testcase: ContextTestcase = context.context_testcase
     readable_input = get_readable_input(bundle, testcase)
-    report_update(bundle.out, StartTestcase(description=readable_input))
+
+    context_collector = UpdateCollector(StartTestcase(description=readable_input))
 
     # Handle the compiler output. If there is compiler output, there is no point in
     # checking additional testcases, so stop early.
@@ -90,13 +96,14 @@ def evaluate_results(bundle: Bundle,
     if compiler_results[1] != Status.CORRECT:
         # Report all compiler messages.
         for message in compiler_results[0]:
-            report_update(bundle.out, AppendMessage(message=message))
+            context_collector.collect(AppendMessage(message=message))
         # Escalate the compiler status to every testcase.
-        report_update(bundle.out, EscalateStatus(
-            status=StatusMessage(enum=compiler_results[1])))
+        context_collector.collect(EscalateStatus(status=StatusMessage(
+            enum=compiler_results[1]
+        )))
 
         # Finish evaluation, since there is nothing we can do.
-        report_update(bundle.out, CloseTestcase(accepted=False))
+        context_collector.end(bundle.out, CloseTestcase(accepted=False))
         return
 
     # There must be execution if compilation succeeded.
@@ -135,25 +142,25 @@ def evaluate_results(bundle: Bundle,
     # Actual do the evaluation.
     results = [
         _evaluate_channel(
-            bundle.out, "file", testcase.output.file, "", file_evaluator
+            context_collector, "file", testcase.output.file, "", file_evaluator
         ),
         _evaluate_channel(
-            bundle.out, "stderr", testcase.output.stderr, actual_stderr,
+            context_collector, "stderr", testcase.output.stderr, actual_stderr,
             stderr_evaluator
         ),
         _evaluate_channel(
-            bundle.out, "exception", testcase.output.exception, actual_exception,
-            exception_evaluator
+            context_collector, "exception", testcase.output.exception,
+            actual_exception, exception_evaluator
         ),
         _evaluate_channel(
-            bundle.out, "stdout", testcase.output.stdout, actual_stdout,
+            context_collector, "stdout", testcase.output.stdout, actual_stdout,
             stdout_evaluator
         )
     ]
 
     # Check for missing values and stop if necessary.
     if not stdout_ or not stderr_ or not exceptions or not values:
-        report_update(bundle.out, AppendMessage(
+        context_collector.collect(AppendMessage(
             "Ontbrekende uitvoerresultaten in Dodona. Er ging iets verkeerd!"
         ))
         results.append(False)  # Ensure we stop.
@@ -161,12 +168,12 @@ def evaluate_results(bundle: Bundle,
     must_stop = False
     if not all(results):
         # As last item, we evaluate the exit code of the context.
-        _evaluate_channel(bundle.out, "exitcode", exit_output,
+        _evaluate_channel(context_collector, "exitcode", exit_output,
                           str(exec_results.exit), exit_evaluator)
         must_stop = True
 
     # Done with the context testcase.
-    report_update(bundle.out, CloseTestcase())
+    context_collector.end(bundle.out, CloseTestcase())
 
     # Decide if we want to proceed.
     if must_stop:

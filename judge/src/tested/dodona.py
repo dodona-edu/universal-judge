@@ -205,6 +205,43 @@ class _EnhancedJSONEncoder(json.JSONEncoder):
         return super().default(o)
 
 
+class UpdateCollector:
+    """
+    A class to collect updates but not print them.
+    """
+
+    def __init__(self, start: Update):
+        if not start.command.startswith("start"):
+            raise ValueError("The collector can only be used with start commands.")
+        self.start = start
+        self.content = []
+
+    def collect(self, update: Update):
+        self.content.append(update)
+
+    def end(self, to: IO, end: Update):
+        if not end.command.startswith("close"):
+            raise ValueError(f"The collector can only be used with close commands, "
+                             f"got {end.command}")
+        _, start_type = self.start.command.split("-")
+        _, end_type = end.command.split("-")
+        if start_type != end_type:
+            raise ValueError(f"The start and close types of the commands must "
+                             f"match, got {start_type} and {end_type}.")
+        if self.content:
+            report_update(to, self.start)
+            for content in self.content:
+                report_update(to, content)
+            report_update(to, end)
+
+
+def report_or_collect(to: Union[IO, UpdateCollector], update: Update):
+    if isinstance(to, UpdateCollector):
+        to.collect(update)
+    else:
+        report_update(to, update)
+
+
 def report_update(to: IO, update: Update):
     """
     Write the given update to the given output stream.

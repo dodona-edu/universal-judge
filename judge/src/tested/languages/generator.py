@@ -23,7 +23,7 @@ _logger = logging.getLogger(__name__)
 @dataclass
 class _TestcaseArguments:
     """Arguments for a testcases testcase template."""
-    statement: Statement
+    command: Union[Statement, Expression]
     has_return: bool
     value_function: FunctionCall
     exception_function: FunctionCall
@@ -177,14 +177,14 @@ def _base_prepare_testcase(
         names.append(exception_evaluator_name)
 
     if isinstance(testcase.input, ExpressionInput):
-        statement = _prepare_expression(bundle, testcase.input.expression)
+        command = _prepare_expression(bundle, testcase.input.expression)
     else:
         assert isinstance(testcase.input, StatementInput)
         prepared = _prepare_expression(bundle, testcase.input.statement.expression)
-        statement = testcase.input.statement.replace_expression(prepared)
+        command = testcase.input.statement.replace_expression(prepared)
 
     return _TestcaseArguments(
-        statement=statement,
+        command=command,
         has_return=result_channel != EmptyChannel.NONE,
         value_function=value_function_call,
         exception_function=exception_function_call
