@@ -133,8 +133,7 @@ def evaluate(config: EvaluatorConfig,
     try:
         evaluation_result = EvaluationResult.__pydantic_model__.parse_raw(actual)
     except (TypeError, ValueError) as e:
-        logger.warning("An error occurred while parsing as evaluation result.")
-        logger.warning(e)
+        pass
     else:
         return evaluation_result
 
@@ -160,10 +159,10 @@ def evaluate(config: EvaluatorConfig,
     messages = []
     type_status = None
 
-    expected = to_python_comparable(expected)
-    actual = to_python_comparable(actual)
+    py_expected = to_python_comparable(expected)
+    py_actual = to_python_comparable(actual)
 
-    content_check = expected == actual
+    content_check = py_expected == py_actual
 
     # Only add the message about the type if the content is the same.
     if content_check and not type_check:

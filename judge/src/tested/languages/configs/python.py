@@ -122,7 +122,7 @@ class Python(Language):
     def run_linter(self,
                    bundle: Bundle,
                    path: Path,
-                   submission: Union[Path, PathLike]) \
+                   submission: Path) \
             -> Tuple[List[Message], List[AnnotateCode]]:
         return python_linter.run_pylint(bundle, path, submission)
 

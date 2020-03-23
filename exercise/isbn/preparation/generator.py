@@ -242,7 +242,12 @@ if ONE_CONTEXT:
 # Terugvallen op individuele modus is niet nuttig in Python, dus laten we dat niet
 # toe. Indien het terugvallen niet nuttig is, is het sneller om het uit te zetten.
 plan["configuration"] = {
-    "allow_fallback": False
+    "allow_fallback": False,
+    "language": {
+        "python": {
+            "linter": True
+        }
+    }
 }
 
 # Schrijf het testplan.

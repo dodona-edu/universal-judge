@@ -97,16 +97,15 @@ def consume_shebang(submission: Path) -> Optional[str]:
         # Steps to find
         has_potential = True
         for line in lines:
-            if has_potential and not line.strip():
-                continue
-            if stripped := line.strip():
-                if has_potential and stripped.startswith("#!tested"):
-                    try:
-                        _, language = stripped.split(" ")
-                    except ValueError:
-                        logger.error(f"Invalid shebang on line {stripped}")
-                else:
-                    file.write(line)
+            stripped = line.strip()
+            if has_potential and stripped.startswith("#!tested"):
+                try:
+                    _, language = stripped.split(" ")
+                except ValueError:
+                    logger.error(f"Invalid shebang on line {stripped}")
+            else:
+                file.write(line)
+            if has_potential and stripped:
                 has_potential = False
         file.truncate()
 
@@ -167,3 +166,7 @@ def get_args(type_):
         return a
     else:
         return type_,
+
+
+if __name__ == '__main__':
+    consume_shebang(Path("./solution.py"))

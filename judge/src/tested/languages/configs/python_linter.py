@@ -45,19 +45,16 @@ def run_pylint(bundle: Bundle, path: Path, submission: Path) \
     annotations to tab.
     """
     config = bundle.config
-    pylint_config: Union[Path, PathLike] = path / 'pylint_config.rc'
-    if config.options.get("custom_pylint"):
-        # If a custom pylint configs exists, use it.
-        source = f"{config.resources}/{config.options['custom_pylint']}"
-        shutil.copy2(source, pylint_config)
+    language_options = bundle.plan.config_for(bundle.config.programming_language)
+    if language_options.get("pylint_config", None):
+        config_path = config.resources / language_options.get('pylint_config')
     else:
         # Use the default file.
-        source = f"{config.judge}/tested/languages/configs/pylint_config.rc"
-        shutil.copy2(source, pylint_config)
+        config_path = config.judge / "tested/languages/configs/pylint_config.rc"
 
     pylint_out = StringIO()
     try:
-        args = [f"--rcfile={pylint_config}", submission]
+        args = [f"--rcfile={config_path}", submission]
         logger.debug("Running with template_args %s", args)
         lint.Run(args, reporter=JSONReporter(output=pylint_out), do_exit=False)
     except Exception as e:

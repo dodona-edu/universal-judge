@@ -1,3 +1,4 @@
+import logging
 from argparse import ArgumentParser, FileType
 from .configs import read_config
 from .utils import smart_close
@@ -12,6 +13,10 @@ parser.add_argument('-o', '--output', type=FileType('w'),
                     help="Where the judge output should be written to.",
                     default="-")
 parser = parser.parse_args()
+
+# Disable logging
+log = logging.getLogger()
+log.setLevel(logging.CRITICAL)
 
 configuration = read_config(parser.testplan)
 with smart_close(parser.output) as out:

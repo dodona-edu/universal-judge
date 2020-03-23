@@ -25,7 +25,7 @@ def encode(value):
         type_ = "fixed_precision"
         data_ = str(value)
     elif isinstance(value, list):
-        type_ = "list"
+        type_ = "sequence"
         data_ = [encode(x) for x in value]
     elif isinstance(value, tuple):
         type_ = "tuple"
