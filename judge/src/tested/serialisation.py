@@ -91,7 +91,7 @@ class SequenceType(WithFeatures):
 
         if len(types) == 1:
             # noinspection PyTypeChecker
-            return next(types)
+            return next(iter(types))
         else:
             return BasicStringTypes.ANY
 

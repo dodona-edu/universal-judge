@@ -1,6 +1,7 @@
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.Random;
 class Main {
     /**
      * Checks whether the given ISBN-10 code is valid.
@@ -72,12 +73,17 @@ class Main {
         }
         return isIsbn(isbn, isIsbn13);
     }
-    public static List<Boolean> areIsbn(List<Object> codes, Boolean isbn13) {
-        return codes.stream()
-                .map(isbn -> isIsbnCheck(isbn, isbn13))
-                .collect(Collectors.toList());
+    public static Object areIsbn(List<Object> codes, Boolean isbn13) {
+        var stream = codes.stream()
+                .map(isbn -> isIsbnCheck(isbn, isbn13));
+        Random rand = new Random();
+        if (rand.nextBoolean()) {
+            return stream.toArray(Boolean[]::new);
+        } else {
+            return stream.collect(Collectors.toList());
+        }
     }
-    public static List<Boolean> areIsbn(List<Object> code) {
+    public static Object areIsbn(List<Object> code) {
         return areIsbn(code, null);
     }
     public static void main(String[] args) {

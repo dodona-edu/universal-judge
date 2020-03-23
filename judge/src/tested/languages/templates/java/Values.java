@@ -30,7 +30,7 @@ public class Values {
             data = value.toString();
         } else if (value.getClass().isArray()) {
             type = "array";
-            data = encodeSequence(Collections.singletonList(value));
+            data = encodeSequence(Arrays.asList((Object[]) value));
         } else if (value instanceof BigInteger) {
             type = "bigint";
             data = value.toString();
@@ -69,7 +69,6 @@ public class Values {
             data = encodeSequence((Iterable<Object>) value);
         } else if (value instanceof Map) {
             type = "object";
-            Map<String, String> map = new HashMap<>();
             var elements = new ArrayList<String>();
             for (Map.Entry<Object, Object> entry : ((Map<Object, Object>) value).entrySet()) {
                 elements.add("\"" + entry.getKey().toString() + "\": " + encode(entry.getValue()));

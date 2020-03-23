@@ -4,8 +4,7 @@
 <%page args="value" />
 ## First, add support for the advanced types in Java.
 % if value.type == AdvancedSequenceTypes.ARRAY:
-    <% type_ = value.get_content_type() %>
-    new ${type}[]{<%include file="value_arguments.mako" args="arguments=value.data"/>}
+    new <%include file="declaration.mako" args="tp=value.type,value=value"/>{<%include file="value_arguments.mako" args="arguments=value.data"/>}\
 % elif value.type in (AdvancedNumericTypes.U_INT_64, AdvancedNumericTypes.BIG_INT):
     new BigInteger("${data.value}")
 % elif value.type in (AdvancedNumericTypes.DOUBLE_EXTENDED, AdvancedNumericTypes.FIXED_PRECISION):

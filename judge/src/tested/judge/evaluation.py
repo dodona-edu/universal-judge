@@ -163,6 +163,17 @@ def evaluate_results(bundle: Bundle,
         context_collector.collect(AppendMessage(
             "Ontbrekende uitvoerresultaten in Dodona. Er ging iets verkeerd!"
         ))
+        # Recover stdout and stderr if present.
+        if recovered := "\n".join(stdout_[1:]):
+            context_collector.collect(AppendMessage(ExtendedMessage(
+                description="Andere standaarduitvoer was:\n" + recovered,
+                format="code"
+            )))
+        if recovered := "\n".join(stderr_[1:]):
+            context_collector.collect(AppendMessage(ExtendedMessage(
+                description="Andere standaardfout was:\n" + recovered,
+                format="code"
+            )))
         results.append(False)  # Ensure we stop.
 
     must_stop = False
@@ -232,6 +243,17 @@ def evaluate_results(bundle: Bundle,
             report_update(bundle.out, AppendMessage(
                 "Ontbrekende uitvoerresultaten in Dodona. Er ging iets verkeerd!"
             ))
+            # Recover stdout and stderr if present.
+            if recovered := "\n".join(stdout_[i:]):
+                context_collector.collect(AppendMessage(ExtendedMessage(
+                    description="Andere standaarduitvoer was:\n" + recovered,
+                    format="code"
+                )))
+            if recovered := "\n".join(stderr_[i:]):
+                context_collector.collect(AppendMessage(ExtendedMessage(
+                    description="Andere standaardfout was:\n" + recovered,
+                    format="code"
+                )))
             super_stop = True
         else:
             super_stop = False
