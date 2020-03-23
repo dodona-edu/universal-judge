@@ -11,13 +11,14 @@ from os import path
 from pathlib import Path
 from typing import List, Optional, Dict, Any, Literal, Union
 
-from pydantic import BaseModel, root_validator
+from pydantic import BaseModel, root_validator, validator
 from pydantic.dataclasses import dataclass
 
 from .datatypes import StringTypes
 from .features import (Constructs, FeatureSet, combine_features, WithFeatures,
                        NOTHING)
-from .serialisation import ExceptionValue, Value, Expression, Statement
+from .serialisation import ExceptionValue, Value, Expression, Statement, \
+    Identifier, FunctionCall, SequenceType, ObjectType
 
 
 class TextBuiltin(str, Enum):
@@ -300,6 +301,32 @@ class Output(BaseOutput):
             super().get_used_features(),
             self.result.get_used_features()
         ])
+
+    @validator("result")
+    def validate_no_expression(cls, v):
+        """
+        The values in the "result" output channel can never contain an expression,
+        only a value. Since the serialisation format has become too permissive, we
+        restrict it using a validator.
+        """
+        def _only_values(value: Expression) -> bool:
+            if isinstance(value, Identifier):
+                return False
+            if isinstance(value, FunctionCall):
+                return False
+            if isinstance(value, SequenceType):
+                return all(_only_values(va) for va in value.data)
+            if isinstance(value, ObjectType):
+                return all(_only_values(va) for k, va in value.data.items())
+
+            return True
+
+        if v == IgnoredChannel.IGNORED:
+            return v
+        assert isinstance(v, ValueOutputChannel)
+        if not _only_values(v.value):
+            raise ValueError("Only values are allowed in descriptive mode.")
+        return v
 
 
 @dataclass
