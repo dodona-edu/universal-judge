@@ -105,9 +105,9 @@ def consume_shebang(submission: Path) -> Optional[str]:
                         _, language = stripped.split(" ")
                     except ValueError:
                         logger.error(f"Invalid shebang on line {stripped}")
-                    has_potential = False
                 else:
                     file.write(line)
+                has_potential = False
         file.truncate()
 
     return language
