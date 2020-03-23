@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import IO, Union, Generator, TypeVar, Generic, Optional, Mapping
 
 import sys
+import typing
 
 logger = logging.getLogger(__name__)
 
@@ -118,9 +119,9 @@ V = TypeVar('V')
 
 class _FallbackDict(dict, Generic[K, V]):
 
-    def __init__(self, existing: Mapping[K, V], other: Mapping[K, V]):
+    def __init__(self, existing: Mapping[K, V], fallback_: Mapping[K, V]):
         super().__init__(existing)
-        self.fallback = other
+        self.fallback = fallback_
 
     def __missing__(self, key: K) -> Optional[V]:
         return self.fallback[key]
@@ -128,3 +129,41 @@ class _FallbackDict(dict, Generic[K, V]):
 
 def fallback(source: Mapping[K, V], additions: Mapping[K, V]) -> Mapping[K, V]:
     return _FallbackDict(additions, source)
+
+
+def get_args(type_):
+    """
+    Get the args of a type or the type itself.
+
+    This function is basically the same as `typing.get_args`, but it will return
+    the type itself if the typing function returns nothing.
+
+    Use of this function allows uniform isinstance checks, regardless of how many
+    parameters a Union has or even regardless if the type is a generic or not.
+
+    Some examples:
+
+    >>> import typing
+    >>> Test = typing.Union[str]
+    >>> Test2 = typing.Union[str, int]
+    >>> a = "hallo"
+    >>> isinstance(a, typing.get_args(Test))
+    False
+    >>> isinstance(a, typing.get_args(Test2))
+    True
+    >>> isinstance(a, get_args(Test))
+    True
+    >>> isinstance(a, get_args(Test2))
+    True
+    >>> isinstance(a, get_args(str))
+    True
+    >>> isinstance(a, typing.get_args(str))
+    False
+
+    :param type_: The type to resolve.
+    :return: The resolved generics or the type itself.
+    """
+    if a := typing.get_args(type_):
+        return a
+    else:
+        return type_,

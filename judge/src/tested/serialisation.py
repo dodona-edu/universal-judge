@@ -21,7 +21,7 @@ import logging
 from dataclasses import field, replace
 from decimal import Decimal
 from enum import Enum
-from typing import Union, List, Dict, Literal, Optional, Any, get_args, Set
+from typing import Union, List, Dict, Literal, Optional, Any
 
 import math
 from pydantic import BaseModel, root_validator
@@ -33,6 +33,7 @@ from .datatypes import (NumericTypes, StringTypes, BooleanTypes,
                         BasicObjectTypes, BasicNumericTypes, BasicBooleanTypes,
                         BasicStringTypes, BasicNothingTypes)
 from .features import FeatureSet, Constructs, combine_features, WithFeatures
+from .utils import get_args
 
 logger = logging.getLogger(__name__)
 
@@ -235,7 +236,7 @@ class Assignment(WithFeatures):
         return combine_features([base, other])
 
 
-Statement = Assignment
+Statement = Union[Assignment]
 
 # Update the forward references, which fixes the schema generation.
 ObjectType.__pydantic_model__.update_forward_refs()

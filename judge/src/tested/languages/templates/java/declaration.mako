@@ -1,44 +1,44 @@
 ## Convert a Value to a type.
-<%! from tested.serialisation import VariableType, as_basic_type %>
+<%! from tested.serialisation import VariableType, as_basic_type, resolve_to_basic %>
 <%! from tested.datatypes import AdvancedNumericTypes, AdvancedSequenceTypes  %>
 <%! from tested.datatypes import BasicNumericTypes, BasicStringTypes, BasicBooleanTypes, BasicNothingTypes, BasicSequenceTypes, BasicObjectTypes  %>
-<%page args="type" />
-% if value.type == AdvancedSequenceTypes.ARRAY:
+<%page args="tp" />
+% if tp == AdvancedSequenceTypes.ARRAY:
     <% type_ = value.get_content_type() %>
-    ${type}[]\
-% elif value.type in (AdvancedNumericTypes.U_INT_64, AdvancedNumericTypes.BIG_INT, AdvancedNumericTypes.DOUBLE_EXTENDED):
+    ${tp}[]\
+% elif tp in (AdvancedNumericTypes.U_INT_64, AdvancedNumericTypes.BIG_INT, AdvancedNumericTypes.DOUBLE_EXTENDED):
     BigInteger\
-% elif value.type in (AdvancedNumericTypes.DOUBLE_EXTENDED, AdvancedNumericTypes.FIXED_PRECISION):
+% elif tp in (AdvancedNumericTypes.DOUBLE_EXTENDED, AdvancedNumericTypes.FIXED_PRECISION):
     BigDecimal\
-% elif value.type == AdvancedNumericTypes.INT_8:
+% elif tp == AdvancedNumericTypes.INT_8:
     byte\
-% elif value.type in (AdvancedNumericTypes.U_INT_8, AdvancedNumericTypes.INT_16):
+% elif tp in (AdvancedNumericTypes.U_INT_8, AdvancedNumericTypes.INT_16):
     short\
-% elif value.type in (AdvancedNumericTypes.U_INT_16, AdvancedNumericTypes.INT_32):
+% elif tp in (AdvancedNumericTypes.U_INT_16, AdvancedNumericTypes.INT_32):
     int\
-% elif value.type in (AdvancedNumericTypes.U_INT_32, AdvancedNumericTypes.INT_64):
+% elif tp in (AdvancedNumericTypes.U_INT_32, AdvancedNumericTypes.INT_64):
     long\
-% elif value.type == AdvancedNumericTypes.SINGLE_PRECISION:
+% elif tp == AdvancedNumericTypes.SINGLE_PRECISION:
     float\
 % else:
-    <% basic = as_basic_type(value) %>
-    % if value.type == BasicSequenceTypes.SEQUENCE:
+    <% basic = resolve_to_basic(tp) %>
+    % if basic == BasicSequenceTypes.SEQUENCE:
         List\
-    % elif value.type == BasicSequenceTypes.SET:
+    % elif basic == BasicSequenceTypes.SET:
         Set\
-    % elif value.type == BasicBooleanTypes.BOOLEAN:
+    % elif basic == BasicBooleanTypes.BOOLEAN:
         boolean\
-    % elif value.type == BasicStringTypes.TEXT:
+    % elif basic == BasicStringTypes.TEXT:
         String\
-    % elif value.type == BasicStringTypes.CHAR:
+    % elif basic == BasicStringTypes.CHAR:
         char\
-    % elif value.type == BasicNumericTypes.INTEGER:
+    % elif basic == BasicNumericTypes.INTEGER:
         long\
-    % elif value.type == BasicNumericTypes.RATIONAL:
+    % elif basic == BasicNumericTypes.RATIONAL:
         double\
-    % elif value.type == BasicObjectTypes.MAP:
+    % elif basic == BasicObjectTypes.MAP:
         Map\
-    % elif value.type == BasicNothingTypes.NOTHING:
+    % elif basic == BasicNothingTypes.NOTHING:
         Object\
     % endif
 % endif

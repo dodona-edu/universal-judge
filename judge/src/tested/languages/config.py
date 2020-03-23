@@ -7,17 +7,17 @@ For very exotic configs, it is possible to create a custom runner subclass,
 but that will be a lot more work.
 """
 import os
-from pathlib import Path
-from typing import List, Tuple, Dict, Optional, Mapping
-from enum import Enum, auto
 from collections import defaultdict
+from enum import Enum, auto
+from pathlib import Path
+from typing import List, Tuple, Mapping
 
 from ..configs import Bundle
-from ..datatypes import AdvancedTypes
+from ..datatypes import AllTypes
 from ..dodona import AnnotateCode, Message
 from ..features import Constructs
-from ..testplan import Plan
 from ..serialisation import FunctionCall
+from ..testplan import Plan
 
 CallbackResult = Tuple[List[str], List[str]]
 
@@ -146,7 +146,7 @@ class Language:
         """
         return Constructs.ALL
 
-    def type_support_map(self) -> Mapping[AdvancedTypes, TypeSupport]:
+    def type_support_map(self) -> Mapping[AllTypes, TypeSupport]:
         """
         Return a map containing the support for advanced types. The returned dict
         influences how types are used:
@@ -167,7 +167,7 @@ class Language:
         :return: The typing support dict. By default, all types are mapped to their
                  basic type.
         """
-        return defaultdict(default_factory=lambda: TypeSupport.REDUCED)
+        return defaultdict(lambda: TypeSupport.REDUCED)
 
     def solution_callback(self, solution: Path, plan: Plan):
         """
@@ -179,8 +179,9 @@ class Language:
 
     def specific_evaluator_callback(self, function: FunctionCall) -> FunctionCall:
         """
-        An opportunity to modify the function expression used to expression the language-
-        specific evaluator. This allows injecting language dependent parameters.
+        An opportunity to modify the function expression used to expression the
+        language-specific evaluator. This allows injecting language dependent
+        parameters.
         TODO: this is fairly ugly, is there a better way?
         By default, this does nothing.
         :param function: The function as produced by the judge.
@@ -196,8 +197,7 @@ class Language:
         context-specific directory when executing. This can be used to, for example,
         not copy files for all contexts, but only those specific for the given
         context. By default, this does nothing.
-        :param tab_number: The tab that is being executed.
-        :param context_number: The context that is being executed.
+        :param context_name: The tab that is being executed.
         :param dependencies: The dependencies. Read-only: copy before modifying.
         :return: The new dependencies.
         """

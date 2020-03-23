@@ -116,4 +116,6 @@ def find_template(bundle: Bundle, template_name: str) -> Template:
             return _get_environment(bundle).get_template(file_name)
         except TemplateLookupException as e:
             error = e
-    raise LookupError(f"Could not find template with name {template_name}", error)
+    raise LookupError(
+        f"Could not find template with name {template_name} for language "
+        f"{bundle.config.programming_language}", error)

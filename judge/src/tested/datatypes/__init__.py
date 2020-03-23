@@ -12,10 +12,10 @@ As mentioned in the manuscript, the context_testcase use is scenario 1.
 Additionally, the types in this file are organised by their JSON encoding type.
 They are also split in "basic types" and "advanced types".
 """
-from typing import get_args
 
 from .advanced import *
 from .basic import *
+from ..utils import get_args
 
 NumericTypes = Union[BasicNumericTypes, AdvancedNumericTypes]
 StringTypes = Union[BasicStringTypes]

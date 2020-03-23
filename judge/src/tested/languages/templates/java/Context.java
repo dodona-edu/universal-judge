@@ -1,6 +1,6 @@
 ## Code to execute_module one test context.
 <%! from tested.serialisation import Statement, Expression %>
-<%! from typing import get_args %>
+<%! from tested.utils import get_args %>
 <%! import humps %>
 ## This imports are defined by the "common" start-up scripts of JShell.
 import java.io.*;
@@ -23,12 +23,12 @@ public class ${context_name} {
     % endfor
 
     ## Prepare the evaluator files.
-    private final FileWriter valueWriter;
-    private final FileWriter exceptionWriter;
+    private final PrintWriter valueWriter;
+    private final PrintWriter exceptionWriter;
 
     public ${context_name}() throws Exception {
-        this.valueWriter = new FileWriter("${value_file}");
-        this.exceptionWriter = new FileWriter("${exception_file}");
+        this.valueWriter = new PrintWriter("${value_file}");
+        this.exceptionWriter = new PrintWriter("${exception_file}");
     }
 
     private void writeDelimiter(String value) throws Exception {
@@ -91,7 +91,7 @@ public class ${context_name} {
 
         % for additional in testcases:
             % if isinstance(additional.command, get_args(Statement)):
-                <%include file="declaration.mako" args="type=additional.command.type" /> ${additional.command.name} = null;
+                <%include file="declaration.mako" args="tp=additional.command.type" /> ${additional.command.name} = null;
             % endif
             try {
                 % if isinstance(additional.command, get_args(Statement)):

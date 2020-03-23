@@ -2,7 +2,7 @@
 Value evaluator.
 """
 import logging
-from typing import Union, Tuple, Optional, get_args
+from typing import Union, Tuple, Optional
 
 from . import EvaluationResult, EvaluatorConfig
 from ..configs import Bundle
@@ -12,7 +12,7 @@ from ..languages.config import TypeSupport
 from ..languages.generator import convert_expression
 from ..serialisation import Value, parse_value, to_python_comparable, as_basic_type
 from ..testplan import ValueOutputChannel, OutputChannel
-from ..utils import Either
+from ..utils import Either, get_args
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +28,7 @@ def try_as_value(value: str) -> Either[Value]:
 def try_as_readable_value(bundle: Bundle, value: str) -> Optional[str]:
     try:
         actual = parse_value(value)
-    except (ValueError, TypeError) as e:
+    except (ValueError, TypeError):
         return None
     else:
         return convert_expression(bundle, actual)

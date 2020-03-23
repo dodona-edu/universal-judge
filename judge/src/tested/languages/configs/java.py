@@ -6,11 +6,10 @@ from humps import pascalize, camelize
 
 from .. import Language
 from ..config import CallbackResult, TypeSupport
-from ...datatypes import AdvancedNumericTypes as ant, AdvancedTypes
+from ...datatypes import AdvancedNumericTypes as ant, AllTypes
 from ...datatypes import AdvancedSequenceTypes as ast
 from ...testplan import Plan
 from ...utils import fallback
-
 
 CONTEXT_PREFIX = "Context_"
 
@@ -23,7 +22,7 @@ class JavaConfig(Language):
     """
 
     def initial_dependencies(self) -> List[str]:
-        return ["Values.java", "json-simple-3.1.0.jar", "AbstractEvaluator.java",
+        return ["Values.java", "AbstractEvaluator.java",
                 "AbstractSpecificEvaluator.java"]
 
     def evaluator_dependencies(self) -> List[str]:
@@ -79,7 +78,7 @@ class JavaConfig(Language):
                 if not x.startswith(CONTEXT_PREFIX)
                    or x.startswith(f"{context_name}.")]
 
-    def type_support_map(self) -> Mapping[AdvancedTypes, TypeSupport]:
+    def type_support_map(self) -> Mapping[AllTypes, TypeSupport]:
         return fallback(super().type_support_map(), {
             ant.INT_8:            TypeSupport.SUPPORTED,
             ant.U_INT_8:          TypeSupport.SUPPORTED,

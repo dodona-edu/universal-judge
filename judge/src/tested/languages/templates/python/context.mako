@@ -1,6 +1,6 @@
 ## Code to execute_module one test context.
 <%! from tested.serialisation import Statement, Expression %>
-<%! from typing import get_args %>
+<%! from tested.utils import get_args %>
 import values
 import sys
 

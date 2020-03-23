@@ -1,15 +1,15 @@
 import java.io.Closeable;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.List;
 
 abstract class AbstractEvaluator implements Closeable {
 
-    protected final OutputStreamWriter writer;
+    protected final PrintWriter writer;
 
     public AbstractEvaluator() {
-        this.writer = new OutputStreamWriter(System.out);
+        this.writer = new PrintWriter(System.out);
     }
 
     @Override

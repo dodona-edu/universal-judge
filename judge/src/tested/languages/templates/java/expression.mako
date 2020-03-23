@@ -1,5 +1,5 @@
 ## This translates an expression to Java.
-<%! from typing import get_args %>
+<%! from tested.utils import get_args %>
 <%! from tested.serialisation import Value, Identifier, FunctionCall%>
 <%page args="expression" />
 % if isinstance(expression, Identifier):

@@ -9,9 +9,8 @@ from humps import decamelize, depascalize
 from . import python_linter
 from ..config import Language, CallbackResult, TypeSupport
 from ...configs import Bundle
-from ...datatypes import AdvancedNumericTypes as ant
+from ...datatypes import AdvancedNumericTypes as ant, AllTypes
 from ...datatypes import AdvancedSequenceTypes as ast
-from ...datatypes import AdvancedTypes
 from ...dodona import AnnotateCode, Severity, Message
 from ...testplan import Plan
 from ...utils import fallback
@@ -127,7 +126,7 @@ class Python(Language):
             -> Tuple[List[Message], List[AnnotateCode]]:
         return python_linter.run_pylint(bundle, path, submission)
 
-    def type_support_map(self) -> Mapping[AdvancedTypes, TypeSupport]:
+    def type_support_map(self) -> Mapping[AllTypes, TypeSupport]:
         return fallback(super().type_support_map(), {
             ant.DOUBLE_EXTENDED: TypeSupport.SUPPORTED,
             ant.FIXED_PRECISION: TypeSupport.SUPPORTED,

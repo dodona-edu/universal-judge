@@ -1,7 +1,7 @@
 """
 Programmed evaluator.
 """
-from typing import get_args, Tuple, Optional
+from typing import Tuple, Optional
 
 from . import EvaluationResult, EvaluatorConfig, value
 from .value import get_values
@@ -12,7 +12,7 @@ from ..serialisation import StringType, SpecificResult, Value
 from ..testplan import (TextOutputChannel, FileOutputChannel, ValueOutputChannel,
                         NormalOutputChannel, ExceptionOutputChannel,
                         ProgrammedEvaluator)
-from ..utils import Either
+from ..utils import Either, get_args
 
 DEFAULT_STUDENT = ("Er ging iets fout op bij het evalueren van de oplossing. Meld "
                    "dit aan de lesgever!")
@@ -75,7 +75,7 @@ def evaluate(config: EvaluatorConfig,
     # evaluator for evaluation.
     # This is slightly tricky, since the actual value must also be converted
     # to a value, and we are not yet sure what the actual value is exactly
-    expected_value, actual_value = get_values(channel, actual)
+    expected_value, actual_value = get_values(config.bundle, channel, actual)
     readable_expected = repr(expected_value)  # TODO: fix this
 
     try:

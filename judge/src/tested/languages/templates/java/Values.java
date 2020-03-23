@@ -1,10 +1,7 @@
-import com.github.cliftonlabs.json_simple.JsonObject;
-import com.github.cliftonlabs.json_simple.Jsonable;
-
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.StringWriter;
 import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.*;
 
 /**
@@ -12,84 +9,103 @@ import java.util.*;
  */
 public class Values {
 
+    private static String encodeSequence(Iterable<Object> objects) {
+        var results = new ArrayList<String>();
+        for (Object obj: objects) {
+            results.add(encode(obj));
+        }
+        return "[" + String.join(", ", results) + "]";
+    }
+
     @SuppressWarnings("unchecked")
-    private static Jsonable encode(Object value) {
+    private static String encode(Object value) {
         String type;
-        Object data;
+        String data;
 
         if (value == null) {
             type = "nothing";
-            data = null;
+            data = "null";
+        } else if (value instanceof Boolean) {
+            type = "boolean";
+            data = value.toString();
+        } else if (value.getClass().isArray()) {
+            type = "array";
+            data = encodeSequence(Collections.singletonList(value));
+        } else if (value instanceof BigInteger) {
+            type = "bigint";
+            data = value.toString();
+        } else if (value instanceof BigDecimal) {
+            type = "fixed_precision";
+            data = value.toString();
+        } else if (value instanceof Byte) {
+            type = "int8";
+            data = value.toString();
+        } else if (value instanceof Short) {
+            type = "int16";
+            data = value.toString();
+        } else if (value instanceof Integer) {
+            type = "int32";
+            data = value.toString();
+        } else if (value instanceof Long) {
+            type = "int64";
+            data = value.toString();
+        } else if (value instanceof Float) {
+            type = "single_precision";
+            data = value.toString();
+        } else if (value instanceof Double) {
+            type = "double_precision";
+            data = value.toString();
+        } else if (value instanceof Character) {
+            type = "char";
+            data = "\"" + value.toString() + "\"";
         } else if (value instanceof CharSequence) {
             type = "text";
-            data = value.toString();
-        } else if (value instanceof Byte || value instanceof Short || value instanceof Integer || value instanceof Long) {
-            type = "integer";
-            data = value;
-        } else if (value instanceof Float || value instanceof Double) {
-            type = "rational";
-            data = value;
+            data = "\"" + value.toString() + "\"";
         } else if (value instanceof List) {
             type = "list";
-            List<Jsonable> list = new ArrayList<>();
-            for (Object object: (List) value) {
-                list.add(encode(object));
-            }
-            data = list;
-        } else if (value instanceof Object[]) {
-            type = "list";
-            List<Jsonable> list = new ArrayList<>();
-            for (Object object: (Object[]) value) {
-                list.add(encode(object));
-            }
-            data = list;
+            data = encodeSequence((Iterable<Object>) value);
         } else if (value instanceof Set) {
             type = "set";
-            List<Jsonable> list = new ArrayList<>();
-            for (Object object: (Set) value) {
-                list.add(encode(object));
-            }
-            data = list;
+            data = encodeSequence((Iterable<Object>) value);
         } else if (value instanceof Map) {
             type = "object";
-            Map<String, Jsonable> map = new HashMap<>();
-            //noinspection unchecked
+            Map<String, String> map = new HashMap<>();
+            var elements = new ArrayList<String>();
             for (Map.Entry<Object, Object> entry : ((Map<Object, Object>) value).entrySet()) {
-                map.put(entry.getKey().toString(), encode(entry.getValue()));
+                elements.add("\"" + entry.getKey().toString() + "\": " + encode(entry.getValue()));
             }
-            data = map;
+            data = "{" + String.join(", ", elements) + "}";
         } else {
             type = "unknown";
             data = value.toString();
         }
 
-        JsonObject object = new JsonObject();
-        object.put("data", data);
-        object.put("type", type);
-        return object;
+        return "{ \"data\": " + data + ", \"type\": \"" + type + "\"}";
     }
 
-    public static void send(OutputStreamWriter writer, Object value) throws IOException {
-        Jsonable object = encode(value);
-        object.toJson(writer);
+    public static void send(PrintWriter writer, Object value) {
+        writer.print(encode(value));
     }
 
-    public static void sendException(OutputStreamWriter writer, Exception exception) throws IOException {
+    public static void sendException(PrintWriter writer, Exception exception) {
         var sw = new StringWriter();
         exception.printStackTrace(new PrintWriter(sw));
-        JsonObject object = new JsonObject();
-        object.put("message", exception.getMessage());
-        object.put("stacktrace", sw.toString());
-        object.toJson(writer);
+        var result = "{ \"message\": \"" + exception.getMessage() + "\", \"type\": \"" + sw.toString() + "\"}";
+        writer.write(result);
     }
 
-    public static void evaluated(OutputStreamWriter writer,
-                                 boolean result, String expected, String actual, Collection<String> messages) throws IOException {
-        JsonObject object = new JsonObject();
-        object.put("result", result);
-        object.put("readable_expected", expected);
-        object.put("readable_actual", actual);
-        object.put("messages", messages);
-        object.toJson(writer);
+    public static void evaluated(PrintWriter writer,
+                                 boolean result, String expected, String actual, Collection<String> messages) {
+        String builder = "{" +
+            "\"result\": " +
+            result +
+            ", \"readable_expected\": " +
+            expected +
+            ", \"readable_actual\": " +
+            actual +
+            ", \"messages\": [" +
+            String.join(", ", messages) +
+            "]}";
+        writer.print(builder);
     }
 }

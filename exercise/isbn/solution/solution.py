@@ -45,7 +45,7 @@ def is_isbn13(code):
     False
     """
 
-    # helper function for computing ISBN-10 check digit
+    # helper function for computing ISBN-13 check digit
     def check_digit(code):
 
         # compute check digit

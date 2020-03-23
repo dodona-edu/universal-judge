@@ -7,8 +7,7 @@ cases.
 from enum import Enum
 from typing import Union
 
-from .basic import BasicNumericTypes, BasicSequenceTypes, BasicTypes, \
-    BasicObjectTypes
+from .basic import BasicNumericTypes, BasicSequenceTypes, BasicTypes
 
 
 class _AdvancedDataType(str, Enum):
