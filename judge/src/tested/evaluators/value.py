@@ -158,22 +158,26 @@ def evaluate(config: EvaluatorConfig,
 
     type_check, expected = _check_type(config.bundle, expected, actual)
     messages = []
-    type_message = None
-    if not type_check:
-        type_message = "Returnwaarde heeft verkeerd type."
+    type_status = None
+
+    expected = to_python_comparable(expected)
+    actual = to_python_comparable(actual)
+
+    content_check = expected == actual
+
+    # Only add the message about the type if the content is the same.
+    if content_check and not type_check:
+        type_status = "Returnwaarde heeft verkeerd gegevenstype."
         messages.append(
             f"Verwachtte waarde van type {expected.type}, "
             f"maar was type {actual.type}."
         )
 
-    expected = to_python_comparable(expected)
-    actual = to_python_comparable(actual)
-
-    correct = type_check and expected == actual
+    correct = type_check and content_check
 
     return EvaluationResult(
         result=StatusMessage(
-            human=type_message,
+            human=type_status,
             enum=Status.CORRECT if correct else Status.WRONG
         ),
         readable_expected=readable_expected,

@@ -18,7 +18,7 @@ def run(config: DodonaConfig, judge_output: IO):
         textual_plan = t.read()
 
     plan = parse_test_plan(textual_plan)
+    pack = create_bundle(config, judge_output, plan)
 
     from .judge import judge
-    pack = create_bundle(config, judge_output, plan)
     judge(pack)
