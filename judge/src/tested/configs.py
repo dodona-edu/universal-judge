@@ -69,6 +69,17 @@ class Bundle:
     plan: testplan.Plan
 
 
+def _get_language(config: DodonaConfig) -> str:
+
+    from .languages import language_exists
+
+    bang = utils.consume_shebang(config.source)
+    if bang and language_exists(bang):
+        return bang
+    else:
+        return config.programming_language
+
+
 def create_bundle(config: DodonaConfig,
                   output: IO,
                   plan: testplan.Plan,
@@ -85,9 +96,8 @@ def create_bundle(config: DodonaConfig,
     :return: The configuration bundle.
     """
     from .languages import get_language
-
     if language is None:
-        language = config.programming_language
+        language = _get_language(config)
     adjusted_config = dataclasses.replace(config, programming_language=language)
     language_config = get_language(language)
     return Bundle(

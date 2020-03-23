@@ -24,3 +24,7 @@ def get_language(language: str) -> Language:
     Get the configuration for a programming language.
     """
     return LANGUAGES[language]()
+
+
+def language_exists(language: str) -> bool:
+    return language in LANGUAGES

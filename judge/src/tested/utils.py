@@ -2,14 +2,13 @@ import contextlib
 import logging
 import os
 import random
-import shutil
 import stat
 import string
 from os import PathLike
 from pathlib import Path
+from typing import IO, Union, Generator, TypeVar, Generic, Optional
 
 import sys
-from typing import IO, List, Union, Generator, TypeVar, Generic, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -79,3 +78,35 @@ def get_identifier() -> str:
     letter = random.choice(string.ascii_letters)
     rest = random.sample(string.ascii_letters + string.digits, 8)
     return letter + ''.join(rest)
+
+
+def consume_shebang(submission: Path) -> Optional[str]:
+    """
+    Find the shebang in the submission, and if it is present, consume it.
+
+    :param submission: The path to the file containing the code.
+
+    :return: The programming language if found.
+    """
+    language = None
+    with open(submission, "r+") as file:
+        lines = file.readlines()
+        file.seek(0)
+
+        # Steps to find
+        has_potential = True
+        for line in lines:
+            if has_potential and not line.strip():
+                continue
+            if stripped := line.strip():
+                if has_potential and stripped.startswith("#!tested"):
+                    try:
+                        _, language = stripped.split(" ")
+                    except ValueError:
+                        logger.error(f"Invalid shebang on line {stripped}")
+                    has_potential = False
+                else:
+                    file.write(line)
+        file.truncate()
+
+    return language
