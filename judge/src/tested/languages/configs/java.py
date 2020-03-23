@@ -1,12 +1,18 @@
 import os
 from pathlib import Path
-from typing import List
+from typing import List, Mapping
 
 from humps import pascalize, camelize
 
 from .. import Language
-from ..config import CallbackResult
+from ..config import CallbackResult, TypeSupport
+from ...datatypes import AdvancedNumericTypes as ant, AdvancedTypes
+from ...datatypes import AdvancedSequenceTypes as ast
 from ...testplan import Plan
+from ...utils import fallback
+
+
+CONTEXT_PREFIX = "Context_"
 
 
 class JavaConfig(Language):
@@ -52,7 +58,7 @@ class JavaConfig(Language):
         return "Selector"
 
     def context_name(self, tab_number: int, context_number: int) -> str:
-        return f"Context_{tab_number}_{context_number}"
+        return f"{CONTEXT_PREFIX}{tab_number}_{context_number}"
 
     def _get_classpath(self):
         return [x for x in self.initial_dependencies() if x.endswith(".jar")]
@@ -65,3 +71,28 @@ class JavaConfig(Language):
 
     def needs_selector(self):
         return True
+
+    def context_dependencies_callback(self,
+                                      context_name: str,
+                                      dependencies: List[str]) -> List[str]:
+        return [x for x in dependencies
+                if not x.startswith(CONTEXT_PREFIX)
+                   or x.startswith(f"{context_name}.")]
+
+    def type_support_map(self) -> Mapping[AdvancedTypes, TypeSupport]:
+        return fallback(super().type_support_map(), {
+            ant.INT_8:            TypeSupport.SUPPORTED,
+            ant.U_INT_8:          TypeSupport.SUPPORTED,
+            ant.INT_16:           TypeSupport.SUPPORTED,
+            ant.U_INT_16:         TypeSupport.SUPPORTED,
+            ant.INT_32:           TypeSupport.SUPPORTED,
+            ant.U_INT_32:         TypeSupport.SUPPORTED,
+            ant.INT_64:           TypeSupport.SUPPORTED,
+            ant.U_INT_64:         TypeSupport.SUPPORTED,
+            ant.SINGLE_PRECISION: TypeSupport.SUPPORTED,
+            ant.DOUBLE_EXTENDED:  TypeSupport.SUPPORTED,
+            ant.FIXED_PRECISION:  TypeSupport.SUPPORTED,
+            ast.ARRAY:            TypeSupport.SUPPORTED,
+            ast.LIST:             TypeSupport.SUPPORTED,
+            ast.TUPLE:            TypeSupport.UNSUPPORTED
+        })

@@ -8,6 +8,7 @@ from . import EvaluationResult, EvaluatorConfig
 from ..configs import Bundle
 from ..datatypes import AdvancedTypes, BasicTypes
 from ..dodona import ExtendedMessage, Permission, StatusMessage, Status
+from ..languages.config import TypeSupport
 from ..languages.generator import convert_expression
 from ..serialisation import Value, parse_value, to_python_comparable, as_basic_type
 from ..testplan import ValueOutputChannel, OutputChannel
@@ -78,13 +79,12 @@ def _check_type(
     2. If the expected value's type is an advanced type, there are two
        possibilities:
        a. If the language of the submission supports the advanced type, both types
-          are checked for equality. With "supports" we mean explicit support, not
-          the fallback to the basic type.
-       b. If the language of the submission does not support the advanced type, all
-          types are reduced to their basic type, after which equality is checked.
-          With "not support" we mean the language has the fallback.
-       c. An error occurs if the language explicitly does not support the advanced
-          type.
+          are checked for equality.
+       b. If the language of the submission only supports a reduction of the type,
+          all types are reduced to their basic type, after which equality is
+          checked.
+    3. An error occurs if the language explicitly does not support the advanced
+       type.
 
     :param bundle: The configuration bundle.
     :param expected: The expected type from the testplan.
@@ -95,8 +95,8 @@ def _check_type(
     """
     supported_types = bundle.language_config.type_support_map()
 
-    # Case 2.c.
-    if expected.type in supported_types and supported_types[expected.type] is None:
+    # Case 3.
+    if supported_types[expected.type] == TypeSupport.UNSUPPORTED:
         raise ValueError(f"The language does not support {expected.type}")
 
     # Case 1.
@@ -108,13 +108,13 @@ def _check_type(
     assert isinstance(expected.type, get_args(AdvancedTypes))
 
     # Case 2.b.
-    if expected.type not in supported_types:
+    if supported_types[expected.type] == TypeSupport.REDUCED:
         basic_expected = as_basic_type(expected)
         basic_actual = as_basic_type(actual)
         return basic_expected.type == basic_actual.type, basic_expected
 
     # Case 2.a.
-    assert supported_types[expected.type] is not None
+    assert supported_types[expected.type] == TypeSupport.SUPPORTED
 
     return expected.type == actual.type, expected
 

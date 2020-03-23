@@ -21,7 +21,7 @@ import logging
 from dataclasses import field, replace
 from decimal import Decimal
 from enum import Enum
-from typing import Union, List, Dict, Literal, Optional, Any, get_args
+from typing import Union, List, Dict, Literal, Optional, Any, get_args, Set
 
 import math
 from pydantic import BaseModel, root_validator
@@ -73,6 +73,26 @@ class SequenceType(WithFeatures):
         base_features = FeatureSet(Constructs.NOTHING, {self.type})
         nested_features = [x.get_used_features() for x in self.data]
         return combine_features([base_features] + nested_features)
+
+    def get_content_type(self) -> AllTypes:
+        """
+        Attempt to get a type for the content of the container. The function will
+        attempt to get the most specific type possible, but this is not very
+        sophisticated, e.g. all nested types are simply "Any", as are heterogeneous
+        sequences.
+        """
+        types = set()
+        for element in self.data:
+            if isinstance(element, get_args(Value)):
+                types.add(element.type)
+            else:
+                types.add(BasicStringTypes.ANY)
+
+        if len(types) == 1:
+            # noinspection PyTypeChecker
+            return next(types)
+        else:
+            return BasicStringTypes.ANY
 
 
 @dataclass

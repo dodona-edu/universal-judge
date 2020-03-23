@@ -73,7 +73,7 @@ write_delimiter("--${secret_id}-- SEP")
 ## Generate the actual tests based on the context.
 % for additional in testcases:
     try:
-        % if isinstance(additional.command, Statement):
+        % if isinstance(additional.command, get_args(Statement)):
             <%include file="statement.mako" args="statement=additional.command" />\
         % else:
             <% assert isinstance(additional.command, get_args(Expression)) %>

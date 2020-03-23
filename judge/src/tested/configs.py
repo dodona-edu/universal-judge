@@ -3,6 +3,7 @@ Module for handling and bundling various configuration options for TESTed.
 """
 import dataclasses
 import json
+import logging
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional, Dict, IO, TYPE_CHECKING
@@ -13,6 +14,9 @@ import tested.testplan as testplan
 # Prevent circular imports
 if TYPE_CHECKING:
     from tested.languages import Language
+
+
+_logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -71,12 +75,16 @@ class Bundle:
 
 def _get_language(config: DodonaConfig) -> str:
 
-    from .languages import language_exists
+    import tested.languages as langs
 
     bang = utils.consume_shebang(config.source)
-    if bang and language_exists(bang):
+    if bang and langs.language_exists(bang):
+        _logger.debug(f"Found shebang language and it exists, using {bang} instead "
+                      f"of config language {config.programming_language}.")
         return bang
     else:
+        _logger.debug(f"No shebang found or it doesn't exist: {bang}. Using "
+                      f"configuration language {config.programming_language}.")
         return config.programming_language
 
 
@@ -95,11 +103,12 @@ def create_bundle(config: DodonaConfig,
 
     :return: The configuration bundle.
     """
-    from .languages import get_language
+    import tested.languages as langs
+
     if language is None:
         language = _get_language(config)
     adjusted_config = dataclasses.replace(config, programming_language=language)
-    language_config = get_language(language)
+    language_config = langs.get_language(language)
     return Bundle(
         config=adjusted_config,
         out=output,

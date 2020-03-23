@@ -8,7 +8,9 @@ but that will be a lot more work.
 """
 import os
 from pathlib import Path
-from typing import List, Tuple, Dict, Optional
+from typing import List, Tuple, Dict, Optional, Mapping
+from enum import Enum, auto
+from collections import defaultdict
 
 from ..configs import Bundle
 from ..datatypes import AdvancedTypes
@@ -26,6 +28,12 @@ def executable_name(basename: str) -> str:
         return f"{basename}.exe"
     else:
         return basename
+
+
+class TypeSupport(Enum):
+    SUPPORTED = auto()
+    UNSUPPORTED = auto()
+    REDUCED = auto()
 
 
 class Language:
@@ -138,7 +146,7 @@ class Language:
         """
         return Constructs.ALL
 
-    def type_support_map(self) -> Dict[AdvancedTypes, Optional[AdvancedTypes]]:
+    def type_support_map(self) -> Mapping[AdvancedTypes, TypeSupport]:
         """
         Return a map containing the support for advanced types. The returned dict
         influences how types are used:
@@ -159,7 +167,7 @@ class Language:
         :return: The typing support dict. By default, all types are mapped to their
                  basic type.
         """
-        return dict()
+        return defaultdict(default_factory=lambda: TypeSupport.REDUCED)
 
     def solution_callback(self, solution: Path, plan: Plan):
         """

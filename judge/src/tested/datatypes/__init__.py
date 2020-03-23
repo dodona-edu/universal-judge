@@ -18,11 +18,11 @@ from .advanced import *
 from .basic import *
 
 NumericTypes = Union[BasicNumericTypes, AdvancedNumericTypes]
-StringTypes = BasicStringTypes
-BooleanTypes = BasicBooleanTypes
-NothingTypes = BasicNothingTypes
+StringTypes = Union[BasicStringTypes]
+BooleanTypes = Union[BasicBooleanTypes]
+NothingTypes = Union[BasicNothingTypes]
 SequenceTypes = Union[BasicSequenceTypes, AdvancedSequenceTypes]
-ObjectTypes = Union[BasicObjectTypes, AdvancedObjectTypes]
+ObjectTypes = Union[BasicObjectTypes]
 
 
 SimpleTypes = Union[NumericTypes, StringTypes, BooleanTypes, NothingTypes]

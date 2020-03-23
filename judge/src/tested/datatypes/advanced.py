@@ -85,17 +85,7 @@ class AdvancedSequenceTypes(_AdvancedDataType):
     TUPLE = "tuple", BasicSequenceTypes.SEQUENCE
     """A tuple is read-only, immutable list."""
 
-    ORDERED_SET = "ordered_set", BasicSequenceTypes.SET
-    """A SET, but with ordered elements."""
-
-
-class AdvancedObjectTypes(_AdvancedDataType):
-    STRUCT = "struct", BasicObjectTypes.MAP
-    """
-    A map-style object, of which the members are often determined at compile time.
-    """
-
 
 AdvancedTypes = Union[
-    AdvancedNumericTypes, AdvancedSequenceTypes, AdvancedObjectTypes
+    AdvancedNumericTypes, AdvancedSequenceTypes
 ]

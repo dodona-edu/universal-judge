@@ -6,7 +6,7 @@ import stat
 import string
 from os import PathLike
 from pathlib import Path
-from typing import IO, Union, Generator, TypeVar, Generic, Optional
+from typing import IO, Union, Generator, TypeVar, Generic, Optional, Mapping
 
 import sys
 
@@ -110,3 +110,21 @@ def consume_shebang(submission: Path) -> Optional[str]:
         file.truncate()
 
     return language
+
+
+K = TypeVar('K')
+V = TypeVar('V')
+
+
+class _FallbackDict(dict, Generic[K, V]):
+
+    def __init__(self, existing: Mapping[K, V], other: Mapping[K, V]):
+        super().__init__(existing)
+        self.fallback = other
+
+    def __missing__(self, key: K) -> Optional[V]:
+        return self.fallback[key]
+
+
+def fallback(source: Mapping[K, V], additions: Mapping[K, V]) -> Mapping[K, V]:
+    return _FallbackDict(additions, source)

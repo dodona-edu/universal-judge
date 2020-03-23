@@ -1,21 +1,20 @@
 ## This generates a function expression in Java.
-<%! from testplan import FunctionType %>
+<%! from tested.serialisation import FunctionType %>
 <%page args="function" />
 % if function.type == FunctionType.CONSTRUCTOR:
-    new
-% elif function.type != FunctionType.IDENTITY:
-    % if function.type == FunctionType.NAMESPACE or (function.type == FunctionType.FUNCTION and function.namespace):
-        ${function.namespace}.\
-    % endif
-    ${function.name}\
-    (\
+    new \
 % endif
-% for argument in function.arguments:
-    <%include file="literal.mako" args="value=argument"/>
-    % if not loop.last:
-        , \
-    % endif
-% endfor
-% if function.type != FunctionType.IDENTITY:
+% if function.type == FunctionType.NAMESPACE or (function.type == FunctionType.FUNCTION and function.namespace):
+    ${function.namespace}.\
+% endif
+${function.name}\
+% if function.type != FunctionType.PROPERTY:
+    (\
+    % for argument in function.arguments:
+        <%include file="expression.mako" args="expression=argument"/>
+        % if not loop.last:
+            , \
+        % endif
+    % endfor
     )\
 % endif

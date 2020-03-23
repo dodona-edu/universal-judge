@@ -1,5 +1,6 @@
 ## Code to execute_module one test context.
-<%! from testplan import Assignment %>
+<%! from tested.serialisation import Statement, Expression %>
+<%! from typing import get_args %>
 <%! import humps %>
 ## This imports are defined by the "common" start-up scripts of JShell.
 import java.io.*;
@@ -52,18 +53,18 @@ public class ${context_name} {
     }
 
     private void eEvaluateMain(Exception value) throws Exception {
-        <%include file="function.mako" args="function=main_testcase.exception_function"/>;
+        <%include file="expression.mako" args="expression=context_testcase.exception_function"/>;
     }
 
-    % for additional in additional_testcases:
+    % for additional in testcases:
         % if additional.has_return:
             private void vEvaluate${loop.index}(Object value) throws Exception {
-                <%include file="function.mako" args="function=additional.value_function"/>;
+                <%include file="expression.mako" args="expression=additional.value_function"/>;
             }
         % endif
 
         private void eEvaluate${loop.index}(Exception value) throws Exception {
-            <%include file="function.mako" args="function=additional.exception_function"/>;
+            <%include file="expression.mako" args="expression=additional.exception_function"/>;
         }
     % endfor
 
@@ -72,36 +73,35 @@ public class ${context_name} {
         ${before}
 
         ## Call the context_testcase fucnction if necessary
-        % if main_testcase.exists:
+        % if context_testcase.exists:
             try {
                 ${submission_name}.main(new String[]{
-                % for argument in main_testcase.arguments:
-                    <%include file="literal.mako" args="value=argument"/>
-                    % if not loop.last:
-                        , \
-                    % endif
+                % for argument in context_testcase.arguments:
+                    "${argument}", \
                 % endfor
                 });
             } catch (Exception e) {
                 this.eEvaluateMain(e);
             }
-            System.err.print("--${secret_id}-- SEP");
-            System.out.print("--${secret_id}-- SEP");
-            this.writeDelimiter("--${secret_id}-- SEP");
         % endif
 
-        % for additional in additional_testcases:
-            % if isinstance(additional.command, Assignment):
-                <%include file="declaration.mako" args="value=additional.statement.get_type()" /> ${additional.command.name} = null;
+        System.err.print("--${secret_id}-- SEP");
+        System.out.print("--${secret_id}-- SEP");
+        this.writeDelimiter("--${secret_id}-- SEP");
+
+        % for additional in testcases:
+            % if isinstance(additional.command, get_args(Statement)):
+                <%include file="declaration.mako" args="type=additional.command.type" /> ${additional.command.name} = null;
             % endif
             try {
-                % if isinstance(additional.command, Assignment):
-                    <%include file="assignment.mako" args="assignment=additional.statement" />
+                % if isinstance(additional.command, get_args(Statement)):
+                    <%include file="statement.mako" args="statement=additional.command" />
                 % else:
+                    <% assert isinstance(additional.command, get_args(Expression)) %>
                     % if additional.has_return:
                         this.vEvaluate${loop.index}(\
                     % endif
-                    <%include file="function.mako" args="function=additional.statement" />\
+                    <%include file="expression.mako" args="expression=additional.command" />\
                     % if additional.has_return:
                         )\
                     % endif

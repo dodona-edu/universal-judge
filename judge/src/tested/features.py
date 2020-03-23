@@ -7,6 +7,7 @@ from functools import reduce
 from typing import Iterable, Set, NamedTuple, TYPE_CHECKING
 
 from .datatypes import AllTypes
+
 if TYPE_CHECKING:
     from .configs import Bundle
 
@@ -71,6 +72,8 @@ def is_supported(bundle: 'Bundle') -> bool:
 
     :return: True or False
     """
+    from .languages.config import TypeSupport
+
     required = bundle.plan.get_used_features()
 
     # Check constructs
@@ -78,16 +81,5 @@ def is_supported(bundle: 'Bundle') -> bool:
     if required.constructs & available_constructs != required.constructs:
         return False
 
-    type_mapping = bundle.language_config.type_support_map()
-    # Check types
-    supported = True
-    for required_type in required.types:
-        if required_type in type_mapping:
-            # If the required type is in the map, it is only valid if it is not
-            # mapped to none.
-            supported = supported and type_mapping[required_type] is not None
-        else:
-            # If the required type is not in the map, it is OK.
-            pass
-
-    return supported
+    mapping = bundle.language_config.type_support_map()
+    return all(mapping[t] != TypeSupport.UNSUPPORTED for t in required.types)
