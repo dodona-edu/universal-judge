@@ -214,19 +214,18 @@ class Language:
         """Allows parsing error message to annotate the code."""
         return []
 
-    def run_linter(self, bundle: Bundle, path: Path, submission: Path) \
+    def run_linter(self, bundle: Bundle, submission: Path) \
             -> Tuple[List[Message], List[AnnotateCode]]:
         """
         Run a linter or other code analysis tools on the submission.
-        The messages that are output will be passed to Dodona. Note that there is no
-        support for modifying the submission code; all changes will be discarded.
+        The messages that are output will be passed to Dodona.
         By default, this does nothing.
 
+        Note that you should not modify the solution file. There is no guarantee
+        that this solution is the one that will be evaluated.
+
         :param bundle: The configuration bundle.
-        :param path: The path to the directory where the linter is run.
-        :param submission: The path to the submission. The path is absolute, but
-                           the submission will be in the directory where the linter
-                           is run.
+        :param submission: The path to the submission.
 
         :return: A list of messages and annotations.
         """

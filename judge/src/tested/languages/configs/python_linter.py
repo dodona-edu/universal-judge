@@ -38,7 +38,7 @@ message_categories = {
 }
 
 
-def run_pylint(bundle: Bundle, path: Path, submission: Path) \
+def run_pylint(bundle: Bundle, submission: Path) \
         -> Tuple[List[Message], List[AnnotateCode]]:
     """
     Calls pylint to annotate submitted source code and adds resulting score and
@@ -54,7 +54,7 @@ def run_pylint(bundle: Bundle, path: Path, submission: Path) \
 
     pylint_out = StringIO()
     try:
-        args = [f"--rcfile={config_path}", submission]
+        args = [f"--rcfile={config_path}", str(submission)]
         logger.debug("Running with template_args %s", args)
         lint.Run(args, reporter=JSONReporter(output=pylint_out), do_exit=False)
     except Exception as e:

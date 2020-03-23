@@ -119,12 +119,9 @@ class Python(Language):
 
         return line, column, message
 
-    def run_linter(self,
-                   bundle: Bundle,
-                   path: Path,
-                   submission: Path) \
+    def run_linter(self, bundle: Bundle, submission: Path) \
             -> Tuple[List[Message], List[AnnotateCode]]:
-        return python_linter.run_pylint(bundle, path, submission)
+        return python_linter.run_pylint(bundle, submission)
 
     def type_support_map(self) -> Mapping[AllTypes, TypeSupport]:
         return fallback(super().type_support_map(), {

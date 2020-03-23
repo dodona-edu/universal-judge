@@ -25,17 +25,10 @@ def run_linter(bundle: Bundle):
         _logger.debug("Linter is disabled.")
         return
 
-    directory = Path(bundle.config.workdir) / "linter"
-    directory.mkdir()
-
-    _logger.debug("Running linter in %s", directory)
-
-    # Copy the submission.
-    source_path = shutil.copy2(bundle.config.source, directory)
-    _logger.debug("Copying %s to linter dir", bundle.config.source)
+    _logger.debug("Running linter...")
 
     messages, annotations = \
-        bundle.language_config.run_linter(bundle, directory, source_path)
+        bundle.language_config.run_linter(bundle, bundle.config.source)
 
     for message in messages:
         report_update(bundle.out, AppendMessage(message=message))
