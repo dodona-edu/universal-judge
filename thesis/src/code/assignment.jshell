@@ -1,3 +1,4 @@
 var variabele = new DoorDeStudentGemaakteKlasse();
 assert variabele.testfunctie1() == 15;
 assert variabele.testfunctie2() == "Vijftienduizend";
+assert variabele.eigenschap == 42;

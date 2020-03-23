@@ -1,0 +1,5 @@
+var variabele1 = functie1();
+var variabele2 = [variabele1, 15, functie2()];
+var object = new Test();
+
+assert object.process(variabele2, [functie1()]) == 85;

@@ -39,7 +39,7 @@
         double\
     % elif basic == BasicObjectTypes.MAP:
         Map<Object, Object>\
-    % elif basic == BasicNothingTypes.NOTHING:
+    % elif basic in (BasicNothingTypes.NOTHING, BasicStringTypes.ANY):
         Object\
     % endif
 % endif

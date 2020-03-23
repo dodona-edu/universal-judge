@@ -1,13 +1,7 @@
 {
   "type": "sequence",
   "data": [
-    {
-      "type": "integer",
-      "data": 5
-    },
-    {
-      "type": "integer",
-      "data": 15
-    }
+    { "type": "integer", "data": 5 },
+    { "type": "integer", "data": 15 }
   ]
 }

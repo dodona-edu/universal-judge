@@ -1,12 +1,8 @@
 {
   "name": "name",
   "expression": {
-    "type": "identity",
-    "arguments": [
-      {
-        "type": "text",
-        "value": "Dodona"
-      }
-    ]
-  }
+    "type": "text",
+    "value": "Dodona"
+  },
+  "type": "text"
 }

@@ -286,7 +286,6 @@ Een concreet voorbeeld is \cref{lst:serialisation}.
     \label{lst:serialisation}
 \end{listing}
 
-
 Het encoderen van waarden slaat op het voorstellen van waarden als json-waarden.
 Json heeft slechts een beperkt aantal gegevenstypes, dus worden alle waarden voorgesteld als een van deze types.
 Zo worden bijvoorbeeld zowel \texttt{array}s en \texttt{set}s voorgesteld als een json-lijst.
@@ -294,45 +293,51 @@ Zo worden bijvoorbeeld zowel \texttt{array}s en \texttt{set}s voorgesteld als ee
 Het verschil tussen beiden wordt dan duidelijk gemaakt door het bijhorende gegevenstype.
 Er is dus nood aan een systeem om aan te geven wat het gegevenstype van een waarde is.
 
-\Cref{lst:value-schema} bevat het dataschema van een waarde in het serialisatieformaat, in een vereenvoudigde versie van JSON Schema.
-Hierbij staat \texttt{<type>} voor een van de gegevenstypes die hierna besproken worden.
+\Cref{lst:type-schema} bevat het onder andere de structuur van een waarde in het serialisatieformaat, in een vereenvoudigde versie van JSON Schema.
+Hierbij staat \texttt{<types>} voor een van de gegevenstypes die hierna besproken werden.
 
 \begin{listing}
-    \inputminted{json}{code/value-schema.json}
-    \caption{
-        Het schema voor een waarde in het serialisatieformaat, in een vereenvoudigde versie van JSON Schema.
-        Hierbij is \texttt{<type>} een van de gegevenstypes die besproken worden in subparagraaf \emph{Gegevenstypes} van \cref{subsec:dataserialisatie}.
-    }
-    \label{lst:value-schema}
+    \inputminted{json}{code/type-schema.json}
+    \caption{Het schema voor waarden, expressies en statements, in een vereenvoudigde versie van JSON Schema.}
+    \label{lst:type-schema}
 \end{listing}
 
 \subsubsection{Gegevenstypes}
 
-Het systeem om de gegevenstypes aan te duiden vervult een dubbele functie:
+Het systeem om de gegevenstypes aan te duiden vervult meerdere functies.
+Het wordt gebruikt om:
 
 \begin{itemize}
-    \item Het wordt gebruikt om het gegevenstype van concrete data aan te duiden (beschrijvende modus).
-    \item Het wordt gebruikt om te beschrijven welke gegevenstype verwacht wordt (voorschrijvende modus).
+    \item het gegevenstype van concrete data aan te duiden (beschrijvende modus).
+    Dit gaat om de serialisatie van waarden uit de uitvoeringsomgeving naar TESTed, zoals het geval is bij returnwaarden van functies.
+    \item te beschrijven welk gegevenstype verwacht wordt (voorschrijvende modus).
+    Een voorbeeld hiervan is het aangeven van het gegevenstype van een variabele.
+    \item zelf code te schrijven (letterlijke modus).
+    Dit gaat om serialisatie vanuit het testplan zelf naar de uitvoeringsomgeving.
+    Een voorbeeld hiervan is het opnemen van functieargumenten in het testplan: deze argumenten worden tijdens de serialisatie omgezet naar echte code.
 \end{itemize}
 
-Bij het ontwerp van het systeem voor de gegevenstypes zorgen deze twee functies soms voor tegenstrijdige belangen: voor het beschrijven van een waarde moet het systeem zo eenvoudig mogelijk zijn.
+Bij het ontwerp van het systeem voor de gegevenstypes zorgen deze verschillende functies soms voor tegenstrijdige belangen: voor het beschrijven van een waarde moet het systeem zo eenvoudig mogelijk zijn.
 Een waarde met bijhorend gegevenstype \texttt{union[string, int]} is niet bijster nuttig: een waarde kan nooit tegelijk een \texttt{string} en een \texttt{int} zijn.
-Aan de andere kant zijn dit soort complexe gegevenstypes wel nuttig bij het beschrijven van het verwachte gegevenstype van bijvoorbeeld een variabele.
+Aan de andere kant zijn dit soort complexe gegevenstypes wel nuttig bij het aangeven van het verwachte gegevenstype van bijvoorbeeld een variabele.
 Daarnaast moet ook rekening gehouden worden met het feit dat deze gegevenstypes in veel programmeertalen implementeerbaar moeten zijn.
 Een gegevenstype als \texttt{union[string, int]} is eenvoudig te implementeren in Python, maar dat is niet het geval in bijvoorbeeld Java of C\@.
 Ook heeft elke programmeertaal een eigen niveau van details bij gegevenstypes.
 Python heeft bijvoorbeeld enkel \texttt{integer} voor gehele getallen, terwijl C beschikt over \texttt{int}, \texttt{unsigned}, \texttt{long}, enz.
+Daarenboven heeft het schrijven van code bijkomende vereisten: als functieargument zijn waarden alleen niet voldoende, ook andere variabelen moeten gerefereerd kunnen worden en het resultaat van andere functieoproepen moeten ook als argument gebruikt kunnen worden.
 
-Om deze redenen zijn de gegevenstypes opgedeeld in vier categorieën:
+Om deze redenen zijn de gegevenstypes opgedeeld in drie categorieën:
 
 \begin{enumerate}
     \item De basistypes.
-    Deze gegevenstypes zijn bruikbaar in zowel beschrijvende als voorschrijvende modus.
+    Deze gegevenstypes zijn bruikbaar in alle modi.
     De lijst van basistypes omvat:
     \begin{description}
         \item[\texttt{integer}] Gehele getallen, zowel positief als negatief.
         \item[\texttt{rational}] Rationale getallen.
+        Het gaat hier om \texttt{float}s, die ook vaak gebruikt worden als benadering van gehele getallen.
         \item[\texttt{text}] Een tekenreeks of string (alle vormen).
+        \item[\texttt{char}] Een enkel teken.
         \item[\texttt{boolean}] Een Boolese waarde (of boolean).
         \item[\texttt{sequence}] Een wiskundige rij, wat wil zeggen dat de volgorde belangrijk is en dat dubbele elementen toegelaten zijn.
         \item[\texttt{set}] Een wiskundige verzameling, wat wil zeggen dat de volgorde niet belangrijk is en dat dubbele elementen niet toegelaten zijn.
@@ -340,37 +345,53 @@ Om deze redenen zijn de gegevenstypes opgedeeld in vier categorieën:
         In Java is dit bijvoorbeeld een \texttt{Map}, in Python een \texttt{dict} en in Javascript een \texttt{object}.
         \item[\texttt{nothing}] Geeft aan dat er geen waarde is, ook wel \texttt{null}, \texttt{None} of \texttt{nil} genoemd.
     \end{description}
+    Een lijst van de implementaties in de verschillende programmeertalen is \cref{tab:basistypes}.
     Elke implementatie van een programmeertaal moet een keuze maken wat de standaardimplementatie van deze types is.
     Zo implementeert de Java-implementatie het gegevenstype \texttt{sequence} als een \texttt{List<>}, niet als een \texttt{array}.
     Een implementatie in een programmeertaal kan ook aangeven dat een bepaald type niet ondersteund wordt, waardoor testplannen met dat type niet zullen werken.
-    \item De uitgebreide types.
-    Naast de basistypes van hierboven, bevat TESTed een hele reeks bijkomende types.
-    Deze gegevenstypes staan toe om meer details te gebruiken.
+    \item De uitgebreide types: dit zijn een hele reeks bijkomende types.
+    Deze gegevenstypes staan toe om meer details over de types te serialiseren en in het testplan op te nemen.
     Een voorbeeld is de lijst van types in \cref{tab:vertaling}, die voor een reeks gegevenstypes voor gehele getallen de concrete types in verschillende programmeertalen geeft.
     Het grote verschil is dat deze uitgebreide types standaard vertaald worden naar een van de basistypes.
     Voor talen die bijvoorbeeld geen \texttt{tuple} uit Python ondersteunen, zal het type omgezet worden naar \texttt{list}.
     Er is ook de mogelijk dat implementaties voor programmeertalen expliciet een bepaald type niet ondersteunen.
-    Zo zal de Java-implementatie geen \texttt{uint64} (een unsigned 64-bit integer) ondersteunen, omdat er geen equivalent bestaat in de taal\footnote{Toch niet met de ingebouwde types van de taal. Een implementatie met \texttt{BigInteger} is mogelijk.}.
-    \item De gegevenstypes worden ook gebruikt om de types van functie-argumenten aan te duiden.
-    Hier is er nood aan een bijkomend type:
-    \begin{description}
-        \item[identifier] Een verwijzing naar een eerder benoemd element (zoals variabelen of functies).
-        Bij het gebruik van dit gegevenstype stelt de data de naam van de identifier voor.
-    \end{description}
-    Het is logisch dat dit type niet gebruikt kan worden voor het encoderen van data, daar dit bijvoorbeeld onmogelijk als returnwaarde kan voorkomen.
+    Zo zal de Java-implementatie geen \texttt{uint64} (een unsigned 64-bit integer) ondersteunen, omdat er geen equivalent bestaat in de taal\footnote{Dit is slechts ter illustratie: in de implementatie van TESTed wordt \texttt{BigInteger} gebruikt.}.
     \item Voorschrijvende types.
     Gegevenstypes in deze categorie kunnen enkel gebruikt worden bij het aangeven welk gegevenstype verwacht wordt, niet bij de eigenlijke encodering van waarden.
     In de praktijk gaat het om het type van variabelen.
     In deze categorie zouden gegevenstypes als \texttt{union[str, int]} komen.
-    Er is echt expliciet gekozen om dit soort types niet te ondersteunen, door de moeilijkheid om dit te implementeren in statisch getypeerde talen, zoals Java of C\@.
-    Een type dat wel ondersteund wordt is:
+    Er is echter expliciet gekozen om dit soort types niet te ondersteunen, door de moeilijkheid om dit te implementeren in statisch getypeerde talen, zoals Java of C\@.
+    Twee types die wel ondersteund worden in deze modus zijn:
     \begin{description}
         \item[any] Het \texttt{any}-type geeft aan dat het type van een variabele onbekend is.
         Merk op dat dit in sommige talen tot moeilijkheden zal leiden: zo zal dit in C-code als \texttt{long} beschouwd worden (want C heeft geen equivalent van een \texttt{any}-type).
+        \item[custom] Een eigen type, waarbij de naam van het type gegeven wordt.
+        Dit is nuttig om bijvoorbeeld variabelen aan te maken met als gegevenstype een eigen klasse, zoals een klasse die de student moest implementeren.
     \end{description}
 \end{enumerate}
 
-\begin{table}[h]
+\begin{table}
+    \centering
+    \caption{Implementaties van de basistypes in de verschillende programmeertalen.}
+    \label{tab:basistypes}
+    \begin{tabular}{|l|lll|}
+        \hline
+        Type              & Python                      & Java                          & Haskell \\
+        \hline
+        \texttt{integer}  & \mintinline{python}{int}    & \mintinline{java}{long}     &         \\
+        \texttt{rational} & \mintinline{python}{float}  & \mintinline{java}{double}   &         \\
+        \texttt{text}     & \mintinline{python}{str}    & \mintinline{java}{String}   &         \\
+        \texttt{char}     & \mintinline{python}{str}    & \mintinline{java}{char}     &         \\
+        \texttt{boolean}  & \mintinline{python}{bool}   & \mintinline{java}{boolean}  &         \\
+        \texttt{sequence} & \mintinline{python}{list}   & \mintinline{java}{List<>}   &         \\
+        \texttt{set}      & \mintinline{python}{set}    & \mintinline{java}{Set<>}    &         \\
+        \texttt{map}      & \mintinline{python}{dict}   & \mintinline{java}{Map<>}    &         \\
+        \texttt{nothing}  & \mintinline{python}{None}   & \mintinline{java}{null}     &         \\
+        \hline
+    \end{tabular}
+\end{table}
+
+\begin{table}
     \centering
     \caption{Voorbeeld van de implementatie van types voor gehele getallen, met als basistype \texttt{integer}.}
     \label{tab:vertaling}
@@ -391,7 +412,7 @@ Om deze redenen zijn de gegevenstypes opgedeeld in vier categorieën:
     \end{threeparttable}
 \end{table}
 
-\subsection{Functieoproepen en assignments}\label{subsec:functieoproepen}
+\subsection{Expressions en statements}\label{subsec:expressions-and-statements}
 
 Een ander onderdeel van het testplan verdient ook speciale aandacht: toekennen van waarden aan variabelen (\english{assignments}) en functieoproepen.
 
@@ -401,69 +422,62 @@ Bij de evaluatie dient dan een instantie van die klasse aangemaakt te worden, wa
 
 \inputminted{java}{code/assignment.jshell}
 
-Concreet is ervoor gekozen om het testplan niet uit te breiden met generieke statements of expressies, maar de ondersteuning te beperken tot assignments en functieoproepen.
-Dit om de implementatie van de vertaling van het testplan naar de ondersteunde programmeertalen niet nodeloos ingewikkeld te maken.
+Om deze reden is het testplan uitgebreid met ondersteuning voor statements en expressies.
+Toch moet meteen opgemerkt worden dan deze ondersteuning beperkt is tot wat er nodig is om het scenario van hiervoor te kunnen uitvoeren;
+het is zeker niet de bedoeling om een volledige eigen programmeertaal te ontwerpen.
 
-\begin{listing}
-    \inputminted{json}{code/value-schema.json}
-    \caption{
-        Het schema voor een functieoproep in het testplan.
-        Hierbij is \texttt{<waarde>} een waarde, zoals besproken in subparagraaf \emph{Dataschema} van \cref{subsec:dataserialisatie}.
-    }
-    \label{lst:function-schema}
-\end{listing}
-
-\Cref{lst:function-schema} toont de structuur van een functieoproep in een vereenvoudigde versie van JSON Schema.
-Het bestaat uit volgende onderdelen:
-\begin{description}
-    \item[\texttt{type}] Het soort functie.
-    Kan een van deze waarden zijn:
+In \cref{lst:type-schema} staat onder andere het formaat van een expressie en een functieoproep in een vereenvoudigde versie van JSON Schema.
+Een expressie is een dezer drie dingen:
+\begin{enumerate}
+    \item Een waarde, zoals hiervoor besproken in subparagraaf \emph{Dataschema} van \cref{subsec:dataserialisatie}.
+    \item Een \texttt{identifier}, voorgesteld als een string.
+    \item Een functieoproep, die bestaat uit:
     \begin{description}
-        \item[\texttt{function}] Een \english{top-level} functie.
-        Afhankelijk van de programmeertaal zal deze functie toch omgezet worden naar een \texttt{namespace}-functie.
-        Zo worden dit soort functies in Java omgezet naar statische functies.
-        \item[\texttt{namespace}] Een methode (functie van een object) of een functie in een namespace.
-        De invulling hiervan is gedeeltelijk programmeertaalafhankelijk: in Java gaat het om methodes, terwijl het in Haskell om functies van een module gaat.
-        Bij dit soort functies moet de \texttt{namespace} gegeven worden.
-        \item[\texttt{constructor}] Deze soort heeft dezelfde semantiek als een top-level functie, met dien verstande dat het om een constructor gaat.
-        In Java zal bijvoorbeeld het keyword \texttt{new} vanzelf toegevoegd worden.
-        De functienaam doet dienst als naam van de klasse.
-        \item[\texttt{identity}] Dit is een speciaal geval: er mag geen functienaam gegeven worden en er moet exact één argument gegeven worden.
-        Dat ene argument zal de returnwaarde van de functie zijn.
-        In de implementaties wordt dit vaak ook niet vertaald als een functie, maar wordt de waarde rechtstreeks gebruikt.
-        De bestaansreden van dit soort functies is het toekennen van waarden aan variabelen, om redenen die we later zullen bespreken.
+        \item[\texttt{type}] Het soort functie.
+        Kan een van deze waarden zijn:
+        \begin{description}
+            \item[\texttt{function}] Een \english{top-level} functie.
+            Afhankelijk van de programmeertaal zal deze functie toch omgezet worden naar een \texttt{namespace}-functie.
+            Zo worden dit soort functies in Java omgezet naar statische functies.
+            \item[\texttt{namespace}] Een methode (functie van een object) of een functie in een namespace.
+            De invulling hiervan is gedeeltelijk programmeertaalafhankelijk: in Java gaat het om methodes, terwijl het in Haskell om functies van een module gaat.
+            Bij dit soort functies moet de \texttt{namespace} gegeven worden.
+            \item[\texttt{constructor}] Deze soort functie heeft dezelfde semantiek als een top-level functie, met dien verstande dat het om een constructor gaat.
+            In Java zal bijvoorbeeld het keyword \texttt{new} vanzelf toegevoegd worden.
+            De functienaam doet dienst als naam van de klasse.
+            \item[\texttt{property}] De property van een instantie wordt gelezen.
+            Deze soort functie heeft dezelfde semantiek van een namespace-functie, maar heeft geen argumenten.
+        \end{description}
+        \item[\texttt{namespace}] De namespace van de functie.
+        \item[\texttt{name}] De naam van de functie.
+        \item[\texttt{arguments}] De argumenten van de functie.
+        Dit is een lijst van expressies.
     \end{description}
-    \item[\texttt{namespace}] De namespace voor functies van het type \texttt{namespace}.
-    \item[\texttt{name}] De naam van de functie.
-    \item[\texttt{arguments}] De argumenten van de functie.
-    Dit is een lijst van waarden, waarbij de waarden zijn zoals beschreven bij het serialisatieformaat in \cref{subsec:dataserialisatie}.
-\end{description}
+\end{enumerate}
 
-% TODO: herdenk heel deze zever.
-Een beperking is dat het niet mogelijk is om rechtstreeks een functieoproep te doen als argument voor een andere functie,
-of toch niet op een programmeertaalonafhankelijke manier.
-Een oproep als \texttt{oproep(hallo(), 5)} is niet mogelijk.
-Bij dergelijke dingen zal de functieoproep eerst aan variabele moeten toegekend worden, bv.\ \texttt{var param = hallo()}, waarna deze variabele als argument met type \texttt{literal} kan gegeven worden aan de oorspronkelijke functie: \texttt{oproep(param, 5)}.
-De aandachtige lezer zal opmerken dat met die functieargumenten van het type \texttt{identifier} rond deze beperking kan gewerkt worden, aangezien de tekstuele waarde van een dergelijk argument letterlijk in de taal komt.
-We raden deze omweg echter ten sterkste af: dit maakt het testplan taalafhankelijk, want niet elke programmeertaal implementeert functieoproepen op eenzelfde wijze.
-
-Dit brengt ons bij de variabeletoekenning of \english{assignment}.
-In ons testplan beperkt dit zich tot het toekennen van een naam aan het resultaat van een functieoproep.
-Dit is ook meteen de reden voor het bestaan van de functiesoort \texttt{identity}: via deze weg blijft het testplan eenvoudiger (de waarde van een assignment is altijd een functieoproep), maar toch kunnen gewoon waarden toegekend worden aan een variabelen.
-Concreet ziet een variabeletoekenning er als volgt uit:
-
-\inputminted{json}{code/assignment.json}
+De ondersteuning voor statements in het testplan beperkt zich tot variabeletoekenningen of \english{assignment}s.
+Er is expliciet voor gekozen om expressies geen statements te maken.
+De reden hiervoor is dat dit de implementatie ingewikkelder zou maken, zonder noemenswaardig voordeel.
+Een assignment kent een naam toe aan het resultaat van een expression.
+\Cref{lst:type-schema} toont ook de vereenvoudigde JSON Schema van een statement (en dus van een assignment, daar er maar één soort statement bestaat).
+Hier staat \texttt{<datatype>} voor een van de gegevenstypes die hiervoor besproken zijn.
 
 De \texttt{name} is de naam die aan de variabele gegeven zal worden.
-Het veldje \texttt{expression} moet een object zijn dat een functieoproep voorstelt, in het formaat zoals hiervoor besproken.
-In een beperkt aantal gevallen kan de judge het type van de variabele afleiden uit de functieoproep, maar in veel gevallen is het nodig om zelf het type mee te geven.
-Dit type moet een van de ondersteunde types zijn uit het serialisatieformaat, zij het dat er ondersteuning is voor eigen types (zoals een klasse die geïmplementeerd moest worden door de student).
+Het veldje \texttt{expression} moet een expressie zijn, zoals reeds besproken.
+Ook moet het gegevenstype van de variabele gegeven worden.
+Hiervoor kunnen types het het serialisatieformaat gebruikt worden, inclusief de types uit de letterlijke modus.
 
 Een gecombineerd voorbeeld staat hieronder.
 Hier wordt de string \texttt{'Dodona'} toegekend aan een variabele met naam \texttt{name}.
-De judge kan het type afleiden, dus we moeten niet opgeven dat \texttt{name} een \texttt{text} is.
 
 \inputminted{json}{code/assign-variable.json}
+
+Tot slot is het nog het vermelden waard dat waarden van de gegevenstypes \texttt{sequence} en \texttt{map} als elementen geen andere waarden hebben, maar expressies.
+Dit niet het geval in de beschrijvende modus van de gegevenstypes, bijvoorbeeld bij het aangeven wat de verwachte returnwaarde van een functie is.
+Het testplan biedt namelijk geen ondersteuning voor het serialiseren van identifiers en functieoproepen, enkel waarden.
+Dit betekent dat constructies zoals deze mogelijk zijn in het testplan:
+
+\inputminted{java}{code/advanced.jshell}
 
 \subsection{Controle ondersteuning voor programmeertalen}\label{subsec:vereiste-functies}
 
