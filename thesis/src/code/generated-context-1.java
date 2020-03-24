@@ -1,11 +1,11 @@
 public class Context_0_0 {
 
-    private final FileWriter valueWriter;
-    private final FileWriter exceptionWriter;
+    private final PrintWriter valueWriter;
+    private final PrintWriter exceptionWriter;
 
     public Context_0_0() throws Exception {
-        this.valueWriter = new FileWriter("TDm75Wrze_values.txt");
-        this.exceptionWriter = new FileWriter("TDm75Wrze_exceptions.txt");
+        this.valueWriter = new PrintWriter("TDm75Wrze_values.txt");
+        this.exceptionWriter = new PrintWriter("TDm75Wrze_exceptions.txt");
     }
 
     private void send(Object value) throws Exception {
@@ -16,9 +16,13 @@ public class Context_0_0 {
         Values.sendException(exceptionWriter, exception);
     }
 
-    private void vEvaluate0(Object value) throws Exception { send(value); }
+    private void vEvaluate0(Object value) throws Exception {
+        send(value);
+    }
 
-    private void eEvaluate0(Exception value) throws Exception { sendE(value); }
+    private void eEvaluate0(Exception value) throws Exception {
+        sendE(value);
+    }
 
     void execute() throws Exception {
         try {
@@ -32,14 +36,7 @@ public class Context_0_0 {
         exceptionWriter.write("--TDm75Wrze-- SEP");
     }
 
-    void close() throws Exception {
-        this.valueWriter.close();
-        this.exceptionWriter.close();
-    }
-
     public static void main(String[] a) throws Exception {
-        var context = new Context_0_1();
-        context.execute();
-        context.close();
+        (new Context_0_1()).execute();
     }
 }

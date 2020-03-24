@@ -15,7 +15,6 @@ def valid_lottery_numbers(number_str, count=6, maximum=42):
         return False, "lottogetallen worden niet in correct formaat teruggegeven"
 
     nrs = [int(x) for x in number_str.split(" - ")]
-
     if len(nrs) != count:
         return False, f"verwachtte {count} in plaats van {len(nrs)} lottogetallen"
 
