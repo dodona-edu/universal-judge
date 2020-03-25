@@ -73,7 +73,13 @@ class SequenceType(WithFeatures):
     def get_used_features(self) -> FeatureSet:
         base_features = FeatureSet(Constructs.NOTHING, {self.type})
         nested_features = [x.get_used_features() for x in self.data]
-        return combine_features([base_features] + nested_features)
+        combined = combine_features([base_features] + nested_features)
+        content_type = self.get_content_type()
+        if content_type == BasicStringTypes.ANY:
+            combined = combine_features([FeatureSet(
+                Constructs.HETEROGENEOUS_COLLECTIONS, set()
+            )])
+        return combined
 
     def get_content_type(self) -> AllTypes:
         """
@@ -84,7 +90,9 @@ class SequenceType(WithFeatures):
         """
         types = set()
         for element in self.data:
-            if isinstance(element, get_args(Value)):
+            if isinstance(element, SequenceType):
+                types.add(element.get_content_type())
+            elif isinstance(element, get_args(Value)):
                 types.add(element.type)
             else:
                 types.add(BasicStringTypes.ANY)
