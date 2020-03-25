@@ -1,9 +1,11 @@
 ## Convert a Value to a type.
-<%! from tested.serialisation import VariableType, as_basic_type, resolve_to_basic %>
+<%! from tested.serialisation import VariableType, as_basic_type, resolve_to_basic, Type %>
 <%! from tested.datatypes import AdvancedNumericTypes, AdvancedSequenceTypes  %>
 <%! from tested.datatypes import BasicNumericTypes, BasicStringTypes, BasicBooleanTypes, BasicNothingTypes, BasicSequenceTypes, BasicObjectTypes  %>
 <%page args="tp,value=None" />
-% if tp == AdvancedSequenceTypes.ARRAY:
+% if isinstance(tp, VariableType):
+    ${tp.data}
+% elif tp == AdvancedSequenceTypes.ARRAY:
     <% type_ = value.get_content_type() %>
     <% assert value is not None, "Value is needed for arrays!" %>
     <%include file="declaration.mako" args="tp=type_"/>[]

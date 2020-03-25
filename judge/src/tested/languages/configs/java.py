@@ -6,8 +6,8 @@ from humps import pascalize, camelize
 
 from .. import Language
 from ..config import CallbackResult, TypeSupport
-from ...datatypes import AdvancedNumericTypes as ant, AllTypes
-from ...datatypes import AdvancedSequenceTypes as ast
+from ...datatypes import (AdvancedNumericTypes as ant, AllTypes,
+                          AdvancedSequenceTypes as ast)
 from ...testplan import Plan
 from ...utils import fallback
 
@@ -78,6 +78,7 @@ class JavaConfig(Language):
                 if not x.startswith(CONTEXT_PREFIX)
                    or x.startswith(f"{context_name}.")]
 
+    # noinspection DuplicatedCode
     def type_support_map(self) -> Mapping[AllTypes, TypeSupport]:
         return fallback(super().type_support_map(), {
             ant.INT_8:            TypeSupport.SUPPORTED,

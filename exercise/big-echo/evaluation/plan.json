@@ -1,4 +1,7 @@
 {
+  "configuration": {
+    "allow_fallback": false
+  },
   "tabs": [
     {
       "name": "Feedback",

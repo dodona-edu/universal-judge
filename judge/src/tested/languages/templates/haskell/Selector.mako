@@ -8,11 +8,8 @@ import System.Environment
     import qualified ${c}
 % endfor
 
-getIntArg :: IO Int
-getIntArg = fmap (read . head) getArgs
-
 main = do
-    n <- head getArgs
+    [n] <- getArgs
     case n of
         % for c in contexts:
             "${c}" -> ${c}.main

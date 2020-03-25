@@ -19,10 +19,10 @@ def read_config() -> DodonaConfig:
     return DodonaConfig(**{
         "memory_limit": 536870912,
         "time_limit": 10000000,
-        "programming_language": 'java',
+        "programming_language": 'haskell',
         "natural_language": 'nl',
-        "resources": Path('../exercise/isbn/evaluation').resolve(),
-        "source": Path('../exercise/isbn/solution/solution.java').resolve(),
+        "resources": Path('../exercise/big-echo/evaluation').resolve(),
+        "source": Path('../exercise/big-echo/solutions/test.hs').resolve(),
         "judge": Path('../judge/src/').resolve(),
         "workdir": Path('./workdir').resolve(),
         "plan_name": "plan.json",
@@ -41,6 +41,7 @@ if __name__ == '__main__':
     log.addHandler(ch)
 
     # Delete content in work dir
+    # noinspection PyTypeChecker
     for root, dirs, files in os.walk(config.workdir):
         for f in files:
             os.unlink(os.path.join(root, f))

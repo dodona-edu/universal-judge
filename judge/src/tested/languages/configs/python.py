@@ -9,8 +9,8 @@ from humps import decamelize, depascalize
 from . import python_linter
 from ..config import Language, CallbackResult, TypeSupport
 from ...configs import Bundle
-from ...datatypes import AdvancedNumericTypes as ant, AllTypes
-from ...datatypes import AdvancedSequenceTypes as ast
+from ...datatypes import (AdvancedNumericTypes as ant, AllTypes,
+                          AdvancedSequenceTypes as ast)
 from ...dodona import AnnotateCode, Severity, Message
 from ...testplan import Plan
 from ...utils import fallback

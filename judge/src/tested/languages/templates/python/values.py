@@ -16,7 +16,7 @@ def encode(value):
         type_ = "boolean"
         data_ = value
     elif isinstance(value, int):
-        type_ = "integer"
+        type_ = "bigint"
         data_ = value
     elif isinstance(value, float):
         type_ = "rational"

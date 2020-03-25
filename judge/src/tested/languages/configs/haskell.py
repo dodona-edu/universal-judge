@@ -1,14 +1,18 @@
 from os import PathLike
 from pathlib import Path
-from typing import List, Union
+from typing import List, Union, Mapping
 
 from humps import pascalize
 
 from .. import Language
-from ..config import CallbackResult, executable_name
+from ..config import CallbackResult, executable_name, TypeSupport
 from ...features import Constructs
 from ...serialisation import StringType, StringTypes, FunctionCall
 from ...testplan import Plan
+from ...datatypes import (AdvancedNumericTypes as ant, AllTypes,
+                          AdvancedSequenceTypes as ast,
+                          BasicSequenceTypes as bst, BasicObjectTypes as bot)
+from ...utils import fallback
 
 
 class HaskellConfig(Language):
@@ -30,10 +34,9 @@ class HaskellConfig(Language):
         return ["EvaluationUtils.hs"]
 
     def generation_callback(self, files: List[str]) -> CallbackResult:
-        # TODO: indicate the context_testcase file somehow?
         main_file = files[-1]
         exec_file = main_file.rstrip(".hs")
-        return (["ghc", main_file, "-context_testcase-is", exec_file],
+        return (["ghc", main_file, "-main-is", exec_file],
                 [executable_name(exec_file)])
 
     def conventionalise_function(self, function_name: str) -> str:
@@ -57,10 +60,7 @@ class HaskellConfig(Language):
         return f"Context_{tab_number}_{context_number}"
 
     def supported_constructs(self) -> Constructs:
-        return (Constructs.MAIN | Constructs.FUNCTION_CALL | Constructs.ASSIGNMENT
-                | Constructs.LISTS | Constructs.SETS | Constructs.MAPS
-                | Constructs.INTEGERS | Constructs.RATIONALS | Constructs.STRINGS
-                | Constructs.BOOLEANS)
+        return Constructs.MAIN | Constructs.FUNCTION_CALL | Constructs.ASSIGNMENT
 
     def solution_callback(self, solution: Union[Path, PathLike], plan: Plan):
         """Support implicit modules if needed."""
@@ -86,3 +86,24 @@ class HaskellConfig(Language):
             namespace=function.namespace,
             arguments=arguments
         )
+
+    # noinspection DuplicatedCode
+    def type_support_map(self) -> Mapping[AllTypes, TypeSupport]:
+        return fallback(super().type_support_map(), {
+            ant.INT_8:            TypeSupport.SUPPORTED,
+            ant.U_INT_8:          TypeSupport.SUPPORTED,
+            ant.INT_16:           TypeSupport.SUPPORTED,
+            ant.U_INT_16:         TypeSupport.SUPPORTED,
+            ant.INT_32:           TypeSupport.SUPPORTED,
+            ant.U_INT_32:         TypeSupport.SUPPORTED,
+            ant.INT_64:           TypeSupport.SUPPORTED,
+            ant.U_INT_64:         TypeSupport.SUPPORTED,
+            ant.SINGLE_PRECISION: TypeSupport.SUPPORTED,
+            ant.DOUBLE_EXTENDED:  TypeSupport.UNSUPPORTED,  # TODO: maybe?
+            ant.FIXED_PRECISION:  TypeSupport.UNSUPPORTED,  # TODO: maybe?
+            ast.ARRAY:            TypeSupport.UNSUPPORTED,  # TODO: maybe?
+            bst.SET:              TypeSupport.UNSUPPORTED,  # TODO: maybe?
+            bot.MAP:              TypeSupport.UNSUPPORTED,  # TODO: maybe?
+            ast.LIST:             TypeSupport.SUPPORTED,
+            ast.TUPLE:            TypeSupport.SUPPORTED
+        })

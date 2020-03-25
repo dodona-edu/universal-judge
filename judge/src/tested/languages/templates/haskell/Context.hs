@@ -1,5 +1,6 @@
-## Code to execute one test context.
-<%! from testplan import Assignment %>
+## Code to execute_module one test context.
+<%! from tested.serialisation import Statement, Expression %>
+<%! from tested.utils import get_args %>
 module ${context_name} where
 
 import System.IO (hPutStr, stderr)
@@ -26,8 +27,8 @@ send :: Typeable a => a -> IO ()
 send = sendValue value_file
 
 
-% for additional in additional_testcases:
-    v_evaluate_${loop.index} value = <%include file="function.mako" args="function=additional.value_function"/>
+% for additional in testcases:
+    v_evaluate_${loop.index} value = <%include file="function.mako" args="function=testcases.value_function"/>
 % endfor
 
 
@@ -36,28 +37,28 @@ main = do
         ${before}
     % endif
 
-    % if main_testcase.exists:
+    % if context_testcase.exists:
         let mainArgs = [\
-            % for argument in main_testcase.arguments:
+            % for argument in context_testcase.arguments:
                 <%include file="value.mako" args="value=argument"/>\
             % endfor
         ]
         withArgs mainArgs ${submission_name}.main
-        hPutStr stderr "--${secret_id}-- SEP"
-        putStr "--${secret_id}-- SEP"
-        writeDelimiter value_file "--${secret_id}-- SEP"
-        writeDelimiter exception_file "--${secret_id}-- SEP"
     % endif
+    hPutStr stderr "--${secret_id}-- SEP"
+    putStr "--${secret_id}-- SEP"
+    writeDelimiter value_file "--${secret_id}-- SEP"
+    writeDelimiter exception_file "--${secret_id}-- SEP"
 
-    % for additional in additional_testcases:
-        % if isinstance(additional.statement, Assignment):
-            <%include file="assignment.mako" args="assignment=additional.statement,root=False" />
+    % for additional in testcases:
+        % if isinstance(additional.command, get_args(Statement)):
+            <%include file="statement.mako" args="statement=additional.command,root=False" />
         % else:
             % if additional.has_return:
-                v${loop.index} <- <%include file="function.mako" args="function=additional.statement" />
+                v${loop.index} <- <%include file="expression.mako" args="expression=additional.command" />
                 v_evaluate_${loop.index} v${loop.index}
             % else:
-                <%include file="function.mako" args="function=additional.statement" />
+                <%include file="expression.mako" args="expression=additional.command" />
             % endif
         % endif
 
