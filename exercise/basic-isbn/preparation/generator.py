@@ -70,28 +70,21 @@ def generate_is_isbn():
     args = [
         ('9789027439642', False),
         ('9789027439642', True),
-        ('9789027439642', None),
-        ('080442957X', None),
         ('080442957X', False),
-        (9789027439642, None),
+        ('080442957X', True),
     ]
     # Voor de rest vullen we aan met willekeurige argumenten.
     while len(args) < 50:
         code = generate_code()
-        args.append((code, random.choice([None, True, False])))
+        args.append((code, random.choice([True, False])))
 
     # Genereer de eigenlijke contexten.
     for code, isbn13 in args:
         # Eerst doen we de functieoproep. We geven zeker de ISBN mee.
-        function_arguments = [
-            values.encode(code)
-        ]
-        # Indien nodig geven we ook het tweede argument mee.
-        if isbn13 is not None:
-            function_arguments.append(values.encode(isbn13))
+        function_arguments = [values.encode(code), values.encode(isbn13)]
 
         # Bereken het resultaat met de gegeven argumenten.
-        result = solution.is_isbn(code, isbn13 if isbn13 is not None else True)
+        result = solution.is_isbn(code, isbn13)
 
         # Ons testgeval bevat de functieoproep als invoer, en de berekende waarde
         # als verwachte uitvoer.
@@ -127,22 +120,20 @@ def generate_are_isbn():
 
     # Vaste invoerargumenten die we zeker in het testplan willen.
     codes = [
-        '0012345678', '0012345679', '9971502100', '080442957X', 5, True,
+        '0012345678', '0012345679', '9971502100', '080442957X', "5", "True",
         'The Practice of Computing Using Python', '9789027439642', '5486948320146'
     ]
     codes2 = ['012345678' + str(digit) for digit in range(10)]
     args = [
-        (codes, None),
         (codes, True),
         (codes, False),
-        (codes2, None),
         (codes2, True),
         (codes2, False),
     ]
     # Vul opnieuw de rest aan tot we aan 50 zitten.
     while len(args) < 50:
         codes = [generate_code() for _ in range(random.randint(4, 10))]
-        args.append((codes, random.choice([None, True, False])))
+        args.append((codes, random.choice([True, False])))
 
     # Genereer de eigenlijke contexten.
     contexts = []
@@ -163,16 +154,12 @@ def generate_are_isbn():
 
         # Stel de functieargumenten op. We geven opnieuw sowieso de variabele die
         # we eerst hebben aangemaakt mee als argument.
-        function_arguments = [
-            f"codes{index:02d}"
-        ]
+        function_arguments = [f"codes{index:02d}", values.encode(isbn13)]
 
         # Voeg het tweede argument toe indien nodig.
-        if isbn13 is not None:
-            function_arguments.append(values.encode(isbn13))
 
         # Bereken het resultaat.
-        result = solution.are_isbn(codes, isbn13 if isbn13 is not None else None)
+        result = solution.are_isbn(codes, isbn13)
 
         # Maak het normale testgeval. We hebben opnieuw als invoer de functie en als
         # uitvoer de verwachte waarde.
