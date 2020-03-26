@@ -178,6 +178,7 @@ def generate_files(bundle: Bundle,
     submission_file = f"{submission_name}" \
                       f".{bundle.language_config.file_extension()}"
     solution_path = common_dir / submission_file
+    # noinspection PyTypeChecker
     shutil.copy2(bundle.config.source, solution_path)
     dependencies.append(submission_file)
 
@@ -232,7 +233,7 @@ def evaluate_programmed(bundle: Bundle,
 
     # Create a directory for this evaluator. If one exists, delete it first.
     evaluator_dir_name = humps.decamelize(evaluator.path.stem)
-    custom_directory_name = f"{evaluator_dir_name}_{get_identifier()}"
+    custom_directory_name = f"{get_identifier()}_{evaluator_dir_name}"
     custom_path = Path(bundle.config.workdir, "evaluators", custom_directory_name)
     if custom_path.exists():
         _logger.debug("Removing existing directory for custom evaluator.")

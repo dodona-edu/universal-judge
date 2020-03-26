@@ -22,12 +22,12 @@ workdir                           //Werkmap van TESTed
 │   └── values.pyc
 ...
 └── evaluators                    //Aangepaste evaluatoren
-    ├── buzzchecker_Aao9H18Ve     //Map voor elke context
+    ├── Aao9H18Ve_buzzchecker     //Map voor elke context
     │   ├── buzzchecker.py        //Code aangepaste evaluator
     │   ├── evaluation_utils.py
     │   ├── evaluator_executor.py
     │   └── values.py
-    ├── buzzchecker_B5WViK0zQ
+    ├── B5WViK0zQ_buzzchecker
     │   ├── buzzchecker.py
     │   ├── evaluation_utils.py
     │   ├── evaluator_executor.py
