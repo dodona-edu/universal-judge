@@ -376,17 +376,17 @@ Om deze redenen zijn de gegevenstypes opgedeeld in drie categorieën:
     \label{tab:basistypes}
     \begin{tabular}{|l|lll|}
         \hline
-        Type              & Python                      & Java                          & Haskell \\
+        Type              & Python          & Java              & Haskell           \\
         \hline
-        \texttt{integer}  & \mintinline{python}{int}    & \mintinline{java}{long}     &         \\
-        \texttt{rational} & \mintinline{python}{float}  & \mintinline{java}{double}   &         \\
-        \texttt{text}     & \mintinline{python}{str}    & \mintinline{java}{String}   &         \\
-        \texttt{char}     & \mintinline{python}{str}    & \mintinline{java}{char}     &         \\
-        \texttt{boolean}  & \mintinline{python}{bool}   & \mintinline{java}{boolean}  &         \\
-        \texttt{sequence} & \mintinline{python}{list}   & \mintinline{java}{List<>}   &         \\
-        \texttt{set}      & \mintinline{python}{set}    & \mintinline{java}{Set<>}    &         \\
-        \texttt{map}      & \mintinline{python}{dict}   & \mintinline{java}{Map<>}    &         \\
-        \texttt{nothing}  & \mintinline{python}{None}   & \mintinline{java}{null}     &         \\
+        \texttt{integer}  & \texttt{int}    & \texttt{long}     & \texttt{Integer}  \\
+        \texttt{rational} & \texttt{float}  & \texttt{double}   & \texttt{Double}   \\
+        \texttt{text}     & \texttt{str}    & \texttt{String}   & \texttt{String}   \\
+        \texttt{char}     & \texttt{str}    & \texttt{char}     & \texttt{Char}     \\
+        \texttt{boolean}  & \texttt{bool}   & \texttt{boolean}  & \texttt{Boolean}  \\
+        \texttt{sequence} & \texttt{list}   & \texttt{List<>}   & \texttt{List}     \\
+        \texttt{set}      & \texttt{set}    & \texttt{Set<>}    & -        \\
+        \texttt{map}      & \texttt{dict}   & \texttt{Map<>}    & -        \\
+        \texttt{nothing}  & \texttt{None}   & \texttt{null}     & \texttt{Nothing}  \\
         \hline
     \end{tabular}
 \end{table}
@@ -403,7 +403,7 @@ Om deze redenen zijn de gegevenstypes opgedeeld in drie categorieën:
             Python     & \texttt{int}  & \texttt{int}   & \texttt{int}   & \texttt{int}    & \texttt{int}   & \texttt{int}    & \texttt{int}   & \texttt{int}    \\
             Java       & \texttt{byte} & \texttt{short} & \texttt{short} & \texttt{int}    & \texttt{int}   & \texttt{long}   & \texttt{long}  & -               \\
             C\tnote{1} & \texttt{int8\_t} & \texttt{uint8\_t} & \texttt{int16\_t} & \texttt{uint16\_t} & \texttt{int32\_t} & \texttt{uint32\_t} & \texttt{int64\_t} & \texttt{uint64\_t} \\
-            Haskell    & \texttt{Integer} & \texttt{Integer} & \texttt{Integer} & \texttt{Integer} & \texttt{Integer} & \texttt{Integer} & \texttt{Integer} & \texttt{Integer} \\
+            Haskell    & \texttt{Int8} & \texttt{Word8} & \texttt{Int16} & \texttt{Word16} & \texttt{Int32} & \texttt{Word32} & \texttt{Int64} & \texttt{Word64} \\
             \hline
         \end{tabular}
     \begin{tablenotes}
