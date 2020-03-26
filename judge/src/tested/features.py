@@ -24,6 +24,9 @@ class Constructs(Flag):
 
     HETEROGENEOUS_COLLECTIONS = auto()
 
+    DEFAULT_ARGUMENTS = auto()
+    HETEROGENEOUS_ARGUMENTS = auto()
+
     ALL = (OBJECTS | EXCEPTIONS | MAIN | FUNCTION_CALL | ASSIGNMENT
            | HETEROGENEOUS_COLLECTIONS)
 
@@ -38,7 +41,7 @@ class FeatureSet(NamedTuple):
 
 class WithFeatures:
     def get_used_features(self) -> FeatureSet:
-        raise NotImplementedError()
+        raise NotImplementedError
 
 
 NOTHING = FeatureSet(constructs=Constructs.NOTHING, types=set())

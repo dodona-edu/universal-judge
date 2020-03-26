@@ -5,20 +5,27 @@ This module is the authoritative source on the format and behaviour of the testp
 When executing this module, a json-schema is generated for the format, which can be
 of assistance when checking existing testplans.
 """
+from collections import defaultdict
 from dataclasses import field
 from enum import Enum
 from os import path
 from pathlib import Path
-from typing import List, Optional, Dict, Any, Literal, Union
+from typing import List, Optional, Dict, Any, Literal, Union, NamedTuple, Iterable
 
+from itertools import chain
 from pydantic import BaseModel, root_validator, validator
 from pydantic.dataclasses import dataclass
 
 from .datatypes import StringTypes
 from .features import (Constructs, FeatureSet, combine_features, WithFeatures,
                        NOTHING)
-from .serialisation import ExceptionValue, Value, Expression, Statement, \
-    Identifier, FunctionCall, SequenceType, ObjectType
+from .serialisation import (ExceptionValue, Value, Expression, Statement,
+                            Identifier, FunctionCall, SequenceType, ObjectType,
+                            FunctionType, WithFunctions)
+from .utils import get_args
+
+# Create alias, since we use this a lot.
+_flatten = chain.from_iterable
 
 
 class TextBuiltin(str, Enum):
@@ -250,21 +257,27 @@ OutputChannel = Union[NormalOutputChannel, SpecialOutputChannel]
 
 
 @dataclass
-class ExpressionInput(WithFeatures):
+class ExpressionInput(WithFeatures, WithFunctions):
     """Input for an expression."""
     expression: Expression
 
     def get_used_features(self) -> FeatureSet:
         return self.expression.get_used_features()
 
+    def get_functions(self) -> Iterable[FunctionCall]:
+        return self.expression.get_functions()
+
 
 @dataclass
-class StatementInput(WithFeatures):
+class StatementInput(WithFeatures, WithFunctions):
     """Input for a command."""
     statement: Statement
 
     def get_used_features(self) -> FeatureSet:
         return self.statement.get_used_features()
+
+    def get_functions(self) -> Iterable[FunctionCall]:
+        return self.statement.get_functions()
 
 
 _TextOutput = Union[TextOutputChannel, SpecialOutputChannel]
@@ -330,7 +343,7 @@ class Output(BaseOutput):
 
 
 @dataclass
-class Testcase(WithFeatures):
+class Testcase(WithFeatures, WithFunctions):
     """A testcase is defined by an input channel and an output channel"""
     input: Union[ExpressionInput, StatementInput]
     description: Optional[str] = None  # Will be generated if None.
@@ -352,6 +365,9 @@ class Testcase(WithFeatures):
         ):
             raise ValueError(f"An convert_statement cannot have a return value.")
         return values
+
+    def get_functions(self) -> Iterable[FunctionCall]:
+        return self.input.get_functions()
 
 
 @dataclass
@@ -405,7 +421,7 @@ Code = Dict[str, TextData]
 
 
 @dataclass
-class Context(WithFeatures):
+class Context(WithFeatures, WithFunctions):
     """
     A test case is an independent run of the solution.
     """
@@ -433,15 +449,22 @@ class Context(WithFeatures):
     def get_stdin(self, resources: Path):
         return self.context_testcase.input.get_as_string(resources)
 
+    def get_functions(self) -> Iterable[FunctionCall]:
+        return _flatten(x.get_functions() for x in self.testcases)
+
 
 @dataclass
-class Tab(WithFeatures):
+class Tab(WithFeatures, WithFunctions):
     """Represents a tab on Dodona."""
+
     name: str
     contexts: List[Context]
 
     def get_used_features(self) -> FeatureSet:
         return combine_features(x.get_used_features() for x in self.contexts)
+
+    def get_functions(self) -> Iterable[FunctionCall]:
+        return _flatten(x.get_functions() for x in self.contexts)
 
 
 class ExecutionMode(str, Enum):
@@ -478,17 +501,96 @@ class Configuration:
 
 
 @dataclass
-class Plan(WithFeatures):
+class Plan(WithFeatures, WithFunctions):
     """General test plan, which is used to run tests of some code."""
     tabs: List[Tab] = field(default_factory=list)
     namespace: str = "Main"
     configuration: Configuration = Configuration()
 
     def get_used_features(self) -> FeatureSet:
-        return combine_features(x.get_used_features() for x in self.tabs)
+        """
+        Get the used features in the testplan.
+
+        For most features, the function will recurse into the testplan to get all
+        features from each element individually.
+
+        Detection of functions with optional parameters or parameters of different
+        types is done on a testplan level, since we need an overview of every
+        function call to do this.
+        """
+        function_features = _resolve_function_calls(self._get_functions())
+        other_features = combine_features(x.get_used_features() for x in self.tabs)
+        return combine_features([function_features, other_features])
+
+    def get_functions(self) -> Iterable[FunctionCall]:
+        return _flatten(x.get_functions() for x in self.tabs)
 
     def config_for(self, language: str) -> dict:
         return self.configuration.language.get(language, dict())
+
+
+class _FunctionSignature(NamedTuple):
+    name: str
+    namespace: str
+    type: FunctionType
+
+    @classmethod
+    def from_call(cls, call: FunctionCall):
+        return _FunctionSignature(call.name, call.namespace, call.type)
+
+
+def _resolve_function_calls(function_calls: Iterable[FunctionCall]):
+    """
+    Determine if functions with optional parameters and/or dynamic types are used.
+    This follows the following algorithm:
+
+    1. Collect all function calls of functions with the same base signature.
+       A base signature is a tuple of (name, namespace, type).
+    2. For every set of the signature and collection of calls, get all parameters.
+       TODO: support named parameters.
+    3. Check for used features:
+       1. If every function call has the same number of arguments.
+       2. If every function call has the same type of arguments.
+
+    :param function_calls:
+    :return:
+    """
+    registry: Dict[_FunctionSignature, List[FunctionCall]] = defaultdict(list)
+
+    for function_call in function_calls:
+        signature = _FunctionSignature.from_call(function_call)
+        registry[signature].append(function_call)
+
+    used_features = []
+    for signature, calls in registry.items():
+        # If there are default arguments, some function calls will not have the
+        # same amount of arguments.
+        if len(set(len(x.arguments) for x in calls)) == 1:
+            used_features.append(FeatureSet(Constructs.DEFAULT_ARGUMENTS, set()))
+        # Create mapping [arg position] -> arguments for each call
+        argument_map: Dict[Any, List[Expression]] = defaultdict(list)
+        for call in calls:
+            for i, arg in enumerate(call.arguments):
+                argument_map[i].append(arg)
+
+        # All types inside the every list should be the same.
+        # TODO: this has some limitations, more specifically, function calls and
+        #  identifiers are not checked, as it is not known which types they are.
+        type_use = []
+        for arguments in argument_map.values():
+            types = set()
+            for argument in arguments:
+                if isinstance(argument, SequenceType):
+                    types.add((argument.type, argument.get_content_type()))
+                elif isinstance(argument, get_args(Value)):
+                    types.add(argument.type)
+            type_use.append(types)
+        if not all(len(x) == 1 for x in type_use):
+            used_features.append(FeatureSet(
+                Constructs.HETEROGENEOUS_ARGUMENTS, set()
+            ))
+
+        return combine_features(used_features)
 
 
 class _PlanModel(BaseModel):

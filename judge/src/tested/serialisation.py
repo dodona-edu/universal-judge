@@ -16,12 +16,13 @@ A json-schema can be generated from this format by executing the module on the
 command line. The schema will be printed to stdout. This can be used to generate
 classes for implementations in other configs.
 """
+import itertools
 import json
 import logging
 from dataclasses import field, replace
 from decimal import Decimal
 from enum import Enum
-from typing import Union, List, Dict, Literal, Optional, Any
+from typing import Union, List, Dict, Literal, Optional, Any, Iterable
 
 import math
 from pydantic import BaseModel, root_validator
@@ -38,35 +39,49 @@ from .utils import get_args
 logger = logging.getLogger(__name__)
 
 
+class WithFunctions:
+    def get_functions(self) -> Iterable['FunctionCall']:
+        raise NotImplementedError
+
+
 @dataclass
-class NumberType(WithFeatures):
+class NumberType(WithFeatures, WithFunctions):
     type: NumericTypes
     data: Union[int, Decimal]
 
     def get_used_features(self) -> FeatureSet:
         return FeatureSet(Constructs.NOTHING, {self.type})
 
+    def get_functions(self) -> Iterable['FunctionCall']:
+        return []
+
 
 @dataclass
-class StringType(WithFeatures):
+class StringType(WithFeatures, WithFunctions):
     type: StringTypes
     data: str
 
     def get_used_features(self) -> FeatureSet:
         return FeatureSet(Constructs.NOTHING, {self.type})
 
+    def get_functions(self) -> Iterable['FunctionCall']:
+        return []
+
 
 @dataclass
-class BooleanType(WithFeatures):
+class BooleanType(WithFeatures, WithFunctions):
     type: BooleanTypes
     data: bool
 
     def get_used_features(self) -> FeatureSet:
         return FeatureSet(Constructs.NOTHING, {self.type})
 
+    def get_functions(self) -> Iterable['FunctionCall']:
+        return []
+
 
 @dataclass
-class SequenceType(WithFeatures):
+class SequenceType(WithFeatures, WithFunctions):
     type: SequenceTypes
     data: List['Expression']
 
@@ -84,9 +99,7 @@ class SequenceType(WithFeatures):
     def get_content_type(self) -> AllTypes:
         """
         Attempt to get a type for the content of the container. The function will
-        attempt to get the most specific type possible, but this is not very
-        sophisticated, e.g. all nested types are simply "Any", as are heterogeneous
-        sequences.
+        attempt to get the most specific type possible.
         """
         types = set()
         for element in self.data:
@@ -103,9 +116,12 @@ class SequenceType(WithFeatures):
         else:
             return BasicStringTypes.ANY
 
+    def get_functions(self) -> Iterable['FunctionCall']:
+        return itertools.chain.from_iterable(x.get_functions() for x in self.data)
+
 
 @dataclass
-class ObjectType(WithFeatures):
+class ObjectType(WithFeatures, WithFunctions):
     type: ObjectTypes
     data: Dict[str, 'Expression']
 
@@ -114,14 +130,22 @@ class ObjectType(WithFeatures):
         nested_features = [y.get_used_features() for x, y in self.data]
         return combine_features([base_features] + nested_features)
 
+    def get_functions(self) -> Iterable['FunctionCall']:
+        return itertools.chain.from_iterable(
+            x.get_functions() for x in self.data.values()
+        )
+
 
 @dataclass
-class NothingType(WithFeatures):
+class NothingType(WithFeatures, WithFunctions):
     type: NothingTypes
     data: Literal[None] = None
 
     def get_used_features(self) -> FeatureSet:
         return FeatureSet(Constructs.NOTHING, {self.type})
+
+    def get_functions(self) -> Iterable['FunctionCall']:
+        return []
 
 
 # A value is one of the preceding types.
@@ -130,11 +154,14 @@ Value = Union[
 ]
 
 
-class Identifier(str, WithFeatures):
+class Identifier(str, WithFeatures, WithFunctions):
     """Represents an identifier."""
 
     def get_used_features(self) -> FeatureSet:
         return FeatureSet(Constructs.NOTHING, set())
+
+    def get_functions(self) -> Iterable['FunctionCall']:
+        return []
 
     @classmethod
     def __get_validators__(cls):
@@ -173,7 +200,7 @@ class FunctionType(str, Enum):
 
 
 @dataclass
-class FunctionCall(WithFeatures):
+class FunctionCall(WithFeatures, WithFunctions):
     """
     Represents a function expression.
     """
@@ -212,6 +239,9 @@ class FunctionCall(WithFeatures):
 
         return combine_features([base_features] + argument_features)
 
+    def get_functions(self) -> Iterable['FunctionCall']:
+        return [self, *[x.get_functions() for x in self.arguments]]
+
 
 @dataclass
 class VariableType:
@@ -223,7 +253,7 @@ Expression = Union[Identifier, FunctionCall, Value]
 
 
 @dataclass
-class Assignment(WithFeatures):
+class Assignment(WithFeatures, WithFunctions):
     """
     Assigns the return value of a function to a variable. Because the expression
     part is pretty simple, the type of the value is determined by looking at the
@@ -242,6 +272,9 @@ class Assignment(WithFeatures):
         other = self.expression.get_used_features()
 
         return combine_features([base, other])
+
+    def get_functions(self) -> Iterable['FunctionCall']:
+        return self.expression.get_functions()
 
 
 Statement = Union[Assignment]
