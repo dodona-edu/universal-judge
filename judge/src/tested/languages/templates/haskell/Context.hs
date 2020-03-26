@@ -28,7 +28,7 @@ send = sendValue value_file
 
 
 % for additional in testcases:
-    v_evaluate_${loop.index} value = <%include file="function.mako" args="function=testcases.value_function"/>
+    v_evaluate_${loop.index} value = <%include file="expression.mako" args="expression=additional.value_function"/>
 % endfor
 
 
@@ -55,7 +55,7 @@ main = do
             <%include file="statement.mako" args="statement=additional.command,root=False" />
         % else:
             % if additional.has_return:
-                v${loop.index} <- <%include file="expression.mako" args="expression=additional.command" />
+                v${loop.index} <- <%include file="expression.mako" args="expression=additional.command,lifting=True" />
                 v_evaluate_${loop.index} v${loop.index}
             % else:
                 <%include file="expression.mako" args="expression=additional.command" />

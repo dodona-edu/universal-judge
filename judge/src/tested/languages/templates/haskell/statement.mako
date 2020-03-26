@@ -1,7 +1,7 @@
 ## Generates an statement in Java.
 <%page args="statement,root=False"/>
 % if root:
-    ${assignment.name} <- <%include file="expression.mako" args="expression=statement.expression"/>
+    ${statement.name} <- <%include file="expression.mako" args="expression=statement.expression, lifting=True"/>
 % else:
-    let ${assignment.name} = <%include file="expression.mako" args="expression=statement.expression,lifting=False"/>
+    let ${statement.name} = <%include file="expression.mako" args="expression=statement.expression"/>
 % endif

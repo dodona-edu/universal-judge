@@ -42,12 +42,16 @@ isbn10check = return >=> checkLength >=> checkDigits >=> checkChecksum
 
 
 -- We need a type class to be able to handle other types than String.
-class Checkable a where
-    isIsbn10 :: a -> Bool
-    isIsbn10 _ = False
+--class Checkable a where
+--    isIsbn10 :: a -> Bool
+--    isIsbn10 _ = False
 
 
 isIsbn10 :: String -> Bool
 isIsbn10 = isJust . isbn10check
+
+
+is_isbn a b = False
+are_isbn a b = False
 
 

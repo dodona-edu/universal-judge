@@ -1,7 +1,10 @@
 ## This translates an expression to Java.
 <%! from tested.utils import get_args %>
 <%! from tested.serialisation import Value, Identifier, FunctionCall%>
-<%page args="expression,lifting=True" />
+<%page args="expression,lifting=False" />
+% if lifting:
+    return (\
+% endif
 % if isinstance(expression, Identifier):
     ## If the expression is an identifier, just echo it.
     ${expression}\
@@ -11,8 +14,8 @@
 % else:
     <% assert isinstance(expression, get_args(Value))%>
     ## We have a value, delegate to the value template.
-    % if lifting:
-        return
-    % endif
     <%include file="value.mako", args="value=expression" />
+% endif
+% if lifting:
+    )\
 % endif
