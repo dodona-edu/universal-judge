@@ -482,10 +482,16 @@ Dit betekent dat constructies zoals deze mogelijk zijn in het testplan:
 \subsection{Controle ondersteuning voor programmeertalen}\label{subsec:vereiste-functies}
 
 In het stappenplan uit \cref{sec:ontwerp} is al vermeld dat vóór een beoordeling start, een controle plaatsvindt om zeker te zijn dat het testplan uitgevoerd kan worden in de programmeertaal van de ingediende oplossing.
-Concreet gebeurt dit door voor elk item in het testplan af te leiden wat de programmeertaal dient te ondersteunen om met dat item uit het testplan te kunnen werken.
-Bevat een testplan bijvoorbeeld waarden met als type \texttt{set} (verzamelingen), dan kunnen enkel programmeertalen die verzamelingen ondersteunen gebruikt worden.
-Dat zijn bijvoorbeeld Python en Java, maar geen Bash.
-Het afleiden van wat de programmeertaal moet ondersteunen gebeurt volledig automatisch aan de hand van het testplan.
+Bij de controle worden volgende zaken nagekeken:
+\begin{itemize}
+    \item Controle of de programmeertaal de nodige gegevenstypes ondersteunt.
+    Dit gaat van de basistypes (zoals \texttt{sequence}) tot de geavanceerde types (zoals \texttt{tuple}).
+    Voor elke programmeertaal binnen TESTed wordt bijgehouden welke types ondersteund worden en welke niet.
+    Bevat een testplan bijvoorbeeld waarden met als type \texttt{set} (verzamelingen), dan kunnen enkel programmeertalen die verzamelingen ondersteunen gebruikt worden.
+    Dat zijn bijvoorbeeld Python en Java, maar geen Bash.
+    \item Controle of de programmeertaal over de nodige taalconstructies beschikt, zoals \texttt{exceptions} of \texttt{objects}.
+    Bij deze controle wordt ook gecontroleerd of dat de programmeertaal optionele functieargumenten of functieargumenten met heterogene gegevenstypes nodig heeft.
+\end{itemize}
 
 \section{Oplossingen uitvoeren}\label{sec:oplossingen-uitvoeren}
 
