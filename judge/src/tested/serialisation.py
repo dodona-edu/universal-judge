@@ -34,7 +34,7 @@ from .datatypes import (NumericTypes, StringTypes, BooleanTypes,
                         BasicObjectTypes, BasicNumericTypes, BasicBooleanTypes,
                         BasicStringTypes, BasicNothingTypes)
 from .features import FeatureSet, Constructs, combine_features, WithFeatures
-from .utils import get_args
+from .utils import get_args, flatten
 
 logger = logging.getLogger(__name__)
 
@@ -117,7 +117,7 @@ class SequenceType(WithFeatures, WithFunctions):
             return BasicStringTypes.ANY
 
     def get_functions(self) -> Iterable['FunctionCall']:
-        return itertools.chain.from_iterable(x.get_functions() for x in self.data)
+        return flatten(x.get_functions() for x in self.data)
 
 
 @dataclass
@@ -131,9 +131,7 @@ class ObjectType(WithFeatures, WithFunctions):
         return combine_features([base_features] + nested_features)
 
     def get_functions(self) -> Iterable['FunctionCall']:
-        return itertools.chain.from_iterable(
-            x.get_functions() for x in self.data.values()
-        )
+        return flatten(x.get_functions() for x in self.data.values())
 
 
 @dataclass

@@ -4,12 +4,14 @@ import os
 import random
 import stat
 import string
+import typing
 from os import PathLike
 from pathlib import Path
-from typing import IO, Union, Generator, TypeVar, Generic, Optional, Mapping
+from typing import (IO, Union, Generator, TypeVar, Generic, Optional, Mapping,
+                    Iterable)
 
+import itertools
 import sys
-import typing
 
 logger = logging.getLogger(__name__)
 
@@ -90,6 +92,7 @@ def consume_shebang(submission: Path) -> Optional[str]:
     :return: The programming language if found.
     """
     language = None
+    # noinspection PyTypeChecker
     with open(submission, "r+") as file:
         lines = file.readlines()
         file.seek(0)
@@ -168,5 +171,11 @@ def get_args(type_):
         return type_,
 
 
-if __name__ == '__main__':
-    consume_shebang(Path("./solution.py"))
+def flatten(nested: Iterable[Iterable[T]]) -> Iterable[T]:
+    """
+    Flatten a list of lists one level.
+
+    >>> flatten([[0], [1], [2]])
+    [0, 1, 2]
+    """
+    return filter(None, itertools.chain.from_iterable(nested))

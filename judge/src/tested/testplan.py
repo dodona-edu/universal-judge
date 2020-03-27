@@ -12,7 +12,6 @@ from os import path
 from pathlib import Path
 from typing import List, Optional, Dict, Any, Literal, Union, NamedTuple, Iterable
 
-from itertools import chain
 from pydantic import BaseModel, root_validator, validator
 from pydantic.dataclasses import dataclass
 
@@ -22,10 +21,8 @@ from .features import (Constructs, FeatureSet, combine_features, WithFeatures,
 from .serialisation import (ExceptionValue, Value, Expression, Statement,
                             Identifier, FunctionCall, SequenceType, ObjectType,
                             FunctionType, WithFunctions)
-from .utils import get_args
+from .utils import get_args, flatten
 
-# Create alias, since we use this a lot.
-_flatten = chain.from_iterable
 
 
 class TextBuiltin(str, Enum):
@@ -450,7 +447,7 @@ class Context(WithFeatures, WithFunctions):
         return self.context_testcase.input.get_as_string(resources)
 
     def get_functions(self) -> Iterable[FunctionCall]:
-        return _flatten(x.get_functions() for x in self.testcases)
+        return flatten(x.get_functions() for x in self.testcases)
 
 
 @dataclass
@@ -464,7 +461,7 @@ class Tab(WithFeatures, WithFunctions):
         return combine_features(x.get_used_features() for x in self.contexts)
 
     def get_functions(self) -> Iterable[FunctionCall]:
-        return _flatten(x.get_functions() for x in self.contexts)
+        return flatten(x.get_functions() for x in self.contexts)
 
 
 class ExecutionMode(str, Enum):
@@ -518,12 +515,12 @@ class Plan(WithFeatures, WithFunctions):
         types is done on a testplan level, since we need an overview of every
         function call to do this.
         """
-        function_features = _resolve_function_calls(self._get_functions())
+        function_features = _resolve_function_calls(self.get_functions())
         other_features = combine_features(x.get_used_features() for x in self.tabs)
         return combine_features([function_features, other_features])
 
     def get_functions(self) -> Iterable[FunctionCall]:
-        return _flatten(x.get_functions() for x in self.tabs)
+        return flatten(x.get_functions() for x in self.tabs)
 
     def config_for(self, language: str) -> dict:
         return self.configuration.language.get(language, dict())
@@ -557,7 +554,9 @@ def _resolve_function_calls(function_calls: Iterable[FunctionCall]):
     """
     registry: Dict[_FunctionSignature, List[FunctionCall]] = defaultdict(list)
 
-    for function_call in function_calls:
+    fs = list(function_calls)
+
+    for function_call in fs:
         signature = _FunctionSignature.from_call(function_call)
         registry[signature].append(function_call)
 
@@ -565,7 +564,7 @@ def _resolve_function_calls(function_calls: Iterable[FunctionCall]):
     for signature, calls in registry.items():
         # If there are default arguments, some function calls will not have the
         # same amount of arguments.
-        if len(set(len(x.arguments) for x in calls)) == 1:
+        if len(set(len(x.arguments) for x in calls)) != 1:
             used_features.append(FeatureSet(Constructs.DEFAULT_ARGUMENTS, set()))
         # Create mapping [arg position] -> arguments for each call
         argument_map: Dict[Any, List[Expression]] = defaultdict(list)
