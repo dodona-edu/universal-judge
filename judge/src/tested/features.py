@@ -1,6 +1,7 @@
 """
 Module containing the definitions of the features we can support.
 """
+import logging
 import operator
 from enum import Flag, auto
 from functools import reduce
@@ -10,6 +11,9 @@ from .datatypes import AllTypes
 
 if TYPE_CHECKING:
     from .configs import Bundle
+
+
+_logger = logging.getLogger(__name__)
 
 
 class Constructs(Flag):
@@ -84,8 +88,17 @@ def is_supported(bundle: 'Bundle') -> bool:
 
     # Check constructs
     available_constructs = bundle.language_config.supported_constructs()
-    if required.constructs & available_constructs != required.constructs:
+    if (required.constructs & available_constructs) != required.constructs:
+        _logger.warning("This plan is not compatible!")
+        _logger.warning(f"Required constructs are {required.constructs}.")
+        _logger.warning(f"The language supports {available_constructs}.")
+        missing = (required.constructs ^ available_constructs) & required.constructs
+        _logger.warning(f"Missing features are: {missing}.")
         return False
 
     mapping = bundle.language_config.type_support_map()
-    return all(mapping[t] != TypeSupport.UNSUPPORTED for t in required.types)
+    for t in required.types:
+        if mapping[t] == TypeSupport.UNSUPPORTED:
+            _logger.warning(f"Plan requires unsupported type {t}")
+            return False
+    return True
