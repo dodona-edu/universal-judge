@@ -88,7 +88,7 @@ def generate_is_isbn():
 
         # Ons testgeval bevat de functieoproep als invoer, en de berekende waarde
         # als verwachte uitvoer.
-        testcase = {
+        testcases = [{
             "input":  {
                 "expression": {
                     "type":      "function",
@@ -101,11 +101,11 @@ def generate_is_isbn():
                     "value": (values.encode(result))
                 }
             }
-        }
+        } for _ in range(5)]
 
         # Steek het testgeval in een context.
         context = {
-            "testcases": [testcase]
+            "testcases": testcases
         }
         contexts.append(context)
 
@@ -163,7 +163,21 @@ def generate_are_isbn():
 
         # Maak het normale testgeval. We hebben opnieuw als invoer de functie en als
         # uitvoer de verwachte waarde.
-        testcase = {
+        testcase1 = {
+            "input":  {
+                "expression": {
+                    "type":      "function",
+                    "name":      "are_isbn",
+                    "arguments": function_arguments
+                }
+            },
+            "output": {
+                "result": {
+                    "value": (values.encode(result))
+                }
+            }
+        }
+        testcase2 = {
             "input":  {
                 "expression": {
                     "type":      "function",
@@ -184,7 +198,7 @@ def generate_are_isbn():
         # de assignment heeft enkel de standaardtests, wat wil zeggen dat er bv.
         # geen uitvoer op stderr mag zijn.
         context = {
-            "testcases": [assignment_testcase, testcase]
+            "testcases": [assignment_testcase, testcase1, testcase2]
         }
 
         contexts.append(context)

@@ -31,6 +31,7 @@ def _write_template(arguments, template: Template, path: Path):
     except Exception as e:
         _logger.error(exceptions.text_error_template().render())
         raise e
+    # noinspection PyTypeChecker
     with open(path, "w") as file:
         file.write(result)
 
@@ -59,13 +60,10 @@ _env_cache: Dict[str, TemplateLookup] = {}
 def _get_environment(bundle: Bundle) -> TemplateLookup:
     """Get the templating environment for a given configuration bundle."""
     if bundle.config.programming_language not in _env_cache:
-        _logger.debug("CACHE MISS: template environment will built.")
         processors = [remove_indents, remove_newline]
         paths = [str(x) for x in path_to_templates(bundle)]
         template = TemplateLookup(directories=paths, preprocessor=processors)
         _env_cache[bundle.config.programming_language] = template
-    else:
-        _logger.debug("CACHE HIT: existing template environment will be used.")
 
     return _env_cache[bundle.config.programming_language]
 

@@ -21,42 +21,60 @@ def _evaluate_channel(
         out: Union[UpdateCollector, IO],
         channel_name: str,
         expected_output: OutputChannel,
-        actual_result: str,
+        actual_result: Optional[str],
         evaluator: Evaluator) -> bool:
     """
     Evaluate the output on a given channel. This function will output the
-    appropriate messages
-    to start and end a new test in Dodona.
+    appropriate messages to start and end a new test in Dodona.
 
     If errors is given, the test will end with a runtime error. Note that if the
     channel output
     is None, the test will not be written to Dodona if everything is correct.
 
+    If the actual result is None, this indicates that the test has not been
+    executed. The same logic will be used to determine if the test should be
+    reported or not.
+
+    See https://github.com/dodona-edu/dodona/issues/1785, which will be used once
+    implemented in Dodona itself. For now, a separate message it sent.
+
     :param out: The output file for the judge.
     :param channel_name: The name of the channel being evaluated. Will be
                          displayed in Dodona.
     :param expected_output: The output channel from the test case.
-    :param actual_result: The actual output.
+    :param actual_result: The actual output or None if the test did not run.
     :param evaluator: The evaluator to use.
     :return: True if successful, otherwise False.
     """
-    evaluation_result = evaluator(expected_output, actual_result)
+    evaluation_result = evaluator(expected_output, actual_result or "")
     status = evaluation_result.result
-
-    test_collector = UpdateCollector(StartTest(
-        expected=evaluation_result.readable_expected,
-        channel=channel_name
-    ))
 
     # If the actual value is empty and the channel output is None or ignored,
     # don't report it.
-    is_correct = status.enum == Status.CORRECT
+    is_correct = status.enum == Status.CORRECT or actual_result is None
     has_no_result = actual_result is None or actual_result == ""
     has_no_expected = (expected_output == EmptyChannel.NONE
                        or expected_output == IgnoredChannel.IGNORED)
     is_exit_code = isinstance(expected_output, ExitCodeOutputChannel)
     if is_correct and ((has_no_result and has_no_expected) or is_exit_code):
         return True
+
+    if actual_result is None:
+        report_or_collect(out, StartTest(
+            expected=evaluation_result.readable_expected,
+            channel=channel_name
+        ))
+        report_or_collect(out, AppendMessage(
+            message="Test niet uitgevoerd."
+        ))
+        report_or_collect(out, CloseTest(
+            generated="",
+            status=StatusMessage(
+                enum=Status.WRONG,
+                human="Test niet uitgevoerd."
+            )
+        ))
+        return False
 
     report_or_collect(out, StartTest(
         expected=evaluation_result.readable_expected,
@@ -128,6 +146,8 @@ def evaluate_results(bundle: Bundle,
     exit_output = output.exit_code
     exit_evaluator = get_evaluator(bundle, context_dir, exit_output)
 
+    _logger.debug(f"Values before: {values}")
+
     # Get the values produced by the execution. If there are no values, we use an
     # empty string at this time. We handle missing output later.
     # We use pop here, since we want to remove the values. That way, all result
@@ -138,6 +158,8 @@ def evaluate_results(bundle: Bundle,
     # This is not actually evaluated, but for implementation reasons, the languages
     # still write a delimiter to it.
     _ = values.pop(0) if values else ""
+
+    _logger.debug(f"Values after: {values}")
 
     # Actual do the evaluation.
     results = [
@@ -160,6 +182,7 @@ def evaluate_results(bundle: Bundle,
 
     # Check for missing values and stop if necessary.
     if not stdout_ or not stderr_ or not exceptions or not values:
+        _logger.warning("Missing output in context testcase.")
         context_collector.collect(AppendMessage(
             "Ontbrekende uitvoerresultaten in Dodona. Er ging iets verkeerd!"
         ))
@@ -190,10 +213,14 @@ def evaluate_results(bundle: Bundle,
     if must_stop:
         return  # Stop now.
 
+    executed_testcases = 0
+
     # Begin processing the normal testcases.
     for i, testcase in enumerate(context.testcases):
         # Type hint for PyCharm.
         testcase: Testcase
+
+        _logger.debug(f"Evaluating testcase {i}")
 
         readable_input = get_readable_input(bundle, testcase)
         report_update(bundle.out, StartTestcase(description=readable_input))
@@ -235,11 +262,18 @@ def evaluate_results(bundle: Bundle,
             )
         ]
 
+        _logger.debug(f"IN TESTCASE {i}")
+        _logger.debug(f"  stdout -> {stdout_}")
+        _logger.debug(f"  stderr -> {stderr_}")
+        _logger.debug(f"  values -> {values}")
+        _logger.debug(f"  exceptions -> {exceptions}")
+
         # Check for missing values and stop if necessary.
         if (i >= len(stdout_)
                 or i >= len(stderr_)
                 or i >= len(values)
                 or i >= len(exceptions)):
+            _logger.warning(f"Missing output in testcase {i}")
             report_update(bundle.out, AppendMessage(
                 "Ontbrekende uitvoerresultaten in Dodona. Er ging iets verkeerd!"
             ))
@@ -267,8 +301,66 @@ def evaluate_results(bundle: Bundle,
 
         report_update(bundle.out, CloseTestcase())
 
+        executed_testcases = i
+
         if must_stop:
-            return  # Stop evaluation now.
+            _logger.debug("Stopping evaluation, since testcase is essential.")
+            break  # Stop evaluation now.
+
+    _logger.debug(f"Stopped at testcase {executed_testcases}")
+
+    # TODO: merge all three evaluations: context, testcases and not handled, since
+    #  they are quite similar but also not the same.
+
+    start = executed_testcases + 1
+
+    for i, testcase in enumerate(context.testcases[start:], start):
+        # Type hint for PyCharm.
+        testcase: Testcase
+
+        _logger.debug(f"Evaluating not executed testcase {i}")
+
+        readable_input = get_readable_input(bundle, testcase)
+        report_update(bundle.out, StartTestcase(description=readable_input))
+
+        # Get the evaluators
+        output = testcase.output
+        stdout_evaluator = get_evaluator(bundle, context_dir, output.stdout)
+        stderr_evaluator = get_evaluator(bundle, context_dir, output.stderr)
+        file_evaluator = get_evaluator(bundle, context_dir, output.file)
+        value_evaluator = get_evaluator(bundle, context_dir, output.result)
+        exception_evaluator = get_evaluator(bundle, context_dir, output.exception)
+
+        # Get the values produced by the execution. If there are no values, we use
+        # an empty string at this time. We handle missing output later.
+        actual_stderr = stderr_[i] if i < len(stderr_) else None
+        actual_exception = exceptions[i] if i < len(exceptions) else None
+        actual_stdout = stdout_[i] if i < len(stdout_) else None
+        actual_value = values[i] if i < len(values) else None
+
+        results = [
+            _evaluate_channel(
+                bundle.out, "file", testcase.output.file, "", file_evaluator
+            ),
+            _evaluate_channel(
+                bundle.out, "stderr", testcase.output.stderr, actual_stderr,
+                stderr_evaluator
+            ),
+            _evaluate_channel(
+                bundle.out, "exception", testcase.output.exception,
+                actual_exception, exception_evaluator
+            ),
+            _evaluate_channel(
+                bundle.out, "stdout", testcase.output.stdout, actual_stdout,
+                stdout_evaluator
+            ),
+            _evaluate_channel(
+                bundle.out, "return", testcase.output.result, actual_value,
+                value_evaluator
+            )
+        ]
+
+        report_update(bundle.out, CloseTestcase())
 
 
 def execute_context(bundle: Bundle, args: ContextExecution) \

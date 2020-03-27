@@ -149,7 +149,7 @@ def evaluate(config: EvaluatorConfig,
         return EvaluationResult(
             result=StatusMessage(
                 enum=Status.WRONG,
-                human="Verwachtte een returnwaarde, maar er was er geen."
+                human="Ontbrekende returnwaarde."
             ),
             readable_expected=readable_expected,
             readable_actual=readable_actual
