@@ -491,6 +491,14 @@ Bij de controle worden volgende zaken nagekeken:
     Dat zijn bijvoorbeeld Python en Java, maar geen Bash.
     \item Controle of de programmeertaal over de nodige taalconstructies beschikt, zoals \texttt{exceptions} of \texttt{objects}.
     Bij deze controle wordt ook gecontroleerd of dat de programmeertaal optionele functieargumenten of functieargumenten met heterogene gegevenstypes nodig heeft.
+    Een voorbeeld van een functie met argumenten met heterogene gegevenstypes komt bijvoorbeeld uit de ISBN-oefening (deze oefening wordt besproken in \cref{ch:nieuwe-oefening}):
+    \begin{minted}{pycon}
+>>> is_isbn("9789027439642")
+True
+>>> is_isbn(9789027439642)
+False
+    \end{minted}
+    In talen als Python en Java kan deze functie geïmplementeerd worden, maar in talens als C is dat veel moeilijker.
 \end{itemize}
 
 \section{Oplossingen uitvoeren}\label{sec:oplossingen-uitvoeren}
