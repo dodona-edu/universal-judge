@@ -12,7 +12,8 @@ int main(int argc, const char* argv[]) {
 
     % for c in contexts:
         if (strcmp("${c}", name) != 0) {
-            ${c}();
+            return ${c}();
         }
     % endfor
+    return -1;
 }

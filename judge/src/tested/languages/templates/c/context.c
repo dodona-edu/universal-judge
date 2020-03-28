@@ -58,6 +58,6 @@ int ${context_name}() {
 
 #ifndef INCLUDED
 int main() {
-    ${context_name}();
+    return ${context_name}();
 }
 #endif

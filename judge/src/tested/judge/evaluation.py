@@ -146,8 +146,6 @@ def evaluate_results(bundle: Bundle,
     exit_output = output.exit_code
     exit_evaluator = get_evaluator(bundle, context_dir, exit_output)
 
-    _logger.debug(f"Values before: {values}")
-
     # Get the values produced by the execution. If there are no values, we use an
     # empty string at this time. We handle missing output later.
     # We use pop here, since we want to remove the values. That way, all result
@@ -158,8 +156,6 @@ def evaluate_results(bundle: Bundle,
     # This is not actually evaluated, but for implementation reasons, the languages
     # still write a delimiter to it.
     _ = values.pop(0) if values else ""
-
-    _logger.debug(f"Values after: {values}")
 
     # Actual do the evaluation.
     results = [
@@ -306,8 +302,6 @@ def evaluate_results(bundle: Bundle,
         if must_stop:
             _logger.debug("Stopping evaluation, since testcase is essential.")
             break  # Stop evaluation now.
-
-    _logger.debug(f"Stopped at testcase {executed_testcases}")
 
     # TODO: merge all three evaluations: context, testcases and not handled, since
     #  they are quite similar but also not the same.
