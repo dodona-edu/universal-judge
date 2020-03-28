@@ -81,13 +81,10 @@ void write_string(FILE * out, const char * value) {
     fprintf(out, asString, value);
 }
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-parameter"
 void write_unknown(FILE * out, void * value) {
     const char* asString = format("unknown", "%s");
     fprintf(out, asString, "?");
 }
-#pragma clang diagnostic pop
 
 void send_evaluated(FILE *out, bool result, const char *expected, const char *actual, size_t nrOfMessages, const char **messages) {
 

@@ -85,7 +85,7 @@ def find_and_write_template(bundle: Bundle,
 
     :return: The name of the generated file.
     """
-    template_name = bundle.language_config.conventionalise_object(template_name)
+    template_name = bundle.language_config.conventionalise_namespace(template_name)
     if destination.is_dir():
         destination /= bundle.language_config.with_extension(template_name)
 

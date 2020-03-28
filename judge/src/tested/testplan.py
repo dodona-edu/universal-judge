@@ -24,7 +24,6 @@ from .serialisation import (ExceptionValue, Value, Expression, Statement,
 from .utils import get_args, flatten
 
 
-
 class TextBuiltin(str, Enum):
     """Textual built in evaluators."""
     TEXT = "text"
@@ -555,6 +554,7 @@ def _resolve_function_calls(function_calls: Iterable[FunctionCall]):
     registry: Dict[_FunctionSignature, List[FunctionCall]] = defaultdict(list)
 
     fs = list(function_calls)
+    assert all(x for x in fs)
 
     for function_call in fs:
         signature = _FunctionSignature.from_call(function_call)
@@ -589,7 +589,8 @@ def _resolve_function_calls(function_calls: Iterable[FunctionCall]):
                 Constructs.HETEROGENEOUS_ARGUMENTS, set()
             ))
 
-        return combine_features(used_features)
+        assert all(x for x in used_features)
+    return combine_features(used_features)
 
 
 class _PlanModel(BaseModel):

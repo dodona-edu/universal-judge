@@ -111,7 +111,7 @@ def _create_exception_function(
         evaluator = exception_channel.evaluator.for_language(language)
 
         # We assume the class is already imported by the templates.
-        evaluator_name = lang_config.conventionalise_object(evaluator.stem)
+        evaluator_name = lang_config.conventionalise_namespace(evaluator.stem)
         return FunctionCall(
             type=FunctionType.NAMESPACE,
             name="evaluate_text",
@@ -154,11 +154,11 @@ def _base_prepare_testcase(
             and isinstance(result_channel.evaluator, SpecificEvaluator)):
         evaluator = result_channel.evaluator.for_language(language)
         # We can assume the namespace is already imported.
-        evaluator_name = lang_config.conventionalise_object(evaluator.stem)
+        evaluator_name = lang_config.conventionalise_namespace(evaluator.stem)
         call = FunctionCall(
             type=FunctionType.NAMESPACE,
             name=lang_config.conventionalise_function("evaluate_text"),
-            namespace=lang_config.conventionalise_object(evaluator_name),
+            namespace=lang_config.conventionalise_namespace(evaluator_name),
             arguments=[Identifier("value")]
         )
         value_function_call = lang_config.specific_evaluator_callback(call)
@@ -410,7 +410,7 @@ def generate_custom_evaluator(bundle: Bundle,
 
     :return: The name of the generated file.
     """
-    evaluator_name = bundle.language_config.conventionalise_object(
+    evaluator_name = bundle.language_config.conventionalise_namespace(
         evaluator.path.stem
     )
     arguments = SequenceType(

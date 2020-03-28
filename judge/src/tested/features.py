@@ -55,14 +55,16 @@ def combine_features(iterable: Iterable[FeatureSet]) -> FeatureSet:
     """
     Combine multiple features into one features.
     """
+    features = list(iterable)
+    assert all(isinstance(x, FeatureSet) for x in features)
     constructs = reduce(
         operator.or_,
-        (x.constructs for x in iterable),
+        (x.constructs for x in features),
         Constructs.NOTHING
     )
     types = reduce(
         operator.or_,
-        (x.types for x in iterable),
+        (x.types for x in features),
         set()
     )
 

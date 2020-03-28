@@ -9,7 +9,7 @@
     (\
 % endif
 % for argument in function.arguments:
-    <%include file="literal.mako" args="value=argument"/>
+    <%include file="value.mako" args="value=argument"/>
     % if not loop.last:
         , \
     % endif

@@ -91,7 +91,7 @@ class Language:
 
     def submission_name(self, plan: Plan) -> str:
         """The name for the submission file."""
-        raise NotImplementedError
+        return plan.namespace
 
     def selector_name(self) -> str:
         """The name of the selector module."""
@@ -104,7 +104,7 @@ class Language:
         """Apply a language's conventions to function name."""
         raise NotImplementedError
 
-    def conventionalise_object(self, class_name: str) -> str:
+    def conventionalise_namespace(self, class_name: str) -> str:
         """Apply a language's conventions to a module name."""
         raise NotImplementedError
 
@@ -230,3 +230,6 @@ class Language:
         :return: A list of messages and annotations.
         """
         return [], []
+
+    def supports_evaluation(self):
+        return True

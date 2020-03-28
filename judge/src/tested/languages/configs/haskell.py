@@ -42,7 +42,7 @@ class HaskellConfig(Language):
     def conventionalise_function(self, function_name: str) -> str:
         return function_name
 
-    def conventionalise_object(self, class_name: str) -> str:
+    def conventionalise_namespace(self, class_name: str) -> str:
         return pascalize(class_name)
 
     def execution_command(self, cwd: Path, file: str, dependencies: List[str],
@@ -52,9 +52,6 @@ class HaskellConfig(Language):
 
     def file_extension(self) -> str:
         return "hs"
-
-    def submission_name(self, plan: Plan) -> str:
-        return plan.namespace
 
     def context_name(self, tab_number: int, context_number: int) -> str:
         return f"Context_{tab_number}_{context_number}"

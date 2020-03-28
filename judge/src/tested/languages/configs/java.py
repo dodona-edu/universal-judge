@@ -8,7 +8,6 @@ from .. import Language
 from ..config import CallbackResult, TypeSupport
 from ...datatypes import (AdvancedNumericTypes as ant, AllTypes,
                           AdvancedSequenceTypes as ast)
-from ...testplan import Plan
 from ...utils import fallback
 
 CONTEXT_PREFIX = "Context_"
@@ -39,18 +38,15 @@ class JavaConfig(Language):
                           arguments: List[str]) -> List[str]:
         cp = self._classpath_separator().join(self._get_classpath() + ["."])
         name = Path(file).stem
-        return ["java", "-cp", cp, self.conventionalise_object(name), *arguments]
+        return ["java", "-cp", cp, self.conventionalise_namespace(name), *arguments]
 
     def file_extension(self) -> str:
         return "java"
 
-    def submission_name(self, plan: Plan) -> str:
-        return plan.namespace
-
     def conventionalise_function(self, function_name: str) -> str:
         return camelize(function_name)
 
-    def conventionalise_object(self, class_name: str) -> str:
+    def conventionalise_namespace(self, class_name: str) -> str:
         return pascalize(class_name)
 
     def selector_name(self) -> str:

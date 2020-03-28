@@ -9,13 +9,15 @@ you will probably find it in this package.
 from .config import Language
 from .configs.haskell import HaskellConfig
 from .configs.java import JavaConfig
-from .configs.python import Python
+from .configs.python import PythonConfig
+from .configs.c import CConfig
 
 
 LANGUAGES = {
-    'python':  Python,
+    'python':  PythonConfig,
     'java':    JavaConfig,
-    'haskell': HaskellConfig
+    'haskell': HaskellConfig,
+    'c': CConfig
 }
 
 

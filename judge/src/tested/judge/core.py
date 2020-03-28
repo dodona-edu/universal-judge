@@ -231,6 +231,17 @@ def evaluate_programmed(bundle: Bundle,
       to decode values, only compile time support.
     """
 
+    # Check if the language supports this.
+    if not bundle.language_config.supports_evaluation():
+        _logger.error(f"{bundle.config.programming_language} does not support"
+                      f" evaluations.")
+        return BaseExecutionResult(
+            stdout="",
+            stderr=f"Evaluatie in {bundle.config.programming_language} wordt niet "
+                   f"ondersteund.",
+            exit=-1
+        )
+
     # Create a directory for this evaluator. If one exists, delete it first.
     evaluator_dir_name = humps.decamelize(evaluator.path.stem)
     custom_directory_name = f"{get_identifier()}_{evaluator_dir_name}"

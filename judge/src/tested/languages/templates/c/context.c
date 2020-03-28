@@ -1,60 +1,63 @@
 ## Code to execute_module one test context.
-<%! from testplan import Assignment %>
+<%! from tested.serialisation import Statement, Expression %>
+<%! from tested.utils import get_args %>
 
 #include <stdio.h>
 
-#include <values.h>
+#include "values.h"
+#include "${submission_name}.c"
 
-void write_delimiter(FILE* value, FILE* exception, const char* delimiter) {
-    fprintf(value, "%s", delimiter);
-    fprintf(exception, "%s", delimiter);
-}
+//// Main function of the solution.
+//int solution_main();
 
+// TODO: evaluate return value somehow.
 
-int runner() {
+int ${context_name}() {
     // Open the files for the values.
     FILE* value = fopen("${value_file}", "w");
     FILE* exception = fopen("${exception_file}", "w");
 
     // Main functions are not support at the moment.
-    % if main_testcase.exists:
-        write_delimiter(value, exception, "--${secret_id}-- SEP")
-        printf("--${secret_id}-- SEP")
-        fprintf(stderr, "--${secret_id}-- SEP")
+    % if context_testcase.exists:
+        solution_main();
+        // TODO: options
     % endif
+    fprintf(value, "--${secret_id}-- SEP");
+    fprintf(exception, "--${secret_id}-- SEP");
+    fprintf(stdout, "--${secret_id}-- SEP");
+    fprintf(stderr, "--${secret_id}-- SEP");
 
     ## Generate the actual tests based on the context.
-    % for additional in additional_testcases:
-        % if isinstance(additional.statement, Assignment):
-            <%include file="assignment.mako" args="assignment=additional.statement" />\
+    % for additional in testcases:
+        % if isinstance(additional.command, get_args(Statement)):
+            <%include file="statement.mako" args="statement=additional.command,full=True" />\
         % else:
+            <% assert isinstance(additional.command, get_args(Expression)) %>
             % if additional.has_return:
-                v_evaluate_${loop.index}(\
+                // TODO
             % endif
-            <%include file="function.mako" args="function=additional.statement" />\
+            <%include file="expression.mako" args="expression=additional.command" />;
             % if additional.has_return:
-                );\
-            % else:
-                ;\
+                // TODO
             % endif
         % endif
 
-        write_delimiter(value, exception, "--${secret_id}-- SEP");
-        printf("--${secret_id}-- SEP");
+        fprintf(value, "--${secret_id}-- SEP");
+        fprintf(exception, "--${secret_id}-- SEP");
+        fprintf(stdout, "--${secret_id}-- SEP");
         fprintf(stderr, "--${secret_id}-- SEP");
 
     % endfor
 
-    % if after:
-        ${after}
-    % endif
+    ${after}
 
     fclose(value);
     fclose(exception);
+    return 0;
 }
 
 #ifndef INCLUDED
 int main() {
-    runner();
+    ${context_name}();
 }
 #endif

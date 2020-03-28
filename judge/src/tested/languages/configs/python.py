@@ -1,8 +1,7 @@
 import os
 import re
-from os import PathLike
 from pathlib import Path
-from typing import List, Tuple, Union, Mapping
+from typing import List, Tuple, Mapping
 
 from humps import decamelize, depascalize
 
@@ -16,7 +15,7 @@ from ...testplan import Plan
 from ...utils import fallback
 
 
-class Python(Language):
+class PythonConfig(Language):
     """Configuration for the Python language."""
 
     def initial_dependencies(self) -> List[str]:
@@ -51,7 +50,7 @@ class Python(Language):
     def conventionalise_function(self, function_name: str) -> str:
         return decamelize(function_name)
 
-    def conventionalise_object(self, class_name: str) -> str:
+    def conventionalise_namespace(self, class_name: str) -> str:
         return depascalize(class_name)
 
     def context_dependencies_callback(self,
