@@ -1,7 +1,7 @@
 import os
 import re
 from pathlib import Path
-from typing import List, Tuple, Mapping
+from typing import List, Tuple, Mapping, Optional
 
 from humps import decamelize, depascalize
 
@@ -68,7 +68,7 @@ class PythonConfig(Language):
             self,
             stdout: str,
             stderr: str
-    ) -> List[AnnotateCode]:
+    ) -> Optional[Tuple[List[Message], List[AnnotateCode]]]:
         if match := re.search(
                 r".*: (?P<error>.+Error): (?P<message>.+) \(submission.py, "
                 r"line (?P<line>\d+)\)",
@@ -76,7 +76,7 @@ class PythonConfig(Language):
             error = match.group('error')
             message = match.group('message')
             line = match.group('line')
-            return [
+            return [], [
                 AnnotateCode(
                     row=int(line),
                     text=f"{error}: {message}",
@@ -85,7 +85,7 @@ class PythonConfig(Language):
             ]
         elif stuff := self._attempt_stacktrace(stdout):
             line, column, message = stuff
-            return [
+            return [], [
                 AnnotateCode(
                     row=line,
                     column=column,
@@ -94,7 +94,7 @@ class PythonConfig(Language):
                 )
             ]
         else:
-            return []
+            return None
 
     def _attempt_stacktrace(self, trace: str):
         # TODO: this only works with compiler traces.

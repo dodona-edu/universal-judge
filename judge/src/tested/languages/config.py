@@ -10,7 +10,7 @@ import os
 from collections import defaultdict
 from enum import Enum, auto
 from pathlib import Path
-from typing import List, Tuple, Mapping
+from typing import List, Tuple, Mapping, Optional
 
 from ..configs import Bundle
 from ..datatypes import AllTypes
@@ -210,9 +210,17 @@ class Language:
             self,
             stdout: str,
             stderr: str
-    ) -> List[AnnotateCode]:
-        """Allows parsing error message to annotate the code."""
-        return []
+    ) -> Optional[Tuple[List[Message], List[AnnotateCode]]]:
+        """
+        Callback for processing compiler output.
+
+        :param stdout:
+        :param stderr:
+
+        :return: A list of messages and annotations. None indicates that the
+                 callback did not handle the output; TESTed will show it instead.
+        """
+        return None
 
     def run_linter(self, bundle: Bundle, submission: Path) \
             -> Tuple[List[Message], List[AnnotateCode]]:
