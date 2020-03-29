@@ -29,7 +29,7 @@ from typing import Union, Callable, Optional
 from pydantic.dataclasses import dataclass
 
 from ..configs import Bundle
-from ..dodona import StatusMessage, Message
+from ..dodona import StatusMessage, Message, Status
 from ..testplan import GenericTextEvaluator, TextBuiltin, \
     GenericValueEvaluator, ValueBuiltin, GenericExceptionEvaluator, \
     ExceptionBuiltin, ProgrammedEvaluator, SpecificEvaluator
@@ -58,9 +58,10 @@ class EvaluatorConfig(NamedTuple):
     context_dir: Path
 
 
-RawEvaluator = Callable[[EvaluatorConfig, OutputChannel, str], EvaluationResult]
+RawEvaluator = Callable[
+    [EvaluatorConfig, OutputChannel, str, Status], EvaluationResult]
 
-Evaluator = Callable[[OutputChannel, str], EvaluationResult]
+Evaluator = Callable[[OutputChannel, str, Status], EvaluationResult]
 
 
 def _curry_evaluator(

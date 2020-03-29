@@ -119,8 +119,8 @@ def _check_type(
     return expected.type == actual.type, expected
 
 
-def evaluate(config: EvaluatorConfig,
-             channel: OutputChannel, actual: str) -> EvaluationResult:
+def evaluate(config: EvaluatorConfig, channel: OutputChannel, actual: str,
+             wrong: Status) -> EvaluationResult:
     """
     Evaluate two values. The values must match exact. Currently, this evaluator
     has no options, but it might receive them in the future (e.g. options on how
@@ -148,7 +148,7 @@ def evaluate(config: EvaluatorConfig,
     if actual is None:
         return EvaluationResult(
             result=StatusMessage(
-                enum=Status.WRONG,
+                enum=wrong,
                 human="Ontbrekende returnwaarde."
             ),
             readable_expected=readable_expected,
@@ -177,7 +177,7 @@ def evaluate(config: EvaluatorConfig,
     return EvaluationResult(
         result=StatusMessage(
             human=type_status,
-            enum=Status.CORRECT if correct else Status.WRONG
+            enum=Status.CORRECT if correct else wrong
         ),
         readable_expected=readable_expected,
         readable_actual=readable_actual,

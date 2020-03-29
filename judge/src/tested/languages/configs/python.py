@@ -68,7 +68,7 @@ class PythonConfig(Language):
             self,
             stdout: str,
             stderr: str
-    ) -> Optional[Tuple[List[Message], List[AnnotateCode]]]:
+    ) -> Tuple[List[Message], List[AnnotateCode]]:
         if match := re.search(
                 r".*: (?P<error>.+Error): (?P<message>.+) \(submission.py, "
                 r"line (?P<line>\d+)\)",
@@ -94,7 +94,7 @@ class PythonConfig(Language):
                 )
             ]
         else:
-            return None
+            return [], []
 
     def _attempt_stacktrace(self, trace: str):
         # TODO: this only works with compiler traces.

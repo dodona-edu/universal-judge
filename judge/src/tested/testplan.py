@@ -450,8 +450,8 @@ class Context(WithFeatures, WithFunctions):
     def get_functions(self) -> Iterable[FunctionCall]:
         return flatten(x.get_functions() for x in self.testcases)
 
-    def time_limit(self, language: str, default: int) -> int:
-        return self.time_limits.get(language, default)
+    def time_limit(self, language: str) -> Optional[int]:
+        return self.time_limits.get(language)
 
 
 @dataclass

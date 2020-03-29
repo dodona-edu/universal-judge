@@ -210,7 +210,7 @@ class Language:
             self,
             stdout: str,
             stderr: str
-    ) -> Optional[Tuple[List[Message], List[AnnotateCode]]]:
+    ) -> Tuple[List[Message], List[AnnotateCode]]:
         """
         Callback for processing compiler output.
 
@@ -220,7 +220,7 @@ class Language:
         :return: A list of messages and annotations. None indicates that the
                  callback did not handle the output; TESTed will show it instead.
         """
-        return None
+        return [], []
 
     def run_linter(self, bundle: Bundle, submission: Path) \
             -> Tuple[List[Message], List[AnnotateCode]]:

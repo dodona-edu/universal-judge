@@ -46,8 +46,8 @@ def run_command(directory: Path,
                                  capture_output=True, input=stdin, timeout=timout)
     except subprocess.TimeoutExpired as e:
         return BaseExecutionResult(
-            stdout=e.stdout,
-            stderr=e.stderr,
+            stdout=e.stdout or "",
+            stderr=e.stderr or "",
             exit=0,  # Use 0 to prevent double reporting.
             was_timeout=True
         )

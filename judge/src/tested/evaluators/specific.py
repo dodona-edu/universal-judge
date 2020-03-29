@@ -8,7 +8,8 @@ from ..testplan import OutputChannel
 from ..testplan import SpecificEvaluator
 
 
-def evaluate(_, channel: OutputChannel, actual: str) -> EvaluationResult:
+def evaluate(_, channel: OutputChannel, actual: str,
+             wrong: Status) -> EvaluationResult:
     """
     Compare the result of a specific evaluator. This evaluator has no options.
     """
@@ -56,7 +57,7 @@ def evaluate(_, channel: OutputChannel, actual: str) -> EvaluationResult:
 
     return EvaluationResult(
         result=StatusMessage(
-            enum=Status.CORRECT if actual.result else Status.WRONG
+            enum=Status.CORRECT if actual.result else wrong
         ),
         readable_expected=actual.readable_expected,
         readable_actual=actual.readable_actual,

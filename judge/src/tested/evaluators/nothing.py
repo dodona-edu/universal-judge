@@ -8,8 +8,8 @@ from . import EvaluationResult, try_outputs, exception, value, EvaluatorConfig
 from ..testplan import EmptyChannel
 
 
-def evaluate(config: EvaluatorConfig,
-             channel: EmptyChannel, actual: str) -> EvaluationResult:
+def evaluate(config: EvaluatorConfig, channel: EmptyChannel, actual: str,
+             _ignored: Status) -> EvaluationResult:
     assert channel == EmptyChannel.NONE
 
     if actual:

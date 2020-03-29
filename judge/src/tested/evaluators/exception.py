@@ -27,7 +27,8 @@ def try_as_readable_exception(value: str) -> Optional[str]:
         return actual.readable()
 
 
-def evaluate(_, channel: ExceptionOutputChannel, actual: str) -> EvaluationResult:
+def evaluate(_, channel: ExceptionOutputChannel, actual: str,
+             wrong: Status) -> EvaluationResult:
     assert isinstance(channel, ExceptionOutputChannel)
     assert channel.exception is not None
 
@@ -56,8 +57,7 @@ def evaluate(_, channel: ExceptionOutputChannel, actual: str) -> EvaluationResul
 
     return EvaluationResult(
         result=StatusMessage(
-            enum=Status.CORRECT if expected.message == actual.message else
-            Status.WRONG
+            enum=Status.CORRECT if expected.message == actual.message else wrong
         ),
         readable_expected=expected.readable(),
         readable_actual=actual.readable()

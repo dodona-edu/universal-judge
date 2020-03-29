@@ -8,8 +8,8 @@ from . import EvaluationResult, exception, value, try_outputs, EvaluatorConfig
 from ..testplan import IgnoredChannel
 
 
-def evaluate(config: EvaluatorConfig,
-             channel: IgnoredChannel, actual: str) -> EvaluationResult:
+def evaluate(config: EvaluatorConfig, channel: IgnoredChannel, actual: str,
+             _ignored: Status) -> EvaluationResult:
     assert channel == IgnoredChannel.IGNORED
 
     # If there is something in the channel, try parsing it as

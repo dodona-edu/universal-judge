@@ -44,7 +44,7 @@ def _file_defaults(config: EvaluatorConfig) -> dict:
 def compare_text(
         options: Dict[str, Any],
         expected: str,
-        actual: str) -> EvaluationResult:
+        actual: str, wrong: Status) -> EvaluationResult:
     if options['ignoreWhitespace']:
         expected = expected.strip()
         actual = actual.strip()
@@ -66,7 +66,7 @@ def compare_text(
         result = actual == expected
 
     return EvaluationResult(
-        result=StatusMessage(enum=Status.CORRECT if result else Status.WRONG),
+        result=StatusMessage(enum=Status.CORRECT if result else wrong),
         readable_expected=str(expected),
         readable_actual=str(actual)
     )
@@ -75,7 +75,7 @@ def compare_text(
 def evaluate_text(
         config: EvaluatorConfig,
         channel: OutputChannel,
-        actual: str) -> EvaluationResult:
+        actual: str, wrong: Status) -> EvaluationResult:
     """
     The base evaluator, used to compare two strings. As this evaluator is
     intended for evaluating stdout, it supports various options to make life
@@ -92,12 +92,12 @@ def evaluate_text(
     assert isinstance(channel, TextOutputChannel)
     options = _text_options(config)
     expected = channel.get_data_as_string(config.bundle.config.resources)
-    return compare_text(options, expected, actual)
+    return compare_text(options, expected, actual, wrong)
 
 
 def evaluate_file(config: EvaluatorConfig,
                   channel: OutputChannel,
-                  actual: str) -> EvaluationResult:
+                  actual: str, wrong: Status) -> EvaluationResult:
     """
     Evaluate the contents of two files. The file evaluator supports one option,
     ``mode``, used to define in which mode the evaluator should operate:
@@ -152,7 +152,7 @@ def evaluate_file(config: EvaluatorConfig,
 
     if options["mode"] == "exact":
         result = StatusMessage(
-            enum=Status.CORRECT if actual == expected else Status.WRONG
+            enum=Status.CORRECT if actual == expected else wrong
         )
     elif options["mode"] == "lines":
         expected_lines = expected.splitlines()
@@ -160,7 +160,7 @@ def evaluate_file(config: EvaluatorConfig,
         correct = len(actual_lines) == len(expected_lines)
         for (expected_line, actual_line) in zip(expected_lines, actual_lines):
             correct = correct and expected_line == actual_line
-        result = StatusMessage(enum=Status.CORRECT if correct else Status.WRONG)
+        result = StatusMessage(enum=Status.CORRECT if correct else wrong)
     else:
         assert options["mode"] == "values"
         expected_lines = expected.splitlines()
@@ -171,14 +171,14 @@ def evaluate_file(config: EvaluatorConfig,
         expected = []
         actual = []
         for (expected_line, actual_line) in zip(expected_lines, actual_lines):
-            r = compare_text(options, expected_line, actual_line)
+            r = compare_text(options, expected_line, actual_line, wrong)
             expected.append(r.readable_expected)
             actual.append(r.readable_actual)
             correct = correct and r.result.enum == Status.CORRECT
-        result = StatusMessage(enum=Status.CORRECT if correct else Status.WRONG)
+        result = StatusMessage(enum=Status.CORRECT if correct else wrong)
 
     return EvaluationResult(
-        result=StatusMessage(enum=Status.CORRECT if result else Status.WRONG),
+        result=StatusMessage(enum=Status.CORRECT if result else wrong),
         readable_expected=expected,
         readable_actual=actual
     )

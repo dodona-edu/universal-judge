@@ -43,12 +43,12 @@ def _evaluate_channel(
     :param evaluator: The evaluator to use.
     :return: True if successful, otherwise False.
     """
-    evaluation_result = evaluator(expected_output, actual_result or "")
+    evaluation_result = evaluator(
+        expected_output,
+        actual_result or "",
+        Status.TIME_LIMIT_EXCEEDED if is_timeout else Status.WRONG
+    )
     status = evaluation_result.result
-
-    # Override if timeout
-    if is_timeout and status == Status.WRONG:
-        status = Status.TIME_LIMIT_EXCEEDED
 
     # If the actual value is empty and the channel output is None or ignored,
     # don't report it.
@@ -173,7 +173,8 @@ def evaluate_results(bundle: Bundle,
     ]
 
     # Check for missing values and stop if necessary.
-    if not stdout_ or not stderr_ or not exceptions or not values:
+    if (not stdout_ or not stderr_ or not exceptions or not values) \
+            and not is_timout:
         _logger.warning("Missing output in context testcase.")
         context_collector.collect(AppendMessage(
             "Ontbrekende uitvoerresultaten in Dodona. Er ging iets verkeerd!"
@@ -258,7 +259,7 @@ def evaluate_results(bundle: Bundle,
         if (i >= len(stdout_)
                 or i >= len(stderr_)
                 or i >= len(values)
-                or i >= len(exceptions)):
+                or i >= len(exceptions)) and not is_timout:
             _logger.warning(f"Missing output in testcase {i}")
             report_update(bundle.out, AppendMessage(
                 "Ontbrekende uitvoerresultaten in Dodona. Er ging iets verkeerd!"

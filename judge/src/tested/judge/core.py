@@ -234,10 +234,10 @@ def _calculate_timeout(bundle: Bundle, context: Context):
     """
 
     global_ = int(bundle.config.time_limit)
-    override = context.time_limit(bundle.config.programming_language, global_)
+    override = context.time_limit(bundle.config.programming_language)
     upper_limit = int(0.8 * global_)
 
-    if override > upper_limit:
-        return upper_limit
+    if override is not None:
+        return min(override, upper_limit)
 
     return upper_limit // _get_units_of_work(bundle)

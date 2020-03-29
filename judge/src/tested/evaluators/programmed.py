@@ -62,7 +62,8 @@ def expected_as_value(config: EvaluatorConfig,
 
 def evaluate(config: EvaluatorConfig,
              channel: NormalOutputChannel,
-             actual: str) -> EvaluationResult:
+             actual: str,
+             wrong: Status) -> EvaluationResult:
     """
     Evaluate using a programmed evaluator. This evaluator is unique, in that it is
     also responsible for running the evaluator (all other evaluators don't do that).
@@ -139,7 +140,7 @@ def evaluate(config: EvaluatorConfig,
 
     return EvaluationResult(
         result=StatusMessage(
-            enum=Status.CORRECT if evaluation_result.result else Status.WRONG
+            enum=Status.CORRECT if evaluation_result.result else wrong
         ),
         readable_expected=readable_expected,
         readable_actual=readable_actual,
