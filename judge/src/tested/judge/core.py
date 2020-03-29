@@ -1,33 +1,19 @@
-"""
-The main judge package. Responsible for turning a configuration bundle (containing
-the configs, testplan and solution) into output for Dodona.
-
-The main module has two functions, which are the main interfaces to interact with
-the judge. All other modules might be useful, but are more for the internal code
-organisation.
-"""
 import logging
 import shutil
 from pathlib import Path
 from typing import Tuple, List
 
-import humps
-
 from .compilation import run_compilation, process_compile_results
-from .evaluation import evaluate_results, execute_context
-from .execution import ContextExecution, execute_file
-from .linter import run_linter
-from .utils import BaseExecutionResult, run_command, find_main_file, \
-    copy_from_paths_to_path
-from ..configs import Bundle, create_bundle
+from .evaluation import evaluate_results
+from .execution import ContextExecution, execute_context
+from .linter import run_linter, runs_linter
+from .utils import copy_from_paths_to_path
+from ..configs import Bundle
 from ..dodona import *
 from ..features import is_supported
-from ..languages.generator import generate_context, generate_selector, \
-    generate_custom_evaluator
+from ..languages.generator import generate_context, generate_selector
 from ..languages.templates import path_to_templates
-from ..serialisation import Value
-from ..testplan import ExecutionMode, ProgrammedEvaluator
-from ..utils import get_identifier
+from ..testplan import ExecutionMode, Context
 
 _logger = logging.getLogger(__name__)
 
@@ -62,7 +48,7 @@ def judge(bundle: Bundle):
     run_linter(bundle)
 
     _logger.info("Start generating code...")
-    common_dir, files, selector = generate_files(bundle, mode)
+    common_dir, files, selector = _generate_files(bundle, mode)
 
     # Add the selector to the dependencies.
     if selector:
@@ -119,6 +105,7 @@ def judge(bundle: Bundle):
         # Create a list of arguments to execute_module (in threads)
         executions = []
         for context_index, context in enumerate(tab.contexts):
+            time_limit = _calculate_timeout(bundle, context)
             executions.append(ContextExecution(
                 context=context,
                 context_name=bundle.language_config.context_name(
@@ -128,7 +115,8 @@ def judge(bundle: Bundle):
                 mode=mode,
                 common_directory=common_dir,
                 files=files,
-                precompilation_result=precompilation_result
+                precompilation_result=precompilation_result,
+                time_limit=time_limit
             ))
 
         results = []
@@ -155,9 +143,9 @@ def judge(bundle: Bundle):
     report_update(bundle.out, CloseJudgment())
 
 
-def generate_files(bundle: Bundle,
-                   mode: ExecutionMode
-                   ) -> Tuple[Path, List[str], Optional[str]]:
+def _generate_files(bundle: Bundle,
+                    mode: ExecutionMode
+                    ) -> Tuple[Path, List[str], Optional[str]]:
     """
     Generate all necessary files, using the templates. This creates a common
     directory, copies all dependencies to that folder and runs the generation.
@@ -217,91 +205,39 @@ def generate_files(bundle: Bundle,
     return common_dir, dependencies, generated
 
 
-def evaluate_programmed(bundle: Bundle,
-                        evaluator: ProgrammedEvaluator,
-                        expected: Optional[Value],
-                        actual: Value) -> BaseExecutionResult:
+def _get_units_of_work(bundle: Bundle):
+    units = 1 if runs_linter(bundle) else 0
+    for tab in bundle.plan.tabs:
+        units += len(tab.contexts)
+    return units
+
+
+def _calculate_timeout(bundle: Bundle, context: Context):
     """
-    Run the custom evaluation. Concerning structure and execution, the custom
-    evaluator is very similar to the execution of the whole evaluation. It a
-    mini-evaluation if you will.
+    Calculate how long the context gets to execute.
 
-    TODO: considering implementing a precompilation mode as well for custom
-      evaluators. One difficulty is that there is currently no runtime support
-      to decode values, only compile time support.
+    If applicable, the timeout from the context will be taken. If not, the
+    timeout will be (0.8 * global) / units, were global is the timeout given by
+    Dodona, and units are the units of work. A unit of work is a context or an
+    additional processor, like a linter.
+
+    Note that the override in the context is only a suggestion: the timeout cannot
+    be more than 0.8 * global, since that would not leave enough time for the judge
+    itself.
+
+    Additionally, the timeout in TESTed is no guarantee: it's on a best efforts
+    basis. Dodona guarantees global timeouts.
+
+    :param bundle: The configuration bundle.
+    :param context: The context to execute.
+    :return: The timeout, in seconds.
     """
 
-    # Check if the language supports this.
-    if not bundle.language_config.supports_evaluation():
-        _logger.error(f"{bundle.config.programming_language} does not support"
-                      f" evaluations.")
-        return BaseExecutionResult(
-            stdout="",
-            stderr=f"Evaluatie in {bundle.config.programming_language} wordt niet "
-                   f"ondersteund.",
-            exit=-1
-        )
+    global_ = int(bundle.config.time_limit)
+    override = context.time_limit(bundle.config.programming_language, global_)
+    upper_limit = int(0.8 * global_)
 
-    # Create a directory for this evaluator. If one exists, delete it first.
-    evaluator_dir_name = humps.decamelize(evaluator.path.stem)
-    custom_directory_name = f"{get_identifier()}_{evaluator_dir_name}"
-    custom_path = Path(bundle.config.workdir, "evaluators", custom_directory_name)
-    if custom_path.exists():
-        _logger.debug("Removing existing directory for custom evaluator.")
-        shutil.rmtree(custom_path, ignore_errors=True)
-    custom_path.mkdir(parents=True)
+    if override > upper_limit:
+        return upper_limit
 
-    _logger.info("Will do custom evaluation in %s", custom_path)
-
-    # Create a configs bundle for the language of the evaluator.
-    eval_bundle = create_bundle(
-        bundle.config, bundle.out, bundle.plan, evaluator.language
-    )
-
-    # Copy the evaluator
-    origin_path = Path(bundle.config.resources, evaluator.path)
-    _logger.debug("Copying %s to %s", origin_path, custom_path)
-    shutil.copy2(origin_path, custom_path)
-
-    # Copy the dependencies to the folder.
-    dependencies = eval_bundle.language_config.initial_dependencies()
-    dependencies.extend(eval_bundle.language_config.evaluator_dependencies())
-    origin = path_to_templates(eval_bundle)
-    copy_from_paths_to_path(origin, dependencies, custom_path)
-    # Include the actual evaluator in the dependencies.
-    dependencies.append(evaluator.path.name)
-
-    # Generate the evaluator.
-    _logger.debug("Generating custom evaluator.")
-    evaluator_name = generate_custom_evaluator(
-        eval_bundle,
-        destination=custom_path,
-        evaluator=evaluator,
-        expected_value=expected,
-        actual_value=actual
-    )
-    dependencies.append(evaluator_name)
-    _logger.debug("Generated evaluator executor %s", evaluator_name)
-
-    # Do compilation for those configs that require it.
-    command, files = eval_bundle.language_config.evaluator_generation_callback(
-        dependencies
-    )
-    _logger.debug("Compiling custom evaluator with command %s", command)
-    result = run_command(custom_path, command)
-    if result and result.stderr:
-        raise ValueError("Error while compiling specific test case:" +
-                         result.stderr)
-
-    # Execute the custom evaluator.
-    evaluator_name = Path(evaluator_name).stem
-    executable = find_main_file(files, evaluator_name)
-    files.remove(executable)
-
-    return execute_file(
-        bundle=eval_bundle,
-        executable_name=executable,
-        working_directory=custom_path,
-        dependencies=files,
-        stdin=None
-    )
+    return upper_limit // _get_units_of_work(bundle)

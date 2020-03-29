@@ -427,6 +427,8 @@ class Context(WithFeatures, WithFunctions):
     after: Code = field(default_factory=dict)
     description: Optional[str] = None
 
+    time_limits: Dict[str, int] = field(default_factory=dict)
+
     @root_validator
     def check_testcases_exist(cls, values):
         context = values.get('context_testcase')
@@ -447,6 +449,9 @@ class Context(WithFeatures, WithFunctions):
 
     def get_functions(self) -> Iterable[FunctionCall]:
         return flatten(x.get_functions() for x in self.testcases)
+
+    def time_limit(self, language: str, default: int) -> int:
+        return self.time_limits.get(language, default)
 
 
 @dataclass

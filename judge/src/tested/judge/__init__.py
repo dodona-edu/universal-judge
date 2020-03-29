@@ -6,4 +6,5 @@ The main module has two functions, which are the main interfaces to interact wit
 the judge. All other modules might be useful, but are more for the internal code
 organisation.
 """
-from .core import judge, evaluate_programmed
+from .core import judge
+from .programmed import evaluate_programmed

@@ -76,10 +76,11 @@ def process_compile_results(
         return messages, Status.CORRECT, []
 
     show_stdout = False
-    annotations = language_config.process_compiler_output(
+    compiler_messages, annotations = language_config.process_compiler_output(
         results.stdout, results.stderr
     )
-    shown_messages = bool(annotations)
+    messages.extend(compiler_messages)
+    shown_messages = annotations or compiler_messages
 
     # Report stderr.
     if results.stderr:

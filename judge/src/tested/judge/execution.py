@@ -1,12 +1,15 @@
 import logging
+import shutil
 from pathlib import Path
 from typing import List, Optional, Tuple
 
 from pydantic.dataclasses import dataclass
 
-from tested.dodona import Message, Status
-from .utils import BaseExecutionResult, run_command
+from tested.dodona import Message, Status, report_update
+from .compilation import run_compilation, process_compile_results
+from .utils import BaseExecutionResult, run_command, find_main_file
 from ..configs import Bundle
+from ..languages.paths import value_file, exception_file
 from ..testplan import Context, ExecutionMode
 
 _logger = logging.getLogger(__name__)
@@ -38,6 +41,7 @@ class ContextExecution:
     common_directory: Path
     files: List[str]
     precompilation_result: Optional[Tuple[List[Message], Status]]
+    time_limit: int
 
 
 def execute_file(
@@ -46,7 +50,8 @@ def execute_file(
         working_directory: Path,
         dependencies: List[str],
         stdin: Optional[str] = None,
-        argument: Optional[str] = None
+        argument: Optional[str] = None,
+        timeout: Optional[int] = None
 ) -> BaseExecutionResult:
     """
     Execute a file.
@@ -62,6 +67,7 @@ def execute_file(
     :param stdin: The stdin for the execution.
     :param executable_name: The executable that should be executed. This file
                             will not be present in the dependency list.
+    :param timeout: A timeout for the command.
 
     :return: The result of the execution.
     """
@@ -76,6 +82,132 @@ def execute_file(
     _logger.debug("Executing command %s in directory %s", command,
                   working_directory)
 
-    result = run_command(working_directory, command, stdin)
+    result = run_command(working_directory, command, stdin, timeout)
     assert result is not None
     return result
+
+
+def execute_context(bundle: Bundle, args: ContextExecution) \
+        -> Tuple[Optional[ExecutionResult], List[Message], Status, Path]:
+    """
+    Execute a context.
+    """
+    lang_config = bundle.language_config
+
+    # Create a working directory for the context.
+    context_dir = Path(
+        bundle.config.workdir,
+        args.context_name
+    )
+    context_dir.mkdir()
+
+    _logger.info("Executing context %s in path %s",
+                 args.context_name, context_dir)
+
+    dependencies = lang_config.context_dependencies_callback(
+        args.context_name,
+        args.files
+    )
+
+    # Copy files from the common directory to the context directory.
+    for file in dependencies:
+        origin = args.common_directory / file
+        _logger.debug("Copying %s to %s", origin, context_dir)
+        # noinspection PyTypeChecker
+        shutil.copy2(origin, context_dir)
+
+    # If needed, do a compilation.
+    if args.mode == ExecutionMode.INDIVIDUAL:
+        _logger.info("Compiling context %s in INDIVIDUAL mode...",
+                     args.context_name)
+        result, files = run_compilation(bundle, context_dir, dependencies)
+
+        # Process compilation results.
+        messages, status, annotations = process_compile_results(
+            lang_config,
+            result
+        )
+
+        for annotation in annotations:
+            report_update(bundle.out, annotation)
+
+        if status != Status.CORRECT:
+            _logger.debug("Compilation of individual context failed.")
+            _logger.debug("Aborting executing of this context.")
+            return None, messages, status, context_dir
+
+        _logger.debug("Executing context %s in INDIVIDUAL mode...",
+                      args.context_name)
+        executable = find_main_file(files, args.context_name)
+        files.remove(executable)
+        stdin = args.context.get_stdin(bundle.config.resources)
+        argument = None
+    else:
+        result, files = None, dependencies
+        if args.precompilation_result:
+            _logger.debug("Substituting precompilation results.")
+            messages, status = args.precompilation_result
+        else:
+            _logger.debug("No precompilation results found, using default.")
+            messages, status = [], Status.CORRECT
+
+        _logger.info("Executing context %s in PRECOMPILATION mode...",
+                     args.context_name)
+
+        if lang_config.needs_selector():
+            _logger.debug("Selector is needed, using it.")
+
+            selector_name = lang_config.selector_name()
+            executable = find_main_file(files, selector_name)
+            files.remove(executable)
+            stdin = args.context.get_stdin(bundle.config.resources)
+            argument = args.context_name
+        else:
+            _logger.debug("Selector is not needed, using individual execution.")
+            executable = find_main_file(files, args.context_name)
+            files.remove(executable)
+            stdin = args.context.get_stdin(bundle.config.resources)
+            argument = None
+
+    # Do the execution.
+    base_result = execute_file(
+        bundle,
+        executable_name=executable,
+        working_directory=context_dir,
+        dependencies=files,
+        stdin=stdin,
+        argument=argument,
+        timeout=args.time_limit
+    )
+
+    identifier = f"--{bundle.secret}-- SEP"
+
+    value_file_path = value_file(bundle, context_dir)
+    try:
+        with open(value_file_path, "r") as f:
+            values = f.read()
+    except FileNotFoundError:
+        _logger.warning("Value file not found, looked in %s", value_file_path)
+        values = ""
+
+    exception_file_path = exception_file(bundle, context_dir)
+    try:
+        # noinspection PyTypeChecker
+        with open(exception_file_path, "r") as f:
+            exceptions = f.read()
+    except FileNotFoundError:
+        _logger.warning("Exception file not found, looked in %s",
+                        exception_file_path)
+        exceptions = ""
+
+    result = ExecutionResult(
+        stdout=base_result.stdout,
+        stderr=base_result.stderr,
+        exit=base_result.exit,
+        separator=identifier,
+        results=values,
+        exceptions=exceptions,
+        was_timeout=base_result.was_timeout
+    )
+
+    return result, messages, status, context_dir

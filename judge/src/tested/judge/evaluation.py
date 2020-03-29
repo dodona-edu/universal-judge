@@ -1,17 +1,13 @@
 import logging
-import shutil
 from pathlib import Path
 from typing import Tuple, List
 
-from .compilation import run_compilation, process_compile_results
-from .execution import ContextExecution, ExecutionResult, execute_file
-from .utils import find_main_file
+from .execution import ExecutionResult
 from ..configs import Bundle
 from ..dodona import *
 from ..evaluators import Evaluator, get_evaluator
 from ..languages.generator import get_readable_input
-from ..languages.paths import value_file, exception_file
-from ..testplan import Context, ExecutionMode, OutputChannel, EmptyChannel, \
+from ..testplan import Context, OutputChannel, EmptyChannel, \
     IgnoredChannel, ExitCodeOutputChannel, Testcase, ContextTestcase
 
 _logger = logging.getLogger(__name__)
@@ -332,162 +328,24 @@ def evaluate_results(bundle: Bundle,
         actual_stdout = stdout_[i] if i < len(stdout_) else None
         actual_value = values[i] if i < len(values) else None
 
-        results = [
-            _evaluate_channel(
-                bundle.out, "file", testcase.output.file, "", file_evaluator
-            ),
-            _evaluate_channel(
-                bundle.out, "stderr", testcase.output.stderr, actual_stderr,
-                stderr_evaluator
-            ),
-            _evaluate_channel(
-                bundle.out, "exception", testcase.output.exception,
-                actual_exception, exception_evaluator
-            ),
-            _evaluate_channel(
-                bundle.out, "stdout", testcase.output.stdout, actual_stdout,
-                stdout_evaluator
-            ),
-            _evaluate_channel(
-                bundle.out, "return", testcase.output.result, actual_value,
-                value_evaluator
-            )
-        ]
+        _evaluate_channel(
+            bundle.out, "file", testcase.output.file, "", file_evaluator
+        )
+        _evaluate_channel(
+            bundle.out, "stderr", testcase.output.stderr, actual_stderr,
+            stderr_evaluator
+        )
+        _evaluate_channel(
+            bundle.out, "exception", testcase.output.exception,
+            actual_exception, exception_evaluator
+        )
+        _evaluate_channel(
+            bundle.out, "stdout", testcase.output.stdout, actual_stdout,
+            stdout_evaluator
+        )
+        _evaluate_channel(
+            bundle.out, "return", testcase.output.result, actual_value,
+            value_evaluator
+        )
 
         report_update(bundle.out, CloseTestcase())
-
-
-def execute_context(bundle: Bundle, args: ContextExecution) \
-        -> Tuple[Optional[ExecutionResult], List[Message], Status, Path]:
-    """
-    Execute a context.
-    """
-    lang_config = bundle.language_config
-
-    # Create a working directory for the context.
-    context_dir = Path(
-        bundle.config.workdir,
-        args.context_name
-    )
-    context_dir.mkdir()
-
-    _logger.info("Executing context %s in path %s",
-                 args.context_name, context_dir)
-
-    dependencies = lang_config.context_dependencies_callback(
-        args.context_name,
-        args.files
-    )
-
-    # Copy files from the common directory to the context directory.
-    for file in dependencies:
-        origin = args.common_directory / file
-        _logger.debug("Copying %s to %s", origin, context_dir)
-        # noinspection PyTypeChecker
-        shutil.copy2(origin, context_dir)
-
-    # If needed, do a compilation.
-    if args.mode == ExecutionMode.INDIVIDUAL:
-        _logger.info("Compiling context %s in INDIVIDUAL mode...",
-                     args.context_name)
-        result, files = run_compilation(bundle, context_dir, dependencies)
-
-        # Process compilation results.
-        messages, status, annotations = process_compile_results(
-            lang_config,
-            result
-        )
-
-        for annotation in annotations:
-            report_update(bundle.out, annotation)
-
-        if status != Status.CORRECT:
-            _logger.debug("Compilation of individual context failed.")
-            _logger.debug("Aborting executing of this context.")
-            return None, messages, status, context_dir
-
-        _logger.debug("Executing context %s in INDIVIDUAL mode...",
-                      args.context_name)
-        executable = find_main_file(files, args.context_name)
-        files.remove(executable)
-        stdin = args.context.get_stdin(bundle.config.resources)
-
-        base_result = execute_file(
-            bundle,
-            executable_name=executable,
-            working_directory=context_dir,
-            dependencies=files,
-            stdin=stdin
-        )
-    else:
-        result, files = None, dependencies
-        if args.precompilation_result:
-            _logger.debug("Substituting precompilation results.")
-            messages, status = args.precompilation_result
-        else:
-            _logger.debug("No precompilation results found, using default.")
-            messages, status = [], Status.CORRECT
-
-        _logger.info("Executing context %s in PRECOMPILATION mode...",
-                     args.context_name)
-
-        if lang_config.needs_selector():
-            _logger.debug("Selector is needed, using it.")
-
-            selector_name = lang_config.selector_name()
-            executable = find_main_file(files, selector_name)
-            files.remove(executable)
-            stdin = args.context.get_stdin(bundle.config.resources)
-
-            base_result = execute_file(
-                bundle,
-                executable_name=executable,
-                working_directory=context_dir,
-                dependencies=files,
-                stdin=stdin,
-                argument=args.context_name
-            )
-        else:
-            _logger.debug("Selector is not needed, using individual execution.")
-            executable = find_main_file(files, args.context_name)
-            files.remove(executable)
-            stdin = args.context.get_stdin(bundle.config.resources)
-
-            base_result = execute_file(
-                bundle,
-                executable_name=executable,
-                working_directory=context_dir,
-                dependencies=files,
-                stdin=stdin
-            )
-
-    identifier = f"--{bundle.secret}-- SEP"
-
-    value_file_path = value_file(bundle, context_dir)
-    try:
-        with open(value_file_path, "r") as f:
-            values = f.read()
-    except FileNotFoundError:
-        _logger.warning("Value file not found, looked in %s", value_file_path)
-        values = ""
-
-    exception_file_path = exception_file(bundle, context_dir)
-    try:
-        # noinspection PyTypeChecker
-        with open(exception_file_path, "r") as f:
-            exceptions = f.read()
-    except FileNotFoundError:
-        _logger.warning("Exception file not found, looked in %s",
-                        exception_file_path)
-        exceptions = ""
-
-    result = ExecutionResult(
-        stdout=base_result.stdout,
-        stderr=base_result.stderr,
-        exit=base_result.exit,
-        separator=identifier,
-        results=values,
-        exceptions=exceptions
-    )
-
-    return result, messages, status, context_dir

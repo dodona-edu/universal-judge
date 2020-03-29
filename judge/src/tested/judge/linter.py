@@ -8,6 +8,12 @@ from ..dodona import report_update, AppendMessage
 _logger = logging.getLogger(__name__)
 
 
+def runs_linter(bundle: Bundle) -> bool:
+    language_options = bundle.plan.config_for(bundle.config.programming_language)
+    # By default, we allow the linter to work.
+    return language_options.get("linter", False)
+
+
 def run_linter(bundle: Bundle):
     """
     Run the linter on the submission. For the linter to run, two preconditions
@@ -19,9 +25,7 @@ def run_linter(bundle: Bundle):
     :param bundle: The configuration bundle.
     """
 
-    language_options = bundle.plan.config_for(bundle.config.programming_language)
-    # By default, we allow the linter to work.
-    if not language_options.get("linter", False):
+    if not runs_linter(bundle):
         _logger.debug("Linter is disabled.")
         return
 
