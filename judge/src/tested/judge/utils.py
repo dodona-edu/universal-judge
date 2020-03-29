@@ -48,7 +48,7 @@ def run_command(directory: Path,
         return BaseExecutionResult(
             stdout=e.stdout,
             stderr=e.stderr,
-            exit=-10,
+            exit=0,  # Use 0 to prevent double reporting.
             was_timeout=True
         )
     return BaseExecutionResult(

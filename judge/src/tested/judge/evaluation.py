@@ -16,6 +16,7 @@ _logger = logging.getLogger(__name__)
 def _evaluate_channel(
         out: Union[UpdateCollector, IO],
         channel_name: str,
+        is_timeout: bool,
         expected_output: OutputChannel,
         actual_result: Optional[str],
         evaluator: Evaluator) -> bool:
@@ -45,6 +46,10 @@ def _evaluate_channel(
     evaluation_result = evaluator(expected_output, actual_result or "")
     status = evaluation_result.result
 
+    # Override if timeout
+    if is_timeout and status == Status.WRONG:
+        status = Status.TIME_LIMIT_EXCEEDED
+
     # If the actual value is empty and the channel output is None or ignored,
     # don't report it.
     is_correct = status.enum == Status.CORRECT or actual_result is None
@@ -66,7 +71,7 @@ def _evaluate_channel(
         report_or_collect(out, CloseTest(
             generated="",
             status=StatusMessage(
-                enum=Status.WRONG,
+                enum=Status.TIME_LIMIT_EXCEEDED if is_timeout else Status.WRONG,
                 human="Test niet uitgevoerd."
             )
         ))
@@ -95,7 +100,6 @@ def evaluate_results(bundle: Bundle,
                      exec_results: Optional[ExecutionResult],
                      compiler_results: Tuple[List[Message], Status],
                      context_dir: Path):
-
     # Begin by processing the context testcase.
     # Even if there is no main testcase, we can still proceed, since the defaults
     # should take care of this.
@@ -153,23 +157,19 @@ def evaluate_results(bundle: Bundle,
     # still write a delimiter to it.
     _ = values.pop(0) if values else ""
 
+    is_timout = exec_results.was_timeout
+
     # Actual do the evaluation.
     results = [
-        _evaluate_channel(
-            context_collector, "file", testcase.output.file, "", file_evaluator
-        ),
-        _evaluate_channel(
-            context_collector, "stderr", testcase.output.stderr, actual_stderr,
-            stderr_evaluator
-        ),
-        _evaluate_channel(
-            context_collector, "exception", testcase.output.exception,
-            actual_exception, exception_evaluator
-        ),
-        _evaluate_channel(
-            context_collector, "stdout", testcase.output.stdout, actual_stdout,
-            stdout_evaluator
-        )
+        _evaluate_channel(context_collector, "file", is_timout,
+                          testcase.output.file, "", file_evaluator),
+        _evaluate_channel(context_collector, "stderr", is_timout,
+                          testcase.output.stderr, actual_stderr, stderr_evaluator),
+        _evaluate_channel(context_collector, "exception", is_timout,
+                          testcase.output.exception, actual_exception,
+                          exception_evaluator),
+        _evaluate_channel(context_collector, "stdout", is_timout,
+                          testcase.output.stdout, actual_stdout, stdout_evaluator)
     ]
 
     # Check for missing values and stop if necessary.
@@ -194,7 +194,7 @@ def evaluate_results(bundle: Bundle,
     must_stop = False
     if not all(results):
         # As last item, we evaluate the exit code of the context.
-        _evaluate_channel(context_collector, "exitcode", exit_output,
+        _evaluate_channel(context_collector, "exitcode", is_timout, exit_output,
                           str(exec_results.exit), exit_evaluator)
         must_stop = True
 
@@ -233,25 +233,19 @@ def evaluate_results(bundle: Bundle,
         actual_value = values[i] if i < len(values) else ""
 
         results = [
-            _evaluate_channel(
-                bundle.out, "file", testcase.output.file, "", file_evaluator
-            ),
-            _evaluate_channel(
-                bundle.out, "stderr", testcase.output.stderr, actual_stderr,
-                stderr_evaluator
-            ),
-            _evaluate_channel(
-                bundle.out, "exception", testcase.output.exception,
-                actual_exception, exception_evaluator
-            ),
-            _evaluate_channel(
-                bundle.out, "stdout", testcase.output.stdout, actual_stdout,
-                stdout_evaluator
-            ),
-            _evaluate_channel(
-                bundle.out, "return", testcase.output.result, actual_value,
-                value_evaluator
-            )
+            _evaluate_channel(bundle.out, "file", is_timout, testcase.output.file,
+                              "", file_evaluator),
+            _evaluate_channel(bundle.out, "stderr", is_timout,
+                              testcase.output.stderr, actual_stderr,
+                              stderr_evaluator),
+            _evaluate_channel(bundle.out, "exception", is_timout,
+                              testcase.output.exception, actual_exception,
+                              exception_evaluator),
+            _evaluate_channel(bundle.out, "stdout", is_timout,
+                              testcase.output.stdout, actual_stdout,
+                              stdout_evaluator),
+            _evaluate_channel(bundle.out, "return", is_timout,
+                              testcase.output.result, actual_value, value_evaluator)
         ]
 
         _logger.debug(f"IN TESTCASE {i}")
@@ -287,7 +281,7 @@ def evaluate_results(bundle: Bundle,
         # Decide if we want to proceed.
         if (testcase.essential and not all(results)) or super_stop:
             # As last item, we evaluate the exit code of the context.
-            _evaluate_channel(bundle.out, "exitcode", exit_output,
+            _evaluate_channel(bundle.out, "exitcode", is_timout, exit_output,
                               str(exec_results.exit), exit_evaluator)
             must_stop = True
 
@@ -328,24 +322,16 @@ def evaluate_results(bundle: Bundle,
         actual_stdout = stdout_[i] if i < len(stdout_) else None
         actual_value = values[i] if i < len(values) else None
 
-        _evaluate_channel(
-            bundle.out, "file", testcase.output.file, "", file_evaluator
-        )
-        _evaluate_channel(
-            bundle.out, "stderr", testcase.output.stderr, actual_stderr,
-            stderr_evaluator
-        )
-        _evaluate_channel(
-            bundle.out, "exception", testcase.output.exception,
-            actual_exception, exception_evaluator
-        )
-        _evaluate_channel(
-            bundle.out, "stdout", testcase.output.stdout, actual_stdout,
-            stdout_evaluator
-        )
-        _evaluate_channel(
-            bundle.out, "return", testcase.output.result, actual_value,
-            value_evaluator
-        )
+        _evaluate_channel(bundle.out, "file", is_timout, testcase.output.file, "",
+                          file_evaluator)
+        _evaluate_channel(bundle.out, "stderr", is_timout, testcase.output.stderr,
+                          actual_stderr, stderr_evaluator)
+        _evaluate_channel(bundle.out, "exception", is_timout,
+                          testcase.output.exception, actual_exception,
+                          exception_evaluator)
+        _evaluate_channel(bundle.out, "stdout", is_timout, testcase.output.stdout,
+                          actual_stdout, stdout_evaluator)
+        _evaluate_channel(bundle.out, "return", is_timout, testcase.output.result,
+                          actual_value, value_evaluator)
 
         report_update(bundle.out, CloseTestcase())
