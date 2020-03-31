@@ -1,13 +1,16 @@
 \chapter{Beperkingen en toekomstig werk}\label{ch:beperkingen-en-toekomstig-werk}
 
-\lettrine{D}{it hoofdstuk} bespreekt de beperkingen van TESTed en geeft aan waar er nog werk is.
+\lettrine{E}{en softwarepakket} is zelden af;
+hetzelfde geldt voor TESTed.
+Verschillende onderdelen van TESTed hebben beperkingen of zijn nog niet helemaal uitgewerkt.
+Ook het Dodona-platform zelf heeft wat beperkingen, vaak omdat een judge met ondersteuning voor meerdere programmeertalen niet voorzien was in het originele ontwerp.
 
 \section{Programmeertaalkeuze in het Dodona-platform}\label{sec:programmeertaalkeuze-in-het-dodona-platform}
 
 Geen enkele bestaande judge in het Dodona-platform ondersteunt meerdere programmeertalen.
-Het concept van een programmeertaal in Dodona is gekoppeld aan een oefening.
-Dit impliceert dat elke oplossing van een oefening in dezelfde programmeertaal is, een aanname die niet meer nodig is voor TESTed.
-Een eerste uitbreiding van Dodona bestaat er dus uit om ondersteuning toe te voegen voor het kiezen van een programmeertaal per oplossing.
+Mede hierdoor is het concept van een programmeertaal in Dodona gekoppeld aan een oefening zelf.
+Dit impliceert dat elke oplossing van een oefening in dezelfde programmeertaal is, een aanname die niet meer geldt bij TESTed.
+Een uitbreiding van Dodona bestaat er dus uit om ondersteuning toe te voegen voor het kiezen van een programmeertaal per oplossing.
 Dit moet ook in de gebruikersinterface mogelijk zijn, zodat studenten kunnen kiezen in welke programmeertaal ze een oefening oplossen.
 
 Als \english{workaround} zijn er twee opties:
@@ -21,14 +24,14 @@ Als \english{workaround} zijn er twee opties:
     \item TESTed zelf de programmeertaal laten afleiden op basis van de ingediende oplossing.
     Hier zijn ook verschillende implementaties van, zoals een heuristiek die op basis van de inhoud van de oplossing de programmeertaal gokt of de student de programmeertaal laten aanduiden.
     Er is gekozen om de tweede manier te implementeren: TESTed ondersteunt een speciale \term{shebang}\footnote{Zie \url{https://en.wikipedia.org/wiki/Shebang_(Unix)}.} die aangeeft in welke programmeertaal de ingediende oplossing beoordeeld moet worden.
-    De eerste regel van de ingediende oplossing moet er als volgt uitzien:
+    De eerste regel van de ingediende oplossing kan er als volgt uitzien:
     \begin{minted}{bash}
 #!tested [programmeertaal]
     \end{minted}
     Hierbij wordt \texttt{[programmeertaal]} vervangen door de naam van de programmeertaal, zoals \texttt{java} of \texttt{python}.
 \end{itemize}
 
-\section{Detectie mogelijke programmeertalen}\label{sec:detectie-mogelijke-programmeertalen}
+\section{Detectie beschikbare programmeertalen}\label{sec:detectie-mogelijke-programmeertalen}
 
 Een andere beperking die zich situeert in het Dodona-platform is het detecteren van de ondersteunde programmeertalen voor een bepaalde oefening.
 Zoals besproken in \cref{subsec:vereiste-functies} controleert TESTed of de programmeertaal van de ingediende oplossing ondersteund wordt door het testplan van de oefening.
@@ -48,19 +51,19 @@ Er zijn twee mogelijkheden:
     Een nadeel aan deze aanpak is wel dat het verwerken van de oefeningen waarschijnlijk langer zal duren.
 \end{itemize}
 
-\section{Instellen ondersteunde programmeertalen}\label{sec:instellen-ondersteunde-programmeertalen}
+\section{Beperken beschikbare programmeertalen}\label{sec:instellen-ondersteunde-programmeertalen}
 
-De vorige paragraaf handelt steeds over de automatische detectie van ondersteunde programmeertalen.
-Het is nuttig om deze automatische detectie te kunnen overschrijven:
+Gerelateerd aan de vorige paragraaf is dat het nuttig kan zijn om de automatische detectie van in welke programmeertalen een oefening opgelost kan worden te overschrijven:
 \begin{itemize}
-    \item De automatische detectie is niet perfect (niet altijd voldoende streng).
+    \item De automatische detectie is niet altijd voldoende streng (\english{false positive}).
     Een concreet voorbeeld hiervan is de detectie van functieargumenten met heterogene gegevenstypes (zie \cref{subsec:vereiste-functies} voor een voorbeeld).
     De automatische detectie houdt enkel rekening met \english{literal} functieargumenten.
     De gegevenstypes van functieoproepen en identifiers worden niet gecontroleerd, aangezien deze informatie niet eenvoudig af te leiden is uit het testplan.
     Het is dus mogelijk dat TESTed aangeeft dat een programmeertaal ondersteund wordt, terwijl de opgave niet te implementeren valt in die programmeertaal.
-    \item Lesgevers willen het aantal talen waarin een oefening opgelost kan worden beperken.
+    \item Lesgevers willen dat studenten slechts in een beperkt aantal programmeertalen kunnen indienen.
     TESTed doet weliswaar de beoordeling, maar het toekennen van punten, bijvoorbeeld voor een examen, gebeurt nog steeds door de lesgever.
     In bepaalde gevallen is het logisch dat studenten geen oefeningen kunnen indienen in programmeertalen die de lesgever niet machtig is.
+    Deze beperking kan ook nuttig zijn voor vakken waar bv.\ een specifieke programmeertaal aangeleerd wordt.
 \end{itemize}
 
 In SPOJ (een gelijkaardig platform dat als inspiratie diende voor Dodona, zie \cref{sec:wat-is-dodona}) kan een lesgever bijvoorbeeld aangeven in welke programmeertalen een oefening gemaakt kan worden, samen met een optie of de oefening nieuwe programmeertalen (die aan SPOJ toegevoegd worden na het opstellen van de oefening) ondersteunt.
@@ -84,10 +87,10 @@ Er zijn twee groepen personen voor wie het steek houdt de ondersteunde programme
 Concreet zijn dus volgende uitbreidingen nuttig:
 \begin{itemize}
     \item TESTed uitbreiden zodat bijkomende programmeertalen ook verboden kunnen worden, ook al geeft de automatische detectie aan dat de ondersteuning er is.
-    \item Dodona uitbreiden, zodat een cursus of reeks een lijst van toegelaten programmeertalen heeft, en dat deze lijst ook aan TESTed wordt gegeven.
+    \item De uitbreiding van Dodona uit de vorige paragraaf verder uitwerken, zodat een cursus of reeks een lijst van toegelaten programmeertalen kan krijgen.
 \end{itemize}
 
-\section{Artisanale testplannen zijn omslachtig}\label{sec:artisanale-testplannen-zijn-omslachtig}
+\section{Handgeschreven testplannen zijn omslachtig}\label{sec:artisanale-testplannen-zijn-omslachtig}
 
 In TESTed is gekozen om het testplan in json op te stellen (zie \cref{subsec:het-testplan}).
 Bovendien is een designkeuze geweest om zoveel mogelijk informatie expliciet te maken.
@@ -97,37 +100,31 @@ Anderzijds zorgt dit wel voor redelijk wat herhaalde informatie in het testplan.
 De combinatie van json met de herhaalde informatie zorgt ervoor dat een testplan vaak lang is, en te lang wordt om met de hand te schrijven.
 Een oplossing hiervoor, die al gebruikt wordt, is om het testplan niet met de hand te schrijven, maar te laten generen, door bijvoorbeeld een Python-script.
 
-Een mogelijke andere oplossing is een zeer specifieke programmeertaal "voor" het testplan zetten: een DSL (\english{domain-specific language}).
-Deze programmeertaal zou dan omgezet worden naar het json-formaat van het testplan, bijvoorbeeld voor de beoordeling van een oplossing of tijdens de verwerking van een oefening door Dodona.
-Een bijkomend voordeel van json als formaat is dat het neutraal is: meerdere DSL's, bijvoorbeeld specifiek gericht op een bepaalde soort oefening, zijn mogelijk.
-Een voorbeeld: voor veel oefeningen bestaat de beoordeling uit een functie met een reeks waarden (of een bereik van waarden).
-Het is in te beelden dat een DSL hier ondersteuning voor biedt en automatisch functieoproepen genereert.
-Een fictief voorbeeld:
+Een mogelijke andere oplossing is bijkomende stap toevoegen voor het testplan: het testplan wordt dan in een ander formaat geschreven, en bijvoorbeeld tijdens het importeren in Dodona omgezet naar het json-bestand.
+Voor dat andere formaat kan een DSL (\english{domain-specific language}) nuttig zijn.
+Dit is een programmeertaal die specifiek ontworpen is voor een bepaald onderwerp of doel;
+hier zou het specifiek ontworpen zijn om een testplan te schrijven.
 
-\begin{minted}{text}
-= function sinus =
-params:
-    angle -> [-100, 100]
-output:
-    [-1, 1]
-description:
-    Bereken de sinus van een hoek.
-\end{minted}
+Een bijkomend voordeel van json als formaat is dat het een neutraal formaat is.
+Meerdere DSL's, bijvoorbeeld specifiek gericht op een bepaalde soort oefening (zoals een oefening die enkel stdin en stdout gebruikt), zijn mogelijk.
+Een DSL moet niet beperkt blijven tot een beschrijvende rol, maar kan bijvoorbeeld ook zelf testen genereren (het automatisch genereren van testen is een volledig onderwerp op zich\footnote{Zie bijvoorbeeld de Wikipedia-pagina over het onderwerp: \url{https://en.wikipedia.org/wiki/Test_generation}}).
 
 \section{Dynamische scheduling van testen}\label{sec:dynamisch-schedulen-van-testgevallen}
 
 In TESTed is gekozen om het testplan in json op te stellen (zie \cref{subsec:het-testplan}).
-Een nadeel van deze aanpak is dat de \term{scheduling} (of het plannen van welke testcode wanneer uitgevoerd worden) statisch gebeurt, voor de uitvoering van diezelfde testcode.
-Het is niet mogelijk om in het algemeen op basis van het resultaat van een vorige uitvoering het verloop van de volgende uitvoering te bepalen.
+Een nadeel van deze aanpak is dat de \term{scheduling} (of het plannen van welke testcode wanneer uitgevoerd worden) statisch gebeurt/
+Het is niet mogelijk om in het algemeen op basis van het resultaat van een vorig testgeval het verloop van de overige testgevallen te bepalen.
 
-De keuze voor een statisch testplan \emph{an sich} is echter niet in alle scenario's een probleem.
-Het testplan zou uitgebreid kunnen worden op verschillende manieren, van eenvoudig tot complex, in zowel implementatie als mogelijkheden:
+De keuze voor een statisch testplan \emph{an sich} is echter voor specifieke gevallen echter geen probleem.
+Het testplan zou uitgebreid kunnen worden op verschillende manieren, van eenvoudig tot complex, in zowel implementatie als mogelijkheden.
+Zo is reeds voorzien in het testplan om een testgeval als essentieel aan te duiden: faalt dit testgeval, zullen volgende testgevallen niet meer uitgevoerd worden.
+Dit zou ook uitgebreid kunnen worden om op het niveau van contexten te werken.
+Hieronder worden nog twee mogelijke maar complexere uitbreidingen besproken:
 
 \begin{itemize}
-    \item Het eenvoudigste geval is de mogelijkheid bieden om een context als essentieel te markeren (deze mogelijk is al voorzien binnen één context voor de testgevallen): is deze essentiële context niet succesvol, worden volgende contexten niet meer uitgevoerd.
-    \item Elke context kan van een unieke identificatiecode voorzien worden, waarna er voor elke context aangegeven kan worden welke eerdere contexten geslaagd moeten zijn, vooraleer die context uitgevoerd mag worden.
-    Men kan bijvoorbeeld instellen dat context 15 enkel uitgevoerd kan worden indien contexten 1, 7 en 14 ook succesvol waren.
-    \item Het systeem van hierboven kan uitgebreid worden met voorwaarden en ook omgedraaid worden.
+    \item Elke context kan van een unieke identificatiecode voorzien worden, waarna er voor elke volgende context aangegeven kan worden welke eerdere contexten geslaagd moeten zijn, vooraleer die context uitgevoerd mag worden.
+    Men kan bijvoorbeeld aangeven dat context 15 enkel uitgevoerd kan worden indien contexten 1, 7 en 14 ook succesvol waren.
+    \item Het systeem met de identificatiecodes van hierboven kan uitgebreid worden met voorwaarden en ook omgedraaid worden.
     Contexten zouden kunnen resulteren in een resultaat (juist, fout, een waarde, enz.) en zouden instructies kunnen meekrijgen om aan te geven wat de volgende context is, afhankelijk van een voorwaarde.
     Een voorbeeld is dat indien het resultaat van context 20 groter is dan 2, ga na naar context 25, anders naar context 35.
 \end{itemize}
@@ -138,12 +135,17 @@ Een oefening waarbij waarden bijvoorbeeld uit een normale verdeling getrokken mo
 
 \section{Geprogrammeerde evaluatie is traag}\label{sec:geprogrammeerde-evaluatie-is-traag}
 
-Het uitvoeren van een geprogrammeerde evaluatie (zie \cref{subsec:geprogrammeerde-evaluatie}) zorgt voor een redelijke kost op het vlak van performantie (zie \cref{tab:meting} voor enkele metingen).
+Het uitvoeren van een geprogrammeerde evaluatie (zie \cref{subsec:geprogrammeerde-evaluatie}) zorgt voor een niet te verwaarlozen kost op het vlak van performantie (zie \cref{tab:meting} voor enkele metingen).
 De reden hiervoor is eenvoudig te verklaren: zoals de contexten wordt elke geprogrammeerde evaluatie in een afzonderlijk subproces uitgevoerd (afhankelijk van de programmeertaal ook met eigen compilatiestap).
 Zoals echter vermeld in \cref{sec:performantie} is TESTed oorspronkelijk gestart met het uitvoeren van code in Jupyter-kernels.
 De grootste reden dat daar vanaf gestapt is, is dat de kost voor het opnieuw opstarten van een kernel te groot is, en het heropstarten noodzakelijk is om de onafhankelijkheid van de contexten te garanderen.
 Een geprogrammeerde evaluatie lijkt een ideale kandidaat om te onderzoeken of de Jupyter-kernels niet sneller zijn: enerzijds is het opnieuw starten van de kernels niet nodig (er wordt geen code van de student uitgevoerd, dus is de code te vertrouwen), en anderzijds wordt een bepaalde geprogrammeerde evaluatiecode vaak voor meerdere contexten gebruikt.
 Het idee is dat het eenmalig opstarten van een Jupyter-kernel en gebruiken bijvoorbeeld sneller is dan voor elke context een nieuw subproces starten.
+
+TODO: indien geïmplementeerd vermeld ook dat Python een speciaal geval is (of vermeld het als mogelijkheid): de code rechtstreeks uitvoeren in de judge (zoals bv.\ de Python-judge nu dingen uitvoert).
+Dan kan de aanbevolen taal voor geprogrammeerde evaluatie Python zijn, maar andere talen blijven mogelijk.
+Of nog verder gaan: enkel Python toelaten. Dit zou de implementatie van talen vereenvoudigen, en ook TESTed wordt eenvoudiger.
+Ook wordt het dan gemakkelijker om de geprogrammeerde evaluatie eventueel uit te breiden met meer informatie (bv. de context mee krijgen), aangezien er geen serialisatie meer nodig is voor de evaluatie.
 
 \section{Ondersteuning voor natuurlijke talen}\label{sec:ondersteuning-voor-natuurlijke-talen}
 
@@ -194,7 +196,7 @@ Stel als voorbeeld de ISBN-oefeningen.
 In Python is het \english{pythonic} om hiervoor twee top-level functies te schrijven (\texttt{is\_isbn} en \texttt{are\_isbn})
 In Java zal TESTed dan twee statische functies verwachten, terwijl deze opgave in de Java-wereld ook vaak opgelost zal worden met bijvoorbeeld een klasse \texttt{IsbnValidator}, met twee methoden \texttt{check} en \texttt{checkAll}.
 
-Er meerdere denkpistes om hier een oplossing voor te bieden:
+Er zijn meerdere denkpistes om hier een oplossing voor te bieden:
 
 \begin{itemize}
     \item Voorzie binnen TESTed ook vertalingen van programmeerparadigma.
@@ -206,3 +208,31 @@ Er meerdere denkpistes om hier een oplossing voor te bieden:
 Het omgekeerde, programmeertaalonafhankelijk invoer en programmeertaalspecifieke beoordeling, bestaat al binnen TESTed (zie \cref{subsec:programmeertaalspecifieke-evaluatie}).
 Als tot slot zowel de invoer als de uitvoer verschilt van programmeertaal tot programmeertaal, kan er niet meer gesproken worden van een programmeertaalonafhankelijke oefeningen.
 In dat geval is het beter een bestaande programmeertaalspecifieke judge van Dodona te gebruiken.
+
+%\section{Tijds- en geheugenlimieten}\label{sec:uitvoerformaat-van-dodona-met-timeouts}
+%
+%Een judge rapporteert de resultaten aan Dodona in een formaat dat door Dodona opgelegd wordt.
+%Er worden twee formaten ondersteund door Dodona:
+%
+%\begin{itemize}
+%    \item Het volledige formaat.
+%    Dit is een json-bestand met het volledige resultaat.
+%    De judge houdt intern de toestand van de verschillende testcases en tests bij en stuurt op het einde van de beoordeling het volledige resultaat naar Dodona.
+%    \item Het partiële formaat.
+%    Hierbij wordt elk evenement afzonderlijk naar Dodona gestuurd.
+%    Wordt bijvoorbeeld de beoordeling van een context gestart, dan stuurt de judge het commando \texttt{open-context} naar Dodona.
+%\end{itemize}
+%
+%Het idee achter het partiële formaat is ervoor te zorgen dat een judge die testen sequentieel uitvoert, geen rekening meer moet houden met de tijds- en geheugenlimieten.
+%Eens de tijdslimiet verstreken is, wordt de judge afgesloten, maar toont Dodona de reeds beoordeelde testgevallen wel (aangezien die al in de uitvoer zitten).
+%Dit in tegenstelling tot het volledige formaat: als daar de judge afgesloten moet worden, dan is er geen uitvoer.
+%Het is dus nodig dat de judge daar zelf de tijds- en geheugenlimieten in de gaten houdt.
+%
+%In TESTed is gekozen om het partiële formaat te gebruiken, maar hierbij zijn wel enkele beperkingen gevonden:
+%
+%\begin{itemize}
+%    \item Uit educatieve overwegingen kan het nuttig zijn bij een time-out niet enkel de beoordeelde testgevallen te tonen, maar ook de nog niet beoordeelde testgevallen.
+%    Ervaring uit het werken met Dodona in de praktijk leert dat studenten het niet altijd even duidelijk vinden dat bij een time-out er slechts één testgeval fout is.
+%    Als eerste is dit moeilijk, aangezien Dodona geen status heeft voor "niet uitgevoerd" testgeval\footnote{De status van deze feature kan gevolgd worden op \url{https://github.com/dodona-edu/dodona/issues/1785}}.
+%    Daarnaast moet de judge dan wel zelf de tijds- en geheugenlimieten bijhouden: als de judge wordt afgesloten, weet Dodona niet welke testen nog uitgevoerd moesten worden, dus kunnen ze ook niet getoond worden.
+%\end{itemize}
