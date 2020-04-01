@@ -96,17 +96,14 @@ def judge(bundle: Bundle):
         precompilation_result = None
 
     _logger.info("Starting judgement...")
-    # pool = Pool(4 if plan.configuration.parallel else 1)
-
-    # with utils.protected_directory(common_dir) as common_dir:
 
     for tab_index, tab in enumerate(bundle.plan.tabs):
         report_update(bundle.out, StartTab(title=tab.name))
-        # Create a list of arguments to execute_module (in threads)
-        executions = []
         for context_index, context in enumerate(tab.contexts):
-            time_limit = _calculate_timeout(bundle, context)
-            executions.append(ContextExecution(
+            report_update(bundle.out, StartContext(
+                description=context.description
+            ))
+            execution = ContextExecution(
                 context=context,
                 context_name=bundle.language_config.context_name(
                     tab_number=tab_index,
@@ -115,22 +112,11 @@ def judge(bundle: Bundle):
                 mode=mode,
                 common_directory=common_dir,
                 files=files,
-                precompilation_result=precompilation_result,
-                time_limit=time_limit
-            ))
+                precompilation_result=precompilation_result
+            )
 
-        results = []
-        for execution in executions:
-            results.append(execute_context(bundle, execution))
-        # Do the executions in parallel
-        # results = pool.map(self.execute_context, executions)
+            execution_result, m, s, p = execute_context(bundle, execution)
 
-        # Handle the results
-        for context_index, context in enumerate(tab.contexts):
-            report_update(bundle.out, StartContext(
-                description=context.description
-            ))
-            execution_result, m, s, p = results[context_index]
             evaluate_results(
                 bundle,
                 context=context,
@@ -171,7 +157,7 @@ def _generate_files(bundle: Bundle,
     dependencies.append(submission_file)
 
     # Allow modifications of the submission file.
-    bundle.language_config.solution_callback(solution_path, bundle.plan)
+    bundle.language_config.solution_callback(solution_path, bundle)
 
     # The names of the contexts in the testplan.
     context_names = []

@@ -41,7 +41,6 @@ class ContextExecution:
     common_directory: Path
     files: List[str]
     precompilation_result: Optional[Tuple[List[Message], Status]]
-    time_limit: int
 
 
 def execute_file(
@@ -176,8 +175,7 @@ def execute_context(bundle: Bundle, args: ContextExecution) \
         working_directory=context_dir,
         dependencies=files,
         stdin=stdin,
-        argument=argument,
-        timeout=args.time_limit
+        argument=argument
     )
 
     identifier = f"--{bundle.secret}-- SEP"

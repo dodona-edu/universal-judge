@@ -53,6 +53,10 @@ class Options:
     Controls running the linter for languages. Default is True. Of course, for
     languages without linter implementation, this does nothing.
     """
+    show_unprocessed: bool = False
+    """
+    If testcases that were not run should be shown or not.
+    """
 
 
 @dataclass

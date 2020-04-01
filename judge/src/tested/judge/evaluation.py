@@ -206,8 +206,6 @@ def evaluate_results(bundle: Bundle,
     if must_stop:
         return  # Stop now.
 
-    executed_testcases = 0
-
     # Begin processing the normal testcases.
     for i, testcase in enumerate(context.testcases):
         # Type hint for PyCharm.
@@ -288,51 +286,6 @@ def evaluate_results(bundle: Bundle,
 
         report_update(bundle.out, CloseTestcase())
 
-        executed_testcases = i
-
         if must_stop:
             _logger.debug("Stopping evaluation, since testcase is essential.")
-            break  # Stop evaluation now.
-
-    # TODO: merge all three evaluations: context, testcases and not handled, since
-    #  they are quite similar but also not the same.
-
-    start = executed_testcases + 1
-
-    for i, testcase in enumerate(context.testcases[start:], start):
-        # Type hint for PyCharm.
-        testcase: Testcase
-
-        _logger.debug(f"Evaluating not executed testcase {i}")
-
-        readable_input = get_readable_input(bundle, testcase)
-        report_update(bundle.out, StartTestcase(description=readable_input))
-
-        # Get the evaluators
-        output = testcase.output
-        stdout_evaluator = get_evaluator(bundle, context_dir, output.stdout)
-        stderr_evaluator = get_evaluator(bundle, context_dir, output.stderr)
-        file_evaluator = get_evaluator(bundle, context_dir, output.file)
-        value_evaluator = get_evaluator(bundle, context_dir, output.result)
-        exception_evaluator = get_evaluator(bundle, context_dir, output.exception)
-
-        # Get the values produced by the execution. If there are no values, we use
-        # an empty string at this time. We handle missing output later.
-        actual_stderr = stderr_[i] if i < len(stderr_) else None
-        actual_exception = exceptions[i] if i < len(exceptions) else None
-        actual_stdout = stdout_[i] if i < len(stdout_) else None
-        actual_value = values[i] if i < len(values) else None
-
-        _evaluate_channel(bundle.out, "file", is_timout, testcase.output.file, "",
-                          file_evaluator)
-        _evaluate_channel(bundle.out, "stderr", is_timout, testcase.output.stderr,
-                          actual_stderr, stderr_evaluator)
-        _evaluate_channel(bundle.out, "exception", is_timout,
-                          testcase.output.exception, actual_exception,
-                          exception_evaluator)
-        _evaluate_channel(bundle.out, "stdout", is_timout, testcase.output.stdout,
-                          actual_stdout, stdout_evaluator)
-        _evaluate_channel(bundle.out, "return", is_timout, testcase.output.result,
-                          actual_value, value_evaluator)
-
-        report_update(bundle.out, CloseTestcase())
+            return  # Stop evaluation now.
