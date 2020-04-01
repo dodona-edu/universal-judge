@@ -1,17 +1,16 @@
-from os import PathLike
 from pathlib import Path
-from typing import List, Union, Mapping
+from typing import List, Mapping
 
 from humps import pascalize
 
-from tested.languages import Language
-from tested.languages.config import CallbackResult, executable_name, TypeSupport
-from tested.features import Constructs
-from tested.serialisation import StringType, StringTypes, FunctionCall
-from tested.testplan import Plan
+from tested.configs import Bundle
 from tested.datatypes import (AdvancedNumericTypes as ant, AllTypes,
                               AdvancedSequenceTypes as ast,
                               BasicSequenceTypes as bst, BasicObjectTypes as bot)
+from tested.features import Constructs
+from tested.languages import Language
+from tested.languages.config import CallbackResult, executable_name, TypeSupport
+from tested.serialisation import StringType, StringTypes, FunctionCall
 from tested.utils import fallback
 
 
@@ -57,14 +56,18 @@ class HaskellConfig(Language):
         return f"Context_{tab_number}_{context_number}"
 
     def supported_constructs(self) -> Constructs:
-        return Constructs.MAIN | Constructs.FUNCTION_CALL | Constructs.ASSIGNMENT
+        return (
+                    Constructs.MAIN | Constructs.FUNCTION_CALL |
+                    Constructs.ASSIGNMENT | Constructs.EVALUATION)
 
-    def solution_callback(self, solution: Union[Path, PathLike], plan: Plan):
+    def solution_callback(self, solution: Path, bundle: Bundle):
         """Support implicit modules if needed."""
-        if plan.config_for("haskell").get("implicitModule", True):
-            name = self.submission_name(plan)
+        if bundle.config.config_for().get("implicitModule", True):
+            name = self.submission_name(bundle.plan)
+            # noinspection PyTypeChecker
             with open(solution, "r") as file:
                 contents = file.read()
+            # noinspection PyTypeChecker
             with open(solution, "w") as file:
                 result = f"module {name} where\n" + contents
                 file.write(result)

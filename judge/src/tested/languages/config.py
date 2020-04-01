@@ -169,11 +169,11 @@ class Language:
         """
         return defaultdict(lambda: TypeSupport.REDUCED)
 
-    def solution_callback(self, solution: Path, plan: Plan):
+    def solution_callback(self, solution: Path, bundle: Bundle):
         """
         An opportunity to modify the solution. By default, this does nothing.
         :param solution: Path to the solution and path for the modified solution.
-        :param plan: The testplan.
+        :param bundle: The configuration bundle.
         """
         pass
 
