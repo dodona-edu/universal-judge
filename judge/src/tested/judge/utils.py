@@ -20,42 +20,30 @@ class BaseExecutionResult:
     stdout: str
     stderr: str
     exit: int
-    was_timeout: bool
 
 
 def run_command(directory: Path,
                 command: Optional[List[str]] = None,
-                stdin: Optional[str] = None,
-                timout: Optional[int] = None) -> Optional[BaseExecutionResult]:
+                stdin: Optional[str] = None) -> Optional[BaseExecutionResult]:
     """
     Run a command and get the result of said command.
 
     :param directory: The directory to execute in.
     :param command: Optional, the command to execute.
     :param stdin: Optional stdin for the process.
-    :param timout:
-
     :return: The result of the execution if the command was not None.
     """
     if not command:
         return None
 
-    try:
-        # noinspection PyTypeChecker
-        process = subprocess.run(command, cwd=directory, text=True,
-                                 capture_output=True, input=stdin, timeout=timout)
-    except subprocess.TimeoutExpired as e:
-        return BaseExecutionResult(
-            stdout=e.stdout or "",
-            stderr=e.stderr or "",
-            exit=0,  # Use 0 to prevent double reporting.
-            was_timeout=True
-        )
+    # noinspection PyTypeChecker
+    process = subprocess.run(command, cwd=directory, text=True,
+                             capture_output=True, input=stdin)
+
     return BaseExecutionResult(
         stdout=process.stdout,
         stderr=process.stderr,
-        exit=process.returncode,
-        was_timeout=False
+        exit=process.returncode
     )
 
 

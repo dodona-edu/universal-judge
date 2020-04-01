@@ -49,8 +49,7 @@ def execute_file(
         working_directory: Path,
         dependencies: List[str],
         stdin: Optional[str] = None,
-        argument: Optional[str] = None,
-        timeout: Optional[int] = None
+        argument: Optional[str] = None
 ) -> BaseExecutionResult:
     """
     Execute a file.
@@ -66,8 +65,6 @@ def execute_file(
     :param stdin: The stdin for the execution.
     :param executable_name: The executable that should be executed. This file
                             will not be present in the dependency list.
-    :param timeout: A timeout for the command.
-
     :return: The result of the execution.
     """
     _logger.info("Starting execution on file %s", executable_name)
@@ -81,7 +78,7 @@ def execute_file(
     _logger.debug("Executing command %s in directory %s", command,
                   working_directory)
 
-    result = run_command(working_directory, command, stdin, timeout)
+    result = run_command(working_directory, command, stdin)
     assert result is not None
     return result
 
@@ -204,8 +201,7 @@ def execute_context(bundle: Bundle, args: ContextExecution) \
         exit=base_result.exit,
         separator=identifier,
         results=values,
-        exceptions=exceptions,
-        was_timeout=base_result.was_timeout
+        exceptions=exceptions
     )
 
     return result, messages, status, context_dir

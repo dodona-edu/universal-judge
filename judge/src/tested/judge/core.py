@@ -6,14 +6,14 @@ from typing import Tuple, List
 from .compilation import run_compilation, process_compile_results
 from .evaluation import evaluate_results
 from .execution import ContextExecution, execute_context
-from .linter import run_linter, runs_linter
+from .linter import run_linter
 from .utils import copy_from_paths_to_path
 from ..configs import Bundle
 from ..dodona import *
 from ..features import is_supported
 from ..languages.generator import generate_context, generate_selector
 from ..languages.templates import path_to_templates
-from ..testplan import ExecutionMode, Context
+from ..testplan import ExecutionMode
 
 _logger = logging.getLogger(__name__)
 
@@ -189,41 +189,3 @@ def _generate_files(bundle: Bundle,
     else:
         generated = None
     return common_dir, dependencies, generated
-
-
-def _get_units_of_work(bundle: Bundle):
-    units = 1 if runs_linter(bundle) else 0
-    for tab in bundle.plan.tabs:
-        units += len(tab.contexts)
-    return units
-
-
-def _calculate_timeout(bundle: Bundle, context: Context):
-    """
-    Calculate how long the context gets to execute.
-
-    If applicable, the timeout from the context will be taken. If not, the
-    timeout will be (0.8 * global) / units, were global is the timeout given by
-    Dodona, and units are the units of work. A unit of work is a context or an
-    additional processor, like a linter.
-
-    Note that the override in the context is only a suggestion: the timeout cannot
-    be more than 0.8 * global, since that would not leave enough time for the judge
-    itself.
-
-    Additionally, the timeout in TESTed is no guarantee: it's on a best efforts
-    basis. Dodona guarantees global timeouts.
-
-    :param bundle: The configuration bundle.
-    :param context: The context to execute.
-    :return: The timeout, in seconds.
-    """
-
-    global_ = int(bundle.config.time_limit)
-    override = context.time_limit(bundle.config.programming_language)
-    upper_limit = int(0.8 * global_)
-
-    if override is not None:
-        return min(override, upper_limit)
-
-    return upper_limit // _get_units_of_work(bundle)

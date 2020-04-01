@@ -427,8 +427,6 @@ class Context(WithFeatures, WithFunctions):
     after: Code = field(default_factory=dict)
     description: Optional[str] = None
 
-    time_limits: Dict[str, int] = field(default_factory=dict)
-
     @root_validator
     def check_testcases_exist(cls, values):
         context = values.get('context_testcase')
