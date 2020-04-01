@@ -474,39 +474,10 @@ class ExecutionMode(str, Enum):
 
 
 @dataclass
-class Configuration:
-    """
-    The configuration options for the judge.
-    """
-    parallel: bool = True
-    """
-    Indicate that the contexts should be executed in parallel. It is recommended to
-    disable this for exercises that already are multithreaded. It may also be worth
-    investigating if the exercise is computationally heady.
-    """
-    mode: ExecutionMode = ExecutionMode.PRECOMPILATION
-    """
-    The default mode for the judge.
-    """
-    allow_fallback: Optional[bool] = True
-    """
-    Indicate if the judge should attempt individual mode if the precompilation mode
-    fails. If nothing is given, the language-dependent default is used. If a boolean
-    is given, this value is used, regardless of the language default.
-    """
-    language: Dict[str, Dict[str, Any]] = field(default_factory=dict)
-    """
-    Language-specific options for the judge. These depend on the language
-    implementation; the judge itself does nothing with it.
-    """
-
-
-@dataclass
 class Plan(WithFeatures, WithFunctions):
     """General test plan, which is used to run tests of some code."""
     tabs: List[Tab] = field(default_factory=list)
     namespace: str = "Main"
-    configuration: Configuration = Configuration()
 
     def get_used_features(self) -> FeatureSet:
         """
@@ -525,9 +496,6 @@ class Plan(WithFeatures, WithFunctions):
 
     def get_functions(self) -> Iterable[FunctionCall]:
         return flatten(x.get_functions() for x in self.tabs)
-
-    def config_for(self, language: str) -> dict:
-        return self.configuration.language.get(language, dict())
 
 
 class _FunctionSignature(NamedTuple):

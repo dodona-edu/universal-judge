@@ -1,6 +1,4 @@
 import logging
-import shutil
-from pathlib import Path
 
 from ..configs import Bundle
 from ..dodona import report_update, AppendMessage
@@ -9,9 +7,7 @@ _logger = logging.getLogger(__name__)
 
 
 def runs_linter(bundle: Bundle) -> bool:
-    language_options = bundle.plan.config_for(bundle.config.programming_language)
-    # By default, we allow the linter to work.
-    return language_options.get("linter", False)
+    return bundle.config.linter()
 
 
 def run_linter(bundle: Bundle):

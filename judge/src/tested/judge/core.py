@@ -41,7 +41,7 @@ def judge(bundle: Bundle):
         _logger.info("Required features not supported.")
         return  # Not all required features are supported.
 
-    mode = bundle.plan.configuration.mode
+    mode = bundle.config.options.mode
     report_update(bundle.out, StartJudgment())
 
     # Run the linter.
@@ -67,7 +67,7 @@ def judge(bundle: Bundle):
         precompilation_result = (messages, status)
 
         # If we have fallback, discard all results.
-        if status != Status.CORRECT and bundle.plan.configuration.allow_fallback:
+        if status != Status.CORRECT and bundle.config.options.allow_fallback:
             mode = ExecutionMode.INDIVIDUAL
             _logger.info("Compilation error, falling back to individual mode")
             # Remove the selector file from the dependencies.

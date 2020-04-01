@@ -49,7 +49,7 @@ def path_to_templates(bundle: Bundle) -> List[Path]:
     language = bundle.config.programming_language
     result = []
     for end in bundle.language_config.template_folders(language):
-        result.append(judge_root / 'tested' / 'languages' / 'templates' / end)
+        result.append(judge_root / 'tested' / 'languages' / end / 'templates')
     assert result, "At least one template folder is required."
     return result
 

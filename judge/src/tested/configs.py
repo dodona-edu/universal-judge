@@ -4,9 +4,11 @@ Module for handling and bundling various configuration options for TESTed.
 import dataclasses
 import json
 import logging
-from dataclasses import dataclass, field
+from collections import defaultdict
+from dataclasses import field
 from pathlib import Path
-from typing import Optional, Dict, IO, TYPE_CHECKING
+from typing import Optional, Dict, IO, TYPE_CHECKING, Any
+from pydantic.dataclasses import dataclass
 
 import tested.utils as utils
 import tested.testplan as testplan
@@ -20,6 +22,40 @@ _logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
+class Options:
+    """
+    TESTed-specific options. Putting these options in the exercise config allows to
+    override them for each exercise, and not
+    """
+    parallel: bool = True
+    """
+    Indicate that the contexts should be executed in parallel. It is recommended to
+    disable this for exercises that already are multithreaded. It may also be worth
+    investigating if the exercise is computationally heady.
+    """
+    mode: testplan.ExecutionMode = testplan.ExecutionMode.PRECOMPILATION
+    """
+    The default mode for the judge.
+    """
+    allow_fallback: bool = True
+    """
+    Indicate if the judge should attempt individual mode if the precompilation mode
+    fails. If nothing is given, the language-dependent default is used. If a boolean
+    is given, this value is used, regardless of the language default.
+    """
+    language: Dict[str, Dict[str, Any]] = field(default_factory=dict)
+    """
+    Language-specific options for the judge. These depend on the language
+    implementation; the judge itself does nothing with it.
+    """
+    linter: Dict[str, bool] = field(default_factory=dict)
+    """
+    Controls running the linter for languages. Default is True. Of course, for
+    languages without linter implementation, this does nothing.
+    """
+
+
+@dataclass
 class DodonaConfig:
     resources: Path
     source: Path
@@ -31,7 +67,13 @@ class DodonaConfig:
     workdir: Path
     judge: Path
     plan_name: str = "plan.json"  # Name of the testplan file.
-    options: Dict[str, str] = field(default_factory=dict)
+    options: Options = Options()
+
+    def config_for(self) -> dict:
+        return self.options.language.get(self.programming_language, dict())
+
+    def linter(self) -> bool:
+        return self.options.linter.get(self.programming_language, False)
 
 
 def read_config(config_in: IO) -> DodonaConfig:
@@ -43,24 +85,11 @@ def read_config(config_in: IO) -> DodonaConfig:
         config_json = input_.read()
     config_ = json.loads(config_json)
 
-    # The configuration we receive from Dodona can contain additional fields that
-    # we don't use. To prevent errors, only take the fields we use. Additionally,
-    # convert some fields to Paths, since we like typed attributes in TESTed.
-    required = dict()
-    for field_ in dataclasses.fields(DodonaConfig):
-        if field_.name not in config_:
-            continue
+    # Replace the judge directory.
+    parsed: DodonaConfig = DodonaConfig.__pydantic_model__.parse_obj(config_)
+    parsed.judge = parsed.judge / 'judge' / 'src'
 
-        # Special support for Paths
-        if field_.type == Path:
-            required[field_.name] = Path(config_[field_.name])
-        else:
-            # Just take in the value.
-            required[field_.name] = config_[field_.name]
-
-    dodona = DodonaConfig(**required)
-    judge_dir = dodona.judge
-    return dataclasses.replace(dodona, judge=judge_dir / 'judge' / 'src')
+    return parsed
 
 
 @dataclasses.dataclass(frozen=True)
@@ -107,6 +136,7 @@ def create_bundle(config: DodonaConfig,
 
     if language is None:
         language = _get_language(config)
+    # noinspection PyDataclass
     adjusted_config = dataclasses.replace(config, programming_language=language)
     language_config = langs.get_language(language)
     return Bundle(
@@ -116,6 +146,3 @@ def create_bundle(config: DodonaConfig,
         secret=utils.get_identifier(),
         plan=plan
     )
-
-
-
