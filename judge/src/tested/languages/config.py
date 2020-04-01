@@ -10,7 +10,7 @@ import os
 from collections import defaultdict
 from enum import Enum, auto
 from pathlib import Path
-from typing import List, Tuple, Mapping, Optional
+from typing import List, Tuple, Mapping
 
 from ..configs import Bundle
 from ..datatypes import AllTypes
