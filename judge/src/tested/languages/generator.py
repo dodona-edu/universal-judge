@@ -8,7 +8,6 @@ from typing import List, Union, Tuple, Optional, Set
 
 from ..datatypes import SequenceTypes
 from ..dodona import ExtendedMessage
-from .paths import value_file, exception_file
 from .templates import find_and_write_template, find_template
 from ..serialisation import Value, SequenceType, Identifier, FunctionType, \
     FunctionCall, Expression, Statement
@@ -426,3 +425,29 @@ def generate_custom_evaluator(bundle: Bundle,
     )
 
     return find_and_write_template(bundle, args, destination, "evaluator_executor")
+
+
+def value_file(bundle: Bundle, directory: Path):
+    """
+    Return the path to the value file. The file will be placed inside the given
+    working directory.
+
+    :param bundle: The configuration bundle.
+    :param directory: The directory in which to place the file.
+
+    :return: The path to the file, depending on the working directory.
+    """
+    return directory / f"{bundle.secret}_values.txt"
+
+
+def exception_file(bundle: Bundle, directory: Path):
+    """
+    Return the path to the exception file. The file will be placed inside the given
+    working directory.
+
+    :param bundle: The configuration bundle.
+    :param directory: The directory in which to place the file.
+
+    :return: The path to the file, depending on the working directory.
+    """
+    return directory / f"{bundle.secret}_exceptions.txt"

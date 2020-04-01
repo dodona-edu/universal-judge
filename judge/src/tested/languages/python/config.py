@@ -1,18 +1,18 @@
 import os
 import re
 from pathlib import Path
-from typing import List, Tuple, Mapping, Optional
+from typing import List, Tuple, Mapping
 
 from humps import decamelize, depascalize
 
-from . import python_linter
-from ..config import Language, CallbackResult, TypeSupport
-from ...configs import Bundle
-from ...datatypes import (AdvancedNumericTypes as ant, AllTypes,
-                          AdvancedSequenceTypes as ast)
-from ...dodona import AnnotateCode, Severity, Message
-from ...testplan import Plan
-from ...utils import fallback
+from tested.languages.python import linter
+from tested.languages.config import Language, CallbackResult, TypeSupport
+from tested.configs import Bundle
+from tested.datatypes import (AdvancedNumericTypes as ant, AllTypes,
+                              AdvancedSequenceTypes as ast)
+from tested.dodona import AnnotateCode, Severity, Message
+from tested.testplan import Plan
+from tested.utils import fallback
 
 
 class PythonConfig(Language):
@@ -120,7 +120,7 @@ class PythonConfig(Language):
 
     def run_linter(self, bundle: Bundle, submission: Path) \
             -> Tuple[List[Message], List[AnnotateCode]]:
-        return python_linter.run_pylint(bundle, submission)
+        return linter.run_pylint(bundle, submission)
 
     def type_support_map(self) -> Mapping[AllTypes, TypeSupport]:
         return fallback(super().type_support_map(), {

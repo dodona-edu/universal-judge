@@ -12,8 +12,8 @@ from typing import List, Tuple
 from pylint import lint
 from pylint.reporters import JSONReporter
 
-from ...configs import Bundle
-from ...dodona import *
+from tested.configs import Bundle
+from tested.dodona import *
 
 logger = logging.getLogger(__name__)
 

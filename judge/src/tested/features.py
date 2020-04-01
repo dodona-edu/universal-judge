@@ -31,8 +31,10 @@ class Constructs(Flag):
     DEFAULT_ARGUMENTS = auto()
     HETEROGENEOUS_ARGUMENTS = auto()
 
+    EVALUATION = auto()  # Programmed evaluation is possible in this language.
+
     ALL = (OBJECTS | EXCEPTIONS | MAIN | FUNCTION_CALL | ASSIGNMENT
-           | HETEROGENEOUS_COLLECTIONS)
+           | HETEROGENEOUS_COLLECTIONS | DEFAULT_ARGUMENTS | EVALUATION)
 
 
 Types = Set[AllTypes]

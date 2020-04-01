@@ -9,7 +9,7 @@ from tested.dodona import Message, Status, report_update
 from .compilation import run_compilation, process_compile_results
 from .utils import BaseExecutionResult, run_command, find_main_file
 from ..configs import Bundle
-from ..languages.paths import value_file, exception_file
+from ..languages.generator import value_file, exception_file
 from ..testplan import Context, ExecutionMode
 
 _logger = logging.getLogger(__name__)

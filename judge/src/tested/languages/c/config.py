@@ -3,14 +3,14 @@ from typing import List, Mapping
 
 from humps import decamelize
 
-from .. import Language
-from ..config import CallbackResult, TypeSupport, executable_name
-from ...datatypes import (AdvancedNumericTypes as ant, AllTypes,
-                          AdvancedSequenceTypes as ast, BasicObjectTypes as bot,
-                          BasicSequenceTypes as bst)
-from ...features import Constructs
-from ...testplan import Plan
-from ...utils import fallback
+from tested.languages import Language
+from tested.languages.config import CallbackResult, TypeSupport, executable_name
+from tested.datatypes import (AdvancedNumericTypes as ant, AllTypes,
+                              AdvancedSequenceTypes as ast, BasicObjectTypes as bot,
+                              BasicSequenceTypes as bst)
+from tested.features import Constructs
+from tested.testplan import Plan
+from tested.utils import fallback
 
 
 class CConfig(Language):

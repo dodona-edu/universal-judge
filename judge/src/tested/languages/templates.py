@@ -8,8 +8,8 @@ from mako.exceptions import TemplateLookupException
 from mako.lookup import TemplateLookup
 from mako.template import Template
 
-from ..templates.preprocessors import remove_indents, remove_newline
-from ...configs import Bundle
+from tested.languages._preprocessors import remove_indents, remove_newline
+from tested.configs import Bundle
 
 _logger = logging.getLogger(__name__)
 

@@ -4,11 +4,11 @@ from typing import List, Mapping
 
 from humps import pascalize, camelize
 
-from .. import Language
-from ..config import CallbackResult, TypeSupport
-from ...datatypes import (AdvancedNumericTypes as ant, AllTypes,
-                          AdvancedSequenceTypes as ast)
-from ...utils import fallback
+from tested.languages import Language
+from tested.languages.config import CallbackResult, TypeSupport
+from tested.datatypes import (AdvancedNumericTypes as ant, AllTypes,
+                              AdvancedSequenceTypes as ast)
+from tested.utils import fallback
 
 CONTEXT_PREFIX = "Context_"
 

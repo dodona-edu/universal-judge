@@ -4,15 +4,15 @@ from typing import List, Union, Mapping
 
 from humps import pascalize
 
-from .. import Language
-from ..config import CallbackResult, executable_name, TypeSupport
-from ...features import Constructs
-from ...serialisation import StringType, StringTypes, FunctionCall
-from ...testplan import Plan
-from ...datatypes import (AdvancedNumericTypes as ant, AllTypes,
-                          AdvancedSequenceTypes as ast,
-                          BasicSequenceTypes as bst, BasicObjectTypes as bot)
-from ...utils import fallback
+from tested.languages import Language
+from tested.languages.config import CallbackResult, executable_name, TypeSupport
+from tested.features import Constructs
+from tested.serialisation import StringType, StringTypes, FunctionCall
+from tested.testplan import Plan
+from tested.datatypes import (AdvancedNumericTypes as ant, AllTypes,
+                              AdvancedSequenceTypes as ast,
+                              BasicSequenceTypes as bst, BasicObjectTypes as bot)
+from tested.utils import fallback
 
 
 class HaskellConfig(Language):
