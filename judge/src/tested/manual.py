@@ -18,7 +18,7 @@ def read_config() -> DodonaConfig:
     """Read the configuration from stdout"""
     return DodonaConfig(**{
         "memory_limit":         536870912,
-        "time_limit":           15,
+        "time_limit":           1000,
         "programming_language": 'python',
         "natural_language":     'nl',
         "resources":            Path('../exercise/isbn/evaluation'),

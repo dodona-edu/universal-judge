@@ -17,22 +17,6 @@ def evaluate(_, channel: OutputChannel, actual: str,
     """
     assert isinstance(channel.evaluator, SpecificEvaluator)
 
-    # There is no output.
-    if not actual:
-        return EvaluationResult(
-            result=StatusMessage(
-                enum=Status.INTERNAL_ERROR,
-                human="Ontbrekende uitvoer."
-            ),
-            readable_expected="",
-            readable_actual="",
-            messages=[
-
-                "Er ging iets verkeerd bij het beoordelen van de oplossing. Meld "
-                "dit aan de lesgever!"
-            ]
-        )
-
     # Try parsing as the result.
     try:
         actual: SpecificResult = SpecificResult.__pydantic_model__.parse_raw(actual)

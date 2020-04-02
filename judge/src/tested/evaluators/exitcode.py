@@ -21,7 +21,6 @@ def evaluate(_, channel: ExitCodeOutputChannel, value: str,
     exit_code = _as_int(value)
 
     if exit_code is None:
-        logger.warning(f"Could not interpret {exit_code} as a valid exit code.")
         return EvaluationResult(
             result=StatusMessage(
                 enum=Status.WRONG,

@@ -8,6 +8,7 @@ from .value import get_values
 from ..datatypes import StringTypes
 from ..dodona import ExtendedMessage, StatusMessage, Status, Permission
 from ..judge import evaluate_programmed
+from ..languages.generator import convert_expression
 from ..serialisation import StringType, SpecificResult, Value
 from ..testplan import (TextOutputChannel, FileOutputChannel, ValueOutputChannel,
                         NormalOutputChannel, ExceptionOutputChannel,
@@ -76,8 +77,8 @@ def evaluate(config: EvaluatorConfig,
     # evaluator for evaluation.
     # This is slightly tricky, since the actual value must also be converted
     # to a value, and we are not yet sure what the actual value is exactly
-    expected_value, actual_value = get_values(config.bundle, channel, actual)
-    readable_expected = repr(expected_value)  # TODO: fix this
+    expected_value, actual_value = get_values(config.bundle, channel, actual or "")
+    readable_expected = convert_expression(config.bundle, expected_value)
 
     try:
         actual_value = actual_value.get()
