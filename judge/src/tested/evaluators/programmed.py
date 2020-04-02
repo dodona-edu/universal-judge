@@ -63,7 +63,7 @@ def expected_as_value(config: EvaluatorConfig,
 def evaluate(config: EvaluatorConfig,
              channel: NormalOutputChannel,
              actual: str,
-             wrong: Status) -> EvaluationResult:
+             wrong: Status, timeout: Optional[float]) -> EvaluationResult:
     """
     Evaluate using a programmed evaluator. This evaluator is unique, in that it is
     also responsible for running the evaluator (all other evaluators don't do that).
@@ -104,8 +104,17 @@ def evaluate(config: EvaluatorConfig,
         config.bundle,
         evaluator=channel.evaluator,
         expected=expected_value,
-        actual=actual_value
+        actual=actual_value,
+        timeout=timeout
     )
+
+    if result.timeout:
+        return EvaluationResult(
+            result=StatusMessage(enum=Status.TIME_LIMIT_EXCEEDED),
+            readable_expected=readable_expected,
+            readable_actual=readable_actual,
+            messages=[result.stdout, result.stderr]
+        )
 
     if not result.stdout:
         stdout = ExtendedMessage(description=result.stdout, format="text")

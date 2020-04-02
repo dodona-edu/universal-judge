@@ -75,7 +75,7 @@ def compare_text(
 def evaluate_text(
         config: EvaluatorConfig,
         channel: OutputChannel,
-        actual: str, wrong: Status) -> EvaluationResult:
+        actual: str, wrong: Status, timeout: Optional[float]) -> EvaluationResult:
     """
     The base evaluator, used to compare two strings. As this evaluator is
     intended for evaluating stdout, it supports various options to make life
@@ -97,7 +97,8 @@ def evaluate_text(
 
 def evaluate_file(config: EvaluatorConfig,
                   channel: OutputChannel,
-                  actual: str, wrong: Status) -> EvaluationResult:
+                  actual: str, wrong: Status,
+                  timeout: Optional[float]) -> EvaluationResult:
     """
     Evaluate the contents of two files. The file evaluator supports one option,
     ``mode``, used to define in which mode the evaluator should operate:

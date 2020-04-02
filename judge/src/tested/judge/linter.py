@@ -11,7 +11,7 @@ def runs_linter(bundle: Bundle) -> bool:
     return bundle.config.linter()
 
 
-def run_linter(bundle: Bundle, collector: OutputManager):
+def run_linter(bundle: Bundle, collector: OutputManager, remaining: float):
     """
     Run the linter on the submission. For the linter to run, two preconditions
     must be satisfied:
@@ -21,6 +21,7 @@ def run_linter(bundle: Bundle, collector: OutputManager):
 
     :param bundle: The configuration bundle.
     :param collector: The output collector.
+    :param remaining: The remaining time for the execution.
     """
 
     if not runs_linter(bundle):
@@ -30,9 +31,9 @@ def run_linter(bundle: Bundle, collector: OutputManager):
     _logger.debug("Running linter...")
 
     messages, annotations = \
-        bundle.language_config.run_linter(bundle, bundle.config.source)
+        bundle.language_config.run_linter(bundle, bundle.config.source, remaining)
 
     for message in messages:
-        collector.out(AppendMessage(message=message))
+        collector.add(AppendMessage(message=message))
     for annotation in annotations:
-        collector.out(annotation)
+        collector.add(annotation)

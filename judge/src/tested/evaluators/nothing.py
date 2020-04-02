@@ -2,6 +2,7 @@
 RawEvaluator for channels without output.
 """
 import functools
+from typing import Optional
 
 from tested.dodona import StatusMessage, Status
 from . import EvaluationResult, try_outputs, exception, value, EvaluatorConfig
@@ -9,7 +10,7 @@ from ..testplan import EmptyChannel
 
 
 def evaluate(config: EvaluatorConfig, channel: EmptyChannel, actual: str,
-             _ignored: Status) -> EvaluationResult:
+             _ignored: Status, timeout: Optional[float]) -> EvaluationResult:
     assert channel == EmptyChannel.NONE
 
     if actual:

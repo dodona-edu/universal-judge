@@ -1,5 +1,6 @@
 import logging
 import shutil
+import time
 from pathlib import Path
 from typing import List, Optional, Tuple, NamedTuple
 
@@ -49,6 +50,7 @@ def execute_file(
         executable_name: str,
         working_directory: Path,
         dependencies: List[str],
+        remaining: float,
         stdin: Optional[str] = None,
         argument: Optional[str] = None
 ) -> BaseExecutionResult:
@@ -66,6 +68,8 @@ def execute_file(
     :param stdin: The stdin for the execution.
     :param executable_name: The executable that should be executed. This file
                             will not be present in the dependency list.
+    :param remaining: The max amount of time.
+
     :return: The result of the execution.
     """
     _logger.info("Starting execution on file %s", executable_name)
@@ -79,17 +83,18 @@ def execute_file(
     _logger.debug("Executing command %s in directory %s", command,
                   working_directory)
 
-    result = run_command(working_directory, command, stdin)
+    result = run_command(working_directory, remaining, command, stdin)
     assert result is not None
     return result
 
 
-def execute_context(bundle: Bundle, args: ContextExecution) \
+def execute_context(bundle: Bundle, args: ContextExecution, max_time: float) \
         -> Tuple[Optional[ExecutionResult], List[Message], Status, Path]:
     """
     Execute a context.
     """
     lang_config = bundle.language_config
+    start = time.perf_counter()
 
     # Create a working directory for the context.
     context_dir = Path(
@@ -117,7 +122,9 @@ def execute_context(bundle: Bundle, args: ContextExecution) \
     if args.mode == ExecutionMode.INDIVIDUAL:
         _logger.info("Compiling context %s in INDIVIDUAL mode...",
                      args.context_name)
-        result, files = run_compilation(bundle, context_dir, dependencies)
+        remaining = max_time - (time.perf_counter() - start)
+        result, files = run_compilation(bundle, context_dir, dependencies,
+                                        remaining)
 
         # Process compilation results.
         messages, status, annotations = process_compile_results(
@@ -126,7 +133,7 @@ def execute_context(bundle: Bundle, args: ContextExecution) \
         )
 
         for annotation in annotations:
-            args.collector.out(annotation)
+            args.collector.add(annotation)
 
         if status != Status.CORRECT:
             _logger.debug("Compilation of individual context failed.")
@@ -166,6 +173,7 @@ def execute_context(bundle: Bundle, args: ContextExecution) \
             stdin = args.context.get_stdin(bundle.config.resources)
             argument = None
 
+    remaining = max_time - (time.perf_counter() - start)
     # Do the execution.
     base_result = execute_file(
         bundle,
@@ -173,7 +181,8 @@ def execute_context(bundle: Bundle, args: ContextExecution) \
         working_directory=context_dir,
         dependencies=files,
         stdin=stdin,
-        argument=argument
+        argument=argument,
+        remaining=remaining
     )
 
     identifier = f"--{bundle.secret}-- SEP"
@@ -202,7 +211,9 @@ def execute_context(bundle: Bundle, args: ContextExecution) \
         exit=base_result.exit,
         separator=identifier,
         results=values,
-        exceptions=exceptions
+        exceptions=exceptions,
+        timeout=base_result.timeout,
+        memory=base_result.memory
     )
 
     return result, messages, status, context_dir

@@ -15,7 +15,8 @@ _logger = logging.getLogger(__name__)
 
 def run_compilation(bundle: Bundle,
                     working_directory: Path,
-                    dependencies: List[str]
+                    dependencies: List[str],
+                    remaining: float
                     ) -> Tuple[Optional[BaseExecutionResult], List[str]]:
     """
     The compilation step in the pipeline. This callback is used in both the
@@ -44,6 +45,7 @@ def run_compilation(bundle: Bundle,
                          configs might need a context_testcase file. By convention,
                          the last file is the context_testcase file.
                          TODO: make this explicit?
+    :param remaining: The max amount of time.
 
     :return: A tuple containing an optional compilation result, and a list of
              files, intended for further processing in the pipeline. For
@@ -55,7 +57,7 @@ def run_compilation(bundle: Bundle,
     command, files = bundle.language_config.generation_callback(dependencies)
     _logger.debug("Generating files with command %s in directory %s",
                   command, working_directory)
-    result = run_command(working_directory, command)
+    result = run_command(working_directory, remaining, command)
     return result, files
 
 

@@ -47,14 +47,14 @@ def judge(bundle: Bundle):
     collector = OutputManager(bundle)
     collector.add(StartJudgment())
 
-    max_time = float(bundle.config.time_limit) * 0.8
+    max_time = float(bundle.config.time_limit) * 0.9
     start = time.perf_counter()
 
     # Run the linter.
-    run_linter(bundle, collector)
+    run_linter(bundle, collector, max_time)
     if time.perf_counter() - start > max_time:
         collector.terminate(Status.TIME_LIMIT_EXCEEDED)
-        collector.flush(bundle.out)
+        collector.flush()
         exit()
 
     _logger.info("Start generating code...")
@@ -68,12 +68,28 @@ def judge(bundle: Bundle):
         assert not bundle.language_config.needs_selector() or selector is not None
         # Compile all code in one go.
         _logger.info("Running precompilation step...")
-        result, compilation_files = run_compilation(bundle, common_dir, files)
+        remaining = max_time - (time.perf_counter() - start)
+        result, compilation_files = run_compilation(bundle, common_dir, files,
+                                                    remaining)
 
         messages, status, annotations = process_compile_results(
             bundle.language_config,
             result
         )
+
+        # Handle timout if necessary.
+        if result.timeout:
+            for message in messages:
+                collector.add(AppendMessage(message=message))
+            for annotation in annotations:
+                collector.add(annotation)
+            collector.terminate(Status.TIME_LIMIT_EXCEEDED, 0)
+            collector.flush()
+            return
+
+        assert not result.timeout
+        assert not result.memory
+
         precompilation_result = (messages, status)
 
         # If we have fallback, discard all results.
@@ -100,7 +116,7 @@ def judge(bundle: Bundle):
                         human="Ongeldige broncode"
                     )
                 ))
-                collector.flush(bundle.out)
+                collector.flush()
                 _logger.info("Compilation error without fallback")
                 return  # Compilation error occurred, useless to continue.
     else:
@@ -111,10 +127,6 @@ def judge(bundle: Bundle):
     for tab_index, tab in enumerate(bundle.plan.tabs):
         collector.add(StartTab(title=tab.name), tab_index)
         for context_index, context in enumerate(tab.contexts):
-            if time.perf_counter() - start > max_time:
-                collector.terminate(Status.TIME_LIMIT_EXCEEDED, tab_index)
-                collector.flush(bundle.out)
-                exit()
             collector.add(StartContext(description=context.description),
                           context_index)
             execution = ContextExecution(
@@ -130,20 +142,36 @@ def judge(bundle: Bundle):
                 collector=collector
             )
 
-            execution_result, m, s, p = execute_context(bundle, execution)
+            remaining = max_time - (time.perf_counter() - start)
+            execution_result, m, s, p = execute_context(bundle, execution,
+                                                        remaining)
 
+            # Handle timeout.
+            if execution_result.timeout:
+                # Add compiler output.
+                for message in m:
+                    collector.add(AppendMessage(message))
+                collector.terminate(Status.TIME_LIMIT_EXCEEDED, context_index)
+                collector.flush()
+                return
+
+            assert not execution_result.timeout
+            assert not execution_result.memory
+
+            remaining = max_time - (time.perf_counter() - start)
             evaluate_results(
                 bundle,
                 context=context,
                 exec_results=execution_result,
                 compiler_results=(m, s),
                 context_dir=p,
-                collector=collector
+                collector=collector,
+                max_time=remaining
             )
             collector.add(CloseContext(), context_index)
         collector.add(CloseTab(), tab_index)
     collector.add(CloseJudgment())
-    collector.flush(bundle.out)
+    collector.flush()
 
 
 def _generate_files(bundle: Bundle,

@@ -14,6 +14,8 @@ The following parameters are passed to the function:
   - The judge instance
 - The output channel from the testplan.
 - The raw actual output.
+- The maximum time for the evaluation. Simple evaluators can ignore this, but more
+  advanced ones need more time.
 
 For example, such a function looks like this:
 
@@ -59,9 +61,14 @@ class EvaluatorConfig(NamedTuple):
 
 
 RawEvaluator = Callable[
-    [EvaluatorConfig, OutputChannel, str, Status], EvaluationResult]
+    [EvaluatorConfig, OutputChannel, str, Status, Optional[float]],
+    EvaluationResult]
 
-Evaluator = Callable[[OutputChannel, str, Status], EvaluationResult]
+
+Evaluator = Callable[
+    [OutputChannel, str, Status, Optional[float]],
+    EvaluationResult
+]
 
 
 def _curry_evaluator(

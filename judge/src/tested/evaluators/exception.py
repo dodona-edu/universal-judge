@@ -28,7 +28,7 @@ def try_as_readable_exception(value: str) -> Optional[str]:
 
 
 def evaluate(_, channel: ExceptionOutputChannel, actual: str,
-             wrong: Status) -> EvaluationResult:
+             wrong: Status, timeout: Optional[float]) -> EvaluationResult:
     assert isinstance(channel, ExceptionOutputChannel)
     assert channel.exception is not None
 

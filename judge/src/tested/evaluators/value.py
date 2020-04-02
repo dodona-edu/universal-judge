@@ -120,7 +120,7 @@ def _check_type(
 
 
 def evaluate(config: EvaluatorConfig, channel: OutputChannel, actual: str,
-             wrong: Status) -> EvaluationResult:
+             wrong: Status, timeout: Optional[float]) -> EvaluationResult:
     """
     Evaluate two values. The values must match exact. Currently, this evaluator
     has no options, but it might receive them in the future (e.g. options on how

@@ -1,4 +1,5 @@
 import logging
+import time
 from pathlib import Path
 from typing import Tuple, List
 
@@ -20,7 +21,8 @@ def _evaluate_channel(
         channel_name: str,
         expected_output: OutputChannel,
         actual_result: Optional[str],
-        evaluator: Evaluator) -> bool:
+        evaluator: Evaluator,
+        max_time: Optional[float] = None) -> bool:
     """
     Evaluate the output on a given channel. This function will output the
     appropriate messages to start and end a new test in Dodona.
@@ -42,12 +44,15 @@ def _evaluate_channel(
     :param expected_output: The output channel from the test case.
     :param actual_result: The actual output or None if the test did not run.
     :param evaluator: The evaluator to use.
+    :param max_time: The max amount of time.
+
     :return: True if successful, otherwise False.
     """
     evaluation_result = evaluator(
         expected_output,
         actual_result or "",
-        Status.WRONG
+        Status.WRONG,
+        max_time
     )
     status = evaluation_result.result
 
@@ -60,6 +65,9 @@ def _evaluate_channel(
     is_exit_code = isinstance(expected_output, ExitCodeOutputChannel)
     if is_correct and ((has_no_result and has_no_expected) or is_exit_code):
         return True
+
+    if max_time and max_time < 0:
+        return False
 
     if actual_result is None:
         out.add(StartTest(
@@ -101,10 +109,12 @@ def evaluate_results(bundle: Bundle,
                      exec_results: Optional[ExecutionResult],
                      compiler_results: Tuple[List[Message], Status],
                      context_dir: Path,
-                     collector: OutputManager):
+                     collector: OutputManager,
+                     max_time: float):
     # Begin by processing the context testcase.
     # Even if there is no main testcase, we can still proceed, since the defaults
     # should take care of this.
+    start = time.perf_counter()
     testcase: ContextTestcase = context.context_testcase
     readable_input = get_readable_input(bundle, testcase)
 
@@ -159,18 +169,26 @@ def evaluate_results(bundle: Bundle,
     # still write a delimiter to it.
     _ = values.pop(0) if values else ""
 
+    remaining = max_time - (time.perf_counter() - start)
     # Actual do the evaluation.
-    results = [
-        _evaluate_channel(context_collector, "file",
-                          testcase.output.file, "", file_evaluator),
-        _evaluate_channel(context_collector, "stderr",
-                          testcase.output.stderr, actual_stderr, stderr_evaluator),
-        _evaluate_channel(context_collector, "exception",
-                          testcase.output.exception, actual_exception,
-                          exception_evaluator),
-        _evaluate_channel(context_collector, "stdout",
-                          testcase.output.stdout, actual_stdout, stdout_evaluator)
-    ]
+    results = [_evaluate_channel(
+        context_collector, "file", output.file, "", file_evaluator, remaining
+    )]
+    remaining = max_time - (time.perf_counter() - start)
+    results.append(_evaluate_channel(
+        context_collector, "stderr", output.stderr, actual_stderr, stderr_evaluator,
+        remaining
+    ))
+    remaining = max_time - (time.perf_counter() - start)
+    results.append(_evaluate_channel(
+        context_collector, "exception", output.exception, actual_exception,
+        exception_evaluator, remaining
+    ))
+    remaining = max_time - (time.perf_counter() - start)
+    results.append(_evaluate_channel(
+        context_collector, "stdout", output.stdout, actual_stdout, stdout_evaluator,
+        remaining
+    ))
 
     # Check for missing values and stop if necessary.
     if not stdout_ or not stderr_ or not exceptions or not values:
@@ -193,9 +211,10 @@ def evaluate_results(bundle: Bundle,
 
     must_stop = False
     if not all(results):
+        remaining = max_time - (time.perf_counter() - start)
         # As last item, we evaluate the exit code of the context.
         _evaluate_channel(context_collector, "exitcode", exit_output,
-                          str(exec_results.exit), exit_evaluator)
+                          str(exec_results.exit), exit_evaluator, remaining)
         must_stop = True
 
     # Done with the context testcase.
@@ -230,21 +249,31 @@ def evaluate_results(bundle: Bundle,
         actual_stdout = stdout_[i] if i < len(stdout_) else ""
         actual_value = values[i] if i < len(values) else ""
 
+        remaining = max_time - (time.perf_counter() - start)
         results = [
-            _evaluate_channel(t_col, "file", testcase.output.file,
-                              "", file_evaluator),
-            _evaluate_channel(t_col, "stderr",
-                              testcase.output.stderr, actual_stderr,
-                              stderr_evaluator),
-            _evaluate_channel(t_col, "exception",
-                              testcase.output.exception, actual_exception,
-                              exception_evaluator),
-            _evaluate_channel(t_col, "stdout",
-                              testcase.output.stdout, actual_stdout,
-                              stdout_evaluator),
-            _evaluate_channel(t_col, "return",
-                              testcase.output.result, actual_value, value_evaluator)
+            _evaluate_channel(t_col, "file", output.file, "", file_evaluator,
+                              remaining)
         ]
+        remaining = max_time - (time.perf_counter() - start)
+        results.append(_evaluate_channel(
+            t_col, "stderr", output.stderr, actual_stderr, stderr_evaluator,
+            remaining
+        )),
+        remaining = max_time - (time.perf_counter() - start)
+        results.append(_evaluate_channel(
+            t_col, "exception", output.exception, actual_exception,
+            exception_evaluator, remaining
+        )),
+        remaining = max_time - (time.perf_counter() - start)
+        results.append(_evaluate_channel(
+            t_col, "stdout", output.stdout, actual_stdout, stdout_evaluator,
+            remaining
+        )),
+        remaining = max_time - (time.perf_counter() - start)
+        results.append(_evaluate_channel(
+            t_col, "return", output.result, actual_value, value_evaluator,
+            remaining
+        ))
 
         # Check for missing values and stop if necessary.
         if (i >= len(stdout_)
@@ -274,9 +303,10 @@ def evaluate_results(bundle: Bundle,
         if ((testcase.essential and not all(results))
                 or super_stop
                 or i == len(context.testcases) - 1):
+            remaining = max_time - (time.perf_counter() - start)
             # As last item, we evaluate the exit code of the context.
             _evaluate_channel(t_col, "exitcode", exit_output,
-                              str(exec_results.exit), exit_evaluator)
+                              str(exec_results.exit), exit_evaluator, remaining)
             must_stop = True
 
         t_col.end(collector, CloseTestcase(), i + 1)

@@ -2,6 +2,7 @@
 RawEvaluator for ignored channels.
 """
 import functools
+from typing import Optional
 
 from ..dodona import StatusMessage, Status
 from . import EvaluationResult, exception, value, try_outputs, EvaluatorConfig
@@ -9,7 +10,7 @@ from ..testplan import IgnoredChannel
 
 
 def evaluate(config: EvaluatorConfig, channel: IgnoredChannel, actual: str,
-             _ignored: Status) -> EvaluationResult:
+             _ignored: Status, timeout: Optional[float]) -> EvaluationResult:
     assert channel == IgnoredChannel.IGNORED
 
     # If there is something in the channel, try parsing it as

@@ -1,6 +1,8 @@
 """
 Specific evaluator
 """
+from typing import Optional
+
 from ..dodona import StatusMessage, Status, ExtendedMessage, Permission
 from . import EvaluationResult
 from ..serialisation import SpecificResult
@@ -9,7 +11,7 @@ from ..testplan import SpecificEvaluator
 
 
 def evaluate(_, channel: OutputChannel, actual: str,
-             wrong: Status) -> EvaluationResult:
+             wrong: Status, timeout: Optional[float]) -> EvaluationResult:
     """
     Compare the result of a specific evaluator. This evaluator has no options.
     """

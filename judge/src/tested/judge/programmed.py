@@ -2,6 +2,7 @@
 Programmed evaluation.
 """
 import shutil
+import time
 from pathlib import Path
 from typing import Optional
 
@@ -22,7 +23,8 @@ from tested.utils import get_identifier
 def evaluate_programmed(bundle: Bundle,
                         evaluator: ProgrammedEvaluator,
                         expected: Optional[Value],
-                        actual: Value) -> BaseExecutionResult:
+                        actual: Value,
+                        timeout: Optional[float]) -> BaseExecutionResult:
     """
     Run the custom evaluation. Concerning structure and execution, the custom
     evaluator is very similar to the execution of the whole evaluation. It a
@@ -32,6 +34,7 @@ def evaluate_programmed(bundle: Bundle,
       evaluators. One difficulty is that there is currently no runtime support
       to decode values, only compile time support.
     """
+    start = time.perf_counter()
 
     # Check if the language supports this.
     if not bundle.language_config.supports_evaluation():
@@ -89,8 +92,9 @@ def evaluate_programmed(bundle: Bundle,
     command, files = eval_bundle.language_config.evaluator_generation_callback(
         dependencies
     )
+    remaining = timeout - (time.perf_counter() - start)
     _logger.debug("Compiling custom evaluator with command %s", command)
-    result = run_command(custom_path, command)
+    result = run_command(custom_path, remaining, command)
     if result and result.stderr:
         raise ValueError("Error while compiling specific test case:" +
                          result.stderr)
@@ -100,10 +104,12 @@ def evaluate_programmed(bundle: Bundle,
     executable = find_main_file(files, evaluator_name)
     files.remove(executable)
 
+    remaining = timeout - (time.perf_counter() - start)
     return execute_file(
         bundle=eval_bundle,
         executable_name=executable,
         working_directory=custom_path,
         dependencies=files,
-        stdin=None
+        stdin=None,
+        remaining=remaining
     )

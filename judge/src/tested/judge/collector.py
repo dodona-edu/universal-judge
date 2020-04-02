@@ -115,7 +115,7 @@ class OutputManager:
         elif isinstance(command, CloseTestcase):
             self.max_testcase = max(self.max_testcase, id_ or 0)
 
-    def flush(self, to: IO):
+    def flush(self):
         assert not self.collected, "OutputManager already finished!"
         assert not self.tree_stack, f"All outputs should be closed, " \
                                     f"got {self.tree_stack} "
@@ -128,7 +128,7 @@ class OutputManager:
         self.commands[-at:-at] = added_commands
 
         for command, ids in self.commands:
-            report_update(to, command)
+            report_update(self.output, command)
 
         self.collected = True
 

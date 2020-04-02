@@ -38,14 +38,14 @@ message_categories = {
 }
 
 
-def run_pylint(bundle: Bundle, submission: Path) \
+def run_pylint(bundle: Bundle, submission: Path, remaining: int) \
         -> Tuple[List[Message], List[AnnotateCode]]:
     """
     Calls pylint to annotate submitted source code and adds resulting score and
     annotations to tab.
     """
     config = bundle.config
-    language_options = bundle.plan.config_for(bundle.config.programming_language)
+    language_options = bundle.config.config_for()
     if language_options.get("pylint_config", None):
         config_path = config.resources / language_options.get('pylint_config')
     else:

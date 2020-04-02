@@ -4,10 +4,10 @@ Common utilities for the judge.
 import logging
 import shutil
 import subprocess
+from pathlib import Path
+from typing import List, Optional
 
 from pydantic.dataclasses import dataclass
-from typing import List, Optional
-from pathlib import Path
 
 _logger = logging.getLogger(__name__)
 
@@ -20,9 +20,12 @@ class BaseExecutionResult:
     stdout: str
     stderr: str
     exit: int
+    timeout: bool
+    memory: bool
 
 
 def run_command(directory: Path,
+                timeout: float,
                 command: Optional[List[str]] = None,
                 stdin: Optional[str] = None) -> Optional[BaseExecutionResult]:
     """
@@ -31,19 +34,33 @@ def run_command(directory: Path,
     :param directory: The directory to execute in.
     :param command: Optional, the command to execute.
     :param stdin: Optional stdin for the process.
+    :param timeout: The max time for this command.
+
     :return: The result of the execution if the command was not None.
     """
     if not command:
         return None
 
-    # noinspection PyTypeChecker
-    process = subprocess.run(command, cwd=directory, text=True,
-                             capture_output=True, input=stdin)
+    try:
+        # noinspection PyTypeChecker
+        process = subprocess.run(command, cwd=directory, text=True,
+                                 capture_output=True, input=stdin,
+                                 timeout=int(timeout))
+    except subprocess.TimeoutExpired as e:
+        return BaseExecutionResult(
+            stdout=e.stdout or "",
+            stderr=e.stderr or "",
+            exit=0,
+            timeout=True,
+            memory=False
+        )
 
     return BaseExecutionResult(
         stdout=process.stdout,
         stderr=process.stderr,
-        exit=process.returncode
+        exit=process.returncode,
+        timeout=False,
+        memory=False
     )
 
 

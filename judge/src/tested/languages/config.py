@@ -222,7 +222,7 @@ class Language:
         """
         return [], []
 
-    def run_linter(self, bundle: Bundle, submission: Path) \
+    def run_linter(self, bundle: Bundle, submission: Path, remaining: int) \
             -> Tuple[List[Message], List[AnnotateCode]]:
         """
         Run a linter or other code analysis tools on the submission.
@@ -234,6 +234,7 @@ class Language:
 
         :param bundle: The configuration bundle.
         :param submission: The path to the submission.
+        :param remaining: The time the judge can use.
 
         :return: A list of messages and annotations.
         """
