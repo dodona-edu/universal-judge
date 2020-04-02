@@ -5,7 +5,7 @@ from typing import Optional
 
 from ..dodona import StatusMessage, Status, ExtendedMessage, Permission
 from . import EvaluationResult
-from ..serialisation import SpecificResult
+from ..serialisation import EvalResult
 from ..testplan import OutputChannel
 from ..testplan import SpecificEvaluator
 
@@ -19,7 +19,7 @@ def evaluate(_, channel: OutputChannel, actual: str,
 
     # Try parsing as the result.
     try:
-        actual: SpecificResult = SpecificResult.__pydantic_model__.parse_raw(actual)
+        actual: EvalResult = EvalResult.__pydantic_model__.parse_raw(actual)
     except (TypeError, ValueError) as e:
         staff_message = ExtendedMessage(
             description=f"Received invalid output for programmed evaluation: "

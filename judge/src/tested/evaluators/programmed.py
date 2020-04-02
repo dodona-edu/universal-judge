@@ -9,7 +9,8 @@ from .value import get_values
 from ..datatypes import StringTypes
 from ..dodona import ExtendedMessage, StatusMessage, Status, Permission
 from ..judge import evaluate_programmed
-from ..serialisation import StringType, SpecificResult, Value
+from ..judge.utils import BaseExecutionResult
+from ..serialisation import StringType, EvalResult, Value
 from ..testplan import (TextOutputChannel, FileOutputChannel, ValueOutputChannel,
                         NormalOutputChannel, ExceptionOutputChannel,
                         ProgrammedEvaluator)
@@ -30,8 +31,8 @@ def _maybe_string(value_: str) -> Optional[Value]:
         return None
 
 
-def _try_specific(value_: str) -> SpecificResult:
-    return SpecificResult.__pydantic_model__.parse_raw(value_)
+def _try_specific(value_: str) -> EvalResult:
+    return EvalResult.__pydantic_model__.parse_raw(value_)
 
 
 def expected_as_value(config: EvaluatorConfig,
@@ -109,39 +110,43 @@ def evaluate(config: EvaluatorConfig,
         timeout=timeout
     )
 
-    if result.timeout:
-        return EvaluationResult(
-            result=StatusMessage(enum=Status.TIME_LIMIT_EXCEEDED),
-            readable_expected=readable_expected,
-            readable_actual=readable_actual,
-            messages=[result.stdout, result.stderr]
-        )
+    if isinstance(result, BaseExecutionResult):
+        if result.timeout:
+            return EvaluationResult(
+                result=StatusMessage(enum=Status.TIME_LIMIT_EXCEEDED),
+                readable_expected=readable_expected,
+                readable_actual=readable_actual,
+                messages=[result.stdout, result.stderr]
+            )
 
-    if not result.stdout:
-        stdout = ExtendedMessage(description=result.stdout, format="text")
-        stderr = ExtendedMessage(description=result.stderr, format="text")
-        return EvaluationResult(
-            result=StatusMessage(enum=Status.INTERNAL_ERROR),
-            readable_expected=readable_expected,
-            readable_actual=readable_actual,
-            messages=[stdout, stderr, DEFAULT_STUDENT]
-        )
+        if not result.stdout:
+            stdout = ExtendedMessage(description=result.stdout, format="text")
+            stderr = ExtendedMessage(description=result.stderr, format="text")
+            return EvaluationResult(
+                result=StatusMessage(enum=Status.INTERNAL_ERROR),
+                readable_expected=readable_expected,
+                readable_actual=readable_actual,
+                messages=[stdout, stderr, DEFAULT_STUDENT]
+            )
 
-    try:
-        evaluation_result = _try_specific(result.stdout)
-    except (TypeError, ValueError) as e:
-        staff_message = ExtendedMessage(
-            description=f"An error occurred parsing the result of the programmed "
-                        f"evaluation. Received {result}, which caused {e}",
-            format="text",
-            permission=Permission.STAFF
-        )
-        return EvaluationResult(
-            result=StatusMessage(enum=Status.INTERNAL_ERROR),
-            readable_expected=readable_expected,
-            readable_actual=readable_actual,
-            messages=[staff_message, DEFAULT_STUDENT]
-        )
+        try:
+            evaluation_result = _try_specific(result.stdout)
+        except (TypeError, ValueError) as e:
+            staff_message = ExtendedMessage(
+                description=f"An error occurred parsing the result of the programmed "
+                            f"evaluation. Received {result}, which caused {e}",
+                format="text",
+                permission=Permission.STAFF
+            )
+            return EvaluationResult(
+                result=StatusMessage(enum=Status.INTERNAL_ERROR),
+                readable_expected=readable_expected,
+                readable_actual=readable_actual,
+                messages=[staff_message, DEFAULT_STUDENT]
+            )
+    else:
+        assert isinstance(result, EvalResult)
+        evaluation_result = result
 
     if evaluation_result.readable_expected:
         readable_expected = evaluation_result.readable_expected

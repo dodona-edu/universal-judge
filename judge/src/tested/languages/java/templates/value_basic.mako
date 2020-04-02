@@ -2,9 +2,9 @@
 <%! from tested.datatypes import BasicNumericTypes, BasicStringTypes, BasicBooleanTypes, BasicNothingTypes, BasicSequenceTypes, BasicObjectTypes  %>
 <%page args="value" />
 % if value.type == BasicNumericTypes.INTEGER:
-    ${value.data}L\
+    ${value.data}\
 % elif value.type == BasicNumericTypes.RATIONAL:
-    ${value.data}D
+    ${value.data}\
 % elif value.type == BasicStringTypes.TEXT:
     "${value.data}"\
 % elif value.type == BasicStringTypes.CHAR:

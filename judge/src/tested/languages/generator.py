@@ -393,6 +393,13 @@ def generate_selector(bundle: Bundle,
     )
 
 
+def custom_evaluator_arguments(evaluator: ProgrammedEvaluator) -> Value:
+    return SequenceType(
+        type=BasicSequenceTypes.SEQUENCE,
+        data=evaluator.arguments
+    )
+
+
 def generate_custom_evaluator(bundle: Bundle,
                               destination: Path,
                               evaluator: ProgrammedEvaluator,
@@ -412,10 +419,7 @@ def generate_custom_evaluator(bundle: Bundle,
     evaluator_name = bundle.language_config.conventionalise_namespace(
         evaluator.path.stem
     )
-    arguments = SequenceType(
-        type=BasicSequenceTypes.SEQUENCE,
-        data=evaluator.arguments
-    )
+    arguments = custom_evaluator_arguments(evaluator)
 
     args = _CustomEvaluatorArguments(
         evaluator=evaluator_name,

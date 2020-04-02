@@ -444,8 +444,8 @@ def to_python_comparable(value: Optional[Value]):
 
 
 @dataclass
-class SpecificResult:
-    """Result of an evaluation by a language specific evaluator."""
+class EvalResult:
+    """Result of an evaluation by an evaluator."""
     result: bool  # The result of the evaluation.
     readable_expected: Optional[str] = None
     # A human-friendly version of what the channel should have
