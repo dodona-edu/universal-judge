@@ -35,8 +35,7 @@ def try_as_readable_value(bundle: Bundle, value: str) -> Optional[str]:
 
 
 def get_values(bundle: Bundle, output_channel: ValueOutputChannel, actual) \
-        -> Union[EvaluationResult,
-                 Tuple[Value, str, Optional[Value], str]]:
+        -> Union[EvaluationResult, Tuple[Value, str, Optional[Value], str]]:
     expected = output_channel.value
     readable_expected = convert_expression(bundle, expected)
 

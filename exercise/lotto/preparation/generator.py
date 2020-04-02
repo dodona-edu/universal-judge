@@ -1,19 +1,10 @@
 import json
-
 import random
 
-import sys
-
-sys.path.append("../solution/")
+from lotto.solution import correct
 
 # Met een vaste seed krijgen we deterministische resultaten.
 random.seed(123456789)
-
-try:
-    from ..solution.correct import loterij
-except:
-    # noinspection PyUnresolvedReferences
-    from correct import loterij
 
 
 def generate_data():
@@ -35,7 +26,7 @@ def generate_data():
         elif case == 3:
             a = count
             m = maximum
-        s = loterij(a, m)
+        s = correct.loterij(a, m)
         return s, a, m
 
 
@@ -45,7 +36,7 @@ if __name__ == '__main__':
     for data in tuples:
         print(data)
         contexts.append({
-            "normal": [{
+            "testcases": [{
                 "output": {
                     "result": {
                         "value":     {
@@ -70,7 +61,7 @@ if __name__ == '__main__':
                     }
                 },
                 "input":  {
-                    "function": {
+                    "expression": {
                         "type":      "function",
                         "name":      "loterij",
                         "arguments": [

@@ -50,7 +50,7 @@ def _evaluate_channel(
     """
     evaluation_result = evaluator(
         expected_output,
-        actual_result or "",
+        actual_result if actual_result else "",
         Status.WRONG,
         max_time
     )

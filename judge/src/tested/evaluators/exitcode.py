@@ -16,7 +16,7 @@ def _as_int(value: str) -> Optional[int]:
 
 
 def evaluate(_, channel: ExitCodeOutputChannel, value: str,
-             _ignored: Status, timeout: Optional[float]) -> EvaluationResult:
+             _ignored: Status, _timeout: Optional[float]) -> EvaluationResult:
     assert isinstance(channel, ExitCodeOutputChannel)
     exit_code = _as_int(value)
 

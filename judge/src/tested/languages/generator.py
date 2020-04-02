@@ -6,12 +6,12 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Union, Tuple, Optional, Set
 
-from ..datatypes import SequenceTypes
-from ..dodona import ExtendedMessage
 from .templates import find_and_write_template, find_template
-from ..serialisation import Value, SequenceType, Identifier, FunctionType, \
-    FunctionCall, Expression, Statement
 from ..configs import Bundle
+from ..datatypes import BasicSequenceTypes
+from ..dodona import ExtendedMessage
+from ..serialisation import (Value, SequenceType, Identifier, FunctionType,
+                             FunctionCall, Expression, Statement)
 from ..testplan import (EmptyChannel, IgnoredChannel, TextData, ProgrammedEvaluator,
                         SpecificEvaluator, Testcase, ContextTestcase, Context,
                         ExpressionInput, StatementInput)
@@ -413,7 +413,7 @@ def generate_custom_evaluator(bundle: Bundle,
         evaluator.path.stem
     )
     arguments = SequenceType(
-        type=SequenceTypes.SEQUENCE,
+        type=BasicSequenceTypes.SEQUENCE,
         data=evaluator.arguments
     )
 

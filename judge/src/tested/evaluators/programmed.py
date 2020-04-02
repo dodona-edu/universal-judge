@@ -1,6 +1,7 @@
 """
 Programmed evaluator.
 """
+import logging
 from typing import Tuple, Optional
 
 from . import EvaluationResult, EvaluatorConfig, value
@@ -8,12 +9,15 @@ from .value import get_values
 from ..datatypes import StringTypes
 from ..dodona import ExtendedMessage, StatusMessage, Status, Permission
 from ..judge import evaluate_programmed
-from ..languages.generator import convert_expression
 from ..serialisation import StringType, SpecificResult, Value
 from ..testplan import (TextOutputChannel, FileOutputChannel, ValueOutputChannel,
                         NormalOutputChannel, ExceptionOutputChannel,
                         ProgrammedEvaluator)
 from ..utils import Either, get_args
+
+
+_logger = logging.getLogger(__name__)
+
 
 DEFAULT_STUDENT = ("Er ging iets fout op bij het evalueren van de oplossing. Meld "
                    "dit aan de lesgever!")
@@ -73,39 +77,35 @@ def evaluate(config: EvaluatorConfig,
     assert hasattr(channel, 'evaluator')
     assert isinstance(channel.evaluator, ProgrammedEvaluator)
 
+    _logger.debug(f"Programmed evaluator for output {actual}")
+
     # Convert the expected item to a Value, which is then passed to the
     # evaluator for evaluation.
     # This is slightly tricky, since the actual value must also be converted
     # to a value, and we are not yet sure what the actual value is exactly
-    expected_value, actual_value = get_values(config.bundle, channel, actual or "")
-    readable_expected = convert_expression(config.bundle, expected_value)
+    result = get_values(config.bundle, channel, actual or "")
+    if isinstance(result, EvaluationResult):
+        return result
+    else:
+        expected, readable_expected, actual, readable_actual = result
 
-    try:
-        actual_value = actual_value.get()
-    except (ValueError, TypeError) as e:
-        staff_message = ExtendedMessage(
-            description=f"An error occurred while receiving output for programmed "
-                        f"evaluation. Error was {e}",
-            format="text",
-            permission=Permission.STAFF
-        )
+    # If there is no actual result, stop early.
+    if actual is None:
         return EvaluationResult(
-            result=StatusMessage(
-                enum=Status.INTERNAL_ERROR,
-                human="Fout bij beoordelen van resultaat."
-            ),
+            result=StatusMessage(enum=Status.WRONG),
             readable_expected=readable_expected,
-            readable_actual="",
-            messages=[staff_message, DEFAULT_STUDENT]
+            readable_actual=readable_actual
         )
 
-    readable_actual = repr(actual_value)  # TODO: fix this.
+    _logger.debug(f"Calling programmed evaluation with params:\n"
+                  f"expected: {expected}\n"
+                  f"actual: {actual}")
 
     result = evaluate_programmed(
         config.bundle,
         evaluator=channel.evaluator,
-        expected=expected_value,
-        actual=actual_value,
+        expected=expected,
+        actual=actual,
         timeout=timeout
     )
 
