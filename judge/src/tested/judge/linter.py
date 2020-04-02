@@ -1,6 +1,6 @@
 import logging
 
-from .collector import Collector
+from .collector import OutputManager
 from ..configs import Bundle
 from ..dodona import AppendMessage
 
@@ -11,7 +11,7 @@ def runs_linter(bundle: Bundle) -> bool:
     return bundle.config.linter()
 
 
-def run_linter(bundle: Bundle, collector: Collector):
+def run_linter(bundle: Bundle, collector: OutputManager):
     """
     Run the linter on the submission. For the linter to run, two preconditions
     must be satisfied:

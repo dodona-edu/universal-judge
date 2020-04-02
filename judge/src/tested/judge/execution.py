@@ -6,7 +6,7 @@ from typing import List, Optional, Tuple, NamedTuple
 from pydantic.dataclasses import dataclass
 
 from tested.dodona import Message, Status
-from .collector import Collector
+from .collector import OutputManager
 from .compilation import run_compilation, process_compile_results
 from .utils import BaseExecutionResult, run_command, find_main_file
 from ..configs import Bundle
@@ -41,7 +41,7 @@ class ContextExecution(NamedTuple):
     common_directory: Path
     files: List[str]
     precompilation_result: Optional[Tuple[List[Message], Status]]
-    collector: Collector
+    collector: OutputManager
 
 
 def execute_file(
