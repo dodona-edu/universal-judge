@@ -7,7 +7,8 @@
     }
   },
   "evaluation": {
-    "memory_limit": 500000000
+    "memory_limit": 500000000,
+    "time_limit": 10
   },
   "programming_language": "python",
   "access": "public",
@@ -18,4 +19,4 @@
     "token": "VAjjfKZI3i79WuTvZY3u2UGsuaCtpV2h5d52u8UQmtupjwtYt3e2gZvUt9aKEZPh",
     "_info": "These fields are used for internal bookkeeping in Dodona, please do not change them."
   }
-}
+}

@@ -1,8 +1,10 @@
 import logging
 import shutil
+import time
 from pathlib import Path
 from typing import Tuple, List
 
+from .collector import Collector
 from .compilation import run_compilation, process_compile_results
 from .evaluation import evaluate_results
 from .execution import ContextExecution, execute_context
@@ -42,10 +44,19 @@ def judge(bundle: Bundle):
         return  # Not all required features are supported.
 
     mode = bundle.config.options.mode
-    report_update(bundle.out, StartJudgment())
+    collector = Collector()
+    collector.add_fallback(bundle)
+    collector.out(StartJudgment())
+
+    max_time = float(bundle.config.time_limit) * 0.8
+    start = time.perf_counter()
 
     # Run the linter.
-    run_linter(bundle)
+    run_linter(bundle, collector)
+    if time.perf_counter() - start > max_time:
+        collector.terminate(Status.TIME_LIMIT_EXCEEDED)
+        collector.write(bundle.out)
+        exit()
 
     _logger.info("Start generating code...")
     common_dir, files, selector = _generate_files(bundle, mode)
@@ -78,18 +89,19 @@ def judge(bundle: Bundle):
             files = compilation_files
             # Report messages.
             for message in messages:
-                report_update(bundle.out, AppendMessage(message=message))
+                collector.out(AppendMessage(message=message))
             for annotation in annotations:
-                report_update(bundle.out, annotation)
+                collector.out(annotation)
 
             if status != Status.CORRECT:
-                report_update(bundle.out, CloseJudgment(
+                collector.out(CloseJudgment(
                     accepted=False,
                     status=StatusMessage(
                         enum=status,
                         human="Ongeldige broncode"
                     )
                 ))
+                collector.write(bundle.out)
                 _logger.info("Compilation error without fallback")
                 return  # Compilation error occurred, useless to continue.
     else:
@@ -98,11 +110,13 @@ def judge(bundle: Bundle):
     _logger.info("Starting judgement...")
 
     for tab_index, tab in enumerate(bundle.plan.tabs):
-        report_update(bundle.out, StartTab(title=tab.name))
+        collector.out(StartTab(title=tab.name))
         for context_index, context in enumerate(tab.contexts):
-            report_update(bundle.out, StartContext(
-                description=context.description
-            ))
+            if time.perf_counter() - start > max_time:
+                collector.terminate(Status.TIME_LIMIT_EXCEEDED, tab_index)
+                collector.write(bundle.out)
+                exit()
+            collector.out(StartContext(description=context.description))
             execution = ContextExecution(
                 context=context,
                 context_name=bundle.language_config.context_name(
@@ -112,7 +126,8 @@ def judge(bundle: Bundle):
                 mode=mode,
                 common_directory=common_dir,
                 files=files,
-                precompilation_result=precompilation_result
+                precompilation_result=precompilation_result,
+                collector=collector
             )
 
             execution_result, m, s, p = execute_context(bundle, execution)
@@ -122,11 +137,13 @@ def judge(bundle: Bundle):
                 context=context,
                 exec_results=execution_result,
                 compiler_results=(m, s),
-                context_dir=p
+                context_dir=p,
+                collector=collector
             )
-            report_update(bundle.out, CloseContext())
-        report_update(bundle.out, CloseTab())
-    report_update(bundle.out, CloseJudgment())
+            collector.out(CloseContext(), context_index)
+        collector.out(CloseTab(), tab_index)
+    collector.out(CloseJudgment())
+    collector.write(bundle.out)
 
 
 def _generate_files(bundle: Bundle,

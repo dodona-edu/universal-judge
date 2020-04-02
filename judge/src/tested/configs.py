@@ -4,14 +4,15 @@ Module for handling and bundling various configuration options for TESTed.
 import dataclasses
 import json
 import logging
-from collections import defaultdict
 from dataclasses import field
 from pathlib import Path
 from typing import Optional, Dict, IO, TYPE_CHECKING, Any
+
+from pydantic import BaseModel
 from pydantic.dataclasses import dataclass
 
-import tested.utils as utils
 import tested.testplan as testplan
+import tested.utils as utils
 
 # Prevent circular imports
 if TYPE_CHECKING:
@@ -59,8 +60,7 @@ class Options:
     """
 
 
-@dataclass
-class DodonaConfig:
+class DodonaConfig(BaseModel):
     resources: Path
     source: Path
     time_limit: str
@@ -90,8 +90,9 @@ def read_config(config_in: IO) -> DodonaConfig:
     config_ = json.loads(config_json)
 
     # Replace the judge directory.
-    parsed: DodonaConfig = DodonaConfig.__pydantic_model__.parse_obj(config_)
-    parsed.judge = parsed.judge / 'judge' / 'src'
+    parsed: DodonaConfig = DodonaConfig.parse_obj(config_)
+    # noinspection PyDataclass
+    parsed = parsed.copy(update={"judge": parsed.judge / 'judge' / 'src'})
 
     return parsed
 
@@ -141,7 +142,7 @@ def create_bundle(config: DodonaConfig,
     if language is None:
         language = _get_language(config)
     # noinspection PyDataclass
-    adjusted_config = dataclasses.replace(config, programming_language=language)
+    adjusted_config = config.copy(update={"programming_language": language})
     language_config = langs.get_language(language)
     return Bundle(
         config=adjusted_config,

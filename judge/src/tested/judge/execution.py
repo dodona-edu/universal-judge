@@ -1,11 +1,12 @@
 import logging
 import shutil
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, NamedTuple
 
 from pydantic.dataclasses import dataclass
 
-from tested.dodona import Message, Status, report_update
+from tested.dodona import Message, Status
+from .collector import Collector
 from .compilation import run_compilation, process_compile_results
 from .utils import BaseExecutionResult, run_command, find_main_file
 from ..configs import Bundle
@@ -30,8 +31,7 @@ class ExecutionResult(BaseExecutionResult):
     exceptions: str
 
 
-@dataclass
-class ContextExecution:
+class ContextExecution(NamedTuple):
     """
     Arguments used to execute_module a single context of the testplan.
     """
@@ -41,6 +41,7 @@ class ContextExecution:
     common_directory: Path
     files: List[str]
     precompilation_result: Optional[Tuple[List[Message], Status]]
+    collector: Collector
 
 
 def execute_file(
@@ -100,10 +101,10 @@ def execute_context(bundle: Bundle, args: ContextExecution) \
     _logger.info("Executing context %s in path %s",
                  args.context_name, context_dir)
 
-    dependencies = lang_config.context_dependencies_callback(
+    dependencies = list(lang_config.context_dependencies_callback(
         args.context_name,
         args.files
-    )
+    ))
 
     # Copy files from the common directory to the context directory.
     for file in dependencies:
@@ -125,7 +126,7 @@ def execute_context(bundle: Bundle, args: ContextExecution) \
         )
 
         for annotation in annotations:
-            report_update(bundle.out, annotation)
+            args.collector.out(annotation)
 
         if status != Status.CORRECT:
             _logger.debug("Compilation of individual context failed.")

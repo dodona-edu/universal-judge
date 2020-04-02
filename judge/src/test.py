@@ -1,5 +1,8 @@
+from pydantic import BaseModel
 from pydantic.dataclasses import dataclass
 import json
+
+import dataclasses
 
 
 @dataclass(frozen=True)
@@ -8,13 +11,17 @@ class Hallo:
     test: str = "Niko"
 
 
+class _RootTest(BaseModel):
+    __root__: Hallo
+
+
 if __name__ == '__main__':
     json = json.dumps({
         "niko": "Halo"
     })
 
-    d = Hallo.__pydantic_model__.parse_raw(json)
+    d = _RootTest.parse_raw(json).__root__
     print(d)
-    dd = d.copy(update={"test": "2"})
-    print(dd)
+    ddd = dataclasses.replace(d, test="tester")
+    print(ddd)
 

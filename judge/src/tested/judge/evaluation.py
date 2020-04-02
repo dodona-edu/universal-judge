@@ -2,9 +2,11 @@ import logging
 from pathlib import Path
 from typing import Tuple, List
 
+from .collector import Collector
 from .execution import ExecutionResult
 from ..configs import Bundle
 from ..dodona import *
+from ..dodona import StartTestcase, CloseTestcase
 from ..evaluators import Evaluator, get_evaluator
 from ..languages.generator import get_readable_input
 from ..testplan import Context, OutputChannel, EmptyChannel, \
@@ -14,7 +16,7 @@ _logger = logging.getLogger(__name__)
 
 
 def _evaluate_channel(
-        out: Union[UpdateCollector, IO],
+        out: Collector,
         channel_name: str,
         expected_output: OutputChannel,
         actual_result: Optional[str],
@@ -60,14 +62,14 @@ def _evaluate_channel(
         return True
 
     if actual_result is None:
-        report_or_collect(out, StartTest(
+        out.out(StartTest(
             expected=evaluation_result.readable_expected,
             channel=channel_name
         ))
-        report_or_collect(out, AppendMessage(
+        out.out(AppendMessage(
             message="Test niet uitgevoerd."
         ))
-        report_or_collect(out, CloseTest(
+        out.out(CloseTest(
             generated="",
             status=StatusMessage(
                 enum=Status.WRONG,
@@ -76,17 +78,17 @@ def _evaluate_channel(
         ))
         return False
 
-    report_or_collect(out, StartTest(
+    out.out(StartTest(
         expected=evaluation_result.readable_expected,
         channel=channel_name
     ))
 
     # Report any messages we received.
     for message in evaluation_result.messages:
-        report_or_collect(out, AppendMessage(message=message))
+        out.out(AppendMessage(message=message))
 
     # Close the test.
-    report_or_collect(out, CloseTest(
+    out.out(CloseTest(
         generated=evaluation_result.readable_actual,
         status=status
     ))
@@ -98,14 +100,16 @@ def evaluate_results(bundle: Bundle,
                      context: Context,
                      exec_results: Optional[ExecutionResult],
                      compiler_results: Tuple[List[Message], Status],
-                     context_dir: Path):
+                     context_dir: Path,
+                     collector: Collector):
     # Begin by processing the context testcase.
     # Even if there is no main testcase, we can still proceed, since the defaults
     # should take care of this.
     testcase: ContextTestcase = context.context_testcase
     readable_input = get_readable_input(bundle, testcase)
 
-    context_collector = UpdateCollector(StartTestcase(description=readable_input))
+    context_collector = Collector()
+    context_collector.out(StartTestcase(description=readable_input))
 
     # Handle the compiler output. If there is compiler output, there is no point in
     # checking additional testcases, so stop early.
@@ -113,14 +117,15 @@ def evaluate_results(bundle: Bundle,
     if compiler_results[1] != Status.CORRECT:
         # Report all compiler messages.
         for message in compiler_results[0]:
-            context_collector.collect(AppendMessage(message=message))
+            context_collector.out(AppendMessage(message=message))
         # Escalate the compiler status to every testcase.
-        context_collector.collect(EscalateStatus(status=StatusMessage(
+        context_collector.out(EscalateStatus(status=StatusMessage(
             enum=compiler_results[1]
         )))
 
         # Finish evaluation, since there is nothing we can do.
-        context_collector.end(bundle.out, CloseTestcase(accepted=False))
+        context_collector.out(CloseTestcase(accepted=False))
+        context_collector.write(collector)
         return
 
     # There must be execution if compilation succeeded.
@@ -172,17 +177,17 @@ def evaluate_results(bundle: Bundle,
     # Check for missing values and stop if necessary.
     if not stdout_ or not stderr_ or not exceptions or not values:
         _logger.warning("Missing output in context testcase.")
-        context_collector.collect(AppendMessage(
+        context_collector.out(AppendMessage(
             "Ontbrekende uitvoerresultaten in Dodona. Er ging iets verkeerd!"
         ))
         # Recover stdout and stderr if present.
         if recovered := "\n".join(stdout_[1:]):
-            context_collector.collect(AppendMessage(ExtendedMessage(
+            context_collector.out(AppendMessage(ExtendedMessage(
                 description="Andere standaarduitvoer was:\n" + recovered,
                 format="code"
             )))
         if recovered := "\n".join(stderr_[1:]):
-            context_collector.collect(AppendMessage(ExtendedMessage(
+            context_collector.out(AppendMessage(ExtendedMessage(
                 description="Andere standaardfout was:\n" + recovered,
                 format="code"
             )))
@@ -196,7 +201,8 @@ def evaluate_results(bundle: Bundle,
         must_stop = True
 
     # Done with the context testcase.
-    context_collector.end(bundle.out, CloseTestcase())
+    context_collector.out(CloseTestcase(), 0)
+    context_collector.write(collector)
 
     # Decide if we want to proceed.
     if must_stop:
@@ -210,7 +216,7 @@ def evaluate_results(bundle: Bundle,
         _logger.debug(f"Evaluating testcase {i}")
 
         readable_input = get_readable_input(bundle, testcase)
-        report_update(bundle.out, StartTestcase(description=readable_input))
+        collector.out(StartTestcase(description=readable_input))
 
         # Get the evaluators
         output = testcase.output
@@ -228,26 +234,20 @@ def evaluate_results(bundle: Bundle,
         actual_value = values[i] if i < len(values) else ""
 
         results = [
-            _evaluate_channel(bundle.out, "file", testcase.output.file,
+            _evaluate_channel(collector, "file", testcase.output.file,
                               "", file_evaluator),
-            _evaluate_channel(bundle.out, "stderr",
+            _evaluate_channel(collector, "stderr",
                               testcase.output.stderr, actual_stderr,
                               stderr_evaluator),
-            _evaluate_channel(bundle.out, "exception",
+            _evaluate_channel(collector, "exception",
                               testcase.output.exception, actual_exception,
                               exception_evaluator),
-            _evaluate_channel(bundle.out, "stdout",
+            _evaluate_channel(collector, "stdout",
                               testcase.output.stdout, actual_stdout,
                               stdout_evaluator),
-            _evaluate_channel(bundle.out, "return",
+            _evaluate_channel(collector, "return",
                               testcase.output.result, actual_value, value_evaluator)
         ]
-
-        _logger.debug(f"IN TESTCASE {i}")
-        _logger.debug(f"  stdout -> {stdout_}")
-        _logger.debug(f"  stderr -> {stderr_}")
-        _logger.debug(f"  values -> {values}")
-        _logger.debug(f"  exceptions -> {exceptions}")
 
         # Check for missing values and stop if necessary.
         if (i >= len(stdout_)
@@ -255,17 +255,17 @@ def evaluate_results(bundle: Bundle,
                 or i >= len(values)
                 or i >= len(exceptions)):
             _logger.warning(f"Missing output in testcase {i}")
-            report_update(bundle.out, AppendMessage(
+            collector.out(AppendMessage(
                 "Ontbrekende uitvoerresultaten in Dodona. Er ging iets verkeerd!"
             ))
             # Recover stdout and stderr if present.
             if recovered := "\n".join(stdout_[i:]):
-                context_collector.collect(AppendMessage(ExtendedMessage(
+                collector.out(AppendMessage(ExtendedMessage(
                     description="Andere standaarduitvoer was:\n" + recovered,
                     format="code"
                 )))
             if recovered := "\n".join(stderr_[i:]):
-                context_collector.collect(AppendMessage(ExtendedMessage(
+                collector.out(AppendMessage(ExtendedMessage(
                     description="Andere standaardfout was:\n" + recovered,
                     format="code"
                 )))
@@ -274,14 +274,90 @@ def evaluate_results(bundle: Bundle,
             super_stop = False
 
         # Decide if we want to proceed.
-        if (testcase.essential and not all(results)) or super_stop:
+        if ((testcase.essential and not all(results))
+                or super_stop
+                or i == len(context.testcases) - 1):
             # As last item, we evaluate the exit code of the context.
-            _evaluate_channel(bundle.out, "exitcode", exit_output,
+            _evaluate_channel(collector, "exitcode", exit_output,
                               str(exec_results.exit), exit_evaluator)
             must_stop = True
 
-        report_update(bundle.out, CloseTestcase())
+        collector.out(CloseTestcase(), i + 1)
 
         if must_stop:
             _logger.debug("Stopping evaluation, since testcase is essential.")
             return  # Stop evaluation now.
+
+
+def prepare_evaluation(bundle: Bundle, collector: Collector):
+    # This is very similar to the normal evaluation, see the docs there.
+    collector.prepare(None, None, None, [StartJudgment()])
+    for i, tab in enumerate(bundle.plan.tabs):
+        collector.prepare(i, None, None, [StartTab(title=tab.name)])
+        for j, context in enumerate(tab.contexts):
+            collector.prepare(i, j, None,
+                              [StartContext(description=context.description)])
+            # Begin with the context testcase.
+            c_dir = Path(
+                bundle.config.workdir,
+                bundle.language_config.context_name(
+                    tab_number=i,
+                    context_number=j
+                )
+            )
+            readable_input = get_readable_input(bundle, context.context_testcase)
+            c_col = Collector()
+            c_col.out(StartTestcase(description=readable_input))
+            # Get the evaluators for the tests.
+            output = context.context_testcase.output
+            stdout_eval = get_evaluator(bundle, c_dir, output.stdout)
+            stderr_eval = get_evaluator(bundle, c_dir, output.stderr)
+            file_eval = get_evaluator(bundle, c_dir, output.file)
+            exc_eval = get_evaluator(bundle, c_dir, output.exception)
+            # Get exit code stuff, but don't evaluate yet.
+            exit_output = output.exit_code
+            exit_evaluator = get_evaluator(bundle, c_dir, exit_output)
+            # Do the tests.
+            _evaluate_channel(c_col, "file", output.file, None, file_eval),
+            _evaluate_channel(c_col, "stderr", output.stderr, None, stderr_eval),
+            _evaluate_channel(c_col, "exception", output.exception, None, exc_eval),
+            _evaluate_channel(c_col, "stdout", output.stdout, None, stdout_eval)
+            c_col.out(CloseTestcase())
+            collector.prepare(i, j, 0, [x for x, _ in c_col.commands])
+            # Begin normal testcases.
+            for t, testcase in enumerate(context.testcases, 1):
+                testcase: Testcase
+                t_col = Collector()
+                readable_input = get_readable_input(bundle, testcase)
+                t_col.out(StartTestcase(description=readable_input))
+                # Get the evaluators for the tests.
+                output = testcase.output
+                stdout_eval = get_evaluator(bundle, c_dir, output.stdout)
+                stderr_eval = get_evaluator(bundle, c_dir, output.stderr)
+                file_eval = get_evaluator(bundle, c_dir, output.file)
+                value_evaluator = get_evaluator(bundle, c_dir, output.result)
+                exc_eval = get_evaluator(bundle, c_dir, output.exception)
+
+                # Do the tests.
+                _evaluate_channel(t_col, "file", output.file, None, file_eval),
+                _evaluate_channel(t_col, "stderr"
+                                  , output.stderr, None, stderr_eval),
+                _evaluate_channel(t_col, "exception",
+                                  output.exception, None, exc_eval),
+                _evaluate_channel(t_col, "stdout",
+                                  output.stdout, None, stdout_eval),
+                _evaluate_channel(t_col, "return",
+                                  output.result, None, value_evaluator)
+
+                # If last testcase, do exit code.
+                if t == len(context.testcases):
+                    _evaluate_channel(t_col, "exitcode",
+                                      exit_output, None, exit_evaluator)
+
+                t_col.out(CloseTestcase())
+                collector.prepare(i, j, t, [x for x, _ in t_col.commands])
+
+            collector.prepare(i, j, None, [CloseContext()])
+
+        collector.prepare(i, None, None, [CloseTab()])
+    collector.prepare(None, None, None, [CloseJudgment()])

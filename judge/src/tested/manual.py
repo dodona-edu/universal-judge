@@ -17,15 +17,16 @@ from .main import run
 def read_config() -> DodonaConfig:
     """Read the configuration from stdout"""
     return DodonaConfig(**{
-        "memory_limit": 536870912,
-        "time_limit": 10000000,
+        "memory_limit":         536870912,
+        "time_limit":           1,
         "programming_language": 'c',
-        "natural_language": 'nl',
-        "resources": Path('../exercise/big-echo/evaluation').resolve(),
-        "source": Path('../exercise/big-echo/solution/test.c').resolve(),
-        "judge": Path('../judge/src/').resolve(),
-        "workdir": Path('./workdir').resolve(),
-        "plan_name": "plan.json",
+        "natural_language":     'nl',
+        "resources":            Path('../exercise/big-echo/evaluation'),
+        "source":               Path('../exercise/big-echo/solution/test.c'),
+        "judge":                Path('../judge/src/'),
+        "workdir":              Path('./workdir'),
+        "plan_name":            "plan.json",
+        "test":                 "Gallo"
     })
 
 

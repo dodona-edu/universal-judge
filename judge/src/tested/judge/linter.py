@@ -1,7 +1,8 @@
 import logging
 
+from .collector import Collector
 from ..configs import Bundle
-from ..dodona import report_update, AppendMessage
+from ..dodona import AppendMessage
 
 _logger = logging.getLogger(__name__)
 
@@ -10,7 +11,7 @@ def runs_linter(bundle: Bundle) -> bool:
     return bundle.config.linter()
 
 
-def run_linter(bundle: Bundle):
+def run_linter(bundle: Bundle, collector: Collector):
     """
     Run the linter on the submission. For the linter to run, two preconditions
     must be satisfied:
@@ -19,6 +20,7 @@ def run_linter(bundle: Bundle):
     2. The linter is allowed to run based on the configuration.
 
     :param bundle: The configuration bundle.
+    :param collector: The output collector.
     """
 
     if not runs_linter(bundle):
@@ -31,6 +33,6 @@ def run_linter(bundle: Bundle):
         bundle.language_config.run_linter(bundle, bundle.config.source)
 
     for message in messages:
-        report_update(bundle.out, AppendMessage(message=message))
+        collector.out(AppendMessage(message=message))
     for annotation in annotations:
-        report_update(bundle.out, annotation)
+        collector.out(annotation)
