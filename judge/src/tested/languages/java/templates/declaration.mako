@@ -1,5 +1,5 @@
 ## Convert a Value to a type.
-<%! from tested.serialisation import VariableType, as_basic_type, resolve_to_basic, Type %>
+<%! from tested.serialisation import VariableType, as_basic_type, resolve_to_basic %>
 <%! from tested.datatypes import AdvancedNumericTypes, AdvancedSequenceTypes  %>
 <%! from tested.datatypes import BasicNumericTypes, BasicStringTypes, BasicBooleanTypes, BasicNothingTypes, BasicSequenceTypes, BasicObjectTypes  %>
 <%page args="tp,value=None" />

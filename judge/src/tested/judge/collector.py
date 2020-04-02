@@ -109,11 +109,14 @@ class OutputManager:
 
     def _save_closed(self, command: Update, id_: Optional[int]):
         if isinstance(command, CloseTab):
-            self.max_tab = max(self.max_tab, id_ or 0)
+            self.max_tab = id_ + 1
+            self.max_context = None
+            self.max_testcase = None
         elif isinstance(command, CloseContext):
-            self.max_context = max(self.max_context, id_ or 0)
+            self.max_context = id_ + 1
+            self.max_testcase = None
         elif isinstance(command, CloseTestcase):
-            self.max_testcase = max(self.max_testcase, id_ or 0)
+            self.max_testcase = id_ + 1
 
     def flush(self):
         assert not self.collected, "OutputManager already finished!"
@@ -122,7 +125,11 @@ class OutputManager:
 
         from_, at = self.determine_handled()
         from_ = min(from_, len(self.prepared))
-        added_commands = _prepare(self.prepared[from_ + 2:])[:-2]
+        added_commands = _prepare(self.prepared[from_:])[:-2]
+        _logger.debug(f"Tab, context, case: {self.max_tab}, {self.max_context}, "
+                      f"{self.max_testcase}")
+        _logger.debug(f"Appending from {from_}, at {at}")
+        _logger.debug(added_commands)
         assert not added_commands or added_commands[0][
             0].command.startswith("start-")
         self.commands[-at:-at] = added_commands
