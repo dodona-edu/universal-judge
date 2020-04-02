@@ -50,7 +50,7 @@ def run_pylint(bundle: Bundle, submission: Path, remaining: int) \
         config_path = config.resources / language_options.get('pylint_config')
     else:
         # Use the default file.
-        config_path = config.judge / "tested/languages/configs/pylint_config.rc"
+        config_path = config.judge / "tested/languages/python/pylint_config.rc"
 
     pylint_out = StringIO()
     try:

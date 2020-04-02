@@ -312,7 +312,6 @@ def evaluate_results(bundle: Bundle,
         t_col.end(collector, CloseTestcase(), i + 1)
 
         if must_stop:
-            _logger.debug("Stopping evaluation, since testcase is essential.")
             return  # Stop evaluation now.
 
 

@@ -12,7 +12,6 @@ from .datatypes import AllTypes
 if TYPE_CHECKING:
     from .configs import Bundle
 
-
 _logger = logging.getLogger(__name__)
 
 
@@ -34,7 +33,8 @@ class Constructs(Flag):
     EVALUATION = auto()  # Programmed evaluation is possible in this language.
 
     ALL = (OBJECTS | EXCEPTIONS | MAIN | FUNCTION_CALL | ASSIGNMENT
-           | HETEROGENEOUS_COLLECTIONS | DEFAULT_ARGUMENTS | EVALUATION)
+           | HETEROGENEOUS_COLLECTIONS | DEFAULT_ARGUMENTS
+           | HETEROGENEOUS_ARGUMENTS | EVALUATION)
 
 
 Types = Set[AllTypes]

@@ -239,17 +239,6 @@ if ONE_CONTEXT:
     new_tab2_context = flatten_contexts(plan["tabs"][1]["contexts"])
     plan["tabs"][1]["contexts"] = [new_tab2_context]
 
-# Terugvallen op individuele modus is niet nuttig in Python, dus laten we dat niet
-# toe. Indien het terugvallen niet nuttig is, is het sneller om het uit te zetten.
-plan["configuration"] = {
-    "allow_fallback": False,
-    "language": {
-        "python": {
-            "linter": True
-        }
-    }
-}
-
 # Schrijf het testplan.
 with open(f"../evaluation/{testplan_name}", 'w') as fp:
     json.dump(plan, fp, indent=2)

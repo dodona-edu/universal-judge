@@ -6372,13 +6372,5 @@
         }
       ]
     }
-  ],
-  "configuration": {
-    "allow_fallback": false,
-    "language": {
-      "python": {
-        "linter": true
-      }
-    }
-  }
+  ]
 }

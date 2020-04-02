@@ -13,7 +13,12 @@
   ],
   "evaluation": {
     "memory_limit": 500000000,
-    "plan_name": "plan.json"
+    "plan_name": "plan.json",
+    "options": {
+      "linter": {
+        "python": true
+      }
+    }
   },
   "internals": {
     "token": "FTuj8BW6UXbnxA8pcVWxSaP5Tr_Y54FgtBeJEKEwTEvDFVGvY8Y_th9ZJzfqRJJe",
