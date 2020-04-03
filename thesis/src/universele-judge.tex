@@ -143,7 +143,7 @@ Concreet is de structuur een hiërarchie met volgende elementen:
     Het beoordelen van de verschillende aspecten wordt in meer detail beschreven in \cref{sec:oplossingen-beoordelen}
 \end{description}
 
-Bij de keuze voor een formaat voor het testplan (JSON, XML, \ldots), zijn vooraf enkele vereisten geformuleerd waaraan het gekozen formaat moet voldoen.
+Bij de keuze voor een formaat voor het testplan (\acronym{JSON}, \acronym{XML}, \ldots), zijn vooraf enkele vereisten geformuleerd waaraan het gekozen formaat moet voldoen.
 Het moet:
 
 \begin{itemize}
@@ -152,15 +152,15 @@ Het moet:
     \item programmeertaalonafhankelijk zijn.
 \end{itemize}
 
-Uiteindelijk is gekozen om het testplan op te stellen in JSON\@.
-Niet alleen voldoet JSON aan de vooropgestelde voorwaarden, het wordt ook door veel talen ondersteund.
+Uiteindelijk is gekozen om het testplan op te stellen in \acronym{JSON}.
+Niet alleen voldoet \acronym{JSON} aan de vooropgestelde voorwaarden, het wordt ook door veel talen ondersteund.
 
-Toch zijn er ook enkele nadelen aan het gebruik van JSON\@.
-Zo is JSON geen beknopte of compacte taal om met de hand te schrijven.
-Een oplossing hiervoor gebruikt de eigenschap dat veel talen JSON kunnen produceren: andere programma's kunnen desgewenst het testplan in het json-formaat genereren, waardoor het niet met de hand geschreven moet worden.
-Hiervoor denken we aan een \termen{DSL} (\english{domain specific language}), maar dit valt buiten de thesis en wordt verder besproken in \cref{ch:beperkingen-en-toekomstig-werk}.
+Toch zijn er ook enkele nadelen aan het gebruik van \acronym{JSON}.
+Zo is \acronym{JSON} geen beknopte of compacte taal om met de hand te schrijven.
+Een oplossing hiervoor gebruikt de eigenschap dat veel talen \acronym{JSON} kunnen produceren: andere programma's kunnen desgewenst het testplan in het json-formaat genereren, waardoor het niet met de hand geschreven moet worden.
+Hiervoor denken we aan een \acronym{DSL} (\english{domain specific language}), maar dit valt buiten de thesis en wordt verder besproken in \cref{ch:beperkingen-en-toekomstig-werk}.
 
-Een tweede nadeel is dat JSON geen programmeertaal is.
+Een tweede nadeel is dat \acronym{JSON} geen programmeertaal is.
 Terwijl dit de implementatie van de judge bij het interpreteren van het testplan weliswaar eenvoudiger maakt, is het tevens beperkend: beslissen of een testgeval moet uitgevoerd worden op basis van het resultaat van een vorig testgeval is bijvoorbeeld niet mogelijk.
 Ook deze beperking wordt uitgebreider besproken in \cref{ch:beperkingen-en-toekomstig-werk}.
 
@@ -198,15 +198,15 @@ Het formaat moet:
     \end{itemize}
 \end{itemize}
 
-Een voor de hand liggende oplossing is om ook hiervoor JSON te gebruiken, en zelf in JSON een structuur op te stellen voor de waarden.
+Een voor de hand liggende oplossing is om ook hiervoor \acronym{JSON} te gebruiken, en zelf in \acronym{JSON} een structuur op te stellen voor de waarden.
 In tegenstelling tot de situatie bij het testplan bestaan er al een resem aan dataserialisatieformaten, waardoor het de moeite loont om na te gaan of er geen bestaand formaat voldoet aan de vereisten.
 Hiervoor is gestart van een overzicht op Wikipedia \autocite{wiki2020}.
-Uiteindelijk is niet gekozen voor een bestaand formaat, maar voor de JSON-oplossing.
+Uiteindelijk is niet gekozen voor een bestaand formaat, maar voor de \acronym{JSON}-oplossing.
 De redenen hiervoor zijn samen te vatten als:
 
 \begin{itemize}
     \item Het gaat om een binair formaat.
-    Binaire formaten zijn uitgesloten op basis van de eerste twee voorwaarden die we opgesteld hebben: mensen kunnen het niet schrijven zonder hulp van bijkomende tools en het is moeilijk in te bedden in een JSON-bestand (zonder gebruik te maken van encoderingen zoals base64).
+    Binaire formaten zijn uitgesloten op basis van de eerste twee voorwaarden die we opgesteld hebben: mensen kunnen het niet schrijven zonder hulp van bijkomende tools en het is moeilijk in te bedden in een \acronym{JSON}-bestand (zonder gebruik te maken van encoderingen zoals base64).
     Bovendien zijn binaire formaten moeilijker te implementeren in sommige talen.
     \item Het formaat ondersteunt niet alle gewenste types.
     Sommige formaten hebben ondersteuning voor complexere datatypes, maar niet voor alle complexere datatypes die wij nodig hebben.
@@ -222,54 +222,54 @@ Een lijst van de overwogen formaten met een korte beschrijving:
 
 \begin{description}
     \item[Apache Avro] Een volledig "systeem voor dataserialisatie".
-    De specificatie van het formaat gebeurt in JSON (vergelijkbaar met JSON Schema), terwijl de eigenlijke data binair geëncodeerd wordt.
+    De specificatie van het formaat gebeurt in \acronym{JSON} (vergelijkbaar met \acronym{JSON} Schema), terwijl de eigenlijke data binair geëncodeerd wordt.
     Heeft uitbreidbare types, met veel ingebouwde types \autocite{avro}.
     \item[Apache Parquet] Minder relevant, dit is een bestandsformaat voor Hadoop \autocite{parquet}.
-    \item[ASN.1] Staat voor \english{Abstract Syntax Notation One}, een formaat uit de telecommunicatie.
+    \item[\acronym{ASN}.1] Staat voor \english{Abstract Syntax Notation One}, een formaat uit de telecommunicatie.
     De hoofdstandaard beschrijft enkel de notatie voor een dataformaat.
-    Andere standaarden beschrijven dan de serialisatie, bv.\ een binair formaat, JSON of XML.
+    Andere standaarden beschrijven dan de serialisatie, bijvoorbeeld een binair formaat, \acronym{JSON} of \acronym{XML}.
     De meerdere serialisatievormen zijn in theorie aantrekkelijk: elke taal moet er slechts een ondersteunen, terwijl de judge ze allemaal kan ondersteunen.
     In de praktijk blijkt echter dat voor veel talen er slechts één serialisatieformaat is, en dat dit vaak het binaire formaat is \autocite{x680}.
     \item[Bencode] Schema gebruikt in BitTorrent.
     Het is gedeeltelijk binair, gedeeltelijk in text \autocite{cohen2017}.
     \item[Binn] Binair dataformaat \autocite{ramos2019}.
-    \item[BSON] Een binaire variant op JSON, geschreven voor en door MongoDB \autocite{bson}.
-    \item[CBOR] Een lichtjes op JSON gebaseerd formaat, ook binair.
+    \item[\acronym{BSON}] Een binaire variant op \acronym{JSON}, geschreven voor en door MongoDB \autocite{bson}.
+    \item[\acronym{CBOR}] Een lichtjes op \acronym{JSON} gebaseerd formaat, ook binair.
     Heeft een goede standaard, ondersteunt redelijk wat talen \autocite{rfc7049}.
     \item[FlatBuffers] Lijkt op ProtocolBuffers, allebei geschreven door Google, maar verschilt wat in implementatie van ProtocolBuffers.
     De encodering is binair \autocite{flatbuffers}.
-    \item[Fast Infoset] Is eigenlijk een manier om xml binair te encoderen (te beschouwen als een soort compressie voor xml), waardoor het minder geschikt voor ons gebruik wordt \autocite{x981}.
-    \item[Ion] Een superset van JSON, ontwikkeld door Amazon.
+    \item[Fast Infoset] Is eigenlijk een manier om \acronym{XML} binair te encoderen (te beschouwen als een soort compressie voor xml), waardoor het minder geschikt voor ons gebruik wordt \autocite{x981}.
+    \item[Ion] Een superset van \acronym{JSON}, ontwikkeld door Amazon.
     Het heeft zowel een tekstuele als binaire voorstelling.
-    Naast de gebruikelijke JSON-types, bevat het enkele uitbreidingen. \autocite{ion}.
-    \item[MessagePack] Nog een binair formaat dat lichtjes op JSON gebaseerd is.
-    Lijkt qua types sterk op JSON.
+    Naast de gebruikelijke \acronym{JSON}-types, bevat het enkele uitbreidingen. \autocite{ion}.
+    \item[MessagePack] Nog een binair formaat dat lichtjes op \acronym{JSON} gebaseerd is.
+    Lijkt qua types sterk op \acronym{JSON}.
     Heeft implementaties in veel talen \autocite{messagepack}.
-    \item[OGDL] Afkorting voor \english{Ordered Graph Data Language}.
+    \item[\acronym{OGDL}] Afkorting voor \english{Ordered Graph Data Language}.
     Daar het om een serialisatieformaat voor grafen gaat, is het niet nuttig voor ons doel \autocite{ogdl}.
-    \item[OPC Unified Architecture] Een protocol voor intermachinecommunicatie.
+    \item[\acronym{OPC} Unified Architecture] Een protocol voor intermachinecommunicatie.
     Complex: de specificatie bevat 14 documenten, met ongeveer 1250 pagina's \autocite{tr62541}.
-    \item[OpenDLL] Afkorting voor de \english{Open Data Description Language}.
+    \item[Open\acronym{DLL}] Afkorting voor de \english{Open Data Description Language}.
     Een tekstueel formaat, bedoeld om arbitraire data voor te stellen.
-    Wordt niet ondersteund in veel programmeertalen, in vergelijking met bv.\ JSON \autocite{openddl}.
+    Wordt niet ondersteund in veel programmeertalen, in vergelijking met bijvoorbeeld \acronym{JSON} \autocite{openddl}.
     \item[ProtocolBuffers] Lijkt zoals vermeld sterk op FlatBuffers, maar heeft nog extra stappen nodig bij het encoderen en decoderen, wat het minder geschikt maakt \autocite{protobuf}.
-    \item[Smile] Nog een binaire variant van JSON \autocite{smile}.
-    \item[SOAP] Afkorting voor \english{Simple Object Access Protocol}.
+    \item[Smile] Nog een binaire variant van \acronym{JSON} \autocite{smile}.
+    \item[\acronym{SOAP}] Afkorting voor \english{Simple Object Access Protocol}.
     Niet bedoeld als formaat voor dataserialisatie, maar voor communicatie tussen systemen over een netwerk \autocite{soap}.
-    \item[SDXF] Binair formaat voor data-uitwisseling.
+    \item[\acronym{SDXF}] Binair formaat voor data-uitwisseling.
     Weinig talen ondersteunen dit formaat \autocite{rfc3072}.
     \item[Thrift] Lijkt sterk op ProtocolBuffers, maar geschreven door Facebook \autocite{slee2007}.
-    \item[UBJSON] Nog een binaire variant van JSON \autocite{ubjson}.
+    \item[\acronym{UBJSON}] Nog een binaire variant van \acronym{JSON} \autocite{ubjson}.
 
 \end{description}
 
-Geen enkel overwogen formaat heeft grote voordelen tegenover een eigen structuur in JSON.
-Daarenboven hebben veel talen het nadeel dat ze geen JSON zijn, waardoor we een nieuwe taal moeten inbedden in het bestaande JSON-testplan.
-Dit nadeel, gekoppeld met het ontbreken van voordelen, heeft geleid tot de keuze voor JSON.
+Geen enkel overwogen formaat heeft grote voordelen tegenover een eigen structuur in \acronym{JSON}.
+Daarenboven hebben veel talen het nadeel dat ze geen \acronym{JSON} zijn, waardoor we een nieuwe taal moeten inbedden in het bestaande \acronym{JSON}-testplan.
+Dit nadeel, gekoppeld met het ontbreken van voordelen, heeft geleid tot de keuze voor \acronym{JSON}.
 
 \subsubsection{Dataschema}
 
-Json is slechts een formaat en geeft geen semantische betekenis aan JSON-elementen.
+Json is slechts een formaat en geeft geen semantische betekenis aan \acronym{JSON}-elementen.
 Hiervoor stellen we een dataschema op, dat uit twee onderdelen bestaat:
 
 \begin{itemize}
@@ -286,19 +286,19 @@ Een concreet voorbeeld is \cref{lst:serialisation}.
     \label{lst:serialisation}
 \end{listing}
 
-Het encoderen van waarden slaat op het voorstellen van waarden als JSON-waarden.
+Het encoderen van waarden slaat op het voorstellen van waarden als \acronym{JSON}-waarden.
 Json heeft slechts een beperkt aantal gegevenstypes, dus worden alle waarden voorgesteld als een van deze types.
-Zo worden bijvoorbeeld zowel \texttt{array}s en \texttt{set}s voorgesteld als een JSON-lijst.
+Zo worden bijvoorbeeld zowel \texttt{array}s en \texttt{set}s voorgesteld als een \acronym{JSON}-lijst.
 
 Het verschil tussen beiden wordt dan duidelijk gemaakt door het bijhorende gegevenstype.
 Er is dus nood aan een systeem om aan te geven wat het gegevenstype van een waarde is.
 
-\Cref{lst:type-schema} bevat het onder andere de structuur van een waarde in het serialisatieformaat, in een vereenvoudigde versie van JSON Schema.
+\Cref{lst:type-schema} bevat het onder andere de structuur van een waarde in het serialisatieformaat, in een vereenvoudigde versie van \acronym{JSON} Schema.
 Hierbij staat \texttt{<types>} voor een van de gegevenstypes die hierna besproken werden.
 
 \begin{listing}
     \inputminted{json}{code/type-schema.json}
-    \caption{Het schema voor waarden, expressies en statements, in een vereenvoudigde versie van JSON Schema.}
+    \caption{Het schema voor waarden, expressies en statements, in een vereenvoudigde versie van \acronym{JSON} Schema.}
     \label{lst:type-schema}
 \end{listing}
 
@@ -426,7 +426,7 @@ Om deze reden is het testplan uitgebreid met ondersteuning voor statements en ex
 Toch moet meteen opgemerkt worden dan deze ondersteuning beperkt is tot wat er nodig is om het scenario van hiervoor te kunnen uitvoeren;
 het is zeker niet de bedoeling om een volledige eigen programmeertaal te ontwerpen.
 
-In \cref{lst:type-schema} staat onder andere het formaat van een expressie en een functieoproep in een vereenvoudigde versie van JSON Schema.
+In \cref{lst:type-schema} staat onder andere het formaat van een expressie en een functieoproep in een vereenvoudigde versie van \acronym{JSON} Schema.
 Een expressie is een dezer drie dingen:
 \begin{enumerate}
     \item Een waarde, zoals hiervoor besproken in subparagraaf \emph{Dataschema} van \cref{subsec:dataserialisatie}.
@@ -459,7 +459,7 @@ De ondersteuning voor statements in het testplan beperkt zich tot variabeletoeke
 Er is expliciet voor gekozen om expressies geen statements te maken.
 De reden hiervoor is dat dit de implementatie ingewikkelder zou maken, zonder noemenswaardig voordeel.
 Een assignment kent een naam toe aan het resultaat van een expression.
-\Cref{lst:type-schema} toont ook de vereenvoudigde JSON Schema van een statement (en dus van een assignment, daar er maar één soort statement bestaat).
+\Cref{lst:type-schema} toont ook de vereenvoudigde \acronym{JSON} Schema van een statement (en dus van een assignment, daar er maar één soort statement bestaat).
 Hier staat \texttt{<datatype>} voor een van de gegevenstypes die hiervoor besproken zijn.
 
 De \texttt{name} is de naam die aan de variabele gegeven zal worden.
@@ -491,7 +491,7 @@ Bij de controle worden volgende zaken nagekeken:
     Dat zijn bijvoorbeeld Python en Java, maar geen Bash.
     \item Controle of de programmeertaal over de nodige taalconstructies beschikt, zoals \texttt{exceptions} of \texttt{objects}.
     Bij deze controle wordt ook gecontroleerd of dat de programmeertaal optionele functieargumenten of functieargumenten met heterogene gegevenstypes nodig heeft.
-    Een voorbeeld van een functie met argumenten met heterogene gegevenstypes komt bijvoorbeeld uit de ISBN-oefening (deze oefening wordt besproken in \cref{ch:nieuwe-oefening}):
+    Een voorbeeld van een functie met argumenten met heterogene gegevenstypes komt bijvoorbeeld uit de \acronym{ISBN}-oefening (deze oefening wordt besproken in \cref{ch:nieuwe-oefening}):
     \begin{minted}{pycon}
 >>> is_isbn("9789027439642")
 True
@@ -508,7 +508,7 @@ De eerste stap die wordt uitgevoerd bij de beoordeling van een ingediende oploss
 \subsection{Testcode genereren}\label{subsec:testcode-genereren}
 
 Het genereren van de testcode gebeurt met een sjabloonsysteem genaamd Mako \autocite{mako}.
-Dit soort systemen wordt traditioneel gebruikt bij webapplicaties (zoals Ruby on Rails met \textsc{erb}, Phoenix met \textsc{eex}, Laravel met Blade, enz.) om bijvoorbeeld html-pagina's te genereren.
+Dit soort systemen wordt traditioneel gebruikt bij webapplicaties (zoals Ruby on Rails met \acronym{ERB}, Phoenix met \acronym{EEX}, Laravel met Blade, enz.) om bijvoorbeeld html-pagina's te genereren.
 In ons geval zijn de sjablonen verantwoordelijk voor de vertaling van programmeertaalonafhankelijke specificaties in het testplan naar concrete testcode in de programmeertaal van de ingediende oplossing.
 Hierbij denken we aan de functieoproepen, assignments, enz.
 Ook zijn de sjablonen verantwoordelijk voor het genereren van de code die de oplossing van de student zal oproepen en evalueren.
@@ -707,7 +707,7 @@ Deze evaluator biedt enkele opties om het gedrag aan te passen:
 Deze configuratieopties worden op het niveau van de testen meegegeven.
 Dit laat toe om voor elke test (zelfs binnen eenzelfde testgeval) andere opties mee te geven.
 Een nadeel is wel dat dezelfde opties mogelijk veel herhaald moeten worden, bijvoorbeeld als een bepaalde oefening een optie voor elke test wil instellen.
-Echter wordt er verwacht dat dit soort zaken opgelost kunnen worden door een DSL of door het testplan te genereren.
+Echter wordt er verwacht dat dit soort zaken opgelost kunnen worden door een \acronym{DSL} of door het testplan te genereren.
 
 Dit is de standaardevaluatievorm in het testplan als niets anders gegeven wordt.
 \Cref{lst:testplan-text} toont een fragment uit een testplan: de uitvoerspecificatie van een testgeval waarbij de tekstevaluatie gebruikt wordt.
@@ -894,7 +894,7 @@ Het eerste prototype van TESTed gebruikte Jupyter-kernels voor het uitvoeren van
 Jupyter-kernels zijn de achterliggende technologie van Jupyter Notebooks \autocite{jupyter2016}.
 De werking van een Jupyter-kernel kan als volgt samengevat worden: een Jupyter-kernel is een lokaal proces, dat code kan uitvoeren en de resultaten van die uitvoer teruggeeft.
 Zo kan men naar de Python-kernel de expressie \mintinline{python}{5 + 9} sturen, waarop het antwoord \mintinline{python}{14} zal zijn.
-Een andere manier om een Jupyter-kernel te bekijken is als een programmeertaalonafhankelijk protocol bovenop een \term{REPL} (een \english{read-eval-print loop}).
+Een andere manier om een Jupyter-kernel te bekijken is als een programmeertaalonafhankelijk protocol bovenop een \acronym{REPL} (een \english{read-eval-print loop}).
 Deze keuze voor Jupyter-kernels als uitvoering was gebaseerd op volgende argumenten:
 \begin{itemize}
     \item Hergebruik van bestaande kernels.

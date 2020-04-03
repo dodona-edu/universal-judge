@@ -101,24 +101,24 @@ Deze paragraaf bespreekt drie grote beperkingen en mogelijke oplossingen.
 
 \subsection{Handgeschreven testplannen zijn omslachtig}\label{subsec:handgeschreven-testplannen-zijn-omslachtig}
 
-In TESTed is gekozen om het testplan in JSON op te stellen (zie \cref{subsec:het-testplan}).
+In TESTed is gekozen om het testplan in \acronym{JSON} op te stellen (zie \cref{subsec:het-testplan}).
 Bovendien is een designkeuze geweest om zoveel mogelijk informatie expliciet te maken.
 Dit heeft als voornaamste voordeel dat de implementatie in TESTed eenvoudiger blijft.
 Anderzijds zorgt dit wel voor redelijk wat herhaalde informatie in het testplan.
 
-De combinatie van JSON met de herhaalde informatie zorgt ervoor dat een testplan vaak lang is.
+De combinatie van \acronym{JSON} met de herhaalde informatie zorgt ervoor dat een testplan vaak lang is.
 Te lang om nog met de hand te schrijven.
 Een oplossing hiervoor, die al gebruikt wordt, is om het testplan niet met de hand te schrijven, maar te laten generen door bijvoorbeeld een Python-script.
 
-Een andere oplossing is het toevoegen van een bijkomende stap voor het testplan: het testplan wordt dan in een ander formaat geschreven, en bijvoorbeeld tijdens het importeren in Dodona omgezet naar het JSON-bestand.
-Voor dat andere formaat kan een DSL (\english{domain-specific language}) nuttig zijn.
+Een andere oplossing is het toevoegen van een bijkomende stap voor het testplan: het testplan wordt dan in een ander formaat geschreven, en bijvoorbeeld tijdens het importeren in Dodona omgezet naar het \acronym{JSON}-bestand.
+Voor dat andere formaat kan een \acronym{DSL} (\english{domain-specific language}) nuttig zijn.
 Dit is een programmeertaal die specifiek ontworpen is voor een bepaald onderwerp of doel.
 Hier zou ze specifiek ontworpen zijn om een testplan te schrijven.
 
-Een bijkomend voordeel van JSON als formaat is dat het een neutraal formaat is.
+Een bijkomend voordeel van \acronym{JSON} als formaat is dat het een neutraal formaat is.
 Verschillende soorten oefeningen hebben andere noden op het vlak van schrijven van het testplan.
 Het testplan voor een oefening die enkel stdin en stdout gebruikt zal er helemaal anders uitzien dan een testplan voor een oefening waar functieoproepen gebruikt worden.
-Het zou bijvoorbeeld kunnen dat voor verschillende soorten oefeningen een andere DSL ontworpen wordt.
+Het zou bijvoorbeeld kunnen dat voor verschillende soorten oefeningen een andere \acronym{DSL} ontworpen wordt.
 
 Zo zijn er bijvoorbeeld meerdere standaarden voor het schrijven van programmeeroefeningen.
 Op het moment van schrijven lijken er wel nog geen wijdverspreide standaarden te zijn.
@@ -127,9 +127,9 @@ Bij wijze van voorbeeld worden twee standaarden besproken, telkens met een besch
 Bij deze voorbeeldoefening moet invoer gelezen worden en dan als uitvoer moet aangegeven worden of de invoer al dan niet een palindroom is.
 
 Een eerste standaard is PExIL (\term{Programming Exercises Interoperability Language}) \autocite{queiros2011pexil}.
-Dit is een op XML-gebaseerd formaat, gepubliceerd in 2011.
+Dit is een op \acronym{XML}-gebaseerd formaat, gepubliceerd in 2011.
 Ontwikkeling van deze standaard lijkt gestopt te zijn.
-We hebben geen online oefeningen gevonden die in dit formaat beschreven zijn en de de nodige resources voor het zelf schrijven van een oefeningen (zoals het XML Schema) zijn niet meer beschikbaar online.
+We hebben geen online oefeningen gevonden die in dit formaat beschreven zijn en de de nodige resources voor het zelf schrijven van een oefeningen (zoals het \acronym{XML} Schema) zijn niet meer beschikbaar online.
 De beschrijving van de voorbeeldoefening is \cref{lst:pexil}.
 
 \begin{listing}
@@ -139,16 +139,16 @@ De beschrijving van de voorbeeldoefening is \cref{lst:pexil}.
     \label{lst:pexil}
 \end{listing}
 
-Een tweede standaard is PEML (\english{Programming Exercise Markup Language}) \autocite{peml}.
-PEML is een tekstueel formaat (een soort DSL) dat er veelbelovend uitziet om met de hand te schrijven.
-Op het moment van schrijven van deze thesis is PEML nog in volle ontwikkeling.
-Aangezien een van de \english{design goals} van PEML is dat de omzetting van PEML naar JSON eenvoudig zal zijn, lijkt dit een interessant formaat.
-De beschrijving van de voorbeeldoefening is \cref{lst:peml} en is overgenomen uit de documentatie van PEML.
+Een tweede standaard is \acronym{PEML} (\english{Programming Exercise Markup Language}) \autocite{peml}.
+P\acronym{EML} is een tekstueel formaat (een soort \acronym{DSL}) dat er veelbelovend uitziet om met de hand te schrijven.
+Op het moment van schrijven van deze thesis is \acronym{PEML} nog in volle ontwikkeling.
+Aangezien een van de \english{design goals} van \acronym{PEML} is dat de omzetting van \acronym{PEML} naar \acronym{JSON} eenvoudig zal zijn, lijkt dit een interessant formaat.
+De beschrijving van de voorbeeldoefening is \cref{lst:peml} en is overgenomen uit de documentatie van \acronym{PEML}.
 
 \begin{listing}
     \inputminted{yaml}{code/peml.peml}
     \caption{
-        Beschrijving van de oefening "palindroom" in PEML.
+        Beschrijving van de oefening "palindroom" in \acronym{PEML}.
         Overgenomen uit \autocite{peml}.
     }
     \label{lst:peml}
@@ -157,7 +157,7 @@ De beschrijving van de voorbeeldoefening is \cref{lst:peml} en is overgenomen ui
 
 \subsection{Dynamische scheduling van testen}\label{subsec:dynamische-scheduling-van-testen}
 
-In TESTed is gekozen om het testplan in JSON op te stellen (zie \cref{subsec:het-testplan}).
+In TESTed is gekozen om het testplan in \acronym{JSON} op te stellen (zie \cref{subsec:het-testplan}).
 Een nadeel van deze aanpak is dat de \term{scheduling} (het plannen van welke testcode wanneer uitgevoerd worden) statisch gebeurt.
 Een analogie is bijvoorbeeld een gecompileerde taal zoals C/C++ en een dynamische taal zoals Python: TESTed vervult in deze analogie de rol van compiler.
 Door dit statische testplan is het niet mogelijk om in het algemeen op basis van het resultaat van een vorig testgeval het verloop van de volgende testgevallen te bepalen.
@@ -223,7 +223,7 @@ Ondersteuning voor vertaling kan dan deze vorm aannemen:
 \inputminted{json}{code/example-name-trans.json}
 
 Als een functie binnen een testplan veel wordt opgeroepen, zorgt dit nog steeds voor veel herhaling.
-Dit kan opgelost worden door een DSL, maar dat neemt niet weg dat het testplan onnodig lang zal worden.
+Dit kan opgelost worden door een \acronym{DSL}, maar dat neemt niet weg dat het testplan onnodig lang zal worden.
 Een mogelijke oplossing hiervoor is om een soort vertaalwoordenboek mee te geven in het testplan, waar met sleutelwoorden gewerkt wordt.
 Een voorbeeld illustreert dit:
 
@@ -256,17 +256,17 @@ Concreet gaat het om volgende zaken:
 
 De expressies in het testplan zijn opzettelijk eenvoudig gehouden (zie \cref{subsec:expressions-and-statements}).
 Dit levert wel beperkingen op: zo is het niet mogelijk om bijvoorbeeld een functieoproep als \mintinline{python}{test(5 + 5)} in het testplan te schrijven.
-Een idee zou dus kunnen zijn om het testplan uit te breiden met meer taalconstructies, waarbij het testplan dan dienst doet als een soort AST (abstract syntax tree).
+Een idee zou dus kunnen zijn om het testplan uit te breiden met meer taalconstructies, waarbij het testplan dan dienst doet als een soort \acronym{AST} (abstract syntax tree).
 Afhankelijk van hoe ver men hierin gaat, begint dit wel een universele programmeertaal te worden (wat ook expliciet buiten het bestek van deze thesis valt).
 In dat geval loont het de moeite om te onderzoeken of geen eenvoudige, bestaande programmeertaal \english{transpiled} zou kunnen worden naar het testplan, in plaats van zelf een nieuwe taal op te stellen.
-Hiervoor moet het testplan wel uitgebreid worden met functies van een AST of IR (intermediary language).
+Hiervoor moet het testplan wel uitgebreid worden met functies van een \acronym{AST} of \acronym{IR} (intermediary language).
 Ook TESTed zelf zal uitgebreid moeten worden, aangezien er meer zal moeten omgezet kunnen worden naar de programmeertalen (de sjablonen zullen dus uitgebreid moeten worden).
 
 \subsection{Programmeertaalonafhankelijke programmeerparadigma}\label{subsec:programmeertaalonafhankelijke-programmeerparadigma}
 
 TESTed vertaalt geen programmeerparadigma tussen verschillende programmeertalen.
 Dit kan ervoor zorgen dat bepaalde oefeningen in sommige programmeertalen op onnatuurlijke wijze opgelost moeten worden.
-Stel als voorbeeld de ISBN-oefeningen.
+Stel als voorbeeld de \acronym{ISBN}-oefeningen.
 In Python is het \english{pythonic} om hiervoor twee top-level functies te schrijven (\texttt{is\_isbn} en \texttt{are\_isbn})
 In Java zal TESTed dan twee statische functies verwachten, terwijl deze opgave in de Java-wereld ook vaak opgelost zal worden met bijvoorbeeld een klasse \texttt{IsbnValidator}, met twee methoden \texttt{check} en \texttt{checkAll}.
 

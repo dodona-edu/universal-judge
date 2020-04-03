@@ -2,7 +2,7 @@
 
 \lettrine{D}{e evoluties} op technologisch vlak hebben ervoor gezorgd dat onze maatschappij de laatste decennia in hoge mate gedigitaliseerd is, een proces dat nog steeds aan de gang is.
 Bovendien kan, door de snelheid waarmee deze veranderingen vaak optreden, eerder gesproken worden van een revolutie dan een evolutie: de veranderingen zijn vaak ingrijpend en veranderen fundamentele aspecten van de sectoren waarin de digitalisering plaatsvindt.
-Dit gaat over nieuwe sectoren, zoals de deeleconomie, of ingrijpende veranderingen bij bestaande sectoren, zoals de opkomst van \english{ride sharing} in de taxisector.
+Dit gaat over het ontstaan van nieuwe sectoren, zoals de deeleconomie, maar ook ingrijpende veranderingen bij bestaande sectoren, zoals de opkomst van \english{ride sharing} in de taxisector.
 Ook de impact op maatschappelijk vlak, zoals de sociale media in de politiek, mag niet vergeten worden \autocite{hipeac2019}.
 
 Ook op educatief vlak heeft de digitalisering een grote impact.
@@ -46,8 +46,8 @@ De uitdaging wordt beschouwd binnen de context van Dodona, een online leerplatfo
 \section{Het leerplatform Dodona}\label{sec:wat-is-dodona}
 
 Sinds 2011 wordt aan de onderzoeksgroep Computationele Biologie van de Universiteit Gent gewerkt met programmeeroefeningen die in een online systeem ingediend en beoordeeld worden.
-Oorspronkelijk werd hiervoor gebruik gemaakt van de \english{Sphere Online Judge} (SPOJ) \autocite{10.1007/978-3-540-78139-4_31}.
-Op basis van ervaringen met SPOJ ontwikkelde de onderzoeksgroep een eigen leerplatform, Dodona, dat in september 2016 beschikbaar werd.
+Oorspronkelijk werd hiervoor gebruik gemaakt van de \english{Sphere Online Judge} (\acronym{SPOJ}) \autocite{10.1007/978-3-540-78139-4_31}.
+Op basis van ervaringen met \acronym{SPOJ} ontwikkelde de onderzoeksgroep een eigen leerplatform, Dodona, dat in september 2016 beschikbaar werd.
 Het doel van Dodona is eenvoudig: lesgevers bijstaan om hun studenten niet alleen zo goed mogelijk te leren programmeren, maar dit ook op een zo efficiënt mogelijke manier te doen.
 
 Het online leerplatform Dodona kan opgedeeld worden in verschillende onderdelen:
@@ -71,7 +71,7 @@ In Dodona wordt elke ingediende oplossing beoordeeld door een evaluatieprogramma
 In wezen is dit een eenvoudig programma: via de standaardinvoerstroom (\texttt{stdin}) krijgt het programma een configuratie binnen van Dodona.
 Deze configuratie bevat onder andere de programmeertaal van de ingediende oplossing, de locatie van de oefeningenbestanden (die opgesteld zijn door de lesgever), de locatie van de ingediende oplossing zelf en configuratieopties, zoals geheugen- en tijdslimieten.
 Het resultaat van de beoordeling wordt uitgeschreven naar de standaarduitvoerstroom (\texttt{stdout}).
-Zowel de invoer als de uitvoer van de judge zijn JSON, waarvan het formaat vastgelegd is in JSON Schema.\footnote{Dit schema en een tekstuele beschrijving ervan is te vinden in de handleiding op \url{https://dodona-edu.github.io/en/guides/creating-a-judge/}.}
+Zowel de invoer als de uitvoer van de judge zijn \acronym{JSON}, waarvan het formaat vastgelegd is in \acronym{JSON} Schema.\footnote{Dit schema en een tekstuele beschrijving ervan is te vinden in de handleiding op \url{https://dodona-edu.github.io/en/guides/creating-a-judge/}.}
 
 Concreet wordt elke beoordeling uitgevoerd in een Docker-container.
 Deze Docker-container wordt gemaakt op basis van een Docker-image die bij de judge hoort, en alle dependencies bevat die de judge in kwestie nodig heeft.
