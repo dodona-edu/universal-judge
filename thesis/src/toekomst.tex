@@ -126,7 +126,7 @@ Een programma dat oefening die in deze formaten beschreven zijn omzet naar het e
 Bij wijze van voorbeeld worden twee standaarden besproken, telkens met een beschrijving van dezelfde oefening.
 Bij deze voorbeeldoefening moet invoer gelezen worden en dan als uitvoer moet aangegeven worden of de invoer al dan niet een palindroom is.
 
-Een eerste standaard is PExIL (\term{Programming Exercises Interoperability Language}) \autocite{queiros2011pexil}.
+Een eerste standaard is \acronym{PExIL} (\term{Programming Exercises Interoperability Language}) \autocite{queiros2011pexil}.
 Dit is een op \acronym{XML}-gebaseerd formaat, gepubliceerd in 2011.
 Ontwikkeling van deze standaard lijkt gestopt te zijn.
 We hebben geen online oefeningen gevonden die in dit formaat beschreven zijn en de de nodige resources voor het zelf schrijven van een oefeningen (zoals het \acronym{XML} Schema) zijn niet meer beschikbaar online.
@@ -135,7 +135,7 @@ De beschrijving van de voorbeeldoefening is \cref{lst:pexil}.
 \begin{listing}
     \inputminted{xml}{code/pexil-in.xml}
     \inputminted{xml}{code/pexil-out.xml}
-    \caption{Beschrijving van de oefening "palindroom" (gesplitst in invoer en uitvoer) in PExIL.}
+    \caption{Beschrijving van de oefening "palindroom" (gesplitst in invoer en uitvoer) in \acronym{PExIL}.}
     \label{lst:pexil}
 \end{listing}
 
@@ -143,7 +143,7 @@ Een tweede standaard is \acronym{PEML} (\english{Programming Exercise Markup Lan
 P\acronym{EML} is een tekstueel formaat (een soort \acronym{DSL}) dat er veelbelovend uitziet om met de hand te schrijven.
 Op het moment van schrijven van deze thesis is \acronym{PEML} nog in volle ontwikkeling.
 Aangezien een van de \english{design goals} van \acronym{PEML} is dat de omzetting van \acronym{PEML} naar \acronym{JSON} eenvoudig zal zijn, lijkt dit een interessant formaat.
-De beschrijving van de voorbeeldoefening is \cref{lst:peml} en is overgenomen uit de documentatie van \acronym{PEML}.
+De beschrijving van de voorbeeldoefening staat in \cref{lst:peml} en is overgenomen uit de documentatie van \acronym{PEML}.
 
 \begin{listing}
     \inputminted{yaml}{code/peml.peml}
