@@ -143,7 +143,7 @@ Concreet is de structuur een hiërarchie met volgende elementen:
     Het beoordelen van de verschillende aspecten wordt in meer detail beschreven in \cref{sec:oplossingen-beoordelen}
 \end{description}
 
-Bij de keuze voor een formaat voor het testplan (json, xml, \ldots), zijn vooraf enkele vereisten geformuleerd waaraan het gekozen formaat moet voldoen.
+Bij de keuze voor een formaat voor het testplan (JSON, XML, \ldots), zijn vooraf enkele vereisten geformuleerd waaraan het gekozen formaat moet voldoen.
 Het moet:
 
 \begin{itemize}
@@ -152,15 +152,15 @@ Het moet:
     \item programmeertaalonafhankelijk zijn.
 \end{itemize}
 
-Uiteindelijk is gekozen om het testplan op te stellen in json.
-Niet alleen voldoet json aan de vooropgestelde voorwaarden, het wordt ook door veel talen ondersteund.
+Uiteindelijk is gekozen om het testplan op te stellen in JSON\@.
+Niet alleen voldoet JSON aan de vooropgestelde voorwaarden, het wordt ook door veel talen ondersteund.
 
-Toch zijn er ook enkele nadelen aan het gebruik van json.
-Zo is json geen beknopte of compacte taal om met de hand te schrijven.
-Een oplossing hiervoor gebruikt de eigenschap dat veel talen json kunnen produceren: andere programma's kunnen desgewenst het testplan in het json-formaat genereren, waardoor het niet met de hand geschreven moet worden.
+Toch zijn er ook enkele nadelen aan het gebruik van JSON\@.
+Zo is JSON geen beknopte of compacte taal om met de hand te schrijven.
+Een oplossing hiervoor gebruikt de eigenschap dat veel talen JSON kunnen produceren: andere programma's kunnen desgewenst het testplan in het json-formaat genereren, waardoor het niet met de hand geschreven moet worden.
 Hiervoor denken we aan een \termen{DSL} (\english{domain specific language}), maar dit valt buiten de thesis en wordt verder besproken in \cref{ch:beperkingen-en-toekomstig-werk}.
 
-Een tweede nadeel is dat json geen programmeertaal is.
+Een tweede nadeel is dat JSON geen programmeertaal is.
 Terwijl dit de implementatie van de judge bij het interpreteren van het testplan weliswaar eenvoudiger maakt, is het tevens beperkend: beslissen of een testgeval moet uitgevoerd worden op basis van het resultaat van een vorig testgeval is bijvoorbeeld niet mogelijk.
 Ook deze beperking wordt uitgebreider besproken in \cref{ch:beperkingen-en-toekomstig-werk}.
 
@@ -198,15 +198,15 @@ Het formaat moet:
     \end{itemize}
 \end{itemize}
 
-Een voor de hand liggende oplossing is om ook hiervoor json te gebruiken, en zelf in json een structuur op te stellen voor de waarden.
+Een voor de hand liggende oplossing is om ook hiervoor JSON te gebruiken, en zelf in JSON een structuur op te stellen voor de waarden.
 In tegenstelling tot de situatie bij het testplan bestaan er al een resem aan dataserialisatieformaten, waardoor het de moeite loont om na te gaan of er geen bestaand formaat voldoet aan de vereisten.
 Hiervoor is gestart van een overzicht op Wikipedia \autocite{wiki2020}.
-Uiteindelijk is niet gekozen voor een bestaand formaat, maar voor de json-oplossing.
+Uiteindelijk is niet gekozen voor een bestaand formaat, maar voor de JSON-oplossing.
 De redenen hiervoor zijn samen te vatten als:
 
 \begin{itemize}
     \item Het gaat om een binair formaat.
-    Binaire formaten zijn uitgesloten op basis van de eerste twee voorwaarden die we opgesteld hebben: mensen kunnen het niet schrijven zonder hulp van bijkomende tools en het is moeilijk in te bedden in een json-bestand (zonder gebruik te maken van encoderingen zoals base64).
+    Binaire formaten zijn uitgesloten op basis van de eerste twee voorwaarden die we opgesteld hebben: mensen kunnen het niet schrijven zonder hulp van bijkomende tools en het is moeilijk in te bedden in een JSON-bestand (zonder gebruik te maken van encoderingen zoals base64).
     Bovendien zijn binaire formaten moeilijker te implementeren in sommige talen.
     \item Het formaat ondersteunt niet alle gewenste types.
     Sommige formaten hebben ondersteuning voor complexere datatypes, maar niet voor alle complexere datatypes die wij nodig hebben.
@@ -222,28 +222,28 @@ Een lijst van de overwogen formaten met een korte beschrijving:
 
 \begin{description}
     \item[Apache Avro] Een volledig "systeem voor dataserialisatie".
-    De specificatie van het formaat gebeurt in json (vergelijkbaar met JSON Schema), terwijl de eigenlijke data binair geëncodeerd wordt.
+    De specificatie van het formaat gebeurt in JSON (vergelijkbaar met JSON Schema), terwijl de eigenlijke data binair geëncodeerd wordt.
     Heeft uitbreidbare types, met veel ingebouwde types \autocite{avro}.
     \item[Apache Parquet] Minder relevant, dit is een bestandsformaat voor Hadoop \autocite{parquet}.
     \item[ASN.1] Staat voor \english{Abstract Syntax Notation One}, een formaat uit de telecommunicatie.
     De hoofdstandaard beschrijft enkel de notatie voor een dataformaat.
-    Andere standaarden beschrijven dan de serialisatie, bv.\ een binair formaat, json of xml.
+    Andere standaarden beschrijven dan de serialisatie, bv.\ een binair formaat, JSON of XML.
     De meerdere serialisatievormen zijn in theorie aantrekkelijk: elke taal moet er slechts een ondersteunen, terwijl de judge ze allemaal kan ondersteunen.
     In de praktijk blijkt echter dat voor veel talen er slechts één serialisatieformaat is, en dat dit vaak het binaire formaat is \autocite{x680}.
     \item[Bencode] Schema gebruikt in BitTorrent.
     Het is gedeeltelijk binair, gedeeltelijk in text \autocite{cohen2017}.
     \item[Binn] Binair dataformaat \autocite{ramos2019}.
-    \item[BSON] Een binaire variant op json, geschreven voor en door MongoDB \autocite{bson}.
-    \item[CBOR] Een lichtjes op json gebaseerd formaat, ook binair.
+    \item[BSON] Een binaire variant op JSON, geschreven voor en door MongoDB \autocite{bson}.
+    \item[CBOR] Een lichtjes op JSON gebaseerd formaat, ook binair.
     Heeft een goede standaard, ondersteunt redelijk wat talen \autocite{rfc7049}.
     \item[FlatBuffers] Lijkt op ProtocolBuffers, allebei geschreven door Google, maar verschilt wat in implementatie van ProtocolBuffers.
     De encodering is binair \autocite{flatbuffers}.
     \item[Fast Infoset] Is eigenlijk een manier om xml binair te encoderen (te beschouwen als een soort compressie voor xml), waardoor het minder geschikt voor ons gebruik wordt \autocite{x981}.
-    \item[Ion] Een superset van json, ontwikkeld door Amazon.
+    \item[Ion] Een superset van JSON, ontwikkeld door Amazon.
     Het heeft zowel een tekstuele als binaire voorstelling.
-    Naast de gebruikelijke json-types, bevat het enkele uitbreidingen. \autocite{ion}.
-    \item[MessagePack] Nog een binair formaat dat lichtjes op json gebaseerd is.
-    Lijkt qua types sterk op json.
+    Naast de gebruikelijke JSON-types, bevat het enkele uitbreidingen. \autocite{ion}.
+    \item[MessagePack] Nog een binair formaat dat lichtjes op JSON gebaseerd is.
+    Lijkt qua types sterk op JSON.
     Heeft implementaties in veel talen \autocite{messagepack}.
     \item[OGDL] Afkorting voor \english{Ordered Graph Data Language}.
     Daar het om een serialisatieformaat voor grafen gaat, is het niet nuttig voor ons doel \autocite{ogdl}.
@@ -251,25 +251,25 @@ Een lijst van de overwogen formaten met een korte beschrijving:
     Complex: de specificatie bevat 14 documenten, met ongeveer 1250 pagina's \autocite{tr62541}.
     \item[OpenDLL] Afkorting voor de \english{Open Data Description Language}.
     Een tekstueel formaat, bedoeld om arbitraire data voor te stellen.
-    Wordt niet ondersteund in veel programmeertalen, in vergelijking met bv.\ json \autocite{openddl}.
+    Wordt niet ondersteund in veel programmeertalen, in vergelijking met bv.\ JSON \autocite{openddl}.
     \item[ProtocolBuffers] Lijkt zoals vermeld sterk op FlatBuffers, maar heeft nog extra stappen nodig bij het encoderen en decoderen, wat het minder geschikt maakt \autocite{protobuf}.
-    \item[Smile] Nog een binaire variant van json \autocite{smile}.
+    \item[Smile] Nog een binaire variant van JSON \autocite{smile}.
     \item[SOAP] Afkorting voor \english{Simple Object Access Protocol}.
     Niet bedoeld als formaat voor dataserialisatie, maar voor communicatie tussen systemen over een netwerk \autocite{soap}.
     \item[SDXF] Binair formaat voor data-uitwisseling.
     Weinig talen ondersteunen dit formaat \autocite{rfc3072}.
     \item[Thrift] Lijkt sterk op ProtocolBuffers, maar geschreven door Facebook \autocite{slee2007}.
-    \item[UBJSON] Nog een binaire variant van json \autocite{ubjson}.
+    \item[UBJSON] Nog een binaire variant van JSON \autocite{ubjson}.
 
 \end{description}
 
-Geen enkel overwogen formaat heeft grote voordelen tegenover een eigen structuur in json.
-Daarenboven hebben veel talen het nadeel dat ze geen json zijn, waardoor we een nieuwe taal moeten inbedden in het bestaande json-testplan.
-Dit nadeel, gekoppeld met het ontbreken van voordelen, heeft geleid tot de keuze voor json.
+Geen enkel overwogen formaat heeft grote voordelen tegenover een eigen structuur in JSON.
+Daarenboven hebben veel talen het nadeel dat ze geen JSON zijn, waardoor we een nieuwe taal moeten inbedden in het bestaande JSON-testplan.
+Dit nadeel, gekoppeld met het ontbreken van voordelen, heeft geleid tot de keuze voor JSON.
 
 \subsubsection{Dataschema}
 
-Json is slechts een formaat en geeft geen semantische betekenis aan json-elementen.
+Json is slechts een formaat en geeft geen semantische betekenis aan JSON-elementen.
 Hiervoor stellen we een dataschema op, dat uit twee onderdelen bestaat:
 
 \begin{itemize}
@@ -286,9 +286,9 @@ Een concreet voorbeeld is \cref{lst:serialisation}.
     \label{lst:serialisation}
 \end{listing}
 
-Het encoderen van waarden slaat op het voorstellen van waarden als json-waarden.
+Het encoderen van waarden slaat op het voorstellen van waarden als JSON-waarden.
 Json heeft slechts een beperkt aantal gegevenstypes, dus worden alle waarden voorgesteld als een van deze types.
-Zo worden bijvoorbeeld zowel \texttt{array}s en \texttt{set}s voorgesteld als een json-lijst.
+Zo worden bijvoorbeeld zowel \texttt{array}s en \texttt{set}s voorgesteld als een JSON-lijst.
 
 Het verschil tussen beiden wordt dan duidelijk gemaakt door het bijhorende gegevenstype.
 Er is dus nood aan een systeem om aan te geven wat het gegevenstype van een waarde is.

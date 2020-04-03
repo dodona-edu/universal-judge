@@ -1,9 +1,10 @@
 \chapter{Beperkingen en toekomstig werk}\label{ch:beperkingen-en-toekomstig-werk}
 
-\lettrine{E}{en softwarepakket} is zelden af;
-hetzelfde geldt voor TESTed.
-Verschillende onderdelen van TESTed hebben beperkingen of zijn nog niet helemaal uitgewerkt.
-Ook het Dodona-platform zelf heeft wat beperkingen, vaak omdat een judge met ondersteuning voor meerdere programmeertalen niet voorzien was in het originele ontwerp.
+\lettrine{D}{e doelstelling} van deze thesis is het formuleren van een antwoord op de vraag of programmeertaalonafhankelijke oefeningen mogelijk zijn (zie \cref{sec:probleemstelling}).
+Als antwoord hierop is een prototype, TESTed, ontwikkelt.
+Op basis van het prototype blijkt dat het antwoord op de onderzoeksvraag positief is.
+Eigen aan een prototype is dat het nog niet \english{production ready} is.
+Dit hoofdstuk handelt over ontbrekende functionaliteit of beperkingen van TESTed, en reikt mogelijke ideeën voor een oplossing aan.
 
 \section{Dodona-platform}\label{sec:dodona-platform}
 
@@ -13,52 +14,64 @@ Dit heeft gevolgen voor hoe Dodona omgaat met programmeertalen, zoals hieronder 
 \subsection{Programmeertaalkeuze in het Dodona-platform}\label{subsec:programmeertaalkeuze-in-het-dodona-platform}
 
 Een eerste probleem is dat binnen Dodona de programmeertaal gekoppeld is aan een oefening, niet aan een oplossing.
-Dit impliceert dat elke oplossing van een oefening in dezelfde programmeertaal geschreven is, een aanname die niet meer geldt bij TESTed.
-Een uitbreiding van Dodona bestaat er dus uit om ondersteuning toe te voegen voor het kiezen van een programmeertaal per oplossing.
+Dit impliceert dat elke oplossing van een oefening in dezelfde programmeertaal geschreven is.
+Een aanname die niet meer geldt bij TESTed.
+Een uitbreiding van Dodona bestaat er dus in om ondersteuning toe te voegen voor het kiezen van een programmeertaal per oplossing.
 Dit moet ook in de gebruikersinterface mogelijk zijn, zodat studenten kunnen kiezen in welke programmeertaal ze een oefening oplossen.
 
-Als \english{workaround} zijn er twee opties:
+Als \english{workaround} zijn er twee suboptimale opties:
 \begin{itemize}
-    \item Dezelfde oefening aan in meerdere programmeertalen gebruiken, door bijvoorbeeld met symlinks dezelfde opgave, testplan en andere bestanden te gebruiken, maar met een ander config-bestand.
+    \item Dezelfde oefening in meerdere programmeertalen aanbieden, door bijvoorbeeld met symlinks dezelfde opgave, testplan en andere bestanden te gebruiken, maar met een ander config-bestand.
     Op deze manier zullen er in Dodona meerdere oefeningen zijn.
     Deze aanpak heeft nadelen.
     Zo zijn de oefeningen effectief andere oefeningen vanuit het perspectief van Dodona.
     Dient een student bijvoorbeeld een oplossing in voor één van de oefeningen, worden de overige oefeningen niet automatisch als ingediend gemarkeerd.
     Ook is de manier waarop de opgave, het testplan, enzovoort gedeeld worden (de symlinks) niet echt handig.
     \item TESTed zelf de programmeertaal laten afleiden op basis van de ingediende oplossing.
-    Hier zijn ook verschillende implementaties van, zoals een heuristiek die op basis van de inhoud van de oplossing de programmeertaal gokt of de student de programmeertaal laten aanduiden.
-    Er is gekozen om de tweede manier te implementeren: TESTed ondersteunt een speciale \term{shebang}\footnote{Zie \url{https://en.wikipedia.org/wiki/Shebang_(Unix)}.} die aangeeft in welke programmeertaal de ingediende oplossing beoordeeld moet worden.
+    Hiervoor zijn verschillende implementaties mogelijk, zoals een heuristiek die op basis van de ingediende broncode de programmeertaal voorspelt of de student die programmeertaal expliciet laten aanduiden.
+    Er is voorlopig gekozen om de tweede manier te implementeren: TESTed ondersteunt een speciale \term{shebang}\footnote{Zie \url{https://en.wikipedia.org/wiki/Shebang_(Unix)}.} die aangeeft in welke programmeertaal de ingediende oplossing beoordeeld moet worden.
     De eerste regel van de ingediende oplossing kan er als volgt uitzien:
     \begin{minted}{bash}
 #!tested [programmeertaal]
     \end{minted}
     Hierbij wordt \texttt{[programmeertaal]} vervangen door de naam van de programmeertaal, zoals \texttt{java} of \texttt{python}.
+    Dit is een voorlopige oplossing die toelaat om oefeningen in meerdere programmeertalen aan te bieden zonder dat Dodona moet aangepast worden.
+    Een nadeel aan deze oplossing is dat de student niet kan zien in welke programmeertalen ingediend kan worden;
+    dit moet door de lesgever aangeduid worden.
 \end{itemize}
 
 \subsection{Detectie ondersteunde programmeertalen}\label{subsec:detectie-beschikbare-programmeertalen}
 
-Een ander gevolg is dat Dodona momenteel altijd weet in welke programmeertaal een oplossing zal zijn: de programmeertaal van de oefening.
-Het is echter niet voldoende dat de programmeertaal van de oplossing gekend is bij het indienen;
+Een ander gevolg van de koppeling van de programmeertaal aan een oefening binnen Dodona is dat Dodona momenteel altijd weet voor welke programmeertaal een oplossing werd ingediend: de programmeertaal van de oefening.
+Het is echter niet voldoende dat de programmeertaal van de oplossing gekend is bij het indienen,
 het is ook nuttig te weten in welke programmeertalen een oefening gemaakt kan worden.
 Dit om enerzijds dingen als syntaxiskleuring te kunnen toepassen, maar ook om ervoor te zorgen dat een student geen nutteloos werk verricht en een oplossing maakt in een niet-ondersteunde programmeertaal.
 
 Zoals besproken in \cref{subsec:vereiste-functies}, controleert TESTed of de programmeertaal van de ingediende oplossing ondersteund wordt door het testplan van de oefening.
-Deze controle is echter al te laat: deze gebeurt bij het beoordelen van een oplossing.
-Aan de andere kant is deze controle feitelijk onafhankelijk van de oplossing: enkel het testplan is nodig.
-Een mogelijk ogenblik om de ondersteunde programmeertalen van een oefening te bepalen is bij het importeren van de oefening in het Dodona-platform.
+Die controle komt echter te laat, namelijk bij het beoordelen van een oplossing.
+Aan de andere kant is de controle onafhankelijk van de oplossing: enkel het testplan is nodig.
+Een beter ogenblik om de ondersteunde programmeertalen van een oefening te bepalen is bij het importeren van de oefening in het Dodona-platform.
 Bij het importeren gebeurt al een verwerking van de oefening door Dodona, om bijvoorbeeld de configuratiebestanden te lezen en de oefening in de databank op te slaan.
 Deze verwerking zou kunnen uitgebreid worden om ook de ondersteunde programmeertalen te bepalen.
+Merk op dat deze controle opnieuw moet uitgevoerd worden elke keer dat een nieuwe programmeertaal aan TESTed toegevoegd wordt.
 
-De volgende vraag die zich stelt is hoe dit praktisch aangepakt moet worden.
+De volgende vraag die zich stelt is hoe dit praktisch moet aangepakt worden.
 Het bepalen van de ondersteunde programmeertalen is iets specifieks voor TESTed, terwijl judge-specifieke code zoveel mogelijk buiten Dodona wordt gehouden.
 Een mogelijke oplossing is de verwerking van de oefeningen uit te breiden, zodat de judge ook een verwerking kan doen van de oefening.
 Deze aanpak heeft als voordeel dat het een generieke oplossing is: alle judges krijgen de mogelijkheid tot het verwerken van de oefening.
 
+Een andere variant van deze oplossing wordt overwogen door het Dodona-team\footnote{Zie \url{https://github.com/dodona-edu/dodona/issues/1754}}.
+Het voorstel is om oefeningen en judges te combineren in Dodona tot één Docker-container.
+Interessant binnen TESTed is het toevoegen van een \texttt{prepare}-stap aan de judge (momenteel heeft een judge slechts één stap, namelijk \texttt{run}, het beoordelen).
+Deze voorbereidende stap resulteert dan in een Docker-container op maat van de oefening.
+Het is in deze voorbereidende stap dat het detecteren van de ondersteunde programmeertalen zou plaatsvinden.
+
 Een andere oplossing voor dit probleem is de ondersteunde programmeertalen manueel opgeven in de configuratiebestanden van de oefening.
 Hier is dan weer het voordeel dat de verwerkingsstap van Dodona niet uitgebreider en trager moet worden.
 Aan de andere kant mag de auteur van de oefening dan niet vergeten om de programmeertalen in de configuratie op te nemen.
-Eventueel kan dit gemakkelijker gemaakt worden door een script te voorzien die de ondersteunde programmeertalen detecteert en het resultaat in de configuratiebestanden schrijft.
-De lezer zal opmerken dat dit feitelijk neerkomt op de verwerkingsstap van hierboven manueel uitvoeren.
+Eventueel kan dit gemakkelijker gemaakt worden door een script te voorzien dat de ondersteunde programmeertalen detecteert en het resultaat in de configuratiebestanden schrijft.
+In de twee eerdere voorstellen wordt telkens gesproken over een verwerkingsstap, waarin het detecteren plaatsvindt.
+Bij deze laatste oplossing verschuift de verantwoordelijkheid voor het uitvoeren van deze stap van Dodona naar de auteur van de oefening.
 
 \subsection{Beperken ondersteunde programmeertalen}\label{subsec:beperken-beschikbare-programmeertalen}
 
@@ -77,8 +90,9 @@ Dit kan bijvoorbeeld zijn omdat de lesgever slechts programmeertalen wil toelate
 Binnen Dodona stelt een lesgever binnen een vak reeksen oefeningen op.
 Die reeksen kunnen bestaan uit eigen, zelfgeschreven oefeningen, maar kunnen ook bestaan uit oefeningen die beschikbaar zijn in het Dodona-platform.
 De auteur van de oefening en lesgever zijn dus niet altijd dezelfde persoon.
-Om die reden is het nuttig als de lesgevers op het niveau van het vak of de reekse een \term{whitelist} of witte lijst van programmeertalen kunnen opgeven: oefeningen in dat vak of die reeksen zullen enkel in de toegelaten programmeertalen kunnen opgelost worden.
+Om die reden is het nuttig als de lesgevers op het niveau van het vak, de reeks of de oefening een \term{whitelist} of witte lijst van programmeertalen kunnen opgeven: oefeningen in dat vak of die reeksen zullen enkel in de toegelaten programmeertalen kunnen opgelost worden.
 Bij deze beperking worden nieuwe programmeertalen niet automatisch ondersteund.
+Het zou ook nuttig zijn ook hier met een zwarte lijst te kunnen werken, waarbij nieuwe talen wel automatisch ondersteund worden.
 
 \section{Testplan}\label{sec:beperkingen-testplan}
 
@@ -87,59 +101,85 @@ Deze paragraaf bespreekt drie grote beperkingen en mogelijke oplossingen.
 
 \subsection{Handgeschreven testplannen zijn omslachtig}\label{subsec:handgeschreven-testplannen-zijn-omslachtig}
 
-In TESTed is gekozen om het testplan in json op te stellen (zie \cref{subsec:het-testplan}).
+In TESTed is gekozen om het testplan in JSON op te stellen (zie \cref{subsec:het-testplan}).
 Bovendien is een designkeuze geweest om zoveel mogelijk informatie expliciet te maken.
 Dit heeft als voornaamste voordeel dat de implementatie in TESTed eenvoudiger blijft.
 Anderzijds zorgt dit wel voor redelijk wat herhaalde informatie in het testplan.
 
-De combinatie van json met de herhaalde informatie zorgt ervoor dat een testplan vaak lang is, te lang om nog met de hand te schrijven.
-Een oplossing hiervoor, die al gebruikt wordt, is om het testplan niet met de hand te schrijven, maar te laten generen, door bijvoorbeeld een Python-script.
+De combinatie van JSON met de herhaalde informatie zorgt ervoor dat een testplan vaak lang is.
+Te lang om nog met de hand te schrijven.
+Een oplossing hiervoor, die al gebruikt wordt, is om het testplan niet met de hand te schrijven, maar te laten generen door bijvoorbeeld een Python-script.
 
-Een andere oplossing is bijkomende stap toevoegen voor het testplan: het testplan wordt dan in een ander formaat geschreven, en bijvoorbeeld tijdens het importeren in Dodona omgezet naar het json-bestand.
+Een andere oplossing is het toevoegen van een bijkomende stap voor het testplan: het testplan wordt dan in een ander formaat geschreven, en bijvoorbeeld tijdens het importeren in Dodona omgezet naar het JSON-bestand.
 Voor dat andere formaat kan een DSL (\english{domain-specific language}) nuttig zijn.
-Dit is een programmeertaal die specifiek ontworpen is voor een bepaald onderwerp of doel;
-hier zou ze specifiek ontworpen zijn om een testplan te schrijven.
+Dit is een programmeertaal die specifiek ontworpen is voor een bepaald onderwerp of doel.
+Hier zou ze specifiek ontworpen zijn om een testplan te schrijven.
 
-Een bijkomend voordeel van json als formaat is dat het een neutraal formaat is.
+Een bijkomend voordeel van JSON als formaat is dat het een neutraal formaat is.
 Verschillende soorten oefeningen hebben andere noden op het vlak van schrijven van het testplan.
-Het testplan voor een oefening die enkel stdin en stdout gebruikt zal er helemaal anders uitzien dan een testplan voor oefening waar functieoproepen gebruikt worden.
-Het is in te beelden van voor elk van deze soort oefeningen een andere DSL gebruikt wordt.
+Het testplan voor een oefening die enkel stdin en stdout gebruikt zal er helemaal anders uitzien dan een testplan voor een oefening waar functieoproepen gebruikt worden.
+Het zou bijvoorbeeld kunnen dat voor verschillende soorten oefeningen een andere DSL ontworpen wordt.
 
-Zo zijn er bijvoorbeeld meerdere voorstellen voor standaarden voor het schrijven van programmeeroefeningen.
-Twee voorbeelden zijn PExIL (\term{Programming Exercises Interoperability Language}) \autocite{queiros2011pexil} en PEML (\english{Programming Exercise Markup Language}) \autocite{peml}.
-PExIL is een xml-formaat uit 2011, maar lijkt niet direct geschikt om met de hand te schrijven.
-Ook zijn er niet veel oefeningen gevonden die hier mee beschreven zijn.
+Zo zijn er bijvoorbeeld meerdere standaarden voor het schrijven van programmeeroefeningen.
+Op het moment van schrijven lijken er wel nog geen wijdverspreide standaarden te zijn.
+Een programma dat oefening die in deze formaten beschreven zijn omzet naar het eigen formaat van TESTed kan een nuttige uitbreiding zijn.
+Bij wijze van voorbeeld worden twee standaarden besproken, telkens met een beschrijving van dezelfde oefening.
+Bij deze voorbeeldoefening moet invoer gelezen worden en dan als uitvoer moet aangegeven worden of de invoer al dan niet een palindroom is.
+
+Een eerste standaard is PExIL (\term{Programming Exercises Interoperability Language}) \autocite{queiros2011pexil}.
+Dit is een op XML-gebaseerd formaat, gepubliceerd in 2011.
+Ontwikkeling van deze standaard lijkt gestopt te zijn.
+We hebben geen online oefeningen gevonden die in dit formaat beschreven zijn en de de nodige resources voor het zelf schrijven van een oefeningen (zoals het XML Schema) zijn niet meer beschikbaar online.
+De beschrijving van de voorbeeldoefening is \cref{lst:pexil}.
+
+\begin{listing}
+    \inputminted{xml}{code/pexil-in.xml}
+    \inputminted{xml}{code/pexil-out.xml}
+    \caption{Beschrijving van de oefening "palindroom" (gesplitst in invoer en uitvoer) in PExIL.}
+    \label{lst:pexil}
+\end{listing}
+
+Een tweede standaard is PEML (\english{Programming Exercise Markup Language}) \autocite{peml}.
 PEML is een tekstueel formaat (een soort DSL) dat er veelbelovend uitziet om met de hand te schrijven.
 Op het moment van schrijven van deze thesis is PEML nog in volle ontwikkeling.
-Een programma dat oefening van dit formaat omzet naar het eigen formaat van TESTed kan een nuttige uitbreiding zijn.
+Aangezien een van de \english{design goals} van PEML is dat de omzetting van PEML naar JSON eenvoudig zal zijn, lijkt dit een interessant formaat.
+De beschrijving van de voorbeeldoefening is \cref{lst:peml} en is overgenomen uit de documentatie van PEML.
+
+\begin{listing}
+    \inputminted{yaml}{code/peml.peml}
+    \caption{
+        Beschrijving van de oefening "palindroom" in PEML.
+        Overgenomen uit \autocite{peml}.
+    }
+    \label{lst:peml}
+\end{listing}
+
 
 \subsection{Dynamische scheduling van testen}\label{subsec:dynamische-scheduling-van-testen}
 
-In TESTed is gekozen om het testplan in json op te stellen (zie \cref{subsec:het-testplan}).
+In TESTed is gekozen om het testplan in JSON op te stellen (zie \cref{subsec:het-testplan}).
 Een nadeel van deze aanpak is dat de \term{scheduling} (het plannen van welke testcode wanneer uitgevoerd worden) statisch gebeurt.
 Een analogie is bijvoorbeeld een gecompileerde taal zoals C/C++ en een dynamische taal zoals Python: TESTed vervult in deze analogie de rol van compiler.
-Door dit statische testplan is niet mogelijk om in het algemeen op basis van het resultaat van een vorig testgeval het verloop van de overige testgevallen te bepalen.
+Door dit statische testplan is het niet mogelijk om in het algemeen op basis van het resultaat van een vorig testgeval het verloop van de volgende testgevallen te bepalen.
 
 Het statisch testplan \emph{an sich} is echter voor specifieke gevallen geen probleem.
-Het testplan zou uitgebreid kunnen worden op verschillende manieren, van eenvoudig tot complex, in zowel implementatie als mogelijkheden.
-Zo is reeds voorzien in het testplan om een testgeval als essentieel aan te duiden: faalt dit testgeval, zullen volgende testgevallen niet meer uitgevoerd worden.
-Dit zou uitgebreid kunnen worden om ook op het niveau van contexten te werken.
+Het testplan kan uitgebreid kunnen worden met verschillende mogelijkheden.
+Zo is reeds voorzien in het testplan om een testgeval als essentieel aan te duiden: faalt het testgeval, dan zullen volgende testgevallen niet meer uitgevoerd worden.
+Dit zou uitgebreid kunnen worden zodat het ook op het niveau van contexten werkt.
 
 Dit systeem kan verder uitgebreid worden door aan elke context een unieke identificatiecode toe te kennen.
 Daarna kan voor elke context een preconditie gegeven worden: welke contexten moet geslaagd zijn om de huidige context uit te voeren.
 Zijn niet alle contexten uit de preconditie geslaagd, dan wordt de context niet uitgevoerd.
 Men kan bijvoorbeeld aangeven dat context 15 enkel uitgevoerd kan worden indien contexten 1, 7 en 14 ook succesvol waren.
 
-Een verdere uitbreiding bestaat er uit om het systeem om te draaien: in plaats van een preconditie kan opgegeven worden wat de volgende context is (de contexten vormen zo een soort controleverloopgraaf).
-Daarbij kunnen ook voorwaarden ingebouwd worden: indien het resultaat van context 20 groter is dan 2, ga naar context 25, anders naar context 35.
-
 \subsection{Herhaalde uitvoeringen van testgevallen}\label{subsec:herhaalde-uitvoeringen-van-testgevallen}
 
-Een ander, maar aan het dynamisch uitvoeren verwante, beperking is het ontbreken van de mogelijkheid om contexten of testgevallen meerdere keren uit te voeren.
-Dit herhaald uitvoeren is nuttig bij niet-deterministische oefeningen, waarbij werken met willekeurige element het schoolvoorbeeld is.
-Een oefening waarbij waarden bijvoorbeeld uit een normale verdeling getrokken moeten worden, zal een duizendtal keren uitgevoerd moeten worden vooraleer met zekerheid kan gezegd worden of er effectief een normale verdeling gebruikt wordt of niet.
+Een andere, maar aan het dynamisch uitvoeren verwante, beperking is het ontbreken van de mogelijkheid om contexten of testgevallen meerdere keren uit te voeren.
+Dit herhaald uitvoeren is nuttig bij niet-deterministische oefeningen.
+Een oefening waarbij waarden bijvoorbeeld uit een normale verdeling getrokken moeten worden, zal een duizendtal keren uitgevoerd moeten worden vooraleer met voldoende zekerheid kan geconstateerd worden of er effectief een normale verdeling gebruikt wordt of niet.
 
-Dit is ook op te lossen met een uitbreiding van het testplan: per testgeval of context zou kunnen aangeduid worden hoeveel keer deze moet uitgevoerd worden.
+Dit is ook op te lossen met een uitbreiding van het testplan: per testgeval of per context zou kunnen aangeduid worden hoeveel keer deze moet uitgevoerd worden.
+Om de performantie te verbeteren, zouden ook stopvoorwaarden kunnen meegegeven worden.
 Een aspect dat dit complexer maakt is dat de evaluatoren (zowel de ingebouwde evaluatie binnen TESTed als de geprogrammeerde en programmeertaalspecifieke evaluatie) aangepast zullen moeten worden om niet enkel met één resultaat, maar met een reeks resultaten te werken.
 
 \section{TESTed}\label{sec:beperkingen-tested}
@@ -148,33 +188,33 @@ In deze paragraaf komen de beperkingen aan bod die ofwel enkel betrekking hebben
 
 \subsection{Geprogrammeerde evaluatie is traag}\label{subsec:geprogrammeerde-evaluatie-is-traag}
 
-Het uitvoeren van een geprogrammeerde evaluatie (zie \cref{subsec:geprogrammeerde-evaluatie}) zorgt voor een niet te verwaarlozen kost op het vlak van performantie (zie \cref{tab:meting} voor enkele metingen).
+Het uitvoeren van een geprogrammeerde evaluatie (zie \cref{subsec:geprogrammeerde-evaluatie}) zorgt voor een niet te verwaarlozen kost op het vlak van performantie (zie \cref{tab:meting} voor enkele tijdsmetingen).
 De reden hiervoor is eenvoudig te verklaren: zoals de contexten wordt elke geprogrammeerde evaluatie in een afzonderlijk subproces uitgevoerd (afhankelijk van de programmeertaal ook met eigen compilatiestap).
 Zoals vermeld in \cref{sec:performantie} is TESTed oorspronkelijk gestart met het uitvoeren van code in Jupyter-kernels.
-De grootste reden dat daar vanaf gestapt is, is dat de kost voor het opnieuw opstarten van een kernel te groot is, en het heropstarten noodzakelijk is om de onafhankelijkheid van de contexten te garanderen.
+De grootste reden dat we daar vanaf gestapt zijn, is dat de kost voor het opnieuw opstarten van een kernel te groot is, en het heropstarten noodzakelijk is om de onafhankelijkheid van de contexten te garanderen.
 Bij $n$ contexten moet de kernel dus $n$ keer opnieuw gestart worden.
 
 Bij een geprogrammeerde evaluatie wordt geen code van de student uitgevoerd: het opnieuw starten van de kernel is dus niet nodig.
-Hierdoor wordt de opstartkost van de kernel verspreid over alle contexten die van die programmeerde evaluatie gebruik maken.
+Hierdoor wordt de opstartkost van de kernel verspreid over alle contexten die van die programmeerde evaluatie gebruikmaken.
 Wordt er $n$ keer andere evaluatiecode in een andere programmeertaal gebruikt, zal dit uiteraard geen voordeel opleveren, omdat er dan nog steeds $n$ keer een kernel gestart wordt.
 In de meeste gevallen wordt echter dezelfde evaluatiecode gebruikt voor alle testgevallen.
-De \english{worst case scenario} is dan weliswaar trager, maar in de meeste gevallen zal de geprogrammeerde evaluatie sneller zijn.
+Het \english{worst case scenario} is dan weliswaar trager, maar in de meeste gevallen zal de geprogrammeerde evaluatie sneller zijn.
 
 Hierop is één uitzondering: een geprogrammeerde evaluatie waarbij de programmeertaal van de evaluatiecode in Python geschreven is.
 Voor Python is er speciale ondersteuning (vermits TESTed zelf ook in Python geschreven is, wordt deze evaluatie ook rechtsreeks in TESTed gedaan zonder subproces): hiervoor is het gebruik van Jupyter-kernels niet nuttig.
 
 \subsection{Ondersteuning voor natuurlijke talen}\label{subsec:ondersteuning-voor-natuurlijke-talen}
 
-Bepaalde bestaande judges in Dodona hebben ondersteuning voor het vertalen op het gebied van natuurlijke talen, zoals de vertaling van bijvoorbeeld namen van functies of variabelen.
-De vertaling van bijvoorbeeld opgaves is geïmplementeerd in Dodona door een tweede bestandsextensie.
+Sommige judges voor specifieke programmeertalen in Dodona hebben ondersteuning voor het vertalen op het gebied van natuurlijke talen, zoals de vertaling van bijvoorbeeld namen van functies of variabelen.
+De vertaling van de beschrijving van de opgave is dan weer geïmplementeerd in Dodona zelf door een tweede bestandsextensie.
 Zo zullen \texttt{description.nl.md} en \texttt{description.en.md} gebruikt worden voor respectievelijk Nederlands en Engels.
 
 Een eenvoudige oplossing voor het vertalen in de code is iets gelijkaardigs doen met het testplan: \texttt{testplan.nl.json} en \texttt{testplan.en.json} voor respectievelijk Nederlands en Engels.
 Deze aanpak heeft wel als nadeel dat veel dingen in het testplan onnodig zullen gedupliceerd moeten worden;
 een waarde \texttt{5} is niet taalafhankelijk.
 
-Een idee dat dit zou voorkomen is binnen eenzelfde testplan ondersteuning bieden voor vertalingen, door bijvoorbeeld telkens meerdere talen te aanvaarden.
-Momenteel ziet bijvoorbeeld een functienaam er als volgt uit:
+Een idee dat dit zou voorkomen is om binnen eenzelfde testplan ondersteuning te bieden voor vertalingen, bijvoorbeeld door telkens meerdere talen te aanvaarden.
+Momenteel ziet een functienaam er bijvoorbeeld als volgt uit:
 
 \inputminted{json}{code/example-name.json}
 
@@ -182,7 +222,18 @@ Ondersteuning voor vertaling kan dan deze vorm aannemen:
 
 \inputminted{json}{code/example-name-trans.json}
 
-Ook TESTed zelf, bijvoorbeeld de foutboodschappen, is nog niet vertaald.
+Als een functie binnen een testplan veel wordt opgeroepen, zorgt dit nog steeds voor veel herhaling.
+Dit kan opgelost worden door een DSL, maar dat neemt niet weg dat het testplan onnodig lang zal worden.
+Een mogelijke oplossing hiervoor is om een soort vertaalwoordenboek mee te geven in het testplan, waar met sleutelwoorden gewerkt wordt.
+Een voorbeeld illustreert dit:
+
+\inputminted{json}{code/example-name-dict.json}
+
+De functieoproep gebruikt dan een sleutelwoord uit het vertaalwoordenboek, waarna TESTed bij het uitvoeren de juiste naam gebruikt:
+
+\inputminted{json}{code/example-name-key.json}
+
+Ook de foutboodschappen die TESTed zelf genereert zijn bijvoorbeeld nog niet vertaald: de boodschappen met studenten als doelpubliek zijn in het Nederlands, terwijl de boodschappen voor cursusbeheerders in het Engels zijn.
 Dit is echter eenvoudig op te lossen: TESTed krijgt de natuurlijke taal mee van Dodona in de configuratie, en Python heeft meerdere internationalisatie-API's\footnote{Zie \url{https://docs.python.org/3/library/gettext.html}}.
 
 \subsection{Programmeertaalonafhankelijke opgaven}\label{subsec:programmeertaalonafhankelijke-opgaven}
@@ -196,7 +247,8 @@ TESTed bevat namelijk alles om het testplan om te zetten naar concrete code.
 Concreet gaat het om volgende zaken:
 \begin{enumerate}
     \item De programmeertaalkeuze in het Dodona-platform moet uitgebreid worden zodat de opgave ook programmeertaalafhankelijk is en dus kan gewijzigd worden als de student een andere programmeertaal kiest.
-    \item De tekstuele beschrijving van de opgave is vaak programmeertaalonafhankelijk: er moet dus een formaat gedefinieerd waarbij zowel gemeenschappelijke als programmeertaalspecifieke onderdelen mogelijk zijn.
+    \item De uitleg bij een opgave (bijvoorbeeld omkadering of bijkomende informatie) is vaak programmeertaalonafhankelijk, terwijl de meer technische onderdelen programmeertaalafhankelijk zijn.
+    Voorbeelden van dat laatste zijn datastructuren (\texttt{list}/\texttt{array}) of codevoorbeelden.
     Hiervoor zijn ook meerdere mogelijkheden: zo zou alles binnen eenzelfde bestand kunnen, of kan er één bestand per programmeertaal zijn, waarbij de gemeenschappelijke delen in een apart bestand komen.
 \end{enumerate}
 
@@ -205,7 +257,7 @@ Concreet gaat het om volgende zaken:
 De expressies in het testplan zijn opzettelijk eenvoudig gehouden (zie \cref{subsec:expressions-and-statements}).
 Dit levert wel beperkingen op: zo is het niet mogelijk om bijvoorbeeld een functieoproep als \mintinline{python}{test(5 + 5)} in het testplan te schrijven.
 Een idee zou dus kunnen zijn om het testplan uit te breiden met meer taalconstructies, waarbij het testplan dan dienst doet als een soort AST (abstract syntax tree).
-Afhankelijk van hoe ver men hier in gaat, begint dit wel een universele programmeertaal te worden (wat ook expliciet buiten het bestek van deze thesis valt).
+Afhankelijk van hoe ver men hierin gaat, begint dit wel een universele programmeertaal te worden (wat ook expliciet buiten het bestek van deze thesis valt).
 In dat geval loont het de moeite om te onderzoeken of geen eenvoudige, bestaande programmeertaal \english{transpiled} zou kunnen worden naar het testplan, in plaats van zelf een nieuwe taal op te stellen.
 Hiervoor moet het testplan wel uitgebreid worden met functies van een AST of IR (intermediary language).
 Ook TESTed zelf zal uitgebreid moeten worden, aangezien er meer zal moeten omgezet kunnen worden naar de programmeertalen (de sjablonen zullen dus uitgebreid moeten worden).

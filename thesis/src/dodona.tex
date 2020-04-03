@@ -71,7 +71,7 @@ In Dodona wordt elke ingediende oplossing beoordeeld door een evaluatieprogramma
 In wezen is dit een eenvoudig programma: via de standaardinvoerstroom (\texttt{stdin}) krijgt het programma een configuratie binnen van Dodona.
 Deze configuratie bevat onder andere de programmeertaal van de ingediende oplossing, de locatie van de oefeningenbestanden (die opgesteld zijn door de lesgever), de locatie van de ingediende oplossing zelf en configuratieopties, zoals geheugen- en tijdslimieten.
 Het resultaat van de beoordeling wordt uitgeschreven naar de standaarduitvoerstroom (\texttt{stdout}).
-Zowel de invoer als de uitvoer van de judge zijn json, waarvan het formaat vastgelegd is in JSON Schema.\footnote{Dit schema en een tekstuele beschrijving ervan is te vinden in de handleiding op \url{https://dodona-edu.github.io/en/guides/creating-a-judge/}.}
+Zowel de invoer als de uitvoer van de judge zijn JSON, waarvan het formaat vastgelegd is in JSON Schema.\footnote{Dit schema en een tekstuele beschrijving ervan is te vinden in de handleiding op \url{https://dodona-edu.github.io/en/guides/creating-a-judge/}.}
 
 Concreet wordt elke beoordeling uitgevoerd in een Docker-container.
 Deze Docker-container wordt gemaakt op basis van een Docker-image die bij de judge hoort, en alle dependencies bevat die de judge in kwestie nodig heeft.
