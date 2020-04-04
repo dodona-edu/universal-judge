@@ -28,7 +28,7 @@ def read_config() -> DodonaConfig:
         "plan_name":            "plan.json",
         "test":                 "Gallo",
         "options":              {
-            "allow_fallback": False,
+            "allow_fallback": True,
             "linter":         {
                 "python": True
             }

@@ -276,6 +276,20 @@ def get_readable_input(bundle: Bundle,
     return ExtendedMessage(description=text, format=format_)
 
 
+def attempt_readable_input(bundle: Bundle, context: Context) -> ExtendedMessage:
+    # Try until we find a testcase with input.
+    testcases = [context.context_testcase, *context.testcases]
+    for testcase in testcases:
+        result = get_readable_input(bundle, testcase)
+        if result.description:
+            return result
+
+    return ExtendedMessage(
+        description="Geen invoer gevonden.",
+        format="text"
+    )
+
+
 def convert_expression(bundle: Bundle, expression: Expression) -> str:
     """
     Convert an expression to actual code for the given programming language.

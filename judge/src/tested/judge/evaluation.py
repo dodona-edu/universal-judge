@@ -9,7 +9,7 @@ from ..configs import Bundle
 from ..dodona import *
 from ..dodona import StartTestcase, CloseTestcase
 from ..evaluators import Evaluator, get_evaluator
-from ..languages.generator import get_readable_input
+from ..languages.generator import get_readable_input, attempt_readable_input
 from ..testplan import Context, OutputChannel, EmptyChannel, \
     IgnoredChannel, ExitCodeOutputChannel, Testcase, ContextTestcase
 
@@ -115,15 +115,13 @@ def evaluate_results(bundle: Bundle,
     # Even if there is no main testcase, we can still proceed, since the defaults
     # should take care of this.
     start = time.perf_counter()
-    testcase: ContextTestcase = context.context_testcase
-    readable_input = get_readable_input(bundle, testcase)
-
-    context_collector = UpdateCollector(StartTestcase(description=readable_input))
 
     # Handle the compiler output. If there is compiler output, there is no point in
     # checking additional testcases, so stop early.
     # Handle compiler results
     if compiler_results[1] != Status.CORRECT:
+        readable_input = attempt_readable_input(bundle, context)
+        context_collector = UpdateCollector(StartTestcase(description=readable_input))
         # Report all compiler messages.
         for message in compiler_results[0]:
             context_collector.add(AppendMessage(message=message))
@@ -135,6 +133,11 @@ def evaluate_results(bundle: Bundle,
         # Finish evaluation, since there is nothing we can do.
         context_collector.end(collector, CloseTestcase(accepted=False), 0)
         return
+
+    testcase: ContextTestcase = context.context_testcase
+    readable_input = get_readable_input(bundle, testcase)
+
+    context_collector = UpdateCollector(StartTestcase(description=readable_input))
 
     # There must be execution if compilation succeeded.
     assert exec_results is not None
