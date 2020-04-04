@@ -50,7 +50,6 @@ In \cref{fig:tested-flow} zijn deze stappen gegeven als een flowchart, en een ui
     In talen die geen compilatie nodig hebben of ondersteunen, wordt deze stap overgeslagen.
     \item Nu kan het uitvoeren van de beoordeling zelf beginnen: de gegenereerde code wordt uitgevoerd (nog steeds in de uitvoeringsomgeving).
     Elke context uit het testplan wordt in een afzonderlijk subproces uitgevoerd, teneinde het delen van informatie tegen te gaan.
-    De onafhankelijkheid van de contexten laat ons ook toe om contexten in parallel uit te voeren.
     \item De uitvoering van de executable in de vorige stap produceert resultaten (voor elke context), zoals de standaarduitvoerstroom, de standaardfoutstroom, returnwaardes, exceptions of exitcodes.
     Deze bundel resultaten wordt nu geëvalueerd op juistheid.
     Hiervoor zijn drie mogelijke manieren:
@@ -595,9 +594,6 @@ Het uitvoeren zelf gebeurt op de normale manier waarop code voor de programmeert
 Deze aanpak heeft als voordeel dat er geen verschil is tussen hoe TESTed de ingediende code uitvoert en hoe de student zijn code zelf uitvoert op zijn eigen computer.
 Dit voorkomt dat er subtiele verschillen in de resultaten sluipen.
 
-Indien de configuratie het toelaat, worden de contexten parallel uitgevoerd.
-Toch moeten we opmerken dat het parallel uitvoeren vooral een theoretische mogelijkheid is: in werkelijkheid gebruiken er meerdere gebruikers tegelijk Dodona, waardoor er ook meerdere oefeningen tegelijk beoordeeld worden, wat op zijn beurt ervoor zorgt dat er geen grote ruimte voor snelheidswinst door parallellisatie binnen een judge is.
-Om te vermijden dat bestanden of uitvoer overschreven worden, wordt alle relevante gecompileerde code voor een context gekopieerd naar een aparte map waar het uitvoeren gebeurt.
 \Cref{lst:mapstructuur} illustreert dit met een voorbeeld voor een ingediende oplossing in de programmeertaal Python.
 Deze mapstructuur stelt de toestand van de werkmap van TESTed voor na het uitvoeren van de code.
 In de map \texttt{common} zit alle testcode en de gecompileerde bestanden voor alle contexten.
@@ -973,12 +969,34 @@ Dit wordt best geïllustreerd met het reeds vermelde scenario van een oefening w
 In batchcompilatie in bijvoorbeeld Java kan de student niet de oplossing voor de eerste functie indienen en laten beoordelen: omdat de tweede functie ontbreekt zullen compilatiefouten optreden.
 
 De laatste en huidige iteratie bevat de mogelijkheid om contextcompilatie en batchcompilatie te combineren, waarbij TESTed terugvalt op de contextcompilatie indien er iets misgaat bij de batchcompilatie.
+Een eerdere versie van deze iteratie TESTed bevatte ook de mogelijkheid om contexten in parallel uit te voeren, wat mogelijk is omdat ze onafhankelijk zijn.
+Uiteindelijk is ervoor gekozen dit niet te doen, door meerdere redenen:
 
-Tot slot bevat \cref{tab:meting} nog enkele tijdsmetingen van de verschillende implementaties van het systeem met sjablonen, voor de programmeertalen Python en Java.
+\begin{itemize}
+    \item De parallelle uitvoeren is vooral een theoretisch voordeel bij tijdsmetingen.
+    In werkelijkheid, bij een uitvoering in het Dodona-platform, zijn er praktisch altijd meerdere gebruikers tezelfdertijd actief.
+    Zij dienen ook oefeningen tegelijkertijd in, waardoor er meerdere beoordelingen tegelijk uitgevoerd worden op de server.
+    Er is dus weinig snelheidswinst te halen door parallellisatie binnen de judge.
+    \item De parallelle uitvoering zorgt voor niet-triviale problemen bij het implementeren van andere functies.
+    Zo is het onduidelijk wat het gewenste gedrag is voor tijds- en geheugenlimieten, zoals hoe er betrouwbare metingen kunnen gebeuren die niet teveel afhangen van de gebruikslast van de server op het moment van uitvoering.
+    \item Geen parallelle uitvoering is nuttig met het oog op de toekomst, meer specifiek op een mogelijke uitbreiding van het testplan waarbij \english{dependencies} tussen contexten kunnen aangeduid worden, bijvoorbeeld context 25 enkel uitvoeren indien contexten 1 en 5 geslaagd zijn.
+    Meer hierover in \cref{subsec:dynamische-scheduling-van-testen}.
+\end{itemize}
+
+Een laatste performantieverbetering werd behaald op het vlak van geprogrammeerde evaluatie (zie \cref{subsec:geprogrammeerde-evaluatie-is-traag} voor verdere verbeteringen op dit vlak).
+Zoals beschreven in \cref{subsec:geprogrammeerde-evaluatie}, wordt normaliter voor elke geprogrammeerde evaluatie de evaluatiecode opnieuw gecompileerd en uitgevoerd in een nieuw subproces.
+Voor evaluatiecode die geschreven is in Python worden deze stappen overgeslagen.
+Er is speciale ondersteuning in TESTed ingebouwd om geprogrammeerde evaluaties waarvan de evaluatiecode in Python geschreven is, rechtstreeks in TESTed zelf uit te voeren.
+
+\Cref{tab:meting} enkele tijdsmetingen van de verschillende implementaties van het systeem met sjablonen, voor de programmeertalen Python en Java.
 In deze tabel is de tijd gemeten in seconden om een (juiste) ingediende oplossing voor twee oefeningen te beoordelen: de voorbeeldoefening Lotto (met geprogrammeerde evaluatie) en een eenvoudigere oefening Echo (met enkel generieke evaluatie).
 Bij die laatste bestaat de opgave uit het implementeren van een functie die haar parameters naar de standaarduitvoerstroom schrijft.
 Elke beoordeling is uitgevoerd met contextcompilatie, partiële compilatie en batchcompilatie.
-Elke combinatie van oefening en compilatiemanier is ook uitgevoerd met en zonder parallelle uitvoering van de contexten.
+De Lotto-oefening is ook gemeten met de optimalisatie voor geprogrammeerde evaluatie (de evaluatiecode voor deze oefening is geschreven in Python).
+Dit is aangeduid met de naam "Evaluatie" in de kolom "Compilatie".
+Deze meting is niet uitgevoerd in parallelle modus, omdat ondersteuning voor deze modus reeds uit TESTed verwijderd was (hierboven wordt besproken waarom).
+Deze meting is niet uitgevoerd op de Echo-oefening, daar die oefening geen geprogrammeerde evaluatie heeft.
+Elke andere combinatie van oefening en compilatiemanier is ook uitgevoerd met en zonder parallelle modus.
 Deze tijdsmetingen zijn uitgevoerd op een standaardcomputer (Windows 10, Intel \version{i7-8550U}, Python \version{3.8.1}, 64-bit), niet op de Dodona-server en niet in een Docker-container.
 Die laatste twee factoren kunnen ervoor zorgen dat uitvoeringstijden op Dodona sterk verschillen van deze metingen.
 
@@ -996,13 +1014,14 @@ Bij Python is de compilatie veel sneller en ook veel minder belangrijk (zelfs op
         \multicolumn{1}{|l|}{\multirow{3}{*}{Lotto}} & Context    & 13       & 9         & 48       & 36        \\
         \multicolumn{1}{|l|}{}                       & Partieel   & 9        & 6         & 46       & 25        \\
         \multicolumn{1}{|l|}{}                       & Batch      & 8        & 5         & 14       & 10        \\
+        \multicolumn{1}{|l|}{}                       & Evaluatie  & 5        & -         & 10       & -         \\
         \hline
         \multicolumn{1}{|l|}{\multirow{3}{*}{Echo}}  & Context    & 6        & 3         & 48       & 28        \\
         \multicolumn{1}{|l|}{}                       & Partieel   & 5        & 3         & 46       & 26        \\
         \multicolumn{1}{|l|}{}                       & Batch      & 5        & 3         & 8        & 5         \\
         \hline
     \end{tabular}
-    \caption{Tijdsmetingen voor de oefeningen Lotto en Echo, voor de programmeertalen Python en Java, in contextcompilatie, partiële compilatie en batchcompilatie.}
+    \caption{Tijdsmetingen voor de oefeningen Lotto en Echo, voor de programmeertalen Python en Java, in contextcompilatie, partiële compilatie en batchcompilatie (bij Lotto is deze laatste uitgevoerd met en zonder optimalisatie voor geprogrammeerde evaluaties).}
     \label{tab:meting}
 \end{table}
 
