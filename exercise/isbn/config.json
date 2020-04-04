@@ -17,7 +17,8 @@
     "options": {
       "linter": {
         "python": true
-      }
+      },
+      "allow_fallback": false
     }
   },
   "internals": {

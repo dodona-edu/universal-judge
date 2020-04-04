@@ -108,6 +108,8 @@ class OutputManager:
         self.tree_stack.clear()
 
     def _save_closed(self, command: Update, id_: Optional[int]):
+        if id_ is None:
+            return
         if isinstance(command, CloseTab):
             self.max_tab = id_ + 1
             self.max_context = None

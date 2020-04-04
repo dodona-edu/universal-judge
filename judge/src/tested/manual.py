@@ -21,12 +21,18 @@ def read_config() -> DodonaConfig:
         "time_limit":           10000,
         "programming_language": 'python',
         "natural_language":     'nl',
-        "resources":            Path('../exercise/lotto/evaluation'),
-        "source":               Path('../exercise/lotto/solution/correct.py'),
+        "resources":            Path('../exercise/isbn/evaluation'),
+        "source":               Path('../exercise/isbn/solution/solution.py'),
         "judge":                Path('../judge/src/'),
         "workdir":              Path('./workdir'),
         "plan_name":            "plan.json",
-        "test":                 "Gallo"
+        "test":                 "Gallo",
+        "options":              {
+            "allow_fallback": False,
+            "linter":         {
+                "python": True
+            }
+        }
     })
 
 

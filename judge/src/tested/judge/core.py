@@ -79,10 +79,15 @@ def judge(bundle: Bundle):
 
         # Handle timout if necessary.
         if result.timeout:
+            # Show in separate tab.
+            if messages:
+                collector.add(StartTab("Compilatie"))
             for message in messages:
                 collector.add(AppendMessage(message=message))
             for annotation in annotations:
                 collector.add(annotation)
+            if messages:
+                collector.add(CloseTab())
             collector.terminate(Status.TIME_LIMIT_EXCEEDED, 0)
             collector.flush()
             return
@@ -103,10 +108,14 @@ def judge(bundle: Bundle):
         else:
             files = compilation_files
             # Report messages.
+            if messages:
+                collector.add(StartTab("Compilatie"))
             for message in messages:
                 collector.add(AppendMessage(message=message))
             for annotation in annotations:
                 collector.add(annotation)
+            if messages:
+                collector.add(CloseTab())
 
             if status != Status.CORRECT:
                 collector.add(CloseJudgment(
@@ -147,7 +156,7 @@ def judge(bundle: Bundle):
                                                         remaining)
 
             # Handle timeout.
-            if execution_result.timeout:
+            if execution_result and execution_result.timeout:
                 # Add compiler output.
                 for message in m:
                     collector.add(AppendMessage(message))
@@ -155,8 +164,8 @@ def judge(bundle: Bundle):
                 collector.flush()
                 return
 
-            assert not execution_result.timeout
-            assert not execution_result.memory
+            assert not (execution_result and execution_result.timeout)
+            assert not (execution_result and execution_result.memory)
 
             remaining = max_time - (time.perf_counter() - start)
             evaluate_results(
