@@ -18,7 +18,7 @@ def read_config() -> DodonaConfig:
     """Read the configuration from stdout"""
     return DodonaConfig(**{
         "memory_limit":         536870912,
-        "time_limit":           5,
+        "time_limit":           0,
         "programming_language": 'python',
         "natural_language":     'nl',
         "resources":            Path('../exercise/isbn/evaluation'),
@@ -41,7 +41,7 @@ if __name__ == '__main__':
 
     # Enable logging
     log = logging.getLogger()
-    log.setLevel(logging.DEBUG)
+    log.setLevel(logging.CRITICAL)
     ch = logging.StreamHandler(stream=sys.stdout)
     formatter = logging.Formatter('%(name)s:%(levelname)s:%(message)s')
     ch.setFormatter(formatter)

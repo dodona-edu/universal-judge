@@ -82,7 +82,7 @@ class OutputManager:
         self.collected = False
         self.prepared = _ExpectedJudgment()
         self.bundle = bundle
-        self.tab = 0
+        self.tab = -1
         self.context = -1
         from .evaluation import prepare_evaluation
         prepare_evaluation(bundle, self)
@@ -189,6 +189,9 @@ class OutputManager:
             return []
 
         to_write = []
+        if self.tab == -1:
+            self.tab += 1
+            to_write.append(self.prepared.tabs[self.tab].start)
         # Do remainder of current tab.
         for c in range(self.context, len(self.bundle.plan.tabs[self.tab].contexts)):
             context = self.prepared.tabs[self.tab].contexts[c]

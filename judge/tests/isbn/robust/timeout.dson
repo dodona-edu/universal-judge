@@ -3,10 +3,9 @@
 {"command": "start-context"}
 {"description": {"description": "is_isbn(\"9789027439642\", False)", "format": "python"}, "command": "start-testcase"}
 {"expected": "False", "channel": "return", "command": "start-test"}
-{"generated": "", "status": {"enum": "wrong", "human": "Ontbrekende returnwaarde."}, "command": "close-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
 {"command": "close-testcase"}
-{"command": "close-context"}
-{"command": "start-context"}
 {"command": "close-context"}
 {"command": "start-context"}
 {"description": {"description": "is_isbn(\"9789027439642\", True)", "format": "python"}, "command": "start-testcase"}

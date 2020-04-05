@@ -67,6 +67,6 @@ def test_runtime_error(tmp_path: Path):
 
 def test_timout(tmp_path: Path):
     config = read_config("timeout", tmp_path, {
-        "time_limit": 2
+        "time_limit": 5
     })
     do_test(config)
