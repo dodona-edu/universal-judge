@@ -1,2 +1,1 @@
-waarde = 100 = 2
-print(waarde)
+value = 100 / 0
