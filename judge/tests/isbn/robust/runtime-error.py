@@ -8,8 +8,7 @@ def is_isbn10(code):
     False
     """
 
-    while True:
-        pass
+    raise BaseException("Hallo")
 
     # helper function for computing ISBN-10 check digit
     def check_digit(code):

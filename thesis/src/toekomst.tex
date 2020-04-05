@@ -282,3 +282,37 @@ Er zijn meerdere denkpistes om hier een oplossing voor te bieden:
 Het omgekeerde, programmeertaalonafhankelijk invoer en programmeertaalspecifieke beoordeling, bestaat al binnen TESTed (zie \cref{subsec:programmeertaalspecifieke-evaluatie}).
 Als tot slot zowel de invoer als de uitvoer verschilt van programmeertaal tot programmeertaal, kan er niet meer gesproken worden van een programmeertaalonafhankelijke oefeningen.
 In dat geval is het beter een bestaande programmeertaalspecifieke judge van Dodona te gebruiken.
+
+\subsection{Kleinere functionaliteit}\label{subsec:kleinere-functies}
+
+Er zijn in de loop van de thesis verschillende kleinere features naar boven gekomen, waarvoor ook ondersteuning zou toegevoegd kunnen worden:
+
+\begin{itemize}
+    \item Ondersteuning voor Python Tutor.
+    Dit is een visuele debugger, origineel geschreven voor Python \autocite{10.1145/2445196.2445368}.
+    Ondertussen worden ook andere talen ondersteund, zoals Java, C++, JavaScript en Ruby.
+    In Dodona ondersteunt momenteel enkel de Python-judge de Python Tutor.
+    Het zou een mooie toevoeging zijn indien dit bij TESTed voor meerdere programmeertalen kan toegevoegd worden.
+    \item Interpreteren van output van de compiler.
+    Momenteel ondersteunt TESTed linting (zie \cref{sec:andere-taken}), maar bij sommige talen worden ook veel nuttige waarschuwingen getoond bij het compileren van de code.
+    Deze uitvoeren wordt momenteel getoond in TESTed, en er is ondersteuning om deze uitvoer om te zetten in annotaties op de code van de oplossing.
+    Dit laatste is momenteel geïmplementeerd voor de compilatiestap in Python.
+    De ondersteuning hiervoor zou uitgebreid kunnen worden naar andere talen en flexibeler gemaakt worden.
+    Zo wordt de uitvoer van de compiler altijd getoond, ook al is die uitvoer omgezet naar annotaties (dezelfde informatie wordt dus dubbel getoond).
+    \item Foutboodschappen beter afhandelen.
+    Als momenteel een fout optreed wordt de stacktrace zonder verdere verwerking getoond aan de gebruiker.
+    Het is echter nuttig hier een verwerkingsstap toe te voegen, zodat:
+    \begin{itemize}
+        \item De code gegenereerd door TESTed weggefilterd kan worden.
+        Het kan verwarrend zijn voor studenten als er in de stacktrace code staat zij niet ingediend hebben.
+        \item Het aanbrengen van links naar specifieke plaatsen in de ingediende code.
+        Als er bijvoorbeeld in de foutboodschap staat "fout op regel 5, kolom 10", dan zou een snelkoppeling naar die plaats in de code nuttig zijn.
+        Dit is ook iets onder andere door de Python-judge geïmplementeerd is.
+    \end{itemize}
+    \item Lange uitvoer beperken en mooier weergeven.
+    Het gaat hier enerzijds om lange stacktraces (bijvoorbeeld een \mintinline{StackOverflow} uit Java) en anderzijds om grote verzameling (bijvoorbeeld een lijst van duizend elementen).
+    Momenteel wordt deze uitvoer verbatim getoond aan de studenten, wat soms overweldigend is.
+    \item Tijdslimieten op het niveau van de contexten.
+    Momenteel is het enkel mogelijk om op het niveau van een oefening een tijdslimiet in te stellen.
+    De implementatie hiervan zou eenvoudig moeten zijn: intern werkt TESTed al met een tijdslimiet per context, namelijk de totale tijdslimiet van de oefening minus de verstreken tijd.
+\end{itemize}

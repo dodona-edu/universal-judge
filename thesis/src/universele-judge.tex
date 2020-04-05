@@ -1025,6 +1025,19 @@ Bij Python is de compilatie veel sneller en ook veel minder belangrijk (zelfs op
     \label{tab:meting}
 \end{table}
 
+\section{Andere taken}\label{sec:andere-taken}
+
+Sommige judges doen meer dan enkel het oordelen over de juistheid van de ingediende oplossing.
+Zo heeft de Python-judge ondersteuning voor \term{linting}.
+Dit betekent dat de code van de ingediende oplossing geanalyseerd wordt (maar niet uitgevoerd) om zo allerlei mogelijke problemen op te sporen, zoals stijlfouten, mogelijke bugs, verdachte constructies, enz.
+
+TESTed voorziet hier ondersteuning voor middels een optionele functie in de configuratie van een programmeertaal (zie \cref{ch:nieuwe-taal} voor het configureren van een taal in detail).
+Deze functie krijgt als argumenten onder andere de configuratie, het testplan en het pad naar de code van de ingediende oplossing mee.
+Als resultaat geeft een de functie een lijst van berichten en annotaties, die naar Dodona gestuurd worden.
+Om te verifiëren dat dit voldoende is, is voor Python ook linting geïmplementeerd.
+
+Een bijkomende taak die TESTed momenteel niet ondersteunt is de \term{Python Tutor}, zie \cref{subsec:kleinere-functies}.
+
 \section{Robuustheid}\label{sec:robuustheid}
 
 Een belangrijk aspect bij educative software testing is de feedback als het verkeerd loopt.
@@ -1032,9 +1045,52 @@ De feedback bij een verkeerde oplossing is in veel gevallen zelfs belangrijker d
 De feedback die Dodona toont is afkomstig uit de judges: het is de taak van TESTed om kwalitatief hoogstaande feedback te voorzien.
 Met kwalitatief hoogstaand wordt bedoeld dat de feedback nuttige informatie bevat, maar ook geen verkeerde of misleidende informatie bevat.
 
-TESTed moet dus robuust zijn tegen allerlei vormen van fouten in de ingediende oplossingen.
+\subsection{In de praktijk}\label{subsec:in-de-praktijk}
+
+In het vak \emph{Scriptingtalen} van de bachelor informatica krijgen de studenten elke week een reeks oefeningen om op te lossen (op Dodona).
+Een van die oefeningen is de ISBN-oefening.
+Om een idee te krijgen van hoe TESTed werkt in de praktijk is besloten om een van de weken de ISBN-oefening te vervangen door een oefening met dezelfde opgave, maar die beoordeeld wordt door TESTed in plaats van de Python-judge.
+
+De algemene bevindingen die uit de praktijktest naar boven kwamen waren:
+
+\begin{itemize}
+    \item Geen ondersteuning voor de Python Tutor.
+    Dit is al vermeld, en wordt verder besproken in \cref{subsec:kleinere-functies}.
+    \item De evaluatie duurt ongeveer dubbel zo lang als met de Python-judge.
+    Aan de ene kant zou de optimalisatie van de geprogrammeerde evaluatie (zie \cref{sec:performantie}) dit moeten verbeteren (maar wel in dit specifieke geval, moest de evaluatiecode in een andere programmeertaal dan Python geschreven zijn, zou het geen verschil maken).
+    Aan de andere kant ligt een tragere uitvoer in vergelijking met de Python-judge binnen de verwachtingen: TESTed voert elke context uit in een afzonderlijk subproces.
+    De Python-judge doet dit niet.
+    Qua uitvoer worden wel contexten gebruikt, maar de interne werking van de Python-judge kan het best vergeleken worden met een oefeningen waar alle testen in dezelfde context opgenomen zijn.
+    \item Er is geen verwerking van stacktraces.
+    Deze functie is opgenomen als mogelijke uitbreiding als onderdeel van \cref{subsec:kleinere-functies}.
+    \item Er is geen linting.
+    Naar aanleiding van de praktijktest is hier ondersteuning voor toegevoegd, zie \cref{sec:andere-taken}.
+    \item Geen ondersteuning voor vertalingen op het vlak van natuurlijke talen.
+    Deze functie wordt besproken als uitbreiding in \cref{subsec:ondersteuning-voor-natuurlijke-talen}.
+\end{itemize}
+
+Verder heeft professor Dawyndt heel heleboel fouten en scenario's uitgeprobeerd.
+Deze worden hieronder besproken.
+
+\subsection{Soorten fouten}\label{subsec:soorten-fouten}
+
+TESTed moet robuust zijn tegen allerlei vormen van fouten in de ingediende oplossingen.
 Hieronder volgt een lijst van (categorieën) van fouten waarvoor TESTed nuttige feedback geeft.
 TESTed is zo opgebouwd dat er altijd iets van feedback komt, ook in onvoorziene omstandigheden, maar voor de soorten fouten op onderstaande lijst is expliciet gecontroleerd wat de kwaliteit van de feedback is.
+
+\begin{description}
+    \item[Compilatiefouten] De uitvoer van de compiler wordt altijd getoond aan de studenten, dus op dat vlak wordt juist afgehandeld.
+    Er bestaat ook de mogelijkheid om de compilatie-uitvoer te verwerken en bijvoorbeeld om te zetten naar annotaties, die dan in de code worden getoond.
+    Hierbij wordt vooral gedacht aan foutboodschappen als "syntaxisfout op regel 5, kolom 2".
+    De stacktraces bij deze uitvoer bevatten wel referenties naar code die TESTed gegenereerd heeft.
+    Deze verwijzingen naar interne code wegfilteren is opgenomen als uitbreiding als onderdeel van \cref{subsec:kleinere-functies}.
+    Bij een batchcompilatie wordt de uitvoer in een nieuw tabblad getoond, terwijl bij contextcompilatie de uitvoer bij de relevant context staat.
+    \item[Uitvoeringsfouten] Hier gaat het om crashes tijdens de uitvoering, zoals delen door nul.
+    Ook hier wordt nog geen verdere verwerking van de foutboodschap gedaan (ook onderdeel van \cref{subsec:kleinere-functies}).
+    Een bijkomende opmerking is dat sommige fouten tijdens de uitvoering nu als uitzondering opgevangen worden.
+    \item[Tijdslimieten] TESTed heeft ondersteuning voor tijdslimieten in de judge, dit laat toe om meer uitvoer te tonen dan als de tijdslimiet aan Dodona wordt overgelaten.
+
+\end{description}
 
 % TODO: lijst van issues
 TODO: een lijst van issues (zie ook de issue van op GitHub).

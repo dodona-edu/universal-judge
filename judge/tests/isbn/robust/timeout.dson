@@ -1,0 +1,707 @@
+{"command": "start-judgement"}
+{"title": "is_isbn", "command": "start-tab"}
+{"command": "start-context"}
+{"description": {"description": "is_isbn(\"9789027439642\", False)", "format": "python"}, "command": "start-testcase"}
+{"expected": "False", "channel": "return", "command": "start-test"}
+{"generated": "", "status": {"enum": "wrong", "human": "Ontbrekende returnwaarde."}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "is_isbn(\"9789027439642\", True)", "format": "python"}, "command": "start-testcase"}
+{"expected": "True", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "is_isbn(\"9789027439642\")", "format": "python"}, "command": "start-testcase"}
+{"expected": "True", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "is_isbn(\"080442957X\")", "format": "python"}, "command": "start-testcase"}
+{"expected": "False", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "is_isbn(\"080442957X\", False)", "format": "python"}, "command": "start-testcase"}
+{"expected": "True", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "is_isbn(9789027439642)", "format": "python"}, "command": "start-testcase"}
+{"expected": "False", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "is_isbn(\"8964768567830\", True)", "format": "python"}, "command": "start-testcase"}
+{"expected": "False", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "is_isbn(\"0925794147\", False)", "format": "python"}, "command": "start-testcase"}
+{"expected": "True", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "is_isbn(\"0168109840\", True)", "format": "python"}, "command": "start-testcase"}
+{"expected": "False", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "is_isbn(\"7044330485\", True)", "format": "python"}, "command": "start-testcase"}
+{"expected": "False", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "is_isbn(\"3825158586\", False)", "format": "python"}, "command": "start-testcase"}
+{"expected": "True", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "is_isbn(\"3429866681470\", False)", "format": "python"}, "command": "start-testcase"}
+{"expected": "False", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "is_isbn(\"9468218407804\", True)", "format": "python"}, "command": "start-testcase"}
+{"expected": "False", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "is_isbn(\"0943854644\", False)", "format": "python"}, "command": "start-testcase"}
+{"expected": "True", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "is_isbn(\"1434767558\", True)", "format": "python"}, "command": "start-testcase"}
+{"expected": "False", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "is_isbn(\"7938800166\", True)", "format": "python"}, "command": "start-testcase"}
+{"expected": "False", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "is_isbn(\"8397833414060\", False)", "format": "python"}, "command": "start-testcase"}
+{"expected": "False", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "is_isbn(\"8078643299904\", True)", "format": "python"}, "command": "start-testcase"}
+{"expected": "False", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "is_isbn(\"0506416943028\", False)", "format": "python"}, "command": "start-testcase"}
+{"expected": "False", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "is_isbn(\"9722715530\", True)", "format": "python"}, "command": "start-testcase"}
+{"expected": "False", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "is_isbn(\"4791748022\")", "format": "python"}, "command": "start-testcase"}
+{"expected": "False", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "is_isbn(\"3840271479\", False)", "format": "python"}, "command": "start-testcase"}
+{"expected": "True", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "is_isbn(\"0375624463778\", True)", "format": "python"}, "command": "start-testcase"}
+{"expected": "True", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "is_isbn(\"9080865796\", True)", "format": "python"}, "command": "start-testcase"}
+{"expected": "False", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "is_isbn(\"9432069044\")", "format": "python"}, "command": "start-testcase"}
+{"expected": "False", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "is_isbn(\"8250605502140\")", "format": "python"}, "command": "start-testcase"}
+{"expected": "False", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "is_isbn(\"5511109770\")", "format": "python"}, "command": "start-testcase"}
+{"expected": "False", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "is_isbn(\"1932082166\", False)", "format": "python"}, "command": "start-testcase"}
+{"expected": "True", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "is_isbn(\"6570736566\", True)", "format": "python"}, "command": "start-testcase"}
+{"expected": "False", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "is_isbn(\"5699924763554\", True)", "format": "python"}, "command": "start-testcase"}
+{"expected": "False", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "is_isbn(\"8748973067355\", False)", "format": "python"}, "command": "start-testcase"}
+{"expected": "False", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "is_isbn(\"1844757447\", False)", "format": "python"}, "command": "start-testcase"}
+{"expected": "True", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "is_isbn(\"5059901866\", False)", "format": "python"}, "command": "start-testcase"}
+{"expected": "True", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "is_isbn(\"7206012892\")", "format": "python"}, "command": "start-testcase"}
+{"expected": "False", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "is_isbn(\"1549249548595\", False)", "format": "python"}, "command": "start-testcase"}
+{"expected": "False", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "is_isbn(\"5741262171\", True)", "format": "python"}, "command": "start-testcase"}
+{"expected": "False", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "is_isbn(\"6987894817\", True)", "format": "python"}, "command": "start-testcase"}
+{"expected": "False", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "is_isbn(\"7712609248282\", True)", "format": "python"}, "command": "start-testcase"}
+{"expected": "False", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "is_isbn(\"8990446177012\", False)", "format": "python"}, "command": "start-testcase"}
+{"expected": "False", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "is_isbn(\"7428012262\", True)", "format": "python"}, "command": "start-testcase"}
+{"expected": "False", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "is_isbn(\"8877602177971\", False)", "format": "python"}, "command": "start-testcase"}
+{"expected": "False", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "is_isbn(\"9035233784203\", True)", "format": "python"}, "command": "start-testcase"}
+{"expected": "False", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "is_isbn(\"4067339749495\", True)", "format": "python"}, "command": "start-testcase"}
+{"expected": "True", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "is_isbn(\"3124274830\", True)", "format": "python"}, "command": "start-testcase"}
+{"expected": "False", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "is_isbn(\"0362781866\")", "format": "python"}, "command": "start-testcase"}
+{"expected": "False", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "is_isbn(\"6826988163398\", True)", "format": "python"}, "command": "start-testcase"}
+{"expected": "False", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "is_isbn(\"6767750436932\", True)", "format": "python"}, "command": "start-testcase"}
+{"expected": "False", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "is_isbn(\"4017727677\", True)", "format": "python"}, "command": "start-testcase"}
+{"expected": "False", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "is_isbn(\"9324782062052\", False)", "format": "python"}, "command": "start-testcase"}
+{"expected": "False", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "is_isbn(\"2837162051\", False)", "format": "python"}, "command": "start-testcase"}
+{"expected": "True", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "close-tab"}
+{"title": "are_isbn", "command": "start-tab"}
+{"command": "start-context"}
+{"description": {"description": "are_isbn(codes01)", "format": "python"}, "command": "start-testcase"}
+{"expected": "[False, True, True, True, False, False, False, True, False]", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "are_isbn(codes02, True)", "format": "python"}, "command": "start-testcase"}
+{"expected": "[False, False, False, False, False, False, False, True, False]", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "are_isbn(codes03, False)", "format": "python"}, "command": "start-testcase"}
+{"expected": "[False, True, True, True, False, False, False, False, False]", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "are_isbn(codes04)", "format": "python"}, "command": "start-testcase"}
+{"expected": "[False, False, False, False, False, False, False, False, False, True]", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "are_isbn(codes05, True)", "format": "python"}, "command": "start-testcase"}
+{"expected": "[False, False, False, False, False, False, False, False, False, False]", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "are_isbn(codes06, False)", "format": "python"}, "command": "start-testcase"}
+{"expected": "[False, False, False, False, False, False, False, False, False, True]", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "are_isbn(codes07)", "format": "python"}, "command": "start-testcase"}
+{"expected": "[False, True, True, True, False, True, True, True, True]", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "are_isbn(codes08)", "format": "python"}, "command": "start-testcase"}
+{"expected": "[False, True, False, False, True, False, True, False, True]", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "are_isbn(codes09, True)", "format": "python"}, "command": "start-testcase"}
+{"expected": "[False, False, False, False, False, False, False]", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "are_isbn(codes10, False)", "format": "python"}, "command": "start-testcase"}
+{"expected": "[False, False, False, True]", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "are_isbn(codes11)", "format": "python"}, "command": "start-testcase"}
+{"expected": "[True, True, False, True, True]", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "are_isbn(codes12, True)", "format": "python"}, "command": "start-testcase"}
+{"expected": "[False, False, False, False, False, False, False]", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "are_isbn(codes13, False)", "format": "python"}, "command": "start-testcase"}
+{"expected": "[True, False, False, False, True, False, False, False]", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "are_isbn(codes14)", "format": "python"}, "command": "start-testcase"}
+{"expected": "[False, False, True, True, True, True]", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "are_isbn(codes15, False)", "format": "python"}, "command": "start-testcase"}
+{"expected": "[True, False, False, True, False, False, False, False, False]", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "are_isbn(codes16, False)", "format": "python"}, "command": "start-testcase"}
+{"expected": "[False, False, True, False]", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "are_isbn(codes17, False)", "format": "python"}, "command": "start-testcase"}
+{"expected": "[False, False, False, False, True, True, False, True]", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "are_isbn(codes18)", "format": "python"}, "command": "start-testcase"}
+{"expected": "[True, False, True, False, True, True, False, False, True]", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "are_isbn(codes19, True)", "format": "python"}, "command": "start-testcase"}
+{"expected": "[False, False, True, True, True, False, False, False]", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "are_isbn(codes20, False)", "format": "python"}, "command": "start-testcase"}
+{"expected": "[False, False, True, False, True]", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "are_isbn(codes21, True)", "format": "python"}, "command": "start-testcase"}
+{"expected": "[False, False, True, False]", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "are_isbn(codes22, True)", "format": "python"}, "command": "start-testcase"}
+{"expected": "[True, False, True, False, False, False, False, True]", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "are_isbn(codes23, True)", "format": "python"}, "command": "start-testcase"}
+{"expected": "[False, False, False, False, True, False, False, True, False]", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "are_isbn(codes24, True)", "format": "python"}, "command": "start-testcase"}
+{"expected": "[False, False, False, True]", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "are_isbn(codes25)", "format": "python"}, "command": "start-testcase"}
+{"expected": "[True, False, False, True]", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "are_isbn(codes26)", "format": "python"}, "command": "start-testcase"}
+{"expected": "[True, True, True, True]", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "are_isbn(codes27, False)", "format": "python"}, "command": "start-testcase"}
+{"expected": "[False, False, False, True, False, False, True]", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "are_isbn(codes28, False)", "format": "python"}, "command": "start-testcase"}
+{"expected": "[False, False, False, False]", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "are_isbn(codes29, False)", "format": "python"}, "command": "start-testcase"}
+{"expected": "[False, True, False, False, False, False, True]", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "are_isbn(codes30, False)", "format": "python"}, "command": "start-testcase"}
+{"expected": "[False, False, False, True, False, False, True, False, False, False]", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "are_isbn(codes31, False)", "format": "python"}, "command": "start-testcase"}
+{"expected": "[False, True, False, False, False, False, True, False, False, True]", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "are_isbn(codes32, False)", "format": "python"}, "command": "start-testcase"}
+{"expected": "[False, False, False, False, True, False, False, True, False]", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "are_isbn(codes33, False)", "format": "python"}, "command": "start-testcase"}
+{"expected": "[False, True, True, False, False, False, True, False]", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "are_isbn(codes34, False)", "format": "python"}, "command": "start-testcase"}
+{"expected": "[False, True, False, False, False, False, False]", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "are_isbn(codes35)", "format": "python"}, "command": "start-testcase"}
+{"expected": "[True, False, False, False, True, False, True, False, False, True]", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "are_isbn(codes36)", "format": "python"}, "command": "start-testcase"}
+{"expected": "[True, True, False, False, False]", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "are_isbn(codes37, True)", "format": "python"}, "command": "start-testcase"}
+{"expected": "[False, True, False, False, False, False, False, False]", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "are_isbn(codes38, False)", "format": "python"}, "command": "start-testcase"}
+{"expected": "[True, False, False, True, False, False, False, False, False]", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "are_isbn(codes39, True)", "format": "python"}, "command": "start-testcase"}
+{"expected": "[False, False, False, False, False]", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "are_isbn(codes40, True)", "format": "python"}, "command": "start-testcase"}
+{"expected": "[False, True, False, False, False]", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "are_isbn(codes41)", "format": "python"}, "command": "start-testcase"}
+{"expected": "[False, False, True, True, True, True, True, False]", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "are_isbn(codes42)", "format": "python"}, "command": "start-testcase"}
+{"expected": "[True, True, True, True, True, True, False, True]", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "are_isbn(codes43, False)", "format": "python"}, "command": "start-testcase"}
+{"expected": "[False, False, True, False, False, False, False, False, False]", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "are_isbn(codes44, True)", "format": "python"}, "command": "start-testcase"}
+{"expected": "[False, True, False, False, False, False, False, False]", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "are_isbn(codes45)", "format": "python"}, "command": "start-testcase"}
+{"expected": "[False, False, False, False, False, True]", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "are_isbn(codes46, True)", "format": "python"}, "command": "start-testcase"}
+{"expected": "[True, False, False, True, True, False, False, False]", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "are_isbn(codes47, False)", "format": "python"}, "command": "start-testcase"}
+{"expected": "[True, True, False, False, False, False]", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "are_isbn(codes48)", "format": "python"}, "command": "start-testcase"}
+{"expected": "[True, True, False, True, True, False]", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "are_isbn(codes49)", "format": "python"}, "command": "start-testcase"}
+{"expected": "[True, True, True, True, True, True, True]", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "start-context"}
+{"description": {"description": "are_isbn(codes50, True)", "format": "python"}, "command": "start-testcase"}
+{"expected": "[False, True, True, False, False, False]", "channel": "return", "command": "start-test"}
+{"message": "Test niet uitgevoerd.", "command": "append-message"}
+{"generated": "", "status": {"enum": "time limit exceeded"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"command": "close-context"}
+{"command": "close-tab"}
+{"status": {"enum": "time limit exceeded"}, "command": "close-judgement"}

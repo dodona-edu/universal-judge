@@ -3,12 +3,16 @@ Generate all channel values for the tests.
 Only do this if you are sure the results are correct!
 """
 import os
+import shutil
 
-from tested import DodonaConfig, run, clean_working_directory
 from pathlib import Path
 
 
 # noinspection PyShadowingNames
+from tested.configs import DodonaConfig
+from tested.main import run
+
+
 def all_submissions():
     iter_ = os.walk("tests/isbn/students/")
     next(iter_)
@@ -48,6 +52,12 @@ if __name__ == '__main__':
     for index, (student, exercise) in enumerate(final_data):
         print(f"Updating channel for {student}, {exercise} [{index+1}/{total}]")
         config = read_config(student, exercise, str(Path('./workdir').resolve()))
-        clean_working_directory(config)
+        # Delete content in work dir
+        # noinspection PyTypeChecker
+        for root, dirs, files in os.walk(config.workdir):
+            for f in files:
+                os.unlink(os.path.join(root, f))
+            for d in dirs:
+                shutil.rmtree(os.path.join(root, d), ignore_errors=True)
         with open(f"tests/isbn/students/{student}/{exercise}.dson", 'w') as output_file:
             run(config, output_file)

@@ -1,4 +1,5 @@
 import logging
+import sys
 from argparse import ArgumentParser, FileType
 from .configs import read_config
 from .utils import smart_close

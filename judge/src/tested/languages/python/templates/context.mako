@@ -17,7 +17,13 @@ exception_file = open(r"${exception_file}", "w")
 
 def write_delimiter(delimiter):
     value_file.write(delimiter)
+    value_file.flush()
     exception_file.write(delimiter)
+    exception_file.flush()
+    sys.stderr.write(delimiter)
+    sys.stderr.flush()
+    sys.stdout.write(delimiter)
+    sys.stdout.flush()
 
 
 def send(value):
@@ -66,8 +72,6 @@ except Exception as e:
         raise e
     % endif
 
-sys.stderr.write("--${secret_id}-- SEP")
-sys.stdout.write("--${secret_id}-- SEP")
 write_delimiter("--${secret_id}-- SEP")
 
 ## Generate the actual tests based on the context.
@@ -89,8 +93,6 @@ write_delimiter("--${secret_id}-- SEP")
     except Exception as e:
         e_evaluate_${loop.index}(e)
 
-    sys.stderr.write("--${secret_id}-- SEP")
-    sys.stdout.write("--${secret_id}-- SEP")
     write_delimiter("--${secret_id}-- SEP")
 
 % endfor

@@ -5,13 +5,36 @@ testcase level if needed.
 """
 import dataclasses
 import logging
-from typing import IO, Optional, List, Tuple
+from collections import defaultdict
+from typing import List, Union, Optional, Generator
 
 from tested.configs import Bundle
-from tested.dodona import Update, Status, close_for, report_update, StatusMessage, \
-    CloseTab, CloseContext, CloseTestcase
+from tested.dodona import Update, Status, report_update, StatusMessage, \
+    CloseTab, CloseContext, CloseTestcase, StartJudgment, CloseJudgment, \
+    StartTab, StartContext, StartTestcase
 
 _logger = logging.getLogger(__name__)
+
+
+class _ExpectedContext:
+    __slots__ = ["start", "end", "content"]
+
+    def __init__(self):
+        self.content = []
+
+
+class _ExpectedTab:
+    __slots__ = ["start", "end", "contexts"]
+
+    def __init__(self):
+        self.contexts = defaultdict(lambda: _ExpectedContext())
+
+
+class _ExpectedJudgment:
+    __slots__ = ["start", "end", "tabs"]
+
+    def __init__(self):
+        self.tabs = defaultdict(lambda: _ExpectedTab())
 
 
 class OutputManager:
@@ -30,51 +53,75 @@ class OutputManager:
                 testcase1
                 testcase2
 
-    The fallback will generate output for every testcase. If after execution only
-    context 1 was run, the output for context 2 will still be shown.
-
-    The buffer of commands is emptied as soon as possible. The buffer is emptied
-    every time a non-close command is issued. The reasoning for this is as follows:
-    close commands cannot be output immediately, since we might need to inject
-    updates from the fallback before showing the close command.
+    The fallback will generate output for every context. This means that if a
+    context is started, but stopped after, for example, testcase 5, the rest of the
+    testcase will not be shown either. This is to reduce the complexity: TESTed
+    determines which testcases are shown at run time, based on the results. It is
+    very difficult and error prone to predict which ones are shown and which ones
+    are not.
 
     For example, if we need to show the fallback for context 2, we cannot output
     the "close-judgment" command yet.
 
+    Tabs, contexts and testcases are identified by there number within their parent.
+    The context testcase has id 0, while the others start at 1.
+
     The collector has a few fields:
 
-    :ivar commands: The buffer with updates.
     :ivar tree_stack: A stack of the structure. This enables us to automatically
                       close stuff if needed.
     :ivar prepared: The fallback.
-    :ivar output: Where the commands will be written to.
-    :ivar max_tab: The index of the latest completed tab.
-    :ivar max_context: The index of the latest completed context.
-    :ivar max_testcase: The index of the latest completed testcase.
+    :ivar bundle: The configuration bundle.
+    :ivar tab: The index of the latest completed tab.
+    :ivar context: The index of the latest completed context.
     """
-    __slots__ = ["commands", "tree_stack", "collected", "prepared", "output",
-                 "max_tab", "max_context", "max_testcase"]
+    __slots__ = ["tree_stack", "collected", "prepared", "bundle", "tab", "context"]
 
     def __init__(self, bundle: Bundle):
-        self.commands: List[Tuple[Update, Optional[int]]] = []
-        self.tree_stack = []
+        self.tree_stack: List[str] = []
         self.collected = False
-        self.prepared = []
-        self.output = bundle.out
-        self.max_tab = 0
-        self.max_context = 0
-        self.max_testcase = 0
+        self.prepared = _ExpectedJudgment()
+        self.bundle = bundle
+        self.tab = 0
+        self.context = -1
         from .evaluation import prepare_evaluation
         prepare_evaluation(bundle, self)
 
-    def prepare(self, tab_index: Optional[int], context_index: Optional[int],
-                testcase_index: Optional[int], results: List[Update]):
-        self.prepared.append(((tab_index, context_index, testcase_index), results))
+    def prepare_judgment(self, update: Union[StartJudgment, CloseJudgment]):
+        assert not self.collected, "OutputManager already finished!"
+        if isinstance(update, StartJudgment):
+            self.prepared.start = update
+        else:
+            assert isinstance(update, CloseJudgment)
+            self.prepared.end = update
 
-    def add(self, command: Update, id_: Optional[int] = None):
+    def prepare_tab(self, update: Union[StartTab, CloseTab], tab_index: int):
+        assert not self.collected, "OutputManager already finished!"
+        if isinstance(update, StartTab):
+            self.prepared.tabs[tab_index].start = update
+        else:
+            assert isinstance(update, CloseTab)
+            self.prepared.tabs[tab_index].end = update
+
+    def prepare_context(self,
+                        update: Union[StartContext, CloseContext, List[Update]],
+                        tab_index: int, context_index: int):
+        assert not self.collected, "OutputManager already finished!"
+        if isinstance(update, StartContext):
+            self.prepared.tabs[tab_index].contexts[context_index].start = update
+        elif isinstance(update, CloseContext):
+            self.prepared.tabs[tab_index].contexts[context_index].end = update
+        else:
+            assert isinstance(update, list)
+            assert all((not isinstance(x, (
+                StartTab, CloseTab, StartContext, CloseContext, StartJudgment,
+                CloseJudgment)) for x in update))
+            self.prepared.tabs[tab_index].contexts[context_index].content = update
+
+    def _add(self, command: Update):
         """
-        If a close command is send, all saved commands are output, to make sure the
-        output reaches Dodona as soon as possible.
+        Add a command. If the command is not a close command, the buffer will be
+        sent. If the command is a close command,
         """
         assert not self.collected, "OutputManager already finished!"
         action, type_ = command.command.split("-")
@@ -83,138 +130,132 @@ class OutputManager:
         elif action == "close":
             previous = self.tree_stack.pop()
             assert previous == type_, "Close same type"
-            self._save_closed(command, id_)
 
-        self.commands.append((command, id_))
+        report_update(self.bundle.out, command)
+        return action
 
-        if not action == "close":
-            # Flush buffer.
-            for command, ids in self.commands:
-                report_update(self.output, command)
-            self.commands = []
-
-    def terminate(self, status: Status, id_: Optional[int] = None):
+    def add(self, command: Update):
+        assert not isinstance(command,
+                              (StartTab, StartContext, CloseContext, CloseTab))
         assert not self.collected, "OutputManager already finished!"
-        for i, to_close in enumerate(reversed(self.tree_stack), 1):
-            try:
-                # noinspection PyArgumentList
-                command = close_for(to_close)(status=StatusMessage(status))
-            except TypeError:
-                command = close_for(to_close)()
-            if i == len(self.tree_stack):
-                self.commands.append((command, id_))
-            else:
-                self.commands.append((command, None))
-        self.tree_stack.clear()
+        self._add(command)
 
-    def _save_closed(self, command: Update, id_: Optional[int]):
-        if id_ is None:
-            return
-        if isinstance(command, CloseTab):
-            self.max_tab = id_ + 1
-            self.max_context = None
-            self.max_testcase = None
-        elif isinstance(command, CloseContext):
-            self.max_context = id_ + 1
-            self.max_testcase = None
-        elif isinstance(command, CloseTestcase):
-            self.max_testcase = id_ + 1
-
-    def flush(self):
+    def add_tab(self, update: Union[StartTab, CloseTab], tab_index: int):
         assert not self.collected, "OutputManager already finished!"
-        assert not self.tree_stack, f"All outputs should be closed, " \
-                                    f"got {self.tree_stack} "
+        action = self._add(update)
+        self.tab = tab_index
+        if action == "close":
+            assert self.prepared.tabs[tab_index].contexts == []
+            del self.prepared.tabs[tab_index]
 
-        from_, at = self.determine_handled()
-        from_ = min(from_, len(self.prepared))
-        added_commands = _prepare(self.prepared[from_:])[:-2]
-        _logger.debug(f"Tab, context, case: {self.max_tab}, {self.max_context}, "
-                      f"{self.max_testcase}")
-        _logger.debug(f"Appending from {from_}, at {at}")
-        _logger.debug(added_commands)
-        assert not added_commands or added_commands[0][
-            0].command.startswith("start-")
-        self.commands[-at:-at] = added_commands
+    def add_context(self, update: Union[StartContext, CloseContext],
+                    context_index: int):
+        assert not self.collected, "OutputManager already finished!"
+        self.context = context_index
+        action = self._add(update)
+        if action == "close":
+            assert (self.prepared.tabs[self.tab].contexts[context_index].content
+                    == [])
+            del self.prepared.tabs[self.tab].contexts[context_index].content
 
-        for command, ids in self.commands:
-            report_update(self.output, command)
+    def terminate(self, status: Status):
+        """Terminates the collector and writes everything."""
+        assert not self.collected, "OutputManager already finished!"
 
-        self.collected = True
+        to_add = self._get_to_add()
+        for added in to_add:
+            modified = _replace_status(added, status)
+            self._add(modified)
 
-    def determine_handled(self) -> Tuple[int, int]:
-        tb = self.max_tab
-        co = self.max_context
-        tc = self.max_testcase
-        indices = [i for i, x in self.prepared]
-        zero = next((i for i, x in enumerate((tb, co, tc), 2) if i), 0)
-        try:
-            return indices.index((tb, co, tc)), zero
-        except ValueError:
-            return len(self.prepared), 0
+        # We should have a completed tree by now.
+        assert self.tree_stack == []
+
+    def clean_finish(self):
+        """Assert that the collector has terminated cleanly."""
+        assert self.tree_stack == []
+
+    def _get_to_add(self) -> List[Update]:
+        # Determine which default still need to written.
+        assert self.tab < len(self.bundle.plan.tabs)
+        assert self.context < len(self.bundle.plan.tabs[self.tab].contexts)
+
+        if self.context + 1 == len(self.bundle.plan.tabs[self.tab].contexts):
+            self.context = 0
+            self.tab += 1
+        else:
+            self.context += 1
+
+        if self.tab == len(self.bundle.plan.tabs):
+            return []
+
+        to_write = []
+        # Do remainder of current tab.
+        for c in range(self.context, len(self.bundle.plan.tabs[self.tab].contexts)):
+            context = self.prepared.tabs[self.tab].contexts[c]
+            to_write.append(context.start)
+            to_write.extend(context.content)
+            to_write.append(context.end)
+            del self.prepared.tabs[self.tab].contexts[c]
+        to_write.append(self.prepared.tabs[self.tab].end)
+        del self.prepared.tabs[self.tab]
+
+        # Do remainder of tabs.
+        for t in range(self.tab + 1, len(self.bundle.plan.tabs)):
+            to_write.append(self.prepared.tabs[t].start)
+            for c in range(0, len(self.bundle.plan.tabs[t].contexts)):
+                context = self.prepared.tabs[t].contexts[c]
+                to_write.append(context.start)
+                to_write.extend(context.content)
+                to_write.append(context.end)
+                del self.prepared.tabs[t].contexts[c]
+            to_write.append(self.prepared.tabs[t].end)
+            del self.prepared.tabs[t]
+
+        # Stop judgment.
+        to_write.append(self.prepared.end)
+
+        assert all(x is not None for x in to_write)
+
+        return to_write
 
 
-def _prepare(collected: List[Update]) -> List[Tuple[Update, None]]:
-    result = []
-    for _, collector in collected:
-        adjusted = []
-        for x in collector:
-            try:
-                # noinspection PyDataclass
-                adjusted.append((
-                    dataclasses.replace(x, status=StatusMessage(
-                        Status.TIME_LIMIT_EXCEEDED
-                    )), None))
-            except TypeError:
-                adjusted.append((x, None))
-        result.extend(adjusted)
-    return result
+def _replace_status(t: Update, status: Status) -> Update:
+    try:
+        # noinspection PyDataclass
+        return dataclasses.replace(t, status=StatusMessage(status))
+    except TypeError:
+        return t
 
 
-class UpdateCollector:
+class TestcaseCollector:
     """
-    A class to collect updates but not print them.
+    Collects updates for a testcase, but only outputs them if the testcase has
+    content (children). This is intended to be used to evaluate testcases: they can
+    be started without problem, but if nothing is written during evaluation, they
+    will not be shown in Dodona.
     """
-    __slots__ = ["start", "content", "id"]
+    __slots__ = ["start", "content"]
 
-    def __init__(self, start: Update):
-        if not start.command.startswith("start"):
-            raise ValueError("The collector can only be used with start commands.")
+    def __init__(self, start: StartTestcase):
+        assert isinstance(start, StartTestcase)
         self.start = start
         self.content = []
 
-    def add(self, update: Update, id_: Optional[int] = None):
-        self.content.append((update, id_))
+    def add(self, update: Update):
+        self.content.append(update)
 
-    def end(self, to: OutputManager, end: Update, id_: int):
-        if not end.command.startswith("close"):
-            raise ValueError(f"The collector can only be used with close commands, "
-                             f"got {end.command}")
-        _, start_type = self.start.command.split("-")
-        _, end_type = end.command.split("-")
-        if start_type != end_type:
-            raise ValueError(f"The start and close types of the commands must "
-                             f"match, got {start_type} and {end_type}.")
-        if self.content:
-            to.add(self.start, id_)
-            for command, c_id in self.content:
-                to.add(command, c_id)
-            to.add(end, id_)
+    def to_manager(self, manager: OutputManager, end: Optional[CloseTestcase]):
+        assert end is None or isinstance(end, CloseTestcase)
+        for command in self._generate(end):
+            manager.add(command)
 
-    def prepare_end(self,
-                    to: OutputManager,
-                    end: Update,
-                    tab_index: Optional[int],
-                    context_index: Optional[int],
-                    testcase_index: Optional[int]):
-        if not end.command.startswith("close"):
-            raise ValueError(f"The collector can only be used with close commands, "
-                             f"got {end.command}")
-        _, start_type = self.start.command.split("-")
-        _, end_type = end.command.split("-")
-        if start_type != end_type:
-            raise ValueError(f"The start and close types of the commands must "
-                             f"match, got {start_type} and {end_type}.")
+    def _generate(self, end: Optional[CloseTestcase])\
+            -> Generator[Update, None, None]:
         if self.content:
-            to.prepare(tab_index, context_index, testcase_index,
-                       [self.start] + [c for c, _ in self.content] + [end]
-                       )
+            yield self.start
+            yield from self.content
+            if end is not None:
+                yield end
+
+    def as_list(self, end: Optional[CloseTestcase]) -> List[Update]:
+        return list(self._generate(end))

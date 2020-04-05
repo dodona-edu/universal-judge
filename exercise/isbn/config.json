@@ -13,12 +13,13 @@
   ],
   "evaluation": {
     "memory_limit": 500000000,
+    "time_limit": 5,
     "plan_name": "plan.json",
     "options": {
       "linter": {
         "python": true
       },
-      "allow_fallback": false
+      "allow_fallback": true
     }
   },
   "internals": {

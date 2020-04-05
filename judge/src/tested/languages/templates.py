@@ -108,12 +108,13 @@ def find_template(bundle: Bundle, template_name: str) -> Template:
     :raises LookupError: If no template for the given name were found.
     """
     error = None
+    environment = _get_environment(bundle)
     for extension in bundle.language_config.template_extensions():
         try:
             file_name = f"{template_name}.{extension}"
-            return _get_environment(bundle).get_template(file_name)
+            return environment.get_template(file_name)
         except TemplateLookupException as e:
             error = e
     raise LookupError(
         f"Could not find template with name {template_name} for language "
-        f"{bundle.config.programming_language}", error)
+        f"{bundle.config.programming_language}", error, environment.directories)

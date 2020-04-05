@@ -54,8 +54,7 @@ def judge(bundle: Bundle):
     run_linter(bundle, collector, max_time)
     if time.perf_counter() - start > max_time:
         collector.terminate(Status.TIME_LIMIT_EXCEEDED)
-        collector.flush()
-        exit()
+        return
 
     _logger.info("Start generating code...")
     common_dir, files, selector = _generate_files(bundle, mode)
@@ -88,8 +87,7 @@ def judge(bundle: Bundle):
                 collector.add(annotation)
             if messages:
                 collector.add(CloseTab())
-            collector.terminate(Status.TIME_LIMIT_EXCEEDED, 0)
-            collector.flush()
+            collector.terminate(Status.TIME_LIMIT_EXCEEDED)
             return
 
         assert not result.timeout
@@ -125,7 +123,7 @@ def judge(bundle: Bundle):
                         human="Ongeldige broncode"
                     )
                 ))
-                collector.flush()
+                collector.terminate(status)
                 _logger.info("Compilation error without fallback")
                 return  # Compilation error occurred, useless to continue.
     else:
@@ -134,10 +132,9 @@ def judge(bundle: Bundle):
     _logger.info("Starting judgement...")
 
     for tab_index, tab in enumerate(bundle.plan.tabs):
-        collector.add(StartTab(title=tab.name), tab_index)
+        collector.add_tab(StartTab(title=tab.name), tab_index)
         for context_index, context in enumerate(tab.contexts):
-            collector.add(StartContext(description=context.description),
-                          context_index)
+
             execution = ContextExecution(
                 context=context,
                 context_name=bundle.language_config.context_name(
@@ -156,31 +153,26 @@ def judge(bundle: Bundle):
                                                         remaining)
 
             # Handle timeout.
-            if execution_result and execution_result.timeout:
-                # Add compiler output.
-                for message in m:
-                    collector.add(AppendMessage(message))
-                collector.terminate(Status.TIME_LIMIT_EXCEEDED, context_index)
-                collector.flush()
+            if execution_result.timeout:
+                collector.terminate(Status.TIME_LIMIT_EXCEEDED)
                 return
 
-            assert not (execution_result and execution_result.timeout)
-            assert not (execution_result and execution_result.memory)
+            collector.add_context(StartContext(description=context.description),
+                                  context_index)
 
             remaining = max_time - (time.perf_counter() - start)
             evaluate_results(
-                bundle,
-                context=context,
-                exec_results=execution_result,
-                compiler_results=(m, s),
-                context_dir=p,
-                collector=collector,
-                max_time=remaining
-            )
-            collector.add(CloseContext(), context_index)
-        collector.add(CloseTab(), tab_index)
+                    bundle,
+                    context=context,
+                    exec_results=execution_result,
+                    compiler_results=(m, s),
+                    context_dir=p,
+                    collector=collector,
+                    max_time=remaining)
+            collector.add_context(CloseContext(), context_index)
+        collector.add_tab(CloseTab(), tab_index)
     collector.add(CloseJudgment())
-    collector.flush()
+    collector.clean_finish()
 
 
 def _generate_files(bundle: Bundle,

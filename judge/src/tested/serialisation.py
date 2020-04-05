@@ -16,7 +16,6 @@ A json-schema can be generated from this format by executing the module on the
 command line. The schema will be printed to stdout. This can be used to generate
 classes for implementations in other configs.
 """
-import itertools
 import json
 import logging
 from dataclasses import field, replace
@@ -456,8 +455,7 @@ class EvalResult:
     messages: List[str] = field(default_factory=list)
 
 
-@dataclass
-class ExceptionValue(WithFeatures):
+class ExceptionValue(WithFeatures, BaseModel):
     """An exception that was thrown while executing the user context."""
     message: str
     stacktrace: str
