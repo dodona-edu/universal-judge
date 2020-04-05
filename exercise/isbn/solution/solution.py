@@ -83,9 +83,6 @@ def is_isbn(code, isbn13=True):
     >>> is_isbn('080442957X', False)
     True
     """
-    while True:
-        import sys
-        sys.stdout.write("Niko")
     return is_isbn13(code) if isbn13 else is_isbn10(code)
 
 

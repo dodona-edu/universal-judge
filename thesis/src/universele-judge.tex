@@ -1089,9 +1089,15 @@ TESTed is zo opgebouwd dat er altijd iets van feedback komt, ook in onvoorziene 
     Ook hier wordt nog geen verdere verwerking van de foutboodschap gedaan (ook onderdeel van \cref{subsec:kleinere-functies}).
     Een bijkomende opmerking is dat sommige fouten tijdens de uitvoering nu als uitzondering opgevangen worden.
     \item[Tijdslimieten] TESTed heeft ondersteuning voor tijdslimieten in de judge, dit laat toe om meer uitvoer te tonen dan als de tijdslimiet aan Dodona wordt overgelaten.
+    Het gaat om code die traag is, maar ook om bijvoorbeeld oneindige lussen.
+    Momenteel worden alle geplande testen die niet zijn uitgevoerd ook getoond, met een boodschap die uitlegt dat ze niet zijn uitgevoerd.
+    Op termijn is het de bedoeling in Dodona een bijkomende status toe te voegen.
+    \item[Te grote uitvoer] Bij te grote uitvoer zal TESTed deze limiteren.
+    Hierbij gaat het om scenario's zoals een oneindige lus die blijft schrijven naar stdout.
+    TESTed beperkt zowel het aantal regels (maximaal 20) en de regellengte (maximaal 150) tekens.
+    \item[Te veel uitvoer] Hierbij wordt gedacht aan zaken zoals uitvoer op stdout of stderr terwijl die niet verwacht wordt.
+    Standaard wordt een oefening als fout beschouwd indien er te veel uitvoer is, maar de auteur van de oefening kan kiezen om het teveel aan uitvoer te negeren (bijvoorbeeld als de studenten debugberichten schrijven naar stdout is dit niet in elke oefening een probleem).
+    \item[Vroegtijdig stoppen van uitvoering] Hier gaat het om code van de studenten die bijvoorbeeld \inlinemint{exit(-5)} bevat.
+    Ook dit zal fout gerekend worden door TESTed.
 
 \end{description}
-
-% TODO: lijst van issues
-TODO: een lijst van issues (zie ook de issue van op GitHub).
-
