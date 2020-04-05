@@ -23,6 +23,10 @@ def write_delimiter(delimiter):
     exception_file.write(delimiter)
     sys.stderr.write(delimiter)
     sys.stdout.write(delimiter)
+    sys.stdout.flush()
+    sys.stderr.flush()
+    value_file.flush()
+    exception_file.flush()
 
 
 def send(value):

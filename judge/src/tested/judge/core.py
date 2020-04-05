@@ -148,16 +148,11 @@ def judge(bundle: Bundle):
             execution_result, m, s, p = execute_context(bundle, execution,
                                                         remaining)
 
-            # Handle timeout.
-            if execution_result and execution_result.timeout:
-                collector.terminate(Status.TIME_LIMIT_EXCEEDED)
-                return
-
             collector.add_context(StartContext(description=context.description),
                                   context_index)
 
             remaining = max_time - (time.perf_counter() - start)
-            evaluate_results(
+            continue_ = evaluate_results(
                     bundle,
                     context=context,
                     exec_results=execution_result,
@@ -166,6 +161,10 @@ def judge(bundle: Bundle):
                     collector=collector,
                     max_time=remaining)
             collector.add_context(CloseContext(), context_index)
+            if continue_ == Status.TIME_LIMIT_EXCEEDED:
+                assert not collector.collected
+                collector.terminate(continue_)
+                return
         collector.add_tab(CloseTab(), tab_index)
     collector.add(CloseJudgment())
     collector.clean_finish()

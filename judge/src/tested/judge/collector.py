@@ -11,7 +11,7 @@ from typing import List, Union, Optional, Generator
 from tested.configs import Bundle
 from tested.dodona import Update, Status, report_update, StatusMessage, \
     CloseTab, CloseContext, CloseTestcase, StartJudgment, CloseJudgment, \
-    StartTab, StartContext, StartTestcase
+    StartTab, StartContext, StartTestcase, close_for
 
 _logger = logging.getLogger(__name__)
 
@@ -159,13 +159,22 @@ class OutputManager:
         """Terminates the collector and writes everything."""
         assert not self.collected, "OutputManager already finished!"
 
+        if isinstance(status, Status):
+            status = StatusMessage(enum=status)
+
         to_add = self._get_to_add()
         for added in to_add:
             modified = _replace_status(added, status)
             self._add(modified)
 
-        # We should have a completed tree by now.
-        assert self.tree_stack == []
+        # Add stack.
+        for to_close in reversed(self.tree_stack):
+            try:
+                # noinspection PyArgumentList
+                command = close_for(to_close)(status=status)
+            except TypeError:
+                command = close_for(to_close)()
+            self._add(command)
 
     def clean_finish(self):
         """Assert that the collector has terminated cleanly."""
@@ -219,9 +228,7 @@ class OutputManager:
         return to_write
 
 
-def _replace_status(t: Update, status: Union[Status, StatusMessage]) -> Update:
-    if isinstance(status, Status):
-        status = StatusMessage(enum=status)
+def _replace_status(t: Update, status: StatusMessage) -> Update:
     try:
         # noinspection PyDataclass
         return dataclasses.replace(t, status=status)

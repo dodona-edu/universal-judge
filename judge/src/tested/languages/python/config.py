@@ -33,7 +33,7 @@ class PythonConfig(Language):
 
     def execution_command(self, cwd: str, file: str, dependencies: List[str],
                           arguments: List[str]) -> List[str]:
-        return ["python", file, *arguments]
+        return ["python", "-u", file, *arguments]
 
     def file_extension(self) -> str:
         return "py"

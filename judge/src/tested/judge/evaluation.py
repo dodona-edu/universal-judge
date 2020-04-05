@@ -109,7 +109,7 @@ def evaluate_results(bundle: Bundle,
                      compiler_results: Tuple[List[Message], Status],
                      context_dir: Path,
                      collector: OutputManager,
-                     max_time: float):
+                     max_time: float) -> Optional[Status]:
     # Begin by processing the context testcase.
     # Even if there is no main testcase, we can still proceed, since the defaults
     # should take care of this.
@@ -131,7 +131,7 @@ def evaluate_results(bundle: Bundle,
 
         # Finish evaluation, since there is nothing we can do.
         collector.add(CloseTestcase(accepted=False))
-        return
+        return None
 
     testcase: ContextTestcase = context.context_testcase
     readable_input = get_readable_input(bundle, testcase)
@@ -224,7 +224,9 @@ def evaluate_results(bundle: Bundle,
 
     # Decide if we want to proceed.
     if must_stop:
-        return  # Stop now.
+        if exec_results.timeout:
+            return Status.TIME_LIMIT_EXCEEDED
+        return None  # Stop now.
 
     # Begin processing the normal testcases.
     for i, testcase in enumerate(context.testcases):
@@ -314,7 +316,9 @@ def evaluate_results(bundle: Bundle,
         t_col.to_manager(collector, CloseTestcase())
 
         if must_stop:
-            return  # Stop evaluation now.
+            if exec_results.timeout:
+                return Status.TIME_LIMIT_EXCEEDED
+            return None  # Stop evaluation now.
 
 
 def prepare_evaluation(bundle: Bundle, collector: OutputManager):

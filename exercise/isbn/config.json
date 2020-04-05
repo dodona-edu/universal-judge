@@ -13,7 +13,7 @@
   ],
   "evaluation": {
     "memory_limit": 500000000,
-    "time_limit": 5,
+    "time_limit": 20,
     "plan_name": "plan.json",
     "options": {
       "linter": {

@@ -11,6 +11,7 @@ the authoritative json-schema, provided by Dodona.
 """
 import dataclasses
 import json
+import textwrap
 from enum import Enum
 from typing import Optional, Union, Literal, IO, Type
 
@@ -217,12 +218,36 @@ class _EnhancedJSONEncoder(json.JSONEncoder):
         return super().default(o)
 
 
+def _maybe_shorten(text: str) -> str:
+    lines = text.splitlines()
+    if len(lines) > 20:
+        lines = lines[:20] + ["\n[...Uitvoer is te lang...]\n"]
+    lines = [l[:150] + "..." if len(l) > 150 else l for l in lines]
+    return "\n".join(lines)
+
+
 def report_update(to: IO, update: Update):
     """
     Write the given update to the given output stream.
     :param to: Where to write to. Will not be closed.
     :param update: The update to write.
     """
+    # Handle shortening messages and other output here.
+    if isinstance(update, AppendMessage):
+        if isinstance(update.message, ExtendedMessage):
+            shorter = _maybe_shorten(update.message.description)
+            # noinspection PyDataclass
+            new_message = dataclasses.replace(update.message, description=shorter)
+        else:
+            assert isinstance(update.message, str)
+            new_message = _maybe_shorten(update.message)
+        # noinspection PyDataclass
+        update = dataclasses.replace(update, message=new_message)
+    if isinstance(update, CloseTest):
+        new_message = _maybe_shorten(update.generated)
+        # noinspection PyDataclass
+        update = dataclasses.replace(update, generated=new_message)
+
     json.dump(update, to, cls=_EnhancedJSONEncoder)
     # noinspection PyUnreachableCode
     if __debug__:
