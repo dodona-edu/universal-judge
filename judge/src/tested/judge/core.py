@@ -153,7 +153,7 @@ def judge(bundle: Bundle):
                                                         remaining)
 
             # Handle timeout.
-            if execution_result.timeout:
+            if execution_result and execution_result.timeout:
                 collector.terminate(Status.TIME_LIMIT_EXCEEDED)
                 return
 
