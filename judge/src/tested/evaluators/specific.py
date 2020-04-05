@@ -11,7 +11,7 @@ from ..testplan import SpecificEvaluator
 
 
 def evaluate(_, channel: OutputChannel, actual: str,
-             wrong: Status, timeout: Optional[float]) -> EvaluationResult:
+             wrong: Status, _timeout: Optional[float]) -> EvaluationResult:
     """
     Compare the result of a specific evaluator. This evaluator has no options.
     """
@@ -19,16 +19,16 @@ def evaluate(_, channel: OutputChannel, actual: str,
 
     # Try parsing as the result.
     try:
-        actual: EvalResult = EvalResult.__pydantic_model__.parse_raw(actual)
+        actual: EvalResult = EvalResult.parse_raw(actual)
     except (TypeError, ValueError) as e:
         staff_message = ExtendedMessage(
-            description=f"Received invalid output for programmed evaluation: "
+            description=f"Received invalid output for specific evaluation: "
                         f"{actual!r}. Either the testplan is invalid, the "
                         f"evaluation code has a bug or the student is trying to "
                         f"cheat: {e}",
             format="text",
             permission=Permission.STAFF
-        ),
+        )
         student_message = ("Er ging iets fout bij het beoordelen van de "
                            "oplossing. Meld dit aan de lesgever!")
         return EvaluationResult(

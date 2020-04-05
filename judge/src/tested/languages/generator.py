@@ -113,7 +113,7 @@ def _create_exception_function(
         evaluator_name = lang_config.conventionalise_namespace(evaluator.stem)
         return FunctionCall(
             type=FunctionType.NAMESPACE,
-            name="evaluate_text",
+            name="evaluate",
             namespace=evaluator_name,
             arguments=arguments
         ), evaluator_name

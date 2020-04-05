@@ -442,8 +442,7 @@ def to_python_comparable(value: Optional[Value]):
     raise AssertionError(f"Unknown value type: {value}")
 
 
-@dataclass
-class EvalResult:
+class EvalResult(BaseModel):
     """Result of an evaluation by an evaluator."""
     result: bool  # The result of the evaluation.
     readable_expected: Optional[str] = None

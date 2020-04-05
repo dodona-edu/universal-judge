@@ -19,7 +19,7 @@ class PythonConfig(Language):
     """Configuration for the Python language."""
 
     def initial_dependencies(self) -> List[str]:
-        return ["values.py"]
+        return ["values.py", "specific_evaluation_utils.py"]
 
     def evaluator_dependencies(self) -> List[str]:
         return ["evaluation_utils.py"]

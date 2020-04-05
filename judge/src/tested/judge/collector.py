@@ -145,7 +145,6 @@ class OutputManager:
         action = self._add(update)
         self.tab = tab_index
         if action == "close":
-            assert self.prepared.tabs[tab_index].contexts == []
             del self.prepared.tabs[tab_index]
 
     def add_context(self, update: Union[StartContext, CloseContext],
@@ -154,9 +153,7 @@ class OutputManager:
         self.context = context_index
         action = self._add(update)
         if action == "close":
-            assert (self.prepared.tabs[self.tab].contexts[context_index].content
-                    == [])
-            del self.prepared.tabs[self.tab].contexts[context_index].content
+            del self.prepared.tabs[self.tab].contexts[context_index]
 
     def terminate(self, status: Status):
         """Terminates the collector and writes everything."""

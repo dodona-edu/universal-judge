@@ -3,6 +3,7 @@
 <%! from tested.utils import get_args %>
 import values
 import sys
+import specific_evaluation_utils
 
 ## Import the language specific evaluators we will need.
 % for name in evaluator_names:
@@ -14,16 +15,14 @@ import sys
 value_file = open(r"${value_file}", "w")
 exception_file = open(r"${exception_file}", "w")
 
+specific_evaluation_utils.out = exception_file
+
 
 def write_delimiter(delimiter):
     value_file.write(delimiter)
-    value_file.flush()
     exception_file.write(delimiter)
-    exception_file.flush()
     sys.stderr.write(delimiter)
-    sys.stderr.flush()
     sys.stdout.write(delimiter)
-    sys.stdout.flush()
 
 
 def send(value):
@@ -71,6 +70,10 @@ except Exception as e:
     % else:
         raise e
     % endif
+else:  # Handle no exception.
+    % if context_testcase.exists:
+        e_evaluate_main(None)
+    % endif
 
 write_delimiter("--${secret_id}-- SEP")
 
@@ -92,6 +95,8 @@ write_delimiter("--${secret_id}-- SEP")
 
     except Exception as e:
         e_evaluate_${loop.index}(e)
+    else:
+        e_evaluate_${loop.index}(None)
 
     write_delimiter("--${secret_id}-- SEP")
 
