@@ -198,6 +198,10 @@ def evaluate_results(bundle: Bundle,
         context_collector.add(AppendMessage(
             "Ontbrekende uitvoerresultaten in Dodona. Er ging iets verkeerd!"
         ))
+        context_collector.add(EscalateStatus(status=StatusMessage(
+            enum=Status.WRONG,
+            human="Ontbrekende uitvoer."
+        )))
         # Recover stdout and stderr if present.
         if recovered := "\n".join(stdout_[1:]):
             context_collector.add(AppendMessage(ExtendedMessage(
