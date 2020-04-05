@@ -17,6 +17,18 @@ def evaluate(_, channel: OutputChannel, actual: str,
     """
     assert isinstance(channel.evaluator, SpecificEvaluator)
 
+    # Special support for no values to have a better error message.
+    if actual == "":
+        return EvaluationResult(
+            result=StatusMessage(
+                enum=Status.WRONG,
+                human="Ontbrekende uitvoer."
+            ),
+            readable_actual="",
+            readable_expected="",
+            messages=["Hier ontbreekt uitvoer."]
+        )
+
     # Try parsing as the result.
     try:
         actual: EvalResult = EvalResult.parse_raw(actual)

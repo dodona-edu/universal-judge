@@ -1,1 +1,2 @@
-value = 100 / 0
+while True:
+    pass

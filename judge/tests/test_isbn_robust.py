@@ -44,6 +44,7 @@ def do_test(config: DodonaConfig, result: Optional[str] = None):
     with open(f'tests/isbn/robust/{result}.dson', 'r') as f:
         expected_string = f.read()
     actual_string = actual.getvalue()
+    print(actual_string)
 
     assert actual_string == expected_string
 

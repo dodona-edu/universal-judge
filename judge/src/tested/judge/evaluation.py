@@ -379,8 +379,8 @@ def prepare_evaluation(bundle: Bundle, collector: OutputManager):
 
                 # Do the tests.
                 _evaluate_channel(t_col, "file", output.file, None, file_eval),
-                _evaluate_channel(t_col, "stderr"
-                                  , output.stderr, None, stderr_eval),
+                _evaluate_channel(t_col, "stderr",
+                                  output.stderr, None, stderr_eval),
                 _evaluate_channel(t_col, "exception",
                                   output.exception, None, exc_eval),
                 _evaluate_channel(t_col, "stdout",

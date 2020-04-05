@@ -18,17 +18,17 @@ def read_config() -> DodonaConfig:
     """Read the configuration from stdout"""
     return DodonaConfig(**{
         "memory_limit":         536870912,
-        "time_limit":           15,
+        "time_limit":           5,
         "programming_language": 'python',
         "natural_language":     'nl',
-        "resources":            Path('../exercise/isbn/evaluation'),
-        "source":               Path('../exercise/isbn/solution/solution.py'),
+        "resources":            Path('../exercise/division/evaluation'),
+        "source":               Path('../exercise/division/solution/solution.py'),
         "judge":                Path('../judge/src/'),
         "workdir":              Path('./workdir'),
         "plan_name":            "plan.json",
         "test":                 "Gallo",
         "options":              {
-            "allow_fallback": True,
+            "allow_fallback": False,
             "linter":         {
                 "python": False
             }
