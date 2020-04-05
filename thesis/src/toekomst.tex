@@ -121,16 +121,16 @@ Het testplan voor een oefening die enkel stdin en stdout gebruikt zal er helemaa
 Het zou bijvoorbeeld kunnen dat voor verschillende soorten oefeningen een andere \acronym{DSL} ontworpen wordt.
 
 Zo zijn er bijvoorbeeld meerdere standaarden voor het schrijven van programmeeroefeningen.
-Op het moment van schrijven lijken er wel nog geen wijdverspreide standaarden te zijn.
 Een programma dat oefening die in deze formaten beschreven zijn omzet naar het eigen formaat van TESTed kan een nuttige uitbreiding zijn.
-Bij wijze van voorbeeld worden twee standaarden besproken, telkens met een beschrijving van dezelfde oefening.
+Op het moment van schrijven lijken er echter nog geen wijdverspreide standaarden te zijn.
+Bij wijze van voorbeeld worden twee standaarden besproken, telkens met een beschrijving van dezelfde oefening, de \emph{Palindroom}-oefening.
 Bij deze voorbeeldoefening moet invoer gelezen worden en dan als uitvoer moet aangegeven worden of de invoer al dan niet een palindroom is.
 
 Een eerste standaard is \acronym{PExIL} (\term{Programming Exercises Interoperability Language}) \autocite{queiros2011pexil}.
 Dit is een op \acronym{XML}-gebaseerd formaat, gepubliceerd in 2011.
 Ontwikkeling van deze standaard lijkt gestopt te zijn.
 We hebben geen online oefeningen gevonden die in dit formaat beschreven zijn en de de nodige resources voor het zelf schrijven van een oefeningen (zoals het \acronym{XML} Schema) zijn niet meer beschikbaar online.
-De beschrijving van de voorbeeldoefening is \cref{lst:pexil}.
+De beschrijving van de \emph{Palindroom}-oefening is \cref{lst:pexil}.
 
 \begin{listing}
     \inputminted{xml}{code/pexil-in.xml}
@@ -143,7 +143,8 @@ Een tweede standaard is \acronym{PEML} (\english{Programming Exercise Markup Lan
 P\acronym{EML} is een tekstueel formaat (een soort \acronym{DSL}) dat er veelbelovend uitziet om met de hand te schrijven.
 Op het moment van schrijven van deze thesis is \acronym{PEML} nog in volle ontwikkeling.
 Aangezien een van de \english{design goals} van \acronym{PEML} is dat de omzetting van \acronym{PEML} naar \acronym{JSON} eenvoudig zal zijn, lijkt dit een interessant formaat.
-De beschrijving van de voorbeeldoefening staat in \cref{lst:peml} en is overgenomen uit de documentatie van \acronym{PEML}.
+De beschrijving van de \emph{Palindroom}-oefening staat in \cref{lst:peml}.
+Dit voorbeeld is overgenomen uit de documentatie van \acronym{PEML}.
 
 \begin{listing}
     \inputminted{yaml}{code/peml.peml}
