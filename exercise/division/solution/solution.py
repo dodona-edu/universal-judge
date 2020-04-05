@@ -1,2 +1,2 @@
-waarde = 100
+waarde = 100 = 2
 print(waarde)

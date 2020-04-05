@@ -4,8 +4,8 @@
       "name": "Correctheid",
       "contexts": [
         {
-          "description": "Uitvoeren code",
           "context_testcase": {
+            "description": "Uitvoeren code",
             "input": {
               "main_call": true
             },
