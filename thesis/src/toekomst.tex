@@ -309,10 +309,21 @@ Er zijn in de loop van de thesis verschillende kleinere features naar boven geko
         Als er bijvoorbeeld in de foutboodschap staat "fout op regel 5, kolom 10", dan zou een snelkoppeling naar die plaats in de code nuttig zijn.
         Dit is ook iets onder andere door de Python-judge geïmplementeerd is.
     \end{itemize}
-    \item Lange uitvoer beperken en mooier weergeven.
-    Het gaat hier enerzijds om lange stacktraces (bijvoorbeeld een \mintinline{StackOverflow} uit Java) en anderzijds om grote verzameling (bijvoorbeeld een lijst van duizend elementen).
-    Momenteel wordt deze uitvoer verbatim getoond aan de studenten, wat soms overweldigend is.
+    \item Lange uitvoer beperkt tonen.
+    TESTed bevat momenteel een zeer eenvoudige limiet: de uitvoer wordt beperkt tot 20 regels en de regellengte is beperkt tot 150 tekens.
+    Deze limiet houdt echter geen rekening met de aard van de uitvoer (bijvoorbeeld een boodschap van TESTed of de uitvoer van de compiler).
+    Zo zou een stacktrace anders ingekort kunnen worden.
+    \item Waarden mooier weergeven (\english{pretty printing}).
+    Enerzijds gaat het om grote verzamelingen verkort weer te geven.
+    Is de uitvoer bijvoorbeeld een lijst van duizend elementen, zouden enkel de eerste tien getoond kunnen worden.
+    Momenteel worden alle waarden verbatim aan de studenten getoond.
+    Anderzijds gaat het ook om het beter weergeven van waarden om het vergelijken met de verwachte uitvoer eenvoudiger te maken.
+    Een voorbeeld hier zijn verzamelingen: door de verzameling gesorteerd te tonen wordt het zoeken naar bijvoorbeeld ontbrekende waarden een stuk eenvoudiger.
     \item Tijdslimieten op het niveau van de contexten.
     Momenteel is het enkel mogelijk om op het niveau van een oefening een tijdslimiet in te stellen.
     De implementatie hiervan zou eenvoudig moeten zijn: intern werkt TESTed al met een tijdslimiet per context, namelijk de totale tijdslimiet van de oefening minus de verstreken tijd.
+    \item Gerelateerd aan de tijdslimieten is binnen Dodona een status voor een test die niet uitgevoerd is\footnote{Zie de issue: \url{https://github.com/dodona-edu/dodona/issues/1785}}.
+    Momenteel toont TESTed de niet-uitgevoerde testen met de status "fout".
+    Het is echter wenselijk deze oefening als "niet-uitgevoerd" aan te duiden.
+    Ook visueel zou er een verschil kunnen zijn, door bijvoorbeeld een grijze achtergrond te gebruiken in plaats van een rode achtergrond.
 \end{itemize}
