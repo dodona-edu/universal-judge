@@ -107,23 +107,19 @@ def judge(bundle: Bundle):
             files = compilation_files
             # Report messages.
             if messages:
-                collector.add(StartTab("Compilatie"))
+                collector.add_tab(StartTab("Compilatie"), -1)
             for message in messages:
                 collector.add(AppendMessage(message=message))
             for annotation in annotations:
                 collector.add(annotation)
             if messages:
-                collector.add(CloseTab())
+                collector.add_tab(CloseTab(), -1)
 
             if status != Status.CORRECT:
-                collector.add(CloseJudgment(
-                    accepted=False,
-                    status=StatusMessage(
-                        enum=status,
-                        human="Ongeldige broncode"
-                    )
+                collector.terminate(StatusMessage(
+                    enum=status,
+                    human="Ongeldige broncode"
                 ))
-                collector.terminate(status)
                 _logger.info("Compilation error without fallback")
                 return  # Compilation error occurred, useless to continue.
     else:

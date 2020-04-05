@@ -144,7 +144,7 @@ class OutputManager:
         assert not self.collected, "OutputManager already finished!"
         action = self._add(update)
         self.tab = tab_index
-        if action == "close":
+        if action == "close" and tab_index >= 0:
             del self.prepared.tabs[tab_index]
 
     def add_context(self, update: Union[StartContext, CloseContext],
@@ -155,7 +155,7 @@ class OutputManager:
         if action == "close":
             del self.prepared.tabs[self.tab].contexts[context_index]
 
-    def terminate(self, status: Status):
+    def terminate(self, status: Union[Status, StatusMessage]):
         """Terminates the collector and writes everything."""
         assert not self.collected, "OutputManager already finished!"
 
@@ -219,10 +219,12 @@ class OutputManager:
         return to_write
 
 
-def _replace_status(t: Update, status: Status) -> Update:
+def _replace_status(t: Update, status: Union[Status, StatusMessage]) -> Update:
+    if isinstance(status, Status):
+        status = StatusMessage(enum=status)
     try:
         # noinspection PyDataclass
-        return dataclasses.replace(t, status=StatusMessage(status))
+        return dataclasses.replace(t, status=status)
     except TypeError:
         return t
 

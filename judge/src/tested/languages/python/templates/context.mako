@@ -70,10 +70,10 @@ except Exception as e:
     % else:
         raise e
     % endif
-else:  # Handle no exception.
-    % if context_testcase.exists:
+% if context_testcase.exists:
+    else:
         e_evaluate_main(None)
-    % endif
+% endif
 
 write_delimiter("--${secret_id}-- SEP")
 

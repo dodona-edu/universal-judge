@@ -52,6 +52,8 @@ def send_value(stream, value):
 
 
 def send_exception(stream, exception):
+    if exception is None:
+        return
     tracer = io.StringIO()
     traceback.print_tb(exception.__traceback__, file=tracer)
     data = {
