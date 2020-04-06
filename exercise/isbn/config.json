@@ -9,7 +9,7 @@
   "access": "public",
   "programming_language": "python",
   "labels": [
-
+    "test", "niko", "hallo"
   ],
   "evaluation": {
     "memory_limit": 500000000,
