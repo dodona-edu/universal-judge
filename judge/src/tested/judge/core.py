@@ -1,5 +1,9 @@
 import logging
 import shutil
+from concurrent.futures.thread import ThreadPoolExecutor
+from multiprocessing.dummy import Pool
+from threading import Thread
+
 import time
 from pathlib import Path
 from typing import Tuple, List
@@ -9,6 +13,7 @@ from .compilation import run_compilation, process_compile_results
 from .evaluation import evaluate_results
 from .execution import ContextExecution, execute_context
 from .linter import run_linter
+from .processor import ResultProcessor
 from .utils import copy_from_paths_to_path
 from ..configs import Bundle
 from ..dodona import *
@@ -126,9 +131,12 @@ def judge(bundle: Bundle):
         precompilation_result = None
 
     _logger.info("Starting judgement...")
+    parallel = bundle.config.options.parallel
 
+    # Create a list of contexts we want to execute.
     for tab_index, tab in enumerate(bundle.plan.tabs):
         collector.add_tab(StartTab(title=tab.name), tab_index)
+        to_run = []
         for context_index, context in enumerate(tab.contexts):
 
             execution = ContextExecution(
@@ -143,31 +151,105 @@ def judge(bundle: Bundle):
                 precompilation_result=precompilation_result,
                 collector=collector
             )
+            to_run.append((context_index, execution))
 
-            remaining = max_time - (time.perf_counter() - start)
-            execution_result, m, s, p = execute_context(bundle, execution,
-                                                        remaining)
+        if parallel:
+            result = _parallel_execution(bundle, tab_index, to_run, start, max_time)
+        else:
+            result = _single_execution(bundle, to_run, start, max_time)
 
-            collector.add_context(StartContext(description=context.description),
-                                  context_index)
-
-            remaining = max_time - (time.perf_counter() - start)
-            continue_ = evaluate_results(
-                    bundle,
-                    context=context,
-                    exec_results=execution_result,
-                    compiler_results=(m, s),
-                    context_dir=p,
-                    collector=collector,
-                    max_time=remaining)
-            collector.add_context(CloseContext(), context_index)
-            if continue_ == Status.TIME_LIMIT_EXCEEDED:
-                assert not collector.collected
-                collector.terminate(continue_)
-                return
+        if result == Status.TIME_LIMIT_EXCEEDED:
+            assert not collector.collected
+            collector.terminate(result)
+            return
         collector.add_tab(CloseTab(), tab_index)
     collector.add(CloseJudgment())
     collector.clean_finish()
+
+
+def _single_execution(bundle: Bundle,
+                      items: List[Tuple[int, ContextExecution]],
+                      start: float,
+                      max_time: float) -> Optional[Status]:
+    """
+    Process items in a non-threaded way.
+
+    :param bundle: The configuration bundle.
+    :param items: The contexts to execute.
+    :param start: The start time.
+    :param max_time: The max amount of time.
+    """
+    for context_index, execution in items:
+        execution.collector.add_context(
+            StartContext(description=execution.context.description), context_index
+        )
+
+        remaining = max_time - (time.perf_counter() - start)
+        execution_result, m, s, p = execute_context(bundle, execution, remaining)
+        continue_ = evaluate_results(
+                bundle,
+                context=execution.context,
+                exec_results=execution_result,
+                compiler_results=(m, s),
+                context_dir=p,
+                collector=execution.collector,
+                max_time=remaining)
+        execution.collector.add_context(CloseContext(), context_index)
+        if continue_ == Status.TIME_LIMIT_EXCEEDED:
+            return continue_
+
+
+def _parallel_execution(bundle: Bundle,
+                        tab: int,
+                        items: List[Tuple[int, ContextExecution]],
+                        start: float,
+                        max_time: float):
+    """
+    Execute a list of contexts in parallel.
+
+    :param bundle: The configuration bundle.
+    :param items: The contexts to execute.
+    :param start: The start time.
+    :param max_time: The max amount of time.
+    """
+    processor = ResultProcessor(bundle.plan, tab)
+
+    def threaded_execution(params: Tuple[int, ContextExecution]):
+        """The function executed in parallel."""
+        context_index, execution = params
+        remaining = max_time - (time.perf_counter() - start)
+        execution_result, m, s, p = execute_context(bundle, execution, remaining)
+
+        def evaluation_function():
+            execution.collector.add_context(
+                StartContext(description=execution.context.description),
+                context_index
+            )
+            continue_ = evaluate_results(
+                bundle,
+                context=execution.context,
+                exec_results=execution_result,
+                compiler_results=(m, s),
+                context_dir=p,
+                collector=execution.collector,
+                max_time=remaining)
+            execution.collector.add_context(CloseContext(), context_index)
+            return continue_
+
+        processor.submit(context_index, evaluation_function)
+
+    # Start a thread that will process results.
+    eval_thread = Thread(target=processor.processing_thread)
+    eval_thread.start()
+
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        result = executor.map(threaded_execution, items, timeout=max_time)
+        eval_thread.join()
+        try:
+            if Status.TIME_LIMIT_EXCEEDED in result:
+                return Status.TIME_LIMIT_EXCEEDED
+        except TimeoutError:
+            return Status.TIME_LIMIT_EXCEEDED
 
 
 def _generate_files(bundle: Bundle,

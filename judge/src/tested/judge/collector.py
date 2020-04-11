@@ -175,6 +175,7 @@ class OutputManager:
             except TypeError:
                 command = close_for(to_close)()
             self._add(command)
+        self.collected = True
 
     def clean_finish(self):
         """Assert that the collector has terminated cleanly."""

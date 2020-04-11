@@ -28,7 +28,7 @@ class Options:
     TESTed-specific options. Putting these options in the exercise config allows to
     override them for each exercise, and not
     """
-    parallel: bool = True
+    parallel: bool = False
     """
     Indicate that the contexts should be executed in parallel. It is recommended to
     disable this for exercises that already are multithreaded. It may also be worth

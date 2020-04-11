@@ -1,4 +1,4 @@
-\chapter{TESTed}\label{ch:de-universele-judge}
+\chapter{TESTed}\label{ch:tested}
 
 \lettrine{I}{n het kader} van deze masterproef werd een prototype geïmplementeerd van een judge voor Dodona.
 Het doel hiervan is een antwoord te bieden aan de onderzoeksvraag uit het vorige hoofdstuk en de beperkingen van deze aanpak in kaart te brengen.
@@ -927,7 +927,7 @@ Zo schrijven de Java-kernel en de Julia-kernel bij het opstarten altijd een bood
 
 \subsection{Sjablonen}\label{subsec:sjablonen}
 
-De keuze viel om verder te gaan met een systeem van sjablonen (zie ook \cref{subsec:testcode-genereren}).
+We kozen ervoor om verder te gaan met een systeem van sjablonen (zie ook \cref{subsec:testcode-genereren}).
 Hierbij wordt de code gegenereerd en vervolgens uitgevoerd via de commandoregel.
 
 Voordelen ten opzichte van de Jupyter-kernels zijn:
@@ -936,39 +936,68 @@ Voordelen ten opzichte van de Jupyter-kernels zijn:
     \item Het laat meer vrijheid toe in hoe de resultaten (gedrag en neveneffecten) van het uitvoeren van de testcode verzameld worden.
     \item Het implementeren en configureren van een programmeertaal in TESTed met de basisfunctionaliteit is minder werk dan dan het implementeren van een nieuwe Jupyter-kernel.
     Optionele functionaliteit, zoals linting, kan ervoor zorgen dat meer tijd en werk nodig is bij het toevoegen van een programmeertaal.
-    Het systeem met de sjablonen hanteert echter het designprincipe dat optionele functionaliteit geen bijkomend werk mag betekenen voor programmeertalen die er geen gebruik van maken.
+    Het systeem met de sjablonen hanteert echter het designprincipe dat optionele functionaliteit geen bijkomend werk mag vragen voor programmeertalen die er geen gebruik van maken.
     \item Er is geen verschil tussen hoe TESTed de ingediende oplossing uitvoert en hoe de student diezelfde oplossing uitvoert.
     Bij de Jupyter-kernels is dat soms wel het geval: bij de R-kernel zitten subtiele verschillen tussen het uitvoeren in de kernel en het uitvoeren op de commandoregel.
     \item Herbruikbaar in die zin dat het genereren van testcode in een programmeertaal op basis van de programmeertaalonafhankelijke specificatie in het testplan sowieso nodig is.
-    \item De gegenereerde testcode bestaat uit normale codebestanden (bv.\ \texttt{.py}- of \texttt{.java}-bestanden), wat het toevoegen van een programmeertaal aan TESTed eenvoudiger te debuggen maakt: alle gegenereerde testcode is beschikbaar voor inspectie als een bestand.
+    \item De gegenereerde testcode bestaat uit normale codebestanden (bv.\ \texttt{.py}- of \texttt{.java}-bestanden), wat het toevoegen van een programmeertaal aan TESTed eenvoudiger te debuggen maakt: alle gegenereerde testcode is in een bestand beschikbaar voor inspectie.
 \end{itemize}
 
 Elke medaille heeft ook een keerzijde:
 \begin{itemize}
-    \item Het gebruik van sjablonen zorgt ervoor dat het uitvoeren van de testcode minder dynamisch kan zijn.
+    \item Het gebruik van sjablonen zorgt ervoor dat het uitvoeren van de testcode minder dynamisch is.
     Daar de testcode eerst gegenereerd moet worden, moet vóór het uitvoeren bepaald worden welke testcode zal uitgevoerd worden.
-    \item Er moet meer zelf geïmplementeerd worden: het ecosysteem van Jupyter is redelijk groot, en er bestaan kernels voor veel talen (of in elk geval een begin van een kernel, waarop verder zou kunnen gewerkt worden)\footnote{Zie deze pagina voor een lijst van kernels: \url{https://github.com/jupyter/jupyter/wiki/Jupyter-kernels}.}.
+    \item Er moet meer zelf geïmplementeerd worden: het ecosysteem van Jupyter is groot.
+    Er bestaan meer dan honderden kernels\footnote{Zie deze pagina voor een actuele lijst van kernels: \url{https://github.com/jupyter/jupyter/wiki/Jupyter-kernels}.}, goed voor ondersteuning voor meer dan tachtig programmeertalen.
+    Niet elke kernel is onmiddellijk bruikbaar, maar er kan verder gewerkt worden op wat bestaat.
     \item Het uitvoeren op de commandoregel is bij veel programmeertalen trager indien er geen reset moet gebeuren tussen de verschillende uitvoeringen.
-    Bij het uitvoeren op de commandoregel is er bij veel programmeertalen de performantiekost van het opstarten van de interpreter (zoals Python) of virtuele machine (zoals Java).
+    Bij het uitvoeren op de commandoregel is er bij veel programmeertalen een performantiekost bij het opstarten van de interpreter (zoals Python) of virtuele machine (zoals Java).
     Bij een kernel is de opstartkost weliswaar groter, maar deze wordt maar één keer opgestart als er geen reset nodig is.
 \end{itemize}
 
-Bij een eerste iteratie van het systeem met sjablonen bestond enkel de contextcompilatie (zie opnieuw \cref{subsec:testcode-genereren} voor een beschrijving van deze term).
+Bij een eerste iteratie van het systeem met sjablonen bestond enkel de \textbf{contextcompilatie} (\cref{subsec:testcode-genereren}).
 Dit heeft een grote performantiekost bij alle programmeertalen, maar in het bijzonder bij talen zoals Java.
 Daar moest voor elke context eerst een compilatie plaatsvinden, waarna de gecompileerde testcode werd uitgevoerd.
 Bij een testplan met bijvoorbeeld 50 contexten vertaalt dit zich in 50 keer de \texttt{javac}-compiler uitvoeren en ook 50 keer het uitvoeren van de code zelf met \texttt{java}.
 
-In een tweede iteratie werd een "partiële compilatie" geïmplementeerd.
+In een tweede iteratie werd een \textbf{partiële compilatie} geïmplementeerd.
 Het idee hier is dat er veel testcode is die hetzelfde blijft voor elke context (denk aan de ingediende oplossing en hulpbestanden van TESTed).
 In de partiële compilatie wordt de gemeenschappelijke testcode eerst gecompileerd (bij programmeertalen die dat ondersteunen).
-Bij het beoordelen van een context werd dan enkel de testcode specifiek voor te beoordelen context gecompileerd.
+Bij het beoordelen van een context wordt dan enkel de testcode specifiek voor de te beoordelen context gecompileerd.
 
-In een derde iteratie werd de partiële compilatie uitgebreid naar batchcompilatie.
+In een derde iteratie werd de partiële compilatie uitgebreid naar \textbf{batchcompilatie}.
 Hoewel dit een grote winst voor de uitvoeringstijd betekende, heeft deze modus wel een ander groot nadeel (zoals reeds vermeld in \cref{subsec:testcode-genereren}): bij statische talen zorgen compilatiefouten in één context ervoor dat geen enkele context beoordeeld kan worden, daar de compilatiefout ervoor zorgt dat er geen code gegenereerd wordt.
 Dit wordt best geïllustreerd met het reeds vermelde scenario van een oefening waarbij de student twee functies dient te implementeren.
 In batchcompilatie in bijvoorbeeld Java kan de student niet de oplossing voor de eerste functie indienen en laten beoordelen: omdat de tweede functie ontbreekt zullen compilatiefouten optreden.
 
 De laatste en huidige iteratie bevat de mogelijkheid om contextcompilatie en batchcompilatie te combineren, waarbij TESTed terugvalt op de contextcompilatie indien er iets misgaat bij de batchcompilatie.
+Dit terugvalmechanisme is geen geavanceerd systeem: faalt de compilatie, wordt onmiddellijk elke context afzonderlijk gecompileerd.
+Een mogelijke optimalisatie bestaat er uit een tussenoplossing toe te passen, door bijvoorbeeld compilatie op het niveau van tabbladen proberen (dit wordt verder besproken in \cref{subsec:future-performance}).
+
+\subsubsection{Parallelle uitvoering van contexten}
+
+Een ander aspect is de ondersteuning voor parallelle uitvoering van de contexten.
+Eerdere iteraties van TESTed hadden hier ondersteuning voor, terwijl er in de huidige versie geen ondersteuning meer voor is.
+
+De hoofdreden heeft te maken met hoe TESTed communiceert met Dodona (de manier waarop dit gebeurt wordt bepaald door het uitvoerformaat).
+Er zijn twee varianten van dit uitvoerformaat: een volledige en een partieel uitvoerformaat.
+Het verschil tussen beide situeert zich vooral in hoe de resultaten van de beoordeling tot bij Dodona geraken: bij het volledige formaat wordt de volledige beoordeling (onderverdeeld volgens de tabbladen, contexten, testgevallen en testen) op het einde, na de beoordeling, naar Dodona gestuurd.
+Bij het partiële formaat loopt dit anders: daar wordt het resultaat van een onderdeel (bijvoorbeeld een context) onmiddellijk naar Dodona gestuurd als het beschikbaar is.
+Een voordeel aan dit partiële formaat is dat indien de geheugen- of tijdslimiet overschreden wordt door een judge, de beschikbare uitvoer nog steeds wordt getoond aan de studenten.
+Dit zorgt ervoor dat de judge zelf minder implementatiewerk heeft.
+Het onmiddellijk uitschreven van beschikbare resultaten is echter niet mogelijk als de contexten in parallel worden uitgevoerd: het is wenselijk om de contexten wel aan de gebruiker te tonen in de volgorde dat ze in het testplan gedefinieerd zijn, niet in de volgorde dat ze uitgevoerd zijn.
+
+Bij de overweging om het parallel uitvoeren al dan niet te schrappen zijn ook volgende zaken in overweging genomen:
+
+\begin{itemize}
+    \item We vermoeden dat de tijdswinst van de parallelle uitvoering op Dodona minder groot zal zijn dan de winst geobserveerd in de tijdsmeting (zie \cref{tab:meting}).
+    De reden hiervoor is dat er op Dodona vaak meerdere gebruikers tezelfdertijd actief zijn en oplossingen indienen.
+    Al deze oplossingen worden reeds op een beperkt aantal servers beoordeeld, waardoor er minder ruimte is voor parallellisatie binnen de judge.
+    \item De parallelle uitvoering zorgt ervoor dat globale tijdslimieten minder nauwkeurig zijn.
+    Doordat
+\end{itemize}
+
+
 Een eerdere versie van deze iteratie TESTed bevatte ook de mogelijkheid om contexten in parallel uit te voeren, wat mogelijk is omdat ze onafhankelijk zijn.
 Uiteindelijk is ervoor gekozen dit niet te doen, door meerdere redenen:
 
