@@ -36,8 +36,9 @@ class ContextExecution(NamedTuple):
     """
     Arguments used to execute_module a single context of the testplan.
     """
-    context: Context
-    context_name: str
+    context: Context  # The context object.
+    context_name: str  # Name of the context instance (used in code)
+    context_index: int  # Index of the context within the tab.
     mode: ExecutionMode
     common_directory: Path
     files: List[str]

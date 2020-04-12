@@ -18,15 +18,16 @@ def read_config() -> DodonaConfig:
     """Read the configuration from stdout"""
     return DodonaConfig(**{
         "memory_limit":         536870912,
-        "time_limit":           60,
+        "time_limit":           4,
         "programming_language": 'python',
         "natural_language":     'nl',
-        "resources":            Path('../exercise/lotto/evaluation'),
-        "source":               Path('../exercise/lotto/solution/correct.py'),
+        "resources":            Path('../exercise/isbn/evaluation'),
+        "source":               Path('../exercise/isbn/solution/solution.py'),
         "judge":                Path('../judge/src/'),
         "workdir":              Path('./workdir'),
         "plan_name":            "plan.json",
         "options":              {
+            "parallel": True,
             "allow_fallback": False,
             "linter":         {
                 "python": False
@@ -40,7 +41,7 @@ if __name__ == '__main__':
 
     # Enable logging
     log = logging.getLogger()
-    log.setLevel(logging.CRITICAL)
+    log.setLevel(logging.WARNING)
     ch = logging.StreamHandler(stream=sys.stdout)
     formatter = logging.Formatter('%(name)s:%(levelname)s:%(message)s')
     ch.setFormatter(formatter)

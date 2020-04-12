@@ -1,19 +1,17 @@
+import concurrent
 import logging
 import shutil
 from concurrent.futures.thread import ThreadPoolExecutor
-from multiprocessing.dummy import Pool
-from threading import Thread
-
-import time
 from pathlib import Path
 from typing import Tuple, List
+
+import time
 
 from .collector import OutputManager
 from .compilation import run_compilation, process_compile_results
 from .evaluation import evaluate_results
 from .execution import ContextExecution, execute_context
 from .linter import run_linter
-from .processor import ResultProcessor
 from .utils import copy_from_paths_to_path
 from ..configs import Bundle
 from ..dodona import *
@@ -136,7 +134,7 @@ def judge(bundle: Bundle):
     # Create a list of contexts we want to execute.
     for tab_index, tab in enumerate(bundle.plan.tabs):
         collector.add_tab(StartTab(title=tab.name), tab_index)
-        to_run = []
+        executions = []
         for context_index, context in enumerate(tab.contexts):
 
             execution = ContextExecution(
@@ -145,18 +143,20 @@ def judge(bundle: Bundle):
                     tab_number=tab_index,
                     context_number=context_index
                 ),
+                context_index=context_index,
                 mode=mode,
                 common_directory=common_dir,
                 files=files,
                 precompilation_result=precompilation_result,
                 collector=collector
             )
-            to_run.append((context_index, execution))
+            executions.append(execution)
 
+        remaining = max_time - (time.perf_counter() - start)
         if parallel:
-            result = _parallel_execution(bundle, tab_index, to_run, start, max_time)
+            result = _parallel_execution(bundle, executions, remaining)
         else:
-            result = _single_execution(bundle, to_run, start, max_time)
+            result = _single_execution(bundle, executions, remaining)
 
         if result == Status.TIME_LIMIT_EXCEEDED:
             assert not collector.collected
@@ -168,20 +168,20 @@ def judge(bundle: Bundle):
 
 
 def _single_execution(bundle: Bundle,
-                      items: List[Tuple[int, ContextExecution]],
-                      start: float,
+                      items: List[ContextExecution],
                       max_time: float) -> Optional[Status]:
     """
     Process items in a non-threaded way.
 
     :param bundle: The configuration bundle.
     :param items: The contexts to execute.
-    :param start: The start time.
     :param max_time: The max amount of time.
     """
-    for context_index, execution in items:
+    start = time.perf_counter()
+    for execution in items:
         execution.collector.add_context(
-            StartContext(description=execution.context.description), context_index
+            StartContext(description=execution.context.description),
+            execution.context_index
         )
 
         remaining = max_time - (time.perf_counter() - start)
@@ -193,37 +193,34 @@ def _single_execution(bundle: Bundle,
                 compiler_results=(m, s),
                 context_dir=p,
                 collector=execution.collector,
-                max_time=remaining)
-        execution.collector.add_context(CloseContext(), context_index)
+                max_time=remaining
+        )
+        execution.collector.add_context(CloseContext(), execution.context_index)
         if continue_ == Status.TIME_LIMIT_EXCEEDED:
             return continue_
 
 
 def _parallel_execution(bundle: Bundle,
-                        tab: int,
-                        items: List[Tuple[int, ContextExecution]],
-                        start: float,
-                        max_time: float):
+                        items: List[ContextExecution],
+                        max_time: float) -> Optional[Status]:
     """
     Execute a list of contexts in parallel.
 
     :param bundle: The configuration bundle.
     :param items: The contexts to execute.
-    :param start: The start time.
     :param max_time: The max amount of time.
     """
-    processor = ResultProcessor(bundle.plan, tab)
+    start = time.perf_counter()  # Accessed from threads.
 
-    def threaded_execution(params: Tuple[int, ContextExecution]):
+    def threaded_execution(execution: ContextExecution):
         """The function executed in parallel."""
-        context_index, execution = params
-        remaining = max_time - (time.perf_counter() - start)
-        execution_result, m, s, p = execute_context(bundle, execution, remaining)
+        remainder = max_time - (time.perf_counter() - start)
+        execution_result, m, s, p = execute_context(bundle, execution, remainder)
 
-        def evaluation_function():
+        def evaluation_function(eval_remainder):
             execution.collector.add_context(
                 StartContext(description=execution.context.description),
-                context_index
+                execution.context_index
             )
             continue_ = evaluate_results(
                 bundle,
@@ -232,23 +229,24 @@ def _parallel_execution(bundle: Bundle,
                 compiler_results=(m, s),
                 context_dir=p,
                 collector=execution.collector,
-                max_time=remaining)
-            execution.collector.add_context(CloseContext(), context_index)
+                max_time=eval_remainder
+            )
+            execution.collector.add_context(CloseContext(), execution.context_index)
             return continue_
-
-        processor.submit(context_index, evaluation_function)
-
-    # Start a thread that will process results.
-    eval_thread = Thread(target=processor.processing_thread)
-    eval_thread.start()
+        return evaluation_function
 
     with ThreadPoolExecutor(max_workers=4) as executor:
-        result = executor.map(threaded_execution, items, timeout=max_time)
-        eval_thread.join()
+        remaining = max_time - (time.perf_counter() - start)
+        results = executor.map(threaded_execution, items, timeout=remaining)
         try:
-            if Status.TIME_LIMIT_EXCEEDED in result:
-                return Status.TIME_LIMIT_EXCEEDED
-        except TimeoutError:
+            for eval_function in list(results):
+                remaining = max_time - (time.perf_counter() - start)
+                if eval_function(remaining) == Status.TIME_LIMIT_EXCEEDED:
+                    # Ensure finally is called NOW and cancels remaining tasks.
+                    del results
+                    return Status.TIME_LIMIT_EXCEEDED
+        except concurrent.futures.TimeoutError:
+            _logger.warning("Futures did not end soon enough.", exc_info=True)
             return Status.TIME_LIMIT_EXCEEDED
 
 
