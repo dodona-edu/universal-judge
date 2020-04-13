@@ -977,7 +977,21 @@ Een mogelijke optimalisatie bestaat er uit een tussenoplossing toe te passen, do
 \subsubsection{Parallelle uitvoering van contexten}
 
 Een ander aspect is de ondersteuning voor parallelle uitvoering van de contexten.
-Eerdere iteraties van TESTed hadden hier ondersteuning voor, terwijl er in de huidige versie geen ondersteuning meer voor is.
+Zoals al enkele malen aangehaald zijn de contexten van het testplan volledig onafhankelijk van elkaar, waardoor ze zich ertoe lenen om parallel uitgevoerd te worden.
+
+Een eerste opmerking hierbij is dat de tijdswinst op Dodona kleiner waarschijnlijk zal zijn dan de tijdswinst geobserveerd in de tijdsmetingen (\cref{tab:meting}).
+De reden hiervoor is dat Dodona een beperkt aantal \english{workers} heeft die beoordelingen uitvoeren.
+Doordat er meerdere gebruikers tegelijk oplossingen indienen, zal er niet altijd ruimte zijn voor parallellisatie binnen de judge.
+
+Een tweede opmerking is dat er verschillende beperkingen of opmerkingen zijn in de implementatie:
+
+\begin{itemize}
+    \item
+    \item De parallelle uitvoering heeft enkel betrekking op het uitvoeren van de contexten, niet op de beoordeling ervan.
+    De beoordeling gebeurt nog steeds sequentieel.
+    \item
+
+\end{itemize}
 
 De hoofdreden heeft te maken met hoe TESTed communiceert met Dodona (de manier waarop dit gebeurt wordt bepaald door het uitvoerformaat).
 Er zijn twee varianten van dit uitvoerformaat: een volledige en een partieel uitvoerformaat.
@@ -1040,10 +1054,10 @@ Bij Python is de compilatie veel sneller en ook veel minder belangrijk (zelfs op
         \hline
         \multicolumn{1}{|l|}{Oefening}               & Compilatie & 1 thread & 4 threads & 1 thread & 4 threads \\
         \hline
-        \multicolumn{1}{|l|}{\multirow{3}{*}{Lotto}} & Context    & 13       & 9         & 48       & 36        \\
-        \multicolumn{1}{|l|}{}                       & Partieel   & 9        & 6         & 46       & 25        \\
-        \multicolumn{1}{|l|}{}                       & Batch      & 8        & 5         & 14       & 10        \\
-        \multicolumn{1}{|l|}{}                       & Evaluatie  & 5        & -         & 10       & -         \\
+        \multicolumn{1}{|l|}{\multirow{3}{*}{Lotto}} & Context    & 13       & 9         & 51       & 38        \\
+        \multicolumn{1}{|l|}{}                       & Partieel   & 9        & 7         & 46       & 25        \\
+        \multicolumn{1}{|l|}{}                       & Batch      & 9        & 6         & 12       & 10        \\
+        \multicolumn{1}{|l|}{}                       & Evaluatie  & 5        & 3         & 9        & 6         \\
         \hline
         \multicolumn{1}{|l|}{\multirow{3}{*}{Echo}}  & Context    & 6        & 3         & 48       & 28        \\
         \multicolumn{1}{|l|}{}                       & Partieel   & 5        & 3         & 46       & 26        \\

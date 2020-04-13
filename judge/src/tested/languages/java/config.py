@@ -38,7 +38,7 @@ class JavaConfig(Language):
                           arguments: List[str]) -> List[str]:
         cp = self._classpath_separator().join(self._get_classpath() + ["."])
         name = Path(file).stem
-        return ["java", "-cp", cp, self.conventionalise_namespace(name), *arguments]
+        return ["java", "-cp", cp, name, *arguments]
 
     def file_extension(self) -> str:
         return "java"

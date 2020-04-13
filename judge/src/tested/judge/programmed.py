@@ -48,7 +48,7 @@ def evaluate_programmed(
         )
 
     # We have special support for Python.
-    if evaluator.language == "python":
+    if evaluator.language == "python" and bundle.config.options.optimized:
         return _evaluate_python(bundle, evaluator, expected, actual, timeout)
     else:
         return _evaluate_others(bundle, evaluator, expected, actual, timeout)
@@ -63,7 +63,6 @@ def _evaluate_others(bundle: Bundle,
     Evaluate in all languages but Python. The re-uses the infrastructure of the
     templates and execution facilities of the language config.
     """
-    assert evaluator.language != "python"
     _logger.debug("Doing evaluation in non-Python mode.")
     start = time.perf_counter()
 

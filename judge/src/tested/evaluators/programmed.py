@@ -32,7 +32,7 @@ def _maybe_string(value_: str) -> Optional[Value]:
 
 
 def _try_specific(value_: str) -> EvalResult:
-    return EvalResult.__pydantic_model__.parse_raw(value_)
+    return EvalResult.parse_raw(value_)
 
 
 def expected_as_value(config: EvaluatorConfig,

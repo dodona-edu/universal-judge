@@ -222,7 +222,7 @@ class Language:
         """
         return [], []
 
-    def run_linter(self, bundle: Bundle, submission: Path, remaining: int) \
+    def run_linter(self, bundle: Bundle, submission: Path, remaining: float) \
             -> Tuple[List[Message], List[AnnotateCode]]:
         """
         Run a linter or other code analysis tools on the submission.

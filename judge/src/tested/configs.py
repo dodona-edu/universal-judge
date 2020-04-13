@@ -54,9 +54,9 @@ class Options:
     Controls running the linter for languages. Default is True. Of course, for
     languages without linter implementation, this does nothing.
     """
-    show_unprocessed: bool = False
+    optimized: bool = True
     """
-    If testcases that were not run should be shown or not.
+    If the custom Python evaluator should be optimized or not.
     """
 
 
