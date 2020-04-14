@@ -2,7 +2,7 @@
 
 \lettrine{D}{e evoluties} op technologisch vlak hebben ervoor gezorgd dat onze maatschappij de laatste decennia in hoge mate gedigitaliseerd is, een proces dat nog steeds aan de gang is.
 Bovendien kan, door de snelheid waarmee deze veranderingen vaak optreden, eerder gesproken worden van een revolutie dan een evolutie: de veranderingen zijn vaak ingrijpend en veranderen fundamentele aspecten van de sectoren waarin de digitalisering plaatsvindt.
-Dit gaat over het ontstaan van nieuwe sectoren, zoals de deeleconomie, maar ook ingrijpende veranderingen bij bestaande sectoren, zoals de opkomst van \english{ride sharing} in de taxisector.
+Dit gaat over het ontstaan van nieuwe sectoren, zoals de deeleconomie, maar ook over ingrijpende veranderingen bij bestaande sectoren, zoals de opkomst van \english{ride sharing} in de taxisector.
 Ook de impact op maatschappelijk vlak, zoals de sociale media in de politiek, mag niet vergeten worden \autocite{hipeac2019}.
 
 Ook op educatief vlak heeft de digitalisering een grote impact.
@@ -32,9 +32,9 @@ Bovendien is programmeren op zich ook een nuttige vaardigheid om studenten aan t
 
 Het aanleren van programmeren is niet eenvoudig en wordt door veel studenten als moeilijk ervaren \autocite{10.1145/3293881.3295779}.
 Het maken van oefeningen kan daarbij helpen, indachtig het spreekwoord "oefening baart kunst".
-Studenten veel oefeningen laten maken, resulteert wel in twee uitdagingen voor de lesgevers:
+Studenten veel oefeningen laten maken resulteert wel in twee uitdagingen voor de lesgevers:
 \begin{enumerate}
-    \item Lesgevers moeten geschikte oefeningen opstellen, die rekening houden met welke programmeerconcepten studenten al kennen, tijdslimieten, moeilijkheidsgraden, enz.
+    \item Lesgevers moeten geschikte oefeningen opstellen, die rekening houden met welke programmeerconcepten studenten al kennen, tijdslimieten, moeilijkheidsgraden, enzovoort.
     Het opstellen van deze oefeningen vraagt veel tijd.
     \item De oplossingen voor deze oefeningen moeten voorzien worden van kwalitatieve feedback.
     Bij het aanleren van programmeren is feedback een belangrijk aspect om de programmeervaardigheden van de studenten te verbeteren \autocite{10.1145/2899415.2899422}.
@@ -52,9 +52,9 @@ Het doel van Dodona is eenvoudig: lesgevers bijstaan om hun studenten niet allee
 
 Het online leerplatform Dodona kan opgedeeld worden in verschillende onderdelen:
 \begin{enumerate}
-    \item Het \textbf{leerplatform} zelf is een webapplicatie, die verantwoordelijk is om alle modules samen te laten werken en die ook de webinterface aanbiedt die de studenten en lesgevers gebruiken.
+    \item Het \textbf{leerplatform} zelf is een webapplicatie, die verantwoordelijk is om de verschillende onderdelen samen te laten werken en die ook de webinterface aanbiedt die de studenten en lesgevers gebruiken.
     Het is via deze interface dat lesgevers oefeningen beschikbaar maken en dat studenten hun oplossingen indienen.
-    Het platform zelf is programmeertaalonafhankelijk geschreven.
+    Het platform zelf is zo opgebouwd dat het onafhankelijk is van de programmeertaal van de oefeningen.
     \item De \textbf{judges} binnen Dodona zijn verantwoordelijk voor het beoordelen van ingediende oplossingen.
     Dit onderdeel wordt uitgebreid besproken in \cref{sec:evalueren-van-een-oplossing}.
     \item De \textbf{oefeningen} worden niet in Dodona zelf aangemaakt, maar worden door de lesgever aangeleverd via een git-repository.
@@ -63,30 +63,30 @@ Het online leerplatform Dodona kan opgedeeld worden in verschillende onderdelen:
 
 Met Dodona kunnen lesgevers een leertraject opstellen door een reeks oefeningen te selecteren.
 Studenten die dit leertraject volgen, zien onmiddellijk hun voortgang binnen het traject.
-Bij het indienen van hun oplossingen ontvangen de studenten ook onmiddellijk feedback over hun oplossing: deze feedback bevat niet alleen de correctheid van de oplossing, maar kan ook andere aspecten belichten, zoals de kwaliteit (bv.\ de programmeerstijl), het resultaat van het uitvoeren van linters, en de performantie van de oplossing.
+Bij het indienen van hun oplossingen ontvangen de studenten ook onmiddellijk feedback over hun oplossing: deze feedback bevat niet alleen de correctheid van de oplossing, maar kan ook andere aspecten belichten, zoals de kwaliteit van de oplossing (onder andere de programmeerstijl), het resultaat van het uitvoeren van linters, en de performantie van de oplossing.
 
 \section{Beoordelen van oplossingen}\label{sec:evalueren-van-een-oplossing}
 
 In Dodona wordt elke ingediende oplossing beoordeeld door een evaluatieprogramma, de \termen{judge}.
-In wezen is dit een eenvoudig programma: via de standaardinvoerstroom (\texttt{stdin}) krijgt het programma een configuratie binnen van Dodona.
-Deze configuratie bevat onder andere de programmeertaal van de ingediende oplossing, de locatie van de oefeningenbestanden (die opgesteld zijn door de lesgever), de locatie van de ingediende oplossing zelf en configuratieopties, zoals geheugen- en tijdslimieten.
+In wezen is dit een eenvoudig programma: via de standaardinvoerstroom (\texttt{stdin}) krijgt het programma een configuratie van Dodona.
+Deze configuratie bevat onder andere de programmeertaal van de ingediende oplossing, de locatie van de oefeningenbestanden (via de git-repository van de oefening), de locatie van de ingediende oplossing zelf en configuratieopties, zoals geheugen- en tijdslimieten.
 Het resultaat van de beoordeling wordt uitgeschreven naar de standaarduitvoerstroom (\texttt{stdout}).
-Zowel de invoer als de uitvoer van de judge zijn \acronym{JSON}, waarvan het formaat vastgelegd is in \acronym{JSON} Schema.\footnote{Dit schema en een tekstuele beschrijving ervan is te vinden in de handleiding op \url{https://dodona-edu.github.io/en/guides/creating-a-judge/}.}
+Zowel de invoer als de uitvoer van de judge zijn \acronym{JSON}, waarvan de structuur vastgelegd is in \acronym{JSON} Schema.\footnote{Dit schema en een tekstuele beschrijving ervan is te vinden in de handleiding op \url{https://dodona-edu.github.io/en/guides/creating-a-judge/}.}
 
 Concreet wordt elke beoordeling uitgevoerd in een Docker-container.
 Deze Docker-container wordt gemaakt op basis van een Docker-image die bij de judge hoort, en alle dependencies bevat die de judge in kwestie nodig heeft.
 Bij het uitvoeren van de beoordeling zal Dodona een \english{bind mount}\footnote{Informatie over deze term is te vinden op \url{https://docs.docker.com/storage/bind-mounts/}} voorzien, zodat de code van de judge zelf, de code van de oefening en de code van de ingediende oplossing beschikbaar zijn in de container.
-Via de configuratie geeft Dodona aan de judge aan waar deze bestanden zich bevinden.
+Via de configuratie geeft Dodona aan de judge mee waar deze bestanden zich bevinden.
 
 Samenvattend bestaat interface tussen de judge en Dodona uit drie onderdelen:
 
 \begin{enumerate}
     \item De judge zal uitgevoerd worden in een Docker-container, dus een Docker-image met alle dependencies moet voorzien worden.
     Deze Docker-image moet ook de judge opstarten.
-    \item De judge stelt de invoer van een beoordeling ter beschikking voor de judge.
+    \item De judge stelt de invoer van een beoordeling ter beschikking aan de judge.
     Bestanden worden via een bind mount aan de Docker-container gekoppeld.
     De paden naar deze bestanden binnen de container en andere informatie (zoals programmeertaal van de oplossing of natuurlijke taal van de gebruiker) worden via de configuratie aan de judge gegeven (via de standaardinvoerstroom).
-    \item De judge moet het resultaat van zijn beoordeling uitschrijven naar de standaarduitvoerstroom, in een vastgelegd formaat.
+    \item De judge moet het resultaat van zijn beoordeling uitschrijven naar de standaarduitvoerstroom, in de vastgelegde structuur.
 \end{enumerate}
 
 Buiten deze interface legt Dodona geen vereisten op aan de werking van judge.
@@ -102,8 +102,8 @@ De beoordeling van een oplossing van een student verloopt als volgt:
 \begin{enumerate}
     \item De student dient de oplossing in via de webinterface van Dodona.
     \item Dodona start een Docker-container voor de judge.
-    \item Dodona voorziet de container van de bestanden van de judge, de oefening en de ingediende oplossing.
-    \item De judge wordt uitgevoerd met de configuratie als op de standaardinvoerstroom.
+    \item Dodona voorziet de container van de bestanden van de judge, de oefening en de ingediende oplossing van de bind mount.
+    \item De judge wordt uitgevoerd met de configuratie op de standaardinvoerstroom.
     \item De judge beoordeelt de oplossing aan de beoordelingsmethodes opgesteld door de lesgever (d.w.z.\ de jUnit-test, de doctests, \ldots).
     Judges kunnen ook bijkomende taken uitvoeren, zoals linting, beoordeling van de performantie of \english{grading} van de code van de oplossing.
     \item De judge vertaalt zijn beoordeling naar het Dodona-formaat en schrijft het resultaat naar de standaarduitvoerstroom.
@@ -116,7 +116,7 @@ De beoordeling van een oplossing van een student verloopt als volgt:
 De manier waarop de huidige judges werken resulteert in twee belangrijke nadelen.
 Bij het bespreken hiervan is het nuttig een voorbeeld in het achterhoofd te houden, teneinde de nadelen te kunnen concretiseren.
 Als voorbeeld gebruiken we de "Lotto"-oefening\footnote{Vrij naar een oefening van prof.\ Dawyndt.
-De originele oefening is beschikbaar op \url{https://dodona.ugent.be/nl/exercises/2025591548/}}, waarvan de opgave gegeven is in \cref{lst:lotto}.
+De originele oefening is beschikbaar op \url{https://dodona.ugent.be/nl/exercises/2025591548/}.}, waarvan de opgave gegeven is in \cref{lst:lotto}.
 Oplossingen voor deze oefening staan in \cref{lst:java-solution,lst:python-solution}, voor respectievelijk Python en Java.
 
 \begin{listing}
@@ -139,7 +139,7 @@ Oplossingen voor deze oefening staan in \cref{lst:java-solution,lst:python-solut
     \label{lst:java-solution}
 \end{listing}
 
-\subsection*{Opstellen van oefeningen}\label{subsec:opstellen-van-oefeningen}
+\subsection{Opstellen van oefeningen}\label{subsec:opstellen-van-oefeningen}
 
 Het eerste en belangrijkste nadeel aan de werking van de huidige judges heeft betrekking op de lesgevers en komt voor als zij een oefening willen aanbieden in meerdere programmeertalen.
 Enerzijds is dit een zware werklast: de oefening, en vooral de code voor de beoordeling, moet voor elke judge opnieuw geschreven worden.
@@ -148,7 +148,7 @@ Anderzijds lijdt dit ook tot verschillende versies van dezelfde oefening, wat he
 Als er bijvoorbeeld een fout sluipt in de beoordelingscode, zal de lesgever er aan moeten denken om de fout te verhelpen in alle varianten van de oefening.
 Bovendien geeft elke nieuwe versie van de oefening een nieuwe mogelijkheid voor het introduceren van fouten.
 
-Kijkt men naar de Lotto-oefening, dan valt op dat het gaat om een eenvoudige opgave en een eenvoudige oplossing.
+Kijken we naar de Lotto-oefening, dan valt op dat het gaat om een eenvoudige opgave en een eenvoudige oplossing.
 Bovendien zijn de verschillen tussen oplossingen in verschillende programmeertalen niet zo groot.
 In de voorbeeldoplossingen in Python en Java zijn de verschillen minimaal, zij het dat de Java-oplossing wat langer is.
 De Lotto-oefening zou zonder problemen in nog vele andere programmeertalen opgelost kunnen worden.
@@ -169,13 +169,13 @@ Deze evaluatiecode moet momenteel voor elke programmeertaal en dus elke judge op
 In de context van de Lotto-oefening controleert deze code bijvoorbeeld of de gegeven getallen binnen het bereik liggen en of ze gesorteerd zijn.
 Toch is deze evaluatiecode niet inherent programmeertaalafhankelijk: controleren of een lijst gesorteerd is, heeft weinig te maken met de programmeertaal van de oplossing.
 
-\subsection*{Implementeren van judges}\label{subsec:implementeren-van-judges}
+\subsection{Implementeren van judges}\label{subsec:implementeren-van-judges}
 
 Een tweede nadeel aan de huidige werking zijn de judges zelf: voor elke programmeertaal die men wil aanbieden in Dodona moet een nieuwe judge ontwikkeld worden.
 Ook hier is er dubbel werk: dezelfde concepten en features, die eigenlijk programmeertaalonafhankelijk zijn, moeten in elke judge opnieuw geïmplementeerd worden.
 Hierbij denken we aan bijvoorbeeld de logica om te bepalen wanneer een beoordeling positief of negatief moet zijn.
 
-\subsection*{Onderzoeksvraag}\label{subsec:onderzoeksvraag}
+\subsection{Onderzoeksvraag}\label{subsec:onderzoeksvraag}
 
 Het eerste nadeel wordt beschouwd als het belangrijkste nadeel en de focus van deze thesis.
 Het nadeel valt te formuleren als de onderzoeksvraag waarop deze thesis een antwoord wil bieden:
@@ -189,7 +189,7 @@ Als bijzaak is het ook interessant om na te gaan of het antwoord op de onderzoek
 
 De aandachtige lezer zal opmerken dat de opgave voor de Lotto-oefening (\cref{lst:lotto}) programmeertaalspecifieke en taalspecifieke elementen bevat.
 Zo zijn de voorbeelden in Python en zijn de namen van functies en argumenten in het Nederlands.
-Het ondersteunen van opgaves met programmeertaalonafhankelijke voorbeelden en vertalingen wordt voor deze thesis expliciet als \english{out-of-scope} gezien en zal niet behandeld worden, zij het in \cref{subsec:programmeertaalonafhankelijke-opgaven}.
+Het ondersteunen van opgaves met programmeertaalonafhankelijke voorbeelden en vertalingen wordt voor deze thesis expliciet als \english{out-of-scope} gezien en zullen niet behandeld worden, zij het in \cref{subsec:programmeertaalonafhankelijke-opgaven}.
 
 \section{Opbouw van de thesis}\label{sec:opbouw}
 
