@@ -18,6 +18,8 @@ from typing import Optional, Union, Literal, IO, Type
 from pydantic import BaseModel
 from pydantic.dataclasses import dataclass
 
+MAX_CHARACTERS = 10_000  # UTF-8 characters
+
 
 class Permission(str, Enum):
     """To which level of user this message is visible."""
@@ -219,11 +221,9 @@ class _EnhancedJSONEncoder(json.JSONEncoder):
 
 
 def _maybe_shorten(text: str) -> str:
-    lines = text.splitlines()
-    if len(lines) > 20:
-        lines = lines[:20] + ["\n[...Uitvoer is te lang...]\n"]
-    lines = [l[:150] + "..." if len(l) > 150 else l for l in lines]
-    return "\n".join(lines)
+    if len(text) > MAX_CHARACTERS:
+        text = text[:MAX_CHARACTERS] + "..."
+    return text
 
 
 def report_update(to: IO, update: Update):

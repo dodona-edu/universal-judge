@@ -121,7 +121,7 @@ Het testplan voor een oefening die enkel stdin en stdout gebruikt zal er helemaa
 Het zou bijvoorbeeld kunnen dat voor verschillende soorten oefeningen een andere \acronym{DSL} ontworpen wordt.
 
 Zo zijn er bijvoorbeeld meerdere standaarden voor het schrijven van programmeeroefeningen.
-Een programma dat oefening die in deze formaten beschreven zijn omzet naar het eigen formaat van TESTed kan een nuttige uitbreiding zijn.
+Een programma dat oefening, die in deze formaten beschreven zijn, omzet naar het eigen formaat van TESTed kan een nuttige uitbreiding zijn.
 Op het moment van schrijven lijken er echter nog geen wijdverspreide standaarden te zijn.
 Bij wijze van voorbeeld worden twee standaarden besproken, telkens met een beschrijving van dezelfde oefening, de \emph{Palindroom}-oefening.
 Bij deze voorbeeldoefening moet invoer gelezen worden en dan als uitvoer moet aangegeven worden of de invoer al dan niet een palindroom is.
@@ -129,7 +129,7 @@ Bij deze voorbeeldoefening moet invoer gelezen worden en dan als uitvoer moet aa
 Een eerste standaard is \acronym{PExIL} (\term{Programming Exercises Interoperability Language}) \autocite{queiros2011pexil}.
 Dit is een op \acronym{XML}-gebaseerd formaat, gepubliceerd in 2011.
 Ontwikkeling van deze standaard lijkt gestopt te zijn.
-We hebben geen online oefeningen gevonden die in dit formaat beschreven zijn en de de nodige resources voor het zelf schrijven van een oefeningen (zoals het \acronym{XML} Schema) zijn niet meer beschikbaar online.
+We hebben geen online oefeningen gevonden die in dit formaat beschreven zijn en de nodige resources voor het zelf schrijven van een oefeningen (zoals het \acronym{XML} Schema) zijn niet meer beschikbaar online.
 De beschrijving van de \emph{Palindroom}-oefening is \cref{lst:pexil}.
 
 \begin{listing}
@@ -171,7 +171,7 @@ Dit zou uitgebreid kunnen worden zodat het ook op het niveau van contexten werkt
 Dit systeem kan verder uitgebreid worden door aan elke context een unieke identificatiecode toe te kennen.
 Daarna kan voor elke context een preconditie gegeven worden: welke contexten moet geslaagd zijn om de huidige context uit te voeren.
 Zijn niet alle contexten uit de preconditie geslaagd, dan wordt de context niet uitgevoerd.
-Men kan bijvoorbeeld aangeven dat context 15 enkel uitgevoerd kan worden indien contexten 1, 7 en 14 ook succesvol waren.
+Het testplan kan bevatten dat context 15 enkel uitgevoerd kan worden indien contexten 1, 7 en 14 ook succesvol waren.
 
 \subsection{Herhaalde uitvoeringen van testgevallen}\label{subsec:herhaalde-uitvoeringen-van-testgevallen}
 
@@ -181,7 +181,7 @@ Een oefening waarbij waarden bijvoorbeeld uit een normale verdeling getrokken mo
 
 Dit is ook op te lossen met een uitbreiding van het testplan: per testgeval of per context zou kunnen aangeduid worden hoeveel keer deze moet uitgevoerd worden.
 Om de performantie te verbeteren, zouden ook stopvoorwaarden kunnen meegegeven worden.
-Een aspect dat dit complexer maakt is dat de evaluatoren (zowel de ingebouwde evaluatie binnen TESTed als de geprogrammeerde en programmeertaalspecifieke evaluatie) aangepast zullen moeten worden om niet enkel met één resultaat, maar met een reeks resultaten te werken.
+Een aspect dat dit complexer maakt, is dat de evaluatoren (zowel de ingebouwde evaluatie binnen TESTed als de geprogrammeerde en programmeertaalspecifieke evaluatie) aangepast zullen moeten worden om niet enkel met één resultaat, maar met een reeks resultaten te werken.
 
 \section{TESTed}\label{sec:beperkingen-tested}
 
@@ -213,7 +213,7 @@ De vertaling van de beschrijving van de opgave is dan weer geïmplementeerd in D
 Zo zullen \texttt{description.nl.md} en \texttt{description.en.md} gebruikt worden voor respectievelijk Nederlands en Engels.
 
 Een eenvoudige oplossing voor het vertalen in de code is iets gelijkaardigs doen met het testplan: \texttt{testplan.nl.json} en \texttt{testplan.en.json} voor respectievelijk Nederlands en Engels.
-Deze aanpak heeft wel als nadeel dat veel dingen in het testplan onnodig zullen gedupliceerd moeten worden;
+Deze aanpak heeft wel als nadeel dat veel zaken in het testplan onnodig zullen gedupliceerd moeten worden;
 een waarde \texttt{5} is niet taalafhankelijk.
 
 Een idee dat dit zou voorkomen is om binnen eenzelfde testplan ondersteuning te bieden voor vertalingen, bijvoorbeeld door telkens meerdere talen te aanvaarden.
@@ -286,42 +286,43 @@ Het omgekeerde, programmeertaalonafhankelijk invoer en programmeertaalspecifieke
 Als tot slot zowel de invoer als de uitvoer verschilt van programmeertaal tot programmeertaal, kan er niet meer gesproken worden van een programmeertaalonafhankelijke oefeningen.
 In dat geval is het beter een bestaande programmeertaalspecifieke judge van Dodona te gebruiken.
 
-\subsection{Kleinere functionaliteit}\label{subsec:kleinere-functies}
+\subsection{Extra functionaliteit}\label{subsec:kleinere-functies}
 
-Er zijn in de loop van de thesis verschillende kleinere features naar boven gekomen, waarvoor ook ondersteuning zou toegevoegd kunnen worden:
+Er is in de loop van de thesis extra functionaliteit naar boven gekomen, waarvoor ook ondersteuning zou toegevoegd kunnen worden:
 
 \begin{itemize}
     \item Ondersteuning voor Python Tutor.
-    Dit is een visuele debugger, origineel geschreven voor Python \autocite{10.1145/2445196.2445368}.
+    Dit is een visuele debugger, die origineel geschreven is voor Python \autocite{10.1145/2445196.2445368}.
     Ondertussen worden ook andere talen ondersteund, zoals Java, C++, JavaScript en Ruby.
     In Dodona ondersteunt momenteel enkel de Python-judge de Python Tutor.
     Het zou een mooie toevoeging zijn indien dit bij TESTed voor meerdere programmeertalen kan toegevoegd worden.
     \item Interpreteren van output van de compiler.
     Momenteel ondersteunt TESTed linting (zie \cref{sec:andere-taken}), maar bij sommige talen worden ook veel nuttige waarschuwingen getoond bij het compileren van de code.
-    Deze uitvoeren wordt momenteel getoond in TESTed, en er is ondersteuning om deze uitvoer om te zetten in annotaties op de code van de oplossing.
+    Deze waarschuwingen wordt momenteel getoond in TESTed, en er is ondersteuning om deze waarschuwingen om te zetten in annotaties op de code van de oplossing.
     Dit laatste is momenteel geïmplementeerd voor de compilatiestap in Python.
     De ondersteuning hiervoor zou uitgebreid kunnen worden naar andere talen en flexibeler gemaakt worden.
     Zo wordt de uitvoer van de compiler altijd getoond, ook al is die uitvoer omgezet naar annotaties (dezelfde informatie wordt dus dubbel getoond).
     \item Foutboodschappen beter afhandelen.
-    Als momenteel een fout optreed wordt de stacktrace zonder verdere verwerking getoond aan de gebruiker.
+    Als momenteel een fout optreedt, wordt de stacktrace zonder verdere verwerking getoond aan de gebruiker.
     Het is echter nuttig hier een verwerkingsstap toe te voegen, zodat:
     \begin{itemize}
         \item De code gegenereerd door TESTed weggefilterd kan worden.
-        Het kan verwarrend zijn voor studenten als er in de stacktrace code staat zij niet ingediend hebben.
+        Het kan verwarrend zijn voor studenten als de stacktrace verwijst naar code die zij niet ingediend hebben.
         \item Het aanbrengen van links naar specifieke plaatsen in de ingediende code.
         Als er bijvoorbeeld in de foutboodschap staat "fout op regel 5, kolom 10", dan zou een snelkoppeling naar die plaats in de code nuttig zijn.
-        Dit is ook iets onder andere door de Python-judge geïmplementeerd is.
+        Dodona biedt hier ondersteuning voor en dit wordt ook gebruikt in de Python-judge.
     \end{itemize}
     \item Lange uitvoer beperkt tonen.
-    TESTed bevat momenteel een zeer eenvoudige limiet: de uitvoer wordt beperkt tot 20 regels en de regellengte is beperkt tot 150 tekens.
+    TESTed bevat momenteel een eenvoudige limiet: de uitvoer wordt beperkt tot tienduizend tekens.
     Deze limiet houdt echter geen rekening met de aard van de uitvoer (bijvoorbeeld een boodschap van TESTed of de uitvoer van de compiler).
     Zo zou een stacktrace anders ingekort kunnen worden.
-    \item Waarden mooier weergeven (\english{pretty printing}).
-    Enerzijds gaat het om grote verzamelingen verkort weer te geven.
-    Is de uitvoer bijvoorbeeld een lijst van duizend elementen, zouden enkel de eerste tien getoond kunnen worden.
+    \item Datastructuren mooier weergeven (\english{pretty printing}).
+    Enerzijds gaat het om grote datastructuren verkort weer te geven.
+    Is de uitvoer bijvoorbeeld een lijst van duizend elementen, dan zouden enkel de eerste en laatste tien getoond kunnen worden.
     Momenteel worden alle waarden verbatim aan de studenten getoond.
-    Anderzijds gaat het ook om het beter weergeven van waarden om het vergelijken met de verwachte uitvoer eenvoudiger te maken.
-    Een voorbeeld hier zijn verzamelingen: door de verzameling gesorteerd te tonen wordt het zoeken naar bijvoorbeeld ontbrekende waarden een stuk eenvoudiger.
+    Anderzijds gaat het ook om het beter weergeven van waarden om het vergelijken met de verwachte uitvoer gemakkelijker te maken.
+    Een voorbeeld is verzamelingen gesorteerd tonen, zodat het vinden van de verschillen eenvoudiger wordt.
+    Ook het tonen van complexe datastructuren op meerdere regels is hier een voorbeeld van.
     \item Tijdslimieten op het niveau van de contexten.
     Momenteel is het enkel mogelijk om op het niveau van een oefening een tijdslimiet in te stellen.
     De implementatie hiervan zou eenvoudig moeten zijn: intern werkt TESTed al met een tijdslimiet per context, namelijk de totale tijdslimiet van de oefening minus de verstreken tijd.

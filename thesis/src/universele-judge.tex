@@ -1029,7 +1029,8 @@ Er is speciale ondersteuning in TESTed ingebouwd om geprogrammeerde evaluaties w
         \multicolumn{1}{|l|}{}                       & Batch             & 5        & 3         & 8        & 5         \\
         \hline
     \end{tabular}
-    \caption{Tijdsmetingen voor de oefeningen Lotto en Echo, voor de programmeertalen Python en Java, in contextcompilatie, partiële compilatie en batchcompilatie (bij Lotto is deze laatste uitgevoerd met en zonder optimalisatie voor geprogrammeerde evaluaties).}
+    \caption{Tijdsmetingen voor de oefeningen Lotto en Echo, voor de programmeertalen Python en Java, in contextcompilatie, partiële compilatie en batchcompilatie.
+        Bij Lotto is deze laatste uitgevoerd met en zonder optimalisatie voor geprogrammeerde evaluaties.}
     \label{tab:meting}
 \end{table}
 
@@ -1058,20 +1059,20 @@ Bij Python is de compilatie veel sneller en ook veel minder belangrijk (en zelfs
 \section{Bijkomende taken}\label{sec:andere-taken}
 
 Sommige judges doen meer dan enkel het oordelen over de juistheid van de ingediende oplossing.
-Zo heeft de Python-judge ondersteuning voor \term{linting}.
+Zo heeft onder andere de Python-judge ondersteuning voor \term{linting}.
 Dit betekent dat de code van de ingediende oplossing geanalyseerd (maar niet uitgevoerd) wordt om zo allerlei mogelijke problemen op te sporen, zoals stijlfouten, mogelijke bugs, verdachte constructies, enz.
 
-TESTed voorziet hier ondersteuning voor middels een optionele functie in de configuratie van een programmeertaal (zie \cref{ch:nieuwe-taal} voor het configureren van een taal in detail).
+TESTed voorziet hier ondersteuning voor middels een optionele functie in de configuratie van een programmeertaal (zie \cref{ch:nieuwe-taal} voor de details over het configureren van een taal).
 Deze functie krijgt als argumenten onder andere de configuratie, het testplan en het pad naar de code van de ingediende oplossing mee.
-Als resultaat geeft een de functie een lijst van berichten en annotaties, die naar Dodona gestuurd worden.
+Als resultaat geeft de functie een lijst van berichten en annotaties die naar Dodona gestuurd worden.
 Ter illustratie dat deze aanpak werkt, is linting geïmplementeerd voor Python.
 Ook geeft dit veel vrijheid: de implementatie in Python gebruikt een bestand voor het configureren van de linter, en het is mogelijk om de naam van een eigen configuratiebestand (uit de oefeningenrepository) mee te geven via de programmeertaalspecifieke configuratie van TESTed.
 Tot slot nog opmerken dat het formaat van de annotaties wordt voorgeschreven door Dodona, maar dit is voldoende generiek voor praktisch alle scenario's.
-Ze ondersteunen onder andere:
+Het formaat ondersteunt onder andere:
 
 \begin{itemize}
     \item Het aangeven van een gedetailleerde plaats in de ingediende oplossing, zoals de regel en kolom.
-    Het aanduiden van meerdere na elkaar of meerdere kolommen is ook mogelijk.
+    Het aanduiden van meerdere opeenvolgende regels of kolommen is ook mogelijk.
     \item De boodschap is vrij tekstveld.
     \item De ernst van de boodschap, met ondersteuning voor een veelvoorkomende indeling: informatiebericht, waarschuwing en foutbericht.
 \end{itemize}
@@ -1081,40 +1082,40 @@ Bij veel linters heeft elke boodschap een unieke code.
 Aan de hand van die code zou Dodona de uitleg over de boodschap kunnen tonen (maar dit vereist wel dat Dodona de uitleg voor specifieke linters heeft).
 Een alternatief zou zijn dat TESTed deze zelf toevoegt.
 De gemakkelijkste oplossing is echter de annotatie uitbreiding met ondersteuning voor een \acronym{URL}: bij veel linters kan met de identificatiecode van het bericht een \acronym{URL} geconstrueerd worden waarop meer informatie staat.
-Deze \acronym{URL} zou dan aan de studenten getoond kunnen worden.
+Deze \acronym{URL} zou dan aan de studenten kunnen getoond worden.
 
 \section{Robuustheid}\label{sec:robuustheid}
 
-Een belangrijk aspect bij educative software testing is de feedback als het verkeerd loopt.
-De feedback bij een verkeerde oplossing is in veel gevallen zelfs belangrijker dan de feedback bij een juiste oplossing: het is namelijk de bedoeling dat als studenten een verkeerde oplossing indienen, de feedback die Dodona geeft ze op weg kan helpen om hun oplossing te verbeteren.
-De feedback die Dodona toont is afkomstig uit de judges: het is de taak van TESTed om kwalitatief hoogstaande feedback te voorzien.
+Een belangrijk aspect bij \term{educational software testing} is de feedback als het verkeerd loopt.
+De feedback bij een verkeerde oplossing is in veel gevallen zelfs belangrijker dan de feedback bij een juiste oplossing: het is namelijk de bedoeling dat als studenten een verkeerde oplossing indienen, dat de feedback ze terug op weg kan helpen om hun oplossing te verbeteren.
+De feedback die Dodona toont is afkomstig van de judges: het is de taak van TESTed om kwalitatief hoogstaande feedback te voorzien.
 Met kwalitatief hoogstaand wordt bedoeld dat de feedback nuttige informatie bevat, maar ook geen verkeerde of misleidende informatie bevat.
 
 \subsection{In de praktijk}\label{subsec:in-de-praktijk}
 
-In het vak \emph{Scriptingtalen} van de bachelor informatica krijgen de studenten elke week een reeks oefeningen om op te lossen (op Dodona).
+In het vak \emph{Scriptingtalen} van de bachelor informatica krijgen studenten elke week een reeks oefeningen om op te lossen (op Dodona).
 Een van die oefeningen is de ISBN-oefening.
-Om een idee te krijgen van hoe TESTed werkt in de praktijk is besloten om een van de weken de ISBN-oefening te vervangen door een oefening met dezelfde opgave, maar die beoordeeld wordt door TESTed in plaats van de Python-judge.
+Om een idee te krijgen van hoe TESTed werkt in de praktijk is besloten om tijdens een van de weken de ISBN-oefening aan te vullen door een oefening met dezelfde opgave, maar die beoordeeld wordt door TESTed in plaats van de Python-judge.
 
 De algemene bevindingen die uit de praktijktest naar boven kwamen waren:
 
 \begin{itemize}
-    \item Geen ondersteuning voor de Python Tutor.
+    \item TESTed heeft geen ondersteuning voor de Python Tutor.
     Dit is al vermeld, en wordt verder besproken in \cref{subsec:kleinere-functies}.
-    \item De evaluatie duurt ongeveer dubbel zo lang als met de Python-judge.
+    \item De evaluatie met TESTed duurt ongeveer dubbel zo lang als met de Python-judge.
     Aan de ene kant zou de optimalisatie van de geprogrammeerde evaluatie (zie \cref{sec:performantie}) dit moeten verbeteren (maar wel in dit specifieke geval, moest de evaluatiecode in een andere programmeertaal dan Python geschreven zijn, zou het geen verschil maken).
     Aan de andere kant ligt een tragere uitvoer in vergelijking met de Python-judge binnen de verwachtingen: TESTed voert elke context uit in een afzonderlijk subproces.
     De Python-judge doet dit niet.
     Qua uitvoer worden wel contexten gebruikt, maar de interne werking van de Python-judge kan het best vergeleken worden met een oefeningen waar alle testen in dezelfde context opgenomen zijn.
-    \item Er is geen verwerking van stacktraces.
-    Deze functie is opgenomen als mogelijke uitbreiding als onderdeel van \cref{subsec:kleinere-functies}.
-    \item Er is geen linting.
+    \item TESTed heeft geen verwerking van stacktraces.
+    Deze functionaliteit is opgenomen als mogelijke uitbreiding als onderdeel van \cref{subsec:kleinere-functies}.
+    \item TESTed heeft geen linting.
     Naar aanleiding van de praktijktest is hier ondersteuning voor toegevoegd, zie \cref{sec:andere-taken}.
-    \item Geen ondersteuning voor vertalingen op het vlak van natuurlijke talen.
+    \item TESTed heeft geen ondersteuning voor vertalingen op het vlak van natuurlijke talen.
     Deze functie wordt besproken als uitbreiding in \cref{subsec:ondersteuning-voor-natuurlijke-talen}.
 \end{itemize}
 
-Verder heeft professor Dawyndt heel heleboel fouten en scenario's uitgeprobeerd.
+Verder heeft professor Dawyndt een heleboel fouten en scenario's uitgeprobeerd.
 Deze worden hieronder besproken.
 
 \subsection{Soorten fouten}\label{subsec:soorten-fouten}
@@ -1122,6 +1123,7 @@ Deze worden hieronder besproken.
 TESTed moet robuust zijn tegen allerlei vormen van fouten in de ingediende oplossingen.
 Hieronder volgt een lijst van (categorieën) van fouten waarvoor TESTed nuttige feedback geeft.
 TESTed is zo opgebouwd dat er altijd iets van feedback komt, ook in onvoorziene omstandigheden, maar voor de soorten fouten op onderstaande lijst is expliciet gecontroleerd wat de kwaliteit van de feedback is.
+Waar nuttig zijn deze gevallen omgezet naar een unit test voor TESTed.
 
 \begin{description}
     \item[Compilatiefouten] De uitvoer van de compiler wordt altijd getoond aan de studenten, dus op dat vlak wordt juist afgehandeld.
@@ -1132,22 +1134,24 @@ TESTed is zo opgebouwd dat er altijd iets van feedback komt, ook in onvoorziene 
     Bij een batchcompilatie wordt de uitvoer in een nieuw tabblad getoond, terwijl bij contextcompilatie de uitvoer bij de relevant context staat.
     \item[Uitvoeringsfouten] Hier gaat het om crashes tijdens de uitvoering, zoals delen door nul.
     Ook hier wordt nog geen verdere verwerking van de foutboodschap gedaan (ook onderdeel van \cref{subsec:kleinere-functies}).
-    Een bijkomende opmerking is dat sommige fouten tijdens de uitvoering nu als uitzondering opgevangen worden.
-    \item[Tijdslimieten] TESTed heeft ondersteuning voor tijdslimieten in de judge, dit laat toe om meer uitvoer te tonen dan als de tijdslimiet aan Dodona wordt overgelaten.
+    \item[Tijdslimieten] TESTed heeft ondersteuning voor tijdslimieten in de judge.
+    Dit laat toe om meer uitvoer te tonen dan als de tijdslimiet aan Dodona wordt overgelaten.
     Momenteel werkt de implementatie ervan als volgt: TESTed houdt bij hoe lang de beoordeling al duurt, en gebruikt de resterende tijd als een limiet op de uitvoering van een context.
     De eerste context heeft dan als limiet de volledige toegestane tijd (minus een percentage dat voorbehouden wordt voor TESTed zelf).
     De laatste context zal de kleinste limiet krijgen (de tijd die nog overschiet).
     Scenario's waar dit voorkomt zijn bijvoorbeeld oplossingen die te traag werken, maar ook oplossingen met bijvoorbeeld oneindige lussen.
-    Als uitbreiding opgenomen in \cref{subsec:kleinere-functies} wordt beschreven dat er ook een tijdslimiet per context mogelijk zou kunnen zijn (zodat de eerste context niet de volledige beschikbare tijd krijgt, maar slechts een deel ervan).
-    De hoofdreden om zelf de tijdslimiet te implementeren in TESTed is omdat zo de overige, niet-uitgevoerde testen ook getoond kunnen worden.
+    Als uitbreiding (opgenomen in \cref{subsec:kleinere-functies}) wordt beschreven dat er ook een tijdslimiet per context mogelijk zou kunnen zijn (zodat de eerste context niet de volledige beschikbare tijd krijgt, maar slechts een deel ervan).
+    De hoofdreden om zelf de tijdslimiet te implementeren in TESTed is om zo de overige, niet-uitgevoerde testen ook te kunnen tonen.
     Momenteel is dat met een boodschap die uitlegt dat ze niet zijn uitgevoerd, maar op termijn is het de bedoeling in Dodona een bijkomende status toe te voegen.
     \item[Te grote uitvoer] Bij te grote uitvoer zal TESTed deze limiteren.
     Hierbij gaat het om scenario's zoals een oneindige lus die blijft schrijven naar stdout.
-    TESTed beperkt zowel het aantal regels (maximaal 20) en de regellengte (maximaal 150) tekens.
-    Dit is enkel bij tekstuele uitvoer: het inkorten van grote verzamelingen (bijvoorbeeld een lijst van duizend elementen) is opgenomen als uitbreiding in \cref{subsec:kleinere-functies}.
+    TESTed beperkt tekstuele uitvoer tot tienduizend tekens.
+    Dit is niet van toepassing op andere vormen van uitvoer: het inkorten van grote verzamelingen (bijvoorbeeld een lijst van duizend elementen) is opgenomen als uitbreiding in \cref{subsec:kleinere-functies}.
     \item[Te veel uitvoer] Hierbij wordt gedacht aan zaken zoals uitvoer op stdout of stderr terwijl die niet verwacht wordt.
     Standaard wordt een oefening als fout beschouwd indien er te veel uitvoer is, maar de auteur van de oefening kan kiezen om het teveel aan uitvoer te negeren (bijvoorbeeld als de studenten debugberichten schrijven naar stdout is dit niet in elke oefening een probleem).
     \item[Vroegtijdig stoppen van uitvoering] Hier gaat het om code van de studenten die bijvoorbeeld \mintinline{python}{exit(-5)} bevat.
-    Dit zal fout gerekend worden door TESTed.
+    Dit zal standaard fout gerekend worden door TESTed.
+    De exitcode is echter een uitvoerkanaal zoals elk ander, waar de verwachte waarde ingesteld kan worden.
+    Is het dus de bedoeling om exitcode \texttt{-5} te krijgen, zal de oefening juist gerekend worden.
 
 \end{description}
