@@ -274,7 +274,7 @@ class Assignment(WithFeatures, WithFunctions):
         return self.expression.get_functions()
 
 
-Statement = Union[Assignment]
+Statement = Union[Assignment, Expression]
 
 # Update the forward references, which fixes the schema generation.
 ObjectType.__pydantic_model__.update_forward_refs()

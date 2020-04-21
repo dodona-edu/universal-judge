@@ -16,7 +16,7 @@
 % elif value.type == BasicObjectTypes.MAP:
     {\
     % for key, item in value.data.items():
-        "${key}": <%include file="expression.mako" args="value=item" />\
+        "${key}": <%include file="statement.mako" args="statement=item" />\
         % if not loop.last:
             , \
         % endif

@@ -16,7 +16,7 @@ from tested.judge.execution import execute_file
 from tested.judge.utils import BaseExecutionResult, copy_from_paths_to_path, \
     run_command, find_main_file
 from tested.languages.generator import generate_custom_evaluator, \
-    convert_expression, custom_evaluator_arguments
+    convert_statement, custom_evaluator_arguments
 from tested.languages.templates import path_to_templates
 from tested.serialisation import Value, EvalResult
 from tested.testplan import ProgrammedEvaluator
@@ -187,10 +187,10 @@ def _evaluate_python(bundle: Bundle,
     exec(evaluator_code, global_env)
 
     # Call the evaluator.
-    literal_expected = convert_expression(eval_bundle, expected)
-    literal_actual = convert_expression(eval_bundle, actual)
+    literal_expected = convert_statement(eval_bundle, expected)
+    literal_actual = convert_statement(eval_bundle, actual)
     arguments = custom_evaluator_arguments(evaluator)
-    literal_arguments = convert_expression(eval_bundle, arguments)
+    literal_arguments = convert_statement(eval_bundle, arguments)
 
     exec(f"evaluate(expected={literal_expected}, actual={literal_actual}, "
          f"arguments={literal_arguments})", global_env)

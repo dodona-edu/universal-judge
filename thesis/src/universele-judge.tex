@@ -512,7 +512,7 @@ False
 
 \section{Oplossingen uitvoeren}\label{sec:oplossingen-uitvoeren}
 
-De eerste stap die wordt uitgevoerd bij de beoordeling van een ingediende oplossing is het genereren van de testcode, die de ingediende oplossing zal beoordelen.
+De eerste stap die wordt uitgevoerd bij het beoordelen van een ingediende oplossing is het genereren van de testcode, die de ingediende oplossing zal uitvoeren.
 
 \subsection{Testcode genereren}\label{subsec:testcode-genereren}
 
@@ -524,102 +524,100 @@ Ook zijn de sjablonen verantwoordelijk voor het genereren van de code die de opl
 
 \subsubsection{Sjablonen}
 
-TESTed heeft een aantal standaardsjablonen nodig, waaraan vastgelegde parameters meegegeven worden en die een vaste functie moeten uitvoeren.
+TESTed heeft een aantal standaardsjablonen nodig, waaraan vastgelegde parameters meegegeven worden en die verantwoordelijk zijn voor specifieke functionaliteit.
 Deze verplichte sjablonen zijn:
 \begin{description}
-    \item[\texttt{assignment}] Vertaalt een toekenningsopdracht uit het testplan naar code.
-    \item[\texttt{context}] Een sjabloon dat code genereert om een context te beoordelen.
-    Deze code moet uitvoerbaar zijn (dat wil zeggen een main-functie bevatten of een script zijn).
-    \item[\texttt{selector}] Een sjabloon dat code genereert om een bepaalde context uit te voeren.
-    Om performantieredenen (hierover later meer) wordt de code van alle contexten soms uit een keer gegenereerd en gecompileerd.
-    Aan de hand van een parameter (de naam van de context), wordt bij het uitvoeren van deze selectiecode de testcode voor de juiste context gekozen.
-    Dit sjabloon is enkel nodig indien batchcompilatie ondersteund wordt en de programmeertaal dit nodig heeft (bijvoorbeeld niet nodig in Python, maar wel in Java).
-    \item[\texttt{evaluator\_executor}] Een sjabloon dat code genereert om een geprogrammeerde evaluatie te starten.
-    \item[\texttt{function}] Vertaalt een functie-oproep naar testcode.
+    \item[\texttt{statement}] Vertaalt een statement uit het testplan naar code.
+    \item[\texttt{context}] Genereert de code om de testgevallen uit een context uit te voeren.
+    \item[\texttt{selector}] Leest een parameter in en voert aan de hand van die parameter de juiste context uit bij de batchcompilatie (zie de volgende subparagraaf en \cref{sec:performantie}).
+    Dit sjabloon is niet in elke programmeertaal nodig: in Python kunnen de contexten samen gecompileerd worden zonder selector, terwijl dit in Java en Haskell niet mogelijk is.
+    \item[\texttt{evaluator\_executor}] Genereert de code om een geprogrammeerde evaluatie te starten.
+    \item[\texttt{expression}] Vertaalt een expressie naar testcode.
 \end{description}
 
-Daarnaast moet het encoderen naar het serialisatieformaat ook geïmplementeerd worden in elke programmeertaal.
-Veel programmeertalen hebben dus nog enkele bijkomende bestanden met code.
-In alle bestaande configuraties van programmeertalen is dit geïmplementeerd als een module of een klasse met naam \texttt{Value}.
+Sjablonen kunnen zelf ook andere sjablonen gebruiken: zo gebruikt het contextsjabloon ook de sjablonen voor statements en expressies.
+Tot slot moet ook het serialisatieformaat geïmplementeerd worden in de taal, en dit in beide richtingen: waarden encoderen in het serialisatieformaat en waarden uit het serialisatieformaat omzetten naar de types van de programmeertaal (het decoderen).
+Hoe het encoderen van waarden moet gebeuren is vrij, maar in alle bestaande programmeertalen wordt geïmplementeerd met een bijkomende klasse of module (die vaak de naam \texttt{Value} krijgt).
+TESTed zelf gaat nooit waarden decoderen, maar dit is toch nodig, bijvoorbeeld binnen de sjablonen voor expressies of statements.
+In alle bestaande talen is dit geïmplementeerd met bijkomende sjablonen.
 Dit wordt geïllustreerd in \cref{ch:nieuwe-taal}, dat het toevoegen van een nieuwe programmeertaal aan TESTed volledig uitwerkt.
 
 \subsubsection{Testcode compileren}
 
-TESTed ondersteunt twee modi waarin de code gecompileerd kan worden (bij programmeertalen die geen compilatie ondersteunen wordt deze stap overgeslagen):
+TESTed ondersteunt twee manieren waarop de code gecompileerd kan worden (bij programmeertalen die geen compilatie ondersteunen wordt deze stap overgeslagen):
 
 \begin{description}
-    \item[Batchcompilatie] In deze modus wordt de code voor alle contexten in een keer gecompileerd.
+    \item[Batchcompilatie] Bij deze manier wordt de code voor alle contexten in een keer gecompileerd.
     Dit wordt gedaan om performantieredenen.
-    In talen die resulteren in een uitvoerbaar bestand (zoals Haskell, C/C++), resulteert deze modus in één uitvoerbaar bestand voor alle contexten.
-    Bij het uitvoeren wordt dan aan de hand van een parameter de juiste context uitgevoerd (met het \texttt{selector}-sjabloon van hierboven).
-    \item[Contextcompilatie] Hierbij wordt elke context afzonderlijk gecompileerd.
+    In talen die resulteren in een uitvoerbaar bestand (zoals Haskell of C/C++), resulteert deze modus in één uitvoerbaar bestand voor alle contexten.
+    Bij het uitvoeren wordt dan aan de hand van een parameter de juiste context uitgevoerd (met het \texttt{selector}-sjabloon).
+    \item[Contextcompilatie] Hierbij wordt elke context afzonderlijk gecompileerd tot een uitvoerbaar bestand.
 \end{description}
 
-Dit wordt getoond in \cref{fig:tested-flow} uit \cref{sec:ontwerp} door twee kleuren te gebruiken: de stappen die enkel gebeuren bij batchcompilatie zijn in het \textcolor{ugent-ps}{groen}, terwijl stappen die enkel bij contextcompilatie gebeuren in het \textcolor{ugent-we}{blauw} staan.
-Stappen die altijd gebeuren staan in de flowchart in het zwart.
+Dit wordt getoond in \cref{fig:tested-flow} (uit \cref{sec:ontwerp}) door twee kleuren te gebruiken: de stappen die enkel plaatsvinden bij batchcompilatie zijn in het \textcolor{ugent-ps}{groen}, terwijl stappen die enkel bij contextcompilatie plaatsvinden in het \textcolor{ugent-we}{blauw} staan.
+Stappen die altijd uitgevoerd worden staan in de flowchart in het zwart.
 
-Dit gedrag is configureerbaar in het testplan, maar standaard wordt de batchcompilatie gebruikt.
-Als er een compilatiefout optreed bij de compilatie in batchcompilatie, valt TESTed terug op contextcompilatie.
-Deze terugval is handig voor programmeertalen waar de compilatie veel fouten ontdekt (vaak de meer statische programmeertalen).
-Een voorbeeldscenario is als volgt: stel een oefening waarbij de student twee functies moet implementeren.
-De student implementeert de eerste functie en dient een oplossing in om al feedback te krijgen.
-Bij programmeertalen als Java of Haskell zal dit niet lukken: daar alle contexten in één keer gecompileerd worden, zal de ontbrekende tweede functie ervoor zorgen dat de volledige compilatie faalt.
-In individuele modus is dit geen probleem: de contexten die de eerste functie testen zullen compileren en kunnen uitgevoerd worden.
-De individuele modus brengt wel een niet te verwaarlozen kost qua uitvoeringstijd met zich mee (zie ook \cref{ch:beperkingen-en-toekomstig-werk}).
+Batchcompilatie resulteert een grote tijdswinst (zoals beschreven in \cref{sec:performantie}), maar heeft wel een groot nadeel: bij statische talen zorgen compilatiefouten in één context ervoor dat geen enkele context beoordeeld kan worden, daar de compilatiefout ervoor zorgt dat er geen code gegenereerd wordt.
+Stel bijvoorbeeld een oefening waarbij studenten twee functies moeten implementeren.
+Met batchcompilatie in bijvoorbeeld Java kan de student niet de oplossing voor de eerste functie indienen en laten beoordelen: omdat de tweede functie ontbreekt zullen compilatiefouten optreden.
+
+Als oplossing hiervoor bevat TESTed de mogelijkheid om contextcompilatie en batchcompilatie te combineren, waarbij TESTed terugvalt op de contextcompilatie indien er iets misgaat bij de batchcompilatie.
+Dit terugvalmechanisme is geen geavanceerd systeem: faalt de compilatie, wordt onmiddellijk elke context afzonderlijk gecompileerd.
+Een mogelijke optimalisatie bestaat er uit een tussenoplossing toe te passen, door bijvoorbeeld compilatie op het niveau van tabbladen proberen.
 
 \Cref{lst:generated-context-python,lst:generated-context-java} bevatten de testcode gegenereerd voor een context uit de voorbeeldoefening Lotto (het gaat om dezelfde context uit het voorbeeld van het testplan in \cref{lst:testplan}), in respectievelijk Python en Java.
-Daarnaast bevat Z de code voor de \texttt{selector} in Java.
-Hiervan is geen versie in Python, daar Python selector nodig heeft in batchcompilatie (in Python kunnen meerdere onafhankelijke bestanden tegelijk gecompileerd worden).
-De selector bevat twee contexten om de werking duidelijk te maken.
+Daarnaast bevat \cref{lst:selector-java} de code voor de \texttt{selector} in Java.
+Hiervan is geen versie in Python, omdat Python geen selector nodig heeft.
 
 \begin{listing}
-    \inputminted{python}{code/generated-context-1.py}
-    \caption{
-        Gegenereerde testcode in Python voor de eerste context uit het testplan van de voorbeeldoefening Lotto.
-    }
+    \caption{Gegenereerde testcode in Python voor de eerste context uit het testplan van de voorbeeldoefening Lotto.}
     \label{lst:generated-context-python}
+    \inputminted{python}{code/generated-context-1.py}
 \end{listing}
 
 \begin{listing}
-    \inputminted{java}{code/generated-context-1.java}
     \caption{
         Gegenereerde testcode in Java voor de eerste context uit het testplan van de voorbeeldoefening Lotto.
-        Enkele hulpfuncties en imports zijn verwijderd om de code korter te maken.
+        Enkele hulpfuncties en imports zijn verwijderd om de code kort te houden.
     }
     \label{lst:generated-context-java}
+    \inputminted{java}{code/generated-context-1.java}
 \end{listing}
 
 \begin{listing}
-    \inputminted{java}{code/Selector.java}
-    \caption{
-        Gegenereerde selectiecode in Java voor twee contexten uit het testplan van de voorbeeldoefening Lotto.
-    }
+    \caption{Gegenereerde selectiecode in Java voor twee contexten uit het testplan van de voorbeeldoefening Lotto.}
     \label{lst:selector-java}
+    \inputminted{java}{code/Selector.java}
+\end{listing}
+
+\begin{listing}
+    \caption{Mapstructuur na het uitvoeren van de testcode van een oplossing in Python.}
+    \label{lst:mapstructuur}
+    \inputminted{text}{code/dir-listing.txt}
+\end{listing}
+
+\begin{listing}
+    \caption{Mapstructuur voor het uitvoeren van een geprogrammeerde evaluator.}
+    \label{lst:mapstructuur-evaluator}
+    \inputminted{text}{code/dir-listing-eval.txt}
 \end{listing}
 
 \subsection{Testcode uitvoeren}\label{subsec:testcode-uitvoeren}
 
 Vervolgens wordt de (gecompileerde) testcode voor elke context uit het testplan afzonderlijk uitgevoerd en worden de resultaten (het gedrag en de neveneffecten) verzameld.
-Het uitvoeren zelf gebeurt op de normale manier waarop code voor de programmeertaal uitgevoerd wordt: via de commandoregel.
-Deze aanpak heeft als voordeel dat er geen verschil is tussen hoe TESTed de ingediende code uitvoert en hoe de student zijn code zelf uitvoert op zijn eigen computer.
+Het uitvoeren zelf gebeurt op de normale manier waarop code voor de programmeertaal uitgevoerd wordt: via de commandoregel (bijvoorbeeld \texttt{python context0.py}).
+Deze aanpak heeft als voordeel dat er weinig verschil is tussen hoe TESTed de ingediende code uitvoert en hoe de student zijn code zelf uitvoert op zijn eigen computer.
 Dit voorkomt dat er subtiele verschillen in de resultaten sluipen.
 
 \Cref{lst:mapstructuur} illustreert dit met een voorbeeld voor een ingediende oplossing in de programmeertaal Python.
 Deze mapstructuur stelt de toestand van de werkmap van TESTed voor na het uitvoeren van de code.
 In de map \texttt{common} zit alle testcode en de gecompileerde bestanden voor alle contexten.
 Voor elke context worden de gecompileerde bestanden gekopieerd naar een andere map, bv.\ \texttt{context\_0\_1}, wat de map is voor context \texttt{1} van tabblad \texttt{0} van het testplan.
+De mapstructuur voor een geprogrammeerde evaluatie is \cref{lst:mapstructuur-evaluator}.
 
-\begin{listing}
-    \inputminted{text}{code/dir-listing.txt}
-    \caption{Mapstructuur na het uitvoeren van de testcode van een oplossing in Python.
-    \texttt{context\_0\_0} staat voor de eerste context van het eerste tabblad.
-    }
-    \label{lst:mapstructuur}
-\end{listing}
+\subsection{Beoordelen van gedrag en neveneffecten}\label{subsec:beoordelen-van-gedrag}
 
-\subsection{Beoordelen van gedrag}\label{subsec:beoordelen-van-gedrag}
-
-Het uitvoeren van de testcode genereert resultaten (gedrag en neveneffecten) die door TESTed beoordeeld moeten worden.
+Het uitvoeren van de testcode genereert resultaten (het gedrag en de neveneffecten) die door TESTed beoordeeld moeten worden.
 Er zijn verschillende soorten gedragingen en neveneffecten die interessant zijn.
 Elke soort gedrag of neveneffect wordt een \term{uitvoerkanaal} genoemd.
 TESTed verzamelt volgende uitvoerkanalen:
@@ -636,7 +634,7 @@ TESTed verzamelt volgende uitvoerkanalen:
     Deze waarden worden geëncodeerd en ook verzameld in een bestand.
     \item Exitcode.
     Het gaat om de exitcode van de testcode voor een context.
-    Daar de code per context wordt uitgevoerd, wordt de exitcode ook verzameld per context (en niet per testcase, zoals de andere uitvoerkanalen).
+    Daar de code per context wordt uitgevoerd, wordt de exitcode ook verzameld per context (en niet per testgeval zoals de andere uitvoerkanalen).
     \item Bestanden.
     Tijdens het beoordelen van de verzamelde resultaten is het mogelijk de door de ingediende oplossing gemaakte bestanden te bekijken.
 \end{itemize}
@@ -645,7 +643,7 @@ De standaarduitvoer- en standaardfoutstroom worden rechtstreeks opgevangen door 
 De andere uitvoerkanalen (uitzonderingen en returnwaarden) worden naar een bestand geschreven.
 De reden dat deze niet naar een andere \term{file descriptor} geschreven worden is eenvoudig: niet alle talen (zoals Java) ondersteunen het openen van bijkomende file descriptors.
 
-Alle uitvoerkanalen (met uitzondering van de exitcode en de bestanden) worden per testcase verzameld.
+Alle uitvoerkanalen (met uitzondering van de exitcode en de bestanden) worden per testgeval verzameld.
 Aangezien de uitvoerkanalen pas verzameld worden na het uitvoeren van de context, moet er een manier zijn om de uitvoer van de verschillende testgevallen te onderscheiden.
 De testcode is hier verantwoordelijk voor, en schrijft een \english{separator} naar alle uitvoerkanalen tussen elk testgeval, zoals te zien is in \cref{lst:uitvoer}.
 
@@ -670,18 +668,19 @@ Deze secret wordt gebruikt voor verschillende dingen, zoals:
 
 \section{Oplossingen beoordelen}\label{sec:oplossingen-beoordelen}
 
-Na het uitvoeren van de testcode voor elke context heeft TESTed alle relevante uitvoer gemeten en verzameld.
-Deze uitvoer moet vervolgens beoordeeld worden om na te gaan in hoeverre deze uitvoer voldoet aan de verwachte uitvoer.
+In de vorige stap heeft TESTed de resultaten verzameld.
+Het geheel van de verzamelde resultaten noemen we de uitvoer van een beoordeling.
+Deze uitvoer moet vervolgens beoordeeld worden om na te gaan in hoeverre deze voldoet aan de verwachte uitvoer.
 Dit kan op drie manieren:
 \begin{enumerate}
     \item Generieke evaluatie: de uitvoer wordt beoordeeld door TESTed zelf.
-    \item Geprogrammeerde evaluatie: de uitvoer wordt beoordeeld door programmacode geschreven door degene die de oefening opgesteld heeft, in een aparte omgeving (de evaluatieomgeving).
+    \item Geprogrammeerde evaluatie: de uitvoer wordt beoordeeld door evaluatiecode, geschreven door degene die de oefening opgesteld heeft, in een aparte omgeving (de evaluatieomgeving).
     \item Programmeertaalspecifieke evaluatie: de uitvoer wordt onmiddellijk na het uitvoeren van de testcode beoordeeld in het hetzelfde proces.
 \end{enumerate}
 
 \subsection{Generieke evaluatie}\label{subsec:ingebouwde-evaluator}
 
-Voor eenvoudige beoordelingen (bijvoorbeeld tussen twee waarden) volstaat de generieke evaluatie binnen TESTed.
+Voor eenvoudige beoordelingen (bijvoorbeeld stdout vergelijken met een verwachte tekst) volstaat de generieke evaluatie binnen TESTed.
 Het is mogelijk om de verwachte resultaten in het testplan op te nemen.
 TESTed zal deze resultaten uit het testplan dan vergelijken met de resultaten geproduceerd door het uitvoeren van de testcode.
 Als \english{proof of concept} zijn drie eenvoudige evaluatiemethoden ingebouwd in TESTed, die hieronder besproken worden.
@@ -712,16 +711,12 @@ Deze evaluator biedt enkele opties om het gedrag aan te passen:
 
 Deze configuratieopties worden op het niveau van de testen meegegeven.
 Dit laat toe om voor elke test (zelfs binnen eenzelfde testgeval) andere opties mee te geven.
-Een nadeel is wel dat dezelfde opties mogelijk veel herhaald moeten worden, bijvoorbeeld als een bepaalde oefening een optie voor elke test wil instellen.
-Echter, we verwachten dat dit soort zaken opgelost kunnen worden door een \acronym{DSL} of door het testplan te genereren.
-
-Dit is de standaardevaluatievorm in het testplan als niets anders gegeven wordt.
 \Cref{lst:testplan-text} toont een fragment uit een testplan: de uitvoerspecificatie van een testgeval waarbij de tekstevaluatie gebruikt wordt.
 
 \begin{listing}
-    \inputminted{json}{code/testplan-text.json}
-    \caption{Fragment uit een testplan dat de uitvoerspecificatie van de standaarduitvoerstroom voor een testgeval toont, waarbij de tekstevaluatie gebruikt wordt.}
+    \caption{Fragment uit een testplan dat tekstevaluatie gebruikt.}
     \label{lst:testplan-text}
+    \inputminted[breaklines]{json}{code/testplan-text.json}
 \end{listing}
 
 \subsubsection{Bestandsevaluatie}
@@ -746,9 +741,9 @@ Het bestand met de verwachte inhoud heeft als naam \texttt{bestand-uit-de-oefeni
 Beide paden zijn relatief, maar ten opzichte van andere mappen: het bestand met verwachte inhoud is relatief tegenover de map van de oefening, terwijl het pad waar de ingediende oplossing naar moet schrijven relatief is ten aanzien van de werkmap van de context waarin de oplossing wordt uitgevoerd (zie \cref{lst:mapstructuur} voor een overzicht van de structuur).
 
 \begin{listing}
-    \inputminted{json}{code/testplan-file.json}
-    \caption{Fragment uit een testplan dat de uitvoerspecificatie van een bestand voor een testgeval toont, waarbij de bestandsevaluatie gebruikt wordt.}
+    \caption{Fragment uit een testplan dat bestandsevaluatie gebruikt.}
     \label{lst:testplan-file}
+    \inputminted[breaklines]{json}{code/testplan-file.json}
 \end{listing}
 
 \subsubsection{Waarde-evaluatie}
@@ -780,9 +775,9 @@ Bij deze evaluatievorm zijn geen configuratieopties.
 Een voorbeeld van het gebruik binnen een testplan is \cref{lst:testplan-value}.
 Hier wordt als returnwaarde een verzameling met drie elementen (5, 10 en 15) verwacht.
 
-\begin{listing}
+\begin{listing}[h]
     \inputminted{json}{code/testplan-value.json}
-    \caption{Fragment uit een testplan dat de uitvoerspecificatie van de returnwaarde voor een testgeval toont, waarbij de waarde-evaluatie gebruikt wordt.}
+    \caption{Fragment uit een testplan dat waarde-evaluatie gebruikt.}
     \label{lst:testplan-value}
 \end{listing}
 
@@ -796,8 +791,29 @@ Voor dergelijke scenario's is geprogrammeerde evaluatie een oplossing: hierbij w
 Binnen TESTed wordt dit mogelijk gemaakt door geproduceerde waarden uit de ingediende oplossing te serialiseren bij het uitvoeren van de testcode, en terug te deserialiseren bij het uitvoeren van de evaluatiecode.
 
 Deze evaluatiecode kan geschreven worden in een programmeertaal naar keuze, al moet de programmeertaal wel ondersteund worden door TESTed.
-De implementatie volgt in alle programmeertalen hetzelfde stramien, maar de implementatiedetails kunnen verschillen.
+Hoewel de exacte implementatie verschilt van programmeertaal tot programmeertaal, komt het neer op het implementeren van een functie met als naam \texttt{evaluate}.
+Deze functie krijgt drie argumenten mee:
+
+\begin{description}
+    \item[\texttt{expected}] De verwachte waarde uit het testplan.
+    \item[\texttt{actual}] De waarde die geproduceerd werd door de ingediende oplossing.
+    \item[\texttt{arguments}] Een lijst van opties voor de geprogrammeerde evaluatie uit het testplan.
+\end{description}
+
+De \texttt{evaluate}-functie moet één oproep doen naar de functie \texttt{evaluated()}.
+Deze laatste functie is een hulpfunctie die TESTed beschikbaar maakt en heeft vier argumenten:
+
+\begin{description}
+    \item[\texttt{result}] Een \texttt{boolean} die aangeeft of de geproduceerde waarde juist is of niet.
+    \item[\texttt{readableExpected}] (Optioneel) Een \texttt{string} met een tekstuele voorstelling van de verwachte waarde.
+    Deze tekstuele voorstelling wordt gebruikt om te tonen aan de gebruiker.
+    Indien niets gegeven wordt, zal TESTed zelf een voorstelling maken op basis van de verwachte waarde uit het testplan.
+    \item[\texttt{readableActual}] (Optioneel) Een \texttt{string} met een tekstuele voorstelling van de geproduceerde waarde.
+    Indien niets gegeven wordt, zal TESTed zelf een voorstelling maken op basis van de geproduceerde waarde.
+\end{description}
+
 In Python bestaat de evaluatiecode uit een module (een \texttt{.py}-bestand) met een functie die voldoet aan de definitie, zoals gegeven in \cref{lst:evaluation-python-custom}.
+Deze functie moet één oproep doen naar de functie \texttt{evaluated()}, waarvan de documentatie in fragment X gegeven is.
 TESTed stelt ook een module \texttt{evaluation\_utils} ter beschikking.
 De functie van hierboven moet dan één oproep doen naar de functie \texttt{evaluated()}.
 Deze module is redelijk eenvoudig, zoals te zien in \cref{lst:evaluation-util-python}
@@ -975,14 +991,7 @@ Het idee hier is dat er veel testcode is die hetzelfde blijft voor elke context 
 In de partiële compilatie wordt de gemeenschappelijke testcode eerst gecompileerd (bij programmeertalen die dat ondersteunen).
 Bij het beoordelen van een context wordt dan enkel de testcode specifiek voor de te beoordelen context gecompileerd.
 
-In een derde iteratie werd de partiële compilatie uitgebreid naar \textbf{batchcompilatie}.
-Hoewel dit een grote winst voor de uitvoeringstijd betekende, heeft deze modus wel een ander groot nadeel (zoals reeds vermeld in \cref{subsec:testcode-genereren}): bij statische talen zorgen compilatiefouten in één context ervoor dat geen enkele context beoordeeld kan worden, daar de compilatiefout ervoor zorgt dat er geen code gegenereerd wordt.
-Dit wordt best geïllustreerd met het reeds vermelde scenario van een oefening waarbij de student twee functies dient te implementeren.
-In batchcompilatie in bijvoorbeeld Java kan de student niet de oplossing voor de eerste functie indienen en laten beoordelen: omdat de tweede functie ontbreekt zullen compilatiefouten optreden.
-
-De laatste en huidige iteratie bevat de mogelijkheid om contextcompilatie en batchcompilatie te combineren, waarbij TESTed terugvalt op de contextcompilatie indien er iets misgaat bij de batchcompilatie.
-Dit terugvalmechanisme is geen geavanceerd systeem: faalt de compilatie, wordt onmiddellijk elke context afzonderlijk gecompileerd.
-Een mogelijke optimalisatie bestaat er uit een tussenoplossing toe te passen, door bijvoorbeeld compilatie op het niveau van tabbladen proberen (dit wordt verder besproken in \cref{subsec:future-performance}).
+In een derde iteratie werd de partiële compilatie uitgebreid naar \textbf{batchcompilatie}, zoals beschreven in \cref{subsec:testcode-genereren}.
 
 \subsection{Parallelle uitvoering van contexten}\label{subsec:parallelle-uitvoering-van-contexten}
 

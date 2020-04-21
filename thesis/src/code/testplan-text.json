@@ -6,12 +6,7 @@
       "evaluator": {
         "type": "builtin",
         "name": "text",
-        "options": {
-          "ignoreWhitespace": true,
-          "tryFloatingPoint": true,
-          "applyRounding": true,
-          "roundTo": 2
-        }
+        "options": {"ignoreWhitespace": true, "tryFloatingPoint": true, "applyRounding": true, "roundTo": 2}
       }
     }
   }

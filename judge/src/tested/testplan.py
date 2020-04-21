@@ -252,30 +252,6 @@ NormalOutputChannel = Union[
 OutputChannel = Union[NormalOutputChannel, SpecialOutputChannel]
 
 
-@dataclass
-class ExpressionInput(WithFeatures, WithFunctions):
-    """Input for an expression."""
-    expression: Expression
-
-    def get_used_features(self) -> FeatureSet:
-        return self.expression.get_used_features()
-
-    def get_functions(self) -> Iterable[FunctionCall]:
-        return self.expression.get_functions()
-
-
-@dataclass
-class StatementInput(WithFeatures, WithFunctions):
-    """Input for a command."""
-    statement: Statement
-
-    def get_used_features(self) -> FeatureSet:
-        return self.statement.get_used_features()
-
-    def get_functions(self) -> Iterable[FunctionCall]:
-        return self.statement.get_functions()
-
-
 _TextOutput = Union[TextOutputChannel, SpecialOutputChannel]
 _FileOutput = Union[FileOutputChannel, IgnoredChannel]
 _ExceptionOutput = Union[ExceptionOutputChannel, SpecialOutputChannel]
@@ -341,7 +317,7 @@ class Output(BaseOutput):
 @dataclass
 class Testcase(WithFeatures, WithFunctions):
     """A testcase is defined by an input channel and an output channel"""
-    input: Union[ExpressionInput, StatementInput]
+    input: Statement
     description: Optional[str] = None  # Will be generated if None.
     essential: bool = True
     output: Output = Output()
@@ -355,11 +331,12 @@ class Testcase(WithFeatures, WithFunctions):
     def no_return_with_assignment(cls, values):
         input_ = values.get("input")
         output_ = values.get("output")
-        if isinstance(input_, StatementInput) and not (
-                output_.result == IgnoredChannel.IGNORED
-                or output_.result == EmptyChannel.NONE
-        ):
-            raise ValueError(f"An convert_statement cannot have a return value.")
+        result = output_.result
+        # If the statement is not an expression, but we do expect a return value,
+        # it is an error.
+        if not isinstance(input_.statement, get_args(Expression))\
+                and result != EmptyChannel.NONE:
+            raise ValueError(f"Only an expression can be evaluated as a value.")
         return values
 
     def get_functions(self) -> Iterable[FunctionCall]:

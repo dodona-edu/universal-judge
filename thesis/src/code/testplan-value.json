@@ -9,10 +9,7 @@
           { "type": "integer", "data": 15 }
         ]
       },
-      "evaluator": {
-        "type": "builtin",
-        "name": "value"
-      }
+      "evaluator": {"type": "builtin", "name": "value"}
     }
   }
 }

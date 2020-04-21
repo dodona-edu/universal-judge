@@ -9,7 +9,7 @@ from ..configs import Bundle
 from ..datatypes import AdvancedTypes, BasicTypes
 from ..dodona import ExtendedMessage, Permission, StatusMessage, Status
 from ..languages.config import TypeSupport
-from ..languages.generator import convert_expression
+from ..languages.generator import convert_statement
 from ..serialisation import Value, parse_value, to_python_comparable, as_basic_type
 from ..testplan import ValueOutputChannel, OutputChannel
 from ..utils import Either, get_args
@@ -31,13 +31,13 @@ def try_as_readable_value(bundle: Bundle, value: str) -> Optional[str]:
     except (ValueError, TypeError):
         return None
     else:
-        return convert_expression(bundle, actual)
+        return convert_statement(bundle, actual)
 
 
 def get_values(bundle: Bundle, output_channel: ValueOutputChannel, actual) \
         -> Union[EvaluationResult, Tuple[Value, str, Optional[Value], str]]:
     expected = output_channel.value
-    readable_expected = convert_expression(bundle, expected)
+    readable_expected = convert_statement(bundle, expected)
 
     # Special support for empty strings.
     if not actual.strip():
@@ -63,7 +63,7 @@ def get_values(bundle: Bundle, output_channel: ValueOutputChannel, actual) \
             messages=[message]
         )
 
-    readable_actual = convert_expression(bundle, actual)
+    readable_actual = convert_statement(bundle, actual)
     return expected, readable_expected, actual, readable_actual
 
 

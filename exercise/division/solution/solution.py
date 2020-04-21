@@ -1,2 +1,1 @@
-while True:
-    pass
+print("ok")

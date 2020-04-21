@@ -21,15 +21,3 @@ workdir                           //Werkmap van TESTed
 │   ├── submission.pyc
 │   └── values.pyc
 ...
-└── evaluators                    //Aangepaste evaluatoren
-    ├── Aao9H18Ve_buzzchecker     //Map voor elke context
-    │   ├── buzzchecker.py        //Code aangepaste evaluator
-    │   ├── evaluation_utils.py
-    │   ├── evaluator_executor.py
-    │   └── values.py
-    ├── B5WViK0zQ_buzzchecker
-    │   ├── buzzchecker.py
-    │   ├── evaluation_utils.py
-    │   ├── evaluator_executor.py
-    │   └── values.py
-    ...

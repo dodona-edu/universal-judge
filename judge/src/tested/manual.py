@@ -19,10 +19,10 @@ def read_config() -> DodonaConfig:
     return DodonaConfig(**{
         "memory_limit":         536870912,
         "time_limit":           20,
-        "programming_language": 'java',
+        "programming_language": 'python',
         "natural_language":     'nl',
-        "resources":            Path('../exercise/lotto/evaluation'),
-        "source":               Path('../exercise/lotto/solution/correct.java'),
+        "resources":            Path('../exercise/division/evaluation'),
+        "source":               Path('../exercise/division/solution/solution.py'),
         "judge":                Path('../judge/src/'),
         "workdir":              Path('./workdir'),
         "plan_name":            "plan.json",
@@ -38,7 +38,7 @@ if __name__ == '__main__':
 
     # Enable logging
     log = logging.getLogger()
-    log.setLevel(logging.WARNING)
+    log.setLevel(logging.DEBUG)
     ch = logging.StreamHandler(stream=sys.stdout)
     formatter = logging.Formatter('%(name)s:%(levelname)s:%(message)s')
     ch.setFormatter(formatter)
