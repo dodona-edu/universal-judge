@@ -1,0 +1,27 @@
+{
+  "tabs": [
+    {
+      "name": "Correctheid",
+      "contexts": [
+        {
+          "context_testcase": {
+            "description": "Uitvoeren code",
+            "input": {
+              "main_call": true
+            },
+            "output": {
+              "exception": {
+                "evaluator": {
+                  "type": "specific",
+                  "evaluators": {
+                    "python": "evaluator.py"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

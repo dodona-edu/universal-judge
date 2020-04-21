@@ -75,3 +75,10 @@ def test_io_function_exercise(language: str, tmp_path: Path, pytestconfig: Confi
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["correct"]
+
+
+def test_language_evaluator_exception(tmp_path: Path, pytestconfig: Config):
+    conf = configuration(pytestconfig, "division", "python", tmp_path, "plan.json", "correct")
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]
