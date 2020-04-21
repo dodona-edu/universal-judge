@@ -6,12 +6,13 @@ from typing import Union, Tuple, Optional
 
 from . import EvaluationResult, EvaluatorConfig
 from ..configs import Bundle
-from ..datatypes import AdvancedTypes, BasicTypes
+from ..datatypes import AdvancedTypes, BasicTypes, BasicStringTypes
 from ..dodona import ExtendedMessage, Permission, StatusMessage, Status
 from ..languages.config import TypeSupport
 from ..languages.generator import convert_statement
-from ..serialisation import Value, parse_value, to_python_comparable, as_basic_type
-from ..testplan import ValueOutputChannel, OutputChannel
+from ..serialisation import Value, parse_value, to_python_comparable, as_basic_type, \
+    StringType
+from ..testplan import ValueOutputChannel, OutputChannel, TextOutputChannel
 from ..utils import Either, get_args
 
 logger = logging.getLogger(__name__)
@@ -36,6 +37,15 @@ def try_as_readable_value(bundle: Bundle, value: str) -> Optional[str]:
 
 def get_values(bundle: Bundle, output_channel: ValueOutputChannel, actual) \
         -> Union[EvaluationResult, Tuple[Value, str, Optional[Value], str]]:
+
+    if isinstance(output_channel, TextOutputChannel):
+        expected = output_channel.get_data_as_string(bundle.config.resources)
+        expected_value = StringType(type=BasicStringTypes.TEXT, data=expected)
+        actual_value = StringType(type=BasicStringTypes.TEXT, data=actual)
+        return expected_value, expected, actual_value, actual
+
+    assert isinstance(output_channel, ValueOutputChannel)
+
     expected = output_channel.value
     readable_expected = convert_statement(bundle, expected)
 

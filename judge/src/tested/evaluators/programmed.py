@@ -85,6 +85,7 @@ def evaluate(config: EvaluatorConfig,
     # This is slightly tricky, since the actual value must also be converted
     # to a value, and we are not yet sure what the actual value is exactly
     result = get_values(config.bundle, channel, actual or "")
+    # TODO: why is this?
     if isinstance(result, EvaluationResult):
         return result
     else:

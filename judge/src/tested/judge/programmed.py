@@ -3,6 +3,7 @@ Programmed evaluation.
 """
 import shutil
 import types
+from dataclasses import dataclass
 
 import time
 from pathlib import Path
@@ -152,21 +153,12 @@ def _evaluate_python(bundle: Bundle,
         bundle.config, bundle.out, bundle.plan, evaluator.language
     )
 
-    result_ = None
-    readable_expected_ = None
-    readable_actual_ = None
-    messages_ = None
-
-    # The function we use to handle the evaluation code.
-    def evaluated(result: bool,
-                  readable_expected: Optional[str] = None,
-                  readable_actual: Optional[str] = None,
-                  messages: Optional[List[str]] = None):
-        nonlocal result_, readable_expected_, readable_actual_, messages_
-        result_ = result
-        readable_expected_ = readable_expected
-        readable_actual_ = readable_actual
-        messages_ = messages
+    @dataclass
+    class EvaluationResult:
+        result: bool
+        readable_expected: Optional[str] = None
+        readable_actual: Optional[str] = None
+        messages: Optional[List[str]] = None
 
     # Path to the evaluator.
     origin_path = Path(bundle.config.resources, evaluator.path)
@@ -177,7 +169,7 @@ def _evaluate_python(bundle: Bundle,
     # We must provide the globals from the "evaluation_utils" to the code.
     # Begin by defining the module.
     utils = types.ModuleType("evaluation_utils")
-    utils.__dict__["evaluated"] = evaluated
+    utils.__dict__["EvaluationResult"] = EvaluationResult
 
     # The context in which to execute.
     global_env = {"__tested_test__": utils}
@@ -192,23 +184,25 @@ def _evaluate_python(bundle: Bundle,
     arguments = custom_evaluator_arguments(evaluator)
     literal_arguments = convert_statement(eval_bundle, arguments)
 
-    exec(f"evaluate(expected={literal_expected}, actual={literal_actual}, "
-         f"arguments={literal_arguments})", global_env)
+    print(f"__tested_test__result = evaluate(expected={literal_expected}, actual={literal_actual}, arguments={literal_arguments})")
+    exec(f"__tested_test__result = evaluate(expected={literal_expected}, actual={literal_actual}, arguments={literal_arguments})", global_env)
+
+    # noinspection PyTypeChecker
+    result_: EvaluationResult = global_env["__tested_test__result"]
 
     # If the result is None, the evaluator is broken.
     if result_ is None:
         return EvalResult(
             result=False,
-            readable_expected=readable_expected_,
-            readable_actual=readable_actual_,
+            readable_expected=None,
+            readable_actual=None,
             messages=["De evaluator is kapot, contacteer lesgever."]
         )
 
-    assert isinstance(result_, bool)
+    assert isinstance(result_, EvaluationResult)
     return EvalResult(
-        result=result_,
-        readable_expected=readable_expected_,
-        readable_actual=readable_actual_,
-        messages=messages_ or []
+        result=result_.result,
+        readable_expected=result_.readable_expected,
+        readable_actual=result_.readable_actual,
+        messages=result_.messages or []
     )
-

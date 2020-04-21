@@ -324,6 +324,12 @@ def convert_statement(bundle: Bundle, statement: Statement) -> str:
 
     :return: The code the statement.
     """
+    if isinstance(statement, get_args(Expression)):
+        statement = _prepare_expression(bundle, statement)
+        template = find_template(bundle, "statement")
+        return template.render(statement=statement)
+
+    assert isinstance(statement, get_args(Assignment))
     prepared_expression = _prepare_expression(bundle, statement.expression)
     statement = statement.replace_expression(prepared_expression)
     template = find_template(bundle, "statement")

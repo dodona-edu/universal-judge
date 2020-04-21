@@ -55,3 +55,16 @@ def test_io_exercise(language: str, tmp_path: Path, pytestconfig: Config):
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["correct"]
 
+
+def test_simple_programmed_eval(language: str, tmp_path: Path, pytestconfig: Config):
+    conf = configuration(pytestconfig, "echo", language, tmp_path, "simple-programmed.json", "correct")
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]
+
+
+def test_simple_programmed_eval_wrong(language: str, tmp_path: Path, pytestconfig: Config):
+    conf = configuration(pytestconfig, "echo", language, tmp_path, "simple-programmed-wrong.json", "correct")
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["wrong"]
