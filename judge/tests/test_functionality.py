@@ -68,3 +68,10 @@ def test_simple_programmed_eval_wrong(language: str, tmp_path: Path, pytestconfi
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["wrong"]
+
+
+def test_io_function_exercise(language: str, tmp_path: Path, pytestconfig: Config):
+    conf = configuration(pytestconfig, "echo-function", language, tmp_path, "simple.json", "correct")
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]

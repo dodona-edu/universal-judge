@@ -64,7 +64,7 @@ def e_evaluate_main(value):
 ## Other testcase evaluators    ##
 ##################################
 % for additional in testcases:
-    % if additional.has_return:
+    % if additional.value_function:
         def v_evaluate_${loop.index}(value):
             <%include file="statement.mako" args="statement=additional.value_function"/>
     % endif

@@ -184,8 +184,11 @@ def _evaluate_python(bundle: Bundle,
     arguments = custom_evaluator_arguments(evaluator)
     literal_arguments = convert_statement(eval_bundle, arguments)
 
-    print(f"__tested_test__result = evaluate(expected={literal_expected}, actual={literal_actual}, arguments={literal_arguments})")
-    exec(f"__tested_test__result = evaluate(expected={literal_expected}, actual={literal_actual}, arguments={literal_arguments})", global_env)
+    exec(
+        f"__tested_test__result = evaluate(expected={literal_expected}, actual="
+        f"{literal_actual}, arguments={literal_arguments})",
+        global_env
+    )
 
     # noinspection PyTypeChecker
     result_: EvaluationResult = global_env["__tested_test__result"]
