@@ -63,21 +63,19 @@ def e_evaluate_main(value):
 ##################################
 ## Other testcase evaluators    ##
 ##################################
-% for additional in testcases:
-    % if additional.value_function:
+% for testcase in testcases:
+    % if testcase.value_function:
         def v_evaluate_${loop.index}(value):
-            <%include file="statement.mako" args="statement=additional.value_function"/>
+            <%include file="statement.mako" args="statement=testcase.value_function"/>
     % endif
 
     def e_evaluate_${loop.index}(value):
-        <%include file="statement.mako" args="statement=additional.exception_function"/>
+        <%include file="statement.mako" args="statement=testcase.exception_function"/>
 % endfor
 
 
 ## Run the "before" code if it exists.
-% if before:
-    ${before}
-% endif
+${before}
 
 
 ## Prepare the command line arguments if needed.
@@ -110,7 +108,6 @@ except Exception as e:
 write_delimiter("--${secret_id}-- SEP")
 
 ## Generate the actual tests based on the context.
-## testcase: Testcase
 % for testcase in testcases:
     <% testcase: _TestcaseArguments %>
     try:
@@ -132,9 +129,7 @@ write_delimiter("--${secret_id}-- SEP")
 
 % endfor
 
-% if after:
-    ${after}
-% endif
+${after}
 
 ## Close output files.
 value_file.close()

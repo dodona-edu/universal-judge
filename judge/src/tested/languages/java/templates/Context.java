@@ -1,5 +1,6 @@
 ## Code to execute_module one test context.
-<%! from tested.serialisation import Statement, Expression %>
+<%! from tested.languages.generator import _TestcaseArguments %>
+<%! from tested.serialisation import Statement, Expression, Assignment %>
 <%! from tested.utils import get_args %>
 <%! import humps %>
 ## This imports are defined by the "common" start-up scripts of JShell.
@@ -22,6 +23,10 @@ public class ${context_name} {
         private final ${name} ${var_name} = new ${name}();
     % endfor
 
+    ##################################
+    ## Setup                        ##
+    ##################################
+
     ## Prepare the evaluator files.
     private final PrintWriter valueWriter;
     private final PrintWriter exceptionWriter;
@@ -31,48 +36,67 @@ public class ${context_name} {
         this.exceptionWriter = new PrintWriter("${exception_file}");
     }
 
-    private void writeDelimiter(String value) throws Exception {
-        valueWriter.write(value);
-        exceptionWriter.write(value);
+    private void writeDelimiter() throws Exception {
+        valueWriter.write("--${secret_id}-- SEP");
+        exceptionWriter.write("--${secret_id}-- SEP");
+        System.err.print("--${secret_id}-- SEP");
+        System.out.print("--${secret_id}-- SEP");
     }
 
-    private void evaluated(boolean result, String expected, String actual, Collection<String> messages) throws Exception {
-        Values.evaluated(valueWriter, result, expected, actual, messages);
-    }
+    ##################################
+    ## Predefined functions         ##
+    ##################################
 
-    private void evaluated(boolean result, String expected, String actual) throws Exception {
-        Values.evaluated(valueWriter, result, expected, actual, Collections.emptyList());
-    }
-
+    ## Send a value to TESTed.
     private void send(Object value) throws Exception {
         Values.send(valueWriter, value);
     }
 
+    ## Send an exception to TESTed.
     private void sendException(Exception exception) throws Exception {
         Values.sendException(exceptionWriter, exception);
     }
 
-    private void eEvaluateMain(Exception value) throws Exception {
-        <%include file="expression.mako" args="expression=context_testcase.exception_function"/>;
+    ## Send the result of a language specific value evaluator to TESTed.
+    private void sendSpecificValue(EvaluationResult r) {
+        Values.evaluated(valueWriter, r.result, r.readableExpected, r.readableActual, r.messages);
     }
 
-    % for additional in testcases:
-        % if additional.has_return:
+    ## Send the result of a language specific exception evaluator to TESTed.
+    private void sendSpecificException(EvaluationResult r) {
+        Values.evaluated(exceptionWriter, r.result, r.readableExpected, r.readableActual, r.messages);
+    }
+
+    ##################################
+    ## Main testcase evalutors      ##
+    ##################################
+
+    private void eEvaluateMain(Exception value) throws Exception {
+        <%include file="statement.mako" args="statement=context_testcase.exception_function"/>;
+    }
+
+    ##################################
+    ## Other testcase evaluators    ##
+    ##################################
+
+    % for testcase in testcases:
+        % if testcase.value_function:
             private void vEvaluate${loop.index}(Object value) throws Exception {
-                <%include file="expression.mako" args="expression=additional.value_function"/>;
+                <%include file="statement.mako" args="statement=testcase.value_function"/>;
             }
         % endif
 
         private void eEvaluate${loop.index}(Exception value) throws Exception {
-            <%include file="expression.mako" args="expression=additional.exception_function"/>;
+            <%include file="statement.mako" args="statement=testcase.exception_function"/>;
         }
     % endfor
 
+    ## Most important function: actual execution happens here.
     void execute() throws Exception {
         ## In Java, we must execute_module the before and after code in the context.
         ${before}
 
-        ## Call the context_testcase fucnction if necessary
+        ## Call the main function if needed.
         % if context_testcase.exists:
             try {
                 ${submission_name}.main(new String[]{
@@ -80,39 +104,36 @@ public class ${context_name} {
                     "${argument}", \
                 % endfor
                 });
+                this.eEvaluateMain(null);
             } catch (Exception e) {
                 this.eEvaluateMain(e);
             }
         % endif
 
-        System.err.print("--${secret_id}-- SEP");
-        System.out.print("--${secret_id}-- SEP");
-        this.writeDelimiter("--${secret_id}-- SEP");
+        this.writeDelimiter();
 
-        % for additional in testcases:
-            % if isinstance(additional.command, get_args(Statement)):
-                <%include file="declaration.mako" args="tp=additional.command.type" /> ${additional.command.name} = null;
+        ## Generate the actual tests based on the context.
+        % for testcase in testcases:
+            ## In Java, we need special code to make variables available outside of
+            ## the try-catch block.
+            % if isinstance(testcase.command, get_args(Assignment)):
+                <%include file="declaration.mako" args="tp=testcase.command.type" /> ${testcase.command.name} = null;
             % endif
             try {
-                % if isinstance(additional.command, get_args(Statement)):
-                    <%include file="statement.mako" args="statement=additional.command" />
-                % else:
-                    <% assert isinstance(additional.command, get_args(Expression)) %>
-                    % if additional.has_return:
-                        this.vEvaluate${loop.index}(\
-                    % endif
-                    <%include file="expression.mako" args="expression=additional.command" />\
-                    % if additional.has_return:
-                        )\
-                    % endif
-                    ;
+                ## If we have a value function, we have an expression.
+                % if testcase.value_function:
+                    this.vEvaluate${loop.index}(\
                 % endif
+                <%include file="statement.mako" args="statement=testcase.command" />
+                % if testcase.value_function:
+                    )\
+                % endif
+                ;
+                this.eEvaluate${loop.index}(null);
             } catch (Exception e) {
                 this.eEvaluate${loop.index}(e);
             }
-            System.err.print("--${secret_id}-- SEP");
-            System.out.print("--${secret_id}-- SEP");
-            this.writeDelimiter("--${secret_id}-- SEP");
+            this.writeDelimiter();
         % endfor
 
         ${after}

@@ -12,7 +12,7 @@
     ## We have a value, delegate to the value template.
     <%include file="value.mako", args="value=statement" />
 % else:
-    <% assert isinstance(statement, Assignment)%>
+    <% assert isinstance(statement, get_args(Assignment)) %>
     ## We haven an assignment.
     ${statement.name} = <%include file="statement.mako" args="expression=statement.expression"/>
 % endif

@@ -21,9 +21,6 @@ class PythonConfig(Language):
     def initial_dependencies(self) -> List[str]:
         return ["values.py", "evaluation_utils.py"]
 
-    def evaluator_dependencies(self) -> List[str]:
-        return ["evaluation_utils.py"]
-
     def generation_callback(self, files: List[str]) -> CallbackResult:
         return (["python", "-m", "compileall", "-q", "-b", "."],
                 [f.replace(".py", '.pyc') for f in files])

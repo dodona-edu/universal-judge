@@ -18,7 +18,7 @@ public class Values {
     }
 
     @SuppressWarnings("unchecked")
-    private static String encode(Object value) {
+    private static List<String> internalEncode(Object value) {
         String type;
         String data;
 
@@ -78,8 +78,12 @@ public class Values {
             type = "unknown";
             data = value.toString();
         }
+        return List.of(type, data);
+    }
 
-        return "{ \"data\": " + data + ", \"type\": \"" + type + "\"}";
+    private static String encode(Object value) {
+        var typeAndData = internalEncode(value);
+        return "{ \"data\": " + typeAndData.get(1) + ", \"type\": \"" + typeAndData.get(0) + "\"}";
     }
 
     public static void send(PrintWriter writer, Object value) {
@@ -95,13 +99,15 @@ public class Values {
 
     public static void evaluated(PrintWriter writer,
                                  boolean result, String expected, String actual, Collection<String> messages) {
+        var encodedExpected = internalEncode(expected);
+        var encodedActual = internalEncode(actual);
         String builder = "{" +
             "\"result\": " +
             result +
             ", \"readable_expected\": " +
-            expected +
+            encodedExpected.get(1) +
             ", \"readable_actual\": " +
-            actual +
+            encodedActual.get(1) +
             ", \"messages\": [" +
             String.join(", ", messages) +
             "]}";

@@ -21,11 +21,7 @@ class JavaConfig(Language):
     """
 
     def initial_dependencies(self) -> List[str]:
-        return ["Values.java", "AbstractEvaluator.java",
-                "AbstractSpecificEvaluator.java"]
-
-    def evaluator_dependencies(self) -> List[str]:
-        return ["AbstractCustomEvaluator.java"]
+        return ["Values.java", "EvaluationResult.java"]
 
     def generation_callback(self, files: List[str]) -> CallbackResult:
         others = [x for x in files if not x.endswith(".jar")]
