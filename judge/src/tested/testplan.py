@@ -184,6 +184,7 @@ class ValueOutputChannel(WithFeatures):
             return self.value.get_used_features()
         return NOTHING
 
+    @classmethod
     @root_validator
     def value_requirements(cls, values):
         value = values.get("value")
@@ -206,6 +207,7 @@ class ExceptionOutputChannel(WithFeatures):
             return self.exception.get_used_features()
         return NOTHING
 
+    @classmethod
     @root_validator
     def value_requirements(cls, values):
         exception = values.get("exception")
@@ -287,6 +289,7 @@ class Output(BaseOutput):
             self.result.get_used_features()
         ])
 
+    @classmethod
     @validator("result")
     def validate_no_expression(cls, v):
         """
@@ -327,6 +330,7 @@ class Testcase(WithFeatures, WithFunctions):
             [self.input.get_used_features(), self.output.get_used_features()]
         )
 
+    @classmethod
     @root_validator
     def no_return_with_assignment(cls, values):
         input_ = values.get("input")
@@ -404,6 +408,7 @@ class Context(WithFeatures, WithFunctions):
     after: Code = field(default_factory=dict)
     description: Optional[str] = None
 
+    @classmethod
     @root_validator
     def check_testcases_exist(cls, values):
         context = values.get('context_testcase')
