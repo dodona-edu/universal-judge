@@ -30,6 +30,14 @@ class JavaConfig(Language):
         c = ["javac", "-cp", jar_argument, *others]
         return c, [x.replace(".java", ".class") for x in files]
 
+    def post_generation_callback(self, directory: Path, files: List[str])\
+            -> List[str]:
+        # In Java, compilation might result in too multiple resulting files per
+        # source file. To make our life easier, we just add all files ending in
+        # ".class".
+        non_class = [x for x in files if Path(x).suffix != '.class']
+        return [x.name for x in directory.glob("*.class")] + non_class
+
     def execution_command(self, cwd: Path, file: str, dependencies: List[str],
                           arguments: List[str]) -> List[str]:
         cp = self._classpath_separator().join(self._get_classpath() + ["."])

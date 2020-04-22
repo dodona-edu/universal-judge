@@ -14,7 +14,8 @@
                 "evaluator": {
                   "type": "specific",
                   "evaluators": {
-                    "python": "evaluator.py"
+                    "python": "evaluator.py",
+                    "java": "Evaluator.java"
                   }
                 }
               }

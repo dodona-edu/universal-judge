@@ -57,6 +57,18 @@ class Language:
         """
         return [], files
 
+    def post_generation_callback(self, directory: Path, files: List[str]) \
+            -> List[str]:
+        """
+        Called after the generation step has run. Normally, the generation callback
+        returns the resulting files. However, in some languages, such as Java, the
+        generated files depend on the contents of the compiled files.
+        :param directory: The directory where the files were compiled.
+        :param files: The files as returned by the generation callback.
+        :return: The new files.
+        """
+        return files
+
     def evaluator_generation_callback(self, files: List[str]) -> CallbackResult:
         """
         Same as the generation_callback, but used for evaluators. By default,

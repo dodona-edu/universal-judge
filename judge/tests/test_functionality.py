@@ -13,6 +13,7 @@ from io import StringIO
 from pathlib import Path
 from typing import List
 
+import pytest
 from _pytest.config import Config
 
 from tested.configs import DodonaConfig
@@ -77,8 +78,9 @@ def test_io_function_exercise(language: str, tmp_path: Path, pytestconfig: Confi
     assert updates.find_status_enum() == ["correct"]
 
 
-def test_language_evaluator_exception(tmp_path: Path, pytestconfig: Config):
-    conf = configuration(pytestconfig, "division", "python", tmp_path, "plan.json", "correct")
+@pytest.mark.parametrize("lang", ["python", "java"])
+def test_language_evaluator_exception(lang: str, tmp_path: Path, pytestconfig: Config):
+    conf = configuration(pytestconfig, "division", lang, tmp_path, "plan.json", "correct")
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["correct"]

@@ -91,6 +91,9 @@ public class Values {
     }
 
     public static void sendException(PrintWriter writer, Exception exception) {
+        if (exception == null) {
+            return;
+        }
         var sw = new StringWriter();
         exception.printStackTrace(new PrintWriter(sw));
         var result = "{ \"message\": \"" + exception.getMessage() + "\", \"type\": \"" + sw.toString() + "\"}";

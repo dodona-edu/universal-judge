@@ -14,7 +14,7 @@ _logger = logging.getLogger(__name__)
 
 
 def run_compilation(bundle: Bundle,
-                    working_directory: Path,
+                    directory: Path,
                     dependencies: List[str],
                     remaining: float
                     ) -> Tuple[Optional[BaseExecutionResult], List[str]]:
@@ -38,7 +38,7 @@ def run_compilation(bundle: Bundle,
     penalty, so disabling the fallback if not needed is recommended.
 
     :param bundle: The configuration bundle.
-    :param working_directory: The directory in which the dependencies are
+    :param directory: The directory in which the dependencies are
                               available and in which the compilation results
                               should be stored.
     :param dependencies: A list of files available for compilation. Some
@@ -56,8 +56,11 @@ def run_compilation(bundle: Bundle,
     """
     command, files = bundle.language_config.generation_callback(dependencies)
     _logger.debug("Generating files with command %s in directory %s",
-                  command, working_directory)
-    result = run_command(working_directory, remaining, command)
+                  command, directory)
+    result = run_command(directory, remaining, command)
+    _logger.debug(f"Would take files: {files}")
+    files = bundle.language_config.post_generation_callback(directory, files)
+    _logger.debug(f"Post callback files are {files}.")
     return result, files
 
 
