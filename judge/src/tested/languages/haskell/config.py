@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import List, Mapping
 
-from humps import pascalize
+from humps import pascalize, camelize
 
 from tested.configs import Bundle
 from tested.datatypes import (AdvancedNumericTypes as ant, AllTypes,
@@ -27,10 +27,7 @@ class HaskellConfig(Language):
         return "Selector"
 
     def initial_dependencies(self) -> List[str]:
-        return ["Values.hs", "SpecificEvaluationUtils.hs"]
-
-    def evaluator_dependencies(self) -> List[str]:
-        return ["EvaluationUtils.hs"]
+        return ["Values.hs", "EvaluationUtils.hs"]
 
     def generation_callback(self, files: List[str]) -> CallbackResult:
         main_file = files[-1]
@@ -39,7 +36,7 @@ class HaskellConfig(Language):
                 [executable_name(exec_file)])
 
     def conventionalise_function(self, function_name: str) -> str:
-        return function_name
+        return camelize(function_name)
 
     def conventionalise_namespace(self, class_name: str) -> str:
         return pascalize(class_name)

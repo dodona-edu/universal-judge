@@ -78,7 +78,7 @@ def test_io_function_exercise(language: str, tmp_path: Path, pytestconfig: Confi
     assert updates.find_status_enum() == ["correct"]
 
 
-@pytest.mark.parametrize("lang", ["python", "java"])
+@pytest.mark.parametrize("lang", ["python", "java", "haskell"])
 def test_language_evaluator_exception(lang: str, tmp_path: Path, pytestconfig: Config):
     conf = configuration(pytestconfig, "division", lang, tmp_path, "plan.json", "correct")
     result = execute_config(conf)

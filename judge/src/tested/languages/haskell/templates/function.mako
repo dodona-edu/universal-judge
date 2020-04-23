@@ -6,7 +6,7 @@
 % endif
 ${function.name} \
 % for argument in function.arguments:
-    (<%include file="expression.mako" args="expression=argument"/>)\
+    (<%include file="statement.mako" args="statement=argument"/>)\
     % if not loop.last:
          \
     % endif

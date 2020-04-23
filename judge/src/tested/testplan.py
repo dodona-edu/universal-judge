@@ -10,7 +10,8 @@ from dataclasses import field
 from enum import Enum
 from os import path
 from pathlib import Path
-from typing import List, Optional, Dict, Any, Literal, Union, NamedTuple, Iterable
+from typing import List, Optional, Dict, Any, Literal, Union, NamedTuple, Iterable, \
+    Set
 
 from pydantic import BaseModel, root_validator, validator
 from pydantic.dataclasses import dataclass
@@ -110,6 +111,16 @@ class SpecificEvaluator:
 
     def for_language(self, language: str) -> Path:
         return self.evaluators[language]
+
+    @classmethod
+    @validator("evaluators")
+    def validate_evaluator(cls, v):
+        """There should be at least one evaluator."""
+
+        if len(v.keys()) == 0:
+            raise ValueError("At least one specific evaluator is required.")
+
+        return v
 
 
 class TextChannelType(str, Enum):
@@ -277,6 +288,18 @@ class BaseOutput(WithFeatures):
             self.exception.get_used_features(),
         ])
 
+    def get_specific_eval_languages(self) -> Optional[Set[str]]:
+        """
+        Get the languages supported by this output if language specific evaluators
+        are used. If none are used, None is returned, otherwise a set of languages.
+        """
+        languages = None
+        if isinstance(self.exception, ExceptionOutputChannel):
+            if isinstance(self.exception.evaluator, SpecificEvaluator):
+                languages = set(self.exception.evaluator.evaluators.keys())
+
+        return languages
+
 
 @dataclass
 class Output(BaseOutput):
@@ -315,6 +338,22 @@ class Output(BaseOutput):
         if not _only_values(v.value):
             raise ValueError("Only values are allowed in descriptive mode.")
         return v
+
+    def get_specific_eval_languages(self) -> Optional[Set[str]]:
+        """
+        Get the languages supported by this output if language specific evaluators
+        are used. If none are used, None is returned, otherwise a set of languages.
+        """
+        languages = super().get_specific_eval_languages()
+        if isinstance(self.result, ValueOutputChannel):
+            if isinstance(self.result.evaluator, SpecificEvaluator):
+                langs = set(self.result.evaluator.evaluators.keys())
+                if languages is not None:
+                    languages &= langs
+                else:
+                    languages = langs
+
+        return languages
 
 
 @dataclass
@@ -430,8 +469,10 @@ class Context(WithFeatures, WithFunctions):
     def get_functions(self) -> Iterable[FunctionCall]:
         return flatten(x.get_functions() for x in self.testcases)
 
-    def time_limit(self, language: str) -> Optional[int]:
-        return self.time_limits.get(language)
+    def all_testcases(self) -> List[Union[ContextTestcase, Testcase]]:
+        result = [self.context_testcase]
+        result.extend(self.testcases)
+        return result
 
 
 @dataclass

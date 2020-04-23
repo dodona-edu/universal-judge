@@ -1,4 +1,4 @@
-## Code to execute_module one test context.
+## Code to execute one context.
 <%! from tested.languages.generator import _TestcaseArguments %>
 <%! from tested.serialisation import Statement, Expression %>
 <%! from tested.utils import get_args %>
@@ -55,7 +55,7 @@ def send_specific_exception(r):
 
 
 ##################################
-## Main testcase evalutors      ##
+## Main testcase evaluators     ##
 ##################################
 def e_evaluate_main(value):
     <%include file="statement.mako" args="statement=context_testcase.exception_function"/>

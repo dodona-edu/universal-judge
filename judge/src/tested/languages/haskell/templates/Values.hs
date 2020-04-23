@@ -6,6 +6,7 @@ import Data.Aeson
 import Data.Text (Text)
 import Data.Word as W
 import Data.Int as I
+import Control.Exception
 import qualified Data.ByteString.Lazy as LBS
 
 -- Typeable things are convertible to our format
@@ -240,18 +241,8 @@ sendValue file value = LBS.appendFile file (encode (object [
     ]))
 
 
-sendCustomEvaluated :: Bool -> Maybe String -> Maybe String -> [String] -> IO ()
-sendCustomEvaluated result expected actual messages =
-    LBS.putStr (encode (object [
-        "result" .= toJSON result,
-        "readable_expected" .= toJSON expected,
-        "readable_actual" .= toJSON actual,
-        "messages" .= toJSON messages
-    ]))
-
-
-sendSpecificEvaluated :: FilePath -> Bool -> String -> String -> [String] -> IO ()
-sendSpecificEvaluated file result expected actual messages =
+sendEvaluated :: FilePath -> Bool -> Maybe String -> Maybe String -> [String] -> IO ()
+sendEvaluated file result expected actual messages =
     LBS.appendFile file (encode (object [
         "result" .= toJSON result,
         "readable_expected" .= toJSON expected,
@@ -259,3 +250,9 @@ sendSpecificEvaluated file result expected actual messages =
         "messages" .= toJSON messages
     ]))
 
+sendException :: Exception e => FilePath -> Maybe e -> IO ()
+sendException file (Just ex) = LBS.appendFile file (encode (object [
+        "message" .= toJSON (show ex),
+        "stacktrace" .= toJSON (show "-")
+    ]))
+sendException _ Nothing = return ()

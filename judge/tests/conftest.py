@@ -1,6 +1,6 @@
 from .regenerate import all_submissions
 
-LANGUAGES = ["python", "java"]
+LANGUAGES = ["python", "java", "haskell"]
 
 
 def pytest_generate_tests(metafunc):
