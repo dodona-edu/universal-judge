@@ -31,8 +31,6 @@ class CConfig(Language):
         main_file = files[-1]
         exec_file = Path(main_file).stem
         result = executable_name(exec_file)
-        # Only include the values, to prevent multiple definitions.
-        # c_files = [x for x in files if x.endswith(".c")]
         return ["gcc", "-std=c11", "-Wall", "values.c", main_file, "-o", result], [result]
 
     def execution_command(self,
