@@ -86,7 +86,7 @@ void write_unknown(FILE * out, void * value) {
     fprintf(out, asString, "?");
 }
 
-void send_evaluated(FILE *out, bool result, const char *expected, const char *actual, size_t nrOfMessages, const char **messages) {
+void send_evaluated(FILE* out, bool result, char* expected, char* actual, size_t nrOfMessages, char** messages) {
 
     // Find the length of the string we need.
     size_t messageLength = 0;

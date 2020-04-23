@@ -35,18 +35,6 @@ def evaluate_programmed(
     evaluator is very similar to the execution of the whole evaluation. It a
     mini-evaluation if you will.
     """
-    # Check if the language supports this.
-    if not bundle.language_config.supports_evaluation():
-        _logger.error(f"{bundle.config.programming_language} does not support"
-                      f" evaluations.")
-        return BaseExecutionResult(
-            stdout="",
-            stderr=f"Evaluatie in {bundle.config.programming_language} wordt niet "
-                   f"ondersteund.",
-            exit=-1,
-            timeout=False,
-            memory=False
-        )
 
     # We have special support for Python.
     if evaluator.language == "python" and bundle.config.options.optimized:
@@ -82,6 +70,19 @@ def _evaluate_others(bundle: Bundle,
     eval_bundle = create_bundle(
         bundle.config, bundle.out, bundle.plan, evaluator.language
     )
+
+    # Check if the language supports this.
+    if not eval_bundle.language_config.supports_evaluation():
+        _logger.error(f"{eval_bundle.config.programming_language} does not support"
+                      f" evaluations.")
+        return BaseExecutionResult(
+            stdout="",
+            stderr=f"Evaluatie in {eval_bundle.config.programming_language} wordt "
+                   f"niet ondersteund.",
+            exit=-1,
+            timeout=False,
+            memory=False
+        )
 
     # Copy the evaluator
     origin_path = Path(bundle.config.resources, evaluator.path)

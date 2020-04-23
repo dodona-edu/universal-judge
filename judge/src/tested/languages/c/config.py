@@ -31,12 +31,13 @@ class CConfig(Language):
         main_file = files[-1]
         exec_file = Path(main_file).stem
         result = executable_name(exec_file)
-        return ["gcc", "-std=c11", "-Wall", main_file, "-o", result], [result]
+        # Only include the values, to prevent multiple definitions.
+        # c_files = [x for x in files if x.endswith(".c")]
+        return ["gcc", "-std=c11", "-Wall", "values.c", main_file, "-o", result], [result]
 
     def execution_command(self,
                           cwd: Path,
                           file: str,
-                          dependencies: List[str],
                           arguments: List[str]) -> List[str]:
         local_file = cwd / executable_name(Path(file).stem)
         return [str(local_file.absolute()), *arguments]
@@ -68,7 +69,7 @@ class CConfig(Language):
             contents = file.read()
         # noinspection PyTypeChecker
         with open(solution, "w") as file:
-            header = "#ifdef INCLUDED\n#pragma once\n#endif\n\n"
+            header = "#pragma once\n\n"
             result = header + contents.replace("main", "solution_main")
             file.write(result)
 

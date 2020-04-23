@@ -62,6 +62,14 @@ void write_unknown(FILE*, void*);
 
 #define write_value(f, x) write_value_function(x)(f, x)
 
-void send_evaluated(FILE* out, bool result, const char* expected, const char* actual, size_t nrOfMessages, const char** messages);
+void send_evaluated(FILE* out, bool result, char* expected, char* actual, size_t nrOfMessages, char** messages);
+
+typedef struct EvaluationResult {
+    bool result;
+    char* readableExpected;
+    char* readableActual;
+    char** messages;
+    size_t nrOfMessages;
+} EvaluationResult;
 
 #endif //WRITER_VALUES_H

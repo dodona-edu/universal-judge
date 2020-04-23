@@ -28,8 +28,8 @@ class PythonConfig(Language):
     def evaluator_generation_callback(self, files: List[str]) -> CallbackResult:
         return [], files
 
-    def execution_command(self, cwd: str, file: str, dependencies: List[str],
-                          arguments: List[str]) -> List[str]:
+    def execution_command(self, cwd: str, file: str, arguments: List[str]) \
+            -> List[str]:
         return ["python", "-u", file, *arguments]
 
     def file_extension(self) -> str:

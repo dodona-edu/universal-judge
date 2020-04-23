@@ -22,11 +22,11 @@ exception_file = open(r"${exception_file}", "w")
 ## Write the delimiter and flush to ensure the output is in the files.
 ## This is necessary, otherwise the delimiters are sometimes missing when
 ## execution is killed due to timeouts.
-def write_delimiter(delimiter):
-    value_file.write(delimiter)
-    exception_file.write(delimiter)
-    sys.stderr.write(delimiter)
-    sys.stdout.write(delimiter)
+def write_delimiter():
+    value_file.write("--${secret_id}-- SEP")
+    exception_file.write("--${secret_id}-- SEP")
+    sys.stderr.write("--${secret_id}-- SEP")
+    sys.stdout.write("--${secret_id}-- SEP")
     sys.stdout.flush()
     sys.stderr.flush()
     value_file.flush()
@@ -73,10 +73,7 @@ def e_evaluate_main(value):
         <%include file="statement.mako" args="statement=testcase.exception_function"/>
 % endfor
 
-
-## Run the "before" code if it exists.
 ${before}
-
 
 ## Prepare the command line arguments if needed.
 % if context_testcase.exists and context_testcase.arguments:
@@ -105,7 +102,7 @@ except Exception as e:
         e_evaluate_main(None)
 % endif
 
-write_delimiter("--${secret_id}-- SEP")
+write_delimiter()
 
 ## Generate the actual tests based on the context.
 % for testcase in testcases:
@@ -125,7 +122,7 @@ write_delimiter("--${secret_id}-- SEP")
     else:
         e_evaluate_${loop.index}(None)
 
-    write_delimiter("--${secret_id}-- SEP")
+    write_delimiter()
 
 % endfor
 

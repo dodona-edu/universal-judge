@@ -78,7 +78,6 @@ def execute_file(
     command = bundle.language_config.execution_command(
         cwd=working_directory,
         file=executable_name,
-        dependencies=dependencies,
         arguments=[argument] if argument else []
     )
     _logger.debug("Executing command %s in directory %s", command,

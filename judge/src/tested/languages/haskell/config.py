@@ -32,7 +32,7 @@ class HaskellConfig(Language):
     def generation_callback(self, files: List[str]) -> CallbackResult:
         main_file = files[-1]
         exec_file = main_file.rstrip(".hs")
-        return (["ghc", main_file, "-main-is", exec_file],
+        return (["ghc", "-O0", main_file, "-main-is", exec_file],
                 [executable_name(exec_file)])
 
     def conventionalise_function(self, function_name: str) -> str:
@@ -41,8 +41,8 @@ class HaskellConfig(Language):
     def conventionalise_namespace(self, class_name: str) -> str:
         return pascalize(class_name)
 
-    def execution_command(self, cwd: Path, file: str, dependencies: List[str],
-                          arguments: List[str]) -> List[str]:
+    def execution_command(self, cwd: Path, file: str, arguments: List[str]) \
+            -> List[str]:
         local_file = cwd / file
         return [str(local_file.absolute()), *arguments]
 

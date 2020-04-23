@@ -490,8 +490,8 @@ class Tab(WithFeatures, WithFunctions):
 
 
 class ExecutionMode(str, Enum):
-    PRECOMPILATION = "precompilation"
-    INDIVIDUAL = "individual"
+    PRECOMPILATION = "batch"
+    INDIVIDUAL = "context"
 
 
 @dataclass

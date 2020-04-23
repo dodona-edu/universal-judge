@@ -38,8 +38,8 @@ class JavaConfig(Language):
         non_class = [x for x in files if Path(x).suffix != '.class']
         return [x.name for x in directory.glob("*.class")] + non_class
 
-    def execution_command(self, cwd: Path, file: str, dependencies: List[str],
-                          arguments: List[str]) -> List[str]:
+    def execution_command(self, cwd: Path, file: str, arguments: List[str])\
+            -> List[str]:
         cp = self._classpath_separator().join(self._get_classpath() + ["."])
         name = Path(file).stem
         return ["java", "-cp", cp, name, *arguments]

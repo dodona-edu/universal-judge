@@ -21,6 +21,8 @@ from tested.languages import get_language
 from tested.main import run
 from tests.manual_utils import merge, assert_valid_output
 
+ALL_LANGUAGES = ["python", "java", "haskell", "c"]
+
 
 def configuration(config: Config, exercise: str, language: str, work_dir: Path,
                   plan: str = "plan.json", solution: str = "solution",
@@ -50,6 +52,7 @@ def execute_config(config: DodonaConfig) -> str:
     return actual.getvalue()
 
 
+@pytest.mark.parametrize("language", ALL_LANGUAGES)
 def test_io_exercise(language: str, tmp_path: Path, pytestconfig: Config):
     conf = configuration(pytestconfig, "echo", language, tmp_path, "simple.json", "correct")
     result = execute_config(conf)
@@ -57,13 +60,16 @@ def test_io_exercise(language: str, tmp_path: Path, pytestconfig: Config):
     assert updates.find_status_enum() == ["correct"]
 
 
+@pytest.mark.parametrize("language", ALL_LANGUAGES)
 def test_simple_programmed_eval(language: str, tmp_path: Path, pytestconfig: Config):
     conf = configuration(pytestconfig, "echo", language, tmp_path, "simple-programmed.json", "correct")
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
+    print(result)
     assert updates.find_status_enum() == ["correct"]
 
 
+@pytest.mark.parametrize("language", ALL_LANGUAGES)
 def test_simple_programmed_eval_wrong(language: str, tmp_path: Path, pytestconfig: Config):
     conf = configuration(pytestconfig, "echo", language, tmp_path, "simple-programmed-wrong.json", "correct")
     result = execute_config(conf)
@@ -71,6 +77,7 @@ def test_simple_programmed_eval_wrong(language: str, tmp_path: Path, pytestconfi
     assert updates.find_status_enum() == ["wrong"]
 
 
+@pytest.mark.parametrize("language", ALL_LANGUAGES)
 def test_io_function_exercise(language: str, tmp_path: Path, pytestconfig: Config):
     conf = configuration(pytestconfig, "echo-function", language, tmp_path, "simple.json", "correct")
     result = execute_config(conf)

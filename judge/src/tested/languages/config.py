@@ -79,7 +79,6 @@ class Language:
     def execution_command(self,
                           cwd: Path,
                           file: str,
-                          dependencies: List[str],
                           arguments: List[str]) -> List[str]:
         """
         Get the command for executing a file with some arguments.
@@ -87,7 +86,6 @@ class Language:
                     be used to specify the path the executable (first item in the
                     returned command). Files MUST NOT be prepended with the cwd.
         :param file: The "context_testcase" file to be executed.
-        :param dependencies: A list of other available files.
         :param arguments: The arguments, e.g. other dependencies or execution
                           arguments.
         :return: A command that can be passed to the subprocess package.
@@ -118,7 +116,7 @@ class Language:
 
     def conventionalise_namespace(self, class_name: str) -> str:
         """Apply a language's conventions to a module name."""
-        raise NotImplementedError
+        return class_name
 
     def template_folders(self, programming_language: str) -> List[str]:
         """The name of the template folders to search."""
