@@ -23,18 +23,17 @@
   },
   "Identifier": {"type": "string"},
   "Expression": {
-    "anyOf": [
-      {"type": "#Identifier"},
-      {"$ref": "#Value"},
-      {"$ref": "#FunctionCall"}
-    ]
+    "anyOf": [{"$ref": "#Identifier"}, {"$ref": "#Value"}, {"$ref": "#FunctionCall"}]
   },
-  "Statement": {
+  "Assignment": {
     "type": "object",
     "properties": {
       "name": {"type": "string"},
       "expression": {"type": "#Expression"},
       "type": "<datatype>"
     }
+  },
+  "Statement": {
+    "anyOf": [{"$ref": "#Assignment"}, {"$ref": "#Expression"}]
   }
 }

@@ -17,7 +17,7 @@
                 "type": "text",
                 "data": "input-1",
                 "evaluator": {
-                  "type": "custom",
+                  "type": "programmed",
                   "language": "python",
                   "path": "evaluator.py"
                 }

@@ -84,7 +84,7 @@ class ProgrammedEvaluator:
     language: str
     path: Path
     arguments: List[Value] = field(default_factory=list)
-    type: Literal["custom"] = "custom"
+    type: Literal["programmed"] = "programmed"
 
 
 @dataclass

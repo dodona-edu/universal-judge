@@ -12,7 +12,7 @@ public class Context_0_0 {
         Values.send(valueWriter, value);
     }
 
-    private void sendE(Exception exception) throws Exception {
+    private void sendException(Exception exception) throws Exception {
         Values.sendException(exceptionWriter, exception);
     }
 
@@ -27,13 +27,11 @@ public class Context_0_0 {
     void execute() throws Exception {
         try {
             this.vEvaluate0(Main.loterij(6, 15));
+            this.eEvaluate0(null);
         } catch (Exception e) {
             this.eEvaluate0(e);
         }
-        System.err.print("--TDm75Wrze-- SEP");
-        System.out.print("--TDm75Wrze-- SEP");
-        valueWriter.write("--TDm75Wrze-- SEP");
-        exceptionWriter.write("--TDm75Wrze-- SEP");
+        writeDelimiter();
     }
 
     public static void main(String[] a) throws Exception {

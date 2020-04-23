@@ -457,9 +457,8 @@ Een expressie is een dezer drie dingen:
     \end{description}
 \end{enumerate}
 
-De ondersteuning voor statements in het testplan beperkt zich tot variabeletoekenningen of \english{assignment}s.
-Er is expliciet voor gekozen om expressies geen statements te maken.
-De reden hiervoor is dat dit de implementatie ingewikkelder zou maken, zonder noemenswaardig voordeel.
+In het serialisatieformaat is een statement ofwel een variabeletoekenningen of \english{assignment}, ofwel een expressie.
+Een expressie is zoals reeds besproken.
 Een assignment kent een naam toe aan het resultaat van een expression.
 \Cref{lst:type-schema} toont ook de vereenvoudigde \acronym{JSON} Schema van een statement (en dus van een assignment, daar er maar één soort statement bestaat).
 Hier staat \texttt{<datatype>} voor een van de gegevenstypes die hiervoor besproken zijn.
@@ -776,9 +775,9 @@ Een voorbeeld van het gebruik binnen een testplan is \cref{lst:testplan-value}.
 Hier wordt als returnwaarde een verzameling met drie elementen (5, 10 en 15) verwacht.
 
 \begin{listing}[h]
-    \inputminted{json}{code/testplan-value.json}
     \caption{Fragment uit een testplan dat waarde-evaluatie gebruikt.}
     \label{lst:testplan-value}
+    \inputminted{json}{code/testplan-value.json}
 \end{listing}
 
 \subsection{Geprogrammeerde evaluatie}\label{subsec:geprogrammeerde-evaluatie}
@@ -791,7 +790,10 @@ Voor dergelijke scenario's is geprogrammeerde evaluatie een oplossing: hierbij w
 Binnen TESTed wordt dit mogelijk gemaakt door geproduceerde waarden uit de ingediende oplossing te serialiseren bij het uitvoeren van de testcode, en terug te deserialiseren bij het uitvoeren van de evaluatiecode.
 
 Deze evaluatiecode kan geschreven worden in een programmeertaal naar keuze, al moet de programmeertaal wel ondersteund worden door TESTed.
-Hoewel de exacte implementatie verschilt van programmeertaal tot programmeertaal, komt het neer op het implementeren van een functie met als naam \texttt{evaluate}.
+Hoewel de exacte implementatie verschilt van programmeertaal tot programmeertaal, komt het neer op het implementeren van een top-level functie\footnote{
+    Deze functie wordt dan vertaald door TESTed.
+    In Java zal dit bijvoorbeeld resulteren in een statische functie.
+} met als naam \texttt{evaluate}.
 Deze functie krijgt drie argumenten mee:
 
 \begin{description}
@@ -800,8 +802,10 @@ Deze functie krijgt drie argumenten mee:
     \item[\texttt{arguments}] Een lijst van opties voor de geprogrammeerde evaluatie uit het testplan.
 \end{description}
 
-De \texttt{evaluate}-functie moet één oproep doen naar de functie \texttt{evaluated()}.
-Deze laatste functie is een hulpfunctie die TESTed beschikbaar maakt en heeft vier argumenten:
+Het resultaat van de beoordeling moet gegeven worden als returnwaarde.
+Hoe deze returnwaarde er exact uitziet, is opnieuw programmeertaalafhankelijk.
+In Python en Java gaat het om een klasse, terwijl het in Haskell om een record gaat.
+Deze returnwaarde moet vier gegevens bevatten:
 
 \begin{description}
     \item[\texttt{result}] Een \texttt{boolean} die aangeeft of de geproduceerde waarde juist is of niet.
@@ -810,57 +814,18 @@ Deze laatste functie is een hulpfunctie die TESTed beschikbaar maakt en heeft vi
     Indien niets gegeven wordt, zal TESTed zelf een voorstelling maken op basis van de verwachte waarde uit het testplan.
     \item[\texttt{readableActual}] (Optioneel) Een \texttt{string} met een tekstuele voorstelling van de geproduceerde waarde.
     Indien niets gegeven wordt, zal TESTed zelf een voorstelling maken op basis van de geproduceerde waarde.
+    \item[\texttt{messages}] (Optioneel) Een lijst van berichten om te tonen aan de studenten.
 \end{description}
 
-In Python bestaat de evaluatiecode uit een module (een \texttt{.py}-bestand) met een functie die voldoet aan de definitie, zoals gegeven in \cref{lst:evaluation-python-custom}.
-Deze functie moet één oproep doen naar de functie \texttt{evaluated()}, waarvan de documentatie in fragment X gegeven is.
-TESTed stelt ook een module \texttt{evaluation\_utils} ter beschikking.
-De functie van hierboven moet dan één oproep doen naar de functie \texttt{evaluated()}.
-Deze module is redelijk eenvoudig, zoals te zien in \cref{lst:evaluation-util-python}
+Een concreet voorbeeld van de evaluatiecode voor een geprogrammeerde evaluatie geschreven in Python wordt gegeven in \cref{lst:evaluation-lotto}.
+Deze evaluatiecode is eenvoudig: er wordt gekeken of de verwachte waarde overeenkomt met de geproduceerde waarde.
+Indien dat niet het geval is, wordt een bericht meegegeven.
+In realiteit zal deze code wel complexer zijn, want eenvoudige gevallen zoals dit kunnen namelijk met de ingebouwde evaluatie, waardoor het niet nodig is om een geprogrammeerde evaluatie te gebruiken.
 
 \begin{listing}
-    \inputminted{python}{code/custom_signature.py}
-    \caption{De definitie van de functie die aanwezig moet zijn in de evaluatiecode voor een geprogrammeerde evaluatie geschreven in Python.}
-    \label{lst:evaluation-python-custom}
-\end{listing}
-
-\begin{listing}
-    \inputminted{python}{../../judge/src/tested/languages/python/templates/evaluation_utils.py}
-    \caption{De implementatie van de module \texttt{evaluation\_utils}}
-    \label{lst:evaluation-util-python}
-\end{listing}
-
-In de Java-implementatie is de situatie gelijkaardig: het gaat om het implementeren van een abstracte klasse.
-Deze abstracte klasse biedt ook de functionaliteit aan van de module \texttt{evaluation\_utils} bij Python.
-De te implementeren klasse en haar ouderklasse staan in \cref{lst:evaluation-util-java,lst:evaluation-java-custom}.
-
-\begin{listing}
-    \inputminted{java}{../../judge/src/tested/languages/java/templates/AbstractCustomEvaluator.java}
-    \caption{De implementatie van de klasse \texttt{AbstractCustomEvaluator}.}
-    \label{lst:evaluation-java-custom}
-\end{listing}
-
-\begin{listing}
-    \inputminted{java}{../../judge/src/tested/languages/java/templates/AbstractEvaluator.java}
-    \caption{De implementatie van de klasse \texttt{AbstractEvaluator}.}
-    \label{lst:evaluation-util-java}
-\end{listing}
-
-Een geprogrammeerde evaluatie wordt gebruikt in de voorbeeldoefening Lotto.
-Het gebruik in het testplan wordt getoond in \cref{lst:testplan-custom}, waar de evaluatiecode voor de aangepaste evaluatie in Python geschreven is.
-Er worden ook argumenten meegegeven aan deze code.
-De evaluatiecode zelf is gegeven in \cref{lst:evaluation-lotto}.
-
-\begin{listing}
-    \inputminted{java}{code/testplan-custom.json}
-    \caption{Fragment uit het testplan van de voorbeeldoefening Lotto, waar een geprogrammeerde evaluatie gebruikt wordt.}
-    \label{lst:testplan-custom}
-\end{listing}
-
-\begin{listing}
-    \inputminted{python}{../../exercise/lotto/evaluation/evaluator.py}
-    \caption{De evaluatiecode voor de geprogrammeerde evaluatie van de voorbeeldoefening Lotto.}
+    \caption{Voorbeeld van evaluatiecode in Python voor een geprogrammeerde evaluatie.}
     \label{lst:evaluation-lotto}
+    \inputminted{python}{code/evaluator.py}
 \end{listing}
 
 \subsection{Programmeertaalspecifieke evaluatie}\label{subsec:programmeertaalspecifieke-evaluatie}
@@ -876,30 +841,15 @@ Het is desalniettemin het vermelden waard dat het niet zeker is of deze evaluati
 Oefeningen die programmeertaalspecifieke aspecten moeten beoordelen zijn, net door hun programmeertaalspecifieke aard, moeilijker aan te bieden in meerdere programmeertalen.
 Een oefening in de programmeertaal C die bijvoorbeeld beoordeelt op juist gebruik van pointers zal weinig nut hebben in Python.
 
-\begin{listing}
-    \inputminted{json}{code/testplan-specific.json}
-    \caption{Fragment uit een testplan waar een programmeertaalspecifieke evaluatie gebruikt wordt.}
-    \label{lst:testplan-specific}
-\end{listing}
-
-In gebruik lijkt de programmeertaalspecifieke evaluatie sterk op de geprogrammeerde evaluatie, met dat verschil dat het testplan niet evaluatiecode in één programmeertaal bevat, maar evaluatiecode in alle programmeertalen waarin de oefening aangeboden wordt, zoals geïllustreerd in \cref{lst:testplan-specific}.
-Als de programmeertaalspecifieke evaluatie gebruikt wordt en er wordt geen evaluatiecode voor een bepaalde programmeertaal, zal de oefening niet opgelost kunnen worden in die programmeertaal.
-
-Ook de implementatie lijkt op de geprogrammeerde evaluatie, zij het dat de te implementeren functie afwijkt.
-In Python wordt dit \cref{lst:evaluation-python-specific}, in Java \cref{lst:evaluation-java-specific}.
-Om het resultaat van de evaluatie aan de judge te geven, wordt dezelfde \texttt{evaluated}-functie als bij de aangepaste evaluator gebruikt (zie \cref{lst:evaluation-util-python,lst:evaluation-util-java}).
-Het gebruik in het testplan is \cref{lst:testplan-specific}.
+In gebruik is een programmeertaalspecifieke evaluatie zo goed als identiek aan de geprogrammeerde evaluatie, met dat verschil dat de functie \texttt{evaluate} slechts één parameter meekrijgt.
+Ook moet de evaluatiecode geschreven worden voor elke programmeertaal waarin de oefening aangeboden wordt.
+Een concreet voorbeeld, opnieuw in Python, is \cref{lst:evaluation-specific}.
+In dit voorbeeld wordt gekeken of de waarde een integer is of niet.
 
 \begin{listing}
-    \inputminted{python}{code/specific_signature.py}
-    \caption{De definitie van de functie die aanwezig moet zijn in de evaluatiecode voor een programmeertaalspecifieke evaluatie geschreven in Python.}
-    \label{lst:evaluation-python-specific}
-\end{listing}
-
-\begin{listing}
-    \inputminted{java}{../../judge/src/tested/languages/java/templates/AbstractSpecificEvaluator.java}
-    \caption{De implementatie van de klasse \texttt{AbstractSpecificEvaluator}.}
-    \label{lst:evaluation-java-specific}
+    \caption{Voorbeeld van evaluatiecode in Python voor een programmeertaalspecifieke evaluatie.}
+    \label{lst:evaluation-specific}
+    \inputminted{python}{code/evaluator-specific.py}
 \end{listing}
 
 \section{Performantie}\label{sec:performantie}
@@ -1031,6 +981,9 @@ Er is speciale ondersteuning in TESTed ingebouwd om geprogrammeerde evaluaties w
 \subsection{Tijdsmetingen}\label{subsec:tijdsmetingen}
 
 \begin{table}
+    \caption{Tijdsmetingen voor de oefeningen Lotto en Echo, voor de programmeertalen Python en Java, in contextcompilatie, partiële compilatie en batchcompilatie.
+    Bij Lotto is deze laatste uitgevoerd met en zonder optimalisatie voor geprogrammeerde evaluaties.}
+    \label{tab:meting}
     \centering
     \begin{tabular}{ll|r|r|r|r|}
         \cline{3-6}
@@ -1048,9 +1001,6 @@ Er is speciale ondersteuning in TESTed ingebouwd om geprogrammeerde evaluaties w
         \multicolumn{1}{|l|}{}                       & Batch             & 5        & 3         & 8        & 5         \\
         \hline
     \end{tabular}
-    \caption{Tijdsmetingen voor de oefeningen Lotto en Echo, voor de programmeertalen Python en Java, in contextcompilatie, partiële compilatie en batchcompilatie.
-        Bij Lotto is deze laatste uitgevoerd met en zonder optimalisatie voor geprogrammeerde evaluaties.}
-    \label{tab:meting}
 \end{table}
 
 \Cref{tab:meting} toont enkele tijdsmetingen van de verschillende implementaties van het systeem met sjablonen, voor de programmeertalen Python en Java.
