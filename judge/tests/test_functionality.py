@@ -54,7 +54,6 @@ def execute_config(config: DodonaConfig) -> str:
 def test_io_exercise(language: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "echo", language, tmp_path, "simple.json", "correct")
     result = execute_config(conf)
-    print(result)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["correct"]
 
@@ -64,7 +63,6 @@ def test_simple_programmed_eval(language: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "echo", language, tmp_path, "simple-programmed.json", "correct")
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
-    print(result)
     assert updates.find_status_enum() == ["correct"]
 
 
