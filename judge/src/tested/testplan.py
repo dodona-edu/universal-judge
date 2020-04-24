@@ -10,15 +10,14 @@ from dataclasses import field
 from enum import Enum
 from os import path
 from pathlib import Path
-from typing import List, Optional, Dict, Any, Literal, Union, NamedTuple, Iterable, \
-    Set
+from typing import (List, Optional, Dict, Any, Literal, Union, NamedTuple, Iterable,
+                    Set)
 
 from pydantic import BaseModel, root_validator, validator
 from pydantic.dataclasses import dataclass
 
 from .datatypes import StringTypes
-from .features import (Constructs, FeatureSet, combine_features, WithFeatures,
-                       NOTHING)
+from .features import FeatureSet, combine_features, WithFeatures, NOTHING, Construct
 from .serialisation import (ExceptionValue, Value, Expression, Statement,
                             Identifier, FunctionCall, SequenceType, ObjectType,
                             FunctionType, WithFunctions)
@@ -264,7 +263,6 @@ NormalOutputChannel = Union[
 
 OutputChannel = Union[NormalOutputChannel, SpecialOutputChannel]
 
-
 _TextOutput = Union[TextOutputChannel, SpecialOutputChannel]
 _FileOutput = Union[FileOutputChannel, IgnoredChannel]
 _ExceptionOutput = Union[ExceptionOutputChannel, SpecialOutputChannel]
@@ -320,6 +318,7 @@ class Output(BaseOutput):
         only a value. Since the serialisation format has become too permissive, we
         restrict it using a validator.
         """
+
         def _only_values(value: Expression) -> bool:
             if isinstance(value, Identifier):
                 return False
@@ -365,9 +364,9 @@ class Testcase(WithFeatures, WithFunctions):
     output: Output = Output()
 
     def get_used_features(self) -> FeatureSet:
-        return combine_features(
-            [self.input.get_used_features(), self.output.get_used_features()]
-        )
+        return combine_features([
+            self.input.get_used_features(), self.output.get_used_features()
+        ])
 
     @classmethod
     @root_validator
@@ -377,7 +376,7 @@ class Testcase(WithFeatures, WithFunctions):
         result = output_.result
         # If the statement is not an expression, but we do expect a return value,
         # it is an error.
-        if not isinstance(input_.statement, get_args(Expression))\
+        if not isinstance(input_.statement, get_args(Expression)) \
                 and result != EmptyChannel.NONE:
             raise ValueError(f"Only an expression can be evaluated as a value.")
         return values
@@ -402,7 +401,7 @@ class ContextInput(WithFeatures):
 
     def get_used_features(self) -> FeatureSet:
         if self.arguments:
-            return FeatureSet(Constructs.NOTHING, {StringTypes.TEXT})
+            return FeatureSet(set(), {StringTypes.TEXT})
         else:
             return NOTHING
 
@@ -498,7 +497,7 @@ class ExecutionMode(str, Enum):
 class Plan(WithFeatures, WithFunctions):
     """General test plan, which is used to run tests of some code."""
     tabs: List[Tab] = field(default_factory=list)
-    namespace: str = "Main"
+    namespace: str = "submission"
 
     def get_used_features(self) -> FeatureSet:
         """
@@ -559,7 +558,7 @@ def _resolve_function_calls(function_calls: Iterable[FunctionCall]):
         # If there are default arguments, some function calls will not have the
         # same amount of arguments.
         if len(set(len(x.arguments) for x in calls)) != 1:
-            used_features.append(FeatureSet(Constructs.DEFAULT_ARGUMENTS, set()))
+            used_features.append(FeatureSet({Construct.DEFAULT_ARGUMENTS}, set()))
         # Create mapping [arg position] -> arguments for each call
         argument_map: Dict[Any, List[Expression]] = defaultdict(list)
         for call in calls:
@@ -580,7 +579,7 @@ def _resolve_function_calls(function_calls: Iterable[FunctionCall]):
             type_use.append(types)
         if not all(len(x) == 1 for x in type_use):
             used_features.append(FeatureSet(
-                Constructs.HETEROGENEOUS_ARGUMENTS, set()
+                {Construct.HETEROGENEOUS_ARGUMENTS}, set()
             ))
 
         assert all(x for x in used_features)

@@ -130,7 +130,6 @@ def _evaluate_others(bundle: Bundle,
         bundle=eval_bundle,
         executable_name=executable,
         working_directory=custom_path,
-        dependencies=files,
         stdin=None,
         remaining=remaining
     )

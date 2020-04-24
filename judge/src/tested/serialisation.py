@@ -32,7 +32,7 @@ from .datatypes import (NumericTypes, StringTypes, BooleanTypes,
                         resolve_to_basic, AllTypes, BasicSequenceTypes,
                         BasicObjectTypes, BasicNumericTypes, BasicBooleanTypes,
                         BasicStringTypes, BasicNothingTypes)
-from .features import FeatureSet, Constructs, combine_features, WithFeatures
+from .features import FeatureSet, combine_features, WithFeatures, Construct
 from .utils import get_args, flatten
 
 logger = logging.getLogger(__name__)
@@ -49,7 +49,7 @@ class NumberType(WithFeatures, WithFunctions):
     data: Union[int, Decimal]
 
     def get_used_features(self) -> FeatureSet:
-        return FeatureSet(Constructs.NOTHING, {self.type})
+        return FeatureSet(set(), {self.type})
 
     def get_functions(self) -> Iterable['FunctionCall']:
         return []
@@ -61,7 +61,7 @@ class StringType(WithFeatures, WithFunctions):
     data: str
 
     def get_used_features(self) -> FeatureSet:
-        return FeatureSet(Constructs.NOTHING, {self.type})
+        return FeatureSet(set(), {self.type})
 
     def get_functions(self) -> Iterable['FunctionCall']:
         return []
@@ -73,7 +73,7 @@ class BooleanType(WithFeatures, WithFunctions):
     data: bool
 
     def get_used_features(self) -> FeatureSet:
-        return FeatureSet(Constructs.NOTHING, {self.type})
+        return FeatureSet(set(), {self.type})
 
     def get_functions(self) -> Iterable['FunctionCall']:
         return []
@@ -85,13 +85,13 @@ class SequenceType(WithFeatures, WithFunctions):
     data: List['Expression']
 
     def get_used_features(self) -> FeatureSet:
-        base_features = FeatureSet(Constructs.NOTHING, {self.type})
+        base_features = FeatureSet(set(), {self.type})
         nested_features = [x.get_used_features() for x in self.data]
         combined = combine_features([base_features] + nested_features)
         content_type = self.get_content_type()
         if content_type == BasicStringTypes.ANY:
             combined = combine_features([FeatureSet(
-                Constructs.HETEROGENEOUS_COLLECTIONS, set()
+                {Construct.HETEROGENEOUS_COLLECTIONS}, set()
             )])
         return combined
 
@@ -125,7 +125,7 @@ class ObjectType(WithFeatures, WithFunctions):
     data: Dict[str, 'Expression']
 
     def get_used_features(self) -> FeatureSet:
-        base_features = FeatureSet(Constructs.NOTHING, {self.type})
+        base_features = FeatureSet(set(), {self.type})
         nested_features = [y.get_used_features() for x, y in self.data]
         return combine_features([base_features] + nested_features)
 
@@ -139,7 +139,7 @@ class NothingType(WithFeatures, WithFunctions):
     data: Literal[None] = None
 
     def get_used_features(self) -> FeatureSet:
-        return FeatureSet(Constructs.NOTHING, {self.type})
+        return FeatureSet(set(), {self.type})
 
     def get_functions(self) -> Iterable['FunctionCall']:
         return []
@@ -155,7 +155,7 @@ class Identifier(str, WithFeatures, WithFunctions):
     """Represents an identifier."""
 
     def get_used_features(self) -> FeatureSet:
-        return FeatureSet(Constructs.NOTHING, set())
+        return FeatureSet(set(), set())
 
     def get_functions(self) -> Iterable['FunctionCall']:
         return []
@@ -225,11 +225,11 @@ class FunctionCall(WithFeatures, WithFunctions):
         return values
 
     def get_used_features(self) -> FeatureSet:
-        constructs = Constructs.FUNCTION_CALL
+        constructs = {Construct.FUNCTION_CALL}
 
         # Get OOP features.
         if self.type in (FunctionType.PROPERTY, FunctionType.CONSTRUCTOR):
-            constructs |= Constructs.OBJECTS
+            constructs.add(Construct.OBJECTS)
 
         base_features = FeatureSet(constructs=constructs, types=set())
         argument_features = [x.get_used_features() for x in self.arguments]
@@ -265,7 +265,7 @@ class Assignment(WithFeatures, WithFunctions):
         return Assignment(name=self.name, expression=expression, type=self.type)
 
     def get_used_features(self) -> FeatureSet:
-        base = FeatureSet(Constructs.ASSIGNMENT, set())
+        base = FeatureSet({Construct.ASSIGNMENT}, set())
         other = self.expression.get_used_features()
 
         return combine_features([base, other])
@@ -460,7 +460,7 @@ class ExceptionValue(WithFeatures, BaseModel):
     stacktrace: str
 
     def get_used_features(self) -> FeatureSet:
-        return FeatureSet(Constructs.EXCEPTIONS, types=set())
+        return FeatureSet({Construct.EXCEPTIONS}, types=set())
 
     def readable(self) -> str:
         return f"Fout met boodschap: {self.message}\n{self.stacktrace}"

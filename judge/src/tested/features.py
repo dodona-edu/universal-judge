@@ -3,7 +3,7 @@ Module containing the definitions of the features we can support.
 """
 import logging
 import operator
-from enum import Flag, auto
+from enum import Enum
 from functools import reduce
 from typing import Iterable, Set, NamedTuple, TYPE_CHECKING
 
@@ -15,29 +15,26 @@ if TYPE_CHECKING:
 _logger = logging.getLogger(__name__)
 
 
-class Constructs(Flag):
-    # No special features are used
-    NOTHING = 0
-    # Language features
-    OBJECTS = auto()  # Object oriented stuff, classes, ...
-    EXCEPTIONS = auto()
-    MAIN = auto()  # Main function. Does not necessarily imply FUNCTION_CALL.
-    FUNCTION_CALL = auto()
-    ASSIGNMENT = auto()
+class Construct(str, Enum):
+    # Object oriented stuff, classes, ...
+    OBJECTS = "objects"
+    EXCEPTIONS = "exceptions"
+    # Main function. Does not necessarily imply FUNCTION_CALL.
+    MAIN = "main"
+    FUNCTION_CALL = "function_calls"
+    ASSIGNMENT = "assignments"
 
-    HETEROGENEOUS_COLLECTIONS = auto()
+    HETEROGENEOUS_COLLECTIONS = "heterogeneous_collections"
 
-    DEFAULT_ARGUMENTS = auto()
-    HETEROGENEOUS_ARGUMENTS = auto()
+    DEFAULT_ARGUMENTS = "default_arguments"
+    HETEROGENEOUS_ARGUMENTS = "heterogeneous_arguments"
 
-    EVALUATION = auto()  # Programmed evaluation is possible in this language.
-
-    ALL = (OBJECTS | EXCEPTIONS | MAIN | FUNCTION_CALL | ASSIGNMENT
-           | HETEROGENEOUS_COLLECTIONS | DEFAULT_ARGUMENTS
-           | HETEROGENEOUS_ARGUMENTS | EVALUATION)
+    # Programmed evaluation is possible in this language.
+    EVALUATION = "evaluation"
 
 
 Types = Set[AllTypes]
+Constructs = Set[Construct]
 
 
 class FeatureSet(NamedTuple):
@@ -50,7 +47,7 @@ class WithFeatures:
         raise NotImplementedError
 
 
-NOTHING = FeatureSet(constructs=Constructs.NOTHING, types=set())
+NOTHING = FeatureSet(constructs=set(), types=set())
 
 
 def combine_features(iterable: Iterable[FeatureSet]) -> FeatureSet:
@@ -62,7 +59,7 @@ def combine_features(iterable: Iterable[FeatureSet]) -> FeatureSet:
     constructs = reduce(
         operator.or_,
         (x.constructs for x in features),
-        Constructs.NOTHING
+        set()
     )
     types = reduce(
         operator.or_,
@@ -91,8 +88,8 @@ def is_supported(bundle: 'Bundle') -> bool:
     required = bundle.plan.get_used_features()
 
     # Check constructs
-    available_constructs = bundle.language_config.supported_constructs()
-    if (required.constructs & available_constructs) != required.constructs:
+    available_constructs = bundle.language_config.c_supported_constructs()
+    if not (required.constructs <= available_constructs):
         _logger.warning("This plan is not compatible!")
         _logger.warning(f"Required constructs are {required.constructs}.")
         _logger.warning(f"The language supports {available_constructs}.")

@@ -1,0 +1,41 @@
+[general]
+# Which files from the templates directory should also be added as a dependency for
+# compilation and execution.
+dependencies = ["values.py", "evaluation_utils.py"]
+# If this language needs a selector for batch compilation mode.
+selector = true
+
+[extensions]
+# The main file extension of code.
+file = "py"
+# Which extensions the templates have; this is the file extension + mako by default.
+template = ["py", "mako"]
+
+[templates]
+# The names of the templates for certain features.
+# These templates are mandatory.
+context = "context"
+statement = "statement"
+
+# Only needed if selector = true.
+selector = "selector"
+
+[formats]
+# The formatting for namespaces (= modules/classes)
+namespace = "snake_case"
+# Namespace for functions
+function = "snake_case"
+
+[datatypes]
+# A list of support for datatypes.
+# You can use the names of all the types in the "tested.datatypes" package.
+# Possible values are "supported", "unsupported" and "reduced".
+double_extended = "unsupported"
+bigint = "reduced"
+list = "supported"
+
+[features]
+# A list of supported or unsupported language features.
+# As keys all features from the tested.features.Construct enum are allowed.
+objects = true
+exceptions = false

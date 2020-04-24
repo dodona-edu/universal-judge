@@ -10,6 +10,7 @@ from mako.template import Template
 
 from tested.languages._preprocessors import remove_indents, remove_newline
 from tested.configs import Bundle
+from tested.languages.config import TemplateType
 
 _logger = logging.getLogger(__name__)
 
@@ -47,9 +48,7 @@ def path_to_templates(bundle: Bundle) -> List[Path]:
     """
     judge_root = bundle.config.judge
     language = bundle.config.programming_language
-    result = []
-    for end in bundle.language_config.template_folders(language):
-        result.append(judge_root / 'tested' / 'languages' / end / 'templates')
+    result = [judge_root / 'tested' / 'languages' / language / 'templates']
     assert result, "At least one template folder is required."
     return result
 
@@ -85,7 +84,6 @@ def find_and_write_template(bundle: Bundle,
 
     :return: The name of the generated file.
     """
-    template_name = bundle.language_config.conventionalise_namespace(template_name)
     if destination.is_dir():
         destination /= bundle.language_config.with_extension(template_name)
 

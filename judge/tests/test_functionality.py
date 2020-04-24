@@ -11,10 +11,8 @@ tests/) as the working directory.
 import threading
 from io import StringIO
 from pathlib import Path
-from typing import List
 
 import pytest
-from _pytest.config import Config
 
 from tested.configs import DodonaConfig
 from tested.languages import get_language
@@ -24,12 +22,12 @@ from tests.manual_utils import merge, assert_valid_output
 ALL_LANGUAGES = ["python", "java", "haskell", "c"]
 
 
-def configuration(config: Config, exercise: str, language: str, work_dir: Path,
+def configuration(config, exercise: str, language: str, work_dir: Path,
                   plan: str = "plan.json", solution: str = "solution",
                   options=None) -> DodonaConfig:
     """Create a config."""
     # Get the file extension for this language.
-    ext = get_language(language).file_extension()
+    ext = get_language(language).p_extension_file()
     if options is None:
         options = {}
     ep = f'{config.rootdir}/tests/cases/{exercise}'
@@ -53,15 +51,16 @@ def execute_config(config: DodonaConfig) -> str:
 
 
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
-def test_io_exercise(language: str, tmp_path: Path, pytestconfig: Config):
+def test_io_exercise(language: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "echo", language, tmp_path, "simple.json", "correct")
     result = execute_config(conf)
+    print(result)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["correct"]
 
 
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
-def test_simple_programmed_eval(language: str, tmp_path: Path, pytestconfig: Config):
+def test_simple_programmed_eval(language: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "echo", language, tmp_path, "simple-programmed.json", "correct")
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
@@ -70,7 +69,7 @@ def test_simple_programmed_eval(language: str, tmp_path: Path, pytestconfig: Con
 
 
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
-def test_simple_programmed_eval_wrong(language: str, tmp_path: Path, pytestconfig: Config):
+def test_simple_programmed_eval_wrong(language: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "echo", language, tmp_path, "simple-programmed-wrong.json", "correct")
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
@@ -78,7 +77,7 @@ def test_simple_programmed_eval_wrong(language: str, tmp_path: Path, pytestconfi
 
 
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
-def test_io_function_exercise(language: str, tmp_path: Path, pytestconfig: Config):
+def test_io_function_exercise(language: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "echo-function", language, tmp_path, "simple.json", "correct")
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
@@ -86,7 +85,7 @@ def test_io_function_exercise(language: str, tmp_path: Path, pytestconfig: Confi
 
 
 @pytest.mark.parametrize("lang", ["python", "java", "haskell"])
-def test_language_evaluator_exception(lang: str, tmp_path: Path, pytestconfig: Config):
+def test_language_evaluator_exception(lang: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "division", lang, tmp_path, "plan.json", "correct")
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)

@@ -1,0 +1,32 @@
+[general]
+dependencies = ["Values.java", "EvaluationResult.java"]
+selector = true
+
+[extensions]
+file = "java"
+
+[formats]
+namespace = "pascal_case"
+function = "camel_case"
+
+[constructs]
+heterogeneous_collections = false
+heterogeneous_arguments = false
+
+[datatypes]
+int8 = "supported"
+uint8 = "supported"
+int16 = "supported"
+uint16 = "supported"
+int32 = "supported"
+uint32 = "supported"
+int64 = "supported"
+uint64 = "supported"
+
+single_precision = "supported"
+double_extended = "supported"
+fixed_precision = "supported"
+
+array = "supported"
+list = "supported"
+tuple = "unsupported"

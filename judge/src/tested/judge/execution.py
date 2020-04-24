@@ -2,7 +2,7 @@ import logging
 import shutil
 import time
 from pathlib import Path
-from typing import List, Optional, Tuple, NamedTuple
+from typing import List, Optional, Tuple, NamedTuple, Callable, Union
 
 from pydantic.dataclasses import dataclass
 
@@ -41,16 +41,24 @@ class ContextExecution(NamedTuple):
     context_index: int  # Index of the context within the tab.
     mode: ExecutionMode
     common_directory: Path
-    files: List[str]
+    files: Union[List[str], Callable[[Path, str], bool]]
     precompilation_result: Optional[Tuple[List[Message], Status]]
     collector: OutputManager
+
+
+def filter_files(ce: ContextExecution) -> List[str]:
+    if callable(ce.files):
+        def filterer(file: Path):
+            return ce.files(file, ce.context_name)
+        return list(x.name for x in filter(filterer, ce.common_directory.glob("*")))
+    else:
+        return ce.files
 
 
 def execute_file(
         bundle: Bundle,
         executable_name: str,
         working_directory: Path,
-        dependencies: List[str],
         remaining: float,
         stdin: Optional[str] = None,
         argument: Optional[str] = None
@@ -61,8 +69,6 @@ def execute_file(
     Note that this method must be thread-safe.
 
     :param bundle: The configuration bundle.
-    :param dependencies: A list of files that are available in the given working
-                         directory.
     :param working_directory: The working directory, in which the execution must
                               take place.
     :param argument: Argument for the executable, optional.
@@ -75,13 +81,12 @@ def execute_file(
     """
     _logger.info("Starting execution on file %s", executable_name)
 
-    command = bundle.language_config.execution_command(
+    command = bundle.language_config.c_execution(
         cwd=working_directory,
         file=executable_name,
         arguments=[argument] if argument else []
     )
-    _logger.debug("Executing command %s in directory %s", command,
-                  working_directory)
+    _logger.debug("Executing %s in directory %s", command, working_directory)
 
     result = run_command(working_directory, remaining, command, stdin)
     assert result is not None
@@ -103,13 +108,9 @@ def execute_context(bundle: Bundle, args: ContextExecution, max_time: float) \
     )
     context_dir.mkdir()
 
-    _logger.info("Executing context %s in path %s",
-                 args.context_name, context_dir)
+    _logger.info("Executing context %s in path %s", args.context_name, context_dir)
 
-    dependencies = list(lang_config.context_dependencies_callback(
-        args.context_name,
-        args.files
-    ))
+    dependencies = filter_files(args)
 
     # Copy files from the common directory to the context directory.
     for file in dependencies:
@@ -158,10 +159,10 @@ def execute_context(bundle: Bundle, args: ContextExecution, max_time: float) \
         _logger.info("Executing context %s in PRECOMPILATION mode...",
                      args.context_name)
 
-        if lang_config.needs_selector():
+        if lang_config.p_needs_selector():
             _logger.debug("Selector is needed, using it.")
 
-            selector_name = lang_config.selector_name()
+            selector_name = lang_config.c_selector_name()
             executable = find_main_file(files, selector_name)
             files.remove(executable)
             stdin = args.context.get_stdin(bundle.config.resources)
@@ -179,7 +180,6 @@ def execute_context(bundle: Bundle, args: ContextExecution, max_time: float) \
         bundle,
         executable_name=executable,
         working_directory=context_dir,
-        dependencies=files,
         stdin=stdin,
         argument=argument,
         remaining=remaining

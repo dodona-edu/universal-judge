@@ -6,3 +6,5 @@ pydantic
 pyhumps
 typing_inspect
 pylint
+
+toml

@@ -54,13 +54,11 @@ def run_compilation(bundle: Bundle,
              decide to fallback to individual mode if the compilation result is
              not positive.
     """
-    command, files = bundle.language_config.generation_callback(dependencies)
+    command, files = bundle.language_config.c_compilation(dependencies)
     _logger.debug("Generating files with command %s in directory %s",
                   command, directory)
     result = run_command(directory, remaining, command)
     _logger.debug(f"Would take files: {files}")
-    files = bundle.language_config.post_generation_callback(directory, files)
-    _logger.debug(f"Post callback files are {files}.")
     return result, files
 
 
@@ -81,33 +79,32 @@ def process_compile_results(
         return messages, Status.CORRECT, []
 
     show_stdout = False
-    compiler_messages, annotations = language_config.process_compiler_output(
-        results.stdout, results.stderr
-    )
+    compiler_messages, annotations, stdout, stderr = \
+        language_config.c_compiler_output(results.stdout, results.stderr)
     messages.extend(compiler_messages)
     shown_messages = annotations or compiler_messages
 
     # Report stderr.
-    if results.stderr:
+    if stderr:
         # Append compiler messages to the output.
         messages.append("De compiler produceerde volgende uitvoer op stderr:")
         messages.append(ExtendedMessage(
-            description=results.stderr,
+            description=stderr,
             format='code'
         ))
-        _logger.debug("Received stderr from compiler: " + results.stderr)
+        _logger.debug("Received stderr from compiler: " + stderr)
         show_stdout = True
         shown_messages = True
 
     # Report stdout.
-    if results.stdout and (show_stdout or results.exit != 0):
+    if stdout and (show_stdout or results.exit != 0):
         # Append compiler messages to the output.
         messages.append("De compiler produceerde volgende uitvoer op stdout:")
         messages.append(ExtendedMessage(
-            description=results.stdout,
+            description=stdout,
             format='code'
         ))
-        _logger.debug("Received stdout from compiler: " + results.stderr)
+        _logger.debug("Received stdout from compiler: " + stderr)
         shown_messages = True
 
     # Report errors if needed.

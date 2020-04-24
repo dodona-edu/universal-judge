@@ -179,3 +179,63 @@ def flatten(nested: Iterable[Iterable[T]]) -> Iterable[T]:
     [0, 1, 2]
     """
     return filter(None, itertools.chain.from_iterable(nested))
+
+
+def camelize(what: str) -> str:
+    """
+    Convert a string to camelCase from snake_case. The algorithm is simple: each
+    underscore is removed and the letter behind it will be capitalized. The first
+    letter will be downcased.
+
+    >>> camelize("__foo_bar__")
+    'fooBar'
+    >>> camelize("this_is_snake_case")
+    'thisIsSnakeCase'
+    >>> camelize("_Weird_cases_aRe_mostly_KEPT")
+    'weirdCasesAReMostlyKEPT'
+    >>> camelize("numbers_1_2_are_not_special")
+    'numbers12AreNotSpecial'
+    >>> camelize("________________")
+    ''
+
+    :param what: The string to convert.
+    :return: The converted string.
+    """
+    result = pascalize(what)
+    return (result[0].lower() + result[1:]) if result else ""
+
+
+def pascalize(what: str) -> str:
+    """
+    Convert a string to PascalCase from snake_case.
+
+    >>> pascalize("__foo_bar__")
+    'FooBar'
+    >>> pascalize("this_is_snake_case")
+    'ThisIsSnakeCase'
+    >>> pascalize("_Weird_cases_aRe_mostly_KEPT")
+    'WeirdCasesAReMostlyKEPT'
+    >>> pascalize("numbers_1_2_are_not_special")
+    'Numbers12AreNotSpecial'
+    >>> pascalize("________________")
+    ''
+
+    :param what: The string to convert.
+    :return: The converted string.
+    """
+    result = ""
+    i = 0
+    while i < len(what):
+        this = what[i]
+        if this == "_":
+            i += 1
+            if i < len(what):
+                while i < len(what) - 1 and what[i] == "_":
+                    i += 1
+                r = what[i]
+                if r != "_":
+                    result += r.upper()
+        else:
+            result += this
+        i += 1
+    return (result[0].upper() + result[1:]) if result else ""

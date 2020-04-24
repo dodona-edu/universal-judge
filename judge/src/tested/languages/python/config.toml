@@ -1,0 +1,12 @@
+[general]
+dependencies = ["values.py", "evaluation_utils.py"]
+selector = false
+
+[extensions]
+file = "py"
+
+[datatypes]
+double_extended = "supported"
+fixed_precision = "supported"
+tuple = "supported"
+list = "supported"

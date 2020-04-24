@@ -1,0 +1,35 @@
+[general]
+dependencies = ["values.h", "values.c"]
+selector = true
+
+[extensions]
+file = "c"
+
+[formats]
+namespace = "snake_case"
+function = "snake_case"
+
+[constructs]
+exceptions = false
+heterogeneous_collections = false
+heterogeneous_arguments = false
+
+[datatypes]
+int8 = "supported"
+uint8 = "supported"
+int16 = "supported"
+uint16 = "supported"
+int32 = "supported"
+uint32 = "supported"
+int64 = "supported"
+uint64 = "supported"
+
+single_precision = "supported"
+double_extended = "unsupported"
+fixed_precision = "unsupported"
+
+array = "unsupported"
+set = "unsupported"
+map = "unsupported"
+list = "supported"
+tuple = "supported"
