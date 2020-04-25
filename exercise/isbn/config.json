@@ -2,19 +2,16 @@
   "description": {
     "difficulty": 2.0,
     "names": {
-      "en": "ISBN",
-      "nl": "ISBN"
+      "en": "ISBN (Full) [UNIVERSAL]",
+      "nl": "ISBN (Volledige) [UNIVERSEEL]"
     }
   },
   "access": "public",
   "programming_language": "python",
-  "labels": [
-    "test", "niko", "hallo"
-  ],
   "evaluation": {
     "memory_limit": 500000000,
     "time_limit": 20,
-    "plan_name": "plan.json",
+    "plan_name": "full.tson",
     "options": {
       "linter": {
         "python": true
