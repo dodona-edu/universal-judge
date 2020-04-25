@@ -17,10 +17,6 @@ def is_isbn10(code):
         # convert check digit into its string representation
         return 'X' if check == 10 else str(check)
 
-    # check whether given code is a string
-    if not isinstance(code, str):
-        return False
-
     # check whether given code contains 10 characters
     if len(code) != 10:
         return False
@@ -54,10 +50,6 @@ def is_isbn13(code):
         # convert check digit into a single digit
         return str((10 - check) % 10)
 
-    # check whether given code is a string
-    if not isinstance(code, str):
-        return False
-
     # check whether given code contains 10 characters
     if len(code) != 13:
         return False
@@ -69,34 +61,22 @@ def is_isbn13(code):
     # check the check digit
     return check_digit(code) == code[-1]
 
-allowed = True
 
-def is_isbn(code, isbn13=True):
+def is_isbn(code, isbn13):
     """
     >>> is_isbn('9789027439642', False)
     False
     >>> is_isbn('9789027439642', True)
     True
-    >>> is_isbn('9789027439642')
-    True
-    >>> is_isbn('080442957X')
-    False
     >>> is_isbn('080442957X', False)
     True
     """
-    global allowed
-    if not allowed:
-        exit(0)
-    allowed = False
     return is_isbn13(code) if isbn13 else is_isbn10(code)
 
 
-def are_isbn(codes, isbn13=None):
+def are_isbn(codes, isbn13):
     """
-    >>> codes = ['0012345678', '0012345679', '9971502100', '080442957X', 5, True,
-    'The Practice of Computing Using Python', '9789027439642', '5486948320146']
-    >>> are_isbn(codes)
-    [False, True, True, True, False, False, False, True, False]
+    >>> codes = ['0012345678', '0012345679', '9971502100', '080442957X', True, 'The Practice of Computing Using Python', '9789027439642', '5486948320146']
     >>> are_isbn(codes, True)
     [False, False, False, False, False, False, False, True, False]
     >>> are_isbn(codes, False)
@@ -110,14 +90,8 @@ def are_isbn(codes, isbn13=None):
     for code in codes:
 
         if isinstance(code, str):
-
-            if isbn13 is None:
-                checks.append(is_isbn(code, len(code) == 13))
-            else:
-                checks.append(is_isbn(code, isbn13))
-
+            checks.append(is_isbn(code, isbn13))
         else:
-
             checks.append(False)
 
     # return list of checks
@@ -126,4 +100,5 @@ def are_isbn(codes, isbn13=None):
 
 if __name__ == '__main__':
     import doctest
+
     doctest.testmod()

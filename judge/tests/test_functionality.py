@@ -116,6 +116,20 @@ def test_crashing_assignment_with_before(lang: str, tmp_path: Path, pytestconfig
     assert updates.find_next("start-test")["channel"] == "exception"
 
 
+@pytest.mark.parametrize("lang", ["haskell", "java", "python"])
+def test_crashing_assignment_with_before(lang: str, tmp_path: Path, pytestconfig):
+    conf = configuration(pytestconfig, "isbn-list", lang, tmp_path, "one-with-assignment.tson", "solution")
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    print(result)
+    # Assert that the empty context testcase is not shown, while the assignment
+    # and expression testcase are shown.
+    assert len(updates.find_all("start-testcase")) == 2
+    # Assert the only one test was executed.
+    assert updates.find_status_enum() == ["correct"]
+    assert len(updates.find_all("start-test")) == 1
+
+
 @pytest.mark.parametrize("lang", ["haskell", "c"])
 def test_heterogeneous_arguments_are_detected(lang: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "isbn", lang, tmp_path, "full.tson", "solution")
@@ -126,7 +140,7 @@ def test_heterogeneous_arguments_are_detected(lang: str, tmp_path: Path, pytestc
 
 
 @pytest.mark.slow
-@pytest.mark.parametrize("lang", ["python"])
+@pytest.mark.parametrize("lang", ["python", "java"])
 def test_full_isbn(lang: str, tmp_path: Path, pytestconfig):
     config_ = {
         "options": {

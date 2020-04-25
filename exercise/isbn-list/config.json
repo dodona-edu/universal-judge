@@ -2,8 +2,8 @@
   "description": {
     "difficulty": 2.0,
     "names": {
-      "en": "ISBN [Eenvoudig]",
-      "nl": "ISBN [Eenvoudig]"
+      "en": "ISBN (list) [UNIVERSAL]",
+      "nl": "ISBN (lijst) [UNIVERSEEL]"
     }
   },
   "access": "public",
@@ -15,7 +15,7 @@
   ],
   "evaluation": {
     "memory_limit": 500000000,
-    "plan_name": "plan.json"
+    "plan_name": "plan.tson"
   },
   "internals": {
     "token": "I8zFSMutAT3SneG4F4hPvW4Dc8f8vrQk29pHHSPP7M3sXSfnhTVgCU-Ufrmaz3HN",

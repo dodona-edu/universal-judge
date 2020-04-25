@@ -51,7 +51,7 @@ isIsbn10 :: String -> Bool
 isIsbn10 = isJust . isbn10check
 
 
-is_isbn a b = False
-are_isbn a b = False
+isIsbn a b = if b then isIsbn10 a else False
+areIsbn a b = map (\x -> (isIsbn x b)) a
 
 

@@ -577,7 +577,7 @@ def _resolve_function_calls(function_calls: Iterable[FunctionCall]):
                 elif isinstance(argument, get_args(Value)):
                     types.add(argument.type)
             type_use.append(types)
-        if not all(len(x) == 1 for x in type_use):
+        if not all(len(x) <= 1 for x in type_use):
             used_features.append(FeatureSet(
                 {Construct.HETEROGENEOUS_ARGUMENTS}, set()
             ))

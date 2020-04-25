@@ -13,7 +13,7 @@ random.seed(123456789)
 # We halen de naam van het testplan op uit de configuratie van de oefening.
 with open("../config.json", "r") as config_file:
     config = json.load(config_file)
-testplan_name = config["evaluation"].get("plan_name", "plan.json")
+testplan_name = config["evaluation"].get("plan_name", "full.tson")
 
 # Of alle testgevallen in dezelfde context moeten plaatsvinden of niet.
 # Aangezien ze onafhankelijk zijn, doen we dit niet.
@@ -70,8 +70,8 @@ def generate_is_isbn():
     args = [
         ('9789027439642', False),
         ('9789027439642', True),
-        ('080442957X', False),
         ('080442957X', True),
+        ('080442957X', False),
     ]
     # Voor de rest vullen we aan met willekeurige argumenten.
     while len(args) < 50:
@@ -88,24 +88,22 @@ def generate_is_isbn():
 
         # Ons testgeval bevat de functieoproep als invoer, en de berekende waarde
         # als verwachte uitvoer.
-        testcases = [{
+        testcase = {
             "input":  {
-                "expression": {
-                    "type":      "function",
-                    "name":      "is_isbn",
-                    "arguments": function_arguments
-                }
+                "type":      "function",
+                "name":      "is_isbn",
+                "arguments": function_arguments
             },
             "output": {
                 "result": {
                     "value": (values.encode(result))
                 }
             }
-        } for _ in range(5)]
+        }
 
         # Steek het testgeval in een context.
         context = {
-            "testcases": testcases
+            "testcases": [testcase]
         }
         contexts.append(context)
 
@@ -120,7 +118,7 @@ def generate_are_isbn():
 
     # Vaste invoerargumenten die we zeker in het testplan willen.
     codes = [
-        '0012345678', '0012345679', '9971502100', '080442957X', "5", "True",
+        '0012345678', '0012345679', '9971502100', '080442957X',
         'The Practice of Computing Using Python', '9789027439642', '5486948320146'
     ]
     codes2 = ['012345678' + str(digit) for digit in range(10)]
@@ -144,11 +142,9 @@ def generate_are_isbn():
         # argument. Maak het testgeval voor de assignment.
         assignment_testcase = {
             "input": {
-                "statement": {
-                    "name": f"codes{index:02d}",
-                    "expression": values.encode(codes),
-                    "type": "sequence"
-                }
+                "name":       f"codes{index:02d}",
+                "expression": values.encode(codes),
+                "type":       "sequence"
             }
         }
 
@@ -156,34 +152,16 @@ def generate_are_isbn():
         # we eerst hebben aangemaakt mee als argument.
         function_arguments = [f"codes{index:02d}", values.encode(isbn13)]
 
-        # Voeg het tweede argument toe indien nodig.
-
         # Bereken het resultaat.
         result = solution.are_isbn(codes, isbn13)
 
         # Maak het normale testgeval. We hebben opnieuw als invoer de functie en als
         # uitvoer de verwachte waarde.
-        testcase1 = {
+        testcase = {
             "input":  {
-                "expression": {
-                    "type":      "function",
-                    "name":      "are_isbn",
-                    "arguments": function_arguments
-                }
-            },
-            "output": {
-                "result": {
-                    "value": (values.encode(result))
-                }
-            }
-        }
-        testcase2 = {
-            "input":  {
-                "expression": {
-                    "type":      "function",
-                    "name":      "are_isbn",
-                    "arguments": function_arguments
-                }
+                "type":      "function",
+                "name":      "are_isbn",
+                "arguments": function_arguments
             },
             "output": {
                 "result": {
@@ -198,7 +176,7 @@ def generate_are_isbn():
         # de assignment heeft enkel de standaardtests, wat wil zeggen dat er bv.
         # geen uitvoer op stderr mag zijn.
         context = {
-            "testcases": [assignment_testcase, testcase1, testcase2]
+            "testcases": [assignment_testcase, testcase]
         }
 
         contexts.append(context)
@@ -223,11 +201,11 @@ tab_2_contexts = generate_are_isbn()
 plan = {
     "tabs": [
         {
-            "name": "is_isbn",
+            "name":     "is_isbn",
             "contexts": tab_1_contexts
         },
         {
-            "name": "are_isbn",
+            "name":     "are_isbn",
             "contexts": tab_2_contexts
         }
     ]
@@ -239,17 +217,6 @@ if ONE_CONTEXT:
     plan["tabs"][0]["contexts"] = [new_tab1_context]
     new_tab2_context = flatten_contexts(plan["tabs"][1]["contexts"])
     plan["tabs"][1]["contexts"] = [new_tab2_context]
-
-# Terugvallen op individuele modus is niet nuttig in Python, dus laten we dat niet
-# toe. Indien het terugvallen niet nuttig is, is het sneller om het uit te zetten.
-plan["configuration"] = {
-    "allow_fallback": False,
-    "language": {
-        "python": {
-            "linter": True
-        }
-    }
-}
 
 # Schrijf het testplan.
 with open(f"../evaluation/{testplan_name}", 'w') as fp:

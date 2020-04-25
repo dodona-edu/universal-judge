@@ -2,15 +2,15 @@
   "description": {
     "difficulty": 2.0,
     "names": {
-      "en": "ISBN (Full) [UNIVERSAL]",
-      "nl": "ISBN (Volledig) [UNIVERSEEL]"
+      "en": "ISBN (full) [UNIVERSAL]",
+      "nl": "ISBN (volledig) [UNIVERSEEL]"
     }
   },
   "access": "public",
   "programming_language": "python",
   "evaluation": {
     "memory_limit": 500000000,
-    "time_limit": 20,
+    "time_limit": 40,
     "plan_name": "full.tson",
     "options": {
       "linter": {

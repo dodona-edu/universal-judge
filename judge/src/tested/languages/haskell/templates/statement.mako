@@ -1,6 +1,6 @@
 ## Translate "statements" and expressions to Haskell.
 <%! from tested.utils import get_args %>
-<%! from tested.serialisation import Value, Identifier, FunctionCall, Expression %>
+<%! from tested.serialisation import Value, Identifier, FunctionCall, Expression, Assignment %>
 <%page args="statement,root=False,lifting=False"/>
 % if isinstance(statement, get_args(Expression)):
     % if lifting:

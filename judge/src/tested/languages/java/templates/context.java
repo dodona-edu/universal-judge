@@ -117,7 +117,7 @@ public class ${context_name} implements Closeable {
             ## In Java, we need special code to make variables available outside of
             ## the try-catch block.
             % if isinstance(testcase.command, get_args(Assignment)):
-                <%include file="declaration.mako" args="tp=testcase.command.type" /> ${testcase.command.name} = null;
+                <%include file="declaration.mako" args="tp=testcase.command.type,value=testcase.command.expression" /> ${testcase.command.name} = null;
             % endif
             try {
                 ## If we have a value function, we have an expression.

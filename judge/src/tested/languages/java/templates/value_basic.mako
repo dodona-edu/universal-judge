@@ -2,7 +2,12 @@
 <%! from tested.datatypes import BasicNumericTypes, BasicStringTypes, BasicBooleanTypes, BasicNothingTypes, BasicSequenceTypes, BasicObjectTypes  %>
 <%page args="value" />
 % if value.type == BasicNumericTypes.INTEGER:
-    ${value.data}\
+    ## Basic heuristic for long/int
+    % if len(str(value.data)) >= 10:
+        ${value.data}L\
+    % else:
+        ${value.data}\
+    % endif
 % elif value.type == BasicNumericTypes.RATIONAL:
     ${value.data}\
 % elif value.type == BasicStringTypes.TEXT:
