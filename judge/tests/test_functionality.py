@@ -112,6 +112,20 @@ def test_crashing_assignment_with_before(lang: str, tmp_path: Path, pytestconfig
     # Only the assignment was started.
     assert len(updates.find_all("start-testcase")) == 1
     assert updates.find_status_enum() == ["wrong"]
-    assert len(updates.find_all("start-test")) == 1
     # Assert the exception is included.
     assert updates.find_next("start-test")["channel"] == "exception"
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize("lang", ["python"])
+def test_full_isbn(lang: str, tmp_path: Path, pytestconfig):
+    config_ = {
+        "options": {
+            "parallel": True
+        }
+    }
+    conf = configuration(pytestconfig, "isbn", lang, tmp_path, "full.tson", "solution", options=config_)
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert len(updates.find_all("start-testcase")) == 150
+    assert updates.find_status_enum() == ["correct"] * 100
