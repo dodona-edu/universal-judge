@@ -1,0 +1,15 @@
+{
+  "description": {
+    "difficulty": 0.5,
+    "names": {
+      "en": "Echo (functie) [UNIVERSEEL]",
+      "nl": "Echo (function) [UNIVERSEEL]"
+    }
+  },
+  "evaluation": {
+    "memory_limit": 500000000,
+    "plan_name": "full.tson"
+  },
+  "programming_language": "python",
+  "access": "public"
+}

@@ -30,7 +30,8 @@ def configuration(config, exercise: str, language: str, work_dir: Path,
     ext = get_language(language).p_extension_file()
     if options is None:
         options = {}
-    ep = f'{config.rootdir}/tests/cases/{exercise}'
+    exercise_dir = Path(config.rootdir).parent / "exercise"
+    ep = f'{exercise_dir}/{exercise}'
     return DodonaConfig(**merge({
         "memory_limit":         536870912,
         "time_limit":           threading.TIMEOUT_MAX,
@@ -52,7 +53,7 @@ def execute_config(config: DodonaConfig) -> str:
 
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
 def test_io_exercise(language: str, tmp_path: Path, pytestconfig):
-    conf = configuration(pytestconfig, "echo", language, tmp_path, "simple.json", "correct")
+    conf = configuration(pytestconfig, "echo", language, tmp_path, "one.tson", "correct")
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["correct"]
@@ -60,7 +61,7 @@ def test_io_exercise(language: str, tmp_path: Path, pytestconfig):
 
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
 def test_simple_programmed_eval(language: str, tmp_path: Path, pytestconfig):
-    conf = configuration(pytestconfig, "echo", language, tmp_path, "simple-programmed.json", "correct")
+    conf = configuration(pytestconfig, "echo", language, tmp_path, "one-programmed-correct.tson", "correct")
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["correct"]
@@ -68,7 +69,7 @@ def test_simple_programmed_eval(language: str, tmp_path: Path, pytestconfig):
 
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
 def test_simple_programmed_eval_wrong(language: str, tmp_path: Path, pytestconfig):
-    conf = configuration(pytestconfig, "echo", language, tmp_path, "simple-programmed-wrong.json", "correct")
+    conf = configuration(pytestconfig, "echo", language, tmp_path, "one-programmed-wrong.tson", "correct")
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["wrong"]
@@ -76,7 +77,7 @@ def test_simple_programmed_eval_wrong(language: str, tmp_path: Path, pytestconfi
 
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
 def test_io_function_exercise(language: str, tmp_path: Path, pytestconfig):
-    conf = configuration(pytestconfig, "echo-function", language, tmp_path, "simple.json", "correct")
+    conf = configuration(pytestconfig, "echo-function", language, tmp_path, "one.tson", "correct")
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["correct"]

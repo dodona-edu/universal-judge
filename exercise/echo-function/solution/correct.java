@@ -1,6 +1,6 @@
 class Submission {
 
-    public static Object echo(Object value) {
+    public static String echo(String value) {
         return value;
     }
 }
