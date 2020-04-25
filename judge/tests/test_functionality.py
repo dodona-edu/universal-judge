@@ -116,6 +116,15 @@ def test_crashing_assignment_with_before(lang: str, tmp_path: Path, pytestconfig
     assert updates.find_next("start-test")["channel"] == "exception"
 
 
+@pytest.mark.parametrize("lang", ["haskell", "c"])
+def test_heterogeneous_arguments_are_detected(lang: str, tmp_path: Path, pytestconfig):
+    conf = configuration(pytestconfig, "isbn", lang, tmp_path, "full.tson", "solution")
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert len(updates.find_all("start-testcase")) == 0
+    assert updates.find_status_enum() == ["internal error"]
+
+
 @pytest.mark.slow
 @pytest.mark.parametrize("lang", ["python"])
 def test_full_isbn(lang: str, tmp_path: Path, pytestconfig):

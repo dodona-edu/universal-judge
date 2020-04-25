@@ -51,7 +51,8 @@ class CommandDict(list):
         return next(x for x in self if x["command"] == command)
 
     def find_status_enum(self) -> List[str]:
-        return [x["status"]["enum"] for x in self.find_all("close-test")]
+        commands = [x for x in self if x["command"].startswith("close-")]
+        return [x["status"]["enum"] for x in commands if "status" in x]
 
 
 def assert_valid_output(output: str, config: Config) -> CommandDict:

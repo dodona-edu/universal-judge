@@ -92,25 +92,28 @@ def consume_shebang(submission: Path) -> Optional[str]:
     :return: The programming language if found.
     """
     language = None
-    # noinspection PyTypeChecker
-    with open(submission, "r+") as file:
-        lines = file.readlines()
-        file.seek(0)
+    try:
+        # noinspection PyTypeChecker
+        with open(submission, "r+") as file:
+            lines = file.readlines()
+            file.seek(0)
 
-        # Steps to find
-        has_potential = True
-        for line in lines:
-            stripped = line.strip()
-            if has_potential and stripped.startswith("#!tested"):
-                try:
-                    _, language = stripped.split(" ")
-                except ValueError:
-                    logger.error(f"Invalid shebang on line {stripped}")
-            else:
-                file.write(line)
-            if has_potential and stripped:
-                has_potential = False
-        file.truncate()
+            # Steps to find
+            has_potential = True
+            for line in lines:
+                stripped = line.strip()
+                if has_potential and stripped.startswith("#!tested"):
+                    try:
+                        _, language = stripped.split(" ")
+                    except ValueError:
+                        logger.error(f"Invalid shebang on line {stripped}")
+                else:
+                    file.write(line)
+                if has_potential and stripped:
+                    has_potential = False
+            file.truncate()
+    except FileNotFoundError:
+        pass
 
     return language
 
