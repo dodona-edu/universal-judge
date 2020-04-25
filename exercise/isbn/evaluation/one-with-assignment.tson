@@ -1,0 +1,114 @@
+{
+  "tabs": [
+    {
+      "name": "are_isbn",
+      "contexts": [
+        {
+          "testcases": [
+            {
+              "input": {
+                "name": "codes01",
+                "expression": {
+                  "data": [
+                    {
+                      "data": "0012345678",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0012345679",
+                      "type": "text"
+                    },
+                    {
+                      "data": "9971502100",
+                      "type": "text"
+                    },
+                    {
+                      "data": "080442957X",
+                      "type": "text"
+                    },
+                    {
+                      "data": 5,
+                      "type": "integer"
+                    },
+                    {
+                      "data": true,
+                      "type": "boolean"
+                    },
+                    {
+                      "data": "The Practice of Computing Using Python",
+                      "type": "text"
+                    },
+                    {
+                      "data": "9789027439642",
+                      "type": "text"
+                    },
+                    {
+                      "data": "5486948320146",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "sequence"
+                },
+                "type": "sequence"
+              }
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "are_isbn",
+                "arguments": [
+                  "codes01"
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": [
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "sequence"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

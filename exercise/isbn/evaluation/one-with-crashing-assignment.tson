@@ -1,0 +1,83 @@
+{
+  "tabs": [
+    {
+      "name": "are_isbn",
+      "contexts": [
+        {
+          "before": {
+            "python": {
+              "data": "def e(): assert False"
+            }
+          },
+          "testcases": [
+            {
+              "input": {
+                "type": "integer",
+                "name": "codes01",
+                "expression": {
+                  "type": "function",
+                  "name": "e",
+                  "arguments": []
+                }
+              }
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "are_isbn",
+                "arguments": [
+                  "codes01"
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": [
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "sequence"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

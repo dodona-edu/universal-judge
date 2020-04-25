@@ -25,7 +25,7 @@ def read_config() -> DodonaConfig:
         "source":               Path('../exercise/isbn/solution/solution.py'),
         "judge":                Path('../judge/src/'),
         "workdir":              Path('./workdir'),
-        "plan_name":            "full.tson",
+        "plan_name":            "one-with-crashing-assignment.tson",
         "options":              {
             "parallel": True,
             "mode":     "batch",

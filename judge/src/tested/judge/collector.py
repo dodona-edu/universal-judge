@@ -11,7 +11,7 @@ from typing import List, Union, Optional, Generator
 from tested.configs import Bundle
 from tested.dodona import Update, Status, report_update, StatusMessage, \
     CloseTab, CloseContext, CloseTestcase, StartJudgment, CloseJudgment, \
-    StartTab, StartContext, StartTestcase, close_for
+    StartTab, StartContext, StartTestcase, close_for, ExtendedMessage
 
 _logger = logging.getLogger(__name__)
 
@@ -259,9 +259,13 @@ class TestcaseCollector:
         for command in self._generate(end):
             manager.add(command)
 
-    def _generate(self, end: Optional[CloseTestcase])\
+    def _generate(self, end: Optional[CloseTestcase]) \
             -> Generator[Update, None, None]:
-        if self.content:
+        has_text = (isinstance(self.start.description, str)
+                    and self.start.description)
+        has_extended = (isinstance(self.start.description, ExtendedMessage)
+                        and self.start.description.description)
+        if has_text or has_extended:
             yield self.start
             yield from self.content
             if end is not None:

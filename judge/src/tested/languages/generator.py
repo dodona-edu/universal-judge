@@ -356,8 +356,11 @@ def generate_context(bundle: Bundle,
     """
     language = bundle.config.programming_language
     lang_config = bundle.lang_config
-    before_code = context.before.get(language, "")
-    after_code = context.after.get(language, "")
+    resources = bundle.config.resources
+    before_code = context.before.get(language, TextData(data=""))\
+        .get_data_as_string(resources)
+    after_code = context.after.get(language, TextData(data=""))\
+        .get_data_as_string(resources)
 
     value_file_name = value_file(bundle, destination).name
     exception_file_name = exception_file(bundle, destination).name
