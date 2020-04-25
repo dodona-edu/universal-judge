@@ -10,8 +10,8 @@ namespace = "pascal_case"
 function = "camel_case"
 
 [constructs]
-heterogeneous_collections = false
-heterogeneous_arguments = false
+heterogeneous_collections = true
+heterogeneous_arguments = true
 
 [datatypes]
 int8 = "supported"

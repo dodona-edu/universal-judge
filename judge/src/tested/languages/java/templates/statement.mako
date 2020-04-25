@@ -1,6 +1,6 @@
 ## Convert a statement and/or expression into Java code.
 <%! from tested.utils import get_args %>
-<%! from tested.serialisation import Value, Identifier, FunctionCall %>
+<%! from tested.serialisation import Value, Identifier, FunctionCall, Assignment %>
 <%page args="statement,full=False"/>
 % if isinstance(statement, Identifier):
     ## If the expression is an identifier, just echo it.

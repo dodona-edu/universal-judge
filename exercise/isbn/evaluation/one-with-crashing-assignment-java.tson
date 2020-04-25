@@ -5,18 +5,19 @@
       "contexts": [
         {
           "before": {
-            "python": {
-              "data": "def e(): assert False"
+            "java": {
+              "data": "Supplier<List<Object>> ex = () -> {throw new AssertionError();};"
             }
           },
           "testcases": [
             {
               "input": {
-                "type": "integer",
+                "type": "sequence",
                 "name": "codes01",
                 "expression": {
-                  "type": "function",
-                  "name": "e",
+                  "type": "namespace",
+                  "namespace": "ex",
+                  "name": "get",
                   "arguments": []
                 }
               }

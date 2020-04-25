@@ -2,7 +2,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.Random;
-class Main {
+
+class Submission {
     /**
      * Checks whether the given ISBN-10 code is valid.
      */

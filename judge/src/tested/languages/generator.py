@@ -6,6 +6,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Union, Tuple, Optional, Set
 
+from mako import exceptions
+
 from .config import TemplateType
 from .templates import find_and_write_template, find_template
 from ..configs import Bundle
@@ -336,7 +338,11 @@ def convert_statement(bundle: Bundle, statement: Statement) -> str:
     prepared_expression = _prepare_expression(bundle, statement.expression)
     statement = statement.replace_expression(prepared_expression)
     template = find_template(bundle, template)
-    return template.render(statement=statement, full=True)
+    try:
+        return template.render(statement=statement, full=True)
+    except Exception as e:
+        _logger.error(exceptions.text_error_template().render())
+        raise e
 
 
 def generate_context(bundle: Bundle,

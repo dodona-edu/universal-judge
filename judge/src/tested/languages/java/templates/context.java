@@ -15,7 +15,7 @@ import java.util.prefs.*;
 import java.util.regex.*;
 import java.util.stream.*;
 
-public class ${context_name} {
+public class ${context_name} implements Closeable {
 
     ## Generate the evaluators we need.
     % for name in evaluator_names:
@@ -53,7 +53,7 @@ public class ${context_name} {
     }
 
     ## Send an exception to TESTed.
-    private void sendException(Exception exception) throws Exception {
+    private void sendException(Throwable exception) throws Exception {
         Values.sendException(exceptionWriter, exception);
     }
 
@@ -71,7 +71,7 @@ public class ${context_name} {
     ## Main testcase evalutors      ##
     ##################################
 
-    private void eEvaluateMain(Exception value) throws Exception {
+    private void eEvaluateMain(Throwable value) throws Exception {
         <%include file="statement.mako" args="statement=context_testcase.exception_function"/>;
     }
 
@@ -86,7 +86,7 @@ public class ${context_name} {
             }
         % endif
 
-        private void eEvaluate${loop.index}(Exception value) throws Exception {
+        private void eEvaluate${loop.index}(Throwable value) throws Exception {
             <%include file="statement.mako" args="statement=testcase.exception_function"/>;
         }
     % endfor
@@ -105,7 +105,7 @@ public class ${context_name} {
                 % endfor
                 });
                 this.eEvaluateMain(null);
-            } catch (Exception e) {
+            } catch (Exception | AssertionError e) {
                 this.eEvaluateMain(e);
             }
         % endif
@@ -130,7 +130,7 @@ public class ${context_name} {
                 % endif
                 ;
                 this.eEvaluate${loop.index}(null);
-            } catch (Exception e) {
+            } catch (Exception | AssertionError e) {
                 this.eEvaluate${loop.index}(e);
             }
             this.writeDelimiter();
@@ -139,14 +139,15 @@ public class ${context_name} {
         ${after}
     }
 
-    void close() throws Exception {
+    @Override
+    public void close() throws IOException {
         this.valueWriter.close();
         this.exceptionWriter.close();
     }
 
     public static void main(String[] a) throws Exception {
-        var context = new ${context_name}();
-        context.execute();
-        context.close();
+        try(${context_name} context = new ${context_name}()) {
+            context.execute();
+        }
     }
 }

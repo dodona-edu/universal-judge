@@ -91,7 +91,7 @@ def test_language_evaluator_exception(lang: str, tmp_path: Path, pytestconfig):
     assert updates.find_status_enum() == ["correct"]
 
 
-@pytest.mark.parametrize("lang", ["python"])
+@pytest.mark.parametrize("lang", ["python", "java"])
 def test_assignment_and_use_in_expression(lang: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "isbn", lang, tmp_path, "one-with-assignment.tson", "solution")
     result = execute_config(conf)
@@ -104,9 +104,9 @@ def test_assignment_and_use_in_expression(lang: str, tmp_path: Path, pytestconfi
     assert len(updates.find_all("start-test")) == 1
 
 
-@pytest.mark.parametrize("lang", ["python"])
+@pytest.mark.parametrize("lang", ["python", "java"])
 def test_crashing_assignment_with_before(lang: str, tmp_path: Path, pytestconfig):
-    conf = configuration(pytestconfig, "isbn", lang, tmp_path, "one-with-crashing-assignment.tson", "solution")
+    conf = configuration(pytestconfig, "isbn", lang, tmp_path, f"one-with-crashing-assignment-{lang}.tson", "solution")
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     # Only the assignment was started.

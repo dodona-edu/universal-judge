@@ -90,7 +90,7 @@ public class Values {
         writer.print(encode(value));
     }
 
-    public static void sendException(PrintWriter writer, Exception exception) {
+    public static void sendException(PrintWriter writer, Throwable exception) {
         if (exception == null) {
             return;
         }
