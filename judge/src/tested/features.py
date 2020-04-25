@@ -88,7 +88,7 @@ def is_supported(bundle: 'Bundle') -> bool:
     required = bundle.plan.get_used_features()
 
     # Check constructs
-    available_constructs = bundle.language_config.c_supported_constructs()
+    available_constructs = bundle.lang_config.c_supported_constructs()
     if not (required.constructs <= available_constructs):
         _logger.warning("This plan is not compatible!")
         _logger.warning(f"Required constructs are {required.constructs}.")
@@ -97,7 +97,7 @@ def is_supported(bundle: 'Bundle') -> bool:
         _logger.warning(f"Missing features are: {missing}.")
         return False
 
-    mapping = bundle.language_config.type_support_map()
+    mapping = bundle.lang_config.type_support_map()
     for t in required.types:
         if mapping[t] == TypeSupport.UNSUPPORTED:
             _logger.warning(f"Plan requires unsupported type {t}")

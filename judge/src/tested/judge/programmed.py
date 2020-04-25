@@ -4,20 +4,20 @@ Programmed evaluation.
 import shutil
 import types
 from dataclasses import dataclass
-
-import time
 from pathlib import Path
 from typing import Optional, List, Union
 
-import humps
+import time
 
 from tested.configs import Bundle, create_bundle
+from tested.features import Construct
 from tested.judge.core import _logger
 from tested.judge.execution import execute_file
-from tested.judge.utils import BaseExecutionResult, copy_from_paths_to_path, \
-    run_command, find_main_file
-from tested.languages.generator import generate_custom_evaluator, \
-    convert_statement, custom_evaluator_arguments
+from tested.judge.utils import (BaseExecutionResult, copy_from_paths_to_path,
+                                run_command, find_main_file)
+from tested.languages.generator import (generate_custom_evaluator,
+                                        convert_statement,
+                                        custom_evaluator_arguments)
 from tested.languages.templates import path_to_templates
 from tested.serialisation import Value, EvalResult
 from tested.testplan import ProgrammedEvaluator
@@ -56,7 +56,7 @@ def _evaluate_others(bundle: Bundle,
     start = time.perf_counter()
 
     # Create a directory for this evaluator. If one exists, delete it first.
-    evaluator_dir_name = humps.decamelize(evaluator.path.stem)
+    evaluator_dir_name = evaluator.path.stem
     custom_directory_name = f"{get_identifier()}_{evaluator_dir_name}"
     custom_path = Path(bundle.config.workdir, "evaluators", custom_directory_name)
     if custom_path.exists():
@@ -72,7 +72,7 @@ def _evaluate_others(bundle: Bundle,
     )
 
     # Check if the language supports this.
-    if not eval_bundle.language_config.supports_evaluation():
+    if Construct.EVALUATION not in eval_bundle.lang_config.c_supported_constructs():
         _logger.error(f"{eval_bundle.config.programming_language} does not support"
                       f" evaluations.")
         return BaseExecutionResult(
@@ -90,8 +90,7 @@ def _evaluate_others(bundle: Bundle,
     shutil.copy2(origin_path, custom_path)
 
     # Copy the dependencies to the folder.
-    dependencies = eval_bundle.language_config.initial_dependencies()
-    dependencies.extend(eval_bundle.language_config.evaluator_dependencies())
+    dependencies = eval_bundle.lang_config.p_initial_dependencies()
     origin = path_to_templates(eval_bundle)
     copy_from_paths_to_path(origin, dependencies, custom_path)
     # Include the actual evaluator in the dependencies.
@@ -110,9 +109,7 @@ def _evaluate_others(bundle: Bundle,
     _logger.debug("Generated evaluator executor %s", evaluator_name)
 
     # Do compilation for those configs that require it.
-    command, files = eval_bundle.language_config.evaluator_generation_callback(
-        dependencies
-    )
+    command, files = eval_bundle.lang_config.c_compilation(dependencies)
     remaining = timeout - (time.perf_counter() - start)
     _logger.debug("Compiling custom evaluator with command %s", command)
     result = run_command(custom_path, remaining, command)

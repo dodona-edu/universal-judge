@@ -81,7 +81,7 @@ def execute_file(
     """
     _logger.info("Starting execution on file %s", executable_name)
 
-    command = bundle.language_config.c_execution(
+    command = bundle.lang_config.c_execution(
         cwd=working_directory,
         file=executable_name,
         arguments=[argument] if argument else []
@@ -98,7 +98,7 @@ def execute_context(bundle: Bundle, args: ContextExecution, max_time: float) \
     """
     Execute a context.
     """
-    lang_config = bundle.language_config
+    lang_config = bundle.lang_config
     start = time.perf_counter()
 
     # Create a working directory for the context.

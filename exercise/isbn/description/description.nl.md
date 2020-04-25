@@ -1,10 +1,28 @@
 Binnen het ISBN-10 (_International Standard Book Numbering_) systeem dat tot eind 2006 gebruikt werd, kreeg elk boek een unieke code toegewezen die bestaat uit 10 cijfers. De eerste 9 daarvan geven informatie over het boek zelf, terwijl het laatste louter een controlecijfer is dat dient om foutieve ISBN-10 codes te detecteren.
 
-<div class="dodona-centered-group">![ISBN](media/ISBN.gif "ISBN")</div>
+<div class="dodona-centered-group">
+<img src="media/ISBN.gif" alt="IBSN">
+</div>
 
-Indien $$x_1, \ldots, x_9$$ de eerste 9 cijfers van een ISBN-10 code voorstellen, dan wordt het controlecijfer $$x_{10}$$ als volgt berekend: \[x_{10} = (x_1+ 2x_2+ 3x_3+ 4x_4+ 5x_5+ 6x_6+ 7x_7+ 8x_8+ 9x_9)\!\!\!\!\mod{11}\,\] Het controlecijfer $$x_{10}$$ kan m.a.w. de waarden 0 tot en met 10 aannemen. Indien het controlecijfer gelijk is aan 10, dan wordt dit in de ISBN-10 code genoteerd als de letter `X`.
+Indien $$x_1, \ldots, x_9$$ de eerste 9 cijfers van een ISBN-10 code voorstellen, dan wordt het controlecijfer $$x_{10}$$ als volgt berekend:
 
-Binnen het nieuwe ISBN-13 systeem krijgt elk boek een unieke code bestaande uit 13 cijfers. De eerste 12 daarvan geven informatie over het boek zelf, terwijl het laatste louter een controlecijfer is dat dient om foutieve ISBN-13 codes te detecteren. Indien $$x_1, \ldots, x_{12}$$ de eerste 12 cijfers van een ISBN-13 code voorstellen, dan wordt het controlecijfer $$x_{13}$$ als volgt berekend: \[\begin{align} o &= x_1 + x_3 + x_5 + x_7 + x_9 + x_{11} \\ e &= x_2 + x_4 + x_6 + x_8 + x_{10} + x_{12} \\ x_{13} &= (10 - (o + 3e)\!\!\!\!\mod{10})\!\!\!\!\!\mod{10}\end{align}\] Het controlecijfer $$x_{13}$$ kan m.a.w. de waarden 0 tot en met 9 aannemen, waardoor ISBN-13 codes uitsluitend uit cijfers bestaan.
+$$
+x_{10} = (x_1+ 2x_2+ 3x_3+ 4x_4+ 5x_5+ 6x_6+ 7x_7+ 8x_8+ 9x_9) \mod{11}
+$$
+
+Het controlecijfer $$x_{10}$$ kan m.a.w. de waarden 0 tot en met 10 aannemen. Indien het controlecijfer gelijk is aan 10, dan wordt dit in de ISBN-10 code genoteerd als de letter `X`.
+
+Binnen het nieuwe ISBN-13 systeem krijgt elk boek een unieke code bestaande uit 13 cijfers. De eerste 12 daarvan geven informatie over het boek zelf, terwijl het laatste louter een controlecijfer is dat dient om foutieve ISBN-13 codes te detecteren. Indien $$x_1, \ldots, x_{12}$$ de eerste 12 cijfers van een ISBN-13 code voorstellen, dan wordt het controlecijfer $$x_{13}$$ als volgt berekend: 
+
+$$
+\begin{align}
+ o &= x_1 + x_3 + x_5 + x_7 + x_9 + x_{11} \\
+ e &= x_2 + x_4 + x_6 + x_8 + x_{10} + x_{12} \\
+ x_{13} &= (10 - (o + 3e) \mod{10}) \mod{10}
+\end{align}
+$$
+
+Het controlecijfer $$x_{13}$$ kan m.a.w. de waarden 0 tot en met 9 aannemen, waardoor ISBN-13 codes uitsluitend uit cijfers bestaan.
 
 ### Opgave
 

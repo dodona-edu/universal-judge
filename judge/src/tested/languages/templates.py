@@ -85,7 +85,7 @@ def find_and_write_template(bundle: Bundle,
     :return: The name of the generated file.
     """
     if destination.is_dir():
-        destination /= bundle.language_config.with_extension(template_name)
+        destination /= bundle.lang_config.with_extension(template_name)
 
     template = find_template(bundle, template_name)
     _write_template(template_args, template, destination)
@@ -107,7 +107,7 @@ def find_template(bundle: Bundle, template_name: str) -> Template:
     """
     error = None
     environment = _get_environment(bundle)
-    for extension in bundle.language_config.template_extensions():
+    for extension in bundle.lang_config.template_extensions():
         try:
             file_name = f"{template_name}.{extension}"
             return environment.get_template(file_name)

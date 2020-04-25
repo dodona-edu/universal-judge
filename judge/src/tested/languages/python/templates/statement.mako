@@ -14,5 +14,5 @@
 % else:
     <% assert isinstance(statement, get_args(Assignment)) %>
     ## We haven an assignment.
-    ${statement.name} = <%include file="statement.mako" args="expression=statement.expression"/>
+    ${statement.name} = <%include file="statement.mako" args="statement=statement.expression"/>
 % endif

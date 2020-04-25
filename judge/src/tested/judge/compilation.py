@@ -54,7 +54,7 @@ def run_compilation(bundle: Bundle,
              decide to fallback to individual mode if the compilation result is
              not positive.
     """
-    command, files = bundle.language_config.c_compilation(dependencies)
+    command, files = bundle.lang_config.c_compilation(dependencies)
     _logger.debug("Generating files with command %s in directory %s",
                   command, directory)
     result = run_command(directory, remaining, command)

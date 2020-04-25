@@ -67,7 +67,7 @@ def judge(bundle: Bundle):
         files.append(selector)
 
     if mode == ExecutionMode.PRECOMPILATION:
-        assert not bundle.language_config.p_needs_selector() or selector is not None
+        assert not bundle.lang_config.p_needs_selector() or selector is not None
         # Compile all code in one go.
         _logger.info("Running precompilation step...")
         remaining = max_time - (time.perf_counter() - start)
@@ -75,7 +75,7 @@ def judge(bundle: Bundle):
                                                     remaining)
 
         messages, status, annotations = process_compile_results(
-            bundle.language_config,
+            bundle.lang_config,
             result
         )
 
@@ -104,7 +104,7 @@ def judge(bundle: Bundle):
             _logger.info("Compilation error, falling back to individual mode")
             # Remove the selector file from the dependencies.
             # Otherwise, it will keep being compiled, which we want to avoid.
-            if bundle.language_config.p_needs_selector():
+            if bundle.lang_config.p_needs_selector():
                 files.remove(selector)
         else:
             files = compilation_files
@@ -139,7 +139,7 @@ def judge(bundle: Bundle):
 
             execution = ContextExecution(
                 context=context,
-                context_name=bundle.language_config.c_context_name(
+                context_name=bundle.lang_config.c_context_name(
                     tab_number=tab_index,
                     context_number=context_index
                 ),
@@ -257,7 +257,7 @@ def _generate_files(bundle: Bundle,
     Generate all necessary files, using the templates. This creates a common
     directory, copies all dependencies to that folder and runs the generation.
     """
-    dependencies = bundle.language_config.p_initial_dependencies()
+    dependencies = bundle.lang_config.p_initial_dependencies()
     common_dir = Path(bundle.config.workdir, f"common")
     common_dir.mkdir()
 
@@ -267,25 +267,25 @@ def _generate_files(bundle: Bundle,
     dependency_paths = path_to_templates(bundle)
     copy_from_paths_to_path(dependency_paths, dependencies, common_dir)
 
-    submission_name = bundle.language_config.c_submission_name(bundle.plan)
+    submission_name = bundle.lang_config.c_submission_name(bundle.plan)
 
     # Copy the submission file.
     submission_file = f"{submission_name}" \
-                      f".{bundle.language_config.p_extension_file()}"
+                      f".{bundle.lang_config.p_extension_file()}"
     solution_path = common_dir / submission_file
     # noinspection PyTypeChecker
     shutil.copy2(bundle.config.source, solution_path)
     dependencies.append(submission_file)
 
     # Allow modifications of the submission file.
-    bundle.language_config.c_solution(solution_path, bundle)
+    bundle.lang_config.c_solution(solution_path, bundle)
 
     # The names of the contexts in the testplan.
     context_names = []
     # Generate the files for each context.
     for tab_i, tab in enumerate(bundle.plan.tabs):
         for context_i, context in enumerate(tab.contexts):
-            context_name = bundle.language_config.c_context_name(tab_i, context_i)
+            context_name = bundle.lang_config.c_context_name(tab_i, context_i)
             _logger.debug(f"Generating file for context {context_name}")
             generated, evaluators = generate_context(
                 bundle=bundle,
@@ -304,7 +304,7 @@ def _generate_files(bundle: Bundle,
             context_names.append(context_name)
 
     if mode == ExecutionMode.PRECOMPILATION \
-            and bundle.language_config.p_needs_selector():
+            and bundle.lang_config.p_needs_selector():
         _logger.debug("Generating selector for PRECOMPILATION mode.")
         generated = generate_selector(bundle, common_dir, context_names)
     else:

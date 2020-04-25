@@ -1,10 +1,28 @@
 In the ISBN-10 (_International Standard Book Numbering_) system that was used until the end of 2006, each book is assigned a unique 10-digit code. The first nine digits uniquely identify the book itself, whereas the last digit merely serves as a check digit to detect invalid ISBN-10 codes.
 
-<div class="dodona-centered-group">![ISBN](media/ISBN.gif "ISBN")</div>
+<div class="dodona-centered-group">
+<img src="media/ISBN.gif" alt="IBSN">
+</div>
 
-If $$x_1, \ldots, x_9$$ represent the first nine digits of an ISBN-10 code, the check digit $$x_{10}$$ is calculated as \[ x_{10} = (x_1+ 2x_2+ 3x_3+ 4x_4+ 5x_5+ 6x_6+ 7x_7+ 8x_8+ 9x_9)\!\!\!\!\mod{11} \] As a result, the check digit $$x_{10}$$ always takes a value in between 0 and 10\. If the check digit is equal to 10, it is represented by the uppercase letter X in the ISBN-10 code. As such, only a single character is needed to represent the check digit.
+If $$x_1, \ldots, x_9$$ represent the first nine digits of an ISBN-10 code, the check digit $$x_{10}$$ is calculated as
 
-In the new ISBN-13 system, each book is assigned a unique 13-digit code. The first twelve digits identify the book itself, whereas the last digit merely serves as a check digit to detect invalid ISBN-13 codes. If $$x_1, \ldots, x_{12}$$ represent the first twelve digits of an ISBN-13 code, the check digit $$x_{13}$$ is calculated as \[\begin{align} o &= x_1 + x_3 + x_5 + x_7 + x_9 + x_{11} \\ e &= x_2 + x_4 + x_6 + x_8 + x_{10} + x_{12} \\ x_{13} &= (10 - (o + 3e)\!\!\!\!\mod{10})\!\!\!\!\!\mod{10}\end{align}\] As a result, $$x_{13}$$ always takes a value in between 0 and 9, so that ISBN-13 codes only contain digits.
+$$
+ x_{10} = (x_1+ 2x_2+ 3x_3+ 4x_4+ 5x_5+ 6x_6+ 7x_7+ 8x_8+ 9x_9)\!\!\!\!\mod{11}
+$$
+ 
+ As a result, the check digit $$x_{10}$$ always takes a value in between 0 and 10\. If the check digit is equal to 10, it is represented by the uppercase letter X in the ISBN-10 code. As such, only a single character is needed to represent the check digit.
+
+In the new ISBN-13 system, each book is assigned a unique 13-digit code. The first twelve digits identify the book itself, whereas the last digit merely serves as a check digit to detect invalid ISBN-13 codes. If $$x_1, \ldots, x_{12}$$ represent the first twelve digits of an ISBN-13 code, the check digit $$x_{13}$$ is calculated as
+ 
+ $$
+ \begin{align}
+  o &= x_1 + x_3 + x_5 + x_7 + x_9 + x_{11} \\
+  e &= x_2 + x_4 + x_6 + x_8 + x_{10} + x_{12} \\
+  x_{13} &= (10 - (o + 3e) \mod{10}) \mod{10}
+ \end{align}
+ $$
+ 
+ As a result, $$x_{13}$$ always takes a value in between 0 and 9, so that ISBN-13 codes only contain digits.
 
 ### Assignment
 

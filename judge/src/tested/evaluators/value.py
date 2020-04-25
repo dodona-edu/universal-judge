@@ -102,7 +102,7 @@ def _check_type(
     :return: A tuple with the result and expected value, the type that was used to
              do the check.
     """
-    supported_types = bundle.language_config.type_support_map()
+    supported_types = bundle.lang_config.type_support_map()
 
     # Case 3.
     if supported_types[expected.type] == TypeSupport.UNSUPPORTED:

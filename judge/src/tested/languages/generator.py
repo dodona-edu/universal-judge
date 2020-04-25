@@ -83,11 +83,11 @@ def _prepare_expression(bundle: Bundle, expression: Expression) -> Expression:
     Prepare an expression for use in a template.
     """
     if isinstance(expression, FunctionCall):
-        submission_name = bundle.language_config.c_submission_name(bundle.plan)
+        submission_name = bundle.lang_config.c_submission_name(bundle.plan)
         return FunctionCall(
             type=expression.type,
             arguments=expression.arguments,
-            name=bundle.language_config.c_conventionalize_function(expression.name),
+            name=bundle.lang_config.c_conventionalize_function(expression.name),
             namespace=expression.namespace or submission_name
         )
 
@@ -112,7 +112,7 @@ def _create_exception_function(
 
     exception_channel = testcase.output.exception
     language = bundle.config.programming_language
-    lang_config = bundle.language_config
+    lang_config = bundle.lang_config
     arguments = [Identifier("value")]
 
     # If exceptions are checked and we have a language specific evaluator, generate
@@ -159,14 +159,15 @@ def _prepare_testcase(
 
     result_channel = testcase.output.result
     language = bundle.config.programming_language
-    lang_config = bundle.language_config
+    lang_config = bundle.lang_config
 
-    has_return = result_channel != EmptyChannel.NONE
+    has_return = result_channel not in (EmptyChannel.NONE, IgnoredChannel.IGNORED)
 
     # Handle the return values.
     if has_return:
         # Generate the code to call language specific evaluators.
-        if isinstance(result_channel.evaluator, SpecificEvaluator):
+        if (hasattr(result_channel, "evaluator")
+                and isinstance(result_channel.evaluator, SpecificEvaluator)):
             # Call the the evaluator itself does not write the result out to the
             # correct file, so wrap it in another call.
             # This basically generates a function like this:
@@ -325,7 +326,7 @@ def convert_statement(bundle: Bundle, statement: Statement) -> str:
 
     :return: The code the statement.
     """
-    template = bundle.language_config.c_template_name(TemplateType.STATEMENT)
+    template = bundle.lang_config.c_template_name(TemplateType.STATEMENT)
     if isinstance(statement, get_args(Expression)):
         statement = _prepare_expression(bundle, statement)
         template = find_template(bundle, template)
@@ -354,7 +355,7 @@ def generate_context(bundle: Bundle,
              of evaluator files that will also be needed.
     """
     language = bundle.config.programming_language
-    lang_config = bundle.language_config
+    lang_config = bundle.lang_config
     before_code = context.before.get(language, "")
     after_code = context.after.get(language, "")
 
@@ -404,14 +405,14 @@ def generate_selector(bundle: Bundle,
 
     :return: The name of the generated file in the given destination.
     """
-    assert bundle.language_config.p_needs_selector()
-    selector_name = bundle.language_config.c_selector_name()
-    destination /= bundle.language_config.with_extension(selector_name)
+    assert bundle.lang_config.p_needs_selector()
+    selector_name = bundle.lang_config.c_selector_name()
+    destination /= bundle.lang_config.with_extension(selector_name)
     return find_and_write_template(
         bundle=bundle,
         template_args=_SelectorArguments(contexts=context_names),
         destination=destination,
-        template_name=bundle.language_config.c_template_name(TemplateType.SELECTOR)
+        template_name=bundle.lang_config.c_template_name(TemplateType.SELECTOR)
     )
 
 
@@ -438,7 +439,7 @@ def generate_custom_evaluator(bundle: Bundle,
 
     :return: The name of the generated file.
     """
-    evaluator_name = bundle.language_config.c_conventionalize_namespace(
+    evaluator_name = bundle.lang_config.c_conventionalize_namespace(
         evaluator.path.stem
     )
     arguments = custom_evaluator_arguments(evaluator)
@@ -450,7 +451,7 @@ def generate_custom_evaluator(bundle: Bundle,
         arguments=arguments
     )
 
-    template = bundle.language_config\
+    template = bundle.lang_config \
         .c_template_name(TemplateType.EVALUATOR_EXECUTOR)
     return find_and_write_template(bundle, args, destination, template)
 

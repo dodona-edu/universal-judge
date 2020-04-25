@@ -102,7 +102,7 @@ class Bundle:
     """A bundle of arguments and configs for running everything."""
     config: DodonaConfig
     out: IO
-    language_config: 'Language'
+    lang_config: 'Language'
     secret: str
     plan: testplan.Plan
 
@@ -143,11 +143,11 @@ def create_bundle(config: DodonaConfig,
         language = _get_language(config)
     # noinspection PyDataclass
     adjusted_config = config.copy(update={"programming_language": language})
-    language_config = langs.get_language(language)
+    lang_config = langs.get_language(language)
     return Bundle(
         config=adjusted_config,
         out=output,
-        language_config=language_config,
+        lang_config=lang_config,
         secret=utils.get_identifier(),
         plan=plan
     )
