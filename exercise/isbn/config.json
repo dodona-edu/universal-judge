@@ -3,7 +3,7 @@
     "difficulty": 2.0,
     "names": {
       "en": "ISBN (Full) [UNIVERSAL]",
-      "nl": "ISBN (Volledige) [UNIVERSEEL]"
+      "nl": "ISBN (Volledig) [UNIVERSEEL]"
     }
   },
   "access": "public",
@@ -22,5 +22,8 @@
   "internals": {
     "token": "FTuj8BW6UXbnxA8pcVWxSaP5Tr_Y54FgtBeJEKEwTEvDFVGvY8Y_th9ZJzfqRJJe",
     "_info": "These fields are used for internal bookkeeping in Dodona, please do not change them."
-  }
+  },
+  "labels": [
+
+  ]
 }

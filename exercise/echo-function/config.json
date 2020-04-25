@@ -11,5 +11,12 @@
     "plan_name": "full.tson"
   },
   "programming_language": "python",
-  "access": "public"
+  "access": "public",
+  "internals": {
+    "token": "ErgcR2PkJTm6Nj4swbTgkP6dr59mt-3q_p9PezTXDXUZpx29WRt5W-T83KE-9PhQ",
+    "_info": "These fields are used for internal bookkeeping in Dodona, please do not change them."
+  },
+  "labels": [
+
+  ]
 }
