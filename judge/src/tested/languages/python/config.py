@@ -11,7 +11,7 @@ from tested.languages.python import linter
 
 class PythonConfig(Language):
 
-    def c_compilation(self, files: List[str]) -> CallbackResult:
+    def compilation(self, files: List[str]) -> CallbackResult:
 
         def file_filter(file: Path, context: str) -> bool:
             # We only allow pyc files
@@ -23,10 +23,10 @@ class PythonConfig(Language):
 
         return ["python", "-m", "compileall", "-q", "-b", "."], file_filter
 
-    def c_execution(self, cwd: Path, file: str, arguments: List[str]) -> Command:
+    def execution(self, cwd: Path, file: str, arguments: List[str]) -> Command:
         return ["python", "-u", file, *arguments]
 
-    def c_compiler_output(self, stdout: str, stderr: str) \
+    def compiler_output(self, stdout: str, stderr: str) \
             -> Tuple[List[Message], List[AnnotateCode], str, str]:
         if match := re.search(
                 r".*: (?P<error>.+Error): (?P<message>.+) \(submission.py, "
@@ -77,6 +77,6 @@ class PythonConfig(Language):
 
         return line, column, message
 
-    def c_linter(self, bundle: Bundle, submission: Path, remaining: float) \
+    def linter(self, bundle: Bundle, submission: Path, remaining: float) \
             -> Tuple[List[Message], List[AnnotateCode]]:
         return linter.run_pylint(bundle, submission, remaining)

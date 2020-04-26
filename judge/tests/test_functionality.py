@@ -27,7 +27,7 @@ def configuration(config, exercise: str, language: str, work_dir: Path,
                   options=None) -> DodonaConfig:
     """Create a config."""
     # Get the file extension for this language.
-    ext = get_language(language).p_extension_file()
+    ext = get_language(language).extension_file()
     if options is None:
         options = {}
     exercise_dir = Path(config.rootdir).parent / "exercise"
@@ -104,6 +104,19 @@ def test_assignment_and_use_in_expression(lang: str, tmp_path: Path, pytestconfi
     assert len(updates.find_all("start-test")) == 1
 
 
+@pytest.mark.parametrize("lang", ["haskell"])
+def test_assignment_and_use_in_expression_list(lang: str, tmp_path: Path, pytestconfig):
+    conf = configuration(pytestconfig, "isbn-list", lang, tmp_path, "one-with-assignment.tson", "solution")
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    # Assert that the empty context testcase is not shown, while the assignment
+    # and expression testcase are shown.
+    assert len(updates.find_all("start-testcase")) == 2
+    # Assert the only one test was executed.
+    assert updates.find_status_enum() == ["correct"]
+    assert len(updates.find_all("start-test")) == 1
+
+
 @pytest.mark.parametrize("lang", ["python", "java"])
 def test_crashing_assignment_with_before(lang: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "isbn", lang, tmp_path, f"one-with-crashing-assignment-{lang}.tson", "solution")
@@ -116,7 +129,7 @@ def test_crashing_assignment_with_before(lang: str, tmp_path: Path, pytestconfig
     assert updates.find_next("start-test")["channel"] == "exception"
 
 
-@pytest.mark.parametrize("lang", ["haskell", "java", "python"])
+@pytest.mark.parametrize("lang", ["java", "python"])
 def test_crashing_assignment_with_before(lang: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "isbn-list", lang, tmp_path, "one-with-assignment.tson", "solution")
     result = execute_config(conf)
@@ -148,6 +161,21 @@ def test_full_isbn(lang: str, tmp_path: Path, pytestconfig):
         }
     }
     conf = configuration(pytestconfig, "isbn", lang, tmp_path, "full.tson", "solution", options=config_)
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert len(updates.find_all("start-testcase")) == 150
+    assert updates.find_status_enum() == ["correct"] * 100
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize("lang", ["haskell"])
+def test_full_isbn_list(lang: str, tmp_path: Path, pytestconfig):
+    config_ = {
+        "options": {
+            "parallel": True
+        }
+    }
+    conf = configuration(pytestconfig, "isbn-list", lang, tmp_path, "plan.tson", "solution", options=config_)
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert len(updates.find_all("start-testcase")) == 150

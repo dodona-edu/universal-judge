@@ -72,7 +72,7 @@ def _evaluate_others(bundle: Bundle,
     )
 
     # Check if the language supports this.
-    if Construct.EVALUATION not in eval_bundle.lang_config.c_supported_constructs():
+    if Construct.EVALUATION not in eval_bundle.lang_config.supported_constructs():
         _logger.error(f"{eval_bundle.config.programming_language} does not support"
                       f" evaluations.")
         return BaseExecutionResult(
@@ -90,7 +90,7 @@ def _evaluate_others(bundle: Bundle,
     shutil.copy2(origin_path, custom_path)
 
     # Copy the dependencies to the folder.
-    dependencies = eval_bundle.lang_config.p_initial_dependencies()
+    dependencies = eval_bundle.lang_config.initial_dependencies()
     origin = path_to_templates(eval_bundle)
     copy_from_paths_to_path(origin, dependencies, custom_path)
     # Include the actual evaluator in the dependencies.
@@ -109,7 +109,7 @@ def _evaluate_others(bundle: Bundle,
     _logger.debug("Generated evaluator executor %s", evaluator_name)
 
     # Do compilation for those configs that require it.
-    command, files = eval_bundle.lang_config.c_compilation(dependencies)
+    command, files = eval_bundle.lang_config.compilation(dependencies)
     remaining = timeout - (time.perf_counter() - start)
     _logger.debug("Compiling custom evaluator with command %s", command)
     result = run_command(custom_path, remaining, command)

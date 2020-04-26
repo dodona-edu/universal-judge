@@ -81,7 +81,7 @@ def execute_file(
     """
     _logger.info("Starting execution on file %s", executable_name)
 
-    command = bundle.lang_config.c_execution(
+    command = bundle.lang_config.execution(
         cwd=working_directory,
         file=executable_name,
         arguments=[argument] if argument else []
@@ -159,10 +159,10 @@ def execute_context(bundle: Bundle, args: ContextExecution, max_time: float) \
         _logger.info("Executing context %s in PRECOMPILATION mode...",
                      args.context_name)
 
-        if lang_config.p_needs_selector():
+        if lang_config.needs_selector():
             _logger.debug("Selector is needed, using it.")
 
-            selector_name = lang_config.c_selector_name()
+            selector_name = lang_config.selector_name()
             executable = find_main_file(files, selector_name)
             files.remove(executable)
             stdin = args.context.get_stdin(bundle.config.resources)

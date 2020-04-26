@@ -13,7 +13,7 @@ from typing import (IO, Union, Generator, TypeVar, Generic, Optional, Mapping,
 import itertools
 import sys
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 
 def smart_close(file: IO):
@@ -32,11 +32,11 @@ def smart_close(file: IO):
 def protected_directory(directory: Union[PathLike, Path]
                         ) -> Generator[Path, None, None]:
     try:
-        logger.info("Making %s read-only", directory)
+        _logger.info("Making %s read-only", directory)
         os.chmod(directory, stat.S_IREAD)  # Disable write access
         yield directory
     finally:
-        logger.info("Giving write-access to %s", directory)
+        _logger.info("Giving write-access to %s", directory)
         os.chmod(directory, stat.S_IREAD | stat.S_IWRITE)
 
 
@@ -106,7 +106,7 @@ def consume_shebang(submission: Path) -> Optional[str]:
                     try:
                         _, language = stripped.split(" ")
                     except ValueError:
-                        logger.error(f"Invalid shebang on line {stripped}")
+                        _logger.error(f"Invalid shebang on line {stripped}")
                 else:
                     file.write(line)
                 if has_potential and stripped:
@@ -242,3 +242,18 @@ def pascalize(what: str) -> str:
             result += this
         i += 1
     return (result[0].upper() + result[1:]) if result else ""
+
+
+def snake_case(what: str) -> str:
+    """
+    Emits a warning if the string is not in snake_case. The check is simple: it
+    just checks for capitals.
+
+    :param what: The name.
+    :return: The same name.
+    """
+    if any(x.isupper() for x in what):
+        _logger.warning(
+            f"A name '{what}' is not in snake_case. This might cause problems."
+        )
+    return what

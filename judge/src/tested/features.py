@@ -88,7 +88,7 @@ def is_supported(bundle: 'Bundle') -> bool:
     required = bundle.plan.get_used_features()
 
     # Check constructs
-    available_constructs = bundle.lang_config.c_supported_constructs()
+    available_constructs = bundle.lang_config.supported_constructs()
     if not (required.constructs <= available_constructs):
         _logger.warning("This plan is not compatible!")
         _logger.warning(f"Required constructs are {required.constructs}.")

@@ -85,11 +85,11 @@ def _prepare_expression(bundle: Bundle, expression: Expression) -> Expression:
     Prepare an expression for use in a template.
     """
     if isinstance(expression, FunctionCall):
-        submission_name = bundle.lang_config.c_submission_name(bundle.plan)
+        submission_name = bundle.lang_config.submission_name(bundle.plan)
         return FunctionCall(
             type=expression.type,
             arguments=expression.arguments,
-            name=bundle.lang_config.c_conventionalize_function(expression.name),
+            name=bundle.lang_config.conventionalize_function(expression.name),
             namespace=expression.namespace or submission_name
         )
 
@@ -122,14 +122,14 @@ def _create_exception_function(
     if (not isinstance(exception_channel, (IgnoredChannel, EmptyChannel))
             and isinstance(exception_channel.evaluator, SpecificEvaluator)):
         evaluator = exception_channel.evaluator.for_language(language)
-        evaluator_name = lang_config.c_conventionalize_namespace(evaluator.stem)
+        evaluator_name = lang_config.conventionalize_namespace(evaluator.stem)
 
         return FunctionCall(
             type=FunctionType.FUNCTION,
-            name=lang_config.c_conventionalize_function(SEND_SPECIFIC_EXCEPTION),
+            name=lang_config.conventionalize_function(SEND_SPECIFIC_EXCEPTION),
             arguments=[FunctionCall(
                 type=FunctionType.NAMESPACE,
-                name=lang_config.c_conventionalize_function(EVALUATE),
+                name=lang_config.conventionalize_function(EVALUATE),
                 namespace=evaluator_name,
                 arguments=arguments
             )]
@@ -139,7 +139,7 @@ def _create_exception_function(
     # exception to the judge for further processing.
     return FunctionCall(
         type=FunctionType.FUNCTION,
-        name=lang_config.c_conventionalize_function(SEND_EXCEPTION),
+        name=lang_config.conventionalize_function(SEND_EXCEPTION),
         arguments=arguments
     ), None
 
@@ -175,13 +175,13 @@ def _prepare_testcase(
             # This basically generates a function like this:
             # send_specific_value(evaluator(value))
             evaluator = result_channel.evaluator.for_language(language)
-            evaluator_name = lang_config.c_conventionalize_namespace(evaluator.stem)
+            evaluator_name = lang_config.conventionalize_namespace(evaluator.stem)
             value_function_call = FunctionCall(
                 type=FunctionType.FUNCTION,
-                name=lang_config.c_conventionalize_function(SEND_SPECIFIC_VALUE),
+                name=lang_config.conventionalize_function(SEND_SPECIFIC_VALUE),
                 arguments=[FunctionCall(
                     type=FunctionType.NAMESPACE,
-                    name=lang_config.c_conventionalize_function(EVALUATE),
+                    name=lang_config.conventionalize_function(EVALUATE),
                     namespace=evaluator_name,
                     arguments=[Identifier("value")]
                 )]
@@ -328,7 +328,7 @@ def convert_statement(bundle: Bundle, statement: Statement) -> str:
 
     :return: The code the statement.
     """
-    template = bundle.lang_config.c_template_name(TemplateType.STATEMENT)
+    template = bundle.lang_config.template_name(TemplateType.STATEMENT)
     if isinstance(statement, get_args(Expression)):
         statement = _prepare_expression(bundle, statement)
         template = find_template(bundle, template)
@@ -376,7 +376,7 @@ def generate_context(bundle: Bundle,
     if context_eval_name:
         evaluator_names.add(context_eval_name)
 
-    submission_name = lang_config.c_submission_name(bundle.plan)
+    submission_name = lang_config.submission_name(bundle.plan)
 
     context_argument = _ContextArguments(
         context_name=context_name,
@@ -391,11 +391,11 @@ def generate_context(bundle: Bundle,
         evaluator_names=evaluator_names
     )
 
-    evaluator_files = [f"{x}.{lang_config.p_extension_file()}"
+    evaluator_files = [f"{x}.{lang_config.extension_file()}"
                        for x in evaluator_names]
 
     context_destination = destination / lang_config.with_extension(context_name)
-    template = lang_config.c_template_name(TemplateType.CONTEXT)
+    template = lang_config.template_name(TemplateType.CONTEXT)
 
     return find_and_write_template(
         bundle, context_argument, context_destination, template
@@ -414,14 +414,14 @@ def generate_selector(bundle: Bundle,
 
     :return: The name of the generated file in the given destination.
     """
-    assert bundle.lang_config.p_needs_selector()
-    selector_name = bundle.lang_config.c_selector_name()
+    assert bundle.lang_config.needs_selector()
+    selector_name = bundle.lang_config.selector_name()
     destination /= bundle.lang_config.with_extension(selector_name)
     return find_and_write_template(
         bundle=bundle,
         template_args=_SelectorArguments(contexts=context_names),
         destination=destination,
-        template_name=bundle.lang_config.c_template_name(TemplateType.SELECTOR)
+        template_name=bundle.lang_config.template_name(TemplateType.SELECTOR)
     )
 
 
@@ -448,7 +448,7 @@ def generate_custom_evaluator(bundle: Bundle,
 
     :return: The name of the generated file.
     """
-    evaluator_name = bundle.lang_config.c_conventionalize_namespace(
+    evaluator_name = bundle.lang_config.conventionalize_namespace(
         evaluator.path.stem
     )
     arguments = custom_evaluator_arguments(evaluator)
@@ -461,7 +461,7 @@ def generate_custom_evaluator(bundle: Bundle,
     )
 
     template = bundle.lang_config \
-        .c_template_name(TemplateType.EVALUATOR_EXECUTOR)
+        .template_name(TemplateType.EVALUATOR_EXECUTOR)
     return find_and_write_template(bundle, args, destination, template)
 
 

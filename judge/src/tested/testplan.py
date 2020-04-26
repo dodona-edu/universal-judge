@@ -135,7 +135,7 @@ class TextData(WithFeatures):
     type: TextChannelType = TextChannelType.TEXT
 
     @staticmethod
-    def __resolve_path(working_directory, file_path):
+    def _resolve_path(working_directory, file_path):
         """
         Resolve a path to an absolute path. Relative paths will be resolved against
         the given ``directory``, not the actual working directory.
@@ -150,7 +150,7 @@ class TextData(WithFeatures):
         if self.type == TextChannelType.TEXT:
             return self.data
         elif self.type == TextChannelType.FILE:
-            file_path = self.__resolve_path(working_directory, self.data)
+            file_path = self._resolve_path(working_directory, self.data)
             with open(file_path, 'r') as file:
                 return file.read()
         else:

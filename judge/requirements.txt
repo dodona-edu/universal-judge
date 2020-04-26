@@ -1,10 +1,5 @@
-jsonschema
-psutil
-pytest
-mako
-pydantic
-pyhumps
-typing_inspect
-pylint
-
-toml
+psutil==5.7.0
+mako==1.1.2
+pydantic==1.4
+typing_inspect==0.5.0
+pylint==2.4.4

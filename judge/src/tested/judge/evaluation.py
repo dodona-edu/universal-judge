@@ -337,7 +337,7 @@ def prepare_evaluation(bundle: Bundle, collector: OutputManager):
             # Begin with the context testcase.
             c_dir = Path(
                 bundle.config.workdir,
-                bundle.lang_config.c_context_name(
+                bundle.lang_config.context_name(
                     tab_number=i,
                     context_number=j
                 )

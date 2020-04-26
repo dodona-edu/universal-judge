@@ -3,10 +3,11 @@ The configuration class for a programming language in TESTed. Note that this is 
 of the three things you must implement:
 
 - This class
-- A config.toml file
+- A config.json file
 - The templates which are used to create the code.
 
-## Implementing a new programming language
+Implementing a new programming language
+---------------------------------------
 
 The first thing you should do is implement this class and the accompanying toml
 file. While the toml file is not strictly required, it makes implementing the
@@ -17,14 +18,14 @@ There are a few callbacks that must be implemented. These raise a
 `NotImplementedError`, so proper editors will warn you (or TESTed will crash when
 using your language).
 """
+import json
 import os
-import sys
 from collections import defaultdict
 from enum import Enum, auto
 from pathlib import Path
 from typing import List, Tuple, Mapping, Union, Callable, Set, Dict
 
-import toml
+import sys
 
 from ..configs import Bundle
 from ..datatypes import AllTypes
@@ -32,7 +33,7 @@ from ..dodona import AnnotateCode, Message
 from ..features import Construct
 from ..serialisation import ExceptionValue
 from ..testplan import Plan
-from ..utils import camelize, pascalize, fallback
+from ..utils import camelize, pascalize, fallback, snake_case
 
 Command = List[str]
 CallbackResult = Tuple[Command, Union[List[str], Callable[[Path, str], bool]]]
@@ -40,7 +41,7 @@ CallbackResult = Tuple[Command, Union[List[str], Callable[[Path, str], bool]]]
 _case_mapping = {
     "camel_case":  camelize,
     "pascal_case": pascalize,
-    "snake_case":  (lambda x: x)
+    "snake_case":  snake_case
 }
 
 
@@ -80,23 +81,19 @@ class TemplateType(str, Enum):
 
 class Language:
     """
-    Base configuration class for a programming language. The functions in this class
-    follow the following convention:
+    Base configuration class for a programming language.
 
-    - Functions prefixed with `c_` are intended to be overridden in the
-      configuration class of your programming language (or at least provide the
-      possibility; in most cases the defaults are enough). The c stands for
-      "callback".
-    - Functions prefixed with `p_` are intended to be read from the toml
-      file. You can override them, but it is recommended to adjust your toml file
-      instead. The p stans for "property".
+    When you need to override a function, check the docs or the implementation to
+    see if the function reads configuration data from the config.json file. If this
+    is the case, it is recommended to modify the value in the config.json file
+    instead of overriding the function in a subclass.
     """
     __slots__ = ["options"]
 
-    def __init__(self, config_file: str = "config.toml"):
+    def __init__(self, config_file: str = "config.json"):
         """
         Initialise a language configuration. Subclasses can modify the name of the
-        toml configuration file. By default, "config.toml" file is expected in the
+        toml configuration file. By default, a "config.json" file is expected in the
         same directory as the configuration class.
 
         :param config_file: The name of the configuration file. Relative to the
@@ -104,9 +101,10 @@ class Language:
         """
         path_to_config = (Path(sys.modules[self.__module__].__file__).parent
                           / config_file)
-        self.options = toml.load(path_to_config)
+        with open(path_to_config, "r") as f:
+            self.options = json.load(f)
 
-    def c_compilation(self, files: List[str]) -> CallbackResult:
+    def compilation(self, files: List[str]) -> CallbackResult:
         """
         Callback for generating the compilation command.
 
@@ -187,7 +185,7 @@ class Language:
         """
         return [], files
 
-    def c_execution(self, cwd: Path, file: str, arguments: List[str]) -> Command:
+    def execution(self, cwd: Path, file: str, arguments: List[str]) -> Command:
         """
         Callback for generating the execution command.
 
@@ -206,93 +204,104 @@ class Language:
         """
         raise NotImplementedError
 
-    def c_conventionalize_function(self, function: str) -> str:
+    def conventionalize_function(self, function: str) -> str:
         """
-        Conventionalize the name of a function. By default this uses the format
-        specified in the toml file called "function" The default implementation is
-        snake_case.
+        Conventionalize the name of a function. This function uses the format
+        specified in the config.json file. If no format is specified, the function
+        name is unchanged, which is the same as snake_case, since the testplan uses
+        snake case.
 
         :param function: The name of the function to conventionalize.
         :return: The conventionalized function.
         """
         return _conventionalize(self.options, "function", function)
 
-    def c_conventionalize_namespace(self, namespace: str) -> str:
+    def conventionalize_namespace(self, namespace: str) -> str:
         """
-        Conventionalize the name of a namespace (class/module). By default this uses
-        the format from the toml file called "namespace". The default implementation
-        is snake_case.
+        Conventionalize the name of a namespace (class/module). This function uses
+        the format specified in the config.json file. If no format is specified, the
+        function name is unchanged, which is the same as snake_case, since the
+        testplan uses snake case.
 
         :param namespace: The name of the namespace to conventionalize.
         :return: The conventionalized namespace.
         """
         return _conventionalize(self.options, "namespace", namespace)
 
-    def c_submission_name(self, plan: Plan) -> str:
+    def submission_name(self, plan: Plan) -> str:
         """
-        Get the namespace (module/class) for the submission.
+        Get the namespace (module/class) for the submission. This will use the
+        namespace specified in the testplan. The name is conventionalized for the
+        programming language.
 
         :param plan: The testplan we are executing.
-        :return: The name for the submission, not conventionalized.
+        :return: The name for the submission, conventionalized.
         """
-        return self.c_conventionalize_namespace(plan.namespace)
+        return self.conventionalize_namespace(plan.namespace)
 
-    def c_selector_name(self) -> str:
+    def selector_name(self) -> str:
         """
-        :return: The name for the selector, not conventionalized.
+        :return: The name for the selector, conventionalized.
         """
-        return self.c_conventionalize_namespace("selector")
+        return self.conventionalize_namespace("selector")
 
-    def c_context_name(self, tab_number: int, context_number: int) -> str:
+    def context_name(self, tab_number: int, context_number: int) -> str:
         """
         Get the name of a context. The name should be unique for the tab and context
         number combination.
 
         :param tab_number: The number of the tab.
         :param context_number: The number of the context.
-        :return: The name of the context, not conventionalized for the language.
+        :return: The name of the context, conventionalized.
         """
-        return self.c_conventionalize_namespace(
+        return self.conventionalize_namespace(
             f"context_{tab_number}_{context_number}"
         )
 
-    def p_extension_file(self) -> str:
-        """The main file extension for this language, sans the dot."""
+    def extension_file(self) -> str:
+        """
+        The main file extension for this language, sans the dot. This is read from
+        the config.json file.
+        """
         return self.options["extensions"]["file"]
 
     def with_extension(self, file_name: str) -> str:
         """Utility function to append the file extension to a file name."""
-        return f"{file_name}.{self.p_extension_file()}"
+        return f"{file_name}.{self.extension_file()}"
 
     def template_extensions(self) -> List[str]:
         """Extensions a template can be in."""
-        return [self.p_extension_file(), "mako"]
+        return [self.extension_file(), "mako"]
 
-    def p_extension_templates(self) -> List[str]:
+    def extension_templates(self) -> List[str]:
         """
         A list of extensions for the template files. By default, this uses the
-        ``p_extension_file`` and ``mako``.
+        ``extension_file`` and ``mako``.
 
         :return: The templates.
         """
-        default = [self.p_extension_file(), "mako"]
+        default = [self.extension_file(), "mako"]
         return self.options.get("extension").get("templates", default)
 
-    def p_initial_dependencies(self) -> List[str]:
+    def initial_dependencies(self) -> List[str]:
         """
         Return the additional dependencies that tested will include in compilation.
+        The dependencies are read from the config.json file.
 
         :return: A list of dependencies, relative to the "templates" folder.
         """
         return self.options["general"]["dependencies"]
 
-    def p_needs_selector(self):
+    def needs_selector(self):
         """
+        Return if the language needs a selector for batch compilation or not. This
+        is a mandatory option in the config.json file.
+
         :return: True if a selector is needed, false otherwise.
         """
         return self.options["general"]["selector"]
 
-    def c_supported_constructs(self) -> Set[Construct]:
+    def supported_constructs(self) -> Set[Construct]:
         """
         Callback to get the supported constructs for a language. By default, all
         features are returned.
@@ -337,7 +346,7 @@ class Language:
         config = {x: TypeSupport[y.upper()] for x, y in raw_config.items()}
         return fallback(defaultdict(lambda: TypeSupport.REDUCED), config)
 
-    def c_solution(self, solution: Path, bundle: Bundle):
+    def solution(self, solution: Path, bundle: Bundle):
         """
         An opportunity to modify the solution. By default, this does nothing.
         If you modify the solution, you must overwrite the contents of the solution
@@ -350,7 +359,7 @@ class Language:
         """
         pass
 
-    def c_specific_evaluator(self, evaluator: Path, bundle: Bundle):
+    def specific_evaluator(self, evaluator: Path, bundle: Bundle):
         """
         An opportunity to modify the language specific evaluator. By default,
         this does nothing. If you modify the evaluator, you must overwrite the
@@ -363,7 +372,7 @@ class Language:
         """
         pass
 
-    def c_compiler_output(
+    def compiler_output(
             self, stdout: str, stderr: str
     ) -> Tuple[List[Message], List[AnnotateCode], str, str]:
         """
@@ -382,7 +391,7 @@ class Language:
         """
         return [], [], stdout, stderr
 
-    def c_exception_output(self, exception: ExceptionValue) -> ExceptionValue:
+    def exception_output(self, exception: ExceptionValue) -> ExceptionValue:
         """
         Callback that allows modifying the exception value, for example the
         stacktrace.
@@ -392,8 +401,7 @@ class Language:
         """
         return exception
 
-    def c_stdout(self,
-                 stdout: str) -> Tuple[List[Message], List[AnnotateCode], str]:
+    def stdout(self, stdout: str) -> Tuple[List[Message], List[AnnotateCode], str]:
         """
         Callback that allows modifying the stdout.
 
@@ -402,8 +410,7 @@ class Language:
         """
         return [], [], stdout
 
-    def c_stderr(self,
-                 stderr: str) -> Tuple[List[Message], List[AnnotateCode], str]:
+    def stderr(self, stderr: str) -> Tuple[List[Message], List[AnnotateCode], str]:
         """
         Callback that allows modifying the stderr.
 
@@ -412,8 +419,7 @@ class Language:
         """
         return [], [], stderr
 
-    # noinspection PyUnusedLocal
-    def c_linter(self, bundle: Bundle, submission: Path, remaining: float) \
+    def linter(self, bundle: Bundle, submission: Path, remaining: float) \
             -> Tuple[List[Message], List[AnnotateCode]]:
         """
         Run a linter or other code analysis tools on the submission.
@@ -431,9 +437,10 @@ class Language:
         """
         return [], []
 
-    def c_template_name(self, template_type: TemplateType) -> str:
+    def template_name(self, template_type: TemplateType) -> str:
         """
-        Get the name for built-in templates.
+        Get the name for built-in templates. This can be specified in the
+        config.json file, but needing to override this is generally not necessary.
 
         :param template_type: The built-in type.
         :return: The name of the template (without extension).

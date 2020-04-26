@@ -54,7 +54,7 @@ def run_compilation(bundle: Bundle,
              decide to fallback to individual mode if the compilation result is
              not positive.
     """
-    command, files = bundle.lang_config.c_compilation(dependencies)
+    command, files = bundle.lang_config.compilation(dependencies)
     _logger.debug("Generating files with command %s in directory %s",
                   command, directory)
     result = run_command(directory, remaining, command)
@@ -80,7 +80,7 @@ def process_compile_results(
 
     show_stdout = False
     compiler_messages, annotations, stdout, stderr = \
-        language_config.c_compiler_output(results.stdout, results.stderr)
+        language_config.compiler_output(results.stdout, results.stderr)
     messages.extend(compiler_messages)
     shown_messages = annotations or compiler_messages
 
