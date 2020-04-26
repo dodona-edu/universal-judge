@@ -76,7 +76,7 @@ def is_isbn(code, isbn13):
 
 def are_isbn(codes, isbn13):
     """
-    >>> codes = ['0012345678', '0012345679', '9971502100', '080442957X', True, 'The Practice of Computing Using Python', '9789027439642', '5486948320146']
+    >>> codes = ['0012345678', '0012345679', '9971502100', '080442957X', 'The Practice of Computing Using Python', '9789027439642', '5486948320146']
     >>> are_isbn(codes, True)
     [False, False, False, False, False, False, False, True, False]
     >>> are_isbn(codes, False)

@@ -77,6 +77,7 @@ def test_assignment_and_use_in_expression_list(lang: str, tmp_path: Path, pytest
     updates = assert_valid_output(result, pytestconfig)
     # Assert that the empty context testcase is not shown, while the assignment
     # and expression testcase are shown.
+    print(result)
     assert len(updates.find_all("start-testcase")) == 2
     # Assert the only one test was executed.
     assert updates.find_status_enum() == ["correct"]
@@ -100,7 +101,6 @@ def test_crashing_assignment_with_before(lang: str, tmp_path: Path, pytestconfig
     conf = configuration(pytestconfig, "isbn-list", lang, tmp_path, "one-with-assignment.tson", "solution")
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
-    print(result)
     # Assert that the empty context testcase is not shown, while the assignment
     # and expression testcase are shown.
     assert len(updates.find_all("start-testcase")) == 2
