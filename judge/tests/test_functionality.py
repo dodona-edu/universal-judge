@@ -77,7 +77,6 @@ def test_assignment_and_use_in_expression_list(lang: str, tmp_path: Path, pytest
     updates = assert_valid_output(result, pytestconfig)
     # Assert that the empty context testcase is not shown, while the assignment
     # and expression testcase are shown.
-    print(result)
     assert len(updates.find_all("start-testcase")) == 2
     # Assert the only one test was executed.
     assert updates.find_status_enum() == ["correct"]

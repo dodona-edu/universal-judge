@@ -24,7 +24,7 @@ def test_full_isbn(lang: str, tmp_path: Path, pytestconfig):
 
 
 @pytest.mark.slow
-@pytest.mark.parametrize("lang", ["haskell"])
+@pytest.mark.parametrize("lang", ["haskell", "java", "python"])
 def test_full_isbn_list(lang: str, tmp_path: Path, pytestconfig):
     config_ = {
         "options": {

@@ -25,9 +25,9 @@ def read_config() -> DodonaConfig:
         "source":               Path('../exercise/isbn-list/solution/solution.hs'),
         "judge":                Path('../judge/src/'),
         "workdir":              Path('./workdir'),
-        "plan_name":            "one-with-assignment.tson",
+        "plan_name":            "plan.tson",
         "options":              {
-            "parallel": False,
+            "parallel": True,
             "mode":     "batch",
             "linter": {
                 "python": True

@@ -23,14 +23,14 @@ asDigit x   = digitToInt x
 
 
 checkDigits :: String -> Maybe String
-checkDigits x = if (areDigits (slice 0 10 x)) then Just x else Nothing
+checkDigits x = if (areDigits (slice 0 8 x)) then Just x else Nothing
 
 checkAllDigits :: String -> Maybe String
 checkAllDigits x = if (areDigits x) then Just x else Nothing
 
 checkChecksum10 :: String -> Maybe String
 checkChecksum10 s =
-    let checksum = (sum $ map (\(a, b) -> a * (asDigit b)) (zip [1..] (slice 0 10 s))) `mod` 11
+    let checksum = (sum $ map (\(a, b) -> a * (asDigit b)) (zip [1..] (slice 0 8 s))) `mod` 11
     in if checksum == asDigit (s !! 9)
        then Just s
        else Nothing

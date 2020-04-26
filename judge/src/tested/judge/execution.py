@@ -148,7 +148,7 @@ def execute_context(bundle: Bundle, args: ContextExecution, max_time: float) \
         stdin = args.context.get_stdin(bundle.config.resources)
         argument = None
     else:
-        result, files = None, dependencies
+        result, files = None, list(dependencies)
         if args.precompilation_result:
             _logger.debug("Substituting precompilation results.")
             messages, status = args.precompilation_result
