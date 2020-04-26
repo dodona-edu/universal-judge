@@ -33,7 +33,7 @@
     "array": "unsupported",
     "set": "unsupported",
     "map": "unsupported",
-    "list": "supported",
-    "tuple": "supported"
+    "list": "unsupported",
+    "tuple": "unsupported"
   }
 }

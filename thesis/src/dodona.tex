@@ -121,7 +121,11 @@ Oplossingen voor deze oefening staan in \cref{lst:java-solution,lst:python-solut
 
 \begin{listing}
     \begin{quote}
-        \markdownInput{generated/description.md}
+        \markdownInput[renderers = {
+            headingOne = {\chapter*{#1}},
+            headingTwo = {\section*{#1}},
+            headingThree = {\subsection*{#1}},
+        }]{generated/description.md}
     \end{quote}
     \caption{De opgave van de voorbeeldoefening, Lotto.}
     \label{lst:lotto}

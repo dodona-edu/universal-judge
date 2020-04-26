@@ -59,20 +59,17 @@
 }
 
 \markdownSetup{
-    renderers = {
-        headingOne = {\chapter*{#1}},
-        headingTwo = {\section*{#1}},
-        headingThree = {\subsection*{#1}},
-    },
     headerAttributes = true,
     hybrid = true,
-    fencedCode = true
+    fencedCode = true,
+    tightLists = false
 }
 
 \definecolor{bg}{rgb}{0.98,0.98,0.98}
 \setminted{
     bgcolor=bg,
-    linenos
+    linenos,
+    breaklines
 }
 \setmintedinline{bgcolor={}}
 
