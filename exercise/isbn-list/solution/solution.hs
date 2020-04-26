@@ -28,23 +28,12 @@ checkDigits x = if (areDigits (slice 0 10 x)) then Just x else Nothing
 checkChecksum :: String -> Maybe String
 checkChecksum s =
     let checksum = (sum $ map (\(a, b) -> a * (asDigit b)) (zip [1..] (slice 0 10 s))) `mod` 11
-    in if (checksum ) == asDigit (s !! 10)
+    in if (checksum ) == asDigit (s !! 9)
        then Just s
        else Nothing
 
-
-isValid :: Maybe x -> Bool
-isValid Nothing = False
-isValid _ = True
-
 isbn10check :: String -> Maybe String
 isbn10check = return >=> checkLength >=> checkDigits >=> checkChecksum
-
-
--- We need a type class to be able to handle other types than String.
---class Checkable a where
---    isIsbn10 :: a -> Bool
---    isIsbn10 _ = False
 
 
 isIsbn10 :: String -> Bool
@@ -55,3 +44,5 @@ isIsbn a b = if b then isIsbn10 a else False
 areIsbn a b = map (\x -> (isIsbn x b)) a
 
 
+main = do
+    putStrLn $ show (areIsbn ["0012345678", "0012345679", "9971502100", "080442957X", "The Practice of Computing Using Python", "9789027439642", "5486948320146"] True)
