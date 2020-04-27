@@ -49,18 +49,6 @@ def do_test(config: DodonaConfig, result: Optional[str] = None):
     assert actual_string == expected_string
 
 
-def test_compilation_batch(tmp_path: Path):
-    config = read_config("compilation", tmp_path, {
-        "options": {"allow_fallback": False}
-    })
-    do_test(config, "compilation-batch")
-
-
-def test_compilation_context(tmp_path: Path):
-    config = read_config("compilation", tmp_path)
-    do_test(config, "compilation-context")
-
-
 def test_runtime_error(tmp_path: Path):
     config = read_config("runtime-error", tmp_path)
     do_test(config)

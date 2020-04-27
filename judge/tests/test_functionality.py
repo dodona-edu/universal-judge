@@ -158,7 +158,6 @@ def test_batch_compilation_fallback(language: str, tmp_path: Path, pytestconfig,
     mocker.patch.object(lang_class, 'compilation', wraps=class_instance.compilation)
     conf = configuration(pytestconfig, "echo", language, tmp_path, "two.tson", "comp-error")
     result = execute_config(conf)
-    print(result)
     updates = assert_valid_output(result, pytestconfig)
     assert len(updates.find_all("start-testcase")) == 2
     assert updates.find_status_enum() == ["compilation error"] * 2
@@ -177,8 +176,25 @@ def test_batch_compilation_no_fallback(language: str, tmp_path: Path, pytestconf
     mocker.patch.object(lang_class, 'compilation', wraps=class_instance.compilation)
     conf = configuration(pytestconfig, "echo", language, tmp_path, "two.tson", "comp-error", config_)
     result = execute_config(conf)
-    print(result)
     updates = assert_valid_output(result, pytestconfig)
     assert len(updates.find_all("start-testcase")) == 2
     assert updates.find_status_enum() == ["compilation error"] * 3
     assert class_instance.compilation.call_count == 1
+
+
+@pytest.mark.parametrize("language", ["python", "java", "haskell", "c"])
+def test_batch_compilation_no_fallback(language: str, tmp_path: Path, pytestconfig):
+    config_ = {
+        "options": {
+            "allow_fallback": False
+        }
+    }
+    conf = configuration(pytestconfig, "echo", language, tmp_path, "two.tson", "run-error", config_)
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert len(updates.find_all("start-testcase")) == 2
+    # One wrong status for every stderr + stdout
+    assert len(updates.find_status_enum()) >= 4
+    # There could be more wrongs: some languages might modify the exit code
+    assert all(s == "wrong" for s in updates.find_status_enum())
+
