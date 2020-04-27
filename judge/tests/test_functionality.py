@@ -12,6 +12,7 @@ from pathlib import Path
 
 import pytest
 
+from tested.languages import LANGUAGES
 from tests.manual_utils import assert_valid_output, configuration, execute_config
 
 ALL_LANGUAGES = ["python", "java", "haskell", "c"]
@@ -114,30 +115,37 @@ def test_programmed_python_evaluator(lang: str, tmp_path: Path, pytestconfig):
 
 
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
-def test_context_compilation(language: str, tmp_path: Path, pytestconfig):
+def test_context_compilation(language: str, tmp_path: Path, pytestconfig, mocker):
     config_ = {
         "options": {
             "mode": "context"
         }
     }
     # Mock the compilation callback to ensure we call it for every context.
+    lang_class = LANGUAGES[language]
+    class_instance = lang_class()
+    mocker.patch.object(lang_class, 'compilation', wraps=class_instance.compilation)
     conf = configuration(pytestconfig, "echo", language, tmp_path, "two.tson", "correct", config_)
     result = execute_config(conf)
-    print(result)
     updates = assert_valid_output(result, pytestconfig)
     assert len(updates.find_all("start-testcase")) == 2
     assert updates.find_status_enum() == ["correct"] * 2
+    assert class_instance.compilation.call_count == 2
 
 
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
-def test_batch_compilation(language: str, tmp_path: Path, pytestconfig):
+def test_batch_compilation(language: str, tmp_path: Path, pytestconfig, mocker):
     config_ = {
         "options": {
             "mode": "batch"
         }
     }
+    lang_class = LANGUAGES[language]
+    class_instance = lang_class()
+    mocker.patch.object(lang_class, 'compilation', wraps=class_instance.compilation)
     conf = configuration(pytestconfig, "echo", language, tmp_path, "two.tson", "correct", config_)
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert len(updates.find_all("start-testcase")) == 2
     assert updates.find_status_enum() == ["correct"] * 2
+    assert class_instance.compilation.call_count == 1
