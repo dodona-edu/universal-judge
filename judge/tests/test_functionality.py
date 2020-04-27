@@ -27,6 +27,14 @@ def test_io_exercise(language: str, tmp_path: Path, pytestconfig):
 
 
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
+def test_io_exercise_wrong(language: str, tmp_path: Path, pytestconfig):
+    conf = configuration(pytestconfig, "echo", language, tmp_path, "one.tson", "wrong")
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["wrong"]
+
+
+@pytest.mark.parametrize("language", ALL_LANGUAGES)
 def test_simple_programmed_eval(language: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "echo", language, tmp_path, "one-programmed-correct.tson", "correct")
     result = execute_config(conf)
