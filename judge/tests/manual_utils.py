@@ -55,7 +55,7 @@ class CommandDict(list):
         return next(x for x in self if x["command"] == command)
 
     def find_status_enum(self) -> List[str]:
-        commands = [x for x in self if x["command"].startswith("close-")]
+        commands = [x for x in self if x["command"].startswith("close-") or x["command"] == "escalate-status"]
         return [x["status"]["enum"] for x in commands if "status" in x]
 
 
