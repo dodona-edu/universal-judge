@@ -603,12 +603,10 @@ def generate_schema():
 
     sc = _PlanModel.schema()
     sc['$schema'] = "http://json-schema.org/schema#"
+    sc['$id'] = "tested/testplan"
     sc['title'] = "Testplan"
     print(json.dumps(sc, indent=2))
 
 
 if __name__ == '__main__':
-    # with open('../exercise/zoemzinnen/preparation/plan.json', 'r') as f:
-    #     r = parse_test_plan(f.read())
-    #     print(r)
     generate_schema()

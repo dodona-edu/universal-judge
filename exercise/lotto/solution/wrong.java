@@ -3,7 +3,7 @@ import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
-class Main {
+class Submission {
 
     public static String loterij(int aantal, int maximum) {
         ThreadLocalRandom r = ThreadLocalRandom.current();

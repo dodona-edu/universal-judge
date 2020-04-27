@@ -299,7 +299,7 @@ def generate_schema():
     Generate a json schema for the serialisation type. It will be printed on stdout.
     """
     sc = _SerialisationSchema.schema()
-    sc['$id'] = "universal-judge/serialisation"
+    sc['$id'] = "tested/serialisation"
     sc['$schema'] = "http://json-schema.org/schema#"
     print(json.dumps(sc, indent=2))
 

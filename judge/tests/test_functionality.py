@@ -95,19 +95,6 @@ def test_crashing_assignment_with_before(lang: str, tmp_path: Path, pytestconfig
     assert updates.find_next("start-test")["channel"] == "exception"
 
 
-@pytest.mark.parametrize("lang", ["java", "python"])
-def test_crashing_assignment_with_before(lang: str, tmp_path: Path, pytestconfig):
-    conf = configuration(pytestconfig, "isbn-list", lang, tmp_path, "one-with-assignment.tson", "solution")
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    # Assert that the empty context testcase is not shown, while the assignment
-    # and expression testcase are shown.
-    assert len(updates.find_all("start-testcase")) == 2
-    # Assert the only one test was executed.
-    assert updates.find_status_enum() == ["correct"]
-    assert len(updates.find_all("start-test")) == 1
-
-
 @pytest.mark.parametrize("lang", ["haskell", "c"])
 def test_heterogeneous_arguments_are_detected(lang: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "isbn", lang, tmp_path, "full.tson", "solution")
@@ -115,3 +102,13 @@ def test_heterogeneous_arguments_are_detected(lang: str, tmp_path: Path, pytestc
     updates = assert_valid_output(result, pytestconfig)
     assert len(updates.find_all("start-testcase")) == 0
     assert updates.find_status_enum() == ["internal error"]
+
+
+@pytest.mark.parametrize("lang", ["python", "java"])
+def test_programmed_python_evaluator(lang: str, tmp_path: Path, pytestconfig):
+    conf = configuration(pytestconfig, "lotto", lang, tmp_path, "one-programmed-python.tson", "correct")
+    result = execute_config(conf)
+    print(result)
+    updates = assert_valid_output(result, pytestconfig)
+    assert len(updates.find_all("start-testcase")) == 1
+    assert updates.find_status_enum() == ["correct"]

@@ -36,3 +36,18 @@ def test_full_isbn_list(lang: str, tmp_path: Path, pytestconfig):
     updates = assert_valid_output(result, pytestconfig)
     assert len(updates.find_all("start-testcase")) == 150
     assert updates.find_status_enum() == ["correct"] * 100
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize("lang", ["java", "python"])
+def test_full_isbn_list(lang: str, tmp_path: Path, pytestconfig):
+    config_ = {
+        "options": {
+            "parallel": True
+        }
+    }
+    conf = configuration(pytestconfig, "lotto", lang, tmp_path, "plan.tson", "correct", options=config_)
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert len(updates.find_all("start-testcase")) == 45
+    assert updates.find_status_enum() == ["correct"] * 45
