@@ -205,4 +205,3 @@ def test_batch_compilation_no_fallback(language: str, tmp_path: Path, pytestconf
     assert len(updates.find_status_enum()) >= 4
     # There could be more wrongs: some languages might modify the exit code
     assert all(s == "wrong" for s in updates.find_status_enum())
-

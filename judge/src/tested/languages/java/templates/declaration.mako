@@ -24,6 +24,8 @@
     long\
 % elif tp == AdvancedNumericTypes.SINGLE_PRECISION:
     float\
+% elif tp == "Object":
+    Object\
 % else:
     <% basic = resolve_to_basic(tp) %>
     % if basic == BasicSequenceTypes.SEQUENCE:

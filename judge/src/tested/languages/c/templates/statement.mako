@@ -1,6 +1,6 @@
 ## Convert a statement and/or expression into C code.
 <%! from tested.utils import get_args %>
-<%! from tested.serialisation import Value, Identifier, FunctionCall %>
+<%! from tested.serialisation import Value, Identifier, FunctionCall, Assignment %>
 <%page args="statement,full=False"/>
 % if isinstance(statement, Identifier):
     ## If the expression is an identifier, just echo it.
@@ -14,7 +14,7 @@
 % else:
     <% assert isinstance(statement, get_args(Assignment)) %>
     % if full:
-        <%include file="declaration.mako" args="tp=statement.type" /> \
+        <%include file="declaration.mako" args="value=statement.expression" /> \
     % endif
     ${statement.name} = <%include file="statement.mako" args="statement=statement.expression"/>;
 % endif
