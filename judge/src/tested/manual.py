@@ -21,14 +21,14 @@ def read_config() -> DodonaConfig:
         "time_limit":           60,
         "programming_language": 'haskell',
         "natural_language":     'nl',
-        "resources":            Path('../exercise/isbn-list/evaluation'),
-        "source":               Path('../exercise/isbn-list/solution/solution.hs'),
+        "resources":            Path('../exercise/echo/evaluation'),
+        "source":               Path('../exercise/echo/solution/correct.hs'),
         "judge":                Path('../judge/src/'),
         "workdir":              Path('./workdir'),
-        "plan_name":            "plan.tson",
+        "plan_name":            "two.tson",
         "options":              {
-            "parallel": True,
-            "mode":     "batch",
+            "parallel": False,
+            "mode":     "context",
             "linter": {
                 "python": True
             }

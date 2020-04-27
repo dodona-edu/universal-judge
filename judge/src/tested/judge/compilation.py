@@ -3,21 +3,22 @@ Functions responsible for the compilation step.
 """
 import logging
 from pathlib import Path
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Optional, Union
 
-from .utils import run_command, BaseExecutionResult
+from .utils import BaseExecutionResult, run_command
 from ..configs import Bundle
-from ..dodona import Message, Status, AnnotateCode, ExtendedMessage
-from ..languages.config import Language
+from ..dodona import Status, ExtendedMessage, Message, AnnotateCode
+from ..languages.config import FileFilter, Language
 
 _logger = logging.getLogger(__name__)
 
 
-def run_compilation(bundle: Bundle,
-                    directory: Path,
-                    dependencies: List[str],
-                    remaining: float
-                    ) -> Tuple[Optional[BaseExecutionResult], List[str]]:
+def run_compilation(
+        bundle: Bundle,
+        directory: Path,
+        dependencies: List[str],
+        remaining: float
+) -> Tuple[Optional[BaseExecutionResult], Union[List[str], FileFilter]]:
     """
     The compilation step in the pipeline. This callback is used in both the
     precompilation and individual mode. The implementation may only depend on
@@ -44,7 +45,6 @@ def run_compilation(bundle: Bundle,
     :param dependencies: A list of files available for compilation. Some
                          configs might need a context_testcase file. By convention,
                          the last file is the context_testcase file.
-                         TODO: make this explicit?
     :param remaining: The max amount of time.
 
     :return: A tuple containing an optional compilation result, and a list of
@@ -58,7 +58,7 @@ def run_compilation(bundle: Bundle,
     _logger.debug("Generating files with command %s in directory %s",
                   command, directory)
     result = run_command(directory, remaining, command)
-    _logger.debug(f"Would take files: {files}")
+    _logger.debug(f"Compilation dependencies are: {files}")
     return result, files
 
 

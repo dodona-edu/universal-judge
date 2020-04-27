@@ -108,7 +108,36 @@ def test_heterogeneous_arguments_are_detected(lang: str, tmp_path: Path, pytestc
 def test_programmed_python_evaluator(lang: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "lotto", lang, tmp_path, "one-programmed-python.tson", "correct")
     result = execute_config(conf)
-    print(result)
     updates = assert_valid_output(result, pytestconfig)
     assert len(updates.find_all("start-testcase")) == 1
     assert updates.find_status_enum() == ["correct"]
+
+
+@pytest.mark.parametrize("language", ALL_LANGUAGES)
+def test_context_compilation(language: str, tmp_path: Path, pytestconfig):
+    config_ = {
+        "options": {
+            "mode": "context"
+        }
+    }
+    # Mock the compilation callback to ensure we call it for every context.
+    conf = configuration(pytestconfig, "echo", language, tmp_path, "two.tson", "correct", config_)
+    result = execute_config(conf)
+    print(result)
+    updates = assert_valid_output(result, pytestconfig)
+    assert len(updates.find_all("start-testcase")) == 2
+    assert updates.find_status_enum() == ["correct"] * 2
+
+
+@pytest.mark.parametrize("language", ALL_LANGUAGES)
+def test_batch_compilation(language: str, tmp_path: Path, pytestconfig):
+    config_ = {
+        "options": {
+            "mode": "batch"
+        }
+    }
+    conf = configuration(pytestconfig, "echo", language, tmp_path, "two.tson", "correct", config_)
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert len(updates.find_all("start-testcase")) == 2
+    assert updates.find_status_enum() == ["correct"] * 2

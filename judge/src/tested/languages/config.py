@@ -36,7 +36,8 @@ from ..testplan import Plan
 from ..utils import camelize, pascalize, fallback, snake_case
 
 Command = List[str]
-CallbackResult = Tuple[Command, Union[List[str], Callable[[Path, str], bool]]]
+FileFilter = Callable[[Path], bool]
+CallbackResult = Tuple[Command, Union[List[str], FileFilter]]
 
 _case_mapping = {
     "camel_case":  camelize,
@@ -245,6 +246,10 @@ class Language:
         """
         return self.conventionalize_namespace("selector")
 
+    def context_prefix(self) -> str:
+        """The "name" or prefix for the context names. Not conventionalized."""
+        return "context"
+
     def context_name(self, tab_number: int, context_number: int) -> str:
         """
         Get the name of a context. The name should be unique for the tab and context
@@ -255,7 +260,7 @@ class Language:
         :return: The name of the context, conventionalized.
         """
         return self.conventionalize_namespace(
-            f"context_{tab_number}_{context_number}"
+            f"{self.context_prefix()}_{tab_number}_{context_number}"
         )
 
     def extension_file(self) -> str:

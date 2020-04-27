@@ -12,16 +12,8 @@ from tested.languages.python import linter
 class PythonConfig(Language):
 
     def compilation(self, files: List[str]) -> CallbackResult:
-
-        def file_filter(file: Path, context: str) -> bool:
-            # We only allow pyc files
-            is_pyc = file.suffix == ".pyc"
-            # We don't want files for contexts that are not the one we use.
-            is_context = file.name.startswith("context")
-            is_our_context = file.name.startswith(context + ".")
-            return is_pyc and (not is_context or is_our_context)
-
-        return ["python", "-m", "compileall", "-q", "-b", "."], file_filter
+        result = [x.replace(".py", ".pyc") for x in files]
+        return ["python", "-m", "compileall", "-q", "-b", "."], result
 
     def execution(self, cwd: Path, file: str, arguments: List[str]) -> Command:
         return ["python", "-u", file, *arguments]

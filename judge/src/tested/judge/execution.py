@@ -1,16 +1,17 @@
 import logging
 import shutil
-import time
 from pathlib import Path
 from typing import List, Optional, Tuple, NamedTuple, Callable, Union
 
+import time
 from pydantic.dataclasses import dataclass
 
-from tested.dodona import Message, Status
 from .collector import OutputManager
 from .compilation import run_compilation, process_compile_results
 from .utils import BaseExecutionResult, run_command, find_main_file
 from ..configs import Bundle
+from ..dodona import Message, Status
+from ..languages.config import FileFilter
 from ..languages.generator import value_file, exception_file
 from ..testplan import Context, ExecutionMode
 
@@ -46,13 +47,26 @@ class ContextExecution(NamedTuple):
     collector: OutputManager
 
 
-def filter_files(ce: ContextExecution) -> List[str]:
-    if callable(ce.files):
-        def filterer(file: Path):
-            return ce.files(file, ce.context_name)
-        return list(x.name for x in filter(filterer, ce.common_directory.glob("*")))
+def filter_files(files: Union[List[str], FileFilter],
+                 directory: Path) -> List[str]:
+    if callable(files):
+        return list(x.name for x in filter(files, directory.glob("*")))
     else:
-        return ce.files
+        return files
+
+
+def filter_dependencies(bundle: Bundle,
+                        files: List[str],
+                        context_name: str) -> List[str]:
+    def filter_function(file: str) -> bool:
+        # We don't want files for contexts that are not the one we use.
+        prefix = bundle.lang_config.conventionalize_namespace(
+            bundle.lang_config.context_prefix()
+        )
+        is_context = file.startswith(prefix)
+        is_our_context = file.startswith(context_name + ".")
+        return not is_context or is_our_context
+    return list(x for x in files if filter_function(x))
 
 
 def execute_file(
@@ -110,7 +124,10 @@ def execute_context(bundle: Bundle, args: ContextExecution, max_time: float) \
 
     _logger.info("Executing context %s in path %s", args.context_name, context_dir)
 
-    dependencies = filter_files(args)
+    # Filter dependencies of the global compilation results.
+    dependencies = \
+        filter_files(args.files, args.common_directory)
+    dependencies = filter_dependencies(bundle, dependencies, args.context_name)
 
     # Copy files from the common directory to the context directory.
     for file in dependencies:
@@ -126,6 +143,9 @@ def execute_context(bundle: Bundle, args: ContextExecution, max_time: float) \
         remaining = max_time - (time.perf_counter() - start)
         result, files = run_compilation(bundle, context_dir, dependencies,
                                         remaining)
+
+        # A new compilation means a new file filtering
+        files = filter_files(files, context_dir)
 
         # Process compilation results.
         messages, status, annotations = process_compile_results(
