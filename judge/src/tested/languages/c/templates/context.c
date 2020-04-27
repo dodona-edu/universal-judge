@@ -17,15 +17,15 @@
     #include "${name}.c"
 % endfor
 
-static FILE* value_file = NULL;
-static FILE* exception_file = NULL;
+static FILE* ${context_name}_value_file = NULL;
+static FILE* ${context_name}_exception_file = NULL;
 
 ## Write the delimiter and flush to ensure the output is in the files.
 ## This is necessary, otherwise the delimiters are sometimes missing when
 ## execution is killed due to timeouts.
-static void write_delimiter() {
-    fprintf(value_file, "--${secret_id}-- SEP");
-    fprintf(exception_file, "--${secret_id}-- SEP");
+static void ${context_name}_write_delimiter() {
+    fprintf(${context_name}_value_file, "--${secret_id}-- SEP");
+    fprintf(${context_name}_exception_file, "--${secret_id}-- SEP");
     fprintf(stdout, "--${secret_id}-- SEP");
     fprintf(stderr, "--${secret_id}-- SEP");
 }
@@ -36,29 +36,27 @@ static void write_delimiter() {
 
 ## Send a value to TESTed.
 ## Use a macro, since there are no generics in C.
-#define send(value) write_value(value_file, value)
+#undef send
+#define send(value) write_value(${context_name}_value_file, value)
 
 ## Send the result of a language specific value evaluator to TESTed.
-#pragma GCC diagnostic ignored "-Wunused-function"
-static void send_specific_value(EvaluationResult r) {
-    send_evaluated(value_file, r.result, r.readableExpected, r.readableActual, r.nrOfMessages, r.messages);
-}
-#pragma GCC diagnostic pop
+#undef send_specific_value
+#define send_specific_value(r) send_evaluated(${context_name}_value_file, r.result, r.readableExpected, r.readableActual, r.nrOfMessages, r.messages)
 
 ##################################
 ## Other testcase evaluators    ##
 ##################################
 % for testcase in testcases:
     % if testcase.value_function:
-        #define v_evaluate_${loop.index}(value) <%include file="statement.mako" args="statement=testcase.value_function"/>
+        #define ${context_name}_v_evaluate_${loop.index}(value) <%include file="statement.mako" args="statement=testcase.value_function"/>
     % endif
 % endfor
 
 
 int ${context_name}() {
 
-    value_file = fopen("${value_file}", "w");
-    exception_file = fopen("${exception_file}", "w");
+    ${context_name}_value_file = fopen("${value_file}", "w");
+    ${context_name}_exception_file = fopen("${exception_file}", "w");
 
     ${before}
 
@@ -68,27 +66,27 @@ int ${context_name}() {
         solution_main();
     % endif
 
-    write_delimiter();
+    ${context_name}_write_delimiter();
 
     ## Generate the actual tests based on the context.
     % for testcase in testcases:
         ## If we have a value function, we have an expression.
         % if testcase.value_function:
-            v_evaluate_${loop.index}(\
+            ${context_name}_v_evaluate_${loop.index}(\
         % endif
         <%include file="statement.mako" args="statement=testcase.command" />\
         % if testcase.value_function:
             );
         % endif
 
-        write_delimiter();
+        ${context_name}_write_delimiter();
 
     % endfor
 
     ${after}
 
-    fclose(value_file);
-    fclose(exception_file);
+    fclose(${context_name}_value_file);
+    fclose(${context_name}_exception_file);
     return 0;
 }
 
