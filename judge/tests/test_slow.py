@@ -55,7 +55,7 @@ def test_full_isbn_list(lang: str, tmp_path: Path, pytestconfig):
 
 
 @pytest.mark.flaky
-@pytest.mark.parametrize("language_and_time", [("python", 2), ("java", 5), ("haskell", 20), ("c", 4)])
+@pytest.mark.parametrize("language_and_time", [("python", 2), ("java", 5), ("haskell", 20), ("c", 3)])
 def test_timeout(language_and_time: Tuple[str, int], tmp_path: Path, pytestconfig):
     config_ = {
         "time_limit": language_and_time[1]  # seconds

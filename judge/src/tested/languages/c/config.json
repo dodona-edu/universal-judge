@@ -16,7 +16,8 @@
   "constructs": {
     "exceptions": false,
     "heterogeneous_collections": false,
-    "heterogeneous_arguments": false
+    "heterogeneous_arguments": false,
+    "evaluation": false
   },
   "datatypes": {
     "int8": "supported",

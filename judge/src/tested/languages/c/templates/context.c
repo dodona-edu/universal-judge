@@ -76,8 +76,9 @@ int ${context_name}() {
         % endif
         <%include file="statement.mako" args="statement=testcase.command" />\
         % if testcase.value_function:
-            );
+            )\
         % endif
+        ;
 
         ${context_name}_write_delimiter();
 

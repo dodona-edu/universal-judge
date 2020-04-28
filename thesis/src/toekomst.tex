@@ -286,6 +286,22 @@ Het omgekeerde, programmeertaalonafhankelijk invoer en programmeertaalspecifieke
 Als tot slot zowel de invoer als de uitvoer verschilt van programmeertaal tot programmeertaal, kan er niet meer gesproken worden van een programmeertaalonafhankelijke oefeningen.
 In dat geval is het beter een bestaande programmeertaalspecifieke judge van Dodona te gebruiken.
 
+\subsection{Combinaties van evaluatiemanieren}\label{subsec:combinaties-van-evaluatiemanieren}
+
+Momenteel moet bij de evaluatie een keuze gemaakt worden: het is ofwel een ingebouwde evaluatie, ofwel een geprogrammeerde evaluatie, ofwel een programmeertaalspecifieke evaluatie.
+In sommige scenario's is het echter wenselijk om een combinatie te kunnen gebruiken, vooral bij de geprogrammeerde evaluatie.
+Een voorbeeld is het volgende: stel dat de oefening vereist dat een functie geïmplementeerd moet worden die een getal moet teruggeven.
+Dit getal is het resultaat van een niet-deterministische berekening, dus is een geprogrammeerde evaluatie aangewezen.
+Het zou dan nuttig zijn dat TESTed al controleert of de door de oplossing geproduceerde waarde het juiste gegevenstype heeft.
+In talen zoals Haskell of C is het niet eenvoudig om een evaluatiefunctie te schrijven waaraan arbitraire types kunnen meegegeven worden.
+
+Een ander scenario waar dit nuttig kan zijn is als er voorbereidend werk nodig is voor de evaluatie.
+Stel dat een functie geïmplementeerd moet worden die een datum teruggeeft.
+In veel programmeertalen is dit een object (denk aan\texttt{DateTime}).
+Het zou nuttig kunnen zijn als in de programmeertaalspecifieke evaluatie deze datum bijvoorbeeld omgezet wordt naar een string, waarna TESTed de evaluatie kan overnemen.
+Op deze manier moet er minder evaluatiecode in elke programmeertaal geschreven worden.
+
+
 \subsection{Extra functionaliteit}\label{subsec:kleinere-functies}
 
 Er is in de loop van de thesis extra functionaliteit naar boven gekomen, waarvoor ook ondersteuning zou toegevoegd kunnen worden:
