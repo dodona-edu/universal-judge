@@ -205,3 +205,13 @@ def test_batch_compilation_no_fallback(language: str, tmp_path: Path, pytestconf
     assert len(updates.find_status_enum()) >= 4
     # There could be more wrongs: some languages might modify the exit code
     assert all(s == "wrong" for s in updates.find_status_enum())
+
+
+@pytest.mark.parametrize("lang", ["python"])
+def test_program_params(lang: str, tmp_path: Path, pytestconfig):
+    conf = configuration(pytestconfig, "sum", lang, tmp_path, "short.tson", "correct")
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ['correct', 'correct', 'correct', 'correct']
+    assert len(updates.find_all("start-testcase")) == 3
+    assert len(updates.find_all("start-test")) == 4
