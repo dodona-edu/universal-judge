@@ -283,13 +283,17 @@ def get_readable_input(bundle: Bundle,
         format_ = bundle.config.programming_language
         text = convert_statement(bundle, case.input)
     elif isinstance(case, ContextTestcase):
-        args = f"Argumenten: {case.input.arguments}"
+        arguments = " ".join(case.input.arguments)
+        args = f"./submission {arguments}"
         if isinstance(case.input.stdin, TextData):
             stdin = case.input.stdin.get_data_as_string(bundle.config.resources)
         else:
             stdin = ""
         if case.input.arguments:
-            text = f"{args}\n{stdin}"
+            if stdin:
+                text = f"{args}\n{stdin}"
+            else:
+                text = args
         else:
             text = stdin
     else:
