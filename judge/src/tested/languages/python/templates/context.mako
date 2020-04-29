@@ -101,8 +101,9 @@ except Exception as e:
     else:
         e_evaluate_main(None)
 % endif
+finally:
+    write_delimiter()
 
-write_delimiter()
 
 ## Generate the actual tests based on the context.
 % for testcase in testcases:
@@ -121,8 +122,8 @@ write_delimiter()
         e_evaluate_${loop.index}(e)
     else:
         e_evaluate_${loop.index}(None)
-
-    write_delimiter()
+    finally:
+        write_delimiter()
 
 % endfor
 
