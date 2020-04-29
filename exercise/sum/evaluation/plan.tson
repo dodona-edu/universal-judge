@@ -1,0 +1,1034 @@
+{
+  "tabs": [
+    {
+      "name": "Feedback",
+      "contexts": [
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": [
+                "-1",
+                "-23",
+                "72",
+                "84",
+                "-38",
+                "-61",
+                "49",
+                "45"
+              ],
+              "main_call": true
+            },
+            "output": {
+              "stdout": {
+                "type": "text",
+                "data": "127"
+              }
+            }
+          }
+        },
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": [
+                "22"
+              ],
+              "main_call": true
+            },
+            "output": {
+              "stdout": {
+                "type": "text",
+                "data": "22"
+              }
+            }
+          }
+        },
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": [
+                "-85",
+                "-30",
+                "18",
+                "-35",
+                "-15",
+                "-95",
+                "-4",
+                "92",
+                "-33"
+              ],
+              "main_call": true
+            },
+            "output": {
+              "stdout": {
+                "type": "text",
+                "data": "-187"
+              }
+            }
+          }
+        },
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": [],
+              "main_call": true
+            },
+            "output": {
+              "stdout": {
+                "type": "text",
+                "data": "0"
+              }
+            }
+          }
+        },
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": [
+                "-25",
+                "19",
+                "2",
+                "24",
+                "-14",
+                "-19",
+                "-39",
+                "-66",
+                "-17",
+                "94"
+              ],
+              "main_call": true
+            },
+            "output": {
+              "stdout": {
+                "type": "text",
+                "data": "-41"
+              }
+            }
+          }
+        },
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": [
+                "81",
+                "-37",
+                "89",
+                "68",
+                "-52",
+                "28",
+                "-67"
+              ],
+              "main_call": true
+            },
+            "output": {
+              "stdout": {
+                "type": "text",
+                "data": "110"
+              }
+            }
+          }
+        },
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": [
+                "-73",
+                "-36",
+                "-90",
+                "-2"
+              ],
+              "main_call": true
+            },
+            "output": {
+              "stdout": {
+                "type": "text",
+                "data": "-201"
+              }
+            }
+          }
+        },
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": [
+                "E",
+                "y",
+                "j",
+                "2",
+                "f",
+                "N",
+                "a"
+              ],
+              "main_call": true
+            },
+            "output": {
+              "stderr": {
+                "type": "text",
+                "data": "som: ongeldige argumenten"
+              },
+              "exit_code": {
+                "value": 1
+              }
+            }
+          }
+        },
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": [
+                "40",
+                "75",
+                "-78",
+                "-12"
+              ],
+              "main_call": true
+            },
+            "output": {
+              "stdout": {
+                "type": "text",
+                "data": "25"
+              }
+            }
+          }
+        },
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": [
+                "56",
+                "-53",
+                "-94",
+                "89"
+              ],
+              "main_call": true
+            },
+            "output": {
+              "stdout": {
+                "type": "text",
+                "data": "-2"
+              }
+            }
+          }
+        },
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": [
+                "-2"
+              ],
+              "main_call": true
+            },
+            "output": {
+              "stdout": {
+                "type": "text",
+                "data": "-2"
+              }
+            }
+          }
+        },
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": [
+                "-17",
+                "52",
+                "-24",
+                "31",
+                "-97",
+                "23"
+              ],
+              "main_call": true
+            },
+            "output": {
+              "stdout": {
+                "type": "text",
+                "data": "-32"
+              }
+            }
+          }
+        },
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": [
+                "52",
+                "-74",
+                "27",
+                "-36",
+                "32",
+                "89",
+                "-95"
+              ],
+              "main_call": true
+            },
+            "output": {
+              "stdout": {
+                "type": "text",
+                "data": "-5"
+              }
+            }
+          }
+        },
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": [
+                "82",
+                "20",
+                "-4",
+                "-29"
+              ],
+              "main_call": true
+            },
+            "output": {
+              "stdout": {
+                "type": "text",
+                "data": "69"
+              }
+            }
+          }
+        },
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": [
+                "75",
+                "-47",
+                "32",
+                "28",
+                "97",
+                "-86",
+                "-85",
+                "94",
+                "-70"
+              ],
+              "main_call": true
+            },
+            "output": {
+              "stdout": {
+                "type": "text",
+                "data": "38"
+              }
+            }
+          }
+        },
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": [
+                "14",
+                "45",
+                "2",
+                "51",
+                "-30",
+                "-2"
+              ],
+              "main_call": true
+            },
+            "output": {
+              "stdout": {
+                "type": "text",
+                "data": "80"
+              }
+            }
+          }
+        },
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": [
+                "X",
+                "G",
+                "Q",
+                "b",
+                "5",
+                "2",
+                "y",
+                "S",
+                "x",
+                "D"
+              ],
+              "main_call": true
+            },
+            "output": {
+              "stderr": {
+                "type": "text",
+                "data": "som: ongeldige argumenten"
+              },
+              "exit_code": {
+                "value": 1
+              }
+            }
+          }
+        },
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": [
+                "85",
+                "-76",
+                "-16",
+                "39",
+                "-7"
+              ],
+              "main_call": true
+            },
+            "output": {
+              "stdout": {
+                "type": "text",
+                "data": "25"
+              }
+            }
+          }
+        },
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": [
+                "12",
+                "39",
+                "76",
+                "-47",
+                "72",
+                "53"
+              ],
+              "main_call": true
+            },
+            "output": {
+              "stdout": {
+                "type": "text",
+                "data": "205"
+              }
+            }
+          }
+        },
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": [
+                "18",
+                "-76"
+              ],
+              "main_call": true
+            },
+            "output": {
+              "stdout": {
+                "type": "text",
+                "data": "-58"
+              }
+            }
+          }
+        },
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": [
+                "A",
+                "p",
+                "Hallo World",
+                "V"
+              ],
+              "main_call": true
+            },
+            "output": {
+              "stderr": {
+                "type": "text",
+                "data": "som: ongeldige argumenten"
+              },
+              "exit_code": {
+                "value": 1
+              }
+            }
+          }
+        },
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": [
+                "10",
+                "1",
+                "24",
+                "94",
+                "88",
+                "79"
+              ],
+              "main_call": true
+            },
+            "output": {
+              "stdout": {
+                "type": "text",
+                "data": "296"
+              }
+            }
+          }
+        },
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": [
+                "68",
+                "33",
+                "-24"
+              ],
+              "main_call": true
+            },
+            "output": {
+              "stdout": {
+                "type": "text",
+                "data": "77"
+              }
+            }
+          }
+        },
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": [
+                "82",
+                "-50",
+                "-72",
+                "-29",
+                "67",
+                "-51"
+              ],
+              "main_call": true
+            },
+            "output": {
+              "stdout": {
+                "type": "text",
+                "data": "-53"
+              }
+            }
+          }
+        },
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": [
+                "1",
+                "-72",
+                "89",
+                "14",
+                "-96",
+                "-34",
+                "-23"
+              ],
+              "main_call": true
+            },
+            "output": {
+              "stdout": {
+                "type": "text",
+                "data": "-121"
+              }
+            }
+          }
+        },
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": [
+                "-20",
+                "-4",
+                "71",
+                "98"
+              ],
+              "main_call": true
+            },
+            "output": {
+              "stdout": {
+                "type": "text",
+                "data": "145"
+              }
+            }
+          }
+        },
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": [
+                "-32",
+                "-40",
+                "-99",
+                "-58",
+                "16",
+                "-88",
+                "79",
+                "77",
+                "-59"
+              ],
+              "main_call": true
+            },
+            "output": {
+              "stdout": {
+                "type": "text",
+                "data": "-204"
+              }
+            }
+          }
+        },
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": [
+                "-63",
+                "-76"
+              ],
+              "main_call": true
+            },
+            "output": {
+              "stdout": {
+                "type": "text",
+                "data": "-139"
+              }
+            }
+          }
+        },
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": [
+                "-64",
+                "89",
+                "-20",
+                "73",
+                "18",
+                "51",
+                "-23",
+                "62",
+                "-78"
+              ],
+              "main_call": true
+            },
+            "output": {
+              "stdout": {
+                "type": "text",
+                "data": "108"
+              }
+            }
+          }
+        },
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": [
+                "11",
+                "55",
+                "33",
+                "2",
+                "-47",
+                "63",
+                "-24",
+                "-66"
+              ],
+              "main_call": true
+            },
+            "output": {
+              "stdout": {
+                "type": "text",
+                "data": "27"
+              }
+            }
+          }
+        },
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": [
+                "66"
+              ],
+              "main_call": true
+            },
+            "output": {
+              "stdout": {
+                "type": "text",
+                "data": "66"
+              }
+            }
+          }
+        },
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": [],
+              "main_call": true
+            },
+            "output": {
+              "stdout": {
+                "type": "text",
+                "data": "0"
+              }
+            }
+          }
+        },
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": [
+                "-36",
+                "-89",
+                "-45",
+                "17",
+                "-14",
+                "8",
+                "-60",
+                "-28",
+                "89"
+              ],
+              "main_call": true
+            },
+            "output": {
+              "stdout": {
+                "type": "text",
+                "data": "-158"
+              }
+            }
+          }
+        },
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": [
+                "a",
+                "A"
+              ],
+              "main_call": true
+            },
+            "output": {
+              "stderr": {
+                "type": "text",
+                "data": "som: ongeldige argumenten"
+              },
+              "exit_code": {
+                "value": 1
+              }
+            }
+          }
+        },
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": [
+                "-40",
+                "86",
+                "-32",
+                "-86",
+                "-7"
+              ],
+              "main_call": true
+            },
+            "output": {
+              "stdout": {
+                "type": "text",
+                "data": "-79"
+              }
+            }
+          }
+        },
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": [],
+              "main_call": true
+            },
+            "output": {
+              "stdout": {
+                "type": "text",
+                "data": "0"
+              }
+            }
+          }
+        },
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": [],
+              "main_call": true
+            },
+            "output": {
+              "stdout": {
+                "type": "text",
+                "data": "0"
+              }
+            }
+          }
+        },
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": [
+                "69",
+                "-41",
+                "45",
+                "19",
+                "77",
+                "32",
+                "-37",
+                "-45"
+              ],
+              "main_call": true
+            },
+            "output": {
+              "stdout": {
+                "type": "text",
+                "data": "119"
+              }
+            }
+          }
+        },
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": [
+                "j",
+                "e",
+                "x",
+                "o",
+                "R",
+                "M",
+                "U",
+                "r",
+                "n"
+              ],
+              "main_call": true
+            },
+            "output": {
+              "stderr": {
+                "type": "text",
+                "data": "som: ongeldige argumenten"
+              },
+              "exit_code": {
+                "value": 1
+              }
+            }
+          }
+        },
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": [
+                "70",
+                "75",
+                "-89",
+                "85",
+                "-30",
+                "-17",
+                "-68",
+                "-96"
+              ],
+              "main_call": true
+            },
+            "output": {
+              "stdout": {
+                "type": "text",
+                "data": "-70"
+              }
+            }
+          }
+        },
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": [
+                "69",
+                "81",
+                "-43"
+              ],
+              "main_call": true
+            },
+            "output": {
+              "stdout": {
+                "type": "text",
+                "data": "107"
+              }
+            }
+          }
+        },
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": [],
+              "main_call": true
+            },
+            "output": {
+              "stdout": {
+                "type": "text",
+                "data": "0"
+              }
+            }
+          }
+        },
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": [
+                "70",
+                "18",
+                "-59",
+                "-65",
+                "82",
+                "65",
+                "26",
+                "-74",
+                "-16"
+              ],
+              "main_call": true
+            },
+            "output": {
+              "stdout": {
+                "type": "text",
+                "data": "47"
+              }
+            }
+          }
+        },
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": [
+                "73",
+                "88",
+                "-62",
+                "-72",
+                "35",
+                "-36",
+                "-100",
+                "13"
+              ],
+              "main_call": true
+            },
+            "output": {
+              "stdout": {
+                "type": "text",
+                "data": "-61"
+              }
+            }
+          }
+        },
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": [
+                "42",
+                "-84",
+                "-95",
+                "52",
+                "33",
+                "-22"
+              ],
+              "main_call": true
+            },
+            "output": {
+              "stdout": {
+                "type": "text",
+                "data": "-74"
+              }
+            }
+          }
+        },
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": [
+                "-29",
+                "-51",
+                "68",
+                "39",
+                "79",
+                "-13",
+                "-22",
+                "-4",
+                "-32"
+              ],
+              "main_call": true
+            },
+            "output": {
+              "stdout": {
+                "type": "text",
+                "data": "35"
+              }
+            }
+          }
+        },
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": [],
+              "main_call": true
+            },
+            "output": {
+              "stdout": {
+                "type": "text",
+                "data": "0"
+              }
+            }
+          }
+        },
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": [
+                "39",
+                "11",
+                "69",
+                "0",
+                "6",
+                "37",
+                "-72",
+                "-29",
+                "25"
+              ],
+              "main_call": true
+            },
+            "output": {
+              "stdout": {
+                "type": "text",
+                "data": "86"
+              }
+            }
+          }
+        },
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": [
+                "13",
+                "38",
+                "81",
+                "54",
+                "1",
+                "-23",
+                "76",
+                "19",
+                "36",
+                "-11"
+              ],
+              "main_call": true
+            },
+            "output": {
+              "stdout": {
+                "type": "text",
+                "data": "284"
+              }
+            }
+          }
+        },
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": [
+                "80",
+                "-23"
+              ],
+              "main_call": true
+            },
+            "output": {
+              "stdout": {
+                "type": "text",
+                "data": "57"
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
