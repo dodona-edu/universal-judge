@@ -14,5 +14,9 @@
   "labels": [
 
   ],
-  "programming_language": "python"
+  "programming_language": "python",
+  "internals": {
+    "token": "T5wgD3Dz3Ik8nGIK-jbBjeZ2QPhxHtd-tWJ8ywQySm8jAWwfQUTyHktG9KZjzIG8",
+    "_info": "These fields are used for internal bookkeeping in Dodona, please do not change them."
+  }
 }
