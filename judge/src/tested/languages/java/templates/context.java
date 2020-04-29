@@ -41,6 +41,10 @@ public class ${context_name} implements Closeable {
         exceptionWriter.write("--${secret_id}-- SEP");
         System.err.print("--${secret_id}-- SEP");
         System.out.print("--${secret_id}-- SEP");
+        valueWriter.flush();
+        exceptionWriter.flush();
+        System.err.flush();
+        System.out.flush();
     }
 
     ##################################
@@ -97,6 +101,7 @@ public class ${context_name} implements Closeable {
         ${before}
 
         ## Call the main function if needed.
+        this.writeDelimiter();
         % if context_testcase.exists:
             try {
                 ${submission_name}.main(new String[]{
@@ -110,12 +115,11 @@ public class ${context_name} implements Closeable {
             }
         % endif
 
-        this.writeDelimiter();
-
         ## Generate the actual tests based on the context.
         % for testcase in testcases:
             ## In Java, we need special code to make variables available outside of
             ## the try-catch block.
+           this.writeDelimiter();
             % if isinstance(testcase.command, get_args(Assignment)):
                 <%include file="declaration.mako" args="tp=testcase.command.type,value=testcase.command.expression" /> ${testcase.command.name} = null;
             % endif
@@ -133,7 +137,6 @@ public class ${context_name} implements Closeable {
             } catch (Exception | AssertionError e) {
                 this.eEvaluate${loop.index}(e);
             }
-            this.writeDelimiter();
         % endfor
 
         ${after}

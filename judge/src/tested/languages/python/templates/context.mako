@@ -89,6 +89,7 @@ ${before}
 
 ## Import the code for the first time, which will run the code.
 try:
+    write_delimiter()
     from ${submission_name} import *
 except Exception as e:
     ## If there is a main test case, pass the exception to it.
@@ -101,12 +102,11 @@ except Exception as e:
     else:
         e_evaluate_main(None)
 % endif
-finally:
-    write_delimiter()
 
 
 ## Generate the actual tests based on the context.
 % for testcase in testcases:
+    write_delimiter()
     <% testcase: _TestcaseArguments %>
     try:
         ## If we have a value function, we have an expression.
@@ -122,8 +122,6 @@ finally:
         e_evaluate_${loop.index}(e)
     else:
         e_evaluate_${loop.index}(None)
-    finally:
-        write_delimiter()
 
 % endfor
 

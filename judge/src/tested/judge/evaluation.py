@@ -149,6 +149,25 @@ def evaluate_results(bundle: Bundle,
     exceptions = exec_results.exceptions.split(exec_results.separator)
     values = exec_results.results.split(exec_results.separator)
 
+    # The first item should be empty; so remove it.
+    removed = True
+    if len(stdout_) >= 2 and stdout_[0] == '':
+        stdout_.pop(0)
+    else:
+        removed = False
+    if len(stderr_) >= 2 and stderr_[0] == '':
+        stderr_.pop(0)
+    else:
+        removed = False
+    if len(exceptions) >= 2 and exceptions[0] == '':
+        exceptions.pop(0)
+    else:
+        removed = False
+    if len(values) >= 2 and values[0] == '':
+        values.pop(0)
+    else:
+        removed = False
+
     # Proceed with evaluating the context testcase.
     # Get the evaluators. These take care of everything if there is no testcase.
     output = testcase.output
@@ -194,7 +213,7 @@ def evaluate_results(bundle: Bundle,
     ))
 
     # Check for missing values and stop if necessary.
-    if not stdout_ or not stderr_ or not exceptions or not values:
+    if not removed:
         _logger.warning("Missing output in context testcase.")
         context_collector.add(AppendMessage(
             "Ontbrekende uitvoerresultaten in Dodona. Er ging iets verkeerd!"
@@ -224,7 +243,7 @@ def evaluate_results(bundle: Bundle,
                           str(exec_results.exit), exit_evaluator, remaining)
         must_stop = True
 
-    if not context.testcases:
+    if not context.testcases and not must_stop:
         # There are no testcases, so evaluate the exit code.
         _evaluate_channel(context_collector, "exitcode", exit_output,
                           str(exec_results.exit), exit_evaluator, remaining)

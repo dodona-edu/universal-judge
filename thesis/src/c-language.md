@@ -324,18 +324,20 @@ int ${context_name}() {
     ${context_name}_exception_file = fopen("${exception_file}", "w");
 ```
 
-Als volgende zetten we de `before`-code en roepen we de `main`-functie van de oplossing op indien het testplan dat vereist. Ook schrijven we de separator naar de kanalen. Dit moet gebeuren tussen elk testgeval.
+Als volgende zetten we de `before`-code.
+We schrijven altijd de separator uit voor de start van het testgeval, wat we hier ook doen.
+Tot slot roepen we de `main`-functie van de oplossing op indien het testplan dat vereist.
 
 TODO: arguments in de main-functie
 
 ```mako
     ${before}
 
+    ${context_name}_write_delimiter();
+
     % if context_testcase.exists:
         solution_main();
     % endif
-
-    write_delimiter();
 ```
 
 Hieronder doen we de eigenlijke testgevallen. Elk testgeval heeft een statement als invoer. Indien dit statement een expression is en we zijn geïnteresseerd in de returnwaarde, moeten we natuurlijk de waarde opvangen. Dat gebeurt met `v_evaluate_${loop.index}`. De `\` op het einde duidt aan dat het regeleinde weggelaten mag worden.
@@ -344,6 +346,7 @@ Na elke testcase schrijven we ook opnieuw het scheidingsteken uit.
 
 ```mako
     % for testcase in testcases:
+        ${context_name}_write_delimiter();
         ## Als value_function bestaat, hebben we een expressie.
         ## Dan moeten we het resultaat aan TESTed geven.
         % if testcase.value_function:
@@ -353,9 +356,7 @@ Na elke testcase schrijven we ook opnieuw het scheidingsteken uit.
         % if testcase.value_function:
             )\
         % endif
-        ;
-
-        ${context_name}_write_delimiter();
+        ;        
     % endfor
 ```
 

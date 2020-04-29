@@ -60,16 +60,17 @@ int ${context_name}() {
 
     ${before}
 
+    ${context_name}_write_delimiter();
+
     // Main functions are not support at the moment.
     // TODO: arguments?
     % if context_testcase.exists:
         solution_main();
     % endif
 
-    ${context_name}_write_delimiter();
-
     ## Generate the actual tests based on the context.
     % for testcase in testcases:
+        ${context_name}_write_delimiter();
         ## If we have a value function, we have an expression.
         % if testcase.value_function:
             ${context_name}_v_evaluate_${loop.index}(\
@@ -79,8 +80,6 @@ int ${context_name}() {
             )\
         % endif
         ;
-
-        ${context_name}_write_delimiter();
 
     % endfor
 

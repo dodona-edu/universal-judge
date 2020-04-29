@@ -90,6 +90,8 @@ eEvaluateMain value = <%include file="statement.mako" args="statement=context_te
 main = do
     ${before}
 
+    writeDelimiter
+
     % if context_testcase.exists:
         let mainArgs = [\
             % for argument in context_testcase.arguments:
@@ -100,9 +102,9 @@ main = do
         handleException eEvaluateMain result
     % endif
 
-    writeDelimiter
-
     % for testcase in testcases:
+        writeDelimiter
+
         ## In Haskell we do not actually have statements, so we need to keep them separate.
         ## Additionally, exceptions with "statements" are not supported at this time.
         % if isinstance(testcase.command, get_args(Assignment)):
@@ -113,7 +115,8 @@ main = do
                 (\e -> eEvaluate${loop.index} (Just (e :: SomeException)))
         % endif
 
-        writeDelimiter
     % endfor
+
+    putStr ""
 
     ${after}
