@@ -63,7 +63,8 @@ def _evaluate_channel(
     has_no_result = actual_result is None or actual_result == ""
     has_no_expected = (expected_output == EmptyChannel.NONE
                        or expected_output == IgnoredChannel.IGNORED)
-    is_exit_code = isinstance(expected_output, ExitCodeOutputChannel)
+    is_exit_code = (isinstance(expected_output, ExitCodeOutputChannel)
+                    and expected_output.value == 0)
 
     if is_correct and ((has_no_result and has_no_expected) or is_exit_code):
         return True
@@ -223,6 +224,11 @@ def evaluate_results(bundle: Bundle,
                           str(exec_results.exit), exit_evaluator, remaining)
         must_stop = True
 
+    if not context.testcases:
+        # There are no testcases, so evaluate the exit code.
+        _evaluate_channel(context_collector, "exitcode", exit_output,
+                          str(exec_results.exit), exit_evaluator, remaining)
+
     # Done with the context testcase.
     context_collector.to_manager(collector, CloseTestcase())
 
@@ -323,6 +329,10 @@ def evaluate_results(bundle: Bundle,
             if exec_results.timeout:
                 return Status.TIME_LIMIT_EXCEEDED
             return None  # Stop evaluation now.
+
+        if i == len(context.testcases) - 1:
+            _evaluate_channel(t_col, "exitcode", exit_output,
+                              str(exec_results.exit), exit_evaluator, remaining)
 
 
 def prepare_evaluation(bundle: Bundle, collector: OutputManager):

@@ -283,19 +283,22 @@ def get_readable_input(bundle: Bundle,
         format_ = bundle.config.programming_language
         text = convert_statement(bundle, case.input)
     elif isinstance(case, ContextTestcase):
-        arguments = " ".join(case.input.arguments)
-        args = f"./submission {arguments}"
-        if isinstance(case.input.stdin, TextData):
-            stdin = case.input.stdin.get_data_as_string(bundle.config.resources)
-        else:
-            stdin = ""
-        if case.input.arguments:
-            if stdin:
-                text = f"{args}\n{stdin}"
+        if case.input.main_call:
+            arguments = " ".join(case.input.arguments)
+            args = f"./submission {arguments}"
+            if isinstance(case.input.stdin, TextData):
+                stdin = case.input.stdin.get_data_as_string(bundle.config.resources)
             else:
+                stdin = ""
+            if not stdin:
                 text = args
+            else:
+                if case.input.arguments:
+                    text = f"{args}\n{stdin}"
+                else:
+                    text = stdin
         else:
-            text = stdin
+            text = ""
     else:
         raise AssertionError("Unknown testcase type.")
     return ExtendedMessage(description=text, format=format_)
