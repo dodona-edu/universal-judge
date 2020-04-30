@@ -19,13 +19,13 @@ def read_config() -> DodonaConfig:
     return DodonaConfig(**{
         "memory_limit":         536870912,
         "time_limit":           60,
-        "programming_language": 'haskell',
+        "programming_language": 'python',
         "natural_language":     'nl',
-        "resources":            Path('../../exercise/isbn-list/evaluation'),
-        "source":               Path('../../exercise/isbn-list/solution/solution.hs'),
+        "resources":            Path('../../exercise/lotto/evaluation'),
+        "source":               Path('../../exercise/lotto/solution/correct.py'),
         "judge":                Path('.'),
         "workdir":              Path('../workdir'),
-        "plan_name":            "one-with-assignment.tson",
+        "plan_name":            "one-programmed-python.tson",
         "options":              {
             "parallel": True,
             "mode":     "batch",

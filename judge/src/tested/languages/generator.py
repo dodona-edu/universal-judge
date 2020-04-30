@@ -16,7 +16,8 @@ from ..dodona import ExtendedMessage
 from ..serialisation import (Value, SequenceType, Identifier, FunctionType,
                              FunctionCall, Expression, Statement, Assignment)
 from ..testplan import (EmptyChannel, IgnoredChannel, TextData, ProgrammedEvaluator,
-                        SpecificEvaluator, Testcase, ContextTestcase, Context)
+                        SpecificEvaluator, Testcase, ContextTestcase, Context,
+                        ExceptionOutput, ValueOutput)
 from ..utils import get_args
 
 _logger = logging.getLogger(__name__)
@@ -28,7 +29,9 @@ SEND_SPECIFIC_VALUE = "send_specific_value"
 SEND_SPECIFIC_EXCEPTION = "send_specific_exception"
 
 # Name of the function to call in evaluators
-EVALUATE = "evaluate"
+PROGRAMMED_EVALUATE = "evaluate"
+
+EVALUATION_ARGS = "value"
 
 # Names of predefined templates.
 STATEMENT = "statement"
@@ -70,9 +73,7 @@ class _ContextArguments:
 @dataclass
 class _CustomEvaluatorArguments:
     evaluator: str
-    expected: Value
-    actual: Value
-    arguments: Value
+    function: FunctionCall
 
 
 @dataclass
@@ -96,6 +97,60 @@ def _prepare_expression(bundle: Bundle, expression: Expression) -> Expression:
     return expression
 
 
+def _create_handling_function(
+        b: Bundle,
+        send_value: str,
+        send_evaluated: str,
+        output: Union[ExceptionOutput, ValueOutput]
+) -> Tuple[FunctionCall, Optional[str]]:
+    """
+    Create a function to handle the result of a return value or an exception.
+
+    There are two possibilities:
+    - There is a language specific evaluator. In that case, we wrap the value in
+      a function call to the evaluator, and then send off the result. An example of
+      the result:
+
+        send_evaluated(evaluate(value))
+
+    - There is no language specific evaluator. In that case, we just send off the
+      value directly. An example of the result:
+
+        send_value(value)
+
+    :param b: The configuration bundle.
+    :param send_evaluated: The name of the function that will handle sending the
+                           result of an evaluation.
+    :param send_value: The name of the function that will handle sending the value.
+    :param output: The evaluator.
+    :return: A tuple containing the call and the name of the evaluator if present.
+    """
+
+    arguments = [Identifier(EVALUATION_ARGS)]
+    lang_config = b.lang_config
+
+    if (hasattr(output, "evaluator")
+            and isinstance(output.evaluator, SpecificEvaluator)):
+        evaluator = output.evaluator.for_language(b.config.programming_language)
+        evaluator_name = lang_config.conventionalize_namespace(evaluator.file.stem)
+        arguments = [FunctionCall(
+            type=FunctionType.NAMESPACE,
+            name=evaluator.name,
+            namespace=evaluator_name,
+            arguments=arguments
+        )]
+        function_name = send_evaluated
+    else:
+        function_name = send_value
+        evaluator_name = None
+
+    return FunctionCall(
+        type=FunctionType.FUNCTION,
+        name=lang_config.conventionalize_function(function_name),
+        arguments=arguments
+    ), evaluator_name
+
+
 def _create_exception_function(
         bundle: Bundle,
         testcase: Union[Testcase, ContextTestcase]
@@ -113,35 +168,9 @@ def _create_exception_function(
     # If we have a regular testcase, handle special evaluators.
 
     exception_channel = testcase.output.exception
-    language = bundle.config.programming_language
-    lang_config = bundle.lang_config
-    arguments = [Identifier("value")]
-
-    # If exceptions are checked and we have a language specific evaluator, generate
-    # the code to call that evaluator.
-    if (not isinstance(exception_channel, (IgnoredChannel, EmptyChannel))
-            and isinstance(exception_channel.evaluator, SpecificEvaluator)):
-        evaluator = exception_channel.evaluator.for_language(language)
-        evaluator_name = lang_config.conventionalize_namespace(evaluator.stem)
-
-        return FunctionCall(
-            type=FunctionType.FUNCTION,
-            name=lang_config.conventionalize_function(SEND_SPECIFIC_EXCEPTION),
-            arguments=[FunctionCall(
-                type=FunctionType.NAMESPACE,
-                name=lang_config.conventionalize_function(EVALUATE),
-                namespace=evaluator_name,
-                arguments=arguments
-            )]
-        ), evaluator_name
-
-    # In all other cases, we return the default function, which sends the
-    # exception to the judge for further processing.
-    return FunctionCall(
-        type=FunctionType.FUNCTION,
-        name=lang_config.conventionalize_function(SEND_EXCEPTION),
-        arguments=arguments
-    ), None
+    return _create_handling_function(
+        bundle, SEND_EXCEPTION, SEND_SPECIFIC_EXCEPTION, exception_channel
+    )
 
 
 def _prepare_testcase(
@@ -160,41 +189,20 @@ def _prepare_testcase(
     names = []
 
     result_channel = testcase.output.result
-    language = bundle.config.programming_language
-    lang_config = bundle.lang_config
 
     has_return = result_channel not in (EmptyChannel.NONE, IgnoredChannel.IGNORED)
 
-    # Handle the return values.
-    if has_return:
-        # Generate the code to call language specific evaluators.
-        if (hasattr(result_channel, "evaluator")
-                and isinstance(result_channel.evaluator, SpecificEvaluator)):
-            # Call the the evaluator itself does not write the result out to the
-            # correct file, so wrap it in another call.
-            # This basically generates a function like this:
-            # send_specific_value(evaluator(value))
-            evaluator = result_channel.evaluator.for_language(language)
-            evaluator_name = lang_config.conventionalize_namespace(evaluator.stem)
-            value_function_call = FunctionCall(
-                type=FunctionType.FUNCTION,
-                name=lang_config.conventionalize_function(SEND_SPECIFIC_VALUE),
-                arguments=[FunctionCall(
-                    type=FunctionType.NAMESPACE,
-                    name=lang_config.conventionalize_function(EVALUATE),
-                    namespace=evaluator_name,
-                    arguments=[Identifier("value")]
-                )]
-            )
-            names.append(evaluator_name)
-        else:
-            value_function_call = FunctionCall(
-                type=FunctionType.FUNCTION,
-                name="send",
-                arguments=[Identifier("value")]
-            )
-    else:
+    # Create the function to handle the values.
+    value_function_call, evaluator_name = _create_handling_function(
+        bundle, SEND_VALUE, SEND_SPECIFIC_VALUE, result_channel
+    )
+    if evaluator_name:
+        names.append(evaluator_name)
+
+    # A special case: if there isn't an actual value, don't call the function.
+    if not has_return:
         value_function_call = None
+        assert evaluator_name is None
 
     (exception_function_call,
      exception_evaluator_name) = _create_exception_function(bundle, testcase)
@@ -370,9 +378,9 @@ def generate_context(bundle: Bundle,
     language = bundle.config.programming_language
     lang_config = bundle.lang_config
     resources = bundle.config.resources
-    before_code = context.before.get(language, TextData(data=""))\
+    before_code = context.before.get(language, TextData(data="")) \
         .get_data_as_string(resources)
-    after_code = context.after.get(language, TextData(data=""))\
+    after_code = context.after.get(language, TextData(data="")) \
         .get_data_as_string(resources)
 
     value_file_name = value_file(bundle, destination).name
@@ -456,15 +464,20 @@ def generate_custom_evaluator(bundle: Bundle,
     :return: The name of the generated file.
     """
     evaluator_name = bundle.lang_config.conventionalize_namespace(
-        evaluator.path.stem
+        evaluator.function.file.stem
     )
     arguments = custom_evaluator_arguments(evaluator)
 
+    function = FunctionCall(
+        type=FunctionType.NAMESPACE,
+        namespace=evaluator_name,
+        name=evaluator.function.name,
+        arguments=[expected_value, actual_value, arguments]
+    )
+
     args = _CustomEvaluatorArguments(
         evaluator=evaluator_name,
-        expected=expected_value,
-        actual=actual_value,
-        arguments=arguments
+        function=function
     )
 
     template = bundle.lang_config \

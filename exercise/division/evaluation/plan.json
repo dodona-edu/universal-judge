@@ -14,9 +14,15 @@
                 "evaluator": {
                   "type": "specific",
                   "evaluators": {
-                    "python": "evaluator.py",
-                    "java": "Evaluator.java",
-                    "haskell": "Evaluator.hs"
+                    "python": {
+                      "file": "evaluator.py"
+                    },
+                    "java": {
+                      "file": "Evaluator.java"
+                    },
+                    "haskell": {
+                      "file": "Evaluator.hs"
+                    }
                   }
                 }
               }

@@ -19,7 +19,9 @@
                 "evaluator": {
                   "type": "programmed",
                   "language": "python",
-                  "path": "evaluator-correct.py"
+                  "function": {
+                    "file": "evaluator-correct.py"
+                  }
                 }
               }
             }

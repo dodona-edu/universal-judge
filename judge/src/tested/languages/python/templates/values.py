@@ -63,11 +63,10 @@ def send_exception(stream, exception):
     json.dump(data, stream)
 
 
-# noinspection PyDefaultArgument
-def send_evaluated(stream, result, expected, actual, messages):
+def send_evaluated(stream, r):
     json.dump({
-        "result": result,
-        "readable_expected": expected,
-        "readable_actual": actual,
-        "messages": messages
+        "result": r.result,
+        "readable_expected": r.readable_expected,
+        "readable_actual": r.readable_actual,
+        "messages": r.messages
     }, stream)

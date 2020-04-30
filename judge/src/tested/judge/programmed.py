@@ -36,6 +36,8 @@ def evaluate_programmed(
     mini-evaluation if you will.
     """
 
+    _logger.debug("Doing programmed output")
+
     # We have special support for Python.
     if evaluator.language == "python" and bundle.config.options.optimized:
         return _evaluate_python(bundle, evaluator, expected, actual, timeout)
@@ -56,7 +58,7 @@ def _evaluate_others(bundle: Bundle,
     start = time.perf_counter()
 
     # Create a directory for this evaluator. If one exists, delete it first.
-    evaluator_dir_name = evaluator.path.stem
+    evaluator_dir_name = evaluator.function.file.stem
     custom_directory_name = f"{get_identifier()}_{evaluator_dir_name}"
     custom_path = Path(bundle.config.workdir, "evaluators", custom_directory_name)
     if custom_path.exists():
@@ -85,7 +87,7 @@ def _evaluate_others(bundle: Bundle,
         )
 
     # Copy the evaluator
-    origin_path = Path(bundle.config.resources, evaluator.path)
+    origin_path = Path(bundle.config.resources, evaluator.function.file)
     _logger.debug("Copying %s to %s", origin_path, custom_path)
     shutil.copy2(origin_path, custom_path)
 
@@ -94,7 +96,7 @@ def _evaluate_others(bundle: Bundle,
     origin = path_to_templates(eval_bundle)
     copy_from_paths_to_path(origin, dependencies, custom_path)
     # Include the actual evaluator in the dependencies.
-    dependencies.append(evaluator.path.name)
+    dependencies.append(evaluator.function.file.name)
 
     # Generate the evaluator.
     _logger.debug("Generating custom evaluator.")
@@ -158,7 +160,7 @@ def _evaluate_python(bundle: Bundle,
         messages: Optional[List[str]] = None
 
     # Path to the evaluator.
-    origin_path = Path(bundle.config.resources, evaluator.path)
+    origin_path = Path(bundle.config.resources, evaluator.function.file)
     # Read evaluator to file.
     with open(origin_path, "r") as file:
         evaluator_code = file.read()
@@ -182,8 +184,9 @@ def _evaluate_python(bundle: Bundle,
     literal_arguments = convert_statement(eval_bundle, arguments)
 
     exec(
-        f"__tested_test__result = evaluate(expected={literal_expected}, actual="
-        f"{literal_actual}, arguments={literal_arguments})",
+        f"__tested_test__result = {evaluator.function.name}("
+        f"expected={literal_expected}, actual={literal_actual}, "
+        f"arguments={literal_arguments})",
         global_env
     )
 

@@ -114,7 +114,7 @@ def test_heterogeneous_arguments_are_detected(lang: str, tmp_path: Path, pytestc
 
 
 @pytest.mark.parametrize("lang", ["python", "java"])
-def test_programmed_python_evaluator(lang: str, tmp_path: Path, pytestconfig):
+def test_programmed_evaluator(lang: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "lotto", lang, tmp_path, "one-programmed-python.tson", "correct")
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)

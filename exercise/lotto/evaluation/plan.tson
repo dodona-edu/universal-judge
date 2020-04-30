@@ -15,7 +15,9 @@
                   "evaluator": {
                     "type": "programmed",
                     "language": "python",
-                    "path": "./evaluator.py",
+                    "function": {
+                      "file": "./evaluator.py"
+                    },
                     "arguments": [
                       {
                         "type": "integer",
@@ -58,7 +60,9 @@
                   "evaluator": {
                     "type": "programmed",
                     "language": "python",
-                    "path": "./evaluator.py",
+                    "function": {
+                      "file": "./evaluator.py"
+                    },
                     "arguments": [
                       {
                         "type": "integer",
@@ -101,7 +105,9 @@
                   "evaluator": {
                     "type": "programmed",
                     "language": "python",
-                    "path": "./evaluator.py",
+                    "function": {
+                      "file": "./evaluator.py"
+                    },
                     "arguments": [
                       {
                         "type": "integer",
@@ -144,7 +150,9 @@
                   "evaluator": {
                     "type": "programmed",
                     "language": "python",
-                    "path": "./evaluator.py",
+                    "function": {
+                      "file": "./evaluator.py"
+                    },
                     "arguments": [
                       {
                         "type": "integer",
@@ -187,7 +195,9 @@
                   "evaluator": {
                     "type": "programmed",
                     "language": "python",
-                    "path": "./evaluator.py",
+                    "function": {
+                      "file": "./evaluator.py"
+                    },
                     "arguments": [
                       {
                         "type": "integer",
@@ -230,7 +240,9 @@
                   "evaluator": {
                     "type": "programmed",
                     "language": "python",
-                    "path": "./evaluator.py",
+                    "function": {
+                      "file": "./evaluator.py"
+                    },
                     "arguments": [
                       {
                         "type": "integer",
@@ -273,7 +285,9 @@
                   "evaluator": {
                     "type": "programmed",
                     "language": "python",
-                    "path": "./evaluator.py",
+                    "function": {
+                      "file": "./evaluator.py"
+                    },
                     "arguments": [
                       {
                         "type": "integer",
@@ -316,7 +330,9 @@
                   "evaluator": {
                     "type": "programmed",
                     "language": "python",
-                    "path": "./evaluator.py",
+                    "function": {
+                      "file": "./evaluator.py"
+                    },
                     "arguments": [
                       {
                         "type": "integer",
@@ -359,7 +375,9 @@
                   "evaluator": {
                     "type": "programmed",
                     "language": "python",
-                    "path": "./evaluator.py",
+                    "function": {
+                      "file": "./evaluator.py"
+                    },
                     "arguments": [
                       {
                         "type": "integer",
@@ -402,7 +420,9 @@
                   "evaluator": {
                     "type": "programmed",
                     "language": "python",
-                    "path": "./evaluator.py",
+                    "function": {
+                      "file": "./evaluator.py"
+                    },
                     "arguments": [
                       {
                         "type": "integer",
@@ -445,7 +465,9 @@
                   "evaluator": {
                     "type": "programmed",
                     "language": "python",
-                    "path": "./evaluator.py",
+                    "function": {
+                      "file": "./evaluator.py"
+                    },
                     "arguments": [
                       {
                         "type": "integer",
@@ -488,7 +510,9 @@
                   "evaluator": {
                     "type": "programmed",
                     "language": "python",
-                    "path": "./evaluator.py",
+                    "function": {
+                      "file": "./evaluator.py"
+                    },
                     "arguments": [
                       {
                         "type": "integer",
@@ -531,7 +555,9 @@
                   "evaluator": {
                     "type": "programmed",
                     "language": "python",
-                    "path": "./evaluator.py",
+                    "function": {
+                      "file": "./evaluator.py"
+                    },
                     "arguments": [
                       {
                         "type": "integer",
@@ -574,7 +600,9 @@
                   "evaluator": {
                     "type": "programmed",
                     "language": "python",
-                    "path": "./evaluator.py",
+                    "function": {
+                      "file": "./evaluator.py"
+                    },
                     "arguments": [
                       {
                         "type": "integer",
@@ -617,7 +645,9 @@
                   "evaluator": {
                     "type": "programmed",
                     "language": "python",
-                    "path": "./evaluator.py",
+                    "function": {
+                      "file": "./evaluator.py"
+                    },
                     "arguments": [
                       {
                         "type": "integer",
@@ -660,7 +690,9 @@
                   "evaluator": {
                     "type": "programmed",
                     "language": "python",
-                    "path": "./evaluator.py",
+                    "function": {
+                      "file": "./evaluator.py"
+                    },
                     "arguments": [
                       {
                         "type": "integer",
@@ -703,7 +735,9 @@
                   "evaluator": {
                     "type": "programmed",
                     "language": "python",
-                    "path": "./evaluator.py",
+                    "function": {
+                      "file": "./evaluator.py"
+                    },
                     "arguments": [
                       {
                         "type": "integer",
@@ -746,7 +780,9 @@
                   "evaluator": {
                     "type": "programmed",
                     "language": "python",
-                    "path": "./evaluator.py",
+                    "function": {
+                      "file": "./evaluator.py"
+                    },
                     "arguments": [
                       {
                         "type": "integer",
@@ -789,7 +825,9 @@
                   "evaluator": {
                     "type": "programmed",
                     "language": "python",
-                    "path": "./evaluator.py",
+                    "function": {
+                      "file": "./evaluator.py"
+                    },
                     "arguments": [
                       {
                         "type": "integer",
@@ -832,7 +870,9 @@
                   "evaluator": {
                     "type": "programmed",
                     "language": "python",
-                    "path": "./evaluator.py",
+                    "function": {
+                      "file": "./evaluator.py"
+                    },
                     "arguments": [
                       {
                         "type": "integer",
@@ -875,7 +915,9 @@
                   "evaluator": {
                     "type": "programmed",
                     "language": "python",
-                    "path": "./evaluator.py",
+                    "function": {
+                      "file": "./evaluator.py"
+                    },
                     "arguments": [
                       {
                         "type": "integer",
@@ -918,7 +960,9 @@
                   "evaluator": {
                     "type": "programmed",
                     "language": "python",
-                    "path": "./evaluator.py",
+                    "function": {
+                      "file": "./evaluator.py"
+                    },
                     "arguments": [
                       {
                         "type": "integer",
@@ -961,7 +1005,9 @@
                   "evaluator": {
                     "type": "programmed",
                     "language": "python",
-                    "path": "./evaluator.py",
+                    "function": {
+                      "file": "./evaluator.py"
+                    },
                     "arguments": [
                       {
                         "type": "integer",
@@ -1004,7 +1050,9 @@
                   "evaluator": {
                     "type": "programmed",
                     "language": "python",
-                    "path": "./evaluator.py",
+                    "function": {
+                      "file": "./evaluator.py"
+                    },
                     "arguments": [
                       {
                         "type": "integer",
@@ -1047,7 +1095,9 @@
                   "evaluator": {
                     "type": "programmed",
                     "language": "python",
-                    "path": "./evaluator.py",
+                    "function": {
+                      "file": "./evaluator.py"
+                    },
                     "arguments": [
                       {
                         "type": "integer",
@@ -1090,7 +1140,9 @@
                   "evaluator": {
                     "type": "programmed",
                     "language": "python",
-                    "path": "./evaluator.py",
+                    "function": {
+                      "file": "./evaluator.py"
+                    },
                     "arguments": [
                       {
                         "type": "integer",
@@ -1133,7 +1185,9 @@
                   "evaluator": {
                     "type": "programmed",
                     "language": "python",
-                    "path": "./evaluator.py",
+                    "function": {
+                      "file": "./evaluator.py"
+                    },
                     "arguments": [
                       {
                         "type": "integer",
@@ -1176,7 +1230,9 @@
                   "evaluator": {
                     "type": "programmed",
                     "language": "python",
-                    "path": "./evaluator.py",
+                    "function": {
+                      "file": "./evaluator.py"
+                    },
                     "arguments": [
                       {
                         "type": "integer",
@@ -1219,7 +1275,9 @@
                   "evaluator": {
                     "type": "programmed",
                     "language": "python",
-                    "path": "./evaluator.py",
+                    "function": {
+                      "file": "./evaluator.py"
+                    },
                     "arguments": [
                       {
                         "type": "integer",
@@ -1262,7 +1320,9 @@
                   "evaluator": {
                     "type": "programmed",
                     "language": "python",
-                    "path": "./evaluator.py",
+                    "function": {
+                      "file": "./evaluator.py"
+                    },
                     "arguments": [
                       {
                         "type": "integer",
@@ -1305,7 +1365,9 @@
                   "evaluator": {
                     "type": "programmed",
                     "language": "python",
-                    "path": "./evaluator.py",
+                    "function": {
+                      "file": "./evaluator.py"
+                    },
                     "arguments": [
                       {
                         "type": "integer",
@@ -1348,7 +1410,9 @@
                   "evaluator": {
                     "type": "programmed",
                     "language": "python",
-                    "path": "./evaluator.py",
+                    "function": {
+                      "file": "./evaluator.py"
+                    },
                     "arguments": [
                       {
                         "type": "integer",
@@ -1391,7 +1455,9 @@
                   "evaluator": {
                     "type": "programmed",
                     "language": "python",
-                    "path": "./evaluator.py",
+                    "function": {
+                      "file": "./evaluator.py"
+                    },
                     "arguments": [
                       {
                         "type": "integer",
@@ -1434,7 +1500,9 @@
                   "evaluator": {
                     "type": "programmed",
                     "language": "python",
-                    "path": "./evaluator.py",
+                    "function": {
+                      "file": "./evaluator.py"
+                    },
                     "arguments": [
                       {
                         "type": "integer",
@@ -1477,7 +1545,9 @@
                   "evaluator": {
                     "type": "programmed",
                     "language": "python",
-                    "path": "./evaluator.py",
+                    "function": {
+                      "file": "./evaluator.py"
+                    },
                     "arguments": [
                       {
                         "type": "integer",
@@ -1520,7 +1590,9 @@
                   "evaluator": {
                     "type": "programmed",
                     "language": "python",
-                    "path": "./evaluator.py",
+                    "function": {
+                      "file": "./evaluator.py"
+                    },
                     "arguments": [
                       {
                         "type": "integer",
@@ -1563,7 +1635,9 @@
                   "evaluator": {
                     "type": "programmed",
                     "language": "python",
-                    "path": "./evaluator.py",
+                    "function": {
+                      "file": "./evaluator.py"
+                    },
                     "arguments": [
                       {
                         "type": "integer",
@@ -1606,7 +1680,9 @@
                   "evaluator": {
                     "type": "programmed",
                     "language": "python",
-                    "path": "./evaluator.py",
+                    "function": {
+                      "file": "./evaluator.py"
+                    },
                     "arguments": [
                       {
                         "type": "integer",
@@ -1649,7 +1725,9 @@
                   "evaluator": {
                     "type": "programmed",
                     "language": "python",
-                    "path": "./evaluator.py",
+                    "function": {
+                      "file": "./evaluator.py"
+                    },
                     "arguments": [
                       {
                         "type": "integer",
@@ -1692,7 +1770,9 @@
                   "evaluator": {
                     "type": "programmed",
                     "language": "python",
-                    "path": "./evaluator.py",
+                    "function": {
+                      "file": "./evaluator.py"
+                    },
                     "arguments": [
                       {
                         "type": "integer",
@@ -1735,7 +1815,9 @@
                   "evaluator": {
                     "type": "programmed",
                     "language": "python",
-                    "path": "./evaluator.py",
+                    "function": {
+                      "file": "./evaluator.py"
+                    },
                     "arguments": [
                       {
                         "type": "integer",
@@ -1778,7 +1860,9 @@
                   "evaluator": {
                     "type": "programmed",
                     "language": "python",
-                    "path": "./evaluator.py",
+                    "function": {
+                      "file": "./evaluator.py"
+                    },
                     "arguments": [
                       {
                         "type": "integer",
@@ -1821,7 +1905,9 @@
                   "evaluator": {
                     "type": "programmed",
                     "language": "python",
-                    "path": "./evaluator.py",
+                    "function": {
+                      "file": "./evaluator.py"
+                    },
                     "arguments": [
                       {
                         "type": "integer",
@@ -1864,7 +1950,9 @@
                   "evaluator": {
                     "type": "programmed",
                     "language": "python",
-                    "path": "./evaluator.py",
+                    "function": {
+                      "file": "./evaluator.py"
+                    },
                     "arguments": [
                       {
                         "type": "integer",
@@ -1907,7 +1995,9 @@
                   "evaluator": {
                     "type": "programmed",
                     "language": "python",
-                    "path": "./evaluator.py",
+                    "function": {
+                      "file": "./evaluator.py"
+                    },
                     "arguments": [
                       {
                         "type": "integer",

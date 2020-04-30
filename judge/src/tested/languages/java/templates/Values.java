@@ -116,4 +116,8 @@ public class Values {
             "]}";
         writer.print(builder);
     }
+
+    public static void sendEvaluated(PrintWriter writer, EvaluationResult r) {
+        evaluated(writer, r.result, r.readableExpected, r.readableActual, r.messages);
+    }
 }

@@ -1,10 +1,9 @@
 ## Responsible for generating a function expression to a custom evaluator.
-<%page args="evaluator,expected,actual,arguments" />
+<%page args="evaluator,function" />
 
 import ${evaluator}
+import values
+import sys
 
-${evaluator}.evaluate(
-    expected=<%include file="value.mako" args="value=expected"/>,
-    actual=<%include file="value.mako" args="value=actual"/>,
-    arguments=<%include file="value.mako" args="value=arguments"/>
-)
+result = <%include file="function.mako" args="function=function" />
+values.send_evaluated(sys.stdout, result)

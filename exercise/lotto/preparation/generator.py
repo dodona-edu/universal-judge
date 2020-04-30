@@ -45,7 +45,9 @@ if __name__ == '__main__':
                         "evaluator": {
                             "type":      "programmed",
                             "language":  "python",
-                            "path":      "./evaluator.py",
+                            "function": {
+                                "file": "./evaluator.py"
+                            },
                             "arguments": [
                                 {
                                     "type": "integer",

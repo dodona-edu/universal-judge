@@ -47,11 +47,11 @@ def send_exception(exception):
 
 ## Send the result of a language specific value evaluator to TESTed.
 def send_specific_value(r):
-    values.send_evaluated(value_file, r.result, r.readable_expected, r.readable_actual, r.messages)
+    values.send_evaluated(value_file, r)
 
 ## Send the result of a language specific exception evaluator to TESTed.
 def send_specific_exception(r):
-    values.send_evaluated(exception_file, r.result, r.readable_expected, r.readable_actual, r.messages)
+    values.send_evaluated(exception_file, r)
 
 
 ##################################

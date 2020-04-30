@@ -70,6 +70,16 @@ class GenericExceptionEvaluator(BaseBuiltinEvaluator):
 
 
 @dataclass
+class EvaluationFunction:
+    """
+    An evaluation function. This not a normal function call; only the name may be
+    specified, and the file should also be specified.
+    """
+    file: Path
+    name: str = "evaluate"
+
+
+@dataclass
 class ProgrammedEvaluator:
     """
     Evaluate the responses with custom code. This is still a language-independent
@@ -81,7 +91,7 @@ class ProgrammedEvaluator:
       How should we handle functions? Stdin? Stdout?
     """
     language: str
-    path: Path
+    function: EvaluationFunction
     arguments: List[Value] = field(default_factory=list)
     type: Literal["programmed"] = "programmed"
 
@@ -105,13 +115,13 @@ class SpecificEvaluator:
     calls. If you want to evaluate_text stdout you should use the custom evaluator
     instead.
     """
-    evaluators: Dict[str, Path]
+    evaluators: Dict[str, EvaluationFunction]
     type: Literal["specific"] = "specific"
 
-    def for_language(self, language: str) -> Path:
+    def for_language(self, language: str) -> EvaluationFunction:
         return self.evaluators[language]
 
-    @classmethod
+    # noinspection PyMethodParameters
     @validator("evaluators")
     def validate_evaluator(cls, v):
         """There should be at least one evaluator."""
@@ -194,7 +204,7 @@ class ValueOutputChannel(WithFeatures):
             return self.value.get_used_features()
         return NOTHING
 
-    @classmethod
+    # noinspection PyMethodParameters
     @root_validator
     def value_requirements(cls, values):
         value = values.get("value")
@@ -217,7 +227,7 @@ class ExceptionOutputChannel(WithFeatures):
             return self.exception.get_used_features()
         return NOTHING
 
-    @classmethod
+    # noinspection PyMethodParameters
     @root_validator
     def value_requirements(cls, values):
         exception = values.get("exception")
@@ -265,8 +275,8 @@ OutputChannel = Union[NormalOutputChannel, SpecialOutputChannel]
 
 _TextOutput = Union[TextOutputChannel, SpecialOutputChannel]
 _FileOutput = Union[FileOutputChannel, IgnoredChannel]
-_ExceptionOutput = Union[ExceptionOutputChannel, SpecialOutputChannel]
-_ValueOutput = Union[ValueOutputChannel, IgnoredChannel]
+ExceptionOutput = Union[ExceptionOutputChannel, SpecialOutputChannel]
+ValueOutput = Union[ValueOutputChannel, IgnoredChannel, EmptyChannel]
 
 
 @dataclass
@@ -276,7 +286,7 @@ class BaseOutput(WithFeatures):
     stdout: _TextOutput = EmptyChannel.NONE
     stderr: _TextOutput = EmptyChannel.NONE
     file: _FileOutput = IgnoredChannel.IGNORED
-    exception: _ExceptionOutput = EmptyChannel.NONE
+    exception: ExceptionOutput = EmptyChannel.NONE
 
     def get_used_features(self) -> FeatureSet:
         return combine_features([
@@ -302,7 +312,7 @@ class BaseOutput(WithFeatures):
 @dataclass
 class Output(BaseOutput):
     """The output channels for a testcase."""
-    result: _ValueOutput = IgnoredChannel.IGNORED
+    result: ValueOutput = EmptyChannel.NONE
 
     def get_used_features(self) -> FeatureSet:
         return combine_features([
@@ -310,7 +320,7 @@ class Output(BaseOutput):
             self.result.get_used_features()
         ])
 
-    @classmethod
+    # noinspection PyMethodParameters
     @validator("result")
     def validate_no_expression(cls, v):
         """
@@ -331,7 +341,7 @@ class Output(BaseOutput):
 
             return True
 
-        if v == IgnoredChannel.IGNORED:
+        if v == IgnoredChannel.IGNORED or v == EmptyChannel.NONE:
             return v
         assert isinstance(v, ValueOutputChannel)
         if not _only_values(v.value):
@@ -368,7 +378,7 @@ class Testcase(WithFeatures, WithFunctions):
             self.input.get_used_features(), self.output.get_used_features()
         ])
 
-    @classmethod
+    # noinspection PyMethodParameters
     @root_validator
     def no_return_with_assignment(cls, values):
         input_ = values.get("input")
@@ -376,7 +386,7 @@ class Testcase(WithFeatures, WithFunctions):
         result = output_.result
         # If the statement is not an expression, but we do expect a return value,
         # it is an error.
-        if not isinstance(input_.statement, get_args(Expression)) \
+        if not isinstance(input_, get_args(Expression)) \
                 and result != EmptyChannel.NONE:
             raise ValueError(f"Only an expression can be evaluated as a value.")
         return values
@@ -446,7 +456,7 @@ class Context(WithFeatures, WithFunctions):
     after: Code = field(default_factory=dict)
     description: Optional[str] = None
 
-    @classmethod
+    # noinspection PyMethodParameters
     @root_validator
     def check_testcases_exist(cls, values):
         context = values.get('context_testcase')
@@ -472,6 +482,50 @@ class Context(WithFeatures, WithFunctions):
         result = [self.context_testcase]
         result.extend(self.testcases)
         return result
+
+    # noinspection PyMethodParameters
+    @root_validator
+    def unique_evaluation_functions(cls, values):
+        other_testcases: List[Testcase] = values.get("testcases")
+        context_testcase: ContextTestcase = values.get("context_testcase")
+
+        eval_functions: Dict[str, List[EvaluationFunction]] = defaultdict(list)
+
+        output = context_testcase.output
+        if (isinstance(output.exception, ExceptionOutputChannel)
+                and isinstance(output.exception.evaluator, SpecificEvaluator)):
+            for language, function in output.exception.evaluator.evaluators.items():
+                eval_functions[language].append(function)
+
+        for testcase in other_testcases:
+            output = testcase.output
+            if (isinstance(output.result, ValueOutputChannel)
+                    and isinstance(output.result.evaluator, SpecificEvaluator)):
+                evaluator = output.result.evaluator
+                for language, function in evaluator.evaluators.items():
+                    eval_functions[language].append(function)
+            if (isinstance(output.exception, ExceptionOutputChannel)
+                    and isinstance(output.exception.evaluator, SpecificEvaluator)):
+                evaluator = output.exception.evaluator
+                for language, function in evaluator.evaluators.items():
+                    eval_functions[language].append(function)
+
+        # Check within each language that the functions are unique over the files.
+        # Two calls to a function with the same name in the same file is obviously
+        # allowed, as they refer to the same function.
+        for language, functions in eval_functions.items():
+            # Map every function name to the files it is present in.
+            function_file: Dict[str, List[Path]] = defaultdict(list)
+            for function in functions:
+                function_file[function.name].append(function.file)
+
+            for function, file in function_file.items():
+                if len(file) > 1:
+                    raise ValueError(
+                        "Evaluator function names must be unique within the same "
+                        f"context. {function} was used in multiple files: {file}")
+
+        return values
 
 
 @dataclass
@@ -602,7 +656,7 @@ def generate_schema():
     import json
 
     sc = _PlanModel.schema()
-    sc['$schema'] = "http://json-schema.org/schema#"
+    sc['$schema'] = "http://json-schema.org/draft-07/schema#"
     sc['$id'] = "tested/testplan"
     sc['title'] = "Testplan"
     print(json.dumps(sc, indent=2))
