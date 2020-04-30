@@ -20,7 +20,8 @@
                   "type": "programmed",
                   "language": "python",
                   "function": {
-                    "file": "evaluator-correct.py"
+                    "file": "evaluator.py",
+                    "name": "evaluate_correct"
                   }
                 }
               }
