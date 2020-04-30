@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleInstances, OverloadedStrings, DefaultSignatures #-}
+{-# LANGUAGE FlexibleInstances, OverloadedStrings, DefaultSignatures, NamedFieldPuns #-}
 
 module Values where
 
@@ -8,6 +8,8 @@ import Data.Word as W
 import Data.Int as I
 import Control.Exception
 import qualified Data.ByteString.Lazy as LBS
+import EvaluationUtils
+import System.IO (Handle)
 
 -- Typeable things are convertible to our format
 class Typeable a where
@@ -244,13 +246,22 @@ sendValue file value = LBS.appendFile file (encode (object [
     ]))
 
 
-sendEvaluated :: FilePath -> Bool -> Maybe String -> Maybe String -> [String] -> IO ()
-sendEvaluated file result expected actual messages =
+sendEvaluated :: FilePath -> EvaluationResult -> IO ()
+sendEvaluated file r =
     LBS.appendFile file (encode (object [
-        "result" .= toJSON result,
-        "readable_expected" .= toJSON expected,
-        "readable_actual" .= toJSON actual,
-        "messages" .= toJSON messages
+        "result" .= toJSON (result r),
+        "readable_expected" .= toJSON (readableExpected r),
+        "readable_actual" .= toJSON (readableActual r),
+        "messages" .= toJSON (messages r)
+    ]))
+
+sendEvaluatedH :: Handle -> EvaluationResult -> IO ()
+sendEvaluatedH file r =
+    LBS.hPutStr file (encode (object [
+        "result" .= toJSON (result r),
+        "readable_expected" .= toJSON (readableExpected r),
+        "readable_actual" .= toJSON (readableActual r),
+        "messages" .= toJSON (messages r)
     ]))
 
 sendException :: Exception e => FilePath -> Maybe e -> IO ()

@@ -482,6 +482,7 @@ def generate_custom_evaluator(bundle: Bundle,
 
     template = bundle.lang_config \
         .template_name(TemplateType.EVALUATOR_EXECUTOR)
+    template = bundle.lang_config.conventionalize_namespace(template)
     return find_and_write_template(bundle, args, destination, template)
 
 

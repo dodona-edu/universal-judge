@@ -12,7 +12,7 @@ import time
 from tested.configs import Bundle, create_bundle
 from tested.features import Construct
 from tested.judge.core import _logger
-from tested.judge.execution import execute_file
+from tested.judge.execution import execute_file, filter_files
 from tested.judge.utils import (BaseExecutionResult, copy_from_paths_to_path,
                                 run_command, find_main_file)
 from tested.languages.generator import (generate_custom_evaluator,
@@ -119,6 +119,7 @@ def _evaluate_others(bundle: Bundle,
         raise ValueError("Error while compiling specific test case:" +
                          result.stderr)
 
+    files = filter_files(files, custom_path)
     # Execute the custom evaluator.
     evaluator_name = Path(evaluator_name).stem
     executable = find_main_file(files, evaluator_name)
@@ -185,8 +186,7 @@ def _evaluate_python(bundle: Bundle,
 
     exec(
         f"__tested_test__result = {evaluator.function.name}("
-        f"expected={literal_expected}, actual={literal_actual}, "
-        f"arguments={literal_arguments})",
+        f"{literal_expected}, {literal_actual}, {literal_arguments})",
         global_env
     )
 

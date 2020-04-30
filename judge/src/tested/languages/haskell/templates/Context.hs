@@ -53,15 +53,11 @@ sendException = Values.sendException exception_file
 
 ## Send the result of a language specific value evaluator to TESTed.
 sendSpecificValue :: EvaluationResult -> IO ()
-sendSpecificValue EvaluationResult {
-    result, readableExpected, readableActual, messages
-} = Values.sendEvaluated value_file result readableExpected readableActual messages
+sendSpecificValue r = Values.sendEvaluated value_file r
 
 ## Send the result of a language specific exception evaluator to TESTed.
 sendSpecificException :: EvaluationResult -> IO ()
-sendSpecificException EvaluationResult {
-    result, readableExpected, readableActual, messages
-} = Values.sendEvaluated exception_file result readableExpected readableActual messages
+sendSpecificException r = Values.sendEvaluated exception_file r
 
 
 ## Exception handler

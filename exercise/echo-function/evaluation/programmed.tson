@@ -1,0 +1,100 @@
+{
+  "tabs": [
+    {
+      "name": "Tab",
+      "contexts": [
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "echo",
+                "arguments": [
+                  {
+                    "type": "text",
+                    "data": "input-1"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "type": "text",
+                    "data": "input-1"
+                  },
+                  "evaluator": {
+                    "type": "programmed",
+                    "function": {
+                      "file": "Evaluator.hs",
+                      "name": "evaluate_value"
+                    },
+                    "language": "haskell"
+                  }
+                }
+              },
+              "essential": false
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "echo",
+                "arguments": [
+                  {
+                    "type": "text",
+                    "data": "input-2"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "type": "text",
+                    "data": "input-2"
+                  },
+                  "evaluator": {
+                    "type": "programmed",
+                    "function": {
+                      "file": "Evaluator.java",
+                      "name": "evaluateValue"
+                    },
+                    "language": "java"
+                  }
+                }
+              },
+              "essential": false
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "echo",
+                "arguments": [
+                  {
+                    "type": "text",
+                    "data": "input-3"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "type": "text",
+                    "data": "input-3"
+                  },
+                  "evaluator": {
+                    "type": "programmed",
+                    "function": {
+                      "file": "evaluator.py",
+                      "name": "evaluate_value"
+                    },
+                    "language": "python"
+                  }
+                }
+              },
+              "essential": false
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
