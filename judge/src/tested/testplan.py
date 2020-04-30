@@ -515,9 +515,9 @@ class Context(WithFeatures, WithFunctions):
         # allowed, as they refer to the same function.
         for language, functions in eval_functions.items():
             # Map every function name to the files it is present in.
-            function_file: Dict[str, List[Path]] = defaultdict(list)
+            function_file: Dict[str, Set[Path]] = defaultdict(set)
             for function in functions:
-                function_file[function.name].append(function.file)
+                function_file[function.name].add(function.file)
 
             for function, file in function_file.items():
                 if len(file) > 1:

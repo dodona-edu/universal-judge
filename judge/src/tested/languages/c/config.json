@@ -2,7 +2,8 @@
   "general": {
     "dependencies": [
       "values.h",
-      "values.c"
+      "values.c",
+      "evaluation_result.h"
     ],
     "selector": true
   },

@@ -295,7 +295,7 @@ De implementatie van deze functies is eenvoudig: meestal wordt gewoon de overeen
 #define send(value) write_value(${context_name}_value_file, value)
 
 #undef send_specific_value
-#define send_specific_value(r) send_evaluated(${context_name}_value_file, r.result, r.readableExpected, r.readableActual, r.nrOfMessages, r.messages)
+#define send_specific_value(r) send_evaluated(${context_name}_value_file, r)
 ```
 
 Elke testgeval heeft twee functies evaluatiefuncties nodig:

@@ -58,6 +58,16 @@ def test_io_function_exercise(language: str, tmp_path: Path, pytestconfig):
     assert updates.find_status_enum() == ["correct"]
 
 
+@pytest.mark.parametrize("language", ALL_LANGUAGES)
+def test_specific_evaluation(language: str, tmp_path: Path, pytestconfig):
+    conf = configuration(pytestconfig, "echo-function", language, tmp_path, "two-specific.tson", "correct")
+    result = execute_config(conf)
+    print(result)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["wrong", "correct"]
+    assert len(updates.find_all("append-message")) == 2
+
+
 @pytest.mark.parametrize("lang", ["python", "java", "haskell"])
 def test_language_evaluator_exception(lang: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "division", lang, tmp_path, "plan.json", "correct")

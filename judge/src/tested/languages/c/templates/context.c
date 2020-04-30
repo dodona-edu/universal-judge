@@ -41,7 +41,7 @@ static void ${context_name}_write_delimiter() {
 
 ## Send the result of a language specific value evaluator to TESTed.
 #undef send_specific_value
-#define send_specific_value(r) send_evaluated(${context_name}_value_file, r.result, r.readableExpected, r.readableActual, r.nrOfMessages, r.messages)
+#define send_specific_value(r) send_evaluated(${context_name}_value_file, r)
 
 ##################################
 ## Other testcase evaluators    ##

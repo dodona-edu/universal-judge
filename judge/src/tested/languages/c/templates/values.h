@@ -10,6 +10,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "evaluation_result.h"
+
 void write_bool(FILE*, bool);
 
 void write_char(FILE*, char);
@@ -62,14 +64,6 @@ void write_unknown(FILE*, void*);
 
 #define write_value(f, x) write_value_function(x)(f, x)
 
-void send_evaluated(FILE* out, bool result, char* expected, char* actual, size_t nrOfMessages, char** messages);
-
-typedef struct EvaluationResult {
-    bool result;
-    char* readableExpected;
-    char* readableActual;
-    char** messages;
-    size_t nrOfMessages;
-} EvaluationResult;
+void send_evaluated(FILE* out, EvaluationResult result);
 
 #endif //WRITER_VALUES_H

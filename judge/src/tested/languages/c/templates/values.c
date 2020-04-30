@@ -86,12 +86,12 @@ void write_unknown(FILE * out, void * value) {
     fprintf(out, asString, "?");
 }
 
-void send_evaluated(FILE* out, bool result, char* expected, char* actual, size_t nrOfMessages, char** messages) {
+void send_evaluated(FILE* out, EvaluationResult result) {
 
     // Find the length of the string we need.
     size_t messageLength = 0;
-    for (size_t i = 0; i < nrOfMessages; ++i) {
-        const char* message = messages[i];
+    for (size_t i = 0; i < result.nrOfMessages; ++i) {
+        const char* message = result.messages[i];
         messageLength += strlen(message);
         messageLength += 3; // For the comma, and two quotes.
     }
@@ -99,10 +99,10 @@ void send_evaluated(FILE* out, bool result, char* expected, char* actual, size_t
     char* concatMessages = calloc(messageLength, sizeof(char));
     size_t nextMessage = 0;
 
-    for (size_t j = 0; j < nrOfMessages; ++j) {
+    for (size_t j = 0; j < result.nrOfMessages; ++j) {
         concatMessages[nextMessage++] = '"';
-        strcpy(&concatMessages[nextMessage], messages[j]);
-        nextMessage += strlen(messages[j]);
+        strcpy(&concatMessages[nextMessage], result.messages[j]);
+        nextMessage += strlen(result.messages[j]);
         concatMessages[nextMessage++] = '"';
         concatMessages[nextMessage++] = ',';
     }
@@ -115,7 +115,7 @@ void send_evaluated(FILE* out, bool result, char* expected, char* actual, size_t
                         "\"readable_actual\": \"%s\", "
                         "\"messages\": [%s]"
                         "}";
-    const char* resulting = result ? "true" : "false";
-    fprintf(out, value, resulting, expected, actual, concatMessages);
+    const char* resulting = result.result ? "true" : "false";
+    fprintf(out, value, resulting, result.readableExpected, result.readableActual, concatMessages);
     free(concatMessages);
 }

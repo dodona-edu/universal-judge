@@ -1,0 +1,80 @@
+{
+  "tabs": [
+    {
+      "name": "Tab",
+      "contexts": [
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "echo",
+                "arguments": [
+                  {
+                    "type": "text",
+                    "data": "input-1"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "evaluator": {
+                    "type": "specific",
+                    "evaluators": {
+                      "python": {
+                        "file": "evaluator.py"
+                      },
+                      "java": {
+                        "file": "Evaluator.java"
+                      },
+                      "haskell": {
+                        "file": "Evaluator.hs"
+                      },
+                      "c": {
+                        "file": "evaluator.c"
+                      }
+                    }
+                  }
+                }
+              },
+              "essential": false
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "echo",
+                "arguments": [
+                  {
+                    "type": "text",
+                    "data": "correct"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "evaluator": {
+                    "type": "specific",
+                    "evaluators": {
+                      "python": {
+                        "file": "evaluator.py"
+                      },
+                      "java": {
+                        "file": "Evaluator.java"
+                      },
+                      "haskell": {
+                        "file": "Evaluator.hs"
+                      },
+                      "c": {
+                        "file": "evaluator.c"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

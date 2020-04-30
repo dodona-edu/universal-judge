@@ -3,6 +3,7 @@ import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Minimal RPC language in JSON to send data from the tests to the judge.
@@ -11,7 +12,7 @@ public class Values {
 
     private static String encodeSequence(Iterable<Object> objects) {
         var results = new ArrayList<String>();
-        for (Object obj: objects) {
+        for (Object obj : objects) {
             results.add(encode(obj));
         }
         return "[" + String.join(", ", results) + "]";
@@ -102,17 +103,14 @@ public class Values {
 
     public static void evaluated(PrintWriter writer,
                                  boolean result, String expected, String actual, Collection<String> messages) {
-        var encodedExpected = internalEncode(expected);
-        var encodedActual = internalEncode(actual);
+        List<String> converted = messages.stream().map(m -> "\"" + m + "\"").collect(Collectors.toList());
         String builder = "{" +
             "\"result\": " +
             result +
-            ", \"readable_expected\": " +
-            encodedExpected.get(1) +
-            ", \"readable_actual\": " +
-            encodedActual.get(1) +
+            ", \"readable_expected\": \"" + expected + "\"" +
+            ", \"readable_actual\": \"" + actual + "\"" +
             ", \"messages\": [" +
-            String.join(", ", messages) +
+            String.join(", ", converted) +
             "]}";
         writer.print(builder);
     }
