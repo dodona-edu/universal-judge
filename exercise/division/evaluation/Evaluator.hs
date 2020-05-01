@@ -5,11 +5,19 @@ import EvaluationUtils
 import Control.Exception
 
 evaluate :: Maybe (SomeException) -> EvaluationResult
-evaluate Nothing = evaluationResult
+evaluate Nothing = evaluationResult {
+                      readableExpected = Just $ show DivideByZero,
+                      readableActual = Just "",
+                      messages = [message "Expected DivideByZero, got nothing."]
+                  }
 evaluate (Just x) =
     case fromException x of
         Just (x :: ArithException) -> handleA x
-        nothing -> evaluationResult
+        nothing -> evaluationResult {
+                       readableExpected = Just $ show DivideByZero,
+                       readableActual = Just "",
+                       messages = [message "Expected DivideByZero, got nothing."]
+                   }
 
 
 handleA :: ArithException -> EvaluationResult
@@ -18,4 +26,8 @@ handleA DivideByZero = evaluationResult {
                           readableExpected = Just $ show DivideByZero,
                           readableActual = Just $ show DivideByZero
                       }
-handleA _ = evaluationResult
+handleA other = evaluationResult {
+                readableExpected = Just $ show DivideByZero,
+                readableActual = Just $ show other,
+                messages = [message "Expected DivideByZero, got something else."]
+            }

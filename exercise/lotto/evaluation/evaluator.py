@@ -1,5 +1,5 @@
 import re
-from evaluation_utils import EvaluationResult
+from evaluation_utils import EvaluationResult, Message
 
 def listing(numbers):
     if len(numbers) == 1:
@@ -40,6 +40,6 @@ def evaluate(expected, actual, arguments):
     count = arguments[0]
     maximum = arguments[1]
     valid, message = valid_lottery_numbers(actual, count, maximum)
-    messages = ["Fout: " + message] if message else []
+    messages = [Message(message)] if message else []
     # We geven geen verwachte waarde mee; TESTed neemt de waarde uit het testplan.
     return EvaluationResult(valid, None, actual, messages)

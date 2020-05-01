@@ -327,7 +327,7 @@ def parse_value(value: str) -> Value:
         except (TypeError, ValueError) as e:
             errors.append(e)
 
-    logger.warning(f"Could not parse value, errors are {errors}")
+    logger.debug(f"Could not parse value, errors are {errors}. Could be normal!")
 
     raise TypeError(
         f"Could not find valid type for {value}."

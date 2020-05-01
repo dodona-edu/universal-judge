@@ -10,6 +10,7 @@ public class Evaluator {
             return EvaluationResult.builder(false)
                     .withReadableExpected("ArithmeticException")
                     .withReadableActual(actual == null ? "" : actual.toString())
+                    .withMessage(new EvaluationResult.Message("Expected ArithmeticException, got something else."))
                     .build();
         }
     }
