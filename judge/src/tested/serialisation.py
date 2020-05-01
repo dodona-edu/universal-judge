@@ -27,6 +27,7 @@ import math
 from pydantic import BaseModel, root_validator
 from pydantic.dataclasses import dataclass
 
+from tested.dodona import ExtendedMessage, Status
 from .datatypes import (NumericTypes, StringTypes, BooleanTypes,
                         SequenceTypes, ObjectTypes, NothingTypes, SimpleTypes,
                         resolve_to_basic, AllTypes, BasicSequenceTypes,
@@ -443,15 +444,10 @@ def to_python_comparable(value: Optional[Value]):
 
 
 class EvalResult(BaseModel):
-    """Result of an evaluation by an evaluator."""
-    result: bool  # The result of the evaluation.
+    result: Union[bool, Status]
     readable_expected: Optional[str] = None
-    # A human-friendly version of what the channel should have
-    # been.
     readable_actual: Optional[str] = None
-    # A human-friendly version (best effort at least) of what
-    # the channel is.
-    messages: List[str] = field(default_factory=list)
+    messages: List[ExtendedMessage] = field(default_factory=list)
 
 
 class ExceptionValue(WithFeatures, BaseModel):

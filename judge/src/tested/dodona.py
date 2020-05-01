@@ -31,7 +31,7 @@ class Permission(str, Enum):
 @dataclass
 class ExtendedMessage:
     description: str
-    format: str
+    format: str = "text"
     permission: Optional[Permission] = None
 
 

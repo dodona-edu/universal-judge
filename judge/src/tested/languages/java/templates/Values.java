@@ -101,9 +101,19 @@ public class Values {
         writer.write(result);
     }
 
+    private static String convertMessage(EvaluationResult.Message message) {
+        String result = "{" +
+            "\"description\": \"" + message.description + "\"," +
+            "\"format\": \"" + message.format + "\"";
+        if (message.permission instanceof String) {
+            result += ", \"permission\": \"" + message.permission + "\"";
+        }
+        return result + "}";
+    }
+
     public static void evaluated(PrintWriter writer,
-                                 boolean result, String expected, String actual, Collection<String> messages) {
-        List<String> converted = messages.stream().map(m -> "\"" + m + "\"").collect(Collectors.toList());
+                                 boolean result, String expected, String actual, Collection<EvaluationResult.Message> messages) {
+        List<String> converted = messages.stream().map(Values::convertMessage).collect(Collectors.toList());
         String builder = "{" +
             "\"result\": " +
             result +

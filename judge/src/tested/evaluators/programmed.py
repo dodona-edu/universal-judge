@@ -2,6 +2,7 @@
 Programmed evaluator.
 """
 import logging
+import traceback
 from typing import Tuple, Optional
 
 from . import EvaluationResult, EvaluatorConfig, value
@@ -16,9 +17,7 @@ from ..testplan import (TextOutputChannel, FileOutputChannel, ValueOutputChannel
                         ProgrammedEvaluator)
 from ..utils import Either, get_args
 
-
 _logger = logging.getLogger(__name__)
-
 
 DEFAULT_STUDENT = ("Er ging iets fout op bij het evalueren van de oplossing. Meld "
                    "dit aan de lesgever!")
@@ -129,21 +128,51 @@ def evaluate(config: EvaluatorConfig,
                 readable_actual=readable_actual,
                 messages=[stdout, stderr, DEFAULT_STUDENT]
             )
-
         try:
+            print(result.stdout)
             evaluation_result = _try_specific(result.stdout)
         except (TypeError, ValueError) as e:
-            staff_message = ExtendedMessage(
-                description=f"An error occurred parsing the result of the programmed "
-                            f"evaluation. Received {result}, which caused {e}",
-                format="text",
-                permission=Permission.STAFF
-            )
+            messages = [
+                ExtendedMessage(
+                    description="Er ging iets verkeerds tijdens de evaluatie. "
+                                "Contacteer de lesgever.",
+                    format="text"
+                ),
+                ExtendedMessage(
+                    description="Het resultaat van de geprogrammeerde evaluatie is "
+                                "ongeldig:",
+                    format="text",
+                    permission=Permission.STAFF
+                ),
+                ExtendedMessage(
+                    description=traceback.format_exc(),
+                    format="code",
+                    permission=Permission.STAFF
+                ),
+                ExtendedMessage(
+                    description="Dit werd geproduceerd op stdout:",
+                    permission=Permission.STAFF
+                ),
+                ExtendedMessage(
+                    description=result.stdout,
+                    format="code",
+                    permission=Permission.STAFF
+                ),
+                ExtendedMessage(
+                    description="Dit werd geproduceerd op stderr:",
+                    permission=Permission.STAFF
+                ),
+                ExtendedMessage(
+                    description=result.stderr,
+                    format="code",
+                    permission=Permission.STAFF
+                )
+            ]
             return EvaluationResult(
                 result=StatusMessage(enum=Status.INTERNAL_ERROR),
                 readable_expected=readable_expected,
                 readable_actual=readable_actual,
-                messages=[staff_message, DEFAULT_STUDENT]
+                messages=messages
             )
     else:
         assert isinstance(result, EvalResult)
@@ -154,10 +183,16 @@ def evaluate(config: EvaluatorConfig,
     if evaluation_result.readable_actual:
         readable_actual = evaluation_result.readable_actual
 
-    return EvaluationResult(
-        result=StatusMessage(
+    if isinstance(evaluation_result.result, Status):
+        result_status = StatusMessage(enum=evaluation_result.result)
+    else:
+        assert isinstance(evaluation_result.result, bool)
+        result_status = StatusMessage(
             enum=Status.CORRECT if evaluation_result.result else wrong
-        ),
+        )
+
+    return EvaluationResult(
+        result=result_status,
         readable_expected=readable_expected,
         readable_actual=readable_actual,
         messages=evaluation_result.messages

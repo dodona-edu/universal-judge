@@ -3,9 +3,12 @@
 
 #include "evaluation_result.h"
 
-EvaluationResult evaluate(char* actual) {
+EvaluationResult* evaluate(char* actual) {
     bool result = !strcmp("correct", actual);
-    char* messages[] = {"Hallo"};
-    EvaluationResult r = { result, "correct", actual, messages, 1};
+    EvaluationResult* r = create_result(1);
+    r->result = result;
+    r->readableExpected = "correct";
+    r->readableActual = actual;
+    r->messages[0] = create_message("Hallo", NULL, NULL);
     return r;
 }

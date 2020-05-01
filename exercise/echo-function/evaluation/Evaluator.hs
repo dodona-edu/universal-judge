@@ -11,7 +11,7 @@ evaluate value  =
         result = correct,
         readableExpected = Just "correct",
         readableActual = Just value,
-        messages = ["Hallo"]
+        messages = [message "Hallo"]
     }
 
 
@@ -22,5 +22,5 @@ evaluate_value expected actual arguments =
         result = correct,
         readableExpected = Just expected,
         readableActual = Just actual,
-        messages = ["Hallo"]
+        messages = [message "Hallo"]
     }

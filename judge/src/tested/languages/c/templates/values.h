@@ -64,6 +64,6 @@ void write_unknown(FILE*, void*);
 
 #define write_value(f, x) write_value_function(x)(f, x)
 
-void send_evaluated(FILE* out, EvaluationResult result);
+void send_evaluated(FILE* out, EvaluationResult* result);
 
 #endif //WRITER_VALUES_H

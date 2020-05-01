@@ -86,25 +86,45 @@ void write_unknown(FILE * out, void * value) {
     fprintf(out, asString, "?");
 }
 
-void send_evaluated(FILE* out, EvaluationResult result) {
+void send_evaluated(FILE* out, EvaluationResult* result) {
 
-    // Find the length of the string we need.
+    // Count the size of the string we need for each message object.
     size_t messageLength = 0;
-    for (size_t i = 0; i < result.nrOfMessages; ++i) {
-        const char* message = result.messages[i];
-        messageLength += strlen(message);
-        messageLength += 3; // For the comma, and two quotes.
+    for (size_t i = 0; i < result->nrOfMessages; ++i) {
+        Message* message = result->messages[i];
+        if (message->permission == NULL) {
+            char* template = "{'description': '', 'format': ''}";
+            messageLength += strlen(template);
+        } else {
+            char* template = "{'description': '', 'format': '', 'permission': ''}";
+            messageLength += strlen(template);
+            messageLength += strlen(message->permission);
+        }
+        messageLength += strlen(message->description);
+        if (message->format == NULL) {
+            messageLength += 4;
+        } else {
+            messageLength += strlen(message->format);
+        }
     }
 
-    char* concatMessages = calloc(messageLength, sizeof(char));
+    size_t totalLength = messageLength + result->nrOfMessages;
+    char* concatMessages = calloc(totalLength, sizeof(char));
     size_t nextMessage = 0;
 
-    for (size_t j = 0; j < result.nrOfMessages; ++j) {
-        concatMessages[nextMessage++] = '"';
-        strcpy(&concatMessages[nextMessage], result.messages[j]);
-        nextMessage += strlen(result.messages[j]);
-        concatMessages[nextMessage++] = '"';
-        concatMessages[nextMessage++] = ',';
+    for (size_t j = 0; j < result->nrOfMessages; ++j) {
+        Message* message = result->messages[j];
+        int added;
+        if (message->permission == NULL) {
+            char* template = "{\"description\": \"%s\", \"format\": \"%s\"}";
+            added = sprintf(&concatMessages[nextMessage], template, message->description, message->format);
+        } else {
+            char* template = "{\"description\": \"%s\", \"format\": \"%s\", \"permission\": \"%s\"}";
+            added = sprintf(&concatMessages[nextMessage], template, message->description, message->format, message->permission);
+        }
+        nextMessage += added;
+        concatMessages[nextMessage] = ',';
+        nextMessage++;
     }
     // The last comma is not needed, so use it as null-delimiter.
     concatMessages[nextMessage - 1] = '\0';
@@ -115,7 +135,8 @@ void send_evaluated(FILE* out, EvaluationResult result) {
                         "\"readable_actual\": \"%s\", "
                         "\"messages\": [%s]"
                         "}";
-    const char* resulting = result.result ? "true" : "false";
-    fprintf(out, value, resulting, result.readableExpected, result.readableActual, concatMessages);
+    const char* resulting = result->result ? "true" : "false";
+    fprintf(out, value, resulting, result->readableExpected, result->readableActual, concatMessages);
     free(concatMessages);
+    free_result(result);
 }

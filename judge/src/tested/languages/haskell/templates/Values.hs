@@ -245,6 +245,12 @@ sendValue file value = LBS.appendFile file (encode (object [
         "data" .= toJson value
     ]))
 
+toMessage :: Message -> Value
+toMessage m = object [
+        "description" .= toJSON (description m),
+        "format" .= toJSON (format m),
+        "permission" .= toJSON (permission m)
+    ]
 
 sendEvaluated :: FilePath -> EvaluationResult -> IO ()
 sendEvaluated file r =
@@ -252,7 +258,7 @@ sendEvaluated file r =
         "result" .= toJSON (result r),
         "readable_expected" .= toJSON (readableExpected r),
         "readable_actual" .= toJSON (readableActual r),
-        "messages" .= toJSON (messages r)
+        "messages" .= toJSON (map toMessage (messages r))
     ]))
 
 sendEvaluatedH :: Handle -> EvaluationResult -> IO ()
@@ -261,7 +267,7 @@ sendEvaluatedH file r =
         "result" .= toJSON (result r),
         "readable_expected" .= toJSON (readableExpected r),
         "readable_actual" .= toJSON (readableActual r),
-        "messages" .= toJSON (messages r)
+        "messages" .= toJSON (map toMessage (messages r))
     ]))
 
 sendException :: Exception e => FilePath -> Maybe e -> IO ()

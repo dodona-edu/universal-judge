@@ -7,7 +7,7 @@ public class Evaluator {
         return EvaluationResult.builder(correct)
                 .withReadableExpected("correct")
                 .withReadableActual(actual != null ? actual.toString() : "")
-                .withMessage("Hallo")
+                .withMessage(new EvaluationResult.Message("Hallo"))
                 .build();
     }
 
@@ -15,7 +15,7 @@ public class Evaluator {
         return EvaluationResult.builder(expected.equals(expected))
                 .withReadableExpected(expected.toString())
                 .withReadableActual(actual != null ? actual.toString() : "")
-                .withMessage("Hallo")
+                .withMessage(new EvaluationResult.Message("Hallo"))
                 .build();
     }
 }

@@ -68,7 +68,7 @@ def test_specific_evaluation(language: str, tmp_path: Path, pytestconfig):
 
 
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
-def test_specific_evaluation(language: str, tmp_path: Path, pytestconfig):
+def test_programmed_evaluation(language: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "echo-function", language, tmp_path, "programmed.tson", "correct")
     result = execute_config(conf)
     print(result)

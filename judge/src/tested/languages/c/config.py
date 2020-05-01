@@ -12,8 +12,8 @@ class CConfig(Language):
         main_file = files[-1]
         exec_file = Path(main_file).stem
         result = executable_name(exec_file)
-        return (["gcc", "-std=c11", "-Wall", "values.c", main_file, "-o", result],
-                [result])
+        return (["gcc", "-std=c11", "-Wall", "evaluation_result.c", "values.c",
+                 main_file, "-o", result], [result])
 
     def execution(self, cwd: Path, file: str, arguments: List[str]) -> Command:
         local_file = cwd / executable_name(Path(file).stem)
