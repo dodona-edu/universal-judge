@@ -411,6 +411,7 @@ def generate_context(bundle: Bundle,
 
     context_destination = destination / lang_config.with_extension(context_name)
     template = lang_config.template_name(TemplateType.CONTEXT)
+    template = lang_config.conventionalize_namespace(template)
 
     return find_and_write_template(
         bundle, context_argument, context_destination, template
@@ -432,11 +433,13 @@ def generate_selector(bundle: Bundle,
     assert bundle.lang_config.needs_selector()
     selector_name = bundle.lang_config.selector_name()
     destination /= bundle.lang_config.with_extension(selector_name)
+    selector = bundle.lang_config.template_name(TemplateType.SELECTOR)
+    selector = bundle.lang_config.conventionalize_namespace(selector)
     return find_and_write_template(
         bundle=bundle,
         template_args=_SelectorArguments(contexts=context_names),
         destination=destination,
-        template_name=bundle.lang_config.template_name(TemplateType.SELECTOR)
+        template_name=selector
     )
 
 

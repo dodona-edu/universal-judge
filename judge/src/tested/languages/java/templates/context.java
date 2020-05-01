@@ -2,7 +2,6 @@
 <%! from tested.languages.generator import _TestcaseArguments %>
 <%! from tested.serialisation import Statement, Expression, Assignment %>
 <%! from tested.utils import get_args %>
-<%! import humps %>
 ## This imports are defined by the "common" start-up scripts of JShell.
 import java.io.*;
 import java.math.*;
@@ -16,12 +15,6 @@ import java.util.regex.*;
 import java.util.stream.*;
 
 public class ${context_name} implements Closeable {
-
-    ## Generate the evaluators we need.
-    % for name in evaluator_names:
-        <% var_name = humps.camelize(name) %>
-        private final ${name} ${var_name} = new ${name}();
-    % endfor
 
     ##################################
     ## Setup                        ##
