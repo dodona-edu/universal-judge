@@ -84,6 +84,7 @@ def find_and_write_template(bundle: Bundle,
 
     :return: The name of the generated file.
     """
+    template_name = bundle.lang_config.conventionalize_namespace(template_name)
     if destination.is_dir():
         destination /= bundle.lang_config.with_extension(template_name)
 
@@ -107,14 +108,12 @@ def find_template(bundle: Bundle, template_name: str) -> Template:
     """
     error = None
     environment = _get_environment(bundle)
-    for name in [template_name,
-                 bundle.lang_config.conventionalize_namespace(template_name)]:
-        for extension in bundle.lang_config.extension_templates():
-            try:
-                file_name = f"{name}.{extension}"
-                return environment.get_template(file_name)
-            except TemplateLookupException as e:
-                error = e
+    for extension in bundle.lang_config.extension_templates():
+        try:
+            file_name = f"{template_name}.{extension}"
+            return environment.get_template(file_name)
+        except TemplateLookupException as e:
+            error = e
     raise LookupError(
         f"Could not find template with name {template_name} for language "
         f"{bundle.config.programming_language}", error, environment.directories)
