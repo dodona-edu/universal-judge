@@ -125,9 +125,10 @@ def execute_context(bundle: Bundle, args: ContextExecution, max_time: float) \
     _logger.info("Executing context %s in path %s", args.context_name, context_dir)
 
     # Filter dependencies of the global compilation results.
-    dependencies = \
-        filter_files(args.files, args.common_directory)
-    dependencies = filter_dependencies(bundle, dependencies, args.context_name)
+    dependencies = filter_files(args.files, args.common_directory)
+    dependencies = bundle.lang_config.filter_dependencies(
+        bundle, dependencies, args.context_name
+    )
 
     # Copy files from the common directory to the context directory.
     for file in dependencies:

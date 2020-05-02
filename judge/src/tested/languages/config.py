@@ -23,7 +23,7 @@ import os
 from collections import defaultdict
 from enum import Enum, auto
 from pathlib import Path
-from typing import List, Tuple, Mapping, Union, Callable, Set, Dict
+from typing import List, Tuple, Mapping, Union, Callable, Set, Dict, Optional
 
 import sys
 
@@ -48,7 +48,8 @@ _case_mapping = {
 
 def _conventionalize(options: dict, what: str, name: str):
     """Conventionalize based on the options."""
-    function = _case_mapping[options.get("naming_conventions", {}).get(what, "snake_case")]
+    function = _case_mapping[
+        options.get("naming_conventions", {}).get(what, "snake_case")]
     return function(name)
 
 
@@ -430,3 +431,29 @@ class Language:
         :return: The name of the template (without extension).
         """
         return self.options.get("templates", {}).get(template_type, template_type)
+
+    def inherits_from(self) -> Optional[str]:
+        """
+        Indicates that this language inherits from another language. This means
+        that the other language will be used as a fallback if something is not
+        implemented in the other language (templates only, if you need to inherit
+        this class, just extend the config class the language).
+
+        :return: An optional language.
+        """
+        return self.options["general"].get("inherits")
+
+    def filter_dependencies(self,
+                            bundle: Bundle,
+                            files: List[str],
+                            context_name: str) -> List[str]:
+        def filter_function(file: str) -> bool:
+            # We don't want files for contexts that are not the one we use.
+            prefix = bundle.lang_config.conventionalize_namespace(
+                bundle.lang_config.context_prefix()
+            )
+            is_context = file.startswith(prefix)
+            is_our_context = file.startswith(context_name + ".")
+            return not is_context or is_our_context
+
+        return list(x for x in files if filter_function(x))

@@ -11,12 +11,14 @@ from tested.languages.haskell.config import HaskellConfig
 from tested.languages.java.config import JavaConfig
 from tested.languages.python.config import PythonConfig
 from tested.languages.c.config import CConfig
+from tested.languages.runhaskell.config import RunHaskellConfig
 
 
 LANGUAGES = {
     'python':  PythonConfig,
     'java':    JavaConfig,
     'haskell': HaskellConfig,
+    'runhaskell': RunHaskellConfig,
     'c': CConfig
 }
 

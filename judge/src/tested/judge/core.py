@@ -79,52 +79,56 @@ def judge(bundle: Bundle):
             result
         )
 
-        # Handle timout if necessary.
-        if result.timeout:
-            # Show in separate tab.
-            if messages:
-                collector.add(StartTab("Compilatie"))
-            for message in messages:
-                collector.add(AppendMessage(message=message))
-            for annotation in annotations:
-                collector.add(annotation)
-            if messages:
-                collector.add(CloseTab())
-            collector.terminate(Status.TIME_LIMIT_EXCEEDED)
-            return
-
-        assert not result.timeout
-        assert not result.memory
-
-        precompilation_result = (messages, status)
-
-        # If we have fallback, discard all results.
-        if status != Status.CORRECT and bundle.config.options.allow_fallback:
-            mode = ExecutionMode.INDIVIDUAL
-            _logger.info("Compilation error, falling back to individual mode")
-            # Remove the selector file from the dependencies.
-            # Otherwise, it will keep being compiled, which we want to avoid.
-            if bundle.lang_config.needs_selector():
-                files.remove(selector)
+        # If there is no result, there was no compilation.
+        if not result:
+            precompilation_result = None
         else:
-            files = compilation_files
-            # Report messages.
-            if messages:
-                collector.add_tab(StartTab("Compilatie"), -1)
-            for message in messages:
-                collector.add(AppendMessage(message=message))
-            for annotation in annotations:
-                collector.add(annotation)
-            if messages:
-                collector.add_tab(CloseTab(), -1)
+            # Handle timout if necessary.
+            if result.timeout:
+                # Show in separate tab.
+                if messages:
+                    collector.add(StartTab("Compilatie"))
+                for message in messages:
+                    collector.add(AppendMessage(message=message))
+                for annotation in annotations:
+                    collector.add(annotation)
+                if messages:
+                    collector.add(CloseTab())
+                collector.terminate(Status.TIME_LIMIT_EXCEEDED)
+                return
 
-            if status != Status.CORRECT:
-                collector.terminate(StatusMessage(
-                    enum=status,
-                    human="Ongeldige broncode"
-                ))
-                _logger.info("Compilation error without fallback")
-                return  # Compilation error occurred, useless to continue.
+            assert not result.timeout
+            assert not result.memory
+
+            precompilation_result = (messages, status)
+
+            # If we have fallback, discard all results.
+            if status != Status.CORRECT and bundle.config.options.allow_fallback:
+                mode = ExecutionMode.INDIVIDUAL
+                _logger.info("Compilation error, falling back to individual mode")
+                # Remove the selector file from the dependencies.
+                # Otherwise, it will keep being compiled, which we want to avoid.
+                if bundle.lang_config.needs_selector():
+                    files.remove(selector)
+            else:
+                files = compilation_files
+                # Report messages.
+                if messages:
+                    collector.add_tab(StartTab("Compilatie"), -1)
+                for message in messages:
+                    collector.add(AppendMessage(message=message))
+                for annotation in annotations:
+                    collector.add(annotation)
+                if messages:
+                    collector.add_tab(CloseTab(), -1)
+
+                if status != Status.CORRECT:
+                    collector.terminate(StatusMessage(
+                        enum=status,
+                        human="Ongeldige broncode"
+                    ))
+                    _logger.info("Compilation error without fallback")
+                    return  # Compilation error occurred, useless to continue.
     else:
         precompilation_result = None
 
@@ -136,7 +140,6 @@ def judge(bundle: Bundle):
         collector.add_tab(StartTab(title=tab.name), tab_index)
         executions = []
         for context_index, context in enumerate(tab.contexts):
-
             execution = ContextExecution(
                 context=context,
                 context_name=bundle.lang_config.context_name(
@@ -187,13 +190,13 @@ def _single_execution(bundle: Bundle,
         remaining = max_time - (time.perf_counter() - start)
         execution_result, m, s, p = execute_context(bundle, execution, remaining)
         continue_ = evaluate_results(
-                bundle,
-                context=execution.context,
-                exec_results=execution_result,
-                compiler_results=(m, s),
-                context_dir=p,
-                collector=execution.collector,
-                max_time=remaining
+            bundle,
+            context=execution.context,
+            exec_results=execution_result,
+            compiler_results=(m, s),
+            context_dir=p,
+            collector=execution.collector,
+            max_time=remaining
         )
         execution.collector.add_context(CloseContext(), execution.context_index)
         if continue_ == Status.TIME_LIMIT_EXCEEDED:
@@ -233,6 +236,7 @@ def _parallel_execution(bundle: Bundle,
             )
             execution.collector.add_context(CloseContext(), execution.context_index)
             return continue_
+
         return evaluation_function
 
     with ThreadPoolExecutor(max_workers=4) as executor:

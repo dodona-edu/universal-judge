@@ -8,6 +8,7 @@ from mako.exceptions import TemplateLookupException
 from mako.lookup import TemplateLookup
 from mako.template import Template
 
+from tested.languages import get_language
 from tested.languages._preprocessors import remove_indents, remove_newline
 from tested.configs import Bundle
 from tested.languages.config import TemplateType
@@ -35,6 +36,15 @@ def _write_template(arguments, template: Template, path: Path):
     # noinspection PyTypeChecker
     with open(path, "w") as file:
         file.write(result)
+        
+        
+def _language_inheritance_tree(bundle: Bundle) -> List[str]:
+    current = bundle.lang_config
+    result = [bundle.config.programming_language]
+    while lang := current.inherits_from():
+        result.append(lang)
+        current = get_language(lang)
+    return result
 
 
 def path_to_templates(bundle: Bundle) -> List[Path]:
@@ -47,8 +57,9 @@ def path_to_templates(bundle: Bundle) -> List[Path]:
     :return: A list of template folders.
     """
     judge_root = bundle.config.judge
-    language = bundle.config.programming_language
-    result = [judge_root / 'tested' / 'languages' / language / 'templates']
+    result = []
+    for language in _language_inheritance_tree(bundle):
+        result.append(judge_root / 'tested' / 'languages' / language / 'templates')
     assert result, "At least one template folder is required."
     return result
 

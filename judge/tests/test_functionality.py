@@ -15,7 +15,8 @@ import pytest
 from tested.languages import LANGUAGES
 from tests.manual_utils import assert_valid_output, configuration, execute_config
 
-ALL_LANGUAGES = ["python", "java", "haskell", "c"]
+COMPILE_LANGUAGES = ["python", "java", "haskell", "c"]
+ALL_LANGUAGES = COMPILE_LANGUAGES + ["runhaskell"]
 
 
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
@@ -62,6 +63,7 @@ def test_io_function_exercise(language: str, tmp_path: Path, pytestconfig):
 def test_specific_evaluation(language: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "echo-function", language, tmp_path, "two-specific.tson", "correct")
     result = execute_config(conf)
+    print(result)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["wrong", "correct"]
     assert len(updates.find_all("append-message")) == 2
@@ -77,7 +79,7 @@ def test_programmed_evaluation(language: str, tmp_path: Path, pytestconfig):
     assert len(updates.find_all("append-message")) == 3
 
 
-@pytest.mark.parametrize("lang", ["python", "java", "haskell"])
+@pytest.mark.parametrize("lang", ["python", "java", "haskell", "runhaskell"])
 def test_language_evaluator_exception(lang: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "division", lang, tmp_path, "plan.json", "correct")
     result = execute_config(conf)
@@ -85,7 +87,7 @@ def test_language_evaluator_exception(lang: str, tmp_path: Path, pytestconfig):
     assert updates.find_status_enum() == ["correct"]
 
 
-@pytest.mark.parametrize("lang", ["python", "java", "haskell"])
+@pytest.mark.parametrize("lang", ["python", "java", "haskell", "runhaskell"])
 def test_language_evaluator_exception(lang: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "division", lang, tmp_path, "plan.json", "wrong")
     result = execute_config(conf)
@@ -108,7 +110,7 @@ def test_assignment_and_use_in_expression(lang: str, tmp_path: Path, pytestconfi
     assert len(updates.find_all("start-test")) == 1
 
 
-@pytest.mark.parametrize("lang", ["python", "java", "haskell"])
+@pytest.mark.parametrize("lang", ["python", "java", "haskell", "runhaskell"])
 def test_assignment_and_use_in_expression_list(lang: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "isbn-list", lang, tmp_path, "one-with-assignment.tson", "solution")
     result = execute_config(conf)
@@ -133,7 +135,7 @@ def test_crashing_assignment_with_before(lang: str, tmp_path: Path, pytestconfig
     assert updates.find_next("start-test")["channel"] == "exception"
 
 
-@pytest.mark.parametrize("lang", ["haskell", "c"])
+@pytest.mark.parametrize("lang", ["haskell", "runhaskell", "c"])
 def test_heterogeneous_arguments_are_detected(lang: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "isbn", lang, tmp_path, "full.tson", "solution")
     result = execute_config(conf)
@@ -198,7 +200,7 @@ def test_batch_compilation(language: str, tmp_path: Path, pytestconfig, mocker):
     assert class_instance.compilation.call_count == 1
 
 
-@pytest.mark.parametrize("language", ALL_LANGUAGES)
+@pytest.mark.parametrize("language", COMPILE_LANGUAGES)
 def test_batch_compilation_fallback(language: str, tmp_path: Path, pytestconfig, mocker):
     lang_class = LANGUAGES[language]
     class_instance = lang_class()
@@ -229,7 +231,7 @@ def test_batch_compilation_no_fallback(language: str, tmp_path: Path, pytestconf
     assert class_instance.compilation.call_count == 1
 
 
-@pytest.mark.parametrize("language", ["python", "java", "haskell", "c"])
+@pytest.mark.parametrize("language", ALL_LANGUAGES)
 def test_batch_compilation_no_fallback(language: str, tmp_path: Path, pytestconfig):
     config_ = {
         "options": {
@@ -265,7 +267,7 @@ def test_objects(language: str, tmp_path: Path, pytestconfig):
     assert len(updates.find_all("start-testcase")) == 3
 
 
-@pytest.mark.parametrize("language", ["haskell", "c"])
+@pytest.mark.parametrize("language", ["haskell", "runhaskell", "c"])
 def test_objects_error(language: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "objects", language, tmp_path, "plan.tson", "correct")
     result = execute_config(conf)

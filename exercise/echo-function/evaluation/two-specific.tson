@@ -30,6 +30,9 @@
                       "haskell": {
                         "file": "Evaluator.hs"
                       },
+                      "runhaskell": {
+                        "file": "Evaluator.hs"
+                      },
                       "c": {
                         "file": "evaluator.c"
                       }
@@ -62,6 +65,9 @@
                         "file": "Evaluator.java"
                       },
                       "haskell": {
+                        "file": "Evaluator.hs"
+                      },
+                      "runhaskell": {
                         "file": "Evaluator.hs"
                       },
                       "c": {

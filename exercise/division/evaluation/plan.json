@@ -22,6 +22,9 @@
                     },
                     "haskell": {
                       "file": "Evaluator.hs"
+                    },
+                    "runhaskell": {
+                      "file": "Evaluator.hs"
                     }
                   }
                 }
