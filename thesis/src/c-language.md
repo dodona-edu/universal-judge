@@ -72,7 +72,7 @@ Taalelementen als functies en namespaces kunnen omgezet worden in functie van de
 
 ```json
 {
-  "formats": {
+  "naming_conventions": {
     "namespace": "snake_case",
     "function": "snake_case"
   }
@@ -89,17 +89,62 @@ Standaard wordt `snake_case` gebruikt, dus bij C is dit niet strikt nodig om het
 
 ## Functionaliteit
 
-De laatste twee blokken in de configuratie geven aan welke constructies en datatypes de programmeertaal ondersteunt. Hieronder is de omzetting van wat we eerder besproken hebben:
+De laatste twee blokken in de configuratie geven aan welke constructies en datatypes de programmeertaal ondersteunt. We hebben reeds besproken welke functionaliteit we willen ondersteunen en welke niet (TODO: reference!). We beginnen met de taalconstructies vast te leggen:
 
 ```json
 {
   "constructs": {
+    "objects": false,
     "exceptions": false,
+    "function_calls": true,
+    "assignments": true,
     "heterogeneous_collections": false,
     "heterogeneous_arguments": false,
     "evaluation": false
-  },
+  }
+}
+```
+
+Hier kan voor elke taalconstructie opgegeven worden of ze ondersteund wordt of niet. Standaard wordt geen enkele taalconstructie ondersteunt: dit zorgt ervoor dat alle ondersteunde constructies expliciet in het configuratiebestand staan en dat nieuwe taalconstructies toegevoegd kunnen worden zonder dat bestaande configuraties van programmeertalen aangepast moeten worden.
+
+De mogelijke taalconstructie zijn deze uit de enum `tested.features.Construct`. Voor het gemak volgt hieronder een oplijsten en een korte beschrijving van elke taalconstructie:
+
+`objects`
+: Objectgeoriënteerde zaken zoals klassen.
+
+`exceptions`
+: Exceptions en uitzonderingen.
+
+`function_calls`
+: Functieoproepen. Merk op dat constructors in het testplan een speciale soort functie zijn, maar deze hangen af van de taalconstructie `objects`.
+
+`assignments`
+: Het toekennen van een waarde aan een variabele. Dit moet eerder los geïnterpreteerd worden als ondersteuning voor iets dat neerkomt op een assigment. Zo kent Haskell bijvoorbeeld geen assignments, want `x = 5` definieert technisch gezien een functie met een constante returnwaarde `5`. Dit moet ook onder `assignments` gerekend worden.
+
+`heterogeneous_collections`
+: Hiermee bedoelen we verzamelingen met elementen met verschillende gegevenstypes. Dit is bijvoorbeeld geen probleem in Python (`[5, 52.23]`), gaat al iets moeilijker in Java (`List<Object> = List.of(1, 52.23)`), maar zal niet lukken in Haskell.
+
+`heterogeneous_arguments`
+: Hiermee bedoelen we functieoproepen waarbij dezelfde functie meerdere keren wordt opgeroepen met argumenten met verschillende datatypes (bijvoorbeeld eerst `check(True)` daarna `check("hallo")`). Dit zal lukken in Python en Java, maar niet in Haskell en C.
+
+`evaluation`
+: Of een geprogrammeerde evaluatie mogelijk is in deze programmeertaal. Dit is technisch gezien geen taalconstructie, maar wordt erbij genomen omdat dezelfde infrastructuur gebruikt wordt om te controleren of dit nodig is of niet.
+
+Dan moeten we nu de ondersteuning voor de gegevenstypes vastleggen:
+
+```json
+{
   "datatypes": {
+    "integer": "supported",
+    "rational": "supported",
+    "char": "supported",
+    "text": "supported",
+    "boolean": "supported",
+    "sequence": "unsupported",
+    "set": "unsupported",
+    "map": "unsupported",
+    "nothing": "supported",
+
     "int8": "supported",
     "uint8": "supported",
     "int16": "supported",
@@ -108,26 +153,34 @@ De laatste twee blokken in de configuratie geven aan welke constructies en datat
     "uint32": "supported",
     "int64": "supported",
     "uint64": "supported",
+    "bigint": "reduced",
     "single_precision": "supported",
+    "double_precision": "supported",
     "double_extended": "unsupported",
     "fixed_precision": "unsupported",
     "array": "unsupported",
-    "set": "unsupported",
-    "map": "unsupported",
     "list": "unsupported",
     "tuple": "unsupported"
   }
 }
 ```
 
-Bij de `constructs` kunnen alle types uit de enum `tested.features.Construct` gegeven worden.
-Bij de `datatypes` kunnen alle datatypes uit `tested.datatypes` gebruikt worden. Voor elk datatype zijn drie mogelijkheden:
+Zoals uitgelegd in (TODO: referentie!) zijn er twee soorten gegevenstypes in TESTed: de basistypes en de geavanceerde types. De basistypes zijn abstracte types voor concepten (zoals een sequentie of een geheel getal), terwijl de geavanceerde types concreter zijn (zoals een geheel getal van 8 bits).
+Een gegevenstype kan drie niveaus van ondersteuning hebben:
 
 - `supported` - volledige ondersteuning
 - `reduced` - wordt ondersteund, maar wordt herleid tot een basistype (bijvoorbeeld een `list` wordt geïnterpreteerd als een `sequence`)
-- `unsupported` - geen ondersteuning
+- `unsupported` - geen ondersteuning, dit is de standaardwaarde
+
+Een opmerking hierbij is dat de status `reduced` voor de basistypes equivalent is aan `supported`; een basistype reduceren tot een basistype blijft hetzelfde type.
+
+Het is de bedoeling dat de meeste programmeertalen voor het merendeel van de datatypes ten minste `reduced` hebben. Toch is gekozen om `unsupported` als standaardwaarde te nemen; dit zorgt ervoor dat de ondersteunde datatypes explicit uitgeschreven zijn. Ook laat dit opnieuw toe om datatypes toe te voegen aan TESTed zonder bestaande configuraties van programmeertalen te moeten aanpassen.
+Ter illustratie vermelden we hier bij C alle datatypes, ook de niet-ondersteunde.
 
 # Configuratieklasse
+
+De configuratieklasse is de schakel tussen de generieke aspecten van TESTed en het programmeertaalafhankelijke gedrag.
+Omdat TESTed in Python geschreven is, moet deze klasse ook in Python geïmplementeerd worden.
 
 Maak een nieuw Python-bestand in `judge/src/tested/langauges/c/config.py`.
 Hierin moet een klasse komen die `Language` uitbreidt:
@@ -139,43 +192,59 @@ class CConfig(Language):
     pass
 ```
 
-## Compileren van de testcode
+In de rest van deze paragraaf overlopen we de verschillende methodes die geïmplementeerd moeten worden in deze klasse.
+In de superklasse, `Language`, zijn de abstracte methodes voorzien van uitgebreide documentatie.
 
-Een eerste en belangrijke functie om te implementeren is de functie die de callback voorziet voor de compilatiestap:
+## Compileren van de code
+
+Een eerste en belangrijke methode is de methode die de callback voorziet voor de compilatiestap:
 
 ```python
 def compilation(self, files: List[str]) -> CallbackResult:
-    main = files[-1]
+    main_file = files[-1]
     exec_file = Path(main_file).stem
     result = executable_name(exec_file)
-    return ["gcc", "-std=c11", "-Wall", "values.c", main, "-o", result], [result]
+    return ["gcc", "-std=c11", "-Wall", "evaluation_result.c", "values.c", main_file, "-o", result], [result]
 ```
 
-De exacte details over hoe deze functie geïmplementeerd moet worden in beschreven in de documentatie van de superklasse `Language`. Samengevat krijgt deze functie als parameter een lijst van bestanden waarvan TESTed denkt dat ze gecompileerd kunnen worden. Conventioneel is het laatste bestand het bestand met de `main`-functie.
-Als returnwaarde moet deze functie een tuple met twee dingen teruggeven:
+Doordat het compileren een samenspel is van gegenereerde code uit de sjablonen en de dependencies, moet deze functie met zorg geïmplementeerd worden. Hieronder volgt een (licht gewijzigde) versie van de documentatie van deze methode.
 
-- Het commando dat uitgevoerd moet worden voor de compilatie. Dit commando zal aan de module `subprocess` van Python gegeven worden.
-- Een lijst van bestanden die het resultaat zijn van de compilatie of een functie die de lijst van bestanden filtert.
+Als argument krijgt deze methode een lijst van bestanden mee waarvan TESTed vermoed dat ze nuttig kunnen zijn voor de compilatiestap. Het bevat onder andere de dependencies uit het configuratiebestand, de ingediende oplossing en de uit de sjablonen gegenereerde bestanden. Die laatste bestanden zijn bijvoorbeeld de verschillende contexten bij een batchcompilatie, maar kunnen ook de evaluator zijn bij een geprogrammeerde evaluatie. De bestanden bestaan uit de naam en een bestandsextensie.
 
-Die laatste waarde vraagt wat meer uitleg: nadat TESTed de compilatie uitgevoerd heeft, zullen enkel de bestanden in deze lijst gebruikt worden. Bij Python gaat het om `pyc`-bestanden, terwijl hier bij C enkel het uitvoerbaar bestand gebruikt wordt.
+De conventie is om het bestand met de main-functie als laatste te plaatsen.
 
-Soms is een statische lijst van bestanden niet voldoende, en is een filterfunctie nodig, zoals wanneer de gegenereerde bestanden hangt af van de inhoud van de bestanden die gecompileerd worden. Dit is bijvoorbeeld het geval bij Java, waar één `java`-bestand in meerdere `class`-bestanden kan resulteren.
-- Niet alle bestanden zijn nodig voor elke context. In Python wordt bijvoorbeeld voor elke context een `context_x_y_.py` gecompileerd naar een `context_x_y.pyc` bestand. Om context XY uit te voeren, is wel enkel dat ene bestand nodig, niet de bestanden van alle contexten.
-Een voorbeeld van hoe deze filterfunctie gebruikt kan worden is te zien in de configuratieklassen voor Python en Java.
+Al deze bestanden zullen zich bevinden in de map waarin de compilatie plaatsvindt.
+Het is niet verplicht al deze bestanden ook effectief te gebruiken: sommige programmeertalen hebben zelf een detectiesysteem voor bestanden.
 
-Een programmeertaal die geen compilatie nodig heeft kan een leeg compilatiecommando teruggeven (of deze functie niet implementeren, een leeg commando is de standaardimplementatie).
+Concreet ziet deze parameter er bijvoorbeeld als volgt uit:
 
-Merk tot slot op dat we hier in C de `files` niet gebruiken: de linker van `gcc` vindt vanzelf de meeste bestanden (buiten `values.c`).
+```python
+["values.py", "evaluation_utils.py", "context_0_0.py"]
+```
 
-Een voorbeeld van de in- en uitvoer van deze functie:
+Als returnwaarde moet deze methode een tuple met twee element teruggeven: het compilatiecommando en een lijst van resulterende bestanden of een filter.
+
+Het compilatiecommando neemt de vorm aan van een lijst van de elementen waaruit het commando bestaat. Bij het uitvoeren van dit commando zal deze lijst aan de Python-module `subprocess` gegeven worden.
+
+Na het uitvoeren van het compilatiecommando moet TESTed weten welke bestanden relevant zijn om mee te nemen naar een volgende stap in de beoordeling. Daarom moet een lijst van resulterende bestanden teruggegeven worden. Enkel bestanden in deze lijst zullen bijvoorbeeld beschikbaar zijn bij het uitvoeren van de contexten.
+Een lijst van bestanden teruggeven is mogelijk indien op voorhand geweten is in welke bestanden de compilatie resulteert. Dit is bijvoorbeeld hier het geval (in C resulteert de compilatie in één uitvoerbaar bestand), of ook bij Python, waar de compilatie voor elk `.py`-bestand resulteert in een `.pyc`-bestand. Ook hier moet de conventie dat het bestand met de main-functie als laatste komt gerespecteerd worden.
+
+Het is op voorhand echter niet altijd mogelijk om te weten in welke bestanden de code zal resulteren. Zo resulteert compilatie van één `.java`-bestand mogelijk in meerdere `.class`-bestanden, afhankelijk van de inhoud van de bestanden.
+Om dit op te lossen kan in plaats van een lijst ook een filterfunctie teruggegeven worden.
+
+TESTed zal deze filter toepassen nadat de compilatie uitgevoerd is op elk bestand in de map waarin de compilatie uitgevoerd is. De filterfunctie krijgt als argument de naam van een bestand en moet `true` of `False` teruggeven als het bestand respectievelijk wel of niet meegenomen moet worden naar een volgende stap.
+
+Een voorbeeld van de in- en uitvoer van de compilatiemethode:
 
 ```pycon
->>> generation_callback(["submission.c", "context0.c", "selector.c"])
+>>> compilation(["submission.c", "context_0_0.c", "selector.c"])
 (
     ["gcc", "-std=c11", "-Wall", "values.c", "selector.c", "-o", "selector.exe"],
     ["selector.exe"]
 )
 ```
+
+Als een leeg compilatiecommando wordt teruggegeven, dan wordt er geen compilatie gedaan. Dit is ook de standaardimplementatie van deze methode. Voor programmeertalen waar geen compilatie nodig is, moet deze methode niet geïmplementeerd worden.
 
 ## Uitvoeren van de testcode
 

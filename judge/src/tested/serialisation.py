@@ -226,7 +226,7 @@ class FunctionCall(WithFeatures, WithFunctions):
         return values
 
     def get_used_features(self) -> FeatureSet:
-        constructs = {Construct.FUNCTION_CALL}
+        constructs = {Construct.FUNCTION_CALLS}
 
         # Get OOP features.
         if self.type in (FunctionType.PROPERTY, FunctionType.CONSTRUCTOR):
@@ -266,7 +266,7 @@ class Assignment(WithFeatures, WithFunctions):
         return Assignment(name=self.name, expression=expression, type=self.type)
 
     def get_used_features(self) -> FeatureSet:
-        base = FeatureSet({Construct.ASSIGNMENT}, set())
+        base = FeatureSet({Construct.ASSIGNMENTS}, set())
         other = self.expression.get_used_features()
 
         return combine_features([base, other])

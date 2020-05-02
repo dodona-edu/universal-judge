@@ -19,10 +19,9 @@ class Construct(str, Enum):
     # Object oriented stuff, classes, ...
     OBJECTS = "objects"
     EXCEPTIONS = "exceptions"
-    # Main function. Does not necessarily imply FUNCTION_CALL.
-    MAIN = "main"
-    FUNCTION_CALL = "function_calls"
-    ASSIGNMENT = "assignments"
+    # Main function. Does not necessarily imply FUNCTION_CALLS.
+    FUNCTION_CALLS = "function_calls"
+    ASSIGNMENTS = "assignments"
 
     HETEROGENEOUS_COLLECTIONS = "heterogeneous_collections"
 

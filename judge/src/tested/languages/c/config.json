@@ -11,18 +11,29 @@
   "extensions": {
     "file": "c"
   },
-  "formats": {
+  "naming_conventions": {
     "namespace": "snake_case",
     "function": "snake_case"
   },
   "constructs": {
+    "objects": false,
     "exceptions": false,
+    "function_calls": true,
+    "assignments": true,
     "heterogeneous_collections": false,
     "heterogeneous_arguments": false,
-    "evaluation": false,
-    "objects": false
+    "evaluation": false
   },
   "datatypes": {
+    "integer": "supported",
+    "rational": "supported",
+    "char": "supported",
+    "text": "supported",
+    "boolean": "supported",
+    "sequence": "unsupported",
+    "set": "unsupported",
+    "map": "unsupported",
+    "nothing": "supported",
     "int8": "supported",
     "uint8": "supported",
     "int16": "supported",
@@ -31,12 +42,12 @@
     "uint32": "supported",
     "int64": "supported",
     "uint64": "supported",
+    "bigint": "reduced",
     "single_precision": "supported",
+    "double_precision": "supported",
     "double_extended": "unsupported",
     "fixed_precision": "unsupported",
     "array": "unsupported",
-    "set": "unsupported",
-    "map": "unsupported",
     "list": "unsupported",
     "tuple": "unsupported"
   }

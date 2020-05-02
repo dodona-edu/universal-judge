@@ -48,7 +48,7 @@ _case_mapping = {
 
 def _conventionalize(options: dict, what: str, name: str):
     """Conventionalize based on the options."""
-    function = _case_mapping[options.get("formats", {}).get(what, "snake_case")]
+    function = _case_mapping[options.get("naming_conventions", {}).get(what, "snake_case")]
     return function(name)
 
 
@@ -114,7 +114,7 @@ class Language:
 
         The files parameter contains the dependencies which TESTed assumes can be
         useful for compilation. This generally includes the `dependencies` from the
-        toml config, the submission and either the context or the context and the
+        json config, the submission and either the context or the context and the
         selector. By convention, the last file in the list is the file containing
         the "main" function. The files are in the form of the filename, extension
         including.
@@ -155,18 +155,7 @@ class Language:
         Note that the convention that the executable file is the last file in the
         list must be respected in the returned list as well.
 
-        The callback functions receives two arguments: a file and the name of the
-        current context. The filter function will be called for each file in the
-        directory after compilation and before each context is executed. This allows
-        fine-grained control over which files are needed and which files are not.
-        Some examples what can be done with this callback function:
-
-        - In languages such as Java, one .java file might result in multiple .class
-          files. In that case we need to include all of those.
-        - In Java and Python, the result of the compilation step is a lot of files,
-          i.e. one compiled file per context. However, when executing, only the
-          files for one context are needed. With the context name, those can be
-          filtered as well.
+        The callback functions receives a filename as argument.
 
         Non-compiling languages
         -----------------------
@@ -304,22 +293,16 @@ class Language:
 
     def supported_constructs(self) -> Set[Construct]:
         """
-        Callback to get the supported constructs for a language. By default, all
-        features are returned.
-
-        Languages can declare missing support for features in one of two ways:
-
-        - Enumerating all supported features. This is safe against new features.
-        - Explicitly disallowing some features. This also means the language will
-          automatically support new features when they are added to TESTed.
+        Callback to get the supported constructs for a language. By default, no
+        features are returned, i.e. the default is false.
 
         :return: The features supported by this language.
         """
         config: Dict[str, bool] = self.options.get("constructs", {})
-        result = {x for x in Construct}
+        result = set()
         for construct, supported in config.items():
-            if not supported:
-                result.remove(Construct[construct.upper()])
+            if supported:
+                result.add(Construct[construct.upper()])
         return result
 
     def type_support_map(self) -> Mapping[AllTypes, TypeSupport]:
@@ -345,7 +328,7 @@ class Language:
         """
         raw_config: Dict[str, str] = self.options.get("datatypes", {})
         config = {x: TypeSupport[y.upper()] for x, y in raw_config.items()}
-        return fallback(defaultdict(lambda: TypeSupport.REDUCED), config)
+        return fallback(defaultdict(lambda: TypeSupport.UNSUPPORTED), config)
 
     def solution(self, solution: Path, bundle: Bundle):
         """

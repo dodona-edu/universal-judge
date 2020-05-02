@@ -9,16 +9,29 @@
   "extensions": {
     "file": "hs"
   },
-  "formats": {
+  "naming_conventions": {
     "namespace": "pascal_case",
     "function": "camel_case"
   },
   "constructs": {
+    "objects": false,
+    "exceptions": true,
+    "function_calls": true,
+    "assignments": true,
     "heterogeneous_collections": false,
     "heterogeneous_arguments": false,
-    "objects": false
-},
+    "evaluation": true
+  },
   "datatypes": {
+    "integer": "supported",
+    "rational": "supported",
+    "char": "supported",
+    "text": "supported",
+    "boolean": "supported",
+    "sequence": "supported",
+    "set": "unsupported",
+    "map": "unsupported",
+    "nothing": "supported",
     "int8": "supported",
     "uint8": "supported",
     "int16": "supported",
@@ -27,12 +40,12 @@
     "uint32": "supported",
     "int64": "supported",
     "uint64": "supported",
+    "bigint": "reduced",
     "single_precision": "supported",
+    "double_precision": "supported",
     "double_extended": "unsupported",
     "fixed_precision": "unsupported",
     "array": "unsupported",
-    "set": "unsupported",
-    "map": "unsupported",
     "list": "supported",
     "tuple": "supported"
   }
