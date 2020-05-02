@@ -274,10 +274,6 @@ class Language:
         """Utility function to append the file extension to a file name."""
         return f"{file_name}.{self.extension_file()}"
 
-    def template_extensions(self) -> List[str]:
-        """Extensions a template can be in."""
-        return [self.extension_file(), "mako"]
-
     def extension_templates(self) -> List[str]:
         """
         A list of extensions for the template files. By default, this uses the

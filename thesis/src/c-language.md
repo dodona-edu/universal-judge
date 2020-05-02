@@ -1,50 +1,54 @@
-# Algemeen
 
-Het implementeren van een programmeertaal in TESTed bestaat uit drie grote onderdelen:
-
-- Het configuratiebestand
-- De configuratieklasse
-- De sjablonen
-
-Verder kan het tijdens het testen of debuggen nuttig zijn om te zien wat TESTed doet en welke code er gegenereerd wordt. Via de module `tested.manual` kan een oefening uitgevoerd worden, waarbij er uitgebreide logs zijn. De werkmap van deze oefening met de gegenereerde code zal ook in de `judge`-map zijn, teneinde de code te kunnen inkijken (dit in tegenstelling tot de normale manier van uitvoeren, waar deze code in een tijdelijk map geplaatst wordt).
-De manuele modus van TESTed kan als volgt uitgevoerd worden vanuit de map `judge/src`:
-
-```bash
-python -m tested.manual
-```
-
-# Welke functionaliteit we willen ondersteunen
-
-Voor we van start gaan, overlopen we eerst kort welke functionaliteit we willen ondersteunen, langs beide kanten: welke functionaliteit uit C kunnen we aanbieden in TESTed en welke functionaliteit uit TESTed kunnen we implementeren in C?
+Voor we beginnen aan de configuratie, overlopen we kort welke functionaliteit we langs beide kanten willen ondersteunen: welke functionaliteit uit C kunnen we aanbieden in TESTed en welke functionaliteit uit TESTed kunnen we implementeren in C?
 Uiteraard willen we zoveel mogelijk ondersteunen, maar vooral op het vlak van gegevenstypes zijn er momenteel beperkingen.
 
 Welke basistypes gaan we niet ondersteunen?
 
-- `sequence` - Arrays zijn een speciaal geval in C: statische arrays kunnen bijvoorbeeld niet als returnwaarde dienen, en ook als functieargument zijn ze niet ideaal. Dynamische arrays nemen de vorm aan van een pointer en een grootte. Doordat dit twee waarden zijn, ondersteunt TESTed dat momenteel niet.
+- `sequence` - Arrays zijn een speciaal geval in C: statische arrays kunnen bijvoorbeeld niet als returnwaarde dienen, en ook als functieargument zijn ze niet ideaal. Dynamische arrays nemen de vorm aan van een pointer en een grootte. TESTed heeft momenteel geen ondersteuning voor datatypes die als twee waarden geïmplementeerd moeten worden, dus worden arrays momenteel niet ondersteund.
 - `set` - C heeft geen ingebouwde verzamelingen.
-- `map` - C heeft geen ingebouwde map of dict. Er zijn wel structs, maar daarvan is het niet mogelijk om at runtime de velden te achterhalen, waardoor we ze niet kunnen serialiseren.
+- `map` - C heeft geen ingebouwde map of dict. Er zijn wel structs, maar daarvan is het niet mogelijk om de velden at runtime op te vragen, waardoor we ze niet kunnen serialiseren.
 
 Welke geavanceerde types gaan we niet ondersteunen?
 
 - `big_int` - C heeft geen ingebouwd type voor getallen van arbitraire grootte.
-- `fixex_precision`- C heeft geen ingebouwd type voor kommagetallen me arbitraire precisie.
-- Andere datastructuren, zoals `array` en `list` (voor de redenen van hierboven). Ook `tuple` wordt niet ondersteund, omdat het niet bestaat in C.
+- `fixex_precision` - C heeft geen ingebouwd type voor kommagetallen me willekeurige precisie.
+- Andere datastructuren, zoals `array` en `list` (om dezelfde redenen als hierboven). Ook `tuple` wordt niet ondersteund, omdat het niet bestaat in C.
 
-# Waar de code moet komen
+# Locatie van de code
 
-De eerste stap is het aanmaken van een map waarin we de code voor de programmeertaal zullen zetten. Deze map moet de naam van de programmeertaal krijgen en op de juiste plaats binnen TESTed aanwezig zijn. Maak een nieuwe map `judge/src/tested/languages/c`.
+De eerste stap in het configureren van een programmeertaal is het aanmaken van een map waarin we de code voor de programmeertaal zullen zetten. Deze map moet de naam van de programmeertaal krijgen en op de juiste plaats binnen TESTed aanwezig zijn. Maak een nieuwe map `judge/src/tested/languages/c`. Na het aanmaken van de map moet de mappenstructuur er zo uitzien:
+
+```text
+universal-judge
+├── judge/
+│   ├── src/
+│   │   └── tested/
+│   │       ├── languages/
+│   │       │   ├── c/          <- nieuwe map
+│   │       │   ├── haskell/
+│   │       │   ├── java/
+│   │       │   ├── python/
+│   │       │   ├── config.py
+│   │       │   ...
+│   │       ...
+│   ...
+...
+```
+
 
 # Configuratiebestand
 
-Het configuratiebestand is een json-bestand met enkele eigenschappen van de programmeertaal. Dit configuratiebestand maakt het implementeren van de configuratieklasse een stuk eenvoudiger, omdat die implementatie veel minder lang zal zijn. Maak eerst het configuratiebestand aan: `judge/src/tested/languages/c/config.json`.
+Het configuratiebestand is een json-bestand met enkele eigenschappen van de programmeertaal. Dit configuratiebestand maakt het implementeren van de configuratieklasse een stuk eenvoudiger, omdat de implementatie van die klasse daardoor veel minder lang zal zijn. Maak eerst het configuratiebestand aan: `judge/src/tested/languages/c/config.json`.
 
 Merk op dat het configuratiebestand slechts een hulpmiddel is: indien gewenst kunnen al deze opties ook ingesteld worden door de juiste functie te implementeren in de configuratieklasse, maar we verwachten dat dit in veel gevallen niet nodig zal zijn.
 
 ## Algemene opties
 
-- `general.dependencies`: Dit zijn bestanden die beschikbaar zullen zijn tijdens het compileren en tijdens het uitvoeren van de code. In het geval van C is dit de `values` module, waarvan we de implementatie later bespreken.
-- `general.selector`: Dit geeft aan of de programmeertaal gebruik maakt van een selector tijdens het uitvoeren van code die gecompileerd is in batchcompilatie. Voor de meeste talen met compilatie zal dit `true` zijn, zoals ook bij C.
-- `extensions.file`: Geeft de voornaamste bestandsextensie aan van de bestanden.
+- `general.dependencies` - Dit zijn bestanden die beschikbaar zullen zijn tijdens het compileren en tijdens het uitvoeren van de beoordeling. Dit betekent dat deze dependencies gebruikt kunnen worden in de testcode voor de contexten en de evaluatiecode voor de geprogrammeerde en programmeertaalspecifieke code. In het geval van C is dit de `values` module, waarvan we de implementatie later bespreken. Het kan gebeuren dat de code van de dependencies ook beschikbaar is voor de ingediende oplossing. Dit is echter toeval en niet de bedoeling. Er is momenteel geen ondersteuning om dependencies beschikbaar te maken voor de ingediende oplossing.
+- `general.selector` - Dit geeft aan of de programmeertaal gebruikmaakt van een selector tijdens het uitvoeren van code die gecompileerd is in batchcompilatie. Voor de meeste talen met compilatie zal dit `true` zijn, zoals ook bij C.
+TODO: referentie!
+- `extensions.file` - Geeft de voornaamste bestandsextensie aan van de bestanden. Met voornaamste bedoelen we de extensie van de bestanden die gegenereerd worden. Bijvoorbeeld bij C bestaan zowel `.h` en `.c`, maar de gegenereerde code gebruikt `.c`.
+- `extensions.templates` - wordt gebruikt om aan te geven welke extensies gebruikt worden voor de sjablonen. Standaard is dit de bestandsextensie van hierboven en `.mako`. Het is vaak niet nodig om dit op te geven.
 
 ```json
 {
@@ -56,14 +60,15 @@ Merk op dat het configuratiebestand slechts een hulpmiddel is: indien gewenst ku
     "selector": true
   },
   "extensions": {
-    "file": "c"
+    "file": "c",
+    "templates": ["c", "mako"]
   }
 }
 ```
 
 ## Codestijl
 
-Elementen als functies en namespaces kunnen omgezet worden naar de codestijl die gebruikelijk is in de programmeertaal:
+Taalelementen als functies en namespaces kunnen omgezet worden in functie van de codestijl die gebruikelijk is in de programmeertaal:
 
 ```json
 {

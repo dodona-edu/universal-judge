@@ -411,7 +411,6 @@ def generate_context(bundle: Bundle,
 
     context_destination = destination / lang_config.with_extension(context_name)
     template = lang_config.template_name(TemplateType.CONTEXT)
-    template = lang_config.conventionalize_namespace(template)
 
     return find_and_write_template(
         bundle, context_argument, context_destination, template
@@ -434,7 +433,6 @@ def generate_selector(bundle: Bundle,
     selector_name = bundle.lang_config.selector_name()
     destination /= bundle.lang_config.with_extension(selector_name)
     selector = bundle.lang_config.template_name(TemplateType.SELECTOR)
-    selector = bundle.lang_config.conventionalize_namespace(selector)
     return find_and_write_template(
         bundle=bundle,
         template_args=_SelectorArguments(contexts=context_names),
@@ -485,7 +483,6 @@ def generate_custom_evaluator(bundle: Bundle,
 
     template = bundle.lang_config \
         .template_name(TemplateType.EVALUATOR_EXECUTOR)
-    template = bundle.lang_config.conventionalize_namespace(template)
     return find_and_write_template(bundle, args, destination, template)
 
 

@@ -1,6 +1,103 @@
-\chapter{Case-study: toevoegen van C aan TESTed}\label{ch:nieuwe-taal}
+\chapter{Configuratie van een programmeertaal in TESTed}\label{ch:nieuwe-taal}
 
-In dit hoofdstuk wordt het toevoegen van een nieuwe programmeertaal aan TESTed in detail uitgelegd, door te beschrijven hoe de programmeertaal C toegevoegd is.
-Dit hoofdstuk sluit qua vorm en stijl dan ook dichter aan bij een handleiding.\footnote{De rest van dit hoofdstuk is ook beschikbaar als markdown-bestand: dit maakt sommige zaken, zoals het kopiëren van code, eenvoudiger.}
+In dit hoofdstuk wordt in detail uitgelegd hoe een nieuwe programmeertaal aan TESTed toegevoegd kan worden.
+We doen dat door te beschrijven hoe de programmeertaal C aan TESTed toegevoegd is.
+Dit hoofdstuk sluit qua vorm en stijl dan ook dichter aan bij een handleiding.
+Enkele nuttige links hierbij zijn:
 
-\markdownInput[shiftHeadings=1]{c-language.md}
+\begin{enumerate}
+    \item Bestaande configuraties: \url{https://github.com/dodona-edu/universal-judge/tree/new-master/judge/src/tested/languages}
+    \item Een versie van (een deel van) dit hoofdstuk in Markdown, wat gemakkelijker is in gebruik (voor bijvoorbeeld het kopiëren van code): \url{https://github.com/dodona-edu/universal-judge/blob/new-master/thesis/src/c-language.md}
+\end{enumerate}
+
+\section{TESTed lokaal uitvoeren}\label{sec:tested-lokaal-uitvoeren}
+
+Tijdens het configureren van een programmeertaal is het nuttig om TESTed lokaal uit te voeren, zonder daarvoor het volledige Dodona-platform te moeten uitvoeren.
+Buiten de \english{dependencies} voor de bestaande programmeertalen is TESTed een Python-package, die op de normale manier uitgevoerd kan worden.
+
+\subsection{De broncode}\label{subsec:de-broncode}
+
+Na het klonen van de repository van TESTed beschikken we over volgende mappenstructuur:
+
+\inputminted{text}{code/tested-dir.txt}
+
+Merk op dat dit de toestand is op het moment van het schrijven van deze tekst.
+Het is te voorzien dat in een later stadium alles behalve de mappen \texttt{judge} en \texttt{exercise} verhuizen naar een andere repository.
+In dit hoofdstuk interesseren we ons enkel in die mappen, dus we voorzien geen grote problemen.
+
+\subsection{Dependencies}\label{subsec:dependencies}
+
+De dependencies van TESTed zelf zijn opgelijst is een \texttt{requirements.txt}-bestand, zoals gebruikelijk is bij Python-projecten.
+Vereisten voor het uitvoeren van tests staan in \texttt{requirements-test.txt}.
+TESTed gebruikt Python 3.8 of later.
+Het installeren van deze vereisten gebeurt op de gebruikelijke manier:
+
+\begin{minted}{console}
+> pip install -r requirements.txt
+\end{minted}
+
+Voor de programmeertalen zijn volgende dependencies nodig:
+
+\begin{description}
+    \item[Python] Er zijn geen dependencies nodig voor het beoordelen van Python-oplossingen, buiten dat \texttt{python} beschikbaar moet zijn in de \texttt{PATH}.
+    \item[Java] TESTed vereist Java 11, maar heeft verder geen dependencies.
+                De commando's \texttt{javac} en \texttt{java} moeten beschikbaar zijn in de \texttt{PATH}.
+    \item[Haskell] Voor Haskell is \acronym{GHC} 8.6 or later nodig.
+    Daarnaast is \texttt{aeson} nodig.
+    Beiden moeten globaal beschikbaar zijn in de \texttt{PATH}.
+\end{description}
+
+Merk op dat de dependencies voor de programmeertalen optioneel zijn.
+Om bijvoorbeeld enkel Python-oplossingen te beoordelen zijn geen andere dependencies nodig.
+
+Voor de programmeertaal C gaan we gebruik maken van \acronym{GCC}, waarbij versie 8.1 of later nodig is.
+
+TESTed werkt op elk besturingssysteem dat ondersteund wordt door Python.
+Sommige dependencies, zoals \texttt{gcc}, vragen wel meer moeite om te installeren op Windows.\footnote{Gebruikers op Windows kunnen Min\acronym{GW} of \acronym{MSYS}2 proberen.}
+
+\subsection{Uitvoeren}\label{subsec:uitvoeren}
+
+We gaan er voor de rest van het hoofdstuk vanuit dat commando's uitgevoerd worden in de map \texttt{judge/src}.
+
+Er zijn twee manieren om TESTed uit te voeren.
+Ten eerste is er de "gewone" manier;
+dit is ook hoe Dodona TESTed uitvoert.
+Bij het uitvoeren op deze manier zal TESTed een configuratie lezen van \texttt{stdin} en zal het resultaat van de beoordeling in Dodona-formaat uitgeschreven worden naar \texttt{stdout}.
+
+\begin{minted}{console}
+> python -m tested
+\end{minted}
+
+Bij het configureren van een programmeertaal of het werken aan TESTed is het echter nuttiger om meer uitvoer te zien en is het vervelend om telkens een configuratie te lezen vanop \texttt{stdin}.
+Daarom is er een tweede manier:
+
+\begin{minted}{console}
+> python -m tested.manual
+\end{minted}
+
+Deze uitvoer verschilt op een aantal vlakken van de gewone uitvoering:
+
+\begin{enumerate}
+    \item Er wordt geen configuratie gelezen van \texttt{stdin}.
+    De configuratie is gedefinieerd in de code zelf en gebruikt een van de oefeningen die in de map \texttt{exercise} zitten.
+    \item Er worden, naast de resultaten van de beoordeling, logs uitgeschreven naar \texttt{stdout} die aangeven wat TESTed doet.
+    Als er bijvoorbeeld een fout optreedt tijdens het compileren zullen deze logs nuttig zijn: zo wordt uitgeschreven welk commando TESTed exact uitvoert voor de compilatie en ook in welke map dat gebeurt.
+    \item De configuratie is zo opgesteld dat de werkmap van de judge de map \texttt{workdir} zal zijn.
+    Dit laat toe om de gegenereerde code te inspecteren.
+\end{enumerate}
+
+\section{Algemeen stappenplan voor het configureren}\label{sec:algemeen-stappenplan-voor-het-configureren}
+
+Het configureren van een programmeertaal in TESTed bestaat uit drie grote onderdelen:
+
+\begin{enumerate}
+    \item Het configuratiebestand, met enkele opties voor de programmeertaal.
+    \item De configuratieklasse, met de meer dynamische opties, zoals het compilatiecommando.
+    \item De sjablonen, die gebruikt worden om code te genereren.
+\end{enumerate}
+
+We overlopen nu elk onderdeel in functie van de programmeertaal C\@.
+
+\section{De programmeertaal C}\label{sec:de-programmeertaal-c}
+
+\markdownInput[shiftHeadings=2]{c-language.md}

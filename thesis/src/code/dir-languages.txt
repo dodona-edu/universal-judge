@@ -1,0 +1,14 @@
+universal-judge
+├── judge/
+│   ├── src/
+│   │   └── tested/
+│   │       ├── languages/
+│   │       │   ├── c/
+│   │       │   ├── haskell/
+│   │       │   ├── java/
+│   │       │   ├── python/
+│   │       │   ├── config.py
+│   │       │   ...
+│   │       ...
+│   ...
+...
