@@ -19,7 +19,8 @@
     "exceptions": false,
     "heterogeneous_collections": false,
     "heterogeneous_arguments": false,
-    "evaluation": false
+    "evaluation": false,
+    "objects": false
   },
   "datatypes": {
     "int8": "supported",

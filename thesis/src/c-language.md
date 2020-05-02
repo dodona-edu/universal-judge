@@ -83,7 +83,7 @@ De mogelijke waarden zijn:
 
 - `snake_case` - Tussen elk woord staat een underscore: `dit_is_een_voorbeeld`.
 - `came_case` - Elk woord, buiten het eerste, start met een hoofdletter: `ditIsEenVoorbeeld`. Deze variant wordt ook wel _lowerCamelCase_ genoemd.
-- `pascal_case` - Elk woord, ook het eerste, start met een hoofdletter: `DitIsEenVoorbeeld`. Deze variant wpordt ook wel _UpperCamelCase_ genoemd.
+- `pascal_case` - Elk woord, ook het eerste, start met een hoofdletter: `DitIsEenVoorbeeld`. Deze variant wordt ook wel _UpperCamelCase_ genoemd.
 
 Standaard wordt `snake_case` gebruikt, dus bij C is dit niet strikt nodig om het erbij te zetten.
 

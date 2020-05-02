@@ -15,8 +15,9 @@
   },
   "constructs": {
     "heterogeneous_collections": false,
-    "heterogeneous_arguments": false
-  },
+    "heterogeneous_arguments": false,
+    "objects": false
+},
   "datatypes": {
     "int8": "supported",
     "uint8": "supported",
