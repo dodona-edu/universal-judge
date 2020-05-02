@@ -282,7 +282,7 @@ class Language:
         :return: The templates.
         """
         default = [self.extension_file(), "mako"]
-        return self.options.get("extension").get("templates", default)
+        return self.options.get("extensions").get("templates", default)
 
     def initial_dependencies(self) -> List[str]:
         """

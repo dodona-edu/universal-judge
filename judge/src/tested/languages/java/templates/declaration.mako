@@ -5,11 +5,11 @@
 <%! from tested.datatypes import BasicNumericTypes, BasicStringTypes, BasicBooleanTypes, BasicNothingTypes, BasicSequenceTypes, BasicObjectTypes  %>
 <%page args="tp,value" />
 % if isinstance(tp, VariableType):
-    ${tp.data}
+    ${tp.data}\
 % elif tp == AdvancedSequenceTypes.ARRAY:
     <% type_ = value.get_content_type() %>
     <% assert value is not None, "Value is needed for arrays!" %>
-    <%include file="declaration.mako" args="tp=type_,value=None"/>[]
+    <%include file="declaration.mako" args="tp=type_,value=None"/>[]\
 % elif tp in (AdvancedNumericTypes.U_INT_64, AdvancedNumericTypes.BIG_INT, AdvancedNumericTypes.DOUBLE_EXTENDED):
     BigInteger\
 % elif tp in (AdvancedNumericTypes.DOUBLE_EXTENDED, AdvancedNumericTypes.FIXED_PRECISION):

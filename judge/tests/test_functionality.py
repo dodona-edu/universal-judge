@@ -254,3 +254,13 @@ def test_program_params(lang: str, tmp_path: Path, pytestconfig):
     assert updates.find_status_enum() == ['correct', 'correct', 'correct', 'correct']
     assert len(updates.find_all("start-testcase")) == 3
     assert len(updates.find_all("start-test")) == 4
+
+
+@pytest.mark.parametrize("language", ["python", "java"])
+def test_objects(language: str, tmp_path: Path, pytestconfig):
+    conf = configuration(pytestconfig, "objects", language, tmp_path, "plan.tson", "correct")
+    result = execute_config(conf)
+    print(result)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"] * 2
+    assert len(updates.find_all("start-testcase")) == 3

@@ -87,10 +87,14 @@ def _prepare_expression(bundle: Bundle, expression: Expression) -> Expression:
     """
     if isinstance(expression, FunctionCall):
         submission_name = bundle.lang_config.submission_name(bundle.plan)
+        if expression.type == FunctionType.CONSTRUCTOR:
+            name = expression.name
+        else:
+            name = bundle.lang_config.conventionalize_function(expression.name)
         return FunctionCall(
             type=expression.type,
             arguments=expression.arguments,
-            name=bundle.lang_config.conventionalize_function(expression.name),
+            name=name,
             namespace=expression.namespace or submission_name
         )
 
