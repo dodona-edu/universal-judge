@@ -332,32 +332,32 @@ Dit wordt niet afgedwongen door TESTed; alle sjablonen hadden de extensie `.c` o
 
 Dit is veruit het grootste en het meest ingewikkelde sjabloon. Het is verantwoordelijk voor het genereren van de testcode voor één context.
 
-```mako
-<%! from tested.languages.generator import _TestcaseArguments %>
-<%! from tested.serialisation import Statement, Expression %>
-<%! from tested.utils import get_args %>
+We importeren de values-module (hierover later meer) en de ingediende oplossing.
+De variabele `submission_name` zal de naam van het oplossingsbestand bevatten.
+Een overzicht van alle beschikbare variabelen in het contextsjabloon is te vinden in de klasse `tested.languages.generator._ContextArguments`.
 
+We importeren ook alle programmeertaalspecifieke evaluatoren die we nodig zullen hebben. De variabele `evaluator_names` bevat een verzameling van deze namen.
+
+```mako
 #include <stdio.h>
 
 #include "values.h"
 #include "${submission_name}.c"
-```
 
-We importeren de values-module (hierover later meer) en de oplossing van de student.
-De variabele `submission_name` zal de naam van het oplossingsbestand bevatten.
-
-```mako
 % for name in evaluator_names:
     #include "${name}.c"
 % endfor
 ```
 
-In `evaluator_names` zitten de namen van de programmeertaalspecifieke evaluatoren die we nodig hebben. We importeren (of _includen_) die.
+Vervolgens maken we twee variabelen aan waarin de bestanden komen die dienst doen als return- en exception-channel.
+We noemen deze bestanden de uitvoerbestanden.
+Merk op dat C geen exceptions ondersteunt, maar TESTed verwacht toch een bestand voor het exception-channel.
+Anders zal TESTed ervan uitgaan dat er iets verkeerd liep tijdens het uitvoeren.
+We definiëren ook direct een functie om de separator naar alle uitvoerkanalen te schrijven.
 
-Vervolgens maken we twee variabelen aan waarin de bestanden komen die dienst doen als exception- en return-channel. Merk op dat C geen exceptions ondersteunt, maar TESTed verwacht toch een bestand. Anders zal TESTed ervan uitgaan dat er iets verkeerd liep tijdens het uitvoeren. We definiëren ook direct een functie om de separator naar alle uitvoerkanalen te schrijven.
-
-We gebruiken de naam van de context als prefix: dit is omdat in batchcompilatie, alle contexten samen gecompileerd worden. In C is het niet mogelijk om dezelfde naam meerdere keren te gebruiken, dus prefixen we met de contextnaam. In andere programmeertalen met geavanceerdere modulesystemen (zoals Java, Python of Haskell) is dat niet nodig.
-Deze functie slechts éénmaal genereren zou ervoor zorgen dat deze in een ander bestand moet komen (zoals bijvoorbeeld de selector). Dit zorgt er dan wel voor dat het bestand dat gegenereerd wordt door het contextsjabloon niet meer op zichzelf staat. Dat op zichzelf staan is wel nodig, want een context moet ook apart uitgevoerd kunnen worden (in contextcompilatie).
+In onderstaande codefragment, en in de rest van het contextsjabloon wordt regelmatig de naam van de context als prefix gebruikt voor functies en variabelen.
+Dit is omdat het in C niet mogelijk is om in meerdere bestanden functies met dezelfde naam te hebben.
+Als we dus meerdere contexten samen compileren en elke context heeft zijn eigen `write_separator`-functie, dan zou het compileren mislukken.
 
 ```mako
 static FILE* ${context_name}_value_file = NULL;
@@ -371,19 +371,15 @@ static void ${context_name}_write_separator() {
 }
 ```
 
-Als een resultaat geproduceerd wordt (bijvoorbeeld een returnwaarde of een exception), dan moet die waarde op een of andere manier geserialiseerd worden en naar TESTed gestuurd worden.
-Om dit te doen, verwacht TESTed een implementatie van deze functies:
+Als een resultaat geproduceerd wordt voor de return- of exception-channel, dan moet dat resultaat geserialiseerd worden en naar de uitvoerbestanden geschreven worden.
+TESTed verwacht dat volgende functies beschikbaar zijn:
 
-- `send_value` - schrijf een waarde naar een bestand.
-- `send_exception` - schrijf een exception naar een bestand.
-- `send_specific_value` - schrijf het resultaat van een programmeertaalspecifieke evaluatie naar de return-channel.
-- `send_specific_exception` - schrijf het resultaat van een programmeertaalspecifieke evaluatie naar de exception-channel.
+- `send_value(value)` - schrijf een waarde naar een bestand.
+- `send_exception(exception)` - schrijf een exception naar een bestand.
+- `send_specific_value(value)` - schrijf het resultaat van een programmeertaalspecifieke evaluatie naar de return-channel.
+- `send_specific_exception(exception)` - schrijf het resultaat van een programmeertaalspecifieke evaluatie naar de exception-channel.
 
-Als er in het testplan geen uitvoer gedefinieerd staat, zal TESTed een oproep naar een van deze functies genereren en gebruiken.
-Aangezien C geen exceptions ondersteunt, moeten we die al niet implementeren.
-Ook wijken we lichtjes af: we implementeren ze niet als functie, maar als macro. Dit is opnieuw omdat het in C niet gaat om twee bestanden met functies die dezelfde naam hebben samen te compileren.
-
-De implementatie van deze functies is eenvoudig: het betreft het oproepen van de overeenkomende functie uit de `values`-module opgeroepen met het juiste bestand als parameter.
+Concreet in het geval van C zijn de exception-functies niet nodig, daar C geen exceptions ondersteunt. Ook gebruiken we een marco in plaats van een functie: dit opnieuw omdat we niet dezelfde functie in meerdere bestanden kunnen definiëren.
 
 ```mako
 #undef send_value
@@ -393,70 +389,12 @@ De implementatie van deze functies is eenvoudig: het betreft het oproepen van de
 #define send_specific_value(r) send_evaluated(${context_name}_value_file, r)
 ```
 
-Een opmerking terzijde: de lezer stelt zich misschien de vraag dat als de implementatie van deze functies eenvoudig is, waarom TESTed dan niet direct een functieoproep kan genereren die de `values`-module gebruikt?
-Het antwoord hierop is dat de vier functies van hierboven dienst doen als "interface" tussen TESTed en de programmeertaal.
-Hoewel we het er vaak over hebben, is het gebruik van een `values`-module niet opgelegd door TESTed zelf.
-Zo zou de `send_value`-functie ook zelf direct de waarde naar het bestand kunnen schrijven.
-Vanuit het oogpunt van TESTed is de `values`-module een implementatiedetail van de programmeertaal.
+We zien ook dat de implementatie eenvoudig is: we geven de gekregen waarde of exception door aan de juiste functie uit de `values`-module, en geven ook het bestand mee waarin de waarde of exception moet komen.
 
-De functies die we net gedefinieerd hebben zijn de functies die resultaten serialiseren en naar de uitvoerbestanden schrijven. Bij een ingebouwde en geprogrammeerde evaluatie kunnen de resultaten rechtstreeks naar de uitvoerbestanden geschreven worden.
-Een testgeval kan echter ook een programmeertaalspecifieke evaluatie hebben.
-In dat geval moet de geproduceerde waarde niet naar een bestand geschreven worden, maar moet de programmeertaalspecifieke evaluatiecode opgeroepen worden met de geproduceerde waarde als argument, waarna het resultaat van de programmeertaalspecifieke evaluatie naar de uitvoerbestanden geschreven moet worden.
+De lezer zal zich misschien afvragen waarom het nodig is om deze functies te gebruiken: als TESTed een functieoproep naar deze functies kan definiëren, waarom kan TESTed dan niet direct de `values`-module gebruiken, zonder daar deze functies tussen te plaatsen?
 
-Om dit mogelijk te maken, heeft elk testgeval twee evaluatiefuncties nodig:
-
-- `v_evaluate_x` - verwerkt de waarde van testgeval `x`.
-- `e_evaluate_x` - verwerkt de exception van testgeval `x`.
-
-Het is gelukkig niet nodig om bij het implementeren van deze functies rekening te houden met alle evaluatiemogelijkheden en hoe de programmeertaalspecifieke evaluatiecode opgeroepen moet worden.
-Deze beslissing wordt gemaakt door TESTed en het resultaat van deze beslissing zal beschikbaar zijn in de variabele `testcase.value_function` voor elk testgeval.
-Er is ook een variabele `testcase.exception_function`, maar die gebruiken we niet in C (want C ondersteunt nog steeds geen exceptions).
-
-Wat zit er nu concreet in die variabelen? Een geserialiseerde functieoproep. Voor het implementeren van de evaluatiefuncties in de sjablonen volstaat het dus om als implementatie de door TESTed aangeleverde functieoproep te gebruiken.
-
-In het geval van C gebruiken we opnieuw macro's:
-
-```mako
-% for testcase in testcases:
-    % if testcase.value_function:
-        #define ${context_name}_v_evaluate_${loop.index}(value) <%include file="statement.mako" args="statement=testcase.value_function"/>
-    % endif
-% endfor
-```
-
-Doordat de functionaliteit om te evalueren verspreid zit doorheen het contextsjabloon, is het handig om een stappenplan te hebben van wat er nu juist gebeurt (in dit stappenplan hebben we enkele C-specifieke dingen achterwege gelaten, zoals de prefix en het feit dat het om macro's gaat):
-
-1. Stel dat testgeval 20 een waarde produceert, in dit geval een returnwaarde `5`.
-2. Zoals we hieronder zullen zien, zal de functie `v_evaluate_20` opgeroepen worden met als parameter `5`.
-3. De implementatie van `v_evaluate_20` werd ons gegeven door TESTed. Er zijn twee mogelijkheden:
-
-    1. De evaluatie van testgeval 20 is een ingebouwde of geprogrammeerde evaluatie. In dat geval zal de waarde naar de uitvoerbestanden geschreven moeten worden. De uiteindelijke implementatie van `v_evaluate_20` zal er zo uitzien (voorbeeld in Python):
-      
-        ```python
-        def v_evaluate_20(value):
-            send_value(value)
-        ```
-      
-        De oproep `send_value(value)` is wat er in de variabele `testcase.value_function` zal zitten. De `send_value`-functie hebben we net geïmplementeerd, en die geeft de waarde door aan de `values`-module, die de waarde uiteindelijk uitschrijft naar het bestand met de returnwaarden.
-   
-    2. De evaluatie van testgeval 20 is een programmeertaalspecifieke evaluatie. In dat geval moet eerst de evaluatiecode uitgevoerd worden, waarna het resultaat daarvan naar de uitvoerbestanden geschreven moet worden. De uiteindelijke implementatie van `v_evaluate_20` zal er zo uitzien (voorbeeld in Python):
-   
-        ```python
-        def v_evaluate_20(value):
-            send_specific_value(specific_evaluate(value))
-        ```
-        De expressie `send_specific_value(specific_evaluate(value))` is wat er in de variabele `testcase.value_function` zal zitten. De `specific_evaluate`-functie is beschikbaar omdat we helemaal in het begin van het contextsjabloon de programmeertaalspecifieke evaluators hebben geïmporteerd. De `send_specific_value`-functie is opnieuw een functie die we hiervoor geïmplementeerd hebben en de waarde zal uitschrijven naar de uitvoerbestanden.
-
-
-De weg die een waarde aflegt tussen het produceren van die waarde en het schrijven naar een bestand is dus als volgt samen te vatten:
-
-```text
-waarde -> v_evaluate_x -> send_value -> values.send_value -> bestand
-```
-of
-```text
-waarde -> v_evaluate_x -> specific_evaluation -> send_specific_value -> values.send_specific_value -> bestand
-```
+Het antwoord is dat de `values`-module niet verplicht is. Dit is een conventie die in alle ondersteunde programmeertalen gebruikt wordt, maar het is evengoed mogelijk om bij de implementatie van bijvoorbeeld `send_value` de waarde rechtstreeks naar het bestand te schrijven.
+Deze functies moeten beschouwd worden als de "interface" tussen TESTed en de programmeertaal: TESTed verwacht dat deze functies bestaan en de waarde of exception naar het juiste bestand schrijven, maar hoe dat gebeurt maakt voor TESTed niet uit.
 
 Nu zijn we aangekomen bij het uitvoeren van de testgevallen zelf. In C gebeurt dit in een functie die de naam van de context krijgt. Als eerste stap maken we de bestanden voor de return- en exception-channel aan.
 
@@ -472,12 +410,12 @@ De `before`-code is een fragment code dat uitgevoerd wordt voor het uitvoeren va
 Deze kan opgegeven worden in het testplan.
 
 Verder schrijven de _separator_ naar de uitvoerbestanden door gebruik te maken van de functie die we eerder gedefinieerd hebben in ons sjabloon.
-Zoals we reeds bespraken, komt de uitvoer van de return- en exception-channel in bestanden terecht. Het is nodig om de waarden van elkaar te kunnen onderscheiden, om goed te weten waar de resultaten van een testgeval stoppen en waar de resultaten voor het volgende testgeval beginnen.
+Zoals we reeds bespraken, komt de uitvoer van de return- en exception-channel in bestanden terecht. Het is nodig om de waarden van elkaar te kunnen onderscheiden, om goed te weten waar de resultaten van een testgeval stoppen en waar de resultaten van het volgende testgeval beginnen.
 Hiervoor gebruiken we de _separator_.
 
-Het is belangrijk om de separator altijd voor de aanvang van een testgeval naar de uitvoerbestanden te schrijven. TESTed is daar zo op voorzien: de separator na het testgeval uitschrijven zal tot verkeerde resultaten leiden.
+Het is belangrijk om de separator altijd vóór de aanvang van een testgeval naar de uitvoerbestanden te schrijven. TESTed is daar zo op voorzien: de separator na het testgeval uitschrijven zal tot verkeerde resultaten leiden.
 
-Tot slot roepen we de `main`-functie van de oplossing op indien het testplan dat vereist. Oefeningen waar geen `main`-functie opgeroepen wordt zijn bijvoorbeeld deze waarbij de student een functie moet implementeren.
+Ook roepen we de `main`-functie van de oplossing op indien het testplan dat vereist. Oefeningen waar geen `main`-functie opgeroepen wordt zijn bijvoorbeeld deze waarbij de student een functie moet implementeren.
 
 TODO: arguments in de main-functie
 
@@ -491,39 +429,28 @@ TODO: arguments in de main-functie
     % endif
 ```
 
-Hieronder genereren we de testcode voor de "gewone" testgevallen. Elk testgeval heeft een statement als invoer. Indien dit statement een uitdrukking is en we zijn geïnteresseerd in de returnwaarde, moeten we natuurlijk de waarde opvangen. Dat gebeurt met `v_evaluate_${loop.index}`, zoals we eerder besproken. De `\` op het einde duidt aan dat het regeleinde weggelaten mag worden (dit is een extensie van Mako die gebruikt wordt in TESTed).
-
-Voor elk testgeval schrijven we ook opnieuw de separator.
+Vervolgens genereren we de code voor alle normale testgevallen.
+Omdat C geen exceptions ondersteunt, is deze implementatie eenvoudig: we schrijven de separator naar de uitvoerbestanden en voeren het invoerstatement uit.
 
 ```mako
     % for testcase in testcases:
-        ${context_name}_write_delimiter();
-        ## If value_function exists, we have an expression.
-        ## If so, wrap the call with the evaluation function, to
-        ## send the return value to TESTed.
-        % if testcase.value_function:
-            ${context_name}_v_evaluate_${loop.index}(\
-        % endif
-        <%include file="statement.mako" args="statement=testcase.command" />\
-        % if testcase.value_function:
-            )\
-        % endif
-        ;        
+        ${context_name}_write_separator();
+        <%include file="statement.mako" args="statement=testcase.input_statement()" />;
     % endfor
 ```
 
-Als de invoer voor het testgeval een uitdrukking is, zal bovenstaande fragment leiden tot een functieoproep die er zo uitziet:
 
-```c
-context_0_1_v_evaluate_1(functieoproep());
-```
+Dat invoerstatement is `testcase.input_statement()`, wat een geserialiseerd statement zal teruggeven.
+Wat dat statement juist is, is eigenlijk niet relevant voor het sjabloon, maar het kan toch geen kwaad om het te weten:
 
-In de andere gevallen hebben we geen uitdrukking, maar een assignment. Dan zal
-bovenstaande fragment resulteren in deze code:
-
-```c
-int variable = functieoproep();
-```
+- Als de invoer van het testgeval een assignment is, zal dit resulteren in code die er zo uitziet:
+    ```c
+    int variable = functieoproep();
+    ```
+- Is de invoer een uitdrukking (_expression_) en zijn we geïnteresseerd in de returnwaarde (het is dus niet van het type `void`), dan zal de gegenereerde code er als volgt uitzien:
+    ```c
+    send_value(functieoproep());
+    ```
 
 Als afsluiter zetten we de `after`-code en sluiten we de bestanden.
 De `after`-code is analoog aan de `before`-code.
