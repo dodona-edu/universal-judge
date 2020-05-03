@@ -19,13 +19,13 @@ def read_config() -> DodonaConfig:
     return DodonaConfig(**{
         "memory_limit":         536870912,
         "time_limit":           60,
-        "programming_language": 'haskell',
+        "programming_language": 'c',
         "natural_language":     'nl',
-        "resources":            Path('../../exercise/division/evaluation'),
-        "source":               Path('../../exercise/division/solution/wrong.hs'),
+        "resources":            Path('../../exercise/echo-function/evaluation'),
+        "source":               Path('../../exercise/echo-function/solution/correct.c'),
         "judge":                Path('.'),
         "workdir":              Path('../workdir'),
-        "plan_name":            "plan.json",
+        "plan_name":            "one-testcase.tson",
         "options":              {
             "parallel": True,
             "mode":     "batch",
@@ -46,6 +46,9 @@ if __name__ == '__main__':
     formatter = logging.Formatter('%(name)s:%(levelname)s:%(message)s')
     ch.setFormatter(formatter)
     log.addHandler(ch)
+
+    # Create workdir if needed.
+    config.workdir.mkdir(exist_ok=True)
 
     # Delete content in work dir
     # noinspection PyTypeChecker
