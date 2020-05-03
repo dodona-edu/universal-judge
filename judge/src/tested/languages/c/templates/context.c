@@ -43,15 +43,6 @@ static void ${context_name}_write_separator() {
 #undef send_specific_value
 #define send_specific_value(r) send_evaluated(${context_name}_value_file, r)
 
-##################################
-## Other testcase evaluators    ##
-##################################
-% for testcase in testcases:
-    % if testcase.value_function:
-        #define ${context_name}_v_evaluate_${loop.index}(value) <%include file="statement.mako" args="statement=testcase.value_function"/>
-    % endif
-% endfor
-
 
 int ${context_name}() {
 
@@ -71,18 +62,7 @@ int ${context_name}() {
     ## Generate the actual tests based on the context.
     % for testcase in testcases:
         ${context_name}_write_separator();
-        ## If value_function exists, we have an expression.
-        ## If so, wrap the call with the evaluation function, to
-        ## send the return value to TESTed.
-        % if testcase.value_function:
-            ${context_name}_v_evaluate_${loop.index}(\
-        % endif
-        <%include file="statement.mako" args="statement=testcase.command" />\
-        % if testcase.value_function:
-            )\
-        % endif
-        ;
-
+        <%include file="statement.mako" args="statement=testcase.input_statement()" />;
     % endfor
 
     ${after}

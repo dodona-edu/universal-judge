@@ -89,4 +89,6 @@ def configuration(config, exercise: str, language: str, work_dir: Path,
 def execute_config(config: DodonaConfig) -> str:
     actual = StringIO()
     run(config, actual)
-    return actual.getvalue()
+    result = actual.getvalue()
+    print(result)
+    return result

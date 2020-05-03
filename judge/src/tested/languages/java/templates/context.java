@@ -64,30 +64,6 @@ public class ${context_name} implements Closeable {
         Values.sendEvaluated(exceptionWriter, r);
     }
 
-    ##################################
-    ## Main testcase evalutors      ##
-    ##################################
-
-    private void eEvaluateMain(Throwable value) throws Exception {
-        <%include file="statement.mako" args="statement=context_testcase.exception_function"/>;
-    }
-
-    ##################################
-    ## Other testcase evaluators    ##
-    ##################################
-
-    % for testcase in testcases:
-        % if testcase.value_function:
-            private void vEvaluate${loop.index}(Object value) throws Exception {
-                <%include file="statement.mako" args="statement=testcase.value_function"/>;
-            }
-        % endif
-
-        private void eEvaluate${loop.index}(Throwable value) throws Exception {
-            <%include file="statement.mako" args="statement=testcase.exception_function"/>;
-        }
-    % endfor
-
     ## Most important function: actual execution happens here.
     void execute() throws Exception {
         ## In Java, we must execute_module the before and after code in the context.
@@ -102,9 +78,9 @@ public class ${context_name} implements Closeable {
                     "${argument}", \
                 % endfor
                 });
-                this.eEvaluateMain(null);
+                <%include file="statement.mako" args="statement=context_testcase.exception_statement()" />;
             } catch (Exception | AssertionError e) {
-                this.eEvaluateMain(e);
+                <%include file="statement.mako" args="statement=context_testcase.exception_statement('e')" />;
             }
         % endif
 
@@ -112,23 +88,15 @@ public class ${context_name} implements Closeable {
         % for testcase in testcases:
             ## In Java, we need special code to make variables available outside of
             ## the try-catch block.
-           this.writeSeparator();
+            this.writeSeparator();
             % if isinstance(testcase.command, get_args(Assignment)):
                 <%include file="declaration.mako" args="tp=testcase.command.type,value=testcase.command.expression" /> ${testcase.command.name} = null;
             % endif
             try {
-                ## If we have a value function, we have an expression.
-                % if testcase.value_function:
-                    this.vEvaluate${loop.index}(\
-                % endif
-                <%include file="statement.mako" args="statement=testcase.command" />
-                % if testcase.value_function:
-                    )\
-                % endif
-                ;
-                this.eEvaluate${loop.index}(null);
+                <%include file="statement.mako" args="statement=testcase.input_statement()" />;
+                <%include file="statement.mako" args="statement=testcase.exception_statement()" />;
             } catch (Exception | AssertionError e) {
-                this.eEvaluate${loop.index}(e);
+                <%include file="statement.mako" args="statement=testcase.exception_statement('e')" />;
             }
         % endfor
 

@@ -136,7 +136,7 @@ class ObjectType(WithFeatures, WithFunctions):
 
 @dataclass
 class NothingType(WithFeatures, WithFunctions):
-    type: NothingTypes
+    type: NothingTypes = BasicNothingTypes.NOTHING
     data: Literal[None] = None
 
     def get_used_features(self) -> FeatureSet:

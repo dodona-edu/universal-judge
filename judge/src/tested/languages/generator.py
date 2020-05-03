@@ -4,7 +4,7 @@ Translates items from the testplan into the actual programming language.
 import logging
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Union, Tuple, Optional, Set
+from typing import List, Union, Tuple, Optional, Set, Callable
 
 from mako import exceptions
 
@@ -14,7 +14,8 @@ from ..configs import Bundle
 from ..datatypes import BasicSequenceTypes
 from ..dodona import ExtendedMessage
 from ..serialisation import (Value, SequenceType, Identifier, FunctionType,
-                             FunctionCall, Expression, Statement, Assignment)
+                             FunctionCall, Expression, Statement, Assignment,
+                             NothingType)
 from ..testplan import (EmptyChannel, IgnoredChannel, TextData, ProgrammedEvaluator,
                         SpecificEvaluator, Testcase, ContextTestcase, Context,
                         ExceptionOutput, ValueOutput)
@@ -41,16 +42,39 @@ STATEMENT = "statement"
 class _TestcaseArguments:
     """Arguments for a testcases testcase template."""
     command: Statement
-    value_function: Optional[FunctionCall]
-    exception_function: FunctionCall
+    value_function: Optional[Callable[[Expression], Statement]]
+    exception_function: Callable[[Expression], Statement]
+
+    def input_statement(self, override: Optional[str] = None) -> Statement:
+        if self.value_function:
+            assert isinstance(self.command, get_args(Expression))
+            # Replace the arguments
+            if override:
+                return self.value_function(Identifier(override))
+            else:
+                return self.value_function(self.command)
+        else:
+            return self.command
+
+    def exception_statement(self, name: Optional[str] = None) -> Statement:
+        if name:
+            return self.exception_function(Identifier(name))
+        else:
+            return self.exception_function(NothingType())
 
 
 @dataclass
 class _ContextTestcaseArguments:
     """Arguments for a context_testcase testcase template."""
     exists: bool
-    exception_function: FunctionCall
+    exception_function: Callable[[Expression], Statement]
     arguments: List[str]
+
+    def exception_statement(self, name: Optional[str] = None) -> Statement:
+        if name:
+            return self.exception_function(Identifier(name))
+        else:
+            return self.exception_function(NothingType())
 
 
 @dataclass
@@ -106,7 +130,7 @@ def _create_handling_function(
         send_value: str,
         send_evaluated: str,
         output: Union[ExceptionOutput, ValueOutput]
-) -> Tuple[FunctionCall, Optional[str]]:
+) -> Tuple[Callable[[Expression], Statement], Optional[str]]:
     """
     Create a function to handle the result of a return value or an exception.
 
@@ -129,36 +153,41 @@ def _create_handling_function(
     :param output: The evaluator.
     :return: A tuple containing the call and the name of the evaluator if present.
     """
-
-    arguments = [Identifier(EVALUATION_ARGS)]
     lang_config = b.lang_config
-
     if (hasattr(output, "evaluator")
             and isinstance(output.evaluator, SpecificEvaluator)):
         evaluator = output.evaluator.for_language(b.config.programming_language)
         evaluator_name = lang_config.conventionalize_namespace(evaluator.file.stem)
-        arguments = [FunctionCall(
-            type=FunctionType.NAMESPACE,
-            name=evaluator.name,
-            namespace=evaluator_name,
-            arguments=arguments
-        )]
-        function_name = send_evaluated
     else:
-        function_name = send_value
         evaluator_name = None
 
-    return FunctionCall(
-        type=FunctionType.FUNCTION,
-        name=lang_config.conventionalize_function(function_name),
-        arguments=arguments
-    ), evaluator_name
+    def generator(expression: Expression) -> Statement:
+        if (hasattr(output, "evaluator")
+                and isinstance(output.evaluator, SpecificEvaluator)):
+            arguments = [FunctionCall(
+                type=FunctionType.NAMESPACE,
+                name=evaluator.name,
+                namespace=evaluator_name,
+                arguments=[expression]
+            )]
+            function_name = send_evaluated
+        else:
+            arguments = [expression]
+            function_name = send_value
+
+        return FunctionCall(
+            type=FunctionType.FUNCTION,
+            name=lang_config.conventionalize_function(function_name),
+            arguments=arguments
+        )
+
+    return generator, evaluator_name
 
 
 def _create_exception_function(
         bundle: Bundle,
         testcase: Union[Testcase, ContextTestcase]
-) -> Tuple[FunctionCall, Optional[str]]:
+) -> Tuple[Callable[[Expression], Statement], Optional[str]]:
     """
     Create a function call for handling exceptions. These functions assume there is
     a variable called "value", which must be reachable from where the function will

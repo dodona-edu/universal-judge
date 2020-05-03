@@ -53,26 +53,6 @@ def send_specific_value(r):
 def send_specific_exception(r):
     values.send_evaluated(exception_file, r)
 
-
-##################################
-## Main testcase evaluators     ##
-##################################
-def e_evaluate_main(value):
-    <%include file="statement.mako" args="statement=context_testcase.exception_function"/>
-
-##################################
-## Other testcase evaluators    ##
-##################################
-% for testcase in testcases:
-    % if testcase.value_function:
-        def v_evaluate_${loop.index}(value):
-            <%include file="statement.mako" args="statement=testcase.value_function"/>
-    % endif
-
-    def e_evaluate_${loop.index}(value):
-        <%include file="statement.mako" args="statement=testcase.exception_function"/>
-% endfor
-
 ${before}
 
 ## Prepare the command line arguments if needed.
@@ -94,13 +74,13 @@ try:
 except Exception as e:
     ## If there is a main test case, pass the exception to it.
     % if context_testcase.exists:
-        e_evaluate_main(e)
+        <%include file="statement.mako" args="statement=context_testcase.exception_statement('e')" />
     % else:
         raise e
     % endif
 % if context_testcase.exists:
     else:
-        e_evaluate_main(None)
+        <%include file="statement.mako" args="statement=context_testcase.exception_statement()" />
 % endif
 
 
@@ -110,18 +90,12 @@ except Exception as e:
     <% testcase: _TestcaseArguments %>
     try:
         ## If we have a value function, we have an expression.
-        % if testcase.value_function:
-            v_evaluate_${loop.index}(\
-        % endif
-        <%include file="statement.mako" args="statement=testcase.command" />\
-        % if testcase.value_function:
-            )\
-        % endif
-
+        <%include file="statement.mako" args="statement=testcase.input_statement()" />
+        
     except Exception as e:
-        e_evaluate_${loop.index}(e)
+        <%include file="statement.mako" args="statement=testcase.exception_statement('e')" />
     else:
-        e_evaluate_${loop.index}(None)
+        <%include file="statement.mako" args="statement=testcase.exception_statement()" />
 
 % endfor
 

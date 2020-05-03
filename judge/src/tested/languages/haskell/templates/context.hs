@@ -61,26 +61,9 @@ sendSpecificException r = Values.sendEvaluated exception_file r
 
 
 ## Exception handler
-handleException :: Exception e => (Maybe e -> IO()) -> Either e a -> IO ()
-handleException f (Left e) = f (Just e)
-handleException f (Right _) = f (Nothing)
-
-##################################
-## Main testcase evaluators     ##
-##################################
-
-eEvaluateMain value = <%include file="statement.mako" args="statement=context_testcase.exception_function"/>
-
-##################################
-## Other testcase evaluators    ##
-##################################
-% for testcase in testcases:
-    % if testcase.value_function:
-        vEvaluate${loop.index} value = <%include file="statement.mako" args="statement=testcase.value_function"/>
-    % endif
-
-    eEvaluate${loop.index} value = <%include file="statement.mako" args="statement=testcase.exception_function"/>
-% endfor
+handleException :: Exception e => (Either e a) -> Maybe e
+handleException (Left e) = Just e
+handleException (Right _) = Nothing
 
 ## Main function of the context.
 main = do
@@ -95,7 +78,7 @@ main = do
             % endfor
         ]
         result <- try (withArgs mainArgs ${submission_name}.main) :: IO (Either SomeException ())
-        handleException eEvaluateMain result
+        let ee = handleException result in <%include file="statement.mako" args="statement=context_testcase.exception_statement('ee')"/>
     % endif
 
     % for testcase in testcases:
@@ -107,8 +90,10 @@ main = do
             <%include file="statement.mako" args="statement=testcase.command,root=False" />
         % else:
             result${loop.index} <- catch
-                (<%include file="statement.mako" args="statement=testcase.command,lifting=True" /> >>= \r -> vEvaluate${loop.index} r >> eEvaluate${loop.index} (Nothing :: Maybe SomeException))
-                (\e -> eEvaluate${loop.index} (Just (e :: SomeException)))
+                (<%include file="statement.mako" args="statement=testcase.command,lifting=True" /> 
+                    >>= \r -> <%include file="statement.mako" args="statement=testcase.input_statement('r')" />
+                    >> let ee = (Nothing :: Maybe SomeException) in <%include file="statement.mako" args="statement=testcase.exception_statement('ee')"/>)
+                (\e -> let ee = (Just (e :: SomeException)) in <%include file="statement.mako" args="statement=testcase.exception_statement('ee')"/>)
         % endif
 
     % endfor

@@ -63,7 +63,6 @@ def test_io_function_exercise(language: str, tmp_path: Path, pytestconfig):
 def test_specific_evaluation(language: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "echo-function", language, tmp_path, "two-specific.tson", "correct")
     result = execute_config(conf)
-    print(result)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["wrong", "correct"]
     assert len(updates.find_all("append-message")) == 2
@@ -73,7 +72,6 @@ def test_specific_evaluation(language: str, tmp_path: Path, pytestconfig):
 def test_programmed_evaluation(language: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "echo-function", language, tmp_path, "programmed.tson", "correct")
     result = execute_config(conf)
-    print(result)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["correct"] * 3
     assert len(updates.find_all("append-message")) == 3
@@ -92,7 +90,6 @@ def test_language_evaluator_exception(lang: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "division", lang, tmp_path, "plan.json", "wrong")
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
-    print(result)
     assert updates.find_status_enum() == ["wrong"]
     assert len(updates.find_all("append-message")) == 1
 
@@ -271,6 +268,5 @@ def test_objects(language: str, tmp_path: Path, pytestconfig):
 def test_objects_error(language: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "objects", language, tmp_path, "plan.tson", "correct")
     result = execute_config(conf)
-    print(result)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["internal error"]
