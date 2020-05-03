@@ -7,10 +7,10 @@ static FILE* context_0_1_value_file = NULL;
 static FILE* context_0_1_exception_file = NULL;
 
 static void context_0_1_write_separator() {
-    fprintf(context_0_1_value_file, "--iIyiUwfg3-- SEP");
-    fprintf(context_0_1_exception_file, "--iIyiUwfg3-- SEP");
-    fprintf(stdout, "--iIyiUwfg3-- SEP");
-    fprintf(stderr, "--iIyiUwfg3-- SEP");
+    fprintf(context_0_1_value_file, "--jLUzXq6kg-- SEP");
+    fprintf(context_0_1_exception_file, "--jLUzXq6kg-- SEP");
+    fprintf(stdout, "--jLUzXq6kg-- SEP");
+    fprintf(stderr, "--jLUzXq6kg-- SEP");
 }
 
 #undef send_value
@@ -21,8 +21,8 @@ static void context_0_1_write_separator() {
 
 int context_0_1() {
 
-    context_0_1_value_file = fopen("iIyiUwfg3_values.txt", "w");
-    context_0_1_exception_file = fopen("iIyiUwfg3_exceptions.txt", "w");
+    context_0_1_value_file = fopen("jLUzXq6kg_values.txt", "w");
+    context_0_1_exception_file = fopen("jLUzXq6kg_exceptions.txt", "w");    
 
     context_0_1_write_separator();
 
