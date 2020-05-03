@@ -41,9 +41,11 @@ Het installeren van deze vereisten gebeurt op de gebruikelijke manier:
 Voor de programmeertalen zijn volgende dependencies nodig:
 
 \begin{description}
-    \item[Python] Er zijn geen dependencies nodig voor het beoordelen van Python-oplossingen, buiten dat \texttt{python} beschikbaar moet zijn in de \texttt{PATH}.
+    \item[Python] Indien de linter gebruikt wordt, is \texttt{pylint} een dependency.
+    Daarnaast moet \texttt{python} beschikbaar moet zijn in de \texttt{PATH}.
+    Door optimalisaties is het momenteel aan te raden om dezelfde Python-versie te gebruiken voor TESTed als voor de Python-oefeningen.
     \item[Java] TESTed vereist Java 11, maar heeft verder geen dependencies.
-                De commando's \texttt{javac} en \texttt{java} moeten beschikbaar zijn in de \texttt{PATH}.
+    De commando's \texttt{javac} en \texttt{java} moeten beschikbaar zijn in de \texttt{PATH}.
     \item[Haskell] Voor Haskell is \acronym{GHC} 8.6 or later nodig.
     Daarnaast is \texttt{aeson} nodig.
     Beiden moeten globaal beschikbaar zijn in de \texttt{PATH}.

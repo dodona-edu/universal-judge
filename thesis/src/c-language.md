@@ -40,11 +40,11 @@ universal-judge
 
 Het configuratiebestand is een json-bestand met enkele eigenschappen van de programmeertaal. Dit configuratiebestand maakt het implementeren van de configuratieklasse een stuk eenvoudiger, omdat de implementatie van die klasse daardoor veel minder lang zal zijn. Maak eerst het configuratiebestand aan: `judge/src/tested/languages/c/config.json`.
 
-Merk op dat het configuratiebestand slechts een hulpmiddel is: indien gewenst kunnen al deze opties ook ingesteld worden door de juiste functie te implementeren in de configuratieklasse, maar we verwachten dat dit in veel gevallen niet nodig zal zijn.
+Merk op dat het configuratiebestand slechts een hulpmiddel is: indien gewenst kunnen al deze opties ook ingesteld worden door de juiste methodes te implementeren in de configuratieklasse, maar we verwachten dat dit in veel gevallen niet nodig zal zijn.
 
 ## Algemene opties
 
-- `general.dependencies` - Dit zijn bestanden die beschikbaar zullen zijn tijdens het compileren en tijdens het uitvoeren van de beoordeling. Dit betekent dat deze dependencies gebruikt kunnen worden in de testcode voor de contexten en de evaluatiecode voor de geprogrammeerde en programmeertaalspecifieke code. In het geval van C is dit de `values` module, waarvan we de implementatie later bespreken. Het kan gebeuren dat de code van de dependencies ook beschikbaar is voor de ingediende oplossing. Dit is echter toeval en niet de bedoeling. Er is momenteel geen ondersteuning om dependencies beschikbaar te maken voor de ingediende oplossing.
+- `general.dependencies` - Dit zijn bestanden die beschikbaar zullen zijn tijdens het compileren en tijdens het uitvoeren van de beoordeling. Dit betekent dat deze dependencies gebruikt kunnen worden in de testcode voor de contexten en de evaluatiecode voor de geprogrammeerde en programmeertaalspecifieke code. In het geval van C is dit de `values`-module, waarvan we de implementatie later bespreken. Het kan gebeuren dat de code van de dependencies ook beschikbaar is voor de ingediende oplossing. Dit is echter toeval en niet de bedoeling. Er is momenteel geen ondersteuning om dependencies beschikbaar te maken voor de ingediende oplossing.
 - `general.selector` - Dit geeft aan of de programmeertaal gebruikmaakt van een selector tijdens het uitvoeren van code die gecompileerd is in batchcompilatie. Voor de meeste talen met compilatie zal dit `true` zijn, zoals ook bij C.
 TODO: referentie!
 - `extensions.file` - Geeft de voornaamste bestandsextensie aan van de bestanden. Met voornaamste bedoelen we de extensie van de bestanden die gegenereerd worden. Bijvoorbeeld bij C bestaan zowel `.h` en `.c`, maar de gegenereerde code gebruikt `.c`.
@@ -68,7 +68,7 @@ TODO: referentie!
 
 ## Codestijl
 
-Taalelementen als functies en namespaces kunnen omgezet worden in functie van de codestijl die gebruikelijk is in de programmeertaal:
+Programmeertaalelementen zoals functies en namespaces worden omgezet in functie van de codestijl die gebruikelijk is in de programmeertaal:
 
 ```json
 {
@@ -89,7 +89,7 @@ Standaard wordt `snake_case` gebruikt, dus bij C is dit niet strikt nodig om het
 
 ## Functionaliteit
 
-De laatste twee blokken in de configuratie geven aan welke constructies en datatypes de programmeertaal ondersteunt. We hebben reeds besproken welke functionaliteit we willen ondersteunen en welke niet (TODO: reference!). We beginnen met de taalconstructies vast te leggen:
+De laatste twee blokken in de configuratie geven aan welke constructies en gegevenstypes de programmeertaal ondersteunt. We hebben reeds besproken welke functionaliteit we willen ondersteunen en welke niet (TODO: reference!). We beginnen met de taalconstructies vast te leggen:
 
 ```json
 {
@@ -105,9 +105,9 @@ De laatste twee blokken in de configuratie geven aan welke constructies en datat
 }
 ```
 
-Hier kan voor elke taalconstructie opgegeven worden of ze ondersteund wordt of niet. Standaard wordt geen enkele taalconstructie ondersteunt: dit zorgt ervoor dat alle ondersteunde constructies expliciet in het configuratiebestand staan en dat nieuwe taalconstructies toegevoegd kunnen worden zonder dat bestaande configuraties van programmeertalen aangepast moeten worden.
+Hier kan voor elke taalconstructie opgegeven worden of ze ondersteund wordt of niet (met een `boolean`). Standaard wordt geen enkele taalconstructie ondersteund: dit zorgt ervoor dat alle ondersteunde constructies expliciet in het configuratiebestand staan en dat nieuwe taalconstructies toegevoegd kunnen worden zonder dat bestaande configuraties van programmeertalen aangepast moeten worden.
 
-De mogelijke taalconstructie zijn deze uit de enum `tested.features.Construct`. Voor het gemak volgt hieronder een oplijsten en een korte beschrijving van elke taalconstructie:
+De mogelijke taalconstructie zijn deze uit de enum `tested.features.Construct`. Hieronder volgt een lijst van elke taalconstructie en een korte beschrijving:
 
 `objects`
 : Objectgeoriënteerde zaken zoals klassen.
@@ -119,16 +119,16 @@ De mogelijke taalconstructie zijn deze uit de enum `tested.features.Construct`. 
 : Functieoproepen. Merk op dat constructors in het testplan een speciale soort functie zijn, maar deze hangen af van de taalconstructie `objects`.
 
 `assignments`
-: Het toekennen van een waarde aan een variabele. Dit moet eerder los geïnterpreteerd worden als ondersteuning voor iets dat neerkomt op een assigment. Zo kent Haskell bijvoorbeeld geen assignments, want `x = 5` definieert technisch gezien een functie met een constante returnwaarde `5`. Dit moet ook onder `assignments` gerekend worden.
+: Het toekennen van een waarde aan een variabele. Een "assignment" moet ruim geïnterpreteerd worden als ondersteuning voor iets dat neerkomt op een assigment. Zo kent Haskell bijvoorbeeld geen assignments: `x = 5` definieert technisch gezien een functie met een constante returnwaarde `5`. Dit moet ook onder `assignments` gerekend worden.
 
 `heterogeneous_collections`
 : Hiermee bedoelen we verzamelingen met elementen met verschillende gegevenstypes. Dit is bijvoorbeeld geen probleem in Python (`[5, 52.23]`), gaat al iets moeilijker in Java (`List<Object> = List.of(1, 52.23)`), maar zal niet lukken in Haskell.
 
 `heterogeneous_arguments`
-: Hiermee bedoelen we functieoproepen waarbij dezelfde functie meerdere keren wordt opgeroepen met argumenten met verschillende datatypes (bijvoorbeeld eerst `check(True)` daarna `check("hallo")`). Dit zal lukken in Python en Java, maar niet in Haskell en C.
+: Hiermee bedoelen we functieoproepen waarbij dezelfde functie meerdere keren wordt opgeroepen met argumenten met verschillende datatypes (bijvoorbeeld eerst `check(True)` daarna `check('hallo')`). Dit zal lukken in Python en Java, maar niet in Haskell en C.
 
 `evaluation`
-: Of een geprogrammeerde evaluatie mogelijk is in deze programmeertaal. Dit is technisch gezien geen taalconstructie, maar wordt erbij genomen omdat dezelfde infrastructuur gebruikt wordt om te controleren of dit nodig is of niet.
+: Of een geprogrammeerde evaluatie mogelijk is in deze programmeertaal. Dit is technisch gezien geen taalconstructie.
 
 Dan moeten we nu de ondersteuning voor de gegevenstypes vastleggen:
 
@@ -172,10 +172,10 @@ Een gegevenstype kan drie niveaus van ondersteuning hebben:
 - `reduced` - wordt ondersteund, maar wordt herleid tot een basistype (bijvoorbeeld een `list` wordt geïnterpreteerd als een `sequence`)
 - `unsupported` - geen ondersteuning, dit is de standaardwaarde
 
-Een opmerking hierbij is dat de status `reduced` voor de basistypes equivalent is aan `supported`; een basistype reduceren tot een basistype blijft hetzelfde type.
+Een opmerking hierbij is dat de status `reduced` voor de basistypes equivalent is aan `supported`: een basistype reduceren tot een basistype blijft hetzelfde type.
 
 Het is de bedoeling dat de meeste programmeertalen voor het merendeel van de datatypes ten minste `reduced` hebben. Toch is gekozen om `unsupported` als standaardwaarde te nemen; dit zorgt ervoor dat de ondersteunde datatypes explicit uitgeschreven zijn. Ook laat dit opnieuw toe om datatypes toe te voegen aan TESTed zonder bestaande configuraties van programmeertalen te moeten aanpassen.
-Ter illustratie vermelden we hier bij C alle datatypes, ook de niet-ondersteunde.
+Ter illustratie vermelden we hier voor C alle datatypes, ook de niet-ondersteunde.
 
 # Configuratieklasse
 
@@ -197,7 +197,7 @@ In de superklasse, `Language`, zijn de abstracte methodes voorzien van uitgebrei
 
 ## Compileren van de code
 
-Een eerste en belangrijke methode is de methode die de callback voorziet voor de compilatiestap:
+Een eerste en belangrijke methode is de callback voor de compilatiestap:
 
 ```python
 def compilation(self, files: List[str]) -> CallbackResult:
@@ -207,15 +207,15 @@ def compilation(self, files: List[str]) -> CallbackResult:
     return ["gcc", "-std=c11", "-Wall", "evaluation_result.c", "values.c", main_file, "-o", result], [result]
 ```
 
-Doordat het compileren een samenspel is van gegenereerde code uit de sjablonen en de dependencies, moet deze functie met zorg geïmplementeerd worden. Hieronder volgt een (licht gewijzigde) versie van de documentatie van deze methode.
+Doordat het compileren een samenspel is van gegenereerde code uit de sjablonen en de dependencies, moet deze methode met zorg geïmplementeerd worden. Hieronder volgt een (licht gewijzigde) versie van de documentatie van deze methode.
 
 Als argument krijgt deze methode een lijst van bestanden mee waarvan TESTed vermoed dat ze nuttig kunnen zijn voor de compilatiestap. Het bevat onder andere de dependencies uit het configuratiebestand, de ingediende oplossing en de uit de sjablonen gegenereerde bestanden. Die laatste bestanden zijn bijvoorbeeld de verschillende contexten bij een batchcompilatie, maar kunnen ook de evaluator zijn bij een geprogrammeerde evaluatie. De bestanden bestaan uit de naam en een bestandsextensie.
 
 De conventie is om het bestand met de main-functie als laatste te plaatsen.
 
-Al deze bestanden zullen zich bevinden in de map waarin de compilatie plaatsvindt.
+Al deze bestanden zullen zich in de map bevinden waarin de compilatie zal plaatsvinden.
 Het is niet verplicht al deze bestanden ook effectief te gebruiken: sommige programmeertalen hebben zelf een detectiesysteem voor bestanden.
-Zo is het in C voldoende om enkel het laatste bestand met de main-functie te nemen: alle andere bestanden worden gevonden door `gcc`.
+Zo is het in C voldoende om enkel het laatste bestand met de main-functie te gebruiken: alle andere bestanden worden gevonden door `gcc`.
 
 Concreet ziet deze parameter er bijvoorbeeld als volgt uit:
 
@@ -305,7 +305,7 @@ def solution(self, solution: Path, bundle: Bundle):
 # Sjablonen
 
 De derde stap is het schrijven van de sjablonen.
-We hebben uiteraard de verplichte sjablonen nodig (zie TODO REFERENTIE), maar om code te hergebruiken kiezen we ervoor om enkele bijkomende sjablonen te schrijven:
+We hebben uiteraard de verplichte sjablonen nodig (zie TODO REFERENTIE voor een beschrijving van welke sjablonen verplicht zijn en welke niet), maar om code te hergebruiken kiezen we ervoor om enkele bijkomende sjablonen te schrijven:
 
 - `context.c` - het sjabloon om de contextcode te genereren
 - `selector.c` - het sjabloon om de selector voor batchcompilatie
@@ -355,7 +355,7 @@ Merk op dat C geen exceptions ondersteunt, maar TESTed verwacht toch een bestand
 Anders zal TESTed ervan uitgaan dat er iets verkeerd liep tijdens het uitvoeren.
 We definiëren ook direct een functie om de separator naar alle uitvoerkanalen te schrijven.
 
-In onderstaande codefragment, en in de rest van het contextsjabloon wordt regelmatig de naam van de context als prefix gebruikt voor functies en variabelen.
+In onderstaande codefragment, en in de rest van het contextsjabloon, wordt regelmatig de naam van de context als prefix gebruikt voor functies en variabelen.
 Dit is omdat het in C niet mogelijk is om in meerdere bestanden functies met dezelfde naam te hebben.
 Als we dus meerdere contexten samen compileren en elke context heeft zijn eigen `write_separator`-functie, dan zou het compileren mislukken.
 
@@ -504,21 +504,67 @@ int main(int argc, const char* argv[]) {
 }
 ```
 
-## Deserialisatiesjablonen
+## Statementsjabloon
 
-De sjablonen `declaration.mako`, `function.mako`, `statement.c`, `value.mako`, `value_arguments.mako` en `value_basic.mako` zorgen er samen voor dat items uit het serialisatieformaat in C-code omgezet kunnen worden.
+Dit sjabloon wordt door TESTed gebruikt om statements te vertalen naar code.
+Dit omvat assignments, functieoproepen, waarden, enzovoort:
 
-De implementatie van deze sjablonen is niet bijster ingewikkeld: ze komen neer op een groot `switch`-statement dat de verschillende items omzet. De implementaties van deze sjablonen (zowel in C, maar ook die van Java, Python en Haskell) kunnen inspiratie bieden hoe deze te implementeren zijn.
+```mako
+## Convert a statement and/or expression into C code.
+<%! from tested.utils import get_args %>
+<%! from tested.serialisation import Value, Identifier, FunctionCall, Assignment %>
+
+<%page args="statement,full=False"/>
+% if isinstance(statement, Identifier):
+    ## If the expression is an identifier, just print it.
+    ${statement}\
+% elif isinstance(statement, FunctionCall):
+    ## Delegate to the function template for function calls.
+    <%include file="function.mako" args="function=statement"/>
+% elif isinstance(statement, get_args(Value)):
+    ## Delegate to the value template if we have a value.
+    <%include file="value.mako", args="value=statement" />
+% else:
+    <% assert isinstance(statement, get_args(Assignment)) %>
+    % if full:
+        ## If full is true, we want to include the type of the variable.
+        ##      int name = expression;
+        ##      ---------- <- This is the declaration part.  
+        <%include file="declaration.mako" args="value=statement.expression" /> \
+    % endif
+    ${statement.name} = <%include file="statement.mako" args="statement=statement.expression"/>
+% endif
+```
+
+De implementatie van dit sjabloon komt conceptueel neer op een grote `switch`, waarbij we delegeren naar het juiste sjabloon op basis van wat het statement juist is.
+
+Een aspect dat meer uitleg vraagt, is de `full`-parameter.
+Dit geeft aan dat het gegevenstype van de variabele bij een assignment ook nodig is.
+Het verschil is duidelijk met een voorbeeld:
+
+```c
+int variabele = 5; // Met declaration
+variabele = 6; // Zonder variabele.
+```
+
+In C is deze parameter minder relevant, maar deze is vooral nodig in talen zoals Java.
+
+## Overige
+
+De overige sjablonen vertalen ook elk een taalelement op een gelijkaardige wijze als het statementsjabloon.
+Het gaat om de sjablonen `declaration.mako`, `function.mako`, `value.mako`, `value_arguments.mako` en `value_basic.mako`.
+
+Daar de sjablonen qua werken sterk lijken op het statementsjabloon hebben we ze niet toegevoegd aan dit hoofdstuk: de implementatie ervan is te bekijken in de repository.
 
 # Hulpmodules
 
-Zoals we in het begin van dit hoofdstuk vermeld hebben, zijn er twee bestanden die als "dependency" opgegeven zijn: `values.c` en `values.h`. Deze bestanden implementeren het serialiseren van data naar het serialisatieformaat. Er moeten enkele zaken geserialiseerd kunnen worden:
+Zoals we in het begin van dit hoofdstuk vermeld hebben, zijn er twee bestanden die als "dependency" opgegeven zijn: `values.c` en `values.h`. Deze bestanden implementeren het serialiseren van data naar het serialisatieformaat en vormen samen de `values`-module. De zaken die geserialiseerd moeten worden:
 
 - Waarden, zoals returnwaarden.
 - Exceptions (niet het geval in C, want die bestaan niet in C).
 - Resultaten van geprogrammeerde en programmeertaalspecifieke evaluaties.
 
-Opnieuw zijn de implementaties hiervoor de beste handleiding. Ook is de manier waarop dit geïmplementeerd wordt vrij: voor alle ondersteunde programmeertalen is gekozen voor bijkomende bestanden, maar niets houdt tegen op de waarden _inline_ te serialiseren in het contextsjabloon (op de posities waar nu een oproep van een functie uit `values.c` gebeurt).
+Hier nemen we de implementatie opnieuw niet op, daar de implementatie van deze module sterk programmeertaalafhankelijk is.
 
 # Afsluiting
 

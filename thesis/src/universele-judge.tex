@@ -525,16 +525,21 @@ Ook zijn de sjablonen verantwoordelijk voor het genereren van de code die de opl
 
 TESTed heeft een aantal standaardsjablonen nodig, waaraan vastgelegde parameters meegegeven worden en die verantwoordelijk zijn voor specifieke functionaliteit.
 Deze verplichte sjablonen zijn:
+
 \begin{description}
     \item[\texttt{statement}] Vertaalt een statement uit het testplan naar code.
     \item[\texttt{context}] Genereert de code om de testgevallen uit een context uit te voeren.
-    \item[\texttt{selector}] Leest een parameter in en voert aan de hand van die parameter de juiste context uit bij de batchcompilatie (zie de volgende subparagraaf en \cref{sec:performantie}).
+    \item[\texttt{selector}*] Leest een parameter in en voert aan de hand van die parameter de juiste context uit bij de batchcompilatie (zie de volgende subparagraaf en \cref{sec:performantie}).
     Dit sjabloon is niet in elke programmeertaal nodig: in Python kunnen de contexten samen gecompileerd worden zonder selector, terwijl dit in Java en Haskell niet mogelijk is.
-    \item[\texttt{evaluator\_executor}] Genereert de code om een geprogrammeerde evaluatie te starten.
-    \item[\texttt{expression}] Vertaalt een expressie naar testcode.
+    \item[\texttt{evaluator\_executor}*] Genereert de code om een geprogrammeerde evaluatie te starten.
 \end{description}
 
-Sjablonen kunnen zelf ook andere sjablonen gebruiken: zo gebruikt het contextsjabloon ook de sjablonen voor statements en expressies.
+De sjablonen met een ster zijn enkel verplicht indien de gerelateerde functionaliteit gebruikt wordt.
+Zo zal het niet nodig zijn om het selectorsjabloon te implementeren in Python, want Python gebruikt geen selector.
+
+In de meeste talen zullen ook nog andere sjablonen nodig zijn, die dan gebruikt worden door de verplichte sjablonen.
+Een voorbeeld is het omzetten van functieoproepen uit het testplan naar code.
+
 Tot slot moet ook het serialisatieformaat geïmplementeerd worden in de taal, en dit in beide richtingen: waarden encoderen in het serialisatieformaat en waarden uit het serialisatieformaat omzetten naar de types van de programmeertaal (het decoderen).
 Hoe het encoderen van waarden moet gebeuren is vrij, maar in alle bestaande programmeertalen wordt geïmplementeerd met een bijkomende klasse of module (die vaak de naam \texttt{Value} krijgt).
 TESTed zelf gaat nooit waarden decoderen, maar dit is toch nodig, bijvoorbeeld binnen de sjablonen voor expressies of statements.

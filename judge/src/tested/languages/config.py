@@ -77,7 +77,6 @@ class TemplateType(str, Enum):
     STATEMENT = "statement"
     CONTEXT = "context"
     SELECTOR = "selector"
-    VALUE = "value"
     EVALUATOR_EXECUTOR = "evaluator_executor"
 
 
