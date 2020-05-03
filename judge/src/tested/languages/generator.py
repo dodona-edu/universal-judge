@@ -23,7 +23,7 @@ from ..utils import get_args
 _logger = logging.getLogger(__name__)
 
 # Names of the predefined functions that must be available.
-SEND_VALUE = "send"
+SEND_VALUE = "send_value"
 SEND_EXCEPTION = "send_exception"
 SEND_SPECIFIC_VALUE = "send_specific_value"
 SEND_SPECIFIC_EXCEPTION = "send_specific_exception"

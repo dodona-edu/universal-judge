@@ -19,10 +19,10 @@ import sys
 value_file = open(r"${value_file}", "w")
 exception_file = open(r"${exception_file}", "w")
 
-## Write the delimiter and flush to ensure the output is in the files.
-## This is necessary, otherwise the delimiters are sometimes missing when
+## Write the separator and flush to ensure the output is in the files.
+## This is necessary, otherwise the separators are sometimes missing when
 ## execution is killed due to timeouts.
-def write_delimiter():
+def write_separator():
     value_file.write("--${secret_id}-- SEP")
     exception_file.write("--${secret_id}-- SEP")
     sys.stderr.write("--${secret_id}-- SEP")
@@ -38,7 +38,7 @@ def write_delimiter():
 ##################################
 
 ## Send a value to TESTed.
-def send(value):
+def send_value(value):
     values.send_value(value_file, value)
 
 ## Send an exception to TESTed.
@@ -89,7 +89,7 @@ ${before}
 
 ## Import the code for the first time, which will run the code.
 try:
-    write_delimiter()
+    write_separator()
     from ${submission_name} import *
 except Exception as e:
     ## If there is a main test case, pass the exception to it.
@@ -106,7 +106,7 @@ except Exception as e:
 
 ## Generate the actual tests based on the context.
 % for testcase in testcases:
-    write_delimiter()
+    write_separator()
     <% testcase: _TestcaseArguments %>
     try:
         ## If we have a value function, we have an expression.

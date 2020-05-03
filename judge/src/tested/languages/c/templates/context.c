@@ -20,10 +20,10 @@
 static FILE* ${context_name}_value_file = NULL;
 static FILE* ${context_name}_exception_file = NULL;
 
-## Write the delimiter and flush to ensure the output is in the files.
-## This is necessary, otherwise the delimiters are sometimes missing when
+## Write the separator and flush to ensure the output is in the files.
+## This is necessary, otherwise the separators are sometimes missing when
 ## execution is killed due to timeouts.
-static void ${context_name}_write_delimiter() {
+static void ${context_name}_write_separator() {
     fprintf(${context_name}_value_file, "--${secret_id}-- SEP");
     fprintf(${context_name}_exception_file, "--${secret_id}-- SEP");
     fprintf(stdout, "--${secret_id}-- SEP");
@@ -36,8 +36,8 @@ static void ${context_name}_write_delimiter() {
 
 ## Send a value to TESTed.
 ## Use a macro, since there are no generics in C.
-#undef send
-#define send(value) write_value(${context_name}_value_file, value)
+#undef send_value
+#define send_value(value) write_value(${context_name}_value_file, value)
 
 ## Send the result of a language specific value evaluator to TESTed.
 #undef send_specific_value
@@ -60,7 +60,7 @@ int ${context_name}() {
 
     ${before}
 
-    ${context_name}_write_delimiter();
+    ${context_name}_write_separator();
 
     // Main functions are not support at the moment.
     // TODO: arguments?
@@ -70,8 +70,10 @@ int ${context_name}() {
 
     ## Generate the actual tests based on the context.
     % for testcase in testcases:
-        ${context_name}_write_delimiter();
-        ## If we have a value function, we have an expression.
+        ${context_name}_write_separator();
+        ## If value_function exists, we have an expression.
+        ## If so, wrap the call with the evaluation function, to
+        ## send the return value to TESTed.
         % if testcase.value_function:
             ${context_name}_v_evaluate_${loop.index}(\
         % endif

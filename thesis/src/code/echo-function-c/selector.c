@@ -3,9 +3,7 @@
 
 #define INCLUDED true
 
-% for c in contexts:
-    #include "${c}.c"
-% endfor
+#include "context_0_0.c"
 
 int main(int argc, const char* argv[]) {
 
@@ -16,10 +14,8 @@ int main(int argc, const char* argv[]) {
     
     const char* name = argv[1];
 
-    % for c in contexts:
-        if (strcmp("${c}", name) == 0) {
-            return ${c}();
-        }
-    % endfor
+    if (strcmp("context_0_0", name) == 0) {
+        return context_0_0();
+    }
     return -1;
 }

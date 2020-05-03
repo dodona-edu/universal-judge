@@ -28,9 +28,9 @@ import qualified ${submission_name}
 value_file = "${value_file}"
 exception_file = "${exception_file}"
 
-## Write the delimiter and flush to ensure the output is in the files.
-writeDelimiter :: IO ()
-writeDelimiter = do
+## Write the separator and flush to ensure the output is in the files.
+writeSeparator :: IO ()
+writeSeparator = do
     hPutStr stderr "--${secret_id}-- SEP"
     hPutStr stdout "--${secret_id}-- SEP"
     appendFile value_file "--${secret_id}-- SEP"
@@ -44,8 +44,8 @@ writeDelimiter = do
 ##################################
 
 ## Send a value to TESTed
-send :: Values.Typeable a => a -> IO ()
-send = Values.sendValue value_file
+sendValue :: Values.Typeable a => a -> IO ()
+sendValue = Values.sendValue value_file
 
 ## Send an exception to TESTed
 sendException :: Exception e => Maybe e -> IO ()
@@ -86,7 +86,7 @@ eEvaluateMain value = <%include file="statement.mako" args="statement=context_te
 main = do
     ${before}
 
-    writeDelimiter
+    writeSeparator
 
     % if context_testcase.exists:
         let mainArgs = [\
@@ -99,7 +99,7 @@ main = do
     % endif
 
     % for testcase in testcases:
-        writeDelimiter
+        writeSeparator
 
         ## In Haskell we do not actually have statements, so we need to keep them separate.
         ## Additionally, exceptions with "statements" are not supported at this time.

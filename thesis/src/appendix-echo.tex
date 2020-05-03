@@ -1,0 +1,90 @@
+\chapter{Echo-oefening}\label{ch:echo-oefening}
+
+In deze bijlage is een volledige oefening beschikbaar, met opgave, testplan en de gegenereerde code.
+Om de codefragmenten enigszins kort te houden, zijn er maar twee contexten in de oefening.
+
+\section{Opgave}\label{sec:echo-opgave}
+
+De opgave van deze oefening luidt als volgt:
+
+\begin{quote}
+    \markdownInput[renderers = {
+        headingOne = {\chapter*{#1}},
+        headingTwo = {\section*{#1}},
+        headingThree = {\subsection*{#1}},
+    }]{../../exercise/echo/description/description.nl.md}
+\end{quote}
+
+\section{Testplan}\label{sec:echo-testplan}
+
+Een testplan met twee testgevallen, elk in een andere context:
+
+\inputminted{json}{../../exercise/echo/evaluation/two.tson}
+
+\section{Oplossing}\label{sec:echo-oplossing}
+
+We voeren het testplan uit met deze oplossing:
+
+\inputminted{c}{../../exercise/echo/solution/correct.c}
+
+\section{Gegenereerde code}\label{sec:echo-gegenereerde-code}
+
+De gegenereerde code die gegenereerd wordt bij het uitvoeren van bovenstaande testplan.
+Deze code is lichtjes aangepast: overtollige witruimte is verwijderd.
+Anders is de code identiek aan de door TESTed gegenereerde code.
+
+\subsection{Batchcompilatie}\label{subsec:echo-batchcompilatie}
+
+In batchcompilatie worden alle testgevallen in één keer gecompileerd.
+Volgende bestanden werden gegenereerd:
+
+\begin{enumerate}
+    \item \texttt{context\_0\_0.c}
+    \item \texttt{context\_0\_1.c}
+    \item \texttt{selector.c}
+\end{enumerate}
+
+\subsubsection{\texttt{context\_0\_0.c}}
+
+\inputminted{c}{code/echo-c/context_0_0.c}
+
+\subsubsection{\texttt{context\_0\_1.c}}
+
+\inputminted{c}{code/echo-c/context_0_1.c}
+
+\subsubsection{\texttt{selector.c}}
+
+\inputminted{c}{code/echo-c/selector.c}
+
+\subsubsection{Uitvoeren}
+
+Bij het compileren wordt \texttt{selector.c} gecompileerd, wat leidt tot een uitvoerbaar bestand \texttt{selector}.
+Dit laatste bestand wordt dan tweemaal uitgevoerd:
+
+\begin{minted}{console}
+> ./selector context_0_0
+<uitvoer context_0_0>
+> ./selector context_0_1
+<uitvoer context_0_1>    
+\end{minted}
+
+\subsection{Contextcompilatie}\label{subsec:echo-contextcompilatie}
+
+Bij contextcompilatie worden slechts twee bestanden gegenereerd:
+
+\begin{enumerate}
+    \item \texttt{context\_0\_0.c}
+    \item \texttt{context\_0\_1.c}
+\end{enumerate}
+
+De inhoud van deze bestanden is identiek aan de inhoud van dezelfde bestanden bij batchcompilatie.
+
+Elk van deze bestanden wordt afzonderlijk gecompileerd, wat leidt tot twee uitvoerbare bestanden: \texttt{context\_0\_0} en \texttt{context\_0\_1}.
+Deze uitvoerbare bestanden worden vervolgens uitgevoerd:
+
+\begin{minted}{console}
+> ./context_0_0
+<uitvoer context_0_0>
+> ./context_0_1
+<uitvoer context_0_1>
+\end{minted}

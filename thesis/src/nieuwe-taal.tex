@@ -3,12 +3,14 @@
 In dit hoofdstuk wordt in detail uitgelegd hoe een nieuwe programmeertaal aan TESTed toegevoegd kan worden.
 We doen dat door te beschrijven hoe de programmeertaal C aan TESTed toegevoegd is.
 Dit hoofdstuk sluit qua vorm en stijl dan ook dichter aan bij een handleiding.
-Enkele nuttige links hierbij zijn:
+Enkele nuttige links en verwijzingen hierbij zijn:
 
-\begin{enumerate}
+\begin{itemize}
     \item Bestaande configuraties: \url{https://github.com/dodona-edu/universal-judge/tree/new-master/judge/src/tested/languages}
     \item Een versie van (een deel van) dit hoofdstuk in Markdown, wat gemakkelijker is in gebruik (voor bijvoorbeeld het kopiëren van code): \url{https://github.com/dodona-edu/universal-judge/blob/new-master/thesis/src/c-language.md}
-\end{enumerate}
+    \item \Cref{ch:echo-oefening,ch:echo-function-oefening} bevatten volledige oefeningen: de opgave, het testplan en de gegenereerde code.
+    Dat laatste kan nuttig zijn om ook het concrete resultaat te zien van de sjablonen.
+\end{itemize}
 
 \section{TESTed lokaal uitvoeren}\label{sec:tested-lokaal-uitvoeren}
 
@@ -86,7 +88,7 @@ Deze uitvoer verschilt op een aantal vlakken van de gewone uitvoering:
     Dit laat toe om de gegenereerde code te inspecteren.
 \end{enumerate}
 
-\section{Algemeen stappenplan voor het configureren}\label{sec:algemeen-stappenplan-voor-het-configureren}
+\section{Algemeen stappenplan voor het configureren van een programmeertaal}\label{sec:algemeen-stappenplan-voor-het-configureren}
 
 Het configureren van een programmeertaal in TESTed bestaat uit drie grote onderdelen:
 
@@ -101,3 +103,53 @@ We overlopen nu elk onderdeel in functie van de programmeertaal C\@.
 \section{De programmeertaal C}\label{sec:de-programmeertaal-c}
 
 \markdownInput[shiftHeadings=2]{c-language.md}
+
+\section{Hoe lang duurt het implementeren van een programmeertaal?}\label{sec:hoe-lang-duurt-het-implementeren-van-een-programmeertaal?}
+
+TODO
+
+\section{Stabiliteit van TESTed}\label{sec:stabiliteit-van-tested}
+
+Met stabiliteit wordt hier bedoeld hoe flexibel TESTed is bij het toevoegen van een nieuwe programmeertaal.
+Dit is een maat van hoeveel er aan de kern van TESTed gewijzigd moet worden bij het toevoegen van een nieuwe programmeertaal.
+
+We kunnen de interne werking van TESTed in grote lijnen verdelen in drie onderdelen:
+
+\begin{itemize}
+    \item De interface naar de oefeningen toe.
+    Hieronder vallen vooral het testplan en het serialisatieformaat.
+    \item De interface naar de programmeertalen toe.
+    Hieronder vallen vooral het configuratiebestand, de configuratieklasse en de verplichte sjablonen.
+    \item Het interne deel, waar het testplan uitgevoerd wordt, de ingediende oplossingen beoordeeld worden en de resultaten naar Dodona geschreven worden.
+\end{itemize}
+
+De grenzen tussen deze onderdelen zijn niet strikt: zo zal de configuratieklasse ook gebruikt worden in het interne deel tijdens de uitvoering van het testplan.
+
+We willen opmerken dat de focus in deze thesis vooral lag op de interface naar de oefeningen toe (dus het testplan en het serialisatieformaat).
+We verwachten dan ook niet dat het toevoegen van een programmeertaal grote onverwachte wijzigingen vereist in het testplan of het serialisatieformaat.
+We spreken van onverwachte wijzigingen, omdat sommige delen van TESTed juist voorzien zijn op wijzigingen.
+Een voorbeeld zijn de gegevenstypes uit het serialisatieformaat.
+Daar is het juist de bedoeling dan nieuwe programmeertalen bijkomende geavanceerde gegevenstypes toevoegen indien nodig.
+Als een nieuwe programmeertaal bijvoorbeeld ondersteuning wil bieden voor oneindige generators (bijvoorbeeld een functie die getallen blijft teruggeven, dan is dat mogelijk.
+Er zullen ook geen wijzigingen nodig zijn aan de bestaande programmeertalen.
+
+Het omgekeerde is ook waar: we verwachten dat er wijzigingen nodig kunnen zijn aan de configuratieklasse en/of de sjablonen bij nieuwe programmeertalen.
+Een stabiele interface tussen de programmeertalen enerzijds en de kern van TESTed anderzijds is geen doel in deze thesis.
+Hierbij wel twee nuances:
+
+\begin{itemize}
+    \item Hoewel er een poging gedaan is om de configuratieklasse flexibel te maken, is de functionaliteit ervan vooral voorzien op de ondersteunde programmeertalen en de programmeertalen die er op lijken.
+    Het is ook op voorhand moeilijk in te schatten welke functionaliteit nodig zal zijn voor nieuwe programmeertalen.
+    \item De wijzigingen zullen naar verwachting vooral in de configuratieklasse zijn.
+    De methodes om de code te compileren en uit te voeren krijgen momenteel als argumenten de nodige informatie.
+    Het is goed mogelijk dat een nieuwe programmeertaal meer informatie nodig zal hebben.
+    Een ander aspect waar wijzigingen mogelijk zijn is welke informatie beschikbaar wordt gesteld aan de sjablonen.
+    Ook hier is het mogelijk dat een programmeertaal meer informatie nodig heeft dan de informatie die TESTed momenteel aanreikt.
+\end{itemize}
+
+De ontwikkeling van TESTed vond grotendeels plaats met drie programmeertalen: Python, Java en Haskell.
+C is pas in een later stadium toegevoegd, waar de meeste functionaliteit van TESTed reeds bestond.
+Bij het configureren van C zijn wijzigingen nodig geweest aan de configuratieklasse.
+Een voorbeeld is dat bij de methode voor het uitvoeren van de code nu ook het volledige pad naar de map waarin het uitvoeren gebeurt een argument is.
+C compileert naar een uitvoerbaar bestand, wat tot dan nog niet gebeurde (Haskell gebruikte nog \texttt{runhaskell}).
+Om het uitvoerbare bestand uit te voeren is een absoluut pad naar dat uitvoerbaar bestand nodig, maar die informatie was niet voorhanden in de methode.

@@ -29,7 +29,7 @@ public class ${context_name} implements Closeable {
         this.exceptionWriter = new PrintWriter("${exception_file}");
     }
 
-    private void writeDelimiter() throws Exception {
+    private void writeSeparator() throws Exception {
         valueWriter.write("--${secret_id}-- SEP");
         exceptionWriter.write("--${secret_id}-- SEP");
         System.err.print("--${secret_id}-- SEP");
@@ -45,7 +45,7 @@ public class ${context_name} implements Closeable {
     ##################################
 
     ## Send a value to TESTed.
-    private void send(Object value) throws Exception {
+    private void sendValue(Object value) throws Exception {
         Values.send(valueWriter, value);
     }
 
@@ -94,7 +94,7 @@ public class ${context_name} implements Closeable {
         ${before}
 
         ## Call the main function if needed.
-        this.writeDelimiter();
+        this.writeSeparator();
         % if context_testcase.exists:
             try {
                 ${submission_name}.main(new String[]{
@@ -112,7 +112,7 @@ public class ${context_name} implements Closeable {
         % for testcase in testcases:
             ## In Java, we need special code to make variables available outside of
             ## the try-catch block.
-           this.writeDelimiter();
+           this.writeSeparator();
             % if isinstance(testcase.command, get_args(Assignment)):
                 <%include file="declaration.mako" args="tp=testcase.command.type,value=testcase.command.expression" /> ${testcase.command.name} = null;
             % endif
