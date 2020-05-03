@@ -42,39 +42,60 @@ STATEMENT = "statement"
 class _TestcaseArguments:
     """Arguments for a testcases testcase template."""
     command: Statement
-    value_function: Optional[Callable[[Expression], Statement]]
-    exception_function: Callable[[Expression], Statement]
+    _value_function: Optional[Callable[[Expression], Statement]]
+    _exception_function: Callable[[Expression], Statement]
 
     def input_statement(self, override: Optional[str] = None) -> Statement:
-        if self.value_function:
+        """
+        Get the input statement for the testcase.
+
+        This will return, depending on the command, either an expression which will
+        pass the value to the correct handling function or a statement.
+
+        :param override: Optionally override the value argument.
+        :return: The input statement.
+        """
+        if self._value_function:
             assert isinstance(self.command, get_args(Expression))
             # Replace the arguments
             if override:
-                return self.value_function(Identifier(override))
+                return self._value_function(Identifier(override))
             else:
-                return self.value_function(self.command)
+                return self._value_function(self.command)
         else:
             return self.command
 
     def exception_statement(self, name: Optional[str] = None) -> Statement:
+        """
+        Get the exception statement for the testcase.
+
+        :param name: Optionally the name of an identifier containing the exception.
+        :return: The exception statement.
+        """
         if name:
-            return self.exception_function(Identifier(name))
+            return self._exception_function(Identifier(name))
         else:
-            return self.exception_function(NothingType())
+            return self._exception_function(NothingType())
 
 
 @dataclass
 class _ContextTestcaseArguments:
     """Arguments for a context_testcase testcase template."""
     exists: bool
-    exception_function: Callable[[Expression], Statement]
+    _exception_function: Callable[[Expression], Statement]
     arguments: List[str]
 
     def exception_statement(self, name: Optional[str] = None) -> Statement:
+        """
+        Get the exception statement for the testcase.
+
+        :param name: Optionally the name of an identifier containing the exception.
+        :return: The exception statement.
+        """
         if name:
-            return self.exception_function(Identifier(name))
+            return self._exception_function(Identifier(name))
         else:
-            return self.exception_function(NothingType())
+            return self._exception_function(NothingType())
 
 
 @dataclass
@@ -252,8 +273,8 @@ def _prepare_testcase(
 
     return _TestcaseArguments(
         command=command,
-        value_function=value_function_call,
-        exception_function=exception_function_call,
+        _value_function=value_function_call,
+        _exception_function=exception_function_call,
     ), names
 
 
@@ -295,12 +316,12 @@ def _prepare_context_testcase(
         return _ContextTestcaseArguments(
             exists=True,
             arguments=testcase.input.arguments,
-            exception_function=exception_function
+            _exception_function=exception_function
         ), name
     else:
         return _ContextTestcaseArguments(
             exists=False,
-            exception_function=exception_function,
+            _exception_function=exception_function,
             arguments=[]
         ), name
 
