@@ -1,0 +1,11 @@
+{
+  "type": "programmed",
+  "function": {
+    "file": "Evaluator.hs",
+    "name": "evaluate_value"
+  },
+  "language": "haskell",
+  "arguments": [
+    { "type": "text", "data": "arg1" }
+  ]
+}

@@ -14,7 +14,7 @@ Dit hoofdstuk begint met het ontwerp en de algemene werking van de judge toe te 
 De twee stippellijnen geven programmeertaalbarrières aan, en verdelen TESTed in drie logisch omgevingen:
 
 \begin{enumerate}
-    \item TESTed zelf is geschreven in Python: in de middelste omgeving staat de programmeertaal dus vast.
+    \item TESTed zelf is geschreven in Python (zie ook \cref{sec:technische-aspecten}): in de middelste omgeving staat de programmeertaal dus vast.
     Deze omgeving is verantwoordelijk voor de regie van de beoordeling op basis van het testplan.
     \item De ingediende oplossing wordt uitgevoerd in de \term{uitvoeringsomgeving}, waar de programmeertaal overeenkomt met de programmeertaal van de ingediende oplossing.
     \item Tot slot is er nog de \term{evaluatieomgeving}, waar door de lesgever geschreven evaluatiecode wordt uitgevoerd.
@@ -1129,3 +1129,62 @@ Waar nuttig zijn deze gevallen omgezet naar een unit test voor TESTed.
     Is het dus de bedoeling om exitcode \texttt{-5} te krijgen, zal de oefening juist gerekend worden.
 
 \end{description}
+
+\section{Technische aspecten}\label{sec:technische-aspecten}
+
+In deze paragraaf worden enkel technische aspecten van TESTed uitgelicht.
+
+TESTed is geschreven in Python.
+De hoofdreden daarvoor is pragmatisch: zoals besproken in \cref{subsec:jupyter-kernels}, gebruikte de eerste versie van TESTed Jupyter-kernels om code uit te voeren.
+Het raamwerk rond de Jupyter-kernels is geschreven in Python, dus was het een voor de hand liggende keuze om Python te gebruiken voor TESTed.
+Als TESTed later weg van de Jupyter-kernels geëvolueerd is, is niet van programmeertaal veranderd.
+Dit omdat er geen goede reden was om de bestaande code te herschrijven in een andere programmeertaal.
+
+Het grootste nadeel aan Python is dat het niet de snelste programmeertaal is op het gebied van uitvoeringstijd.
+Dit is voor TESTed echter minder relevant: het gros van de beoordelingstijd wordt besteed aan het uitvoeren van de ingediende oplossing, niet aan TESTed zelf.
+
+Binnen TESTed worden twee dependencies intensief gebruikt:
+
+\begin{enumerate}
+    \item \texttt{mako} voor de sjablonen.
+    \item \texttt{pydantic} voor het definiëren van het testplan en serialisatieformaat.
+\end{enumerate}
+
+In TESTed is niet onmiddellijk gekozen voor \texttt{mako} als sjabloonsysteem.
+Een eerdere versie gebruikte \texttt{jinja2}.
+Later is overgeschakeld op \texttt{mako}, omdat er bij \texttt{jinja2} problemen waren met witruimte in de gegenereerde code.
+Deze witruimte is belangrijk bij het genereren van bijvoorbeeld Python-code.
+Deze twee packages zijn ongeveer de populairste packages in het Python-ecosysteem om sjablonen te gebruiken, buiten de ingebouwde sjablonen van Django.
+Die laatste zijn niet overwogen, omdat het niet duidelijk is of de sjablonen van Django ook gebruikt kunnen worden zonder het hele framework te moeten gebruiken.
+
+Na de keuze voor json als testplan en serialisatieformaat (\cref{subsec:het-testplan,subsec:dataserialisatie}) is er beslist om de implementatie in Python de gezaghebbende definitie voor het formaat te maken.
+Oorspronkelijk zijn het testplan en het serialisatieformaat opgesteld met \texttt{dataclasses} uit Python.
+Dit bleek niet voldoende: er waren betere validaties nodig en het bleek handig om het formaat van het testplan en het serialisatieformaat te kunnen exporteren als \acronym{JSON} Schema.
+
+Hiervoor gebruiken we nu \texttt{pydantic}\footnote{Zie \url{https://pydantic-docs.helpmanual.io/}}.
+Deze package laat ons toe om nog steeds \texttt{dataclasses} en toch ook validaties te kunnen toevoegen en te exporteren naar \acronym{JSON} Schema.
+\Cref{lst:programmed-evaluator-python} toont hoe de definitie van het testplan en het serialisatieformaat er uitziet.
+In \cref{lst:programmed-evaluator-json} staat dan de \acronym{JSON}-variant hetzelfde element: het moge duidelijk zijn dat de omzetting van Python naar \acronym{JSON} voor de hand ligt.
+Het \acronym{JSON} Schema voor respectievelijk het testplan en het serialisatieformaat kunnen zo verkregen worden:
+
+\begin{minted}{console}
+> python -m tested.testplan
+<JSON Schema voor testplan>
+> python -m tested.serialisation
+<JSON Schema voor serialisatieformaat>
+\end{minted}
+
+\begin{listing}
+    \caption{
+        Een voorbeeld van hoe het testplan met \texttt{pydantic} gedefinieerd wordt.
+        Hier wordt een geprogrammeerde evaluator voorgesteld in Python-code.
+    }
+    \label{lst:programmed-evaluator-python}
+    \inputminted{python}{code/programmed-testplan.py}
+\end{listing}
+
+\begin{listing}
+    \caption{Hoe een geprogrammeerde evaluator er uitziet in \acronym{JSON}.}
+    \label{lst:programmed-evaluator-json}
+    \inputminted{json}{code/programmed-testplan.json}
+\end{listing}
