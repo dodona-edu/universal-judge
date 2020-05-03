@@ -90,7 +90,7 @@ public class ${context_name} implements Closeable {
             ## the try-catch block.
             this.writeSeparator();
             % if isinstance(testcase.command, get_args(Assignment)):
-                <%include file="declaration.mako" args="tp=testcase.command.type,value=testcase.command.expression" /> ${testcase.command.name} = null;
+                <%include file="declaration.mako" args="tp=testcase.command.type,value=testcase.command.expression" /> ${testcase.command.variable} = null;
             % endif
             try {
                 <%include file="statement.mako" args="statement=testcase.input_statement()" />;

@@ -7,7 +7,7 @@
           "testcases": [
             {
               "input": {
-                "name": "instance",
+                "variable": "instance",
                 "type": {
                   "type": "custom",
                   "data": "EqualChecker"

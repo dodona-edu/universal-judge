@@ -16,7 +16,7 @@
             {
               "input": {
                 "type": "integer",
-                "name": "codes01",
+                "variable": "codes01",
                 "expression": {
                   "type": "function",
                   "name": "e",

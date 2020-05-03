@@ -16,5 +16,5 @@
     % if full:
         <%include file="declaration.mako" args="value=statement.expression" /> \
     % endif
-    ${statement.name} = <%include file="statement.mako" args="statement=statement.expression"/>;
+    ${statement.variable} = <%include file="statement.mako" args="statement=statement.expression"/>;
 % endif

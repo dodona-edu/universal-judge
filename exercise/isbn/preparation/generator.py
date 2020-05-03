@@ -151,7 +151,7 @@ def generate_are_isbn():
         # argument. Maak het testgeval voor de assignment.
         assignment_testcase = {
             "input": {
-                "name":       f"codes{index:02d}",
+                "variable":   f"codes{index:02d}",
                 "expression": values.encode(codes),
                 "type":       "sequence"
             }

@@ -258,12 +258,12 @@ class Assignment(WithFeatures, WithFunctions):
     expression. It is also possible to define the type. If the type cannot be
     determined and it is not specified, this is an error.
     """
-    name: str
+    variable: str
     expression: Expression
     type: Union[AllTypes, VariableType]
 
     def replace_expression(self, expression: Expression) -> 'Assignment':
-        return Assignment(name=self.name, expression=expression, type=self.type)
+        return Assignment(variable=self.variable, expression=expression, type=self.type)
 
     def get_used_features(self) -> FeatureSet:
         base = FeatureSet({Construct.ASSIGNMENTS}, set())

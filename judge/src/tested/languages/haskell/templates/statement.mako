@@ -23,8 +23,8 @@
 % else:
     <% assert isinstance(statement, get_args(Assignment)) %>
     % if root:
-        ${statement.name} <- <%include file="statement.mako" args="statement=statement.expression,lifting=True"/>
+        ${statement.variable} <- <%include file="statement.mako" args="statement=statement.expression,lifting=True"/>
     % else:
-        let ${statement.name} = <%include file="statement.mako" args="statement=statement.expression"/>
+        let ${statement.variable} = <%include file="statement.mako" args="statement=statement.expression"/>
     % endif
 % endif

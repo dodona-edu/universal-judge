@@ -13,7 +13,7 @@
             {
               "input": {
                 "type": "sequence",
-                "name": "codes01",
+                "variable": "codes01",
                 "expression": {
                   "type": "namespace",
                   "namespace": "ex",

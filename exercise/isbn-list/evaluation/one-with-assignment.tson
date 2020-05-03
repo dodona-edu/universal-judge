@@ -7,7 +7,7 @@
           "testcases": [
             {
               "input": {
-                "name": "codes01",
+                "variable": "codes01",
                 "expression": {
                   "data": [
                     {
