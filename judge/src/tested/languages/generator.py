@@ -41,6 +41,7 @@ STATEMENT = "statement"
 @dataclass
 class _TestcaseArguments:
     """Arguments for a testcases testcase template."""
+    # The input command. In most languages, you can use input_statement instead.
     command: Statement
     _value_function: Optional[Callable[[Expression], Statement]]
     _exception_function: Callable[[Expression], Statement]
@@ -81,9 +82,11 @@ class _TestcaseArguments:
 @dataclass
 class _ContextTestcaseArguments:
     """Arguments for a context_testcase testcase template."""
+    # If a context testcase exists.
     exists: bool
-    _exception_function: Callable[[Expression], Statement]
+    # Main arguments.
     arguments: List[str]
+    _exception_function: Callable[[Expression], Statement]
 
     def exception_statement(self, name: Optional[str] = None) -> Statement:
         """
@@ -101,17 +104,25 @@ class _ContextTestcaseArguments:
 @dataclass
 class _ContextArguments:
     """Arguments for a plan template for the contexts."""
+    # The name of the context.
     context_name: str
+    # The "before" code.
     before: str
+    # The after code.
     after: str
+    # The context testcase.
     context_testcase: _ContextTestcaseArguments
+    # A list of the other testcases.
     testcases: List[_TestcaseArguments]
+    # A set of the names of the language specific evaluators we will need.
     evaluator_names: Set[str]
+    # The name of the file for the return channel.
     value_file: str
+    # The name of the file for the exception channel.
     exception_file: str
+    # The name of the submission file.
     submission_name: str
-    value_file: str
-    exception_file: str
+    # The secret ID.
     secret_id: str
 
 
