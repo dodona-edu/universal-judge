@@ -1,7 +1,4 @@
 ## Code to execute_module one context.
-<%! from tested.languages.generator import _TestcaseArguments %>
-<%! from tested.serialisation import Statement, Expression %>
-<%! from tested.utils import get_args %>
 
 #include <stdio.h>
 
@@ -63,6 +60,7 @@ int ${context_name}() {
     % for testcase in testcases:
         ${context_name}_write_separator();
         <%include file="statement.mako" args="statement=testcase.input_statement()" />;
+        
     % endfor
 
     ${after}
