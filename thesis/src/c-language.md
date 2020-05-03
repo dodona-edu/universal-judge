@@ -4,19 +4,26 @@ Uiteraard willen we zoveel mogelijk ondersteunen, maar vooral op het vlak van ge
 
 Welke basistypes gaan we niet ondersteunen?
 
-- `sequence` - Arrays zijn een speciaal geval in C: statische arrays kunnen bijvoorbeeld niet als returnwaarde dienen, en ook als functieargument zijn ze niet ideaal. Dynamische arrays nemen de vorm aan van een pointer en een grootte. TESTed heeft momenteel geen ondersteuning voor datatypes die als twee waarden geïmplementeerd moeten worden, dus worden arrays momenteel niet ondersteund.
+- `sequence` - Arrays zijn een speciaal geval in C: statische arrays kunnen bijvoorbeeld niet als returnwaarde dienen, en ook als functieargument zijn ze niet ideaal.
+  Dynamische arrays nemen de vorm aan van een pointer en een grootte.
+  TESTed heeft momenteel geen ondersteuning voor datatypes die als twee waarden geïmplementeerd moeten worden, dus worden arrays momenteel niet ondersteund.
 - `set` - C heeft geen ingebouwde verzamelingen.
-- `map` - C heeft geen ingebouwde map of dict. Er zijn wel structs, maar daarvan is het niet mogelijk om de velden at runtime op te vragen, waardoor we ze niet kunnen serialiseren.
+- `map` - C heeft geen ingebouwde map of dict.
+  Er zijn wel structs, maar daarvan is het niet mogelijk om de velden at runtime op te vragen, waardoor we ze niet kunnen serialiseren.
 
 Welke geavanceerde types gaan we niet ondersteunen?
 
 - `big_int` - C heeft geen ingebouwd type voor getallen van arbitraire grootte.
 - `fixex_precision` - C heeft geen ingebouwd type voor kommagetallen me willekeurige precisie.
-- Andere datastructuren, zoals `array` en `list` (om dezelfde redenen als hierboven). Ook `tuple` wordt niet ondersteund, omdat het niet bestaat in C.
+- Andere datastructuren, zoals `array` en `list` (om dezelfde redenen als hierboven).
+  Ook `tuple` wordt niet ondersteund, omdat het niet bestaat in C.
 
 # Locatie van de code
 
-De eerste stap in het configureren van een programmeertaal is het aanmaken van een map waarin we de code voor de programmeertaal zullen zetten. Deze map moet de naam van de programmeertaal krijgen en op de juiste plaats binnen TESTed aanwezig zijn. Maak een nieuwe map `judge/src/tested/languages/c`. Na het aanmaken van de map moet de mappenstructuur er zo uitzien:
+De eerste stap in het configureren van een programmeertaal is het aanmaken van een map waarin we de code voor de programmeertaal zullen zetten.
+Deze map moet de naam van de programmeertaal krijgen en op de juiste plaats binnen TESTed aanwezig zijn.
+Maak een nieuwe map `judge/src/tested/languages/c`.
+Na het aanmaken van de map moet de mappenstructuur er zo uitzien:
 
 ```text
 universal-judge
@@ -38,17 +45,26 @@ universal-judge
 
 # Configuratiebestand
 
-Het configuratiebestand is een json-bestand met enkele eigenschappen van de programmeertaal. Dit configuratiebestand maakt het implementeren van de configuratieklasse een stuk eenvoudiger, omdat de implementatie van die klasse daardoor veel minder lang zal zijn. Maak eerst het configuratiebestand aan: `judge/src/tested/languages/c/config.json`.
+Het configuratiebestand is een json-bestand met enkele eigenschappen van de programmeertaal.
+Dit configuratiebestand maakt het implementeren van de configuratieklasse een stuk eenvoudiger, omdat de implementatie van die klasse daardoor veel minder lang zal zijn.
+Maak eerst het configuratiebestand aan: `judge/src/tested/languages/c/config.json`.
 
 Merk op dat het configuratiebestand slechts een hulpmiddel is: indien gewenst kunnen al deze opties ook ingesteld worden door de juiste methodes te implementeren in de configuratieklasse, maar we verwachten dat dit in veel gevallen niet nodig zal zijn.
 
 ## Algemene opties
 
-- `general.dependencies` - Dit zijn bestanden die beschikbaar zullen zijn tijdens het compileren en tijdens het uitvoeren van de beoordeling. Dit betekent dat deze dependencies gebruikt kunnen worden in de testcode voor de contexten en de evaluatiecode voor de geprogrammeerde en programmeertaalspecifieke code. In het geval van C is dit de `values`-module, waarvan we de implementatie later bespreken. Het kan gebeuren dat de code van de dependencies ook beschikbaar is voor de ingediende oplossing. Dit is echter toeval en niet de bedoeling. Er is momenteel geen ondersteuning om dependencies beschikbaar te maken voor de ingediende oplossing.
-- `general.selector` - Dit geeft aan of de programmeertaal gebruikmaakt van een selector tijdens het uitvoeren van code die gecompileerd is in batchcompilatie. Voor de meeste talen met compilatie zal dit `true` zijn, zoals ook bij C.
-TODO: referentie!
-- `extensions.file` - Geeft de voornaamste bestandsextensie aan van de bestanden. Met voornaamste bedoelen we de extensie van de bestanden die gegenereerd worden. Bijvoorbeeld bij C bestaan zowel `.h` en `.c`, maar de gegenereerde code gebruikt `.c`.
-- `extensions.templates` - wordt gebruikt om aan te geven welke extensies gebruikt worden voor de sjablonen. Standaard is dit de bestandsextensie van hierboven en `.mako`. Het is vaak niet nodig om dit op te geven.
+- `general.dependencies` - Dit zijn bestanden die beschikbaar zullen zijn tijdens het compileren en tijdens het uitvoeren van de beoordeling.
+  Dit betekent dat deze dependencies gebruikt kunnen worden in de testcode voor de contexten en de evaluatiecode voor de geprogrammeerde en programmeertaalspecifieke code.
+  In het geval van C is dit de `values`-module, waarvan we de implementatie later bespreken. Het kan gebeuren dat de code van de dependencies ook beschikbaar is voor de ingediende oplossing.
+  Dit is echter toeval en niet de bedoeling. Er is momenteel geen ondersteuning om dependencies beschikbaar te maken voor de ingediende oplossing.
+- `general.selector` - Dit geeft aan of de programmeertaal gebruikmaakt van een selector tijdens het uitvoeren van code die gecompileerd is in batchcompilatie.
+  Voor de meeste talen met compilatie zal dit `true` zijn, zoals ook bij C. TODO: referentie!
+- `extensions.file` - Geeft de voornaamste bestandsextensie aan van de bestanden.
+  Met voornaamste bedoelen we de extensie van de bestanden die gegenereerd worden.
+    Bijvoorbeeld in C bestaan zowel `.h` en `.c`, maar de gegenereerde code gebruikt `.c`.
+- `extensions.templates` - wordt gebruikt om aan te geven welke extensies gebruikt worden voor de sjablonen.
+  Standaard is dit de bestandsextensie van hierboven en `.mako`.
+  Het is vaak niet nodig om dit op te geven.
 
 ```json
 {
@@ -82,14 +98,18 @@ Programmeertaalelementen zoals functies en namespaces worden omgezet in functie 
 De mogelijke waarden zijn:
 
 - `snake_case` - Tussen elk woord staat een underscore: `dit_is_een_voorbeeld`.
-- `came_case` - Elk woord, buiten het eerste, start met een hoofdletter: `ditIsEenVoorbeeld`. Deze variant wordt ook wel _lowerCamelCase_ genoemd.
-- `pascal_case` - Elk woord, ook het eerste, start met een hoofdletter: `DitIsEenVoorbeeld`. Deze variant wordt ook wel _UpperCamelCase_ genoemd.
+- `came_case` - Elk woord, buiten het eerste, start met een hoofdletter: `ditIsEenVoorbeeld`.
+  Deze variant wordt ook wel _lowerCamelCase_ genoemd.
+- `pascal_case` - Elk woord, ook het eerste, start met een hoofdletter: `DitIsEenVoorbeeld`.
+  Deze variant wordt ook wel _UpperCamelCase_ genoemd.
 
 Standaard wordt `snake_case` gebruikt, dus bij C is dit niet strikt nodig om het erbij te zetten.
 
 ## Functionaliteit
 
-De laatste twee blokken in de configuratie geven aan welke constructies en gegevenstypes de programmeertaal ondersteunt. We hebben reeds besproken welke functionaliteit we willen ondersteunen en welke niet (TODO: reference!). We beginnen met de taalconstructies vast te leggen:
+De laatste twee blokken in de configuratie geven aan welke constructies en gegevenstypes de programmeertaal ondersteunt.
+We hebben reeds besproken welke functionaliteit we willen ondersteunen en welke niet (TODO: reference!).
+We beginnen met de taalconstructies vast te leggen:
 
 ```json
 {
@@ -105,9 +125,12 @@ De laatste twee blokken in de configuratie geven aan welke constructies en gegev
 }
 ```
 
-Hier kan voor elke taalconstructie opgegeven worden of ze ondersteund wordt of niet (met een `boolean`). Standaard wordt geen enkele taalconstructie ondersteund: dit zorgt ervoor dat alle ondersteunde constructies expliciet in het configuratiebestand staan en dat nieuwe taalconstructies toegevoegd kunnen worden zonder dat bestaande configuraties van programmeertalen aangepast moeten worden.
+Hier kan voor elke taalconstructie opgegeven worden of ze ondersteund wordt of niet (met een `boolean`).
+Standaard wordt geen enkele taalconstructie ondersteund.
+Dit zorgt ervoor dat alle ondersteunde constructies expliciet in het configuratiebestand staan en dat nieuwe taalconstructies toegevoegd kunnen worden zonder dat bestaande configuraties van programmeertalen aangepast moeten worden.
 
-De mogelijke taalconstructie zijn deze uit de enum `tested.features.Construct`. Hieronder volgt een lijst van elke taalconstructie en een korte beschrijving:
+De mogelijke taalconstructie zijn deze uit de enum `tested.features.Construct`.
+Hieronder volgt een lijst van elke taalconstructie en een korte beschrijving:
 
 `objects`
 : Objectgeoriënteerde zaken zoals klassen.
@@ -165,7 +188,8 @@ Dan moeten we nu de ondersteuning voor de gegevenstypes vastleggen:
 }
 ```
 
-Zoals uitgelegd in (TODO: referentie!) zijn er twee soorten gegevenstypes in TESTed: de basistypes en de geavanceerde types. De basistypes zijn abstracte types voor concepten (zoals een sequentie of een geheel getal), terwijl de geavanceerde types concreter zijn (zoals een geheel getal van 8 bits).
+Zoals uitgelegd in (TODO: referentie!) zijn er twee soorten gegevenstypes in TESTed: de basistypes en de geavanceerde types.
+De basistypes zijn abstracte types voor concepten (zoals een sequentie of een geheel getal), terwijl de geavanceerde types concreter zijn (zoals een geheel getal van 8 bits).
 Een gegevenstype kan drie niveaus van ondersteuning hebben:
 
 - `supported` - volledige ondersteuning
@@ -174,7 +198,9 @@ Een gegevenstype kan drie niveaus van ondersteuning hebben:
 
 Een opmerking hierbij is dat de status `reduced` voor de basistypes equivalent is aan `supported`: een basistype reduceren tot een basistype blijft hetzelfde type.
 
-Het is de bedoeling dat de meeste programmeertalen voor het merendeel van de datatypes ten minste `reduced` hebben. Toch is gekozen om `unsupported` als standaardwaarde te nemen; dit zorgt ervoor dat de ondersteunde datatypes explicit uitgeschreven zijn. Ook laat dit opnieuw toe om datatypes toe te voegen aan TESTed zonder bestaande configuraties van programmeertalen te moeten aanpassen.
+Het is de bedoeling dat de meeste programmeertalen voor het merendeel van de datatypes ten minste `reduced` hebben.
+Toch is gekozen om `unsupported` als standaardwaarde te nemen; dit zorgt ervoor dat de ondersteunde datatypes explicit uitgeschreven zijn.
+Ook laat dit opnieuw toe om datatypes toe te voegen aan TESTed zonder bestaande configuraties van programmeertalen te moeten aanpassen.
 Ter illustratie vermelden we hier voor C alle datatypes, ook de niet-ondersteunde.
 
 # Configuratieklasse
@@ -207,9 +233,10 @@ def compilation(self, files: List[str]) -> CallbackResult:
     return ["gcc", "-std=c11", "-Wall", "evaluation_result.c", "values.c", main_file, "-o", result], [result]
 ```
 
-Doordat het compileren een samenspel is van gegenereerde code uit de sjablonen en de dependencies, moet deze methode met zorg geïmplementeerd worden. Hieronder volgt een (licht gewijzigde) versie van de documentatie van deze methode.
-
-Als argument krijgt deze methode een lijst van bestanden mee waarvan TESTed vermoed dat ze nuttig kunnen zijn voor de compilatiestap. Het bevat onder andere de dependencies uit het configuratiebestand, de ingediende oplossing en de uit de sjablonen gegenereerde bestanden. Die laatste bestanden zijn bijvoorbeeld de verschillende contexten bij een batchcompilatie, maar kunnen ook de evaluator zijn bij een geprogrammeerde evaluatie. De bestanden bestaan uit de naam en een bestandsextensie.
+Als argument krijgt deze methode een lijst van bestanden mee waarvan TESTed vermoed dat ze nuttig kunnen zijn voor de compilatiestap.
+Het bevat onder andere de dependencies uit het configuratiebestand, de ingediende oplossing en de uit de sjablonen gegenereerde bestanden.
+Die laatste bestanden zijn bijvoorbeeld de verschillende contexten bij een batchcompilatie, maar kunnen ook de evaluator zijn bij een geprogrammeerde evaluatie.
+De bestanden bestaan uit de naam en een bestandsextensie.
 
 De conventie is om het bestand met de main-functie als laatste te plaatsen.
 
@@ -227,13 +254,18 @@ Als returnwaarde moet deze methode een tuple met twee element teruggeven: het co
 
 Het compilatiecommando neemt de vorm aan van een lijst van de elementen waaruit het commando bestaat. Bij het uitvoeren van dit commando zal deze lijst aan de Python-module `subprocess` gegeven worden.
 
-Na het uitvoeren van het compilatiecommando moet TESTed weten welke bestanden relevant zijn om mee te nemen naar een volgende stap in de beoordeling. Daarom moet een lijst van resulterende bestanden teruggegeven worden. Enkel bestanden in deze lijst zullen bijvoorbeeld beschikbaar zijn bij het uitvoeren van de contexten.
-Een lijst van bestanden teruggeven is mogelijk indien op voorhand geweten is in welke bestanden de compilatie resulteert. Dit is bijvoorbeeld hier het geval (in C resulteert de compilatie in één uitvoerbaar bestand), of ook bij Python, waar de compilatie voor elk `.py`-bestand resulteert in een `.pyc`-bestand. Ook hier moet de conventie dat het bestand met de main-functie als laatste komt gerespecteerd worden.
+Na het uitvoeren van het compilatiecommando moet TESTed weten welke bestanden relevant zijn om mee te nemen naar een volgende stap in de beoordeling.
+Daarom moet een lijst van resulterende bestanden teruggegeven worden. Enkel bestanden in deze lijst zullen bijvoorbeeld beschikbaar zijn bij het uitvoeren van de contexten.
+Een lijst van bestanden teruggeven is mogelijk indien op voorhand geweten is in welke bestanden de compilatie resulteert.
+Dit is bijvoorbeeld hier het geval (in C resulteert de compilatie in één uitvoerbaar bestand), of ook bij Python, waar de compilatie voor elk `.py`-bestand resulteert in een `.pyc`-bestand.
+Ook hier moet de conventie dat het bestand met de main-functie als laatste komt gerespecteerd worden.
 
-Het is op voorhand echter niet altijd mogelijk om te weten in welke bestanden de code zal resulteren. Zo resulteert compilatie van één `.java`-bestand mogelijk in meerdere `.class`-bestanden, afhankelijk van de inhoud van de bestanden.
+Het is op voorhand echter niet altijd mogelijk om te weten in welke bestanden de code zal resulteren.
+Zo resulteert compilatie van één `.java`-bestand mogelijk in meerdere `.class`-bestanden, afhankelijk van de inhoud van de bestanden.
 Om dit op te lossen kan in plaats van een lijst ook een filterfunctie teruggegeven worden.
 
-TESTed zal deze filter toepassen nadat de compilatie uitgevoerd is op elk bestand in de map waarin de compilatie uitgevoerd is. De filterfunctie krijgt als argument de naam van een bestand en moet `true` of `False` teruggeven als het bestand respectievelijk wel of niet meegenomen moet worden naar een volgende stap.
+TESTed zal deze filter toepassen nadat de compilatie uitgevoerd is op elk bestand in de map waarin de compilatie uitgevoerd is.
+De filterfunctie krijgt als argument de naam van een bestand en moet `true` of `False` teruggeven als het bestand respectievelijk wel of niet meegenomen moet worden naar een volgende stap.
 
 Een voorbeeld van de in- en uitvoer van de compilatiemethode:
 
@@ -245,7 +277,9 @@ Een voorbeeld van de in- en uitvoer van de compilatiemethode:
 )
 ```
 
-Als een leeg compilatiecommando wordt teruggegeven, dan wordt er geen compilatie gedaan. Dit is ook de standaardimplementatie van deze methode. Voor programmeertalen waar geen compilatie nodig is, moet deze methode niet geïmplementeerd worden.
+Als een leeg compilatiecommando wordt teruggegeven, dan wordt er geen compilatie gedaan.
+Dit is ook de standaardimplementatie van deze methode.
+Voor programmeertalen waar geen compilatie nodig is, moet deze methode niet geïmplementeerd worden.
 
 ## Uitvoeren van de testcode
 
@@ -265,7 +299,8 @@ Deze functie heeft drie parameters:
 
 Als resultaat moet het commando teruggegeven worden, dat ook aan `subprocess` doorgegeven wordt.
 
-In het geval van C is dit commando eenvoudig: we geven het absolute pad naar het uitvoerbare bestand mee en geven ook de argumenten mee. Het absolute pad is nodig omdat de executable die we willen uitvoeren (en gemaakt hebben in de compilatiestap) niet in de `PATH` zit.
+In het geval van C is dit commando eenvoudig: we geven het absolute pad naar het uitvoerbare bestand mee en geven ook de argumenten mee.
+Het absolute pad is nodig omdat de executable die we willen uitvoeren (en gemaakt hebben in de compilatiestap) niet in de `PATH` zit.
 
 Een voorbeeld van deze functie in werking is:
 
@@ -274,7 +309,8 @@ Een voorbeeld van deze functie in werking is:
 ["/test/path/executable.exe", "arg1", "arg2"]
 ```
 
-De basisimplementatie van de configuratie is nu klaar. Voor de meeste programmeertalen kan nu overgegaan worden naar de sjablonen, maar in C moeten we nog een kleine methode implementeren.
+De basisimplementatie van de configuratie is nu klaar.
+Voor de meeste programmeertalen kan nu overgegaan worden naar de sjablonen, maar in C moeten we nog een kleine methode implementeren.
 
 ## Aanpassen van de oplossingscode
 
@@ -379,7 +415,8 @@ TESTed verwacht dat volgende functies beschikbaar zijn:
 - `send_specific_value(value)` - schrijf het resultaat van een programmeertaalspecifieke evaluatie naar de return-channel.
 - `send_specific_exception(exception)` - schrijf het resultaat van een programmeertaalspecifieke evaluatie naar de exception-channel.
 
-Concreet in het geval van C zijn de exception-functies niet nodig, daar C geen exceptions ondersteunt. Ook gebruiken we een marco in plaats van een functie: dit opnieuw omdat we niet dezelfde functie in meerdere bestanden kunnen definiëren.
+Concreet in het geval van C zijn de exception-functies niet nodig, daar C geen exceptions ondersteunt.
+Ook gebruiken we een marco in plaats van een functie: dit opnieuw omdat we niet dezelfde functie in meerdere bestanden kunnen definiëren.
 
 ```mako
 #undef send_value
@@ -393,10 +430,13 @@ We zien ook dat de implementatie eenvoudig is: we geven de gekregen waarde of ex
 
 De lezer zal zich misschien afvragen waarom het nodig is om deze functies te gebruiken: als TESTed een functieoproep naar deze functies kan definiëren, waarom kan TESTed dan niet direct de `values`-module gebruiken, zonder daar deze functies tussen te plaatsen?
 
-Het antwoord is dat de `values`-module niet verplicht is. Dit is een conventie die in alle ondersteunde programmeertalen gebruikt wordt, maar het is evengoed mogelijk om bij de implementatie van bijvoorbeeld `send_value` de waarde rechtstreeks naar het bestand te schrijven.
+Het antwoord is dat de `values`-module niet verplicht is.
+Dit is een conventie die in alle ondersteunde programmeertalen gebruikt wordt, maar het is evengoed mogelijk om bij de implementatie van bijvoorbeeld `send_value` de waarde rechtstreeks naar het bestand te schrijven.
 Deze functies moeten beschouwd worden als de "interface" tussen TESTed en de programmeertaal: TESTed verwacht dat deze functies bestaan en de waarde of exception naar het juiste bestand schrijven, maar hoe dat gebeurt maakt voor TESTed niet uit.
 
-Nu zijn we aangekomen bij het uitvoeren van de testgevallen zelf. In C gebeurt dit in een functie die de naam van de context krijgt. Als eerste stap maken we de bestanden voor de return- en exception-channel aan.
+Nu zijn we aangekomen bij het uitvoeren van de testgevallen zelf.
+In C gebeurt dit in een functie die de naam van de context krijgt.
+Als eerste stap maken we de bestanden voor de return- en exception-channel aan.
 
 ```mako
 int ${context_name}() {
@@ -415,7 +455,8 @@ Hiervoor gebruiken we de _separator_.
 
 Het is belangrijk om de separator altijd vóór de aanvang van een testgeval naar de uitvoerbestanden te schrijven. TESTed is daar zo op voorzien: de separator na het testgeval uitschrijven zal tot verkeerde resultaten leiden.
 
-Ook roepen we de `main`-functie van de oplossing op indien het testplan dat vereist. Oefeningen waar geen `main`-functie opgeroepen wordt zijn bijvoorbeeld deze waarbij de student een functie moet implementeren.
+Ook roepen we de `main`-functie van de oplossing op indien het testplan dat vereist.
+Oefeningen waar geen `main`-functie opgeroepen wordt zijn bijvoorbeeld deze waarbij de student een functie moet implementeren.
 
 TODO: arguments in de main-functie
 
@@ -464,7 +505,9 @@ De `after`-code is analoog aan de `before`-code.
 }
 ```
 
-Omdat TESTed zowel contextcompilatie als batchcompilatie ondersteunt, moet elke context een `main`-functie hebben. C laat slechts 1 `main`-functie toe. Indien we in batchcompilatie zitten, zal de selector gebruikt worden, en zal `INCLUDED` op `TRUE` staan. In dat geval voegen we geen `main`-functie toe.
+Omdat TESTed zowel contextcompilatie als batchcompilatie ondersteunt, moet elke context een `main`-functie hebben. C laat slechts 1 `main`-functie toe.
+Indien we in batchcompilatie zitten, zal de selector gebruikt worden, en zal `INCLUDED` op `TRUE` staan.
+In dat geval voegen we geen `main`-functie toe.
 
 ```mako
 #ifndef INCLUDED
@@ -558,7 +601,9 @@ Daar de sjablonen qua werken sterk lijken op het statementsjabloon hebben we ze 
 
 # Hulpmodules
 
-Zoals we in het begin van dit hoofdstuk vermeld hebben, zijn er twee bestanden die als "dependency" opgegeven zijn: `values.c` en `values.h`. Deze bestanden implementeren het serialiseren van data naar het serialisatieformaat en vormen samen de `values`-module. De zaken die geserialiseerd moeten worden:
+Zoals we in het begin van dit hoofdstuk vermeld hebben, zijn er twee bestanden die als "dependency" opgegeven zijn: `values.c` en `values.h`.
+Deze bestanden implementeren het serialiseren van data naar het serialisatieformaat en vormen samen de `values`-module.
+De elementen die geserialiseerd moeten worden:
 
 - Waarden, zoals returnwaarden.
 - Exceptions (niet het geval in C, want die bestaan niet in C).
@@ -568,7 +613,8 @@ Hier nemen we de implementatie opnieuw niet op, daar de implementatie van deze m
 
 # Afsluiting
 
-Als laatste rest nu nog om de nieuwe programmeertaal te registreren bij TESTed. Hiervoor volstaat het om de programmeertaal en de bijhorende configuratieklasse toe te voegen aan het bestand `judge/src/tested/languages/__ini__.py`, in de dictionary `LANGUAGES`:
+Als laatste rest nu nog om de nieuwe programmeertaal te registreren bij TESTed.
+Hiervoor volstaat het om de programmeertaal en de bijhorende configuratieklasse toe te voegen aan het bestand `judge/src/tested/languages/__ini__.py`, in de dictionary `LANGUAGES`:
 
 ```python
 LANGUAGES = {
@@ -583,7 +629,7 @@ Om de programmeertaal manueel te testen is volgende stappenplan aanbevolen:
 
 1. Implementeer oplossingen voor een of meerdere oefeningen uit de map `exercises` in de nieuwe programmeertaal.
 2. Wijzig `judge/src/tested/manual.py` zodat dit bestand de oefening gebruikt waarvoor een oplossing bestaat (en stel ook de juiste programmeertaal in).
-3. Voer uit, zoals we in het begin besproken hebben:
+3. Voer uit, zoals we in het begin van het hoofdstuk besproken hebben:
 
 ```console
 > python -m tested.manual
@@ -591,7 +637,9 @@ Om de programmeertaal manueel te testen is volgende stappenplan aanbevolen:
 
 TESTed heeft ook een testsuite met verschillende oefeningen en scenario's.
 Om de nieuwe programmeertaal hieraan toe te voegen, moeten de juiste oplossingen geïmplementeerd worden.
-Hiervoor wordt best gekeken naar `judge/tests/test_functionality.py`. In dat bestand staan de verschillende testen. Bij elke test staat welke oplossing gebruikt wordt; indien het niet duidelijk zou zijn wat de oplossing voor een bepaalde test moet doen, kunnen de bestaande oplossingen in de bestaande programmeertalen een grote hulp zijn.
+Hiervoor wordt best gekeken naar `judge/tests/test_functionality.py`.
+In dat bestand staan de verschillende testen.
+Bij elke test staat welke oplossing gebruikt wordt; indien het niet duidelijk zou zijn wat de oplossing voor een bepaalde test moet doen, kunnen de bestaande oplossingen in de bestaande programmeertalen een grote hulp zijn.
 
 
 # Resultaat
