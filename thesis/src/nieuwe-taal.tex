@@ -167,13 +167,13 @@ Merk op dat het configuratiebestand slechts een hulpmiddel is: indien gewenst ku
     Het is vaak niet nodig om dit op te geven.
 \end{description}
 
-\inputminted[firstline=2,lastline=14,gobble=2]{js}{../../judge/src/tested/languages/c/config.json}
+\inputminted[firstline=2,lastline=14,gobble=2]{js}{sources/c-config.json}
 
 \subsubsection{Codestijl}
 
 Programmeertaalelementen zoals functies en namespaces worden omgezet in functie van de codestijl die gebruikelijk is in de programmeertaal:
 
-\inputminted[firstline=15,lastline=18,gobble=2]{js}{../../judge/src/tested/languages/c/config.json}
+\inputminted[firstline=15,lastline=18,gobble=2]{js}{sources/c-config.json}
 
 De mogelijke waarden zijn:
 
@@ -193,7 +193,7 @@ De laatste twee blokken in de configuratie geven aan welke constructies en gegev
 We hebben reeds besproken welke functionaliteit we willen ondersteunen en welke niet.
 We beginnen met de taalconstructies vast te leggen:
 
-\inputminted[firstline=19,lastline=27,gobble=2]{js}{../../judge/src/tested/languages/c/config.json}
+\inputminted[firstline=19,lastline=27,gobble=2]{js}{sources/c-config.json}
 
 Hier kan voor elke taalconstructie opgegeven worden of ze ondersteund wordt of niet (met een \texttt{boolean}).
 Standaard wordt geen enkele taalconstructie ondersteund.
@@ -221,7 +221,7 @@ Hieronder volgt een lijst van elke taalconstructie en een korte beschrijving:
 
 Dan moeten we nu de ondersteuning voor de gegevenstypes vastleggen:
 
-\inputminted[firstline=28,lastline=54,gobble=2]{js}{../../judge/src/tested/languages/c/config.json}
+\inputminted[firstline=28,lastline=54,gobble=2]{js}{sources/c-config.json}
 
 Zoals uitgelegd in \cref{subsec:dataserialisatie} zijn er twee soorten gegevenstypes in TESTed: de basistypes en de geavanceerde types.
 De basistypes zijn abstracte types voor concepten (zoals een sequentie of een geheel getal), terwijl de geavanceerde types concreter zijn (zoals een geheel getal van 8 bits).
@@ -249,7 +249,7 @@ Omdat TESTed in Python geschreven is, moet deze klasse ook in Python geïmplemen
 Maak een nieuw Python-bestand in \texttt{judge/src/tested/languages/c/config.py}.
 Hierin moet een klasse komen die \texttt{Language} uitbreidt:
 
-\inputminted[firstline=9,lastline=9]{python}{../../judge/src/tested/languages/c/config.py}
+\inputminted[firstline=9,lastline=9]{python}{sources/c-config.py}
 
 In de rest van deze paragraaf overlopen we de verschillende methodes die geïmplementeerd moeten worden in deze klasse.
 In de superklasse, \texttt{Language}, zijn de abstracte methodes voorzien van uitgebreide documentatie.
@@ -258,7 +258,7 @@ In de superklasse, \texttt{Language}, zijn de abstracte methodes voorzien van ui
 
 Een eerste en belangrijke methode is de callback voor de compilatiestap:
 
-\inputminted[firstline=11,lastline=16,gobble=4]{python}{../../judge/src/tested/languages/c/config.py}
+\inputminted[firstline=11,lastline=16,gobble=4]{python}{sources/c-config.py}
 
 Als argument krijgt deze methode een lijst van bestanden mee waarvan TESTed vermoed dat ze nuttig kunnen zijn voor de compilatiestap.
 Het bevat onder andere de dependencies uit het configuratiebestand, de ingediende oplossing en de uit de sjablonen gegenereerde bestanden.
@@ -314,7 +314,7 @@ Voor programmeertalen waar geen compilatie nodig is, moet deze methode niet geï
 
 Na het compileren moeten we een methode implementeren om de gecompileerde code uit te voeren:
 
-\inputminted[firstline=18,lastline=20,gobble=4]{python}{../../judge/src/tested/languages/c/config.py}
+\inputminted[firstline=18,lastline=20,gobble=4]{python}{sources/c-config.py}
 
 Deze functie heeft drie parameters:
 
@@ -361,7 +361,7 @@ Om deze redenen moeten we de code van de ingediende oplossing een beetje aanpass
 
 Vertaald naar de configuratieklasse wordt dit:
 
-\inputminted[firstline=23,lastline=29,gobble=4]{python}{../../judge/src/tested/languages/c/config.py}
+\inputminted[firstline=23,lastline=29,gobble=4]{python}{sources/c-config.py}
 
 \subsection{Sjablonen}\label{subsec:manual-sjablonen}
 
@@ -407,9 +407,9 @@ Een overzicht van alle beschikbare variabelen in het contextsjabloon is te vinde
 We importeren ook alle programmeertaalspecifieke evaluatoren die we nodig zullen hebben.
 De variabele \texttt{evaluator\_names} bevat een verzameling van deze namen.
 
-\inputminted[firstline=3,lastline=7]{mako}{../../judge/src/tested/languages/c/templates/context.c}
+\inputminted[firstline=3,lastline=7]{mako}{sources/c-context.mako}
 \vspace{-1.7cm} % Ugly hack
-\inputminted[firstline=9,lastline=11]{mako}{../../judge/src/tested/languages/c/templates/context.c}
+\inputminted[firstline=9,lastline=11]{mako}{sources/c-context.mako}
 
 Vervolgens maken we twee variabelen aan waarin de bestanden komen die dienst doen als return- en exception-channel.
 We noemen deze bestanden de uitvoerbestanden.
@@ -421,7 +421,7 @@ In onderstaande codefragment, en in de rest van het contextsjabloon, wordt regel
 Dit is omdat het in C niet mogelijk is om in meerdere bestanden functies met dezelfde naam te hebben.
 Als we dus meerdere contexten samen compileren en elke context heeft zijn eigen \texttt{write\_separator}-functie, dan zou het compileren mislukken.
 
-\inputminted[firstline=13,lastline=21]{mako}{../../judge/src/tested/languages/c/templates/context.c}
+\inputminted[firstline=13,lastline=21]{mako}{sources/c-context.mako}
 
 Als een resultaat geproduceerd wordt voor de return- of exception-channel, dan moet dat resultaat geserialiseerd worden en naar de uitvoerbestanden geschreven worden.
 TESTed verwacht dat volgende functies beschikbaar zijn:
@@ -436,9 +436,9 @@ TESTed verwacht dat volgende functies beschikbaar zijn:
 Concreet in het geval van C zijn de exception-functies niet nodig, daar C geen exceptions ondersteunt.
 Ook gebruiken we een marco in plaats van een functie: dit opnieuw omdat we niet dezelfde functie in meerdere bestanden kunnen definiëren.
 
-\inputminted[firstline=25,lastline=27]{mako}{../../judge/src/tested/languages/c/templates/context.c}
+\inputminted[firstline=25,lastline=27]{mako}{sources/c-context.mako}
 \vspace{-1.7cm} % Ugly hack
-\inputminted[firstline=29,lastline=30]{mako}{../../judge/src/tested/languages/c/templates/context.c}
+\inputminted[firstline=29,lastline=30]{mako}{sources/c-context.mako}
 
 We zien ook dat de implementatie eenvoudig is: we geven de gekregen waarde of exception door aan de juiste functie uit de \texttt{values}-module, en geven ook het bestand mee waarin de waarde of exception moet komen.
 
@@ -452,7 +452,7 @@ Nu zijn we aangekomen bij het uitvoeren van de testgevallen zelf.
 In C gebeurt dit in een functie die de naam van de context krijgt.
 Als eerste stap maken we de bestanden voor de return- en exception-channel aan.
 
-\inputminted[firstline=33,lastline=36]{mako}{../../judge/src/tested/languages/c/templates/context.c}
+\inputminted[firstline=33,lastline=36]{mako}{sources/c-context.mako}
 
 Vervolgens printen we de \texttt{before}-code.
 De \texttt{before}-code is een fragment code dat uitgevoerd wordt voor het uitvoeren van de context.
@@ -471,12 +471,12 @@ Oefeningen waar geen \texttt{main}-functie opgeroepen wordt zijn bijvoorbeeld de
 
 TODO: arguments in de main-functie
 
-\inputminted[firstline=38,lastline=44]{mako}{../../judge/src/tested/languages/c/templates/context.c}
+\inputminted[firstline=38,lastline=44]{mako}{sources/c-context.mako}
 
 Vervolgens genereren we de code voor alle normale testgevallen.
 Omdat C geen exceptions ondersteunt, is deze implementatie eenvoudig: we schrijven de separator naar de uitvoerbestanden en voeren het invoerstatement uit.
 
-\inputminted[firstline=47,lastline=51]{mako}{../../judge/src/tested/languages/c/templates/context.c}
+\inputminted[firstline=47,lastline=51]{mako}{sources/c-context.mako}
 
 Dat invoerstatement is \texttt{testcase.input\_statement()}, wat een geserialiseerd statement zal teruggeven.
 Wat dat statement juist is, is eigenlijk niet relevant voor het sjabloon, maar het kan toch geen kwaad om het te weten:
@@ -492,28 +492,28 @@ Wat dat statement juist is, is eigenlijk niet relevant voor het sjabloon, maar h
 Als afsluiter zetten we de \texttt{after}-code en sluiten we de bestanden.
 De \texttt{after}-code is analoog aan de \texttt{before}-code.
 
-\inputminted[firstline=53,lastline=58]{mako}{../../judge/src/tested/languages/c/templates/context.c}
+\inputminted[firstline=53,lastline=58]{mako}{sources/c-context.mako}
 
 Omdat TESTed zowel contextcompilatie als batchcompilatie ondersteunt, moet elke context een \texttt{main}-functie hebben.
 C laat slechts 1 \texttt{main}-functie toe.
 Indien we in batchcompilatie zitten, zal de selector gebruikt worden, en zal \texttt{INCLUDED} op \texttt{TRUE} staan.
 In dat geval voegen we geen \texttt{main}-functie toe.
 
-\inputminted[firstline=60,lastline=64]{mako}{../../judge/src/tested/languages/c/templates/context.c}
+\inputminted[firstline=60,lastline=64]{mako}{sources/c-context.mako}
 
 \subsubsection{Het selectorsjabloon}
 
 Het is nuttig om er meteen het selectorsjabloon bij te halen: dit wordt gebruikt als TESTed in batchcompilatie werkt en is verantwoordelijk om de juiste context uit te voeren op basis van een argument.
 Het is in dit sjabloon dat de macro \texttt{INCLUDED} op \texttt{true} gezet wordt, waardoor de \texttt{main}-functies in andere contexten niet gebruikt worden.
 
-\inputminted{mako}{../../judge/src/tested/languages/c/templates/selector.c}
+\inputminted{mako}{sources/c-selector.mako}
 
 \subsubsection{Het statementsjabloon}
 
 Dit sjabloon wordt door TESTed gebruikt om statements te vertalen naar code.
 Dit omvat onder andere assignments, functieoproepen en waarden:
 
-\inputminted{mako}{../../judge/src/tested/languages/c/templates/statement.mako}
+\inputminted{mako}{sources/c-statement.mako}
 
 De implementatie van dit sjabloon komt conceptueel neer op een grote \texttt{switch}, waarbij we delegeren naar het juiste sjabloon op basis van wat het statement juist is.
 
@@ -554,7 +554,7 @@ Hier nemen we de implementatie opnieuw niet op, daar de implementatie van deze m
 Als laatste rest nu nog om de nieuwe programmeertaal te registreren bij TESTed.
 Hiervoor volstaat het om de programmeertaal en de bijhorende configuratieklasse toe te voegen aan het bestand \texttt{judge/src/tested/languages/\_\_ini\_\_.py}, in de dictionary \texttt{LANGUAGES}:
 
-\inputminted[firstline=17,lastline=23]{python}{../../judge/src/tested/languages/__init__.py}
+\inputminted[firstline=17,lastline=23]{python}{sources/languages-init.py}
 
 Om de programmeertaal manueel te testen is volgende stappenplan aanbevolen:
 

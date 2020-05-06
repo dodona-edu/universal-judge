@@ -24,6 +24,7 @@ copies:
 	python scripts/copier.py ../judge/src/tested/languages/c/templates/context.c c-context.mako
 	python scripts/copier.py ../judge/src/tested/languages/c/templates/selector.c c-selector.mako
 	python scripts/copier.py ../judge/src/tested/languages/c/templates/statement.mako c-statement.mako
+	python scripts/copier.py ../judge/src/tested/languages/__init__.py languages-init.py
 	python scripts/copier.py ../exercise/lotto/solution/correct.py lotto-correct.py
 	python scripts/copier.py ../exercise/lotto/solution/correct.java lotto-correct.java
 
