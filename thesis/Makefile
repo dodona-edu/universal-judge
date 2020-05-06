@@ -12,23 +12,30 @@ endif
 # Create the main pdf.
 all: src/main.pdf
 
-# Clean temporar files.
+# Clean temporary files.
 clean:
 	$(RM) src/generated
 	latexmk -cd -pdflua -use-make -c src/main.tex
 
-# Generate dependencies needed for the main file.
-dependencies:
+# Dependencies needed for the main file.
+copies:
+	python scripts/copier.py ../judge/src/tested/languages/c/config.json c-config.json
+	python scripts/copier.py ../judge/src/tested/languages/c/config.py c-config.py
+	python scripts/copier.py ../judge/src/tested/languages/c/templates/context.c c-context.mako
+	python scripts/copier.py ../judge/src/tested/languages/c/templates/selector.c c-selector.mako
+	python scripts/copier.py ../judge/src/tested/languages/c/templates/statement.mako c-statement.mako
+	python scripts/copier.py ../exercise/lotto/solution/correct.py lotto-correct.py
+	python scripts/copier.py ../exercise/lotto/solution/correct.java lotto-correct.java
 
-# Generated dependencies
-src/generated/description.md:
-	python scripts/mathjax.py ../exercise/lotto/description/description.nl.md $@
+markdown:
+	python scripts/mathjax.py ../exercise/lotto/description/description.nl.md ./src/sources/lotto-description.md
 
-src/generated/isbn_description.md:
-	python scripts/mathjax.py ../exercise/isbn/description/description_clean.nl.md $@
+generate:
+	python scripts/generate_echo.py
+	python scripts/generate_echo_function.py
 
 # Do the main file.
-src/main.pdf: dependencies
+src/main.pdf: copies markdown generate
 	latexmk -cd -lualatex -shell-escape -use-make ${CONTINUOUS} src/main.tex
 
 watch: CONTINUOUS=-pvc -synctex=1

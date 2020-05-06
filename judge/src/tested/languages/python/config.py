@@ -6,7 +6,6 @@ from typing import List, Tuple
 from tested.configs import Bundle
 from tested.dodona import AnnotateCode, Severity, Message
 from tested.languages.config import Language, CallbackResult, Command
-from tested.languages.python import linter
 
 
 class PythonConfig(Language):
@@ -71,4 +70,6 @@ class PythonConfig(Language):
 
     def linter(self, bundle: Bundle, submission: Path, remaining: float) \
             -> Tuple[List[Message], List[AnnotateCode]]:
+        # Import locally to prevent errors.
+        from tested.languages.python import linter
         return linter.run_pylint(bundle, submission, remaining)
