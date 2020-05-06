@@ -14,7 +14,7 @@ all: src/main.pdf
 
 # Clean temporary files.
 clean:
-	$(RM) src/generated
+	$(RM) src/sources
 	latexmk -cd -pdflua -use-make -c src/main.tex
 
 # Dependencies needed for the main file.
