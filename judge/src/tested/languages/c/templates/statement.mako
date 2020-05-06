@@ -10,7 +10,7 @@
     <%include file="function.mako" args="function=statement"/>
 % elif isinstance(statement, get_args(Value)):
     ## We have a value, delegate to the value template.
-    <%include file="value.mako", args="value=statement" />
+    <%include file="value.mako" args="value=statement" />
 % else:
     <% assert isinstance(statement, get_args(Assignment)) %>
     % if full:

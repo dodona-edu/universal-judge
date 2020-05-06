@@ -9,7 +9,8 @@
     "selector": true
   },
   "extensions": {
-    "file": "c"
+    "file": "c",
+    "templates": ["c", "mako"]
   },
   "naming_conventions": {
     "namespace": "snake_case",

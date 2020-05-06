@@ -19,11 +19,10 @@ class CConfig(Language):
         local_file = cwd / executable_name(Path(file).stem)
         return [str(local_file.absolute()), *arguments]
 
+    # noinspection PyTypeChecker
     def solution(self, solution: Path, bundle: Bundle):
-        # noinspection PyTypeChecker
         with open(solution, "r") as file:
             contents = file.read()
-        # noinspection PyTypeChecker
         with open(solution, "w") as file:
             header = "#pragma once\n\n"
             result = header + contents.replace("main", "solution_main")
