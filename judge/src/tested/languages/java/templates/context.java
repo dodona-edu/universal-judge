@@ -2,9 +2,9 @@
 <%! from tested.languages.generator import _TestcaseArguments %>
 <%! from tested.serialisation import Statement, Expression, Assignment %>
 <%! from tested.utils import get_args %>
-import java.io.Closeable;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
+import java.util.*;
+import java.util.function.*;
 
 public class ${context_name} implements Closeable {
 
