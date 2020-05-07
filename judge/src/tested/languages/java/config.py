@@ -5,7 +5,7 @@ from tested.languages import Language
 from tested.languages.config import CallbackResult, Command
 
 
-class JavaConfig(Language):
+class Java(Language):
 
     def compilation(self, files: List[str]) -> CallbackResult:
         def file_filter(file: Path) -> bool:

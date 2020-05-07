@@ -6,7 +6,7 @@ from tested.languages import Language
 from tested.languages.config import CallbackResult, executable_name, Command
 
 
-class CConfig(Language):
+class C(Language):
 
     def compilation(self, files: List[str]) -> CallbackResult:
         main_file = files[-1]

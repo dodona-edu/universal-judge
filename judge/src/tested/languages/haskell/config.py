@@ -6,7 +6,7 @@ from tested.languages import Language
 from tested.languages.config import CallbackResult, executable_name, Command
 
 
-class HaskellConfig(Language):
+class Haskell(Language):
 
     def compilation(self, files: List[str]) -> CallbackResult:
         main_ = files[-1]

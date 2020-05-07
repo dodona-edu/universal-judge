@@ -6,7 +6,7 @@ from tested.languages import Language
 from tested.languages.config import Command
 
 
-class RunHaskellConfig(Language):
+class RunHaskell(Language):
 
     def execution(self, cwd: Path, file: str, arguments: List[str]) -> Command:
         return ["runhaskell", file, *arguments]

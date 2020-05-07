@@ -8,7 +8,7 @@ from tested.dodona import AnnotateCode, Severity, Message
 from tested.languages.config import Language, CallbackResult, Command
 
 
-class PythonConfig(Language):
+class Python(Language):
 
     def compilation(self, files: List[str]) -> CallbackResult:
         result = [x.replace(".py", ".pyc") for x in files]
