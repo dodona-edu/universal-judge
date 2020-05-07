@@ -1,3 +1,4 @@
+%! Suppress = EscapeHashOutsideCommand
 %! Suppress = EscapeUnderscore
 \chapter{Configuratie van een programmeertaal in TESTed}\label{ch:nieuwe-taal}
 
@@ -472,7 +473,7 @@ De lezer zal zich misschien afvragen waarom het nodig is om deze functies te geb
 
 Het antwoord is dat de \texttt{values}-module niet verplicht is.
 Dit is een conventie die in alle ondersteunde programmeertalen gebruikt wordt, maar het is evengoed mogelijk om bij de implementatie van bijvoorbeeld \texttt{send\_value} de waarde rechtstreeks naar het bestand te schrijven.
-Deze functies moeten beschouwd worden als de ``interface'' tussen TESTed en de programmeertaal: TESTed verwacht dat deze functies bestaan en de waarde of exception naar het juiste bestand schrijven, maar hoe dat gebeurt maakt voor TESTed niet uit.
+Deze functies moeten beschouwd worden als de "interface" tussen TESTed en de programmeertaal: TESTed verwacht dat deze functies bestaan en de waarde of exception naar het juiste bestand schrijven, maar hoe dat gebeurt maakt voor TESTed niet uit.
 
 Nu zijn we aangekomen bij het uitvoeren van de testgevallen zelf.
 In C gebeurt dit in een functie die de naam van de context krijgt.
@@ -549,6 +550,7 @@ Een aspect dat meer uitleg vraagt, is de \texttt{full}-parameter.
 Dit geeft aan dat het gegevenstype van de variabele bij een assignment ook nodig is.
 Het verschil is duidelijk met een voorbeeld:
 
+%! Suppress = LineBreak
 \begin{minted}{c}
 int variabele = 5; // met declaration
 variabele = 6; // zonder declaration
@@ -564,6 +566,7 @@ Zo luidt de definitie van \texttt{Expression} als volgt: \texttt{Expression = Un
 De \texttt{get\_args}-functie lost dit probleem op door de \texttt{Union} om te zetten naar een \texttt{tuple} van echte types.
 Het is beter de functie \texttt{get\_args} te veel dan te weinig te gebruiken: de functie werkt ook voor gewone types.
 
+%! Suppress = EscapeHashOutsideCommand
 \begin{minted}{pycon}
 >>> isinstance('string', Expression)
 TypeError
@@ -647,14 +650,14 @@ We kunnen de interne werking van TESTed in grote lijnen verdelen in drie onderde
 
 De grenzen tussen deze onderdelen zijn niet strikt: zo zal de configuratieklasse ook gebruikt worden in het interne deel tijdens de uitvoering van het testplan.
 
-We willen opmerken dat de focus in deze thesis vooral lag op de interface naar de oefeningen toe (dus het testplan en het serialisatieformaat).
+We willen opmerken dat de focus in deze thesis vooral lag op de interface naar de oefeningen toe (dus het formaat van het testplan en het serialisatieformaat).
 We verwachten dan ook niet dat het toevoegen van een programmeertaal grote onverwachte wijzigingen vereist in het formaat van testplan of het serialisatieformaat.
 We spreken van onverwachte wijzigingen, omdat sommige delen van TESTed juist voorzien zijn op wijzigingen.
 Een voorbeeld zijn de gegevenstypes uit het serialisatieformaat.
 Daar is het juist de bedoeling dan nieuwe programmeertalen bijkomende geavanceerde gegevenstypes toevoegen indien nodig.
 Als een nieuwe programmeertaal bijvoorbeeld ondersteuning wil bieden voor oneindige generators (bijvoorbeeld een functie die getallen blijft teruggeven, dan is dat mogelijk.
 Er zullen ook geen wijzigingen nodig zijn aan de bestaande programmeertalen bij het toevoegen van nieuwe gegevenstypes.
-Aan de testplannen zelf verwachten we niet dat er wijzigingen nodig zijn.
+Aan de testplannen zelf (dus niet het formaat, maar de \acronym{JSON}-bestanden van de oefeningen) verwachten we niet dat er wijzigingen nodig zijn.
 
 Het omgekeerde is ook waar: we verwachten dat er wijzigingen nodig kunnen zijn aan de configuratieklasse en/of de sjablonen bij nieuwe programmeertalen.
 Een stabiele interface tussen de programmeertalen enerzijds en de kern van TESTed anderzijds was geen expliciet doel in deze thesis.
@@ -677,6 +680,3 @@ Een voorbeeld is dat bij de methode voor het uitvoeren van de code nu ook het vo
 C compileert naar een uitvoerbaar bestand, wat tot dan nog niet gebeurde (Haskell gebruikte nog \texttt{runhaskell}).
 Om het uitvoerbare bestand uit te voeren is een absoluut pad naar dat uitvoerbaar bestand nodig, maar die informatie was niet voorhanden in de methode.
 Hierbij moest de configuratieklasse van de bestaande programmeertalen ook licht gewijzigd worden, want de \texttt{execute}-functie die geïmplementeerd was in deze klassen kreeg een bijkomende parameter.
-Technisch gezien was het mogelijk om dit te vermijden door de bestaande functie te behouden en vanuit de nieuwe functie de oude functie op te roepen.
-
-
