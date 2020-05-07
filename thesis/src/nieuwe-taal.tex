@@ -103,7 +103,20 @@ Het configureren van een programmeertaal in TESTed bestaat uit drie grote onderd
     \item De sjablonen, die gebruikt worden om code te genereren.
 \end{enumerate}
 
+TESTed voorziet een hulpmiddel om de bestanden op de juiste plaats te genereren.
+Op basis van enkele vragen worden \english{stubs} gegenereerd voor het configuratiebestand, de configuratieklasse en de sjablonen.
+Dit hulpmiddel kan als volgt uitgevoerd worden:
+
+\begin{minted}{console}
+> python -m tested.generation
+\end{minted}
+
+Merk op dat dit enkel bestanden genereert.
+De stappen in \cref{subsec:afsluiting} voor het registreren van de nieuwe programmeertaal in TESTed zijn nog steeds nodig.
+
 We overlopen nu elk onderdeel in functie van de programmeertaal C\@.
+We gaan er telkens vanuit dat bovenstaande hulpmiddel niet gebruikt is en dat de bestanden dus nog gemaakt moeten worden.
+Is bovenstaande hulpmiddel wel gebruikt, dan kunnen de instructies voor het maken van bestanden genegeerd worden.
 
 \section{De programmeertaal C}\label{sec:de-programmeertaal-c}
 
@@ -154,11 +167,10 @@ Merk op dat het configuratiebestand slechts een hulpmiddel is: indien gewenst ku
     \item[\texttt{general.dependencies}] Dit zijn bestanden die beschikbaar zullen zijn tijdens het compileren en tijdens het uitvoeren van de beoordeling.
     Dit betekent dat deze dependencies gebruikt kunnen worden in de testcode voor de contexten en de evaluatiecode voor de geprogrammeerde en programmeertaalspecifieke code.
     In het geval van C is dit de \texttt{values}-module, waarvan we de implementatie later bespreken.
-    Het kan gebeuren dat de code van de dependencies ook beschikbaar is voor de ingediende oplossing.
-    Dit is echter toeval en niet de bedoeling.
-    Er is momenteel geen ondersteuning om dependencies beschikbaar te maken voor de ingediende oplossing.
+    Deze dependencies zijn bedoeld om gebruikt te worden in de code gegenereerd door de sjablonen, niet in de ingediende oplossing (hoewel dat momenteel technisch mogelijk is).
     \item[\texttt{general.selector}] Dit geeft aan of de programmeertaal gebruikmaakt van een selector tijdens het uitvoeren van code die gecompileerd is in batchcompilatie.
-    Voor de meeste talen met compilatie zal dit \texttt{true} zijn, zoals ook bij C. (\Cref{subsec:testcode-genereren} legt dit mechanisme in meer detail uit.)
+    Voor de meeste talen met compilatie zal dit \texttt{true} zijn.
+    Zo ook bij C (\Cref{subsec:testcode-genereren} legt dit mechanisme in meer detail uit).
     \item[\texttt{extensions.file}] Geeft de voornaamste bestandsextensie aan van de bestanden.
     Met voornaamste bedoelen we de extensie van de bestanden die gegenereerd worden.
     Bijvoorbeeld in C bestaan zowel \texttt{.h} en \texttt{.c}, maar de gegenereerde code gebruikt \texttt{.c}.
@@ -199,7 +211,7 @@ Hier kan voor elke taalconstructie opgegeven worden of ze ondersteund wordt of n
 Standaard wordt geen enkele taalconstructie ondersteund.
 Dit zorgt ervoor dat alle ondersteunde constructies expliciet in het configuratiebestand staan en dat nieuwe taalconstructies toegevoegd kunnen worden zonder dat bestaande configuraties van programmeertalen aangepast moeten worden.
 
-De mogelijke taalconstructie zijn deze uit de enum \texttt{tested.features.Construct}.
+De mogelijke taalconstructies zijn deze uit de enum \texttt{tested.features.Construct}.
 Hieronder volgt een lijst van elke taalconstructie en een korte beschrijving:
 
 \begin{description}
@@ -216,7 +228,7 @@ Hieronder volgt een lijst van elke taalconstructie en een korte beschrijving:
     \item[\texttt{heterogeneous\_arguments}] Hiermee bedoelen we functieoproepen waarbij dezelfde functie meerdere keren wordt opgeroepen met argumenten met verschillende datatypes (bijvoorbeeld eerst \texttt{check(True)} daarna \texttt{check(\textquotesingle{}hallo\textquotesingle{})}).
     Dit zal lukken in Python en Java, maar niet in Haskell en C\@.
     \item[\texttt{evaluation}] Of een geprogrammeerde evaluatie mogelijk is in deze programmeertaal.
-    Dit is technisch gezien geen taalconstructie.
+    Dit is technisch gezien geen taalconstructie, maar dezelfde infrastructuur wordt gebruikt om dit te controleren.
 \end{description}
 
 Dan moeten we nu de ondersteuning voor de gegevenstypes vastleggen:
@@ -238,7 +250,7 @@ Een opmerking hierbij is dat de status \texttt{reduced} voor de basistypes equiv
 Het is de bedoeling dat de meeste programmeertalen voor het merendeel van de datatypes ten minste \texttt{reduced} hebben.
 Toch is gekozen om \texttt{unsupported} als standaardwaarde te nemen;
 dit zorgt ervoor dat de ondersteunde datatypes explicit uitgeschreven zijn.
-Ook laat dit opnieuw toe om datatypes toe te voegen aan TESTed zonder bestaande configuraties van programmeertalen te moeten aanpassen.
+Dit laat ook toe om datatypes toe te voegen aan TESTed zonder bestaande configuraties van programmeertalen te moeten aanpassen.
 Ter illustratie vermelden we hier voor C alle datatypes, ook de niet-ondersteunde.
 
 \subsection{Configuratieklasse}\label{subsec:configuratieklasse}
@@ -246,7 +258,7 @@ Ter illustratie vermelden we hier voor C alle datatypes, ook de niet-ondersteund
 De configuratieklasse is de schakel tussen de generieke aspecten van TESTed en het programmeertaalafhankelijke gedrag.
 Omdat TESTed in Python geschreven is, moet deze klasse ook in Python geïmplementeerd worden.
 
-Maak een nieuw Python-bestand in \texttt{judge/src/tested/languages/c/config.py}.
+Maak een nieuw Python-bestand \texttt{judge/src/tested/languages/c/config.py} aan.
 Hierin moet een klasse komen die \texttt{Language} uitbreidt:
 
 \inputminted[firstline=9,lastline=9]{python}{sources/c-config.py}
