@@ -86,7 +86,7 @@ void write_unknown(FILE * out, void * value) {
     fprintf(out, asString, "?");
 }
 
-void send_evaluated(FILE* out, EvaluationResult* result) {
+void write_evaluated(FILE* out, EvaluationResult* result) {
 
     // Count the size of the string we need for each message object.
     size_t messageLength = 0;

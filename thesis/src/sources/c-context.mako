@@ -27,7 +27,7 @@ static void ${context_name}_write_separator() {
 
 ## Send the result of a language specific value evaluator to TESTed.
 #undef send_specific_value
-#define send_specific_value(r) send_evaluated(${context_name}_value_file, r)
+#define send_specific_value(value) send_evaluated(${context_name}_value_file, value)
 
 
 int ${context_name}() {

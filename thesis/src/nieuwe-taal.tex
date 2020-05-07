@@ -378,15 +378,15 @@ Vertaald naar de configuratieklasse wordt dit:
 
 \subsection{Sjablonen}\label{subsec:manual-sjablonen}
 
-De derde stap is het schrijven van de sjablonen.
+De derde stap bestaat uit het schrijven van de sjablonen.
 We hebben uiteraard de verplichte sjablonen nodig (zie \cref{subsec:sjablonen} voor een beschrijving van welke sjablonen verplicht zijn en welke niet), maar om code te hergebruiken kiezen we ervoor om enkele bijkomende sjablonen te schrijven:
 
 \begin{description}
-    \item[\texttt{context.c}] het sjabloon om de contextcode te genereren
-    \item[\texttt{selector.c}] het sjabloon om de selector voor batchcompilatie
-    \item[\texttt{declaration.mako}] vertaal het type van een variabele naar code
-    \item[\texttt{function.mako}] vertaalt een functieoproep
-    \item[\texttt{statement.mako}] vertaalt een statement of expressie naar code
+    \item[\texttt{context.c}] het sjabloon voor de contextcode
+    \item[\texttt{selector.c}] het sjabloon voor de selector voor batchcompilatie
+    \item[\texttt{declaration.mako}] vertaalt het type van een variabele naar code
+    \item[\texttt{function.mako}] vertaalt een functieoproep naar code
+    \item[\texttt{statement.mako}] vertaalt een statement of een expressie naar code
     \item[\texttt{value.mako}] vertaalt een waarde naar code
     \item[\texttt{value\_arguments.mako}] hulpsjabloon voor \texttt{value.mako}
     \item[\texttt{value\_basic.mako}] hulpsjabloon voor \texttt{value.mako}
@@ -399,7 +399,7 @@ Standaard zijn de toegelaten extensies \texttt{.mako} en een programmeertaalafha
 Een conventie die gebruikt wordt binnen TESTed, is de volgende:
 
 \begin{itemize}
-    \item Sjablonen eindigen op de programmeertaalafhankelijke extensie (\texttt{.c}) indien het sjabloon resulteert in een opzichzelfstaand bestand.
+    \item Sjablonen eindigen op de programmeertaalafhankelijke extensie (\texttt{.c}) indien het sjabloon resulteert in een op zichzelf staand bestand.
     Voorbeeld zijn het contextsjabloon en de selector.
     \item Sjablonen die resulteren in een codefragment en dus vooral gebruikt worden als onderdeel van andere sjablonen eindigen op \texttt{.mako}.
     Dit zijn bijvoorbeeld de sjablonen om functies en statements om te zetten.
@@ -424,13 +424,21 @@ De variabele \texttt{evaluator\_names} bevat een verzameling van deze namen.
 \vspace{-1.7cm} % Ugly hack
 \inputminted[firstline=9,lastline=11]{mako}{sources/c-context.mako}
 
+Nuttig om te weten is dat TESTed een extensie heeft toegevoegd aan mako, waardoor de indentatie van mako-gerelateerde taalconstructies zal verdwijnen.
+De \texttt{for}-loop in het fragment hierboven resulteert bijvoorbeeld in deze code:
+
+\begin{minted}{c}
+#include "context_0_0.c"
+#include "context_0_1.c"
+\end{minted}
+
 Vervolgens maken we twee variabelen aan waarin de bestanden komen die dienst doen als return- en exception-channel.
 We noemen deze bestanden de uitvoerbestanden.
 Merk op dat C geen exceptions ondersteunt, maar TESTed verwacht toch een bestand voor het exception-channel.
 Anders zal TESTed ervan uitgaan dat er iets verkeerd liep tijdens het uitvoeren.
-We definiëren ook direct een functie om de separator naar alle uitvoerkanalen te schrijven.
+We definiëren direct ook een functie om de separator naar alle uitvoerkanalen te schrijven.
 
-In onderstaande codefragment, en in de rest van het contextsjabloon, wordt regelmatig de naam van de context als prefix gebruikt voor functies en variabelen.
+In onderstaand codefragment en in de rest van het contextsjabloon wordt regelmatig de naam van de context als prefix gebruikt voor functies en variabelen.
 Dit is omdat het in C niet mogelijk is om in meerdere bestanden functies met dezelfde naam te hebben.
 Als we dus meerdere contexten samen compileren en elke context heeft zijn eigen \texttt{write\_separator}-functie, dan zou het compileren mislukken.
 
@@ -446,14 +454,19 @@ TESTed verwacht dat volgende functies beschikbaar zijn:
     \item[\texttt{send\_specific\_exception(exception)}] schrijf het resultaat van een programmeertaalspecifieke evaluatie naar de exception-channel.
 \end{itemize}
 
-Concreet in het geval van C zijn de exception-functies niet nodig, daar C geen exceptions ondersteunt.
-Ook gebruiken we een marco in plaats van een functie: dit opnieuw omdat we niet dezelfde functie in meerdere bestanden kunnen definiëren.
+Bij het implementeren moet de conventies van de programmeertaal toegepast worden: zo zal TESTed in Java een oproep naar een functie met naam \texttt{sendValue} genereren.
+
+We zullen later zien dat we zelf de oproepen naar deze functies in het sjabloon schrijven.
+Toegepast op C zijn er wat wijzigingen, omdat C geen exceptions ondersteunt.
+Als gevolg daarvan zullen we de exception-functies niet implementeren en zullen we ook geen oproep naar deze functies genereren.
+In \cref{subsec:echo-java-gegenereerde-code} staat bijvoorbeeld de gegenereerde code in Java, waar de exception-functies wel gebruikt worden.
+Ook gebruiken we in C een marco in plaats van een functie: dit opnieuw omdat we niet dezelfde functie in meerdere bestanden kunnen definiëren.
 
 \inputminted[firstline=25,lastline=27]{mako}{sources/c-context.mako}
 \vspace{-1.7cm} % Ugly hack
 \inputminted[firstline=29,lastline=30]{mako}{sources/c-context.mako}
 
-We zien ook dat de implementatie eenvoudig is: we geven de gekregen waarde of exception door aan de juiste functie uit de \texttt{values}-module, en geven ook het bestand mee waarin de waarde of exception moet komen.
+We zien ook dat de implementatie eenvoudig is: we geven de gekregen waarde of exception door aan de juiste functie uit de \texttt{values}-module en geven ook het bestand mee waarin de waarde of exception moet komen.
 
 De lezer zal zich misschien afvragen waarom het nodig is om deze functies te gebruiken: als TESTed een functieoproep naar deze functies kan definiëren, waarom kan TESTed dan niet direct de \texttt{values}-module gebruiken, zonder daar deze functies tussen te plaatsen?
 
@@ -471,16 +484,20 @@ Vervolgens printen we de \texttt{before}-code.
 De \texttt{before}-code is een fragment code dat uitgevoerd wordt voor het uitvoeren van de context.
 Deze kan opgegeven worden in het testplan.
 
-Verder schrijven de \emph{separator} naar de uitvoerbestanden door gebruik te maken van de functie die we eerder gedefinieerd hebben in ons sjabloon.
+Verder schrijven we de \emph{separator} naar de uitvoerbestanden door gebruik te maken van de functie die we eerder gedefinieerd hebben in ons sjabloon.
 Zoals we reeds bespraken, komt de uitvoer van de return- en exception-channel in bestanden terecht.
 Het is nodig om de waarden van elkaar te kunnen onderscheiden, om goed te weten waar de resultaten van een testgeval stoppen en waar de resultaten van het volgende testgeval beginnen.
 Hiervoor gebruiken we de \emph{separator}.
 
-Het is belangrijk om de separator altijd vóór de aanvang van een testgeval naar de uitvoerbestanden te schrijven.
+Het is belangrijk om de separator altijd vóór aanvang van een testgeval naar de uitvoerbestanden te schrijven.
 TESTed is daar zo op voorzien: de separator na het testgeval uitschrijven zal tot verkeerde resultaten leiden.
 
 Ook roepen we de \texttt{main}-functie van de oplossing op indien het testplan dat vereist.
-Oefeningen waar geen \texttt{main}-functie opgeroepen wordt zijn bijvoorbeeld deze waarbij de student een functie moet implementeren.
+Oefeningen waar geen \texttt{main}-functie opgeroepen wordt zijn bijvoorbeeld deze waarbij de student een functie moet geïmplementeerd worden.
+
+In het codefragment hieronder wordt een oproep gedaan naar de functie \texttt{solution\_main} uit de ingediende oplossing.
+Deze functie hebben we zelf gemaakt door de gewone \texttt{main}-functie te hernoemen (zie \cref{subsec:configuratieklasse}).
+Als de ingediende oplossing geen \texttt{main}-functie bevatte, maar het testplan verwachtte die wel, dan zal de compilatie falen.
 
 \inputminted[firstline=38,lastline=49]{mako}{sources/c-context.mako}
 
@@ -539,12 +556,29 @@ variabele = 6; // zonder declaration
 
 In C is deze parameter minder relevant omdat de tweede variant zelden nodig is, maar deze is vooral nodig in talen zoals Java.
 
+Wat ook nuttig kan zijn is de functie \texttt{get\_args}, geïmporteerd uit \texttt{tested.utils}.
+We willen op verschillende plaatsen in het sjabloon een andere actie doen op basis van het type van het statement.
+Normaliter zou een eenvoudige oproep met \texttt{isinstance} volstaan.
+Nu zijn verschillende types, zoals \texttt{Value}, \texttt{Expression} en \texttt{Statement} geen echt type: ze zijn geïmplementeerd als een \texttt{Union}.
+Zo luidt de definitie van \texttt{Expression} als volgt: \texttt{Expression = Union[Identifier, FunctionCall, Value]}.
+De \texttt{get\_args}-functie lost dit probleem op door de \texttt{Union} om te zetten naar een \texttt{tuple} van echte types.
+Het is beter de functie \texttt{get\_args} te veel dan te weinig te gebruiken: de functie werkt ook voor gewone types.
+
+\begin{minted}{pycon}
+>>> isinstance('string', Expression)
+TypeError
+>>> isinstance('string', get_args(Expression))
+False
+>>> isinstance('string', get_args(str))  # Ook gewone types
+True
+\end{minted}
+
 \subsubsection{Overige}
 
-De overige sjablonen vertalen ook elk een taalelement op een gelijkaardige wijze als het statementsjabloon.
+De overige sjablonen vertalen elk een taalelement op een gelijkaardige wijze als het statementsjabloon.
 Het gaat om de sjablonen \texttt{declaration.mako}, \texttt{function.mako}, \texttt{value.mako}, \texttt{value\_arguments.mako} en \texttt{value\_basic.mako}.
 
-Daar de sjablonen qua werken sterk lijken op het statementsjabloon hebben we ze niet toegevoegd aan dit hoofdstuk: de implementatie ervan is te bekijken in de repository.
+Daar de sjablonen sterk lijken op het statementsjabloon hebben we ze niet toegevoegd aan dit hoofdstuk: de implementatie ervan is te bekijken in de repository.
 
 \subsection{Hulpmodules}\label{subsec:hulpmodules}
 
@@ -558,7 +592,8 @@ De elementen die geserialiseerd moeten worden:
     \item Resultaten van geprogrammeerde en programmeertaalspecifieke evaluaties.
 \end{itemize}
 
-Hier nemen we de implementatie opnieuw niet op, daar de implementatie van deze module sterk programmeertaalafhankelijk is.
+Hier nemen we de implementatie opnieuw niet op, daar de implementatie van deze module volledig programmeertaalafhankelijk is.
+In Python is de implementatie eenvoudig door de ingebouwde module \texttt{json}, terwijl de implementatie in C een stuk langer is.
 
 \subsection{Afsluiting}\label{subsec:afsluiting}
 
@@ -567,7 +602,7 @@ Hiervoor volstaat het om de programmeertaal en de bijhorende configuratieklasse 
 
 \inputminted[firstline=17,lastline=23]{python}{sources/languages-init.py}
 
-Om de programmeertaal manueel te testen is volgende stappenplan aanbevolen:
+Om de programmeertaal manueel te testen is volgend stappenplan aanbevolen:
 
 \begin{enumerate}
     \item Implementeer oplossingen voor een of meerdere oefeningen uit de map \texttt{exercises} in de nieuwe programmeertaal.
@@ -588,7 +623,8 @@ indien het niet duidelijk zou zijn wat de oplossing voor een bepaalde test moet 
 
 \subsection{Resultaat}\label{subsec:resultaat}
 
-We hebben nu een werkende C-judge voor TESTed en bij uitbreiding voor het Dodona-platform, een programmeertaal waarvoor nog geen judge bestaat in Dodona.
+We hebben nu een werkende C-judge voor TESTed en bij uitbreiding voor het Dodona-platform.
+Daarmee hebben we ondersteuning voor een eerste programmeertaal waarvoor er nog geen judge bestond in Dodona.
 
 
 \section{Hoe lang duurt het implementeren van een programmeertaal?}\label{sec:hoe-lang-duurt-het-implementeren-van-een-programmeertaal?}
@@ -597,8 +633,7 @@ TODO
 
 \section{Stabiliteit van TESTed}\label{sec:stabiliteit-van-tested}
 
-Met stabiliteit wordt hier bedoeld hoe flexibel TESTed is bij het toevoegen van een nieuwe programmeertaal.
-Dit is een maat van hoeveel er aan de kern van TESTed gewijzigd moet worden bij het toevoegen van een nieuwe programmeertaal.
+Met stabiliteit wordt hier bedoeld hoe weinig er bij het toevoegen van een nieuwe programmeertaal nog veranderd moet worden aan TESTed zelf, configuraties van bestaande programmeertaal en de testplannen van bestaande oefeningen.
 
 We kunnen de interne werking van TESTed in grote lijnen verdelen in drie onderdelen:
 
@@ -607,21 +642,22 @@ We kunnen de interne werking van TESTed in grote lijnen verdelen in drie onderde
     Hieronder vallen vooral het testplan en het serialisatieformaat.
     \item De interface naar de programmeertalen toe.
     Hieronder vallen vooral het configuratiebestand, de configuratieklasse en de verplichte sjablonen.
-    \item Het interne deel, waar het testplan uitgevoerd wordt, de ingediende oplossingen beoordeeld worden en de resultaten naar Dodona geschreven worden.
+    \item Het interne deel waar het testplan uitgevoerd wordt, de ingediende oplossingen beoordeeld worden en de resultaten aan Dodona doorgegeven worden.
 \end{itemize}
 
 De grenzen tussen deze onderdelen zijn niet strikt: zo zal de configuratieklasse ook gebruikt worden in het interne deel tijdens de uitvoering van het testplan.
 
 We willen opmerken dat de focus in deze thesis vooral lag op de interface naar de oefeningen toe (dus het testplan en het serialisatieformaat).
-We verwachten dan ook niet dat het toevoegen van een programmeertaal grote onverwachte wijzigingen vereist in het testplan of het serialisatieformaat.
+We verwachten dan ook niet dat het toevoegen van een programmeertaal grote onverwachte wijzigingen vereist in het formaat van testplan of het serialisatieformaat.
 We spreken van onverwachte wijzigingen, omdat sommige delen van TESTed juist voorzien zijn op wijzigingen.
 Een voorbeeld zijn de gegevenstypes uit het serialisatieformaat.
 Daar is het juist de bedoeling dan nieuwe programmeertalen bijkomende geavanceerde gegevenstypes toevoegen indien nodig.
 Als een nieuwe programmeertaal bijvoorbeeld ondersteuning wil bieden voor oneindige generators (bijvoorbeeld een functie die getallen blijft teruggeven, dan is dat mogelijk.
-Er zullen ook geen wijzigingen nodig zijn aan de bestaande programmeertalen.
+Er zullen ook geen wijzigingen nodig zijn aan de bestaande programmeertalen bij het toevoegen van nieuwe gegevenstypes.
+Aan de testplannen zelf verwachten we niet dat er wijzigingen nodig zijn.
 
 Het omgekeerde is ook waar: we verwachten dat er wijzigingen nodig kunnen zijn aan de configuratieklasse en/of de sjablonen bij nieuwe programmeertalen.
-Een stabiele interface tussen de programmeertalen enerzijds en de kern van TESTed anderzijds is geen doel in deze thesis.
+Een stabiele interface tussen de programmeertalen enerzijds en de kern van TESTed anderzijds was geen expliciet doel in deze thesis.
 Hierbij wel twee nuances:
 
 \begin{itemize}
@@ -640,3 +676,7 @@ Bij het configureren van C zijn wijzigingen nodig geweest aan de configuratiekla
 Een voorbeeld is dat bij de methode voor het uitvoeren van de code nu ook het volledige pad naar de map waarin het uitvoeren gebeurt een argument is.
 C compileert naar een uitvoerbaar bestand, wat tot dan nog niet gebeurde (Haskell gebruikte nog \texttt{runhaskell}).
 Om het uitvoerbare bestand uit te voeren is een absoluut pad naar dat uitvoerbaar bestand nodig, maar die informatie was niet voorhanden in de methode.
+Hierbij moest de configuratieklasse van de bestaande programmeertalen ook licht gewijzigd worden, want de \texttt{execute}-functie die geïmplementeerd was in deze klassen kreeg een bijkomende parameter.
+Technisch gezien was het mogelijk om dit te vermijden door de bestaande functie te behouden en vanuit de nieuwe functie de oude functie op te roepen.
+
+

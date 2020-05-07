@@ -1,12 +1,12 @@
 import values
 import sys
-value_file = open("fpCH2nSTj_values.txt", "w")
-exception_file = open("fpCH2nSTj_exceptions.txt", "w")
+value_file = open("DPS2okM9j_values.txt", "w")
+exception_file = open("DPS2okM9j_exceptions.txt", "w")
 def write_separator():
-    value_file.write("--fpCH2nSTj-- SEP")
-    exception_file.write("--fpCH2nSTj-- SEP")
-    sys.stderr.write("--fpCH2nSTj-- SEP")
-    sys.stdout.write("--fpCH2nSTj-- SEP")
+    value_file.write("--DPS2okM9j-- SEP")
+    exception_file.write("--DPS2okM9j-- SEP")
+    sys.stderr.write("--DPS2okM9j-- SEP")
+    sys.stdout.write("--DPS2okM9j-- SEP")
     sys.stdout.flush()
     sys.stderr.flush()
     value_file.flush()
