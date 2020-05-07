@@ -1,15 +1,15 @@
 %! Suppress = EscapeUnderscore
 \chapter{Configuratie van een programmeertaal in TESTed}\label{ch:nieuwe-taal}
 
-In dit hoofdstuk wordt in detail uitgelegd hoe een nieuwe programmeertaal aan TESTed toegevoegd kan worden.
+In dit hoofdstuk wordt in detail uitgelegd hoe een nieuwe programmeertaal aan TESTed kan toegevoegd worden.
 We doen dat door te beschrijven hoe de programmeertaal C aan TESTed toegevoegd is.
 Dit hoofdstuk sluit qua vorm en stijl dan ook dichter aan bij een handleiding.
 Enkele nuttige links en verwijzingen hierbij zijn:
 
 \begin{itemize}
     \item Bestaande configuraties: \url{https://github.com/dodona-edu/universal-judge/tree/new-master/judge/src/tested/languages}
-    \item \Cref{ch:echo-oefening,ch:echo-function-oefening} bevatten volledige oefeningen: de opgave, het testplan en de gegenereerde code.
-    Dat laatste kan nuttig zijn om ook het concrete resultaat te zien van de sjablonen.
+    \item \Cref{ch:echo-oefening,ch:echo-function-oefening} bevatten specificaties van volledige oefeningen: de opgave, het testplan en de gegenereerde code.
+    Dat laatste kan nuttig zijn om ook het concrete resultaat te zien van wat de sjablonen genereren.
 \end{itemize}
 
 In dit hoofdstuk worden regelmatig codebestanden getoond verspreid over meerdere codefragmenten (bijvoorbeeld eerst $n$ regels, daarna wat tekst en dan pas de rest van de regels).
@@ -18,7 +18,7 @@ Om dit duidelijk te maken toont de regelnummering aan de linkerkant de regelnumm
 \section{TESTed lokaal uitvoeren}\label{sec:tested-lokaal-uitvoeren}
 
 Tijdens het configureren van een programmeertaal is het nuttig om TESTed lokaal uit te voeren, zonder daarvoor het volledige Dodona-platform te moeten uitvoeren.
-Buiten de \english{dependencies} voor de bestaande programmeertalen is TESTed een Python-package, die op de normale manier uitgevoerd kan worden.
+Buiten de \english{dependencies} voor de bestaande programmeertalen is TESTed een Python-package, dat op de normale manier uitgevoerd kan worden.
 
 \subsection{De broncode}\label{subsec:de-broncode}
 
@@ -41,30 +41,30 @@ Het installeren van deze vereisten gebeurt op de gebruikelijke manier:
 > pip install -r requirements.txt
 \end{minted}
 
-Voor de programmeertalen zijn volgende dependencies nodig:
+Voor de programmeertalen die momenteel reeds geconfigureerd zijn, zijn volgende dependencies nodig:
 
 \begin{description}
     \item[Python] Indien de linter gebruikt wordt, is \texttt{pylint} een dependency.
-    Daarnaast moet \texttt{python} beschikbaar moet zijn in de \texttt{PATH}.
+    Daarnaast moet \texttt{python} beschikbaar zijn in het \texttt{PATH}.
     Door optimalisaties is het momenteel aan te raden om dezelfde Python-versie te gebruiken voor TESTed als voor de Python-oefeningen.
     \item[Java] TESTed vereist Java 11, maar heeft verder geen dependencies.
-    De commando's \texttt{javac} en \texttt{java} moeten beschikbaar zijn in de \texttt{PATH}.
-    \item[Haskell] Voor Haskell is \acronym{GHC} 8.6 or later nodig.
+    De commando's \texttt{javac} en \texttt{java} moeten beschikbaar zijn in het \texttt{PATH}.
+    \item[Haskell] Voor Haskell is \acronym{GHC} 8.6 of later nodig.
     Daarnaast is \texttt{aeson} nodig.
-    Beiden moeten globaal beschikbaar zijn in de \texttt{PATH}.
+    Beiden moeten globaal beschikbaar zijn in het \texttt{PATH}.
 \end{description}
 
 Merk op dat de dependencies voor de programmeertalen optioneel zijn.
 Om bijvoorbeeld enkel Python-oplossingen te beoordelen zijn geen andere dependencies nodig.
 
-Voor de programmeertaal C gaan we gebruik maken van \acronym{GCC}, waarbij versie 8.1 of later nodig is.
+Voor de programmeertaal C gaan we gebruikmaken van \acronym{GCC}, waarbij versie 8.1 of later nodig is.
 
 TESTed werkt op elk besturingssysteem dat ondersteund wordt door Python.
-Sommige dependencies, zoals \texttt{gcc}, vragen wel meer moeite om te installeren op Windows.\footnote{Gebruikers op Windows kunnen Min\acronym{GW} of \acronym{MSYS}2 proberen.}
+Sommige dependencies, zoals \acronym{GCC}, vragen wel meer moeite om te installeren op Windows.\footnote{Gebruikers op Windows kunnen Min\acronym{GW} of \acronym{MSYS}2 proberen.}
 
 \subsection{Uitvoeren}\label{subsec:uitvoeren}
 
-We gaan er voor de rest van het hoofdstuk vanuit dat commando's uitgevoerd worden in de map \texttt{judge/src}.
+We gaan er voor de rest van het hoofdstuk van uit dat commando's uitgevoerd worden in de map \texttt{judge/src}.
 
 Er zijn twee manieren om TESTed uit te voeren.
 Ten eerste is er de "gewone" manier;
@@ -93,7 +93,7 @@ Deze uitvoer verschilt op een aantal vlakken van de gewone uitvoering:
     Dit laat toe om de gegenereerde code te inspecteren.
 \end{enumerate}
 
-\section{Algemeen stappenplan voor het configureren van een programmeertaal}\label{sec:algemeen-stappenplan-voor-het-configureren}
+\section{Globaal stappenplan voor het configureren van een programmeertaal}\label{sec:globaal-stappenplan-voor-het-configureren}
 
 Het configureren van een programmeertaal in TESTed bestaat uit drie grote onderdelen:
 
