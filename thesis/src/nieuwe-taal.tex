@@ -272,7 +272,7 @@ Een eerste en belangrijke methode is de callback voor de compilatiestap:
 
 \inputminted[firstline=11,lastline=16,gobble=4]{python}{sources/c-config.py}
 
-Als argument krijgt deze methode een lijst van bestanden mee waarvan TESTed vermoed dat ze nuttig kunnen zijn voor de compilatiestap.
+Als argument krijgt deze methode een lijst van bestanden mee waarvan TESTed vermoedt dat ze nuttig kunnen zijn voor de compilatiestap.
 Het bevat onder andere de dependencies uit het configuratiebestand, de ingediende oplossing en de uit de sjablonen gegenereerde bestanden.
 Die laatste bestanden zijn bijvoorbeeld de verschillende contexten bij een batchcompilatie, maar kunnen ook de evaluator zijn bij een geprogrammeerde evaluatie.
 De bestanden bestaan uit de naam en een bestandsextensie.
@@ -280,7 +280,7 @@ De bestanden bestaan uit de naam en een bestandsextensie.
 De conventie is om het bestand met de main-functie als laatste te plaatsen.
 
 Al deze bestanden zullen zich in de map bevinden waarin de compilatie zal plaatsvinden.
-Het is niet verplicht al deze bestanden ook effectief te gebruiken: sommige programmeertalen hebben zelf een detectiesysteem voor bestanden.
+Het is niet verplicht om al deze bestanden ook effectief te gebruiken: sommige programmeertalen hebben zelf een detectiesysteem voor bestanden.
 Zo is het in C voldoende om enkel het laatste bestand met de main-functie te gebruiken: alle andere bestanden worden gevonden door \acronym{GCC}.
 
 Concreet ziet deze parameter er bijvoorbeeld als volgt uit:
@@ -299,22 +299,22 @@ Daarom moet een lijst van resulterende bestanden teruggegeven worden.
 Enkel bestanden in deze lijst zullen bijvoorbeeld beschikbaar zijn bij het uitvoeren van de contexten.
 Een lijst van bestanden teruggeven is mogelijk indien op voorhand geweten is in welke bestanden de compilatie resulteert.
 Dit is bijvoorbeeld hier het geval (in C resulteert de compilatie in één uitvoerbaar bestand), of ook bij Python, waar de compilatie voor elk \texttt{.py}-bestand resulteert in een \texttt{.pyc}-bestand.
-Ook hier moet de conventie dat het bestand met de main-functie als laatste komt gerespecteerd worden.
+Ook hier moet de conventie gerespecteerd worden dat het bestand met de \texttt{main}-functie als laatste komt.
 
-Het is op voorhand echter niet altijd mogelijk om te weten in welke bestanden de code zal resulteren.
+Het is echter niet altijd mogelijk om op voorhand te weten in welke bestanden de code zal resulteren.
 Zo resulteert compilatie van één \texttt{.java}-bestand mogelijk in meerdere \texttt{.class}-bestanden, afhankelijk van de inhoud van de bestanden.
 Om dit op te lossen kan in plaats van een lijst ook een filterfunctie teruggegeven worden.
 
-TESTed zal deze filter toepassen nadat de compilatie uitgevoerd is op elk bestand in de map waarin de compilatie uitgevoerd is.
-De filterfunctie krijgt als argument de naam van een bestand en moet \texttt{true} of \texttt{False} teruggeven als het bestand respectievelijk wel of niet meegenomen moet worden naar een volgende stap.
+Nadat de compilatie uitgevoerd is, zal TESTed deze filter toepassen elk bestand in de map waarin de compilatie uitgevoerd is.
+De filterfunctie krijgt als argument de naam van een bestand en moet \texttt{true} of \texttt{False} teruggeven als het bestand respectievelijk wel of niet moet meegenomen worden naar een volgende stap.
 
 Een voorbeeld van de in- en uitvoer van de compilatiemethode:
 
 \begin{minted}{pycon}
->>> compilation(['submission.c', 'context_0_0.c', 'selector.c'])
+>>> compilation(['submission.c', 'evaluation_result.c', 'context_0_0.c', 'selector.c'])
 (
-    ['gcc', '-std=c11', '-Wall', 'values.c', 'selector.c', '-o', 'selector.exe'],
-    ['selector.exe']
+    ['gcc', '-std=c11', '-Wall', 'evaluation_result.c', 'values.c', 'selector.c',
+     '-o', 'selector.exe'], ['selector.exe']
 )
 \end{minted}
 
@@ -339,7 +339,7 @@ Deze functie heeft drie parameters:
 Als resultaat moet het commando teruggegeven worden, dat ook aan \texttt{subprocess} doorgegeven wordt.
 
 In het geval van C is dit commando eenvoudig: we geven het absolute pad naar het uitvoerbare bestand mee en geven ook de argumenten mee.
-Het absolute pad is nodig omdat de executable die we willen uitvoeren (en gemaakt hebben in de compilatiestap) niet in de \texttt{PATH} zit.
+Het absolute pad is nodig omdat de executable die we willen uitvoeren (en gemaakt hebben in de compilatiestap) niet in het \texttt{PATH} zit.
 
 Een voorbeeld van deze functie in werking is:
 
@@ -349,18 +349,18 @@ Een voorbeeld van deze functie in werking is:
 \end{minted}
 
 De basisimplementatie van de configuratie is nu klaar.
-Voor de meeste programmeertalen kan nu overgegaan worden naar de sjablonen, maar in C moeten we nog een kleine methode implementeren.
+Voor de meeste programmeertalen kan nu overgegaan worden naar de sjablonen, maar in C moeten we nog een extra methode implementeren.
 
 \subsubsection{Aanpassen van de ingediende oplossing}
 
-In TESTed kunnen er meerdere \texttt{main}-functies zijn:
+De testcode, die door TESTed gegenereerd wordt, kan meerdere \texttt{main}-functies bevatten:
 
 \begin{itemize}
-    \item De oplossing van de student kan een \texttt{main}-functie hebben.
+    \item De ingediende oplossing kan een \texttt{main}-functie hebben.
     \item Zowel de contexten als de selector kunnen \texttt{main}-functies hebben.
 \end{itemize}
 
-C staat slechts één \texttt{main}-functie toe.
+In C kan er slechts één \texttt{main}-functie per compilatie zijn.
 
 Een ander probleem is dat de selector elke context insluit (zoals we later zullen zien bij de sjablonen), en elke context ook de oplossing insluit.
 

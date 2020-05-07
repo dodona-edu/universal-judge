@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 from typing import List
 
@@ -23,8 +24,19 @@ class C(Language):
     def solution(self, solution: Path, bundle: Bundle):
         with open(solution, "r") as file:
             contents = file.read()
+        # We use regex to find the main function.
+        # First, check if we have a no-arg main function.
+        # If so, replace it with a renamed main function that does have args.
+        no_args = re.compile(r"(int|void)\s+main\s*\(\s*\)\s*{")
+        replacement = "int solution_main(int argc, char** argv){"
+        contents, nr = re.subn(no_args, replacement, contents, count=1)
+        if nr == 0:
+            # There was no main function without arguments. Now we try a main
+            # function with arguments.
+            with_args = re.compile(r"(int|void)\s+main\s*\(\s*int")
+            replacement = "int solution_main(int"
+            contents = re.sub(with_args, replacement, contents)
         with open(solution, "w") as file:
             header = "#pragma once\n\n"
-            result = header + contents.replace("main", "solution_main")
-            file.write(result)
+            file.write(header + contents)
 
