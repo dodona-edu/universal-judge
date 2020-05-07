@@ -35,7 +35,7 @@ class C(Language):
             # function with arguments.
             with_args = re.compile(r"(int|void)\s+main\s*\(\s*int")
             replacement = "int solution_main(int"
-            contents = re.sub(with_args, replacement, contents)
+            contents = re.sub(with_args, replacement, contents, count=1)
         with open(solution, "w") as file:
             header = "#pragma once\n\n"
             file.write(header + contents)
