@@ -1116,7 +1116,7 @@ Waar nuttig zijn deze gevallen omgezet naar een unit test voor TESTed.
 
 \section{Implementatiekeuzes}\label{sec:technische-aspecten}
 
-In deze paragraaf worden enkel keuzes in de implementatie van wat we dit hoofdstuk besproken hebben toegelicht.
+In deze paragraaf lichten we enkele keuzes toe die we gemaakt hebben bij de implementatie van wat we dit hoofdstuk besproken hebben.
 
 TESTed is geschreven in Python.
 De hoofdreden daarvoor is pragmatisch: zoals besproken in \cref{subsec:jupyter-kernels}, gebruikte de eerste versie van TESTed Jupyter-kernels om code uit te voeren.
@@ -1131,7 +1131,7 @@ Binnen TESTed worden twee dependencies intensief gebruikt:
 
 \begin{enumerate}
     \item \texttt{mako} voor de sjablonen.
-    \item \texttt{pydantic} voor het definiëren van het testplan en serialisatieformaat.
+    \item \texttt{pydantic} voor het definiëren van het testplan en het serialisatieformaat.
 \end{enumerate}
 
 In TESTed is niet onmiddellijk gekozen voor \texttt{mako} als sjabloonsysteem.
@@ -1141,14 +1141,14 @@ Deze witruimte is belangrijk bij het genereren van bijvoorbeeld Python-code.
 Deze twee packages zijn ongeveer de populairste packages in het Python-ecosysteem om sjablonen te gebruiken, buiten de ingebouwde sjablonen van Django.
 Die laatste zijn niet overwogen, omdat het niet duidelijk is of de sjablonen van Django ook gebruikt kunnen worden zonder het hele framework te moeten gebruiken.
 
-Na de keuze voor json als testplan en serialisatieformaat (\cref{subsec:het-testplan,subsec:dataserialisatie}) is er beslist om de implementatie in Python de gezaghebbende definitie voor het formaat te maken.
+Na de keuze voor \acronym{JSON} als testplan en serialisatieformaat (\cref{subsec:het-testplan,subsec:dataserialisatie}) is er beslist om de implementatie in Python de gezaghebbende definitie voor het formaat te maken.
 Oorspronkelijk zijn het testplan en het serialisatieformaat opgesteld met \texttt{dataclasses} uit Python.
 Dit bleek niet voldoende: er waren betere validaties nodig en het bleek handig om het formaat van het testplan en het serialisatieformaat te kunnen exporteren als \acronym{JSON} Schema.
 
 Hiervoor gebruiken we nu \texttt{pydantic}\footnote{Zie \url{https://pydantic-docs.helpmanual.io/}}.
-Deze package laat ons toe om nog steeds \texttt{dataclasses} en toch ook validaties te kunnen toevoegen en te exporteren naar \acronym{JSON} Schema.
+Dit package laat ons toe om nog steeds \texttt{dataclasses} te gebruiken, maar toch validaties te kunnen toevoegen en de structuur te kunnen exporteren naar \acronym{JSON} Schema.
 \Cref{lst:programmed-evaluator-python} toont hoe de definitie van het testplan en het serialisatieformaat er uitziet.
-In \cref{lst:programmed-evaluator-json} staat dan de \acronym{JSON}-variant hetzelfde element: het moge duidelijk zijn dat de omzetting van Python naar \acronym{JSON} voor de hand ligt.
+In \cref{lst:programmed-evaluator-json} staat dan de \acronym{JSON}-variant van dezelfde component: het moge duidelijk zijn dat de omzetting van Python naar \acronym{JSON} voor de hand ligt.
 Het \acronym{JSON} Schema voor respectievelijk het testplan en het serialisatieformaat kunnen zo verkregen worden:
 
 \begin{minted}{console}
