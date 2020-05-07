@@ -94,8 +94,8 @@ De context zal dus bestaan uit het testgeval voor de \texttt{main}-functie en ge
 Qua evaluatie is deze oefening eenvoudig: we kunnen de ingebouwde evaluatie van TESTed gebruiken.
 De geproduceerde waarde moet vergeleken worden met de verwachte waarde.
 
-Een enkele context is al opgenomen in \cref{sec:echo-testplan}.
-Dit is opnieuw een testplan voor twee contexten, maar bij het gebruiken van de oefening zullen uiteraard meer contexten nodig zijn.
+Een testplan is al opgenomen in \cref{sec:echo-testplan}.
+Dit is een testplan voor twee contexten, maar bij het gebruiken van de oefening zullen uiteraard meer contexten nodig zijn.
 Ook hier wordt dit testplan gegenereerd door een script en niet met de hand geschreven.
 
 \section{Echofunctie}\label{sec:oefening-echofunctie}
@@ -140,7 +140,8 @@ Ook het testplan is een vrij eenvoudige vertaling van de structuur die we hiervo
 \section{Som}\label{sec:oefeningen-som}
 
 Deze oefening is opnieuw een oefening uit \emph{De Programmeursleerling}\footnote{\url{https://dodona.ugent.be/nl/courses/293/series/2556/exercises/1653208777/}}.
-Ditmaal bestaat de opgave er uit om een reeks getallen in te lezen uit de programma-argumenten en de som ervan uit te schrijven.
+Deze oefening is interessant om te illustreren hoe programma-argumenten werken en hoe de exitcode werkt.
+Ditmaal bestaat de opgave eruit om een reeks getallen in te lezen uit de programma-argumenten en de som ervan uit te schrijven.
 Bijvoorbeeld:
 
 \begin{minted}{console}
@@ -152,10 +153,6 @@ Bijvoorbeeld:
 -5
 \end{minted}
 
-Deze oefening is interessant om te illustreren dat programma-argumenten werken en hoe de exitcode werkt.
-
-\subsection{Testplan en structuur}\label{subsec:testplan-en-structuur}
-
 De structuur van deze oefening is eenvoudig: een reeks contexten die elk het programma oproepen met verschillende programma-argumenten.
 Ook de evaluatie is eenvoudig: we gebruiken de ingebouwde evaluatie van TESTed.
 
@@ -163,3 +160,5 @@ In het testplan zijn twee contexten opgenomen: een waarbij getallen gegeven zijn
 In een echt testplan zullen er uiteraard meer contexten zijn.
 
 \inputminted{json}{sources/sum-plan.tson}
+
+TODO: ISBN oefening
