@@ -1,18 +1,18 @@
-import java.io.Closeable;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
+import java.util.*;
+import java.util.function.*;
 public class Context00 implements Closeable {
     private final PrintWriter valueWriter;
     private final PrintWriter exceptionWriter;
     public Context00() throws Exception {
-        this.valueWriter = new PrintWriter("fF5Et27Tq_values.txt");
-        this.exceptionWriter = new PrintWriter("fF5Et27Tq_exceptions.txt");
+        this.valueWriter = new PrintWriter("y3foDkcdQ_values.txt");
+        this.exceptionWriter = new PrintWriter("y3foDkcdQ_exceptions.txt");
     }
     private void writeSeparator() throws Exception {
-        valueWriter.write("--fF5Et27Tq-- SEP");
-        exceptionWriter.write("--fF5Et27Tq-- SEP");
-        System.err.print("--fF5Et27Tq-- SEP");
-        System.out.print("--fF5Et27Tq-- SEP");
+        valueWriter.write("--y3foDkcdQ-- SEP");
+        exceptionWriter.write("--y3foDkcdQ-- SEP");
+        System.err.print("--y3foDkcdQ-- SEP");
+        System.out.print("--y3foDkcdQ-- SEP");
         valueWriter.flush();
         exceptionWriter.flush();
         System.err.flush();

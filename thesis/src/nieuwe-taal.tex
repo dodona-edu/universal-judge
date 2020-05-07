@@ -369,11 +369,12 @@ Om deze redenen moeten we de code van de ingediende oplossing een beetje aanpass
 \begin{itemize}
     \item We voegen aan \texttt{guard} toe, zodat de oplossing slechts eenmaal geladen wordt.
     \item We hernoemen de \texttt{main}-functie naar \texttt{solution\_main} indien die bestaat.
+    Als de \texttt{main}-functie geen argumenten heeft, voegen we die ook toe.
 \end{itemize}
 
 Vertaald naar de configuratieklasse wordt dit:
 
-\inputminted[firstline=23,lastline=29,gobble=4]{python}{sources/c-config.py}
+\inputminted[firstline=24,lastline=41,gobble=4]{python}{sources/c-config.py}
 
 \subsection{Sjablonen}\label{subsec:manual-sjablonen}
 
@@ -481,14 +482,12 @@ TESTed is daar zo op voorzien: de separator na het testgeval uitschrijven zal to
 Ook roepen we de \texttt{main}-functie van de oplossing op indien het testplan dat vereist.
 Oefeningen waar geen \texttt{main}-functie opgeroepen wordt zijn bijvoorbeeld deze waarbij de student een functie moet implementeren.
 
-TODO: arguments in de main-functie
-
-\inputminted[firstline=38,lastline=44]{mako}{sources/c-context.mako}
+\inputminted[firstline=38,lastline=49]{mako}{sources/c-context.mako}
 
 Vervolgens genereren we de code voor alle normale testgevallen.
 Omdat C geen exceptions ondersteunt, is deze implementatie eenvoudig: we schrijven de separator naar de uitvoerbestanden en voeren het invoerstatement uit.
 
-\inputminted[firstline=47,lastline=51]{mako}{sources/c-context.mako}
+\inputminted[firstline=52,lastline=56]{mako}{sources/c-context.mako}
 
 Dat invoerstatement is \texttt{testcase.input\_statement()}, wat een geserialiseerd statement zal teruggeven.
 Wat dat statement juist is, is eigenlijk niet relevant voor het sjabloon, maar het kan toch geen kwaad om het te weten:
@@ -504,14 +503,14 @@ Wat dat statement juist is, is eigenlijk niet relevant voor het sjabloon, maar h
 Als afsluiter zetten we de \texttt{after}-code en sluiten we de bestanden.
 De \texttt{after}-code is analoog aan de \texttt{before}-code.
 
-\inputminted[firstline=53,lastline=58]{mako}{sources/c-context.mako}
+\inputminted[firstline=58,lastline=63]{mako}{sources/c-context.mako}
 
 Omdat TESTed zowel contextcompilatie als batchcompilatie ondersteunt, moet elke context een \texttt{main}-functie hebben.
 C laat slechts 1 \texttt{main}-functie toe.
 Indien we in batchcompilatie zitten, zal de selector gebruikt worden, en zal \texttt{INCLUDED} op \texttt{TRUE} staan.
 In dat geval voegen we geen \texttt{main}-functie toe.
 
-\inputminted[firstline=60,lastline=64]{mako}{sources/c-context.mako}
+\inputminted[firstline=65,lastline=69]{mako}{sources/c-context.mako}
 
 \subsubsection{Het selectorsjabloon}
 
