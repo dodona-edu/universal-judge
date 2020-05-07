@@ -143,15 +143,23 @@ Deze oefening is opnieuw een oefening uit \emph{De Programmeursleerling}\footnot
 Ditmaal bestaat de opgave er uit om een reeks getallen in te lezen uit de programma-argumenten en de som ervan uit te schrijven.
 Bijvoorbeeld:
 
-\begin{mintend}{console}
+\begin{minted}{console}
 > python ./som
 0
 > python ./som 1 2 3 4 5 6 7 8 9 10
 55
 > python ./som 1 -2 3 -4 5 -6 7 -8 9 -10
 -5
-\end{mintend}
+\end{minted}
 
-Deze oefening is interessant om te illustreren dat programma-argumenten werken.
+Deze oefening is interessant om te illustreren dat programma-argumenten werken en hoe de exitcode werkt.
 
+\subsection{Testplan en structuur}\label{subsec:testplan-en-structuur}
 
+De structuur van deze oefening is eenvoudig: een reeks contexten die elk het programma oproepen met verschillende programma-argumenten.
+Ook de evaluatie is eenvoudig: we gebruiken de ingebouwde evaluatie van TESTed.
+
+In het testplan zijn twee contexten opgenomen: een waarbij getallen gegeven zijn en een waarbij andere argumenten gegeven worden.
+In een echt testplan zullen er uiteraard meer contexten zijn.
+
+\inputminted{json}{sources/sum-plan.tson}

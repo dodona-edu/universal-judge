@@ -31,6 +31,7 @@ copies:
 	python scripts/copier.py ../exercise/lotto/evaluation/plan.tson lotto-plan.tson
 	python scripts/copier.py ../exercise/division/evaluation/Evaluator.java division-evaluator.java
 	python scripts/copier.py ../exercise/division/evaluation/plan.json division-plan.tson
+	python scripts/copier.py ../exercise/sum/evaluation/short.tson sum-plan.tson
 
 markdown:
 	python scripts/mathjax.py ../exercise/lotto/description/description.nl.md ./src/sources/lotto-description.md

@@ -184,28 +184,15 @@ Dit is ook op te lossen met een uitbreiding van het testplan: per testgeval of p
 Om de performantie te verbeteren, zouden ook stopvoorwaarden kunnen meegegeven worden.
 Een aspect dat dit complexer maakt, is dat de evaluatoren (zowel de ingebouwde evaluatie binnen TESTed als de geprogrammeerde en programmeertaalspecifieke evaluatie) aangepast zullen moeten worden om niet enkel met één resultaat, maar met een reeks resultaten te werken.
 
-\section{TESTed}\label{sec:beperkingen-tested}
+\subsection{Beperkte expressies in het testplan}\label{subsec:beperkte-expressies-in-het-testplan}
 
-In deze paragraaf komen de beperkingen aan bod die ofwel enkel betrekking hebben op TESTed zelf, ofwel betrekking hebben op meerdere onderdelen, bijvoorbeeld zowel TESTed als het testplan.
-
-\subsection{Performantie}\label{subsec:future-performance}
-
-\subsection{Geprogrammeerde evaluatie is traag}\label{subsec:geprogrammeerde-evaluatie-is-traag}
-
-Het uitvoeren van een geprogrammeerde evaluatie (zie \cref{subsec:geprogrammeerde-evaluatie}) zorgt voor een niet te verwaarlozen kost op het vlak van performantie (zie \cref{tab:meting} voor enkele tijdsmetingen).
-De reden hiervoor is eenvoudig te verklaren: zoals de contexten wordt elke geprogrammeerde evaluatie in een afzonderlijk subproces uitgevoerd (afhankelijk van de programmeertaal ook met eigen compilatiestap).
-Zoals vermeld in \cref{sec:performantie} is TESTed oorspronkelijk gestart met het uitvoeren van code in Jupyter-kernels.
-De grootste reden dat we daar vanaf gestapt zijn, is dat de kost voor het opnieuw opstarten van een kernel te groot is, en het heropstarten noodzakelijk is om de onafhankelijkheid van de contexten te garanderen.
-Bij $n$ contexten moet de kernel dus $n$ keer opnieuw gestart worden.
-
-Bij een geprogrammeerde evaluatie wordt geen code van de student uitgevoerd: het opnieuw starten van de kernel is dus niet nodig.
-Hierdoor wordt de opstartkost van de kernel verspreid over alle contexten die van die programmeerde evaluatie gebruikmaken.
-Wordt er $n$ keer andere evaluatiecode in een andere programmeertaal gebruikt, zal dit uiteraard geen voordeel opleveren, omdat er dan nog steeds $n$ keer een kernel gestart wordt.
-In de meeste gevallen wordt echter dezelfde evaluatiecode gebruikt voor alle testgevallen.
-Het \english{worst case scenario} is dan weliswaar trager, maar in de meeste gevallen zal de geprogrammeerde evaluatie sneller zijn.
-
-Hierop is één uitzondering: een geprogrammeerde evaluatie waarbij de programmeertaal van de evaluatiecode in Python geschreven is.
-Voor Python is er speciale ondersteuning (vermits TESTed zelf ook in Python geschreven is, wordt deze evaluatie ook rechtsreeks in TESTed gedaan zonder subproces): hiervoor is het gebruik van Jupyter-kernels niet nuttig.
+De expressies in het testplan zijn opzettelijk eenvoudig gehouden (zie \cref{subsec:expressions-and-statements}).
+Dit levert wel beperkingen op: zo is het niet mogelijk om bijvoorbeeld een functieoproep als \mintinline{python}{test(5 + 5)} in het testplan te schrijven.
+Een idee zou dus kunnen zijn om het testplan uit te breiden met meer taalconstructies, waarbij het testplan dan dienst doet als een soort \acronym{AST} (abstract syntax tree).
+Afhankelijk van hoe ver men hierin gaat, begint dit wel een universele programmeertaal te worden (wat ook expliciet buiten het bestek van deze thesis valt).
+In dat geval loont het de moeite om te onderzoeken of geen eenvoudige, bestaande programmeertaal \english{transpiled} zou kunnen worden naar het testplan, in plaats van zelf een nieuwe taal op te stellen.
+Hiervoor moet het testplan wel uitgebreid worden met functies van een \acronym{AST} of \acronym{IR} (intermediary language).
+Ook TESTed zelf zal uitgebreid moeten worden, aangezien er meer zal moeten omgezet kunnen worden naar de programmeertalen (de sjablonen zullen dus uitgebreid moeten worden).
 
 \subsection{Ondersteuning voor natuurlijke talen}\label{subsec:ondersteuning-voor-natuurlijke-talen}
 
@@ -240,6 +227,54 @@ De functieoproep gebruikt dan een sleutelwoord uit het vertaalwoordenboek, waarn
 Ook de foutboodschappen die TESTed zelf genereert zijn bijvoorbeeld nog niet vertaald: de boodschappen met studenten als doelpubliek zijn in het Nederlands, terwijl de boodschappen voor cursusbeheerders in het Engels zijn.
 Dit is echter eenvoudig op te lossen: TESTed krijgt de natuurlijke taal mee van Dodona in de configuratie, en Python heeft meerdere internationalisatie-API's\footnote{Zie \url{https://docs.python.org/3/library/gettext.html}}.
 
+\section{Performantie}\label{sec:future-performantie}
+
+Ook op het gebied van performantie zijn er nog mogelijkheden tot verbetering.
+
+\subsection{Performantie uitvoeren contexten}\label{subsec:future-performance}
+
+Het uitvoeren van elke context in een afzonderlijk subprocess brengt een inherente performantiekost met zich mee.
+Een mogelijke uitbreiding is het toelaten om meerdere contexten in hetzelfde proces en na elkaar uit te voeren, waardoor de totale tijd die nodig is om een oplossing te beoordelen verminderd kan worden, of minstens onderzoeken of wat het effect hiervan is.
+De meeste infrastructuur om dit te doen bestaat al: de selector voert bijvoorbeeld een context uit op basis van een argument.
+Er zou een speciaal argument \texttt{all} voorzien kunnen worden, waarmee alle contexten uitgevoerd zullen worden.
+Mogelijke problemen of zaken die nog moeten opgelost worden:
+
+\begin{itemize}
+    \item Programmeertalen waar geen selector nodig is, zoals Python, zullen dan toch een selector nodig hebben.
+    \item Bij oefeningen waarbij bestanden aangemaakt moeten worden, mogen die bestanden elkaar niet overschrijven.
+    \item Geprogrammeerde evaluaties zullen pas na het uitvoeren van alle contexten kunnen gebeuren.
+    Ook de resultaten van contexten zullen pas erna verwerkt kunnen worden.
+\end{itemize}
+
+Ook blijven alle redenen waarom contexten afzonderlijk uitgevoerd worden gelden, zoals het feit dat studenten dan bijvoorbeeld met statische variabelen gegevens kunnen delen tussen de contexten.
+We zouden dan ook enkel aanraden om deze modus te gebruiken bij eenvoudige oefeningen.
+
+Hetzelfde effect kan nu al bereikt worden door alle testgevallen in het testplan in dezelfde context onder te brengen.
+Het "probleem" hierbij is dat dat dan ook zo getoond wordt in Dodona aan de studenten.
+Een alternatieve oplossing bestaat er dan uit om toe te laten dat TESTed aan Dodona doorgeeft dat elk testgeval in een eigen context uitgevoerd werd, terwijl dat niet zo is.
+Een bedenking hier is dat dit een verschil introduceert tussen de structuur van het testplan en de structuur van de uitvoer die Dodona toont, net iets dat we proberen te vermijden.
+
+\subsection{Performantie geprogrammeerde evaluatie}\label{subsec:geprogrammeerde-evaluatie-is-traag}
+
+Het uitvoeren van een geprogrammeerde evaluatie (zie \cref{subsec:geprogrammeerde-evaluatie}) zorgt voor een niet te verwaarlozen kost op het vlak van performantie (zie \cref{tab:meting} voor enkele tijdsmetingen).
+De reden hiervoor is eenvoudig te verklaren: zoals de contexten wordt elke geprogrammeerde evaluatie in een afzonderlijk subproces uitgevoerd (afhankelijk van de programmeertaal ook met eigen compilatiestap).
+Zoals vermeld in \cref{sec:performantie} is TESTed oorspronkelijk gestart met het uitvoeren van code in Jupyter-kernels.
+De grootste reden dat we daar vanaf gestapt zijn, is dat de kost voor het opnieuw opstarten van een kernel te groot is, en het heropstarten noodzakelijk is om de onafhankelijkheid van de contexten te garanderen.
+Bij $n$ contexten moet de kernel dus $n$ keer opnieuw gestart worden.
+
+Bij een geprogrammeerde evaluatie wordt geen code van de student uitgevoerd: het opnieuw starten van de kernel is dus niet nodig.
+Hierdoor wordt de opstartkost van de kernel verspreid over alle contexten die van die programmeerde evaluatie gebruikmaken.
+Wordt er $n$ keer andere evaluatiecode in een andere programmeertaal gebruikt, zal dit uiteraard geen voordeel opleveren, omdat er dan nog steeds $n$ keer een kernel gestart wordt.
+In de meeste gevallen wordt echter dezelfde evaluatiecode gebruikt voor alle testgevallen.
+Het \english{worst case scenario} is dan weliswaar trager, maar in de meeste gevallen zal de geprogrammeerde evaluatie sneller zijn.
+
+Hierop is één uitzondering: een geprogrammeerde evaluatie waarbij de programmeertaal van de evaluatiecode in Python geschreven is.
+Voor Python is er speciale ondersteuning (vermits TESTed zelf ook in Python geschreven is, wordt deze evaluatie ook rechtsreeks in TESTed gedaan zonder subproces): hiervoor is het gebruik van Jupyter-kernels niet nuttig.
+
+\section{TESTed}\label{sec:beperkingen-tested}
+
+In deze paragraaf komen de beperkingen aan bod die ofwel enkel betrekking hebben op TESTed zelf, ofwel betrekking hebben op meerdere onderdelen, bijvoorbeeld zowel TESTed als het testplan.
+
 \subsection{Programmeertaalonafhankelijke opgaven}\label{subsec:programmeertaalonafhankelijke-opgaven}
 
 In veel oefeningen bevat de opgave een stuk code ter illustratie van de opgave.
@@ -256,15 +291,7 @@ Concreet gaat het om volgende zaken:
     Hiervoor zijn ook meerdere mogelijkheden: zo zou alles binnen eenzelfde bestand kunnen, of kan er één bestand per programmeertaal zijn, waarbij de gemeenschappelijke delen in een apart bestand komen.
 \end{enumerate}
 
-\subsection{Beperkte expressies in het testplan}\label{subsec:beperkte-expressies-in-het-testplan}
 
-De expressies in het testplan zijn opzettelijk eenvoudig gehouden (zie \cref{subsec:expressions-and-statements}).
-Dit levert wel beperkingen op: zo is het niet mogelijk om bijvoorbeeld een functieoproep als \mintinline{python}{test(5 + 5)} in het testplan te schrijven.
-Een idee zou dus kunnen zijn om het testplan uit te breiden met meer taalconstructies, waarbij het testplan dan dienst doet als een soort \acronym{AST} (abstract syntax tree).
-Afhankelijk van hoe ver men hierin gaat, begint dit wel een universele programmeertaal te worden (wat ook expliciet buiten het bestek van deze thesis valt).
-In dat geval loont het de moeite om te onderzoeken of geen eenvoudige, bestaande programmeertaal \english{transpiled} zou kunnen worden naar het testplan, in plaats van zelf een nieuwe taal op te stellen.
-Hiervoor moet het testplan wel uitgebreid worden met functies van een \acronym{AST} of \acronym{IR} (intermediary language).
-Ook TESTed zelf zal uitgebreid moeten worden, aangezien er meer zal moeten omgezet kunnen worden naar de programmeertalen (de sjablonen zullen dus uitgebreid moeten worden).
 
 \subsection{Programmeertaalonafhankelijke programmeerparadigma}\label{subsec:programmeertaalonafhankelijke-programmeerparadigma}
 
@@ -287,7 +314,7 @@ Het omgekeerde, programmeertaalonafhankelijk invoer en programmeertaalspecifieke
 Als tot slot zowel de invoer als de uitvoer verschilt van programmeertaal tot programmeertaal, kan er niet meer gesproken worden van een programmeertaalonafhankelijke oefeningen.
 In dat geval is het beter een bestaande programmeertaalspecifieke judge van Dodona te gebruiken.
 
-\subsection{Combinaties van evaluatiemanieren}\label{subsec:combinaties-van-evaluatiemanieren}
+\subsection{Flexibelere evaluatievormen}\label{subsec:combinaties-van-evaluatiemanieren}
 
 Momenteel moet bij de evaluatie een keuze gemaakt worden: het is ofwel een ingebouwde evaluatie, ofwel een geprogrammeerde evaluatie, ofwel een programmeertaalspecifieke evaluatie.
 In sommige scenario's is het echter wenselijk om een combinatie te kunnen gebruiken, vooral bij de geprogrammeerde evaluatie.
@@ -302,8 +329,14 @@ In veel programmeertalen is dit een object (denk aan \texttt{DateTime} in Java o
 Het zou nuttig kunnen zijn als in de programmeertaalspecifieke evaluatie deze datum bijvoorbeeld omgezet wordt naar een string, waarna TESTed de evaluatie kan overnemen.
 Op deze manier moet er minder evaluatiecode in elke programmeertaal geschreven worden.
 
+Hieraan gerelateerd is een nieuwe evaluatiemodus, die we een \term{orakelevaluatie} kunnen noemen.
+In deze evaluatiemodus staat de waarde waarmee vergeleken moet worden niet in het testplan, maar wordt deze waarde berekend, door bijvoorbeeld de voorbeeldoplossing uit te voeren met dezelfde invoer als de ingediende oplossing.
+Het voordeel van deze evaluatiemodus is dat de vergelijking nog steeds kan gebeuren door TESTed en niet moet gebeuren in een geprogrammeerde evaluatie.
+Vanuit dat oogpunt is de orakelevaluatie op te vatten als een combinatie van een geprogrammeerde evaluatie en een ingebouwde evaluatie, wat ons weer bij de vorige alinea's brengt.
+De geprogrammeerde evaluatie zou dan de waarde berekenen, waarna TESTed de evaluatie overneemt en de ingebouwde evaluatie uitvoert.
+Dit kan nuttig zijn bij oefeningen die bijvoorbeeld iets berekenen op basis van de huidige datum.
 
-\subsection{Extra functionaliteit}\label{subsec:kleinere-functies}
+\section{Extra functionaliteit}\label{sec:kleinere-functies}
 
 Er is in de loop van de thesis extra functionaliteit naar boven gekomen, waarvoor ook ondersteuning zou toegevoegd kunnen worden:
 

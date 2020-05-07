@@ -3,8 +3,8 @@
 
 #define INCLUDED true
 
-% for context in contexts:
-    #include "${context}.c"
+% for cont in contexts:
+    #include "${cont}.c"
 % endfor
 
 int main(int argc, const char* argv[]) {
@@ -15,9 +15,9 @@ int main(int argc, const char* argv[]) {
     }
     
     const char* name = argv[1];
-    % for context in contexts:
-        if (strcmp("${c}", name) == 0) {
-            return ${c}();
+    % for cont in contexts:
+        if (strcmp("${cont}", name) == 0) {
+            return ${cont}();
         }
     % endfor
     fprintf(stderr, "Non-existing selector '%s' selected.", name);
