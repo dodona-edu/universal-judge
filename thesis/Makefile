@@ -27,6 +27,10 @@ copies:
 	python scripts/copier.py ../judge/src/tested/languages/__init__.py languages-init.py
 	python scripts/copier.py ../exercise/lotto/solution/correct.py lotto-correct.py
 	python scripts/copier.py ../exercise/lotto/solution/correct.java lotto-correct.java
+	python scripts/copier.py ../exercise/lotto/evaluation/evaluator.py lotto-evaluator.py
+	python scripts/copier.py ../exercise/lotto/evaluation/plan.tson lotto-plan.tson
+	python scripts/copier.py ../exercise/division/evaluation/Evaluator.java division-evaluator.java
+	python scripts/copier.py ../exercise/division/evaluation/plan.json division-plan.tson
 
 markdown:
 	python scripts/mathjax.py ../exercise/lotto/description/description.nl.md ./src/sources/lotto-description.md

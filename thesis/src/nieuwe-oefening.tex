@@ -1,109 +1,157 @@
-\chapter{Case-study: nieuwe oefening}\label{ch:nieuwe-oefening}
+\chapter{Oefeningen schrijven voor TESTed}\label{ch:nieuwe-oefening}
 
-\lettrine{I}{n dit hoofdstuk} behandelen we het toevoegen van drie oefeningen in handleidingsstijl.
-Elke oefening gebruikt een andere evaluatiemethode uit \cref{sec:oplossingen-beoordelen}.
-We gaan er van uit dat de map voor de repo voor deze oefeningencollectie al bestaat.
-Deze moet voldoen aan de mappenstructuur voor oefeningen, opgelegd door Dodona\footnote{Hier beschikbaar: \url{https://dodona-edu.github.io/en/references/exercise-directory-structure/}}.
+\lettrine{I}{n dit hoofdstuk} behandelen we het schrijven van oefeningen voor TESTed.
+Dit hoofdstuk bevat vooral een beschrijving van welke soort oefeningen ondersteund worden door TESTed en hoe een opgave vertaald moet worden naar een testplan.
 
-\section{ISBN}\label{sec:isbn}
+\section{Oefeningen in het Dodona-platform}\label{sec:oefeningen-in-het-dodona-platform}
 
-Bij de eerste oefening gebruiken we enkel ingebouwde evaluators.
+TESTed zelf legt geen structuur of formaat vast voor de oefeningen, buiten het formaat van het testplan.
+De locatie van de relevante bestanden worden meegegeven met de configuratie bij het uitvoeren van TESTed.
 
-\subsection{Voorbereiding}\label{subsec:voorbereiding}
+De configuratie in de manuele uitvoeringsmodus van TESTed gaat er wel vanuit dat de mappenstructuur van de oefening de structuur van Dodona volgt.
+Voor de volledigheid volgt hieronder een mappenstructuur met de belangrijkste elementen van de oefening:
 
-We beginnen met het maken van een nieuwe map \texttt{isbn} in onze map voor de oefeningencollectie.
-Vervolgens maken we in deze map een configuratiebestand \texttt{config.json} voor onze oefening, met deze inhoud:
+\inputminted{text}{code/dirs-exercise.txt}
 
+Voor meer details en bijkomende informatie (want het voorbeeld hierboven is slechts een basis, er is meer functionaliteit), raden we aan om de relevante handleiding uit de Dodona-documentatie te lezen\footnote{Beschikbaar op \url{https://dodona-edu.github.io/en/references/exercise-directory-structure/}}.
 
-In dit bestand doen we drie belangrijke dingen:
+\section{Lotto}\label{sec:oefening-lotto}
+
+Als eerste oefening beschouwen we de voorbeeldoefening Lotto uit \cref{sec:probleemstelling}, die we uitgebreid zullen bespreken.
+De opgave en voorbeeldoplossingen van deze oefeningen hebben we al vermeld, in respectievelijk \cref{lst:lotto} en \cref{lst:python-solution,lst:java-solution}.
+
+\subsection{Structuur van de beoordeling}\label{subsec:oefening-lotto-structuur}
+
+Na het lezen van de opgave is het duidelijk dat de oefening bestaat uit het implementeren van een functie.
+In abstracto zullen we, om te beoordelen of deze functie correct geïmplementeerd is, de functie een aantal keren oproepen met verschillende argumenten en dan het resultaat vergelijken met een verwachte waarde.
+
+Zoals vermeld in \cref{subsec:het-testplan} bestaat het testplan uit een hiërarchie van elementen, beginnend met een aantal tabbladen, die elk een aantal contexten hebben, die op hun beurt bestaan uit testgevallen, die tot slot bestaan uit testen.
+In ons geval lijkt het logisch om één tabblad te gebruiken: per slot van rekening beoordelen we één functie.
+
+Elke functieoproep is onafhankelijk van elkaar, wat ons suggereert dat elke functieoproep in een aparte context dient te gebeuren.
+Een context bestaat uit een optioneel testgeval voor de \texttt{main}-functie en een reeks normale testgevallen.
+Bij de Lotto-oefening hebben we geen \texttt{main}-functie, dus zullen we enkel normale testgevallen hebben.
+Er zal één testgeval per context zijn, want in elke context willen we de functie éénmaal oproepen.
+
+Vertaald naar pseudocode willen we dus dat onze beoordeling volgende vorm aanneemt:
+
+\inputminted{python}{code/lotto-eval.py}
+
+Hierbij is het geheel van \texttt{assert}s dus ons tabblad, terwijl we elke \texttt{assert} in een aparte context en dus ook apart testgeval steken.
+
+\subsection{Evaluatie}\label{subsec:oefening-lotto-evaluatie}
+
+Iets dat we in de vorige paragraaf genegeerd hebben is hoe we het vergelijken met een verwachte waarde exact gaan doen.
+Lottonummers zijn namelijk willekeurig: de pseudocode van hierboven zou dus slechts heel zelden tot een juiste beoordeling leiden.
+We zullen dit oplossen door een geprogrammeerde evaluatie te gebruiken.
+Dit is een functie die door TESTed zal opgeroepen worden en wier verantwoordelijkheid het vergelijken van de door de ingediende oplossing geproduceerde waarde met een verwachte waarde is.
+Conceptueel kunnen we dat ook vertalen naar dezelfde pseudocode:
+
+\inputminted{python}{code/lotto-eval-programmed.py}
+
+We zullen de geprogrammeerde evaluatie in Python doen: dit is de aanbevolen programmeertaal voor geprogrammeerde evaluaties, met als eenvoudige reden dat ze het snelst is.
+Hieronder is een fragment van de evaluatiecode: dit is de functie die door TESTed zal opgeroepen worden.
+
+\inputminted[firstline=42,lastline=49]{python}{sources/lotto-evaluator.py}
+
+Wat doet deze functie nu juist?
+
 \begin{enumerate}
-    \item We geven onze oefening een naam.
-    \item We duiden aan dat het om een Python-oefening gaat (zie \cref{ch:beperkingen-en-toekomstig-werk} voor waarom we dit doen).
-    \item We zeggen dat ons testplan als naam \texttt{plan.json} heeft.
+    \item Een evaluatiefunctie van een geprogrammeerde evaluatie kan ook argumenten meekrijgen.
+    In ons geval geven we de parameters van de \texttt{loterij}-functie mee als argument aan de evaluatiecode.
+    Eerst worden dus de parameters uit de argumenten gehaald.
+    \item De functie \texttt{valid\_lottery\_numbers} wordt opgeroepen.
+    We hebben deze functie niet opgenomen in het codefragment hierboven omdat het een lange functie is, maar deze functie controleert in feite of de geproduceerde waarde voldoet aan de vereisten (klopt het aantal getallen, is de lijst gesorteerd, enzovoort).
+    \item Indien de geproduceerde waarde geldig is, gebruiken we die waarde ook als verwachte waarde.
+    Dit voorkomt dat de oplossing juist is, maar Dodona toch een verschil toont tussen de geproduceerde en verwachte waarde.
+    \item Tot slot construeren we een \texttt{EvaluationResult} als returnwaarde.
 \end{enumerate}
 
-\subsection{Opgave}\label{subsec:opgave}
+\subsection{Het testplan}\label{subsec:oefening-lotto-testplan}
 
-In deze stap stellen we de opgave op.
-Om dit deel kort te houden, gaan we er van uit dat de opgave al bestaat.
-Maak een map \texttt{description} in onze oefeningenmap, en kopieer de opgavebestanden naar deze map.
-Uiteindelijk moet deze map er zo uitzien:
+Nu we weten welke structuur we willen en we weten hoe we gaan beoordelen kunnen we een testplan in \texttt{JSON} opstellen.
+Hieronder volgt ter illustratie één context uit het testplan.
+In werkelijkheid (en ook bij deze oefening) wordt het testplan niet met de hand geschreven;
+het wordt gegenereerd door een Python-script.
+Dit script bevindt zich in de \texttt{preparation}-map van de oefening.
 
-\begin{minted}{text}
-isbn
-└── description
-    ├── description.en.html
-    ├── description.nl.html
-    └── media
-        └── ISBN.gif
-\end{minted}
+We merken op dat we wel een verwachte waarde opnemen in het testplan, ook al gaat het om willekeurige returnwaarden.
+De reden hiervoor is dat deze verwachte waarde getoond zal worden als de geproduceerde waarde verkeerd is.
+Het is mogelijk om in de geprogrammeerde evaluatie geavanceerde zaken te doen, zoals indien de geproduceerde waarde juist is, maar niet gesorteerd is, de geproduceerde waarde te sorteren en als verwachte waarde te gebruiken.
 
-Om toch een idee te krijgen van waarover de oefening gaat, is hieronder een samenvatting van de opgave:
+\inputminted[firstline=6,lastline=50,gobble=8]{json}{sources/lotto-plan.tson}
 
-%\begin{quote}
-%    \markdownInput{generated/isbn_description.md}
-%\end{quote}
+\section{Echo}\label{sec:oefening-echo}
 
+Een volgende oefening die we bekijken is de oefening uit \cref{ch:echo-oefening}.
+Deze oefening bestaat uit een invoer lezen van \texttt{stdin} en deze invoer schrijven naar \texttt{stdout}.
 
-\section{Testplan}\label{sec:isbn-testplan}
+Voor de structuur van de beoordeling geldt grotendeels hetzelfde als bij \cref{subsec:oefening-lotto-structuur}: we hebben een tabblad, met daarin een aantal contexten.
+In elke context gebruiken we een andere waarde als \texttt{stdin}.
+In tegenstelling tot de Lotto-oefening hebben we nu wel een \texttt{main}-functie.
+De context zal dus bestaan uit het testgeval voor de \texttt{main}-functie en geen normale testgevallen hebben.
 
-Nu komen we aan het belangrijkste deel van het opstellen van een oefening: het testplan.
-Om te beginnen kunnen we even nadenken over hoe de structuur er zal uitzien.
-We hebben twee functies die getest moeten worden.
-Laten we de in- en uitvoer voor deze functies $X_i$ en $X_o$ noemen.
-Aangezien elke functieoproep onafhankelijk is, kiezen we ervoor om ze in aparte contexten van het testplan te steken.
-Verder kunnen we al zeggen dat elke context juist één testgeval zal hebben: de functieoproep.
-Elk testgeval zal ook maar één test hebben, waar we de returnwaarde controleren.
-Alle andere uitvoerkanalen mogen de standaardwaarde behouden (wat betekent dat er bv.\ geen exceptions mogen zijn, een lege standaardfoutstroom, de standaarduitvoerstroom wordt genegeerd, enz.).
-We verdelen de contexten bovendien in twee tabbladen, een voor elke functies.
-De structuur van het testplan ziet er dus als volgt uit:
+Qua evaluatie is deze oefening eenvoudig: we kunnen de ingebouwde evaluatie van TESTed gebruiken.
+De geproduceerde waarde moet vergeleken worden met de verwachte waarde.
 
-\begin{itemize}
-    \item Tabblad voor \texttt{is\_isbn}
-           \begin{itemize}
-               \item Context voor invoer $X_{i1}$ en uitvoer $X_{o1}$
-               \item Context voor invoer $X_{i2}$ en uitvoer $X_{o2}$
-               \item Context voor invoer $X_{i3}$ en uitvoer $X_{o3}$
-               \item Context voor invoer $X_{i4}$ en uitvoer $X_{o4}$
-               \item \ldots
-           \end{itemize}
-    \item Tabblad voor \texttt{are\_isbn}
-    \begin{itemize}
-        \item Context voor invoer $X_{i1}$ en uitvoer $X_{o1}$
-        \item Context voor invoer $X_{i2}$ en uitvoer $X_{o2}$
-        \item Context voor invoer $X_{i3}$ en uitvoer $X_{o3}$
-        \item Context voor invoer $X_{i4}$ en uitvoer $X_{o4}$
-        \item \ldots
-    \end{itemize}
-\end{itemize}
+Een enkele context is al opgenomen in \cref{sec:echo-testplan}.
+Dit is opnieuw een testplan voor twee contexten, maar bij het gebruiken van de oefening zullen uiteraard meer contexten nodig zijn.
+Ook hier wordt dit testplan gegenereerd door een script en niet met de hand geschreven.
 
-In plaats van dit testplan manueel te schrijven, kiezen we ervoor om een Python-scriptje te schrijven, dat dit testplan voor ons genereert.
-Om te beginnen:
-\begin{itemize}
-    \item Kopieer \texttt{solution.py} naar de map \texttt{solution}.
-    Dit is de voorbeeldoplossing.
-    \item Kopieer \texttt{values.py} naar de map \texttt{preparation}.
-    Deze module encodeert waarden in het serialisatieformaat.
-    In de toekomst is dit misschien niet meer nodig, moest dit als Python-package gepubliceerd worden.
-\end{itemize}
+\section{Echofunctie}\label{sec:oefening-echofunctie}
 
-Maak nu een bestand in de map \texttt{preparation} genaamd \texttt{generator.py}.
-Hieronder volgt het script dat het testplan genereert.
-Het is rijkelijk voorzien van commentaar, zodat alles duidelijk is.
+Deze oefening is praktisch volledig analoog aan de echo-oefening uit \cref{sec:oefening-echo}, behalve dat hier een \texttt{echo}-functie moet geïmplementeerd worden.
+Ook deze oefening is opgenomen als bijlage, in \cref{ch:echo-function-oefening}.
 
-\inputminted{python}{../../exercise/isbn/preparation/generator.py}
+Het testplan is ook te zien in \cref{sec:echo-function-testplan}.
+Ter illustratie bevat dit testplan een context met twee testgevallen.
+In het eigenlijke testplan dat gebruikt zou worden voor deze oefening zal elk testgeval ook afzonderlijk in een context geplaatst worden.
 
-\subsection{Afsluiting}\label{subsec:aflsuiting}
+\section{ZeroDivisionError}\label{sec:oefening-zero}
 
-Op dit moment is de oefening klaar.
-Ter controle: de complete mapstructuur van de uiteindelijke oefening wordt nog eens getoond in \cref{lst:mapstructuur-isbn}.
-Nu rest nog enkel de oefening importeren in Dodona.
-Is de oefening toegevoegd aan een bestaande repo, dan volstaat het om op de knop "Alle oefeningen opnieuw verwerken" te drukken.
-Gaat het om een nieuwe oefeningenrepo, dan moet deze toegevoegd worden\footnote{De handleiding hiervoor staat op \url{https://dodona-edu.github.io/en/guides/new-exercise-repo/}}.
+Een interessante oefening is de oefening \emph{ZeroDivisionError} uit \emph{De Programmeursleerling}\footnote{Beschikbaar hier: \url{https://dodona.ugent.be/nl/courses/293/series/2535/activities/270198713/}}.
 
-\begin{listing}
-    \inputminted{text}{code/dirs-exercise.txt}
-    \caption{Finale mapstructuur van de oefening \acronym{ISBN}.}
-    \label{lst:mapstructuur-isbn}
-\end{listing}
+In deze oefening moet een programma geschreven worden dat bij het uitvoeren een \texttt{ZeroDivisionError} gooit.
+
+\subsection{Structuur van de beoordeling}\label{subsec:oefening-zero-structuur}
+
+Daar het programma een exception moet gooien als het uitgevoerd wordt, lijkt het aangewezen dat we met een \texttt{main}-functie zitten.
+Ook uniek aan deze oefening is dat we de oplossing één keer moeten uitvoeren, dus zullen we ook één context hebben.
+De structuur zal dus een tabblad met een context met een testgeval voor de \texttt{main}-functie zijn.
+
+\subsection{Evaluatie}\label{subsec:oefening-zero-evaluatie}
+
+Het feit dat specifiek een \texttt{ZeroDivisionError} moet gegooid worden, zorgt ervoor dat we hier een programmeertaalspecifieke evaluatie zullen moeten gebruiken.
+In Java gaat het bijvoorbeeld om een \texttt{ArithmeticException}, terwijl delen door nul is Haskell zal zorgen voor een \texttt{DivideByZero}.
+
+We bekijken hier eens niet de evaluatiecode in Python, maar die in Java.
+De evaluatiecode is ook beschikbaar in Haskell.
+
+\inputminted{java}{sources/division-evaluator.java}
+
+De evaluatiecode is redelijk rechtdoorzee: indien het een exception van het juiste type is, wordt de oplossing als juist beschouwd, terwijl alle andere exceptions (of \texttt{null} als er geen exception is) fout gerekend worden.
+
+\subsection{Testplan}\label{subsec:oefening-zero-testplan}
+
+Ook het testplan is een vrij eenvoudige vertaling van de structuur die we hiervoor hebben bedacht:
+
+\inputminted{json}{sources/division-plan.tson}
+
+\section{Som}\label{sec:oefeningen-som}
+
+Deze oefening is opnieuw een oefening uit \emph{De Programmeursleerling}\footnote{\url{https://dodona.ugent.be/nl/courses/293/series/2556/exercises/1653208777/}}.
+Ditmaal bestaat de opgave er uit om een reeks getallen in te lezen uit de programma-argumenten en de som ervan uit te schrijven.
+Bijvoorbeeld:
+
+\begin{mintend}{console}
+> python ./som
+0
+> python ./som 1 2 3 4 5 6 7 8 9 10
+55
+> python ./som 1 -2 3 -4 5 -6 7 -8 9 -10
+-5
+\end{mintend}
+
+Deze oefening is interessant om te illustreren dat programma-argumenten werken.
+
 

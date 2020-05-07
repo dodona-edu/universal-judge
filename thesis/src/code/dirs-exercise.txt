@@ -1,14 +1,14 @@
-isbn
-├── config.json
+oefening                     # Map van de oefening
+├── config.json              # Configuratiebestand van Dodona 
 ├── description
-│   ├── description.en.html
-│   ├── description.nl.html
-│   └── media
+│   ├── description.en.html  # Beschrijving in het Engels
+│   ├── description.nl.html  # Beschrijving in het Nederlands
+│   └── media                # Mediabestanden van de beschrijvingen
 │       └── ISBN.gif
-├── evaluation
-│   └── plan.json      # Gegenereerd door generator.py
+├── evaluation               # Evaluatiecode
+│   └── plan.json            # Het testplan
 ├── preparation
-│   ├── generator.py
-│   └── values.py
-└── solution
+│   └── generator.py         # Code die het testplan genereert
+└── solution                 # Voorbeeldoplossingen voor de oefeningen
+    ├── solution.java    
     └── solution.py
