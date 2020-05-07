@@ -280,7 +280,7 @@ Elke waarde wordt in het serialisatieformaat voorgesteld als een object met twee
 Een concreet voorbeeld is \cref{lst:serialisation}.
 
 \begin{listing}
-    \inputminted{json}{code/format.json}
+    \inputminted{json}{code/testplan-value-list.json}
     \caption{Een lijst bestaande uit twee getallen, geëncodeerd in het serialisatieformaat.}
     \label{lst:serialisation}
 \end{listing}
@@ -466,13 +466,19 @@ Hier staat \texttt{<datatype>} voor een van de gegevenstypes die hiervoor bespro
 \begin{listing}
     \caption{Toekennen van de string \texttt{'Dodona'} aan een variabele.}
     \label{lst:assign-variable}
-    \inputminted{json}{code/assign-variable.json}
+    \inputminted{json}{code/testplan-assignment.json}
 \end{listing}
 
 \begin{listing}
     \caption{Geavanceerde constructies die voorgesteld kunnen worden in het testplan.}
     \label{lst:advanced-expressions}
-    \inputminted{java}{code/advanced.jshell}
+    \begin{minted}[autogobble]{java}
+        var variabele1 = functie1();
+        var variabele2 = [variabele1, 15, functie2()];
+        var object = new Test();
+
+        assert object.process(variabele2, [functie1()]) == 85;
+    \end{minted}
 \end{listing}
 
 De \texttt{name} is de naam die aan de variabele gegeven zal worden.
@@ -500,6 +506,7 @@ Bij de controle worden volgende zaken nagekeken:
     \item Controle of de programmeertaal over de nodige taalconstructies beschikt, zoals \texttt{exceptions} of \texttt{objects}.
     Bij deze controle wordt ook gecontroleerd of dat de programmeertaal optionele functieargumenten of functieargumenten met heterogene gegevenstypes nodig heeft.
     Een voorbeeld van een functie met argumenten met heterogene gegevenstypes komt bijvoorbeeld uit de \acronym{ISBN}-oefening (deze oefening wordt besproken in \cref{ch:nieuwe-oefening}):
+    %! Suppress = EscapeUnderscore
     \begin{minted}{pycon}
 >>> is_isbn("9789027439642")
 True
@@ -569,41 +576,18 @@ Als oplossing hiervoor bevat TESTed de mogelijkheid om contextcompilatie en batc
 Dit terugvalmechanisme is geen geavanceerd systeem: faalt de compilatie, wordt onmiddellijk elke context afzonderlijk gecompileerd.
 Een mogelijke optimalisatie bestaat er uit een tussenoplossing toe te passen, door bijvoorbeeld compilatie op het niveau van tabbladen proberen.
 
-\Cref{lst:generated-context-python,lst:generated-context-java} bevatten de testcode gegenereerd voor een context uit de voorbeeldoefening Lotto (het gaat om dezelfde context uit het voorbeeld van het testplan in \cref{lst:testplan}), in respectievelijk Python en Java.
-Daarnaast bevat \cref{lst:selector-java} de code voor de \texttt{selector} in Java.
-Hiervan is geen versie in Python, omdat Python geen selector nodig heeft.
-
-\begin{listing}
-    \caption{Gegenereerde testcode in Python voor de eerste context uit het testplan van de voorbeeldoefening Lotto.}
-    \label{lst:generated-context-python}
-    \inputminted{python}{code/generated-context-1.py}
-\end{listing}
-
-\begin{listing}
-    \caption{
-        Gegenereerde testcode in Java voor de eerste context uit het testplan van de voorbeeldoefening Lotto.
-        Enkele hulpfuncties en imports zijn verwijderd om de code kort te houden.
-    }
-    \label{lst:generated-context-java}
-    \inputminted{java}{code/generated-context-1.java}
-\end{listing}
-
-\begin{listing}
-    \caption{Gegenereerde selectiecode in Java voor twee contexten uit het testplan van de voorbeeldoefening Lotto.}
-    \label{lst:selector-java}
-    \inputminted{java}{code/Selector.java}
-\end{listing}
+In \cref{ch:echo-oefening,ch:echo-function-oefening} wordt de gegenereerde testcode getoond voor eenvoudige oefeningen.
 
 \begin{listing}
     \caption{Mapstructuur na het uitvoeren van de testcode van een oplossing in Python.}
     \label{lst:mapstructuur}
-    \inputminted{text}{code/dir-listing.txt}
+    \inputminted{text}{code/dirs-python-solution.txt}
 \end{listing}
 
 \begin{listing}
-    \caption{Mapstructuur voor het uitvoeren van een geprogrammeerde evaluator.}
+    \caption{Mapstructuur na het uitvoeren van een geprogrammeerde evaluator.}
     \label{lst:mapstructuur-evaluator}
-    \inputminted{text}{code/dir-listing-eval.txt}
+    \inputminted{text}{code/dirs-python-eval.txt}
 \end{listing}
 
 \subsection{Testcode uitvoeren}\label{subsec:testcode-uitvoeren}
