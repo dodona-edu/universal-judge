@@ -41,11 +41,11 @@ int ${context_name}() {
 
     % if context_testcase.exists:
         char* args[] = {\
-        % for argument in context_testcase.arguments:
+        % for argument in ["solution"] + context_testcase.arguments:
             "${argument}", \
         % endfor
         };
-        solution_main(${len(context_testcase.arguments)}, args);
+        solution_main(${len(context_testcase.arguments) + 1}, args);
     % endif
 
     ## Generate the actual tests based on the context.

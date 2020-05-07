@@ -245,7 +245,7 @@ def test_batch_compilation_no_fallback(language: str, tmp_path: Path, pytestconf
     assert all(s == "wrong" for s in updates.find_status_enum())
 
 
-@pytest.mark.parametrize("lang", ["python", "java"])
+@pytest.mark.parametrize("lang", ["python", "java", "c"])
 def test_program_params(lang: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "sum", lang, tmp_path, "short.tson", "correct")
     result = execute_config(conf)
