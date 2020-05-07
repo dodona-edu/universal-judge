@@ -40,7 +40,12 @@ int ${context_name}() {
     ${context_name}_write_separator();
 
     % if context_testcase.exists:
-        solution_main();
+        char* args[] = {\
+        % for argument in context_testcase.arguments:
+            "${argument}", \
+        % endfor
+        };
+        solution_main(${len(context_testcase.arguments)}, args);
     % endif
 
     ## Generate the actual tests based on the context.
