@@ -10,7 +10,7 @@ from pathlib import Path
 
 import sys
 
-prefix = Path("./src/sources/echo-function-c")
+prefix = Path("./src/sources/echo-function")
 judge = Path("../judge/src")
 
 prefix.mkdir(parents=True, exist_ok=True)
@@ -21,10 +21,10 @@ workdir.mkdir()
 args = {
     "memory_limit":         536870912,
     "time_limit":           60,
-    "programming_language": 'c',
+    "programming_language": 'java',
     "natural_language":     'nl',
     "resources":            '../../exercise/echo-function/evaluation',
-    "source":               '../../exercise/echo-function/solution/correct.c',
+    "source":               '../../exercise/echo-function/solution/correct.java',
     "judge":                str(Path('..').resolve()),
     "workdir":              str(workdir.resolve()),
     "plan_name":            "one-testcase.tson",
@@ -51,12 +51,10 @@ def clean(file):
 
 
 # Copy the relevant files.
-shutil.copy2(workdir / "common/context_0_0.c", prefix)
-shutil.copy2(workdir / "common/selector.c", prefix)
-shutil.copy2("../exercise/echo-function/description/description.nl.md", prefix / "description.md")
-shutil.copy2("../exercise/echo-function/evaluation/one-testcase.tson", prefix)
-shutil.copy2("../exercise/echo-function/solution/correct.c", prefix)
+shutil.copy2(workdir / "common/Context00.java", prefix)
+shutil.copy2(workdir / "common/Selector.java", prefix)
+shutil.copy2("../exercise/echo/solution/correct.java", prefix)
 shutil.rmtree(workdir, ignore_errors=True)
 
-clean(prefix / "context_0_0.c")
-clean(prefix / "selector.c")
+clean(prefix / "Context00.java")
+clean(prefix / "Selector.java")

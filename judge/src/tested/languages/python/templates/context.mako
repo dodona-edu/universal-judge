@@ -16,8 +16,8 @@ import sys
 
 
 ## Open the files to which we write results.
-value_file = open(r"${value_file}", "w")
-exception_file = open(r"${exception_file}", "w")
+value_file = open("${value_file}", "w")
+exception_file = open("${exception_file}", "w")
 
 ## Write the separator and flush to ensure the output is in the files.
 ## This is necessary, otherwise the separators are sometimes missing when

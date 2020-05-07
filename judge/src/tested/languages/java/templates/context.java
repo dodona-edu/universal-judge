@@ -2,17 +2,9 @@
 <%! from tested.languages.generator import _TestcaseArguments %>
 <%! from tested.serialisation import Statement, Expression, Assignment %>
 <%! from tested.utils import get_args %>
-## This imports are defined by the "common" start-up scripts of JShell.
-import java.io.*;
-import java.math.*;
-import java.net.*;
-import java.nio.file.*;
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.function.*;
-import java.util.prefs.*;
-import java.util.regex.*;
-import java.util.stream.*;
+import java.io.Closeable;
+import java.io.IOException;
+import java.io.PrintWriter;
 
 public class ${context_name} implements Closeable {
 
@@ -73,7 +65,7 @@ public class ${context_name} implements Closeable {
         this.writeSeparator();
         % if context_testcase.exists:
             try {
-                ${submission_name}.main(new String[]{
+                ${submission_name}.main(new String[]{\
                 % for argument in context_testcase.arguments:
                     "${argument}", \
                 % endfor

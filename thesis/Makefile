@@ -32,8 +32,12 @@ markdown:
 	python scripts/mathjax.py ../exercise/lotto/description/description.nl.md ./src/sources/lotto-description.md
 
 generate:
-	python scripts/generate_echo.py
-	python scripts/generate_echo_function.py
+	python scripts/generate_echo_c.py
+	python scripts/generate_echo_python.py
+	python scripts/generate_echo_java.py
+	python scripts/generate_echo_function_c.py
+	python scripts/generate_echo_function_python.py
+	python scripts/generate_echo_function_java.py
 
 # Do the main file.
 src/main.pdf: copies markdown generate
