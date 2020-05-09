@@ -9,9 +9,9 @@ from . import EvaluationResult, try_outputs, exception, value, EvaluatorConfig
 from ..testplan import EmptyChannel
 
 
-def evaluate(config: EvaluatorConfig, channel: EmptyChannel, actual: str,
-             _ignored: Status, timeout: Optional[float]) -> EvaluationResult:
-    assert channel == EmptyChannel.NONE
+def evaluate(config: EvaluatorConfig, channel: EmptyChannel,
+             actual: str) -> EvaluationResult:
+    assert isinstance(channel, EmptyChannel)
 
     if actual:
         parsers = [
@@ -21,7 +21,7 @@ def evaluate(config: EvaluatorConfig, channel: EmptyChannel, actual: str,
         actual = try_outputs(actual, parsers)
         result = StatusMessage(
             enum=Status.WRONG,
-            human="Te veel uitvoer."
+            human="Onverwachte uitvoer."
         )
     else:
         result = StatusMessage(enum=Status.CORRECT)

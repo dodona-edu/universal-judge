@@ -3,8 +3,8 @@ Exception evaluator.
 """
 from typing import Optional
 
+from . import EvaluationResult, EvaluatorConfig
 from ..dodona import StatusMessage, Status, ExtendedMessage, Permission
-from . import EvaluationResult
 from ..serialisation import ExceptionValue
 from ..testplan import ExceptionOutputChannel
 from ..utils import Either
@@ -27,8 +27,18 @@ def try_as_readable_exception(value: str) -> Optional[str]:
         return actual.readable()
 
 
-def evaluate(_, channel: ExceptionOutputChannel, actual: str,
-             wrong: Status, timeout: Optional[float]) -> EvaluationResult:
+def evaluate(_config: EvaluatorConfig,
+             channel: ExceptionOutputChannel,
+             actual: str) -> EvaluationResult:
+    """
+    Evaluate an exception.
+
+    :param _config: Not used.
+    :param channel: The channel from the testplan.
+    :param actual: The raw actual value from the execution.
+
+    :return: An evaluation result.
+    """
     assert isinstance(channel, ExceptionOutputChannel)
     assert channel.exception is not None
 
@@ -57,7 +67,8 @@ def evaluate(_, channel: ExceptionOutputChannel, actual: str,
 
     return EvaluationResult(
         result=StatusMessage(
-            enum=Status.CORRECT if expected.message == actual.message else wrong
+            enum=Status.CORRECT if expected.message == actual.message else 
+            Status.WRONG
         ),
         readable_expected=expected.readable(),
         readable_actual=actual.readable()

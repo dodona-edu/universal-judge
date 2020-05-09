@@ -8,7 +8,7 @@ import typing
 from os import PathLike
 from pathlib import Path
 from typing import (IO, Union, Generator, TypeVar, Generic, Optional, Mapping,
-                    Iterable)
+                    Iterable, List, Callable)
 
 import itertools
 import sys
@@ -257,3 +257,36 @@ def snake_case(what: str) -> str:
             f"A name '{what}' is not in snake_case. This might cause problems."
         )
     return what
+
+
+def safe_del(l: List[T], index: int, f: Callable[[T], bool]) -> bool:
+    """
+    Delete an item from a list at a position if the filter is True. If the index
+    is out of ranger or the filter is False, the function will return False, else
+    True.
+
+    :param l: The list to delete from.
+    :param index: The index to delete at.
+    :param f: The filter for the element.
+
+    :return: True or False
+    """
+    try:
+        v = l[index]
+        if f(v):
+            del l[index]
+            return True
+        else:
+            return False
+    except IndexError:
+        return False
+
+
+def safe_get(l: List[T], index: int) -> Optional[T]:
+    """
+    Get the element at the given position or None if the index is out of bounds.
+    """
+    try:
+        return l[index]
+    except IndexError:
+        return None

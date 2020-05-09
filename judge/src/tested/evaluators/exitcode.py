@@ -2,7 +2,7 @@ import logging
 from typing import Optional
 
 from ..dodona import StatusMessage, Status
-from . import EvaluationResult
+from . import EvaluationResult, EvaluatorConfig
 from ..testplan import ExitCodeOutputChannel
 
 logger = logging.getLogger(__name__)
@@ -15,8 +15,9 @@ def _as_int(value: str) -> Optional[int]:
         return None
 
 
-def evaluate(_, channel: ExitCodeOutputChannel, value: str,
-             _ignored: Status, _timeout: Optional[float]) -> EvaluationResult:
+def evaluate(_config: EvaluatorConfig,
+             channel: ExitCodeOutputChannel,
+             value: str) -> EvaluationResult:
     assert isinstance(channel, ExitCodeOutputChannel)
     exit_code = _as_int(value)
 

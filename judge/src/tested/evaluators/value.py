@@ -10,8 +10,8 @@ from ..datatypes import AdvancedTypes, BasicTypes, BasicStringTypes
 from ..dodona import ExtendedMessage, Permission, StatusMessage, Status
 from ..languages.config import TypeSupport
 from ..languages.generator import convert_statement
-from ..serialisation import Value, parse_value, to_python_comparable, as_basic_type, \
-    StringType
+from ..serialisation import (Value, parse_value, to_python_comparable,
+                             as_basic_type, StringType)
 from ..testplan import ValueOutputChannel, OutputChannel, TextOutputChannel
 from ..utils import Either, get_args
 
@@ -37,7 +37,6 @@ def try_as_readable_value(bundle: Bundle, value: str) -> Optional[str]:
 
 def get_values(bundle: Bundle, output_channel: ValueOutputChannel, actual) \
         -> Union[EvaluationResult, Tuple[Value, str, Optional[Value], str]]:
-
     if isinstance(output_channel, TextOutputChannel):
         expected = output_channel.get_data_as_string(bundle.config.resources)
         expected_value = StringType(type=BasicStringTypes.TEXT, data=expected)
@@ -128,8 +127,8 @@ def _check_type(
     return expected.type == actual.type, expected
 
 
-def evaluate(config: EvaluatorConfig, channel: OutputChannel, actual: str,
-             wrong: Status, timeout: Optional[float]) -> EvaluationResult:
+def evaluate(config: EvaluatorConfig, channel: OutputChannel,
+             actual: str) -> EvaluationResult:
     """
     Evaluate two values. The values must match exact. Currently, this evaluator
     has no options, but it might receive them in the future (e.g. options on how
@@ -141,7 +140,7 @@ def evaluate(config: EvaluatorConfig, channel: OutputChannel, actual: str,
     # This is the result of a custom evaluator.
     try:
         evaluation_result = EvaluationResult.__pydantic_model__.parse_raw(actual)
-    except (TypeError, ValueError) as e:
+    except (TypeError, ValueError):
         pass
     else:
         return evaluation_result
@@ -157,7 +156,7 @@ def evaluate(config: EvaluatorConfig, channel: OutputChannel, actual: str,
     if actual is None:
         return EvaluationResult(
             result=StatusMessage(
-                enum=wrong,
+                enum=Status.WRONG,
                 human="Ontbrekende returnwaarde."
             ),
             readable_expected=readable_expected,
@@ -186,7 +185,7 @@ def evaluate(config: EvaluatorConfig, channel: OutputChannel, actual: str,
     return EvaluationResult(
         result=StatusMessage(
             human=type_status,
-            enum=Status.CORRECT if correct else wrong
+            enum=Status.CORRECT if correct else Status.WRONG
         ),
         readable_expected=readable_expected,
         readable_actual=readable_actual,

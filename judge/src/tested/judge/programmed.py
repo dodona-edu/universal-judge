@@ -11,7 +11,6 @@ from pathlib import Path
 from typing import Optional, List, Union, Tuple, ContextManager
 
 import sys
-import time
 
 from .core import _logger, ExtendedMessage, Permission
 from .execution import execute_file, filter_files
@@ -32,8 +31,7 @@ def evaluate_programmed(
         bundle: Bundle,
         evaluator: ProgrammedEvaluator,
         expected: Optional[Value],
-        actual: Value,
-        timeout: Optional[float]) -> Union[BaseExecutionResult, EvalResult]:
+        actual: Value) -> Union[BaseExecutionResult, EvalResult]:
     """
     Run the custom evaluation. Concerning structure and execution, the custom
     evaluator is very similar to the execution of the whole evaluation. It a
@@ -44,22 +42,20 @@ def evaluate_programmed(
 
     # We have special support for Python.
     if evaluator.language == "python" and bundle.config.options.optimized:
-        return _evaluate_python(bundle, evaluator, expected, actual, timeout)
+        return _evaluate_python(bundle, evaluator, expected, actual)
     else:
-        return _evaluate_others(bundle, evaluator, expected, actual, timeout)
+        return _evaluate_others(bundle, evaluator, expected, actual)
 
 
 def _evaluate_others(bundle: Bundle,
                      evaluator: ProgrammedEvaluator,
                      expected: Optional[Value],
-                     actual: Value,
-                     timeout: Optional[float]) -> BaseExecutionResult:
+                     actual: Value) -> BaseExecutionResult:
     """
     Evaluate in all languages but Python. The re-uses the infrastructure of the
     templates and execution facilities of the language config.
     """
     _logger.debug("Doing evaluation in non-Python mode.")
-    start = time.perf_counter()
 
     # Create a directory for this evaluator. If one exists, delete it first.
     evaluator_dir_name = evaluator.function.file.stem
@@ -116,9 +112,8 @@ def _evaluate_others(bundle: Bundle,
 
     # Do compilation for those configs that require it.
     command, files = eval_bundle.lang_config.compilation(dependencies)
-    remaining = timeout - (time.perf_counter() - start)
     _logger.debug("Compiling custom evaluator with command %s", command)
-    result = run_command(custom_path, remaining, command)
+    result = run_command(custom_path, None, command)
     if result and result.stderr:
         raise ValueError("Error while compiling specific test case:" +
                          result.stderr)
@@ -129,13 +124,12 @@ def _evaluate_others(bundle: Bundle,
     executable = find_main_file(files, evaluator_name)
     files.remove(executable)
 
-    remaining = timeout - (time.perf_counter() - start)
     return execute_file(
         bundle=eval_bundle,
         executable_name=executable,
         working_directory=custom_path,
         stdin=None,
-        remaining=remaining
+        remaining=None
     )
 
 
@@ -165,8 +159,7 @@ class _EvaluationResult:
 def _evaluate_python(bundle: Bundle,
                      evaluator: ProgrammedEvaluator,
                      expected: Optional[Value],
-                     actual: Value,
-                     _timeout: Optional[float]) -> EvalResult:
+                     actual: Value) -> EvalResult:
     """
     Run an evaluation in Python. While the templates are still used to generate
     code, they are not executed in a separate process, but inside python itself.

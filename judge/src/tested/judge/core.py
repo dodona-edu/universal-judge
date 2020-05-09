@@ -86,15 +86,29 @@ def judge(bundle: Bundle):
             # Handle timout if necessary.
             if result.timeout:
                 # Show in separate tab.
+                index = len(bundle.plan.tabs) + 1
                 if messages:
-                    collector.add(StartTab("Compilatie"))
+                    collector.prepare_tab(StartTab("Compilatie"), index)
                 for message in messages:
                     collector.add(AppendMessage(message=message))
                 for annotation in annotations:
                     collector.add(annotation)
                 if messages:
-                    collector.add(CloseTab())
+                    collector.prepare_tab(CloseTab(), index)
                 collector.terminate(Status.TIME_LIMIT_EXCEEDED)
+                return
+            if result.memory:
+                index = len(bundle.plan.tabs) + 1
+                # Show in separate tab.
+                if messages:
+                    collector.prepare_tab(StartTab("Compilatie"), index)
+                for message in messages:
+                    collector.add(AppendMessage(message=message))
+                for annotation in annotations:
+                    collector.add(annotation)
+                if messages:
+                    collector.prepare_tab(CloseTab(), index)
+                collector.terminate(Status.MEMORY_LIMIT_EXCEEDED)
                 return
 
             assert not result.timeout
@@ -161,7 +175,7 @@ def judge(bundle: Bundle):
         else:
             result = _single_execution(bundle, executions, remaining)
 
-        if result == Status.TIME_LIMIT_EXCEEDED:
+        if result in (Status.TIME_LIMIT_EXCEEDED, Status.MEMORY_LIMIT_EXCEEDED):
             assert not collector.collected
             collector.terminate(result)
             return
@@ -189,19 +203,14 @@ def _single_execution(bundle: Bundle,
 
         remaining = max_time - (time.perf_counter() - start)
         execution_result, m, s, p = execute_context(bundle, execution, remaining)
-        continue_ = evaluate_results(
-            bundle,
-            context=execution.context,
-            exec_results=execution_result,
-            compiler_results=(m, s),
-            context_dir=p,
-            collector=execution.collector,
-            max_time=remaining
-        )
-        execution.collector.add_context(CloseContext(), execution.context_index)
-        if continue_ == Status.TIME_LIMIT_EXCEEDED:
+        continue_ = evaluate_results(bundle, context=execution.context,
+                                     exec_results=execution_result,
+                                     compiler_results=(m, s), context_dir=p,
+                                     collector=execution.collector)
+        if continue_ in (Status.TIME_LIMIT_EXCEEDED, Status.MEMORY_LIMIT_EXCEEDED):
             return continue_
-
+        else:
+            execution.collector.add_context(CloseContext(), execution.context_index)
 
 def _parallel_execution(bundle: Bundle,
                         items: List[ContextExecution],
@@ -225,15 +234,10 @@ def _parallel_execution(bundle: Bundle,
                 StartContext(description=execution.context.description),
                 execution.context_index
             )
-            continue_ = evaluate_results(
-                bundle,
-                context=execution.context,
-                exec_results=execution_result,
-                compiler_results=(m, s),
-                context_dir=p,
-                collector=execution.collector,
-                max_time=eval_remainder
-            )
+            continue_ = evaluate_results(bundle, context=execution.context,
+                                         exec_results=execution_result,
+                                         compiler_results=(m, s), context_dir=p,
+                                         collector=execution.collector)
             execution.collector.add_context(CloseContext(), execution.context_index)
             return continue_
 
@@ -245,10 +249,11 @@ def _parallel_execution(bundle: Bundle,
         try:
             for eval_function in list(results):
                 remaining = max_time - (time.perf_counter() - start)
-                if eval_function(remaining) == Status.TIME_LIMIT_EXCEEDED:
+                if (status := eval_function(remaining)) in (
+                        Status.TIME_LIMIT_EXCEEDED, Status.MEMORY_LIMIT_EXCEEDED):
                     # Ensure finally is called NOW and cancels remaining tasks.
                     del results
-                    return Status.TIME_LIMIT_EXCEEDED
+                    return status
         except concurrent.futures.TimeoutError:
             _logger.warning("Futures did not end soon enough.", exc_info=True)
             return Status.TIME_LIMIT_EXCEEDED

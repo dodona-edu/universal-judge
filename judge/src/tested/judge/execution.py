@@ -73,7 +73,7 @@ def execute_file(
         bundle: Bundle,
         executable_name: str,
         working_directory: Path,
-        remaining: float,
+        remaining: Optional[float],
         stdin: Optional[str] = None,
         argument: Optional[str] = None
 ) -> BaseExecutionResult:

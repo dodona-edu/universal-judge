@@ -11,7 +11,8 @@ from typing import List, Union, Optional, Generator
 from tested.configs import Bundle
 from tested.dodona import Update, Status, report_update, StatusMessage, \
     CloseTab, CloseContext, CloseTestcase, StartJudgment, CloseJudgment, \
-    StartTab, StartContext, StartTestcase, close_for, ExtendedMessage
+    StartTab, StartContext, StartTestcase, close_for, ExtendedMessage, \
+    EscalateStatus
 
 _logger = logging.getLogger(__name__)
 
@@ -161,6 +162,9 @@ class OutputManager:
 
         if isinstance(status, Status):
             status = StatusMessage(enum=status)
+
+        # Ensure we use the given status.
+        self._add(EscalateStatus(status=status))
 
         to_add = self._get_to_add()
         for added in to_add:

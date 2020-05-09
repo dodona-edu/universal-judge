@@ -31,7 +31,7 @@ from typing import Union, Callable, Optional
 from pydantic.dataclasses import dataclass
 
 from ..configs import Bundle
-from ..dodona import StatusMessage, Message, Status
+from ..dodona import StatusMessage, Message
 from ..testplan import GenericTextEvaluator, TextBuiltin, \
     GenericValueEvaluator, ValueBuiltin, GenericExceptionEvaluator, \
     ExceptionBuiltin, ProgrammedEvaluator, SpecificEvaluator
@@ -61,12 +61,13 @@ class EvaluatorConfig(NamedTuple):
 
 
 RawEvaluator = Callable[
-    [EvaluatorConfig, OutputChannel, str, Status, Optional[float]],
-    EvaluationResult]
+    [EvaluatorConfig, OutputChannel, str],
+    EvaluationResult
+]
 
 
 Evaluator = Callable[
-    [OutputChannel, str, Status, Optional[float]],
+    [OutputChannel, str],
     EvaluationResult
 ]
 

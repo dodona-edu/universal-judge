@@ -67,8 +67,7 @@ def expected_as_value(config: EvaluatorConfig,
 
 def evaluate(config: EvaluatorConfig,
              channel: NormalOutputChannel,
-             actual: str,
-             wrong: Status, timeout: Optional[float]) -> EvaluationResult:
+             actual: str) -> EvaluationResult:
     """
     Evaluate using a programmed evaluator. This evaluator is unique, in that it is
     also responsible for running the evaluator (all other evaluators don't do that).
@@ -106,14 +105,20 @@ def evaluate(config: EvaluatorConfig,
         config.bundle,
         evaluator=channel.evaluator,
         expected=expected,
-        actual=actual,
-        timeout=timeout
+        actual=actual
     )
 
     if isinstance(result, BaseExecutionResult):
         if result.timeout:
             return EvaluationResult(
                 result=StatusMessage(enum=Status.TIME_LIMIT_EXCEEDED),
+                readable_expected=readable_expected,
+                readable_actual=readable_actual,
+                messages=[result.stdout, result.stderr]
+            )
+        if result.memory:
+            return EvaluationResult(
+                result=StatusMessage(enum=Status.MEMORY_LIMIT_EXCEEDED),
                 readable_expected=readable_expected,
                 readable_actual=readable_actual,
                 messages=[result.stdout, result.stderr]
@@ -129,9 +134,8 @@ def evaluate(config: EvaluatorConfig,
                 messages=[stdout, stderr, DEFAULT_STUDENT]
             )
         try:
-            print(result.stdout)
             evaluation_result = _try_specific(result.stdout)
-        except (TypeError, ValueError) as e:
+        except (TypeError, ValueError):
             messages = [
                 ExtendedMessage(
                     description="Er ging iets verkeerds tijdens de evaluatie. "
@@ -188,7 +192,7 @@ def evaluate(config: EvaluatorConfig,
     else:
         assert isinstance(evaluation_result.result, bool)
         result_status = StatusMessage(
-            enum=Status.CORRECT if evaluation_result.result else wrong
+            enum=Status.CORRECT if evaluation_result.result else Status.WRONG
         )
 
     return EvaluationResult(

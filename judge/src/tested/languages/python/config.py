@@ -32,7 +32,7 @@ class Python(Language):
                     text=f"{error}: {message}",
                     type=Severity.ERROR
                 )
-            ], "", stderr
+            ], stdout, stderr
         elif stuff := self._attempt_stacktrace(stdout):
             line, column, message = stuff
             return [], [
@@ -42,7 +42,7 @@ class Python(Language):
                     text=message,
                     type=Severity.ERROR
                 )
-            ], "", stderr
+            ], stdout, stderr
         else:
             return [], [], stdout, stderr
 

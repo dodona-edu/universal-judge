@@ -25,7 +25,7 @@ class BaseExecutionResult:
 
 
 def run_command(directory: Path,
-                timeout: float,
+                timeout: Optional[float],
                 command: Optional[List[str]] = None,
                 stdin: Optional[str] = None) -> Optional[BaseExecutionResult]:
     """
@@ -42,10 +42,11 @@ def run_command(directory: Path,
         return None
 
     try:
+        timeout = int(timeout) if timeout is not None else None
         # noinspection PyTypeChecker
         process = subprocess.run(command, cwd=directory, text=True,
                                  capture_output=True, input=stdin,
-                                 timeout=int(timeout))
+                                 timeout=timeout)
     except subprocess.TimeoutExpired as e:
         return BaseExecutionResult(
             stdout=e.stdout or "",
@@ -60,7 +61,7 @@ def run_command(directory: Path,
         stderr=process.stderr,
         exit=process.returncode,
         timeout=False,
-        memory=False
+        memory=True if process.returncode == -9 else False
     )
 
 

@@ -152,7 +152,7 @@ class TextData(WithFeatures):
         else:
             return path.abspath(path.join(working_directory, file_path))
 
-    def get_data_as_string(self, working_directory):
+    def get_data_as_string(self, working_directory: Path) -> str:
         """Get the data as a string, reading the file if necessary."""
         if self.type == TextChannelType.TEXT:
             return self.data
@@ -186,6 +186,11 @@ class FileOutputChannel(WithFeatures):
 
     def get_used_features(self) -> FeatureSet:
         return NOTHING
+
+    def get_data_as_string(self, resources: Path) -> str:
+        file_path = self._resolve_path(resources, self.expected_path)
+        with open(file_path, 'r') as file:
+            return file.read()
 
 
 @dataclass
@@ -265,24 +270,25 @@ NormalOutputChannel = Union[
     TextOutputChannel,
     FileOutputChannel,
     ValueOutputChannel,
+    ExceptionOutputChannel,
     ExitCodeOutputChannel
 ]
 
 OutputChannel = Union[NormalOutputChannel, SpecialOutputChannel]
 
-_TextOutput = Union[TextOutputChannel, SpecialOutputChannel]
-_FileOutput = Union[FileOutputChannel, IgnoredChannel]
+TextOutput = Union[TextOutputChannel, SpecialOutputChannel]
+FileOutput = Union[FileOutputChannel, IgnoredChannel]
 ExceptionOutput = Union[ExceptionOutputChannel, SpecialOutputChannel]
-ValueOutput = Union[ValueOutputChannel, IgnoredChannel, EmptyChannel]
+ValueOutput = Union[ValueOutputChannel, SpecialOutputChannel]
 
 
 @dataclass
 class BaseOutput(WithFeatures):
     """The output channels for a testcase."""
 
-    stdout: _TextOutput = EmptyChannel.NONE
-    stderr: _TextOutput = EmptyChannel.NONE
-    file: _FileOutput = IgnoredChannel.IGNORED
+    stdout: TextOutput = EmptyChannel.NONE
+    stderr: TextOutput = EmptyChannel.NONE
+    file: FileOutput = IgnoredChannel.IGNORED
     exception: ExceptionOutput = EmptyChannel.NONE
 
     def get_used_features(self) -> FeatureSet:
