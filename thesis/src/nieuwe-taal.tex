@@ -262,7 +262,7 @@ Omdat TESTed in Python geschreven is, moet deze klasse ook in Python geïmplemen
 Maak een nieuw Python-bestand \texttt{judge/src/tested/languages/c/config.py} aan.
 Hierin moet een klasse komen die \texttt{Language} uitbreidt:
 
-\inputminted[firstline=9,lastline=9]{python}{sources/c-config.py}
+\inputminted[firstline=10,lastline=10]{python}{sources/c-config.py}
 
 In de rest van deze paragraaf overlopen we de verschillende methodes die geïmplementeerd moeten worden in deze klasse.
 In de superklasse, \texttt{Language}, zijn de abstracte methodes voorzien van uitgebreide documentatie.
@@ -271,7 +271,7 @@ In de superklasse, \texttt{Language}, zijn de abstracte methodes voorzien van ui
 
 Een eerste en belangrijke methode is de callback voor de compilatiestap:
 
-\inputminted[firstline=11,lastline=16,gobble=4]{python}{sources/c-config.py}
+\inputminted[firstline=12,lastline=17,gobble=4]{python}{sources/c-config.py}
 
 Het eerste argument van deze methode is een klasse met enkele configuratie-opties, zoals de tijdslimiet, geheugenlimiet en de programmeertaalspecifieke opties.
 Dit zou bijvoorbeeld gebruikt kunnen worden om de versie van C mee te geven (zoals C11 of C99).
@@ -424,7 +424,7 @@ Het is verantwoordelijk voor het genereren van de testcode voor één context.
 
 We importeren de values-module (hierover later meer) en de ingediende oplossing.
 De variabele \texttt{submission\_name} zal de naam van het oplossingsbestand bevatten.
-Een overzicht van alle beschikbare variabelen in het contextsjabloon is te vinden in de klasse \texttt{tested.languages.generator.\_ContextArguments}.
+Een overzicht van alle beschikbare variabelen in het contextsjabloon is te vinden in de klasse \texttt{\_ContextArguments} uit de module \texttt{tested.languages.generator}.
 
 We importeren ook alle programmeertaalspecifieke evaluatoren die we nodig zullen hebben.
 De variabele \texttt{evaluator\_names} bevat een verzameling van deze namen.
@@ -587,9 +587,18 @@ True
 \subsubsection{Overige}
 
 De overige sjablonen vertalen elk een taalelement op een gelijkaardige wijze als het statementsjabloon.
-Het gaat om de sjablonen \texttt{declaration.mako}, \texttt{function.mako}, \texttt{value.mako}, \texttt{value\_arguments.mako} en \texttt{value\_basic.mako}.
+Het gaat om volgende sjablonen:
 
-Daar de sjablonen sterk lijken op het statementsjabloon hebben we ze niet toegevoegd aan dit hoofdstuk: de implementatie ervan is te bekijken in de repository.
+\begin{itemize}
+    \item \texttt{declaration.mako}
+    \item \texttt{function.mako}
+    \item \texttt{value.mako}
+    \item \texttt{value\_arguments.mako}
+    \item \texttt{value\_basic.mako}
+\end{itemize}
+
+We hebben ze niet opgenomen in dit hoofdstuk, omdat ze sterk lijken op het statementsjabloon.
+De implementatie van deze sjablonen is te bekijken in de repository.
 
 \subsection{Hulpmodules}\label{subsec:hulpmodules}
 
