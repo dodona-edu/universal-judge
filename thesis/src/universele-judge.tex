@@ -1,24 +1,24 @@
-\chapter{TESTed}\label{ch:tested}
+\chapter{\tested{}}\label{ch:tested}
 
 \lettrine{I}{n het kader} van deze masterproef werd een prototype geïmplementeerd van een judge voor Dodona.
 Het doel hiervan is een antwoord te bieden op de onderzoeksvraag uit het vorige hoofdstuk en de beperkingen van de gezoken aanpak in kaart te brengen.
-Deze judge heeft de naam \term{TESTed} gekregen.
-Bij TESTed is een oefening programmeertaalonafhankelijk en kunnen oplossingen in verschillende programmeertalen beoordeeld worden aan de hand van een en dezelfde specificatie.
+Deze judge heeft de naam \term{\tested{}} gekregen.
+Bij \tested{} is een oefening programmeertaalonafhankelijk en kunnen oplossingen in verschillende programmeertalen beoordeeld worden aan de hand van een en dezelfde specificatie.
 Dit hoofdstuk begint met het ontwerp en de algemene werking van de judge toe te lichten, waarna elk onderdeel in meer detail besproken wordt.
 
 \section{Overzicht}\label{sec:ontwerp}
 
 \subsection{Architecturaal ontwerp}\label{subsec:architecturaal-overzicht}
 
-\Cref{fig:universal-judge} toont het architecturaal ontwerp van TESTed.
-De twee stippellijnen geven programmeertaalbarrières aan, en verdelen TESTed in drie logisch omgevingen:
+\Cref{fig:universal-judge} toont het architecturaal ontwerp van \tested{}.
+De twee stippellijnen geven programmeertaalbarrières aan, en verdelen \tested{} in drie logisch omgevingen:
 
 \begin{enumerate}
-    \item TESTed zelf is geschreven in Python (zie ook \cref{sec:technische-aspecten}): in de middelste omgeving staat de programmeertaal dus vast.
+    \item \tested{} zelf is geschreven in Python (zie ook \cref{sec:technische-aspecten}): in de middelste omgeving staat de programmeertaal dus vast.
     Deze omgeving is verantwoordelijk voor de regie van de beoordeling op basis van het testplan.
     \item De ingediende oplossing wordt uitgevoerd in de \term{uitvoeringsomgeving}, waar de programmeertaal overeenkomt met de programmeertaal van de ingediende oplossing.
     \item Tot slot is er nog de \term{evaluatieomgeving}, waar door de lesgever geschreven evaluatiecode wordt uitgevoerd.
-    Deze moet niet in dezelfde programmeertaal als de ingediende oplossing of als TESTed geschreven zijn.
+    Deze moet niet in dezelfde programmeertaal als de ingediende oplossing of als \tested{} geschreven zijn.
 \end{enumerate}
 
 \subsection{Stappenplan van een beoordeling}\label{subsec:stappenplan-van-een-beoordeling}
@@ -27,7 +27,7 @@ De rest van het hoofdstuk bespreekt alle onderdelen van en stappen die gebeuren 
 In \cref{fig:tested-flow} zijn deze stappen gegeven als een flowchart, en een uitgeschreven versie volgt:
 
 \begin{enumerate}
-    \item De Docker-container voor TESTed wordt gestart.
+    \item De Docker-container voor \tested{} wordt gestart.
     Dodona stelt de invoer ter beschikking aan de container: het testplan komt uit de oefening, terwijl de ingediende oplossing en de configuratie uit Dodona komen.
     \item Als eerste stap wordt gecontroleerd dat het testplan de programmeertaal van de ingediende oplossing ondersteunt (zie \cref{subsec:vereiste-functies}).
     De programmeertaal van de oplossing wordt gegeven via de configuratie uit Dodona.
@@ -67,17 +67,17 @@ In \cref{fig:tested-flow} zijn deze stappen gegeven als een flowchart, en een ui
         Het doel van deze modus is om complexe evaluaties toe te laten op een programmeertaalonafhankelijke manier.
         Deze stap vindt plaats in de evaluatieomgeving.
         \item Generieke evaluatie (\acronym{GE}).
-        Hierbij evalueert TESTed zelf het resultaat.
+        Hierbij evalueert \tested{} zelf het resultaat.
         Deze manier is bedoeld voor gestandaardiseerde evaluaties, zoals het vergelijken van geproduceerde uitvoer en verwachte uitvoer.
-        Hier gebeurt de evaluatie binnen TESTed zelf.
+        Hier gebeurt de evaluatie binnen \tested{} zelf.
     \end{enumerate}
-    \item Tot slot verzamelt TESTed alle evaluatieresultaten en stuurt ze gebundeld door naar Dodona, waarna ze getoond worden aan de gebruiker.
+    \item Tot slot verzamelt \tested{} alle evaluatieresultaten en stuurt ze gebundeld door naar Dodona, waarna ze getoond worden aan de gebruiker.
 \end{enumerate}
 
 \begin{figure}
     \centering
     \input{figures/architecture.tex}
-    \caption{Schematische voorstelling van het architecturale ontwerp van de TESTed.}
+    \caption{Schematische voorstelling van het architecturale ontwerp van de \tested{}.}
     \label{fig:universal-judge}
 \end{figure}
 
@@ -85,7 +85,7 @@ In \cref{fig:tested-flow} zijn deze stappen gegeven als een flowchart, en een ui
     \centering
     \input{figures/flow.tex}
     \caption{
-        Flowchart van een beoordeling door TESTed.
+        Flowchart van een beoordeling door \tested{}.
         In het schema worden kleuren gebruikt als er een keuze gemaakt moet worden voor een volgende stap.
         Er kan steeds slechts één mogelijkheid gekozen worden.
         De afkortingen \acronym{PE}, \acronym{GE} en \acronym{SE} staan respectievelijk voor geprogrammeerde evaluatie, generieke evaluatie en (programmeertaal)specifieke evaluatie.
@@ -96,7 +96,7 @@ In \cref{fig:tested-flow} zijn deze stappen gegeven als een flowchart, en een ui
 
 \section{Beschrijven van een oefening}\label{sec:testplan}
 
-De beoordeling van een ingediende oplossing van een oefening begint bij de invoer die TESTed krijgt.
+De beoordeling van een ingediende oplossing van een oefening begint bij de invoer die \tested{} krijgt.
 Centraal in deze invoer is een \term{testplan}, een specificatie die op een programmeertaalonafhankelijke manier beschrijft hoe een oplossing voor een oefening beoordeeld moet worden.
 Het vervangt de programmeertaalspecifieke testen van de bestaande judges (i.e.\ de jUnit-tests of de doctests in respectievelijk Java en Python).
 Het testplan \latin{sensu lato} wordt opgedeeld in verschillende onderdelen, die hierna besproken worden.
@@ -307,7 +307,7 @@ Het wordt gebruikt om:
 
 \begin{itemize}
     \item het gegevenstype van concrete data aan te duiden (beschrijvende modus).
-    Dit gaat om de serialisatie van waarden uit de uitvoeringsomgeving naar TESTed, zoals het geval is bij returnwaarden van functies.
+    Dit gaat om de serialisatie van waarden uit de uitvoeringsomgeving naar \tested{}, zoals het geval is bij returnwaarden van functies.
     \item te beschrijven welk gegevenstype verwacht wordt (voorschrijvende modus).
     Een voorbeeld hiervan is het aangeven van het gegevenstype van een variabele.
     \item zelf code te schrijven (letterlijke modus).
@@ -500,7 +500,7 @@ Bij de controle worden volgende zaken nagekeken:
 \begin{itemize}
     \item Controle of de programmeertaal de nodige gegevenstypes ondersteunt.
     Dit gaat van de basistypes (zoals \texttt{sequence}) tot de geavanceerde types (zoals \texttt{tuple}).
-    Voor elke programmeertaal binnen TESTed wordt bijgehouden welke types ondersteund worden en welke niet.
+    Voor elke programmeertaal binnen \tested{} wordt bijgehouden welke types ondersteund worden en welke niet.
     Bevat een testplan bijvoorbeeld waarden met als type \texttt{set} (verzamelingen), dan kunnen enkel programmeertalen die verzamelingen ondersteunen gebruikt worden.
     Dat zijn bijvoorbeeld Python en Java, maar geen Bash.
     \item Controle of de programmeertaal over de nodige taalconstructies beschikt, zoals \texttt{exceptions} of \texttt{objects}.
@@ -530,7 +530,7 @@ Ook zijn de sjablonen verantwoordelijk voor het genereren van de code die de opl
 
 \subsubsection{Sjablonen}
 
-TESTed heeft een aantal standaardsjablonen nodig, waaraan vastgelegde parameters meegegeven worden en die verantwoordelijk zijn voor specifieke functionaliteit.
+\tested{} heeft een aantal standaardsjablonen nodig, waaraan vastgelegde parameters meegegeven worden en die verantwoordelijk zijn voor specifieke functionaliteit.
 Deze verplichte sjablonen zijn:
 
 \begin{description}
@@ -549,13 +549,13 @@ Een voorbeeld is het omzetten van functieoproepen uit het testplan naar code.
 
 Tot slot moet ook het serialisatieformaat geïmplementeerd worden in de taal, en dit in beide richtingen: waarden encoderen in het serialisatieformaat en waarden uit het serialisatieformaat omzetten naar de types van de programmeertaal (het decoderen).
 Hoe het encoderen van waarden moet gebeuren is vrij, maar in alle bestaande programmeertalen wordt geïmplementeerd met een bijkomende klasse of module (die vaak de naam \texttt{Value} krijgt).
-TESTed zelf gaat nooit waarden decoderen, maar dit is toch nodig, bijvoorbeeld binnen de sjablonen voor expressies of statements.
+\tested{} zelf gaat nooit waarden decoderen, maar dit is toch nodig, bijvoorbeeld binnen de sjablonen voor expressies of statements.
 In alle bestaande talen is dit geïmplementeerd met bijkomende sjablonen.
-Dit wordt geïllustreerd in \cref{ch:nieuwe-taal}, dat het toevoegen van een nieuwe programmeertaal aan TESTed volledig uitwerkt.
+Dit wordt geïllustreerd in \cref{ch:nieuwe-taal}, dat het toevoegen van een nieuwe programmeertaal aan \tested{} volledig uitwerkt.
 
 \subsubsection{Testcode compileren}
 
-TESTed ondersteunt twee manieren waarop de code gecompileerd kan worden (bij programmeertalen die geen compilatie ondersteunen wordt deze stap overgeslagen):
+\tested{} ondersteunt twee manieren waarop de code gecompileerd kan worden (bij programmeertalen die geen compilatie ondersteunen wordt deze stap overgeslagen):
 
 \begin{description}
     \item[Batchcompilatie] Bij deze manier wordt de code voor alle contexten in een keer gecompileerd.
@@ -572,7 +572,7 @@ Batchcompilatie resulteert een grote tijdswinst (zoals beschreven in \cref{sec:p
 Stel bijvoorbeeld een oefening waarbij studenten twee functies moeten implementeren.
 Met batchcompilatie in bijvoorbeeld Java kan de student niet de oplossing voor de eerste functie indienen en laten beoordelen: omdat de tweede functie ontbreekt zullen compilatiefouten optreden.
 
-Als oplossing hiervoor bevat TESTed de mogelijkheid om contextcompilatie en batchcompilatie te combineren, waarbij TESTed terugvalt op de contextcompilatie indien er iets misgaat bij de batchcompilatie.
+Als oplossing hiervoor bevat \tested{} de mogelijkheid om contextcompilatie en batchcompilatie te combineren, waarbij \tested{} terugvalt op de contextcompilatie indien er iets misgaat bij de batchcompilatie.
 Dit terugvalmechanisme is geen geavanceerd systeem: faalt de compilatie, wordt onmiddellijk elke context afzonderlijk gecompileerd.
 Een mogelijke optimalisatie bestaat er uit een tussenoplossing toe te passen, door bijvoorbeeld compilatie op het niveau van tabbladen proberen.
 
@@ -594,21 +594,21 @@ In \cref{ch:echo-oefening,ch:echo-function-oefening} wordt de gegenereerde testc
 
 Vervolgens wordt de (gecompileerde) testcode voor elke context uit het testplan afzonderlijk uitgevoerd en worden de resultaten (het gedrag en de neveneffecten) verzameld.
 Het uitvoeren zelf gebeurt op de normale manier waarop code voor de programmeertaal uitgevoerd wordt: via de commandoregel (bijvoorbeeld \texttt{python context0.py}).
-Deze aanpak heeft als voordeel dat er weinig verschil is tussen hoe TESTed de ingediende code uitvoert en hoe de student zijn code zelf uitvoert op zijn eigen computer.
+Deze aanpak heeft als voordeel dat er weinig verschil is tussen hoe \tested{} de ingediende code uitvoert en hoe de student zijn code zelf uitvoert op zijn eigen computer.
 Dit voorkomt dat er subtiele verschillen in de resultaten sluipen.
 
 \Cref{lst:mapstructuur} illustreert dit met een voorbeeld voor een ingediende oplossing in de programmeertaal Python.
-Deze mapstructuur stelt de toestand van de werkmap van TESTed voor na het uitvoeren van de code.
+Deze mapstructuur stelt de toestand van de werkmap van \tested{} voor na het uitvoeren van de code.
 In de map \texttt{common} zit alle testcode en de gecompileerde bestanden voor alle contexten.
 Voor elke context worden de gecompileerde bestanden gekopieerd naar een andere map, bv.\ \texttt{context\_0\_1}, wat de map is voor context \texttt{1} van tabblad \texttt{0} van het testplan.
 De mapstructuur voor een geprogrammeerde evaluatie is \cref{lst:mapstructuur-evaluator}.
 
 \subsection{Beoordelen van gedrag en neveneffecten}\label{subsec:beoordelen-van-gedrag}
 
-Het uitvoeren van de testcode genereert resultaten (het gedrag en de neveneffecten) die door TESTed beoordeeld moeten worden.
+Het uitvoeren van de testcode genereert resultaten (het gedrag en de neveneffecten) die door \tested{} beoordeeld moeten worden.
 Er zijn verschillende soorten gedragingen en neveneffecten die interessant zijn.
 Elke soort gedrag of neveneffect wordt een \term{uitvoerkanaal} genoemd.
-TESTed verzamelt volgende uitvoerkanalen:
+\tested{} verzamelt volgende uitvoerkanalen:
 \begin{itemize}
     \item De standaarduitvoerstroom.
     Dit wordt verzameld als tekstuele uitvoer.
@@ -627,7 +627,7 @@ TESTed verzamelt volgende uitvoerkanalen:
     Tijdens het beoordelen van de verzamelde resultaten is het mogelijk de door de ingediende oplossing gemaakte bestanden te bekijken.
 \end{itemize}
 
-De standaarduitvoer- en standaardfoutstroom worden rechtstreeks opgevangen door TESTed.
+De standaarduitvoer- en standaardfoutstroom worden rechtstreeks opgevangen door \tested{}.
 De andere uitvoerkanalen (uitzonderingen en returnwaarden) worden naar een bestand geschreven.
 De reden dat deze niet naar een andere \term{file descriptor} geschreven worden is eenvoudig: niet alle talen (zoals Java) ondersteunen het openen van bijkomende file descriptors.
 
@@ -656,22 +656,22 @@ Deze secret wordt gebruikt voor verschillende dingen, zoals:
 
 \section{Oplossingen beoordelen}\label{sec:oplossingen-beoordelen}
 
-In de vorige stap heeft TESTed de resultaten verzameld.
+In de vorige stap heeft \tested{} de resultaten verzameld.
 Het geheel van de verzamelde resultaten noemen we de uitvoer van een beoordeling.
 Deze uitvoer moet vervolgens beoordeeld worden om na te gaan in hoeverre deze voldoet aan de verwachte uitvoer.
 Dit kan op drie manieren:
 \begin{enumerate}
-    \item Generieke evaluatie: de uitvoer wordt beoordeeld door TESTed zelf.
+    \item Generieke evaluatie: de uitvoer wordt beoordeeld door \tested{} zelf.
     \item Geprogrammeerde evaluatie: de uitvoer wordt beoordeeld door evaluatiecode, geschreven door degene die de oefening opgesteld heeft, in een aparte omgeving (de evaluatieomgeving).
     \item Programmeertaalspecifieke evaluatie: de uitvoer wordt onmiddellijk na het uitvoeren van de testcode beoordeeld in het hetzelfde proces.
 \end{enumerate}
 
 \subsection{Generieke evaluatie}\label{subsec:ingebouwde-evaluator}
 
-Voor eenvoudige beoordelingen (bijvoorbeeld stdout vergelijken met een verwachte tekst) volstaat de generieke evaluatie binnen TESTed.
+Voor eenvoudige beoordelingen (bijvoorbeeld stdout vergelijken met een verwachte tekst) volstaat de generieke evaluatie binnen \tested{}.
 Het is mogelijk om de verwachte resultaten in het testplan op te nemen.
-TESTed zal deze resultaten uit het testplan dan vergelijken met de resultaten geproduceerd door het uitvoeren van de testcode.
-Als \english{proof of concept} zijn drie eenvoudige evaluatiemethoden ingebouwd in TESTed, die hieronder besproken worden.
+\tested{} zal deze resultaten uit het testplan dan vergelijken met de resultaten geproduceerd door het uitvoeren van de testcode.
+Als \english{proof of concept} zijn drie eenvoudige evaluatiemethoden ingebouwd in \tested{}, die hieronder besproken worden.
 
 \subsubsection{Tekstevaluatie}
 
@@ -737,7 +737,7 @@ Beide paden zijn relatief, maar ten opzichte van andere mappen: het bestand met 
 \subsubsection{Waarde-evaluatie}
 
 Voor uitvoerkanalen zoals de returnwaarden moet meer dan alleen tekst met elkaar vergeleken kunnen worden.
-Staat er in het testplan welke waarde verwacht wordt (geëncodeerd in het serialisatieformaat), dan kan TESTed dit vergelijken met de eigenlijke waarde die geproduceerd werd door de ingediende oplossing.
+Staat er in het testplan welke waarde verwacht wordt (geëncodeerd in het serialisatieformaat), dan kan \tested{} dit vergelijken met de eigenlijke waarde die geproduceerd werd door de ingediende oplossing.
 
 Het vergelijken van een waarde bestaat uit twee stappen:
 \begin{enumerate}
@@ -754,7 +754,7 @@ Het vergelijken van een waarde bestaat uit twee stappen:
         Merk op dat momenteel bij collecties (\texttt{sequence}s, \texttt{set}s en \texttt{map}s) enkel het type van de collectie gecontroleerd wordt.
     \end{enumerate}
     \item De twee waarden worden vergeleken op inhoud (indien de vergelijking van de gegevenstypes uit de vorige stap positief is).
-    Hierbij maakt TESTed gebruik van de ingebouwde vergelijking van Python om twee waarden te evalueren.
+    Hierbij maakt \tested{} gebruik van de ingebouwde vergelijking van Python om twee waarden te evalueren.
     Dit betekent dat de regels voor \english{value comparisons} uit Python\footnote{Zie \url{https://docs.python.org/3/reference/expressions.html?highlight=comparison\#value-comparisons}} gevolgd worden.
     Eén uitzondering is zwevendekommagetallen, waarvoor opnieuw \mintinline{python}{math.isclose()} gebruikt wordt in plaats van \mintinline{python}{==}.
 \end{enumerate}
@@ -776,11 +776,11 @@ Ook andere oefeningen waar geen directe vergelijking kan gemaakt worden, zoals h
 
 Toch is deze evaluatie niet programmeertaalafhankelijk: de logica om een sequentie uit te lijnen is dezelfde ongeacht de programmeertaal waarin dit gebeurt.
 Voor dergelijke scenario's is geprogrammeerde evaluatie een oplossing: hierbij wordt code geschreven om de evaluatie te doen, maar deze evaluatiecode staat los van de ingediende oplossing en moet ook niet in dezelfde programmeertaal geschreven zijn.
-Binnen TESTed wordt dit mogelijk gemaakt door geproduceerde waarden uit de ingediende oplossing te serialiseren bij het uitvoeren van de testcode, en terug te deserialiseren bij het uitvoeren van de evaluatiecode.
+Binnen \tested{} wordt dit mogelijk gemaakt door geproduceerde waarden uit de ingediende oplossing te serialiseren bij het uitvoeren van de testcode, en terug te deserialiseren bij het uitvoeren van de evaluatiecode.
 
-Deze evaluatiecode kan geschreven worden in een programmeertaal naar keuze, al moet de programmeertaal wel ondersteund worden door TESTed.
+Deze evaluatiecode kan geschreven worden in een programmeertaal naar keuze, al moet de programmeertaal wel ondersteund worden door \tested{}.
 Hoewel de exacte implementatie verschilt van programmeertaal tot programmeertaal, komt het neer op het implementeren van een top-level functie\footnote{
-    Deze functie wordt dan vertaald door TESTed.
+    Deze functie wordt dan vertaald door \tested{}.
     In Java zal dit bijvoorbeeld resulteren in een statische functie.
 } met als naam \texttt{evaluate}.
 Deze functie krijgt drie argumenten mee:
@@ -800,9 +800,9 @@ Deze returnwaarde moet vier gegevens bevatten:
     \item[\texttt{result}] Een \texttt{boolean} die aangeeft of de geproduceerde waarde juist is of niet.
     \item[\texttt{readableExpected}] (Optioneel) Een \texttt{string} met een tekstuele voorstelling van de verwachte waarde.
     Deze tekstuele voorstelling wordt gebruikt om te tonen aan de gebruiker.
-    Indien niets gegeven wordt, zal TESTed zelf een voorstelling maken op basis van de verwachte waarde uit het testplan.
+    Indien niets gegeven wordt, zal \tested{} zelf een voorstelling maken op basis van de verwachte waarde uit het testplan.
     \item[\texttt{readableActual}] (Optioneel) Een \texttt{string} met een tekstuele voorstelling van de geproduceerde waarde.
-    Indien niets gegeven wordt, zal TESTed zelf een voorstelling maken op basis van de geproduceerde waarde.
+    Indien niets gegeven wordt, zal \tested{} zelf een voorstelling maken op basis van de geproduceerde waarde.
     \item[\texttt{messages}] (Optioneel) Een lijst van berichten om te tonen aan de studenten.
 \end{description}
 
@@ -820,11 +820,11 @@ In realiteit zal deze code wel complexer zijn, want eenvoudige gevallen zoals di
 \subsection{Programmeertaalspecifieke evaluatie}\label{subsec:programmeertaalspecifieke-evaluatie}
 
 In sommige scenario's moeten programmeertaalspecifieke concepten beoordeeld worden.
-Een mogelijkheid is deze oefeningen niet aanbieden in TESTed, maar in de programmeertaalspecifieke judges.
-Toch zijn er nog voordelen om ook deze oefeningen in TESTed aan te bieden:
+Een mogelijkheid is deze oefeningen niet aanbieden in \tested{}, maar in de programmeertaalspecifieke judges.
+Toch zijn er nog voordelen om ook deze oefeningen in \tested{} aan te bieden:
 \begin{itemize}
     \item Het bijkomende werk om meer programmeertalen te ondersteunen beperkt zich tot een minimum.
-    \item Het werk om een nieuwe programmeertaal toe te voegen aan TESTed is kleiner dan een volledig nieuwe judge te implementeren.
+    \item Het werk om een nieuwe programmeertaal toe te voegen aan \tested{} is kleiner dan een volledig nieuwe judge te implementeren.
 \end{itemize}
 Het is desalniettemin het vermelden waard dat het niet zeker is of deze evaluatiemethode (en dit scenario meer algemeen) veel zal voorkomen.
 Oefeningen die programmeertaalspecifieke aspecten moeten beoordelen zijn, net door hun programmeertaalspecifieke aard, moeilijker aan te bieden in meerdere programmeertalen.
@@ -847,11 +847,11 @@ Zoals eerder vermeld (\cref{subsec:testcode-uitvoeren}), wordt de testcode voor 
 Dat de contexten strikt onafhankelijk van elkaar uitgevoerd worden, werd reeds in het begin als een doel vooropgesteld.
 Dit geeft wel enkele uitdagingen op het vlak van performantie.
 Het belang van performante judges in Dodona is niet te verwaarlozen, in die zin dat Dodona een interactief platform is, waar studenten verwachten dat de feedback op hun ingediende oplossing onmiddellijk beschikbaar is.
-Deze paragraaf beschrijft de evolutie van de implementatie van TESTed vanuit het perspectief van de performantie.
+Deze paragraaf beschrijft de evolutie van de implementatie van \tested{} vanuit het perspectief van de performantie.
 
 \subsection{Jupyter-kernels}\label{subsec:jupyter-kernels}
 
-Het eerste prototype van TESTed gebruikte Jupyter-kernels voor het uitvoeren van de testcode.
+Het eerste prototype van \tested{} gebruikte Jupyter-kernels voor het uitvoeren van de testcode.
 Jupyter-kernels zijn de achterliggende technologie van Jupyter Notebooks \autocite{jupyter2016}.
 De werking van een Jupyter-kernel kan als volgt samengevat worden: een Jupyter-kernel is een lokaal proces, dat code kan uitvoeren en de resultaten van die uitvoer teruggeeft.
 Zo kan men naar de Python-kernel de expressie \mintinline{python}{5 + 9} sturen, waarop het antwoord \mintinline{python}{14} zal zijn.
@@ -860,7 +860,7 @@ Deze keuze voor Jupyter-kernels als uitvoering was gebaseerd op volgende argumen
 \begin{itemize}
     \item Hergebruik van bestaande kernels.
     Hierdoor is het niet nodig om voor elke programmeertaal veel tijd te besteden aan de implementatie of de configuratie: aangezien het protocol voor Jupyter-kernels programmeertaalonafhankelijk is, kunnen alle bestaande kernels gebruikt worden.
-    \item De functionaliteit aangeboden door een Jupyter-kernel is de functionaliteit die nodig is voor TESTed: het uitvoeren van fragmenten code en het resultaat van die uitvoering verzamelen.
+    \item De functionaliteit aangeboden door een Jupyter-kernel is de functionaliteit die nodig is voor \tested{}: het uitvoeren van fragmenten code en het resultaat van die uitvoering verzamelen.
     \item Eerder werk \autocite{petegem2018}, dat gebruik maakt van Jupyter-kernels voor een gelijkaardig doel, rapporteert geen problemen met het gebruik van Jupyter-kernels.
 \end{itemize}
 
@@ -899,13 +899,13 @@ Voordelen ten opzichte van de Jupyter-kernels zijn:
 \begin{itemize}
     \item Het is sneller om twee onafhankelijke programma's uit te voeren op de commandolijn dan een Jupyter-kernel tweemaal te starten.
     \item Het laat meer vrijheid toe in hoe de resultaten (gedrag en neveneffecten) van het uitvoeren van de testcode verzameld worden.
-    \item Het implementeren en configureren van een programmeertaal in TESTed met de basisfunctionaliteit is minder werk dan dan het implementeren van een nieuwe Jupyter-kernel.
+    \item Het implementeren en configureren van een programmeertaal in \tested{} met de basisfunctionaliteit is minder werk dan dan het implementeren van een nieuwe Jupyter-kernel.
     Optionele functionaliteit, zoals linting, kan ervoor zorgen dat meer tijd en werk nodig is bij het toevoegen van een programmeertaal.
     Het systeem met de sjablonen hanteert echter het designprincipe dat optionele functionaliteit geen bijkomend werk mag vragen voor programmeertalen die er geen gebruik van maken.
-    \item Er is geen verschil tussen hoe TESTed de ingediende oplossing uitvoert en hoe de student diezelfde oplossing uitvoert.
+    \item Er is geen verschil tussen hoe \tested{} de ingediende oplossing uitvoert en hoe de student diezelfde oplossing uitvoert.
     Bij de Jupyter-kernels is dat soms wel het geval: bij de R-kernel zitten subtiele verschillen tussen het uitvoeren in de kernel en het uitvoeren op de commandoregel.
     \item Herbruikbaar in die zin dat het genereren van testcode in een programmeertaal op basis van de programmeertaalonafhankelijke specificatie in het testplan sowieso nodig is.
-    \item De gegenereerde testcode bestaat uit normale codebestanden (bv.\ \texttt{.py}- of \texttt{.java}-bestanden), wat het toevoegen van een programmeertaal aan TESTed eenvoudiger te debuggen maakt: alle gegenereerde testcode is in een bestand beschikbaar voor inspectie.
+    \item De gegenereerde testcode bestaat uit normale codebestanden (bv.\ \texttt{.py}- of \texttt{.java}-bestanden), wat het toevoegen van een programmeertaal aan \tested{} eenvoudiger te debuggen maakt: alle gegenereerde testcode is in een bestand beschikbaar voor inspectie.
 \end{itemize}
 
 Elke medaille heeft ook een keerzijde:
@@ -926,7 +926,7 @@ Daar moest voor elke context eerst een compilatie plaatsvinden, waarna de gecomp
 Bij een testplan met bijvoorbeeld 50 contexten vertaalt dit zich in 50 keer de \texttt{javac}-compiler uitvoeren en ook 50 keer het uitvoeren van de code zelf met \texttt{java}.
 
 In een tweede iteratie werd een \textbf{partiële compilatie} geïmplementeerd.
-Het idee hier is dat er veel testcode is die hetzelfde blijft voor elke context (denk aan de ingediende oplossing en hulpbestanden van TESTed).
+Het idee hier is dat er veel testcode is die hetzelfde blijft voor elke context (denk aan de ingediende oplossing en hulpbestanden van \tested{}).
 In de partiële compilatie wordt de gemeenschappelijke testcode eerst gecompileerd (bij programmeertalen die dat ondersteunen).
 Bij het beoordelen van een context wordt dan enkel de testcode specifiek voor de te beoordelen context gecompileerd.
 
@@ -952,7 +952,7 @@ Een tweede opmerking is dat er verschillende beperkingen of opmerkingen zijn in 
     \item De volgorde waarin het resultaat van de beoordeling van een context naar Dodona gestuurd wordt blijft dezelfde volgorde als in het testplan.
     Dit impliceert dat het mogelijk is dat, bijvoorbeeld bij het overschrijden van de tijdslimiet, de uitvoer van uitgevoerde contexten niet getoond wordt.
     Stel dat contexten 1, 2, 4 en 5 klaar zijn wanneer de tijdslimiet overschreden wordt.
-    Omdat TESTed aan het wachten was op context 3, zullen contexten 4 en 5 ook als niet uitgevoerd beschouwd worden.
+    Omdat \tested{} aan het wachten was op context 3, zullen contexten 4 en 5 ook als niet uitgevoerd beschouwd worden.
     \item De tijdslimieten zullen minder nauwkeurig zijn.
     Door de parallelle uitvoering zal er meer variatie zitten op de totale tijd die nodig is voor het beoordelen van een oefening.
     Dit heeft geen effect op de tijdslimieten bij hun functie voor het detecteren van programmeerfouten, zoals oneindige lussen.
@@ -965,7 +965,7 @@ Een tweede opmerking is dat er verschillende beperkingen of opmerkingen zijn in 
 Een laatste performantieverbetering werd behaald op het vlak van geprogrammeerde evaluatie (zie \cref{subsec:geprogrammeerde-evaluatie-is-traag} voor verdere ideeën voor verbeteringen).
 Zoals beschreven in \cref{subsec:geprogrammeerde-evaluatie}, wordt normaliter voor elke geprogrammeerde evaluatie de evaluatiecode opnieuw gecompileerd en uitgevoerd in een nieuw subproces.
 Voor evaluatiecode die geschreven is in Python worden deze stappen overgeslagen.
-Er is speciale ondersteuning in TESTed ingebouwd om geprogrammeerde evaluaties waarvan de evaluatiecode in Python geschreven is, rechtstreeks in TESTed zelf uit te voeren.
+Er is speciale ondersteuning in \tested{} ingebouwd om geprogrammeerde evaluaties waarvan de evaluatiecode in Python geschreven is, rechtstreeks in \tested{} zelf uit te voeren.
 
 \subsection{Tijdsmetingen}\label{subsec:tijdsmetingen}
 
@@ -1020,11 +1020,11 @@ Sommige judges doen meer dan enkel het oordelen over de juistheid van de ingedie
 Zo heeft onder andere de Python-judge ondersteuning voor \term{linting}.
 Dit betekent dat de code van de ingediende oplossing geanalyseerd (maar niet uitgevoerd) wordt om zo allerlei mogelijke problemen op te sporen, zoals stijlfouten, mogelijke bugs, verdachte constructies, enz.
 
-TESTed voorziet hier ondersteuning voor middels een optionele functie in de configuratie van een programmeertaal (zie \cref{ch:nieuwe-taal} voor de details over het configureren van een taal).
+\tested{} voorziet hier ondersteuning voor middels een optionele functie in de configuratie van een programmeertaal (zie \cref{ch:nieuwe-taal} voor de details over het configureren van een taal).
 Deze functie krijgt als argumenten onder andere de configuratie, het testplan en het pad naar de code van de ingediende oplossing mee.
 Als resultaat geeft de functie een lijst van berichten en annotaties die naar Dodona gestuurd worden.
 Ter illustratie dat deze aanpak werkt, is linting geïmplementeerd voor Python.
-Ook geeft dit veel vrijheid: de implementatie in Python gebruikt een bestand voor het configureren van de linter, en het is mogelijk om de naam van een eigen configuratiebestand (uit de oefeningenrepository) mee te geven via de programmeertaalspecifieke configuratie van TESTed.
+Ook geeft dit veel vrijheid: de implementatie in Python gebruikt een bestand voor het configureren van de linter, en het is mogelijk om de naam van een eigen configuratiebestand (uit de oefeningenrepository) mee te geven via de programmeertaalspecifieke configuratie van \tested{}.
 Tot slot nog opmerken dat het formaat van de annotaties wordt voorgeschreven door Dodona, maar dit is voldoende generiek voor praktisch alle scenario's.
 Het formaat ondersteunt onder andere:
 
@@ -1038,7 +1038,7 @@ Het formaat ondersteunt onder andere:
 Een mogelijke uitbreiding is bijvoorbeeld het toevoegen van identificatienummers aan de berichten.
 Bij veel linters heeft elke boodschap een unieke code.
 Aan de hand van die code zou Dodona de uitleg over de boodschap kunnen tonen (maar dit vereist wel dat Dodona de uitleg voor specifieke linters heeft).
-Een alternatief zou zijn dat TESTed deze zelf toevoegt.
+Een alternatief zou zijn dat \tested{} deze zelf toevoegt.
 De gemakkelijkste oplossing is echter de annotatie uitbreiding met ondersteuning voor een \acronym{URL}: bij veel linters kan met de identificatiecode van het bericht een \acronym{URL} geconstrueerd worden waarop meer informatie staat.
 Deze \acronym{URL} zou dan aan de studenten kunnen getoond worden.
 
@@ -1046,30 +1046,30 @@ Deze \acronym{URL} zou dan aan de studenten kunnen getoond worden.
 
 Een belangrijk aspect bij \term{educational software testing} is de feedback als het verkeerd loopt.
 De feedback bij een verkeerde oplossing is in veel gevallen zelfs belangrijker dan de feedback bij een juiste oplossing: het is namelijk de bedoeling dat als studenten een verkeerde oplossing indienen, dat de feedback ze terug op weg kan helpen om hun oplossing te verbeteren.
-De feedback die Dodona toont is afkomstig van de judges: het is de taak van TESTed om kwalitatief hoogstaande feedback te voorzien.
+De feedback die Dodona toont is afkomstig van de judges: het is de taak van \tested{} om kwalitatief hoogstaande feedback te voorzien.
 Met kwalitatief hoogstaand wordt bedoeld dat de feedback nuttige informatie bevat, maar ook geen verkeerde of misleidende informatie bevat.
 
 \subsection{In de praktijk}\label{subsec:in-de-praktijk}
 
 In het vak \emph{Scriptingtalen} van de bachelor informatica krijgen studenten elke week een reeks oefeningen om op te lossen (op Dodona).
 Een van die oefeningen is de ISBN-oefening.
-Om een idee te krijgen van hoe TESTed werkt in de praktijk is besloten om tijdens een van de weken de ISBN-oefening aan te vullen door een oefening met dezelfde opgave, maar die beoordeeld wordt door TESTed in plaats van de Python-judge.
+Om een idee te krijgen van hoe \tested{} werkt in de praktijk is besloten om tijdens een van de weken de ISBN-oefening aan te vullen door een oefening met dezelfde opgave, maar die beoordeeld wordt door \tested{} in plaats van de Python-judge.
 
 De algemene bevindingen die uit de praktijktest naar boven kwamen waren:
 
 \begin{itemize}
-    \item TESTed heeft geen ondersteuning voor de Python Tutor.
+    \item \tested{} heeft geen ondersteuning voor de Python Tutor.
     Dit is al vermeld, en wordt verder besproken in \cref{sec:kleinere-functies}.
-    \item De evaluatie met TESTed duurt ongeveer dubbel zo lang als met de Python-judge.
+    \item De evaluatie met \tested{} duurt ongeveer dubbel zo lang als met de Python-judge.
     Aan de ene kant zou de optimalisatie van de geprogrammeerde evaluatie (zie \cref{sec:performantie}) dit moeten verbeteren (maar wel in dit specifieke geval, moest de evaluatiecode in een andere programmeertaal dan Python geschreven zijn, zou het geen verschil maken).
-    Aan de andere kant ligt een tragere uitvoer in vergelijking met de Python-judge binnen de verwachtingen: TESTed voert elke context uit in een afzonderlijk subproces.
+    Aan de andere kant ligt een tragere uitvoer in vergelijking met de Python-judge binnen de verwachtingen: \tested{} voert elke context uit in een afzonderlijk subproces.
     De Python-judge doet dit niet.
     Qua uitvoer worden wel contexten gebruikt, maar de interne werking van de Python-judge kan het best vergeleken worden met een oefeningen waar alle testen in dezelfde context opgenomen zijn.
-    \item TESTed heeft geen verwerking van stacktraces.
+    \item \tested{} heeft geen verwerking van stacktraces.
     Deze functionaliteit is opgenomen als mogelijke uitbreiding als onderdeel van \cref{sec:kleinere-functies}.
-    \item TESTed heeft geen linting.
+    \item \tested{} heeft geen linting.
     Naar aanleiding van de praktijktest is hier ondersteuning voor toegevoegd, zie \cref{sec:andere-taken}.
-    \item TESTed heeft geen ondersteuning voor vertalingen op het vlak van natuurlijke talen.
+    \item \tested{} heeft geen ondersteuning voor vertalingen op het vlak van natuurlijke talen.
     Deze functie wordt besproken als uitbreiding in \cref{subsec:ondersteuning-voor-natuurlijke-talen}.
 \end{itemize}
 
@@ -1078,37 +1078,37 @@ Deze worden hieronder besproken.
 
 \subsection{Soorten fouten}\label{subsec:soorten-fouten}
 
-TESTed moet robuust zijn tegen allerlei vormen van fouten in de ingediende oplossingen.
-Hieronder volgt een lijst van (categorieën) van fouten waarvoor TESTed nuttige feedback geeft.
-TESTed is zo opgebouwd dat er altijd iets van feedback komt, ook in onvoorziene omstandigheden, maar voor de soorten fouten op onderstaande lijst is expliciet gecontroleerd wat de kwaliteit van de feedback is.
-Waar nuttig zijn deze gevallen omgezet naar een unit test voor TESTed.
+\tested{} moet robuust zijn tegen allerlei vormen van fouten in de ingediende oplossingen.
+Hieronder volgt een lijst van (categorieën) van fouten waarvoor \tested{} nuttige feedback geeft.
+\tested{} is zo opgebouwd dat er altijd iets van feedback komt, ook in onvoorziene omstandigheden, maar voor de soorten fouten op onderstaande lijst is expliciet gecontroleerd wat de kwaliteit van de feedback is.
+Waar nuttig zijn deze gevallen omgezet naar een unit test voor \tested{}.
 
 \begin{description}
     \item[Compilatiefouten] De uitvoer van de compiler wordt altijd getoond aan de studenten, dus op dat vlak wordt juist afgehandeld.
     Er bestaat ook de mogelijkheid om de compilatie-uitvoer te verwerken en bijvoorbeeld om te zetten naar annotaties, die dan in de code worden getoond.
     Hierbij wordt vooral gedacht aan foutboodschappen als "syntaxisfout op regel 5, kolom 2".
-    De stacktraces bij deze uitvoer bevatten wel referenties naar code die TESTed gegenereerd heeft.
+    De stacktraces bij deze uitvoer bevatten wel referenties naar code die \tested{} gegenereerd heeft.
     Deze verwijzingen naar interne code wegfilteren is opgenomen als uitbreiding als onderdeel van \cref{sec:kleinere-functies}.
     Bij een batchcompilatie wordt de uitvoer in een nieuw tabblad getoond, terwijl bij contextcompilatie de uitvoer bij de relevant context staat.
     \item[Uitvoeringsfouten] Hier gaat het om crashes tijdens de uitvoering, zoals delen door nul.
     Ook hier wordt nog geen verdere verwerking van de foutboodschap gedaan (ook onderdeel van \cref{sec:kleinere-functies}).
-    \item[Tijdslimieten] TESTed heeft ondersteuning voor tijdslimieten in de judge.
+    \item[Tijdslimieten] \tested{} heeft ondersteuning voor tijdslimieten in de judge.
     Dit laat toe om meer uitvoer te tonen dan als de tijdslimiet aan Dodona wordt overgelaten.
-    Momenteel werkt de implementatie ervan als volgt: TESTed houdt bij hoe lang de beoordeling al duurt, en gebruikt de resterende tijd als een limiet op de uitvoering van een context.
-    De eerste context heeft dan als limiet de volledige toegestane tijd (minus een percentage dat voorbehouden wordt voor TESTed zelf).
+    Momenteel werkt de implementatie ervan als volgt: \tested{} houdt bij hoe lang de beoordeling al duurt, en gebruikt de resterende tijd als een limiet op de uitvoering van een context.
+    De eerste context heeft dan als limiet de volledige toegestane tijd (minus een percentage dat voorbehouden wordt voor \tested{} zelf).
     De laatste context zal de kleinste limiet krijgen (de tijd die nog overschiet).
     Scenario's waar dit voorkomt zijn bijvoorbeeld oplossingen die te traag werken, maar ook oplossingen met bijvoorbeeld oneindige lussen.
     Als uitbreiding (opgenomen in \cref{sec:kleinere-functies}) wordt beschreven dat er ook een tijdslimiet per context mogelijk zou kunnen zijn (zodat de eerste context niet de volledige beschikbare tijd krijgt, maar slechts een deel ervan).
-    De hoofdreden om zelf de tijdslimiet te implementeren in TESTed is om zo de overige, niet-uitgevoerde testen ook te kunnen tonen.
+    De hoofdreden om zelf de tijdslimiet te implementeren in \tested{} is om zo de overige, niet-uitgevoerde testen ook te kunnen tonen.
     Momenteel is dat met een boodschap die uitlegt dat ze niet zijn uitgevoerd, maar op termijn is het de bedoeling in Dodona een bijkomende status toe te voegen.
-    \item[Te grote uitvoer] Bij te grote uitvoer zal TESTed deze limiteren.
+    \item[Te grote uitvoer] Bij te grote uitvoer zal \tested{} deze limiteren.
     Hierbij gaat het om scenario's zoals een oneindige lus die blijft schrijven naar stdout.
-    TESTed beperkt tekstuele uitvoer tot tienduizend tekens.
+    \tested{} beperkt tekstuele uitvoer tot tienduizend tekens.
     Dit is niet van toepassing op andere vormen van uitvoer: het inkorten van grote verzamelingen (bijvoorbeeld een lijst van duizend elementen) is opgenomen als uitbreiding in \cref{sec:kleinere-functies}.
     \item[Te veel uitvoer] Hierbij wordt gedacht aan zaken zoals uitvoer op stdout of stderr terwijl die niet verwacht wordt.
     Standaard wordt een oefening als fout beschouwd indien er te veel uitvoer is, maar de auteur van de oefening kan kiezen om het teveel aan uitvoer te negeren (bijvoorbeeld als de studenten debugberichten schrijven naar stdout is dit niet in elke oefening een probleem).
     \item[Vroegtijdig stoppen van uitvoering] Hier gaat het om code van de studenten die bijvoorbeeld \mintinline{python}{exit(-5)} bevat.
-    Dit zal standaard fout gerekend worden door TESTed.
+    Dit zal standaard fout gerekend worden door \tested{}.
     De exitcode is echter een uitvoerkanaal zoals elk ander, waar de verwachte waarde ingesteld kan worden.
     Is het dus de bedoeling om exitcode \texttt{-5} te krijgen, zal de oefening juist gerekend worden.
 
@@ -1118,23 +1118,23 @@ Waar nuttig zijn deze gevallen omgezet naar een unit test voor TESTed.
 
 In deze paragraaf lichten we enkele keuzes toe die we gemaakt hebben bij de implementatie van wat we dit hoofdstuk besproken hebben.
 
-TESTed is geschreven in Python.
-De hoofdreden daarvoor is pragmatisch: zoals besproken in \cref{subsec:jupyter-kernels}, gebruikte de eerste versie van TESTed Jupyter-kernels om code uit te voeren.
-Het raamwerk rond de Jupyter-kernels is geschreven in Python, dus was het een voor de hand liggende keuze om Python te gebruiken voor TESTed.
-Als TESTed later weg van de Jupyter-kernels geëvolueerd is, is niet van programmeertaal veranderd.
+\tested{} is geschreven in Python.
+De hoofdreden daarvoor is pragmatisch: zoals besproken in \cref{subsec:jupyter-kernels}, gebruikte de eerste versie van \tested{} Jupyter-kernels om code uit te voeren.
+Het raamwerk rond de Jupyter-kernels is geschreven in Python, dus was het een voor de hand liggende keuze om Python te gebruiken voor \tested{}.
+Als \tested{} later weg van de Jupyter-kernels geëvolueerd is, is niet van programmeertaal veranderd.
 Dit omdat er geen goede reden was om de bestaande code te herschrijven in een andere programmeertaal.
 
 Het grootste nadeel aan Python is dat het niet de snelste programmeertaal is op het gebied van uitvoeringstijd.
-Dit is voor TESTed echter minder relevant: het gros van de beoordelingstijd wordt besteed aan het uitvoeren van de ingediende oplossing, niet aan TESTed zelf.
+Dit is voor \tested{} echter minder relevant: het gros van de beoordelingstijd wordt besteed aan het uitvoeren van de ingediende oplossing, niet aan \tested{} zelf.
 
-Binnen TESTed worden twee dependencies intensief gebruikt:
+Binnen \tested{} worden twee dependencies intensief gebruikt:
 
 \begin{enumerate}
     \item \texttt{mako} voor de sjablonen.
     \item \texttt{pydantic} voor het definiëren van het testplan en het serialisatieformaat.
 \end{enumerate}
 
-In TESTed is niet onmiddellijk gekozen voor \texttt{mako} als sjabloonsysteem.
+In \tested{} is niet onmiddellijk gekozen voor \texttt{mako} als sjabloonsysteem.
 Een eerdere versie gebruikte \texttt{jinja2}.
 Later is overgeschakeld op \texttt{mako}, omdat er bij \texttt{jinja2} problemen waren met witruimte in de gegenereerde code.
 Deze witruimte is belangrijk bij het genereren van bijvoorbeeld Python-code.

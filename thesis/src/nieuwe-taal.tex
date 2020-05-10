@@ -2,8 +2,8 @@
 %! Suppress = EscapeUnderscore
 \chapter{Configuratie van een programmeertaal in TESTed}\label{ch:nieuwe-taal}
 
-In dit hoofdstuk wordt in detail uitgelegd hoe een nieuwe programmeertaal aan TESTed kan toegevoegd worden.
-We doen dat door te beschrijven hoe de programmeertaal C aan TESTed toegevoegd is.
+In dit hoofdstuk wordt in detail uitgelegd hoe een nieuwe programmeertaal aan \tested{} kan toegevoegd worden.
+We doen dat door te beschrijven hoe de programmeertaal C aan \tested{} toegevoegd is.
 Dit hoofdstuk sluit qua vorm en stijl dan ook dichter aan bij een handleiding.
 Enkele nuttige links en verwijzingen hierbij zijn:
 
@@ -18,12 +18,12 @@ Om dit duidelijk te maken toont de regelnummering aan de linkerkant de regelnumm
 
 \section{TESTed lokaal uitvoeren}\label{sec:tested-lokaal-uitvoeren}
 
-Tijdens het configureren van een programmeertaal is het nuttig om TESTed lokaal uit te voeren, zonder daarvoor het volledige Dodona-platform te moeten uitvoeren.
-Buiten de \english{dependencies} voor de bestaande programmeertalen is TESTed een Python-package, dat op de normale manier uitgevoerd kan worden.
+Tijdens het configureren van een programmeertaal is het nuttig om \tested{} lokaal uit te voeren, zonder daarvoor het volledige Dodona-platform te moeten uitvoeren.
+Buiten de \english{dependencies} voor de bestaande programmeertalen is \tested{} een Python-package, dat op de normale manier uitgevoerd kan worden.
 
 \subsection{De broncode}\label{subsec:de-broncode}
 
-Na het klonen van de repository van TESTed beschikken we over volgende mappenstructuur:
+Na het klonen van de repository van \tested{} beschikken we over volgende mappenstructuur:
 
 \inputminted{text}{code/dirs-tested.txt}
 
@@ -33,9 +33,9 @@ In dit hoofdstuk interesseren we ons enkel in die mappen, dus we voorzien geen g
 
 \subsection{Dependencies}\label{subsec:dependencies}
 
-De dependencies van TESTed zelf zijn opgelijst is een \texttt{requirements.txt}-bestand, zoals gebruikelijk is bij Python-projecten.
+De dependencies van \tested{} zelf zijn opgelijst is een \texttt{requirements.txt}-bestand, zoals gebruikelijk is bij Python-projecten.
 Vereisten voor het uitvoeren van tests staan in \texttt{requirements-test.txt}.
-TESTed gebruikt Python \version{3.8} of later.
+\tested{} gebruikt Python \version{3.8} of later.
 Het installeren van deze vereisten gebeurt op de gebruikelijke manier:
 
 \begin{minted}{console}
@@ -47,8 +47,8 @@ Voor de programmeertalen die momenteel reeds geconfigureerd zijn, zijn volgende 
 \begin{description}
     \item[Python] Indien de linter gebruikt wordt, is \texttt{pylint} een dependency.
     Daarnaast moet \texttt{python} beschikbaar zijn in het \texttt{PATH}.
-    Door optimalisaties is het momenteel aan te raden om dezelfde Python-versie te gebruiken voor TESTed als voor de Python-oefeningen.
-    \item[Java] TESTed vereist Java \version{11}, maar heeft verder geen dependencies.
+    Door optimalisaties is het momenteel aan te raden om dezelfde Python-versie te gebruiken voor \tested{} als voor de Python-oefeningen.
+    \item[Java] \tested{} vereist Java \version{11}, maar heeft verder geen dependencies.
     De commando's \texttt{javac} en \texttt{java} moeten beschikbaar zijn in het \texttt{PATH}.
     \item[Haskell] Voor Haskell is \acronym{GHC} \version{8.6} of later nodig.
     Daarnaast is \texttt{aeson} nodig.
@@ -60,23 +60,23 @@ Om bijvoorbeeld enkel Python-oplossingen te beoordelen zijn geen andere dependen
 
 Voor de programmeertaal C gaan we gebruikmaken van \acronym{GCC}, waarbij versie 8.1 of later nodig is.
 
-TESTed werkt op elk besturingssysteem dat ondersteund wordt door Python.
+\tested{} werkt op elk besturingssysteem dat ondersteund wordt door Python.
 Sommige dependencies, zoals \acronym{GCC}, vragen wel meer moeite om te installeren op Windows.\footnote{Gebruikers op Windows kunnen Min\acronym{GW} of \acronym{MSYS}2 proberen.}
 
 \subsection{Uitvoeren}\label{subsec:uitvoeren}
 
 We gaan er voor de rest van het hoofdstuk van uit dat commando's uitgevoerd worden in de map \texttt{judge/src}.
 
-Er zijn twee manieren om TESTed uit te voeren.
+Er zijn twee manieren om \tested{} uit te voeren.
 Ten eerste is er de "gewone" manier;
-dit is ook hoe Dodona TESTed uitvoert.
-Bij het uitvoeren op deze manier zal TESTed een configuratie lezen van \texttt{stdin} en zal het resultaat van de beoordeling in Dodona-formaat uitgeschreven worden naar \texttt{stdout}.
+dit is ook hoe Dodona \tested{} uitvoert.
+Bij het uitvoeren op deze manier zal \tested{} een configuratie lezen van \texttt{stdin} en zal het resultaat van de beoordeling in Dodona-formaat uitgeschreven worden naar \texttt{stdout}.
 
 \begin{minted}{console}
 > python -m tested
 \end{minted}
 
-Bij het configureren van een programmeertaal of het werken aan TESTed is het echter nuttiger om meer uitvoer te zien en is het vervelend om telkens een configuratie te lezen vanop \texttt{stdin}.
+Bij het configureren van een programmeertaal of het werken aan \tested{} is het echter nuttiger om meer uitvoer te zien en is het vervelend om telkens een configuratie te lezen vanop \texttt{stdin}.
 Daarom is er een tweede manier:
 
 \begin{minted}{console}
@@ -88,15 +88,15 @@ Deze uitvoer verschilt op een aantal vlakken van de gewone uitvoering:
 \begin{enumerate}
     \item Er wordt geen configuratie gelezen van \texttt{stdin}.
     De configuratie is gedefinieerd in de code zelf en gebruikt een van de oefeningen die in de map \texttt{exercise} zitten.
-    \item Er worden, naast de resultaten van de beoordeling, logs uitgeschreven naar \texttt{stdout} die aangeven wat TESTed doet.
-    Als er bijvoorbeeld een fout optreedt tijdens het compileren zullen deze logs nuttig zijn: zo wordt uitgeschreven welk commando TESTed exact uitvoert voor de compilatie en ook in welke map dat gebeurt.
+    \item Er worden, naast de resultaten van de beoordeling, logs uitgeschreven naar \texttt{stdout} die aangeven wat \tested{} doet.
+    Als er bijvoorbeeld een fout optreedt tijdens het compileren zullen deze logs nuttig zijn: zo wordt uitgeschreven welk commando \tested{} exact uitvoert voor de compilatie en ook in welke map dat gebeurt.
     \item De configuratie is zo opgesteld dat de werkmap van de judge de map \texttt{workdir} zal zijn.
     Dit laat toe om de gegenereerde code te inspecteren.
 \end{enumerate}
 
 \section{Globaal stappenplan voor het configureren van een programmeertaal}\label{sec:globaal-stappenplan-voor-het-configureren}
 
-Het configureren van een programmeertaal in TESTed bestaat uit drie grote onderdelen:
+Het configureren van een programmeertaal in \tested{} bestaat uit drie grote onderdelen:
 
 \begin{enumerate}
     \item Het configuratiebestand, met enkele opties voor de programmeertaal.
@@ -104,7 +104,7 @@ Het configureren van een programmeertaal in TESTed bestaat uit drie grote onderd
     \item De sjablonen, die gebruikt worden om code te genereren.
 \end{enumerate}
 
-TESTed voorziet een hulpmiddel om de bestanden op de juiste plaats te genereren.
+\tested{} voorziet een hulpmiddel om de bestanden op de juiste plaats te genereren.
 Op basis van enkele vragen worden \english{stubs} gegenereerd voor het configuratiebestand, de configuratieklasse en de sjablonen.
 Dit hulpmiddel kan als volgt uitgevoerd worden:
 
@@ -113,7 +113,7 @@ Dit hulpmiddel kan als volgt uitgevoerd worden:
 \end{minted}
 
 Merk op dat dit enkel bestanden genereert.
-De stappen in \cref{subsec:afsluiting} voor het registreren van de nieuwe programmeertaal in TESTed zijn nog steeds nodig.
+De stappen in \cref{subsec:afsluiting} voor het registreren van de nieuwe programmeertaal in \tested{} zijn nog steeds nodig.
 
 We overlopen nu elk onderdeel in functie van de programmeertaal C\@.
 We gaan er telkens vanuit dat bovenstaande hulpmiddel niet gebruikt is en dat de bestanden dus nog gemaakt moeten worden.
@@ -121,7 +121,7 @@ Is bovenstaande hulpmiddel wel gebruikt, dan kunnen de instructies voor het make
 
 \section{De programmeertaal C}\label{sec:de-programmeertaal-c}
 
-Voor we beginnen aan de configuratie, overlopen we kort welke functionaliteit we langs beide kanten willen ondersteunen: welke functionaliteit uit C kunnen we aanbieden in TESTed en welke functionaliteit uit TESTed kunnen we implementeren in C?
+Voor we beginnen aan de configuratie, overlopen we kort welke functionaliteit we langs beide kanten willen ondersteunen: welke functionaliteit uit C kunnen we aanbieden in \tested{} en welke functionaliteit uit \tested{} kunnen we implementeren in C?
 Uiteraard willen we zoveel mogelijk ondersteunen, maar vooral op het vlak van gegevenstypes zijn er momenteel beperkingen.
 
 \paragraph{Welke basistypes gaan we niet ondersteunen?}
@@ -129,7 +129,7 @@ Uiteraard willen we zoveel mogelijk ondersteunen, maar vooral op het vlak van ge
 \begin{description}
     \item[\texttt{sequence}] Arrays zijn een speciaal geval in C: statische arrays kunnen bijvoorbeeld niet als returnwaarde dienen, en ook als functieargument zijn ze niet ideaal.
     Dynamische arrays nemen de vorm aan van een pointer en een grootte. 
-    TESTed heeft momenteel geen ondersteuning voor datatypes die als twee waarden geïmplementeerd moeten worden, dus worden arrays momenteel niet ondersteund.
+    \tested{} heeft momenteel geen ondersteuning voor datatypes die als twee waarden geïmplementeerd moeten worden, dus worden arrays momenteel niet ondersteund.
     \item[\texttt{set}] C heeft geen ingebouwde verzamelingen.
     \item[\texttt{map}] C heeft geen ingebouwde map of dict.
     Er zijn wel structs, maar daarvan is het niet mogelijk om de velden at runtime op te vragen, waardoor we ze niet kunnen serialiseren.
@@ -148,7 +148,7 @@ Uiteraard willen we zoveel mogelijk ondersteunen, maar vooral op het vlak van ge
 \subsection{Locatie van de code}\label{subsec:locatie-van-de-code}
 
 De eerste stap in het configureren van een programmeertaal is het aanmaken van een map waarin we de code voor de programmeertaal zullen zetten.
-Deze map moet de naam van de programmeertaal krijgen en op de juiste plaats binnen TESTed aanwezig zijn.
+Deze map moet de naam van de programmeertaal krijgen en op de juiste plaats binnen \tested{} aanwezig zijn.
 Maak een nieuwe map \texttt{judge/src/tested/languages/c}.
 Na het aanmaken van de map moet de mappenstructuur er zo uitzien:
 
@@ -236,7 +236,7 @@ Dan moeten we nu de ondersteuning voor de gegevenstypes vastleggen:
 
 \inputminted[firstline=28,lastline=54,gobble=2]{js}{sources/c-config.json}
 
-Zoals uitgelegd in \cref{subsec:dataserialisatie} zijn er twee soorten gegevenstypes in TESTed: de basistypes en de geavanceerde types.
+Zoals uitgelegd in \cref{subsec:dataserialisatie} zijn er twee soorten gegevenstypes in \tested{}: de basistypes en de geavanceerde types.
 De basistypes zijn abstracte types voor concepten (zoals een sequentie of een geheel getal), terwijl de geavanceerde types concreter zijn (zoals een geheel getal van 8 bits).
 Een gegevenstype kan drie niveaus van ondersteuning hebben:
 
@@ -251,13 +251,13 @@ Een opmerking hierbij is dat de status \texttt{reduced} voor de basistypes equiv
 Het is de bedoeling dat de meeste programmeertalen voor het merendeel van de datatypes ten minste \texttt{reduced} hebben.
 Toch is gekozen om \texttt{unsupported} als standaardwaarde te nemen;
 dit zorgt ervoor dat de ondersteunde datatypes explicit uitgeschreven zijn.
-Dit laat ook toe om datatypes toe te voegen aan TESTed zonder bestaande configuraties van programmeertalen te moeten aanpassen.
+Dit laat ook toe om datatypes toe te voegen aan \tested{} zonder bestaande configuraties van programmeertalen te moeten aanpassen.
 Ter illustratie vermelden we hier voor C alle datatypes, ook de niet-ondersteunde.
 
 \subsection{Configuratieklasse}\label{subsec:configuratieklasse}
 
-De configuratieklasse is de schakel tussen de generieke aspecten van TESTed en het programmeertaalafhankelijke gedrag.
-Omdat TESTed in Python geschreven is, moet deze klasse ook in Python geïmplementeerd worden.
+De configuratieklasse is de schakel tussen de generieke aspecten van \tested{} en het programmeertaalafhankelijke gedrag.
+Omdat \tested{} in Python geschreven is, moet deze klasse ook in Python geïmplementeerd worden.
 
 Maak een nieuw Python-bestand \texttt{judge/src/tested/languages/c/config.py} aan.
 Hierin moet een klasse komen die \texttt{Language} uitbreidt:
@@ -275,11 +275,11 @@ Een eerste en belangrijke methode is de callback voor de compilatiestap:
 
 Het eerste argument van deze methode is een klasse met enkele configuratie-opties, zoals de tijdslimiet, geheugenlimiet en de programmeertaalspecifieke opties.
 Dit zou bijvoorbeeld gebruikt kunnen worden om de versie van C mee te geven (zoals C11 of C99).
-Dit wordt momenteel niet gedaan in C, want TESTed vereist C11, maar de mogelijkheid bestaat.
-Wel moeten we opmerken dat de tijdslimiet zelden nuttig zal zijn, daar TESTed de uitvoeringstijd bijhoudt.
+Dit wordt momenteel niet gedaan in C, want \tested{} vereist C11, maar de mogelijkheid bestaat.
+Wel moeten we opmerken dat de tijdslimiet zelden nuttig zal zijn, daar \tested{} de uitvoeringstijd bijhoudt.
 In de configuratieklasse is het dus niet nodig om daar rekening mee te houden.
 
-Het andere argument van deze methode is een lijst van bestanden mee waarvan TESTed vermoedt dat ze nuttig kunnen zijn voor de compilatiestap.
+Het andere argument van deze methode is een lijst van bestanden mee waarvan \tested{} vermoedt dat ze nuttig kunnen zijn voor de compilatiestap.
 Het bevat onder andere de dependencies uit het configuratiebestand, de ingediende oplossing en de uit de sjablonen gegenereerde bestanden.
 Die laatste bestanden zijn bijvoorbeeld de verschillende contexten bij een batchcompilatie, maar kunnen ook de evaluator zijn bij een geprogrammeerde evaluatie.
 De bestanden bestaan uit de naam en een bestandsextensie.
@@ -301,7 +301,7 @@ Als returnwaarde moet deze methode een tuple met twee element teruggeven: het co
 Het compilatiecommando neemt de vorm aan van een lijst van de elementen waaruit het commando bestaat.
 Bij het uitvoeren van dit commando zal deze lijst aan de Python-module \texttt{subprocess} gegeven worden.
 
-Na het uitvoeren van het compilatiecommando moet TESTed weten welke bestanden relevant zijn om mee te nemen naar een volgende stap in de beoordeling.
+Na het uitvoeren van het compilatiecommando moet \tested{} weten welke bestanden relevant zijn om mee te nemen naar een volgende stap in de beoordeling.
 Daarom moet een lijst van resulterende bestanden teruggegeven worden.
 Enkel bestanden in deze lijst zullen bijvoorbeeld beschikbaar zijn bij het uitvoeren van de contexten.
 Een lijst van bestanden teruggeven is mogelijk indien op voorhand geweten is in welke bestanden de compilatie resulteert.
@@ -312,7 +312,7 @@ Het is echter niet altijd mogelijk om op voorhand te weten in welke bestanden de
 Zo resulteert compilatie van één \texttt{.java}-bestand mogelijk in meerdere \texttt{.class}-bestanden, afhankelijk van de inhoud van de bestanden.
 Om dit op te lossen kan in plaats van een lijst ook een filterfunctie teruggegeven worden.
 
-Nadat de compilatie uitgevoerd is, zal TESTed deze filter toepassen elk bestand in de map waarin de compilatie uitgevoerd is.
+Nadat de compilatie uitgevoerd is, zal \tested{} deze filter toepassen elk bestand in de map waarin de compilatie uitgevoerd is.
 De filterfunctie krijgt als argument de naam van een bestand en moet \texttt{true} of \texttt{False} teruggeven als het bestand respectievelijk wel of niet moet meegenomen worden naar een volgende stap.
 
 Een voorbeeld van de in- en uitvoer van de compilatiemethode:
@@ -362,7 +362,7 @@ Voor de meeste programmeertalen kan nu overgegaan worden naar de sjablonen, maar
 
 \subsubsection{Aanpassen van de ingediende oplossing}
 
-De testcode, die door TESTed gegenereerd wordt, kan meerdere \texttt{main}-functies bevatten:
+De testcode, die door \tested{} gegenereerd wordt, kan meerdere \texttt{main}-functies bevatten:
 
 \begin{itemize}
     \item De ingediende oplossing kan een \texttt{main}-functie hebben.
@@ -405,7 +405,7 @@ Al deze sjablonen komen in de map \texttt{judge/src/tested/languages/c/templates
 
 Het is vrij om de bestandsextensie van de sjablonen te kiezen, zolang het een extensie is uit de configuratie.
 Standaard zijn de toegelaten extensies \texttt{.mako} en een programmeertaalafhankelijke extensie, hier \texttt{.c}.
-Een conventie die gebruikt wordt binnen TESTed, is de volgende:
+Een conventie die gebruikt wordt binnen \tested{}, is de volgende:
 
 \begin{itemize}
     \item Sjablonen eindigen op de programmeertaalafhankelijke extensie (\texttt{.c}) indien het sjabloon resulteert in een op zichzelf staand bestand.
@@ -414,7 +414,7 @@ Een conventie die gebruikt wordt binnen TESTed, is de volgende:
     Dit zijn bijvoorbeeld de sjablonen om functies en statements om te zetten.
 \end{itemize}
 
-Dit wordt niet afgedwongen door TESTed;
+Dit wordt niet afgedwongen door \tested{};
 alle sjablonen hadden de extensie \texttt{.c} of \texttt{.mako} kunnen krijgen, of een mengeling.
 
 \subsubsection{Het contextsjabloon}
@@ -433,7 +433,7 @@ De variabele \texttt{evaluator\_names} bevat een verzameling van deze namen.
 \vspace{-1.7cm} % Ugly hack
 \inputminted[firstline=9,lastline=11]{mako}{sources/c-context.mako}
 
-Nuttig om te weten is dat TESTed een extensie heeft toegevoegd aan mako, waardoor de indentatie van mako-gerelateerde taalconstructies zal verdwijnen.
+Nuttig om te weten is dat \tested{} een extensie heeft toegevoegd aan mako, waardoor de indentatie van mako-gerelateerde taalconstructies zal verdwijnen.
 De \texttt{for}-loop in het fragment hierboven resulteert bijvoorbeeld in deze code:
 
 \begin{minted}{c}
@@ -443,8 +443,8 @@ De \texttt{for}-loop in het fragment hierboven resulteert bijvoorbeeld in deze c
 
 Vervolgens maken we twee variabelen aan waarin de bestanden komen die dienst doen als return- en exception-channel.
 We noemen deze bestanden de uitvoerbestanden.
-Merk op dat C geen exceptions ondersteunt, maar TESTed verwacht toch een bestand voor het exception-channel.
-Anders zal TESTed ervan uitgaan dat er iets verkeerd liep tijdens het uitvoeren.
+Merk op dat C geen exceptions ondersteunt, maar \tested{} verwacht toch een bestand voor het exception-channel.
+Anders zal \tested{} ervan uitgaan dat er iets verkeerd liep tijdens het uitvoeren.
 We definiëren direct ook een functie om de separator naar alle uitvoerkanalen te schrijven.
 
 In onderstaand codefragment en in de rest van het contextsjabloon wordt regelmatig de naam van de context als prefix gebruikt voor functies en variabelen.
@@ -454,7 +454,7 @@ Als we dus meerdere contexten samen compileren en elke context heeft zijn eigen 
 \inputminted[firstline=13,lastline=21]{mako}{sources/c-context.mako}
 
 Als een resultaat geproduceerd wordt voor de return- of exception-channel, dan moet dat resultaat geserialiseerd worden en naar de uitvoerbestanden geschreven worden.
-TESTed verwacht dat volgende functies beschikbaar zijn:
+\tested{} verwacht dat volgende functies beschikbaar zijn:
 
 \begin{itemize}
     \item[\texttt{send\_value(value)}] schrijf een waarde naar een bestand.
@@ -463,7 +463,7 @@ TESTed verwacht dat volgende functies beschikbaar zijn:
     \item[\texttt{send\_specific\_exception(exception)}] schrijf het resultaat van een programmeertaalspecifieke evaluatie naar de exception-channel.
 \end{itemize}
 
-Bij het implementeren moet de conventies van de programmeertaal toegepast worden: zo zal TESTed in Java een oproep naar een functie met naam \texttt{sendValue} genereren.
+Bij het implementeren moet de conventies van de programmeertaal toegepast worden: zo zal \tested{} in Java een oproep naar een functie met naam \texttt{sendValue} genereren.
 
 We zullen later zien dat we zelf de oproepen naar deze functies in het sjabloon schrijven.
 Toegepast op C zijn er wat wijzigingen, omdat C geen exceptions ondersteunt.
@@ -477,11 +477,11 @@ Ook gebruiken we in C een marco in plaats van een functie: dit opnieuw omdat we 
 
 We zien ook dat de implementatie eenvoudig is: we geven de gekregen waarde of exception door aan de juiste functie uit de \texttt{values}-module en geven ook het bestand mee waarin de waarde of exception moet komen.
 
-De lezer zal zich misschien afvragen waarom het nodig is om deze functies te gebruiken: als TESTed een functieoproep naar deze functies kan definiëren, waarom kan TESTed dan niet direct de \texttt{values}-module gebruiken, zonder daar deze functies tussen te plaatsen?
+De lezer zal zich misschien afvragen waarom het nodig is om deze functies te gebruiken: als \tested{} een functieoproep naar deze functies kan definiëren, waarom kan \tested{} dan niet direct de \texttt{values}-module gebruiken, zonder daar deze functies tussen te plaatsen?
 
 Het antwoord is dat de \texttt{values}-module niet verplicht is.
 Dit is een conventie die in alle ondersteunde programmeertalen gebruikt wordt, maar het is evengoed mogelijk om bij de implementatie van bijvoorbeeld \texttt{send\_value} de waarde rechtstreeks naar het bestand te schrijven.
-Deze functies moeten beschouwd worden als de "interface" tussen TESTed en de programmeertaal: TESTed verwacht dat deze functies bestaan en de waarde of exception naar het juiste bestand schrijven, maar hoe dat gebeurt maakt voor TESTed niet uit.
+Deze functies moeten beschouwd worden als de "interface" tussen \tested{} en de programmeertaal: \tested{} verwacht dat deze functies bestaan en de waarde of exception naar het juiste bestand schrijven, maar hoe dat gebeurt maakt voor \tested{} niet uit.
 
 Nu zijn we aangekomen bij het uitvoeren van de testgevallen zelf.
 In C gebeurt dit in een functie die de naam van de context krijgt.
@@ -499,7 +499,7 @@ Het is nodig om de waarden van elkaar te kunnen onderscheiden, om goed te weten 
 Hiervoor gebruiken we de \emph{separator}.
 
 Het is belangrijk om de separator altijd vóór aanvang van een testgeval naar de uitvoerbestanden te schrijven.
-TESTed is daar zo op voorzien: de separator na het testgeval uitschrijven zal tot verkeerde resultaten leiden.
+\tested{} is daar zo op voorzien: de separator na het testgeval uitschrijven zal tot verkeerde resultaten leiden.
 
 Ook roepen we de \texttt{main}-functie van de oplossing op indien het testplan dat vereist.
 Oefeningen waar geen \texttt{main}-functie opgeroepen wordt zijn bijvoorbeeld deze waarbij de student een functie moet geïmplementeerd worden.
@@ -531,7 +531,7 @@ De \texttt{after}-code is analoog aan de \texttt{before}-code.
 
 \inputminted[firstline=58,lastline=63]{mako}{sources/c-context.mako}
 
-Omdat TESTed zowel contextcompilatie als batchcompilatie ondersteunt, moet elke context een \texttt{main}-functie hebben.
+Omdat \tested{} zowel contextcompilatie als batchcompilatie ondersteunt, moet elke context een \texttt{main}-functie hebben.
 C laat slechts 1 \texttt{main}-functie toe.
 Indien we in batchcompilatie zitten, zal de selector gebruikt worden, en zal \texttt{INCLUDED} op \texttt{TRUE} staan.
 In dat geval voegen we geen \texttt{main}-functie toe.
@@ -540,14 +540,14 @@ In dat geval voegen we geen \texttt{main}-functie toe.
 
 \subsubsection{Het selectorsjabloon}
 
-Het is nuttig om er meteen het selectorsjabloon bij te halen: dit wordt gebruikt als TESTed in batchcompilatie werkt en is verantwoordelijk om de juiste context uit te voeren op basis van een argument.
+Het is nuttig om er meteen het selectorsjabloon bij te halen: dit wordt gebruikt als \tested{} in batchcompilatie werkt en is verantwoordelijk om de juiste context uit te voeren op basis van een argument.
 Het is in dit sjabloon dat de macro \texttt{INCLUDED} op \texttt{true} gezet wordt, waardoor de \texttt{main}-functies in andere contexten niet gebruikt worden.
 
 \inputminted{mako}{sources/c-selector.mako}
 
 \subsubsection{Het statementsjabloon}
 
-Dit sjabloon wordt door TESTed gebruikt om statements te vertalen naar code.
+Dit sjabloon wordt door \tested{} gebruikt om statements te vertalen naar code.
 Dit omvat onder andere assignments, functieoproepen en waarden:
 
 \inputminted{mako}{sources/c-statement.mako}
@@ -617,7 +617,7 @@ In Python is de implementatie eenvoudig door de ingebouwde module \texttt{json},
 
 \subsection{Afsluiting}\label{subsec:afsluiting}
 
-Als laatste rest nu nog om de nieuwe programmeertaal te registreren bij TESTed.
+Als laatste rest nu nog om de nieuwe programmeertaal te registreren bij \tested{}.
 Hiervoor volstaat het om de programmeertaal en de bijhorende configuratieklasse toe te voegen aan het bestand \texttt{judge/src/tested/languages/\_\_ini\_\_.py}, in de dictionary \texttt{LANGUAGES}:
 
 \inputminted[firstline=17,lastline=23]{python}{sources/languages-init.py}
@@ -634,7 +634,7 @@ Om de programmeertaal manueel te testen is volgend stappenplan aanbevolen:
     \end{minted}
 \end{enumerate}
 
-TESTed heeft ook een testsuite met verschillende oefeningen en scenario's.
+\tested{} heeft ook een testsuite met verschillende oefeningen en scenario's.
 Om de nieuwe programmeertaal hieraan toe te voegen, moeten de juiste oplossingen geïmplementeerd worden.
 Hiervoor wordt best gekeken naar \texttt{judge/tests/test\_functionality.py}.
 In dat bestand staan de verschillende testen.
@@ -643,7 +643,7 @@ indien het niet duidelijk zou zijn wat de oplossing voor een bepaalde test moet 
 
 \subsection{Resultaat}\label{subsec:resultaat}
 
-We hebben nu een werkende C-judge voor TESTed en bij uitbreiding voor het Dodona-platform.
+We hebben nu een werkende C-judge voor \tested{} en bij uitbreiding voor het Dodona-platform.
 Daarmee hebben we ondersteuning voor een eerste programmeertaal waarvoor er nog geen judge bestond in Dodona.
 
 
@@ -653,9 +653,9 @@ TODO
 
 \section{Stabiliteit van TESTed}\label{sec:stabiliteit-van-tested}
 
-Met stabiliteit wordt hier bedoeld hoe weinig er bij het toevoegen van een nieuwe programmeertaal nog veranderd moet worden aan TESTed zelf, configuraties van bestaande programmeertaal en de testplannen van bestaande oefeningen.
+Met stabiliteit wordt hier bedoeld hoe weinig er bij het toevoegen van een nieuwe programmeertaal nog veranderd moet worden aan \tested{} zelf, configuraties van bestaande programmeertaal en de testplannen van bestaande oefeningen.
 
-We kunnen de interne werking van TESTed in grote lijnen verdelen in drie onderdelen:
+We kunnen de interne werking van \tested{} in grote lijnen verdelen in drie onderdelen:
 
 \begin{itemize}
     \item De interface naar de oefeningen toe.
@@ -669,7 +669,7 @@ De grenzen tussen deze onderdelen zijn niet strikt: zo zal de configuratieklasse
 
 We willen opmerken dat de focus in deze thesis vooral lag op de interface naar de oefeningen toe (dus het formaat van het testplan en het serialisatieformaat).
 We verwachten dan ook niet dat het toevoegen van een programmeertaal grote onverwachte wijzigingen vereist in het formaat van testplan of het serialisatieformaat.
-We spreken van onverwachte wijzigingen, omdat sommige delen van TESTed juist voorzien zijn op wijzigingen.
+We spreken van onverwachte wijzigingen, omdat sommige delen van \tested{} juist voorzien zijn op wijzigingen.
 Een voorbeeld zijn de gegevenstypes uit het serialisatieformaat.
 Daar is het juist de bedoeling dan nieuwe programmeertalen bijkomende geavanceerde gegevenstypes toevoegen indien nodig.
 Als een nieuwe programmeertaal bijvoorbeeld ondersteuning wil bieden voor oneindige generators (bijvoorbeeld een functie die getallen blijft teruggeven, dan is dat mogelijk.
@@ -677,7 +677,7 @@ Er zullen ook geen wijzigingen nodig zijn aan de bestaande programmeertalen bij 
 Aan de testplannen zelf (dus niet het formaat, maar de \acronym{JSON}-bestanden van de oefeningen) verwachten we niet dat er wijzigingen nodig zijn.
 
 Het omgekeerde is ook waar: we verwachten dat er wijzigingen nodig kunnen zijn aan de configuratieklasse en/of de sjablonen bij nieuwe programmeertalen.
-Een stabiele interface tussen de programmeertalen enerzijds en de kern van TESTed anderzijds was geen expliciet doel in deze thesis.
+Een stabiele interface tussen de programmeertalen enerzijds en de kern van \tested{} anderzijds was geen expliciet doel in deze thesis.
 Hierbij wel twee nuances:
 
 \begin{itemize}
@@ -687,11 +687,11 @@ Hierbij wel twee nuances:
     De methodes om de code te compileren en uit te voeren krijgen momenteel als argumenten de nodige informatie.
     Het is goed mogelijk dat een nieuwe programmeertaal meer informatie nodig zal hebben.
     Een ander aspect waar wijzigingen mogelijk zijn is welke informatie beschikbaar wordt gesteld aan de sjablonen.
-    Ook hier is het mogelijk dat een programmeertaal meer informatie nodig heeft dan de informatie die TESTed momenteel aanreikt.
+    Ook hier is het mogelijk dat een programmeertaal meer informatie nodig heeft dan de informatie die \tested{} momenteel aanreikt.
 \end{itemize}
 
-De ontwikkeling van TESTed vond grotendeels plaats met drie programmeertalen: Python, Java en Haskell.
-C is pas in een later stadium toegevoegd, waar de meeste functionaliteit van TESTed reeds bestond.
+De ontwikkeling van \tested{} vond grotendeels plaats met drie programmeertalen: Python, Java en Haskell.
+C is pas in een later stadium toegevoegd, waar de meeste functionaliteit van \tested{} reeds bestond.
 Bij het configureren van C zijn wijzigingen nodig geweest aan de configuratieklasse.
 Een voorbeeld is dat bij de methode voor het uitvoeren van de code nu ook het volledige pad naar de map waarin het uitvoeren gebeurt een argument is.
 C compileert naar een uitvoerbaar bestand, wat tot dan nog niet gebeurde (Haskell gebruikte nog \texttt{runhaskell}).

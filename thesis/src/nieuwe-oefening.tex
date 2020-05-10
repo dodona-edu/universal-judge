@@ -1,14 +1,14 @@
 \chapter{Oefeningen schrijven voor TESTed}\label{ch:nieuwe-oefening}
 
-\lettrine{I}{n dit hoofdstuk} behandelen we het schrijven van oefeningen voor TESTed.
-Dit hoofdstuk bevat vooral een beschrijving van welke soort oefeningen ondersteund worden door TESTed en hoe een opgave vertaald moet worden naar een testplan.
+\lettrine{I}{n dit hoofdstuk} behandelen we het schrijven van oefeningen voor \tested{}.
+Dit hoofdstuk bevat vooral een beschrijving van welke soort oefeningen ondersteund worden door \tested{} en hoe een opgave vertaald moet worden naar een testplan.
 
 \section{Oefeningen in het Dodona-platform}\label{sec:oefeningen-in-het-dodona-platform}
 
-TESTed zelf legt geen structuur of formaat vast voor de oefeningen, buiten het formaat van het testplan.
-De locatie van de relevante bestanden worden meegegeven met de configuratie bij het uitvoeren van TESTed.
+\tested{} zelf legt geen structuur of formaat vast voor de oefeningen, buiten het formaat van het testplan.
+De locatie van de relevante bestanden worden meegegeven met de configuratie bij het uitvoeren van \tested{}.
 
-De configuratie in de manuele uitvoeringsmodus van TESTed gaat er wel vanuit dat de mappenstructuur van de oefening de structuur van Dodona volgt.
+De configuratie in de manuele uitvoeringsmodus van \tested{} gaat er wel vanuit dat de mappenstructuur van de oefening de structuur van Dodona volgt.
 Voor de volledigheid volgt hieronder een mappenstructuur met de belangrijkste elementen van de oefening:
 
 \inputminted{text}{code/dirs-exercise.txt}
@@ -44,13 +44,13 @@ Hierbij is het geheel van \texttt{assert}s dus ons tabblad, terwijl we elke \tex
 Iets dat we in de vorige paragraaf genegeerd hebben is hoe we het vergelijken met een verwachte waarde exact gaan doen.
 Lottonummers zijn namelijk willekeurig: de pseudocode van hierboven zou dus slechts heel zelden tot een juiste beoordeling leiden.
 We zullen dit oplossen door een geprogrammeerde evaluatie te gebruiken.
-Dit is een functie die door TESTed zal opgeroepen worden en wier verantwoordelijkheid het vergelijken van de door de ingediende oplossing geproduceerde waarde met een verwachte waarde is.
+Dit is een functie die door \tested{} zal opgeroepen worden en wier verantwoordelijkheid het vergelijken van de door de ingediende oplossing geproduceerde waarde met een verwachte waarde is.
 Conceptueel kunnen we dat ook vertalen naar dezelfde pseudocode:
 
 \inputminted{python}{code/lotto-eval-programmed.py}
 
 We zullen de geprogrammeerde evaluatie in Python doen: dit is de aanbevolen programmeertaal voor geprogrammeerde evaluaties, met als eenvoudige reden dat ze het snelst is.
-Hieronder is een fragment van de evaluatiecode: dit is de functie die door TESTed zal opgeroepen worden.
+Hieronder is een fragment van de evaluatiecode: dit is de functie die door \tested{} zal opgeroepen worden.
 
 \inputminted[firstline=42,lastline=49]{python}{sources/lotto-evaluator.py}
 
@@ -91,7 +91,7 @@ In elke context gebruiken we een andere waarde als \texttt{stdin}.
 In tegenstelling tot de Lotto-oefening hebben we nu wel een \texttt{main}-functie.
 De context zal dus bestaan uit het testgeval voor de \texttt{main}-functie en geen normale testgevallen hebben.
 
-Qua evaluatie is deze oefening eenvoudig: we kunnen de ingebouwde evaluatie van TESTed gebruiken.
+Qua evaluatie is deze oefening eenvoudig: we kunnen de ingebouwde evaluatie van \tested{} gebruiken.
 De geproduceerde waarde moet vergeleken worden met de verwachte waarde.
 
 Een testplan is al opgenomen in \cref{sec:echo-testplan}.
@@ -154,7 +154,7 @@ Bijvoorbeeld:
 \end{minted}
 
 De structuur van deze oefening is eenvoudig: een reeks contexten die elk het programma oproepen met verschillende programma-argumenten.
-Ook de evaluatie is eenvoudig: we gebruiken de ingebouwde evaluatie van TESTed.
+Ook de evaluatie is eenvoudig: we gebruiken de ingebouwde evaluatie van \tested{}.
 
 In het testplan zijn twee contexten opgenomen: een waarbij getallen gegeven zijn en een waarbij andere argumenten gegeven worden.
 In een echt testplan zullen er uiteraard meer contexten zijn.
