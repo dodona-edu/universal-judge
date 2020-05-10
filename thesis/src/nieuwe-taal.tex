@@ -273,7 +273,13 @@ Een eerste en belangrijke methode is de callback voor de compilatiestap:
 
 \inputminted[firstline=11,lastline=16,gobble=4]{python}{sources/c-config.py}
 
-Als argument krijgt deze methode een lijst van bestanden mee waarvan TESTed vermoedt dat ze nuttig kunnen zijn voor de compilatiestap.
+Het eerste argument van deze methode is een klasse met enkele configuratie-opties, zoals de tijdslimiet, geheugenlimiet en de programmeertaalspecifieke opties.
+Dit zou bijvoorbeeld gebruikt kunnen worden om de versie van C mee te geven (zoals C11 of C99).
+Dit wordt momenteel niet gedaan in C, want TESTed vereist C11, maar de mogelijkheid bestaat.
+Wel moeten we opmerken dat de tijdslimiet zelden nuttig zal zijn, daar TESTed de uitvoeringstijd bijhoudt.
+In de configuratieklasse is het dus niet nodig om daar rekening mee te houden.
+
+Het andere argument van deze methode is een lijst van bestanden mee waarvan TESTed vermoedt dat ze nuttig kunnen zijn voor de compilatiestap.
 Het bevat onder andere de dependencies uit het configuratiebestand, de ingediende oplossing en de uit de sjablonen gegenereerde bestanden.
 Die laatste bestanden zijn bijvoorbeeld de verschillende contexten bij een batchcompilatie, maar kunnen ook de evaluator zijn bij een geprogrammeerde evaluatie.
 De bestanden bestaan uit de naam en een bestandsextensie.
@@ -327,11 +333,13 @@ Voor programmeertalen waar geen compilatie nodig is, moet deze methode niet geï
 
 Na het compileren moeten we een methode implementeren om de gecompileerde code uit te voeren:
 
-\inputminted[firstline=18,lastline=20,gobble=4]{python}{sources/c-config.py}
+\inputminted[firstline=19,lastline=22,gobble=4]{python}{sources/c-config.py}
 
-Deze functie heeft drie parameters:
+Deze functie heeft vier parameters:
 
 \begin{description}
+    \item[\texttt{config}] Dezelfde configuratie-opties als bij de compilatiemethode. 
+    Bij Java wordt dit bijvoorbeeld gebruikt om de geheugenlimiet van de \acronym{VM} juist in te stellen.
     \item[\texttt{cwd}] de map waarin het uitvoeren plaatsvindt
     \item[\texttt{file}] het uitvoerbaar bestand dat moet uitgevoerd worden
     \item[\texttt{arguments}] argumenten die aan het proces moeten meegegeven worden
@@ -375,7 +383,7 @@ Om deze redenen moeten we de code van de ingediende oplossing een beetje aanpass
 
 Vertaald naar de configuratieklasse wordt dit:
 
-\inputminted[firstline=24,lastline=41,gobble=4]{python}{sources/c-config.py}
+\inputminted[firstline=25,lastline=42,gobble=4]{python}{sources/c-config.py}
 
 \subsection{Sjablonen}\label{subsec:manual-sjablonen}
 
