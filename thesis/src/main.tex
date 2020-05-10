@@ -77,7 +77,7 @@
 % Gebruik tabelcijfers in tabellen
 \AtBeginEnvironment{tabular}{\addfontfeature{Numbers={Lining,Monospaced}}}
 
-\newcommand*{\version}[1]{{\addfontfeature{Numbers={Lining,Monospaced}}#1}}
+
 
 \title{TESTed: one judge to rule them all}
 \subtitle{Een universele judge voor het beoordelen van software in een educative context}
@@ -115,9 +115,9 @@ Master of Science in de informatica%
 \newcommand*{\termen}[1]{\foreignlanguage{british}{\textit{#1}}\index{#1}}
 \newcommand*{\english}[1]{\foreignlanguage{british}{\textit{#1}}}
 \newcommand*{\latin}[1]{\foreignlanguage{latin}{\textit{#1}}}
-
 \newcommand*{\acronym}[1]{{\addfontfeature{Letters=UppercaseSmallCaps}#1}}
-\newcommand*{\tested}{TESTed}
+\newcommand*{\version}[1]{{\addfontfeature{Numbers={Lining,Monospaced}}#1}}
+\newcommand*{\tested}{\acronym{TESTed}}
 
 % Enable for index generation
 %\makeindex
