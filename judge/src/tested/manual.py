@@ -18,11 +18,11 @@ def read_config() -> DodonaConfig:
     """Read the configuration from stdout"""
     return DodonaConfig(**{
         "memory_limit":         536870912,
-        "time_limit":           5,
+        "time_limit":           1,
         "programming_language": 'python',
         "natural_language":     'nl',
-        "resources":            Path('../../exercise/isbn/evaluation'),
-        "source":               Path('../../exercise/isbn/solution/solution.py'),
+        "resources":            Path('../../exercise/echo/evaluation'),
+        "source":               Path('../../exercise/echo/solution/correct.py'),
         "judge":                Path('.'),
         "workdir":              Path('../workdir'),
         "plan_name":            "full.tson",
@@ -45,6 +45,10 @@ if __name__ == '__main__':
     formatter = logging.Formatter('%(name)s:%(levelname)s:%(message)s')
     ch.setFormatter(formatter)
     log.addHandler(ch)
+
+    # Some modules are very verbose, hide those by default.
+    logger = logging.getLogger("tested.judge.collector")
+    logger.setLevel(logging.INFO)
 
     # Create workdir if needed.
     config.workdir.mkdir(exist_ok=True)

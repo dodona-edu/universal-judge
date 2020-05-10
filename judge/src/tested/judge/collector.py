@@ -126,12 +126,15 @@ class OutputManager:
         """
         assert not self.collected, "OutputManager already finished!"
         action, type_ = command.command.split("-")
+        _logger.debug(f"Adding {command}")
+        _logger.debug(f"Stack is {self.tree_stack}")
         if action == "start":
             self.tree_stack.append(type_)
         elif action == "close":
             previous = self.tree_stack.pop()
             assert previous == type_, "Close same type"
 
+        _logger.debug(f"After adding, stack is {self.tree_stack}")
         report_update(self.bundle.out, command)
         return action
 
