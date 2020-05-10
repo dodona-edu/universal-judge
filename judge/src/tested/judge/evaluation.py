@@ -422,6 +422,7 @@ def prepare_evaluation(bundle: Bundle, collector: OutputManager):
             if not context.testcases:
                 _add_channel(bundle, exit_output, Channel.EXIT, updates)
 
+            updates.append(AppendMessage("Testgeval niet uitgevoerd."))
             updates.append(CloseTestcase(accepted=False))
 
             # Begin normal testcases.
@@ -442,6 +443,7 @@ def prepare_evaluation(bundle: Bundle, collector: OutputManager):
                 if t == len(context.testcases):
                     _add_channel(bundle, exit_output, Channel.EXIT, updates)
 
+                updates.append(AppendMessage("Testgeval niet uitgevoerd."))
                 updates.append(CloseTestcase(accepted=False))
 
             collector.prepare_context(updates, i, j)
