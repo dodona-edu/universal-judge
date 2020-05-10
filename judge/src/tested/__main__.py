@@ -16,12 +16,12 @@ parser.add_argument('-o', '--output', type=FileType('w'),
 parser = parser.parse_args()
 
 # Disable logging
-log = logging.getLogger()
-log.setLevel(logging.DEBUG)
-ch = logging.StreamHandler(stream=sys.stdout)
-formatter = logging.Formatter('%(name)s:%(levelname)s:%(message)s')
-ch.setFormatter(formatter)
-log.addHandler(ch)
+# log = logging.getLogger()
+# log.setLevel(logging.DEBUG)
+# ch = logging.StreamHandler(stream=sys.stdout)
+# formatter = logging.Formatter('%(name)s:%(levelname)s:%(message)s')
+# ch.setFormatter(formatter)
+# log.addHandler(ch)
 
 configuration = read_config(parser.testplan)
 with smart_close(parser.output) as out:
