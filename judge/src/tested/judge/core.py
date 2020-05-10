@@ -207,10 +207,10 @@ def _single_execution(bundle: Bundle,
                                      exec_results=execution_result,
                                      compiler_results=(m, s), context_dir=p,
                                      collector=execution.collector)
+        execution.collector.add_context(CloseContext(), execution.context_index)
         if continue_ in (Status.TIME_LIMIT_EXCEEDED, Status.MEMORY_LIMIT_EXCEEDED):
             return continue_
-        else:
-            execution.collector.add_context(CloseContext(), execution.context_index)
+
 
 def _parallel_execution(bundle: Bundle,
                         items: List[ContextExecution],
