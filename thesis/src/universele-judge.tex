@@ -798,12 +798,12 @@ Deze returnwaarde moet vier gegevens bevatten:
 
 \begin{description}
     \item[\texttt{result}] Een \texttt{boolean} die aangeeft of de geproduceerde waarde juist is of niet.
-    \item[\texttt{readableExpected}] (Optioneel) Een \texttt{string} met een tekstuele voorstelling van de verwachte waarde.
+    \item[\texttt{readableExpected}] Een optionele \texttt{string} met de tekstuele voorstelling van de verwachte waarde.
     Deze tekstuele voorstelling wordt gebruikt om te tonen aan de gebruiker.
     Indien niets gegeven wordt, zal \tested{} zelf een voorstelling maken op basis van de verwachte waarde uit het testplan.
-    \item[\texttt{readableActual}] (Optioneel) Een \texttt{string} met een tekstuele voorstelling van de geproduceerde waarde.
+    \item[\texttt{readableActual}] Een optionele \texttt{string} met de tekstuele voorstelling van de geproduceerde waarde.
     Indien niets gegeven wordt, zal \tested{} zelf een voorstelling maken op basis van de geproduceerde waarde.
-    \item[\texttt{messages}] (Optioneel) Een lijst van berichten om te tonen aan de studenten.
+    \item[\texttt{messages}] Een optionele lijst van berichten om te tonen aan de studenten.
 \end{description}
 
 Een concreet voorbeeld van de evaluatiecode voor een geprogrammeerde evaluatie geschreven in Python wordt gegeven in \cref{lst:evaluation-lotto}.
