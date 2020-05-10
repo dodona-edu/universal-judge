@@ -32,9 +32,11 @@ copies:
 	python scripts/copier.py ../exercise/division/evaluation/Evaluator.java division-evaluator.java
 	python scripts/copier.py ../exercise/division/evaluation/plan.json division-plan.tson
 	python scripts/copier.py ../exercise/sum/evaluation/short.tson sum-plan.tson
+	python scripts/copier.py ../exercise/isbn/evaluation/one-with-assignment.tson isbn-plan.tson
 
 markdown:
 	python scripts/mathjax.py ../exercise/lotto/description/description.nl.md ./src/sources/lotto-description.md
+	python scripts/mathjax.py ../exercise/isbn/description/description.nl.md ./src/sources/isbn-description.md
 
 generate:
 	python scripts/generate_echo_c.py

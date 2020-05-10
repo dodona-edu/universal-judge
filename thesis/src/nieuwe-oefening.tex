@@ -1,7 +1,10 @@
+%! Suppress = EscapeHashOutsideCommand
+%! Suppress = TooLargeSection
 \chapter{Oefeningen schrijven voor TESTed}\label{ch:nieuwe-oefening}
 
 \lettrine{I}{n dit hoofdstuk} behandelen we het schrijven van oefeningen voor \tested{}.
 Dit hoofdstuk bevat vooral een beschrijving van welke soort oefeningen ondersteund worden door \tested{} en hoe een opgave vertaald moet worden naar een testplan.
+We doen dit door verschillende oefeningen te overlopen.
 
 \section{Oefeningen in het Dodona-platform}\label{sec:oefeningen-in-het-dodona-platform}
 
@@ -83,8 +86,23 @@ Het is mogelijk om in de geprogrammeerde evaluatie geavanceerde zaken te doen, z
 
 \section{Echo}\label{sec:oefening-echo}
 
-Een volgende oefening die we bekijken is de oefening uit \cref{ch:echo-oefening}.
+Een volgende oefening die we bekijken is een eenvoudige \term{invoer-uitvoer}-oefening.
 Deze oefening bestaat uit een invoer lezen van \texttt{stdin} en deze invoer schrijven naar \texttt{stdout}.
+De testcode die gegenereerd wordt door \tested{} voor deze oefening en voorbeeldoplossingen in verschillende programmeertalen zijn opgenomen als \cref{ch:echo-oefening}.
+
+\subsection{Opgave}\label{subsec:oefening-echo-opgave}
+
+De volledige opgave voor deze oefening volgt hieronder:
+
+\begin{quote}
+    \markdownInput[renderers = {
+    headingOne = {\chapter*{#1}},
+    headingTwo = {\section*{#1}},
+    headingThree = {\subsection*{#1}},
+    }]{sources/echo/description.md}
+\end{quote}
+
+\subsection{Structuur van de beoordeling en evaluatie}\label{subsec:oefening-echo-structuur}
 
 Voor de structuur van de beoordeling geldt grotendeels hetzelfde als bij \cref{subsec:oefening-lotto-structuur}: we hebben een tabblad, met daarin een aantal contexten.
 In elke context gebruiken we een andere waarde als \texttt{stdin}.
@@ -94,24 +112,56 @@ De context zal dus bestaan uit het testgeval voor de \texttt{main}-functie en ge
 Qua evaluatie is deze oefening eenvoudig: we kunnen de ingebouwde evaluatie van \tested{} gebruiken.
 De geproduceerde waarde moet vergeleken worden met de verwachte waarde.
 
-Een testplan is al opgenomen in \cref{sec:echo-testplan}.
-Dit is een testplan voor twee contexten, maar bij het gebruiken van de oefening zullen uiteraard meer contexten nodig zijn.
-Ook hier wordt dit testplan gegenereerd door een script en niet met de hand geschreven.
+\subsection{Testplan}\label{subsec:oefening-echo-testplan}
+
+Als voorbeeldtestplan nemen we een testplan met twee contexten.
+Bij het gebruik van deze oefening zal het testplan vijftig contexten bevatten.
+Het wordt ook niet met de hand geschreven: een Python-script genereert het.
+
+\inputminted{json}{sources/echo/two.tson}
 
 \section{Echofunctie}\label{sec:oefening-echofunctie}
 
-Deze oefening is praktisch volledig analoog aan de echo-oefening uit \cref{sec:oefening-echo}, behalve dat hier een \texttt{echo}-functie moet geïmplementeerd worden.
-Ook deze oefening is opgenomen als bijlage, in \cref{ch:echo-function-oefening}.
+Een variant van de vorige oefening is de oefening \emph{Echofunctie}, waarbij een \texttt{echo}-functie geïmplementeerd dient te worden.
+Ook bij deze oefening zijn de gegenereerde testcode en voorbeeldoplossingen opgenomen als \cref{ch:echo-function-oefening}.
 
-Het testplan is ook te zien in \cref{sec:echo-function-testplan}.
-Ter illustratie bevat dit testplan een context met twee testgevallen.
+\subsection{Opgave}\label{subsec:oefening-echofunctie-opgave}
+
+De volledige opgave luidt als volgt:
+
+\begin{quote}
+    \markdownInput[renderers = {
+    headingOne = {\chapter*{#1}},
+    headingTwo = {\section*{#1}},
+    headingThree = {\subsection*{#1}},
+    }]{sources/echo-function/description.md}
+\end{quote}
+
+Het is nuttig om stil te staan bij waarom de opgave vermeld dat de invoer altijd een \texttt{string} zal zijn.
+Dit is om de oefening in zoveel mogelijk programmeertalen te kunnen aanbieden.
+In bepaalde programmeertalen, zoals Haskell en C, is het moeilijk om een functie te schrijven die een argument van een willekeurig type aanvaardt.
+Om die reden verhindert \tested{} dat oefening waar dit vereist is opgelost kunnen worden in die programmeertalen (zie \cref{subsec:vereiste-functies}).
+
+\subsection{Structuur van de beoordeling en evaluatie}\label{subsec:oefening-echofunctie-structuur}
+
+De structuur is volledig analoog aan de \emph{Echo}-oefening.
+We zullen een reeks contexten hebben, waarbij we in elke context de te implementeren functie oproepen met andere invoer en het resultaat controleren.
+Ook de evaluatie is analoog: we gebruiken de ingebouwde evaluatie van \tested{}.
+
+\subsection{Testplan}\label{subsec:oefening-echofunctie-testplan}
+
+Ter illustratie tonen we hier een testplan met één context, die twee testgevallen bevat.
+Dit komt met opzet niet overeen met wat we hierboven bij de structuur van de beoordeling besproken hebben.
 In het eigenlijke testplan dat gebruikt zou worden voor deze oefening zal elk testgeval ook afzonderlijk in een context geplaatst worden.
+
+\inputminted{json}{sources/echo-function/one-testcase.tson}
 
 \section{ZeroDivisionError}\label{sec:oefening-zero}
 
 Een interessante oefening is de oefening \emph{ZeroDivisionError} uit \emph{De Programmeursleerling}\footnote{Beschikbaar hier: \url{https://dodona.ugent.be/nl/courses/293/series/2535/activities/270198713/}}.
 
 In deze oefening moet een programma geschreven worden dat bij het uitvoeren een \texttt{ZeroDivisionError} gooit.
+We nemen de opgave hier niet op, omdat de opgave lang is en weinig bijdraagt aan het doel dat we hier hebben, het uitleggen van hoe oefeningen voor \tested{} geschreven moeten worden.
 
 \subsection{Structuur van de beoordeling}\label{subsec:oefening-zero-structuur}
 
@@ -133,15 +183,16 @@ De evaluatiecode is redelijk rechtdoorzee: indien het een exception van het juis
 
 \subsection{Testplan}\label{subsec:oefening-zero-testplan}
 
-Ook het testplan is een vrij eenvoudige vertaling van de structuur die we hiervoor hebben bedacht:
+Ook het testplan is een vrij eenvoudige vertaling van de structuur die we hiervoor hebben bedacht.
+Uniek hier is dat dit testplan ook het testplan is zoals het gebruikt wordt bij in Dodona.
 
 \inputminted{json}{sources/division-plan.tson}
 
 \section{Som}\label{sec:oefeningen-som}
 
-Deze oefening is opnieuw een oefening uit \emph{De Programmeursleerling}\footnote{\url{https://dodona.ugent.be/nl/courses/293/series/2556/exercises/1653208777/}}.
-Deze oefening is interessant om te illustreren hoe programma-argumenten werken en hoe de exitcode werkt.
-Ditmaal bestaat de opgave eruit om een reeks getallen in te lezen uit de programma-argumenten en de som ervan uit te schrijven.
+Deze oefening is andermaal afkomstig uit \emph{De Programmeursleerling}\footnote{\url{https://dodona.ugent.be/nl/courses/293/series/2556/exercises/1653208777/}}.
+Deze oefening is interessant om te illustreren hoe commandoparameters werken en hoe de exitcode werkt.
+Ditmaal bestaat de opgave eruit om een reeks getallen in te lezen uit de commandoparameters en de som ervan uit te schrijven.
 Bijvoorbeeld:
 
 \begin{minted}{console}
@@ -153,12 +204,64 @@ Bijvoorbeeld:
 -5
 \end{minted}
 
-De structuur van deze oefening is eenvoudig: een reeks contexten die elk het programma oproepen met verschillende programma-argumenten.
-Ook de evaluatie is eenvoudig: we gebruiken de ingebouwde evaluatie van \tested{}.
+Ook hier nemen we de opgave niet op door zijn lengte en geringe nut.
+
+\subsection{Structuur van de beoordeling en evaluatie}\label{subsec:oefening-som-structuur}
+
+Qua structuur en evaluatie lijkt deze oefening sterk op de \emph{Echo}-oefening, met dat verschil dat we hier commandoparameters hebben.
+Om de ingediende oplossing te beoordelen, zullen we de oplossing meerdere malen uitvoeren met telkens andere commandoparameters.
+We plaatsen elk stel parameters in een eigen context.
+Bij deze opgave is er geen keuze: per context is er maximaal één stel commandoparameters, want de \texttt{main}-functie wordt hoogstens eenmaal opgeroepen per context.
+Het verwachte resultaat is opnieuw deterministisch te berekenen op basis van de commandoparameters, dus kunnen we de ingebouwde evaluatie van \tested{} gebruiken.
+
+\subsection{Testplan}\label{subsec:oefening-som-testplan}
 
 In het testplan zijn twee contexten opgenomen: een waarbij getallen gegeven zijn en een waarbij andere argumenten gegeven worden.
-In een echt testplan zullen er uiteraard meer contexten zijn.
+Dit opnieuw om het testplan kort te houden;
+bij gebruik in Dodona zal het testplan meer contexten bevatten.
 
 \inputminted{json}{sources/sum-plan.tson}
 
-TODO: ISBN oefening
+\section{ISBN}\label{sec:oefening-isbn}
+
+Als laatste oefening behandelen we de \emph{\acronym{ISBN}}-oefening.
+Deze oefening is al vermeld in \cref{subsec:in-de-praktijk}, waar we besproken hebben dat we deze oefening al hebben laten oplossen door studenten.
+Vanuit het oogpunt van het schrijven van oefeningen voor \tested{} is deze oefening ook interessant, doordat het een "ingewikkeldere" oefening is, waarbij ook statements gebruikt worden.
+
+\subsection{Opgave}\label{subsec:oefeningen-isbn-opgave}
+
+Hieronder volt (een fragment van) de opgave:
+
+\begin{quote}
+    \markdownInput[renderers = {
+        headingOne = {\chapter*{#1}},
+        headingTwo = {\section*{#1}},
+        headingThree = {\subsection*{#1}},
+    }, slice=opgave voorbeeld]{sources/isbn-description.md}
+\end{quote}
+
+
+\subsection{Structuur van de beoordeling en evaluatie}\label{subsec:oefening-isbn-structuur}
+
+Uit de opgave volgt dat er twee functies geïmplementeerd zullen moeten worden.
+Het is gebruikelijk bij Dodona om elk van deze functies in een apart tabblad te beoordelen.
+
+De contexten in het eerste tabblad, voor de functie \texttt{is\_isbn}, zijn niet speciaal.
+We roepen de functie \texttt{is\_isbn} per context één keer op met andere argumenten.
+
+In het tweede tabblad, voor de functie \texttt{are\_isbn}, ligt de situatie iets anders.
+Het eerste argument van deze functie is een lijst van potentiële \acronym{ISBN}'s.
+Om de overzichtelijkheid te verbeteren willen we, zoals in het voorbeeld in de opgave, deze lijst eerst toekennen aan een variabele (een assignment) en dan de variabele gebruiken als argument voor de functie.
+
+In \tested{} heeft een testgeval altijd uit één statement als invoer.
+In de situatie hierboven hebben we twee statements: eerst de assignment en vervolgens de functieoproep.
+We zullen dus per context twee testgevallen hebben.
+
+Op het vlak van evaluatie is deze oefening eenvoudig: door deterministische resultaten kunnen we de ingebouwde evaluate van \tested{} gebruiken.
+
+\subsection{Testplan}\label{subsec:oefening-isbn-testplan}
+
+Als testplan tonen we hier een testplan met één context, een context uit het tweede tabblad (dus met de assignment).
+Om het testplan niet te lang te maken hebben we geen context opgenomen uit het eerste tabblad, vermits deze contexten niets nieuws doen.
+
+\inputminted{json}{sources/isbn-plan.tson}

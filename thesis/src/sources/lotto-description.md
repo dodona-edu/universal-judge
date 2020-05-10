@@ -9,8 +9,8 @@ Schrijf een functie `loterij` waarmee een lottotrekking kan gesimuleerd worden. 
 ```python
 > loterij()
 '2 - 17 - 22 - 27 - 35 - 40'
-> loterij(aantal=8)
+> loterij(8)
 '5 - 13 - 15 - 31 - 34 - 36 - 39 - 40'
-> loterij(aantal=4, maximum=38)
+> loterij(4, 38)
 '16 - 20 - 35 - 37'
 ```
