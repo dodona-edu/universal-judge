@@ -21,13 +21,14 @@ using your language).
 import json
 import os
 from collections import defaultdict
+from dataclasses import dataclass
 from enum import Enum, auto
 from pathlib import Path
-from typing import List, Tuple, Mapping, Union, Callable, Set, Dict, Optional
+from typing import List, Tuple, Mapping, Union, Callable, Set, Dict, Optional, Any
 
 import sys
 
-from ..configs import Bundle
+from ..configs import Bundle, Options, DodonaConfig
 from ..datatypes import AllTypes
 from ..dodona import AnnotateCode, Message
 from ..features import Construct
@@ -44,6 +45,33 @@ _case_mapping = {
     "pascal_case": pascalize,
     "snake_case":  snake_case
 }
+
+
+@dataclass
+class Config:
+    # noinspection PyUnresolvedReferences
+    """
+    Global options for the language configuration.
+
+    Available fields:
+    :param time_limit: The time limit as given by Dodona. In most cases, you do not
+                       need this; TESTed tracks the execution time.
+    :param memory_limit: The memory limit as given by Dodona.
+    :param options: Language specific options. Using this field you could for
+                    example allow for additional parameters when compiling or
+                    executing.
+    """
+    time_limit: str  # Time limit from Dodona.
+    memory_limit: str  # Memory limit from Dodona.
+    options: Dict[str, Any]  # Language-specific options.
+
+    @classmethod
+    def from_bundle(cls, bundle: Bundle):
+        return Config(
+            time_limit=bundle.config.time_limit,
+            memory_limit=bundle.config.memory_limit,
+            options=bundle.config.config_for()
+        )
 
 
 def _conventionalize(options: dict, what: str, name: str):
@@ -105,7 +133,7 @@ class Language:
         with open(path_to_config, "r") as f:
             self.options = json.load(f)
 
-    def compilation(self, files: List[str]) -> CallbackResult:
+    def compilation(self, config: Config, files: List[str]) -> CallbackResult:
         """
         Callback for generating the compilation command.
 
@@ -166,6 +194,7 @@ class Language:
         Parameters
         ----------
 
+        :param config: Various configuration options.
         :param files: A suggestion containing the dependencies TESTed thinks might
                       be useful to compile. By convention, the last file in the list
                       is the file containing the "main" function.
@@ -175,7 +204,8 @@ class Language:
         """
         return [], files
 
-    def execution(self, cwd: Path, file: str, arguments: List[str]) -> Command:
+    def execution(self, config: Config,
+                  cwd: Path, file: str, arguments: List[str]) -> Command:
         """
         Callback for generating the execution command.
 
@@ -187,9 +217,11 @@ class Language:
         on the PATH, you should use an absolute path to those instead of a relative
         one.
 
+        :param config: Various configuration options. 
         :param cwd: The directory in which the ``file`` is.
         :param file: The file to execute.
         :param arguments: Arguments that must be passed to the execution.
+
         :return: The execution command.
         """
         raise NotImplementedError

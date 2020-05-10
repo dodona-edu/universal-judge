@@ -3,12 +3,13 @@ from typing import List
 
 from tested.configs import Bundle
 from tested.languages import Language
-from tested.languages.config import Command
+from tested.languages.config import Command, Config
 
 
 class RunHaskell(Language):
 
-    def execution(self, cwd: Path, file: str, arguments: List[str]) -> Command:
+    def execution(self, config: Config,
+                  cwd: Path, file: str, arguments: List[str]) -> Command:
         return ["runhaskell", file, *arguments]
 
     def solution(self, solution: Path, bundle: Bundle):

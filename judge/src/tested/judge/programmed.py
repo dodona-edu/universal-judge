@@ -19,6 +19,7 @@ from .utils import (BaseExecutionResult, copy_from_paths_to_path, run_command,
 from ..configs import Bundle, create_bundle
 from ..dodona import Status
 from ..features import Construct
+from ..languages.config import Config
 from ..languages.generator import (generate_custom_evaluator, convert_statement,
                                    custom_evaluator_arguments)
 from ..languages.templates import path_to_templates
@@ -111,7 +112,8 @@ def _evaluate_others(bundle: Bundle,
     _logger.debug("Generated evaluator executor %s", evaluator_name)
 
     # Do compilation for those configs that require it.
-    command, files = eval_bundle.lang_config.compilation(dependencies)
+    config = Config.from_bundle(bundle)
+    command, files = eval_bundle.lang_config.compilation(config, dependencies)
     _logger.debug("Compiling custom evaluator with command %s", command)
     result = run_command(custom_path, None, command)
     if result and result.stderr:
@@ -263,7 +265,7 @@ def _evaluate_python(bundle: Bundle,
             readable_actual=result_.readable_actual,
             messages=messages + result_.messages
         )
-    except (TypeError, ValueError) as e:
+    except (TypeError, ValueError):
         # This happens when the messages are not in the correct format. In normal
         # execution, this is caught when parsing the resulting json, but this does
         # not happen when using Python, so we do it here.

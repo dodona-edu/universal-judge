@@ -73,7 +73,7 @@ class DodonaConfig(BaseModel):
     plan_name: str = "plan.json"  # Name of the testplan file.
     options: Options = Options()
 
-    def config_for(self) -> dict:
+    def config_for(self) -> Dict[str, Any]:
         return self.options.language.get(self.programming_language, dict())
 
     def linter(self) -> bool:

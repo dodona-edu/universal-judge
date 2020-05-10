@@ -8,7 +8,7 @@ from typing import List, Tuple, Optional, Union
 from .utils import BaseExecutionResult, run_command
 from ..configs import Bundle
 from ..dodona import Status, ExtendedMessage, Message, AnnotateCode
-from ..languages.config import FileFilter, Language
+from ..languages.config import FileFilter, Language, Config
 
 _logger = logging.getLogger(__name__)
 
@@ -54,7 +54,8 @@ def run_compilation(
              decide to fallback to individual mode if the compilation result is
              not positive.
     """
-    command, files = bundle.lang_config.compilation(dependencies)
+    config = Config.from_bundle(bundle)
+    command, files = bundle.lang_config.compilation(config, dependencies)
     _logger.debug("Generating files with command %s in directory %s",
                   command, directory)
     result = run_command(directory, remaining, command)

@@ -11,7 +11,7 @@ from .compilation import run_compilation, process_compile_results
 from .utils import BaseExecutionResult, run_command, find_main_file
 from ..configs import Bundle
 from ..dodona import Message, Status
-from ..languages.config import FileFilter
+from ..languages.config import FileFilter, Config
 from ..languages.generator import value_file, exception_file
 from ..testplan import Context, ExecutionMode
 
@@ -96,6 +96,7 @@ def execute_file(
     _logger.info("Starting execution on file %s", executable_name)
 
     command = bundle.lang_config.execution(
+        config=Config.from_bundle(bundle),
         cwd=working_directory,
         file=executable_name,
         arguments=[argument] if argument else []
