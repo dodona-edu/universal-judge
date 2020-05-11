@@ -12,10 +12,10 @@ class Python(Language):
 
     def compilation(self, files: List[str]) -> CallbackResult:
         result = [x.replace(".py", ".pyc") for x in files]
-        return ["python", "-m", "compileall", "-q", "-b", "."], result
+        return ["python3", "-m", "compileall", "-q", "-b", "."], result
 
     def execution(self, cwd: Path, file: str, arguments: List[str]) -> Command:
-        return ["python", "-u", file, *arguments]
+        return ["python3", "-u", file, *arguments]
 
     def compiler_output(self, stdout: str, stderr: str) \
             -> Tuple[List[Message], List[AnnotateCode], str, str]:
