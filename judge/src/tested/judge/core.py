@@ -148,6 +148,8 @@ def judge(bundle: Bundle):
 
     _logger.info("Starting judgement...")
     parallel = bundle.config.options.parallel
+    # How much of the output limit we still have.
+    output_limit = bundle.config.output_limit * 0.8
 
     # Create a list of contexts we want to execute.
     for tab_index, tab in enumerate(bundle.plan.tabs):
@@ -175,7 +177,7 @@ def judge(bundle: Bundle):
         else:
             result = _single_execution(bundle, executions, remaining)
 
-        if result in (Status.TIME_LIMIT_EXCEEDED, Status.MEMORY_LIMIT_EXCEEDED):
+        if result in (Status.TIME_LIMIT_EXCEEDED, Status.MEMORY_LIMIT_EXCEEDED, Status.OUTPUT_LIMIT_EXCEEDED):
             assert not collector.collected
             collector.terminate(result)
             return
@@ -208,6 +210,8 @@ def _single_execution(bundle: Bundle,
                                      compiler_results=(m, s), context_dir=p,
                                      collector=execution.collector)
         execution.collector.add_context(CloseContext(), execution.context_index)
+        if execution.collector.is_full():
+            return Status.OUTPUT_LIMIT_EXCEEDED
         if continue_ in (Status.TIME_LIMIT_EXCEEDED, Status.MEMORY_LIMIT_EXCEEDED):
             return continue_
 
@@ -239,6 +243,8 @@ def _parallel_execution(bundle: Bundle,
                                          compiler_results=(m, s), context_dir=p,
                                          collector=execution.collector)
             execution.collector.add_context(CloseContext(), execution.context_index)
+            if execution.collector.is_full():
+                return Status.OUTPUT_LIMIT_EXCEEDED
             return continue_
 
         return evaluation_function
@@ -250,7 +256,8 @@ def _parallel_execution(bundle: Bundle,
             for eval_function in list(results):
                 remaining = max_time - (time.perf_counter() - start)
                 if (status := eval_function(remaining)) in (
-                        Status.TIME_LIMIT_EXCEEDED, Status.MEMORY_LIMIT_EXCEEDED):
+                        Status.TIME_LIMIT_EXCEEDED, Status.MEMORY_LIMIT_EXCEEDED,
+                        Status.OUTPUT_LIMIT_EXCEEDED):
                     # Ensure finally is called NOW and cancels remaining tasks.
                     del results
                     return status

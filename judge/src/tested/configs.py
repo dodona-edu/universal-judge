@@ -63,8 +63,8 @@ class Options:
 class DodonaConfig(BaseModel):
     resources: Path
     source: Path
-    time_limit: str
-    memory_limit: str
+    time_limit: int
+    memory_limit: int
     natural_language: str
     programming_language: str
     # noinspection SpellCheckingInspection
@@ -72,6 +72,7 @@ class DodonaConfig(BaseModel):
     judge: Path
     plan_name: str = "plan.json"  # Name of the testplan file.
     options: Options = Options()
+    output_limit: int = 10*1024*1024  # Default value for backwards compatibility.
 
     def config_for(self) -> Dict[str, Any]:
         return self.options.language.get(self.programming_language, dict())
