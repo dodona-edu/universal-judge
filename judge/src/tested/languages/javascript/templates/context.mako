@@ -59,9 +59,9 @@ function sendSpecificException(exception) {
 ${before}
 
 ## Prepare the command line arguments if needed.
-% if context_testcase.exists and context_testcase.arguments:
+% if context_testcase.exists:
     new_args = [process.argv[0]]
-    new_args.extend([\
+    new_args = new_args.concat([\
     % for argument in context_testcase.arguments:
         "${argument}", \
     % endfor
