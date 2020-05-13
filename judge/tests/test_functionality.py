@@ -16,7 +16,7 @@ from tested.languages import LANGUAGES
 from tests.manual_utils import assert_valid_output, configuration, execute_config
 
 COMPILE_LANGUAGES = ["python", "java", "haskell", "c"]
-ALL_LANGUAGES = COMPILE_LANGUAGES + ["runhaskell"]
+ALL_LANGUAGES = COMPILE_LANGUAGES + ["runhaskell", "javascript"]
 
 
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
@@ -245,7 +245,7 @@ def test_batch_compilation_no_fallback(language: str, tmp_path: Path, pytestconf
     assert all(s == "wrong" for s in updates.find_status_enum())
 
 
-@pytest.mark.parametrize("lang", ["python", "java", "c"])
+@pytest.mark.parametrize("lang", ["python", "java", "c", "javascript"])
 def test_program_params(lang: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "sum", lang, tmp_path, "short.tson", "correct")
     result = execute_config(conf)
