@@ -156,23 +156,24 @@ def evaluate_results(bundle: Bundle, context: Context,
     could_delete = all(deletions)
 
     # Add a message indicating there were missing values.
+    missing_values = []
     if not could_delete:
         _logger.warning("Missing output in context testcase.")
-        context_collector.add(AppendMessage(
+        missing_values.append(AppendMessage(
             "De beoordeling is vroegtijdig gestopt."
         ))
-        context_collector.add(EscalateStatus(status=StatusMessage(
+        missing_values.append(EscalateStatus(status=StatusMessage(
             enum=Status.WRONG,
             human="Ontbrekende uitvoer."
         )))
         # Recover stdout and stderr if present.
         if recovered := "\n".join(stdout_):
-            context_collector.add(AppendMessage(ExtendedMessage(
+            missing_values.append(AppendMessage(ExtendedMessage(
                 description="Standaarduitvoer was:\n" + recovered,
                 format="code"
             )))
         if recovered := "\n".join(stderr_):
-            context_collector.add(AppendMessage(ExtendedMessage(
+            missing_values.append(AppendMessage(ExtendedMessage(
                 description="Standaardfout was:\n" + recovered,
                 format="code"
             )))
@@ -218,6 +219,10 @@ def evaluate_results(bundle: Bundle, context: Context,
     has_main = testcase.input.main_call
     is_correct = all(results)
     should_stop = has_main and (not is_correct or mem_or_time)
+
+    if has_main:
+        for u in missing_values:
+            context_collector.add(u)
 
     # If we must stop due to errors are there no further testcases, evaluate the
     # exit channel.
@@ -299,6 +304,12 @@ def evaluate_results(bundle: Bundle, context: Context,
                 bundle, context_dir, t_col, Channel.EXIT, exit_output,
                 str(exec_results.exit)
             )
+
+        # Add messages if there was no main file.
+        if missing_values and not has_main:
+            for u in missing_values:
+                t_col.add(u)
+            should_stop = True
 
         # Stop with this testcase.
         t_col.to_manager(collector, CloseTestcase())

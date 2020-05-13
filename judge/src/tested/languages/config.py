@@ -28,7 +28,7 @@ from typing import List, Tuple, Mapping, Union, Callable, Set, Dict, Optional, A
 
 import sys
 
-from ..configs import Bundle, Options, DodonaConfig
+from ..configs import Bundle
 from ..datatypes import AllTypes
 from ..dodona import AnnotateCode, Message
 from ..features import Construct
@@ -61,8 +61,8 @@ class Config:
                     example allow for additional parameters when compiling or
                     executing.
     """
-    time_limit: str  # Time limit from Dodona.
-    memory_limit: str  # Memory limit from Dodona.
+    time_limit: int  # Time limit from Dodona.
+    memory_limit: int  # Memory limit from Dodona.
     options: Dict[str, Any]  # Language-specific options.
 
     @classmethod

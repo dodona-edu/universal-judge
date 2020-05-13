@@ -35,6 +35,9 @@
                       },
                       "c": {
                         "file": "evaluator.c"
+                      },
+                      "javascript": {
+                        "file": "evaluator.js"
                       }
                     }
                   }
@@ -72,6 +75,9 @@
                       },
                       "c": {
                         "file": "evaluator.c"
+                      },
+                      "javascript": {
+                        "file": "evaluator.js"
                       }
                     }
                   }
