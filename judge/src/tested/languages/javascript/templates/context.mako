@@ -12,7 +12,7 @@ const values = require("./values.js");
 
 ## Import the language specific evaluators we will need.
 % for name in evaluator_names:
-    import * from "${name}";
+    const ${name} = require("./${name}.js");
 % endfor
 
 
@@ -48,12 +48,12 @@ function sendException(exception) {
 
 ## Send the result of a language specific value evaluator to TESTed.
 function sendSpecificValue(value) {
-    // values.sendEvaluated(valueFile, value);
+    values.sendEvaluated(valueFile, value);
 }
 
 ## Send the result of a language specific exception evaluator to TESTed.
 function sendSpecificException(exception) {
-    // values.sendEvaluated(exceptionFile, exception);
+    values.sendEvaluated(exceptionFile, exception);
 }
 
 ${before}
