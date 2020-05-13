@@ -73,5 +73,11 @@ function sendException(stream, exception) {
     }));
 }
 
-exports.sendValue = sendValue
-exports.sendException = sendException
+// Send an evaluation result to the given stream.
+function sendEvaluated(stream, result) {
+    fs.writeSync(stream, JSON.stringify(result));
+}
+
+exports.sendValue = sendValue;
+exports.sendException = sendException;
+exports.sendEvaluated = sendEvaluated;

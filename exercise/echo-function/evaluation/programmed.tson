@@ -91,6 +91,35 @@
                 }
               },
               "essential": false
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "echo",
+                "arguments": [
+                  {
+                    "type": "text",
+                    "data": "input-4"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "type": "text",
+                    "data": "input-4"
+                  },
+                  "evaluator": {
+                    "type": "programmed",
+                    "function": {
+                      "file": "evaluator.js",
+                      "name": "evaluateValue"
+                    },
+                    "language": "javascript"
+                  }
+                }
+              },
+              "essential": false
             }
           ]
         }
