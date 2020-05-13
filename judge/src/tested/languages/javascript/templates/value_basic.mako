@@ -8,9 +8,9 @@
     ${repr(value.data)}\
 % elif value.type == BasicBooleanTypes.BOOLEAN:
     ## JavaScript Boolean literals (true, false) are lowercase (pascal case in Python)
-    ${str(value.data)/lower()}\
+    ${str(value.data).lower()}\
 % elif value.type == BasicNothingTypes.NOTHING:
-    Null\
+    null\
 % elif value.type == BasicSequenceTypes.SEQUENCE:
     [<%include file="value_arguments.mako" args="arguments=value.data" />]\
 % elif value.type == BasicSequenceTypes.SET:

@@ -2,7 +2,8 @@
 <%! from tested.languages.generator import _TestcaseArguments %>
 <%! from tested.serialisation import Statement, Expression %>
 <%! from tested.utils import get_args %>
-const fs = require("fs");
+const fs = require('fs');
+const vm = require('vm');
 const values = require("./values.js");
 
 ##################################
@@ -23,11 +24,11 @@ const exceptionFile = fs.openSync("${exception_file}", "w");
 ## This is necessary, otherwise the separators are sometimes missing when
 ## execution is killed due to timeouts.
 function writeSeparator() {
-    const separator = "--${secret_id}-- SEP\n";
-    fs.write(valueFile, separator);
-    fs.write(exceptionFile, separator);
-    fs.write(process.stdout.fd, separator);
-    fs.write(process.stderr.fd, separator);
+    const separator = "--${secret_id}-- SEP";
+    fs.writeSync(valueFile, separator);
+    fs.writeSync(exceptionFile, separator);
+    fs.writeSync(process.stdout.fd, separator);
+    fs.writeSync(process.stderr.fd, separator);
     ## TODO: flush the file descriptors
 }
 
@@ -59,9 +60,14 @@ ${before}
 
 ## Prepare the command line arguments if needed.
 % if context_testcase.exists and context_testcase.arguments:
-## TODO: should anything be done here?
+    new_args = [process.argv[0]]
+    new_args.extend([\
+    % for argument in context_testcase.arguments:
+        "${argument}", \
+    % endfor
+    ])
+    process.argv = new_args
 % endif
-
 
 ## Import the code for the first time, which will run the code.
 try {
@@ -76,33 +82,28 @@ try {
 } catch(e) {
     ## If there is a main test case, pass the exception to it.
     <%include file="statement.mako" args="statement=context_testcase.exception_statement('e')" />
-
 }
 
 
 ## Generate the actual tests based on the context.
 % for testcase in testcases:
-
-    write_separator()
+    writeSeparator();
 
     <% testcase: _TestcaseArguments %>
     try {
 
         ## If we have a value function, we have an expression.
         <%include file="statement.mako" args="statement=testcase.input_statement()" />;
+        <% print(testcase.input_statement()) %>
 
-        <%include file="statement.mako" args="statement=testcase.exception_statement()" />
-
+        <%include file="statement.mako" args="statement=testcase.exception_statement()" />;
     } catch(e) {
-
-        <%include file="statement.mako" args="statement=testcase.exception_statement('e')" />
-
+        <%include file="statement.mako" args="statement=testcase.exception_statement('e')" />;
     }
-
 % endfor
 
 ${after}
 
 ## Close output files.
-valueFile.close();
-exceptionFile.close();
+fs.closeSync(valueFile);
+fs.closeSync(exceptionFile);
