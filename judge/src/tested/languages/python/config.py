@@ -8,15 +8,22 @@ from tested.dodona import AnnotateCode, Severity, Message
 from tested.languages.config import Language, CallbackResult, Command, Config
 
 
+def _executable():
+    if os.name == 'nt':
+        return 'python'
+    else:
+        return 'python3'
+
+
 class Python(Language):
 
     def compilation(self, config: Config, files: List[str]) -> CallbackResult:
         result = [x.replace(".py", ".pyc") for x in files]
-        return ["python3", "-m", "compileall", "-q", "-b", "."], result
+        return [_executable(), "-m", "compileall", "-q", "-b", "."], result
 
     def execution(self, config: Config,
                   cwd: Path, file: str, arguments: List[str]) -> Command:
-        return ["python3", "-u", file, *arguments]
+        return [_executable(), "-u", file, *arguments]
 
     def compiler_output(self, stdout: str, stderr: str) \
             -> Tuple[List[Message], List[AnnotateCode], str, str]:
