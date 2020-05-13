@@ -1,4 +1,5 @@
 // Minimal RPC language in JSON to send data from the tests to the judge."""
+const fs = require("fs");
 
 function encode(value) {
 
@@ -57,17 +58,20 @@ function encode(value) {
 }
 
 // Send a value to the given stream.
-export function sendValue(stream, value) {
-    stream.write(JSON.stringify(encode(value)));
+function sendValue(stream, value) {
+    fs.writeSync(stream, JSON.stringify(encode(value)));
 }
 
 // Send an exception to the given stream.
-export function sendException(stream, exception) {
+function sendException(stream, exception) {
     if (!exception) {
         return;
     }
-    stream.write(JSON.stringify({
-        "message": e.toString(),
-        "stacktrace": exception.stack ? exception.stack : "";
+    fs.writeSync(stream, JSON.stringify({
+        "message": exception.toString(),
+        "stacktrace": exception.stack ? exception.stack : ""
     }));
 }
+
+exports.sendValue = sendValue
+exports.sendException = sendException
