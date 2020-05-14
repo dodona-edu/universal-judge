@@ -47,13 +47,21 @@ class WithFunctions:
 @dataclass
 class NumberType(WithFeatures, WithFunctions):
     type: NumericTypes
-    data: Union[int, Decimal]
+    data: Union[Decimal, int, float]
 
     def get_used_features(self) -> FeatureSet:
         return FeatureSet(set(), {self.type})
 
     def get_functions(self) -> Iterable['FunctionCall']:
         return []
+
+    # noinspection PyMethodParameters
+    @root_validator
+    def check_passwords_match(cls, values):
+        if resolve_to_basic(values.get("type")) == BasicNumericTypes.INTEGER:
+            values["data"] = values["data"].to_integral_value()
+
+        return values
 
 
 @dataclass

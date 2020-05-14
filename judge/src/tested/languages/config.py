@@ -453,7 +453,7 @@ class Language:
         """
         return [], []
 
-    def template_name(self, template_type: TemplateType) -> str:
+    def template_name(self, template_type: Union[TemplateType, str]) -> str:
         """
         Get the name for built-in templates. This can be specified in the
         config.json file, but needing to override this is generally not necessary.
