@@ -142,10 +142,26 @@ Master of Science in de informatica%
     \setmonofont[Scale=MatchLowercase,Contextuals={Alternate}]{Jetbrains Mono}
     \setmathfont{Libertinus Math}
 
+    \pagenumbering{roman}
+
+    \chapter*{Samenvattingen}
+    
+    \begin{enumerate}
+        \item De samenvatting in het Nederlands (ook voor masterproeven in het Engels, maximaal 1 pagina)
+        \item Een Engelstalige “extended abstract” (min 2 pagina’s max. 6 pagina’s)
+        \item Een vulgariserende samenvatting (minimaal 1 bladzijde)
+    \end{enumerate}
+
+    \include{dankwoord}
+    \include{gebruik}
+
     \addtocounter{tocdepth}{-1}
     \tableofcontents
 
-    \include{dankwoord}
+    \newpage
+    
+    \pagenumbering{arabic}
+
     \include{dodona}
     \include{universele-judge}
     \include{nieuwe-taal}
