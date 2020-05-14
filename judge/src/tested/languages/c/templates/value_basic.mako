@@ -12,7 +12,7 @@
 % elif value.type == BasicBooleanTypes.BOOLEAN:
     ${str(value.data).lower()}\
 % elif value.type == BasicNothingTypes.NOTHING:
-    null\
+    NULL\
 % elif value.type == BasicSequenceTypes.SEQUENCE:
     // TODO
     // List.of(<%include file="value_arguments.mako" args="arguments=value.data" />)\

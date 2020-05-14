@@ -86,6 +86,11 @@ void write_unknown(FILE * out, void * value) {
     fprintf(out, asString, "?");
 }
 
+void write_void(FILE * out, void * value) {
+    const char* asString = format("nothing", %s);
+    fprintf(out, asString, "null");
+}
+
 void write_evaluated(FILE* out, EvaluationResult* result) {
 
     // Count the size of the string we need for each message object.

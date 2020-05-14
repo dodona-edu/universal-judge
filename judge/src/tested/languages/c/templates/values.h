@@ -34,9 +34,11 @@ void write_ldouble(FILE*, long double);
 void write_string(FILE*, const char*);
 
 void write_unknown(FILE*, void*);
+void write_void(FILE*, void*);
 
 #define write_value_function(x) _Generic((x),   \
         _Bool: write_bool,                      \
+        void*: write_void,                       \
                                                 \
         /* Number types */                      \
         char: write_char,                       \
