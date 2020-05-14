@@ -69,7 +69,7 @@ public class Values {
             type = "set";
             data = encodeSequence((Iterable<Object>) value);
         } else if (value instanceof Map) {
-            type = "object";
+            type = "map";
             var elements = new ArrayList<String>();
             for (Map.Entry<Object, Object> entry : ((Map<Object, Object>) value).entrySet()) {
                 elements.add("\"" + entry.getKey().toString() + "\": " + encode(entry.getValue()));
