@@ -171,7 +171,7 @@ Merk op dat het configuratiebestand slechts een hulpmiddel is: indien gewenst ku
     Deze dependencies zijn bedoeld om gebruikt te worden in de code gegenereerd door de sjablonen, niet in de ingediende oplossing (hoewel dat momenteel technisch mogelijk is).
     \item[\texttt{general.selector}] Dit geeft aan of de programmeertaal gebruikmaakt van een selector tijdens het uitvoeren van code die gecompileerd is in batchcompilatie.
     Voor de meeste talen met compilatie zal dit \texttt{true} zijn.
-    Zo ook bij C (\Cref{subsec:testcode-genereren} legt dit mechanisme in meer detail uit).
+    Zo ook bij C (\cref{subsec:testcode-genereren} legt dit mechanisme in meer detail uit).
     \item[\texttt{extensions.file}] Geeft de voornaamste bestandsextensie aan van de bestanden.
     Met voornaamste bedoelen we de extensie van de bestanden die gegenereerd worden.
     Bijvoorbeeld in C bestaan zowel \texttt{.h} en \texttt{.c}, maar de gegenereerde code gebruikt \texttt{.c}.
@@ -647,9 +647,19 @@ We hebben nu een werkende C-judge voor \tested{} en bij uitbreiding voor het Dod
 Daarmee hebben we ondersteuning voor een eerste programmeertaal waarvoor er nog geen judge bestond in Dodona.
 
 
-\section{Hoe lang duurt het implementeren van een programmeertaal?}\label{sec:hoe-lang-duurt-het-implementeren-van-een-programmeertaal?}
+\section{Hoe lang duurt het configureren van een programmeertaal?}\label{sec:hoe-lang-duurt-het-implementeren-van-een-programmeertaal?}
 
-TODO
+De tijd die nodig is om een programmeertaal te configureren is moeilijk in te schatten, want dit hangt af van meerdere factoren:
+
+\begin{itemize}
+    \item Hoe goed de programmeur bekend is met de werking van \tested{}.
+    \item Hoe goed de programmeur bekend is met de werking van de programmeertaal die hij wenst te implementeren.
+    \item Hoe goed de programmeertaal aansluit bij de werking van de bestaande programmeertalen van \tested{}.
+\end{itemize}
+
+We schatten dat het voor een programmeertaal die aansluit bij de bestaande programmeertalen (Java, Python, Haskell, C of Javascript) en voor iemand die bekend is met \tested{} en de programmeertaal niet zo lang zal duren: we spreken dan van een dag of twee.
+Is de programmeur niet bekend met \tested{}, dan schatten we dat er toch enkel dagen nodig zullen zijn eer de programmeertaal volledig op punt staat: een dag of twee, drie of zelfs vier.
+
 
 \section{Stabiliteit van TESTed}\label{sec:stabiliteit-van-tested}
 
