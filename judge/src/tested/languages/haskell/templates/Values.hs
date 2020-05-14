@@ -244,6 +244,12 @@ sendValue file value = LBS.appendFile file (encode (object [
         "type" .= toJSON (toType value),
         "data" .= toJson value
     ]))
+    
+sendValueH :: Typeable a => Handle -> a -> IO ()
+sendValueH file value = LBS.hPutStr file (encode (object [
+        "type" .= toJSON (toType value),
+        "data" .= toJson value
+    ]))
 
 toMessage :: Message -> Value
 toMessage m = object [

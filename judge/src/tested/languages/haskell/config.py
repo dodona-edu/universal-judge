@@ -6,6 +6,7 @@ from tested.languages import Language
 from tested.languages.config import CallbackResult, executable_name, Command, Config
 
 
+# TODO: advanced type don't work very good at the moment.
 class Haskell(Language):
 
     def compilation(self, config: Config, files: List[str]) -> CallbackResult:
