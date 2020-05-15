@@ -74,3 +74,18 @@ def test_timeout(language_and_time: Tuple[str, int], tmp_path: Path, pytestconfi
     assert len(exceeded) >= 1
     # Once for every status, plus one escalation, plus one judgement-close
     assert len(wrong + correct + exceeded) == 50 + 1 + 1
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize("lang", ["haskell", "java", "python", "c", "javascript"])
+def test_full_echo(lang: str, tmp_path: Path, pytestconfig):
+    config_ = {
+        "options": {
+            "parallel": True
+        }
+    }
+    conf = configuration(pytestconfig, "echo", lang, tmp_path, "full.tson", "correct", options=config_)
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert len(updates.find_all("start-testcase")) == 50
+    assert updates.find_status_enum() == ["correct"] * 50
