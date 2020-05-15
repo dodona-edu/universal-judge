@@ -649,16 +649,42 @@ Daarmee hebben we ondersteuning voor een eerste programmeertaal waarvoor er nog 
 
 \section{Hoe lang duurt het configureren van een programmeertaal?}\label{sec:hoe-lang-duurt-het-implementeren-van-een-programmeertaal?}
 
-De tijd die nodig is om een programmeertaal te configureren is moeilijk in te schatten, want dit hangt af van meerdere factoren:
+Een belangrijke factor bij het configureren van een programmeertaal is de kennis over de programmeertaal.
+Het is nodig om minstens van volgende aspecten van de programmeertaal een goede kennis te hebben:
 
 \begin{itemize}
-    \item Hoe goed de programmeur bekend is met de werking van \tested{}.
-    \item Hoe goed de programmeur bekend is met de werking van de programmeertaal die hij wenst te implementeren.
-    \item Hoe goed de programmeertaal aansluit bij de werking van de bestaande programmeertalen van \tested{}.
+    \item Het compileren (indien nodig) en uitvoeren van programma's in de programmeertaal vanop de commandoregel, met alle aspecten die daarbij horen.
+    Een voorbeeld is hoe dependencies meegegeven moeten worden aan het compilatiecommando.
+    In sommige programmeertalen (zoals Java) moeten deze explicit meegegeven worden, terwijl dat in andere programmeertalen (zoals C) juist niet mag.
+    \item Het gebruik van een \texttt{main}-functie of equivalent.
+    In talen als Python is dit niet nodig, daar een bestand met code zo kan uitgevoerd worden.
+    Bij andere talen, zoals Java, C en Haskell is dit wel nodig.
+    Bovendien moet deze \texttt{main}-functie programmatisch (vanuit andere code) opgeroepen kunnen worden.
+    Elke context moet namelijk uitvoerbaar zijn op zichzelf, maar ook als onderdeel van een groter programma.
+    In C vraagt dit bijvoorbeeld enige inspanning en wat goochelen met macro's om de \texttt{main}-functies juist te krijgen.
+    \item Het schrijven van tekst naar bestanden.
+    \item Hoe de gegevenstypes die ondersteund worden door \tested{} voorgesteld kunnen worden in de programmeertaal.
+    \item Het serialiseren van die gegevenstypes naar het \acronym{JSON}-formaat van \tested{}.
+    Een mogelijk struikelblok hier is dat \tested{} een functie verwacht die het serialiseren doet voor alle gegevenstypes.
+    Dit is in sommige programmeertalen zoals Haskell of C minder voor de hand liggend.
+    \item Andere zaken die de programmeertaal mogelijk ondersteunt, zoals assignments, functieoproepen en objectgerichte acties (objecten aanmaken en gebruiken).
 \end{itemize}
 
-We schatten dat het voor een programmeertaal die aansluit bij de bestaande programmeertalen (Java, Python, Haskell, C of Javascript) en voor iemand die bekend is met \tested{} en de programmeertaal niet zo lang zal duren: we spreken dan van een dag of twee.
-Is de programmeur niet bekend met \tested{}, dan schatten we dat er toch enkel dagen nodig zullen zijn eer de programmeertaal volledig op punt staat: een dag of twee, drie of zelfs vier.
+Kennis over hoe \tested{} werkt wordt niet verwacht of nodig geacht.
+Het zou moeten volstaan om dit hoofdstuk door te nemen en de stappen die er in beschreven staan uit te voeren.
+Op verschillende plaatsen in dit hoofdstuk wordt verwezen naar andere onderdelen van de thesis: deze kunnen nuttig zijn om het hoe en waarom te beantwoorden, maar zijn niet strikt nodig voor het implementeren van een programmeertaal.
+Ook de bestaande configuraties zijn een grote bron van informatie, zeker als het op syntaxis aankomt.
+Een voorbeeld hiervan zijn de mako-sjablonen.
+We verwachten dat het doornemen van dit hoofdstuk en het bekijken van de bestaande sjablonen alle informatie verschaft die nodig is om aan de slag te kunnen, zonder dat de handleiding van mako doorgenomen moet worden.
+
+Zoals we bespreken in \cref{sec:stabiliteit-van-tested}, zijn er wel inspanningen geleverd om het configureren van een programmeertaal flexibel te maken, maar dat neemt niet weg dat het configureren van een programmeertaal grotendeels opgesteld is op basis van de noden van de bestaande programmeertalen.
+Hoe meer de programmeertaal afwijkt van de bestaande programmeertalen, des te meer creativiteit en tijd nodig zal zijn om de programmeertaal in \tested{} te configureren.
+
+Dit alles neemt niet weg dat we optimistisch zijn dat het configureren van een programmeertaal eerder snel kan verlopen.
+Gegeven een goede kennis over de programmeertaal (en dat de programmeertaal niet te exotisch is), schatten we in dat het configureren van een programmeertaal ongeveer een dag in beslag neemt.
+Hiermee bedoelen we dit hoofdstuk lezen en de stappen die erin beschreven staan uitvoeren, zodat er een werkende configuratie is.
+Om de programmeertaal tot in de puntjes uit te werken voorzien we een kleine twee dagen.
+Hiermee bedoelen we bijvoorbeeld het toevoegen van de programmeertaal aan de testen, waarvoor er verschillende oefeningen opgelost moeten worden.
 
 
 \section{Stabiliteit van TESTed}\label{sec:stabiliteit-van-tested}
@@ -679,7 +705,12 @@ De grenzen tussen deze onderdelen zijn niet strikt: zo zal de configuratieklasse
 
 We willen opmerken dat de focus in deze thesis vooral lag op de interface naar de oefeningen toe (dus het formaat van het testplan en het serialisatieformaat).
 We verwachten dan ook niet dat het toevoegen van een programmeertaal grote onverwachte wijzigingen vereist in het formaat van testplan of het serialisatieformaat.
-We spreken van onverwachte wijzigingen, omdat sommige delen van \tested{} juist voorzien zijn op wijzigingen.
+Met grote wijzigingen bedoelen we fundamentele wijzigingen aan de manier waarop deze systemen werken.
+Dit in tegenstelling tot kleinere wijzigingen: een voorbeeld hiervan is een onderscheid maken tussen constanten en veranderlijken (de \texttt{final} uit Java en de \texttt{const} uit C).
+Momenteel maakt \tested{} dit onderscheid niet, simpelweg omdat er geen \english{use case} voor is.
+Zou dit onderscheid toch nodig zijn in bepaalde programmeertalen, dan is het voldoende om een veldje toe te voegen aan het serialisatiemodel van de assignment.
+
+Daarnaast spreken we van onverwachte wijzigingen, omdat sommige delen van \tested{} juist voorzien zijn op wijzigingen.
 Een voorbeeld zijn de gegevenstypes uit het serialisatieformaat.
 Daar is het juist de bedoeling dan nieuwe programmeertalen bijkomende geavanceerde gegevenstypes toevoegen indien nodig.
 Als een nieuwe programmeertaal bijvoorbeeld ondersteuning wil bieden voor oneindige generators (bijvoorbeeld een functie die getallen blijft teruggeven, dan is dat mogelijk.
