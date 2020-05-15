@@ -7,6 +7,7 @@
           "testcases": [
             {
               "input": {
+                "type": "sequence",
                 "variable": "codes01",
                 "expression": {
                   "data": [
@@ -21,8 +22,7 @@
                     {"data": "5486948320146", "type": "text"}
                   ],
                   "type": "sequence"
-                },
-                "type": "sequence"
+                }
               }
             },
             {
