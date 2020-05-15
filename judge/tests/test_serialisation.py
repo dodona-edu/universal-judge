@@ -40,8 +40,9 @@ def run_encoder(bundle: Bundle, dest: Path, values: List[Value]) -> List[str]:
     dependencies = bundle.lang_config.initial_dependencies()
     copy_from_paths_to_path(dependency_paths, dependencies, dest)
 
-    template = bundle.lang_config.template_name("encode")
-    encoder_name = bundle.lang_config.with_extension("encode")
+    name = bundle.lang_config.conventionalize_namespace("encode")
+    template = bundle.lang_config.template_name(name)
+    encoder_name = bundle.lang_config.with_extension(name)
     encoder_destination = dest / encoder_name
     encoder = find_and_write_template(
         bundle, _Statements(values), encoder_destination, template
@@ -49,15 +50,18 @@ def run_encoder(bundle: Bundle, dest: Path, values: List[Value]) -> List[str]:
 
     # Compile if necessary.
     e, _ = run_compilation(bundle, dest, [*dependencies, encoder], 10000)
-    assert isinstance(e, BaseExecutionResult)
-    assert e.exit == 0
+    if isinstance(e, BaseExecutionResult):
+        print(e.stdout)
+        print(e.stderr)
+        assert e.exit == 0
 
     # Run the code.
     r = execute_file(bundle, encoder, dest, None)
+    print(r.stderr)
     return r.stdout.splitlines(keepends=False)
 
 
-@pytest.mark.parametrize("language", ["python"])
+@pytest.mark.parametrize("language", ["javascript", "python", "runhaskell", "c", "java"])
 def test_basic_types(language, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "", language, tmp_path)
     plan = Plan()
@@ -97,6 +101,9 @@ def test_basic_types(language, tmp_path: Path, pytestconfig):
     assert len(results) == len(types)
 
     for result, expected in zip(results, types):
+        # TODO: hack!
+        if expected.type == BasicBooleanTypes.BOOLEAN and language == "c":
+            expected.type = BasicNumericTypes.INTEGER
         actual = as_basic_type(parse_value(result))
         assert expected.type == actual.type
         py_expected = to_python_comparable(expected)

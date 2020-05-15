@@ -10,7 +10,7 @@ function encode(value) {
     } else if (typeof value === "boolean") {
         type = "boolean";
     } else if (typeof value === "number") {
-        if (value.isInteger()) {
+        if (Number.isInteger(value)) {
             type = "integer";
         } else {
             type = "rational";
@@ -44,7 +44,11 @@ function encode(value) {
                     {}
                 );
         } else {
-            type = "object";
+            type = "map";
+            // Process the elements of the object.
+            for (let [key, v] of Object.entries(value)) {
+                value[key] = encode(v);
+            } 
         }
     } else {
         type = "unknown";
