@@ -271,6 +271,18 @@ Het \english{worst case scenario} is dan weliswaar trager, maar in de meeste gev
 Hierop is één uitzondering: een geprogrammeerde evaluatie waarbij de programmeertaal van de evaluatiecode in Python geschreven is.
 Voor Python is er speciale ondersteuning (vermits \tested{} zelf ook in Python geschreven is, wordt deze evaluatie ook rechtsreeks in \tested{} gedaan zonder subproces): hiervoor is het gebruik van Jupyter-kernels niet nuttig.
 
+\subsection{Optimalisaties bestaande parallellisatie}\label{subsec:optimalisaties-bestaande-parallellisatie}
+
+Zoals we vermeld hebben in \cref{subsec:parallelle-uitvoering-van-contexten}, zijn er nog een aantal beperkingen en opmerkingen bij de implementatie van het parallel uitvoeren van de contexten, waarvan de belangrijkste zijn:
+
+\begin{itemize}
+    \item De contexten per tabblad geparallelliseerd worden, terwijl tabbladen nog steeds sequentieel uitgevoerd worden.
+    In het ergste geval, waarbij elk tabblad één context heeft, gebeurt niets in parallel.
+    \item Enkel het uitvoeren gebeurt in parallel, niet de beoordeling van het resultaat van het uitvoeren.
+    Een gevolg hiervan is dat geprogrammeerde evaluaties ook sequentieel uitgevoerd worden, terwijl dit ook in parallel zou kunnen gebeuren.
+\end{itemize}
+Een voorbeeld is dat
+
 \section{TESTed}\label{sec:beperkingen-tested}
 
 In deze paragraaf komen de beperkingen aan bod die ofwel enkel betrekking hebben op \tested{} zelf, ofwel betrekking hebben op meerdere onderdelen, bijvoorbeeld zowel \tested{} als het testplan.

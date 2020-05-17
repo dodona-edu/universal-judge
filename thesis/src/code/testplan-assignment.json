@@ -1,5 +1,5 @@
 {
-  "variable": "name",
+  "variable": "orakel",
   "expression": {
     "type": "text",
     "value": "Dodona"

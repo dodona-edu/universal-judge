@@ -1,3 +1,5 @@
+%! Suppress = EscapeHashOutsideCommand
+%! Suppress = TooLargeSection
 \chapter{Educational software testing}\label{ch:dodona}
 
 \lettrine{D}{e evoluties} op technologisch vlak hebben ervoor gezorgd dat onze maatschappij de laatste decennia in hoge mate gedigitaliseerd is, een proces dat nog steeds aan de gang is.
@@ -78,12 +80,12 @@ Deze Docker-container wordt gemaakt op basis van een Docker-image die bij de jud
 Bij het uitvoeren van de beoordeling zal Dodona een \english{bind mount}\footnote{Informatie over deze term is te vinden op \url{https://docs.docker.com/storage/bind-mounts/}} voorzien, zodat de code van de judge zelf, de code van de oefening en de code van de ingediende oplossing beschikbaar zijn in de container.
 Via de configuratie geeft Dodona aan de judge mee waar deze bestanden zich bevinden.
 
-Samenvattend bestaat interface tussen de judge en Dodona uit drie onderdelen:
+Samenvattend bestaat de interface tussen de judge en Dodona uit drie onderdelen:
 
 \begin{enumerate}
     \item De judge zal uitgevoerd worden in een Docker-container, dus een Docker-image met alle dependencies moet voorzien worden.
     Deze Docker-image moet ook de judge opstarten.
-    \item De judge stelt de invoer van een beoordeling ter beschikking aan de judge.
+    \item Dodona stelt de invoer van een beoordeling ter beschikking aan de judge.
     Bestanden worden via een bind mount aan de Docker-container gekoppeld.
     De paden naar deze bestanden binnen de container en andere informatie (zoals programmeertaal van de oplossing of natuurlijke taal van de gebruiker) worden via de configuratie aan de judge gegeven (via de standaardinvoerstroom).
     \item De judge moet het resultaat van zijn beoordeling uitschrijven naar de standaarduitvoerstroom, in de vastgelegde structuur.
@@ -94,7 +96,7 @@ Door deze vrijheid lopen de manieren waarop de bestaande judges geïmplementeerd
 Sommige judges beoordelen oplossingen in dezelfde programmeertaal als de taal waarin ze geschreven zijn.
 Zo is de judge voor Python-oplossingen geschreven in Python en de judge voor Java-oplossingen in Java.
 Bij andere judges is dat niet het geval: de judges voor Bash en Prolog zijn bijvoorbeeld ook in Python geschreven.
-Daarnaast heeft elke judge een eigen manier waarop de testen voor een beoordeling van een oplossing opgesteld moeten worden.
+Daarnaast heeft elke judge een eigen manier waarop de testen voor de beoordeling van een oplossing opgesteld moeten worden.
 Zo worden in de Java-judge jUnit-testen gebruikt, terwijl de Python-judge doctests (en een eigen formaat) ondersteunt.
 
 De beoordeling van een oplossing van een student verloopt als volgt:
@@ -116,20 +118,16 @@ De beoordeling van een oplossing van een student verloopt als volgt:
 De manier waarop de huidige judges werken resulteert in twee belangrijke nadelen.
 Bij het bespreken hiervan is het nuttig een voorbeeld in het achterhoofd te houden, teneinde de nadelen te kunnen concretiseren.
 Als voorbeeld gebruiken we de "Lotto"-oefening\footnote{Vrij naar een oefening van prof.\ Dawyndt.
-De originele oefening is beschikbaar op \url{https://dodona.ugent.be/nl/exercises/2025591548/}.}, waarvan de opgave gegeven is in \cref{lst:lotto}.
-Oplossingen voor deze oefening staan in \cref{lst:java-solution,lst:python-solution}, voor respectievelijk Python en Java.
+De originele oefening is beschikbaar op \url{https://dodona.ugent.be/nl/exercises/2025591548/}.}, waarvan de opgave hieronder gegeven wordt.
+Oplossingen voor deze oefening in twee programmeertalen, Python en Java, staan in \cref{lst:java-solution,lst:python-solution}.
 
-\begin{listing}
-    \caption{De opgave van de voorbeeldoefening, Lotto.}
-    \label{lst:lotto}
-    \begin{quote}
-        \markdownInput[renderers = {
-            headingOne = {\chapter*{#1}},
-            headingTwo = {\section*{#1}},
-            headingThree = {\subsection*{#1}},
-        }]{sources/lotto-description.md}
-    \end{quote}
-\end{listing}
+\begin{quote}
+    \markdownInput[renderers = {
+        headingOne = {\chapter*{#1}},
+        headingTwo = {\section*{#1}},
+        headingThree = {\subsection*{#1}}
+    }, slice=opgave voorbeeld]{sources/lotto-description.md}
+\end{quote}
 
 \begin{listing}
     \caption{Oplossing in Python voor de voorbeeldoefening Lotto.}
@@ -177,7 +175,7 @@ Toch is deze evaluatiecode niet inherent programmeertaalafhankelijk: controleren
 
 Een tweede nadeel aan de huidige werking zijn de judges zelf: voor elke programmeertaal die men wil aanbieden in Dodona moet een nieuwe judge ontwikkeld worden.
 Ook hier is er dubbel werk: dezelfde concepten en features, die eigenlijk programmeertaalonafhankelijk zijn, moeten in elke judge opnieuw geïmplementeerd worden.
-Hierbij denken we aan bijvoorbeeld de logica om te bepalen wanneer een beoordeling positief of negatief moet zijn.
+Hierbij denken we aan bijvoorbeeld de logica om te bepalen wanneer een beoordeling juist of fout is.
 
 \subsection{Onderzoeksvraag}\label{subsec:onderzoeksvraag}
 
@@ -191,8 +189,8 @@ Het nadeel valt te formuleren als de onderzoeksvraag waarop deze thesis een antw
 
 Als bijzaak is het ook interessant om na te gaan of het antwoord op de onderzoeksvraag een voordeel kan bieden voor het implementeren van judges zelf.
 
-De aandachtige lezer zal opmerken dat de opgave voor de Lotto-oefening (\cref{lst:lotto}) programmeertaalspecifieke en taalspecifieke elementen bevat.
-Zo zijn de voorbeelden in Python en zijn de namen van functies en argumenten in het Nederlands.
+De aandachtige lezer zal opmerken dat de opgave voor de Lotto-oefening programmeertaalspecifieke en taalspecifieke elementen bevat.
+Zo is de beschrijving van de opgave (de voorbeelden en de gegevenstypes) in Python en zijn de namen van functies en argumenten in het Nederlands.
 Het ondersteunen van opgaves met programmeertaalonafhankelijke voorbeelden en vertalingen wordt voor deze thesis expliciet als \english{out-of-scope} gezien en zal niet behandeld worden, zij het in \cref{subsec:programmeertaalonafhankelijke-opgaven}.
 
 \section{Opbouw van de thesis}\label{sec:opbouw}
@@ -200,6 +198,7 @@ Het ondersteunen van opgaves met programmeertaalonafhankelijke voorbeelden en ve
 \Cref{ch:tested} handelt over het antwoord op bovenstaande onderzoeksvraag, waar een prototype van een dergelijke judge wordt voorgesteld.
 Daarna volgt ter illustratie een gedetailleerde beschrijving van hoe een programmeertaal geconfigureerd moet worden voor dit prototype in \cref{ch:nieuwe-taal}.
 In \cref{ch:nieuwe-oefening} worden een reeks oefeningen met verschillende functionaliteiten besproken om te illustreren dat het prototype flexibel is.
-Daar deze twee hoofdstukken voornamelijk ten doel hebben zij die met het prototype (zoals lesgevers) moeten werken te informeren, nemen deze hoofdstukken de vorm aan van meer traditionele softwarehandleidingen, zoals meer codefragmenten.
-Tot slot volgt met een hoofdstuk over beperkingen van de huidig prototype, en waar er verbeteringen mogelijk zijn (het "toekomstige werk").
+Deze twee hoofdstukken hebben ten doel een handleiding te vormen voor de lesgevers die oefeningen willen opstellen en voor de programmeurs die een nieuwe programmeertaal aan \tested{} willen toevoegen.
+Daarom sluiten deze hoofdstukken qua vorm en stijl meer aan bij een handleiding, wat zich bijvoorbeeld manifesteert als een toename in het aantal codefragmenten.
+Tot slot volgt met een hoofdstuk over beperkingen van het huidige prototype, en waar er verbeteringen mogelijk zijn (het "toekomstige werk").
 Na de bronvermeldingen volgen nog twee appendices waar voor twee eenvoudige oefeningen de opgave, het testplan en de gegenereerde code getoond worden.

@@ -1,5 +1,5 @@
 {
-  "Value": {
+  "Literal": {
     "type": "object",
     "properties": {
       "data": {"type": ["number", "string", "boolean", "object", "array", "null"]},
@@ -23,7 +23,7 @@
   },
   "Identifier": {"type": "string"},
   "Expression": {
-    "anyOf": [{"$ref": "#Identifier"}, {"$ref": "#Value"}, {"$ref": "#FunctionCall"}]
+    "anyOf": [{"$ref": "#Identifier"}, {"$ref": "#Literal"}, {"$ref": "#FunctionCall"}]
   },
   "Assignment": {
     "type": "object",

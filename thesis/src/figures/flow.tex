@@ -11,7 +11,7 @@
     \tikzstyle{process}=[node, rectangle]
     \tikzstyle{terminator}=[node, rectangle, rounded corners=0.5cm]
     \tikzstyle{document}=[node,tape,tape bend top=none]
-    \tikzstyle{io}=[node,trapezium,trapezium left angle=70,trapezium right angle=-70]
+    \tikzstyle{io}=[node,trapezium,trapezium left angle=70,trapezium right angle=-70,minimum width=3cm]
     \tikzstyle{nothing}=[align=center]
     \tikzstyle{inner}=[process,draw=gray]
     \tikzstyle{arrow}=[draw, -latex]
@@ -27,14 +27,11 @@
     \tikzstyle{sea}=[draw=ugent-ge!70!black]
 
     \begin{tikzpicture}
-        %\draw[step=1.0,gray,thin] (0,0) grid (15,-25);
+%        \draw[step=1.0,gray,thin] (0,0) grid (15,-25);
 
-        \node[io] at (2.5,-1) (exercise) {Oefening};
-        \node[process,minimum width=2cm] at (7.25,-1) (check) {Controle testplan};
-        \node[io] at (12,-1) (dodonaIn) {Dodona};
-
-        \draw[arrow] (exercise) -- (check);
-
+        \node[io] at (5.625,-1) (exercise) {Oefening};
+        \node[io] at (12.125,-1) (dodonaIn) {Dodona};
+        
         % These needs to be drawn first, otherwise they are on top of the
         % input node.
         \node[process,minimum width=3cm] at (1.5,-7) (g1) {Genereren};
@@ -73,7 +70,7 @@
         \node[nothing,text height=1.5ex, text depth=.25ex] at (6.875,-4.375) {\ldots};
         \node[inner,minimum width=2.25cm] at (8.5,-4.375) (cn) {Context $n$};
 
-        \draw[arrow] (check.south) -- (check|-plan.north);
+        \draw[arrow] (exercise.south) -- (exercise|-plan.north);
 
         \node[inner,minimum width=3.25cm, minimum height=1.25cm, text height=4ex] at (12.125,-4.5) (solution) {Ingediende \\ oplossing};
 
@@ -82,10 +79,9 @@
         \node[inner,minimum width=3.25cm] at (12.125,-3) (config) {Configuratie};
 
         \draw[arrow] (11.5,-10.33|-solution.south) -- (11.5,-10.33) -- (11.5,-10.33-|con.east);
-        \draw[arrow] (11.5,-10) -- (11.5,-10-|coa.west);
+        \draw[arrow] (11.5,-10.1625) -- (11.5,-10.1625-|coa.west);
 
         \draw[arrow] (dodonaIn.south) -- (dodonaIn|-config.north);
-        \draw[arrow] (config) -- (check.east);
 
         \draw[arrow] (c1) |- (g1.60|-2,-6.25) -- (g1.60);
         \draw[arrow] (c2) |- (g2.120|-6.75,-6.25) -- (g2.120);
