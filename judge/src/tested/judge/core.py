@@ -177,7 +177,8 @@ def judge(bundle: Bundle):
         else:
             result = _single_execution(bundle, executions, remaining)
 
-        if result in (Status.TIME_LIMIT_EXCEEDED, Status.MEMORY_LIMIT_EXCEEDED, Status.OUTPUT_LIMIT_EXCEEDED):
+        if result in (Status.TIME_LIMIT_EXCEEDED, Status.MEMORY_LIMIT_EXCEEDED,
+                      Status.OUTPUT_LIMIT_EXCEEDED):
             assert not collector.collected
             collector.terminate(result)
             return

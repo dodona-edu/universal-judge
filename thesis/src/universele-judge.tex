@@ -1076,14 +1076,14 @@ Deze \acronym{URL} zou dan aan de studenten kunnen getoond worden.
 Een belangrijk aspect bij \term{educational software testing} is de feedback als het verkeerd loopt.
 De feedback bij een verkeerde oplossing is in veel gevallen zelfs belangrijker dan de feedback bij een juiste oplossing: het is namelijk de bedoeling dat als studenten een verkeerde oplossing indienen, dat de feedback ze terug op weg kan helpen om hun oplossing te verbeteren.
 De feedback die Dodona toont is afkomstig van de judges: het is de taak van \tested{} om kwalitatief hoogstaande feedback te voorzien.
-Met kwalitatief hoogstaand wordt bedoeld dat de feedback nuttige informatie bevat, maar ook geen verkeerde of misleidende informatie bevat.
+Met kwalitatief hoogstaand wordt bedoeld dat de feedback nuttige informatie bevat, maar ook geen verkeerde of misleidende informatie.
 
 \subsection{In de praktijk}\label{subsec:in-de-praktijk}
 
-In het vak \emph{Scriptingtalen} van de bachelor informatica krijgen studenten elke week een reeks oefeningen om op te lossen (op Dodona).
-Een van die oefeningen is de \emph{\acronym{ISBN}}-oefening.
+In het vak \emph{Scriptingtalen} van de bachelor Informatica krijgen studenten elke week een reeks oefeningen om op te lossen (op Dodona).
+Een van die oefeningen is de Python-versie van de \emph{\acronym{ISBN}}-oefening.
 De opgave van deze oefening is opgenomen als onderdeel van \cref{sec:oefening-isbn}.
-Om een idee te krijgen van hoe \tested{} werkt in de praktijk is besloten om tijdens een van de weken de \emph{\acronym{ISBN}}-oefening aan te vullen door een oefening met dezelfde opgave, maar die beoordeeld wordt door \tested{} in plaats van de Python-judge.
+Om een idee te krijgen van hoe \tested{} in de praktijk werkt, is besloten om tijdens een van de weken de \emph{\acronym{ISBN}}-oefening aan te vullen door een oefening met dezelfde opgave, maar die beoordeeld wordt door \tested{} in plaats van de Python-judge.
 
 De algemene bevindingen die uit de praktijktest naar boven kwamen waren:
 
@@ -1104,7 +1104,7 @@ De algemene bevindingen die uit de praktijktest naar boven kwamen waren:
 \end{itemize}
 
 Verder heeft professor Dawyndt veel fouten en scenario's uitgeprobeerd.
-Deze worden hieronder besproken.
+Deze worden hierna in detail besproken.
 
 \subsection{Soorten fouten}\label{subsec:soorten-fouten}
 
@@ -1132,21 +1132,24 @@ Waar nuttig zijn deze gevallen omgezet naar een unit test voor \tested{}.
     De hoofdreden om zelf de tijdslimiet te implementeren in \tested{} is om zo de overige, niet-uitgevoerde testen ook te kunnen tonen.
     Momenteel is dat met een boodschap die uitlegt dat ze niet zijn uitgevoerd, maar op termijn is het de bedoeling in Dodona een bijkomende status toe te voegen.
     \item[Te grote uitvoer] Bij te grote uitvoer zal \tested{} deze limiteren.
-    Hierbij gaat het om scenario's zoals een oneindige lus die blijft schrijven naar stdout.
-    \tested{} beperkt tekstuele uitvoer tot tienduizend tekens.
-    Dit is niet van toepassing op andere vormen van uitvoer: het inkorten van grote verzamelingen (bijvoorbeeld een lijst van duizend elementen) is opgenomen als uitbreiding in \cref{sec:kleinere-functies}.
-    \item[Te veel uitvoer] Hierbij wordt gedacht aan zaken zoals uitvoer op stdout of stderr terwijl die niet verwacht wordt.
+    Hierbij gaat het om scenario's zoals een oneindige lus die blijft schrijven naar \texttt{stdout}.
+    De totale grootte van de uitvoer van alle uitvoerkanalen samen wordt gelimiteerd op \unit{8\,MiB} (\unit{80\,\%} van de limiet opgelegd door Dodona).
+    Bij het overschrijden van deze limiet zal \tested{} de evaluatie fout rekenen en de juiste status doorgeven aan Dodona.
+    Deze limiet werkt goed op \texttt{stdout} en \texttt{stderr}, maar minder goed op andere vormen van uitvoer.
+    Het inkorten van grote verzamelingen (bijvoorbeeld een lijst van duizend elementen) is opgenomen als uitbreiding in \cref{sec:kleinere-functies}.
+    Dat laatste is ook nuttig zelfs al wordt de uitvoerlimiet niet overschreden: het is overzichtelijker.
+    \item[Te veel uitvoer] Hierbij wordt gedacht aan zaken zoals uitvoer op \texttt{stdout} of \texttt{stderr} terwijl die niet verwacht wordt.
     Standaard wordt een oefening als fout beschouwd indien er te veel uitvoer is, maar de auteur van de oefening kan kiezen om het teveel aan uitvoer te negeren (bijvoorbeeld als de studenten debugberichten schrijven naar stdout is dit niet in elke oefening een probleem).
     \item[Vroegtijdig stoppen van uitvoering] Hier gaat het om code van de studenten die bijvoorbeeld \mintinline{python}{exit(-5)} bevat.
     Dit zal standaard fout gerekend worden door \tested{}.
     De exitcode is echter een uitvoerkanaal zoals elk ander, waar de verwachte waarde ingesteld kan worden.
-    Is het dus de bedoeling om exitcode \texttt{-5} te krijgen, zal de oefening juist gerekend worden.
+    Is het dus de bedoeling om exitcode \texttt{-5} te krijgen, dan zal het testgeval juist gerekend worden.
 
 \end{description}
 
 \section{Implementatiekeuzes}\label{sec:technische-aspecten}
 
-In deze paragraaf lichten we enkele keuzes toe die we gemaakt hebben bij de implementatie van wat we dit hoofdstuk besproken hebben.
+In deze paragraaf lichten we enkele keuzes toe die we gemaakt hebben bij de implementatie van wat we in dit hoofdstuk besproken hebben.
 
 \tested{} is geschreven in Python.
 De hoofdreden daarvoor is pragmatisch: zoals besproken in \cref{subsec:jupyter-kernels}, gebruikte de eerste versie van \tested{} Jupyter-kernels om code uit te voeren.
@@ -1155,7 +1158,7 @@ Als \tested{} later weg van de Jupyter-kernels geëvolueerd is, is niet van prog
 Dit omdat er geen goede reden was om de bestaande code te herschrijven in een andere programmeertaal.
 
 Het grootste nadeel aan Python is dat het niet de snelste programmeertaal is op het gebied van uitvoeringstijd.
-Dit is voor \tested{} echter minder relevant: het gros van de beoordelingstijd wordt besteed aan het uitvoeren van de ingediende oplossing, niet aan \tested{} zelf.
+Dit is voor \tested{} minder relevant: het gros van de beoordelingstijd wordt besteed aan het uitvoeren van de ingediende oplossing, niet aan \tested{} zelf.
 
 Binnen \tested{} worden twee dependencies intensief gebruikt:
 
@@ -1179,7 +1182,7 @@ Hiervoor gebruiken we nu \texttt{pydantic}\footnote{Zie \url{https://pydantic-do
 Dit package laat ons toe om nog steeds \texttt{dataclasses} te gebruiken, maar toch validaties te kunnen toevoegen en de structuur te kunnen exporteren naar \acronym{JSON} Schema.
 \Cref{lst:programmed-evaluator-python} toont hoe de definitie van het testplan en het serialisatieformaat er uitziet.
 In \cref{lst:programmed-evaluator-json} staat dan de \acronym{JSON}-variant van dezelfde component: het moge duidelijk zijn dat de omzetting van Python naar \acronym{JSON} voor de hand ligt.
-Het \acronym{JSON} Schema voor respectievelijk het testplan en het serialisatieformaat kunnen zo verkregen worden:
+Het \acronym{JSON} Schema voor respectievelijk het testplan en het serialisatieformaat kunnen zo automatisch verkregen worden:
 
 \begin{minted}{console}
 > python -m tested.testplan
