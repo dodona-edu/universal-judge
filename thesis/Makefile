@@ -33,6 +33,8 @@ copies:
 	python scripts/copier.py ../exercise/division/evaluation/plan.json division-plan.tson
 	python scripts/copier.py ../exercise/sum/evaluation/short.tson sum-plan.tson
 	python scripts/copier.py ../exercise/isbn/evaluation/one-with-assignment.tson isbn-plan.tson
+	python scripts/copier.py ../exercise/objects/description/description.nl.md equal-description.md
+	python scripts/copier.py ../exercise/objects/evaluation/plan.tson equal-plan.tson
 
 markdown:
 	python scripts/mathjax.py ../exercise/lotto/description/description.nl.md ./src/sources/lotto-description.md

@@ -272,7 +272,6 @@ Hieronder volgt (een fragment van) de opgave:
     }, slice=opgave voorbeeld]{sources/isbn-description.md}
 \end{quote}
 
-
 \subsection{Structuur van de beoordeling en evaluatie}\label{subsec:oefening-isbn-structuur}
 
 Uit de opgave volgt dat er twee functies geïmplementeerd zullen moeten worden.
@@ -303,3 +302,44 @@ Ook dit is niet mogelijk in alle programmeertalen: \tested{} detecteert dit als 
 Dit zal ervoor zorgen dat we deze oefening niet in alle programmeertalen kunnen oplossen, naast het feit dat de programmeertaal ook collecties moet ondersteunen, wat bijvoorbeeld (nog) niet het geval is in C\@.
 
 \inputminted{json}{sources/isbn-plan.tson}
+
+\section{EqualChecker}\label{sec:oefening-equal}
+
+Als laatste oefeningen bekijken we een oefeningen die gebruik maakt van een klasse, om te illustreren hoe objectgerichte oefeningen ook mogelijk zijn.
+
+\subsection{Opgave}\label{subsec:oefeningen-equal-opgave}
+
+Hieronder volgt de opgave:
+
+\begin{quote}
+    \markdownInput[renderers = {
+    headingOne = {\chapter*{#1}},
+    headingTwo = {\section*{#1}},
+    headingThree = {\subsection*{#1}},
+    }]{sources/equal-description.md}
+\end{quote}
+
+\subsection{Structuur van de beoordeling en evaluatie}\label{subsec:oefening-equal-structuur}
+
+Bij het evalueren van deze oefeningen zullen we opnieuw meerdere statements nodig hebben: een statement om een instantie van de klasse \texttt{EqualCheck} te initialiseren, gevolgd door een statement die een methode van het aangemaakte object oproept.
+Hier hebben we de keuze gemaakt dat we per context drie testgevallen zullen hebben: één om het object te maken en twee die een methode oproepen.
+
+De evaluatie gebeurt met de ingebouwde evaluatie van \tested{}.
+
+\subsection{Testplan}\label{subsec:oefening-equal-testplan}
+
+Als testplan tonen we hier een testplan met één context, die zoals gezegd drie testgevallen heeft.
+Nieuwe elementen in dit testplan zijn:
+
+\begin{itemize}
+    \item In het eerste testgeval gebruiken we een assignment met een constructor om het object aan te maken.
+    In het testplan wordt een constructor voorgesteld als een speciale functie, waarbij de naam van de functie de naam van de klasse is.
+    Ook het type van de variabele die we maken bij de assignment is speciaal: het gaat hier namelijk niet om een ingebouwd type van \tested{}, maar om de klasse \texttt{EqualChecker}.
+    Aangezien dit een apart testgeval is, gebeurt de evaluatie van dit testgeval zoals voor elke functie.
+    Stel dat de constructor uitvoer genereert op \texttt{stdout}, dan zal dit testgeval fout gerekend worden.
+    \item In de volgende twee testgevallen gebruiken we een \texttt{namespace}-functie.
+    Als \texttt{namespace} geven we de naam van de variabele op die we hiervoor gemaakt hebben: \texttt{instance}.
+    Voor het overige gebeurt dit analoog aan de functies die we tot nu toe gezien hebben.
+\end{itemize}
+
+\inputminted{json}{sources/equal-plan.tson}
