@@ -6,6 +6,20 @@
         {
           "testcases": [
             {
+              "input": {
+                "type": "function",
+                "name": "loterij",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 18
+                  },
+                  {
+                    "type": "integer",
+                    "data": 172
+                  }
+                ]
+              },
               "output": {
                 "result": {
                   "value": {
@@ -30,20 +44,6 @@
                     ]
                   }
                 }
-              },
-              "input": {
-                "type": "function",
-                "name": "loterij",
-                "arguments": [
-                  {
-                    "type": "integer",
-                    "data": 18
-                  },
-                  {
-                    "type": "integer",
-                    "data": 172
-                  }
-                ]
               }
             }
           ]
@@ -51,6 +51,20 @@
         {
           "testcases": [
             {
+              "input": {
+                "type": "function",
+                "name": "loterij",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 6
+                  },
+                  {
+                    "type": "integer",
+                    "data": 15
+                  }
+                ]
+              },
               "output": {
                 "result": {
                   "value": {
@@ -75,7 +89,13 @@
                     ]
                   }
                 }
-              },
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
               "input": {
                 "type": "function",
                 "name": "loterij",
@@ -86,16 +106,10 @@
                   },
                   {
                     "type": "integer",
-                    "data": 15
+                    "data": 42
                   }
                 ]
-              }
-            }
-          ]
-        },
-        {
-          "testcases": [
-            {
+              },
               "output": {
                 "result": {
                   "value": {
@@ -120,20 +134,6 @@
                     ]
                   }
                 }
-              },
-              "input": {
-                "type": "function",
-                "name": "loterij",
-                "arguments": [
-                  {
-                    "type": "integer",
-                    "data": 6
-                  },
-                  {
-                    "type": "integer",
-                    "data": 42
-                  }
-                ]
               }
             }
           ]
@@ -141,6 +141,20 @@
         {
           "testcases": [
             {
+              "input": {
+                "type": "function",
+                "name": "loterij",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 13
+                  },
+                  {
+                    "type": "integer",
+                    "data": 27
+                  }
+                ]
+              },
               "output": {
                 "result": {
                   "value": {
@@ -165,20 +179,6 @@
                     ]
                   }
                 }
-              },
-              "input": {
-                "type": "function",
-                "name": "loterij",
-                "arguments": [
-                  {
-                    "type": "integer",
-                    "data": 13
-                  },
-                  {
-                    "type": "integer",
-                    "data": 27
-                  }
-                ]
               }
             }
           ]
@@ -186,6 +186,20 @@
         {
           "testcases": [
             {
+              "input": {
+                "type": "function",
+                "name": "loterij",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 7
+                  },
+                  {
+                    "type": "integer",
+                    "data": 42
+                  }
+                ]
+              },
               "output": {
                 "result": {
                   "value": {
@@ -210,7 +224,13 @@
                     ]
                   }
                 }
-              },
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
               "input": {
                 "type": "function",
                 "name": "loterij",
@@ -221,16 +241,10 @@
                   },
                   {
                     "type": "integer",
-                    "data": 42
+                    "data": 45
                   }
                 ]
-              }
-            }
-          ]
-        },
-        {
-          "testcases": [
-            {
+              },
               "output": {
                 "result": {
                   "value": {
@@ -255,20 +269,6 @@
                     ]
                   }
                 }
-              },
-              "input": {
-                "type": "function",
-                "name": "loterij",
-                "arguments": [
-                  {
-                    "type": "integer",
-                    "data": 7
-                  },
-                  {
-                    "type": "integer",
-                    "data": 45
-                  }
-                ]
               }
             }
           ]
@@ -276,6 +276,20 @@
         {
           "testcases": [
             {
+              "input": {
+                "type": "function",
+                "name": "loterij",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 6
+                  },
+                  {
+                    "type": "integer",
+                    "data": 42
+                  }
+                ]
+              },
               "output": {
                 "result": {
                   "value": {
@@ -300,20 +314,6 @@
                     ]
                   }
                 }
-              },
-              "input": {
-                "type": "function",
-                "name": "loterij",
-                "arguments": [
-                  {
-                    "type": "integer",
-                    "data": 6
-                  },
-                  {
-                    "type": "integer",
-                    "data": 42
-                  }
-                ]
               }
             }
           ]
@@ -321,6 +321,20 @@
         {
           "testcases": [
             {
+              "input": {
+                "type": "function",
+                "name": "loterij",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 17
+                  },
+                  {
+                    "type": "integer",
+                    "data": 55
+                  }
+                ]
+              },
               "output": {
                 "result": {
                   "value": {
@@ -345,20 +359,6 @@
                     ]
                   }
                 }
-              },
-              "input": {
-                "type": "function",
-                "name": "loterij",
-                "arguments": [
-                  {
-                    "type": "integer",
-                    "data": 17
-                  },
-                  {
-                    "type": "integer",
-                    "data": 55
-                  }
-                ]
               }
             }
           ]
@@ -366,6 +366,20 @@
         {
           "testcases": [
             {
+              "input": {
+                "type": "function",
+                "name": "loterij",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 6
+                  },
+                  {
+                    "type": "integer",
+                    "data": 50
+                  }
+                ]
+              },
               "output": {
                 "result": {
                   "value": {
@@ -390,7 +404,13 @@
                     ]
                   }
                 }
-              },
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
               "input": {
                 "type": "function",
                 "name": "loterij",
@@ -401,16 +421,10 @@
                   },
                   {
                     "type": "integer",
-                    "data": 50
+                    "data": 44
                   }
                 ]
-              }
-            }
-          ]
-        },
-        {
-          "testcases": [
-            {
+              },
               "output": {
                 "result": {
                   "value": {
@@ -435,20 +449,6 @@
                     ]
                   }
                 }
-              },
-              "input": {
-                "type": "function",
-                "name": "loterij",
-                "arguments": [
-                  {
-                    "type": "integer",
-                    "data": 6
-                  },
-                  {
-                    "type": "integer",
-                    "data": 44
-                  }
-                ]
               }
             }
           ]
@@ -456,6 +456,20 @@
         {
           "testcases": [
             {
+              "input": {
+                "type": "function",
+                "name": "loterij",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 11
+                  },
+                  {
+                    "type": "integer",
+                    "data": 42
+                  }
+                ]
+              },
               "output": {
                 "result": {
                   "value": {
@@ -480,20 +494,6 @@
                     ]
                   }
                 }
-              },
-              "input": {
-                "type": "function",
-                "name": "loterij",
-                "arguments": [
-                  {
-                    "type": "integer",
-                    "data": 11
-                  },
-                  {
-                    "type": "integer",
-                    "data": 42
-                  }
-                ]
               }
             }
           ]
@@ -501,6 +501,20 @@
         {
           "testcases": [
             {
+              "input": {
+                "type": "function",
+                "name": "loterij",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 17
+                  },
+                  {
+                    "type": "integer",
+                    "data": 80
+                  }
+                ]
+              },
               "output": {
                 "result": {
                   "value": {
@@ -525,20 +539,6 @@
                     ]
                   }
                 }
-              },
-              "input": {
-                "type": "function",
-                "name": "loterij",
-                "arguments": [
-                  {
-                    "type": "integer",
-                    "data": 17
-                  },
-                  {
-                    "type": "integer",
-                    "data": 80
-                  }
-                ]
               }
             }
           ]
@@ -546,6 +546,20 @@
         {
           "testcases": [
             {
+              "input": {
+                "type": "function",
+                "name": "loterij",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 6
+                  },
+                  {
+                    "type": "integer",
+                    "data": 42
+                  }
+                ]
+              },
               "output": {
                 "result": {
                   "value": {
@@ -570,20 +584,6 @@
                     ]
                   }
                 }
-              },
-              "input": {
-                "type": "function",
-                "name": "loterij",
-                "arguments": [
-                  {
-                    "type": "integer",
-                    "data": 6
-                  },
-                  {
-                    "type": "integer",
-                    "data": 42
-                  }
-                ]
               }
             }
           ]
@@ -591,6 +591,20 @@
         {
           "testcases": [
             {
+              "input": {
+                "type": "function",
+                "name": "loterij",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 20
+                  },
+                  {
+                    "type": "integer",
+                    "data": 88
+                  }
+                ]
+              },
               "output": {
                 "result": {
                   "value": {
@@ -615,7 +629,13 @@
                     ]
                   }
                 }
-              },
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
               "input": {
                 "type": "function",
                 "name": "loterij",
@@ -626,16 +646,10 @@
                   },
                   {
                     "type": "integer",
-                    "data": 88
+                    "data": 46
                   }
                 ]
-              }
-            }
-          ]
-        },
-        {
-          "testcases": [
-            {
+              },
               "output": {
                 "result": {
                   "value": {
@@ -660,20 +674,6 @@
                     ]
                   }
                 }
-              },
-              "input": {
-                "type": "function",
-                "name": "loterij",
-                "arguments": [
-                  {
-                    "type": "integer",
-                    "data": 20
-                  },
-                  {
-                    "type": "integer",
-                    "data": 46
-                  }
-                ]
               }
             }
           ]
@@ -681,6 +681,20 @@
         {
           "testcases": [
             {
+              "input": {
+                "type": "function",
+                "name": "loterij",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 10
+                  },
+                  {
+                    "type": "integer",
+                    "data": 42
+                  }
+                ]
+              },
               "output": {
                 "result": {
                   "value": {
@@ -705,20 +719,6 @@
                     ]
                   }
                 }
-              },
-              "input": {
-                "type": "function",
-                "name": "loterij",
-                "arguments": [
-                  {
-                    "type": "integer",
-                    "data": 10
-                  },
-                  {
-                    "type": "integer",
-                    "data": 42
-                  }
-                ]
               }
             }
           ]
@@ -726,6 +726,20 @@
         {
           "testcases": [
             {
+              "input": {
+                "type": "function",
+                "name": "loterij",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 6
+                  },
+                  {
+                    "type": "integer",
+                    "data": 42
+                  }
+                ]
+              },
               "output": {
                 "result": {
                   "value": {
@@ -750,7 +764,13 @@
                     ]
                   }
                 }
-              },
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
               "input": {
                 "type": "function",
                 "name": "loterij",
@@ -761,16 +781,10 @@
                   },
                   {
                     "type": "integer",
-                    "data": 42
+                    "data": 24
                   }
                 ]
-              }
-            }
-          ]
-        },
-        {
-          "testcases": [
-            {
+              },
               "output": {
                 "result": {
                   "value": {
@@ -795,20 +809,6 @@
                     ]
                   }
                 }
-              },
-              "input": {
-                "type": "function",
-                "name": "loterij",
-                "arguments": [
-                  {
-                    "type": "integer",
-                    "data": 6
-                  },
-                  {
-                    "type": "integer",
-                    "data": 24
-                  }
-                ]
               }
             }
           ]
@@ -816,6 +816,20 @@
         {
           "testcases": [
             {
+              "input": {
+                "type": "function",
+                "name": "loterij",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 10
+                  },
+                  {
+                    "type": "integer",
+                    "data": 42
+                  }
+                ]
+              },
               "output": {
                 "result": {
                   "value": {
@@ -840,20 +854,6 @@
                     ]
                   }
                 }
-              },
-              "input": {
-                "type": "function",
-                "name": "loterij",
-                "arguments": [
-                  {
-                    "type": "integer",
-                    "data": 10
-                  },
-                  {
-                    "type": "integer",
-                    "data": 42
-                  }
-                ]
               }
             }
           ]
@@ -861,6 +861,20 @@
         {
           "testcases": [
             {
+              "input": {
+                "type": "function",
+                "name": "loterij",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 1
+                  },
+                  {
+                    "type": "integer",
+                    "data": 42
+                  }
+                ]
+              },
               "output": {
                 "result": {
                   "value": {
@@ -885,20 +899,6 @@
                     ]
                   }
                 }
-              },
-              "input": {
-                "type": "function",
-                "name": "loterij",
-                "arguments": [
-                  {
-                    "type": "integer",
-                    "data": 1
-                  },
-                  {
-                    "type": "integer",
-                    "data": 42
-                  }
-                ]
               }
             }
           ]
@@ -906,6 +906,20 @@
         {
           "testcases": [
             {
+              "input": {
+                "type": "function",
+                "name": "loterij",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 6
+                  },
+                  {
+                    "type": "integer",
+                    "data": 22
+                  }
+                ]
+              },
               "output": {
                 "result": {
                   "value": {
@@ -930,7 +944,13 @@
                     ]
                   }
                 }
-              },
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
               "input": {
                 "type": "function",
                 "name": "loterij",
@@ -941,16 +961,10 @@
                   },
                   {
                     "type": "integer",
-                    "data": 22
+                    "data": 42
                   }
                 ]
-              }
-            }
-          ]
-        },
-        {
-          "testcases": [
-            {
+              },
               "output": {
                 "result": {
                   "value": {
@@ -975,7 +989,13 @@
                     ]
                   }
                 }
-              },
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
               "input": {
                 "type": "function",
                 "name": "loterij",
@@ -989,13 +1009,7 @@
                     "data": 42
                   }
                 ]
-              }
-            }
-          ]
-        },
-        {
-          "testcases": [
-            {
+              },
               "output": {
                 "result": {
                   "value": {
@@ -1020,20 +1034,6 @@
                     ]
                   }
                 }
-              },
-              "input": {
-                "type": "function",
-                "name": "loterij",
-                "arguments": [
-                  {
-                    "type": "integer",
-                    "data": 6
-                  },
-                  {
-                    "type": "integer",
-                    "data": 42
-                  }
-                ]
               }
             }
           ]
@@ -1041,6 +1041,20 @@
         {
           "testcases": [
             {
+              "input": {
+                "type": "function",
+                "name": "loterij",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 7
+                  },
+                  {
+                    "type": "integer",
+                    "data": 55
+                  }
+                ]
+              },
               "output": {
                 "result": {
                   "value": {
@@ -1065,20 +1079,6 @@
                     ]
                   }
                 }
-              },
-              "input": {
-                "type": "function",
-                "name": "loterij",
-                "arguments": [
-                  {
-                    "type": "integer",
-                    "data": 7
-                  },
-                  {
-                    "type": "integer",
-                    "data": 55
-                  }
-                ]
               }
             }
           ]
@@ -1086,6 +1086,20 @@
         {
           "testcases": [
             {
+              "input": {
+                "type": "function",
+                "name": "loterij",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 12
+                  },
+                  {
+                    "type": "integer",
+                    "data": 63
+                  }
+                ]
+              },
               "output": {
                 "result": {
                   "value": {
@@ -1110,7 +1124,13 @@
                     ]
                   }
                 }
-              },
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
               "input": {
                 "type": "function",
                 "name": "loterij",
@@ -1121,16 +1141,10 @@
                   },
                   {
                     "type": "integer",
-                    "data": 63
+                    "data": 42
                   }
                 ]
-              }
-            }
-          ]
-        },
-        {
-          "testcases": [
-            {
+              },
               "output": {
                 "result": {
                   "value": {
@@ -1155,20 +1169,6 @@
                     ]
                   }
                 }
-              },
-              "input": {
-                "type": "function",
-                "name": "loterij",
-                "arguments": [
-                  {
-                    "type": "integer",
-                    "data": 12
-                  },
-                  {
-                    "type": "integer",
-                    "data": 42
-                  }
-                ]
               }
             }
           ]
@@ -1176,6 +1176,20 @@
         {
           "testcases": [
             {
+              "input": {
+                "type": "function",
+                "name": "loterij",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 11
+                  },
+                  {
+                    "type": "integer",
+                    "data": 42
+                  }
+                ]
+              },
               "output": {
                 "result": {
                   "value": {
@@ -1200,20 +1214,6 @@
                     ]
                   }
                 }
-              },
-              "input": {
-                "type": "function",
-                "name": "loterij",
-                "arguments": [
-                  {
-                    "type": "integer",
-                    "data": 11
-                  },
-                  {
-                    "type": "integer",
-                    "data": 42
-                  }
-                ]
               }
             }
           ]
@@ -1221,6 +1221,20 @@
         {
           "testcases": [
             {
+              "input": {
+                "type": "function",
+                "name": "loterij",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 3
+                  },
+                  {
+                    "type": "integer",
+                    "data": 42
+                  }
+                ]
+              },
               "output": {
                 "result": {
                   "value": {
@@ -1245,20 +1259,6 @@
                     ]
                   }
                 }
-              },
-              "input": {
-                "type": "function",
-                "name": "loterij",
-                "arguments": [
-                  {
-                    "type": "integer",
-                    "data": 3
-                  },
-                  {
-                    "type": "integer",
-                    "data": 42
-                  }
-                ]
               }
             }
           ]
@@ -1266,6 +1266,20 @@
         {
           "testcases": [
             {
+              "input": {
+                "type": "function",
+                "name": "loterij",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 6
+                  },
+                  {
+                    "type": "integer",
+                    "data": 42
+                  }
+                ]
+              },
               "output": {
                 "result": {
                   "value": {
@@ -1290,7 +1304,13 @@
                     ]
                   }
                 }
-              },
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
               "input": {
                 "type": "function",
                 "name": "loterij",
@@ -1304,13 +1324,7 @@
                     "data": 42
                   }
                 ]
-              }
-            }
-          ]
-        },
-        {
-          "testcases": [
-            {
+              },
               "output": {
                 "result": {
                   "value": {
@@ -1335,20 +1349,6 @@
                     ]
                   }
                 }
-              },
-              "input": {
-                "type": "function",
-                "name": "loterij",
-                "arguments": [
-                  {
-                    "type": "integer",
-                    "data": 6
-                  },
-                  {
-                    "type": "integer",
-                    "data": 42
-                  }
-                ]
               }
             }
           ]
@@ -1356,6 +1356,20 @@
         {
           "testcases": [
             {
+              "input": {
+                "type": "function",
+                "name": "loterij",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 3
+                  },
+                  {
+                    "type": "integer",
+                    "data": 17
+                  }
+                ]
+              },
               "output": {
                 "result": {
                   "value": {
@@ -1380,20 +1394,6 @@
                     ]
                   }
                 }
-              },
-              "input": {
-                "type": "function",
-                "name": "loterij",
-                "arguments": [
-                  {
-                    "type": "integer",
-                    "data": 3
-                  },
-                  {
-                    "type": "integer",
-                    "data": 17
-                  }
-                ]
               }
             }
           ]
@@ -1401,6 +1401,20 @@
         {
           "testcases": [
             {
+              "input": {
+                "type": "function",
+                "name": "loterij",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 9
+                  },
+                  {
+                    "type": "integer",
+                    "data": 42
+                  }
+                ]
+              },
               "output": {
                 "result": {
                   "value": {
@@ -1425,20 +1439,6 @@
                     ]
                   }
                 }
-              },
-              "input": {
-                "type": "function",
-                "name": "loterij",
-                "arguments": [
-                  {
-                    "type": "integer",
-                    "data": 9
-                  },
-                  {
-                    "type": "integer",
-                    "data": 42
-                  }
-                ]
               }
             }
           ]
@@ -1446,6 +1446,20 @@
         {
           "testcases": [
             {
+              "input": {
+                "type": "function",
+                "name": "loterij",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 6
+                  },
+                  {
+                    "type": "integer",
+                    "data": 15
+                  }
+                ]
+              },
               "output": {
                 "result": {
                   "value": {
@@ -1470,7 +1484,13 @@
                     ]
                   }
                 }
-              },
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
               "input": {
                 "type": "function",
                 "name": "loterij",
@@ -1481,16 +1501,10 @@
                   },
                   {
                     "type": "integer",
-                    "data": 15
+                    "data": 33
                   }
                 ]
-              }
-            }
-          ]
-        },
-        {
-          "testcases": [
-            {
+              },
               "output": {
                 "result": {
                   "value": {
@@ -1515,20 +1529,6 @@
                     ]
                   }
                 }
-              },
-              "input": {
-                "type": "function",
-                "name": "loterij",
-                "arguments": [
-                  {
-                    "type": "integer",
-                    "data": 6
-                  },
-                  {
-                    "type": "integer",
-                    "data": 33
-                  }
-                ]
               }
             }
           ]
@@ -1536,6 +1536,20 @@
         {
           "testcases": [
             {
+              "input": {
+                "type": "function",
+                "name": "loterij",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 16
+                  },
+                  {
+                    "type": "integer",
+                    "data": 135
+                  }
+                ]
+              },
               "output": {
                 "result": {
                   "value": {
@@ -1560,20 +1574,6 @@
                     ]
                   }
                 }
-              },
-              "input": {
-                "type": "function",
-                "name": "loterij",
-                "arguments": [
-                  {
-                    "type": "integer",
-                    "data": 16
-                  },
-                  {
-                    "type": "integer",
-                    "data": 135
-                  }
-                ]
               }
             }
           ]
@@ -1581,6 +1581,20 @@
         {
           "testcases": [
             {
+              "input": {
+                "type": "function",
+                "name": "loterij",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 4
+                  },
+                  {
+                    "type": "integer",
+                    "data": 37
+                  }
+                ]
+              },
               "output": {
                 "result": {
                   "value": {
@@ -1605,20 +1619,6 @@
                     ]
                   }
                 }
-              },
-              "input": {
-                "type": "function",
-                "name": "loterij",
-                "arguments": [
-                  {
-                    "type": "integer",
-                    "data": 4
-                  },
-                  {
-                    "type": "integer",
-                    "data": 37
-                  }
-                ]
               }
             }
           ]
@@ -1626,6 +1626,20 @@
         {
           "testcases": [
             {
+              "input": {
+                "type": "function",
+                "name": "loterij",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 18
+                  },
+                  {
+                    "type": "integer",
+                    "data": 42
+                  }
+                ]
+              },
               "output": {
                 "result": {
                   "value": {
@@ -1650,20 +1664,6 @@
                     ]
                   }
                 }
-              },
-              "input": {
-                "type": "function",
-                "name": "loterij",
-                "arguments": [
-                  {
-                    "type": "integer",
-                    "data": 18
-                  },
-                  {
-                    "type": "integer",
-                    "data": 42
-                  }
-                ]
               }
             }
           ]
@@ -1671,6 +1671,20 @@
         {
           "testcases": [
             {
+              "input": {
+                "type": "function",
+                "name": "loterij",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 11
+                  },
+                  {
+                    "type": "integer",
+                    "data": 110
+                  }
+                ]
+              },
               "output": {
                 "result": {
                   "value": {
@@ -1695,20 +1709,6 @@
                     ]
                   }
                 }
-              },
-              "input": {
-                "type": "function",
-                "name": "loterij",
-                "arguments": [
-                  {
-                    "type": "integer",
-                    "data": 11
-                  },
-                  {
-                    "type": "integer",
-                    "data": 110
-                  }
-                ]
               }
             }
           ]
@@ -1716,6 +1716,20 @@
         {
           "testcases": [
             {
+              "input": {
+                "type": "function",
+                "name": "loterij",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 16
+                  },
+                  {
+                    "type": "integer",
+                    "data": 42
+                  }
+                ]
+              },
               "output": {
                 "result": {
                   "value": {
@@ -1740,20 +1754,6 @@
                     ]
                   }
                 }
-              },
-              "input": {
-                "type": "function",
-                "name": "loterij",
-                "arguments": [
-                  {
-                    "type": "integer",
-                    "data": 16
-                  },
-                  {
-                    "type": "integer",
-                    "data": 42
-                  }
-                ]
               }
             }
           ]
@@ -1761,6 +1761,20 @@
         {
           "testcases": [
             {
+              "input": {
+                "type": "function",
+                "name": "loterij",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 6
+                  },
+                  {
+                    "type": "integer",
+                    "data": 29
+                  }
+                ]
+              },
               "output": {
                 "result": {
                   "value": {
@@ -1785,20 +1799,6 @@
                     ]
                   }
                 }
-              },
-              "input": {
-                "type": "function",
-                "name": "loterij",
-                "arguments": [
-                  {
-                    "type": "integer",
-                    "data": 6
-                  },
-                  {
-                    "type": "integer",
-                    "data": 29
-                  }
-                ]
               }
             }
           ]
@@ -1806,6 +1806,20 @@
         {
           "testcases": [
             {
+              "input": {
+                "type": "function",
+                "name": "loterij",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 15
+                  },
+                  {
+                    "type": "integer",
+                    "data": 42
+                  }
+                ]
+              },
               "output": {
                 "result": {
                   "value": {
@@ -1830,20 +1844,6 @@
                     ]
                   }
                 }
-              },
-              "input": {
-                "type": "function",
-                "name": "loterij",
-                "arguments": [
-                  {
-                    "type": "integer",
-                    "data": 15
-                  },
-                  {
-                    "type": "integer",
-                    "data": 42
-                  }
-                ]
               }
             }
           ]
@@ -1851,6 +1851,20 @@
         {
           "testcases": [
             {
+              "input": {
+                "type": "function",
+                "name": "loterij",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 13
+                  },
+                  {
+                    "type": "integer",
+                    "data": 42
+                  }
+                ]
+              },
               "output": {
                 "result": {
                   "value": {
@@ -1875,20 +1889,6 @@
                     ]
                   }
                 }
-              },
-              "input": {
-                "type": "function",
-                "name": "loterij",
-                "arguments": [
-                  {
-                    "type": "integer",
-                    "data": 13
-                  },
-                  {
-                    "type": "integer",
-                    "data": 42
-                  }
-                ]
               }
             }
           ]
@@ -1896,6 +1896,20 @@
         {
           "testcases": [
             {
+              "input": {
+                "type": "function",
+                "name": "loterij",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 19
+                  },
+                  {
+                    "type": "integer",
+                    "data": 42
+                  }
+                ]
+              },
               "output": {
                 "result": {
                   "value": {
@@ -1920,20 +1934,6 @@
                     ]
                   }
                 }
-              },
-              "input": {
-                "type": "function",
-                "name": "loterij",
-                "arguments": [
-                  {
-                    "type": "integer",
-                    "data": 19
-                  },
-                  {
-                    "type": "integer",
-                    "data": 42
-                  }
-                ]
               }
             }
           ]
@@ -1941,6 +1941,20 @@
         {
           "testcases": [
             {
+              "input": {
+                "type": "function",
+                "name": "loterij",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 6
+                  },
+                  {
+                    "type": "integer",
+                    "data": 42
+                  }
+                ]
+              },
               "output": {
                 "result": {
                   "value": {
@@ -1965,20 +1979,6 @@
                     ]
                   }
                 }
-              },
-              "input": {
-                "type": "function",
-                "name": "loterij",
-                "arguments": [
-                  {
-                    "type": "integer",
-                    "data": 6
-                  },
-                  {
-                    "type": "integer",
-                    "data": 42
-                  }
-                ]
               }
             }
           ]
@@ -1986,6 +1986,20 @@
         {
           "testcases": [
             {
+              "input": {
+                "type": "function",
+                "name": "loterij",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 1
+                  },
+                  {
+                    "type": "integer",
+                    "data": 42
+                  }
+                ]
+              },
               "output": {
                 "result": {
                   "value": {
@@ -2010,20 +2024,6 @@
                     ]
                   }
                 }
-              },
-              "input": {
-                "type": "function",
-                "name": "loterij",
-                "arguments": [
-                  {
-                    "type": "integer",
-                    "data": 1
-                  },
-                  {
-                    "type": "integer",
-                    "data": 42
-                  }
-                ]
               }
             }
           ]

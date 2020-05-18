@@ -1,4 +1,4 @@
-oefening                     # Map van de oefening
+oefening                     # Map van de oefening in Dodona
 ├── config.json              # Configuratiebestand van Dodona 
 ├── description
 │   ├── description.en.html  # Beschrijving in het Engels
@@ -6,7 +6,7 @@ oefening                     # Map van de oefening
 │   └── media                # Mediabestanden van de beschrijvingen
 │       └── ISBN.gif
 ├── evaluation               # Evaluatiecode
-│   └── plan.json            # Het testplan
+│   └── plan.json            # Het testplan voor TESTed
 ├── preparation
 │   └── generator.py         # Code die het testplan genereert
 └── solution                 # Voorbeeldoplossingen voor de oefeningen

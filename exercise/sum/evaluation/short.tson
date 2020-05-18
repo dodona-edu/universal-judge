@@ -34,7 +34,7 @@
         {
           "context_testcase": {
             "input": {
-              "arguments": ["E", "y", "j", "2", "f", "N", "a"],
+              "arguments": ["spam", "eggs", "bacon"],
               "main_call": true
             },
             "output": {

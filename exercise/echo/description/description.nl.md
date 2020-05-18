@@ -1,4 +1,4 @@
-Je krijgt één regel invoer en je moet eenvoudig weg deze invoer herhalen. Je moet dus een programma schrijven dat als echo fungeert.
+Je krijgt één regel invoer en je moet eenvoudigweg deze invoer herhalen. Je moet dus een programma schrijven dat als echo fungeert.
 
 ### Invoer
 

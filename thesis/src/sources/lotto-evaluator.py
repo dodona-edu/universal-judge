@@ -40,8 +40,7 @@ def valid_lottery_numbers(number_str, count=6, maximum=42):
 
 
 def evaluate(expected, actual, arguments):
-    count = arguments[0]
-    maximum = arguments[1]
+    count, maximum = arguments
     valid, message = valid_lottery_numbers(actual, count, maximum)
     messages = [Message(message)] if message else []
     if valid:

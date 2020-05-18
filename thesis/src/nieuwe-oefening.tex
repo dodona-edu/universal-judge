@@ -2,25 +2,27 @@
 %! Suppress = TooLargeSection
 \chapter{Configuratie van een oefening}\label{ch:nieuwe-oefening}
 
-\lettrine{I}{n dit hoofdstuk} behandelen we het schrijven van oefeningen voor \tested{}.
-We bespreken verschillende eenvoudige oefeningen, met als doel dat deze oefeningen als bouwstenen kunnen dienen bij het samenstellen van complexere oefeningen of oefeningen die meerdere functies tegelijk gebruiken.
+\lettrine{I}{n dit hoofdstuk} behandelen we het configureren van oefeningen voor \tested{}.
+We bespreken verschillende eenvoudige oefeningen, met als doel dat deze oefeningen als voorbeeld kunnen dienen bij het samenstellen van complexere oefeningen of oefeningen die meerdere functionaliteiten tegelijk gebruiken.
 We bespreken oefeningen:
 
 \begin{itemize}
-    \item die invoer lezen en uitvoer produceren (\english{I/O}-oefeningen),
+    \item die invoer (\texttt{stdin}) lezen en uitvoer (\texttt{stdout}) produceren (\english{I/O}-oefeningen),
     \item waarbij functies beoordeeld worden door \tested{},
     \item waarbij een programmeertaalspecifieke evaluator gebruikt wordt,
-    \item waarbij een aangepaste evaluator gebruikt wordt,
-    \item waarbij commando-argumenten gelezen worden en
-    \item waarbij statements (assignments) gebruikt worden.
+    \item waarbij een geprogrammeerde evaluator gebruikt wordt,
+    \item waarbij commando-argumenten gelezen worden,
+    \item waarbij statements (assignments) gebruikt worden en
+    \item waarbij objectgerichte zaken gebruikt worden.
 \end{itemize}
 
-Bij elke oefening bespreken we de opgave, hoe we willen dat een beoordeling van een oplossing er zal uitzien en hoe het testplan er uiteindelijk uitziet.
+Bij elke oefening bespreken we de opgave, hoe we willen dat de beoordeling van een oplossing er zal uitzien en hoe het testplan er uiteindelijk uitziet.
 
 \section{Oefeningen in het Dodona-platform}\label{sec:oefeningen-in-het-dodona-platform}
 
 \tested{} zelf legt geen structuur of formaat vast voor de oefeningen, buiten het formaat van het testplan.
-De locatie van de relevante bestanden worden meegegeven met de configuratie bij het uitvoeren van \tested{}.
+De locatie van de relevante bestanden worden meegegeven bij het uitvoeren van \tested{}.
+\tested{} kan daardoor ook los van Dodona gebruikt worden.
 
 De configuratie in de manuele uitvoeringsmodus van \tested{} gaat er wel vanuit dat de mappenstructuur van de oefening de structuur van Dodona volgt.
 Voor de volledigheid volgt hieronder een mappenstructuur met de belangrijkste elementen van de oefening:
@@ -32,7 +34,7 @@ Voor meer details en bijkomende informatie (want het voorbeeld hierboven is slec
 \section{Lotto}\label{sec:oefening-lotto}
 
 Als eerste oefening beschouwen we de voorbeeldoefening Lotto uit \cref{sec:probleemstelling}, die we uitgebreid zullen bespreken.
-De opgave en voorbeeldoplossingen van deze oefeningen hebben we al vermeld, in respectievelijk \cref{lst:lotto} en \cref{lst:python-solution,lst:java-solution}.
+De opgave is al opgenomen in \cref{sec:probleemstelling}, terwijl de voorbeeldoplossingen in \cref{sec:probleemstelling} en \cref{lst:python-solution,lst:java-solution} staan.
 
 \subsection{Structuur van de beoordeling}\label{subsec:oefening-lotto-structuur}
 
@@ -42,31 +44,33 @@ In abstracto zullen we, om te beoordelen of deze functie correct geïmplementeer
 Zoals vermeld in \cref{subsec:het-testplan} bestaat het testplan uit een hiërarchie van elementen, beginnend met een aantal tabbladen, die elk een aantal contexten hebben, die op hun beurt bestaan uit testgevallen, die tot slot bestaan uit testen.
 In dit geval lijkt het logisch om één tabblad te gebruiken: per slot van rekening beoordelen we één functie.
 
-Elke functieoproep is onafhankelijk van elkaar, wat ons suggereert dat elke functieoproep in een aparte context dient te gebeuren.
+Alle functieoproepen zijn onafhankelijk van elkaar, wat suggereert dat elke functieoproep in een aparte context dient te gebeuren.
 Een context bestaat uit een optioneel testgeval voor de \texttt{main}-functie en een reeks normale testgevallen.
 Bij de Lotto-oefening hebben we geen \texttt{main}-functie, dus zullen we enkel normale testgevallen hebben.
 Er zal één testgeval per context zijn, want in elke context willen we de functie éénmaal oproepen.
 
-Vertaald naar pseudocode willen we dus dat onze beoordeling volgende vorm aanneemt:
+Vertaald naar pseudocode willen we dus dat onze beoordeling de volgende vorm aanneemt:
 
 \inputminted{python}{code/lotto-eval.py}
 
-Hierbij is het geheel van \texttt{assert}s dus ons tabblad, terwijl we elke \texttt{assert} in een aparte context en dus ook apart testgeval steken.
+Hierbij is het geheel van \texttt{assert}s dus ons tabblad, terwijl we elke \texttt{assert} in een aparte context en dus ook apart testgeval onderbrengen.
 
 \subsection{Evaluatie}\label{subsec:oefening-lotto-evaluatie}
 
-Iets dat we in de vorige paragraaf genegeerd hebben is hoe we het vergelijken met een verwachte waarde exact gaan doen.
-Lottonummers zijn namelijk willekeurig: de pseudocode van hierboven zou dus slechts heel zelden tot een juiste beoordeling leiden.
+Iets dat we in de vorige paragraaf genegeerd hebben, is hoe we het vergelijken met een verwachte waarde exact gaan doen.
+Lottonummers worden namelijk willekeurig getrokken: de pseudocode van hierboven zou dus slechts heel zelden tot een juiste beoordeling leiden.
 We lossen dit op door een geprogrammeerde evaluatie te gebruiken.
-Dit is een functie die door \tested{} zal opgeroepen worden en wier verantwoordelijkheid het vergelijken van de door de ingediende oplossing geproduceerde waarde met een verwachte waarde is.
+Dit is een functie die \tested{} oproept om de door de ingediende oplossing geproduceerde waarde te vergelijken met een verwachte waarde.
+Hierbij is het mogelijk om in het testplan argumenten mee te geven aan deze evaluatiefunctie, iets dat we hier ook doen.
+De argumenten die we meegeven aan de \texttt{loterij}-functie geven we ook mee aan de evaluatiefunctie.
 Conceptueel kunnen we dat ook vertalen naar dezelfde pseudocode:
 
 \inputminted{python}{code/lotto-eval-programmed.py}
 
-We zullen de geprogrammeerde evaluatie in Python doen: dit is de aanbevolen programmeertaal voor geprogrammeerde evaluaties, met als eenvoudige reden dat ze het snelst is.
+We zullen de geprogrammeerde evaluatie in Python doen: dit is de aanbevolen programmeertaal voor geprogrammeerde evaluaties in \tested{}, met als eenvoudige reden dat ze het snelst is.
 Hieronder is een fragment van de evaluatiecode: dit is de functie die door \tested{} zal opgeroepen worden.
 
-\inputminted[firstline=42,lastline=49]{python}{sources/lotto-evaluator.py}
+\inputminted[firstline=42,lastline=48]{python}{sources/lotto-evaluator.py}
 
 Wat doet deze functie nu juist?
 
@@ -76,30 +80,32 @@ Wat doet deze functie nu juist?
     Eerst worden dus de parameters uit de argumenten gehaald.
     \item De functie \texttt{valid\_lottery\_numbers} wordt opgeroepen.
     We hebben deze functie niet opgenomen in het codefragment hierboven omdat het een lange functie is, maar deze functie controleert in feite of de geproduceerde waarde voldoet aan de vereisten (klopt het aantal getallen, is de lijst gesorteerd, enzovoort).
-    \item Indien de geproduceerde waarde geldig is, gebruiken we die waarde ook als verwachte waarde.
+    \item Indien de geproduceerde waarde geldig is, dan gebruiken we die ook als verwachte waarde.
     Dit voorkomt dat de oplossing juist is, maar Dodona toch een verschil toont tussen de geproduceerde en verwachte waarde.
     \item Tot slot construeren we een \texttt{EvaluationResult} als returnwaarde.
+    Dit object verwacht vier waarden: het resultaat van de evaluatie (juist of fout), optioneel de verwachte waarde indien deze overschreven moet worden, optioneel de geproduceerde waarde indien deze overschreven moet worden en een optionele lijst van feedbackberichten (meer details in \cref{subsec:geprogrammeerde-evaluatie}).
 \end{enumerate}
 
 \subsection{Het testplan}\label{subsec:oefening-lotto-testplan}
 
-Nu we weten welke structuur we willen en we weten hoe we gaan beoordelen kunnen we een testplan in \acronym{JSON} opstellen.
+Nu we weten welke structuur we willen en hoe we gaan beoordelen kunnen, we een testplan opstellen in \acronym{JSON}.
 Hieronder volgt ter illustratie één context uit het testplan.
 In werkelijkheid (en ook bij deze oefening) wordt het testplan niet met de hand geschreven;
 het wordt gegenereerd door een Python-script.
 Dit script bevindt zich in de \texttt{preparation}-map van de oefening.
 
 We merken op dat we wel een verwachte waarde opnemen in het testplan, ook al gaat het om willekeurige returnwaarden.
-De reden hiervoor is dat deze verwachte waarde getoond zal worden als de geproduceerde waarde verkeerd is.
-Het is mogelijk om in de geprogrammeerde evaluatie geavanceerde zaken te doen, zoals indien de geproduceerde waarde juist is, maar niet gesorteerd is, de geproduceerde waarde te sorteren en als verwachte waarde te gebruiken.
+Bij deze oefening wordt deze waarde niet gebruikt bij de geprogrammeerde evaluatie.
+Toch is het nuttig ze op te nemen, omdat deze verwachte waarde in de feedback getoond zal worden als de geproduceerde waarde verkeerd is of als de tijdslimiet bijvoorbeeld overschreden wordt.
+Het is mogelijk om in de geprogrammeerde evaluatie geavanceerde zaken te doen, zoals indien de geproduceerde waarde juist is, maar niet gesorteerd, de geproduceerde waarde te sorteren en als verwachte waarde te gebruiken.
 
 \inputminted[firstline=6,lastline=50,gobble=8]{json}{sources/lotto-plan.tson}
 
 \section{Echo}\label{sec:oefening-echo}
 
-Een volgende oefening die we bekijken is een eenvoudige \term{invoer-uitvoer}-oefening.
+Een volgende oefening die we bekijken, is een eenvoudige \term{invoer-uitvoer}-oefening.
 Deze oefening bestaat uit een invoer lezen van \texttt{stdin} en deze invoer schrijven naar \texttt{stdout}.
-De testcode die gegenereerd wordt door \tested{} voor deze oefening en voorbeeldoplossingen in verschillende programmeertalen zijn opgenomen als \cref{ch:echo-oefening}.
+Bij deze oefeningen zijn voor een aantal programmeertalen de volledige testcode die door \tested{} gegenereerd wordt en de voorbeeldoplossingen opgenomen in \cref{ch:echo-oefening}.
 
 \subsection{Opgave}\label{subsec:oefening-echo-opgave}
 
@@ -119,9 +125,10 @@ Voor de structuur van de beoordeling geldt grotendeels hetzelfde als bij \cref{s
 In elke context gebruiken we een andere waarde als \texttt{stdin}.
 In tegenstelling tot de Lotto-oefening hebben we nu wel een \texttt{main}-functie.
 De context zal dus bestaan uit het testgeval voor de \texttt{main}-functie en geen normale testgevallen hebben.
+Het testgeval voor de \texttt{main}-functie wordt in het testplan apart aangeduid met \texttt{context\_testcase}.
 
 Qua evaluatie is deze oefening eenvoudig: we kunnen de ingebouwde evaluatie van \tested{} gebruiken.
-De geproduceerde waarde moet vergeleken worden met de verwachte waarde.
+De geproduceerde tekstuele waarde moet vergeleken worden met de verwachte waarde (en moet exact overeenkomen).
 
 \subsection{Testplan}\label{subsec:oefening-echo-testplan}
 
@@ -134,7 +141,7 @@ Het wordt ook niet met de hand geschreven: een Python-script genereert het.
 \section{Echofunctie}\label{sec:oefening-echofunctie}
 
 Een variant van de vorige oefening is de oefening \emph{Echofunctie}, waarbij een \texttt{echo}-functie geïmplementeerd dient te worden.
-Ook bij deze oefening zijn de gegenereerde testcode en voorbeeldoplossingen opgenomen als \cref{ch:echo-function-oefening}.
+Ook bij deze oefening zijn voor een aantal programmeertalen de gegenereerde testcode en voorbeeldoplossingen opgenomen in \cref{ch:echo-function-oefening}.
 
 \subsection{Opgave}\label{subsec:oefening-echofunctie-opgave}
 
@@ -148,31 +155,38 @@ De volledige opgave luidt als volgt:
     }]{sources/echo-function/description.md}
 \end{quote}
 
-Het is nuttig om stil te staan bij waarom de opgave vermeld dat de invoer altijd een \texttt{string} zal zijn.
+Het is nuttig om stil te staan bij waarom de opgave vermeldt dat de invoer altijd een \texttt{string} zal zijn.
 Dit is om de oefening in zoveel mogelijk programmeertalen te kunnen aanbieden.
 In bepaalde programmeertalen, zoals C, is het moeilijk om een functie te schrijven die een argument van een willekeurig type aanvaardt (we noemen dit heterogene argumenten binnen \tested{}).
-Om die reden verhindert \tested{} dat oefeningen waar dit vereist is opgelost kunnen worden in die programmeertalen (zie \cref{subsec:vereiste-functies}).
+Om die reden verhindert \tested{} dat oefeningen waar dit vereist is opgelost kunnen worden in die programmeertalen.
+Toch is het mogelijk om oefeningen op te stellen waar heterogene argumenten gebruikt worden.
+Deze oefeningen zullen dan in minder programmeertalen beoordeeld kunnen worden.
+Stel dat we in het testplan bijvoorbeeld de \texttt{echo}-functie oproepen met een getal in plaats van een \texttt{string}.
+\tested{} zal dan automatisch detecteren dat deze oefening enkel opgelost kan worden in programmeertalen die heterogene functieargumenten ondersteunen.
+Als we dan toch zouden proberen om een oplossing geschreven in C te laten beoordelen, zal \tested{} een foutmelding tonen (zie \cref{subsec:vereiste-functies} voor meer details over dit mechanisme).
 
 \subsection{Structuur van de beoordeling en evaluatie}\label{subsec:oefening-echofunctie-structuur}
 
 De structuur is volledig analoog aan de \emph{Echo}-oefening.
 We zullen een reeks contexten hebben, waarbij we in elke context de te implementeren functie oproepen met andere invoer en het resultaat controleren.
 Ook de evaluatie is analoog: we gebruiken de ingebouwde evaluatie van \tested{}.
+Het verschil is in welke kanalen de invoer en uitvoer zich bevindt: bij deze oefening gebruiken we functieargumenten in plaats van \texttt{stdin} en het resultaat is een returnwaarde in plaats van \texttt{stdout}.
 
 \subsection{Testplan}\label{subsec:oefening-echofunctie-testplan}
 
 Ter illustratie tonen we hier een testplan met één context, die twee testgevallen bevat.
 Dit komt met opzet niet overeen met wat we hierboven bij de structuur van de beoordeling besproken hebben.
-In het eigenlijke testplan dat gebruikt zou worden voor deze oefening zal elk testgeval ook afzonderlijk in een context geplaatst worden.
+De reden hiervoor is dat we ook een illustratie van meerdere testgevallen willen in \cref{ch:echo-function-oefening}.
+In het testplan dat gebruikt zou worden bij het beoordelen van oplossingen van studenten zal elk testgeval wel in een eigen context geplaatst worden (en zullen er opnieuw meer contexten zijn).
 
 \inputminted{json}{sources/echo-function/one-testcase.tson}
 
 \section{ZeroDivisionError}\label{sec:oefening-zero}
 
-Een interessante oefening is de oefening \emph{ZeroDivisionError} uit \emph{De Programmeursleerling}\footnote{Beschikbaar hier: \url{https://dodona.ugent.be/nl/courses/293/series/2535/activities/270198713/}}.
+Een interessante oefening is de oefening \emph{ZeroDivisionError} uit het boek \emph{De Programmeursleerling} van Pieter Spronck \autocite{programmeursleerling}.\footnote{Een interactieve versie is beschikbaar op Dodona: \url{https://dodona.ugent.be/nl/courses/293/series/2535/activities/270198713/}}
 In deze oefening moet een programma geschreven worden dat bij het uitvoeren een exception gooit.
 In Python gaat het om een \texttt{ZeroDivisionError}.
-We nemen de opgave hier niet op, omdat de opgave lang is en weinig bijdraagt aan het doel dat we hier hebben, het uitleggen van hoe oefeningen voor \tested{} geschreven moeten worden.
+We nemen de opgave hier niet op, omdat de opgave lang is en weinig bijdraagt aan het doel dat we hier hebben, het uitleggen hoe oefeningen voor \tested{} geschreven moeten worden.
 
 \subsection{Structuur van de beoordeling}\label{subsec:oefening-zero-structuur}
 
@@ -182,7 +196,7 @@ De structuur zal dus een tabblad met een context met een testgeval voor de \text
 
 \subsection{Evaluatie}\label{subsec:oefening-zero-evaluatie}
 
-Het feit dat specifiek een \texttt{ZeroDivisionError} moet gegooid worden, zorgt ervoor dat we hier een programmeertaalspecifieke evaluatie zullen moeten gebruiken.
+Het feit dat specifiek een \texttt{ZeroDivisionError} moet gegooid worden in Python, zorgt ervoor dat we hier een programmeertaalspecifieke evaluatie zullen moeten gebruiken.
 In Java gaat het bijvoorbeeld om een \texttt{ArithmeticException}, terwijl delen door nul is Haskell zal zorgen voor een \texttt{DivideByZero}.
 
 We bekijken hier eens niet de evaluatiecode in Python, maar die in Java.
@@ -195,39 +209,46 @@ De evaluatiecode is redelijk rechtdoorzee: indien het een exception van het juis
 \subsection{Testplan}\label{subsec:oefening-zero-testplan}
 
 Ook het testplan is een vrij eenvoudige vertaling van de structuur die we hiervoor hebben bedacht.
-Uniek hier is dat dit testplan ook het testplan is zoals het gebruikt wordt bij in Dodona.
+Uniek hier is dat dit testplan ook het volledige testplan is zoals het gebruikt wordt bij de oefening in Dodona.
 
 \inputminted{json}{sources/division-plan.tson}
 
 \section{Som}\label{sec:oefeningen-som}
 
-Deze oefening is andermaal afkomstig uit \emph{De Programmeursleerling}\footnote{\url{https://dodona.ugent.be/nl/courses/293/series/2556/exercises/1653208777/}}.
-Deze oefening is interessant om te illustreren hoe commandoparameters werken en hoe de exitcode werkt.
-Ditmaal bestaat de opgave eruit om een reeks getallen in te lezen uit de commandoparameters en de som ervan uit te schrijven.
+Deze oefening is andermaal afkomstig uit het boek \emph{De Programmeursleerling}\footnote{\url{https://dodona.ugent.be/nl/courses/293/series/2556/exercises/1653208777/}}.
+De oefening is interessant om te illustreren hoe commandoargumenten werken en hoe de exitcode werkt.
+De opgave bestaat eruit om een reeks getallen in te lezen uit de commandoparameters en de som ervan uit te schrijven op \texttt{stdout}.
+Als een van de commandoargumenten geen geldig getal is, dan moet een foutboodschap naar \texttt{stderr} geschreven worden en moet het programma eindigen met exitcode \texttt{1}.
 Bijvoorbeeld:
 
 \begin{minted}{console}
 > python ./som
 0
+> echo $?
+0
 > python ./som 1 2 3 4 5 6 7 8 9 10
 55
 > python ./som 1 -2 3 -4 5 -6 7 -8 9 -10
 -5
+> python ./som spam eggs bacon
+som: ongeldige argumenten
+> echo $?
+1
 \end{minted}
 
 Ook hier nemen we de opgave niet op door zijn lengte en geringe nut.
 
 \subsection{Structuur van de beoordeling en evaluatie}\label{subsec:oefening-som-structuur}
 
-Qua structuur en evaluatie lijkt deze oefening sterk op de \emph{Echo}-oefening, met dat verschil dat we hier commandoparameters hebben.
-Om de ingediende oplossing te beoordelen, zullen we de oplossing meerdere malen uitvoeren met telkens andere commandoparameters.
-We plaatsen elk stel parameters in een eigen context.
-Bij deze opgave is er geen keuze: per context is er maximaal één stel commandoparameters, want de \texttt{main}-functie wordt hoogstens eenmaal opgeroepen per context.
-Het verwachte resultaat is opnieuw deterministisch te berekenen op basis van de commandoparameters, dus kunnen we de ingebouwde evaluatie van \tested{} gebruiken.
+Qua structuur en evaluatie lijkt deze oefening sterk op de \emph{Echo}-oefening, met dat verschil dat we hier commandoargumenten hebben.
+Om de ingediende oplossing te beoordelen, zullen we de oplossing meerdere malen uitvoeren met telkens andere commandoargumenten.
+We plaatsen elk stel argumenten in een eigen context.
+Bij deze opgave is er geen keuze: per context is er maximaal één stel commandoargumenten, want de \texttt{main}-functie wordt hoogstens eenmaal opgeroepen per context.
+Het verwachte resultaat op \texttt{stdout} en de foutboodschappen zijn opnieuw deterministisch te berekenen op basis van de commandoargumenten, dus kunnen we de ingebouwde evaluatie van \tested{} gebruiken.
 
 \subsection{Testplan}\label{subsec:oefening-som-testplan}
 
-In het testplan zijn twee contexten opgenomen: een waarbij getallen gegeven zijn en een waarbij andere argumenten gegeven worden.
+In het testplan zijn drie contexten opgenomen: één waarbij getallen gegeven zijn, één waarbij geen argumenten gegeven worden en één waar geen geldige getallen als argumenten gegeven worden.
 Dit opnieuw om het testplan kort te houden;
 bij gebruik in Dodona zal het testplan meer contexten bevatten.
 
@@ -235,9 +256,9 @@ bij gebruik in Dodona zal het testplan meer contexten bevatten.
 
 \section{ISBN}\label{sec:oefening-isbn}
 
-Als laatste oefening behandelen we de \emph{\acronym{ISBN}}-oefening.
+Een volgende oefeningen die we behandelen is de \emph{\acronym{ISBN}}-oefening.
 Deze oefening is al vermeld in \cref{subsec:in-de-praktijk}, waar we besproken hebben dat we deze oefening al hebben laten oplossen door studenten.
-Vanuit het oogpunt van het schrijven van oefeningen voor \tested{} is deze oefening interessant doordat het een "ingewikkeldere" oefening is, waarbij ook statements gebruikt worden.
+Vanuit het oogpunt van het schrijven van oefeningen voor \tested{} is deze oefening interessant doordat het een "ingewikkeldere" oefening is, waarbij ook statements (\latin{in case} assignments) gebruikt worden.
 
 \subsection{Opgave}\label{subsec:oefeningen-isbn-opgave}
 
@@ -257,22 +278,28 @@ Hieronder volgt (een fragment van) de opgave:
 Uit de opgave volgt dat er twee functies geïmplementeerd zullen moeten worden.
 Het is gebruikelijk bij Dodona om elk van deze functies in een apart tabblad te beoordelen.
 
-De contexten in het eerste tabblad, voor de functie \texttt{is\_isbn}, zijn niet speciaal.
+De contexten in het eerste tabblad voor de functie \texttt{is\_isbn} zijn niet speciaal.
 We roepen de functie \texttt{is\_isbn} per context één keer op met andere argumenten.
 
-In het tweede tabblad, voor de functie \texttt{are\_isbn}, ligt de situatie iets anders.
+In het tweede tabblad voor de functie \texttt{are\_isbn} ligt de situatie iets anders.
 Het eerste argument van deze functie is een lijst van potentiële \acronym{ISBN}'s.
 Om de overzichtelijkheid te verbeteren willen we, zoals in het voorbeeld in de opgave, deze lijst eerst toekennen aan een variabele (een assignment) en dan de variabele gebruiken als argument voor de functie.
 
-In \tested{} heeft een testgeval altijd uit één statement als invoer.
+In \tested{} heeft een testgeval altijd één statement als invoer.
 In de situatie hierboven hebben we twee statements: eerst de assignment en vervolgens de functieoproep.
 We zullen dus per context twee testgevallen hebben.
 
-Op het vlak van evaluatie is deze oefening eenvoudig: door deterministische resultaten kunnen we de ingebouwde evaluate van \tested{} gebruiken.
+Op het vlak van evaluatie is deze oefening eenvoudig: door deterministische resultaten kunnen we de ingebouwde evaluatie van \tested{} gebruiken.
 
 \subsection{Testplan}\label{subsec:oefening-isbn-testplan}
 
 Als testplan tonen we hier een testplan met een context uit het tweede tabblad (dus met de assignment).
 Om het testplan niet te lang te maken hebben we geen context opgenomen uit het eerste tabblad, vermits deze contexten niets nieuws doen.
+
+De expressie van de assignment is in dit geval een waarde: een lijst van elementen.
+Dit is de eerste keer dat we een collectie gebruiken als waarde, dus loont het de moeite om daar even stil bij te staan.
+Het gebruikt illustreert dat de types van de elementen in een collectie niet hetzelfde gegevenstype moeten hebben: deze lijst bevat tekst, getallen en booleans.
+Ook dit is niet mogelijk in alle programmeertalen: \tested{} detecteert dit als een heterogene collectie.
+Dit zal ervoor zorgen dat we deze oefening niet in alle programmeertalen kunnen oplossen, naast het feit dat de programmeertaal ook collecties moet ondersteunen, wat bijvoorbeeld (nog) niet het geval is in C\@.
 
 \inputminted{json}{sources/isbn-plan.tson}

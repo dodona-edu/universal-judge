@@ -36,6 +36,20 @@ if __name__ == '__main__':
     for data in tuples:
         contexts.append({
             "testcases": [{
+                "input":  {
+                    "type":      "function",
+                    "name":      "loterij",
+                    "arguments": [
+                        {
+                            "type": "integer",
+                            "data": data[1]
+                        },
+                        {
+                            "type": "integer",
+                            "data": data[2]
+                        }
+                    ]
+                },
                 "output": {
                     "result": {
                         "value":     {
@@ -60,20 +74,6 @@ if __name__ == '__main__':
                             ]
                         }
                     }
-                },
-                "input":  {
-                    "type":      "function",
-                    "name":      "loterij",
-                    "arguments": [
-                        {
-                            "type": "integer",
-                            "data": data[1]
-                        },
-                        {
-                            "type": "integer",
-                            "data": data[2]
-                        }
-                    ]
                 }
             }]
         })
