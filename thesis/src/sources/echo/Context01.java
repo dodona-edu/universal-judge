@@ -5,14 +5,14 @@ public class Context01 implements Closeable {
     private final PrintWriter valueWriter;
     private final PrintWriter exceptionWriter;
     public Context01() throws Exception {
-        this.valueWriter = new PrintWriter("J76WUexjc_values.txt");
-        this.exceptionWriter = new PrintWriter("J76WUexjc_exceptions.txt");
+        this.valueWriter = new PrintWriter("rUXBW36d8_values.txt");
+        this.exceptionWriter = new PrintWriter("rUXBW36d8_exceptions.txt");
     }
     private void writeSeparator() throws Exception {
-        valueWriter.write("--J76WUexjc-- SEP");
-        exceptionWriter.write("--J76WUexjc-- SEP");
-        System.err.print("--J76WUexjc-- SEP");
-        System.out.print("--J76WUexjc-- SEP");
+        valueWriter.write("--rUXBW36d8-- SEP");
+        exceptionWriter.write("--rUXBW36d8-- SEP");
+        System.err.print("--rUXBW36d8-- SEP");
+        System.out.print("--rUXBW36d8-- SEP");
         valueWriter.flush();
         exceptionWriter.flush();
         System.err.flush();

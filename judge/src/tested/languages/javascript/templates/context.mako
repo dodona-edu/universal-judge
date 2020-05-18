@@ -24,12 +24,10 @@ const exceptionFile = fs.openSync("${exception_file}", "w");
 ## This is necessary, otherwise the separators are sometimes missing when
 ## execution is killed due to timeouts.
 function writeSeparator() {
-    const separator = "--${secret_id}-- SEP";
-    fs.writeSync(valueFile, separator);
-    fs.writeSync(exceptionFile, separator);
-    fs.writeSync(process.stdout.fd, separator);
-    fs.writeSync(process.stderr.fd, separator);
-    ## TODO: flush the file descriptors
+    fs.writeSync(valueFile, "--${secret_id}-- SEP");
+    fs.writeSync(exceptionFile, "--${secret_id}-- SEP");
+    fs.writeSync(process.stdout.fd, "--${secret_id}-- SEP");
+    fs.writeSync(process.stderr.fd, "--${secret_id}-- SEP");
 }
 
 ##################################
@@ -71,19 +69,16 @@ ${before}
 
 ## Import the code for the first time, which will run the code.
 try {
-
     writeSeparator();
 
-    // TODO: seek alternative approach for inlining the submission
+    ## TODO: seek alternative approach for inlining the submission
     eval(fs.readFileSync("${submission_name}.js") + "");
 
     <%include file="statement.mako" args="statement=context_testcase.exception_statement()" />
-
 } catch(e) {
     ## If there is a main test case, pass the exception to it.
     <%include file="statement.mako" args="statement=context_testcase.exception_statement('e')" />
 }
-
 
 ## Generate the actual tests based on the context.
 % for testcase in testcases:

@@ -45,6 +45,7 @@ generate:
 	python scripts/generate_echo_python.py
 	python scripts/generate_echo_java.py
 	python scripts/generate_echo_haskell.py
+	python scripts/generate_echo_javascript.py
 	python scripts/generate_echo_function_c.py
 	python scripts/generate_echo_function_python.py
 	python scripts/generate_echo_function_java.py

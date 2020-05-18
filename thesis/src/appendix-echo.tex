@@ -200,12 +200,10 @@ Dit is met opzet en nodig omdat de \texttt{do}-notatie in Haskell moet eindigen 
 
 \subsubsection{\texttt{Context00.hs}}
 
-%! Suppress = EscapeUnderscore
 \inputminted{haskell}{sources/echo/Context00.hs}
 
 \subsubsection{\texttt{Context01.hs}}
 
-%! Suppress = EscapeUnderscore
 \inputminted{haskell}{sources/echo/Context01.hs}
 
 \subsubsection{\texttt{Selector.hs}}
@@ -233,5 +231,46 @@ Deze uitvoerbare bestanden worden vervolgens uitgevoerd:
 > ./Context00
 <uitvoer context_0_0>
 > ./Context01
+<uitvoer context_0_1>
+\end{minted}
+
+\section{JavaScript}\label{sec:echo-javascript}
+
+\subsection{Oplossing}\label{subsec:echo-javascript-oplossing}
+
+\inputminted{python}{sources/echo/correct.js}
+
+\subsection{Gegenereerde code}\label{subsec:echo-javascript-gegenereerde-code}
+
+De testcode die gegenereerd wordt bij het uitvoeren van bovenstaande testplan.
+Deze code is lichtjes aangepast: overtollige witruimte is verwijderd.
+Anders is de code identiek aan de door \tested{} gegenereerde code.
+
+In JavaScript is geen selector nodig, waardoor de gegenereerde code identiek is voor batchcompilatie en voor contextcompilatie.
+In beide gevallen worden twee bestanden gegenereerd:
+
+\begin{enumerate}
+    \item \texttt{context00.js}
+    \item \texttt{context01.js}
+\end{enumerate}
+
+\subsubsection{\texttt{context00.js}}
+
+\inputminted{javascript}{sources/echo/context00.js}
+
+\subsubsection{\texttt{context01.js}}
+
+\inputminted{python}{sources/echo/context01.js}
+
+\subsection{Uitvoeren}\label{subsec:echo-javascript-uitvoeren}
+
+Bij het uitvoeren worden de gegenereerde bestanden uitgevoerd.
+In beide gevallen (batchcompilatie en contextcompilatie) wordt de juiste context uitgevoerd:
+
+%! Suppress = EscapeUnderscore
+\begin{minted}{console}
+> node context00.js
+<uitvoer context_0_0>
+> node context01.js
 <uitvoer context_0_1>
 \end{minted}
