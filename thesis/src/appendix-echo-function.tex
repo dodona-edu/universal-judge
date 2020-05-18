@@ -141,3 +141,55 @@ Dit bestand wordt vervolgens uitgevoerd:
 > ./context_0_0
 <uitvoer context_0_0>
 \end{minted}
+
+\section{Haskell}\label{sec:echo-function-haskell}
+
+\subsection{Oplossing}\label{subsec:echo-function-haskell-oplossing}
+
+We voeren het testplan uit met deze oplossing:
+
+\inputminted{haskell}{sources/echo-function/correct.hs}
+
+\subsection{Gegenereerde code}\label{subsec:echo-function-haskell-gegenereerde-code}
+
+De gegenereerde code die gegenereerd wordt bij het uitvoeren van bovenstaande testplan.
+Deze code is lichtjes aangepast: overtollige witruimte is verwijderd.
+Anders is de code identiek aan de door \tested{} gegenereerde code.
+
+Bij batchcompilatie worden alle testgevallen in één keer gecompileerd.
+Volgende bestanden werden gegenereerd:
+
+\begin{enumerate}
+    \item \texttt{Context00.hs}
+    \item \texttt{Selector.hs}
+\end{enumerate}
+
+\subsubsection{\texttt{Context00.hs}}
+
+%! Suppress = EscapeUnderscore
+\inputminted{haskell}{sources/echo-function/Context00.hs}
+
+\subsubsection{\texttt{Selector.hs}}
+
+\inputminted{haskell}{sources/echo-function/Selector.hs}
+
+\subsection{Uitvoeren}\label{subsec:echo-function-haskell-uitvoeren}
+
+Bij het compileren wordt \texttt{Selector.hs} gecompileerd, wat leidt tot een uitvoerbaar bestand \texttt{Selector}.
+Dit laatste bestand wordt dan uitgevoerd:
+
+%! Suppress = EscapeUnderscore
+\begin{minted}{console}
+> ./selector Context00
+<uitvoer context_0_0>
+\end{minted}
+
+
+Bij contextcompilatie wordt elke context afzonderlijk gecompileerd, wat leidt tot een uitvoerbaar bestand: \texttt{Context00}.
+Dit bestand wordt vervolgens uitgevoerd:
+
+%! Suppress = EscapeUnderscore
+\begin{minted}{console}
+> ./Context00
+<uitvoer context_0_0>
+\end{minted}

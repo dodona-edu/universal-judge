@@ -45,6 +45,7 @@ def clean(file):
     with open(file, 'r') as f:
         contents = f.read()
     contents = re.sub(r"(\s)+\n", os.linesep, contents)
+    contents = re.sub(r"\[\s+]", "{}", contents)
     contents = contents.strip()
     with open(file, 'w') as f:
         f.write(contents)

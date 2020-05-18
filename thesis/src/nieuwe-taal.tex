@@ -644,11 +644,6 @@ In dat bestand staan de verschillende testen.
 Bij elke test staat welke oplossing gebruikt wordt;
 indien het niet duidelijk zou zijn wat de oplossing voor een bepaalde test moet doen, kunnen de bestaande oplossingen in de bestaande programmeertalen een grote hulp zijn.
 
-\subsection{Resultaat}\label{subsec:resultaat}
-
-We hebben nu een werkende C-judge voor \tested{} en bij uitbreiding voor het Dodona-platform.
-Daarmee hebben we ondersteuning voor een eerste programmeertaal waarvoor er nog geen judge bestond in Dodona.
-
 \section{Hoe lang duurt het configureren van een programmeertaal?}\label{sec:hoe-lang-duurt-het-implementeren-van-een-programmeertaal?}
 
 Een belangrijke factor bij het configureren van een programmeertaal is de kennis over de programmeertaal.
@@ -693,7 +688,6 @@ Gegeven een goede kennis over de programmeertaal (en dat de programmeertaal niet
 Hiermee bedoelen we dit hoofdstuk lezen en de stappen die erin beschreven staan uitvoeren, zodat er een werkende configuratie is.
 Om de programmeertaal tot in de puntjes uit te werken voorzien we een kleine twee dagen.
 Hiermee bedoelen we bijvoorbeeld het toevoegen van de programmeertaal aan de testen, waarvoor er verschillende oefeningen opgelost moeten worden.
-
 
 \section{Stabiliteit van TESTed}\label{sec:stabiliteit-van-tested}
 
@@ -746,3 +740,17 @@ Een voorbeeld is dat bij de methode voor het uitvoeren van de code nu ook het vo
 C compileert naar een uitvoerbaar bestand, wat tot dan nog niet gebeurde (Haskell gebruikte nog \texttt{runhaskell}).
 Om het uitvoerbare bestand uit te voeren is een absoluut pad naar dat uitvoerbaar bestand nodig, maar die informatie was niet voorhanden in de methode.
 Hierbij moest de configuratieklasse van de bestaande programmeertalen ook licht gewijzigd worden, want de \texttt{execute}-functie die geïmplementeerd was in deze klassen kreeg een bijkomende parameter.
+
+\section{Ondersteunde programmeertalen}\label{sec:programmeertalen-in-tested}
+
+Momenteel ondersteunt \tested{} 5 programmeertalen:
+
+\begin{itemize}
+    \item Python
+    \item Java
+    \item Haskell (met \acronym{GHC}, er is een variant met \texttt{runhaskell})
+    \item C (toegevoegd in dit hoofdstuk als voorbeeld)
+    \item JavaScript (grotendeels toegevoegd door prof.\ Dawyndt als controle dat dit hoofdstuk slaagt in zijn opzet: duidelijk maken hoe een programmeertaal geconfigureerd moet worden)
+\end{itemize}
+
+Met het toevoegen van C hebben we ondersteuning voor een eerste programmeertaal waarvoor er nog geen judge bestond in Dodona.

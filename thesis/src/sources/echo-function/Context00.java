@@ -5,14 +5,14 @@ public class Context00 implements Closeable {
     private final PrintWriter valueWriter;
     private final PrintWriter exceptionWriter;
     public Context00() throws Exception {
-        this.valueWriter = new PrintWriter("EjgkIhoLX_values.txt");
-        this.exceptionWriter = new PrintWriter("EjgkIhoLX_exceptions.txt");
+        this.valueWriter = new PrintWriter("NuwTZd6h9_values.txt");
+        this.exceptionWriter = new PrintWriter("NuwTZd6h9_exceptions.txt");
     }
     private void writeSeparator() throws Exception {
-        valueWriter.write("--EjgkIhoLX-- SEP");
-        exceptionWriter.write("--EjgkIhoLX-- SEP");
-        System.err.print("--EjgkIhoLX-- SEP");
-        System.out.print("--EjgkIhoLX-- SEP");
+        valueWriter.write("--NuwTZd6h9-- SEP");
+        exceptionWriter.write("--NuwTZd6h9-- SEP");
+        System.err.print("--NuwTZd6h9-- SEP");
+        System.out.print("--NuwTZd6h9-- SEP");
         valueWriter.flush();
         exceptionWriter.flush();
         System.err.flush();
@@ -24,11 +24,11 @@ public class Context00 implements Closeable {
     private void sendException(Throwable exception) throws Exception {
         Values.sendException(exceptionWriter, exception);
     }
-    private void sendSpecificValue(EvaluationResult r) {
-        Values.sendEvaluated(valueWriter, r);
+    private void sendSpecificValue(EvaluationResult value) {
+        Values.sendEvaluated(valueWriter, value);
     }
-    private void sendSpecificException(EvaluationResult r) {
-        Values.sendEvaluated(exceptionWriter, r);
+    private void sendSpecificException(EvaluationResult exception) {
+        Values.sendEvaluated(exceptionWriter, exception);
     }
     void execute() throws Exception {
         this.writeSeparator();

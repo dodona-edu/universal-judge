@@ -1,12 +1,12 @@
 import values
 import sys
-value_file = open("c0bS4U2LG_values.txt", "w")
-exception_file = open("c0bS4U2LG_exceptions.txt", "w")
+value_file = open("uyArukdpI_values.txt", "w")
+exception_file = open("uyArukdpI_exceptions.txt", "w")
 def write_separator():
-    value_file.write("--c0bS4U2LG-- SEP")
-    exception_file.write("--c0bS4U2LG-- SEP")
-    sys.stderr.write("--c0bS4U2LG-- SEP")
-    sys.stdout.write("--c0bS4U2LG-- SEP")
+    value_file.write("--uyArukdpI-- SEP")
+    exception_file.write("--uyArukdpI-- SEP")
+    sys.stderr.write("--uyArukdpI-- SEP")
+    sys.stdout.write("--uyArukdpI-- SEP")
     sys.stdout.flush()
     sys.stderr.flush()
     value_file.flush()
@@ -15,10 +15,10 @@ def send_value(value):
     values.send_value(value_file, value)
 def send_exception(exception):
     values.send_exception(exception_file, exception)
-def send_specific_value(r):
-    values.send_evaluated(value_file, r)
-def send_specific_exception(r):
-    values.send_evaluated(exception_file, r)
+def send_specific_value(value):
+    values.send_evaluated(value_file, value)
+def send_specific_exception(exception):
+    values.send_evaluated(exception_file, exception)
 try:
     write_separator()
     from submission import *

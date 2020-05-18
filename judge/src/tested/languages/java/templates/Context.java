@@ -47,13 +47,13 @@ public class ${context_name} implements Closeable {
     }
 
     ## Send the result of a language specific value evaluator to TESTed.
-    private void sendSpecificValue(EvaluationResult r) {
-        Values.sendEvaluated(valueWriter, r);
+    private void sendSpecificValue(EvaluationResult value) {
+        Values.sendEvaluated(valueWriter, value);
     }
 
     ## Send the result of a language specific exception evaluator to TESTed.
-    private void sendSpecificException(EvaluationResult r) {
-        Values.sendEvaluated(exceptionWriter, r);
+    private void sendSpecificException(EvaluationResult exception) {
+        Values.sendEvaluated(exceptionWriter, exception);
     }
 
     ## Most important function: actual execution happens here.

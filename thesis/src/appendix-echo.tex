@@ -170,3 +170,68 @@ Deze uitvoerbare bestanden worden vervolgens uitgevoerd:
 > ./context_0_1
 <uitvoer context_0_1>
 \end{minted}
+
+
+\section{Haskell}\label{sec:echo-haskell}
+
+\subsection{Oplossing}\label{subsec:echo-haskell-oplossing}
+
+\inputminted{haskell}{sources/echo/correct.hs}
+
+\subsection{Gegenereerde code}\label{subsec:echo-haskell-gegenereerde-code}
+
+De testcode die gegenereerd wordt bij het uitvoeren van bovenstaande testplan.
+Deze code is lichtjes aangepast: overtollige witruimte is verwijderd.
+Anders is de code identiek aan de door \tested{} gegenereerde code.
+
+Bij batchcompilatie worden alle testgevallen in één keer gecompileerd.
+Daarvoor wordt het bestand \texttt{Selector.hs} gegenereerd.
+Bij contextcompilatie wordt geen \texttt{Selector.hs} gegenereerd, maar zijn de bestanden anders identiek.
+Volgende bestanden werden gegenereerd (met \texttt{Selector.hs} dus enkel in batchcompilatie):
+
+\begin{enumerate}
+    \item \texttt{Context00.hs}
+    \item \texttt{Context01.hs}
+    \item \texttt{Selector.hs}
+\end{enumerate}
+
+Op het einde van alle contexten staat in de Haskell-code \mintinline{haskell}{putStr ""}.
+Dit is met opzet en nodig omdat de \texttt{do}-notatie in Haskell moet eindigen met een expressie.
+
+\subsubsection{\texttt{Context00.hs}}
+
+%! Suppress = EscapeUnderscore
+\inputminted{haskell}{sources/echo/Context00.hs}
+
+\subsubsection{\texttt{Context01.hs}}
+
+%! Suppress = EscapeUnderscore
+\inputminted{haskell}{sources/echo/Context01.hs}
+
+\subsubsection{\texttt{Selector.hs}}
+
+\inputminted{haskell}{sources/echo/Selector.hs}
+
+\subsection{Uitvoeren}\label{subsec:echo-haskell-uitvoeren}
+
+Bij batchcompilatie wordt \texttt{Selector.hs} gecompileerd, wat leidt tot een uitvoerbaar bestand \texttt{selector}.
+Dit laatste bestand wordt dan tweemaal uitgevoerd:
+
+%! Suppress = EscapeUnderscore
+\begin{minted}{console}
+> ./selector Context00
+<uitvoer context_0_0>
+> ./selector Context01
+<uitvoer context_0_1>
+\end{minted}
+
+Bij contextcompilatie wordt elke context afzonderlijk gecompileerd, wat leidt tot twee uitvoerbare bestanden: \texttt{Context00} en \texttt{Context01}.
+Deze uitvoerbare bestanden worden vervolgens uitgevoerd:
+
+%! Suppress = EscapeUnderscore
+\begin{minted}{console}
+> ./Context00
+<uitvoer context_0_0>
+> ./Context01
+<uitvoer context_0_1>
+\end{minted}

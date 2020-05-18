@@ -10,7 +10,7 @@ from pathlib import Path
 
 import sys
 
-prefix = Path("./src/sources/echo")
+prefix = Path("./src/sources/echo-function")
 judge = Path("../judge/src")
 
 prefix.mkdir(parents=True, exist_ok=True)
@@ -21,13 +21,13 @@ workdir.mkdir()
 args = {
     "memory_limit":         536870912,
     "time_limit":           60,
-    "programming_language": 'python',
+    "programming_language": 'haskell',
     "natural_language":     'nl',
-    "resources":            '../../exercise/echo/evaluation',
-    "source":               '../../exercise/echo/solution/correct.py',
+    "resources":            '../../exercise/echo-function/evaluation',
+    "source":               '../../exercise/echo-function/solution/correct.hs',
     "judge":                str(Path('..').resolve()),
     "workdir":              str(workdir.resolve()),
-    "plan_name":            "two.tson",
+    "plan_name":            "one-testcase.tson",
     "options":              {
         "parallel": True,
         "linter": {
@@ -40,12 +40,6 @@ stdin = json.dumps(args)
 r = subprocess.run(["python", "-m", "tested"], cwd=judge, input=stdin, text=True, capture_output=True)
 sys.stderr.write(r.stderr)
 
-# Copy the relevant files.
-shutil.copy2(workdir / "common/context_0_0.py", prefix)
-shutil.copy2(workdir / "common/context_0_1.py", prefix)
-shutil.copy2("../exercise/echo/solution/correct.py", prefix)
-shutil.rmtree(workdir, ignore_errors=True)
-
 
 def clean(file):
     with open(file, 'r') as f:
@@ -57,5 +51,11 @@ def clean(file):
         f.write(contents)
 
 
-clean(prefix / "context_0_0.py")
-clean(prefix / "context_0_1.py")
+# Copy the relevant files.
+shutil.copy2(workdir / "common/Context00.hs", prefix)
+shutil.copy2(workdir / "common/Selector.hs", prefix)
+shutil.copy2("../exercise/echo-function/solution/correct.hs", prefix)
+shutil.rmtree(workdir, ignore_errors=True)
+
+clean(prefix / "Context00.hs")
+clean(prefix / "Selector.hs")

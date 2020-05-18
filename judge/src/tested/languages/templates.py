@@ -11,7 +11,6 @@ from mako.template import Template
 from tested.languages import get_language
 from tested.languages._preprocessors import remove_indents, remove_newline
 from tested.configs import Bundle
-from tested.languages.config import TemplateType
 
 _logger = logging.getLogger(__name__)
 
