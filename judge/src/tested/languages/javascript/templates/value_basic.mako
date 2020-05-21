@@ -1,10 +1,14 @@
 ## Convert a base type literal into Javascript.
 <%! from tested.datatypes import BasicNumericTypes, BasicStringTypes, BasicBooleanTypes, BasicNothingTypes, BasicSequenceTypes, BasicObjectTypes  %>
 <%page args="value" />
+<%!
+    def escape_string(text):
+        return text.replace('"', '\\"')
+%>
 % if value.type in (BasicNumericTypes.INTEGER, BasicNumericTypes.RATIONAL):
     ${value.data}\
 % elif value.type in (BasicStringTypes.TEXT, BasicStringTypes.CHAR):
-    "${value.data}"\
+    "${escape_string(value.data)}"\
 % elif value.type == BasicBooleanTypes.BOOLEAN:
     ## JavaScript Boolean literals (true, false) are lowercase (pascal case in Python)
     ${str(value.data).lower()}\

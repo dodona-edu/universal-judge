@@ -61,6 +61,14 @@ def run_encoder(bundle: Bundle, dest: Path, values: List[Value]) -> List[str]:
     return r.stdout.splitlines(keepends=False)
 
 
+def assert_serialisation(bundle: Bundle, tmp_path: Path, expected: Value):
+    results = run_encoder(bundle, tmp_path, [expected])
+    print(results)
+    assert len(results) == 1
+    actual = parse_value(results[0])
+    assert actual.data == expected.data
+
+
 @pytest.mark.parametrize("language", ["javascript", "python", "runhaskell", "c", "java"])
 def test_basic_types(language, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "", language, tmp_path)
@@ -101,11 +109,47 @@ def test_basic_types(language, tmp_path: Path, pytestconfig):
     assert len(results) == len(types)
 
     for result, expected in zip(results, types):
-        # TODO: hack!
-        if expected.type == BasicBooleanTypes.BOOLEAN and language == "c":
-            expected.type = BasicNumericTypes.INTEGER
         actual = as_basic_type(parse_value(result))
         assert expected.type == actual.type
         py_expected = to_python_comparable(expected)
         py_actual = to_python_comparable(actual)
         assert py_expected == py_actual
+
+
+def test_javascript_escape(tmp_path: Path, pytestconfig):
+    conf = configuration(pytestconfig, "", "javascript", tmp_path)
+    plan = Plan()
+    bundle = create_bundle(conf, sys.stdout, plan)
+    assert_serialisation(bundle, tmp_path, StringType(type=BasicStringTypes.TEXT, data='"hallo"'))
+
+
+def test_python_escape(tmp_path: Path, pytestconfig):
+    conf = configuration(pytestconfig, "", "python", tmp_path)
+    plan = Plan()
+    bundle = create_bundle(conf, sys.stdout, plan)
+    assert_serialisation(bundle, tmp_path, StringType(type=BasicStringTypes.TEXT, data='"hallo"'))
+    assert_serialisation(bundle, tmp_path, StringType(type=BasicStringTypes.TEXT, data="'hallo'"))
+
+
+def test_java_escape(tmp_path: Path, pytestconfig):
+    conf = configuration(pytestconfig, "", "java", tmp_path)
+    plan = Plan()
+    bundle = create_bundle(conf, sys.stdout, plan)
+    assert_serialisation(bundle, tmp_path, StringType(type=BasicStringTypes.TEXT, data='"hallo"'))
+    assert_serialisation(bundle, tmp_path, StringType(type=BasicStringTypes.CHAR, data="'"))
+
+
+def test_haskell_escape(tmp_path: Path, pytestconfig):
+    conf = configuration(pytestconfig, "", "runhaskell", tmp_path)
+    plan = Plan()
+    bundle = create_bundle(conf, sys.stdout, plan)
+    assert_serialisation(bundle, tmp_path, StringType(type=BasicStringTypes.TEXT, data='"hallo"'))
+    assert_serialisation(bundle, tmp_path, StringType(type=BasicStringTypes.CHAR, data="'"))
+
+
+def test_c_escape(tmp_path: Path, pytestconfig):
+    conf = configuration(pytestconfig, "", "c", tmp_path)
+    plan = Plan()
+    bundle = create_bundle(conf, sys.stdout, plan)
+    assert_serialisation(bundle, tmp_path, StringType(type=BasicStringTypes.TEXT, data='"hallo"'))
+    assert_serialisation(bundle, tmp_path, StringType(type=BasicStringTypes.CHAR, data="'"))

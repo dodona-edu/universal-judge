@@ -1,9 +1,38 @@
 #include <string.h>
 #include <stdlib.h>
+#include <assert.h>
 
 #include "values.h"
 
 #define format(name, x) "{\"type\": " #name ", \"data\":" #x "}"
+
+// Replace a character with a substring.
+// Not very efficient.
+char* str_replace(const char* stack, char needle, char* with) {
+    const size_t length = strlen(stack);
+    const size_t added = strlen(with);
+    char* result = calloc(length + 1, sizeof(char));
+    size_t totalLength = length;
+
+    size_t j = 0;
+    for (size_t i = 0; i < length; i++) {
+        const char current = stack[i];
+        if (current == needle) {
+            // Enlarge the result.
+            totalLength += added;
+            result = realloc(result, sizeof(char) * (totalLength + 1));
+            for (size_t k = 0; k < added; k++) {
+                result[j + k] = with[k];
+            }
+            j += added;
+        } else {
+            result[j] = current;
+            j++;
+        }
+    }
+
+    return result;
+}
 
 
 void write_bool(FILE* out, bool value) {
@@ -11,82 +40,84 @@ void write_bool(FILE* out, bool value) {
     fprintf(out, asString, value ? "true" : "false");
 }
 
-void write_char(FILE * out, char value) {
+void write_char(FILE* out, char value) {
+    if (value == '\'') {
+        const char* asString = format("character", %s);
+        fprintf(out, asString, "\"'\"");
+    } else {
+        const char* asString = format("character", %c);
+        fprintf(out, asString, value);
+    }
+}
+
+void write_sint(FILE* out, short int value) {
     const char* asString = format("integer", %d);
     fprintf(out, asString, value);
 }
 
-void write_uchar(FILE * out, unsigned char value) {
+void write_usint(FILE* out, unsigned short int value) {
     const char* asString = format("integer", %u);
     fprintf(out, asString, value);
 }
 
-void write_sint(FILE * out, short int value) {
+void write_int(FILE* out, int value) {
     const char* asString = format("integer", %d);
     fprintf(out, asString, value);
 }
 
-void write_usint(FILE * out, unsigned short int value) {
+void write_uint(FILE* out, unsigned int value) {
     const char* asString = format("integer", %u);
     fprintf(out, asString, value);
 }
 
-void write_int(FILE * out, int value) {
-    const char* asString = format("integer", %d);
-    fprintf(out, asString, value);
-}
-
-void write_uint(FILE * out, unsigned int value) {
-    const char* asString = format("integer", %u);
-    fprintf(out, asString, value);
-}
-
-void write_long(FILE * out, long value) {
+void write_long(FILE* out, long value) {
     const char* asString = format("integer", %l);
     fprintf(out, asString, value);
 }
 
-void write_ulong(FILE * out, unsigned long value) {
+void write_ulong(FILE* out, unsigned long value) {
     const char* asString = format("integer", %ul);
     fprintf(out, asString, value);
 }
 
-void write_llong(FILE * out, long long value) {
+void write_llong(FILE* out, long long value) {
     const char* asString = format("integer", %ll);
     fprintf(out, asString, value);
 }
 
-void write_ullong(FILE * out, unsigned long long value) {
+void write_ullong(FILE* out, unsigned long long value) {
     const char* asString = format("integer", %ull);
     fprintf(out, asString, value);
 }
 
-void write_float(FILE * out, float value) {
+void write_float(FILE* out, float value) {
     const char* asString = format("rational", %f);
     fprintf(out, asString, value);
 }
 
-void write_double(FILE * out, double value) {
+void write_double(FILE* out, double value) {
     const char* asString = format("rational", %f);
     fprintf(out, asString, value);
 }
 
-void write_ldouble(FILE * out, long double value) {
+void write_ldouble(FILE* out, long double value) {
     const char* asString = format("rational", %Lf);
     fprintf(out, asString, value);
 }
 
-void write_string(FILE * out, const char * value) {
+void write_string(FILE* out, const char* value) {
     const char* asString = format("text", "%s");
-    fprintf(out, asString, value);
+    char* result = str_replace(value, '"', "\\\"");
+    fprintf(out, asString, result);
+    free(result);
 }
 
-void write_unknown(FILE * out, void * value) {
+void write_unknown(FILE* out, void* value) {
     const char* asString = format("unknown", "%s");
     fprintf(out, asString, "?");
 }
 
-void write_void(FILE * out, void * value) {
+void write_void(FILE* out, void* value) {
     const char* asString = format("nothing", %s);
     fprintf(out, asString, "null");
 }
@@ -125,7 +156,8 @@ void write_evaluated(FILE* out, EvaluationResult* result) {
             added = sprintf(&concatMessages[nextMessage], template, message->description, message->format);
         } else {
             char* template = "{\"description\": \"%s\", \"format\": \"%s\", \"permission\": \"%s\"}";
-            added = sprintf(&concatMessages[nextMessage], template, message->description, message->format, message->permission);
+            added = sprintf(&concatMessages[nextMessage], template, message->description, message->format,
+                            message->permission);
         }
         nextMessage += added;
         concatMessages[nextMessage] = ',';

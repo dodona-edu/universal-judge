@@ -17,6 +17,10 @@ public class Values {
         }
         return "[" + String.join(", ", results) + "]";
     }
+        
+    private static String escape(String string) {
+        return string.replace("\\", "\\\\").replace("\"", "\\\"");
+    }
 
     @SuppressWarnings("unchecked")
     private static List<String> internalEncode(Object value) {
@@ -57,11 +61,11 @@ public class Values {
             type = "double_precision";
             data = value.toString();
         } else if (value instanceof Character) {
-            type = "char";
-            data = "\"" + value.toString() + "\"";
+            type = "character";
+            data = "\"" + escape(value.toString()) + "\"";
         } else if (value instanceof CharSequence) {
             type = "text";
-            data = "\"" + value.toString() + "\"";
+            data = "\"" + escape(value.toString()) + "\"";
         } else if (value instanceof List) {
             type = "list";
             data = encodeSequence((Iterable<Object>) value);
