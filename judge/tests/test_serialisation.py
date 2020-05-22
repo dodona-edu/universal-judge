@@ -6,7 +6,6 @@ Testing advanced types is a work-in progress at this point, since we test in Pyt
 and Python does not have explicit support for e.g. int32, int64.
 """
 from dataclasses import dataclass
-from decimal import Decimal
 from pathlib import Path
 from typing import List
 
@@ -14,14 +13,16 @@ import pytest
 import sys
 
 from tested.configs import create_bundle, Bundle
-from tested.datatypes import BasicNumericTypes, BasicStringTypes, BasicBooleanTypes, BasicSequenceTypes, \
+from tested.datatypes import BasicNumericTypes, BasicStringTypes, BasicBooleanTypes, \
+    BasicSequenceTypes, \
     BasicObjectTypes, BasicNothingTypes
 from tested.judge.compilation import run_compilation
 from tested.judge.execution import execute_file
 from tested.judge.utils import copy_from_paths_to_path, BaseExecutionResult
 from tested.languages.config import TypeSupport
 from tested.languages.templates import find_and_write_template, path_to_templates
-from tested.serialisation import NumberType, Value, parse_value, StringType, BooleanType, SequenceType, ObjectType, \
+from tested.serialisation import NumberType, Value, parse_value, StringType, \
+    BooleanType, SequenceType, ObjectType, \
     NothingType, as_basic_type, to_python_comparable
 from tested.testplan import Plan
 from tests.manual_utils import configuration
