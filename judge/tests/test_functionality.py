@@ -292,7 +292,7 @@ def test_named_parameters_supported(tmp_path: Path, pytestconfig):
 
 @pytest.mark.parametrize("language", ["runhaskell", "c", "java", "javascript"])
 def test_named_parameters_not_supported(language, tmp_path: Path, pytestconfig):
-    conf = configuration(pytestconfig, "echo-function", "python", tmp_path, "one-named.tson", "correct")
+    conf = configuration(pytestconfig, "echo-function", language, tmp_path, "one-named.tson", "correct")
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["internal error"]
