@@ -17,13 +17,20 @@
       "name": {"type": "string"},
       "arguments": {
         "type": "array",
-        "items": {"type": "#Expression"}
+        "items": {"anyOf":  [{"$ref": "#Expression"}, {"$ref": "#NamedArgument"}]}
       }
     }
   },
   "Identifier": {"type": "string"},
   "Expression": {
     "anyOf": [{"$ref": "#Identifier"}, {"$ref": "#Literal"}, {"$ref": "#FunctionCall"}]
+  },
+  "NamedArgument": {
+    "type": "object",
+    "properties": {
+      "name": {"type": "string"},
+      "value": {"type": "#Expression"}
+    }
   },
   "Assignment": {
     "type": "object",
