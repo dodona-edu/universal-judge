@@ -301,6 +301,13 @@ Zoals we vermeld hebben in \cref{subsec:parallelle-uitvoering-van-contexten}, zi
     De beoordelingen in parallel uitvoeren zou er dus voor zorgen dat de uitvoer door elkaar staat.
 \end{itemize}
 
+\subsection{Optimalisatie uitvoering}\label{subsec:optimalisatie-uitvoering}
+
+Bij het uitvoeren wordt voor elke context een nieuwe map gemaakt, waarna de verschillende benodigde bestanden naar die map gekopieerd worden.
+Het is het onderzoeken waard of hier optimalisaties mogelijk zijn, door bijvoorbeeld de bestanden niet te kopiëren, maar te \english{symlinken}.
+Ook zou onderzocht kunnen worden of die nieuwe map nodig is: misschien kan een speciaal bestandssysteem gebruikt worden dat \english{copy-on-write} ondersteunt, waardoor geen nieuwe map moet gemaakt worden voor elke context.
+Dit laatste systeem zou ook het voordeel hebben dat beter gecontroleerd kan worden welke bestanden aangemaakt zijn door de ingediende oplossing.
+
 \section{TESTed}\label{sec:beperkingen-tested}
 
 In deze paragraaf komen de beperkingen aan bod die ofwel enkel betrekking hebben op \tested{} zelf, ofwel betrekking hebben op meerdere onderdelen, bijvoorbeeld zowel \tested{} als het testplan.
