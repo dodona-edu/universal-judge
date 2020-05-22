@@ -6,7 +6,7 @@
       "evaluator": {
         "type": "builtin",
         "name": "file",
-        "options": {"mode": "values", "ignoreWhitespace": true, "tryFloatingPoint": true, "applyRounding": true, "roundTo": 2}
+        "options": {"mode": "line", "ignoreWhitespace": true, "tryFloatingPoint": true, "applyRounding": true, "roundTo": 2}
       }
     }
   }

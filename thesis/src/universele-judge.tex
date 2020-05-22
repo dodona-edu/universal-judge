@@ -734,18 +734,18 @@ De bestandsevaluatie ondersteunt enkel tekstuele bestanden, geen binaire bestand
 Het vergelijken van de bestanden gebeurt op één van deze manieren:
 
 \begin{description}
-    \item[\texttt{exact}] Beide bestanden moet exact hetzelfde zijn, inclusief regeleindes.
-    \item[\texttt{lines}] Elke regel wordt vergeleken met een overeenkomstige regel in het andere bestand.
-    De evaluatie van de regels is exact, maar zonder de regeleindes.
-    Dit betekent dat de witruimte bijvoorbeeld ook moet overeenkomen.
-    \item[\texttt{values}] Elke regel in het bestand wordt met de tekstevaluatie afzonderlijk vergeleken met een overeenkomstige regel uit het andere bestand.
-    Indien deze modus gebruikt wordt, kunnen ook alle opties van de tekstevaluatie meegegeven worden.
+    \item[\texttt{full}] Beide bestanden worden in hun geheel met elkaar vergeleken.
+    \item[\texttt{line}] Elke regel wordt vergeleken met een overeenkomstige regel in het andere bestand, waarbij regeleindes niet vergeleken worden.
 \end{description}
 
+In beide gevallen gebeurt de eigenlijke evaluatie door de tekstevaluator die we zonet besproken hebben.
+De opties van de bestandsevaluator worden ook doorgegeven aan de tekstevaluator, met als gevolg dat aan de bestandsevaluator ook alle opties van de tekstevaluator meegegeven kunnen worden.
+
 Een voorbeeld van hoe dit eruitziet staat in \cref{lst:testplan-file}.
-In dit fragment wordt de modus \texttt{values} gebruikt, en worden de opties van de tekstevaluatie ook meegegeven.
+In dit fragment wordt de modus \texttt{line} gebruikt, en worden de opties van de tekstevaluatie ook meegegeven.
 Het bestand met de verwachte inhoud heeft als naam \texttt{bestand-uit-de-oefening.txt} gekregen, terwijl de ingediende oplossing een bestand moet schrijven naar \texttt{waar-het-verwachte-bestand-komt.txt}.
 Beide paden zijn relatief, maar ten opzichte van andere mappen: het bestand met verwachte inhoud is relatief tegenover de map van de oefening, terwijl het pad waar de ingediende oplossing naar moet schrijven relatief is ten aanzien van de werkmap van de context waarin de oplossing wordt uitgevoerd (zie \cref{lst:mapstructuur} voor een overzicht van de structuur).
+De opties in het voorbeeld zullen ervoor zorgen dat elke regel in de bestanden met elkaar wordt vergeleken, met ondersteuning voor kommagetallen en afronding.
 
 \begin{listing}
     \caption{Fragment uit een testplan dat bestandsevaluatie gebruikt.}
