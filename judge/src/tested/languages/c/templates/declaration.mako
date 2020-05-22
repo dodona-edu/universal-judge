@@ -1,6 +1,6 @@
 ## Convert a Value to a type.
-<%! from tested.serialisation import BasicBooleanTypes, BasicNumericTypes, BasicStringTypes, BasicNothingTypes  %>
-<%page args="value" />
+<%! from tested.serialisation import BasicBooleanTypes, BasicNumericTypes, BasicStringTypes, BasicNothingTypes  %>\
+<%page args="value" />\
 % if value.type == BasicBooleanTypes.BOOLEAN:
     boolean\
 % elif value.type == BasicStringTypes.TEXT:

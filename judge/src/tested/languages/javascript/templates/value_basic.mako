@@ -1,10 +1,10 @@
 ## Convert a base type literal into Javascript.
-<%! from tested.datatypes import BasicNumericTypes, BasicStringTypes, BasicBooleanTypes, BasicNothingTypes, BasicSequenceTypes, BasicObjectTypes  %>
-<%page args="value" />
+<%! from tested.datatypes import BasicNumericTypes, BasicStringTypes, BasicBooleanTypes, BasicNothingTypes, BasicSequenceTypes, BasicObjectTypes  %>\
+<%page args="value" />\
 <%!
     def escape_string(text):
         return text.replace('"', '\\"')
-%>
+%>\
 % if value.type in (BasicNumericTypes.INTEGER, BasicNumericTypes.RATIONAL):
     ${value.data}\
 % elif value.type in (BasicStringTypes.TEXT, BasicStringTypes.CHAR):
@@ -30,5 +30,5 @@
     % endfor
     }\
 % else:
-    <% raise ValueError(f'Invalid literal: {repr(value)}') %>
+    <% raise ValueError('Invalid literal: ' + repr(value)) %>\
 % endif

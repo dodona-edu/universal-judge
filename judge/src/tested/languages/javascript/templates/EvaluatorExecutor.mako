@@ -1,5 +1,5 @@
 ## Responsible for generating a function expression to a custom evaluator.
-<%page args="evaluator,function" />
+<%page args="evaluator,function" />\
 
 const ${evaluator} = require('./${evaluator}.js');
 const values = require('./values.js');

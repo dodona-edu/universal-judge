@@ -1,7 +1,7 @@
 ## Code to execute one context.
-<%! from tested.languages.generator import _TestcaseArguments %>
-<%! from tested.serialisation import Statement, Expression %>
-<%! from tested.utils import get_args %>
+<%! from tested.languages.generator import _TestcaseArguments %>\
+<%! from tested.serialisation import Statement, Expression %>\
+<%! from tested.utils import get_args %>\
 import values
 import sys
 
@@ -91,12 +91,10 @@ except Exception as e:
     try:
         ## If we have a value function, we have an expression.
         <%include file="statement.mako" args="statement=testcase.input_statement()" />
-        
     except Exception as e:
         <%include file="statement.mako" args="statement=testcase.exception_statement('e')" />
     else:
         <%include file="statement.mako" args="statement=testcase.exception_statement()" />
-
 % endfor
 
 ${after}

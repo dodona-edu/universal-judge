@@ -1,7 +1,7 @@
 ## Code to execute one context.
-<%! from tested.languages.generator import _TestcaseArguments %>
-<%! from tested.serialisation import Statement, Expression %>
-<%! from tested.utils import get_args %>
+<%! from tested.languages.generator import _TestcaseArguments %>\
+<%! from tested.serialisation import Statement, Expression %>\
+<%! from tested.utils import get_args %>\
 const fs = require('fs');
 const vm = require('vm');
 const values = require("./values.js");
@@ -84,12 +84,10 @@ try {
 % for testcase in testcases:
     writeSeparator();
 
-    <% testcase: _TestcaseArguments %>
+    <% testcase: _TestcaseArguments %>\
     try {
-
         ## If we have a value function, we have an expression.
         <%include file="statement.mako" args="statement=testcase.input_statement()" />;
-        <% print(testcase.input_statement()) %>
 
         <%include file="statement.mako" args="statement=testcase.exception_statement()" />;
     } catch(e) {

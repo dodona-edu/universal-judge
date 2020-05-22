@@ -1,7 +1,7 @@
 ## Code to execute_module one test context.
-<%! from tested.languages.generator import _TestcaseArguments %>
-<%! from tested.serialisation import Statement, Expression, Assignment %>
-<%! from tested.utils import get_args %>
+<%! from tested.languages.generator import _TestcaseArguments %>\
+<%! from tested.serialisation import Statement, Expression, Assignment %>\
+<%! from tested.utils import get_args %>\
 import java.io.*;
 import java.util.*;
 import java.util.function.*;

@@ -9,7 +9,7 @@ from mako.lookup import TemplateLookup
 from mako.template import Template
 
 from tested.languages import get_language
-from tested.languages._preprocessors import remove_indents, remove_newline
+from tested.languages._preprocessors import remove_indents
 from tested.configs import Bundle
 
 _logger = logging.getLogger(__name__)
@@ -69,9 +69,8 @@ _env_cache: Dict[str, TemplateLookup] = {}
 def _get_environment(bundle: Bundle) -> TemplateLookup:
     """Get the templating environment for a given configuration bundle."""
     if bundle.config.programming_language not in _env_cache:
-        processors = [remove_indents, remove_newline]
         paths = [str(x) for x in path_to_templates(bundle)]
-        template = TemplateLookup(directories=paths, preprocessor=processors)
+        template = TemplateLookup(directories=paths, preprocessor=[remove_indents])
         _env_cache[bundle.config.programming_language] = template
 
     return _env_cache[bundle.config.programming_language]
