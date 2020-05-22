@@ -53,6 +53,10 @@
 \newunicodechar{ë}{\@trema e}
 \makeatother
 
+\newfontfamily{\fallbackfont}{DejaVu Sans Mono}[Scale=1.05]
+\DeclareTextFontCommand{\textfallback}{\fallbackfont}
+\newunicodechar{⏎}{\textfallback{⏎}}
+
 \hypersetup{
     linkcolor  = ugent-blue,
     citecolor  = ugent-blue,

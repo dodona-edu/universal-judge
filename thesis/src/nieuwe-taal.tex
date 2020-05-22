@@ -435,12 +435,31 @@ De variabele \texttt{evaluator\_names} bevat een verzameling van deze namen.
 \vspace{-1.7cm} % Ugly hack
 \inputminted[firstline=9,lastline=11]{mako}{sources/c-context.mako}
 
+\paragraph*{Witruimte in mako}
+
 Nuttig om weten is dat \tested{} een extensie heeft toegevoegd aan mako, waardoor de indentatie van mako-gerelateerde taalconstructies zal verdwijnen.
 De \texttt{for}-loop in het fragment hierboven resulteert bijvoorbeeld in deze code:
 
 \begin{minted}{c}
 #include "context_0_0.c"
 #include "context_0_1.c"
+\end{minted}
+
+\paragraph*{Regeleindes in mako}
+
+Ook nuttig om weten is dat een regeleinde in een sjabloon in mako resulteert in een regeleinde in het geproduceerde bestand.
+Mako voorziet hier een oplossing voor: door een \term{backslash} op het einde van de regel te plaatsen zal er geen regeleinde komen in het geproduceerde bestand.
+Volgende codefragment (let op de \texttt{\textbackslash}):
+
+\begin{minted}{mako}
+int test = \⏎
+"test";⏎
+\end{minted}
+
+Zal bijvoorbeeld resulteren in deze code:
+
+\begin{minted}{text}
+int test = "test";⏎
 \end{minted}
 
 Vervolgens maken we twee variabelen aan waarin de bestanden komen die dienst doen als return- en exception-channel.
