@@ -1,4 +1,4 @@
-{-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE NamedFieldPuns #-}
 module Context00 where
 import System.IO (hPutStr, stderr, stdout, hFlush)
 import System.Environment
@@ -7,14 +7,14 @@ import Control.Monad.Trans.Class
 import Control.Exception
 import EvaluationUtils
 import qualified Submission
-value_file = "ygUJtSc3z_values.txt"
-exception_file = "ygUJtSc3z_exceptions.txt"
+value_file = "sESoGevhN_values.txt"
+exception_file = "sESoGevhN_exceptions.txt"
 writeSeparator :: IO ()
 writeSeparator = do
-    hPutStr stderr "--ygUJtSc3z-- SEP"
-    hPutStr stdout "--ygUJtSc3z-- SEP"
-    appendFile value_file "--ygUJtSc3z-- SEP"
-    appendFile exception_file "--ygUJtSc3z-- SEP"
+    hPutStr stderr "--sESoGevhN-- SEP"
+    hPutStr stdout "--sESoGevhN-- SEP"
+    appendFile value_file "--sESoGevhN-- SEP"
+    appendFile exception_file "--sESoGevhN-- SEP"
     hFlush stdout
     hFlush stderr
 sendValue :: Values.Typeable a => a -> IO ()

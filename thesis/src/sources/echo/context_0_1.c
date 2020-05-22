@@ -4,18 +4,18 @@
 static FILE* context_0_1_value_file = NULL;
 static FILE* context_0_1_exception_file = NULL;
 static void context_0_1_write_separator() {
-    fprintf(context_0_1_value_file, "--mj0EvHqJp-- SEP");
-    fprintf(context_0_1_exception_file, "--mj0EvHqJp-- SEP");
-    fprintf(stdout, "--mj0EvHqJp-- SEP");
-    fprintf(stderr, "--mj0EvHqJp-- SEP");
+    fprintf(context_0_1_value_file, "--Gh9VgYMHD-- SEP");
+    fprintf(context_0_1_exception_file, "--Gh9VgYMHD-- SEP");
+    fprintf(stdout, "--Gh9VgYMHD-- SEP");
+    fprintf(stderr, "--Gh9VgYMHD-- SEP");
 }
 #undef send_value
 #define send_value(value) write_value(context_0_1_value_file, value)
 #undef send_specific_value
 #define send_specific_value(value) write_evaluated(context_0_1_value_file, value)
 int context_0_1() {
-    context_0_1_value_file = fopen("mj0EvHqJp_values.txt", "w");
-    context_0_1_exception_file = fopen("mj0EvHqJp_exceptions.txt", "w");
+    context_0_1_value_file = fopen("Gh9VgYMHD_values.txt", "w");
+    context_0_1_exception_file = fopen("Gh9VgYMHD_exceptions.txt", "w");
     context_0_1_write_separator();
     char* args[] = {    "solution",     };
     solution_main(1, args);

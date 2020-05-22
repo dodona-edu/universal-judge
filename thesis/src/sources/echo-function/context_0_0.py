@@ -1,12 +1,12 @@
 import values
 import sys
-value_file = open("GwrAP9DXV_values.txt", "w")
-exception_file = open("GwrAP9DXV_exceptions.txt", "w")
+value_file = open("UHeaRW0v5_values.txt", "w")
+exception_file = open("UHeaRW0v5_exceptions.txt", "w")
 def write_separator():
-    value_file.write("--GwrAP9DXV-- SEP")
-    exception_file.write("--GwrAP9DXV-- SEP")
-    sys.stderr.write("--GwrAP9DXV-- SEP")
-    sys.stdout.write("--GwrAP9DXV-- SEP")
+    value_file.write("--UHeaRW0v5-- SEP")
+    exception_file.write("--UHeaRW0v5-- SEP")
+    sys.stderr.write("--UHeaRW0v5-- SEP")
+    sys.stdout.write("--UHeaRW0v5-- SEP")
     sys.stdout.flush()
     sys.stderr.flush()
     value_file.flush()
@@ -24,16 +24,16 @@ try:
     from submission import *
 except Exception as e:
     raise e
-write_separator()
+write_separator()
 try:
-    send_value(echo('input-1'))
+    send_value(echo('input-1'))
 except Exception as e:
     send_exception(e)
 else:
-    send_exception(None)
-write_separator()
+    send_exception(None)
+write_separator()
 try:
-    send_value(echo('input-2'))
+    send_value(echo('input-2'))
 except Exception as e:
     send_exception(e)
 else:
