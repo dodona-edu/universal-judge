@@ -1,0 +1,36 @@
+{
+  "tabs": [
+    {
+      "name": "Tab",
+      "contexts": [
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "echo",
+                "arguments": [
+                  {
+                    "name": "content",
+                    "value": {
+                      "type": "text",
+                      "data": "input-1"
+                    }
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "type": "text",
+                    "data": "input-1"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -206,6 +206,21 @@ class FunctionType(str, Enum):
 
 
 @dataclass
+class NamedArgument(WithFeatures, WithFunctions):
+    """Represents a named argument for a function."""
+    name: str
+    value: 'Expression'
+
+    def get_used_features(self) -> FeatureSet:
+        this = FeatureSet(constructs={Construct.NAMED_ARGUMENTS}, types=set())
+        expression = self.value.get_used_features()
+        return combine_features([this, expression])
+
+    def get_functions(self) -> Iterable['FunctionCall']:
+        return self.value.get_functions()
+
+
+@dataclass
 class FunctionCall(WithFeatures, WithFunctions):
     """
     Represents a function expression.
@@ -213,8 +228,10 @@ class FunctionCall(WithFeatures, WithFunctions):
     type: FunctionType
     name: str
     namespace: Optional[str] = None
-    arguments: List['Expression'] = field(default_factory=list)
+    arguments: List[Union['Expression', NamedArgument]] \
+        = field(default_factory=list)
 
+    # noinspection PyMethodParameters
     @root_validator
     def namespace_requirements(cls, values):
         type_ = values.get("type")
@@ -225,6 +242,7 @@ class FunctionCall(WithFeatures, WithFunctions):
             raise ValueError("Property functions must have a namespace.")
         return values
 
+    # noinspection PyMethodParameters
     @root_validator
     def properties_have_no_args(cls, values):
         type_ = values.get("type")
@@ -271,7 +289,8 @@ class Assignment(WithFeatures, WithFunctions):
     type: Union[AllTypes, VariableType]
 
     def replace_expression(self, expression: Expression) -> 'Assignment':
-        return Assignment(variable=self.variable, expression=expression, type=self.type)
+        return Assignment(variable=self.variable, expression=expression,
+                          type=self.type)
 
     def get_used_features(self) -> FeatureSet:
         base = FeatureSet({Construct.ASSIGNMENTS}, set())
@@ -288,6 +307,7 @@ Statement = Union[Assignment, Expression]
 # Update the forward references, which fixes the schema generation.
 ObjectType.__pydantic_model__.update_forward_refs()
 SequenceType.__pydantic_model__.update_forward_refs()
+NamedArgument.__pydantic_model__.update_forward_refs()
 FunctionCall.__pydantic_model__.update_forward_refs()
 
 

@@ -281,3 +281,18 @@ def test_too_much_output(tmp_path: Path, pytestconfig):
     # 4 times: two times for the tests, one escalate and one judgement.
     assert updates.find_status_enum() == ["output limit exceeded"] * 4
     assert len(updates.find_all("close-test")) == 2
+
+
+def test_named_parameters_supported(tmp_path: Path, pytestconfig):
+    conf = configuration(pytestconfig, "echo-function", "python", tmp_path, "one-named.tson", "correct")
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]
+
+
+@pytest.mark.parametrize("language", ["runhaskell", "c", "java", "javascript"])
+def test_named_parameters_not_supported(language, tmp_path: Path, pytestconfig):
+    conf = configuration(pytestconfig, "echo-function", "python", tmp_path, "one-named.tson", "correct")
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["internal error"]
