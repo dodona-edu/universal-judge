@@ -7,14 +7,14 @@ import Control.Monad.Trans.Class
 import Control.Exception
 import EvaluationUtils
 import qualified Submission
-value_file = "sESoGevhN_values.txt"
-exception_file = "sESoGevhN_exceptions.txt"
+value_file = "yq5AlxCOr_values.txt"
+exception_file = "yq5AlxCOr_exceptions.txt"
 writeSeparator :: IO ()
 writeSeparator = do
-    hPutStr stderr "--sESoGevhN-- SEP"
-    hPutStr stdout "--sESoGevhN-- SEP"
-    appendFile value_file "--sESoGevhN-- SEP"
-    appendFile exception_file "--sESoGevhN-- SEP"
+    hPutStr stderr "--yq5AlxCOr-- SEP"
+    hPutStr stdout "--yq5AlxCOr-- SEP"
+    appendFile value_file "--yq5AlxCOr-- SEP"
+    appendFile exception_file "--yq5AlxCOr-- SEP"
     hFlush stdout
     hFlush stderr
 sendValue :: Values.Typeable a => a -> IO ()

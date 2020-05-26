@@ -1,12 +1,12 @@
 import values
 import sys
-value_file = open("UHeaRW0v5_values.txt", "w")
-exception_file = open("UHeaRW0v5_exceptions.txt", "w")
+value_file = open("t8QUHe5mW_values.txt", "w")
+exception_file = open("t8QUHe5mW_exceptions.txt", "w")
 def write_separator():
-    value_file.write("--UHeaRW0v5-- SEP")
-    exception_file.write("--UHeaRW0v5-- SEP")
-    sys.stderr.write("--UHeaRW0v5-- SEP")
-    sys.stdout.write("--UHeaRW0v5-- SEP")
+    value_file.write("--t8QUHe5mW-- SEP")
+    exception_file.write("--t8QUHe5mW-- SEP")
+    sys.stderr.write("--t8QUHe5mW-- SEP")
+    sys.stdout.write("--t8QUHe5mW-- SEP")
     sys.stdout.flush()
     sys.stderr.flush()
     value_file.flush()

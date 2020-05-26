@@ -1,13 +1,13 @@
 const fs = require('fs');
 const vm = require('vm');
 const values = require("./values.js");
-const valueFile = fs.openSync("TY4l6Xnqk_values.txt", "w");
-const exceptionFile = fs.openSync("TY4l6Xnqk_exceptions.txt", "w");
+const valueFile = fs.openSync("TMIQgB2wo_values.txt", "w");
+const exceptionFile = fs.openSync("TMIQgB2wo_exceptions.txt", "w");
 function writeSeparator() {
-    fs.writeSync(valueFile, "--TY4l6Xnqk-- SEP");
-    fs.writeSync(exceptionFile, "--TY4l6Xnqk-- SEP");
-    fs.writeSync(process.stdout.fd, "--TY4l6Xnqk-- SEP");
-    fs.writeSync(process.stderr.fd, "--TY4l6Xnqk-- SEP");
+    fs.writeSync(valueFile, "--TMIQgB2wo-- SEP");
+    fs.writeSync(exceptionFile, "--TMIQgB2wo-- SEP");
+    fs.writeSync(process.stdout.fd, "--TMIQgB2wo-- SEP");
+    fs.writeSync(process.stderr.fd, "--TMIQgB2wo-- SEP");
 }
 function sendValue(value) {
     values.sendValue(valueFile, value);

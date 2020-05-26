@@ -51,6 +51,11 @@ generate:
 	python scripts/generate_echo_function_java.py
 	python scripts/generate_echo_function_haskell.py
 
+
+src/extended.pdf:
+	latexmk -cd -lualatex -use-make ${continuous} src/extended.tex
+
+
 # Do the main file.
 src/main.pdf: copies markdown generate
 	latexmk -cd -lualatex -shell-escape -use-make ${CONTINUOUS} src/main.tex

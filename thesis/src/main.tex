@@ -33,9 +33,9 @@
 \usepackage{newunicodechar}
 \usepackage{placeins}
 \usepackage{multirow}
-\usepackage{multicol}
 \usepackage{threeparttable}
 \usepackage[labelsep=quad]{caption}
+\usepackage{pdfpages}
 %\usepackage{showframe}
 \usepackage{tikz}
 \usetikzlibrary{shapes,arrows,positioning,backgrounds,calc,intersections}
@@ -162,9 +162,10 @@ Master of Science in de Informatica%
     
     \include{samenvatting}
 
-    \begin{otherlanguage}{british}
-        \include{extended}
-    \end{otherlanguage}
+%    \begin{otherlanguage}{british}
+%        \include{extended}
+%    \end{otherlanguage}
+    \includepdf[pages=-]{extended.pdf}
     
     \include{vulgariserend}
 

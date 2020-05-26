@@ -1,74 +1,104 @@
-\chapter*{Extended abstract}
-\begin{multicols}{2}
+%! suppress = Makeatletter
+%! suppress = DuplicateDefinition
+%! suppress = DiscouragedUseOfDef
+\documentclass[5p,number]{elsarticle}
 
+%\fntext[fn1]{Supervisor}
 
-    \paragraph*{Abstract}
+\usepackage[colorlinks]{hyperref}
 
-    Writing programming exercises is a time-consuming activity.
-    One aspect in particular is supporting multiple programming languages.
-    This requires a translation of the exercise by hand, although most exercises are not inherently programming languages dependant.
-    In this article we introduce \tested{}, a prototype of a judge that is capable of evaluating submissions in multiple programming languages for the same exercise.
-    \tested{} also integrates with Dodona, an online platform for programming exercises.
+\input{common.tex}
 
+\title{TESTed: a universal judge for evaluating software in an educational context}
 
-    \section{Introduction}\label{sec:extended-introduction}
+%! suppress = Makeatletter
+\makeatletter
+\def\ps@pprintTitle{%
+\let\@oddhead\@empty
+\let\@evenhead\@empty
+\def\@oddfoot{\footnotesize\itshape\hfill\today}%
+\let\@evenfoot\@oddfoot
+}
+\makeatother
 
-    Technology is becoming more and more important in our society: the computer is used to solve tasks and problems in more and more domains.
-    As a result of this evolution, students have to become familiar with computational thinking: translating problems from the real world into problems understood by a computer.
-    Computational thinking is broader than just programming, yet programming is a very good way to train students in computational thinking.
+\author{Niko Strijbol\corref{cor1}}
+%\author{Peter Dawyndt\fnref{fn1}}
+%\author{Bart Mesuere\fnref{fn1}}
 
-    Learning to program is perceived as difficult by students.
-    As solving exercises is a good way to learn, it is important to provide students with exercises that are high in both quality and quantity.
-    This requirement introduces two challenges on educators:
+\begin{document}
+
+    \setmainfont[Ligatures=TeX,Numbers=OldStyle,Contextuals=Alternate]{Libertinus Serif}
+    \setsansfont[Ligatures=TeX,Numbers=OldStyle,Contextuals=Alternate]{Libertinus Sans}
+    \setmonofont[Scale=MatchLowercase,Contextuals={Alternate}]{Jetbrains Mono}
+
+    \begin{abstract}
+        Writing programming exercises is a time-consuming activity.
+        In this article we focus on one particular aspect: using the same exercise in multiple programming languages.
+        Currently, achieving this requires a manual translation of the exercise to each programming language that the author wishes to support, although most exercises do not make use of language specific constructs.
+        We introduce \tested{}, a prototype of a judge for the Dodona platform (an online exercise platform) that is capable of evaluationg submissions in multiple programming languages using one exercise.
+        We describe how the prototype works and discuss limitations and future work.
+    \end{abstract}
+
+    \maketitle
+
+    \section{Introduction}\label{sec:introduction}
     
+    Technology is becoming increasingly important in our society: the computer is used to solve tasks and problems in more and more domains.
+    As a result of this evolution, students have to become familiar with computational thinking: translating problems from the real world into problems understood by a computer \cite{bastiaensen2017}.
+    Computational thinking is broader than just programming, yet programming is a very good way to train students in computational thinking.
+    However, learning to program is often perceived as difficult by students \cite{10.1145/3293881.3295779}.
+    As solving exercises is beneficial to that learning process, it is important to provide students with exercises that are high in both quality and quantity.
+    This requirement imposes two challenges on educators:
+
     \begin{itemize}
         \item Educators have to write suitable exercises: they need to take into account what concepts the students are familiar with, how long it takes to solve an exercise, etc.
         \item The students' submissions must be provided with high quality feedback.
         This feedback allows students to learn from their mistakes and improve their programming skills (and by proxy their computational thinking skills).
     \end{itemize}
-    
+
     The second challenge often leads educators to use a platform that provides automatic feedback, with at least the correctness of the submission being automatically determined.
-    One such platform is Dodona, which was created and is maintained by a team at Ghent University.
+    One such platform is Dodona, which was created by and is maintained by a team at Ghent University.
     
-    This article focusses on one aspect of the first challenge.
+    In this article, we focus on one aspect of the first challenge.
     There are a lot of programming languages, and each of those languages needs exercises if it will be taught.
     Currently, educators have to manually translates the exercises from one programming language to the next, even though most exercises don't use programming language specific concepts.
-    In this article we try to answer the question: is it feasible to create a system where the exercise is written once, but is solvable in multiple programming languages?
-    As the answer to this question, we introduce \tested{}
+    In this article we provide an answer the question: is it feasible to create a system where the exercise is written once, but is solvable in multiple programming languages?
+    We start by giving some more background on Dodona, after which we introduce the answer to previous question in the form of \tested{} and we finish by discussing limitations and future work.
 
     \section{Dodona}\label{sec:extended-dodona}
 
     Dodona is an online platform for programming exercises.
-    It supports multiple programming languages and provides automatic feedback for submissions.
+    It supports multiple programming languages and provides real-time automatic feedback for submissions.
     Dodona is freely available for schools and is used by multiple courses at Ghent University.
-    
+
     Dodona internally uses the concept of a judge to denote the piece of software responsible for evaluating a submission in a given programming language.
     This judge is run in a Docker container and communicates with Dodona via a \acronym{JSON} interface.
-    The judge system is flexibel: other types of feedback, besides correctness, are possible.
+    The judge system is flexibel: other types of feedback, aside from correctness, are possible.
     For example, some existing judges run a linter on the submissions.
 
     \section{TESTed}\label{sec:extended-test}
-    
+
     \tested{} is a prototype of a judge for the Dodona platform, capable of evaluation submissions in multiple programming languages for the same exercise.
     Although it is a judge for Dodona, it does not depend on Dodona and is independently usable.
+    \tested{} does use the Dodona format for input and output, but we believe this not a hindrance in using \tested{} elsewhere: the formats are sufficiently flexible to accommodate a wide variety of scenario's.
     
-    \tested{} can roughly be split into three parts:
-    
+    To discuss the internals of \tested{}, it is useful to split it into three main area's of interest:
+
     \begin{itemize}
-        \item The \emph{test plan}, which is a specification on how to evaluate a submission for a given exercise.
+        \item The \emph{test plan} and serialization format, which is a specification on how to evaluate a submission for a given exercise.
         \item The \emph{core} of \tested{}, which takes care of communicating with Dodona, generating and running testcode, and evaluating the results.
         \item The \emph{language configurations}, which are the subsystem responsible for translating the testplan into actual code.
     \end{itemize}
-    
-    \section{The test plan}\label{sec:the-test-plan}
-    
+
+    \subsection{The test plan}\label{subsec:the-test-plan}
+
     The test plan is a programming language independent format that specifies how a submission for an exercise must be evaluated.
     It contains elements such as the different tests, the inputs, the expected outputs, etc.
-    Heavily inspired by Dodona, the testplan is a hierarchy of the following elements:
-    
+    The structure of the test plan is heavily inspired by the Dodona output format and consists of following elements:
+
     \begin{description}
         \item[Tabs] A testplan contains multiple tabs, which are the top-level grouping of the tests.
-        \item[Contexts] Each tab consists of one or more contexts. 
+        \item[Contexts] Each tab consists of one or more contexts.
         A context is an independent execution and evaluation of a submission.
         \item[Testcase] A context consists of one or more testcases.
         A testcase the evaluation of one input and the resulting outputs.
@@ -81,33 +111,38 @@
         \item[Test] Finally, a testcase contains multiple tests, each for a different output channel.
         For example, there are tests for \texttt{stdout}, \texttt{stderr}, return values, exceptions, etc.
     \end{description}
-    
-    One important part of the testplan that deserves further attention is the input.
-    As we've said, each testcase has a single input.
+
+    One important part of the test plan that deserves further attention is the input.
+    As we've mentioned, each testcase has a single input.
     There are basically two types of input: \texttt{stdin} and a statement.
     Since our goal is not to create a universal programming language, statements have intentionally been kept simple.
-    A statement is either an expression or an assignment (which is giving a name to an expression).
+    A statement is either an expression or an assignment (by which we mean giving a name to the result of an expression).
     An expression can be a function call, an identifier (if we previously used an assignment) or a literal value.
-    
-    \tested{} also defines a serialization format for values, and consists of two pieces: the data type of a value and the encoding of the value.
+
+    Additionally, \tested{} defines a serialization format for values.
+    This format consists of two pieces: the data type of a value and the encoding of the value.
     Since the serialization format is also defined in \acronym{JSON}, the encoding is simply a \acronym{JSON} type.
-    
     The data type of the value is complexer: since we support multiple programming languages, we must support generic data types.
     To this end, \tested{} defines two kinds of data types:
-    
+
     \begin{itemize}
         \item Basic types, which include integral numbers, rational numbers, booleans, strings, sequences, sets and maps.
+        These are abstract types, and we don't concern ourselves with implementation details for these types.
+        For example, all integer types in C (\texttt{int}, \texttt{long}, etc.) map to the same integer type in the serialization format.
         \item Advanced types, which are more detailed (\texttt{int64}) or programming language specific.
+        Here we do concern ourselves with implementation details.
     \end{itemize}
-    
+
     The advanced types are associated with a basic type, which acts as a fallback.
     For example, a \texttt{tuple} in Python will be considered equal to an \texttt{array} in Java, since they both have the basic type \texttt{sequence}.
     Programming languages can also indicate that there is no support for certain types (e.g.\ no support for sets in C), in which case the exercise will not be solvable in that programming language if the exercise uses that data type.
-    
-    \section{Running an evaluation}\label{sec:running-an-evaluation}
-    
-    To evaluate the correctness of a submission, \tested{} runs the following steps, as illustrated by TODO:
-    
+
+
+    \subsection{Running an evaluation}\label{subsec:running-an-evaluation}
+
+    A first part of the core of \tested{} is responsible for running the evaluation of an exercise.
+    This evaluation consists of a few steps, as illustrated by TODO and described below:
+
     \begin{enumerate}
         \item The Docker container for \tested{} is started by Dodona, and the submission and configuration are made available to \tested{}.
         \item The test plan is checked to verify that the exercise is solvable in the programming language of the submission.
@@ -123,16 +158,24 @@
         Each context is executed in a new subprocess, to combat sharing information between contexts.
         \item The collected results of the execution are then evaluated.
         For example, the results contain the produced \texttt{stdout}, which will now be evaluated.
-        \item In the final step, \tested{} collects all results and sends them to Dodona. 
+        \item In the final step, \tested{} collects all results and sends them to Dodona.
     \end{enumerate}
     
-    \section{Evaluation}\label{sec:extended-evaluation}
+    One might ask why we need two compilation modes.
+    The reason we employ these modes is performance.
+    Since the evaluation of a submission happens in real-time, it is desirable to keep the evaluation short.
+    One bottleneck is the compilation step, which can be quite slow in languages such as Java or Haskell.
+    As a solution, we don't want to compile each context independently: instead we compile all contexts in one go.
+    Note that we still execute the contexts independently, since they are independent of each other.
+
+    \subsection{Evaluating the results}\label{subsec:evaluating-the-results}
     
+    A second part of the core is evaluating the results of the previous execution step.
     As we've mentioned, each output channel is denoted by a different test in the test plan.
     Currently, \tested{} has support for following output channels: \texttt{stdout}, \texttt{stderr}, exceptions, return values, created files and the exit code.
     In most cases, the testplan would specify for each relevant output channel how it should be evaluated, which in most cases boils down to recording the expected value.
     If an output channel is not relevant, \tested{} provides sane defaults (e.g.\ not specifying \texttt{stderr} means there should be no output on \texttt{stderr}).
-    
+
     Generally, there are three ways in which an output channel can be evaluated:
     \begin{description}
         \item[Language-specific evaluation] The evaluation code is included in the test code generated for the context and is executed directly in the same subprocess.
@@ -149,27 +192,77 @@
         This means that for Python and Haskell solutions, only tuples will be accepted.
         In other languages, all data types with the corresponding basic type will be accepted (such as arrays and lists).
     \end{description}
-    
+
     Not all modes are available for all output channels.
     For example, the language-specific evaluation mode is only available for return values and exceptions.
-    
-    \section{Programming languages}\label{sec:extend-programming-languages}
-    
+
+    \section{Configuring programming languages}\label{sec:configuring-programming-languages}
+
     Support for a programming language in \tested{} consists of three parts:
-    
+
     \begin{enumerate}
         \item A configuration file
         \item A configuration class
         \item Templates
     \end{enumerate}
-    
+
     The configuration file is used to record properties of the programming language, such as the file extension or which data structures are supported.
-    
+
     The configuration class handles the language-specific aspects of the compilation and execution step.
     \tested{} expects a command to perform during those steps (e.g.\ for C, the command would along the lines of \texttt{gcc -std=c11 file1.c file2.c}).
-    
+
     The third component are the templates.
     \tested{} uses the mako\footnote{\url{https://www.makotemplates.org/}} templating system to generate the test code and translate language independent concepts from the test plan into actual code (such as literal values).
     The templating system works similar to the one used by webapps (such as \acronym{ERB} in Rails, Blade in Laravel or \acronym{EEX} in Phoenix), but generates code instead of \acronym{HTML}/\acronym{JSON}.
+    
+    \section{Future work}\label{sec:future-work}
+    
+    A first area in which future improvements are possible is the test plan.
+    The test plan currently does not support dynamic scheduling of contexts: the contexts to execute are decided before the execution happens.
+    The test plan can be extended to allow some form of decision, for example deciding if a context should run depending on the result of the previous context.
+    Related are repeated executions of the same context.
+    This is useful for exercises with randomness, where the output is not deterministic.
+    For example, generating a list of random numbers with a minimum and maximum constraint would need multiple runs to validate that random numbers are used.
+    
+    Another aspect of the test plan are the statements and expressions.
+    While these are currently intentionally simple, this does impose some limitations.
+    For example, an expression with mathematical operators (\texttt{5 + 5}) is not possible.
+    The expressions and statements could be extended to provide more capabilities.
+    It is also worth investigating if, when more capabilities are added, it might be worth switching to an existing language and transpile this language to the various programming languages \tested{} supports.
+    
+    The test plan is also fairly verbose.
+    We believe this could be solved by introducing a preprocessing step, that translates a more compact format to the test plan.
+    A promising upcoming format is \cite{peml}.
+    We also envision different formats for different exercise types.
+    For example, an IO exercise and exercise with function calls have different requirements.
+    
+    Secondly, \tested{} does not translate programming paradigms.
+    For example, a given exercise might be solved using two top-level functions in Python, but would often be solved with an object in Java.
+    Functional languages also have different paradigms compared to object-oriented languages.
+    It might be worth researching common patterns and their equivalent in other programming languages and providing translation for those common patterns.
+    
+    Lastly, while the performance is not bad, there is still room for improvements.
+    One area in particular is the programmed evaluations.
+    Each evaluation is currently compiled and executed, even though it is common for multiple contexts to use the same evaluation code.
+    
+    \section{Conclusion}\label{sec:conclusion}
+    
+    We have presented \tested{}, a judge for the Dodona platform, capable of evaluating submissions in multiple programming languages for the same exercise.
+    At the moment, \tested{} supports Python, Java, Haskell, C and JavaScript.
+    While there still some limitations on the type of exercises \tested{} can evaluate, it can already be used for a variaty of exercises.
+    We believe \tested{} can be particularly useful in two scenarios:
+    
+    \begin{itemize}
+        \item When using simple exercises, for example when teaching programming to novices.
+        Due to their simple nature, these exercises often don't use language specific constructs, making them a good candidate for \tested{}.
+        Such exercises might also be useful for students with more programming experience who want to learn a new programming language.
+        \item When the programming language is not important.
+        This is the case, for example, in courses teaching algorithms.
+        The focus of the exercises is learning the algorithmic techniques, not the specifics of a programming language.
+    \end{itemize}
+    
 
-\end{multicols}
+    \bibliographystyle{elsarticle-num}
+    \bibliography{main}
+
+\end{document}
