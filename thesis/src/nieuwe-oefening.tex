@@ -11,7 +11,7 @@ We bespreken oefeningen:
     \item waarbij functies beoordeeld worden door \tested{},
     \item waarbij een programmeertaalspecifieke evaluator gebruikt wordt,
     \item waarbij een geprogrammeerde evaluator gebruikt wordt,
-    \item waarbij commando-argumenten gelezen worden,
+    \item waarbij commandoargumenten gelezen worden,
     \item waarbij statements (assignments) gebruikt worden en
     \item waarbij objectgerichte zaken gebruikt worden.
 \end{itemize}
@@ -76,8 +76,7 @@ Wat doet deze functie nu juist?
 
 \begin{enumerate}
     \item Een evaluatiefunctie van een geprogrammeerde evaluatie kan ook argumenten meekrijgen.
-    In ons geval geven we de parameters van de \texttt{loterij}-functie mee als argument aan de evaluatiecode.
-    Eerst worden dus de parameters uit de argumenten gehaald.
+    In ons geval geven we de argumenten van de \texttt{loterij}-functie mee als argument aan de evaluatiecode.
     \item De functie \texttt{valid\_lottery\_numbers} wordt opgeroepen.
     We hebben deze functie niet opgenomen in het codefragment hierboven omdat het een lange functie is, maar deze functie controleert in feite of de geproduceerde waarde voldoet aan de vereisten (klopt het aantal getallen, is de lijst gesorteerd, enzovoort).
     \item Indien de geproduceerde waarde geldig is, dan gebruiken we die ook als verwachte waarde.
@@ -217,7 +216,7 @@ Uniek hier is dat dit testplan ook het volledige testplan is zoals het gebruikt 
 
 Deze oefening is andermaal afkomstig uit het boek \emph{De Programmeursleerling}\footnote{\url{https://dodona.ugent.be/nl/courses/293/series/2556/exercises/1653208777/}}.
 De oefening is interessant om te illustreren hoe commandoargumenten werken en hoe de exitcode werkt.
-De opgave bestaat eruit om een reeks getallen in te lezen uit de commandoparameters en de som ervan uit te schrijven op \texttt{stdout}.
+De opgave bestaat eruit om een reeks getallen in te lezen uit de commandoargumenten en de som ervan uit te schrijven op \texttt{stdout}.
 Als een van de commandoargumenten geen geldig getal is, dan moet een foutboodschap naar \texttt{stderr} geschreven worden en moet het programma eindigen met exitcode \texttt{1}.
 Bijvoorbeeld:
 
@@ -281,7 +280,7 @@ De contexten in het eerste tabblad voor de functie \texttt{is\_isbn} zijn niet s
 We roepen de functie \texttt{is\_isbn} per context één keer op met andere argumenten.
 
 In het tweede tabblad voor de functie \texttt{are\_isbn} ligt de situatie iets anders.
-Het eerste argument van deze functie is een lijst van potentiële \acronym{ISBN}'s.
+De eerste parameter van deze functie is een lijst van potentiële \acronym{ISBN}'s.
 Om de overzichtelijkheid te verbeteren willen we, zoals in het voorbeeld in de opgave, deze lijst eerst toekennen aan een variabele (een assignment) en dan de variabele gebruiken als argument voor de functie.
 
 In \tested{} heeft een testgeval altijd één statement als invoer.

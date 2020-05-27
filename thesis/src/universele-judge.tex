@@ -129,7 +129,7 @@ Concreet is de structuur een hiërarchie met volgende elementen:
         \item[Main testcase] of hoofdtestgeval.
         Van deze soort is er maximaal één per context (geen hoofdtestgeval is ook mogelijk).
         Dit testgeval heeft als doel het uitvoeren van de main-functie (of de code zelf als het gaat om een scripttaal zoals Bash of Python).
-        Als invoer voor dit testgeval kunnen enkel de standaardinvoerstroom, de commando-argumenten en de bestanden in de \english{workdir} meegegeven worden.
+        Als invoer voor dit testgeval kunnen enkel de standaardinvoerstroom, de commandoargumenten en de bestanden in de \english{workdir} meegegeven worden.
         De exitcode van een uitvoering kan ook enkel in het hoofdtestgeval gecontroleerd worden.
         \item[Normal testcase] of normaal testgeval.
         Hiervan kunnen er nul of meer zijn per context.
@@ -549,7 +549,7 @@ Deze verplichte sjablonen zijn:
 \begin{description}
     \item[\texttt{statement}] Vertaalt een statement uit het testplan naar code.
     \item[\texttt{context}] Genereert de code om de testgevallen van een context uit te voeren.
-    \item[\texttt{selector}*] Leest een parameter in en voert aan de hand van die parameter de juiste context uit bij de batchcompilatie (zie de volgende subparagraaf en \cref{sec:performantie}).
+    \item[\texttt{selector}*] Leest een argument in en voert aan de hand van dat argument de juiste context uit bij de batchcompilatie (zie de volgende subparagraaf en \cref{sec:performantie}).
     Dit sjabloon is niet in elke programmeertaal nodig: in Python kunnen de contexten samen gecompileerd worden zonder selector, terwijl dit in Java en Haskell niet mogelijk is.
     \item[\texttt{evaluator\_executor}*] Genereert de code om een geprogrammeerde evaluatie te starten.
 \end{description}
@@ -577,7 +577,7 @@ Dit alles wordt geïllustreerd in \cref{ch:nieuwe-taal}, dat volledig uitwerkt h
     \item[Batchcompilatie] Bij deze manier wordt de code voor alle contexten in een keer gecompileerd.
     Dit wordt gedaan om performantieredenen.
     In talen die resulteren in een uitvoerbaar bestand (zoals Haskell of C/C++), resulteert deze modus in één uitvoerbaar bestand voor alle contexten.
-    Bij het uitvoeren wordt dan aan de hand van een parameter de juiste context uitgevoerd (met het \texttt{selector}-sjabloon).
+    Bij het uitvoeren wordt dan aan de hand van een argument de juiste context uitgevoerd (met het \texttt{selector}-sjabloon).
     \item[Contextcompilatie] Hierbij wordt elke context afzonderlijk gecompileerd tot een uitvoerbaar bestand.
 \end{description}
 
@@ -803,7 +803,7 @@ Hoewel de exacte implementatie verschilt van programmeertaal tot programmeertaal
     Deze functie wordt dan vertaald door \tested{}.
     In Java zal dit bijvoorbeeld resulteren in een statische functie.
 } met als naam \texttt{evaluate}.
-Deze functie krijgt drie argumenten mee:
+Deze functie heeft drie parameters:
 
 \begin{description}
     \item[\texttt{expected}] De verwachte waarde uit het testplan.
@@ -857,7 +857,7 @@ Het is desalniettemin het vermelden waard dat het niet zeker is of deze evaluati
 Oefeningen die programmeertaalspecifieke aspecten moeten beoordelen zijn, net door hun programmeertaalspecifieke aard, moeilijker aan te bieden in meerdere programmeertalen.
 Een oefening in de programmeertaal C die bijvoorbeeld beoordeelt op juist gebruik van pointers zal weinig nut hebben in Python.
 
-In gebruik is een programmeertaalspecifieke evaluatie zo goed als identiek aan de geprogrammeerde evaluatie, met dat verschil dat de evaluatiefunctie slechts één parameter meekrijgt: de door de ingediende oplossing geproduceerde waarde.
+In gebruik is een programmeertaalspecifieke evaluatie zo goed als identiek aan de geprogrammeerde evaluatie, met dat verschil dat de evaluatiefunctie slechts één argument meekrijgt: de door de ingediende oplossing geproduceerde waarde.
 Een verwachte waarde is niet voorzien, omdat we verwachten dat in veel gevallen de waarde niet ondersteund zal worden door het testplan.
 Ook moet de evaluatiecode geschreven worden voor elke programmeertaal waarin de oefening aangeboden wordt.
 Een concreet voorbeeld, opnieuw in Python, is \cref{lst:evaluation-specific}.
@@ -884,7 +884,7 @@ Jupyter-kernels zijn de achterliggende technologie van Jupyter Notebooks \autoci
 De werking van een Jupyter-kernel kan als volgt samengevat worden: een Jupyter-kernel is een lokaal proces, dat code kan uitvoeren en de resultaten van die uitvoer teruggeeft.
 Zo kan men naar de Python-kernel de expressie \mintinline{python}{5 + 9} sturen, waarop het antwoord \mintinline{python}{14} zal zijn.
 Een andere manier om een Jupyter-kernel te bekijken, is als een programmeertaalonafhankelijk protocol bovenop een \acronym{REPL} (een \english{read-eval-print loop}).
-Deze keuze voor Jupyter-kernels als uitvoering was gebaseerd op volgende argumenten:
+Deze keuze voor Jupyter-kernels als uitvoering was gebaseerd op volgende overwegingen:
 \begin{itemize}
     \item Hergebruik van bestaande kernels.
     Hierdoor is het niet nodig om voor elke programmeertaal veel tijd te besteden aan de implementatie of de configuratie: aangezien het protocol voor Jupyter-kernels programmeertaalonafhankelijk is, kunnen alle bestaande kernels gebruikt worden.

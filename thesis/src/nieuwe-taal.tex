@@ -272,13 +272,13 @@ Een eerste en belangrijke methode is de callback voor de compilatiestap:
 
 \inputminted[firstline=12,lastline=17,gobble=4]{python}{sources/c-config.py}
 
-Het eerste argument van deze methode is een klasse met enkele configuratie-opties, zoals de tijdslimiet, geheugenlimiet en de programmeertaalspecifieke opties.
+De eerste parameter van deze methode is een klasse met enkele configuratie-opties, zoals de tijdslimiet, geheugenlimiet en de programmeertaalspecifieke opties.
 Dit zou bijvoorbeeld gebruikt kunnen worden om de versie van C mee te geven (zoals C11 of C99).
 Dit wordt momenteel niet gedaan in C, want \tested{} vereist C11, maar de mogelijkheid bestaat.
 Wel moeten we opmerken dat de tijdslimiet zelden nuttig zal zijn, daar \tested{} de uitvoeringstijd bijhoudt.
 In de configuratieklasse is het dus niet nodig om daar rekening mee te houden.
 
-Het andere argument van deze methode is een lijst van bestanden waarvan \tested{} vermoedt dat ze nuttig kunnen zijn voor de compilatiestap.
+De andere parameter van deze methode is een lijst van bestanden waarvan \tested{} vermoedt dat ze nuttig kunnen zijn voor de compilatiestap.
 Het bevat onder andere de dependencies uit het configuratiebestand, de ingediende oplossing en de uit de sjablonen gegenereerde bestanden.
 Die laatste bestanden zijn bijvoorbeeld de verschillende contexten bij een batchcompilatie, maar kunnen ook de evaluator zijn bij een geprogrammeerde evaluatie.
 De bestanden bestaan uit de naam en een bestandsextensie.
@@ -289,7 +289,7 @@ Al deze bestanden zullen zich in de map bevinden waarin de compilatie plaatsvind
 Het is niet verplicht om al deze bestanden ook effectief te gebruiken: sommige programmeertalen hebben zelf een detectiesysteem voor bestanden.
 Zo is het in C voldoende om enkel het laatste bestand met de main-functie te gebruiken: alle andere bestanden worden gevonden door \acronym{GCC}.
 
-Concreet ziet deze parameter er bijvoorbeeld als volgt uit:
+Concreet ziet een argument voor deze parameter er bijvoorbeeld als volgt uit:
 
 \begin{minted}{python}
 ['values.py', 'evaluation_utils.py', 'context_0_0.py']
