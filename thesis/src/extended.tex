@@ -1,3 +1,4 @@
+%! suppress = TooLargeSection
 %! suppress = Makeatletter
 %! suppress = DuplicateDefinition
 %! suppress = DiscouragedUseOfDef
@@ -21,9 +22,7 @@
 }
 \makeatother
 
-\author{Niko Strijbol\corref{cor1}}
-%\author{Peter Dawyndt\fnref{fn1}}
-%\author{Bart Mesuere\fnref{fn1}}
+\author{Niko Strijbol \\ Supervisors: Peter Dawyndt, Bart Mesuere}
 
 \begin{document}
 
@@ -32,11 +31,13 @@
     \setmonofont[Scale=MatchLowercase,Contextuals={Alternate}]{Jetbrains Mono}
 
     \begin{abstract}
-        Writing programming exercises is a time-consuming activity.
-        In this article we focus on one particular aspect: using the same exercise in multiple programming languages.
-        Currently, achieving this requires a manual translation of the exercise to each programming language that the author wishes to support, although most exercises do not make use of language specific constructs.
-        We introduce \tested{}, a prototype of a judge for the Dodona platform (an online exercise platform) that is capable of evaluationg submissions in multiple programming languages using one exercise.
-        We describe how the prototype works and discuss limitations and future work.
+        Writing a programming exercise is a time-consuming activity.
+        When the goal is using the same exercise in multiple programming languages, the time needed grows fast.
+        One needs to manually translate the exercise to each language one wishes to support, although most exercises do not make use of language specific constructs.
+        The translation is not intellectually stimulating work: it is an almost mechanical job.
+        This article introduces \tested{}, a prototype of an exercise framework in which a test plan is written in a language-independent format, which allows evaluating submissions in multiple programming languages for the same exercise.
+        \tested{} also integrates with Dodona, an online exercise platform.
+        First the inner workings of the framework are described, followed by the current limitations and future work.
     \end{abstract}
 
     \maketitle
@@ -55,19 +56,20 @@
         \item The students' submissions must be provided with high quality feedback.
         This feedback allows students to learn from their mistakes and improve their programming skills (and by proxy their computational thinking skills).
     \end{itemize}
-
-    The second challenge often leads educators to use a platform that provides automatic feedback, with at least the correctness of the submission being automatically determined.
-    One such platform is Dodona, which was created by and is maintained by a team at Ghent University.
     
-    In this article, we focus on one aspect of the first challenge.
-    There are a lot of programming languages, and each of those languages needs exercises if it will be taught.
-    Currently, educators have to manually translates the exercises from one programming language to the next, even though most exercises don't use programming language specific concepts.
-    In this article we provide an answer the question: is it feasible to create a system where the exercise is written once, but is solvable in multiple programming languages?
-    We start by giving some more background on Dodona, after which we introduce the answer to previous question in the form of \tested{} and we finish by discussing limitations and future work.
+    Writing a programming exercise itself is a labour and time-consuming endeavour.
+    A significant part of programming exercises are for novices: they are intended to teach how to program, while the language details are not very important.
+    Another type of exercise are algorithmic exercises, in which the algorithm is the most important aspect.
+    Both of these types of exercises are prime candidates for being available in multiple programming languages.
+    However, making an exercise available in multiple programming languages adds a non-negligible time cost to the already time-consuming process of writing exercises.
+    The exercise must be translated manually to each language one wishes to support.
+    This translation work is not an intellectually interesting process: it is an almost mechanical translation.
+    \tested, introduced later on, is the answer to the question ``is it feasible to create a system where the exercise is written once, but is solvable in multiple programming languages?''.
 
     \section{Dodona}\label{sec:extended-dodona}
-
-    Dodona is an online platform for programming exercises.
+    
+    To cope with the second challenge, providing good feedback, educators often use a platform in which exercises are solved.
+    One such platform is Dodona, an online platform for programming exercises.
     It supports multiple programming languages and provides real-time automatic feedback for submissions.
     Dodona is freely available for schools and is used by multiple courses at Ghent University.
 
@@ -75,19 +77,22 @@
     This judge is run in a Docker container and communicates with Dodona via a \acronym{JSON} interface.
     The judge system is flexibel: other types of feedback, aside from correctness, are possible.
     For example, some existing judges run a linter on the submissions.
+    
+    \tested{}, introduced in the next section, is such a judge and thus fully integrates with Dodona.
+    It does so by using the Dodona interfaces for input and output, but is otherwise independent.
 
     \section{TESTed}\label{sec:extended-test}
 
-    \tested{} is a prototype of a judge for the Dodona platform, capable of evaluation submissions in multiple programming languages for the same exercise.
-    Although it is a judge for Dodona, it does not depend on Dodona and is independently usable.
-    \tested{} does use the Dodona format for input and output, but we believe this not a hindrance in using \tested{} elsewhere: the formats are sufficiently flexible to accommodate a wide variety of scenario's.
-    
-    To discuss the internals of \tested{}, it is useful to split it into three main area's of interest:
+    \tested{} is a prototype of a framework for writing programming exercises and evaluating submissions for those exercises in multiple programming languages.
+    The framework can be split into three distinct parts:
 
     \begin{itemize}
-        \item The \emph{test plan} and serialization format, which is a specification on how to evaluate a submission for a given exercise.
-        \item The \emph{core} of \tested{}, which takes care of communicating with Dodona, generating and running testcode, and evaluating the results.
+        \item The \emph{test plan} and serialization format.
+        The test plan is a specification on how to evaluate a submission for a given exercise.
+        Combined with the serialization format, it makes writing language-independent exercises possible.
+        \item The \emph{core}, which takes care of handling input and output (in the Dodona format), generating test code from the test plan, executing said code, and evaluating the results of said execution.
         \item The \emph{language configurations}, which are the subsystem responsible for translating the testplan into actual code.
+        By separating the language configurations from the main logic, it is easy to add support for new programming languages in \tested{}.
     \end{itemize}
 
     \subsection{The test plan}\label{subsec:the-test-plan}
