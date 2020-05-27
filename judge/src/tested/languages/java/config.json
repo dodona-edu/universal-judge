@@ -21,7 +21,7 @@
     "heterogeneous_collections": true,
     "heterogeneous_arguments": true,
     "evaluation": true,
-    "default_arguments": true
+    "default_parameters": true
   },
   "datatypes": {
     "integer": "supported",

@@ -18,7 +18,7 @@
     "heterogeneous_arguments": true,
     "named_arguments": true,
     "evaluation": true,
-    "default_arguments": true
+    "default_parameters": true
   },
   "datatypes": {
 

@@ -615,7 +615,7 @@ def _resolve_function_calls(function_calls: Iterable[FunctionCall]):
         # If there are default arguments, some function calls will not have the
         # same amount of arguments.
         if len(set(len(x.arguments) for x in calls)) != 1:
-            used_features.append(FeatureSet({Construct.DEFAULT_ARGUMENTS}, set()))
+            used_features.append(FeatureSet({Construct.DEFAULT_PARAMETERS}, set()))
         # Create mapping [arg position] -> arguments for each call
         argument_map: Dict[Any, List[Expression]] = defaultdict(list)
         for call in calls:

@@ -25,9 +25,9 @@ class Construct(str, Enum):
 
     HETEROGENEOUS_COLLECTIONS = "heterogeneous_collections"
 
-    # Named arguments and default arguments are not necessarily related.
+    # Named arguments and default parameters are not necessarily related.
     # An argument can have a name but still be required.
-    DEFAULT_ARGUMENTS = "default_arguments"
+    DEFAULT_PARAMETERS = "default_parameters"
     HETEROGENEOUS_ARGUMENTS = "heterogeneous_arguments"
     NAMED_ARGUMENTS = "named_arguments"
 
