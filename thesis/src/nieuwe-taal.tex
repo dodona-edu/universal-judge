@@ -139,8 +139,7 @@ Uiteraard willen we zoveel mogelijk ondersteunen, maar vooral op het vlak van ge
 
 \begin{description}
     \item[\texttt{big\_int}] C heeft geen ingebouwd type voor getallen van arbitraire grootte.
-    \item[\texttt{fixed\_precision}] C heeft geen ingebouwd type voor
-    kommagetallen me willekeurige precisie.
+    \item[\texttt{fixed\_precision}] C heeft geen ingebouwd type voor kommagetallen met willekeurige precisie.
     \item[Andere datastructuren] Het gaat hier om datastructuren zoals \texttt{array} en \texttt{list} (om dezelfde redenen als hierboven).
     Ook \texttt{tuple} wordt niet ondersteund, omdat het niet bestaat in C\@.
 \end{description}
@@ -250,7 +249,7 @@ Een opmerking hierbij is dat de status \texttt{reduced} voor de basistypes equiv
 
 Het is de bedoeling dat de meeste programmeertalen voor het merendeel van de datatypes ten minste \texttt{reduced} hebben.
 Toch is gekozen om \texttt{unsupported} als standaardwaarde te nemen;
-dit zorgt ervoor dat de ondersteunde datatypes explicit uitgeschreven zijn.
+dit zorgt ervoor dat de ondersteunde datatypes expliciet uitgeschreven zijn.
 Dit laat ook toe om datatypes toe te voegen aan \tested{} zonder bestaande configuraties van programmeertalen te moeten aanpassen.
 Ter illustratie vermelden we hier voor C alle datatypes, ook de niet-ondersteunde.
 
