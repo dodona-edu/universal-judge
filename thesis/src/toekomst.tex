@@ -179,6 +179,19 @@ Daarna kan voor elke context een preconditie gegeven worden: welke contexten moe
 Zijn niet alle contexten uit de preconditie geslaagd, dan wordt de context niet uitgevoerd.
 Het testplan kan bevatten dat context 15 enkel uitgevoerd kan worden indien contexten 1, 7 en 14 ook succesvol waren.
 
+\subsection{Programmeertaalkeuze voor contexten}\label{subsec:programmeertaalkeuze-voor-contexten}
+
+Een andere variant van dynamische testplannen situeert zich op het niveau van de programmeertalen.
+Het kan nuttig zijn om per context optioneel aan te duiden in welke programmeertalen deze uitgevoerd moet worden.
+Dit gaat zowel over een expliciete lijst van programmeertalen als een automatische bepaling op basis van gebruikte functionaliteit.
+Als er momenteel functionaliteit gebruikt wordt die niet ondersteund wordt door een programmeertaal, kan het volledige testplan niet uitgevoerd worden in die programmeertaal, ook al is het slechts één context die niet ondersteunde functionaliteit gebruikt.
+Bij deze uitbreiding zou dan enkel die ene context niet uitgevoerd worden.
+
+Een scenario waar dit nuttig kan zijn is bijvoorbeeld het gebruik van benoemde argumenten.
+Het kan nuttig zijn om dergelijke argumenten te vertalen naar positionele argumenten in programmeertalen die geen ondersteuning hebben voor benoemde argumenten.
+Dit is echter niet mogelijk voor contexten waar de argumenten in een andere volgorde gegeven zijn.
+Deze laatste contexten zouden dan enkel uitgevoerd worden als de programmeertaal benoemde argumenten ondersteunt.
+
 \subsection{Herhaalde uitvoeringen van testgevallen}\label{subsec:herhaalde-uitvoeringen-van-testgevallen}
 
 Een andere, maar aan het dynamisch uitvoeren verwante, beperking is het ontbreken van de mogelijkheid om contexten of testgevallen meerdere keren uit te voeren.
