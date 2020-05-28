@@ -23,7 +23,9 @@
     "assignments": true,
     "heterogeneous_collections": false,
     "heterogeneous_arguments": false,
-    "evaluation": false
+    "evaluation": false,
+    "named_arguments": false,
+    "default_parameters": false
   },
   "datatypes": {
     "integer": "supported",
