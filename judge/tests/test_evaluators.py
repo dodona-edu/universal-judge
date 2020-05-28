@@ -223,3 +223,51 @@ def test_file_evaluator_line_correct(tmp_path: Path, pytestconfig, mocker):
     assert result.result.enum == Status.CORRECT
     assert result.readable_expected == "expected\nexpected2"
     assert result.readable_actual == "expected\nexpected2"
+
+
+def test_file_evaluator_strip_lines_correct(tmp_path: Path, pytestconfig, mocker):
+    config = evaluator_config(tmp_path, pytestconfig, {
+        "mode": "line",
+        "strip_newlines": True
+    })
+    s = mocker.spy(tested.evaluators.text, name="compare_text")
+    mock_files = [mocker.mock_open(read_data=content).return_value for content in
+                  ["expected\nexpected2\n", "expected\nexpected2"]]
+    mock_opener = mocker.mock_open()
+    mock_opener.side_effect = mock_files
+    mocker.patch("builtins.open", mock_opener)
+    channel = FileOutputChannel(
+        expected_path="expected.txt",
+        actual_path="expected.txt"
+    )
+    result = evaluate_file(config, channel, "")
+    s.assert_any_call(ANY, "expected", "expected")
+    s.assert_any_call(ANY, "expected2", "expected2")
+    assert s.call_count == 2
+    assert result.result.enum == Status.CORRECT
+    assert result.readable_expected == "expected\nexpected2\n"
+    assert result.readable_actual == "expected\nexpected2"
+
+
+def test_file_evaluator_dont_strip_lines_correct(tmp_path: Path, pytestconfig, mocker):
+    config = evaluator_config(tmp_path, pytestconfig, {
+        "mode": "line",
+        "strip_newlines": False
+    })
+    s = mocker.spy(tested.evaluators.text, name="compare_text")
+    mock_files = [mocker.mock_open(read_data=content).return_value for content in
+                  ["expected\nexpected2\n", "expected\nexpected2"]]
+    mock_opener = mocker.mock_open()
+    mock_opener.side_effect = mock_files
+    mocker.patch("builtins.open", mock_opener)
+    channel = FileOutputChannel(
+        expected_path="expected.txt",
+        actual_path="expected.txt"
+    )
+    result = evaluate_file(config, channel, "")
+    s.assert_any_call(ANY, "expected\n", "expected\n")
+    s.assert_any_call(ANY, "expected2\n", "expected2")
+    assert s.call_count == 2
+    assert result.result.enum == Status.CORRECT
+    assert result.readable_expected == "expected\nexpected2\n"
+    assert result.readable_actual == "expected\nexpected2"

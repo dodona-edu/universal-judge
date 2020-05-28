@@ -735,7 +735,8 @@ Het vergelijken van de bestanden gebeurt op één van deze manieren:
 
 \begin{description}
     \item[\texttt{full}] Beide bestanden worden in hun geheel met elkaar vergeleken.
-    \item[\texttt{line}] Elke regel wordt vergeleken met een overeenkomstige regel in het andere bestand, waarbij regeleindes niet vergeleken worden.
+    \item[\texttt{line}] Elke regel wordt vergeleken met een overeenkomstige regel in het andere bestand.
+    Standaard worden regeleindes niet in overweging genomen bij de vergelijking, maar de optie \texttt{stripNewlines} kan op \texttt{False} gezet worden om dit toch te doen.
 \end{description}
 
 In beide gevallen gebeurt de eigenlijke evaluatie door de tekstevaluator die we zonet besproken hebben.
