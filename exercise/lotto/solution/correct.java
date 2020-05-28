@@ -4,7 +4,6 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 class Submission {
-
     public static String loterij(int aantal, int maximum) {
         var r = ThreadLocalRandom.current();
         var result = new HashSet<Integer>();

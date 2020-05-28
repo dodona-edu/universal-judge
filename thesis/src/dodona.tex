@@ -43,11 +43,11 @@ Studenten veel oefeningen laten maken resulteert wel in twee uitdagingen voor de
 \end{enumerate}
 
 Deze thesis focust op de eerste uitdaging, al wordt ook ingespeeld op de tweede uitdaging, onder andere in \cref{sec:robuustheid}.
-De uitdaging wordt beschouwd binnen de context van Dodona, een online leerplatform voor automatische feedback op ingediende oplossingen voor programmeeroefeningen.
+De uitdagingen worden beschouwd binnen de context van Dodona, een online leerplatform voor automatische feedback op ingediende oplossingen voor programmeeroefeningen.
 
 \section{Het leerplatform Dodona}\label{sec:wat-is-dodona}
 
-Sinds 2011 wordt aan de onderzoeksgroep Computationele Biologie van de Universiteit Gent gewerkt met programmeeroefeningen die in een online systeem ingediend en beoordeeld worden.
+Sinds 2011 wordt aan de onderzoeksgroep Computationele Biologie van de Universiteit Gent gewerkt met programmeeroefeningen waarbij oplossingen in een online systeem ingediend en beoordeeld worden.
 Oorspronkelijk werd hiervoor gebruik gemaakt van de \english{Sphere Online Judge} (\acronym{SPOJ}) \autocite{10.1007/978-3-540-78139-4_31}.
 Op basis van ervaringen met \acronym{SPOJ} ontwikkelde de onderzoeksgroep een eigen leerplatform, Dodona, dat in september 2016 beschikbaar werd.
 Het doel van Dodona is eenvoudig: lesgevers bijstaan om hun studenten niet alleen zo goed mogelijk te leren programmeren, maar dit ook op een zo efficiënt mogelijke manier te doen.
@@ -104,9 +104,9 @@ De beoordeling van een oplossing van een student verloopt als volgt:
 \begin{enumerate}
     \item De student dient de oplossing in via de webinterface van Dodona.
     \item Dodona start een Docker-container voor de judge.
-    \item Dodona voorziet de container van de bestanden van de judge, de oefening en de ingediende oplossing van de bind mount.
-    \item De judge wordt uitgevoerd met de configuratie op de standaardinvoerstroom.
-    \item De judge beoordeelt de oplossing aan de beoordelingsmethodes opgesteld door de lesgever (d.w.z.\ de jUnit-test, de doctests, \ldots).
+    \item Dodona voorziet de container van de bestanden van de judge, de oefening en de ingediende oplossing via de bind mount.
+    \item De judge wordt uitgevoerd, waarbij de configuratie via de standaardinvoerstroom beschikbaar is.
+    \item De judge beoordeelt de oplossing zoals aangegeven door de lesgever (via jUnit-tests, doctests, \ldots).
     Judges kunnen ook bijkomende taken uitvoeren, zoals linting, beoordeling van de performantie of \english{grading} van de code van de oplossing.
     \item De judge vertaalt zijn beoordeling naar het Dodona-formaat en schrijft het resultaat naar de standaarduitvoerstroom.
     \item Dodona slaat dat resultaat op in de databank.
@@ -119,25 +119,20 @@ De manier waarop de huidige judges werken resulteert in twee belangrijke nadelen
 Bij het bespreken hiervan is het nuttig een voorbeeld in het achterhoofd te houden, teneinde de nadelen te kunnen concretiseren.
 Als voorbeeld gebruiken we de "Lotto"-oefening\footnote{Vrij naar een oefening van prof.\ Dawyndt.
 De originele oefening is beschikbaar op \url{https://dodona.ugent.be/nl/exercises/2025591548/}.}, waarvan de opgave hieronder gegeven wordt.
-Oplossingen voor deze oefening in twee programmeertalen, Python en Java, staan in \cref{lst:java-solution,lst:python-solution}.
+Oplossingen voor deze oefening in twee programmeertalen, Python en Java, staan in \cref{lst:python-solution}.
 
 \begin{quote}
     \markdownInput[renderers = {
-        headingOne = {\chapter*{#1}},
-        headingTwo = {\section*{#1}},
-        headingThree = {\subsection*{#1}}
+        headingOne = {\section*{#1}},
+        headingTwo = {\subsection*{#1}},
+        headingThree = {\subsubsection*{#1}}
     }, slice=opgave voorbeeld]{sources/lotto-description.md}
 \end{quote}
 
 \begin{listing}
-    \caption{Oplossing in Python voor de voorbeeldoefening Lotto.}
+    \caption{Oplossing in Python en Java voor de voorbeeldoefening Lotto.}
     \label{lst:python-solution}
     \inputminted{python3}{sources/lotto-correct.py}
-\end{listing}
-
-\begin{listing}
-    \caption{Oplossing in Java voor de voorbeeldoefening Lotto.}
-    \label{lst:java-solution}
     \inputminted{java}{sources/lotto-correct.java}
 \end{listing}
 
@@ -196,9 +191,12 @@ Het ondersteunen van opgaves met programmeertaalonafhankelijke voorbeelden en ve
 \section{Opbouw van de thesis}\label{sec:opbouw}
 
 \Cref{ch:tested} handelt over het antwoord op bovenstaande onderzoeksvraag, waar een prototype van een dergelijke judge wordt voorgesteld.
-Daarna volgt ter illustratie een gedetailleerde beschrijving van hoe een programmeertaal geconfigureerd moet worden voor dit prototype in \cref{ch:nieuwe-taal}.
-In \cref{ch:nieuwe-oefening} worden een reeks oefeningen met verschillende functionaliteiten besproken om te illustreren dat het prototype flexibel is.
+
+In \cref{ch:nieuwe-oefening} wordt een reeks oefeningen met verschillende functionaliteiten besproken om te illustreren hoe een testplan opgesteld moet worden en om aan te tonen welke soorten oefeningen met \tested{} gebruikt kunnen worden.
+Daarna volgt een gedetailleerde beschrijving van hoe een programmeertaal geconfigureerd moet worden voor dit prototype in \cref{ch:nieuwe-taal}.
 Deze twee hoofdstukken hebben ten doel een handleiding te vormen voor de lesgevers die oefeningen willen opstellen en voor de programmeurs die een nieuwe programmeertaal aan \tested{} willen toevoegen.
 Daarom sluiten deze hoofdstukken qua vorm en stijl meer aan bij een handleiding, wat zich bijvoorbeeld manifesteert als een toename in het aantal codefragmenten.
+
 Tot slot volgt met een hoofdstuk over beperkingen van het huidige prototype, en waar er verbeteringen mogelijk zijn (het "toekomstige werk").
-Na de bronvermeldingen volgen nog twee appendices waar voor twee eenvoudige oefeningen de opgave, het testplan en de gegenereerde code getoond worden.
+
+Na de bronvermeldingen volgen nog twee appendices waar voor twee eenvoudige oefeningen de opgave, het testplan, een oplossing en de door \tested{} gegenereerde code getoond worden.

@@ -53,7 +53,7 @@ generate:
 
 
 src/extended.pdf:
-	latexmk -cd -lualatex -use-make ${continuous} src/extended.tex
+	latexmk -cd -lualatex -shell-escape -use-make ${continuous} src/extended.tex
 
 
 # Do the main file.

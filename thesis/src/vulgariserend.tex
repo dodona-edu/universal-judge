@@ -1,7 +1,7 @@
 \chapter*{Vulgariserende samenvatting}
 
 In onze maatschappij wordt technologie, en informatica in het bijzonder, alsmaar belangrijker.
-In steeds meer sectoren worden problemen opgelost met behulp van de computer.
+In steeds meer sectoren worden problemen opgelost met behulp van digitale apparatuur.
 Het is daarom belangrijk dat iedereen een basis digitale geletterdheid heeft.
 Het is niet voldoende om te kunnen werken met de programma's en technologie van vandaag.
 Wie weet of programma's zoals Word of PowerPoint binnen twintig jaar nog relevant zijn?
@@ -27,18 +27,18 @@ Het aanbieden van veel oefeningen leidt tot uitdagingen voor de lesgevers:
 Voor de tweede uitdaging wordt vaak gebruikt gemaakt van een platform voor programmeeroefeningen, dat een eerste vorm van automatische feedback geeft, zoals de correctheid van de ingediende oplossing voor een oefening.
 Aan de onderzoeksgroep Computationele Biologie van de UGent is hiervoor het Dodona-platform ontwikkeld.
 
-Een aan de eerste uitdaging gerelateerd aspect is dat er veel programmeertalen zijn en elk van die programmeertalen heeft oefeningen nodig.
+Een aan de eerste uitdaging gerelateerd aspect is dat er veel programmeertalen zijn en elk van die programmeertalen oefeningen nodig heeft.
 Momenteel gebeurt het vertalen van een oefening van één programmeertaal naar de andere manueel.
 Dit neemt ook veel tijd in beslag, terwijl veel oefeningen niet programmeertaalafhankelijk zijn.
 Veel programmeeroefeningen zijn eenvoudig en komen neer op een lijst sorteren, woorden zoeken in een bestand, iets berekenen op basis van gegevens enzovoort.
 Deze taken kunnen in elke programmeertaal.
 
-In deze thesis zoeken we naar een oplossing voor dit laatste probleem: is het mogelijk om de oefeningen slechts één keer op een programmeertaalonafhankelijke manier te schrijven en toch oplossingen in verschillende programmeertalen te aanvaarden?
+In deze thesis zoeken we naar een oplossing voor dit laatste probleem: is het mogelijk om een oefening slechts één keer op een programmeertaalonafhankelijke manier te schrijven en toch oplossingen in verschillende programmeertalen te beoordelen?
 
 Als onderdeel van het antwoord op deze vraag hebben we een prototype van een nieuwe judge voor het Dodona-platform ontwikkeld (een judge in Dodona is het onderdeel dat verantwoordelijk is voor het beoordelen van een ingediende oplossing): \tested{}.
 In \tested{} moet de lesgever voor een oefening een programmeertaalonafhankelijk testplan opstellen.
 Dit testplan bevat de specificatie van hoe een ingediende oplossing beoordeeld moet worden.
 Daarna vertaalt \tested{} dit testplan naar de verschillende programmeertalen, waardoor één oefening opgelost kan worden in de programmeertalen die \tested{} momenteel ondersteunt: Python, Java, JavaScript, Haskell en C.\@
 
-Een bijkomend voordeel van \tested{} is dat we aandacht besteed hebben aan het zo eenvoudig mogelijk houden om nieuwe programmeertalen aan \tested{} toe te voegen.
+Daarnaast hebben we ook aandacht besteed aan het zo eenvoudig mogelijk houden om nieuwe programmeertalen aan \tested{} toe te voegen.
 Als we een nieuwe programmeertaal toevoegen aan \tested{}, zullen bestaande oefeningen ook meteen opgelost kunnen worden in deze nieuwe programmeertaal, zonder dat er iets moet veranderen aan het testplan van deze oefeningen.
