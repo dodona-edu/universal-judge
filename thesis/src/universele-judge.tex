@@ -416,7 +416,11 @@ Om deze redenen zijn de gegevenstypes opgedeeld in drie categorieën:
     \end{description}
 \end{enumerate}
 
-
+Het is het vermelden waard dat \tested{} geen formeel typesysteem gebruikt.
+Het doel van een formeel typesysteem is het beschrijven van welke categorieën data een constructie (een variabele, parameter, enz.) kan zijn of meekrijgen.
+Dit is in tegenstelling tot \tested{}, waar concrete gegevens beschreven worden.
+Zo bevat specificeert het testplan niet "een functie met returntype \texttt{int64}", maar wel "een functie met als verwachte waarde 16, wier gegevenstype \texttt{int64} is".
+Als gevolg maakt \tested{} geen gebruik van technieken die normaliter geassocieerd worden met typesystemen, zoals een formele typeverificatie.
 
 \subsection{Expressions en statements}\label{subsec:expressions-and-statements}
 
