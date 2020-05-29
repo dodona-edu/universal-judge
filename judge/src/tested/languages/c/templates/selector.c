@@ -20,6 +20,6 @@ int main(int argc, const char* argv[]) {
             return ${cont}();
         }
     % endfor
-    fprintf(stderr, "Non-existing selector '%s' selected.", name);
+    fprintf(stderr, "Non-existing context '%s' selected.", name);
     return -1;
 }

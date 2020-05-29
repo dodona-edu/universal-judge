@@ -121,7 +121,7 @@ Is bovenstaande hulpmiddel wel gebruikt, dan kunnen de instructies voor het make
 
 \section{De programmeertaal C}\label{sec:de-programmeertaal-c}
 
-Voor we beginnen aan de configuratie, overlopen we kort welke functionaliteit we langs beide kanten willen ondersteunen: welke functionaliteit uit C kunnen we aanbieden in \tested{} en welke functionaliteit uit \tested{} kunnen we implementeren in C?
+Voor we beginnen aan de configuratie, overlopen we kort welke functionaliteit we willen ondersteunen: welke functionaliteit uit C kunnen we aanbieden in \tested{} en welke functionaliteit uit \tested{} kunnen we implementeren in C?
 Uiteraard willen we zoveel mogelijk ondersteunen, maar vooral op het vlak van gegevenstypes zijn er momenteel beperkingen.
 
 \paragraph{Welke basistypes gaan we niet ondersteunen?}
@@ -229,6 +229,9 @@ Hieronder volgt een lijst van elke taalconstructie en een korte beschrijving:
     Dit zal lukken in Python en Java, maar niet in Haskell en C\@.
     \item[\texttt{evaluation}] Of een geprogrammeerde evaluatie mogelijk is in deze programmeertaal.
     Dit is technisch gezien geen taalconstructie, maar dezelfde infrastructuur wordt gebruikt om dit te controleren.
+    \item[\texttt{named\_arguments}] Of benoemde argumenten ondersteund worden.
+    Dit betekent dat de argumenten voor een functie niet enkel positioneel, maar ook op naam meegegeven kunnen worden.
+    \item[\texttt{default\_parameters}] Of de programmeertaal standaardwaarden voor parameters ondersteunt, wat betekent dat ze kunnen weggelaten worden. 
 \end{description}
 
 Dan moeten we nu de ondersteuning voor de gegevenstypes vastleggen:
@@ -259,7 +262,7 @@ De configuratieklasse is de schakel tussen de generieke aspecten van \tested{} e
 Omdat \tested{} in Python geschreven is, moet deze klasse ook in Python geïmplementeerd worden.
 
 Maak een nieuw Python-bestand \texttt{judge/src/tested/languages/c/config.py} aan.
-Hierin moet een klasse komen die \texttt{Language} uitbreidt:
+Hierin moet een klasse komen die van \texttt{Language} overerft:
 
 \inputminted[firstline=10,lastline=10]{python}{sources/c-config.py}
 
@@ -639,7 +642,7 @@ In Python is de implementatie eenvoudig door de ingebouwde module \texttt{json},
 \subsection{Registratie}\label{subsec:registratie}
 
 Als laatste rest nu nog om de nieuwe programmeertaal te registreren bij \tested{}.
-Hiervoor volstaat het om de programmeertaal en de bijhorende configuratieklasse toe te voegen aan het bestand \texttt{judge/src/tested/languages/\_\_ini\_\_.py}, in de dictionary \texttt{LANGUAGES}:
+Hiervoor volstaat het om de programmeertaal en de bijhorende configuratieklasse toe te voegen aan het bestand \texttt{judge/src/tested/languages/\_\_init\_\_.py}, in de dictionary \texttt{LANGUAGES}:
 
 \inputminted[firstline=18,lastline=25]{python}{sources/languages-init.py}
 
@@ -670,7 +673,7 @@ Het is nodig om minstens een goede kennis te hebben van volgende aspecten van de
 \begin{itemize}
     \item Het compileren (indien nodig) en uitvoeren van programma's in de programmeertaal vanop de commandoregel, met alle aspecten die daarbij horen.
     Een voorbeeld is hoe dependencies meegegeven moeten worden aan het compilatiecommando.
-    In sommige programmeertalen (zoals Java) moeten deze explicit meegegeven worden, terwijl dat in andere programmeertalen (zoals C) juist niet mag.
+    In sommige programmeertalen (zoals Java) moeten deze expliciet meegegeven worden, terwijl dat in andere programmeertalen (zoals C) juist niet mag.
     \item Het gebruik van een \texttt{main}-functie of equivalent.
     In talen als Python is dit niet nodig, daar een bestand met code zo kan uitgevoerd worden.
     Bij andere talen, zoals Java, C en Haskell is dit wel nodig.
@@ -766,7 +769,7 @@ Momenteel ondersteunt \tested{} 5 programmeertalen:
 \begin{itemize}
     \item Python
     \item Java
-    \item Haskell (met \acronym{GHC}, er is een variant met \texttt{runhaskell})
+    \item Haskell (met \acronym{GHC}, al is er een variant die werkt met \texttt{runhaskell})
     \item C (toegevoegd in dit hoofdstuk als voorbeeld)
     \item JavaScript (grotendeels toegevoegd door prof.\ Dawyndt als controle dat dit hoofdstuk slaagt in zijn opzet: duidelijk maken hoe een programmeertaal geconfigureerd moet worden)
 \end{itemize}
