@@ -3,8 +3,6 @@ oefening                     # Map van de oefening in Dodona
 ├── description
 │   ├── description.en.html  # Beschrijving in het Engels
 │   ├── description.nl.html  # Beschrijving in het Nederlands
-│   └── media                # Mediabestanden van de beschrijvingen
-│       └── ISBN.gif
 ├── evaluation               # Evaluatiecode
 │   └── plan.json            # Het testplan voor TESTed
 ├── preparation
