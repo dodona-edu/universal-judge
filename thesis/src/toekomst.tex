@@ -1,3 +1,4 @@
+%! suppress = EscapeHashOutsideCommand
 \chapter{Conclusie, beperkingen en toekomstig werk}\label{ch:beperkingen-en-toekomstig-werk}
 
 \lettrine{D}{e doelstelling} van deze thesis was het formuleren van een antwoord op de vraag of programmeertaalonafhankelijke oefeningen mogelijk zijn (zie \cref{sec:probleemstelling}).
@@ -182,7 +183,7 @@ Het testplan kan bevatten dat context 15 enkel uitgevoerd kan worden indien cont
 \subsection{Programmeertaalkeuze voor contexten}\label{subsec:programmeertaalkeuze-voor-contexten}
 
 Een andere variant van dynamische testplannen situeert zich op het niveau van de programmeertalen.
-Het kan nuttig zijn om per context optioneel aan te duiden in welke programmeertalen deze uitgevoerd moet worden.
+Het kan nuttig zijn om per context optioneel aan te duiden in welke programmeertalen deze uitgevoerd kan worden.
 Dit gaat zowel over een expliciete lijst van programmeertalen als een automatische bepaling op basis van gebruikte functionaliteit.
 Als er momenteel functionaliteit gebruikt wordt die niet ondersteund wordt door een programmeertaal, kan het volledige testplan niet uitgevoerd worden in die programmeertaal, ook al is het slechts één context die niet ondersteunde functionaliteit gebruikt.
 Bij deze uitbreiding zou dan enkel die ene context niet uitgevoerd worden.
@@ -191,6 +192,12 @@ Een scenario waar dit nuttig kan zijn is bijvoorbeeld het gebruik van benoemde a
 Het kan nuttig zijn om dergelijke argumenten te vertalen naar positionele argumenten in programmeertalen die geen ondersteuning hebben voor benoemde argumenten.
 Dit is echter niet mogelijk voor contexten waar de argumenten in een andere volgorde gegeven zijn.
 Deze laatste contexten zouden dan enkel uitgevoerd worden als de programmeertaal benoemde argumenten ondersteunt.
+Bijvoorbeeld:
+
+\begin{minted}[autogobble]{python}
+    functie(argument1='Hallo', argument2=5)  # In alle programmeertalen
+    functie(argument2=10, argument1='Dag')   # Enkel in bepaalde programmeertalen
+\end{minted}
 
 \subsection{Herhaalde uitvoeringen van testgevallen}\label{subsec:herhaalde-uitvoeringen-van-testgevallen}
 
