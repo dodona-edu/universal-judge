@@ -1,7 +1,7 @@
 %! suppress = EscapeHashOutsideCommand
 \chapter{Conclusie, beperkingen en toekomstig werk}\label{ch:beperkingen-en-toekomstig-werk}
 
-\lettrine{D}{e doelstelling} van deze thesis was het formuleren van een antwoord op de vraag of programmeertaalonafhankelijke oefeningen mogelijk zijn (zie \cref{sec:probleemstelling}).
+\lettrine{D}{e doelstelling} van deze masterproef was het formuleren van een antwoord op de vraag of programmeertaalonafhankelijke oefeningen mogelijk zijn (zie \cref{sec:probleemstelling}).
 Als antwoord hierop is een prototype, \tested{}, ontwikkeld.
 Op basis van het prototype kunnen we concluderen dat het antwoord op de onderzoeksvraag positief is.
 
@@ -149,7 +149,7 @@ De beschrijving van de \emph{Palindroom}-oefening staat in \cref{lst:pexil}.
 
 Een tweede standaard is \acronym{PEML} (\english{Programming Exercise Markup Language}) \autocite{peml}.
 P\acronym{EML} is een tekstueel formaat (een soort \acronym{DSL}) dat er veelbelovend uitziet om met de hand te schrijven.
-Op het moment van schrijven van deze thesis is \acronym{PEML} nog in volle ontwikkeling.
+Op het moment van schrijven van deze masterproef is \acronym{PEML} nog in volle ontwikkeling.
 Aangezien een van de \english{design goals} van \acronym{PEML} is dat de omzetting van \acronym{PEML} naar \acronym{JSON} eenvoudig zal zijn, lijkt dit een interessant formaat.
 De beschrijving van de \emph{Palindroom}-oefening staat in \cref{lst:peml}.
 Dit voorbeeld is overgenomen uit de documentatie van \acronym{PEML}.
@@ -219,7 +219,7 @@ Als bij de eerste uitvoering al blijkt dat de returnwaarde (een lijst) niet vold
 De statements en expressies in het testplan zijn opzettelijk eenvoudig gehouden (zie \cref{subsec:expressions-and-statements}).
 Dit levert wel beperkingen op: zo is het niet mogelijk om bijvoorbeeld een functieoproep als \mintinline{python}{test(5 + 5)} in het testplan te schrijven.
 Een idee zou dus kunnen zijn om het testplan uit te breiden met meer taalconstructies, waarbij het testplan dan dienst doet als een soort \acronym{AST} (abstract syntax tree).
-Afhankelijk van hoe ver men we hierin willen gaan, begint de vorm van een universele programmeertaal aan te nemen (wat ook expliciet buiten het bestek van deze thesis valt).
+Afhankelijk van hoe ver men we hierin willen gaan, begint de vorm van een universele programmeertaal aan te nemen (wat ook expliciet buiten het bestek van deze masterproef valt).
 In dat geval loont het de moeite om te onderzoeken of geen eenvoudige, bestaande programmeertaal \english{transpiled} zou kunnen worden naar het testplan, in plaats van zelf een nieuwe taal op te stellen.
 Hiervoor moet het testplan wel uitgebreid worden met functies van een \acronym{AST} of \acronym{IR} (intermediary language).
 Ook \tested{} zelf zal uitgebreid moeten worden, aangezien er meer zal moeten omgezet kunnen worden naar de programmeertalen (de sjablonen zullen dus uitgebreid moeten worden).
@@ -335,7 +335,7 @@ In deze paragraaf komen de beperkingen aan bod die ofwel enkel betrekking hebben
 \subsection{Programmeertaalonafhankelijke opgaven}\label{subsec:programmeertaalonafhankelijke-opgaven}
 
 Bij veel oefeningen bevat de opgave een stuk code ter illustratie van de opgave.
-Dit is expliciet buiten het bestek van deze thesis gehouden, maar deze voorbeelden zijn idealiter in de programmeertaal waarin de student wenst in te dienen.
+Dit is expliciet buiten het bestek van deze masterproef gehouden, maar deze voorbeelden zijn idealiter in de programmeertaal waarin de student wenst in te dienen.
 
 Een idee is hier om de codevoorbeelden uit de opgave ook in het formaat van het testplan op te stellen.
 \tested{} bevat namelijk alles om het testplan om te zetten naar concrete code.
@@ -406,7 +406,7 @@ Elke stap krijgt als argument dan een evaluatiepakket, dat bestaat uit onder and
 
 \section{Extra functionaliteit}\label{sec:kleinere-functies}
 
-Er is in de loop van de thesis extra functionaliteit naar boven gekomen waarvoor ook ondersteuning zou toegevoegd kunnen worden:
+Er is in de loop van de masterproef extra functionaliteit naar boven gekomen waarvoor ook ondersteuning zou toegevoegd kunnen worden:
 
 \begin{itemize}
     \item Ondersteuning voor de Python Tutor.

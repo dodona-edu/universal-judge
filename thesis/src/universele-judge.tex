@@ -557,7 +557,7 @@ Zo zal het niet nodig zijn om het selectorsjabloon te implementeren in Python, w
 
 Verplichte sjablonen kunnen zelf ook andere sjablonen gebruiken als hulpmiddel voor de configuratie of om delen van een sjabloon op meerdere plaatsen te kunnen gebruiken.
 Een voorbeeld is het vertalen van een functieoproep naar code, iets dat op meerdere plaatsen moet gebeuren.
-Dit is een standaardvoorziening van mako.
+Dit is een standaardvoorziening van Mako.
 
 Tot slot moet ook het serialisatieformaat geïmplementeerd worden in de taal.
 Waarden moeten geserialiseerd kunnen worden en statements en expressies moeten gedeserialiseerd kunnen worden.
@@ -1141,13 +1141,13 @@ Dit is voor \tested{} minder relevant: het gros van de beoordelingstijd wordt be
 Binnen \tested{} worden twee dependencies intensief gebruikt:
 
 \begin{enumerate}
-    \item \texttt{mako} voor de sjablonen.
-    \item \texttt{pydantic} voor het definiëren van het testplan en het serialisatieformaat.
+    \item \texttt{Mako} voor de sjablonen.
+    \item \texttt{Pydantic} voor het definiëren van het testplan en het serialisatieformaat.
 \end{enumerate}
 
-In \tested{} is niet onmiddellijk gekozen voor \texttt{mako} als sjabloonsysteem.
-Een eerdere versie gebruikte \texttt{jinja2}.
-Later is overgeschakeld op \texttt{mako}, omdat er bij \texttt{jinja2} problemen waren met witruimte in de gegenereerde code.
+In \tested{} is niet onmiddellijk gekozen voor Mako als sjabloonsysteem.
+Een eerdere versie gebruikte Jinja2.
+Later is overgeschakeld op Mako, omdat er bij Jinja2 problemen waren met witruimte in de gegenereerde code.
 Deze witruimte is belangrijk bij het genereren van bijvoorbeeld Python-code.
 Deze twee packages zijn ongeveer de populairste packages in het Python-ecosysteem om sjablonen te gebruiken, buiten de ingebouwde sjablonen van Django.
 Die laatste zijn niet overwogen, omdat het niet duidelijk is of de sjablonen van Django ook gebruikt kunnen worden zonder het hele framework te moeten gebruiken.

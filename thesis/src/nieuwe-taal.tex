@@ -419,7 +419,7 @@ Een conventie die gebruikt wordt binnen \tested{}, is de volgende:
 Dit wordt niet afgedwongen door \tested{};
 alle sjablonen hadden de extensie \texttt{.c} of \texttt{.mako} kunnen krijgen, of een mengeling.
 Dit geldt voornamelijk voor de verplichte sjablonen.
-De andere sjablonen (die als hulpmiddel gebruikt worden door de verplichte sjablonen) kunnen eender welke extensie krijgen, want bij het gebruiken van een sjabloon in mako moet de bestandsextensie opgegeven worden.
+De andere sjablonen (die als hulpmiddel gebruikt worden door de verplichte sjablonen) kunnen eender welke extensie krijgen, want bij het gebruiken van een sjabloon in Mako moet de bestandsextensie opgegeven worden.
 
 \subsubsection{Het contextsjabloon}
 
@@ -437,9 +437,9 @@ De variabele \texttt{evaluator\_names} bevat een verzameling van deze namen.
 \vspace{-1.7cm} % Ugly hack
 \inputminted[firstline=9,lastline=11]{mako}{sources/c-context.mako}
 
-\paragraph*{Witruimte in mako}
+\paragraph*{Witruimte in Mako}
 
-Nuttig om weten is dat \tested{} een extensie heeft toegevoegd aan mako, waardoor de indentatie van mako-gerelateerde taalconstructies zal verdwijnen.
+Nuttig om weten is dat \tested{} een extensie heeft toegevoegd aan Mako, waardoor de indentatie van Mako-gerelateerde taalconstructies zal verdwijnen.
 De \texttt{for}-loop in het fragment hierboven resulteert bijvoorbeeld in deze code:
 
 \begin{minted}{c}
@@ -447,9 +447,9 @@ De \texttt{for}-loop in het fragment hierboven resulteert bijvoorbeeld in deze c
 #include "context_0_1.c"
 \end{minted}
 
-\paragraph*{Regeleindes in mako}
+\paragraph*{Regeleindes in Mako}
 
-Ook nuttig om weten is dat een regeleinde in een sjabloon in mako resulteert in een regeleinde in het geproduceerde bestand.
+Ook nuttig om weten is dat een regeleinde in een sjabloon in Mako resulteert in een regeleinde in het geproduceerde bestand.
 Mako voorziet hier een oplossing voor: door een \term{backslash} op het einde van de regel te plaatsen zal er geen regeleinde komen in het geproduceerde bestand.
 Volgende codefragment (let op de \texttt{\textbackslash}):
 
@@ -696,10 +696,10 @@ Kennis over hoe \tested{} werkt wordt niet verwacht of nodig geacht, met uitzond
 \end{itemize}
 
 Voor de rest zou het moeten volstaan om dit hoofdstuk door te nemen en de stappen die er in beschreven staan uit te voeren.
-Op verschillende plaatsen wordt verwezen naar andere onderdelen van de thesis: deze kunnen nuttig zijn om het hoe en waarom te beantwoorden, maar zijn niet strikt nodig voor het implementeren van een programmeertaal.
+Op verschillende plaatsen wordt verwezen naar andere onderdelen van de masterproef: deze kunnen nuttig zijn om het hoe en waarom te beantwoorden, maar zijn niet strikt nodig voor het implementeren van een programmeertaal.
 Ook de bestaande configuraties zijn een grote bron van informatie, zeker als het op syntaxis aankomt.
-Een voorbeeld hiervan zijn de mako-sjablonen.
-We verwachten dat het doornemen van dit hoofdstuk en het bekijken van de bestaande sjablonen alle informatie verschaft die nodig is om aan de slag te kunnen, zonder dat de handleiding van mako doorgenomen moet worden.
+Een voorbeeld hiervan zijn de Mako-sjablonen.
+We verwachten dat het doornemen van dit hoofdstuk en het bekijken van de bestaande sjablonen alle informatie verschaft die nodig is om aan de slag te kunnen, zonder dat de handleiding van Mako doorgenomen moet worden.
 
 Zoals we bespreken in \cref{sec:stabiliteit-van-tested}, zijn er wel inspanningen geleverd om het configureren van een programmeertaal flexibel te maken, maar dat neemt niet weg dat het configureren van een programmeertaal grotendeels opgesteld is op basis van de noden van de bestaande programmeertalen.
 Hoe meer de programmeertaal afwijkt van de bestaande programmeertalen, des te meer creativiteit en tijd nodig zal zijn om de programmeertaal in \tested{} te configureren of om meer hooks en callbacks te voorzien in de configuratieklasse.
@@ -726,7 +726,7 @@ We kunnen de interne werking van \tested{} in grote lijnen verdelen in drie onde
 
 De grenzen tussen deze onderdelen zijn niet strikt: zo zal de configuratieklasse ook gebruikt worden in het interne deel tijdens de uitvoering van het testplan.
 
-We willen opmerken dat de focus in deze thesis vooral lag op de interface naar de oefeningen toe (dus het formaat van het testplan en het serialisatieformaat).
+We willen opmerken dat de focus in deze masterproef vooral lag op de interface naar de oefeningen toe (dus het formaat van het testplan en het serialisatieformaat).
 We verwachten dan ook niet dat het toevoegen van een programmeertaal grote onverwachte wijzigingen vereist in het formaat van testplan of het serialisatieformaat.
 Met grote wijzigingen bedoelen we fundamentele wijzigingen aan de manier waarop deze systemen werken.
 Dit in tegenstelling tot kleinere wijzigingen: een voorbeeld hiervan is een onderscheid maken tussen constanten en veranderlijken (de \texttt{final} uit Java en de \texttt{const} uit C).
@@ -741,7 +741,7 @@ Er zullen ook geen wijzigingen nodig zijn aan de bestaande programmeertalen bij 
 Aan de testplannen zelf (dus niet het formaat, maar de \acronym{JSON}-bestanden van de oefeningen) verwachten we niet dat er wijzigingen nodig zijn.
 
 Het omgekeerde is ook waar: we verwachten dat er wijzigingen nodig kunnen zijn aan de configuratieklasse en/of de sjablonen bij nieuwe programmeertalen.
-Een stabiele interface tussen de programmeertalen enerzijds en de kern van \tested{} anderzijds was geen expliciet doel in deze thesis.
+Een stabiele interface tussen de programmeertalen enerzijds en de kern van \tested{} anderzijds was geen expliciet doel in deze masterproef.
 Hierbij wel twee nuances:
 
 \begin{itemize}
