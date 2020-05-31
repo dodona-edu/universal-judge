@@ -1,0 +1,54 @@
+{
+  "general": {
+    "dependencies": [
+      "Values.java",
+      "EvaluationResult.java"
+    ],
+    "selector": true
+  },
+  "extensions": {
+    "file": "java"
+  },
+  "naming_conventions": {
+    "namespace": "pascal_case",
+    "function": "camel_case"
+  },
+  "constructs": {
+    "objects": true,
+    "exceptions": true,
+    "function_calls": true,
+    "assignments": true,
+    "heterogeneous_collections": true,
+    "heterogeneous_arguments": true,
+    "evaluation": true,
+    "default_parameters": true
+  },
+  "datatypes": {
+    "integer": "supported",
+    "rational": "supported",
+    "char": "supported",
+    "text": "supported",
+    "boolean": "supported",
+    "sequence": "supported",
+    "set": "supported",
+    "map": "supported",
+    "nothing": "supported",
+    
+    "int8": "supported",
+    "uint8": "supported",
+    "int16": "supported",
+    "uint16": "supported",
+    "int32": "supported",
+    "uint32": "supported",
+    "int64": "supported",
+    "uint64": "supported",
+    "bigint": "supported",
+    "single_precision": "supported",
+    "double_precision": "supported",
+    "double_extended": "supported",
+    "fixed_precision": "supported",
+    "array": "supported",
+    "list": "supported",
+    "tuple": "unsupported"
+  }
+}

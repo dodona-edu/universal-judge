@@ -1,0 +1,153 @@
+%! Suppress = MultipleIncludes
+\documentclass[class=article,crop=false,11pt]{standalone}
+
+\usepackage{amsmath}
+\usepackage{tikz}
+\usepackage{xcolor}
+\usetikzlibrary{shapes,arrows,positioning,backgrounds,calc,intersections,calc}
+\usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
+
+
+\begin{document}
+
+    \definecolor{ugent-re}{RGB}{220, 78, 40}		% vermilion			/ vermiljoen
+    \definecolor{ugent-we}{RGB}{45, 140, 168}		% no match
+    \definecolor{ugent-ge}{RGB}{232, 94, 113}		% rose				/ bleekrood
+    \definecolor{ugent-ea}{RGB}{111, 113, 185}		% distant blue		/ verblauw
+    \definecolor{ugent-pp}{RGB}{251, 126, 58}		% deep orange		/ dieporanje
+    \definecolor{ugent-ps}{RGB}{113, 168, 96}		% yellow green		/ geelgroen
+
+    \tikzstyle{node}=[draw, minimum height=1cm, align=center, fill=white,text depth=.25ex,node font=\small]
+    \tikzstyle{process}=[node, rectangle]
+    \tikzstyle{terminator}=[node, rectangle, rounded corners=0.5cm]
+    \tikzstyle{document}=[node,tape,tape bend top=none]
+    \tikzstyle{io}=[node,trapezium,trapezium left angle=70,trapezium right angle=-70,minimum width=2.5cm,trapezium stretches=true]
+    \tikzstyle{nothing}=[align=center,node font=\small]
+    \tikzstyle{inner}=[process,draw=gray]
+    \tikzstyle{arrow}=[draw, -latex]
+    \tikzstyle{ind}=[fill=ugent-we!50!white]
+    \tikzstyle{pre}=[fill=ugent-ps!50!white]
+    \tikzstyle{inda}=[draw=ugent-we!70!black]
+    \tikzstyle{prea}=[draw=ugent-ps!70!black]
+    \tikzstyle{ae}=[fill=ugent-re!50!white]
+    \tikzstyle{ie}=[fill=ugent-ea!50!white]
+    \tikzstyle{se}=[fill=ugent-ge!50!white]
+    \tikzstyle{aea}=[draw=ugent-re!70!black]
+    \tikzstyle{iea}=[draw=ugent-ea!70!black]
+    \tikzstyle{sea}=[draw=ugent-ge!70!black]
+
+    \begin{tikzpicture}
+%        \draw[step=1.0,gray,thin] (0,0) grid (6,-25);
+
+        \node[io] at (1.5,-1) (exercise) {Exercise};
+        \node[io] at (4.5,-1) (dodonaIn) {Dodona};
+
+        \node[inner,minimum width=2.75cm] at (4.5,-4) (solution) {Submission};
+
+        % Draw submission -> compile first, since it must be behind other stuff.
+        \node[process,minimum width=1.5cm,ind] at (0.75,-9.25) (co1) {Compilation};
+
+        % These needs to be drawn first, otherwise they are on top of the
+        % input node.
+        \node[process,minimum width=2cm] at (1.5,-6.25) (g1) {\shortstack{Code \\ generation}};
+
+        \draw[arrow] (0,-4-|g1.60) -- (g1.60);
+        
+        % Input
+        \node[document, minimum width=6cm, minimum height=3.5cm,tape bend height=0.5cm] at (3, -3.25) (input) {};
+
+        \draw[arrow] (4.0625,0|-solution.south) -- (4.0625,0|-co1.east) -- (co1.east);
+        \draw[arrow] (4.0625,0|-co1.east) -- (co1.east);
+        \node[process,minimum width=2cm] at (4.5,-6.25) (gn) {\shortstack{Code \\ generation}};
+        \draw[arrow] (0,-4-|gn.60) -- (gn.60);
+
+        % Draw twice
+        \node[inner,minimum width=2.75cm] at (4.5,-4) {Submission};
+
+        \node[document,minimum width=1.5cm,pre] at (5.25,-7.75) (ta) {\shortstack{Test \\ code \\ 1 \ldots{} $n$}};
+
+        \node[document,minimum width=1.5cm] at (0.75,-7.75) (t1) {\shortstack{Test \\ code 1}};
+        \draw[arrow,prea] (t1.10) -- (t1.10-|ta.west);
+        \node[document,minimum width=1.5cm] at (2.825,-7.75) (tn) {\shortstack{Test \\ code $n$}};
+        \draw[arrow,prea] (tn.350) -- (tn.350-|ta.west);
+        
+        % Other compile steps.
+        \node[process,minimum width=1.5cm,ind] at (2.825,-9.25) (con) {Compilation};
+        \node[process,minimum width=1.5cm,pre] at (5.25,-9.25) (coa) {Compilation};
+
+        % Only draw the last part to prevent overlap.
+        \draw[arrow] (4.0625,0|-coa.160) -- (coa.160);
+        \draw[arrow] (4.0625,0|-co1.east) -- (4.0625,0|-con.340) -- (con.340);
+
+        \node[nothing] at (0.75,-2.25) {Input};
+
+        \node[inner,minimum width=2.75cm, minimum height=1.75cm] at (1.5,-3.625) (plan) {};
+        \node[nothing] at (1.125,-3.125) {Test plan};
+        \node[inner,minimum width=0.75cm,minimum height=0.75cm] at (0.75,-3.875) (c1) {$C_1$};
+        \node[nothing,text height=1.5ex, text depth=.25ex] at (1.5,-3.875) {\ldots};
+        \node[inner,minimum width=0.75cm,minimum height=0.75cm] at (2.25,-3.875) (cn) {$C_n$};
+
+        \draw[arrow] (exercise.south) -- (exercise|-plan.north);
+
+        \draw[arrow] (dodonaIn.south east) -- (dodonaIn.south east|-solution.north east);
+
+        \node[inner,minimum width=2.75cm] at (4.5,-2.5) (config) {Configuration};
+
+        \draw[arrow] (dodonaIn.south) -- (dodonaIn|-config.north);
+
+        \draw[arrow] (c1) |- (g1.north|-2,-5.5) -- (g1.north);
+        \draw[arrow] (cn) |- (gn.north|-12.5,-5.5) -- (gn.north);
+
+        \draw[arrow] (g1) |- (g1|-0,-7) -| (t1);
+        \draw[arrow] (gn) |- (gn|-0,-7) -| (tn);
+
+        \draw[arrow,inda] (t1) --(co1);
+        \draw[arrow,inda] (tn) --(con);
+        \draw[arrow,prea] (ta) --(coa);
+
+        \node[document,minimum width=1.5cm,ind] at (0.75,-10.625) (e1) {\shortstack{Executable \\ 1}};
+        \node[document,minimum width=1.5cm,ind] at (2.825,-10.625) (en) {\shortstack{Executable \\ $n$}};
+        \node[document,minimum width=1.5cm,pre] at (5.25,-10.625) (ea) {\shortstack{Executable}};
+
+        \draw[arrow,inda] (co1) --(e1);
+        \draw[arrow,inda] (con) --(en);
+        \draw[arrow,prea] (coa) --(ea);
+
+        \node[process,minimum width=2cm] at (1.5,-12.25) (u1) {Execution};
+        \node[process,minimum width=2cm] at (4.5,-12.25) (un) {Execution};
+
+        \draw[arrow,inda] (e1) |- (u1.135|-0,-11.5) -- (u1.135);
+        \draw[arrow,inda] (en) |- (un.135|-0,-11.5) -- (un.135);
+
+        \draw[arrow,prea] (ea) |- (u1.45|-0,-11.375) -- (u1.45);
+        \draw[arrow,prea] (un.45|-0,-11.375) -- (un.45);
+
+        \node[document,minimum width=2cm] at (1.5,-13.55) (r1) {\shortstack{Execution \\ result 1}};
+        \node[document,minimum width=2cm] at (4.5,-13.55) (rn) {\shortstack{Execution \\ result $n$}};
+
+        \draw[arrow] (u1) --(r1);
+        \draw[arrow] (un) --(rn);
+
+        \node[process,minimum width=2cm] at (1.5,-15) (eval1) {Evaluation};
+        \node[process,minimum width=2cm] at (4.5,-15) (evaln) {Evaluation};
+
+        \draw[arrow] (r1) --(eval1);
+        \draw[arrow] (rn) --(evaln);
+
+        \node[document, minimum width=6cm, minimum height=2.5cm,tape bend height=0.5cm] at (3,-17) (b) {};
+
+        \node[inner,minimum width=2cm] at (1.5,-16.75) (b1) {\shortstack{Evaluation \\ result 1}};
+        \node[inner,minimum width=2cm] at (4.5,-16.75) (bn) {\shortstack{Evaluation \\ result $n$}};
+
+        \draw[arrow] (eval1) --(b1);
+        \draw[arrow] (evaln) --(bn);
+
+        \node[nothing,fill=white] at (1.75,-17.75) {Evaluation results};
+
+        \node[io] at (3,-19.25) (dodonaOut) {Dodona};
+
+        \draw[arrow] (b) -- (dodonaOut);
+
+    \end{tikzpicture}
+
+\end{document}

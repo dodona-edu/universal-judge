@@ -1,10 +1,10 @@
 ## Convert a Value to a literal type in Python.
-<%! from tested.datatypes import BasicNumericTypes, BasicStringTypes, BasicBooleanTypes, BasicNothingTypes, BasicSequenceTypes, BasicObjectTypes  %>
-<%page args="value" />
+<%! from tested.datatypes import BasicNumericTypes, BasicStringTypes, BasicBooleanTypes, BasicNothingTypes, BasicSequenceTypes, BasicObjectTypes  %>\
+<%page args="value" />\
 % if value.type in (BasicNumericTypes.INTEGER, BasicNumericTypes.RATIONAL):
     ${value.data}\
 % elif value.type in (BasicStringTypes.TEXT, BasicStringTypes.CHAR):
-    "${value.data}"\
+    ${repr(value.data)}\
 % elif value.type == BasicBooleanTypes.BOOLEAN:
     ${str(value.data)}\
 % elif value.type == BasicNothingTypes.NOTHING:
@@ -16,7 +16,7 @@
 % elif value.type == BasicObjectTypes.MAP:
     {\
     % for key, item in value.data.items():
-        "${key}": <%include file="expression.mako" args="value=item" />\
+        "${key}": <%include file="statement.mako" args="statement=item" />\
         % if not loop.last:
             , \
         % endif

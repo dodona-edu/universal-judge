@@ -13,7 +13,7 @@ ij_smart_tabs = false
 ij_visual_guides = 84
 ij_wrap_on_typing = false
 
-[.json]
+[*.json]
 indent_size = 2
 ij_json_keep_blank_lines_in_code = 0
 ij_json_keep_indents_on_empty_lines = false
@@ -91,3 +91,6 @@ ij_python_spaces_within_method_parentheses = false
 ij_python_use_continuation_indent_for_arguments = false
 ij_python_use_continuation_indent_for_collection_and_comprehensions = false
 ij_python_wrap_long_lines = true
+
+[*.mako]
+insert_final_newline=false

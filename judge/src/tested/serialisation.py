@@ -27,12 +27,13 @@ import math
 from pydantic import BaseModel, root_validator
 from pydantic.dataclasses import dataclass
 
+from tested.dodona import ExtendedMessage, Status
 from .datatypes import (NumericTypes, StringTypes, BooleanTypes,
                         SequenceTypes, ObjectTypes, NothingTypes, SimpleTypes,
                         resolve_to_basic, AllTypes, BasicSequenceTypes,
                         BasicObjectTypes, BasicNumericTypes, BasicBooleanTypes,
                         BasicStringTypes, BasicNothingTypes)
-from .features import FeatureSet, Constructs, combine_features, WithFeatures
+from .features import FeatureSet, combine_features, WithFeatures, Construct
 from .utils import get_args, flatten
 
 logger = logging.getLogger(__name__)
@@ -46,13 +47,21 @@ class WithFunctions:
 @dataclass
 class NumberType(WithFeatures, WithFunctions):
     type: NumericTypes
-    data: Union[int, Decimal]
+    data: Union[Decimal, int, float]
 
     def get_used_features(self) -> FeatureSet:
-        return FeatureSet(Constructs.NOTHING, {self.type})
+        return FeatureSet(set(), {self.type})
 
     def get_functions(self) -> Iterable['FunctionCall']:
         return []
+
+    # noinspection PyMethodParameters
+    @root_validator
+    def check_passwords_match(cls, values):
+        if resolve_to_basic(values.get("type")) == BasicNumericTypes.INTEGER:
+            values["data"] = values["data"].to_integral_value()
+
+        return values
 
 
 @dataclass
@@ -61,7 +70,7 @@ class StringType(WithFeatures, WithFunctions):
     data: str
 
     def get_used_features(self) -> FeatureSet:
-        return FeatureSet(Constructs.NOTHING, {self.type})
+        return FeatureSet(set(), {self.type})
 
     def get_functions(self) -> Iterable['FunctionCall']:
         return []
@@ -73,7 +82,7 @@ class BooleanType(WithFeatures, WithFunctions):
     data: bool
 
     def get_used_features(self) -> FeatureSet:
-        return FeatureSet(Constructs.NOTHING, {self.type})
+        return FeatureSet(set(), {self.type})
 
     def get_functions(self) -> Iterable['FunctionCall']:
         return []
@@ -85,13 +94,13 @@ class SequenceType(WithFeatures, WithFunctions):
     data: List['Expression']
 
     def get_used_features(self) -> FeatureSet:
-        base_features = FeatureSet(Constructs.NOTHING, {self.type})
+        base_features = FeatureSet(set(), {self.type})
         nested_features = [x.get_used_features() for x in self.data]
         combined = combine_features([base_features] + nested_features)
         content_type = self.get_content_type()
         if content_type == BasicStringTypes.ANY:
             combined = combine_features([FeatureSet(
-                Constructs.HETEROGENEOUS_COLLECTIONS, set()
+                {Construct.HETEROGENEOUS_COLLECTIONS}, set()
             )])
         return combined
 
@@ -125,7 +134,7 @@ class ObjectType(WithFeatures, WithFunctions):
     data: Dict[str, 'Expression']
 
     def get_used_features(self) -> FeatureSet:
-        base_features = FeatureSet(Constructs.NOTHING, {self.type})
+        base_features = FeatureSet(set(), {self.type})
         nested_features = [y.get_used_features() for x, y in self.data]
         return combine_features([base_features] + nested_features)
 
@@ -135,11 +144,11 @@ class ObjectType(WithFeatures, WithFunctions):
 
 @dataclass
 class NothingType(WithFeatures, WithFunctions):
-    type: NothingTypes
+    type: NothingTypes = BasicNothingTypes.NOTHING
     data: Literal[None] = None
 
     def get_used_features(self) -> FeatureSet:
-        return FeatureSet(Constructs.NOTHING, {self.type})
+        return FeatureSet(set(), {self.type})
 
     def get_functions(self) -> Iterable['FunctionCall']:
         return []
@@ -155,7 +164,7 @@ class Identifier(str, WithFeatures, WithFunctions):
     """Represents an identifier."""
 
     def get_used_features(self) -> FeatureSet:
-        return FeatureSet(Constructs.NOTHING, set())
+        return FeatureSet(set(), set())
 
     def get_functions(self) -> Iterable['FunctionCall']:
         return []
@@ -197,6 +206,21 @@ class FunctionType(str, Enum):
 
 
 @dataclass
+class NamedArgument(WithFeatures, WithFunctions):
+    """Represents a named argument for a function."""
+    name: str
+    value: 'Expression'
+
+    def get_used_features(self) -> FeatureSet:
+        this = FeatureSet(constructs={Construct.NAMED_ARGUMENTS}, types=set())
+        expression = self.value.get_used_features()
+        return combine_features([this, expression])
+
+    def get_functions(self) -> Iterable['FunctionCall']:
+        return self.value.get_functions()
+
+
+@dataclass
 class FunctionCall(WithFeatures, WithFunctions):
     """
     Represents a function expression.
@@ -204,8 +228,10 @@ class FunctionCall(WithFeatures, WithFunctions):
     type: FunctionType
     name: str
     namespace: Optional[str] = None
-    arguments: List['Expression'] = field(default_factory=list)
+    arguments: List[Union['Expression', NamedArgument]] \
+        = field(default_factory=list)
 
+    # noinspection PyMethodParameters
     @root_validator
     def namespace_requirements(cls, values):
         type_ = values.get("type")
@@ -216,6 +242,7 @@ class FunctionCall(WithFeatures, WithFunctions):
             raise ValueError("Property functions must have a namespace.")
         return values
 
+    # noinspection PyMethodParameters
     @root_validator
     def properties_have_no_args(cls, values):
         type_ = values.get("type")
@@ -225,11 +252,11 @@ class FunctionCall(WithFeatures, WithFunctions):
         return values
 
     def get_used_features(self) -> FeatureSet:
-        constructs = Constructs.FUNCTION_CALL
+        constructs = {Construct.FUNCTION_CALLS}
 
         # Get OOP features.
         if self.type in (FunctionType.PROPERTY, FunctionType.CONSTRUCTOR):
-            constructs |= Constructs.OBJECTS
+            constructs.add(Construct.OBJECTS)
 
         base_features = FeatureSet(constructs=constructs, types=set())
         argument_features = [x.get_used_features() for x in self.arguments]
@@ -257,15 +284,16 @@ class Assignment(WithFeatures, WithFunctions):
     expression. It is also possible to define the type. If the type cannot be
     determined and it is not specified, this is an error.
     """
-    name: str
+    variable: str
     expression: Expression
     type: Union[AllTypes, VariableType]
 
     def replace_expression(self, expression: Expression) -> 'Assignment':
-        return Assignment(name=self.name, expression=expression, type=self.type)
+        return Assignment(variable=self.variable, expression=expression,
+                          type=self.type)
 
     def get_used_features(self) -> FeatureSet:
-        base = FeatureSet(Constructs.ASSIGNMENT, set())
+        base = FeatureSet({Construct.ASSIGNMENTS}, set())
         other = self.expression.get_used_features()
 
         return combine_features([base, other])
@@ -274,11 +302,12 @@ class Assignment(WithFeatures, WithFunctions):
         return self.expression.get_functions()
 
 
-Statement = Union[Assignment]
+Statement = Union[Assignment, Expression]
 
 # Update the forward references, which fixes the schema generation.
 ObjectType.__pydantic_model__.update_forward_refs()
 SequenceType.__pydantic_model__.update_forward_refs()
+NamedArgument.__pydantic_model__.update_forward_refs()
 FunctionCall.__pydantic_model__.update_forward_refs()
 
 
@@ -299,7 +328,7 @@ def generate_schema():
     Generate a json schema for the serialisation type. It will be printed on stdout.
     """
     sc = _SerialisationSchema.schema()
-    sc['$id'] = "universal-judge/serialisation"
+    sc['$id'] = "tested/serialisation"
     sc['$schema'] = "http://json-schema.org/schema#"
     print(json.dumps(sc, indent=2))
 
@@ -326,7 +355,7 @@ def parse_value(value: str) -> Value:
         except (TypeError, ValueError) as e:
             errors.append(e)
 
-    logger.warning(f"Could not parse value, errors are {errors}")
+    logger.debug(f"Could not parse value, errors are {errors}. Could be normal!")
 
     raise TypeError(
         f"Could not find valid type for {value}."
@@ -443,15 +472,10 @@ def to_python_comparable(value: Optional[Value]):
 
 
 class EvalResult(BaseModel):
-    """Result of an evaluation by an evaluator."""
-    result: bool  # The result of the evaluation.
+    result: Union[bool, Status]
     readable_expected: Optional[str] = None
-    # A human-friendly version of what the channel should have
-    # been.
     readable_actual: Optional[str] = None
-    # A human-friendly version (best effort at least) of what
-    # the channel is.
-    messages: List[str] = field(default_factory=list)
+    messages: List[ExtendedMessage] = field(default_factory=list)
 
 
 class ExceptionValue(WithFeatures, BaseModel):
@@ -460,7 +484,7 @@ class ExceptionValue(WithFeatures, BaseModel):
     stacktrace: str
 
     def get_used_features(self) -> FeatureSet:
-        return FeatureSet(Constructs.EXCEPTIONS, types=set())
+        return FeatureSet({Construct.EXCEPTIONS}, types=set())
 
     def readable(self) -> str:
         return f"Fout met boodschap: {self.message}\n{self.stacktrace}"

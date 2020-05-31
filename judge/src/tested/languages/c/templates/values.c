@@ -1,9 +1,38 @@
 #include <string.h>
 #include <stdlib.h>
+#include <assert.h>
 
 #include "values.h"
 
 #define format(name, x) "{\"type\": " #name ", \"data\":" #x "}"
+
+// Replace a character with a substring.
+// Not very efficient.
+char* str_replace(const char* stack, char needle, char* with) {
+    const size_t length = strlen(stack);
+    const size_t added = strlen(with);
+    char* result = calloc(length + 1, sizeof(char));
+    size_t totalLength = length;
+
+    size_t j = 0;
+    for (size_t i = 0; i < length; i++) {
+        const char current = stack[i];
+        if (current == needle) {
+            // Enlarge the result.
+            totalLength += added;
+            result = realloc(result, sizeof(char) * (totalLength + 1));
+            for (size_t k = 0; k < added; k++) {
+                result[j + k] = with[k];
+            }
+            j += added;
+        } else {
+            result[j] = current;
+            j++;
+        }
+    }
+
+    return result;
+}
 
 
 void write_bool(FILE* out, bool value) {
@@ -11,100 +40,128 @@ void write_bool(FILE* out, bool value) {
     fprintf(out, asString, value ? "true" : "false");
 }
 
-void write_char(FILE * out, char value) {
+void write_char(FILE* out, char value) {
+    if (value == '\'') {
+        const char* asString = format("character", %s);
+        fprintf(out, asString, "\"'\"");
+    } else {
+        const char* asString = format("character", %c);
+        fprintf(out, asString, value);
+    }
+}
+
+void write_sint(FILE* out, short int value) {
     const char* asString = format("integer", %d);
     fprintf(out, asString, value);
 }
 
-void write_uchar(FILE * out, unsigned char value) {
+void write_usint(FILE* out, unsigned short int value) {
     const char* asString = format("integer", %u);
     fprintf(out, asString, value);
 }
 
-void write_sint(FILE * out, short int value) {
+void write_int(FILE* out, int value) {
     const char* asString = format("integer", %d);
     fprintf(out, asString, value);
 }
 
-void write_usint(FILE * out, unsigned short int value) {
+void write_uint(FILE* out, unsigned int value) {
     const char* asString = format("integer", %u);
     fprintf(out, asString, value);
 }
 
-void write_int(FILE * out, int value) {
-    const char* asString = format("integer", %d);
-    fprintf(out, asString, value);
-}
-
-void write_uint(FILE * out, unsigned int value) {
-    const char* asString = format("integer", %u);
-    fprintf(out, asString, value);
-}
-
-void write_long(FILE * out, long value) {
+void write_long(FILE* out, long value) {
     const char* asString = format("integer", %l);
     fprintf(out, asString, value);
 }
 
-void write_ulong(FILE * out, unsigned long value) {
+void write_ulong(FILE* out, unsigned long value) {
     const char* asString = format("integer", %ul);
     fprintf(out, asString, value);
 }
 
-void write_llong(FILE * out, long long value) {
+void write_llong(FILE* out, long long value) {
     const char* asString = format("integer", %ll);
     fprintf(out, asString, value);
 }
 
-void write_ullong(FILE * out, unsigned long long value) {
+void write_ullong(FILE* out, unsigned long long value) {
     const char* asString = format("integer", %ull);
     fprintf(out, asString, value);
 }
 
-void write_float(FILE * out, float value) {
+void write_float(FILE* out, float value) {
     const char* asString = format("rational", %f);
     fprintf(out, asString, value);
 }
 
-void write_double(FILE * out, double value) {
+void write_double(FILE* out, double value) {
     const char* asString = format("rational", %f);
     fprintf(out, asString, value);
 }
 
-void write_ldouble(FILE * out, long double value) {
+void write_ldouble(FILE* out, long double value) {
     const char* asString = format("rational", %Lf);
     fprintf(out, asString, value);
 }
 
-void write_string(FILE * out, const char * value) {
+void write_string(FILE* out, const char* value) {
     const char* asString = format("text", "%s");
-    fprintf(out, asString, value);
+    char* result = str_replace(value, '"', "\\\"");
+    fprintf(out, asString, result);
+    free(result);
 }
 
-void write_unknown(FILE * out, void * value) {
+void write_unknown(FILE* out, void* value) {
     const char* asString = format("unknown", "%s");
     fprintf(out, asString, "?");
 }
 
-void send_evaluated(FILE *out, bool result, const char *expected, const char *actual, size_t nrOfMessages, const char **messages) {
+void write_void(FILE* out, void* value) {
+    const char* asString = format("nothing", %s);
+    fprintf(out, asString, "null");
+}
 
-    // Find the length of the string we need.
+void write_evaluated(FILE* out, EvaluationResult* result) {
+
+    // Count the size of the string we need for each message object.
     size_t messageLength = 0;
-    for (size_t i = 0; i < nrOfMessages; ++i) {
-        const char* message = messages[i];
-        messageLength += strlen(message);
-        messageLength += 3; // For the comma, and two quotes.
+    for (size_t i = 0; i < result->nrOfMessages; ++i) {
+        Message* message = result->messages[i];
+        if (message->permission == NULL) {
+            char* template = "{'description': '', 'format': ''}";
+            messageLength += strlen(template);
+        } else {
+            char* template = "{'description': '', 'format': '', 'permission': ''}";
+            messageLength += strlen(template);
+            messageLength += strlen(message->permission);
+        }
+        messageLength += strlen(message->description);
+        if (message->format == NULL) {
+            messageLength += 4;
+        } else {
+            messageLength += strlen(message->format);
+        }
     }
 
-    char* concatMessages = calloc(messageLength, sizeof(char));
+    size_t totalLength = messageLength + result->nrOfMessages;
+    char* concatMessages = calloc(totalLength, sizeof(char));
     size_t nextMessage = 0;
 
-    for (size_t j = 0; j < nrOfMessages; ++j) {
-        concatMessages[nextMessage++] = '"';
-        strcpy(&concatMessages[nextMessage], messages[j]);
-        nextMessage += strlen(messages[j]);
-        concatMessages[nextMessage++] = '"';
-        concatMessages[nextMessage++] = ',';
+    for (size_t j = 0; j < result->nrOfMessages; ++j) {
+        Message* message = result->messages[j];
+        int added;
+        if (message->permission == NULL) {
+            char* template = "{\"description\": \"%s\", \"format\": \"%s\"}";
+            added = sprintf(&concatMessages[nextMessage], template, message->description, message->format);
+        } else {
+            char* template = "{\"description\": \"%s\", \"format\": \"%s\", \"permission\": \"%s\"}";
+            added = sprintf(&concatMessages[nextMessage], template, message->description, message->format,
+                            message->permission);
+        }
+        nextMessage += added;
+        concatMessages[nextMessage] = ',';
+        nextMessage++;
     }
     // The last comma is not needed, so use it as null-delimiter.
     concatMessages[nextMessage - 1] = '\0';
@@ -115,7 +172,8 @@ void send_evaluated(FILE *out, bool result, const char *expected, const char *ac
                         "\"readable_actual\": \"%s\", "
                         "\"messages\": [%s]"
                         "}";
-    const char* resulting = result ? "true" : "false";
-    fprintf(out, value, resulting, expected, actual, concatMessages);
+    const char* resulting = result->result ? "true" : "false";
+    fprintf(out, value, resulting, result->readableExpected, result->readableActual, concatMessages);
     free(concatMessages);
+    free_result(result);
 }

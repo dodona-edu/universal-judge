@@ -1,0 +1,22 @@
+{
+  "description": {
+    "difficulty": 0.5,
+    "names": {
+      "en": "Sum [Universele test]",
+      "nl": "Som [Universele test]"
+    }
+  },
+  "evaluation": {
+    "memory_limit": 500000000,
+    "plan_name": "plan.tson"
+  },
+  "access": "public",
+  "labels": [
+
+  ],
+  "programming_language": "python",
+  "internals": {
+    "token": "T5wgD3Dz3Ik8nGIK-jbBjeZ2QPhxHtd-tWJ8ywQySm8jAWwfQUTyHktG9KZjzIG8",
+    "_info": "These fields are used for internal bookkeeping in Dodona, please do not change them."
+  }
+}

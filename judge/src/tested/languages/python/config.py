@@ -1,74 +1,32 @@
 import os
 import re
 from pathlib import Path
-from typing import List, Tuple, Mapping
+from typing import List, Tuple
 
-from humps import decamelize, depascalize
-
-from tested.languages.python import linter
-from tested.languages.config import Language, CallbackResult, TypeSupport
 from tested.configs import Bundle
-from tested.datatypes import (AdvancedNumericTypes as ant, AllTypes,
-                              AdvancedSequenceTypes as ast)
 from tested.dodona import AnnotateCode, Severity, Message
-from tested.testplan import Plan
-from tested.utils import fallback
+from tested.languages.config import Language, CallbackResult, Command, Config
 
 
-class PythonConfig(Language):
-    """Configuration for the Python language."""
+def _executable():
+    if os.name == 'nt':
+        return 'python'
+    else:
+        return 'python3'
 
-    def initial_dependencies(self) -> List[str]:
-        return ["values.py", "specific_evaluation_utils.py"]
 
-    def evaluator_dependencies(self) -> List[str]:
-        return ["evaluation_utils.py"]
+class Python(Language):
 
-    def generation_callback(self, files: List[str]) -> CallbackResult:
-        return (["python", "-m", "compileall", "-q", "-b", "."],
-                [f.replace(".py", '.pyc') for f in files])
+    def compilation(self, config: Config, files: List[str]) -> CallbackResult:
+        result = [x.replace(".py", ".pyc") for x in files]
+        return [_executable(), "-m", "compileall", "-q", "-b", "."], result
 
-    def evaluator_generation_callback(self, files: List[str]) -> CallbackResult:
-        return [], files
+    def execution(self, config: Config,
+                  cwd: Path, file: str, arguments: List[str]) -> Command:
+        return [_executable(), "-u", file, *arguments]
 
-    def execution_command(self, cwd: str, file: str, dependencies: List[str],
-                          arguments: List[str]) -> List[str]:
-        return ["python", "-u", file, *arguments]
-
-    def file_extension(self) -> str:
-        return "py"
-
-    def submission_name(self, plan: Plan) -> str:
-        return "submission"
-
-    def selector_name(self) -> str:
-        return "selector"
-
-    def context_name(self, tab_number: int, context_number: int) -> str:
-        return f"context_{tab_number}_{context_number}"
-
-    def conventionalise_function(self, function_name: str) -> str:
-        return decamelize(function_name)
-
-    def conventionalise_namespace(self, class_name: str) -> str:
-        return depascalize(class_name)
-
-    def context_dependencies_callback(self,
-                                      context_name: str,
-                                      dependencies: List[str]) -> List[str]:
-        allowed = context_name + "."
-        not_allowed = "context"
-        return [x for x in dependencies
-                if not x.startswith(not_allowed) or x.startswith(allowed)]
-
-    def needs_selector(self):
-        return False
-
-    def process_compiler_output(
-            self,
-            stdout: str,
-            stderr: str
-    ) -> Tuple[List[Message], List[AnnotateCode]]:
+    def compiler_output(self, stdout: str, stderr: str) \
+            -> Tuple[List[Message], List[AnnotateCode], str, str]:
         if match := re.search(
                 r".*: (?P<error>.+Error): (?P<message>.+) \(submission.py, "
                 r"line (?P<line>\d+)\)",
@@ -82,7 +40,7 @@ class PythonConfig(Language):
                     text=f"{error}: {message}",
                     type=Severity.ERROR
                 )
-            ]
+            ], stdout, stderr
         elif stuff := self._attempt_stacktrace(stdout):
             line, column, message = stuff
             return [], [
@@ -92,9 +50,9 @@ class PythonConfig(Language):
                     text=message,
                     type=Severity.ERROR
                 )
-            ]
+            ], stdout, stderr
         else:
-            return [], []
+            return [], [], stdout, stderr
 
     def _attempt_stacktrace(self, trace: str):
         # TODO: this only works with compiler traces.
@@ -118,14 +76,8 @@ class PythonConfig(Language):
 
         return line, column, message
 
-    def run_linter(self, bundle: Bundle, submission: Path, remaining: int) \
+    def linter(self, bundle: Bundle, submission: Path, remaining: float) \
             -> Tuple[List[Message], List[AnnotateCode]]:
+        # Import locally to prevent errors.
+        from tested.languages.python import linter
         return linter.run_pylint(bundle, submission, remaining)
-
-    def type_support_map(self) -> Mapping[AllTypes, TypeSupport]:
-        return fallback(super().type_support_map(), {
-            ant.DOUBLE_EXTENDED: TypeSupport.SUPPORTED,
-            ant.FIXED_PRECISION: TypeSupport.SUPPORTED,
-            ast.TUPLE:           TypeSupport.SUPPORTED,
-            ast.LIST:            TypeSupport.SUPPORTED
-        })

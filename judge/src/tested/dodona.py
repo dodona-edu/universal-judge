@@ -11,7 +11,6 @@ the authoritative json-schema, provided by Dodona.
 """
 import dataclasses
 import json
-import textwrap
 from enum import Enum
 from typing import Optional, Union, Literal, IO, Type
 
@@ -29,15 +28,13 @@ class Permission(str, Enum):
 @dataclass
 class ExtendedMessage:
     description: str
-    format: str
+    format: str = "text"
     permission: Optional[Permission] = None
 
 
 Message = Union[ExtendedMessage, str]
 
-
 BadgeCount = int
-
 
 Index = int
 
@@ -56,6 +53,7 @@ class Status(str, Enum):
     TIME_LIMIT_EXCEEDED = "time limit exceeded"
     WRONG = "wrong"
     INTERNAL_ERROR = "internal error"
+    OUTPUT_LIMIT_EXCEEDED = "output limit exceeded"
 
 
 @dataclass
@@ -190,10 +188,10 @@ Update = Union[
 
 _mapping = {
     "judgement": CloseJudgment,
-    "tab": CloseTab,
-    "context": CloseContext,
-    "testcase": CloseTestcase,
-    "test": CloseTest
+    "tab":       CloseTab,
+    "context":   CloseContext,
+    "testcase":  CloseTestcase,
+    "test":      CloseTest
 }
 
 
@@ -218,36 +216,55 @@ class _EnhancedJSONEncoder(json.JSONEncoder):
         return super().default(o)
 
 
-def _maybe_shorten(text: str) -> str:
-    lines = text.splitlines()
-    if len(lines) > 20:
-        lines = lines[:20] + ["\n[...Uitvoer is te lang...]\n"]
-    lines = [l[:150] + "..." if len(l) > 150 else l for l in lines]
-    return "\n".join(lines)
+def _maybe_shorten(text: str, max_chars: int) -> str:
+    if len(text) > max_chars - 3:
+        text = text[:max_chars - 3] + "..."
+    return text
+
+
+def update_size(update: Update) -> int:
+    if isinstance(update, AppendMessage):
+        if isinstance(update.message, ExtendedMessage):
+            return len(update.message.description.encode('utf-8'))
+        else:
+            assert isinstance(update.message, str)
+            return len(update.message.encode('utf-8'))
+    if isinstance(update, CloseTest):
+        return len(update.generated.encode('utf-8'))
+    if isinstance(update, AnnotateCode):
+        return len(update.text.encode('utf-8'))
+    return 0
+
+
+def limit_size(update: Update, size: int) -> Update:
+    # Handle shortening messages and other output here.
+    if isinstance(update, AppendMessage):
+        if isinstance(update.message, ExtendedMessage):
+            shorter = _maybe_shorten(update.message.description, size)
+            new_message = dataclasses.replace(update.message, description=shorter)
+        else:
+            assert isinstance(update.message, str)
+            new_message = _maybe_shorten(update.message, size)
+        update = dataclasses.replace(update, message=new_message)
+    if isinstance(update, CloseTest):
+        new_message = _maybe_shorten(update.generated, size)
+        status = dataclasses.replace(update.status,
+                                     enum=Status.OUTPUT_LIMIT_EXCEEDED)
+        update = dataclasses.replace(update, generated=new_message, status=status)
+    if isinstance(update, AnnotateCode):
+        new_text = _maybe_shorten(update.text, size)
+        update = dataclasses.replace(update, text=new_text)
+
+    return update
 
 
 def report_update(to: IO, update: Update):
     """
     Write the given update to the given output stream.
+
     :param to: Where to write to. Will not be closed.
     :param update: The update to write.
     """
-    # Handle shortening messages and other output here.
-    if isinstance(update, AppendMessage):
-        if isinstance(update.message, ExtendedMessage):
-            shorter = _maybe_shorten(update.message.description)
-            # noinspection PyDataclass
-            new_message = dataclasses.replace(update.message, description=shorter)
-        else:
-            assert isinstance(update.message, str)
-            new_message = _maybe_shorten(update.message)
-        # noinspection PyDataclass
-        update = dataclasses.replace(update, message=new_message)
-    if isinstance(update, CloseTest):
-        new_message = _maybe_shorten(update.generated)
-        # noinspection PyDataclass
-        update = dataclasses.replace(update, generated=new_message)
-
     json.dump(update, to, cls=_EnhancedJSONEncoder)
     # noinspection PyUnreachableCode
     if __debug__:

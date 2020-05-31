@@ -1,0 +1,52 @@
+{
+  "general": {
+    "dependencies": [
+      "values.py",
+      "evaluation_utils.py"
+    ],
+    "selector": false
+  },
+  "extensions": {
+    "file": "py"
+  },
+  "constructs": {
+    "objects": true,
+    "exceptions": true,
+    "function_calls": true,
+    "assignments": true,
+    "heterogeneous_collections": true,
+    "heterogeneous_arguments": true,
+    "named_arguments": true,
+    "evaluation": true,
+    "default_parameters": true
+  },
+  "datatypes": {
+
+    "integer": "supported",
+    "rational": "supported",
+    "char": "supported",
+    "text": "supported",
+    "boolean": "supported",
+    "sequence": "supported",
+    "set": "supported",
+    "map": "supported",
+    "nothing": "supported",
+
+    "int8": "reduced",
+    "uint8": "reduced",
+    "int16": "reduced",
+    "uint16": "reduced",
+    "int32": "reduced",
+    "uint32": "reduced",
+    "int64": "reduced",
+    "uint64": "reduced",
+    "bigint": "reduced",
+    "single_precision": "reduced",
+    "double_precision": "reduced",
+    "double_extended": "supported",
+    "fixed_precision": "supported",
+    "array": "reduced",
+    "list": "supported",
+    "tuple": "supported"
+  }
+}

@@ -84,27 +84,3 @@ def remove_indents(code):
         resulting_lines.append(line)
 
     return "\n".join(resulting_lines)
-
-
-def remove_newline(code):
-    """
-    Remove newlines after tags, by appending slashes. For example,
-
-    .. code-block: mako
-       <%! from testplan import BuiltinEvaluator %>
-
-    .. code-block: mako
-       <%! from testplan import BuiltinEvaluator %>\
-    """
-    lines = code.splitlines()
-    resulting_output = []
-
-    for line in lines:
-        if is_tag(line):
-            resulting_output.append(f"{line}\\")
-        else:
-            resulting_output.append(line)
-
-    r = "\n".join(resulting_output)
-    # print(r)
-    return r

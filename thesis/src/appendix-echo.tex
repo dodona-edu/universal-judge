@@ -1,0 +1,276 @@
+%! Suppress = EscapeHashOutsideCommand
+\chapter{Echo-oefening}\label{ch:echo-oefening}
+
+Deze bijlage bevat de door \tested{} gegenereerde testcode voor het testplan uit de oefening \emph{Echo} uit \cref{ch:nieuwe-oefening} (zie \cref{subsec:oefening-echo-testplan} voor het testplan.)
+
+\section{Python}\label{sec:echo-python}
+
+\subsection{Oplossing}\label{subsec:echo-python-oplossing}
+
+\inputminted{python}{sources/echo/correct.py}
+
+\subsection{Gegenereerde code}\label{subsec:echo-python-gegenereerde-code}
+
+De testcode die gegenereerd wordt bij het uitvoeren van bovenstaande testplan.
+Deze code is lichtjes aangepast: overtollige witruimte is verwijderd.
+Anders is de code identiek aan de door \tested{} gegenereerde code.
+
+In Python is geen selector nodig, waardoor de gegenereerde code identiek is voor batchcompilatie en voor contextcompilatie.
+In beide gevallen worden twee bestanden gegenereerd:
+
+\begin{enumerate}
+    \item \texttt{context\_0\_0.py}
+    \item \texttt{context\_0\_1.py}
+\end{enumerate}
+
+\subsubsection{\texttt{context\_0\_0.py}}
+
+%! Suppress = EscapeUnderscore
+\inputminted{python}{sources/echo/context_0_0.py}
+
+\subsubsection{\texttt{context\_0\_1.py}}
+
+%! Suppress = EscapeUnderscore
+\inputminted{python}{sources/echo/context_0_1.py}
+
+\subsection{Uitvoeren}\label{subsec:echo-python-uitvoeren}
+
+Bij het uitvoeren worden de gegenereerde bestanden uitgevoerd.
+In beide gevallen (batchcompilatie en contextcompilatie) wordt de juiste context uitgevoerd:
+
+%! Suppress = EscapeUnderscore
+\begin{minted}{console}
+> python context_0_0.py
+<uitvoer context_0_0>
+> python context_0_1.py
+<uitvoer context_0_1>
+\end{minted}
+
+\section{Java}\label{sec:echo-java}
+
+\subsection{Oplossing}\label{subsec:echo-java-oplossing}
+
+\inputminted{java}{sources/echo/correct.java}
+
+\subsection{Gegenereerde code}\label{subsec:echo-java-gegenereerde-code}
+
+De testcode die gegenereerd wordt bij het uitvoeren van bovenstaande testplan.
+Deze code is lichtjes aangepast: overtollige witruimte is verwijderd.
+Anders is de code identiek aan de door \tested{} gegenereerde code.
+
+Bij batchcompilatie worden alle testgevallen in één keer gecompileerd.
+Daarvoor wordt het bestand \texttt{Selector.java} gegenereerd.
+Bij contextcompilatie wordt geen \texttt{Selector.java} gegenereerd, maar zijn de bestanden anders identiek.
+Volgende bestanden werden gegenereerd (met \texttt{Selector.java} dus enkel in batchcompilatie):
+
+\begin{enumerate}
+    \item \texttt{Context00.java}
+    \item \texttt{Context01.java}
+    \item \texttt{Selector.java}
+\end{enumerate}
+
+\subsubsection{\texttt{Context00.java}}
+
+\inputminted{java}{sources/echo/Context00.java}
+
+\subsubsection{\texttt{Context01.java}}
+
+\inputminted{java}{sources/echo/Context01.java}
+
+\subsubsection{\texttt{Selector.java}}
+
+\inputminted{java}{sources/echo/Selector.java}
+
+\subsection{Uitvoeren}\label{subsec:echo-java-uitvoeren}
+
+Bij batchcompilatie wordt \texttt{Selector.java} gecompileerd, wat leidt tot een reeks \texttt{.class}-bestanden.
+Vervolgens wordt de selector tweemaal uitgevoerd:
+
+%! Suppress = EscapeUnderscore
+%! Suppress = LineBreak
+\begin{minted}{console}
+> ./java -cp . Selector Context00
+<uitvoer context_0_0>
+> ./java -cp . Selector Context01
+<uitvoer context_0_1>
+\end{minted}
+
+Een opmerking hierbij teneinde verwarring tegen te gaan: in de commando's hierboven wordt met het argument \texttt{Selector} de klasse meegegeven aan Java die uitgevoerd moet worden.
+Het argument \texttt{Context0*} is een commandoargument zoals gebruikelijk.
+
+Bij contextcompilatie wordt elke context afzonderlijk gecompileerd, wat ook leidt tot een reeks \texttt{.class}-bestanden.
+Deze keer worden de contexten zelf uitgevoerd:
+
+%! Suppress = EscapeUnderscore
+%! Suppress = LineBreak
+\begin{minted}{console}
+> java -cp . Context00
+<uitvoer context_0_0>
+> java -cp . Context01
+<uitvoer context_0_1>
+\end{minted}
+
+\section{C}\label{sec:echo-c}
+
+\subsection{Oplossing}\label{subsec:echo-c-oplossing}
+
+\inputminted{c}{sources/echo/correct.c}
+
+\subsection{Gegenereerde code}\label{subsec:echo-c-gegenereerde-code}
+
+De testcode die gegenereerd wordt bij het uitvoeren van bovenstaande testplan.
+Deze code is lichtjes aangepast: overtollige witruimte is verwijderd.
+Anders is de code identiek aan de door \tested{} gegenereerde code.
+
+Bij batchcompilatie worden alle testgevallen in één keer gecompileerd.
+Daarvoor wordt het bestand \texttt{selector.c} gegenereerd.
+Bij contextcompilatie wordt geen \texttt{selector.c} gegenereerd, maar zijn de bestanden anders identiek.
+Volgende bestanden werden gegenereerd (met \texttt{selector.c} dus enkel in batchcompilatie):
+
+\begin{enumerate}
+    \item \texttt{context\_0\_0.c}
+    \item \texttt{context\_0\_1.c}
+    \item \texttt{selector.c}
+\end{enumerate}
+
+\subsubsection{\texttt{context\_0\_0.c}}
+
+%! Suppress = EscapeUnderscore
+\inputminted{c}{sources/echo/context_0_0.c}
+
+\subsubsection{\texttt{context\_0\_1.c}}
+
+%! Suppress = EscapeUnderscore
+\inputminted{c}{sources/echo/context_0_1.c}
+
+\subsubsection{\texttt{selector.c}}
+
+\inputminted{c}{sources/echo/selector.c}
+
+\subsection{Uitvoeren}\label{subsec:echo-c-uitvoeren}
+
+Bij batchcompilatie wordt \texttt{selector.c} gecompileerd, wat leidt tot een uitvoerbaar bestand \texttt{selector}.
+Dit laatste bestand wordt dan tweemaal uitgevoerd:
+
+%! Suppress = EscapeUnderscore
+\begin{minted}{console}
+> ./selector context_0_0
+<uitvoer context_0_0>
+> ./selector context_0_1
+<uitvoer context_0_1>    
+\end{minted}
+
+Bij contextcompilatie wordt elke context afzonderlijk gecompileerd, wat leidt tot twee uitvoerbare bestanden: \texttt{context\_0\_0} en \texttt{context\_0\_1}.
+Deze uitvoerbare bestanden worden vervolgens uitgevoerd:
+
+%! Suppress = EscapeUnderscore
+\begin{minted}{console}
+> ./context_0_0
+<uitvoer context_0_0>
+> ./context_0_1
+<uitvoer context_0_1>
+\end{minted}
+
+
+\section{Haskell}\label{sec:echo-haskell}
+
+\subsection{Oplossing}\label{subsec:echo-haskell-oplossing}
+
+\inputminted{haskell}{sources/echo/correct.hs}
+
+\subsection{Gegenereerde code}\label{subsec:echo-haskell-gegenereerde-code}
+
+De testcode die gegenereerd wordt bij het uitvoeren van bovenstaande testplan.
+Deze code is lichtjes aangepast: overtollige witruimte is verwijderd.
+Anders is de code identiek aan de door \tested{} gegenereerde code.
+
+Bij batchcompilatie worden alle testgevallen in één keer gecompileerd.
+Daarvoor wordt het bestand \texttt{Selector.hs} gegenereerd.
+Bij contextcompilatie wordt geen \texttt{Selector.hs} gegenereerd, maar zijn de bestanden anders identiek.
+Volgende bestanden werden gegenereerd (met \texttt{Selector.hs} dus enkel in batchcompilatie):
+
+\begin{enumerate}
+    \item \texttt{Context00.hs}
+    \item \texttt{Context01.hs}
+    \item \texttt{Selector.hs}
+\end{enumerate}
+
+Op het einde van alle contexten staat in de Haskell-code \mintinline{haskell}{putStr ""}.
+Dit is met opzet en nodig omdat de \texttt{do}-notatie in Haskell moet eindigen met een expressie.
+
+\subsubsection{\texttt{Context00.hs}}
+
+\inputminted{haskell}{sources/echo/Context00.hs}
+
+\subsubsection{\texttt{Context01.hs}}
+
+\inputminted{haskell}{sources/echo/Context01.hs}
+
+\subsubsection{\texttt{Selector.hs}}
+
+\inputminted{haskell}{sources/echo/Selector.hs}
+
+\subsection{Uitvoeren}\label{subsec:echo-haskell-uitvoeren}
+
+Bij batchcompilatie wordt \texttt{Selector.hs} gecompileerd, wat leidt tot een uitvoerbaar bestand \texttt{selector}.
+Dit laatste bestand wordt dan tweemaal uitgevoerd:
+
+%! Suppress = EscapeUnderscore
+\begin{minted}{console}
+> ./selector Context00
+<uitvoer context_0_0>
+> ./selector Context01
+<uitvoer context_0_1>
+\end{minted}
+
+Bij contextcompilatie wordt elke context afzonderlijk gecompileerd, wat leidt tot twee uitvoerbare bestanden: \texttt{Context00} en \texttt{Context01}.
+Deze uitvoerbare bestanden worden vervolgens uitgevoerd:
+
+%! Suppress = EscapeUnderscore
+\begin{minted}{console}
+> ./Context00
+<uitvoer context_0_0>
+> ./Context01
+<uitvoer context_0_1>
+\end{minted}
+
+\section{JavaScript}\label{sec:echo-javascript}
+
+\subsection{Oplossing}\label{subsec:echo-javascript-oplossing}
+
+\inputminted{python}{sources/echo/correct.js}
+
+\subsection{Gegenereerde code}\label{subsec:echo-javascript-gegenereerde-code}
+
+De testcode die gegenereerd wordt bij het uitvoeren van bovenstaande testplan.
+Deze code is lichtjes aangepast: overtollige witruimte is verwijderd.
+Anders is de code identiek aan de door \tested{} gegenereerde code.
+
+In JavaScript is geen selector nodig, waardoor de gegenereerde code identiek is voor batchcompilatie en voor contextcompilatie.
+In beide gevallen worden twee bestanden gegenereerd:
+
+\begin{enumerate}
+    \item \texttt{context00.js}
+    \item \texttt{context01.js}
+\end{enumerate}
+
+\subsubsection{\texttt{context00.js}}
+
+\inputminted{javascript}{sources/echo/context00.js}
+
+\subsubsection{\texttt{context01.js}}
+
+\inputminted{python}{sources/echo/context01.js}
+
+\subsection{Uitvoeren}\label{subsec:echo-javascript-uitvoeren}
+
+Bij het uitvoeren worden de gegenereerde bestanden uitgevoerd.
+In beide gevallen (batchcompilatie en contextcompilatie) wordt de juiste context uitgevoerd:
+
+%! Suppress = EscapeUnderscore
+\begin{minted}{console}
+> node context00.js
+<uitvoer context_0_0>
+> node context01.js
+<uitvoer context_0_1>
+\end{minted}

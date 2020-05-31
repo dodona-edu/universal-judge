@@ -13,7 +13,7 @@ random.seed(123456789)
 # We halen de naam van het testplan op uit de configuratie van de oefening.
 with open("../config.json", "r") as config_file:
     config = json.load(config_file)
-testplan_name = config["evaluation"].get("plan_name", "plan.json")
+testplan_name = config["evaluation"].get("plan_name", "full.tson")
 
 # Of alle testgevallen in dezelfde context moeten plaatsvinden of niet.
 # Aangezien ze onafhankelijk zijn, doen we dit niet.
@@ -97,11 +97,9 @@ def generate_is_isbn():
         # als verwachte uitvoer.
         testcase = {
             "input":  {
-                "expression": {
-                    "type":      "function",
-                    "name":      "is_isbn",
-                    "arguments": function_arguments
-                }
+                "type":      "function",
+                "name":      "is_isbn",
+                "arguments": function_arguments
             },
             "output": {
                 "result": {
@@ -153,11 +151,9 @@ def generate_are_isbn():
         # argument. Maak het testgeval voor de assignment.
         assignment_testcase = {
             "input": {
-                "statement": {
-                    "name": f"codes{index:02d}",
-                    "expression": values.encode(codes),
-                    "type": "sequence"
-                }
+                "variable":   f"codes{index:02d}",
+                "expression": values.encode(codes),
+                "type":       "sequence"
             }
         }
 
@@ -178,11 +174,9 @@ def generate_are_isbn():
         # uitvoer de verwachte waarde.
         testcase = {
             "input":  {
-                "expression": {
-                    "type":      "function",
-                    "name":      "are_isbn",
-                    "arguments": function_arguments
-                }
+                "type":      "function",
+                "name":      "are_isbn",
+                "arguments": function_arguments
             },
             "output": {
                 "result": {
@@ -222,11 +216,11 @@ tab_2_contexts = generate_are_isbn()
 plan = {
     "tabs": [
         {
-            "name": "is_isbn",
+            "name":     "is_isbn",
             "contexts": tab_1_contexts
         },
         {
-            "name": "are_isbn",
+            "name":     "are_isbn",
             "contexts": tab_2_contexts
         }
     ]

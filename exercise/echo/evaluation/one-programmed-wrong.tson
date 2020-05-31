@@ -1,0 +1,34 @@
+{
+  "tabs": [
+    {
+      "name": "Tab",
+      "contexts": [
+        {
+          "context_testcase": {
+            "input": {
+              "main_call": true,
+              "stdin": {
+                "type": "text",
+                "data": "input-1"
+              }
+            },
+            "output": {
+              "stdout": {
+                "type": "text",
+                "data": "input-1",
+                "evaluator": {
+                  "type": "programmed",
+                  "language": "python",
+                  "function": {
+                    "file": "evaluator.py",
+                    "name": "evaluate_wrong"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

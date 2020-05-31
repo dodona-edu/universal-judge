@@ -3,21 +3,22 @@ Functions responsible for the compilation step.
 """
 import logging
 from pathlib import Path
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Optional, Union
 
-from .utils import run_command, BaseExecutionResult
+from .utils import BaseExecutionResult, run_command
 from ..configs import Bundle
-from ..dodona import Message, Status, AnnotateCode, ExtendedMessage
-from ..languages.config import Language
+from ..dodona import Status, ExtendedMessage, Message, AnnotateCode
+from ..languages.config import FileFilter, Language, Config
 
 _logger = logging.getLogger(__name__)
 
 
-def run_compilation(bundle: Bundle,
-                    working_directory: Path,
-                    dependencies: List[str],
-                    remaining: float
-                    ) -> Tuple[Optional[BaseExecutionResult], List[str]]:
+def run_compilation(
+        bundle: Bundle,
+        directory: Path,
+        dependencies: List[str],
+        remaining: float
+) -> Tuple[Optional[BaseExecutionResult], Union[List[str], FileFilter]]:
     """
     The compilation step in the pipeline. This callback is used in both the
     precompilation and individual mode. The implementation may only depend on
@@ -38,13 +39,12 @@ def run_compilation(bundle: Bundle,
     penalty, so disabling the fallback if not needed is recommended.
 
     :param bundle: The configuration bundle.
-    :param working_directory: The directory in which the dependencies are
+    :param directory: The directory in which the dependencies are
                               available and in which the compilation results
                               should be stored.
     :param dependencies: A list of files available for compilation. Some
                          configs might need a context_testcase file. By convention,
                          the last file is the context_testcase file.
-                         TODO: make this explicit?
     :param remaining: The max amount of time.
 
     :return: A tuple containing an optional compilation result, and a list of
@@ -54,10 +54,12 @@ def run_compilation(bundle: Bundle,
              decide to fallback to individual mode if the compilation result is
              not positive.
     """
-    command, files = bundle.language_config.generation_callback(dependencies)
+    config = Config.from_bundle(bundle)
+    command, files = bundle.lang_config.compilation(config, dependencies)
     _logger.debug("Generating files with command %s in directory %s",
-                  command, working_directory)
-    result = run_command(working_directory, remaining, command)
+                  command, directory)
+    result = run_command(directory, remaining, command)
+    _logger.debug(f"Compilation dependencies are: {files}")
     return result, files
 
 
@@ -78,40 +80,42 @@ def process_compile_results(
         return messages, Status.CORRECT, []
 
     show_stdout = False
-    compiler_messages, annotations = language_config.process_compiler_output(
-        results.stdout, results.stderr
-    )
+    compiler_messages, annotations, stdout, stderr = \
+        language_config.compiler_output(results.stdout, results.stderr)
     messages.extend(compiler_messages)
     shown_messages = annotations or compiler_messages
 
     # Report stderr.
-    if results.stderr:
+    if stderr:
         # Append compiler messages to the output.
         messages.append("De compiler produceerde volgende uitvoer op stderr:")
         messages.append(ExtendedMessage(
-            description=results.stderr,
+            description=stderr,
             format='code'
         ))
-        _logger.debug("Received stderr from compiler: " + results.stderr)
+        _logger.debug("Received stderr from compiler: " + stderr)
         show_stdout = True
         shown_messages = True
 
     # Report stdout.
-    if results.stdout and (show_stdout or results.exit != 0):
+    if stdout and (show_stdout or results.exit != 0):
         # Append compiler messages to the output.
         messages.append("De compiler produceerde volgende uitvoer op stdout:")
         messages.append(ExtendedMessage(
-            description=results.stdout,
+            description=stdout,
             format='code'
         ))
-        _logger.debug("Received stdout from compiler: " + results.stderr)
+        _logger.debug("Received stdout from compiler: " + stderr)
         shown_messages = True
 
     # Report errors if needed.
     if results.exit != 0:
         if not shown_messages:
-            # TODO: perhaps this should be the status message?
             messages.append(f"Exitcode {results.exit}.")
+        if results.timeout:
+            return messages, Status.TIME_LIMIT_EXCEEDED, annotations
+        if results.memory:
+            return messages, Status.MEMORY_LIMIT_EXCEEDED, annotations
         return messages, Status.COMPILATION_ERROR, annotations
     else:
         return messages, Status.CORRECT, annotations

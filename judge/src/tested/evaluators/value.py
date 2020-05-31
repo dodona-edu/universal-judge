@@ -6,12 +6,13 @@ from typing import Union, Tuple, Optional
 
 from . import EvaluationResult, EvaluatorConfig
 from ..configs import Bundle
-from ..datatypes import AdvancedTypes, BasicTypes
+from ..datatypes import AdvancedTypes, BasicTypes, BasicStringTypes
 from ..dodona import ExtendedMessage, Permission, StatusMessage, Status
 from ..languages.config import TypeSupport
-from ..languages.generator import convert_expression
-from ..serialisation import Value, parse_value, to_python_comparable, as_basic_type
-from ..testplan import ValueOutputChannel, OutputChannel
+from ..languages.generator import convert_statement
+from ..serialisation import (Value, parse_value, to_python_comparable,
+                             as_basic_type, StringType)
+from ..testplan import ValueOutputChannel, OutputChannel, TextOutputChannel
 from ..utils import Either, get_args
 
 logger = logging.getLogger(__name__)
@@ -31,13 +32,21 @@ def try_as_readable_value(bundle: Bundle, value: str) -> Optional[str]:
     except (ValueError, TypeError):
         return None
     else:
-        return convert_expression(bundle, actual)
+        return convert_statement(bundle, actual)
 
 
 def get_values(bundle: Bundle, output_channel: ValueOutputChannel, actual) \
         -> Union[EvaluationResult, Tuple[Value, str, Optional[Value], str]]:
+    if isinstance(output_channel, TextOutputChannel):
+        expected = output_channel.get_data_as_string(bundle.config.resources)
+        expected_value = StringType(type=BasicStringTypes.TEXT, data=expected)
+        actual_value = StringType(type=BasicStringTypes.TEXT, data=actual)
+        return expected_value, expected, actual_value, actual
+
+    assert isinstance(output_channel, ValueOutputChannel)
+
     expected = output_channel.value
-    readable_expected = convert_expression(bundle, expected)
+    readable_expected = convert_statement(bundle, expected)
 
     # Special support for empty strings.
     if not actual.strip():
@@ -63,7 +72,7 @@ def get_values(bundle: Bundle, output_channel: ValueOutputChannel, actual) \
             messages=[message]
         )
 
-    readable_actual = convert_expression(bundle, actual)
+    readable_actual = convert_statement(bundle, actual)
     return expected, readable_expected, actual, readable_actual
 
 
@@ -92,7 +101,7 @@ def _check_type(
     :return: A tuple with the result and expected value, the type that was used to
              do the check.
     """
-    supported_types = bundle.language_config.type_support_map()
+    supported_types = bundle.lang_config.type_support_map()
 
     # Case 3.
     if supported_types[expected.type] == TypeSupport.UNSUPPORTED:
@@ -118,8 +127,8 @@ def _check_type(
     return expected.type == actual.type, expected
 
 
-def evaluate(config: EvaluatorConfig, channel: OutputChannel, actual: str,
-             wrong: Status, timeout: Optional[float]) -> EvaluationResult:
+def evaluate(config: EvaluatorConfig, channel: OutputChannel,
+             actual: str) -> EvaluationResult:
     """
     Evaluate two values. The values must match exact. Currently, this evaluator
     has no options, but it might receive them in the future (e.g. options on how
@@ -131,7 +140,7 @@ def evaluate(config: EvaluatorConfig, channel: OutputChannel, actual: str,
     # This is the result of a custom evaluator.
     try:
         evaluation_result = EvaluationResult.__pydantic_model__.parse_raw(actual)
-    except (TypeError, ValueError) as e:
+    except (TypeError, ValueError):
         pass
     else:
         return evaluation_result
@@ -147,7 +156,7 @@ def evaluate(config: EvaluatorConfig, channel: OutputChannel, actual: str,
     if actual is None:
         return EvaluationResult(
             result=StatusMessage(
-                enum=wrong,
+                enum=Status.WRONG,
                 human="Ontbrekende returnwaarde."
             ),
             readable_expected=readable_expected,
@@ -176,7 +185,7 @@ def evaluate(config: EvaluatorConfig, channel: OutputChannel, actual: str,
     return EvaluationResult(
         result=StatusMessage(
             human=type_status,
-            enum=Status.CORRECT if correct else wrong
+            enum=Status.CORRECT if correct else Status.WRONG
         ),
         readable_expected=readable_expected,
         readable_actual=readable_actual,

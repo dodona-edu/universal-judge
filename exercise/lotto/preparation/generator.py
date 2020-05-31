@@ -34,9 +34,22 @@ if __name__ == '__main__':
     contexts = []
     tuples = [generate_data() for _ in range(45)]
     for data in tuples:
-        print(data)
         contexts.append({
             "testcases": [{
+                "input":  {
+                    "type":      "function",
+                    "name":      "loterij",
+                    "arguments": [
+                        {
+                            "type": "integer",
+                            "data": data[1]
+                        },
+                        {
+                            "type": "integer",
+                            "data": data[2]
+                        }
+                    ]
+                },
                 "output": {
                     "result": {
                         "value":     {
@@ -44,9 +57,11 @@ if __name__ == '__main__':
                             "data": data[0]
                         },
                         "evaluator": {
-                            "type":      "custom",
+                            "type":      "programmed",
                             "language":  "python",
-                            "path":      "./evaluator.py",
+                            "function": {
+                                "file": "./evaluator.py"
+                            },
                             "arguments": [
                                 {
                                     "type": "integer",
@@ -58,22 +73,6 @@ if __name__ == '__main__':
                                 }
                             ]
                         }
-                    }
-                },
-                "input":  {
-                    "expression": {
-                        "type":      "function",
-                        "name":      "loterij",
-                        "arguments": [
-                            {
-                                "type": "integer",
-                                "data": data[1]
-                            },
-                            {
-                                "type": "integer",
-                                "data": data[2]
-                            }
-                        ]
                     }
                 }
             }]
@@ -88,5 +87,5 @@ if __name__ == '__main__':
         ]
     }
 
-    with open("../evaluation/plan.json", "w") as f:
+    with open("../evaluation/plan.tson", "w") as f:
         json.dump(plan, f, indent=2)

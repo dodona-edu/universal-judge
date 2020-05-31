@@ -38,7 +38,7 @@ message_categories = {
 }
 
 
-def run_pylint(bundle: Bundle, submission: Path, remaining: int) \
+def run_pylint(bundle: Bundle, submission: Path, remaining: float) \
         -> Tuple[List[Message], List[AnnotateCode]]:
     """
     Calls pylint to annotate submitted source code and adds resulting score and

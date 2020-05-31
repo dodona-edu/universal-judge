@@ -1,41 +1,75 @@
-## Code to execute_module one test context.
-<%! from tested.serialisation import Statement, Expression %>
+{-# LANGUAGE NamedFieldPuns #-}
+## Code to execute one context.
+<%! from tested.languages.generator import _TestcaseArguments %>
+<%! from tested.serialisation import Statement, Expression, Assignment %>
 <%! from tested.utils import get_args %>
 module ${context_name} where
 
-import System.IO (hPutStr, stderr)
+##################################
+## Setup                        ##
+##################################
+
+import System.IO (hPutStr, stderr, stdout, hFlush)
 import System.Environment
-import Values
+import qualified Values
 import Control.Monad.Trans.Class
+import Control.Exception
+import EvaluationUtils
 
 ## Import the language specific evaluators we will need.
 % for name in evaluator_names:
     import qualified ${name}
 % endfor
 
+## Import the solution.
 import qualified ${submission_name}
 
 
 value_file = "${value_file}"
 exception_file = "${exception_file}"
 
-writeDelimiter :: FilePath -> String -> IO ()
-writeDelimiter = appendFile
+## Write the separator and flush to ensure the output is in the files.
+writeSeparator :: IO ()
+writeSeparator = do
+    hPutStr stderr "--${secret_id}-- SEP"
+    hPutStr stdout "--${secret_id}-- SEP"
+    appendFile value_file "--${secret_id}-- SEP"
+    appendFile exception_file "--${secret_id}-- SEP"
+    hFlush stdout
+    hFlush stderr
 
 
-send :: Typeable a => a -> IO ()
-send = sendValue value_file
+##################################
+## Predefined functions         ##
+##################################
+
+## Send a value to TESTed
+sendValue :: Values.Typeable a => a -> IO ()
+sendValue = Values.sendValue value_file
+
+## Send an exception to TESTed
+sendException :: Exception e => Maybe e -> IO ()
+sendException = Values.sendException exception_file
+
+## Send the result of a language specific value evaluator to TESTed.
+sendSpecificValue :: EvaluationResult -> IO ()
+sendSpecificValue = Values.sendEvaluated value_file
+
+## Send the result of a language specific exception evaluator to TESTed.
+sendSpecificException :: EvaluationResult -> IO ()
+sendSpecificException = Values.sendEvaluated exception_file
 
 
-% for additional in testcases:
-    v_evaluate_${loop.index} value = <%include file="expression.mako" args="expression=additional.value_function"/>
-% endfor
+## Exception handler
+handleException :: Exception e => (Either e a) -> Maybe e
+handleException (Left e) = Just e
+handleException (Right _) = Nothing
 
-
+## Main function of the context.
 main = do
-    % if before:
-        ${before}
-    % endif
+    ${before}
+
+    writeSeparator
 
     % if context_testcase.exists:
         let mainArgs = [\
@@ -43,31 +77,27 @@ main = do
                 <%include file="value.mako" args="value=argument"/>\
             % endfor
         ]
-        withArgs mainArgs ${submission_name}.main
+        result <- try (withArgs mainArgs ${submission_name}.main) :: IO (Either SomeException ())
+        let ee = handleException result in <%include file="statement.mako" args="statement=context_testcase.exception_statement('ee')"/>
     % endif
-    hPutStr stderr "--${secret_id}-- SEP"
-    putStr "--${secret_id}-- SEP"
-    writeDelimiter value_file "--${secret_id}-- SEP"
-    writeDelimiter exception_file "--${secret_id}-- SEP"
 
-    % for additional in testcases:
-        % if isinstance(additional.command, get_args(Statement)):
-            <%include file="statement.mako" args="statement=additional.command,root=False" />
+    % for testcase in testcases:
+        writeSeparator
+
+        ## In Haskell we do not actually have statements, so we need to keep them separate.
+        ## Additionally, exceptions with "statements" are not supported at this time.
+        % if isinstance(testcase.command, get_args(Assignment)):
+            <%include file="statement.mako" args="statement=testcase.command,root=False" />
         % else:
-            % if additional.has_return:
-                v${loop.index} <- <%include file="expression.mako" args="expression=additional.command,lifting=True" />
-                v_evaluate_${loop.index} v${loop.index}
-            % else:
-                <%include file="expression.mako" args="expression=additional.command" />
-            % endif
+            result${loop.index} <- catch
+                (<%include file="statement.mako" args="statement=testcase.command,lifting=True" /> 
+                    >>= \r -> <%include file="statement.mako" args="statement=testcase.input_statement('r')" />
+                    >> let ee = (Nothing :: Maybe SomeException) in <%include file="statement.mako" args="statement=testcase.exception_statement('ee')"/>)
+                (\e -> let ee = (Just (e :: SomeException)) in <%include file="statement.mako" args="statement=testcase.exception_statement('ee')"/>)
         % endif
 
-        hPutStr stderr "--${secret_id}-- SEP"
-        putStr "--${secret_id}-- SEP"
-        writeDelimiter value_file "--${secret_id}-- SEP"
-        writeDelimiter exception_file "--${secret_id}-- SEP"
     % endfor
 
-    % if after:
-        ${after}
-    % endif
+    putStr ""
+
+    ${after}

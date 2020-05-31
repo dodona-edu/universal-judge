@@ -12,23 +12,52 @@ endif
 # Create the main pdf.
 all: src/main.pdf
 
-# Clean temporar files.
+# Clean temporary files.
 clean:
-	$(RM) src/generated
+	$(RM) src/sources
 	latexmk -cd -pdflua -use-make -c src/main.tex
 
-# Generate dependencies needed for the main file.
-dependencies:
+# Dependencies needed for the main file.
+copies:
+	python scripts/copier.py ../judge/src/tested/languages/c/config.json c-config.json
+	python scripts/copier.py ../judge/src/tested/languages/c/config.py c-config.py
+	python scripts/copier.py ../judge/src/tested/languages/c/templates/context.c c-context.mako
+	python scripts/copier.py ../judge/src/tested/languages/c/templates/selector.c c-selector.mako
+	python scripts/copier.py ../judge/src/tested/languages/c/templates/statement.mako c-statement.mako
+	python scripts/copier.py ../judge/src/tested/languages/__init__.py languages-init.py
+	python scripts/copier.py ../exercise/lotto/solution/correct.py lotto-correct.py
+	python scripts/copier.py ../exercise/lotto/solution/correct.java lotto-correct.java
+	python scripts/copier.py ../exercise/lotto/evaluation/evaluator.py lotto-evaluator.py
+	python scripts/copier.py ../exercise/lotto/evaluation/plan.tson lotto-plan.tson
+	python scripts/copier.py ../exercise/division/evaluation/Evaluator.java division-evaluator.java
+	python scripts/copier.py ../exercise/division/evaluation/plan.json division-plan.tson
+	python scripts/copier.py ../exercise/sum/evaluation/short.tson sum-plan.tson
+	python scripts/copier.py ../exercise/isbn/evaluation/one-with-assignment.tson isbn-plan.tson
+	python scripts/copier.py ../exercise/objects/description/description.nl.md equal-description.md
+	python scripts/copier.py ../exercise/objects/evaluation/plan.tson equal-plan.tson
 
-# Generated dependencies
-src/generated/description.md:
-	python scripts/mathjax.py ../exercise/lotto/description/description.nl.md $@
+markdown:
+	python scripts/mathjax.py ../exercise/lotto/description/description.nl.md ./src/sources/lotto-description.md
+	python scripts/mathjax.py ../exercise/isbn/description/description.nl.md ./src/sources/isbn-description.md
 
-src/generated/isbn_description.md:
-	python scripts/mathjax.py ../exercise/isbn/description/description_clean.nl.md $@
+generate:
+	python scripts/generate_echo_c.py
+	python scripts/generate_echo_python.py
+	python scripts/generate_echo_java.py
+	python scripts/generate_echo_haskell.py
+	python scripts/generate_echo_javascript.py
+	python scripts/generate_echo_function_c.py
+	python scripts/generate_echo_function_python.py
+	python scripts/generate_echo_function_java.py
+	python scripts/generate_echo_function_haskell.py
+
+
+src/extended.pdf:
+	latexmk -cd -lualatex -shell-escape -use-make ${continuous} src/extended.tex
+
 
 # Do the main file.
-src/main.pdf: dependencies
+src/main.pdf: copies markdown generate
 	latexmk -cd -lualatex -shell-escape -use-make ${CONTINUOUS} src/main.tex
 
 watch: CONTINUOUS=-pvc -synctex=1

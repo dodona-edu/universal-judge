@@ -1,10 +1,10 @@
 ## Convert a Value to a type.
-<%! from tested.serialisation import VariableType, as_basic_type, resolve_to_basic %>
-<%! from tested.datatypes import AdvancedNumericTypes, AdvancedSequenceTypes  %>
-<%! from tested.datatypes import BasicNumericTypes, BasicStringTypes, BasicBooleanTypes, BasicNothingTypes, BasicSequenceTypes, BasicObjectTypes  %>
-<%page args="tp" />
+<%! from tested.serialisation import VariableType, as_basic_type, resolve_to_basic %>\
+<%! from tested.datatypes import AdvancedNumericTypes, AdvancedSequenceTypes  %>\
+<%! from tested.datatypes import BasicNumericTypes, BasicStringTypes, BasicBooleanTypes, BasicNothingTypes, BasicSequenceTypes, BasicObjectTypes  %>\
+<%page args="tp" />\
 % if isinstance(tp, VariableType):
-    ${tp.data}
+    ${tp.data}\
 % elif tp == AdvancedSequenceTypes.TUPLE:
     \
 % elif tp == AdvancedNumericTypes.U_INT_64:
@@ -28,7 +28,7 @@
 % elif tp == AdvancedNumericTypes.DOUBLE_PRECISION:
     Double\
 % else:
-    <% basic = resolve_to_basic(tp) %>
+    <% basic = resolve_to_basic(tp) %>\
     % if basic == BasicBooleanTypes.BOOLEAN:
         Bool\
     % elif basic == BasicStringTypes.TEXT:

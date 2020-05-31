@@ -3,6 +3,7 @@ import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Minimal RPC language in JSON to send data from the tests to the judge.
@@ -11,14 +12,18 @@ public class Values {
 
     private static String encodeSequence(Iterable<Object> objects) {
         var results = new ArrayList<String>();
-        for (Object obj: objects) {
+        for (Object obj : objects) {
             results.add(encode(obj));
         }
         return "[" + String.join(", ", results) + "]";
     }
+        
+    private static String escape(String string) {
+        return string.replace("\\", "\\\\").replace("\"", "\\\"");
+    }
 
     @SuppressWarnings("unchecked")
-    private static String encode(Object value) {
+    private static List<String> internalEncode(Object value) {
         String type;
         String data;
 
@@ -56,11 +61,11 @@ public class Values {
             type = "double_precision";
             data = value.toString();
         } else if (value instanceof Character) {
-            type = "char";
-            data = "\"" + value.toString() + "\"";
+            type = "character";
+            data = "\"" + escape(value.toString()) + "\"";
         } else if (value instanceof CharSequence) {
             type = "text";
-            data = "\"" + value.toString() + "\"";
+            data = "\"" + escape(value.toString()) + "\"";
         } else if (value instanceof List) {
             type = "list";
             data = encodeSequence((Iterable<Object>) value);
@@ -68,7 +73,7 @@ public class Values {
             type = "set";
             data = encodeSequence((Iterable<Object>) value);
         } else if (value instanceof Map) {
-            type = "object";
+            type = "map";
             var elements = new ArrayList<String>();
             for (Map.Entry<Object, Object> entry : ((Map<Object, Object>) value).entrySet()) {
                 elements.add("\"" + entry.getKey().toString() + "\": " + encode(entry.getValue()));
@@ -78,33 +83,53 @@ public class Values {
             type = "unknown";
             data = value.toString();
         }
+        return List.of(type, data);
+    }
 
-        return "{ \"data\": " + data + ", \"type\": \"" + type + "\"}";
+    private static String encode(Object value) {
+        var typeAndData = internalEncode(value);
+        return "{ \"data\": " + typeAndData.get(1) + ", \"type\": \"" + typeAndData.get(0) + "\"}";
     }
 
     public static void send(PrintWriter writer, Object value) {
         writer.print(encode(value));
     }
 
-    public static void sendException(PrintWriter writer, Exception exception) {
+    public static void sendException(PrintWriter writer, Throwable exception) {
+        if (exception == null) {
+            return;
+        }
         var sw = new StringWriter();
         exception.printStackTrace(new PrintWriter(sw));
         var result = "{ \"message\": \"" + exception.getMessage() + "\", \"type\": \"" + sw.toString() + "\"}";
         writer.write(result);
     }
 
+    private static String convertMessage(EvaluationResult.Message message) {
+        String result = "{" +
+            "\"description\": \"" + message.description + "\"," +
+            "\"format\": \"" + message.format + "\"";
+        if (message.permission instanceof String) {
+            result += ", \"permission\": \"" + message.permission + "\"";
+        }
+        return result + "}";
+    }
+
     public static void evaluated(PrintWriter writer,
-                                 boolean result, String expected, String actual, Collection<String> messages) {
+                                 boolean result, String expected, String actual, Collection<EvaluationResult.Message> messages) {
+        List<String> converted = messages.stream().map(Values::convertMessage).collect(Collectors.toList());
         String builder = "{" +
             "\"result\": " +
             result +
-            ", \"readable_expected\": " +
-            expected +
-            ", \"readable_actual\": " +
-            actual +
+            ", \"readable_expected\": \"" + expected + "\"" +
+            ", \"readable_actual\": \"" + actual + "\"" +
             ", \"messages\": [" +
-            String.join(", ", messages) +
+            String.join(", ", converted) +
             "]}";
         writer.print(builder);
+    }
+
+    public static void sendEvaluated(PrintWriter writer, EvaluationResult r) {
+        evaluated(writer, r.result, r.readableExpected, r.readableActual, r.messages);
     }
 }

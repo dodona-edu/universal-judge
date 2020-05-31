@@ -6,12 +6,14 @@ testcase level if needed.
 import dataclasses
 import logging
 from collections import defaultdict
+from math import floor
 from typing import List, Union, Optional, Generator
 
 from tested.configs import Bundle
 from tested.dodona import Update, Status, report_update, StatusMessage, \
     CloseTab, CloseContext, CloseTestcase, StartJudgment, CloseJudgment, \
-    StartTab, StartContext, StartTestcase, close_for
+    StartTab, StartContext, StartTestcase, close_for, ExtendedMessage, \
+    EscalateStatus, update_size, limit_size
 
 _logger = logging.getLogger(__name__)
 
@@ -74,8 +76,13 @@ class OutputManager:
     :ivar bundle: The configuration bundle.
     :ivar tab: The index of the latest completed tab.
     :ivar context: The index of the latest completed context.
+    :ivar output_limit: How much bytes we can still write. If this is in danger of
+                        being 0, outputs will be truncated. Note that this only
+                        counts the "content", not other stuff. You should add a
+                        buffer for the other stuff.
     """
-    __slots__ = ["tree_stack", "collected", "prepared", "bundle", "tab", "context"]
+    __slots__ = ["tree_stack", "collected", "prepared", "bundle", "tab", "context",
+                 "output_limit"]
 
     def __init__(self, bundle: Bundle):
         self.tree_stack: List[str] = []
@@ -84,8 +91,12 @@ class OutputManager:
         self.bundle = bundle
         self.tab = -1
         self.context = -1
+        self.output_limit = int(floor(bundle.config.output_limit * 0.8))
         from .evaluation import prepare_evaluation
         prepare_evaluation(bundle, self)
+
+    def is_full(self) -> bool:
+        return self.output_limit <= 0
 
     def prepare_judgment(self, update: Union[StartJudgment, CloseJudgment]):
         assert not self.collected, "OutputManager already finished!"
@@ -125,12 +136,15 @@ class OutputManager:
         """
         assert not self.collected, "OutputManager already finished!"
         action, type_ = command.command.split("-")
+        _logger.debug(f"Adding {command}")
+        _logger.debug(f"Stack is {self.tree_stack}")
         if action == "start":
             self.tree_stack.append(type_)
         elif action == "close":
             previous = self.tree_stack.pop()
             assert previous == type_, "Close same type"
 
+        _logger.debug(f"After adding, stack is {self.tree_stack}")
         report_update(self.bundle.out, command)
         return action
 
@@ -138,6 +152,10 @@ class OutputManager:
         assert not isinstance(command,
                               (StartTab, StartContext, CloseContext, CloseTab))
         assert not self.collected, "OutputManager already finished!"
+        size = update_size(command)
+        if size > self.output_limit:
+            command = limit_size(command, self.output_limit - size)
+        self.output_limit -= min(self.output_limit, size)
         self._add(command)
 
     def add_tab(self, update: Union[StartTab, CloseTab], tab_index: int):
@@ -162,6 +180,9 @@ class OutputManager:
         if isinstance(status, Status):
             status = StatusMessage(enum=status)
 
+        # Ensure we use the given status.
+        self._add(EscalateStatus(status=status))
+
         to_add = self._get_to_add()
         for added in to_add:
             modified = _replace_status(added, status)
@@ -175,6 +196,7 @@ class OutputManager:
             except TypeError:
                 command = close_for(to_close)()
             self._add(command)
+        self.collected = True
 
     def clean_finish(self):
         """Assert that the collector has terminated cleanly."""
@@ -258,9 +280,13 @@ class TestcaseCollector:
         for command in self._generate(end):
             manager.add(command)
 
-    def _generate(self, end: Optional[CloseTestcase])\
+    def _generate(self, end: Optional[CloseTestcase]) \
             -> Generator[Update, None, None]:
-        if self.content:
+        has_text = (isinstance(self.start.description, str)
+                    and self.start.description)
+        has_extended = (isinstance(self.start.description, ExtendedMessage)
+                        and self.start.description.description)
+        if has_text or has_extended:
             yield self.start
             yield from self.content
             if end is not None:

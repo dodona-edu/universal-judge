@@ -13,7 +13,7 @@ class BasicNumericTypes(str, Enum):
 class BasicStringTypes(str, Enum):
     CHAR = "character"
     TEXT = "text"
-    ANY = "any"
+    ANY = "any"  # Cannot be used in testplan.
 
 
 class BasicBooleanTypes(str, Enum):

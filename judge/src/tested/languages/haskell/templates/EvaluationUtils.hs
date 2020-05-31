@@ -1,16 +1,28 @@
-{-# OverloadedStrings #-}
-<%page args="evaluator,expected,actual,arguments" />
+{-# LANGUAGE OverloadedStrings #-}
 module EvaluationUtils where
 
-import Values
+data Message = Message {
+    description :: String,
+    format :: String,
+    permission :: Maybe String
+} deriving Show
 
--- | Report the result of an evaluation to the judge. This method should only
--- be called once, otherwise things will break.
--- Note that the first parameter, the file path, will be provided and must not
--- be changed. It should be passed to `evaluated` as is.
-evaluated :: Bool       -- ^ The result of the evaluation.
-          -> Maybe Text -- ^ A string version of the actual value. Optional.
-          -> Maybe Text -- ^ A string version of the expected value. Optional.
-          -> [Text]     -- ^ A list of messages for the user.
-          -> IO ()
-evaluated = sendCustomEvaluated
+data EvaluationResult = EvaluationResult {
+    result :: Bool,
+    readableExpected :: Maybe (String),
+    readableActual :: Maybe (String),
+    messages :: [Message]
+} deriving Show
+
+message description = Message {
+    description = description,
+    format = "text",
+    permission = Nothing
+}
+
+evaluationResult = EvaluationResult {
+    result = False,
+    readableExpected = Nothing,
+    readableActual = Nothing,
+    messages = []
+}

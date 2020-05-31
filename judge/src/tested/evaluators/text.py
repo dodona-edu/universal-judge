@@ -5,8 +5,8 @@ from typing import Optional, Dict, Any
 
 import math
 
-from ..dodona import StatusMessage, Status
 from . import EvaluationResult, EvaluatorConfig
+from ..dodona import StatusMessage, Status
 from ..testplan import TextOutputChannel, FileOutputChannel, OutputChannel
 
 
@@ -44,7 +44,7 @@ def _file_defaults(config: EvaluatorConfig) -> dict:
 def compare_text(
         options: Dict[str, Any],
         expected: str,
-        actual: str, wrong: Status) -> EvaluationResult:
+        actual: str) -> EvaluationResult:
     if options['ignoreWhitespace']:
         expected = expected.strip()
         actual = actual.strip()
@@ -62,11 +62,13 @@ def compare_text(
             expected_float = round(expected_float, numbers)
         # noinspection PyUnboundLocalVariable
         result = math.isclose(actual_float, expected_float)
+        expected = str(expected_float)
+        actual = str(actual_float)
     else:
         result = actual == expected
 
     return EvaluationResult(
-        result=StatusMessage(enum=Status.CORRECT if result else wrong),
+        result=StatusMessage(enum=Status.CORRECT if result else Status.WRONG),
         readable_expected=str(expected),
         readable_actual=str(actual)
     )
@@ -75,7 +77,7 @@ def compare_text(
 def evaluate_text(
         config: EvaluatorConfig,
         channel: OutputChannel,
-        actual: str, wrong: Status, timeout: Optional[float]) -> EvaluationResult:
+        actual: str) -> EvaluationResult:
     """
     The base evaluator, used to compare two strings. As this evaluator is
     intended for evaluating stdout, it supports various options to make life
@@ -92,25 +94,25 @@ def evaluate_text(
     assert isinstance(channel, TextOutputChannel)
     options = _text_options(config)
     expected = channel.get_data_as_string(config.bundle.config.resources)
-    return compare_text(options, expected, actual, wrong)
+    return compare_text(options, expected, actual)
 
 
 def evaluate_file(config: EvaluatorConfig,
-                  channel: OutputChannel,
-                  actual: str, wrong: Status,
-                  timeout: Optional[float]) -> EvaluationResult:
+                  channel: FileOutputChannel,
+                  actual: str) -> EvaluationResult:
     """
     Evaluate the contents of two files. The file evaluator supports one option,
     ``mode``, used to define in which mode the evaluator should operate:
 
-    1. ``exact``: Both files must be exactly the same, including line separators.
-    2. ``lines``: Each line is evaluated against the corresponding line in the
-                  other file. The evaluation itself is exact.
-    3. ``values``: Each line is evaluated as a textual value, using the
-                   :class:`TextEvaluator`. In this mode, options from this
-                   evaluator are passed to the text evaluator.
+    1. ``full``: The complete contents are passed to the :class:`TextEvaluator`.
+    2. ``line``: The file is split by lines and each line is compared to the
+       corresponding line with the :class:`TextEvaluator`. The lines are compared
+       without newlines.
 
-    When no mode is passed, the evaluator will default to exact.
+    Since the text evaluator is used behind the scenes, this evaluator also supports
+    all parameters of that evaluator.
+
+    When no mode is passed, the evaluator will default to ``full``.
     """
     assert isinstance(channel, FileOutputChannel)
     options = _text_options(config)
@@ -151,35 +153,19 @@ def evaluate_file(config: EvaluatorConfig,
             readable_actual="",
         )
 
-    if options["mode"] == "exact":
-        result = StatusMessage(
-            enum=Status.CORRECT if actual == expected else wrong
-        )
-    elif options["mode"] == "lines":
-        expected_lines = expected.splitlines()
-        actual_lines = actual.splitlines()
-        correct = len(actual_lines) == len(expected_lines)
-        for (expected_line, actual_line) in zip(expected_lines, actual_lines):
-            correct = correct and expected_line == actual_line
-        result = StatusMessage(enum=Status.CORRECT if correct else wrong)
+    if options["mode"] == "full":
+        return compare_text(options, expected, actual)
     else:
-        assert options["mode"] == "values"
-        expected_lines = expected.splitlines()
-        actual_lines = actual.splitlines()
+        assert options["mode"] == "line"
+        strip_newlines = options.get("stripNewlines", True)
+        expected_lines = expected.splitlines(keepends=not strip_newlines)
+        actual_lines = actual.splitlines(keepends=not strip_newlines)
         correct = len(actual_lines) == len(expected_lines)
-        # Overwrite the channel and actual with the values from the text
-        # evaluator. This will give a more consistent output in Dodona.
-        expected = []
-        actual = []
         for (expected_line, actual_line) in zip(expected_lines, actual_lines):
-            r = compare_text(options, expected_line, actual_line, wrong)
-            expected.append(r.readable_expected)
-            actual.append(r.readable_actual)
+            r = compare_text(options, expected_line, actual_line)
             correct = correct and r.result.enum == Status.CORRECT
-        result = StatusMessage(enum=Status.CORRECT if correct else wrong)
-
-    return EvaluationResult(
-        result=StatusMessage(enum=Status.CORRECT if result else wrong),
-        readable_expected=expected,
-        readable_actual=actual
-    )
+        return EvaluationResult(
+            result=StatusMessage(enum=Status.CORRECT if correct else Status.WRONG),
+            readable_expected=expected,
+            readable_actual=actual
+        )

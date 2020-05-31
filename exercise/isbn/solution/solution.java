@@ -2,7 +2,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.Random;
-class Main {
+
+class Submission {
     /**
      * Checks whether the given ISBN-10 code is valid.
      */
@@ -28,6 +29,7 @@ class Main {
         }
         return checksum == checkDigit;
     }
+
     /**
      * Checks whether the given ISBN-13 code is valid.
      */
@@ -53,6 +55,7 @@ class Main {
         int checkDigit = Character.getNumericValue(isbn.charAt(12));
         return checkSum == checkDigit;
     }
+
     public static boolean isIsbn(Object isbn, boolean isbn13) {
         if (!(isbn instanceof String)) {
             return false;
@@ -63,9 +66,11 @@ class Main {
             return isIsbn10((String) isbn);
         }
     }
+
     public static boolean isIsbn(Object isbn) {
         return isIsbn(isbn, true);
     }
+
     public static boolean isIsbnCheck(Object isbn, Boolean isbn13) {
         boolean isIsbn13 = true;
         if (isbn instanceof String) {
@@ -73,19 +78,17 @@ class Main {
         }
         return isIsbn(isbn, isIsbn13);
     }
-    public static Object areIsbn(List<Object> codes, Boolean isbn13) {
+
+    public static Object areIsbn(List<?> codes, Boolean isbn13) {
         var stream = codes.stream()
                 .map(isbn -> isIsbnCheck(isbn, isbn13));
-        Random rand = new Random();
-        if (rand.nextBoolean()) {
-            return stream.toArray(Boolean[]::new);
-        } else {
-            return stream.collect(Collectors.toList());
-        }
+        return stream.collect(Collectors.toList());
     }
-    public static Object areIsbn(List<Object> code) {
+
+    public static Object areIsbn(List<?> code) {
         return areIsbn(code, null);
     }
+
     public static void main(String[] args) {
         // Some checks from the python doctests.
         assert isIsbn10("9971502100");

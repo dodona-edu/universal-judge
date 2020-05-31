@@ -4,61 +4,132 @@ Translates items from the testplan into the actual programming language.
 import logging
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Union, Tuple, Optional, Set
+from typing import List, Union, Tuple, Optional, Set, Callable
 
+from mako import exceptions
+
+from .config import TemplateType
 from .templates import find_and_write_template, find_template
 from ..configs import Bundle
 from ..datatypes import BasicSequenceTypes
 from ..dodona import ExtendedMessage
 from ..serialisation import (Value, SequenceType, Identifier, FunctionType,
-                             FunctionCall, Expression, Statement)
+                             FunctionCall, Expression, Statement, Assignment,
+                             NothingType)
 from ..testplan import (EmptyChannel, IgnoredChannel, TextData, ProgrammedEvaluator,
                         SpecificEvaluator, Testcase, ContextTestcase, Context,
-                        ExpressionInput, StatementInput)
+                        ExceptionOutput, ValueOutput)
+from ..utils import get_args
 
 _logger = logging.getLogger(__name__)
+
+# Names of the predefined functions that must be available.
+SEND_VALUE = "send_value"
+SEND_EXCEPTION = "send_exception"
+SEND_SPECIFIC_VALUE = "send_specific_value"
+SEND_SPECIFIC_EXCEPTION = "send_specific_exception"
+
+# Name of the function to call in evaluators
+PROGRAMMED_EVALUATE = "evaluate"
+
+EVALUATION_ARGS = "value"
+
+# Names of predefined templates.
+STATEMENT = "statement"
 
 
 @dataclass
 class _TestcaseArguments:
     """Arguments for a testcases testcase template."""
-    command: Union[Statement, Expression]
-    has_return: bool
-    value_function: FunctionCall
-    exception_function: FunctionCall
+    # The input command. In most languages, you can use input_statement instead.
+    command: Statement
+    _value_function: Optional[Callable[[Expression], Statement]]
+    _exception_function: Callable[[Expression], Statement]
+
+    def input_statement(self, override: Optional[str] = None) -> Statement:
+        """
+        Get the input statement for the testcase.
+
+        This will return, depending on the command, either an expression which will
+        pass the value to the correct handling function or a statement.
+
+        :param override: Optionally override the value argument.
+        :return: The input statement.
+        """
+        if self._value_function:
+            assert isinstance(self.command, get_args(Expression))
+            # Replace the arguments
+            if override:
+                return self._value_function(Identifier(override))
+            else:
+                return self._value_function(self.command)
+        else:
+            return self.command
+
+    def exception_statement(self, name: Optional[str] = None) -> Statement:
+        """
+        Get the exception statement for the testcase.
+
+        :param name: Optionally the name of an identifier containing the exception.
+        :return: The exception statement.
+        """
+        if name:
+            return self._exception_function(Identifier(name))
+        else:
+            return self._exception_function(NothingType())
 
 
 @dataclass
 class _ContextTestcaseArguments:
     """Arguments for a context_testcase testcase template."""
+    # If a context testcase exists.
     exists: bool
-    exception_function: FunctionCall
+    # Main arguments.
     arguments: List[str]
+    _exception_function: Callable[[Expression], Statement]
+
+    def exception_statement(self, name: Optional[str] = None) -> Statement:
+        """
+        Get the exception statement for the testcase.
+
+        :param name: Optionally the name of an identifier containing the exception.
+        :return: The exception statement.
+        """
+        if name:
+            return self._exception_function(Identifier(name))
+        else:
+            return self._exception_function(NothingType())
 
 
 @dataclass
 class _ContextArguments:
     """Arguments for a plan template for the contexts."""
+    # The name of the context.
     context_name: str
+    # The "before" code.
     before: str
+    # The after code.
     after: str
+    # The context testcase.
     context_testcase: _ContextTestcaseArguments
+    # A list of the other testcases.
     testcases: List[_TestcaseArguments]
+    # A set of the names of the language specific evaluators we will need.
     evaluator_names: Set[str]
+    # The name of the file for the return channel.
     value_file: str
+    # The name of the file for the exception channel.
     exception_file: str
+    # The name of the submission file.
     submission_name: str
-    value_file: str
-    exception_file: str
+    # The secret ID.
     secret_id: str
 
 
 @dataclass
 class _CustomEvaluatorArguments:
     evaluator: str
-    expected: Value
-    actual: Value
-    arguments: Value
+    function: FunctionCall
 
 
 @dataclass
@@ -71,21 +142,84 @@ def _prepare_expression(bundle: Bundle, expression: Expression) -> Expression:
     Prepare an expression for use in a template.
     """
     if isinstance(expression, FunctionCall):
-        submission_name = bundle.language_config.submission_name(bundle.plan)
+        submission_name = bundle.lang_config.submission_name(bundle.plan)
+        if expression.type == FunctionType.CONSTRUCTOR:
+            name = expression.name
+        else:
+            name = bundle.lang_config.conventionalize_function(expression.name)
         return FunctionCall(
             type=expression.type,
             arguments=expression.arguments,
-            name=bundle.language_config.conventionalise_function(expression.name),
+            name=name,
             namespace=expression.namespace or submission_name
         )
 
     return expression
 
 
+def _create_handling_function(
+        b: Bundle,
+        send_value: str,
+        send_evaluated: str,
+        output: Union[ExceptionOutput, ValueOutput]
+) -> Tuple[Callable[[Expression], Statement], Optional[str]]:
+    """
+    Create a function to handle the result of a return value or an exception.
+
+    There are two possibilities:
+    - There is a language specific evaluator. In that case, we wrap the value in
+      a function call to the evaluator, and then send off the result. An example of
+      the result:
+
+        send_evaluated(evaluate(value))
+
+    - There is no language specific evaluator. In that case, we just send off the
+      value directly. An example of the result:
+
+        send_value(value)
+
+    :param b: The configuration bundle.
+    :param send_evaluated: The name of the function that will handle sending the
+                           result of an evaluation.
+    :param send_value: The name of the function that will handle sending the value.
+    :param output: The evaluator.
+    :return: A tuple containing the call and the name of the evaluator if present.
+    """
+    lang_config = b.lang_config
+    if (hasattr(output, "evaluator")
+            and isinstance(output.evaluator, SpecificEvaluator)):
+        evaluator = output.evaluator.for_language(b.config.programming_language)
+        evaluator_name = lang_config.conventionalize_namespace(evaluator.file.stem)
+    else:
+        evaluator_name = None
+
+    def generator(expression: Expression) -> Statement:
+        if (hasattr(output, "evaluator")
+                and isinstance(output.evaluator, SpecificEvaluator)):
+            arguments = [FunctionCall(
+                type=FunctionType.NAMESPACE,
+                name=evaluator.name,
+                namespace=evaluator_name,
+                arguments=[expression]
+            )]
+            function_name = send_evaluated
+        else:
+            arguments = [expression]
+            function_name = send_value
+
+        return FunctionCall(
+            type=FunctionType.FUNCTION,
+            name=lang_config.conventionalize_function(function_name),
+            arguments=arguments
+        )
+
+    return generator, evaluator_name
+
+
 def _create_exception_function(
         bundle: Bundle,
         testcase: Union[Testcase, ContextTestcase]
-) -> Tuple[FunctionCall, Optional[str]]:
+) -> Tuple[Callable[[Expression], Statement], Optional[str]]:
     """
     Create a function call for handling exceptions. These functions assume there is
     a variable called "value", which must be reachable from where the function will
@@ -99,35 +233,12 @@ def _create_exception_function(
     # If we have a regular testcase, handle special evaluators.
 
     exception_channel = testcase.output.exception
-    language = bundle.config.programming_language
-    lang_config = bundle.language_config
-    arguments = [Identifier("value")]
-
-    # If exceptions are checked and we have a language specific evaluator, generate
-    # the code to call that evaluator.
-    if (not isinstance(exception_channel, (IgnoredChannel, EmptyChannel))
-            and isinstance(exception_channel.evaluator, SpecificEvaluator)):
-        evaluator = exception_channel.evaluator.for_language(language)
-
-        # We assume the class is already imported by the templates.
-        evaluator_name = lang_config.conventionalise_namespace(evaluator.stem)
-        return FunctionCall(
-            type=FunctionType.NAMESPACE,
-            name="evaluate",
-            namespace=evaluator_name,
-            arguments=arguments
-        ), evaluator_name
-
-    # In all other cases, we return the default function, which sends the
-    # exception to the judge for further processing.
-    return FunctionCall(
-        type=FunctionType.FUNCTION,
-        name=lang_config.conventionalise_function("send_exception"),
-        arguments=arguments
-    ), None
+    return _create_handling_function(
+        bundle, SEND_EXCEPTION, SEND_SPECIFIC_EXCEPTION, exception_channel
+    )
 
 
-def _base_prepare_testcase(
+def _prepare_testcase(
         bundle: Bundle,
         testcase: Testcase) -> Tuple[_TestcaseArguments, List[str]]:
     """
@@ -143,31 +254,20 @@ def _base_prepare_testcase(
     names = []
 
     result_channel = testcase.output.result
-    language = bundle.config.programming_language
-    lang_config = bundle.language_config
 
-    # Handle the return values.
-    # If return values are checked and we have a language specific evaluator,
-    # generate the code to call that evaluator.
-    if (not isinstance(result_channel, (IgnoredChannel, EmptyChannel))
-            and isinstance(result_channel.evaluator, SpecificEvaluator)):
-        evaluator = result_channel.evaluator.for_language(language)
-        # We can assume the namespace is already imported.
-        evaluator_name = lang_config.conventionalise_namespace(evaluator.stem)
-        call = FunctionCall(
-            type=FunctionType.NAMESPACE,
-            name=lang_config.conventionalise_function("evaluate_text"),
-            namespace=lang_config.conventionalise_namespace(evaluator_name),
-            arguments=[Identifier("value")]
-        )
-        value_function_call = lang_config.specific_evaluator_callback(call)
+    has_return = result_channel not in (EmptyChannel.NONE, IgnoredChannel.IGNORED)
+
+    # Create the function to handle the values.
+    value_function_call, evaluator_name = _create_handling_function(
+        bundle, SEND_VALUE, SEND_SPECIFIC_VALUE, result_channel
+    )
+    if evaluator_name:
         names.append(evaluator_name)
-    else:
-        value_function_call = FunctionCall(
-            type=FunctionType.FUNCTION,
-            name="send",
-            arguments=[Identifier("value")]
-        )
+
+    # A special case: if there isn't an actual value, don't call the function.
+    if not has_return:
+        value_function_call = None
+        assert evaluator_name is None
 
     (exception_function_call,
      exception_evaluator_name) = _create_exception_function(bundle, testcase)
@@ -175,18 +275,17 @@ def _base_prepare_testcase(
     if exception_evaluator_name:
         names.append(exception_evaluator_name)
 
-    if isinstance(testcase.input, ExpressionInput):
-        command = _prepare_expression(bundle, testcase.input.expression)
+    if isinstance(testcase.input, get_args(Expression)):
+        command = _prepare_expression(bundle, testcase.input)
     else:
-        assert isinstance(testcase.input, StatementInput)
-        prepared = _prepare_expression(bundle, testcase.input.statement.expression)
-        command = testcase.input.statement.replace_expression(prepared)
+        assert isinstance(testcase.input, get_args(Assignment))
+        prepared = _prepare_expression(bundle, testcase.input.expression)
+        command = testcase.input.replace_expression(prepared)
 
     return _TestcaseArguments(
         command=command,
-        has_return=result_channel != EmptyChannel.NONE,
-        value_function=value_function_call,
-        exception_function=exception_function_call
+        _value_function=value_function_call,
+        _exception_function=exception_function_call,
     ), names
 
 
@@ -204,7 +303,7 @@ def _prepare_testcases(
     result = []
     files = set()
     for i, testcase in enumerate(context.testcases):
-        args, new_names = _base_prepare_testcase(bundle, testcase)
+        args, new_names = _prepare_testcase(bundle, testcase)
         result.append(args)
         files.update(new_names)
     return result, files
@@ -228,12 +327,12 @@ def _prepare_context_testcase(
         return _ContextTestcaseArguments(
             exists=True,
             arguments=testcase.input.arguments,
-            exception_function=exception_function
+            _exception_function=exception_function
         ), name
     else:
         return _ContextTestcaseArguments(
             exists=False,
-            exception_function=exception_function,
+            _exception_function=exception_function,
             arguments=[]
         ), name
 
@@ -255,22 +354,24 @@ def get_readable_input(bundle: Bundle,
         text = case.description
     elif isinstance(case, Testcase):
         format_ = bundle.config.programming_language
-        if isinstance(case.input, ExpressionInput):
-            text = convert_expression(bundle, case.input.expression)
-        elif isinstance(case.input, StatementInput):
-            text = convert_statement(bundle, case.input.statement)
-        else:
-            raise AssertionError("Unknown testcase input type.")
+        text = convert_statement(bundle, case.input)
     elif isinstance(case, ContextTestcase):
-        args = f"Argumenten: {case.input.arguments}"
-        if isinstance(case.input.stdin, TextData):
-            stdin = case.input.stdin.get_data_as_string(bundle.config.resources)
+        if case.input.main_call:
+            arguments = " ".join(case.input.arguments)
+            args = f"./submission {arguments}"
+            if isinstance(case.input.stdin, TextData):
+                stdin = case.input.stdin.get_data_as_string(bundle.config.resources)
+            else:
+                stdin = ""
+            if not stdin:
+                text = args
+            else:
+                if case.input.arguments:
+                    text = f"{args}\n{stdin}"
+                else:
+                    text = stdin
         else:
-            stdin = ""
-        if case.input.arguments:
-            text = f"{args}\n{stdin}"
-        else:
-            text = stdin
+            text = ""
     else:
         raise AssertionError("Unknown testcase type.")
     return ExtendedMessage(description=text, format=format_)
@@ -290,20 +391,6 @@ def attempt_readable_input(bundle: Bundle, context: Context) -> ExtendedMessage:
     )
 
 
-def convert_expression(bundle: Bundle, expression: Expression) -> str:
-    """
-    Convert an expression to actual code for the given programming language.
-
-    :param bundle: The configuration bundle.
-    :param expression: The expression to convert.
-
-    :return: The code for the expression.
-    """
-    expression = _prepare_expression(bundle, expression)
-    template = find_template(bundle, "expression")
-    return template.render(expression=expression)
-
-
 def convert_statement(bundle: Bundle, statement: Statement) -> str:
     """
     Convert a statement to actual code for the given programming language.
@@ -321,16 +408,21 @@ def convert_statement(bundle: Bundle, statement: Statement) -> str:
 
     :return: The code the statement.
     """
+    template = bundle.lang_config.template_name(TemplateType.STATEMENT)
+    if isinstance(statement, get_args(Expression)):
+        statement = _prepare_expression(bundle, statement)
+        template = find_template(bundle, template)
+        return template.render(statement=statement)
+
+    assert isinstance(statement, get_args(Assignment))
     prepared_expression = _prepare_expression(bundle, statement.expression)
     statement = statement.replace_expression(prepared_expression)
-    template = find_template(bundle, "statement")
-    return template.render(statement=statement, full=True)
-
-
-# # TODO: deprecated.
-# def custom_evaluator(self, args: _CustomEvaluatorArguments,
-#                      destination: Path) -> str:
-#     return find_and_write_template(args, destination, "evaluator_executor")
+    template = find_template(bundle, template)
+    try:
+        return template.render(statement=statement, full=True)
+    except Exception as e:
+        _logger.error(exceptions.text_error_template().render())
+        raise e
 
 
 def generate_context(bundle: Bundle,
@@ -349,9 +441,12 @@ def generate_context(bundle: Bundle,
              of evaluator files that will also be needed.
     """
     language = bundle.config.programming_language
-    lang_config = bundle.language_config
-    before_code = context.before.get(language, "")
-    after_code = context.after.get(language, "")
+    lang_config = bundle.lang_config
+    resources = bundle.config.resources
+    before_code = context.before.get(language, TextData(data="")) \
+        .get_data_as_string(resources)
+    after_code = context.after.get(language, TextData(data="")) \
+        .get_data_as_string(resources)
 
     value_file_name = value_file(bundle, destination).name
     exception_file_name = exception_file(bundle, destination).name
@@ -376,13 +471,14 @@ def generate_context(bundle: Bundle,
         evaluator_names=evaluator_names
     )
 
-    evaluator_files = [f"{x}.{lang_config.file_extension()}"
+    evaluator_files = [f"{x}.{lang_config.extension_file()}"
                        for x in evaluator_names]
 
     context_destination = destination / lang_config.with_extension(context_name)
+    template = lang_config.template_name(TemplateType.CONTEXT)
 
     return find_and_write_template(
-        bundle, context_argument, context_destination, "context"
+        bundle, context_argument, context_destination, template
     ), evaluator_files
 
 
@@ -398,12 +494,15 @@ def generate_selector(bundle: Bundle,
 
     :return: The name of the generated file in the given destination.
     """
-    assert bundle.language_config.needs_selector()
+    assert bundle.lang_config.needs_selector()
+    selector_name = bundle.lang_config.selector_name()
+    destination /= bundle.lang_config.with_extension(selector_name)
+    selector = bundle.lang_config.template_name(TemplateType.SELECTOR)
     return find_and_write_template(
         bundle=bundle,
         template_args=_SelectorArguments(contexts=context_names),
         destination=destination,
-        template_name="selector"
+        template_name=selector
     )
 
 
@@ -430,19 +529,26 @@ def generate_custom_evaluator(bundle: Bundle,
 
     :return: The name of the generated file.
     """
-    evaluator_name = bundle.language_config.conventionalise_namespace(
-        evaluator.path.stem
+    evaluator_name = bundle.lang_config.conventionalize_namespace(
+        evaluator.function.file.stem
     )
     arguments = custom_evaluator_arguments(evaluator)
 
-    args = _CustomEvaluatorArguments(
-        evaluator=evaluator_name,
-        expected=expected_value,
-        actual=actual_value,
-        arguments=arguments
+    function = FunctionCall(
+        type=FunctionType.NAMESPACE,
+        namespace=evaluator_name,
+        name=evaluator.function.name,
+        arguments=[expected_value, actual_value, arguments]
     )
 
-    return find_and_write_template(bundle, args, destination, "evaluator_executor")
+    args = _CustomEvaluatorArguments(
+        evaluator=evaluator_name,
+        function=function
+    )
+
+    template = bundle.lang_config \
+        .template_name(TemplateType.EVALUATOR_EXECUTOR)
+    return find_and_write_template(bundle, args, destination, template)
 
 
 def value_file(bundle: Bundle, directory: Path):

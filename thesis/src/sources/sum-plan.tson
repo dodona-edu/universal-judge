@@ -1,0 +1,54 @@
+{
+  "tabs": [
+    {
+      "name": "Feedback",
+      "contexts": [
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": ["-1", "-23", "72", "84", "-38", "-61", "49", "45"],
+              "main_call": true
+            },
+            "output": {
+              "stdout": {
+                "type": "text",
+                "data": "127"
+              }
+            }
+          }
+        },
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": [],
+              "main_call": true
+            },
+            "output": {
+              "stdout": {
+                "type": "text",
+                "data": "0"
+              }
+            }
+          }
+        },
+        {
+          "context_testcase": {
+            "input": {
+              "arguments": ["spam", "eggs", "bacon"],
+              "main_call": true
+            },
+            "output": {
+              "stderr": {
+                "type": "text",
+                "data": "som: ongeldige argumenten"
+              },
+              "exit_code": {
+                "value": 1
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

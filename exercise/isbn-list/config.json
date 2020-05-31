@@ -1,0 +1,24 @@
+{
+  "description": {
+    "difficulty": 2.0,
+    "names": {
+      "en": "ISBN (list) [UNIVERSAL]",
+      "nl": "ISBN (lijst) [UNIVERSEEL]"
+    }
+  },
+  "access": "public",
+  "programming_language": "python",
+  "labels": [
+    "niko",
+    "test",
+    "hallo"
+  ],
+  "evaluation": {
+    "memory_limit": 500000000,
+    "plan_name": "plan.tson"
+  },
+  "internals": {
+    "token": "I8zFSMutAT3SneG4F4hPvW4Dc8f8vrQk29pHHSPP7M3sXSfnhTVgCU-Ufrmaz3HN",
+    "_info": "These fields are used for internal bookkeeping in Dodona, please do not change them."
+  }
+}

@@ -1,0 +1,28 @@
+\chapter*{Samenvatting}
+
+Veel programmeeroefeningen zijn niet inherent gebonden aan een programmeertaal en kunnen opgelost worden in meerdere programmeertalen.
+Het manueel vertalen van oefeningen van de ene programmeertaal naar de andere is een tijdrovende bezigheid.
+De focus van deze masterproef is de onderzoeksvraag "Is het mogelijk om oefeningen slechts één keer op een programmeertaalonafhankelijke manier te schrijven en toch oplossingen in verschillende programmeertalen te aanvaarden?".
+
+Als antwoord hierop introduceert de masterproef \tested{}, een prototype van een judge voor het Dodona-platform, die dezelfde oefening in meerdere programmeertalen kan beoordelen.
+Dodona is een online platform om programmeeroefeningen op te lossen en voorziet oplossingen in real time van feedback, zoals de juistheid.
+
+Een kernaspect van \tested{} is het testplan.
+Dit is een specificatie van hoe een oplossing voor een oefening beoordeeld moet worden.
+Bij bestaande judges in Dodona gebeurt dit op een programmeertaalafhankelijke manier: jUnit in Java, een eigen formaat in Python, enz.
+Het testplan bij \tested{} is programmeertaalonafhankelijk en wordt opgesteld in \acronym{JSON}.
+Op deze manier wordt één testplan opgesteld, waarna de oefening kan opgelost worden in alle programmeertalen die \tested{} ondersteunt.
+Momenteel zijn dat Python, Java, Haskell, C en JavaScript.
+
+Het programmeertaalonafhankelijk zijn van het testplan verhindert niet dat een testplan geschreven kan worden dat bepaalde functionaliteit gebruikt die niet aanwezig is in elke programmeertaal.
+Een voorbeeld hiervan is een testplan met klassen en objecten, dat enkel opgelost zal kunnen worden in objectgericht programmeertalen.
+
+Een testplan bestaat uiteindelijk uit een reeks testgevallen.
+Een testgeval is een invoer gekoppeld aan een uitvoer.
+Als invoer ondersteunt het testplan \texttt{stdin}, functieoproepen en commandoargumenten.
+De uitvoer, die beoordeeld wordt, bestaat uit \texttt{stdout}, \texttt{stderr}, exceptions, returnwaarden, aangemaakte bestanden en de exitcode van de uitvoering.
+
+Voor de vertaling van het testplan naar testcode in de programmeertaal van de oplossing gebruikt \tested{} een sjabloonsysteem genaamd Mako, gelijkaardig aan sjabloonsystemen bij webapplicaties (\acronym{ERB} bij Rails, Blade bij Laravel, enz.).
+Deze sjablonen worden opgesteld bij de configuratie van een programmeertaal in \tested{}, samen met een configuratieklasse, die details over de programmeertaal bevat, zoals hoe de programmeertaal gecompileerd moet worden (dit is optioneel) en hoe ze uitgevoerd moet worden.
+
+Doordat het testplan onafhankelijk is van de programmeertaal kunnen bij het configureren van een nieuwe programmeertaal bestaande oefeningen zonder wijziging gebruikt opgelost worden in de nieuwe programmeertaal.

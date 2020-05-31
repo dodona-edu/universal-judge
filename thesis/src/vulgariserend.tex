@@ -1,0 +1,44 @@
+\chapter*{Vulgariserende samenvatting}
+
+In onze maatschappij wordt technologie, en informatica in het bijzonder, alsmaar belangrijker.
+In steeds meer sectoren worden problemen opgelost met behulp van digitale apparatuur.
+Het is daarom belangrijk dat iedereen een basis digitale geletterdheid heeft.
+Het is niet voldoende om te kunnen werken met de programma's en technologie van vandaag.
+Wie weet of programma's zoals Word of PowerPoint binnen twintig jaar nog relevant zijn?
+De technologie verandert snel, waardoor het nodig is een begrip van de onderliggende systemen te hebben.
+
+Zo komen we aan bij het begrip \emph{computationeel denken}.
+Computationeel denken is een breed begrip, maar een goede definitie is het oplossen van problemen met behulp van de computer.
+Het gaat om het vertalen van het probleem uit de "echte wereld" naar de informaticawereld, zodat het probleem kan begrepen worden door een computer.
+Dit computationeel denken is recent ook opgenomen in de eindtermen van zowel het basisonderwijs als het secundair onderwijs.
+
+Een goede manier om computationeel denken aan te leren aan studenten is programmeren.
+Studenten ervaren programmeren echter vaak als moeilijk.
+Het spreekwoord "oefening baart kunst" indachtig, denken we dat het maken van veel oefeningen een goede manier is om programmeren onder de knie te krijgen.
+Het aanbieden van veel oefeningen leidt tot uitdagingen voor de lesgevers:
+
+\begin{enumerate}
+    \item Lesgevers moeten geschikte oefeningen opstellen, aangepast aan het niveau van de studenten.
+    Oefeningen moeten rekening houden met welke concepten studenten al kennen, hoeveel werk het oplossen is, enzovoort.
+    \item De oplossingen voor deze oefeningen moeten voorzien worden van kwalitatieve feedback.
+    Enkel en alleen oefeningen oplossen is niet voldoende: goede feedback laat toe dat studenten hun vaardigheden verbeteren, doordat ze een idee krijgen wat beter kon of waar ze fout zaten.
+\end{enumerate}
+
+Voor de tweede uitdaging wordt vaak gebruikt gemaakt van een platform voor programmeeroefeningen, dat een eerste vorm van automatische feedback geeft, zoals de correctheid van de ingediende oplossing voor een oefening.
+Aan de onderzoeksgroep Computationele Biologie van de UGent is hiervoor het Dodona-platform ontwikkeld.
+
+Een aan de eerste uitdaging gerelateerd aspect is dat er veel programmeertalen zijn en elk van die programmeertalen oefeningen nodig heeft.
+Momenteel gebeurt het vertalen van een oefening van één programmeertaal naar de andere manueel.
+Dit neemt ook veel tijd in beslag, terwijl veel oefeningen niet programmeertaalafhankelijk zijn.
+Veel programmeeroefeningen zijn eenvoudig en komen neer op een lijst sorteren, woorden zoeken in een bestand, iets berekenen op basis van gegevens enzovoort.
+Deze taken kunnen in elke programmeertaal.
+
+In deze masterproef zoeken we naar een oplossing voor dit laatste probleem: is het mogelijk om een oefening slechts één keer op een programmeertaalonafhankelijke manier te schrijven en toch oplossingen in verschillende programmeertalen te beoordelen?
+
+Als onderdeel van het antwoord op deze vraag hebben we een prototype van een nieuwe judge voor het Dodona-platform ontwikkeld (een judge in Dodona is het onderdeel dat verantwoordelijk is voor het beoordelen van een ingediende oplossing): \tested{}.
+In \tested{} moet de lesgever voor een oefening een programmeertaalonafhankelijk testplan opstellen.
+Dit testplan bevat de specificatie van hoe een ingediende oplossing beoordeeld moet worden.
+Daarna vertaalt \tested{} dit testplan naar de verschillende programmeertalen, waardoor één oefening opgelost kan worden in de programmeertalen die \tested{} momenteel ondersteunt: Python, Java, JavaScript, Haskell en C.\@
+
+Daarnaast hebben we ook aandacht besteed aan het zo eenvoudig mogelijk houden om nieuwe programmeertalen aan \tested{} toe te voegen.
+Als we een nieuwe programmeertaal toevoegen aan \tested{}, zullen bestaande oefeningen ook meteen opgelost kunnen worden in deze nieuwe programmeertaal, zonder dat er iets moet veranderen aan het testplan van deze oefeningen.

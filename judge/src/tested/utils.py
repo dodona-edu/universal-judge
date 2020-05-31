@@ -8,12 +8,12 @@ import typing
 from os import PathLike
 from pathlib import Path
 from typing import (IO, Union, Generator, TypeVar, Generic, Optional, Mapping,
-                    Iterable)
+                    Iterable, List, Callable)
 
 import itertools
 import sys
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 
 def smart_close(file: IO):
@@ -32,11 +32,11 @@ def smart_close(file: IO):
 def protected_directory(directory: Union[PathLike, Path]
                         ) -> Generator[Path, None, None]:
     try:
-        logger.info("Making %s read-only", directory)
+        _logger.info("Making %s read-only", directory)
         os.chmod(directory, stat.S_IREAD)  # Disable write access
         yield directory
     finally:
-        logger.info("Giving write-access to %s", directory)
+        _logger.info("Giving write-access to %s", directory)
         os.chmod(directory, stat.S_IREAD | stat.S_IWRITE)
 
 
@@ -92,25 +92,28 @@ def consume_shebang(submission: Path) -> Optional[str]:
     :return: The programming language if found.
     """
     language = None
-    # noinspection PyTypeChecker
-    with open(submission, "r+") as file:
-        lines = file.readlines()
-        file.seek(0)
+    try:
+        # noinspection PyTypeChecker
+        with open(submission, "r+") as file:
+            lines = file.readlines()
+            file.seek(0)
 
-        # Steps to find
-        has_potential = True
-        for line in lines:
-            stripped = line.strip()
-            if has_potential and stripped.startswith("#!tested"):
-                try:
-                    _, language = stripped.split(" ")
-                except ValueError:
-                    logger.error(f"Invalid shebang on line {stripped}")
-            else:
-                file.write(line)
-            if has_potential and stripped:
-                has_potential = False
-        file.truncate()
+            # Steps to find
+            has_potential = True
+            for line in lines:
+                stripped = line.strip()
+                if has_potential and stripped.startswith("#!tested"):
+                    try:
+                        _, language = stripped.split(" ")
+                    except ValueError:
+                        _logger.error(f"Invalid shebang on line {stripped}")
+                else:
+                    file.write(line)
+                if has_potential and stripped:
+                    has_potential = False
+            file.truncate()
+    except FileNotFoundError:
+        pass
 
     return language
 
@@ -179,3 +182,111 @@ def flatten(nested: Iterable[Iterable[T]]) -> Iterable[T]:
     [0, 1, 2]
     """
     return filter(None, itertools.chain.from_iterable(nested))
+
+
+def camelize(what: str) -> str:
+    """
+    Convert a string to camelCase from snake_case. The algorithm is simple: each
+    underscore is removed and the letter behind it will be capitalized. The first
+    letter will be downcased.
+
+    >>> camelize("__foo_bar__")
+    'fooBar'
+    >>> camelize("this_is_snake_case")
+    'thisIsSnakeCase'
+    >>> camelize("_Weird_cases_aRe_mostly_KEPT")
+    'weirdCasesAReMostlyKEPT'
+    >>> camelize("numbers_1_2_are_not_special")
+    'numbers12AreNotSpecial'
+    >>> camelize("________________")
+    ''
+
+    :param what: The string to convert.
+    :return: The converted string.
+    """
+    result = pascalize(what)
+    return (result[0].lower() + result[1:]) if result else ""
+
+
+def pascalize(what: str) -> str:
+    """
+    Convert a string to PascalCase from snake_case.
+
+    >>> pascalize("__foo_bar__")
+    'FooBar'
+    >>> pascalize("this_is_snake_case")
+    'ThisIsSnakeCase'
+    >>> pascalize("_Weird_cases_aRe_mostly_KEPT")
+    'WeirdCasesAReMostlyKEPT'
+    >>> pascalize("numbers_1_2_are_not_special")
+    'Numbers12AreNotSpecial'
+    >>> pascalize("________________")
+    ''
+
+    :param what: The string to convert.
+    :return: The converted string.
+    """
+    result = ""
+    i = 0
+    while i < len(what):
+        this = what[i]
+        if this == "_":
+            i += 1
+            if i < len(what):
+                while i < len(what) - 1 and what[i] == "_":
+                    i += 1
+                r = what[i]
+                if r != "_":
+                    result += r.upper()
+        else:
+            result += this
+        i += 1
+    return (result[0].upper() + result[1:]) if result else ""
+
+
+def snake_case(what: str) -> str:
+    """
+    Emits a warning if the string is not in snake_case. The check is simple: it
+    just checks for capitals.
+
+    :param what: The name.
+    :return: The same name.
+    """
+    if any(x.isupper() for x in what):
+        _logger.warning(
+            f"A name '{what}' is not in snake_case. This might cause problems."
+        )
+    return what
+
+
+def safe_del(l: List[T], index: int, f: Callable[[T], bool]) -> bool:
+    """
+    Delete an item from a list at a position if the filter is True. If the index
+    is out of ranger or the filter is False, the function will return False, else
+    True.
+
+    :param l: The list to delete from.
+    :param index: The index to delete at.
+    :param f: The filter for the element.
+
+    :return: True or False
+    """
+    try:
+        v = l[index]
+        if f(v):
+            del l[index]
+            return True
+        else:
+            return False
+    except IndexError:
+        return False
+
+
+def safe_get(l: List[T], index: int) -> Optional[T]:
+    """
+    Get the element at the given position or None if the index is out of bounds.
+    """
+    try:
+        return l[index]
+    except IndexError:
+        return None

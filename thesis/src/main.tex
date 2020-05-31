@@ -9,7 +9,9 @@
     parskip=half,
     titleUppercase=false,
     titleUnderline=false,
-    uppercase=false
+    uppercase=false,
+    captions=tableheading,
+    bibliography=totoc
 ]{ugent2016-report}
 
 % Packages
@@ -18,7 +20,7 @@
 \usepackage{unicode-math}
 \usepackage{lettrine}
 \usepackage{microtype}
-\usepackage[backend=biber,dateabbrev=false,citestyle=numeric,style=numeric]{biblatex}
+\usepackage[backend=biber,style=ieee]{biblatex}
 \usepackage{imakeidx}
 \usepackage{markdown}
 \usepackage[newfloat]{minted}
@@ -29,8 +31,11 @@
 \usepackage{amsfonts}
 \usepackage{standalone}
 \usepackage{newunicodechar}
+\usepackage{placeins}
 \usepackage{multirow}
 \usepackage{threeparttable}
+\usepackage[labelsep=quad]{caption}
+\usepackage{pdfpages}
 %\usepackage{showframe}
 \usepackage{tikz}
 \usetikzlibrary{shapes,arrows,positioning,backgrounds,calc,intersections}
@@ -49,6 +54,10 @@
 \newunicodechar{ë}{\@trema e}
 \makeatother
 
+\newfontfamily{\fallbackfont}{DejaVu Sans Mono}[Scale=1.05]
+\DeclareTextFontCommand{\textfallback}{\fallbackfont}
+\newunicodechar{⏎}{\textfallback{⏎}}
+
 \hypersetup{
     linkcolor  = ugent-blue,
     citecolor  = ugent-blue,
@@ -57,27 +66,25 @@
 }
 
 \markdownSetup{
-    renderers = {
-        headingOne = {\chapter*{#1}},
-        headingTwo = {\section*{#1}},
-        headingThree = {\subsection*{#1}},
-    },
     headerAttributes = true,
     hybrid = true,
-    fencedCode = true
+    fencedCode = true,
+    tightLists = false,
+    definitionLists = true
 }
 
 \definecolor{bg}{rgb}{0.98,0.98,0.98}
 \setminted{
     bgcolor=bg,
-    linenos
+    linenos,
+    breaklines
 }
 \setmintedinline{bgcolor={}}
 
 % Gebruik tabelcijfers in tabellen
 \AtBeginEnvironment{tabular}{\addfontfeature{Numbers={Lining,Monospaced}}}
 
-\newcommand*{\version}[1]{{\addfontfeature{Numbers={Lining,Monospaced}}#1}}
+
 
 \title{TESTed: one judge to rule them all}
 \subtitle{Een universele judge voor het beoordelen van software in een educative context}
@@ -91,7 +98,7 @@ Promotoren: prof.\ dr.\ Peter Dawyndt, dr.\ ir.\ Bart Mesuere \\%
 Begeleiding: Charlotte Van Petegem\\%
 \\%
 {\small Masterproef ingediend tot het behalen van de academische graad van\\%
-Master of Science in de informatica%
+Master of Science in de Informatica%
 }%
 }
 
@@ -115,9 +122,10 @@ Master of Science in de informatica%
 \newcommand*{\termen}[1]{\foreignlanguage{british}{\textit{#1}}\index{#1}}
 \newcommand*{\english}[1]{\foreignlanguage{british}{\textit{#1}}}
 \newcommand*{\latin}[1]{\foreignlanguage{latin}{\textit{#1}}}
-
 \newcommand*{\acronym}[1]{{\addfontfeature{Letters=UppercaseSmallCaps}#1}}
-\newcommand*{\tested}{TESTed}
+\newcommand*{\version}[1]{{\addfontfeature{Numbers={Lining,Monospaced}}#1}}
+\newcommand*{\unit}[1]{{\addfontfeature{Numbers={Lining}}#1}}
+\newcommand*{\tested}{\acronym{TESTed}}
 
 % Enable for index generation
 %\makeindex
@@ -126,6 +134,9 @@ Master of Science in de informatica%
 \babelhyphenation[dutch]{be-oor-de-lings-om-ge-ving}
 \babelhyphenation[dutch]{uit-voe-rings-om-ge-ving}
 \babelhyphenation[dutch]{Python}
+
+% We don't want a big TOC, but do want it in the bookmarks
+\hypersetup{bookmarksdepth=3}
 
 % Document
 \begin{document}
@@ -139,16 +150,38 @@ Master of Science in de informatica%
     \setmonofont[Scale=MatchLowercase,Contextuals={Alternate}]{Jetbrains Mono}
     \setmathfont{Libertinus Math}
 
+    \pagenumbering{roman}
+    
+    \include{samenvatting}
+
+    \includepdf[pages=-]{extended.pdf}
+    
+    \include{vulgariserend}
+
+    \include{dankwoord}
+    \include{gebruik}
+
     \addtocounter{tocdepth}{-1}
     \tableofcontents
 
-    \include{dankwoord}
+    \newpage
+    
+    \pagenumbering{arabic}
+
     \include{dodona}
     \include{universele-judge}
-    \include{nieuwe-taal}
     \include{nieuwe-oefening}
+    \include{nieuwe-taal}
     \include{toekomst}
 
+    % Allow a bit more space
+    \emergencystretch=1em
+    
     \printbibliography
-
+    
+    \appendix
+    
+    \include{mapstructuur}
+    \include{appendix-echo}
+    \include{appendix-echo-function}
 \end{document}

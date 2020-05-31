@@ -38,11 +38,11 @@ class AdvancedNumericTypes(_AdvancedDataType):
     """
     INT_8 = "int8", BasicNumericTypes.INTEGER
     """Signed integer, 8 bits minimum."""
-    U_INT_8 = "int8", BasicNumericTypes.INTEGER
+    U_INT_8 = "uint8", BasicNumericTypes.INTEGER
     """Unsigned integer, 8 bits minimum."""
     INT_16 = "int16", BasicNumericTypes.INTEGER
     """Unsigned integer, 16 bits minimum."""
-    U_INT_16 = "int16", BasicNumericTypes.INTEGER
+    U_INT_16 = "uint16", BasicNumericTypes.INTEGER
     """Unsigned integer, 16 bits minimum."""
     INT_32 = "int32", BasicNumericTypes.INTEGER
     """Signed integer, 32 bits minimum."""

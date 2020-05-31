@@ -1,19 +1,14 @@
-## This generates a function expression in Java.
-<%! from testplan import FunctionType %>
-<%page args="function" />
-% if function.type != FunctionType.IDENTITY:
-    % if function.type == FunctionType.NAMESPACE or (function.type == FunctionType.FUNCTION and function.namespace):
-        ${function.namespace}.\
-    % endif
-    ${function.name}\
+## This generates a function expression in C.
+<%! from tested.testplan import FunctionType %>\
+<%page args="function" />\
+${function.name}\
+% if function.type != FunctionType.PROPERTY:
     (\
-% endif
-% for argument in function.arguments:
-    <%include file="value.mako" args="value=argument"/>
-    % if not loop.last:
-        , \
-    % endif
-% endfor
-% if function.type != FunctionType.IDENTITY:
+    % for argument in function.arguments:
+        <%include file="statement.mako" args="statement=argument"/>\
+        % if not loop.last:
+            , \
+        % endif
+    % endfor
     )\
 % endif

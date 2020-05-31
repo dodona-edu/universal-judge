@@ -1,18 +1,13 @@
 {
-  "output": {
-    "file": {
-      "expected_path": "./bestand-uit-de-oefening.txt",
-      "actual_path": "./waar-het-verwachte-bestand-komt.txt",
-      "evaluator": {
-        "type": "builtin",
-        "name": "file",
-        "options": {
-          "mode": "values",
-          "ignoreWhitespace": true,
-          "tryFloatingPoint": true,
-          "applyRounding": true,
-          "roundTo": 2
-        }
+  "file": {
+    "expected_path": "./bestand-uit-de-oefening.txt",
+    "actual_path": "./waar-het-verwachte-bestand-komt.txt",
+    "evaluator": {
+      "type": "builtin",
+      "name": "file",
+      "options": {
+        "mode": "line",
+        "ignoreWhitespace": true, "tryFloatingPoint": true, "applyRounding": true, "roundTo": 2
       }
     }
   }

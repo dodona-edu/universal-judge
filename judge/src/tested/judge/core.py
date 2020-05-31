@@ -1,8 +1,11 @@
+import concurrent
 import logging
 import shutil
-import time
+from concurrent.futures.thread import ThreadPoolExecutor
 from pathlib import Path
 from typing import Tuple, List
+
+import time
 
 from .collector import OutputManager
 from .compilation import run_compilation, process_compile_results
@@ -64,7 +67,7 @@ def judge(bundle: Bundle):
         files.append(selector)
 
     if mode == ExecutionMode.PRECOMPILATION:
-        assert not bundle.language_config.needs_selector() or selector is not None
+        assert not bundle.lang_config.needs_selector() or selector is not None
         # Compile all code in one go.
         _logger.info("Running precompilation step...")
         remaining = max_time - (time.perf_counter() - start)
@@ -72,102 +75,196 @@ def judge(bundle: Bundle):
                                                     remaining)
 
         messages, status, annotations = process_compile_results(
-            bundle.language_config,
+            bundle.lang_config,
             result
         )
 
-        # Handle timout if necessary.
-        if result.timeout:
-            # Show in separate tab.
-            if messages:
-                collector.add(StartTab("Compilatie"))
-            for message in messages:
-                collector.add(AppendMessage(message=message))
-            for annotation in annotations:
-                collector.add(annotation)
-            if messages:
-                collector.add(CloseTab())
-            collector.terminate(Status.TIME_LIMIT_EXCEEDED)
-            return
-
-        assert not result.timeout
-        assert not result.memory
-
-        precompilation_result = (messages, status)
-
-        # If we have fallback, discard all results.
-        if status != Status.CORRECT and bundle.config.options.allow_fallback:
-            mode = ExecutionMode.INDIVIDUAL
-            _logger.info("Compilation error, falling back to individual mode")
-            # Remove the selector file from the dependencies.
-            # Otherwise, it will keep being compiled, which we want to avoid.
-            if bundle.language_config.needs_selector():
-                files.remove(selector)
+        # If there is no result, there was no compilation.
+        if not result:
+            precompilation_result = None
         else:
-            files = compilation_files
-            # Report messages.
-            if messages:
-                collector.add_tab(StartTab("Compilatie"), -1)
-            for message in messages:
-                collector.add(AppendMessage(message=message))
-            for annotation in annotations:
-                collector.add(annotation)
-            if messages:
-                collector.add_tab(CloseTab(), -1)
+            # Handle timout if necessary.
+            if result.timeout:
+                # Show in separate tab.
+                index = len(bundle.plan.tabs) + 1
+                if messages:
+                    collector.prepare_tab(StartTab("Compilatie"), index)
+                for message in messages:
+                    collector.add(AppendMessage(message=message))
+                for annotation in annotations:
+                    collector.add(annotation)
+                if messages:
+                    collector.prepare_tab(CloseTab(), index)
+                collector.terminate(Status.TIME_LIMIT_EXCEEDED)
+                return
+            if result.memory:
+                index = len(bundle.plan.tabs) + 1
+                # Show in separate tab.
+                if messages:
+                    collector.prepare_tab(StartTab("Compilatie"), index)
+                for message in messages:
+                    collector.add(AppendMessage(message=message))
+                for annotation in annotations:
+                    collector.add(annotation)
+                if messages:
+                    collector.prepare_tab(CloseTab(), index)
+                collector.terminate(Status.MEMORY_LIMIT_EXCEEDED)
+                return
 
-            if status != Status.CORRECT:
-                collector.terminate(StatusMessage(
-                    enum=status,
-                    human="Ongeldige broncode"
-                ))
-                _logger.info("Compilation error without fallback")
-                return  # Compilation error occurred, useless to continue.
+            assert not result.timeout
+            assert not result.memory
+
+            precompilation_result = (messages, status)
+
+            # If we have fallback, discard all results.
+            if status != Status.CORRECT and bundle.config.options.allow_fallback:
+                mode = ExecutionMode.INDIVIDUAL
+                _logger.info("Compilation error, falling back to individual mode")
+                # Remove the selector file from the dependencies.
+                # Otherwise, it will keep being compiled, which we want to avoid.
+                if bundle.lang_config.needs_selector():
+                    files.remove(selector)
+            else:
+                files = compilation_files
+                # Report messages.
+                if messages:
+                    collector.add_tab(StartTab("Compilatie"), -1)
+                for message in messages:
+                    collector.add(AppendMessage(message=message))
+                for annotation in annotations:
+                    collector.add(annotation)
+                if messages:
+                    collector.add_tab(CloseTab(), -1)
+
+                if status != Status.CORRECT:
+                    collector.terminate(StatusMessage(
+                        enum=status,
+                        human="Ongeldige broncode"
+                    ))
+                    _logger.info("Compilation error without fallback")
+                    return  # Compilation error occurred, useless to continue.
     else:
         precompilation_result = None
 
     _logger.info("Starting judgement...")
+    parallel = bundle.config.options.parallel
+    # How much of the output limit we still have.
+    output_limit = bundle.config.output_limit * 0.8
 
+    # Create a list of contexts we want to execute.
     for tab_index, tab in enumerate(bundle.plan.tabs):
         collector.add_tab(StartTab(title=tab.name), tab_index)
+        executions = []
         for context_index, context in enumerate(tab.contexts):
-
             execution = ContextExecution(
                 context=context,
-                context_name=bundle.language_config.context_name(
+                context_name=bundle.lang_config.context_name(
                     tab_number=tab_index,
                     context_number=context_index
                 ),
+                context_index=context_index,
                 mode=mode,
                 common_directory=common_dir,
                 files=files,
                 precompilation_result=precompilation_result,
                 collector=collector
             )
+            executions.append(execution)
 
-            remaining = max_time - (time.perf_counter() - start)
-            execution_result, m, s, p = execute_context(bundle, execution,
-                                                        remaining)
+        remaining = max_time - (time.perf_counter() - start)
+        if parallel:
+            result = _parallel_execution(bundle, executions, remaining)
+        else:
+            result = _single_execution(bundle, executions, remaining)
 
-            collector.add_context(StartContext(description=context.description),
-                                  context_index)
-
-            remaining = max_time - (time.perf_counter() - start)
-            continue_ = evaluate_results(
-                    bundle,
-                    context=context,
-                    exec_results=execution_result,
-                    compiler_results=(m, s),
-                    context_dir=p,
-                    collector=collector,
-                    max_time=remaining)
-            collector.add_context(CloseContext(), context_index)
-            if continue_ == Status.TIME_LIMIT_EXCEEDED:
-                assert not collector.collected
-                collector.terminate(continue_)
-                return
+        if result in (Status.TIME_LIMIT_EXCEEDED, Status.MEMORY_LIMIT_EXCEEDED,
+                      Status.OUTPUT_LIMIT_EXCEEDED):
+            assert not collector.collected
+            collector.terminate(result)
+            return
         collector.add_tab(CloseTab(), tab_index)
     collector.add(CloseJudgment())
     collector.clean_finish()
+
+
+def _single_execution(bundle: Bundle,
+                      items: List[ContextExecution],
+                      max_time: float) -> Optional[Status]:
+    """
+    Process items in a non-threaded way.
+
+    :param bundle: The configuration bundle.
+    :param items: The contexts to execute.
+    :param max_time: The max amount of time.
+    """
+    start = time.perf_counter()
+    for execution in items:
+        execution.collector.add_context(
+            StartContext(description=execution.context.description),
+            execution.context_index
+        )
+
+        remaining = max_time - (time.perf_counter() - start)
+        execution_result, m, s, p = execute_context(bundle, execution, remaining)
+        continue_ = evaluate_results(bundle, context=execution.context,
+                                     exec_results=execution_result,
+                                     compiler_results=(m, s), context_dir=p,
+                                     collector=execution.collector)
+        execution.collector.add_context(CloseContext(), execution.context_index)
+        if execution.collector.is_full():
+            return Status.OUTPUT_LIMIT_EXCEEDED
+        if continue_ in (Status.TIME_LIMIT_EXCEEDED, Status.MEMORY_LIMIT_EXCEEDED):
+            return continue_
+
+
+def _parallel_execution(bundle: Bundle,
+                        items: List[ContextExecution],
+                        max_time: float) -> Optional[Status]:
+    """
+    Execute a list of contexts in parallel.
+
+    :param bundle: The configuration bundle.
+    :param items: The contexts to execute.
+    :param max_time: The max amount of time.
+    """
+    start = time.perf_counter()  # Accessed from threads.
+
+    def threaded_execution(execution: ContextExecution):
+        """The function executed in parallel."""
+        remainder = max_time - (time.perf_counter() - start)
+        execution_result, m, s, p = execute_context(bundle, execution, remainder)
+
+        def evaluation_function(eval_remainder):
+            execution.collector.add_context(
+                StartContext(description=execution.context.description),
+                execution.context_index
+            )
+            continue_ = evaluate_results(bundle, context=execution.context,
+                                         exec_results=execution_result,
+                                         compiler_results=(m, s), context_dir=p,
+                                         collector=execution.collector)
+            execution.collector.add_context(CloseContext(), execution.context_index)
+            if execution.collector.is_full():
+                return Status.OUTPUT_LIMIT_EXCEEDED
+            return continue_
+
+        return evaluation_function
+
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        remaining = max_time - (time.perf_counter() - start)
+        results = executor.map(threaded_execution, items, timeout=remaining)
+        try:
+            for eval_function in list(results):
+                remaining = max_time - (time.perf_counter() - start)
+                if (status := eval_function(remaining)) in (
+                        Status.TIME_LIMIT_EXCEEDED, Status.MEMORY_LIMIT_EXCEEDED,
+                        Status.OUTPUT_LIMIT_EXCEEDED):
+                    # Ensure finally is called NOW and cancels remaining tasks.
+                    del results
+                    return status
+        except concurrent.futures.TimeoutError:
+            _logger.warning("Futures did not end soon enough.", exc_info=True)
+            return Status.TIME_LIMIT_EXCEEDED
 
 
 def _generate_files(bundle: Bundle,
@@ -177,7 +274,7 @@ def _generate_files(bundle: Bundle,
     Generate all necessary files, using the templates. This creates a common
     directory, copies all dependencies to that folder and runs the generation.
     """
-    dependencies = bundle.language_config.initial_dependencies()
+    dependencies = bundle.lang_config.initial_dependencies()
     common_dir = Path(bundle.config.workdir, f"common")
     common_dir.mkdir()
 
@@ -187,25 +284,25 @@ def _generate_files(bundle: Bundle,
     dependency_paths = path_to_templates(bundle)
     copy_from_paths_to_path(dependency_paths, dependencies, common_dir)
 
-    submission_name = bundle.language_config.submission_name(bundle.plan)
+    submission_name = bundle.lang_config.submission_name(bundle.plan)
 
     # Copy the submission file.
     submission_file = f"{submission_name}" \
-                      f".{bundle.language_config.file_extension()}"
+                      f".{bundle.lang_config.extension_file()}"
     solution_path = common_dir / submission_file
     # noinspection PyTypeChecker
     shutil.copy2(bundle.config.source, solution_path)
     dependencies.append(submission_file)
 
     # Allow modifications of the submission file.
-    bundle.language_config.solution_callback(solution_path, bundle)
+    bundle.lang_config.solution(solution_path, bundle)
 
     # The names of the contexts in the testplan.
     context_names = []
     # Generate the files for each context.
     for tab_i, tab in enumerate(bundle.plan.tabs):
         for context_i, context in enumerate(tab.contexts):
-            context_name = bundle.language_config.context_name(tab_i, context_i)
+            context_name = bundle.lang_config.context_name(tab_i, context_i)
             _logger.debug(f"Generating file for context {context_name}")
             generated, evaluators = generate_context(
                 bundle=bundle,
@@ -224,7 +321,7 @@ def _generate_files(bundle: Bundle,
             context_names.append(context_name)
 
     if mode == ExecutionMode.PRECOMPILATION \
-            and bundle.language_config.needs_selector():
+            and bundle.lang_config.needs_selector():
         _logger.debug("Generating selector for PRECOMPILATION mode.")
         generated = generate_selector(bundle, common_dir, context_names)
     else:

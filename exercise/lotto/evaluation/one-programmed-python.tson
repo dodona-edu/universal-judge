@@ -1,0 +1,54 @@
+{
+  "tabs": [
+    {
+      "name": "Feedback",
+      "contexts": [
+        {
+          "testcases": [
+            {
+              "output": {
+                "result": {
+                  "value": {
+                    "type": "text",
+                    "data": "7 - 37 - 48 - 54 - 70 - 78 - 81 - 90 - 102 - 103 - 113 - 119 - 120 - 137 - 140 - 154 - 157 - 159"
+                  },
+                  "evaluator": {
+                    "type": "programmed",
+                    "language": "python",
+                    "function": {
+                      "file": "./evaluator.py"
+                    },
+                    "arguments": [
+                      {
+                        "type": "integer",
+                        "data": 18
+                      },
+                      {
+                        "type": "integer",
+                        "data": 172
+                      }
+                    ]
+                  }
+                }
+              },
+              "input": {
+                "type": "function",
+                "name": "loterij",
+                "arguments": [
+                  {
+                    "type": "integer",
+                    "data": 18
+                  },
+                  {
+                    "type": "integer",
+                    "data": 172
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -18,19 +18,19 @@ def read_config() -> DodonaConfig:
     """Read the configuration from stdout"""
     return DodonaConfig(**{
         "memory_limit":         536870912,
-        "time_limit":           5,
-        "programming_language": 'python',
+        "time_limit":           60,
+        "programming_language": 'javascript',
         "natural_language":     'nl',
-        "resources":            Path('../exercise/division/evaluation'),
-        "source":               Path('../exercise/division/solution/solution.py'),
-        "judge":                Path('../judge/src/'),
-        "workdir":              Path('./workdir'),
-        "plan_name":            "plan.json",
-        "test":                 "Gallo",
+        "resources":            Path('../../exercise/echo/evaluation'),
+        "source":               Path('../../exercise/echo/solution/correct.js'),
+        "judge":                Path('.'),
+        "workdir":              Path('../workdir'),
+        "plan_name":            "one.tson",
         "options":              {
-            "allow_fallback": False,
-            "linter":         {
-                "python": False
+            "parallel": True,
+            "mode":     "batch",
+            "linter": {
+                "python": True
             }
         }
     })
@@ -41,11 +41,18 @@ if __name__ == '__main__':
 
     # Enable logging
     log = logging.getLogger()
-    log.setLevel(logging.CRITICAL)
+    log.setLevel(logging.DEBUG)
     ch = logging.StreamHandler(stream=sys.stdout)
     formatter = logging.Formatter('%(name)s:%(levelname)s:%(message)s')
     ch.setFormatter(formatter)
     log.addHandler(ch)
+
+    # Some modules are very verbose, hide those by default.
+    logger = logging.getLogger("tested.judge.collector")
+    logger.setLevel(logging.INFO)
+
+    # Create workdir if needed.
+    config.workdir.mkdir(exist_ok=True)
 
     # Delete content in work dir
     # noinspection PyTypeChecker

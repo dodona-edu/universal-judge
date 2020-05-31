@@ -1,0 +1,12 @@
+oefening                     # Map van de oefening in Dodona
+├── config.json              # Configuratiebestand van Dodona 
+├── description
+│   ├── description.en.html  # Beschrijving in het Engels
+│   ├── description.nl.html  # Beschrijving in het Nederlands
+├── evaluation               # Evaluatiecode
+│   └── plan.json            # Het testplan voor TESTed
+├── preparation
+│   └── generator.py         # Code die het testplan genereert
+└── solution                 # Voorbeeldoplossingen voor de oefeningen
+    ├── solution.java    
+    └── solution.py

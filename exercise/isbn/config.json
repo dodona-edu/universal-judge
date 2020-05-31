@@ -2,19 +2,16 @@
   "description": {
     "difficulty": 2.0,
     "names": {
-      "en": "ISBN",
-      "nl": "ISBN"
+      "en": "ISBN (full) [UNIVERSAL]",
+      "nl": "ISBN (volledig) [UNIVERSEEL]"
     }
   },
   "access": "public",
   "programming_language": "python",
-  "labels": [
-    "test", "niko", "hallo"
-  ],
   "evaluation": {
     "memory_limit": 500000000,
-    "time_limit": 20,
-    "plan_name": "plan.json",
+    "time_limit": 40,
+    "plan_name": "full.tson",
     "options": {
       "linter": {
         "python": true
@@ -25,5 +22,8 @@
   "internals": {
     "token": "FTuj8BW6UXbnxA8pcVWxSaP5Tr_Y54FgtBeJEKEwTEvDFVGvY8Y_th9ZJzfqRJJe",
     "_info": "These fields are used for internal bookkeeping in Dodona, please do not change them."
-  }
+  },
+  "labels": [
+
+  ]
 }

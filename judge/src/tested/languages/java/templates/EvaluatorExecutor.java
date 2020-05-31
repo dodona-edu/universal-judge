@@ -1,16 +1,14 @@
 ## Responsible for generating a function expression to a custom evaluator.
-<%page args="evaluator,expected,actual,arguments" />
+<%page args="evaluator,function" />\
 import java.util.*;
+import java.io.*;
 
 public class EvaluatorExecutor {
 
     public static void main(String[] args) throws Exception {
-        try (AbstractCustomEvaluator eval = new ${evaluator}()) {
-            eval.evaluate(
-                <%include file="value.mako" args="value=expected"/>,
-                <%include file="value.mako" args="value=actual"/>,
-                <%include file="value.mako" args="value=arguments"/>
-            );
-        }
+        var result = <%include file="function.mako" args="function=function" />;
+        PrintWriter writer = new PrintWriter(System.out);
+        Values.sendEvaluated(writer, result);
+        writer.flush();
     }
 }

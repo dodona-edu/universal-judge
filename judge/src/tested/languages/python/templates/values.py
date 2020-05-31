@@ -1,4 +1,5 @@
 """Minimal RPC language in JSON to send data from the tests to the judge."""
+import dataclasses
 import io
 import json
 import traceback
@@ -34,7 +35,7 @@ def encode(value):
         type_ = "set"
         data_ = [encode(x) for x in value]
     elif isinstance(value, dict):
-        type_ = "object"
+        type_ = "map"
         data_ = {str(k): encode(v) for k, v in value.items()}
     else:
         type_ = "unknown"
@@ -63,11 +64,12 @@ def send_exception(stream, exception):
     json.dump(data, stream)
 
 
-# noinspection PyDefaultArgument
-def send_evaluated(stream, result, expected, actual, messages):
-    json.dump({
-        "result": result,
-        "readable_expected": expected,
-        "readable_actual": actual,
-        "messages": messages
-    }, stream)
+class _EnhancedJSONEncoder(json.JSONEncoder):
+    def default(self, o):
+        if dataclasses.is_dataclass(o):
+            return dataclasses.asdict(o)
+        return super().default(o)
+
+
+def send_evaluated(stream, r):
+    json.dump(r, stream, cls=_EnhancedJSONEncoder)

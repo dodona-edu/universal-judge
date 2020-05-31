@@ -1,16 +1,17 @@
 import logging
 import shutil
-import time
 from pathlib import Path
-from typing import List, Optional, Tuple, NamedTuple
+from typing import List, Optional, Tuple, NamedTuple, Callable, Union
 
+import time
 from pydantic.dataclasses import dataclass
 
-from tested.dodona import Message, Status
 from .collector import OutputManager
 from .compilation import run_compilation, process_compile_results
 from .utils import BaseExecutionResult, run_command, find_main_file
 from ..configs import Bundle
+from ..dodona import Message, Status
+from ..languages.config import FileFilter, Config
 from ..languages.generator import value_file, exception_file
 from ..testplan import Context, ExecutionMode
 
@@ -36,21 +37,43 @@ class ContextExecution(NamedTuple):
     """
     Arguments used to execute_module a single context of the testplan.
     """
-    context: Context
-    context_name: str
+    context: Context  # The context object.
+    context_name: str  # Name of the context instance (used in code)
+    context_index: int  # Index of the context within the tab.
     mode: ExecutionMode
     common_directory: Path
-    files: List[str]
+    files: Union[List[str], Callable[[Path, str], bool]]
     precompilation_result: Optional[Tuple[List[Message], Status]]
     collector: OutputManager
+
+
+def filter_files(files: Union[List[str], FileFilter],
+                 directory: Path) -> List[str]:
+    if callable(files):
+        return list(x.name for x in filter(files, directory.glob("*")))
+    else:
+        return files
+
+
+def filter_dependencies(bundle: Bundle,
+                        files: List[str],
+                        context_name: str) -> List[str]:
+    def filter_function(file: str) -> bool:
+        # We don't want files for contexts that are not the one we use.
+        prefix = bundle.lang_config.conventionalize_namespace(
+            bundle.lang_config.context_prefix()
+        )
+        is_context = file.startswith(prefix)
+        is_our_context = file.startswith(context_name + ".")
+        return not is_context or is_our_context
+    return list(x for x in files if filter_function(x))
 
 
 def execute_file(
         bundle: Bundle,
         executable_name: str,
         working_directory: Path,
-        dependencies: List[str],
-        remaining: float,
+        remaining: Optional[float],
         stdin: Optional[str] = None,
         argument: Optional[str] = None
 ) -> BaseExecutionResult:
@@ -60,8 +83,6 @@ def execute_file(
     Note that this method must be thread-safe.
 
     :param bundle: The configuration bundle.
-    :param dependencies: A list of files that are available in the given working
-                         directory.
     :param working_directory: The working directory, in which the execution must
                               take place.
     :param argument: Argument for the executable, optional.
@@ -74,14 +95,13 @@ def execute_file(
     """
     _logger.info("Starting execution on file %s", executable_name)
 
-    command = bundle.language_config.execution_command(
+    command = bundle.lang_config.execution(
+        config=Config.from_bundle(bundle),
         cwd=working_directory,
         file=executable_name,
-        dependencies=dependencies,
         arguments=[argument] if argument else []
     )
-    _logger.debug("Executing command %s in directory %s", command,
-                  working_directory)
+    _logger.debug("Executing %s in directory %s", command, working_directory)
 
     result = run_command(working_directory, remaining, command, stdin)
     assert result is not None
@@ -93,7 +113,7 @@ def execute_context(bundle: Bundle, args: ContextExecution, max_time: float) \
     """
     Execute a context.
     """
-    lang_config = bundle.language_config
+    lang_config = bundle.lang_config
     start = time.perf_counter()
 
     # Create a working directory for the context.
@@ -103,13 +123,13 @@ def execute_context(bundle: Bundle, args: ContextExecution, max_time: float) \
     )
     context_dir.mkdir()
 
-    _logger.info("Executing context %s in path %s",
-                 args.context_name, context_dir)
+    _logger.info("Executing context %s in path %s", args.context_name, context_dir)
 
-    dependencies = list(lang_config.context_dependencies_callback(
-        args.context_name,
-        args.files
-    ))
+    # Filter dependencies of the global compilation results.
+    dependencies = filter_files(args.files, args.common_directory)
+    dependencies = bundle.lang_config.filter_dependencies(
+        bundle, dependencies, args.context_name
+    )
 
     # Copy files from the common directory to the context directory.
     for file in dependencies:
@@ -125,6 +145,9 @@ def execute_context(bundle: Bundle, args: ContextExecution, max_time: float) \
         remaining = max_time - (time.perf_counter() - start)
         result, files = run_compilation(bundle, context_dir, dependencies,
                                         remaining)
+
+        # A new compilation means a new file filtering
+        files = filter_files(files, context_dir)
 
         # Process compilation results.
         messages, status, annotations = process_compile_results(
@@ -147,7 +170,7 @@ def execute_context(bundle: Bundle, args: ContextExecution, max_time: float) \
         stdin = args.context.get_stdin(bundle.config.resources)
         argument = None
     else:
-        result, files = None, dependencies
+        result, files = None, list(dependencies)
         if args.precompilation_result:
             _logger.debug("Substituting precompilation results.")
             messages, status = args.precompilation_result
@@ -179,7 +202,6 @@ def execute_context(bundle: Bundle, args: ContextExecution, max_time: float) \
         bundle,
         executable_name=executable,
         working_directory=context_dir,
-        dependencies=files,
         stdin=stdin,
         argument=argument,
         remaining=remaining

@@ -1,29 +1,94 @@
 """
-Module containing the base class with the channel methods for a language
-configuration. To support a new language, it is often enough to subclass the
-Language class and implement the required templates.
+The configuration class for a programming language in TESTed. Note that this is one
+of the three things you must implement:
 
-For very exotic configs, it is possible to create a custom runner subclass,
-but that will be a lot more work.
+- This class
+- A config.json file
+- The templates which are used to create the code.
+
+Implementing a new programming language
+---------------------------------------
+
+The first thing you should do is implement this class and the accompanying toml
+file. While the toml file is not strictly required, it makes implementing the
+configuration class a lot less work. You can still override all functions and do
+something special instead of reading it from the toml file.
+
+There are a few callbacks that must be implemented. These raise a
+`NotImplementedError`, so proper editors will warn you (or TESTed will crash when
+using your language).
 """
+import json
 import os
 from collections import defaultdict
+from dataclasses import dataclass
 from enum import Enum, auto
 from pathlib import Path
-from typing import List, Tuple, Mapping
+from typing import List, Tuple, Mapping, Union, Callable, Set, Dict, Optional, Any
+
+import sys
 
 from ..configs import Bundle
 from ..datatypes import AllTypes
 from ..dodona import AnnotateCode, Message
-from ..features import Constructs
-from ..serialisation import FunctionCall
+from ..features import Construct
+from ..serialisation import ExceptionValue
 from ..testplan import Plan
+from ..utils import camelize, pascalize, fallback, snake_case
 
-CallbackResult = Tuple[List[str], List[str]]
+Command = List[str]
+FileFilter = Callable[[Path], bool]
+CallbackResult = Tuple[Command, Union[List[str], FileFilter]]
+
+_case_mapping = {
+    "camel_case":  camelize,
+    "pascal_case": pascalize,
+    "snake_case":  snake_case
+}
+
+
+@dataclass
+class Config:
+    # noinspection PyUnresolvedReferences
+    """
+    Global options for the language configuration.
+
+    Available fields:
+    :param time_limit: The time limit as given by Dodona. In most cases, you do not
+                       need this; TESTed tracks the execution time.
+    :param memory_limit: The memory limit as given by Dodona.
+    :param options: Language specific options. Using this field you could for
+                    example allow for additional parameters when compiling or
+                    executing.
+    """
+    time_limit: int  # Time limit from Dodona.
+    memory_limit: int  # Memory limit from Dodona.
+    options: Dict[str, Any]  # Language-specific options.
+
+    @classmethod
+    def from_bundle(cls, bundle: Bundle):
+        return Config(
+            time_limit=bundle.config.time_limit,
+            memory_limit=bundle.config.memory_limit,
+            options=bundle.config.config_for()
+        )
+
+
+def _conventionalize(options: dict, what: str, name: str):
+    """Conventionalize based on the options."""
+    function = _case_mapping[
+        options.get("naming_conventions", {}).get(what, "snake_case")]
+    return function(name)
 
 
 def executable_name(basename: str) -> str:
-    """Append .exe on Windows only."""
+    """
+    Utility function that will
+
+    :param basename: The name of the executable without extension.
+
+    :return: The executable with extension corresponding to the platform.
+    """
     if os.name == 'nt':
         return f"{basename}.exe"
     else:
@@ -36,115 +101,241 @@ class TypeSupport(Enum):
     REDUCED = auto()
 
 
+class TemplateType(str, Enum):
+    STATEMENT = "statement"
+    CONTEXT = "context"
+    SELECTOR = "selector"
+    EVALUATOR_EXECUTOR = "evaluator_executor"
+
+
 class Language:
     """
-    Configuration for the runner. Most of the language dependent options are
-    collected in this class. More involved language dependent changes, such as
-    code generation, are handled by the templates.
-    """
+    Base configuration class for a programming language.
 
-    def generation_callback(self, files: List[str]) -> CallbackResult:
+    When you need to override a function, check the docs or the implementation to
+    see if the function reads configuration data from the config.json file. If this
+    is the case, it is recommended to modify the value in the config.json file
+    instead of overriding the function in a subclass.
+    """
+    __slots__ = ["options"]
+
+    def __init__(self, config_file: str = "config.json"):
         """
-        Called to do the generation step. This function is responsible for
-        returning the precompilation command, and a list of new dependencies. By
-        default, nothing is done here, and the dependencies are returned unchanged.
-        :param files: The files that are destined for precompilation. These were
-                      removed from the general dependencies. There are relative
-                      filenames to the current directory.
-        :return: A tuple, containing 1) the compilation command. If no
-                 compilation is needed, an empty command may be used. Secondly,
-                 the new dependencies, which are a list of names.
+        Initialise a language configuration. Subclasses can modify the name of the
+        toml configuration file. By default, a "config.json" file is expected in the
+        same directory as the configuration class.
+
+        :param config_file: The name of the configuration file. Relative to the
+                            directory in which the configuration class is.
+        """
+        path_to_config = (Path(sys.modules[self.__module__].__file__).parent
+                          / config_file)
+        with open(path_to_config, "r") as f:
+            self.options = json.load(f)
+
+    def compilation(self, config: Config, files: List[str]) -> CallbackResult:
+        """
+        Callback for generating the compilation command.
+
+        Files
+        -----
+
+        The files parameter contains the dependencies which TESTed assumes can be
+        useful for compilation. This generally includes the `dependencies` from the
+        json config, the submission and either the context or the context and the
+        selector. By convention, the last file in the list is the file containing
+        the "main" function. The files are in the form of the filename, extension
+        including.
+
+        All files are guaranteed to be present in the same directory as the main
+        file. You are not obligated to actually use all these files. In some
+        languages, the compiler might find these dependencies on its own. Other
+        compilers need all files.
+
+        For example, the files parameter might look like this::
+
+            ["values.py", "evaluation_utils.py", "context_0_0.py"]
+
+        Compilation command
+        -------------------
+
+        The compilation command that is returned is a list of command parts, which
+        will be passed to the `subprocess` module. The result of the compilation
+        command must be an executable file (or files), that can be executed on the
+        command line.
+
+        Resulting files
+        ---------------
+
+        Additionally, TESTed needs to know which files are still relevant after
+        compilation (to copy them to the execution folder). For example, in Python
+        only *.pyc files are needed after compilation, not the *.py files.
+
+        To this end, you can either return a static list of resulting files or a
+        filter function:
+
+        - The static list is useful if you know which files are generated. For
+          example, in Python, each .py file will result in one .pyc file. In C,
+          the result will be one executable.
+        - The callback will be executed on all files in the directory after the
+          compilation command has been executed. See below for more information.
+
+        Note that the convention that the executable file is the last file in the
+        list must be respected in the returned list as well.
+
+        The callback functions receives a filename as argument.
+
+        Non-compiling languages
+        -----------------------
+        Languages that do not need compilation must return an empty list as
+        compilation command, and can return the ``files`` unchanged. This is also
+        the default implementation of this function.
+
+        Parameters
+        ----------
+
+        :param config: Various configuration options.
+        :param files: A suggestion containing the dependencies TESTed thinks might
+                      be useful to compile. By convention, the last file in the list
+                      is the file containing the "main" function.
+
+        :return: The compilation command and either the resulting files or a filter
+                 for the resulting files.
         """
         return [], files
 
-    def evaluator_generation_callback(self, files: List[str]) -> CallbackResult:
+    def execution(self, config: Config,
+                  cwd: Path, file: str, arguments: List[str]) -> Command:
         """
-        Same as the generation_callback, but used for evaluators. By default,
-        this function just calls generation_callback.
-        """
-        return self.generation_callback(files)
+        Callback for generating the execution command.
 
-    def execution_command(self,
-                          cwd: Path,
-                          file: str,
-                          dependencies: List[str],
-                          arguments: List[str]) -> List[str]:
-        """
-        Get the command for executing a file with some arguments.
-        :param cwd: The directory where the command will be execute. This must only
-                    be used to specify the path the executable (first item in the
-                    returned command). Files MUST NOT be prepended with the cwd.
-        :param file: The "context_testcase" file to be executed.
-        :param dependencies: A list of other available files.
-        :param arguments: The arguments, e.g. other dependencies or execution
-                          arguments.
-        :return: A command that can be passed to the subprocess package.
+        The execution command must execute the file given by the ``file`` parameter.
+        When executing the file, the ``arguments`` MUST be passed to the programme.
+        The returned command will be passed to the subprocess module.
+
+        The ``cwd`` parameter is mainly useful for executables. Since those are not
+        on the PATH, you should use an absolute path to those instead of a relative
+        one.
+
+        :param config: Various configuration options. 
+        :param cwd: The directory in which the ``file`` is.
+        :param file: The file to execute.
+        :param arguments: Arguments that must be passed to the execution.
+
+        :return: The execution command.
         """
         raise NotImplementedError
 
-    def file_extension(self) -> str:
-        """The file extension for this language, without the dot."""
-        raise NotImplementedError
+    def conventionalize_function(self, function: str) -> str:
+        """
+        Conventionalize the name of a function. This function uses the format
+        specified in the config.json file. If no format is specified, the function
+        name is unchanged, which is the same as snake_case, since the testplan uses
+        snake case.
 
-    def with_extension(self, file_name: str) -> str:
-        return f"{file_name}.{self.file_extension()}"
+        :param function: The name of the function to conventionalize.
+        :return: The conventionalized function.
+        """
+        return _conventionalize(self.options, "function", function)
+
+    def conventionalize_namespace(self, namespace: str) -> str:
+        """
+        Conventionalize the name of a namespace (class/module). This function uses
+        the format specified in the config.json file. If no format is specified, the
+        function name is unchanged, which is the same as snake_case, since the
+        testplan uses snake case.
+
+        :param namespace: The name of the namespace to conventionalize.
+        :return: The conventionalized namespace.
+        """
+        return _conventionalize(self.options, "namespace", namespace)
 
     def submission_name(self, plan: Plan) -> str:
-        """The name for the submission file."""
-        return plan.namespace
+        """
+        Get the namespace (module/class) for the submission. This will use the
+        namespace specified in the testplan. The name is conventionalized for the
+        programming language.
+
+        :param plan: The testplan we are executing.
+        :return: The name for the submission, conventionalized.
+        """
+        return self.conventionalize_namespace(plan.namespace)
 
     def selector_name(self) -> str:
-        """The name of the selector module."""
-        raise NotImplementedError
+        """
+        :return: The name for the selector, conventionalized.
+        """
+        return self.conventionalize_namespace("selector")
+
+    def context_prefix(self) -> str:
+        """The "name" or prefix for the context names. Not conventionalized."""
+        return "context"
 
     def context_name(self, tab_number: int, context_number: int) -> str:
-        raise NotImplementedError
+        """
+        Get the name of a context. The name should be unique for the tab and context
+        number combination.
 
-    def conventionalise_function(self, function_name: str) -> str:
-        """Apply a language's conventions to function name."""
-        raise NotImplementedError
+        :param tab_number: The number of the tab.
+        :param context_number: The number of the context.
+        :return: The name of the context, conventionalized.
+        """
+        return self.conventionalize_namespace(
+            f"{self.context_prefix()}_{tab_number}_{context_number}"
+        )
 
-    def conventionalise_namespace(self, class_name: str) -> str:
-        """Apply a language's conventions to a module name."""
-        raise NotImplementedError
+    def extension_file(self) -> str:
+        """
+        The main file extension for this language, sans the dot. This is read from
+        the config.json file.
+        """
+        return self.options["extensions"]["file"]
 
-    def template_folders(self, programming_language: str) -> List[str]:
-        """The name of the template folders to search."""
-        return [programming_language]
+    def with_extension(self, file_name: str) -> str:
+        """Utility function to append the file extension to a file name."""
+        return f"{file_name}.{self.extension_file()}"
 
-    def template_extensions(self) -> List[str]:
-        """Extensions a template can be in."""
-        return [self.file_extension(), "mako"]
+    def extension_templates(self) -> List[str]:
+        """
+        A list of extensions for the template files. By default, this uses the
+        ``extension_file`` and ``mako``.
+
+        :return: The templates.
+        """
+        default = [self.extension_file(), "mako"]
+        return self.options.get("extensions").get("templates", default)
 
     def initial_dependencies(self) -> List[str]:
         """
-        Return the initial dependencies. These are filenames, relative to the
-        "templates" directory.
-        """
-        raise NotImplementedError
+        Return the additional dependencies that tested will include in compilation.
+        The dependencies are read from the config.json file.
 
-    def evaluator_dependencies(self) -> List[str]:
+        :return: A list of dependencies, relative to the "templates" folder.
         """
-        Additional dependencies for running a custom evaluator in this language.
-        These dependencies are also relative to the "templates" directory, and
-        are loaded after the regular dependencies.
+        return self.options["general"]["dependencies"]
+
+    def needs_selector(self):
         """
-        return []
+        Return if the language needs a selector for batch compilation or not. This
+        is a mandatory option in the config.json file.
 
-    def supported_constructs(self) -> Constructs:
+        :return: True if a selector is needed, false otherwise.
         """
-        A flag representing which features this language supports. By default, all
-        features are returned.
+        return self.options["general"]["selector"]
 
-        Languages can declare missing support for features in one of two ways:
-
-        - Enumerating all supported features. This is safe against new features.
-        - Explicitly disallowing some features. This also means the language will
-          automatically support new features when they are added to TESTed.
+    def supported_constructs(self) -> Set[Construct]:
+        """
+        Callback to get the supported constructs for a language. By default, no
+        features are returned, i.e. the default is false.
 
         :return: The features supported by this language.
         """
-        return Constructs.ALL
+        config: Dict[str, bool] = self.options.get("constructs", {})
+        result = set()
+        for construct, supported in config.items():
+            if supported:
+                result.add(Construct[construct.upper()])
+        return result
 
     def type_support_map(self) -> Mapping[AllTypes, TypeSupport]:
         """
@@ -167,62 +358,84 @@ class Language:
         :return: The typing support dict. By default, all types are mapped to their
                  basic type.
         """
-        return defaultdict(lambda: TypeSupport.REDUCED)
+        raw_config: Dict[str, str] = self.options.get("datatypes", {})
+        config = {x: TypeSupport[y.upper()] for x, y in raw_config.items()}
+        return fallback(defaultdict(lambda: TypeSupport.UNSUPPORTED), config)
 
-    def solution_callback(self, solution: Path, bundle: Bundle):
+    def solution(self, solution: Path, bundle: Bundle):
         """
         An opportunity to modify the solution. By default, this does nothing.
+        If you modify the solution, you must overwrite the contents of the solution
+        in-place.
+
+        This callback is called after linting, but before any compilation.
+
         :param solution: Path to the solution and path for the modified solution.
         :param bundle: The configuration bundle.
         """
         pass
 
-    def specific_evaluator_callback(self, function: FunctionCall) -> FunctionCall:
+    def specific_evaluator(self, evaluator: Path, bundle: Bundle):
         """
-        An opportunity to modify the function expression used to expression the
-        language-specific evaluator. This allows injecting language dependent
-        parameters.
-        TODO: this is fairly ugly, is there a better way?
-        By default, this does nothing.
-        :param function: The function as produced by the judge.
-        :return: The new function.
+        An opportunity to modify the language specific evaluator. By default,
+        this does nothing. If you modify the evaluator, you must overwrite the
+        contents of the evaluator in-place.
+
+        This callback is called before any compilation.
+
+        :param evaluator: Path to the evaluator and path for the modified evaluator.
+        :param bundle: The configuration bundle.
         """
-        return function
+        pass
 
-    def context_dependencies_callback(self,
-                                      context_name: str,
-                                      dependencies: List[str]) -> List[str]:
+    def compiler_output(
+            self, stdout: str, stderr: str
+    ) -> Tuple[List[Message], List[AnnotateCode], str, str]:
         """
-        An opportunity to modify the list of dependencies that is copied to the
-        context-specific directory when executing. This can be used to, for example,
-        not copy files for all contexts, but only those specific for the given
-        context. By default, this does nothing.
-        :param context_name: The tab that is being executed.
-        :param dependencies: The dependencies. Read-only: copy before modifying.
-        :return: The new dependencies.
+        Callback that allows processing the output of the compiler. This might be
+        useful to filter TESTed code or add links to the code tab on Dodona.
+
+        TODO: in context compilation mode, this is called for each compilation,
+          which can result in the same annotation 50x times.
+
+        :param stdout: The standard output from the compiler.
+        :param stderr: The standard error from the compiler.
+        :return: A tuple containing:
+                 - A list of messages to show to the user.
+                 - A list of annotations to add.
+                 - The new stdout and stderr.
         """
-        return dependencies
+        return [], [], stdout, stderr
 
-    def needs_selector(self):
-        raise NotImplementedError
-
-    def process_compiler_output(
-            self,
-            stdout: str,
-            stderr: str
-    ) -> Tuple[List[Message], List[AnnotateCode]]:
+    def exception_output(self, exception: ExceptionValue) -> ExceptionValue:
         """
-        Callback for processing compiler output.
+        Callback that allows modifying the exception value, for example the
+        stacktrace.
 
-        :param stdout:
-        :param stderr:
-
-        :return: A list of messages and annotations. None indicates that the
-                 callback did not handle the output; TESTed will show it instead.
+        :param exception: The exception.
+        :return: The modified exception.
         """
-        return [], []
+        return exception
 
-    def run_linter(self, bundle: Bundle, submission: Path, remaining: int) \
+    def stdout(self, stdout: str) -> Tuple[List[Message], List[AnnotateCode], str]:
+        """
+        Callback that allows modifying the stdout.
+
+        :param stdout: The original stdout.
+        :return: A tuple containing messages, annotations and the new stdout.
+        """
+        return [], [], stdout
+
+    def stderr(self, stderr: str) -> Tuple[List[Message], List[AnnotateCode], str]:
+        """
+        Callback that allows modifying the stderr.
+
+        :param stderr: The original stderr.
+        :return: A tuple containing messages, annotations and the new stderr.
+        """
+        return [], [], stderr
+
+    def linter(self, bundle: Bundle, submission: Path, remaining: float) \
             -> Tuple[List[Message], List[AnnotateCode]]:
         """
         Run a linter or other code analysis tools on the submission.
@@ -240,5 +453,38 @@ class Language:
         """
         return [], []
 
-    def supports_evaluation(self):
-        return True
+    def template_name(self, template_type: Union[TemplateType, str]) -> str:
+        """
+        Get the name for built-in templates. This can be specified in the
+        config.json file, but needing to override this is generally not necessary.
+
+        :param template_type: The built-in type.
+        :return: The name of the template (without extension).
+        """
+        return self.options.get("templates", {}).get(template_type, template_type)
+
+    def inherits_from(self) -> Optional[str]:
+        """
+        Indicates that this language inherits from another language. This means
+        that the other language will be used as a fallback if something is not
+        implemented in the other language (templates only, if you need to inherit
+        this class, just extend the config class the language).
+
+        :return: An optional language.
+        """
+        return self.options["general"].get("inherits")
+
+    def filter_dependencies(self,
+                            bundle: Bundle,
+                            files: List[str],
+                            context_name: str) -> List[str]:
+        def filter_function(file: str) -> bool:
+            # We don't want files for contexts that are not the one we use.
+            prefix = bundle.lang_config.conventionalize_namespace(
+                bundle.lang_config.context_prefix()
+            )
+            is_context = file.startswith(prefix)
+            is_our_context = file.startswith(context_name + ".")
+            return not is_context or is_our_context
+
+        return list(x for x in files if filter_function(x))

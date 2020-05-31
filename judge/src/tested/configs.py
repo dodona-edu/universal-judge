@@ -28,7 +28,7 @@ class Options:
     TESTed-specific options. Putting these options in the exercise config allows to
     override them for each exercise, and not
     """
-    parallel: bool = True
+    parallel: bool = False
     """
     Indicate that the contexts should be executed in parallel. It is recommended to
     disable this for exercises that already are multithreaded. It may also be worth
@@ -54,17 +54,17 @@ class Options:
     Controls running the linter for languages. Default is True. Of course, for
     languages without linter implementation, this does nothing.
     """
-    show_unprocessed: bool = False
+    optimized: bool = True
     """
-    If testcases that were not run should be shown or not.
+    If the custom Python evaluator should be optimized or not.
     """
 
 
 class DodonaConfig(BaseModel):
     resources: Path
     source: Path
-    time_limit: str
-    memory_limit: str
+    time_limit: int
+    memory_limit: int
     natural_language: str
     programming_language: str
     # noinspection SpellCheckingInspection
@@ -72,8 +72,9 @@ class DodonaConfig(BaseModel):
     judge: Path
     plan_name: str = "plan.json"  # Name of the testplan file.
     options: Options = Options()
+    output_limit: int = 10*1024*1024  # Default value for backwards compatibility.
 
-    def config_for(self) -> dict:
+    def config_for(self) -> Dict[str, Any]:
         return self.options.language.get(self.programming_language, dict())
 
     def linter(self) -> bool:
@@ -102,7 +103,7 @@ class Bundle:
     """A bundle of arguments and configs for running everything."""
     config: DodonaConfig
     out: IO
-    language_config: 'Language'
+    lang_config: 'Language'
     secret: str
     plan: testplan.Plan
 
@@ -143,11 +144,11 @@ def create_bundle(config: DodonaConfig,
         language = _get_language(config)
     # noinspection PyDataclass
     adjusted_config = config.copy(update={"programming_language": language})
-    language_config = langs.get_language(language)
+    lang_config = langs.get_language(language)
     return Bundle(
         config=adjusted_config,
         out=output,
-        language_config=language_config,
+        lang_config=lang_config,
         secret=utils.get_identifier(),
         plan=plan
     )

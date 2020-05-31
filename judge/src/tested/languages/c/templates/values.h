@@ -10,11 +10,11 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "evaluation_result.h"
+
 void write_bool(FILE*, bool);
 
 void write_char(FILE*, char);
-void write_uchar(FILE*, unsigned char);
-void write_schar(FILE*, signed char);
 
 void write_sint(FILE*, short int);
 void write_usint(FILE*, unsigned short int);
@@ -32,14 +32,16 @@ void write_ldouble(FILE*, long double);
 void write_string(FILE*, const char*);
 
 void write_unknown(FILE*, void*);
+void write_void(FILE*, void*);
 
 #define write_value_function(x) _Generic((x),   \
         _Bool: write_bool,                      \
+        void*: write_void,                       \
                                                 \
         /* Number types */                      \
         char: write_char,                       \
-        unsigned char: write_uchar,             \
-        signed char: write_schar,               \
+        unsigned char: write_char,             \
+        signed char: write_char,               \
         short int: write_sint,                  \
         unsigned short int: write_usint,        \
         int: write_int,                         \
@@ -62,6 +64,6 @@ void write_unknown(FILE*, void*);
 
 #define write_value(f, x) write_value_function(x)(f, x)
 
-void send_evaluated(FILE* out, bool result, const char* expected, const char* actual, size_t nrOfMessages, const char** messages);
+void write_evaluated(FILE* out, EvaluationResult* result);
 
 #endif //WRITER_VALUES_H

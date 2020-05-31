@@ -8,7 +8,8 @@ from mako.exceptions import TemplateLookupException
 from mako.lookup import TemplateLookup
 from mako.template import Template
 
-from tested.languages._preprocessors import remove_indents, remove_newline
+from tested.languages import get_language
+from tested.languages._preprocessors import remove_indents
 from tested.configs import Bundle
 
 _logger = logging.getLogger(__name__)
@@ -34,6 +35,15 @@ def _write_template(arguments, template: Template, path: Path):
     # noinspection PyTypeChecker
     with open(path, "w") as file:
         file.write(result)
+        
+        
+def _language_inheritance_tree(bundle: Bundle) -> List[str]:
+    current = bundle.lang_config
+    result = [bundle.config.programming_language]
+    while lang := current.inherits_from():
+        result.append(lang)
+        current = get_language(lang)
+    return result
 
 
 def path_to_templates(bundle: Bundle) -> List[Path]:
@@ -46,10 +56,9 @@ def path_to_templates(bundle: Bundle) -> List[Path]:
     :return: A list of template folders.
     """
     judge_root = bundle.config.judge
-    language = bundle.config.programming_language
     result = []
-    for end in bundle.language_config.template_folders(language):
-        result.append(judge_root / 'tested' / 'languages' / end / 'templates')
+    for language in _language_inheritance_tree(bundle):
+        result.append(judge_root / 'tested' / 'languages' / language / 'templates')
     assert result, "At least one template folder is required."
     return result
 
@@ -60,9 +69,8 @@ _env_cache: Dict[str, TemplateLookup] = {}
 def _get_environment(bundle: Bundle) -> TemplateLookup:
     """Get the templating environment for a given configuration bundle."""
     if bundle.config.programming_language not in _env_cache:
-        processors = [remove_indents, remove_newline]
         paths = [str(x) for x in path_to_templates(bundle)]
-        template = TemplateLookup(directories=paths, preprocessor=processors)
+        template = TemplateLookup(directories=paths, preprocessor=[remove_indents])
         _env_cache[bundle.config.programming_language] = template
 
     return _env_cache[bundle.config.programming_language]
@@ -85,9 +93,9 @@ def find_and_write_template(bundle: Bundle,
 
     :return: The name of the generated file.
     """
-    template_name = bundle.language_config.conventionalise_namespace(template_name)
+    template_name = bundle.lang_config.conventionalize_namespace(template_name)
     if destination.is_dir():
-        destination /= bundle.language_config.with_extension(template_name)
+        destination /= bundle.lang_config.with_extension(template_name)
 
     template = find_template(bundle, template_name)
     _write_template(template_args, template, destination)
@@ -109,7 +117,7 @@ def find_template(bundle: Bundle, template_name: str) -> Template:
     """
     error = None
     environment = _get_environment(bundle)
-    for extension in bundle.language_config.template_extensions():
+    for extension in bundle.lang_config.extension_templates():
         try:
             file_name = f"{template_name}.{extension}"
             return environment.get_template(file_name)

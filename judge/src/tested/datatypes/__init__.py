@@ -43,3 +43,11 @@ def resolve_to_basic(type_: AllTypes) -> BasicTypes:
 
     assert isinstance(type_, get_args(AdvancedTypes))
     return type_.base_type
+
+
+def string_to_type(type_string: str) -> AllTypes:
+    enums = get_args(AllTypes)
+    for enum in enums:
+        if type_string in enum:
+            return enum[type_string]
+    raise ValueError(f"Unknown type string {type_string}")

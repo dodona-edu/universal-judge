@@ -1,14 +1,14 @@
 ## Convert a Value to a type.
-<%! from tested.serialisation import BooleanTypes, StringTypes, NumericTypes, NothingTypes  %>
-<%page args="value" />
-% if value.type == BooleanTypes.BOOLEAN:
+<%! from tested.serialisation import BasicBooleanTypes, BasicNumericTypes, BasicStringTypes, BasicNothingTypes  %>\
+<%page args="value" />\
+% if value.type == BasicBooleanTypes.BOOLEAN:
     boolean\
-% elif value.type == StringTypes.TEXT:
+% elif value.type == BasicStringTypes.TEXT:
     char*\
-% elif value.type == NumericTypes.INTEGER:
+% elif value.type == BasicNumericTypes.INTEGER:
     long long\
-% elif value.type == NumericTypes.RATIONAL:
+% elif value.type == BasicNumericTypes.RATIONAL:
     double\
-% elif value.type == NothingTypes.NOTHING or value.type == StringTypes.UNKNOWN:
+% elif value.type == BasicNothingTypes.NOTHING or value.type == BasicStringTypes.ANY:
     void*\
 % endif

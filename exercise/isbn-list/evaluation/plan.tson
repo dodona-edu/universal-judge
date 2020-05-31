@@ -1,0 +1,6072 @@
+{
+  "tabs": [
+    {
+      "name": "is_isbn",
+      "contexts": [
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "is_isbn",
+                "arguments": [
+                  {
+                    "data": "9789027439642",
+                    "type": "text"
+                  },
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "is_isbn",
+                "arguments": [
+                  {
+                    "data": "9789027439642",
+                    "type": "text"
+                  },
+                  {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "is_isbn",
+                "arguments": [
+                  {
+                    "data": "080442957X",
+                    "type": "text"
+                  },
+                  {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "is_isbn",
+                "arguments": [
+                  {
+                    "data": "080442957X",
+                    "type": "text"
+                  },
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "is_isbn",
+                "arguments": [
+                  {
+                    "data": "8964768567830",
+                    "type": "text"
+                  },
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "is_isbn",
+                "arguments": [
+                  {
+                    "data": "0925794147",
+                    "type": "text"
+                  },
+                  {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "is_isbn",
+                "arguments": [
+                  {
+                    "data": "1681098471",
+                    "type": "text"
+                  },
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "is_isbn",
+                "arguments": [
+                  {
+                    "data": "4433048151",
+                    "type": "text"
+                  },
+                  {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "is_isbn",
+                "arguments": [
+                  {
+                    "data": "8251585866",
+                    "type": "text"
+                  },
+                  {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "is_isbn",
+                "arguments": [
+                  {
+                    "data": "2986668147676",
+                    "type": "text"
+                  },
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "is_isbn",
+                "arguments": [
+                  {
+                    "data": "8218407804523",
+                    "type": "text"
+                  },
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "is_isbn",
+                "arguments": [
+                  {
+                    "data": "8546463143",
+                    "type": "text"
+                  },
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "is_isbn",
+                "arguments": [
+                  {
+                    "data": "6755325179380",
+                    "type": "text"
+                  },
+                  {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "is_isbn",
+                "arguments": [
+                  {
+                    "data": "6667839783",
+                    "type": "text"
+                  },
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "is_isbn",
+                "arguments": [
+                  {
+                    "data": "4066594808",
+                    "type": "text"
+                  },
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "is_isbn",
+                "arguments": [
+                  {
+                    "data": "3299904740506",
+                    "type": "text"
+                  },
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "is_isbn",
+                "arguments": [
+                  {
+                    "data": "6943027027",
+                    "type": "text"
+                  },
+                  {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "is_isbn",
+                "arguments": [
+                  {
+                    "data": "7155340527",
+                    "type": "text"
+                  },
+                  {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "is_isbn",
+                "arguments": [
+                  {
+                    "data": "4802210384026",
+                    "type": "text"
+                  },
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "is_isbn",
+                "arguments": [
+                  {
+                    "data": "6494037562443",
+                    "type": "text"
+                  },
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "is_isbn",
+                "arguments": [
+                  {
+                    "data": "6271908086571",
+                    "type": "text"
+                  },
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "is_isbn",
+                "arguments": [
+                  {
+                    "data": "9432069044",
+                    "type": "text"
+                  },
+                  {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "is_isbn",
+                "arguments": [
+                  {
+                    "data": "8250605502140",
+                    "type": "text"
+                  },
+                  {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "is_isbn",
+                "arguments": [
+                  {
+                    "data": "5511109770",
+                    "type": "text"
+                  },
+                  {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "is_isbn",
+                "arguments": [
+                  {
+                    "data": "1932082166",
+                    "type": "text"
+                  },
+                  {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "is_isbn",
+                "arguments": [
+                  {
+                    "data": "5707365667750",
+                    "type": "text"
+                  },
+                  {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "is_isbn",
+                "arguments": [
+                  {
+                    "data": "7635514458747",
+                    "type": "text"
+                  },
+                  {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "is_isbn",
+                "arguments": [
+                  {
+                    "data": "6735459218",
+                    "type": "text"
+                  },
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "is_isbn",
+                "arguments": [
+                  {
+                    "data": "7574462150591",
+                    "type": "text"
+                  },
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "is_isbn",
+                "arguments": [
+                  {
+                    "data": "6927206012",
+                    "type": "text"
+                  },
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "is_isbn",
+                "arguments": [
+                  {
+                    "data": "1515492495485",
+                    "type": "text"
+                  },
+                  {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "is_isbn",
+                "arguments": [
+                  {
+                    "data": "5741262171",
+                    "type": "text"
+                  },
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "is_isbn",
+                "arguments": [
+                  {
+                    "data": "6987894817",
+                    "type": "text"
+                  },
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "is_isbn",
+                "arguments": [
+                  {
+                    "data": "7712609248282",
+                    "type": "text"
+                  },
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "is_isbn",
+                "arguments": [
+                  {
+                    "data": "8990446177012",
+                    "type": "text"
+                  },
+                  {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "is_isbn",
+                "arguments": [
+                  {
+                    "data": "4280122690266",
+                    "type": "text"
+                  },
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "is_isbn",
+                "arguments": [
+                  {
+                    "data": "6021779758699",
+                    "type": "text"
+                  },
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "is_isbn",
+                "arguments": [
+                  {
+                    "data": "3378420030",
+                    "type": "text"
+                  },
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "is_isbn",
+                "arguments": [
+                  {
+                    "data": "6733974947",
+                    "type": "text"
+                  },
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "is_isbn",
+                "arguments": [
+                  {
+                    "data": "1312427483502",
+                    "type": "text"
+                  },
+                  {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "is_isbn",
+                "arguments": [
+                  {
+                    "data": "6278186926",
+                    "type": "text"
+                  },
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "is_isbn",
+                "arguments": [
+                  {
+                    "data": "8269881633987",
+                    "type": "text"
+                  },
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "is_isbn",
+                "arguments": [
+                  {
+                    "data": "7677504369327",
+                    "type": "text"
+                  },
+                  {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "is_isbn",
+                "arguments": [
+                  {
+                    "data": "0177276774493",
+                    "type": "text"
+                  },
+                  {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "is_isbn",
+                "arguments": [
+                  {
+                    "data": "7820620522327",
+                    "type": "text"
+                  },
+                  {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "is_isbn",
+                "arguments": [
+                  {
+                    "data": "2057193840642",
+                    "type": "text"
+                  },
+                  {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "is_isbn",
+                "arguments": [
+                  {
+                    "data": "9919362259",
+                    "type": "text"
+                  },
+                  {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "is_isbn",
+                "arguments": [
+                  {
+                    "data": "2230916995878",
+                    "type": "text"
+                  },
+                  {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "is_isbn",
+                "arguments": [
+                  {
+                    "data": "3454385016",
+                    "type": "text"
+                  },
+                  {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "type": "function",
+                "name": "is_isbn",
+                "arguments": [
+                  {
+                    "data": "2102787977532",
+                    "type": "text"
+                  },
+                  {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "are_isbn",
+      "contexts": [
+        {
+          "testcases": [
+            {
+              "input": {
+                "variable": "codes01",
+                "expression": {
+                  "data": [
+                    {
+                      "data": "0012345678",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0012345679",
+                      "type": "text"
+                    },
+                    {
+                      "data": "9971502100",
+                      "type": "text"
+                    },
+                    {
+                      "data": "080442957X",
+                      "type": "text"
+                    },
+                    {
+                      "data": "The Practice of Computing Using Python",
+                      "type": "text"
+                    },
+                    {
+                      "data": "9789027439642",
+                      "type": "text"
+                    },
+                    {
+                      "data": "5486948320146",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "sequence"
+                },
+                "type": "sequence"
+              }
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "are_isbn",
+                "arguments": [
+                  "codes01",
+                  {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": [
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "sequence"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "variable": "codes02",
+                "expression": {
+                  "data": [
+                    {
+                      "data": "0012345678",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0012345679",
+                      "type": "text"
+                    },
+                    {
+                      "data": "9971502100",
+                      "type": "text"
+                    },
+                    {
+                      "data": "080442957X",
+                      "type": "text"
+                    },
+                    {
+                      "data": "The Practice of Computing Using Python",
+                      "type": "text"
+                    },
+                    {
+                      "data": "9789027439642",
+                      "type": "text"
+                    },
+                    {
+                      "data": "5486948320146",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "sequence"
+                },
+                "type": "sequence"
+              }
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "are_isbn",
+                "arguments": [
+                  "codes02",
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": [
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "sequence"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "variable": "codes03",
+                "expression": {
+                  "data": [
+                    {
+                      "data": "0123456780",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0123456781",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0123456782",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0123456783",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0123456784",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0123456785",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0123456786",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0123456787",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0123456788",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0123456789",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "sequence"
+                },
+                "type": "sequence"
+              }
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "are_isbn",
+                "arguments": [
+                  "codes03",
+                  {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": [
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "sequence"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "variable": "codes04",
+                "expression": {
+                  "data": [
+                    {
+                      "data": "0123456780",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0123456781",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0123456782",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0123456783",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0123456784",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0123456785",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0123456786",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0123456787",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0123456788",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0123456789",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "sequence"
+                },
+                "type": "sequence"
+              }
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "are_isbn",
+                "arguments": [
+                  "codes04",
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": [
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "sequence"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "variable": "codes05",
+                "expression": {
+                  "data": [
+                    {
+                      "data": "7778532114794",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0169683653",
+                      "type": "text"
+                    },
+                    {
+                      "data": "1914087879",
+                      "type": "text"
+                    },
+                    {
+                      "data": "2804522123823",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "sequence"
+                },
+                "type": "sequence"
+              }
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "are_isbn",
+                "arguments": [
+                  "codes05",
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": [
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "sequence"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "variable": "codes06",
+                "expression": {
+                  "data": [
+                    {
+                      "data": "1140810500",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0277543976905",
+                      "type": "text"
+                    },
+                    {
+                      "data": "7949209228840",
+                      "type": "text"
+                    },
+                    {
+                      "data": "3267137906644",
+                      "type": "text"
+                    },
+                    {
+                      "data": "6649324428770",
+                      "type": "text"
+                    },
+                    {
+                      "data": "3459054313333",
+                      "type": "text"
+                    },
+                    {
+                      "data": "1616641021385",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "sequence"
+                },
+                "type": "sequence"
+              }
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "are_isbn",
+                "arguments": [
+                  "codes06",
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": [
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "sequence"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "variable": "codes07",
+                "expression": {
+                  "data": [
+                    {
+                      "data": "0545383884125",
+                      "type": "text"
+                    },
+                    {
+                      "data": "8590899233",
+                      "type": "text"
+                    },
+                    {
+                      "data": "677615806X",
+                      "type": "text"
+                    },
+                    {
+                      "data": "8540235260774",
+                      "type": "text"
+                    },
+                    {
+                      "data": "9903515677",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "sequence"
+                },
+                "type": "sequence"
+              }
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "are_isbn",
+                "arguments": [
+                  "codes07",
+                  {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": [
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "sequence"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "variable": "codes08",
+                "expression": {
+                  "data": [
+                    {
+                      "data": "5379369239",
+                      "type": "text"
+                    },
+                    {
+                      "data": "8254851727",
+                      "type": "text"
+                    },
+                    {
+                      "data": "4363558619534",
+                      "type": "text"
+                    },
+                    {
+                      "data": "8866480923786",
+                      "type": "text"
+                    },
+                    {
+                      "data": "6837772531334",
+                      "type": "text"
+                    },
+                    {
+                      "data": "1552764710",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "sequence"
+                },
+                "type": "sequence"
+              }
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "are_isbn",
+                "arguments": [
+                  "codes08",
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": [
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "sequence"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "variable": "codes09",
+                "expression": {
+                  "data": [
+                    {
+                      "data": "3133896825895",
+                      "type": "text"
+                    },
+                    {
+                      "data": "9305059521",
+                      "type": "text"
+                    },
+                    {
+                      "data": "4874581832475",
+                      "type": "text"
+                    },
+                    {
+                      "data": "6430710467",
+                      "type": "text"
+                    },
+                    {
+                      "data": "3257814849438",
+                      "type": "text"
+                    },
+                    {
+                      "data": "2918894028",
+                      "type": "text"
+                    },
+                    {
+                      "data": "7606266531909",
+                      "type": "text"
+                    },
+                    {
+                      "data": "3064694487731",
+                      "type": "text"
+                    },
+                    {
+                      "data": "6511528143223",
+                      "type": "text"
+                    },
+                    {
+                      "data": "6607654290",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "sequence"
+                },
+                "type": "sequence"
+              }
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "are_isbn",
+                "arguments": [
+                  "codes09",
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": [
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "sequence"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "variable": "codes10",
+                "expression": {
+                  "data": [
+                    {
+                      "data": "5700206083801",
+                      "type": "text"
+                    },
+                    {
+                      "data": "8409857189",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0037713291",
+                      "type": "text"
+                    },
+                    {
+                      "data": "8988096534673",
+                      "type": "text"
+                    },
+                    {
+                      "data": "1694754782",
+                      "type": "text"
+                    },
+                    {
+                      "data": "8910168307",
+                      "type": "text"
+                    },
+                    {
+                      "data": "7305804339",
+                      "type": "text"
+                    },
+                    {
+                      "data": "4933501967472",
+                      "type": "text"
+                    },
+                    {
+                      "data": "4580193541",
+                      "type": "text"
+                    },
+                    {
+                      "data": "1222124323",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "sequence"
+                },
+                "type": "sequence"
+              }
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "are_isbn",
+                "arguments": [
+                  "codes10",
+                  {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": [
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "sequence"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "variable": "codes11",
+                "expression": {
+                  "data": [
+                    {
+                      "data": "1240971495573",
+                      "type": "text"
+                    },
+                    {
+                      "data": "7039903210",
+                      "type": "text"
+                    },
+                    {
+                      "data": "9142190172652",
+                      "type": "text"
+                    },
+                    {
+                      "data": "9574019632",
+                      "type": "text"
+                    },
+                    {
+                      "data": "2062263661038",
+                      "type": "text"
+                    },
+                    {
+                      "data": "4226077563",
+                      "type": "text"
+                    },
+                    {
+                      "data": "1376473851",
+                      "type": "text"
+                    },
+                    {
+                      "data": "3208155840",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "sequence"
+                },
+                "type": "sequence"
+              }
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "are_isbn",
+                "arguments": [
+                  "codes11",
+                  {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": [
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "sequence"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "variable": "codes12",
+                "expression": {
+                  "data": [
+                    {
+                      "data": "0304370580",
+                      "type": "text"
+                    },
+                    {
+                      "data": "5951122090",
+                      "type": "text"
+                    },
+                    {
+                      "data": "9956706667508",
+                      "type": "text"
+                    },
+                    {
+                      "data": "6174700024014",
+                      "type": "text"
+                    },
+                    {
+                      "data": "1224903387706",
+                      "type": "text"
+                    },
+                    {
+                      "data": "9878900579",
+                      "type": "text"
+                    },
+                    {
+                      "data": "2537592672417",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "sequence"
+                },
+                "type": "sequence"
+              }
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "are_isbn",
+                "arguments": [
+                  "codes12",
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": [
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "sequence"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "variable": "codes13",
+                "expression": {
+                  "data": [
+                    {
+                      "data": "5444276755",
+                      "type": "text"
+                    },
+                    {
+                      "data": "4497406121",
+                      "type": "text"
+                    },
+                    {
+                      "data": "7361459056",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0873000633",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0280573571231",
+                      "type": "text"
+                    },
+                    {
+                      "data": "7519704890",
+                      "type": "text"
+                    },
+                    {
+                      "data": "1068790538683",
+                      "type": "text"
+                    },
+                    {
+                      "data": "4525805033215",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "sequence"
+                },
+                "type": "sequence"
+              }
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "are_isbn",
+                "arguments": [
+                  "codes13",
+                  {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": [
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "sequence"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "variable": "codes14",
+                "expression": {
+                  "data": [
+                    {
+                      "data": "0110936228268",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0062409422",
+                      "type": "text"
+                    },
+                    {
+                      "data": "304629672X",
+                      "type": "text"
+                    },
+                    {
+                      "data": "3272842608201",
+                      "type": "text"
+                    },
+                    {
+                      "data": "3901434623",
+                      "type": "text"
+                    },
+                    {
+                      "data": "8121556342436",
+                      "type": "text"
+                    },
+                    {
+                      "data": "2949047536",
+                      "type": "text"
+                    },
+                    {
+                      "data": "7903452540403",
+                      "type": "text"
+                    },
+                    {
+                      "data": "5741953779",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "sequence"
+                },
+                "type": "sequence"
+              }
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "are_isbn",
+                "arguments": [
+                  "codes14",
+                  {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": [
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "sequence"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "variable": "codes15",
+                "expression": {
+                  "data": [
+                    {
+                      "data": "4940268241",
+                      "type": "text"
+                    },
+                    {
+                      "data": "2899475366166",
+                      "type": "text"
+                    },
+                    {
+                      "data": "1747043742091",
+                      "type": "text"
+                    },
+                    {
+                      "data": "5028098466623",
+                      "type": "text"
+                    },
+                    {
+                      "data": "3686382450762",
+                      "type": "text"
+                    },
+                    {
+                      "data": "8825575548",
+                      "type": "text"
+                    },
+                    {
+                      "data": "5236415553017",
+                      "type": "text"
+                    },
+                    {
+                      "data": "7517309153",
+                      "type": "text"
+                    },
+                    {
+                      "data": "7588642113332",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "sequence"
+                },
+                "type": "sequence"
+              }
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "are_isbn",
+                "arguments": [
+                  "codes15",
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": [
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "sequence"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "variable": "codes16",
+                "expression": {
+                  "data": [
+                    {
+                      "data": "8388744259",
+                      "type": "text"
+                    },
+                    {
+                      "data": "5886772169261",
+                      "type": "text"
+                    },
+                    {
+                      "data": "676688424X",
+                      "type": "text"
+                    },
+                    {
+                      "data": "3860165322",
+                      "type": "text"
+                    },
+                    {
+                      "data": "8273807274",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "sequence"
+                },
+                "type": "sequence"
+              }
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "are_isbn",
+                "arguments": [
+                  "codes16",
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": [
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "sequence"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "variable": "codes17",
+                "expression": {
+                  "data": [
+                    {
+                      "data": "2247562050589",
+                      "type": "text"
+                    },
+                    {
+                      "data": "2019714026",
+                      "type": "text"
+                    },
+                    {
+                      "data": "4173060582718",
+                      "type": "text"
+                    },
+                    {
+                      "data": "3445815007307",
+                      "type": "text"
+                    },
+                    {
+                      "data": "2477321159",
+                      "type": "text"
+                    },
+                    {
+                      "data": "5065417585",
+                      "type": "text"
+                    },
+                    {
+                      "data": "4061828495542",
+                      "type": "text"
+                    },
+                    {
+                      "data": "3149746593",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "sequence"
+                },
+                "type": "sequence"
+              }
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "are_isbn",
+                "arguments": [
+                  "codes17",
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": [
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "sequence"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "variable": "codes18",
+                "expression": {
+                  "data": [
+                    {
+                      "data": "3538011413795",
+                      "type": "text"
+                    },
+                    {
+                      "data": "1558468856",
+                      "type": "text"
+                    },
+                    {
+                      "data": "5700845093120",
+                      "type": "text"
+                    },
+                    {
+                      "data": "6278502484751",
+                      "type": "text"
+                    },
+                    {
+                      "data": "6271691498",
+                      "type": "text"
+                    },
+                    {
+                      "data": "4496261829",
+                      "type": "text"
+                    },
+                    {
+                      "data": "2374734194343",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "sequence"
+                },
+                "type": "sequence"
+              }
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "are_isbn",
+                "arguments": [
+                  "codes18",
+                  {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": [
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "sequence"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "variable": "codes19",
+                "expression": {
+                  "data": [
+                    {
+                      "data": "8284017842682",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0112019968",
+                      "type": "text"
+                    },
+                    {
+                      "data": "5572180911",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0741514434825",
+                      "type": "text"
+                    },
+                    {
+                      "data": "8946932157630",
+                      "type": "text"
+                    },
+                    {
+                      "data": "6582169904503",
+                      "type": "text"
+                    },
+                    {
+                      "data": "9852696629",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "sequence"
+                },
+                "type": "sequence"
+              }
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "are_isbn",
+                "arguments": [
+                  "codes19",
+                  {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": [
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "sequence"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "variable": "codes20",
+                "expression": {
+                  "data": [
+                    {
+                      "data": "7421721705297",
+                      "type": "text"
+                    },
+                    {
+                      "data": "3250792110570",
+                      "type": "text"
+                    },
+                    {
+                      "data": "2688140361",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0567284300",
+                      "type": "text"
+                    },
+                    {
+                      "data": "2914503397360",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "sequence"
+                },
+                "type": "sequence"
+              }
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "are_isbn",
+                "arguments": [
+                  "codes20",
+                  {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": [
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "sequence"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "variable": "codes21",
+                "expression": {
+                  "data": [
+                    {
+                      "data": "8637665059",
+                      "type": "text"
+                    },
+                    {
+                      "data": "2916861580",
+                      "type": "text"
+                    },
+                    {
+                      "data": "9050808427",
+                      "type": "text"
+                    },
+                    {
+                      "data": "1809482407",
+                      "type": "text"
+                    },
+                    {
+                      "data": "9898421635",
+                      "type": "text"
+                    },
+                    {
+                      "data": "238490597X",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0363808213",
+                      "type": "text"
+                    },
+                    {
+                      "data": "2078307242292",
+                      "type": "text"
+                    },
+                    {
+                      "data": "7043605391",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "sequence"
+                },
+                "type": "sequence"
+              }
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "are_isbn",
+                "arguments": [
+                  "codes21",
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": [
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "sequence"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "variable": "codes22",
+                "expression": {
+                  "data": [
+                    {
+                      "data": "4589420309",
+                      "type": "text"
+                    },
+                    {
+                      "data": "7034025681",
+                      "type": "text"
+                    },
+                    {
+                      "data": "9787592424223",
+                      "type": "text"
+                    },
+                    {
+                      "data": "2408393915917",
+                      "type": "text"
+                    },
+                    {
+                      "data": "3914596393738",
+                      "type": "text"
+                    },
+                    {
+                      "data": "4065051015348",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0430525782134",
+                      "type": "text"
+                    },
+                    {
+                      "data": "7580679078",
+                      "type": "text"
+                    },
+                    {
+                      "data": "3432466277",
+                      "type": "text"
+                    },
+                    {
+                      "data": "7999062318204",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "sequence"
+                },
+                "type": "sequence"
+              }
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "are_isbn",
+                "arguments": [
+                  "codes22",
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": [
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "sequence"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "variable": "codes23",
+                "expression": {
+                  "data": [
+                    {
+                      "data": "1250992060",
+                      "type": "text"
+                    },
+                    {
+                      "data": "1376596075",
+                      "type": "text"
+                    },
+                    {
+                      "data": "8231183823410",
+                      "type": "text"
+                    },
+                    {
+                      "data": "8461777088305",
+                      "type": "text"
+                    },
+                    {
+                      "data": "3617819707634",
+                      "type": "text"
+                    },
+                    {
+                      "data": "2293282709244",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "sequence"
+                },
+                "type": "sequence"
+              }
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "are_isbn",
+                "arguments": [
+                  "codes23",
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": [
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "sequence"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "variable": "codes24",
+                "expression": {
+                  "data": [
+                    {
+                      "data": "2131117911285",
+                      "type": "text"
+                    },
+                    {
+                      "data": "5042958818813",
+                      "type": "text"
+                    },
+                    {
+                      "data": "633253272X",
+                      "type": "text"
+                    },
+                    {
+                      "data": "3393937569",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0932280246291",
+                      "type": "text"
+                    },
+                    {
+                      "data": "2812750081",
+                      "type": "text"
+                    },
+                    {
+                      "data": "4096963594010",
+                      "type": "text"
+                    },
+                    {
+                      "data": "5314666647",
+                      "type": "text"
+                    },
+                    {
+                      "data": "1765780667",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "sequence"
+                },
+                "type": "sequence"
+              }
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "are_isbn",
+                "arguments": [
+                  "codes24",
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": [
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "sequence"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "variable": "codes25",
+                "expression": {
+                  "data": [
+                    {
+                      "data": "2970247719127",
+                      "type": "text"
+                    },
+                    {
+                      "data": "6774512385714",
+                      "type": "text"
+                    },
+                    {
+                      "data": "2175162662576",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0052938993992",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0276564047922",
+                      "type": "text"
+                    },
+                    {
+                      "data": "7083799095758",
+                      "type": "text"
+                    },
+                    {
+                      "data": "1442034055",
+                      "type": "text"
+                    },
+                    {
+                      "data": "8227225476416",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0782919008159",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "sequence"
+                },
+                "type": "sequence"
+              }
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "are_isbn",
+                "arguments": [
+                  "codes25",
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": [
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "sequence"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "variable": "codes26",
+                "expression": {
+                  "data": [
+                    {
+                      "data": "2111550610726",
+                      "type": "text"
+                    },
+                    {
+                      "data": "2160572882",
+                      "type": "text"
+                    },
+                    {
+                      "data": "3318745619863",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0155338641",
+                      "type": "text"
+                    },
+                    {
+                      "data": "7337640459299",
+                      "type": "text"
+                    },
+                    {
+                      "data": "2689602850798",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "sequence"
+                },
+                "type": "sequence"
+              }
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "are_isbn",
+                "arguments": [
+                  "codes26",
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": [
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "sequence"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "variable": "codes27",
+                "expression": {
+                  "data": [
+                    {
+                      "data": "491474810X",
+                      "type": "text"
+                    },
+                    {
+                      "data": "1868862453",
+                      "type": "text"
+                    },
+                    {
+                      "data": "6507744788699",
+                      "type": "text"
+                    },
+                    {
+                      "data": "6514799461",
+                      "type": "text"
+                    },
+                    {
+                      "data": "2699022675",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0015058261347",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "sequence"
+                },
+                "type": "sequence"
+              }
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "are_isbn",
+                "arguments": [
+                  "codes27",
+                  {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": [
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "sequence"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "variable": "codes28",
+                "expression": {
+                  "data": [
+                    {
+                      "data": "1591837900",
+                      "type": "text"
+                    },
+                    {
+                      "data": "4084361662543",
+                      "type": "text"
+                    },
+                    {
+                      "data": "2301995924110",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0883498487122",
+                      "type": "text"
+                    },
+                    {
+                      "data": "6147929279294",
+                      "type": "text"
+                    },
+                    {
+                      "data": "4338840889",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "sequence"
+                },
+                "type": "sequence"
+              }
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "are_isbn",
+                "arguments": [
+                  "codes28",
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": [
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "sequence"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "variable": "codes29",
+                "expression": {
+                  "data": [
+                    {
+                      "data": "838911574X",
+                      "type": "text"
+                    },
+                    {
+                      "data": "5586107032885",
+                      "type": "text"
+                    },
+                    {
+                      "data": "4907552877394",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0815050204277",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0998370956556",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "sequence"
+                },
+                "type": "sequence"
+              }
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "are_isbn",
+                "arguments": [
+                  "codes29",
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": [
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "sequence"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "variable": "codes30",
+                "expression": {
+                  "data": [
+                    {
+                      "data": "6425526636801",
+                      "type": "text"
+                    },
+                    {
+                      "data": "1185984585",
+                      "type": "text"
+                    },
+                    {
+                      "data": "9455174956",
+                      "type": "text"
+                    },
+                    {
+                      "data": "379867853X",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0800885215724",
+                      "type": "text"
+                    },
+                    {
+                      "data": "3955737720259",
+                      "type": "text"
+                    },
+                    {
+                      "data": "208158960X",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0481053162042",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "sequence"
+                },
+                "type": "sequence"
+              }
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "are_isbn",
+                "arguments": [
+                  "codes30",
+                  {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": [
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "sequence"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "variable": "codes31",
+                "expression": {
+                  "data": [
+                    {
+                      "data": "4161838360",
+                      "type": "text"
+                    },
+                    {
+                      "data": "9087877105",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0242975445893",
+                      "type": "text"
+                    },
+                    {
+                      "data": "4671946816",
+                      "type": "text"
+                    },
+                    {
+                      "data": "7068650775",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "sequence"
+                },
+                "type": "sequence"
+              }
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "are_isbn",
+                "arguments": [
+                  "codes31",
+                  {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": [
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "sequence"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "variable": "codes32",
+                "expression": {
+                  "data": [
+                    {
+                      "data": "7969245835026",
+                      "type": "text"
+                    },
+                    {
+                      "data": "7473778412",
+                      "type": "text"
+                    },
+                    {
+                      "data": "5906149128",
+                      "type": "text"
+                    },
+                    {
+                      "data": "1995892451972",
+                      "type": "text"
+                    },
+                    {
+                      "data": "6365545795195",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "sequence"
+                },
+                "type": "sequence"
+              }
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "are_isbn",
+                "arguments": [
+                  "codes32",
+                  {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": [
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "sequence"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "variable": "codes33",
+                "expression": {
+                  "data": [
+                    {
+                      "data": "6367430325",
+                      "type": "text"
+                    },
+                    {
+                      "data": "5654288408048",
+                      "type": "text"
+                    },
+                    {
+                      "data": "2886463959324",
+                      "type": "text"
+                    },
+                    {
+                      "data": "8563482019",
+                      "type": "text"
+                    },
+                    {
+                      "data": "2464247561",
+                      "type": "text"
+                    },
+                    {
+                      "data": "4266063109354",
+                      "type": "text"
+                    },
+                    {
+                      "data": "4932722869",
+                      "type": "text"
+                    },
+                    {
+                      "data": "7451075594",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "sequence"
+                },
+                "type": "sequence"
+              }
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "are_isbn",
+                "arguments": [
+                  "codes33",
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": [
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "sequence"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "variable": "codes34",
+                "expression": {
+                  "data": [
+                    {
+                      "data": "2315563585",
+                      "type": "text"
+                    },
+                    {
+                      "data": "6921325280569",
+                      "type": "text"
+                    },
+                    {
+                      "data": "9997209183",
+                      "type": "text"
+                    },
+                    {
+                      "data": "3307805169",
+                      "type": "text"
+                    },
+                    {
+                      "data": "8669618964",
+                      "type": "text"
+                    },
+                    {
+                      "data": "6577814019533",
+                      "type": "text"
+                    },
+                    {
+                      "data": "5745006743",
+                      "type": "text"
+                    },
+                    {
+                      "data": "2072695456363",
+                      "type": "text"
+                    },
+                    {
+                      "data": "5419518040945",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "sequence"
+                },
+                "type": "sequence"
+              }
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "are_isbn",
+                "arguments": [
+                  "codes34",
+                  {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": [
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "sequence"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "variable": "codes35",
+                "expression": {
+                  "data": [
+                    {
+                      "data": "1916053612727",
+                      "type": "text"
+                    },
+                    {
+                      "data": "3053066182918",
+                      "type": "text"
+                    },
+                    {
+                      "data": "4750653438",
+                      "type": "text"
+                    },
+                    {
+                      "data": "3851511545460",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "sequence"
+                },
+                "type": "sequence"
+              }
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "are_isbn",
+                "arguments": [
+                  "codes35",
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": [
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "sequence"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "variable": "codes36",
+                "expression": {
+                  "data": [
+                    {
+                      "data": "9428839334539",
+                      "type": "text"
+                    },
+                    {
+                      "data": "9438758311306",
+                      "type": "text"
+                    },
+                    {
+                      "data": "4740535481",
+                      "type": "text"
+                    },
+                    {
+                      "data": "5654297907757",
+                      "type": "text"
+                    },
+                    {
+                      "data": "4087876038138",
+                      "type": "text"
+                    },
+                    {
+                      "data": "5680293010",
+                      "type": "text"
+                    },
+                    {
+                      "data": "1188631223",
+                      "type": "text"
+                    },
+                    {
+                      "data": "8964578120",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "sequence"
+                },
+                "type": "sequence"
+              }
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "are_isbn",
+                "arguments": [
+                  "codes36",
+                  {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": [
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "sequence"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "variable": "codes37",
+                "expression": {
+                  "data": [
+                    {
+                      "data": "0604652245",
+                      "type": "text"
+                    },
+                    {
+                      "data": "3211256563",
+                      "type": "text"
+                    },
+                    {
+                      "data": "3816255201119",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0352341858289",
+                      "type": "text"
+                    },
+                    {
+                      "data": "496438909X",
+                      "type": "text"
+                    },
+                    {
+                      "data": "2495874606",
+                      "type": "text"
+                    },
+                    {
+                      "data": "7062808277007",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "sequence"
+                },
+                "type": "sequence"
+              }
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "are_isbn",
+                "arguments": [
+                  "codes37",
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": [
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "sequence"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "variable": "codes38",
+                "expression": {
+                  "data": [
+                    {
+                      "data": "6802122901",
+                      "type": "text"
+                    },
+                    {
+                      "data": "7893828678",
+                      "type": "text"
+                    },
+                    {
+                      "data": "5079052345683",
+                      "type": "text"
+                    },
+                    {
+                      "data": "8859672899",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0202978720397",
+                      "type": "text"
+                    },
+                    {
+                      "data": "2575516043264",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0130327915029",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "sequence"
+                },
+                "type": "sequence"
+              }
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "are_isbn",
+                "arguments": [
+                  "codes38",
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": [
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "sequence"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "variable": "codes39",
+                "expression": {
+                  "data": [
+                    {
+                      "data": "7088038355791",
+                      "type": "text"
+                    },
+                    {
+                      "data": "4492586271237",
+                      "type": "text"
+                    },
+                    {
+                      "data": "154475151X",
+                      "type": "text"
+                    },
+                    {
+                      "data": "3941469996",
+                      "type": "text"
+                    },
+                    {
+                      "data": "1553696506",
+                      "type": "text"
+                    },
+                    {
+                      "data": "5607644433215",
+                      "type": "text"
+                    },
+                    {
+                      "data": "8148215206778",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "sequence"
+                },
+                "type": "sequence"
+              }
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "are_isbn",
+                "arguments": [
+                  "codes39",
+                  {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": [
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "sequence"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "variable": "codes40",
+                "expression": {
+                  "data": [
+                    {
+                      "data": "6374882530318",
+                      "type": "text"
+                    },
+                    {
+                      "data": "8375942489506",
+                      "type": "text"
+                    },
+                    {
+                      "data": "8263520235150",
+                      "type": "text"
+                    },
+                    {
+                      "data": "9899047285577",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "sequence"
+                },
+                "type": "sequence"
+              }
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "are_isbn",
+                "arguments": [
+                  "codes40",
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": [
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "sequence"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "variable": "codes41",
+                "expression": {
+                  "data": [
+                    {
+                      "data": "8148302618",
+                      "type": "text"
+                    },
+                    {
+                      "data": "3464976971",
+                      "type": "text"
+                    },
+                    {
+                      "data": "2921350971",
+                      "type": "text"
+                    },
+                    {
+                      "data": "3861762641",
+                      "type": "text"
+                    },
+                    {
+                      "data": "4378000608140",
+                      "type": "text"
+                    },
+                    {
+                      "data": "8897978495",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0313726597618",
+                      "type": "text"
+                    },
+                    {
+                      "data": "3278586406",
+                      "type": "text"
+                    },
+                    {
+                      "data": "2866344058",
+                      "type": "text"
+                    },
+                    {
+                      "data": "5369684777758",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "sequence"
+                },
+                "type": "sequence"
+              }
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "are_isbn",
+                "arguments": [
+                  "codes41",
+                  {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": [
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "sequence"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "variable": "codes42",
+                "expression": {
+                  "data": [
+                    {
+                      "data": "6182269371429",
+                      "type": "text"
+                    },
+                    {
+                      "data": "3745134823415",
+                      "type": "text"
+                    },
+                    {
+                      "data": "9964141998",
+                      "type": "text"
+                    },
+                    {
+                      "data": "2725739904266",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0246888776501",
+                      "type": "text"
+                    },
+                    {
+                      "data": "7507377113",
+                      "type": "text"
+                    },
+                    {
+                      "data": "6106935653",
+                      "type": "text"
+                    },
+                    {
+                      "data": "4183775275051",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "sequence"
+                },
+                "type": "sequence"
+              }
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "are_isbn",
+                "arguments": [
+                  "codes42",
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": [
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "sequence"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "variable": "codes43",
+                "expression": {
+                  "data": [
+                    {
+                      "data": "7045704127",
+                      "type": "text"
+                    },
+                    {
+                      "data": "248622100X",
+                      "type": "text"
+                    },
+                    {
+                      "data": "5445056292",
+                      "type": "text"
+                    },
+                    {
+                      "data": "9130123745188",
+                      "type": "text"
+                    },
+                    {
+                      "data": "6134661213581",
+                      "type": "text"
+                    },
+                    {
+                      "data": "9355850521085",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "sequence"
+                },
+                "type": "sequence"
+              }
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "are_isbn",
+                "arguments": [
+                  "codes43",
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": [
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "sequence"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "variable": "codes44",
+                "expression": {
+                  "data": [
+                    {
+                      "data": "5229582657678",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0068912072591",
+                      "type": "text"
+                    },
+                    {
+                      "data": "7180158333",
+                      "type": "text"
+                    },
+                    {
+                      "data": "8054200080937",
+                      "type": "text"
+                    },
+                    {
+                      "data": "3520588341762",
+                      "type": "text"
+                    },
+                    {
+                      "data": "2305830527",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "sequence"
+                },
+                "type": "sequence"
+              }
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "are_isbn",
+                "arguments": [
+                  "codes44",
+                  {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": [
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "sequence"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "variable": "codes45",
+                "expression": {
+                  "data": [
+                    {
+                      "data": "5457870618395",
+                      "type": "text"
+                    },
+                    {
+                      "data": "289411334X",
+                      "type": "text"
+                    },
+                    {
+                      "data": "5877904232494",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0952807920633",
+                      "type": "text"
+                    },
+                    {
+                      "data": "179869221X",
+                      "type": "text"
+                    },
+                    {
+                      "data": "2437719326",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0059766800485",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "sequence"
+                },
+                "type": "sequence"
+              }
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "are_isbn",
+                "arguments": [
+                  "codes45",
+                  {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": [
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "sequence"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "variable": "codes46",
+                "expression": {
+                  "data": [
+                    {
+                      "data": "0138479241952",
+                      "type": "text"
+                    },
+                    {
+                      "data": "8193812798714",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0431810779594",
+                      "type": "text"
+                    },
+                    {
+                      "data": "8479912316",
+                      "type": "text"
+                    },
+                    {
+                      "data": "6093281703",
+                      "type": "text"
+                    },
+                    {
+                      "data": "9462745870",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "sequence"
+                },
+                "type": "sequence"
+              }
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "are_isbn",
+                "arguments": [
+                  "codes46",
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": [
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "sequence"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "variable": "codes47",
+                "expression": {
+                  "data": [
+                    {
+                      "data": "6455993591914",
+                      "type": "text"
+                    },
+                    {
+                      "data": "7097568050",
+                      "type": "text"
+                    },
+                    {
+                      "data": "4969860467439",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0567440160935",
+                      "type": "text"
+                    },
+                    {
+                      "data": "1019085629772",
+                      "type": "text"
+                    },
+                    {
+                      "data": "8209033611255",
+                      "type": "text"
+                    },
+                    {
+                      "data": "099050154X",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "sequence"
+                },
+                "type": "sequence"
+              }
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "are_isbn",
+                "arguments": [
+                  "codes47",
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": [
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "sequence"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "variable": "codes48",
+                "expression": {
+                  "data": [
+                    {
+                      "data": "9854017271241",
+                      "type": "text"
+                    },
+                    {
+                      "data": "9821563368",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0594198243",
+                      "type": "text"
+                    },
+                    {
+                      "data": "8939323122",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "sequence"
+                },
+                "type": "sequence"
+              }
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "are_isbn",
+                "arguments": [
+                  "codes48",
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": [
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "sequence"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "variable": "codes49",
+                "expression": {
+                  "data": [
+                    {
+                      "data": "0645917471977",
+                      "type": "text"
+                    },
+                    {
+                      "data": "0832692998",
+                      "type": "text"
+                    },
+                    {
+                      "data": "1682637997",
+                      "type": "text"
+                    },
+                    {
+                      "data": "4026933210",
+                      "type": "text"
+                    },
+                    {
+                      "data": "4315779427",
+                      "type": "text"
+                    },
+                    {
+                      "data": "2745183222",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "sequence"
+                },
+                "type": "sequence"
+              }
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "are_isbn",
+                "arguments": [
+                  "codes49",
+                  {
+                    "data": false,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": [
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "sequence"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "variable": "codes50",
+                "expression": {
+                  "data": [
+                    {
+                      "data": "5978118450374",
+                      "type": "text"
+                    },
+                    {
+                      "data": "4305436261411",
+                      "type": "text"
+                    },
+                    {
+                      "data": "2339184060683",
+                      "type": "text"
+                    },
+                    {
+                      "data": "5930762384",
+                      "type": "text"
+                    }
+                  ],
+                  "type": "sequence"
+                },
+                "type": "sequence"
+              }
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "are_isbn",
+                "arguments": [
+                  "codes50",
+                  {
+                    "data": true,
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "data": [
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      },
+                      {
+                        "data": false,
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "sequence"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -2,12 +2,13 @@
   "description": {
     "difficulty": 0.5,
     "names": {
-      "en": "Echo [UNIVERSELE TEST]",
-      "nl": "Echo [UNIVERSELE TEST]"
+      "en": "Echo (I/O) [UNIVERSEEL]",
+      "nl": "Echo (I/O) [UNIVERSEEL]"
     }
   },
   "evaluation": {
-    "memory_limit": 500000000
+    "memory_limit": 500000000,
+    "plan_name": "full.tson"
   },
   "programming_language": "python",
   "access": "public",

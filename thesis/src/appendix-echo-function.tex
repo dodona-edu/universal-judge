@@ -1,0 +1,198 @@
+%! Suppress = EscapeHashOutsideCommand
+\chapter{Echofunctie-oefening}\label{ch:echo-function-oefening}
+
+Deze bijlage bevat de door \tested{} gegenereerde testcode voor het testplan uit de oefening \emph{Echofunctie} uit \cref{ch:nieuwe-oefening} (zie \cref{subsec:oefening-echofunctie-testplan} voor het testplan.)
+
+\section{Python}\label{sec:echo-function-python}
+
+\subsection{Oplossing}\label{subsec:echo-function-python-oplossing}
+
+\inputminted{python}{sources/echo-function/correct.py}
+
+\subsection{Gegenereerde code}\label{subsec:echo-function-python-gegenereerde-code}
+
+De testcode die gegenereerd wordt bij het uitvoeren van bovenstaande testplan.
+Deze code is lichtjes aangepast: overtollige witruimte is verwijderd.
+Anders is de code identiek aan de door \tested{} gegenereerde code.
+
+In Python is geen selector nodig, waardoor de gegenereerde code identiek is voor batchcompilatie en voor contextcompilatie.
+In beide gevallen wordt een bestanden gegenereerd:
+
+\begin{enumerate}
+    \item \texttt{context\_0\_0.py}
+\end{enumerate}
+
+\subsubsection{\texttt{context\_0\_0.py}}
+
+%! Suppress = EscapeUnderscore
+\inputminted{python}{sources/echo-function/context_0_0.py}
+
+\subsection{Uitvoeren}\label{subsec:echo-function-python-uitvoeren}
+
+Bij het uitvoeren worden de gegenereerde bestanden uitgevoerd.
+In beide gevallen (batchcompilatie en contextcompilatie) wordt de juiste context uitgevoerd:
+
+%! Suppress = EscapeUnderscore
+\begin{minted}{console}
+> python context_0_0.py
+<uitvoer context_0_0>
+\end{minted}
+
+\section{Java}\label{sec:echo-function-java}
+
+\subsection{Oplossing}\label{subsec:echo-function-java-oplossing}
+
+\inputminted{java}{sources/echo-function/correct.java}
+
+\subsection{Gegenereerde code}\label{subsec:echo-function-java-gegenereerde-code}
+
+De testcode die gegenereerd wordt bij het uitvoeren van bovenstaande testplan.
+Deze code is lichtjes aangepast: overtollige witruimte is verwijderd.
+Anders is de code identiek aan de door \tested{} gegenereerde code.
+
+Bij batchcompilatie worden alle testgevallen in één keer gecompileerd.
+Daarvoor wordt het bestand \texttt{Selector.java} gegenereerd.
+Bij contextcompilatie wordt geen \texttt{Selector.java} gegenereerd, maar zijn de bestanden anders identiek.
+Volgende bestanden werden gegenereerd (met \texttt{Selector.java} dus enkel in batchcompilatie):
+
+\begin{enumerate}
+    \item \texttt{Context00.java}
+    \item \texttt{Selector.java}
+\end{enumerate}
+
+\subsubsection{\texttt{Context00.java}}
+
+\inputminted{java}{sources/echo-function/Context00.java}
+
+\subsubsection{\texttt{Selector.java}}
+
+\inputminted{java}{sources/echo-function/Selector.java}
+
+\subsection{Uitvoeren}\label{subsec:echo-function-java-uitvoeren}
+
+Bij batchcompilatie wordt \texttt{Selector.java} gecompileerd, wat leidt tot een reeks \texttt{.class}-bestanden.
+Vervolgens wordt de selector uitgevoerd:
+
+%! Suppress = EscapeUnderscore
+%! Suppress = LineBreak
+\begin{minted}{console}
+> ./java -cp . Selector Context00
+<uitvoer context_0_0>
+\end{minted}
+
+Bij contextcompilatie wordt elke context afzonderlijk gecompileerd, wat ook leidt tot een reeks \texttt{.class}-bestanden.
+Deze keer wordt de context zelf uitgevoerd:
+
+%! Suppress = EscapeUnderscore
+%! Suppress = LineBreak
+\begin{minted}{console}
+> java -cp . Context00
+<uitvoer context_0_0>
+\end{minted}
+
+\section{C}\label{sec:echo-function-c}
+
+\subsection{Oplossing}\label{subsec:echo-function-oplossing}
+
+We voeren het testplan uit met deze oplossing:
+
+\inputminted{c}{sources/echo-function/correct.c}
+
+\subsection{Gegenereerde code}\label{subsec:echo-function-c-gegenereerde-code}
+
+De gegenereerde code die gegenereerd wordt bij het uitvoeren van bovenstaande testplan.
+Deze code is lichtjes aangepast: overtollige witruimte is verwijderd.
+Anders is de code identiek aan de door \tested{} gegenereerde code.
+
+Bij batchcompilatie worden alle testgevallen in één keer gecompileerd.
+Volgende bestanden werden gegenereerd:
+
+\begin{enumerate}
+    \item \texttt{context\_0\_0.c}
+    \item \texttt{selector.c}
+\end{enumerate}
+
+\subsubsection{\texttt{context\_0\_0.c}}
+
+%! Suppress = EscapeUnderscore
+\inputminted{c}{sources/echo-function/context_0_0.c}
+
+\subsubsection{\texttt{selector.c}}
+
+\inputminted{c}{sources/echo-function/selector.c}
+
+\subsection{Uitvoeren}\label{subsec:echo-function-c-uitvoeren}
+
+Bij het compileren wordt \texttt{selector.c} gecompileerd, wat leidt tot een uitvoerbaar bestand \texttt{selector}.
+Dit laatste bestand wordt dan uitgevoerd:
+
+%! Suppress = EscapeUnderscore
+\begin{minted}{console}
+> ./selector context_0_0
+<uitvoer context_0_0>
+\end{minted}
+
+
+Bij contextcompilatie wordt elke context afzonderlijk gecompileerd, wat leidt tot een uitvoerbaar bestand: \texttt{context\_0\_0}.
+Dit bestand wordt vervolgens uitgevoerd:
+
+%! Suppress = EscapeUnderscore
+\begin{minted}{console}
+> ./context_0_0
+<uitvoer context_0_0>
+\end{minted}
+
+\section{Haskell}\label{sec:echo-function-haskell}
+
+\subsection{Oplossing}\label{subsec:echo-function-haskell-oplossing}
+
+We voeren het testplan uit met deze oplossing:
+
+\inputminted{haskell}{sources/echo-function/correct.hs}
+
+\subsection{Gegenereerde code}\label{subsec:echo-function-haskell-gegenereerde-code}
+
+De gegenereerde code die gegenereerd wordt bij het uitvoeren van bovenstaande testplan.
+Deze code is lichtjes aangepast: overtollige witruimte is verwijderd.
+Anders is de code identiek aan de door \tested{} gegenereerde code.
+
+Bij batchcompilatie worden alle testgevallen in één keer gecompileerd.
+Volgende bestanden werden gegenereerd:
+
+\begin{enumerate}
+    \item \texttt{Context00.hs}
+    \item \texttt{Selector.hs}
+\end{enumerate}
+
+\subsubsection{\texttt{Context00.hs}}
+
+\inputminted{haskell}{sources/echo-function/Context00.hs}
+
+\subsubsection{\texttt{Selector.hs}}
+
+\inputminted{haskell}{sources/echo-function/Selector.hs}
+
+\subsection{Uitvoeren}\label{subsec:echo-function-haskell-uitvoeren}
+
+Bij het compileren wordt \texttt{Selector.hs} gecompileerd, wat leidt tot een uitvoerbaar bestand \texttt{Selector}.
+Dit laatste bestand wordt dan uitgevoerd:
+
+%! Suppress = EscapeUnderscore
+\begin{minted}{console}
+> ./selector Context00
+<uitvoer context_0_0>
+\end{minted}
+
+
+Bij contextcompilatie wordt elke context afzonderlijk gecompileerd, wat leidt tot een uitvoerbaar bestand: \texttt{Context00}.
+Dit bestand wordt vervolgens uitgevoerd:
+
+%! Suppress = EscapeUnderscore
+\begin{minted}{console}
+> ./Context00
+<uitvoer context_0_0>
+\end{minted}
+
+\section{JavaScript}\label{sec:echo-function-javascript}
+
+We hebben de code van JavaScript niet opgenomen in deze bijlage, omdat de code weinig verschilt van de code in \cref{sec:echo-javascript}, en ook conceptueel sterk lijkt op de code voor Python van deze oefening.

@@ -1,14 +1,25 @@
 ## Convert a Value to a literal type in Java.
-<%! from tested.datatypes import BasicNumericTypes, BasicStringTypes, BasicBooleanTypes, BasicNothingTypes, BasicSequenceTypes, BasicObjectTypes  %>
-<%page args="value" />
+<%! from tested.datatypes import BasicNumericTypes, BasicStringTypes, BasicBooleanTypes, BasicNothingTypes, BasicSequenceTypes, BasicObjectTypes  %>\
+<%page args="value" />\
+<%!
+    def escape_string(text):
+        return text.replace('"', '\\"')
+    def escape_char(text):
+        return text.replace("'", "\\'")
+%>\
 % if value.type == BasicNumericTypes.INTEGER:
-    ${value.data}\
+    ## Basic heuristic for long/int
+    % if len(str(value.data)) >= 10:
+        ${value.data}L\
+    % else:
+        ${value.data}\
+    % endif
 % elif value.type == BasicNumericTypes.RATIONAL:
     ${value.data}\
 % elif value.type == BasicStringTypes.TEXT:
-    "${value.data}"\
+    "${escape_string(value.data)}"\
 % elif value.type == BasicStringTypes.CHAR:
-    '${value.data}'\
+    '${escape_char(value.data)}'\
 % elif value.type == BasicBooleanTypes.BOOLEAN:
     ${str(value.data).lower()}\
 % elif value.type == BasicNothingTypes.NOTHING:
@@ -20,7 +31,7 @@
 % elif value.type == BasicObjectTypes.MAP:
     Map.of(\
     % for key, item in value.data.items():
-        "${key}", <%include file="expression.mako" args="value=item" />
+        "${key}", <%include file="statement.mako" args="statement=item" />\
         % if not loop.last:
             , \
         % endif

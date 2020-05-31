@@ -1,0 +1,51 @@
+{
+  "general": {
+    "dependencies": [],
+    "selector": true
+  },
+  "extensions": {
+    "file": "c"
+  },
+  "naming_conventions": {
+    "namespace": "snake_case",
+    "function": "snake_case"
+  },
+  "constructs": {
+    "objects": false,
+    "exceptions": false,
+    "function_calls": false,
+    "assignments": false,
+    "heterogeneous_collections": false,
+    "heterogeneous_arguments": false,
+    "evaluation": false,
+    "named_arguments": false,
+    "default_parameters": false
+  },
+  "datatypes": {
+    "integer": "unsupported",
+    "rational": "unsupported",
+    "char": "unsupported",
+    "text": "unsupported",
+    "boolean": "unsupported",
+    "sequence": "unsupported",
+    "set": "unsupported",
+    "map": "unsupported",
+    "nothing": "unsupported",
+    "int8": "unsupported",
+    "uint8": "unsupported",
+    "int16": "unsupported",
+    "uint16": "unsupported",
+    "int32": "unsupported",
+    "uint32": "unsupported",
+    "int64": "unsupported",
+    "uint64": "unsupported",
+    "bigint": "unsupported",
+    "single_precision": "unsupported",
+    "double_precision": "unsupported",
+    "double_extended": "unsupported",
+    "fixed_precision": "unsupported",
+    "array": "unsupported",
+    "list": "unsupported",
+    "tuple": "unsupported"
+  }
+}
