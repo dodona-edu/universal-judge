@@ -27,7 +27,7 @@
                 "arguments": [
                   {
                     "type": "integer",
-                    "data": 50
+                    "data": 42
                   }
                 ]
               },
@@ -35,7 +35,7 @@
                 "result": {
                   "value": {
                     "type": "integer",
-                    "data": 50
+                    "data": 42
                   }
                 }
               }
