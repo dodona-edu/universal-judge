@@ -701,14 +701,14 @@ Dit laat toe om voor elke test (zelfs binnen eenzelfde testgeval) andere opties 
 \subsubsection{Bestandsevaluatie}
 
 In deze evaluatievorm worden twee bestanden met elkaar vergeleken.
-Hiervoor bevat het testplan enerzijds een pad naar een bestand dat met de oefening meegeleverd wordt met de verwachte inhoud en anderzijds de naam (of pad) van de locatie waar het verwachte bestand zich moet bevinden.
+Hiervoor bevat het testplan enerzijds een pad naar een bestand met de verwachte inhoud dat met de oefening meegeleverd wordt en anderzijds de naam (of pad) van de locatie waar het bestand zich moet bevinden dat door de ingediende oplossing moet gegenereerd worden.
 De bestandsevaluatie ondersteunt enkel tekstuele bestanden, geen binaire bestanden.
 Het vergelijken van de bestanden gebeurt op één van deze manieren:
 
 \begin{description}
     \item[\texttt{full}] Beide bestanden worden in hun geheel met elkaar vergeleken.
     \item[\texttt{line}] Elke regel wordt vergeleken met een overeenkomstige regel in het andere bestand.
-    Standaard worden regeleindes niet in overweging genomen bij de vergelijking, maar de optie \texttt{stripNewlines} kan op \texttt{False} gezet worden om dit toch te doen.
+    Standaard worden regeleindes in overweging genomen bij de vergelijking, maar de optie \texttt{stripNewlines} kan op \texttt{True} gezet worden om dit niet te doen.
 \end{description}
 
 In beide gevallen gebeurt de eigenlijke evaluatie door de tekstevaluator die we zonet besproken hebben.
