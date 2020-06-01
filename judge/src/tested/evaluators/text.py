@@ -157,7 +157,7 @@ def evaluate_file(config: EvaluatorConfig,
         return compare_text(options, expected, actual)
     else:
         assert options["mode"] == "line"
-        strip_newlines = options.get("stripNewlines", True)
+        strip_newlines = options.get("stripNewlines", False)
         expected_lines = expected.splitlines(keepends=not strip_newlines)
         actual_lines = actual.splitlines(keepends=not strip_newlines)
         correct = len(actual_lines) == len(expected_lines)

@@ -181,7 +181,8 @@ def test_file_evaluator_full_correct(tmp_path: Path, pytestconfig, mocker):
 
 def test_file_evaluator_line_wrong(tmp_path: Path, pytestconfig, mocker):
     config = evaluator_config(tmp_path, pytestconfig, {
-        "mode": "line"
+        "mode": "line",
+        "stripNewlines": True
     })
     s = mocker.spy(tested.evaluators.text, name="compare_text")
     mock_files = [mocker.mock_open(read_data=content).return_value for content in
@@ -204,7 +205,8 @@ def test_file_evaluator_line_wrong(tmp_path: Path, pytestconfig, mocker):
 
 def test_file_evaluator_line_correct(tmp_path: Path, pytestconfig, mocker):
     config = evaluator_config(tmp_path, pytestconfig, {
-        "mode": "line"
+        "mode": "line",
+        "stripNewlines": True
     })
     s = mocker.spy(tested.evaluators.text, name="compare_text")
     mock_files = [mocker.mock_open(read_data=content).return_value for content in
@@ -228,7 +230,7 @@ def test_file_evaluator_line_correct(tmp_path: Path, pytestconfig, mocker):
 def test_file_evaluator_strip_lines_correct(tmp_path: Path, pytestconfig, mocker):
     config = evaluator_config(tmp_path, pytestconfig, {
         "mode": "line",
-        "strip_newlines": True
+        "stripNewlines": True
     })
     s = mocker.spy(tested.evaluators.text, name="compare_text")
     mock_files = [mocker.mock_open(read_data=content).return_value for content in
@@ -252,7 +254,7 @@ def test_file_evaluator_strip_lines_correct(tmp_path: Path, pytestconfig, mocker
 def test_file_evaluator_dont_strip_lines_correct(tmp_path: Path, pytestconfig, mocker):
     config = evaluator_config(tmp_path, pytestconfig, {
         "mode": "line",
-        "strip_newlines": False
+        "stripNewlines": False
     })
     s = mocker.spy(tested.evaluators.text, name="compare_text")
     mock_files = [mocker.mock_open(read_data=content).return_value for content in
