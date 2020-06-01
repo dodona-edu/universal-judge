@@ -2,7 +2,7 @@
 
 In onze maatschappij wordt technologie, en informatica in het bijzonder, alsmaar belangrijker.
 In steeds meer sectoren worden problemen opgelost met behulp van digitale apparatuur.
-Het is daarom belangrijk dat iedereen een basis digitale geletterdheid heeft.
+Het is daarom belangrijk dat iedereen een basis digitale geletterdheid aangeleerd krijgt.
 Het is niet voldoende om te kunnen werken met de programma's en technologie van vandaag.
 Wie weet of programma's zoals Word of PowerPoint binnen twintig jaar nog relevant zijn?
 De technologie verandert snel, waardoor het nodig is een begrip van de onderliggende systemen te hebben.
@@ -12,33 +12,36 @@ Computationeel denken is een breed begrip, maar een goede definitie is het oplos
 Het gaat om het vertalen van het probleem uit de "echte wereld" naar de informaticawereld, zodat het probleem kan begrepen worden door een computer.
 Dit computationeel denken is recent ook opgenomen in de eindtermen van zowel het basisonderwijs als het secundair onderwijs.
 
-Een goede manier om computationeel denken aan te leren aan studenten is programmeren.
+Programmeren is een goede manier om computationeel denken aan te leren aan studenten.
 Studenten ervaren programmeren echter vaak als moeilijk.
 Het spreekwoord "oefening baart kunst" indachtig, denken we dat het maken van veel oefeningen een goede manier is om programmeren onder de knie te krijgen.
-Het aanbieden van veel oefeningen leidt tot uitdagingen voor de lesgevers:
+Het aanbieden van veel oefeningen leidt tot uitdagingen voor de lesgevers.
 
-\begin{enumerate}
-    \item Lesgevers moeten geschikte oefeningen opstellen, aangepast aan het niveau van de studenten.
-    Oefeningen moeten rekening houden met welke concepten studenten al kennen, hoeveel werk het oplossen is, enzovoort.
-    \item De oplossingen voor deze oefeningen moeten voorzien worden van kwalitatieve feedback.
-    Enkel en alleen oefeningen oplossen is niet voldoende: goede feedback laat toe dat studenten hun vaardigheden verbeteren, doordat ze een idee krijgen wat beter kon of waar ze fout zaten.
-\end{enumerate}
+Ten eerste moeten lesgevers moeten geschikte oefeningen opstellen, aangepast aan het niveau van de studenten.
+Oefeningen moeten rekening houden met welke concepten studenten al kennen, hoeveel werk het kost om ze op te oplossen, enzovoort.
+Een deel van de oefeningen is bedoeld voor beginners: mensen die leren programmeren.
+Bij deze oefeningen is de exacte programmeertaal van minder belang: de onderliggende concepten en denkwijzen zijn het belangrijkste.
+Een twee soort oefeningen zijn wat we algoritmische oefeningen noemen.
+Bij dergelijke oefeningen is het belangrijkste hoe een probleem wordt opgelost, niet in welke programmeertaal dit gebeurt.
+Beide soorten oefeningen zijn dus goede kandidaten om ze in meerdere programmeertalen aan te bieden.
 
-Voor de tweede uitdaging wordt vaak gebruikt gemaakt van een platform voor programmeeroefeningen, dat een eerste vorm van automatische feedback geeft, zoals de correctheid van de ingediende oplossing voor een oefening.
+Ten tweede moeten de oplossingen voor deze oefeningen moeten voorzien worden van kwalitatieve feedback.
+Enkel en alleen oefeningen oplossen is niet voldoende: goede feedback laat toe dat studenten hun vaardigheden verbeteren, doordat ze een idee krijgen wat beter kon of waar ze fout zaten.
+Hiervoor wordt vaak gebruikgemaakt van een platform voor programmeeroefeningen, dat een eerste vorm van automatische feedback geeft, zoals de correctheid van de ingediende oplossing voor een oefening.
 Aan de onderzoeksgroep Computationele Biologie van de UGent is hiervoor het Dodona-platform ontwikkeld.
+Om zo'n platform te kunnen gebruiken is het van belang dat er goede testen geschreven worden voor de oefeningen: enkel zo is een automatische beoordeling nodig.
 
-Een aan de eerste uitdaging gerelateerd aspect is dat er veel programmeertalen zijn en elk van die programmeertalen oefeningen nodig heeft.
-Momenteel gebeurt het vertalen van een oefening van één programmeertaal naar de andere manueel.
-Dit neemt ook veel tijd in beslag, terwijl veel oefeningen niet programmeertaalafhankelijk zijn.
+Bij het aanbieden van een programmeeroefening in meerdere programmeertalen is het veel werk om alle testen voor die oefening te vertalen van de ene programmeertaal naar de andere, ook zijn veel oefeningen niet programmeertaalafhankelijk.
 Veel programmeeroefeningen zijn eenvoudig en komen neer op een lijst sorteren, woorden zoeken in een bestand, iets berekenen op basis van gegevens enzovoort.
 Deze taken kunnen in elke programmeertaal.
+Dit vertalen van de testen is bovendien saai en repetitief werk.
 
-In deze masterproef zoeken we naar een oplossing voor dit laatste probleem: is het mogelijk om een oefening slechts één keer op een programmeertaalonafhankelijke manier te schrijven en toch oplossingen in verschillende programmeertalen te beoordelen?
+In deze masterproef zoeken we hier een oplossing voor: is het mogelijk om een oefening slechts één keer op een programmeertaalonafhankelijke manier te schrijven en toch oplossingen in verschillende programmeertalen te beoordelen?
 
-Als onderdeel van het antwoord op deze vraag hebben we een prototype van een nieuwe judge voor het Dodona-platform ontwikkeld (een judge in Dodona is het onderdeel dat verantwoordelijk is voor het beoordelen van een ingediende oplossing): \tested{}.
+Als onderdeel van het antwoord op deze vraag hebben we \tested{} ontwikkeld: een prototype van een judge voor het Dodona-platform (een judge in Dodona is het onderdeel dat verantwoordelijk is voor het beoordelen van een ingediende oplossing).
 In \tested{} moet de lesgever voor een oefening een programmeertaalonafhankelijk testplan opstellen.
 Dit testplan bevat de specificatie van hoe een ingediende oplossing beoordeeld moet worden.
-Daarna vertaalt \tested{} dit testplan naar de verschillende programmeertalen, waardoor één oefening opgelost kan worden in de programmeertalen die \tested{} momenteel ondersteunt: Python, Java, JavaScript, Haskell en C.\@
+Daarna vertaalt \tested{} dit testplan naar de verschillende programmeertalen, waardoor één oefening kan opgelost worden in de programmeertalen die \tested{} momenteel ondersteunt: Python, Java, JavaScript, Haskell en C.\@
 
-Daarnaast hebben we ook aandacht besteed aan het zo eenvoudig mogelijk houden om nieuwe programmeertalen aan \tested{} toe te voegen.
-Als we een nieuwe programmeertaal toevoegen aan \tested{}, zullen bestaande oefeningen ook meteen opgelost kunnen worden in deze nieuwe programmeertaal, zonder dat er iets moet veranderen aan het testplan van deze oefeningen.
+Daarnaast hebben we er ook aandacht aan besteed om het toevoegen van nieuwe programmeertalen aan \tested{} zo eenvoudig mogelijk te houden.
+Als we een nieuwe programmeertaal toevoegen aan \tested{}, zullen bestaande oefeningen ook meteen opgelost kunnen worden in deze nieuwe programmeertaal, zonder dat er iets aan het testplan van deze oefeningen moet veranderen.
