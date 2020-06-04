@@ -1,0 +1,330 @@
+% Special KOMAScript version of \chapter¨* that is added to the repository.
+\addchap{Voorwoord}
+
+In de zomer van 2011 belandde ik in het ziekenhuis met een ontstoken appendix.
+Daar nam ik drie beslissingen.
+Ik maakte komaf met het vak "Informatica" dat ik als jonge docent geërfd had.
+Daarin leerden we studenten uit de faculteit Wetenschappen werken met de Microsoft Office-toepassingen, taken automatiseren met \emph{Visual Basic for Applications} (\acronym{VBA}), literatuur opzoeken en verwerken.
+Te veel van het goede.
+Dus gingen we ons alleen nog maar concentreren op programmeren.
+We doopten het nieuwe vak "Programmeren".
+\acronym{VBA} ging op de schop en werd vervangen door Python.
+Toen nog \version{Python 2}.
+Maar dat zouden we een jaar later al inruilen voor \version{Python 3}.
+We besloten ook in te zetten op automatisch feedback.
+Op elke ingediende oplossing van onze studenten.
+Geïnspireerd op wat we deden in de Vlaamse Programmeerwedstrijd.
+
+Google bracht ons bij de Sphere Online Judge (\acronym{SPOJ}).
+Een platform om programmeerwedstrijden te organiseren.
+Die keuze werd vooral ingegeven door het feit dat we aan \acronym{SPOJ} een eigen judge konden toevoegen.
+Een script om ingediende oplossingen te beoordelen.
+Dat was nodig.
+Deelnemers aan programmeerwedstrijden krijgen typisch slechts minimale feedback over de correctheid van hun ingediende oplossingen.
+In een onderwijscontext wilden we echter inzetten op maximale feedback.
+Leren programmeren is voor de meeste studenten al uitdagend genoeg en als lesgever kunnen we onmogelijk 24/24 en 7/7 klaar staan om elke student die vast zit tips te geven.
+
+We vernoemden onze Python judge naar de orakelpriesteres in het heiligdom van Apollo Pythios te Delphi -- Pythia.
+De ontwikkeling ervan ging hand in hand met het uitwerken van een reeks programmeeroefeningen.
+Veel tijd voor \english{prototyping} was er niet.
+Wel veel \english{trial and error} door de beperkte documentatie van \acronym{SPOJ}.
+Bij de start van het academiejaar hadden we een "werkende" judge en een honderdtal uitgewerkte oefeningen.
+Met dank aan Karsten Naert.
+We waren blij dat we ervoor gegaan waren en dat we het gehaald hadden.
+Maar we waren vooral heel enthousiast om aan het avontuur te beginnen.
+
+Tijdens die eerste jaren bleven we vooral in onze eigen \english{downtime} aan Pythia sleutelen.
+Bugs fixen.
+Met vallen en opstaan leren wat een judge moet doen om code van studenten te evalueren.
+Hoe we nog beter feedback kunnen geven.
+Dat alles wat kan misgaan bij het uitvoeren en testen van software die studenten schrijven ook misgaat.
+Vroeger eerder dan later.
+Onderweg introduceerden we ook ontzettend veel nieuwe \english{features}.
+Gebaseerd op vragen die studenten ons stellen, observaties tijdens werkcolleges en een constante stroom aan oplossingen die studenten indienen.
+Meer dan 120.000 tijdens het eerste academiejaar.
+Gedreven om de grenzen van automatische feedback te verleggen bij het opstellen van nieuwe oefeningen.
+Veel nieuwe oefeningen.
+Gemiddeld meer dan 60 per semester.
+Een huzarenstukje als je bedenkt dat het een halve tot een hele dag vraagt om een nieuwe oefening
+te bedenken en op te stellen.
+
+Voor het uitwerken van ideeën die tijdens de lesweken waren blijven liggen, konden we tijdens de zomermaanden altijd beroep doen op jobstudenten.
+Cracks uit de opleiding informatica.
+Financieel ondersteund door onderwijsinnovatieprojecten van de faculteit Wetenschappen.
+Met Felix Van der Jeugt als contributor \#1.
+Op die manier tekenden de contouren van Pythia zich steeds verder af.
+
+Feedback stoppen bij het eerste gefaalde testgeval.
+Testgevallen groeperen in contexten.
+Oefeningen omzetten naar \version{Python 3}.
+Toch beter om feedback te geven op alle testgevallen.
+\english{Diff highlighting} bij het vergelijken van verwachte en gegenereerde resultaten.
+\english{Pretty printing} bij het vergelijken van geneste datastructuren.
+Learning analytics over ingediende oplossingen.
+Aftelklok tot volgende deadline toevoegen.
+Linting.
+Stack trace koppelen aan ingediende code.
+Dynamisch schakelen tussen \english{unified} en \english{split} weergave van \english{diff}.
+Geprogrammeerde evaluatie.
+Gewichten toekennen aan testgevallen.
+Verborgen testgevallen.
+Moeilijkheidsgraad weergeven bij oefeningen.
+Beperkingen instellen op de lengte van gegenereerde resultaten.
+Objecten afzonderlijk vergelijken op type en inhoud.
+Stack trace opkuisen.
+Worstelen met afhandeling bij overschrijding van geheugenlimiet.
+Oefeningen exporteren uit \acronym{SPOJ}\@.
+I18n van oefeningen en feedback.
+Script om oefeningen vanuit git repo bij te werken in \acronym{SPOJ}\@.
+Via breekbare \acronym{POST} requests bij gebrek aan \acronym{API}\@.
+Script om oefeningen aan nieuwe versie van judge te koppelen.
+Webhooks voor automatische synchronisatie met \acronym{SPOJ}\@.
+Contexten groeperen in tabs.
+Onderscheid maken tussen stdout, stderr, returnwaarde en exceptions in doctests.
+Feedback toevoegen aan die individuele uitvoerkanalen.
+Expliciete boodschappen bij ontbrekende of overtollige newlines.
+Specifieke weergave van \english{multiline strings}.
+Vergelijken van tekstbestanden.
+Koppeling met Indianio.
+Oefeningen exporteren als pdf.
+Integratie van de Online Python Tutor.
+\english{Lucky shot} want bleek een \english{killer app} voor studenten.
+Maar een worsteling om draaiende te houden.
+Optie om geslaagde testgevallen te verbergen.
+Overzicht voor studenten met hun status voor de opgelegde oefeningen.
+
+\english{Fast forward} naar de zomer van 2016.
+Bart Mesuere -- kersverse doctor in de informatica -- had goed nieuws gekregen dat hij in oktober kon starten als postdoc bij het \acronym{FWO}.
+Als tijdverdrijf zocht hij een interessant hobbyproject om nog eens een nieuwe web app te programmeren.
+Even weg van Unipept.
+Het kindje uit zijn doctoraat.
+Een jaar eerder had ik op het einde van de paasvakantie inderhaast een \english{client side} judge voor JavaScript geschreven.
+Donderdag begonnen met de implementatie.
+De dinsdag daarop al gebruikt tijdens een werkcollege.
+Een jaar later schreef Bart een web app rond de JavaScript judge.
+Vermoedelijk in hetzelfde korte tijdsbestek waarin ook de judge ontwikkeld was.
+Een laatste stuiptrekking van zijn leven als assistent.
+De app gaf studenten overzicht over hun ingediende oplossingen voor een aantal reeksen opgelegde oefeningen.
+Hij noemde hem Dodona.
+Naar de tweede grootste orakelplaats van Griekenland.
+Na Delphi waar het orakel Pythia gehuisvest was.
+
+In die zomer van 2016 -- vlak voor de Gentse Feesten -- besloten we een online leerplatform te ontwikkelen.
+Waarin we onze programmeercursussen zouden kunnen aanbieden.
+Weg van \acronym{SPOJ}.
+Daarin waren onze uitbreidingen ondertussen één grote hack geworden.
+Sommige beperkingen van \acronym{SPOJ}.
+Daar hadden we mee leren leven.
+Maar ze vormden een serieuze rem.
+Een strak keurslijf waar we vanaf wilden.
+Om de vele ideeën uit te werken die we nog wilden realiseren om activerend leren te bevorderen.
+Al hadden we van die term nog nooit gehoord.
+Evenmin als van \english{blended learning} of de \english{flipped classroom}.
+We deden het al zonder dat we er erg in hadden.
+
+Uit die as werd Dodona geboren.
+Het leerplatform zoals we het nu kennen.
+Design sterk beïnvloed door ervaringen uit voorgaande jaren.
+Positief en negatief.
+Aanbod van cursussen met een leerpad van oefeningen gegroepeerd in reeksen.
+Strikte scheiding van verantwoordelijkheden tussen judges en programmeeroefeningen.
+Aan de ene kant een generiek test framework voor een bepaalde programmeertaal.
+Aan de andere kant specifieke testen voor het automatisch beoordelen van ingediende oplossingen volgens de specificaties van een oefening. 
+Docker-containers als sandbox waarin judges een ingediende oplossing konden uitvoeren en beoordelen.
+Eveneens een strikte scheiding tussen het genereren van feedback door de judge en het weergeven van feedback door Dodona.
+Met een gestandaardiseerd \acronym{JSON} Schema om feedback vast te leggen.
+We hielden ook vast aan beheer van content (judges en oefeningen) in externe git \english{repositories}.
+Inclusief \english{webhooks} voor synchronisatie met Dodona.
+Zo moest Dodona geen gebruikersinterface krijgen om content te beheren en behielden auteurs ook volledige controle over hun content.
+Bonus: content kan eenvoudig toegevoegd worden aan meerdere Dodona instanties.
+
+Een universeel ontwerp waarmee we theoretisch gezien alle programmeertalen kunnen ondersteunen.
+Strak plan.
+Strak tijdschema.
+Strakke regie.
+Harm Delva als jobstudent mee in bad getrokken.
+Bestaande Python- en JavaScript-judges overgezet naar Dodona.
+Alle bestaande oefeningen overgezet.
+Ondertussen al meer dan 600.
+Half augustus.
+Bart en Felix trekken naar de Ghent University Global Campus (\acronym{GUGC}) in Zuid-Korea.
+Om er een zomercursus Python te doceren.
+Ideaal om de bèta-versie van Dodona voor de leeuwen te gooien.
+
+7 september 2016.
+Mail van collega prof.\ dr.\ ir.\ Bart Dhoedt.
+Faculteit Ingenieurswetenschappen en Architectuur.
+Via via had hij vernomen dat we met iets bezig waren.
+Of ze het ook mochten gebruiken.
+Voor een programmeercursus met 400 eerstejaarsstudenten.
+In het nieuwe academiejaar maakten ze de overstap van Java naar Python.
+Plots kwam er dus meer dan in het vizier dan die ene cursus die we initieel voorzien hadden.
+
+26 september 2016.
+D-day.
+Start van het nieuwe academiejaar aan de UGent.
+Geboorte van Dodona.
+Versie \version{1.0} uitgerold.
+Blij dat we ervoor gegaan waren en dat we het gehaald hadden.
+De spanning was te snijden.
+Die maandagavond bekeek Bart de statistieken.
+Hij verwedde erom dat we tegen het einde van de week 25.000 ingediende oplossingen zouden halen.
+Ik ging de weddenschap aan.
+Doe ik anders nooit.
+We haalden meer dan 75.000 ingediende oplossingen.
+Gegokt en verloren.
+Maar bijzonder enthousiast om aan de volgende etappe van het avontuur te beginnen.
+
+Het volgende academiejaar maakten al 40 cursussen aan UGent gebruik van Dodona.
+In 2018 waren we laureaat van de UGent Minervaonderscheiding voor onderwijs.
+Voor onze activerende manier van lesgeven en voor het ontwikkelen van het innovatieve EdTech platform Dodona.
+Beide nauw met elkaar verstrengeld.
+Datzelfde jaar gaf UGent een impuls aan de verdere uitbouw van Dodona door ons een interfacultair onderwijsinnovatieproject toe te kennen.
+Daarin waren 7 faculteiten en de \acronym{GUGC} betrokken.
+Samen met de Directie Informatie- en Communicatietechnologie (\acronym{DICT}) van de UGent.
+Voor logistieke ondersteuning.
+Eventjes pauze.
+Hoe kon ik in voorgaande nog vergeten vermelden dat zij ons al jarenlang de nodige \acronym{ICT}-infrastructuur geboden hebben.
+Een dikke merci aan Johan Van Camp en zijn team is hier dus zeker op zijn plaats.
+Soit.
+Met de projectfinanciering konden we voor het eerst op zoek naar een fulltime softwareontwikkelaar voor Dodona.
+Charlotte Van Petegem was bij ons haar masterproef aan het afwerken.
+Zij zag het zitten.
+Wij zagen het zitten.
+Vanaf dan konden we beginnen spreken van team Dodona.
+
+Kunnen we Dodona ook aan de Universiteit Hasselt gebruiken?
+We spreken december 2017.
+De vraag kwam van collega prof.\ dr.\ Frank Neven.
+\acronym{SAML}-authenticatie opgezet.
+In februari 2018 ging hij met zijn studenten aan de slag.
+Snel daarna begon dezelfde vraag ook te komen van andere Vlaamse universiteiten en hogescholen.
+
+Zouden ook leerkrachten uit het secundair onderwijs in Dodona een co-teacher kunnen vinden?
+De vraag kwam initieel van leerkrachten die deelnamen aan nascholingen rond programmeren en algoritmen van prof.\ dr.\ Veerle Fack.
+Daarin was ze ook Dodona beginnen gebruiken.
+Hoe pakken we authenticatie aan voor het secundair onderwijs?
+Rien Maertens \english{to the rescue}.
+Als masterstudent kwam hij enkele weken team Dodona vervoegen -- in volle blok nota bene -- om OAuth-koppelingen te voorzien met Office 365 en Smartschool accounts van scholen.
+Op 3 september 2018 gingen drie pilootscholen aan de slag met Dodona.
+Op 5 september kregen we een enthousiaste mail van Dominiek Vandewalle.
+Leerkracht \acronym{ICT} aan de Sint-Paulusschool campus College Waregem.
+Eerste programmeerles gegeven op woensdagvoormiddag.
+Op woensdagmiddag waren zijn leerlingen thuis al oplossingen aan het indienen voor de meer uitdagende oefeningen.
+
+Uitnodiging van Annick Van Daele.
+Voorzitster van 2Link2.
+De vakvereniging voor leraren informatica en \acronym{STEM}.
+Of we ons op 23 juni 2019 konden vrijmaken om een workshop rond Dodona te geven?
+Wegens veel interesse werden het twee workshops.
+Allebei volgeboekt.
+We maakten van de gelegenheid gebruik om alle scholen toegang te geven tot Dodona.
+Gratis uiteraard.
+Kunnen we ook toegang krijgen met de Google G-Suite accounts van onze school?
+Charlotte?
+\english{Consider it done}.
+We hadden de tamtam van het secundair duidelijk onderschat.
+Tien maanden later waren al ruim 300 secundaire scholen op Dodona geregistreerd.
+Sommige waren al met leerlingen aan de slag.
+Anderen waren nog wat aan het verkennen.
+Toen kwam corona.
+Plots ging iedereen op zoek naar digitale ondersteuning voor het onderwijs.
+Twee maanden later stond de teller boven de 450 scholen.
+
+Vlak voor de zomer van 2019 kreeg Bart een senior postdoc mandaat bij het \acronym{FWO}\@.
+Voor Unipept kreeg hij naast Felix ook Pieter Verschaffelt als \english{wingman}.
+Die had ook een doctoraatsmandaat van het \acronym{FWO} gekregen.
+Charlotte en Rien kozen na de zomer voor een doctoraatsproject binnen het Dodona-ecosysteem.
+Verzekering dat Unipept en Dodona alvast voor de komende jaren in goede handen waren.
+Bart kon zijn energie over de twee projecten verdelen.
+
+Ondertussen waren er ten huize Dodona ook steeds meer judges voor andere programmeertalen bijgekomen.
+Prof.\ dr.\ Christophe Scholliers en Robbert Gurdeep Singh schreven judges voor Haskell en Prolog.
+Dr.\ Niels Neirynck voor bash.
+Dr.\ Dieter Mourisse voor C\#\@.
+Charlotte voor R\@.
+Felix voor Java.
+Later met hulp van masterstudent Pieter De Clercq.
+Die samen met studiegenoot Tobiah Lissens ook een JetBrains-plugin voor Dodona ontwikkelde.
+
+Vaststelling.
+Al die judges waren ontwikkeld door de \english{inner circle} rond Dodona.
+Allemaal medewerkers van de opleiding informatica.
+Blijkbaar voelen velen zich geroepen om programmeeroefeningen uit te werken op basis van een bestaande judge.
+Weinigen durven het aan om zelf een judge te ontwikkelen.
+Het helpt om wat af te weten van de programmeertaal waarvoor de beoordeling moet gebeuren.
+Maar toegegeven.
+Het bouwen van een judge is geen \english{rocket science}.
+Al vraagt het wel wat doorzettingsvermogen om hem robuust te maken tegen weerbarstige code van studenten en rijke feedback te voorzien die typisch ook door andere judges geboden wordt.
+Want -- vaststelling \#2 -- de meeste judges implementeren \latin{grosso modo} dezelfde features maar dan elk voor/in een specifieke programmeertaal.
+
+Wacht eens even.
+Judges lijken zeer sterk op elkaar?
+Op de details van de programmeertaal na.
+Dus schuilt er zekere routine in het schrijven van nieuwe judges?
+Hoeveel programmeertalen zijn er?
+Sorry, maar als informaticus haal ik mijn neus op om steeds hetzelfde te moeten doen.
+Zouden we geen generieke judge kunnen schrijven?
+Die feedback geeft op ingediende oplossingen voor programmeeroefeningen.
+Ongeacht de programmeertaal waarin die oplossingen geschreven zijn.
+\english{One judge to rule them all}, zeg maar.
+Het idee begon te rijpen op het einde van Charlotte Van Petegem haar masterproef.
+We werkten het ontwerp van een architectuur uit.
+Testen uitvoeren loskoppelen van resultaten beoordelen.
+De resultaten moeten we daarvoor kunnen serialiseren en deserialiseren.
+Het uitvoeren kunnen we misschien veralgemenen door de kernels van Jupyter Notebooks te gebruiken.
+Daarmee hebben we meteen ondersteuning voor tientallen programmeertalen.
+Enter \tested{}.
+Conceptueel dan toch.
+We klopten aan bij het \acronym{FWO}\@.
+Interessant!
+Maar blijkbaar toch niet interessant genoeg.
+Ook wat bedenkingen bij de haalbaarheid.
+
+Enter Niko Strijbol.
+Master in de informatica in wording.
+Coding ninja \english{by night}.
+Voor zijn masterproef zou hij er wel eens zijn vingers inzetten (tanden zijn alleen maar spreekwoordelijk).
+Jupyter-kernels gingen snel op de schop.
+De overhead om er afzonderlijk voor elke context één op te starten bleek een onoverkomelijke bottleneck.
+Werken met een pool van kernels bracht ook geen zoden aan de dijk.
+\english{No problemo}.
+Dacht Niko.
+Dan zetten we het testplan van een oefening maar statisch om naar uitvoerbare testcode.
+Dat werkt ook.
+Serialisatie/deserialisatie van waarden?
+Grasduinen in bestaande technologieën leverde enkele interessante pistes op.
+Maar niets dat uiteindelijk aan alle verwachtingen voldeed.
+\english{No problemo}.
+Dacht Niko.
+Met een \english{template engine} moet dat toch ook lukken.
+Jinja2?
+Leek aanvankelijk een goede keuze.
+Maar gaf uiteindelijke onvoldoende controle over witruimte.
+Mako dan maar.
+Hoeveel performantie verliezen we met de extra vertaalslag van een generiek testplan naar testcode voor een specifieke programmeertaal?
+Met batchcompilatie en parallelle verwerking van contexten bleek \tested{} zelfs sneller dan de meeste judges die specifiek voor één programmeertaal een beoordeling uitvoeren.
+Maar nu ben ik al te veel aan het verklappen.
+In dit proefschrift lees je hoe alle puzzelstukjes in elkaar gevallen zijn.
+Hopelijk beleef je evenveel plezier aan het lezen als wij gehad hebben bij het uitdenken, implementeren en configureren van \tested{}.
+
+Wordt \tested{} de heilige graal voor het automatisch beoordelen van software in een educatieve context?
+Daarvoor moet het framework zijn sporen op het slagveld nog verdienen.
+Zal een generieke judge ooit alle features kunnen aanbieden als judges die specifiek op één programmeertaal gericht zijn?
+Voer voor minstens nog een masterproef.
+Gelukkig is er al een masterstudent informatica geïnteresseerd om die uitdaging aan te gaan.
+We moeten ook nog meer oefeningen opstellen voor \tested{}.
+Veel meer oefeningen.
+Kunnen we bestaande oefeningen automatisch omzetten naar \tested{}?
+Welke programmeertalen zullen er volgend jaar toegevoegd zijn aan \tested{}?
+Hoeveel programmeertalen zal \tested{} over vier jaar ondersteunen?
+Dat deel van de geschiedenis moeten we nog schrijven.
+Maar ik ben blij dat we voor \tested{} gegaan zijn.
+Trots op het prototype dat er nu al ligt.
+Enthousiast om aan de volgende etappe van het avontuur te beginnen.
+Samen met Niko die vanaf september team Dodona komt vervoegen.
+
+\begin{flushright}
+    Peter Dawyndt\\
+    juni 2020
+\end{flushright}
