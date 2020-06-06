@@ -59,7 +59,7 @@ Het online leerplatform Dodona kan opgedeeld worden in verschillende onderdelen:
     Het platform zelf is zo opgebouwd dat het onafhankelijk is van de programmeertaal van de oefeningen.
     \item De \textbf{judges} binnen Dodona zijn verantwoordelijk voor het beoordelen van ingediende oplossingen.
     Dit onderdeel wordt uitgebreid besproken in \cref{sec:evalueren-van-een-oplossing}.
-    \item De \textbf{oefeningen} worden niet in Dodona zelf aangemaakt, maar worden door de lesgever aangeleverd via een git-repository.
+    \item De \textbf{oefeningen} worden niet in Dodona zelf aangemaakt, maar worden door de lesgever aangeleverd via een Git repository.
     De oefeningen bevatten de beschrijving van de opgave en de testen die uitgevoerd worden tijdens het automatisch beoordelen van een oplossing.
 \end{enumerate}
 
@@ -71,7 +71,7 @@ Bij het indienen van hun oplossingen ontvangen de studenten ook onmiddellijk fee
 
 In Dodona wordt elke ingediende oplossing beoordeeld door een evaluatieprogramma, de \termen{judge}.
 In wezen is dit een eenvoudig programma: via de standaardinvoerstroom (\texttt{stdin}) krijgt het programma een configuratie van Dodona.
-Deze configuratie bevat onder andere de programmeertaal van de ingediende oplossing, de locatie van de oefeningenbestanden (via de git-repository van de oefening), de locatie van de ingediende oplossing zelf en configuratieopties, zoals geheugen- en tijdslimieten.
+Deze configuratie bevat onder andere de programmeertaal van de ingediende oplossing, de locatie van de oefeningenbestanden (via de Git repository van de oefening), de locatie van de ingediende oplossing zelf en configuratieopties, zoals geheugen- en tijdslimieten.
 Het resultaat van de beoordeling wordt uitgeschreven naar de standaarduitvoerstroom (\texttt{stdout}).
 Zowel de invoer als de uitvoer van de judge zijn \acronym{JSON}, waarvan de structuur vastgelegd is in \acronym{JSON} Schema.\footnote{Dit schema en een tekstuele beschrijving ervan is te vinden in de handleiding op \url{https://dodona-edu.github.io/en/guides/creating-a-judge/}.}
 
@@ -87,7 +87,7 @@ Samenvattend bestaat de interface tussen de judge en Dodona uit drie onderdelen:
     Deze Docker-image moet ook de judge opstarten.
     \item Dodona stelt de invoer van een beoordeling ter beschikking aan de judge.
     Bestanden worden via een bind mount aan de Docker-container gekoppeld.
-    De paden naar deze bestanden binnen de container en andere informatie (zoals programmeertaal van de oplossing of natuurlijke taal van de gebruiker) worden via de configuratie aan de judge gegeven (via de standaardinvoerstroom).
+    De paden naar deze bestanden binnen de container en andere informatie (zoals de programmeertaal van de oplossing of de natuurlijke taal van de gebruiker) worden via de configuratie aan de judge gegeven (via de standaardinvoerstroom).
     \item De judge moet het resultaat van zijn beoordeling uitschrijven naar de standaarduitvoerstroom, in de vastgelegde structuur.
 \end{enumerate}
 
@@ -155,7 +155,7 @@ In het tweede geval is de programmeertaal wel van belang, maar moeten soortgelij
 In beide gevallen is het dus een meerwaarde om de oefening in meerdere programmeertalen aan te bieden.
 
 Eenzelfde constatatie kan gemaakt worden bij meer complexe oefeningen die zich concentreren op algoritmen: ook daar zijn de concepten belangrijker dan in welke programmeertaal een algoritme uiteindelijk geïmplementeerd wordt.
-Een voorbeeld hiervan is het vak "Algoritmen en Datastructuren", dat gegeven wordt door prof.\ Fack binnen de opleiding wiskunde\footnote{De studiefiche is beschikbaar op \url{https://studiegids.ugent.be/2019/NL/studiefiches/C002794.pdf}}.
+Een voorbeeld hiervan is het vak "Algoritmen en Datastructuren", dat gegeven wordt door prof.\ Veerle Fack binnen de opleiding wiskunde\footnote{De studiefiche is beschikbaar op \url{https://studiegids.ugent.be/2019/NL/studiefiches/C002794.pdf}}.
 Daar zijn de meeste opgaven op Dodona vandaag al beschikbaar in de programmeertalen Java en Python, maar dan als afzonderlijke en onafhankelijke oefeningen.
 
 Een ander aspect is de beoordeling van een oefening.
@@ -179,14 +179,14 @@ Het nadeel valt te formuleren als de onderzoeksvraag waarop deze masterproef een
 
 \begin{quote}
     Is het mogelijk om een judge zo te implementeren dat de opgave en beoordelingsmethoden van een oefening slechts eenmaal opgesteld dienen te worden, waarna de oefening beschikbaar is in alle programmeertalen die de judge ondersteunt?
-    Hierbij is het wenselijk dat eens een oefening opgesteld is, deze niet meer gewijzigd moet worden wanneer talen toegevoegd worden aan de judge.
+    Hierbij is het wenselijk dat eens een oefening opgesteld is, deze niet meer gewijzigd moet worden wanneer programmeertalen toegevoegd worden aan de judge.
 \end{quote}
 
 Als bijzaak is het ook interessant om na te gaan of het antwoord op de onderzoeksvraag een voordeel kan bieden voor het implementeren van judges zelf.
 
 De aandachtige lezer zal opmerken dat de opgave voor de Lotto-oefening programmeertaalspecifieke en taalspecifieke elementen bevat.
 Zo is de beschrijving van de opgave (de voorbeelden en de gegevenstypes) in Python en zijn de namen van functies en parameters in het Nederlands.
-Het ondersteunen van opgaves met programmeertaalonafhankelijke voorbeelden en vertalingen wordt voor deze masterproef expliciet als \english{out-of-scope} gezien en zal niet behandeld worden, zij het in \cref{subsec:programmeertaalonafhankelijke-opgaven}.
+Het ondersteunen van opgaven met programmeertaalonafhankelijke voorbeelden en vertalingen wordt voor deze masterproef expliciet als \english{out-of-scope} gezien en zal niet behandeld worden, zij het in \cref{subsec:programmeertaalonafhankelijke-opgaven}.
 
 \section{Opbouw van de masterproef}\label{sec:opbouw}
 

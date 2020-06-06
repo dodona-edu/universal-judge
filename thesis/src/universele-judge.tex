@@ -118,13 +118,13 @@ Concreet is de structuur een hiërarchie met volgende elementen:
     Een tabblad kan een naam hebben, die zichtbaar is voor de gebruikers.
     \item[Context] Elk tabblad bestaat uit een of meerdere \termen{context}en.
     Een context is een onafhankelijke uitvoering van de code van een ingediende oplossing.
-    Hierbij wordt de nadruk gelegd op de onafhankelijkheid: elke context wordt in een nieuw proces en nieuwe map (op het bestandssysteem) uitgevoerd, zodat de kans op het delen van informatie kleiner is.
+    Hierbij wordt de nadruk gelegd op de onafhankelijkheid: elke context wordt in een nieuw proces en nieuwe map (in het bestandssysteem) uitgevoerd, zodat de kans op het delen van informatie kleiner is.
     Hierbij willen we vooral onbedoeld delen van informatie (zoals statische variabelen of het overschrijven van bestanden) vermijden.
     De gemotiveerde student zal nog steeds informatie kunnen delen tussen de uitvoeringen, door bijvoorbeeld in een andere locatie een bestand aan te maken en later te lezen.
     Deze onafhankelijkheid laat ook toe om contexten in parallel te verwerken, waarover meer in \cref{subsec:parallelle-uitvoering-van-contexten}.
     \item[Testcase] Een context bestaat uit een of meerdere \termen{testcase}s of testgevallen.
-    Een testgeval bestaat uit invoer en een aantal tests.
-    De testgevallen kunnen onderverdeeld worden in twee soorten:
+    Een testgeval bestaat uit een invoer en een aantal tests.
+    We onderscheiden twee soorten:
     \begin{description}
         \item[Context testcase] of contexttestgeval.
         Van deze soort is er maximaal één per context (geen is ook mogelijk).
@@ -134,8 +134,8 @@ Concreet is de structuur een hiërarchie met volgende elementen:
         \item[Normal testcase] of normaal testgeval.
         Hiervan kunnen er nul of meer zijn per context.
         Deze testgevallen dienen om andere aspecten van de ingediende oplossing te testen, nadat de code van de gebruiker met success ingeladen is.
-        De invoer is dan ook uitgebreider: het kan gaan om de standaardinvoerstroom, functieoproepen en variabeletoekenningen.
-        Een functieoproep of variabeletoekenning is verplicht (zonder functieoproep of toekenning aan een variabele is er geen code die een resultaat zou kunnen produceren).
+        De invoer is dan ook uitgebreider: het kan gaan om de standaardinvoerstroom, functieoproepen en assignments.
+        Een functieoproep of assignment is verplicht (zonder functieoproep of assignment is er geen code die een resultaat zou kunnen produceren).
     \end{description}
     Het contexttestgeval wordt altijd als eerste uitgevoerd.
     Dit is verplicht omdat bepaalde programmeertalen (zoals Python en andere scripttalen) de code onmiddellijk uitvoeren bij het inladen.
@@ -156,11 +156,11 @@ Het moet:
 \end{itemize}
 
 Uiteindelijk is gekozen om het testplan op te stellen in \acronym{JSON}.
-Niet alleen voldoet \acronym{JSON} aan de vooropgestelde voorwaarden, het wordt ook door veel talen ondersteund.
+Niet alleen voldoet \acronym{JSON} aan de vooropgestelde voorwaarden, het wordt ook door veel programmeertalen ondersteund.
 
 Toch zijn er ook enkele nadelen aan het gebruik van \acronym{JSON}.
-Zo is \acronym{JSON} geen beknopte of compacte taal om met de hand te schrijven.
-Een oplossing hiervoor gebruikt de eigenschap dat veel talen \acronym{JSON} kunnen produceren: andere programma's kunnen desgewenst het testplan in het \acronym{JSON}-formaat genereren, waardoor het niet met de hand geschreven moet worden.
+Zo is \acronym{JSON} geen beknopt of compact formaat om met de hand te schrijven.
+Een oplossing hiervoor gebruikt de eigenschap dat veel programmeertalen \acronym{JSON} kunnen produceren: andere programma's kunnen desgewenst het testplan in het \acronym{JSON}-formaat genereren, waardoor het niet met de hand geschreven moet worden.
 Hiervoor denken we aan een \acronym{DSL} (\english{domain specific language}), maar dit valt buiten de masterproef en wordt verder besproken in \cref{subsec:handgeschreven-testplannen-zijn-omslachtig}.
 
 Een tweede nadeel is dat \acronym{JSON} geen programmeertaal is.
@@ -180,7 +180,7 @@ Tot slot bevat \cref{lst:testplan} ter illustratie van het formaat een testplan 
 
 \subsection{Dataserialisatie}\label{subsec:dataserialisatie}
 
-Bij de beschrijving van de structuur van een testplan wordt gewag gemaakt van returnwaarden en variabeletoekenningen.
+Bij de beschrijving van de structuur van een testplan wordt gewag gemaakt van returnwaarden en assignments.
 Aangezien het testplan programmeertaalonafhankelijk is, moet er dus een manier zijn om data uit de verschillende programmeertalen voor te stellen en te vertalen: het \term{serialisatieformaat}.
 
 \subsubsection{Keuze van het formaat}
@@ -217,7 +217,7 @@ De redenen hiervoor zijn samen te vatten als:
     \item Sommige formaten hebben een ander doel, wat zich uit in functionaliteit die wij niet nodig hebben, met als koploper \acronym{OPC} Unified Architecture, waarvan de specificatie ongeveer 1250 pagina's beslaat.
     Als deze overbodige functionaliteit optioneel is, vormt deze functionaliteit geen nadeel voor het formaat, maar ook geen voordeel.
     \item Het formaat is niet eenvoudig te implementeren in een programmeertaal waarvoor geen ondersteuning is.
-    Sommige dezer formaten ondersteunen weliswaar veel programmeertalen, maar we willen niet dat het serialisatieformaat een beperkende factor wordt in welke talen door \tested{} ondersteund worden.
+    Sommige dezer formaten ondersteunen weliswaar veel programmeertalen, maar we willen niet dat het serialisatieformaat een beperkende factor wordt in welke programmeertalen door \tested{} ondersteund worden.
     Het mag niet de bedoeling zijn dat het implementeren van het serialisatieformaat het meeste tijd in beslag neemt.
 \end{itemize}
 
@@ -316,9 +316,9 @@ Het wordt gebruikt om:
     Dit gaat om de serialisatie van waarden uit de uitvoeringsomgeving naar \tested{}, zoals het geval is bij returnwaarden van functies.
     \item te beschrijven welk gegevenstype verwacht wordt (voorschrijvende modus).
     Een voorbeeld hiervan is het aangeven van het gegevenstype van een variabele.
-    \item zelf code te schrijven (letterlijke modus).
-    Dit gaat om serialisatie vanuit het testplan zelf naar de uitvoeringsomgeving.
-    Een voorbeeld hiervan is het opnemen van functieargumenten in het testplan: deze argumenten worden tijdens de serialisatie omgezet naar echte code.
+    \item zelf waarden te schrijven (letterlijke modus).
+    Dit gaat om serialisatie vanuit het testplan naar de uitvoeringsomgeving.
+    Een voorbeeld is het opnemen van functieargumenten in het testplan: deze argumenten worden tijdens de serialisatie omgezet naar echte code.
 \end{itemize}
 
 Bij het ontwerp van het systeem voor de gegevenstypes zorgen deze verschillende functies soms voor tegenstrijdige belangen: voor het beschrijven van een waarde moet het systeem zo eenvoudig mogelijk zijn.
@@ -372,7 +372,7 @@ Python heeft bijvoorbeeld enkel \texttt{integer} voor gehele getallen, terwijl C
     \end{threeparttable}
 \end{table}
 
-Tot slot heeft het schrijven van code bijkomende vereisten: als functieargument zijn waarden alleen niet voldoende, ook variabelen en andere functieoproepen moeten gebruikt kunnen worden.
+Tot slot heeft het schrijven van waarden bijkomende vereisten: als functieargument zijn waarden alleen niet voldoende, ook variabelen en andere functieoproepen moeten gebruikt kunnen worden.
 Om deze redenen zijn de gegevenstypes opgedeeld in drie categorieën:
 
 \begin{enumerate}
@@ -387,7 +387,7 @@ Om deze redenen zijn de gegevenstypes opgedeeld in drie categorieën:
         \item[\texttt{char}] Een enkel teken.
         \item[\texttt{boolean}] Een Boolese waarde (of boolean).
         \item[\texttt{sequence}] Een wiskundige rij: de volgorde van de elementen is belangrijk en dubbele elementen zijn toegelaten.
-        \item[\texttt{set}] Een wiskundige verzameling: de volgorde van de elementen is niet belangrijk is en dubbele elementen zijn niet toegelaten.
+        \item[\texttt{set}] Een wiskundige verzameling: de volgorde van de elementen is niet belangrijk en dubbele elementen zijn niet toegelaten.
         \item[\texttt{map}] Een wiskundige afbeelding: elk element wordt afgebeeld op een ander element.
         In Java is dit bijvoorbeeld een \texttt{Map}, in Python een \texttt{dict} en in Javascript een \texttt{object}.
         \item[\texttt{nothing}] Geeft aan dat er geen waarde is, ook wel \texttt{null}, \texttt{None} of \texttt{nil} genoemd.
@@ -420,8 +420,8 @@ Om deze redenen zijn de gegevenstypes opgedeeld in drie categorieën:
 Het is het vermelden waard dat \tested{} geen formeel typesysteem gebruikt.
 Het doel van een formeel typesysteem is het beschrijven van welke categorieën data een constructie (een variabele, parameter, enz.) kan zijn.
 Dit is in tegenstelling tot \tested{}, waar meestal concrete gegevens beschreven worden.
-Zo bevat specificeert het testplan niet "een functie met returntype \texttt{int64}", maar wel "een functie met als verwachte waarde 16, wier gegevenstype \texttt{int64} is".
-De enige uitzondering is het gegevenstype van variabelen aanduiden, maar zelfs daar gaat het altijd om het type van een variabele met een concrete expressie die een resultaat oplevert.
+Zo bevat specificeert het testplan niet "een functie met returntype \texttt{int64}", maar wel "een functieoproep met als verwachte returnwaarde 16, wier gegevenstype \texttt{int64} is".
+De enige uitzondering is het gegevenstype van variabelen aanduiden, maar zelfs daar gaat het om het variabelen met een concrete expressie als waarde.
 Als gevolg maakt \tested{} geen gebruik van technieken die normaliter geassocieerd worden met typesystemen, zoals een formele typeverificatie.
 
 \subsection{Expressions en statements}\label{subsec:expressions-and-statements}
@@ -473,9 +473,9 @@ Een expressie is een van deze drie dingen:
     \end{description}
 \end{enumerate}
 
-In het serialisatieformaat is een statement ofwel een variabeletoekenningen of \english{assignment}, ofwel een expressie.
+In het serialisatieformaat is een statement ofwel een \english{assignment}, ofwel een expressie.
 Een expressie is zoals reeds besproken.
-Een assignment kent een naam toe aan het resultaat van een expression.
+Een assignment kent een naam toe aan de resulterende waarde van een expressie.
 \Cref{lst:type-schema} toont ook het vereenvoudigde \acronym{JSON} Schema van een statement (en dus van een assignment, daar er maar één soort statement bestaat).
 Hier staat \texttt{<datatype>} voor een van de gegevenstypes die hiervoor besproken zijn.
 
@@ -517,7 +517,7 @@ Bij de controle worden volgende zaken nagekeken:
     Dat zijn bijvoorbeeld Python en Java, maar geen Bash.
     \item Controle of de programmeertaal over de nodige taalconstructies beschikt, zoals \texttt{exceptions} of \texttt{objects}.
     Bij deze controle wordt ook gecontroleerd of dat de programmeertaal optionele functieargumenten of functieargumenten met heterogene gegevenstypes nodig heeft.
-    Een voorbeeld van een functie met argumenten met heterogene gegevenstypes komt bijvoorbeeld uit de \acronym{ISBN}-oefening (deze oefening wordt besproken in \cref{ch:nieuwe-oefening}):
+    Een voorbeeld van een functie met argumenten met heterogene gegevenstypes komt bijvoorbeeld uit de \acronym{ISBN}-oefening (deze oefening wordt besproken in \cref{sec:oefening-isbn}):
     %! Suppress = EscapeUnderscore
     \begin{minted}{pycon}
 >>> is_isbn("9789027439642")
@@ -525,7 +525,7 @@ True
 >>> is_isbn(9789027439642)
 False
     \end{minted}
-    In talen als Python en Java kan deze functie geïmplementeerd worden, maar in talens als C is dat veel moeilijker.
+    In programmeertalen als Python en Java kan deze functie geïmplementeerd worden, maar in programmeertalen als C is dat veel moeilijker.
 \end{itemize}
 
 \section{Oplossingen uitvoeren}\label{sec:oplossingen-uitvoeren}
@@ -605,7 +605,7 @@ In \cref{ch:mapstructuur-na-uitvoeren} staat de concrete mapstructuur van de wer
 
 Het uitvoeren van de testcode genereert resultaten (het gedrag en de neveneffecten) die door \tested{} beoordeeld moeten worden.
 Er zijn verschillende soorten gedragingen en neveneffecten die interessant zijn.
-Elke soort gedrag of neveneffect wordt een \term{uitvoerkanaal} genoemd.
+Elk soort gedrag of neveneffect wordt een \term{uitvoerkanaal} genoemd.
 \tested{} verzamelt volgende uitvoerkanalen:
 \begin{itemize}
     \item De standaarduitvoerstroom.
@@ -627,7 +627,7 @@ Elke soort gedrag of neveneffect wordt een \term{uitvoerkanaal} genoemd.
 
 De standaarduitvoer- en standaardfoutstroom worden rechtstreeks opgevangen door \tested{}.
 De andere uitvoerkanalen (uitzonderingen en returnwaarden) worden naar een bestand geschreven.
-De reden dat deze niet naar een andere \term{file descriptor} geschreven worden is eenvoudig: niet alle talen (zoals Java) ondersteunen het openen van bijkomende file descriptors.
+De reden dat deze niet naar een andere \term{file descriptor} geschreven worden is eenvoudig: niet alle programmeertalen (zoals Java) ondersteunen het openen van bijkomende file descriptors.
 
 Alle uitvoerkanalen (met uitzondering van de exitcode en de bestanden) worden per testgeval verzameld.
 Aangezien de uitvoerkanalen pas verzameld worden na het uitvoeren van de context, moet er een manier zijn om de uitvoer van de verschillende testgevallen te onderscheiden.
@@ -745,10 +745,10 @@ Het vergelijken van een waarde bestaat uit twee stappen:
     \begin{enumerate}
         \item Specifieert het testplan een basistype, dan zullen alle types die tot dit basistype herleid kunnen worden als hetzelfde beschouwd worden.
         Is de verwachte waarde bijvoorbeeld \texttt{sequence}, zullen ook \texttt{array}s uit Java en \texttt{tuple}s uit Python goedgekeurd worden.
-        \item Specifieert het testplan een uitgebreid type, dan zal het uitgebreid type gebruikt worden voor talen die dat type ondersteunen, terwijl voor andere talen het basistype gebruikt zal worden.
+        \item Specifieert het testplan een uitgebreid type, dan zal het uitgebreid type gebruikt worden voor programmeertalen die dat type ondersteunen, terwijl voor andere programmeertalen het basistype gebruikt zal worden.
         Stel dat het testplan bijvoorbeeld een waarde met als gegevenstype \texttt{tuple} heeft.
-        In Python en Haskell (twee talen die dat gegevenstype ondersteunen) zullen enkel \texttt{tuple}s goedgekeurd worden.
-        Voor andere talen, zoals Java, worden alle gegevenstypes goedgekeurd die herleidbaar zijn tot het basistype.
+        In Python en Haskell (twee programmeertalen die dat gegevenstype ondersteunen) zullen enkel \texttt{tuple}s goedgekeurd worden.
+        Voor andere programmeertalen, zoals Java, worden alle gegevenstypes goedgekeurd die herleidbaar zijn tot het basistype.
         Concreet zullen dus \texttt{List}s en \texttt{array}s goedgekeurd worden.
         Merk op dat momenteel bij collecties (\texttt{sequence}s, \texttt{set}s en \texttt{map}s) enkel het type van de collectie gecontroleerd wordt, niet de types van de elementen.
     \end{enumerate}
@@ -1052,7 +1052,7 @@ Deze \acronym{URL} zou dan aan de studenten kunnen getoond worden.
 \section{Robuustheid}\label{sec:robuustheid}
 
 Een belangrijk aspect bij \term{educational software testing} is de feedback als het verkeerd loopt.
-De feedback bij een verkeerde oplossing is in veel gevallen zelfs belangrijker dan de feedback bij een juiste oplossing: het is namelijk de bedoeling dat als studenten een verkeerde oplossing indienen, dat de feedback ze terug op weg kan helpen om hun oplossing te verbeteren.
+De feedback bij een verkeerde oplossing is in veel gevallen zelfs belangrijker dan de feedback bij een juiste oplossing: het is namelijk de bedoeling dat als studenten een verkeerde oplossing indienen, de feedback ze terug op weg kan helpen om hun oplossing te verbeteren.
 De feedback die Dodona toont is afkomstig van de judges: het is de taak van \tested{} om kwalitatief hoogstaande feedback te voorzien.
 Met kwalitatief hoogstaand wordt bedoeld dat de feedback nuttige informatie bevat, maar ook geen verkeerde of misleidende informatie.
 
@@ -1073,7 +1073,7 @@ De algemene bevindingen die uit de praktijktest naar boven kwamen waren:
     Aan de andere kant ligt een tragere uitvoer in vergelijking met de Python-judge binnen de verwachtingen: \tested{} voert elke context uit in een afzonderlijk subproces.
     De Python-judge doet dit niet.
     Qua uitvoer worden wel contexten gebruikt, maar de interne werking van de Python-judge kan het best vergeleken worden met een oefeningen waar alle testen in dezelfde context opgenomen zijn.
-    \item \tested{} heeft geen verwerking van stacktraces.
+    \item \tested{} heeft geen verwerking van stack traces.
     Deze functionaliteit is opgenomen als mogelijke uitbreiding als onderdeel van \cref{sec:kleinere-functies}.
     \item \tested{} heeft geen linting.
     Naar aanleiding van de praktijktest is hier ondersteuning voor toegevoegd, zie \cref{sec:andere-taken}.
@@ -1095,7 +1095,7 @@ Waar nuttig zijn deze gevallen omgezet naar een unit test voor \tested{}.
     \item[Compilatiefouten] De uitvoer van de compiler wordt altijd getoond aan de studenten, dus op dat vlak wordt juist afgehandeld.
     Er bestaat ook de mogelijkheid om de compilatie-uitvoer te verwerken en bijvoorbeeld om te zetten naar annotaties, die dan in de code worden getoond.
     Hierbij wordt vooral gedacht aan foutboodschappen als "syntaxisfout op regel 5, kolom 2".
-    De stacktraces bij deze uitvoer bevatten wel referenties naar code die \tested{} gegenereerd heeft.
+    De stack traces bij deze uitvoer bevatten wel referenties naar code die \tested{} gegenereerd heeft.
     Deze verwijzingen naar interne code wegfilteren is opgenomen als uitbreiding als onderdeel van \cref{sec:kleinere-functies}.
     Bij een batchcompilatie wordt de uitvoer in een nieuw tabblad getoond, terwijl bij contextcompilatie de uitvoer bij de relevant context staat.
     \item[Uitvoeringsfouten] Hier gaat het om crashes tijdens de uitvoering, zoals delen door nul.
@@ -1141,8 +1141,8 @@ Dit is voor \tested{} minder relevant: het gros van de beoordelingstijd wordt be
 Binnen \tested{} worden twee dependencies intensief gebruikt:
 
 \begin{enumerate}
-    \item \texttt{Mako} voor de sjablonen.
-    \item \texttt{Pydantic} voor het definiëren van het testplan en het serialisatieformaat.
+    \item Mako voor de sjablonen.
+    \item Pydantic voor het definiëren van het testplan en het serialisatieformaat.
 \end{enumerate}
 
 In \tested{} is niet onmiddellijk gekozen voor Mako als sjabloonsysteem.
@@ -1156,7 +1156,7 @@ Na de keuze voor \acronym{JSON} als testplan en serialisatieformaat (\cref{subse
 Oorspronkelijk zijn het testplan en het serialisatieformaat opgesteld met \texttt{dataclasses} uit Python.
 Dit bleek niet voldoende: er waren betere validaties nodig en het bleek handig om het formaat van het testplan en het serialisatieformaat te kunnen exporteren als \acronym{JSON} Schema.
 
-Hiervoor gebruiken we nu \texttt{pydantic}\footnote{Zie \url{https://pydantic-docs.helpmanual.io/}}.
+Hiervoor gebruiken we nu Pydantic\footnote{Zie \url{https://pydantic-docs.helpmanual.io/}}.
 Dit package laat ons toe om nog steeds \texttt{dataclasses} te gebruiken, maar toch validaties te kunnen toevoegen en de structuur te kunnen exporteren naar \acronym{JSON} Schema.
 \Cref{lst:function-python} toont hoe de definitie van een functieoproep er in Python-code uitziet.
 Deze klasse wordt letterlijk vertaald naar \acronym{JSON}, zoals duidelijk is in bijvoorbeeld het testplan in \cref{subsec:oefening-echofunctie-testplan}.
