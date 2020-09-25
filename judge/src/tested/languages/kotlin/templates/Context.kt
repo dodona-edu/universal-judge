@@ -4,19 +4,13 @@ import get_args
 import java.io.PrintWriter
 
 ## Code to execute_module one test context.
-<%! from tested.languages.generator import _TestcaseArguments
-
-%>\
-<%! from tested.serialisation import Statement
-
-, Expression, Assignment %>\
-<%! from tested.utils import get_args
-
-%>
+<%! from tested.languages.generator import _TestcaseArguments %>\
+<%! from tested.serialisation import Statement, Expression, Assignment %>\
+<%! from tested.utils import get_args %>
 
 import java.io.PrintWriter
 
-class $ {context_name } : AutoCloseable {
+class ${context_name} : AutoCloseable {
     private val valueWriter = PrintWriter("${value_file}")
     private val exceptionWriter = PrintWriter("${exception_file}")
 
@@ -32,19 +26,19 @@ class $ {context_name } : AutoCloseable {
     }
 
     private fun sendValue(value: Any?) {
-        Values.send(valueWriter, value)
+        valuesSend(valueWriter, value)
     }
 
     private fun sendException(throwable: Throwable) {
-        Values.sendException(exceptionWriter, throwable)
+        valuesSendException(exceptionWriter, throwable)
     }
 
     private fun sendSpecificValue(value: EvaluationResult) {
-        sendEvaluated(valueWriter, value)
+        valuesSendEvaluated(valueWriter, value)
     }
 
     private fun sendSpecificException(exception: EvaluationResult) {
-        sendEvaluated(exceptionWriter, exception)
+        valuesSendEvaluated(exceptionWriter, exception)
     }
 
     fun execute() {
@@ -54,10 +48,10 @@ class $ {context_name } : AutoCloseable {
 
         % if context_testcase.exists:
         try {
-            solution_main(arrayOf(
-                    % for argument in context_testcase.arguments:
-            "${argument}", \
-            % endfor
+            solutionMain(arrayOf( \
+                % for argument in context_testcase.arguments:
+                    "${argument}", \
+                % endfor
             ))
             <%include file = "statement.mako" args = "statement=context_testcase.exception_statement()" />
         } catch (e: Exception) {
@@ -70,7 +64,7 @@ class $ {context_name } : AutoCloseable {
         % for testcase in testcases:
         this.writeSeparator();
         % if isinstance(testcase.command, get_args(Assignment)):
-        <%include file = "declaration.mako" args = "tp=testcase.command.type,value=testcase.command.expression" /> ${ testcase.command.variable } = null
+            var ${testcase.command.variable} : <%include file = "declaration.mako" args = "tp=testcase.command.type,value=testcase.command.expression" /> = null
         % endif
         try {
             <%include file = "statement.mako" args = "statement=testcase.input_statement()" />
@@ -89,13 +83,16 @@ class $ {context_name } : AutoCloseable {
         valueWriter.close()
         exceptionWriter.close()
     }
-}
 
-fun main(args: Array<String>) {
-    val context = ${context_name}()
-    try {
-        context.execute();
-    } finally {
-        context.close()
+    companion object {
+        @JvmStatic
+        fun main(args: Array<String> = emptyArray()) {
+            val context = ${context_name}()
+            try {
+                context.execute();
+            } finally {
+                context.close()
+            }
+        }
     }
 }

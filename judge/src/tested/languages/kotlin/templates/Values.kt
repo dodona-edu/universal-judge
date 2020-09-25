@@ -107,14 +107,14 @@ fun evaluated(writer: PrintWriter, result: Boolean, expected: String?,
     writer.print(builder.toString())
 }
 
-fun send(writer: PrintWriter, value: Any?): Unit = writer.print(encode(value))
+fun valuesSend(writer: PrintWriter, value: Any?): Unit = writer.print(encode(value))
 
-fun sendEvaluated(writer: PrintWriter, result: EvaluationResult) {
+fun valuesSendEvaluated(writer: PrintWriter, result: EvaluationResult) {
     evaluated(writer, result.result, result.readableExpected, result.readableActual,
             result.messages)
 }
 
-fun sendException(writer: PrintWriter, throwable: Throwable?) {
+fun valuesSendException(writer: PrintWriter, throwable: Throwable?) {
     if (throwable == null) {
         return
     }
@@ -123,5 +123,3 @@ fun sendException(writer: PrintWriter, throwable: Throwable?) {
     writer.printf("{ \"message\": \"%s\", \"type\": \"%s\"}",
             throwable.message, strStackTraceWriter.toString())
 }
-
-
