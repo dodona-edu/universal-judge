@@ -1,8 +1,9 @@
+import re
 from pathlib import Path
 from typing import List
 
-from tested.languages import Language
-from tested.languages.config import CallbackResult, Command, Config
+from tested.configs import Bundle
+from tested.languages.config import CallbackResult, Command, Config, Language
 
 
 def _memory_limit(config: Config) -> int:
@@ -22,7 +23,7 @@ class Kotlin(Language):
             return file.suffix == ".class"
 
         others = [x for x in files if not x.endswith(".jar")]
-        return ["kotlinc", "-jvm-target", "11", "-cp", ".", *others], file_filter
+        return ["kotlinc", "-nowarn", "-jvm-target", "11", "-cp", ".", *others], file_filter
 
     def execution(self, config: Config, cwd: Path, file: str,
                   arguments: List[str]) -> Command:

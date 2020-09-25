@@ -8,7 +8,7 @@ class EvaluationResult private constructor(
                   val format: String = "text",
                   val permission: String? = null)
 
-    class Builder private constructor(
+    class Builder(
             private val result: Boolean,
             private var readableActual: String? = null,
             private var readableExpected: String? = null

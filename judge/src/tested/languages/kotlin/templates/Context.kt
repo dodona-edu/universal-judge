@@ -1,8 +1,3 @@
-import Statement
-import _TestcaseArguments
-import get_args
-import java.io.PrintWriter
-
 ## Code to execute_module one test context.
 <%! from tested.languages.generator import _TestcaseArguments %>\
 <%! from tested.serialisation import Statement, Expression, Assignment %>\
@@ -29,7 +24,7 @@ class ${context_name} : AutoCloseable {
         valuesSend(valueWriter, value)
     }
 
-    private fun sendException(throwable: Throwable) {
+    private fun sendException(throwable: Throwable?) {
         valuesSendException(exceptionWriter, throwable)
     }
 
@@ -47,33 +42,33 @@ class ${context_name} : AutoCloseable {
         this.writeSeparator()
 
         % if context_testcase.exists:
-        try {
-            solutionMain(arrayOf( \
-                % for argument in context_testcase.arguments:
-                    "${argument}", \
-                % endfor
-            ))
-            <%include file = "statement.mako" args = "statement=context_testcase.exception_statement()" />
-        } catch (e: Exception) {
-            <%include file = "statement.mako" args = "statement=context_testcase.exception_statement('e')" />
-        } catch (e: AssertionError) {
-            <%include file = "statement.mako" args = "statement=context_testcase.exception_statement('e')" />
-        }
+            try {
+                solutionMain(arrayOf( \
+                    % for argument in context_testcase.arguments:
+                        "${argument}", \
+                    % endfor
+                ))
+                <%include file = "statement.mako" args = "statement=context_testcase.exception_statement()" />
+            } catch (e: Exception) {
+                <%include file = "statement.mako" args = "statement=context_testcase.exception_statement('e')" />
+            } catch (e: AssertionError) {
+                <%include file = "statement.mako" args = "statement=context_testcase.exception_statement('e')" />
+            }
         % endif
 
         % for testcase in testcases:
-        this.writeSeparator();
-        % if isinstance(testcase.command, get_args(Assignment)):
-            var ${testcase.command.variable} : <%include file = "declaration.mako" args = "tp=testcase.command.type,value=testcase.command.expression" /> = null
-        % endif
-        try {
-            <%include file = "statement.mako" args = "statement=testcase.input_statement()" />
-            <%include file = "statement.mako" args = "statement=testcase.exception_statement()" />
-        } catch (e: Exception) {
-            <%include file = "statement.mako" args = "statement=testcase.exception_statement('e')" />
-        } catch (e: AssertionError) {
-            <%include file = "statement.mako" args = "statement=testcase.exception_statement('e')" />
-        }
+            this.writeSeparator();
+            % if isinstance(testcase.command, get_args(Assignment)):
+                var ${testcase.command.variable} : <%include file = "declaration.mako" args = "tp=testcase.command.type,value=testcase.command.expression" /> = null
+            % endif
+            try {
+                <%include file = "statement.mako" args = "statement=testcase.input_statement()" />
+                <%include file = "statement.mako" args = "statement=testcase.exception_statement()" />
+            } catch (e: Exception) {
+                <%include file = "statement.mako" args = "statement=testcase.exception_statement('e')" />
+            } catch (e: AssertionError) {
+                <%include file = "statement.mako" args = "statement=testcase.exception_statement('e')" />
+            }
         % endfor
 
         ${ after }
@@ -83,16 +78,13 @@ class ${context_name} : AutoCloseable {
         valueWriter.close()
         exceptionWriter.close()
     }
+}
 
-    companion object {
-        @JvmStatic
-        fun main(args: Array<String> = emptyArray()) {
-            val context = ${context_name}()
-            try {
-                context.execute();
-            } finally {
-                context.close()
-            }
-        }
+fun main(args: Array<String> = emptyArray()) {
+    val context = ${context_name}()
+    try {
+        context.execute();
+    } finally {
+        context.close()
     }
 }

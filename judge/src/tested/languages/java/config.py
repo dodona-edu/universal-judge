@@ -1,8 +1,7 @@
 from pathlib import Path
 from typing import List
 
-from tested.languages import Language
-from tested.languages.config import CallbackResult, Command, Config
+from tested.languages.config import CallbackResult, Command, Config, Language
 
 def _memory_limit(config: Config) -> int:
     """

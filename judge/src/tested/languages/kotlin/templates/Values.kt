@@ -4,7 +4,7 @@ import java.math.BigDecimal
 import java.math.BigInteger
 
 private fun convertMessage(message: EvaluationResult.Message): String {
-    val builder = StringBuilder(capacity = 64).append('{')
+    val builder = StringBuilder(64).append('{')
             .append("\"description\": \"").append(message.description)
             .append("\", ")
             .append("\"format\": \"").append(message.format).append("\"")
@@ -98,7 +98,7 @@ private fun internalEncode(value: Any?): Array<String> {
 
 fun evaluated(writer: PrintWriter, result: Boolean, expected: String?,
               actual: String?, messages: Iterable<EvaluationResult.Message>) {
-    val builder = StringBuilder(capacity = 64).append('{')
+    val builder = StringBuilder(64).append('{')
             .append("\"result\": \"").append(result).append("\", ")
             .append("\"readable_expected\": \"").append(expected).append("\", ")
             .append("\"readable_actual\": \"").append(actual).append("\", ")
