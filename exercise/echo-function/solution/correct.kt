@@ -1,3 +1,3 @@
-fun echo(value : Any?) : Any? {
-    return value
+fun echo(content : Any?) : Any? {
+    return content
 }

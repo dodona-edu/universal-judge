@@ -3,7 +3,7 @@
 <%! from tested.utils import get_args %>\
 <%page args="function" />\
 % if function.type == FunctionType.NAMESPACE:
-    ${function.namespace}.\
+    ${function.namespace}?.\
 % endif
 ${function.name}\
 % if function.type != FunctionType.PROPERTY:

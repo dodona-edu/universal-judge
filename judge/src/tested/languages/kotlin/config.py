@@ -44,7 +44,7 @@ class Kotlin(Language):
         if nr == 0:
             # There was no main function without arguments. Now we try a main
             # function with arguments.
-            with_args = re.compile(r"fun\s+main\s*\(\s*([^\s])*\s*:\s*"
+            with_args = re.compile(r"fun\s+main\s*\(\s*([^\s]*)\s*:\s*"
                                    r"Array\s*<\s*String\s*>")
             replacement = "fun solutionMain(\\1: Array<String>"
             contents = re.sub(with_args, replacement, contents, count=1)
