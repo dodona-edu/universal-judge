@@ -19,6 +19,7 @@ There are a few callbacks that must be implemented. These raise a
 using your language).
 """
 import json
+import logging
 import os
 from collections import defaultdict
 from dataclasses import dataclass
@@ -132,6 +133,8 @@ class Language:
                           / config_file)
         with open(path_to_config, "r") as f:
             self.options = json.load(f)
+
+        self._logger = logging.getLogger(__name__)
 
     def compilation(self, config: Config, files: List[str]) -> CallbackResult:
         """
@@ -488,3 +491,7 @@ class Language:
             return not is_context or is_our_context
 
         return list(x for x in files if filter_function(x))
+
+    def find_main_file(self, files: List[str], name: str) -> str:
+        self._logger.debug("Finding %s in %s", name, files)
+        return [x for x in files if x.startswith(name)][0]

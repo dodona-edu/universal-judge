@@ -27,7 +27,7 @@ def read_config() -> DodonaConfig:
         "workdir":              Path('../workdir'),
         "plan_name":            "full.tson",
         "options":              {
-            "parallel": True,
+            "parallel": False,
             "mode":     "batch",
             "linter": {
                 "python": True

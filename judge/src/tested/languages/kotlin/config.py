@@ -50,3 +50,8 @@ class Kotlin(Language):
             contents = re.sub(with_args, replacement, contents, count=1)
         with open(solution, "w") as file:
             file.write(contents)
+
+    def find_main_file(self, files: List[str], name: str) -> str:
+        name += "Kt"
+        self._logger.debug("Finding %s in %s", name, files)
+        return [x for x in files if x.startswith(name)][0]
