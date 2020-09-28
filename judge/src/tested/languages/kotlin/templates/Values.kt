@@ -102,7 +102,7 @@ fun evaluated(writer: PrintWriter, result: Boolean, expected: String?,
             .append("\"result\": \"").append(result).append("\", ")
             .append("\"readable_expected\": \"").append(expected).append("\", ")
             .append("\"readable_actual\": \"").append(actual).append("\", ")
-            .append("\"messages\": ").append(messages.joinToString(separator = ", ",
+            .append("\"messages\": [").append(messages.joinToString(separator = ", ",
                     transform = { m -> convertMessage(m) })).append("]}")
     writer.print(builder.toString())
 }

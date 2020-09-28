@@ -16,6 +16,7 @@
                   "evaluators": {
                     "python": {"file": "evaluator.py"},
                     "java": {"file": "Evaluator.java"},
+                    "kotlin": {"file": "Evaluator.kt"},
                     "haskell": {"file": "Evaluator.hs"},
                     "runhaskell": {"file": "Evaluator.hs"}
                   }
