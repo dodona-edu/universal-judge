@@ -40,6 +40,7 @@ from ..utils import camelize, pascalize, fallback, snake_case
 Command = List[str]
 FileFilter = Callable[[Path], bool]
 CallbackResult = Tuple[Command, Union[List[str], FileFilter]]
+logger = logging.getLogger(__name__)
 
 _case_mapping = {
     "camel_case":  camelize,
@@ -133,8 +134,6 @@ class Language:
                           / config_file)
         with open(path_to_config, "r") as f:
             self.options = json.load(f)
-
-        self._logger = logging.getLogger(__name__)
 
     def compilation(self, config: Config, files: List[str]) -> CallbackResult:
         """
@@ -493,5 +492,5 @@ class Language:
         return list(x for x in files if filter_function(x))
 
     def find_main_file(self, files: List[str], name: str) -> str:
-        self._logger.debug("Finding %s in %s", name, files)
+        logger.debug("Finding %s in %s", name, files)
         return [x for x in files if x.startswith(name)][0]

@@ -27,7 +27,7 @@ from tested.serialisation import NumberType, Value, parse_value, StringType, \
 from tested.testplan import Plan
 from tests.manual_utils import configuration
 
-LANGUAGES = ["python", "java", "haskell", "c", "javascript"]
+LANGUAGES = ["python", "java", "haskell", "c", "javascript", "kotlin"]
 
 
 @dataclass
@@ -70,7 +70,7 @@ def assert_serialisation(bundle: Bundle, tmp_path: Path, expected: Value):
     assert actual.data == expected.data
 
 
-@pytest.mark.parametrize("language", ["javascript", "python", "runhaskell", "c", "java"])
+@pytest.mark.parametrize("language", ["javascript", "python", "runhaskell", "c", "java", "kotlin"])
 def test_basic_types(language, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "", language, tmp_path)
     plan = Plan()
@@ -134,6 +134,14 @@ def test_python_escape(tmp_path: Path, pytestconfig):
 
 def test_java_escape(tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "", "java", tmp_path)
+    plan = Plan()
+    bundle = create_bundle(conf, sys.stdout, plan)
+    assert_serialisation(bundle, tmp_path, StringType(type=BasicStringTypes.TEXT, data='"hallo"'))
+    assert_serialisation(bundle, tmp_path, StringType(type=BasicStringTypes.CHAR, data="'"))
+
+
+def test_kotlin_escape(tmp_path: Path, pytestconfig):
+    conf = configuration(pytestconfig, "", "kotlin", tmp_path)
     plan = Plan()
     bundle = create_bundle(conf, sys.stdout, plan)
     assert_serialisation(bundle, tmp_path, StringType(type=BasicStringTypes.TEXT, data='"hallo"'))

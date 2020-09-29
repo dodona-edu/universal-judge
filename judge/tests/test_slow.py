@@ -10,7 +10,7 @@ from tests.manual_utils import configuration, execute_config, assert_valid_outpu
 
 
 @pytest.mark.slow
-@pytest.mark.parametrize("lang", ["python", "java"])
+@pytest.mark.parametrize("lang", ["python", "java", "kotlin"])
 def test_full_isbn(lang: str, tmp_path: Path, pytestconfig):
     config_ = {
         "options": {
@@ -25,7 +25,7 @@ def test_full_isbn(lang: str, tmp_path: Path, pytestconfig):
 
 
 @pytest.mark.slow
-@pytest.mark.parametrize("lang", ["haskell", "java", "python", "runhaskell"])
+@pytest.mark.parametrize("lang", ["haskell", "java", "python", "runhaskell", "kotlin"])
 def test_full_isbn_list(lang: str, tmp_path: Path, pytestconfig):
     config_ = {
         "options": {
@@ -40,7 +40,7 @@ def test_full_isbn_list(lang: str, tmp_path: Path, pytestconfig):
 
 
 @pytest.mark.slow
-@pytest.mark.parametrize("lang", ["java", "python"])
+@pytest.mark.parametrize("lang", ["java", "python", "kotlin"])
 def test_full_lotto(lang: str, tmp_path: Path, pytestconfig):
     config_ = {
         "options": {
@@ -55,7 +55,8 @@ def test_full_lotto(lang: str, tmp_path: Path, pytestconfig):
 
 
 @pytest.mark.flaky
-@pytest.mark.parametrize("language_and_time", [("python", 2), ("java", 5), ("haskell", 20), ("c", 3), ("runhaskell", 15)])
+@pytest.mark.parametrize("language_and_time", [("python", 2), ("java", 5), ("haskell", 20), ("c", 3),
+                                               ("runhaskell", 15), ("kotlin", 5)])
 def test_timeout(language_and_time: Tuple[str, int], tmp_path: Path, pytestconfig):
     config_ = {
         "time_limit": language_and_time[1]  # seconds
@@ -77,7 +78,7 @@ def test_timeout(language_and_time: Tuple[str, int], tmp_path: Path, pytestconfi
 
 
 @pytest.mark.slow
-@pytest.mark.parametrize("lang", ["haskell", "java", "python", "c", "javascript"])
+@pytest.mark.parametrize("lang", ["haskell", "java", "python", "c", "javascript", "kotlin"])
 def test_full_echo(lang: str, tmp_path: Path, pytestconfig):
     config_ = {
         "options": {
