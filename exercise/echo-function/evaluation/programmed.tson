@@ -120,6 +120,35 @@
                 }
               },
               "essential": false
+            },
+            {
+              "input": {
+                "type": "function",
+                "name": "echo",
+                "arguments": [
+                  {
+                    "type": "text",
+                    "data": "input-5"
+                  }
+                ]
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "type": "text",
+                    "data": "input-5"
+                  },
+                  "evaluator": {
+                    "type": "programmed",
+                    "function": {
+                      "file": "Evaluator.kt",
+                      "name": "evaluateValue"
+                    },
+                    "language": "kotlin"
+                  }
+                }
+              },
+              "essential": false
             }
           ]
         }

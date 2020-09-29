@@ -22,7 +22,7 @@ def read_config() -> DodonaConfig:
         "programming_language": 'kotlin',
         "natural_language":     'nl',
         "resources":            Path('../../exercise/objects/evaluation'),
-        "source":               Path('../../exercise/objects/solution/EqualChecker.kt'),
+        "source":               Path('../../exercise/objects/solution/correct.kt'),
         "judge":                Path('.'),
         "workdir":              Path('../workdir'),
         "plan_name":            "plan.tson",

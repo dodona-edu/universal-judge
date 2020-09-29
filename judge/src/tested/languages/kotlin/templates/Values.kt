@@ -68,6 +68,12 @@ private fun internalEncode(value: Any?): Array<String> {
     } else if (value is Long) {
         type = "int64"
         data = value.toString()
+    } else if (value is Float) {
+        type = "single_precision"
+        data = value.toString()
+    } else if (value is Double) {
+        type = "double_precision"
+        data = value.toString()
     } else if (value is Char) {
         type = "character"
         data = String.format("\"%s\"", escape(value.toString()))
@@ -84,7 +90,7 @@ private fun internalEncode(value: Any?): Array<String> {
         type = "map"
         data = value.asSequence()
                 .map { e ->
-                    String.format("\"%s\": \"%s\"", e.key.toString(),
+                    String.format("\"%s\": %s", e.key.toString(),
                             encode(e.value))
                 }
                 .joinToString(separator = ", ", prefix = "{", postfix = "}")

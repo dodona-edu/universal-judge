@@ -1,10 +1,16 @@
 import java.io.PrintWriter
 
-fun main() {
-    val writer = PrintWriter(System.out)
-    % for statement in statements:
-        send(writer, <%include file="statement.mako" args="statement=statement"/>)
-        writer.write("\n")
-    % endfor
-    writer.close()
+class Encode {
+    companion object {
+        @JvmStatic
+        fun main(args : Array<String> = emptyArray()) {
+            val writer = PrintWriter(System.out)
+            % for statement in statements:
+                valuesSend(writer, <%include file="statement.mako" args="statement=statement"/>)
+                writer.write("\n")
+            % endfor
+            writer.close()
+        }
+    }
+
 }
