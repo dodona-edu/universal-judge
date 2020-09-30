@@ -17,7 +17,8 @@ class Kotlin(Language):
             return file.suffix == ".class"
 
         others = [x for x in files if not x.endswith(".jar")]
-        return ["kotlinc", "-nowarn", "-jvm-target", "11", "-cp", ".", *others], file_filter
+        return ["kotlinc", "-nowarn", "-jvm-target", "11", "-cp", ".",
+                *others], file_filter
 
     def execution(self, config: Config, cwd: Path, file: str,
                   arguments: List[str]) -> Command:
@@ -46,6 +47,25 @@ class Kotlin(Language):
             file.write(contents)
 
     def find_main_file(self, files: List[str], name: str) -> str:
-        name += "Kt"
         logger.debug("Finding %s in %s", name, files)
-        return [x for x in files if x.startswith(name)][0]
+        possible_main = [x for x in files if x.startswith(name + "Kt")]
+        if possible_main:
+            return possible_main[0]
+        else:
+            return [x for x in files if x.startswith(name)][0]
+
+    def filter_dependencies(self,
+                            bundle: Bundle,
+                            files: List[str],
+                            context_name: str) -> List[str]:
+        def filter_function(file: str) -> bool:
+            # We don't want files for contexts that are not the one we use.
+            prefix = bundle.lang_config.conventionalize_namespace(
+                bundle.lang_config.context_prefix()
+            )
+            is_context = file.startswith(prefix)
+            is_our_context = (file.startswith(context_name + ".") or
+                              file.startswith(context_name + "$"))
+            return not is_context or is_our_context
+
+        return list(x for x in files if filter_function(x))

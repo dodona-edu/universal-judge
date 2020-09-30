@@ -21,13 +21,13 @@ def read_config() -> DodonaConfig:
         "time_limit":           60,
         "programming_language": 'kotlin',
         "natural_language":     'nl',
-        "resources":            Path('../../exercise/objects/evaluation'),
-        "source":               Path('../../exercise/objects/solution/correct.kt'),
+        "resources":            Path('../../exercise/echo-function/evaluation'),
+        "source":               Path('../../exercise/echo-function/solution/correct.kt'),
         "judge":                Path('.'),
         "workdir":              Path('../workdir'),
-        "plan_name":            "plan.tson",
+        "plan_name":            "programmed.tson",
         "options":              {
-            "parallel": False,
+            "parallel": True,
             "mode":     "batch",
             "linter": {
                 "python": True

@@ -6,6 +6,6 @@ import java.io.PrintWriter
 fun main() {
     val result = <%include file="function.mako" args="function=function" />
     val writer = PrintWriter(System.out)
-    sendEvaluated(writer, result)
+    valuesSendEvaluated(writer, result)
     writer.flush()
 }

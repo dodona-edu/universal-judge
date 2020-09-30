@@ -37,7 +37,7 @@ class ${context_name} : AutoCloseable {
     }
 
     fun execute() {
-        ${ before }
+        ${before}
 
         this.writeSeparator()
 
@@ -71,7 +71,7 @@ class ${context_name} : AutoCloseable {
             }
         % endfor
 
-        ${ after }
+        ${after}
     }
 
     override fun close() {
