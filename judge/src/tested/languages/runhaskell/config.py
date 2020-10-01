@@ -2,8 +2,7 @@ from pathlib import Path
 from typing import List
 
 from tested.configs import Bundle
-from tested.languages import Language
-from tested.languages.config import Command, Config
+from tested.languages.config import Command, Config, Language
 
 
 class RunHaskell(Language):

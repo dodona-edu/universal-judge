@@ -14,8 +14,7 @@ import sys
 
 from .core import _logger, ExtendedMessage, Permission
 from .execution import execute_file, filter_files
-from .utils import (BaseExecutionResult, copy_from_paths_to_path, run_command,
-                    find_main_file)
+from .utils import (BaseExecutionResult, copy_from_paths_to_path, run_command)
 from ..configs import Bundle, create_bundle
 from ..dodona import Status
 from ..features import Construct
@@ -123,7 +122,7 @@ def _evaluate_others(bundle: Bundle,
     files = filter_files(files, custom_path)
     # Execute the custom evaluator.
     evaluator_name = Path(evaluator_name).stem
-    executable = find_main_file(files, evaluator_name)
+    executable = bundle.lang_config.find_main_file(files, evaluator_name)
     files.remove(executable)
 
     return execute_file(

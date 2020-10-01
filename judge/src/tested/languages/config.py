@@ -19,6 +19,7 @@ There are a few callbacks that must be implemented. These raise a
 using your language).
 """
 import json
+import logging
 import os
 from collections import defaultdict
 from dataclasses import dataclass
@@ -39,6 +40,7 @@ from ..utils import camelize, pascalize, fallback, snake_case
 Command = List[str]
 FileFilter = Callable[[Path], bool]
 CallbackResult = Tuple[Command, Union[List[str], FileFilter]]
+logger = logging.getLogger(__name__)
 
 _case_mapping = {
     "camel_case":  camelize,
@@ -488,3 +490,7 @@ class Language:
             return not is_context or is_our_context
 
         return list(x for x in files if filter_function(x))
+
+    def find_main_file(self, files: List[str], name: str) -> str:
+        logger.debug("Finding %s in %s", name, files)
+        return [x for x in files if x.startswith(name)][0]

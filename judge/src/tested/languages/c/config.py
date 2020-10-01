@@ -3,8 +3,7 @@ from pathlib import Path
 from typing import List
 
 from tested.configs import Bundle
-from tested.languages import Language
-from tested.languages.config import CallbackResult, executable_name, Command, Config
+from tested.languages.config import CallbackResult, executable_name, Command, Config, Language
 
 
 class C(Language):

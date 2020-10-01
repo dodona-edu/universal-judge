@@ -8,7 +8,7 @@ from pydantic.dataclasses import dataclass
 
 from .collector import OutputManager
 from .compilation import run_compilation, process_compile_results
-from .utils import BaseExecutionResult, run_command, find_main_file
+from .utils import BaseExecutionResult, run_command
 from ..configs import Bundle
 from ..dodona import Message, Status
 from ..languages.config import FileFilter, Config
@@ -165,7 +165,8 @@ def execute_context(bundle: Bundle, args: ContextExecution, max_time: float) \
 
         _logger.debug("Executing context %s in INDIVIDUAL mode...",
                       args.context_name)
-        executable = find_main_file(files, args.context_name)
+
+        executable = lang_config.find_main_file(files, args.context_name)
         files.remove(executable)
         stdin = args.context.get_stdin(bundle.config.resources)
         argument = None
@@ -185,13 +186,13 @@ def execute_context(bundle: Bundle, args: ContextExecution, max_time: float) \
             _logger.debug("Selector is needed, using it.")
 
             selector_name = lang_config.selector_name()
-            executable = find_main_file(files, selector_name)
+            executable = lang_config.find_main_file(files, selector_name)
             files.remove(executable)
             stdin = args.context.get_stdin(bundle.config.resources)
             argument = args.context_name
         else:
             _logger.debug("Selector is not needed, using individual execution.")
-            executable = find_main_file(files, args.context_name)
+            executable = lang_config.find_main_file(files, args.context_name)
             files.remove(executable)
             stdin = args.context.get_stdin(bundle.config.resources)
             argument = None

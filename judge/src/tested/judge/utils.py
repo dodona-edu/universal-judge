@@ -65,11 +65,6 @@ def run_command(directory: Path,
     )
 
 
-def find_main_file(files: List[str], name: str) -> str:
-    _logger.debug("Finding %s in %s", name, files)
-    return [x for x in files if x.startswith(name)][0]
-
-
 def copy_from_paths_to_path(origins: List[Path],
                             files: List[str],
                             destination: Path):

@@ -15,7 +15,7 @@ import pytest
 from tested.languages import LANGUAGES
 from tests.manual_utils import assert_valid_output, configuration, execute_config
 
-COMPILE_LANGUAGES = ["python", "java", "haskell", "c"]
+COMPILE_LANGUAGES = ["python", "java", "haskell", "c", "kotlin"]
 ALL_LANGUAGES = COMPILE_LANGUAGES + ["runhaskell", "javascript"]
 
 
@@ -73,11 +73,11 @@ def test_programmed_evaluation(language: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "echo-function", language, tmp_path, "programmed.tson", "correct")
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["correct"] * 4
-    assert len(updates.find_all("append-message")) == 4
+    assert updates.find_status_enum() == ["correct"] * 5
+    assert len(updates.find_all("append-message")) == 5
 
 
-@pytest.mark.parametrize("lang", ["python", "java", "haskell", "runhaskell"])
+@pytest.mark.parametrize("lang", ["python", "java", "haskell", "runhaskell", "kotlin"])
 def test_language_evaluator_exception(lang: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "division", lang, tmp_path, "plan.json", "correct")
     result = execute_config(conf)
@@ -85,7 +85,7 @@ def test_language_evaluator_exception(lang: str, tmp_path: Path, pytestconfig):
     assert updates.find_status_enum() == ["correct"]
 
 
-@pytest.mark.parametrize("lang", ["python", "java", "haskell", "runhaskell"])
+@pytest.mark.parametrize("lang", ["python", "java", "haskell", "runhaskell", "kotlin"])
 def test_language_evaluator_exception(lang: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "division", lang, tmp_path, "plan.json", "wrong")
     result = execute_config(conf)
@@ -94,7 +94,7 @@ def test_language_evaluator_exception(lang: str, tmp_path: Path, pytestconfig):
     assert len(updates.find_all("append-message")) == 1
 
 
-@pytest.mark.parametrize("lang", ["python", "java"])
+@pytest.mark.parametrize("lang", ["python", "java", "kotlin"])
 def test_assignment_and_use_in_expression(lang: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "isbn", lang, tmp_path, "one-with-assignment.tson", "solution")
     result = execute_config(conf)
@@ -107,7 +107,7 @@ def test_assignment_and_use_in_expression(lang: str, tmp_path: Path, pytestconfi
     assert len(updates.find_all("start-test")) == 1
 
 
-@pytest.mark.parametrize("lang", ["python", "java", "haskell", "runhaskell"])
+@pytest.mark.parametrize("lang", ["python", "java", "haskell", "runhaskell", "kotlin"])
 def test_assignment_and_use_in_expression_list(lang: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "isbn-list", lang, tmp_path, "one-with-assignment.tson", "solution")
     result = execute_config(conf)
@@ -120,7 +120,7 @@ def test_assignment_and_use_in_expression_list(lang: str, tmp_path: Path, pytest
     assert len(updates.find_all("start-test")) == 1
 
 
-@pytest.mark.parametrize("lang", ["python", "java"])
+@pytest.mark.parametrize("lang", ["python", "java", "kotlin"])
 def test_crashing_assignment_with_before(lang: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "isbn", lang, tmp_path, f"one-with-crashing-assignment-{lang}.tson", "solution")
     result = execute_config(conf)
@@ -141,7 +141,7 @@ def test_heterogeneous_arguments_are_detected(lang: str, tmp_path: Path, pytestc
     assert updates.find_status_enum() == ["internal error"]
 
 
-@pytest.mark.parametrize("lang", ["python", "java"])
+@pytest.mark.parametrize("lang", ["python", "java", "kotlin"])
 def test_programmed_evaluator_lotto(lang: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "lotto", lang, tmp_path, "one-programmed-python.tson", "correct")
     result = execute_config(conf)
@@ -150,7 +150,7 @@ def test_programmed_evaluator_lotto(lang: str, tmp_path: Path, pytestconfig):
     assert updates.find_status_enum() == ["correct"]
 
 
-@pytest.mark.parametrize("lang", ["python", "java"])
+@pytest.mark.parametrize("lang", ["python", "java", "kotlin"])
 def test_programmed_evaluator_wrong(lang: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "lotto", lang, tmp_path, "one-programmed-python.tson", "wrong")
     result = execute_config(conf)
@@ -245,7 +245,7 @@ def test_batch_compilation_no_fallback(language: str, tmp_path: Path, pytestconf
     assert all(s == "wrong" for s in updates.find_status_enum())
 
 
-@pytest.mark.parametrize("lang", ["python", "java", "c", "javascript"])
+@pytest.mark.parametrize("lang", ["python", "java", "c", "javascript", "kotlin"])
 def test_program_params(lang: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "sum", lang, tmp_path, "short.tson", "correct")
     result = execute_config(conf)
@@ -255,7 +255,7 @@ def test_program_params(lang: str, tmp_path: Path, pytestconfig):
     assert len(updates.find_all("start-test")) == 4
 
 
-@pytest.mark.parametrize("language", ["python", "java"])
+@pytest.mark.parametrize("language", ["python", "java", "kotlin"])
 def test_objects(language: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "objects", language, tmp_path, "plan.tson", "correct")
     result = execute_config(conf)
