@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import List
 
 from tested.languages.config import CallbackResult, Command, Config, Language
-from tested.languages.utils import memory_limit_jvm
+from tested.languages.utils import jvm_memory_limit
 
 
 class Java(Language):
@@ -15,5 +15,5 @@ class Java(Language):
 
     def execution(self, config: Config, 
                   cwd: Path, file: str, arguments: List[str]) -> Command:
-        limit = memory_limit_jvm(config)
+        limit = jvm_memory_limit(config)
         return ["java", f"-Xmx{limit}", "-cp", ".", Path(file).stem, *arguments]
