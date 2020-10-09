@@ -32,4 +32,4 @@ jobs:
         uses: fwilhe2/setup-kotlin@0.0.3
       - name: Run tests
         run: |
-          python -m pytest tests/ --log-cli-level debug
+          python -m pytest tests/ --ignore tests/test_slow.py
