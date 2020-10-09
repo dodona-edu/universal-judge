@@ -1,4 +1,5 @@
 import logging
+import os
 import shutil
 from pathlib import Path
 from typing import List, Optional, Tuple, NamedTuple, Callable, Union
@@ -135,8 +136,12 @@ def execute_context(bundle: Bundle, args: ContextExecution, max_time: float) \
     for file in dependencies:
         origin = args.common_directory / file
         _logger.debug("Copying %s to %s", origin, context_dir)
-        # noinspection PyTypeChecker
-        shutil.copy2(origin, context_dir)
+        # Fix weird OSError when copying th Haskell Selector executable
+        if file.startswith(lang_config.selector_name()):
+            os.link(origin, context_dir / file)
+        else:
+            # noinspection PyTypeChecker
+            shutil.copy2(origin, context_dir)
 
     # If needed, do a compilation.
     if args.mode == ExecutionMode.INDIVIDUAL:
