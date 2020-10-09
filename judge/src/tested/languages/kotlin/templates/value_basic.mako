@@ -10,9 +10,9 @@
 % if value.type == BasicNumericTypes.INTEGER:
     ## Basic heuristic for long/int
     % if len(str(value.data)) >= 10:
-            ${value.data}L\
+        ${value.data}L\
     % else:
-            ${value.data}\
+        ${value.data}\
     % endif
 % elif value.type == BasicNumericTypes.RATIONAL:
     ${value.data}\
