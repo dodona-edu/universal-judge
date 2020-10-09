@@ -3,5 +3,5 @@
 # Script that runs the judge inside a container that supports Python.
 
 DIR="$(dirname $0)"
-cd "$DIR/judge/src" || exit
+cd "$DIR" || exit
 python -m tested
