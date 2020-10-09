@@ -7,7 +7,7 @@
 % if value.type == AdvancedSequenceTypes.TUPLE:
     (<%include file="value_arguments.mako" args="arguments=value.data"/>)\
 % elif isinstance(value.type, get_args(AdvancedNumericTypes)):
-    ${data.value} :: <%include file="declaration.mako" args="tp=data.type" />\
+    ${value.data} :: <%include file="declaration.mako" args="tp=value.type" />\
 % else:
     ## Handle the base types
     <% basic = as_basic_type(value) %>\
