@@ -21,7 +21,7 @@ jobs:
         uses: actions/setup-haskell@v1.1
         with:
           ghc-version: '8.10.2'
-          cabal-version: '3.2'
+          cabal-version: '2.2'
       - name: Install Haskell dependencies
         run: cabal install aeson --global
       - name: Use node 12
@@ -32,4 +32,4 @@ jobs:
         uses: fwilhe2/setup-kotlin@0.0.3
       - name: Run tests
         run: |
-          python -m pytest tests/
+          python -m pytest tests/ --log-cli-level debug
