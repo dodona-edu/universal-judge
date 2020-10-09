@@ -412,7 +412,11 @@ def convert_statement(bundle: Bundle, statement: Statement) -> str:
     if isinstance(statement, get_args(Expression)):
         statement = _prepare_expression(bundle, statement)
         template = find_template(bundle, template)
-        return template.render(statement=statement)
+        try:
+            return template.render(statement=statement)
+        except Exception as e:
+            _logger.error(exceptions.text_error_template().render())
+            raise e
 
     assert isinstance(statement, get_args(Assignment))
     prepared_expression = _prepare_expression(bundle, statement.expression)
