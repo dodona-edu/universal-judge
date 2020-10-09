@@ -73,7 +73,7 @@ def configuration(config, exercise: str, language: str, work_dir: Path,
     ep = f'{exercise_dir}/{exercise}'
     return DodonaConfig(**merge({
         "memory_limit":         536870912,
-        "time_limit":           threading.TIMEOUT_MAX,
+        "time_limit":           3600,  # One hour
         "programming_language": language,
         "natural_language":     'nl',
         "resources":            Path(f'{ep}/evaluation'),
