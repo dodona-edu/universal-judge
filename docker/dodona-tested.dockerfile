@@ -1,7 +1,8 @@
-FROM python:3.8-buster
+FROM python:3.9.0-slim-buster
 
 # First, install all necessary packages for running things.
-RUN apt-get update && apt-get install -y default-jdk haskell-platform gcc-8 nodejs dos2unix curl zip unzip
+RUN mkdir -p /usr/share/man/man1/
+RUN apt-get update && apt-get install -y --no-install-recommends default-jdk haskell-platform gcc-8 nodejs dos2unix curl zip unzip
 ENV SDKMAN_DIR /usr/local/sdkman
 RUN curl -s "https://get.sdkman.io?rcupdate=false" | bash
 RUN chmod a+x "$SDKMAN_DIR/bin/sdkman-init.sh"
