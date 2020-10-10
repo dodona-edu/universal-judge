@@ -8,7 +8,7 @@
         return text.replace("'", "\\'")
 %>\
 % if value.type == BasicNumericTypes.INTEGER:
-    ${value.data} :: Integer\
+    ${value.data} :: Int\
 % endif
 % if value.type == BasicNumericTypes.RATIONAL:
     ${value.data} :: Double\
