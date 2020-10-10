@@ -1,4 +1,5 @@
 import logging
+import os
 import re
 from pathlib import Path
 from typing import List
@@ -10,6 +11,12 @@ from tested.languages.utils import jvm_memory_limit
 logger = logging.getLogger(__name__)
 
 
+def get_executable(name):
+    if os.name == 'nt':
+        return f"{name}.bat"
+    return name
+
+
 class Kotlin(Language):
 
     def compilation(self, config: Config, files: List[str]) -> CallbackResult:
@@ -17,13 +24,13 @@ class Kotlin(Language):
             return file.suffix == ".class"
 
         others = [x for x in files if not x.endswith(".jar")]
-        return ["kotlinc", "-nowarn", "-jvm-target", "11", "-cp", ".",
+        return [get_executable("kotlinc"), "-nowarn", "-jvm-target", "11", "-cp", ".",
                 *others], file_filter
 
     def execution(self, config: Config, cwd: Path, file: str,
                   arguments: List[str]) -> Command:
         limit = jvm_memory_limit(config)
-        return ["kotlin", f"-J-Xmx{limit}", "-cp", ".", Path(file).stem, *arguments]
+        return [get_executable("kotlin"), f"-J-Xmx{limit}", "-cp", ".", Path(file).stem, *arguments]
 
     # noinspection PyTypeChecker
     def solution(self, solution: Path, bundle: Bundle):

@@ -93,7 +93,7 @@ def read_config(config_in: IO) -> DodonaConfig:
     # Replace the judge directory.
     parsed: DodonaConfig = DodonaConfig.parse_obj(config_)
     # noinspection PyDataclass
-    parsed = parsed.copy(update={"judge": parsed.judge / 'judge' / 'src'})
+    parsed = parsed.copy(update={"judge": parsed.judge})
 
     return parsed
 

@@ -1,0 +1,35 @@
+name: CI
+
+on: [ push ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Install Python dependencies
+        run: python -m pip install -r requirements.txt -r requirements-test.txt
+      - name: Install Java 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: '11'
+      - name: Install GHC 8.10
+        uses: actions/setup-haskell@v1.1
+        with:
+          ghc-version: '8.10.2'
+          cabal-version: '2.2'
+      - name: Install Haskell dependencies
+        run: sudo cabal install --lib aeson --global
+      - name: Use node 12
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12.x  
+      - name: Setup Kotlin
+        uses: fwilhe2/setup-kotlin@0.0.3
+      - name: Run tests
+        run: |
+          python -m pytest tests/ --ignore tests/test_slow.py

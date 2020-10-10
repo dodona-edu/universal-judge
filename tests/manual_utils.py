@@ -1,7 +1,5 @@
 import json
-import os
 import re
-import shutil
 import threading
 from io import StringIO
 from pathlib import Path
@@ -71,16 +69,16 @@ def configuration(config, exercise: str, language: str, work_dir: Path,
     ext = get_language(language).extension_file()
     if options is None:
         options = {}
-    exercise_dir = Path(config.rootdir).parent / "exercise"
+    exercise_dir = Path(config.rootdir) / "exercise"
     ep = f'{exercise_dir}/{exercise}'
     return DodonaConfig(**merge({
         "memory_limit":         536870912,
-        "time_limit":           threading.TIMEOUT_MAX,
+        "time_limit":           3600,  # One hour
         "programming_language": language,
         "natural_language":     'nl',
         "resources":            Path(f'{ep}/evaluation'),
         "source":               Path(f'{ep}/solution/{solution}.{ext}'),
-        "judge":                Path(f'{config.rootdir}/src'),
+        "judge":                Path(f'{config.rootdir}'),
         "workdir":              work_dir,
         "plan_name":            plan,
     }, options))
