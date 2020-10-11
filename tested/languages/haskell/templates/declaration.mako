@@ -27,6 +27,8 @@
     Float\
 % elif tp == AdvancedNumericTypes.DOUBLE_PRECISION:
     Double\
+% elif tp == AdvancedNumericTypes.BIG_INT:
+    Integer
 % else:
     <% basic = resolve_to_basic(tp) %>\
     % if basic == BasicBooleanTypes.BOOLEAN:
@@ -36,7 +38,7 @@
     % elif basic == BasicStringTypes.CHAR:
         Char\
     % elif basic == BasicNumericTypes.INTEGER:
-        Integer\
+        Int\
     % elif basic == BasicNumericTypes.RATIONAL:
         Double\
     % elif basic == BasicNothingTypes.NOTHING:

@@ -39,6 +39,7 @@ instance Typeable I.Int64 where toType _ = "int64"
 instance Typeable Float where toType _ = "single_precision"
 instance Typeable Double where toType _ = "double_precision"
 instance Typeable Integer where toType _ = "bigint"
+instance Typeable Int where toType _ = "integer"
 
 instance Typeable Bool where toType _ = "boolean"
 instance Typeable Char where toType _ = "character"
