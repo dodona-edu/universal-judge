@@ -122,7 +122,18 @@ def _evaluate_others(bundle: Bundle,
     files = filter_files(files, custom_path)
     # Execute the custom evaluator.
     evaluator_name = Path(evaluator_name).stem
-    executable = bundle.lang_config.find_main_file(files, evaluator_name)
+    executable, _, status, _ = bundle.lang_config.find_main_file(files,
+                                                                 evaluator_name)
+
+    if status != Status.CORRECT:
+        return BaseExecutionResult(
+            stdout="",
+            stderr="Unknown compilation error",
+            exit=-1,
+            timeout=False,
+            memory=False
+        )
+
     files.remove(executable)
 
     return execute_file(

@@ -2,9 +2,10 @@ import logging
 import os
 import re
 from pathlib import Path
-from typing import List
+from typing import List, Tuple, Optional
 
 from tested.configs import Bundle
+from tested.dodona import Message, Status, AnnotateCode
 from tested.languages.config import CallbackResult, Command, Config, Language
 from tested.languages.utils import jvm_memory_limit
 
@@ -53,13 +54,14 @@ class Kotlin(Language):
         with open(solution, "w") as file:
             file.write(contents)
 
-    def find_main_file(self, files: List[str], name: str) -> str:
+    def find_main_file(self, files: List[str], name: str)  \
+            -> Tuple[Optional[str], List[Message], Status, List[AnnotateCode]]:
         logger.debug("Finding %s in %s", name, files)
-        possible_main = [x for x in files if x.startswith(name + "Kt")]
-        if possible_main:
-            return possible_main[0]
+        main, msgs, status, ants = Language.find_main_file(self, files, name + 'Kt')
+        if status == Status.CORRECT:
+            return main, msgs, status, ants
         else:
-            return [x for x in files if x.startswith(name)][0]
+            return Language.find_main_file(self, files, name)
 
     def filter_dependencies(self,
                             bundle: Bundle,

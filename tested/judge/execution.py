@@ -56,20 +56,6 @@ def filter_files(files: Union[List[str], FileFilter],
         return files
 
 
-def filter_dependencies(bundle: Bundle,
-                        files: List[str],
-                        context_name: str) -> List[str]:
-    def filter_function(file: str) -> bool:
-        # We don't want files for contexts that are not the one we use.
-        prefix = bundle.lang_config.conventionalize_namespace(
-            bundle.lang_config.context_prefix()
-        )
-        is_context = file.startswith(prefix)
-        is_our_context = file.startswith(context_name + ".")
-        return not is_context or is_our_context
-    return list(x for x in files if filter_function(x))
-
-
 def execute_file(
         bundle: Bundle,
         executable_name: str,
@@ -171,7 +157,15 @@ def execute_context(bundle: Bundle, args: ContextExecution, max_time: float) \
         _logger.debug("Executing context %s in INDIVIDUAL mode...",
                       args.context_name)
 
-        executable = lang_config.find_main_file(files, args.context_name)
+        executable, messages, status, annotations = \
+            lang_config.find_main_file(files, args.context_name)
+
+        for annotation in annotations:
+            args.collector.add(annotation)
+
+        if status != Status.CORRECT:
+            return None, messages, status, context_dir
+
         files.remove(executable)
         stdin = args.context.get_stdin(bundle.config.resources)
         argument = None
@@ -191,13 +185,31 @@ def execute_context(bundle: Bundle, args: ContextExecution, max_time: float) \
             _logger.debug("Selector is needed, using it.")
 
             selector_name = lang_config.selector_name()
-            executable = lang_config.find_main_file(files, selector_name)
+
+            executable, messages, status, annotations = \
+                lang_config.find_main_file(files, selector_name)
+
+            for annotation in annotations:
+                args.collector.add(annotation)
+
+            if status != Status.CORRECT:
+                return None, messages, status, context_dir
+
             files.remove(executable)
             stdin = args.context.get_stdin(bundle.config.resources)
             argument = args.context_name
         else:
             _logger.debug("Selector is not needed, using individual execution.")
-            executable = lang_config.find_main_file(files, args.context_name)
+
+            executable, messages, status, annotations = \
+                lang_config.find_main_file(files, args.context_name)
+
+            for annotation in annotations:
+                args.collector.add(annotation)
+
+            if status != Status.CORRECT:
+                return None, messages, status, context_dir
+
             files.remove(executable)
             stdin = args.context.get_stdin(bundle.config.resources)
             argument = None
