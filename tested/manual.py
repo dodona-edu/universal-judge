@@ -24,7 +24,7 @@ def read_config() -> DodonaConfig:
         "resources":            Path('exercise/echo/evaluation'),
         "source":               Path('exercise/echo/solution/run-error.c'),
         "judge":                Path('.'),
-        "workdir":              Path('../workdir'),
+        "workdir":              Path('workdir'),
         "plan_name":            "two.tson",
         "options":              {
             "parallel": True,
