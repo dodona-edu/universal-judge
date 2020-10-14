@@ -20,6 +20,7 @@ using your language).
 """
 import json
 import logging
+import math
 import os
 from collections import defaultdict
 from dataclasses import dataclass
@@ -95,6 +96,67 @@ def executable_name(basename: str) -> str:
         return f"{basename}.exe"
     else:
         return basename
+
+
+def limit_output(output: str,
+                 limit_characters: int = 512,
+                 max_lines: int = 20,
+                 ellipsis_str: str = '...') -> str:
+    """
+    Utility function for limiting a string output
+
+    :param output: String that possible needs to be abbreviated
+    :param limit_characters: Maximum characters used in the output
+    :param max_lines: Maximum lines in the output
+    :param ellipsis_str: ellipsis used when abbreviated is needed
+
+    :return: The abbreviated 'output' if needed otherwise the 'output' itself
+    """
+    lines = output.splitlines()
+    # Case character limit not exceeded and line limit not exceeded
+    if len(output) <= limit_characters and len(lines) <= max_lines:
+        return output
+    # Case character limit exceeded
+    max_chars = limit_characters - len(ellipsis_str)
+    forward_buffer = []
+    backward_buffer = []
+    len_lines = len(lines)
+    for f in range(math.ceil(min(max_lines - 1, len_lines) / 2)):
+        r = len_lines - f - 1
+        # Case last lines to consider are the same
+        if f == r:
+            forward_buffer.append(lines[f][:(max_chars - 1)])
+        # Otherwise
+        else:
+            next_line, prev_line = lines[f], lines[r]
+            current_length = len(next_line) + len(prev_line) + 2
+            # Both lines can be add in full
+            if current_length < max_chars:
+                forward_buffer.append(next_line)
+                backward_buffer.append(prev_line)
+                max_chars -= current_length
+            # Lines must be limited
+            else:
+                half = max_chars / 2
+                # Next line can be add in full
+                if len(next_line) + 2 < max_chars:
+                    forward_buffer.append(next_line)
+                    max_chars -= len(next_line) + 2
+                    backward_buffer.append(prev_line[-max_chars:])
+                # Prev line can be add in full
+                elif len(prev_line) + 2 < max_chars:
+                    backward_buffer.append(prev_line)
+                    max_chars -= len(prev_line) + 2
+                    forward_buffer.append(next_line[:max_chars])
+                    pass
+                # Both lines needed abbreviation
+                else:
+                    forward_buffer.append(next_line[:math.ceil(half - 1)])
+                    backward_buffer.append(prev_line[-math.floor(half - 1):])
+                # Terminate loop because character limit reached
+                break
+    # Concat buffer
+    return '\n'.join(forward_buffer + [ellipsis_str] + backward_buffer[::-1])
 
 
 class TypeSupport(Enum):
@@ -407,7 +469,7 @@ class Language:
                  - A list of annotations to add.
                  - The new stdout and stderr.
         """
-        return [], [], stdout, stderr
+        return [], [], limit_output(stdout), limit_output(stderr)
 
     def exception_output(self, exception: ExceptionValue) -> ExceptionValue:
         """
