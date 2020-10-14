@@ -109,13 +109,13 @@ def process_compile_results(
         shown_messages = True
 
     # Report errors if needed.
+    if results.timeout:
+        return messages, Status.TIME_LIMIT_EXCEEDED, annotations
+    if results.memory:
+        return messages, Status.MEMORY_LIMIT_EXCEEDED, annotations
     if results.exit != 0:
         if not shown_messages:
             messages.append(f"Exitcode {results.exit}.")
-        if results.timeout:
-            return messages, Status.TIME_LIMIT_EXCEEDED, annotations
-        if results.memory:
-            return messages, Status.MEMORY_LIMIT_EXCEEDED, annotations
         return messages, Status.COMPILATION_ERROR, annotations
     else:
         return messages, Status.CORRECT, annotations
