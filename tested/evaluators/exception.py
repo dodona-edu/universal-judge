@@ -18,9 +18,11 @@ def try_as_exception(value: str) -> Either[ExceptionValue]:
         return Either(e)
 
 
-def try_as_readable_exception(value: str) -> Optional[str]:
+def try_as_readable_exception(_config: EvaluatorConfig,
+                              value: str) -> Optional[str]:
     try:
         actual = ExceptionValue.parse_raw(value)
+        actual = _config.bundle.lang_config.exception_output(actual)
     except (TypeError, ValueError):
         return None
     else:
@@ -67,9 +69,10 @@ def evaluate(_config: EvaluatorConfig,
 
     return EvaluationResult(
         result=StatusMessage(
-            enum=Status.CORRECT if expected.message == actual.message else 
+            enum=Status.CORRECT if expected.message == actual.message else
             Status.WRONG
         ),
         readable_expected=expected.readable(),
-        readable_actual=actual.readable()
+        readable_actual=_config.bundle.lang_config.exception_output(actual)
+            .readable()
     )

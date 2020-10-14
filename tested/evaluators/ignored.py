@@ -16,7 +16,7 @@ def evaluate(config: EvaluatorConfig, channel: IgnoredChannel,
     # If there is something in the channel, try parsing it as
     # an exception or a value.
     parsers = [
-        exception.try_as_readable_exception,
+        functools.partial(exception.try_as_readable_exception, config),
         functools.partial(value.try_as_readable_value, config.bundle)
     ]
     actual = try_outputs(actual, parsers)

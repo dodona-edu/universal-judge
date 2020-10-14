@@ -6,6 +6,8 @@ from typing import List, Tuple
 from tested.configs import Bundle
 from tested.dodona import AnnotateCode, Severity, Message
 from tested.languages.config import Language, CallbackResult, Command, Config
+from tested.languages.python.utils import cleanup_stacktrace
+from tested.serialisation import ExceptionValue
 
 
 def _executable():
@@ -81,3 +83,14 @@ class Python(Language):
         # Import locally to prevent errors.
         from tested.languages.python import linter
         return linter.run_pylint(bundle, submission, remaining)
+
+    def exception_output(self, exception: ExceptionValue) -> ExceptionValue:
+        """
+        Callback that allows modifying the exception value, for example the
+        stacktrace.
+
+        :param exception: The exception.
+        :return: The modified exception.
+        """
+        exception.stacktrace = cleanup_stacktrace(exception.stacktrace)
+        return exception
