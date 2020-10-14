@@ -7,7 +7,6 @@ from tested.configs import Bundle
 from tested.dodona import AnnotateCode, Severity, Message
 from tested.languages.config import Language, CallbackResult, Command, Config
 
-
 def _executable():
     if os.name == 'nt':
         return 'python'
