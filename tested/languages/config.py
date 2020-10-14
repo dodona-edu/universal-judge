@@ -31,7 +31,7 @@ import sys
 
 from ..configs import Bundle
 from ..datatypes import AllTypes
-from ..dodona import AnnotateCode, Message
+from ..dodona import AnnotateCode, Message, Status
 from ..features import Construct
 from ..serialisation import ExceptionValue
 from ..testplan import Plan
@@ -491,6 +491,13 @@ class Language:
 
         return list(x for x in files if filter_function(x))
 
-    def find_main_file(self, files: List[str], name: str) -> str:
+    def find_main_file(self, files: List[str], name: str) \
+            -> Tuple[Optional[str], List[Message], Status, List[AnnotateCode]]:
         logger.debug("Finding %s in %s", name, files)
-        return [x for x in files if x.startswith(name)][0]
+        messages = []
+        possible_main_files = [x for x in files if x.startswith(name)]
+        if possible_main_files:
+            return possible_main_files[0], messages, Status.CORRECT, []
+        else:
+            messages.append("Unknown compilation error")
+            return None, messages, Status.COMPILATION_ERROR, []
