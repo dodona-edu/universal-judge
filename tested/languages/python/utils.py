@@ -1,7 +1,4 @@
-import logging
 import re
-
-logger = logging.getLogger(__name__)
 
 
 # Idea and original code: dodona/judge-pythia
@@ -28,16 +25,11 @@ def cleanup_stacktrace(traceback: str, reduce_all=False) -> str:
             lines = []
             continue
 
-        logger.debug(line)
-        logger.debug(context_file_regex.search(line))
-        logger.debug(skip_line and (not line.startswith(' ') or 'File' in line))
         # skip line if not a new File line is started
         if context_file_regex.search(line):
-            logger.debug('>>> Skip')
             skip_line = True
             continue
         elif skip_line and (not line.startswith(' ') or 'File' in line):
-            logger.debug('>>> No skip')
             skip_line = False
         elif skip_line:
             continue
