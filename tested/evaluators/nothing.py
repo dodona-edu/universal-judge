@@ -15,7 +15,7 @@ def evaluate(config: EvaluatorConfig, channel: EmptyChannel,
 
     if actual:
         parsers = [
-            exception.try_as_readable_exception,
+            functools.partial(exception.try_as_readable_exception, config),
             functools.partial(value.try_as_readable_value, config.bundle)
         ]
         actual = try_outputs(actual, parsers)
