@@ -19,7 +19,13 @@ public class Values {
     }
         
     private static String escape(String string) {
-        return string.replace("\\", "\\\\").replace("\"", "\\\"");
+        return string.replace("\\", "\\\\")
+                        .replace("\"", "\\\"")
+                        .replace("\b", "\\b")
+                        .replace("\f", "\\f")
+                        .replace("\n", "\\n")
+                        .replace("\r", "\\r")
+                        .replace("\t", "\\t");
     }
 
     @SuppressWarnings("unchecked")
@@ -101,7 +107,8 @@ public class Values {
         }
         var sw = new StringWriter();
         exception.printStackTrace(new PrintWriter(sw));
-        var result = "{ \"message\": \"" + exception.getMessage() + "\", \"type\": \"" + sw.toString() + "\"}";
+        var trace = sw.toString();
+        var result = "{ \"message\": \"\", \"stacktrace\": \"" + escape(trace) + "\"}";
         writer.write(result);
     }
 
