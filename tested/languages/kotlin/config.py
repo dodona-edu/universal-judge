@@ -7,7 +7,7 @@ from typing import List, Tuple, Optional
 from tested.configs import Bundle
 from tested.dodona import Message, Status, AnnotateCode
 from tested.languages.config import CallbackResult, Command, Config, Language
-from tested.languages.utils import jvm_memory_limit
+from tested.languages.utils import jvm_memory_limit, jvm_cleanup_stacktrace
 
 logger = logging.getLogger(__name__)
 
@@ -78,3 +78,9 @@ class Kotlin(Language):
             return not is_context or is_our_context
 
         return list(x for x in files if filter_function(x))
+
+    def cleanup_stacktrace(self,
+                           traceback: str,
+                           submission_file: str,
+                           reduce_all=False) -> str:
+        return jvm_cleanup_stacktrace(traceback, submission_file, reduce_all)

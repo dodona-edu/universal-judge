@@ -1,6 +1,7 @@
 """
 Exception evaluator.
 """
+import logging
 from typing import Optional
 
 from . import EvaluationResult, EvaluatorConfig
@@ -9,12 +10,14 @@ from ..serialisation import ExceptionValue
 from ..testplan import ExceptionOutputChannel
 from ..utils import Either
 
+logger = logging.getLogger(__name__)
+
 
 def try_as_exception(config: EvaluatorConfig,
                      value: str) -> Either[ExceptionValue]:
     try:
         actual = ExceptionValue.parse_raw(value)
-        actual = config.bundle.lang_config.exception_output(actual)
+        actual = config.bundle.lang_config.exception_output(config.bundle, actual)
         return Either(actual)
     except (TypeError, ValueError) as e:
         return Either(e)
@@ -24,7 +27,7 @@ def try_as_readable_exception(config: EvaluatorConfig,
                               value: str) -> Optional[str]:
     try:
         actual = ExceptionValue.parse_raw(value)
-        actual = config.bundle.lang_config.exception_output(actual)
+        actual = config.bundle.lang_config.exception_output(config.bundle, actual)
     except (TypeError, ValueError):
         return None
     else:

@@ -6,8 +6,6 @@ from typing import List, Tuple
 from tested.configs import Bundle
 from tested.dodona import AnnotateCode, Severity, Message
 from tested.languages.config import Language, CallbackResult, Command, Config
-from tested.languages.python.utils import cleanup_stacktrace
-from tested.serialisation import ExceptionValue
 
 
 def _executable():
@@ -84,13 +82,57 @@ class Python(Language):
         from tested.languages.python import linter
         return linter.run_pylint(bundle, submission, remaining)
 
-    def exception_output(self, exception: ExceptionValue) -> ExceptionValue:
-        """
-        Callback that allows modifying the exception value, for example the
-        stacktrace.
+    # Idea and original code: dodona/judge-pythia
+    def cleanup_stacktrace(self,
+                           traceback: str,
+                           submission_file: str,
+                           reduce_all=False) -> str:
+        context_file_regex = re.compile(r"context_[0-9]+_[0-9]+\.py")
 
-        :param exception: The exception.
-        :return: The modified exception.
-        """
-        exception.stacktrace = cleanup_stacktrace(exception.stacktrace)
-        return exception
+        if isinstance(traceback, str):
+            traceback = traceback.splitlines(True)
+
+        skip_line, lines = False, []
+        for line in traceback:
+
+            line = line.strip('\n')
+
+            if not line:
+                continue
+
+            if line.startswith('During handling of the above exception, another '
+                               'exception occurred:'):
+                lines = []
+                continue
+
+            # skip line if not a new File line is started
+            if context_file_regex.search(line):
+                skip_line = True
+                continue
+            elif skip_line and (not line.startswith(' ') or 'File' in line):
+                skip_line = False
+            elif skip_line:
+                continue
+
+            # replace references to local names
+            if f'File "./{submission_file}"' in line:
+                line = line.replace(f'File "./{submission_file}"', 'File "<code>"')
+            elif 'File "<string>"' in line:
+                line = line.replace('File "<string>"', 'File "<code>"')
+            elif 'File "<doctest>"' in line:
+                continue
+            elif 'File "' in line:
+                skip_line = True
+                continue
+            skip_line = False
+
+            # replace references to modules
+            if ', in <module>' in line:
+                line = line.replace(', in <module>', '')
+
+            if not (reduce_all and line.startswith(' ')):
+                lines.append(line + '\n')
+
+        if len(lines) > 20:
+            lines = lines[:19] + ['...\n'] + [lines[-1]]
+        return "".join(lines)
