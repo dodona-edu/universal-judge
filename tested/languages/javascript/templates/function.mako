@@ -1,15 +1,13 @@
 ## This translates a function call to JavaScript.
 <%! from tested.serialisation import FunctionType %>\
 <%page args="function" />\
-% if function.type == FunctionType.NAMESPACE or (function.type == FunctionType.FUNCTION and function.namespace):
+% if function.type == FunctionType.CONSTRUCTOR:
+    new \
+% endif
+% if function.type == FunctionType.NAMESPACE or (function.type in (FunctionType.FUNCTION, FunctionType.CONSTRUCTOR) \
+                                                     and function.namespace):
     ${function.namespace}.\
 % endif
-%if function.type == FunctionType.CONSTRUCTOR:
-new \
-    %if function.namespace:
-${function.namespace}.\
-    %endif
-%endif
 ${function.name}\
 % if function.type != FunctionType.PROPERTY:
     (\

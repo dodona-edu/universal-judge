@@ -41,6 +41,11 @@ class JavaScript(Language):
                            traceback: str,
                            submission_file: str,
                            reduce_all=False) -> str:
+        namespace = submission_file[:submission_file.rfind('.')]
+        ref_not_found_regex = re.compile(rf"TypeError: {namespace}.([a-zA-Z0-9_]*) "
+                                         r"is not a (function|constructor)")
+        ref_not_found_replace = r'ReferenceError: \1 is not defined'
+
         context_file_regex = re.compile(r"context[0-9]+\.js")
 
         if isinstance(traceback, str):
@@ -60,6 +65,10 @@ class JavaScript(Language):
                 continue
             elif skip_line:
                 continue
+
+            # replace type error not found to reference error
+            if ref_not_found_regex.search(line):
+                line = ref_not_found_regex.sub(ref_not_found_replace, line)
 
             # replace references to local names
             if submission_file in line:
