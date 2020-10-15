@@ -35,7 +35,7 @@ def jvm_cleanup_stacktrace(traceback: str,
         if context_file_regex.search(line):
             skip_line = True
             continue
-        elif skip_line:
+        elif skip_line and (line.startswith(' ') and 'at' not in line):
             continue
 
         # replace references to local names
