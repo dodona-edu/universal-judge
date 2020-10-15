@@ -1,4 +1,6 @@
 import logging
+import re
+
 from esprima import parseScript, error_handler
 from pathlib import Path
 from typing import List
@@ -34,3 +36,42 @@ class JavaScript(Language):
                 print("\nmodule.exports = {", ", ".join(functions), "};", file=file)
         except error_handler.Error:
             logger.debug("Failing to parse submission")
+
+    def cleanup_stacktrace(self,
+                           traceback: str,
+                           submission_file: str,
+                           reduce_all=False) -> str:
+        context_file_regex = re.compile(r"context[0-9]+\.js")
+
+        if isinstance(traceback, str):
+            traceback = traceback.splitlines(True)
+
+        skip_line, lines = False, []
+        for line in traceback:
+
+            line = line.strip('\n')
+
+            if not line:
+                continue
+
+            # skip line if not a new File line is started
+            if context_file_regex.search(line):
+                skip_line = True
+                continue
+            elif skip_line:
+                continue
+
+            # replace references to local names
+            if submission_file in line:
+                line = re.sub(rf'\(.*{submission_file}(.*)\)', r'(<code>\1)', line)
+            elif 'at ' in line:
+                skip_line = True
+                continue
+            skip_line = False
+
+            if not (reduce_all and line.startswith(' ')):
+                lines.append(line + '\n')
+
+        if len(lines) > 20:
+            lines = lines[:19] + ['...\n'] + [lines[-1]]
+        return "".join(lines)
