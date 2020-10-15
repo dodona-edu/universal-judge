@@ -8,7 +8,7 @@ RUN chmod a+x "$SDKMAN_DIR/bin/sdkman-init.sh"
 RUN /bin/bash -c "source \"$SDKMAN_DIR/bin/sdkman-init.sh\" && sdk install kotlin"
 ENV PATH $SDKMAN_DIR/candidates/kotlin/current/bin:$PATH
 
-RUN pip install jsonschema psutil mako pydantic==1.4 toml typing_inspect pylint
+RUN pip install jsonschema psutil mako pydantic==1.4 toml typing_inspect pylint esprima==4.0.1
 RUN cabal update && cabal install aeson --global --force-reinstalls
 
 RUN chmod 711 /mnt
