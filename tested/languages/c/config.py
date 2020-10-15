@@ -1,9 +1,47 @@
+import logging
 import re
 from pathlib import Path
-from typing import List
+from typing import List, Tuple
 
 from tested.configs import Bundle
-from tested.languages.config import CallbackResult, executable_name, Command, Config, Language
+from tested.dodona import AnnotateCode, Message
+from tested.languages.config import CallbackResult, executable_name, Command, \
+    Config, Language, limit_output
+
+
+logger = logging.getLogger(__name__)
+
+
+def cleanup_compilation_stderr(traceback: str) -> str:
+    context_file_regex = re.compile(r"(context_[0-9]+_[0-9]+|selector)")
+
+    if isinstance(traceback, str):
+        traceback = traceback.splitlines(True)
+
+    skip_line, lines = False, []
+    for line in traceback:
+
+        line = line.strip('\n')
+
+        if not line:
+            continue
+
+        # skip line if not a new File line is started
+        if context_file_regex.search(line):
+            skip_line = True
+            continue
+        elif skip_line and not line.startswith(' '):
+            skip_line = False
+            pass
+        elif skip_line:
+            continue
+
+        line = line.replace("solution_main", "main")
+        lines.append(line + '\n')
+
+    if len(lines) > 20:
+        lines = lines[:19] + ['...\n'] + [lines[-1]]
+    return "".join(lines)
 
 
 class C(Language):
@@ -39,3 +77,8 @@ class C(Language):
         with open(solution, "w") as file:
             header = "#pragma once\n\n"
             file.write(header + contents)
+
+    def compiler_output(
+            self, stdout: str, stderr: str
+    ) -> Tuple[List[Message], List[AnnotateCode], str, str]:
+        return [], [], limit_output(stdout), cleanup_compilation_stderr(stderr)
