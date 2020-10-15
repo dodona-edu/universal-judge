@@ -63,7 +63,7 @@ class JavaScript(Language):
             if context_file_regex.search(line):
                 skip_line = True
                 continue
-            elif skip_line and (line.startswith(' ') or 'at' not in line):
+            elif skip_line and (line.startswith(' ') and 'at' not in line):
                 continue
 
             # replace type error not found to reference error
