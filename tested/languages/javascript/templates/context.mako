@@ -67,12 +67,13 @@ ${before}
     process.argv = new_args
 % endif
 
+let ${submission_name};
+
 ## Import the code for the first time, which will run the code.
 try {
     writeSeparator();
 
-    ## TODO: seek alternative approach for inlining the submission
-    eval(fs.readFileSync("${submission_name}.js") + "");
+    ${submission_name} = require("./${submission_name}.js");
 
     <%include file="statement.mako" args="statement=context_testcase.exception_statement()" />
 } catch(e) {
