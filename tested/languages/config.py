@@ -471,14 +471,23 @@ class Language:
         """
         return [], [], limit_output(stdout), limit_output(stderr)
 
-    def exception_output(self, exception: ExceptionValue) -> ExceptionValue:
+    def exception_output(self,
+                         bundle: Bundle,
+                         exception: ExceptionValue) -> ExceptionValue:
         """
         Callback that allows modifying the exception value, for example the
         stacktrace.
 
+        :param bundle: Evaluation bundle
         :param exception: The exception.
         :return: The modified exception.
         """
+        exception.stacktrace = self.cleanup_stacktrace(
+            exception.stacktrace,
+            self.with_extension(
+                self.conventionalize_namespace(bundle.plan.namespace)
+            )
+        )
         return exception
 
     def stdout(self, stdout: str) -> Tuple[List[Message], List[AnnotateCode], str]:
@@ -563,3 +572,18 @@ class Language:
         else:
             messages.append("Unknown compilation error")
             return None, messages, Status.COMPILATION_ERROR, []
+
+    def cleanup_stacktrace(self,
+                           traceback: str,
+                           submission_file: str,
+                           reduce_all=False) -> str:
+        """
+        Takes a traceback as a string or as a list of strings and returns a reduced
+        version of the traceback as a list of strings.
+
+        :param traceback: Stack trace to cleanup
+        :param submission_file: Name of the submission file
+        :param reduce_all: Option for aggressive cleanup
+        :return A clean stack trace
+        """
+        return traceback
