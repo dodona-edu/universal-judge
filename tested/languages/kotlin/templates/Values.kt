@@ -20,7 +20,6 @@ private fun escape(str: String): String {
             .replace("\\", "\\\\")
             .replace("\"", "\\\"")
             .replace("\b", "\\b")
-            .replace("\f", "\\f")
             .replace("\n", "\\n")
             .replace("\r", "\\r")
             .replace("\t", "\\t")
@@ -131,6 +130,6 @@ fun valuesSendException(writer: PrintWriter, throwable: Throwable?) {
     }
     val strStackTraceWriter = StringWriter()
     throwable.printStackTrace(PrintWriter(strStackTraceWriter))
-    writer.printf("{ \"message\": \"%s\", \"type\": \"%s\"}",
-            throwable.message, escape(strStackTraceWriter.toString()))
+    writer.printf("{ \"message\": \"\", \"stacktrace\": \"%s\"}",
+            escape(strStackTraceWriter.toString()))
 }
