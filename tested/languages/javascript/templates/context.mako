@@ -1,6 +1,6 @@
 ## Code to execute one context.
 <%! from tested.languages.generator import _TestcaseArguments %>\
-<%! from tested.serialisation import Statement, Expression %>\
+<%! from tested.serialisation import Statement, Expression, Assignment %>\
 <%! from tested.utils import get_args %>\
 const fs = require('fs');
 const vm = require('vm');
@@ -86,6 +86,9 @@ try {
     writeSeparator();
 
     <% testcase: _TestcaseArguments %>\
+    % if isinstance(testcase.command, get_args(Assignment)):
+        let ${testcase.command.variable};
+    % endif
     try {
         ## If we have a value function, we have an expression.
         <%include file="statement.mako" args="statement=testcase.input_statement()" />;
