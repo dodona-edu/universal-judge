@@ -587,3 +587,6 @@ class Language:
         :return A clean stack trace
         """
         return traceback
+
+    def cleanup_description(self, namespace: str, description: str) -> str:
+        return description

@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 from typing import List
 
@@ -29,3 +30,7 @@ class Haskell(Language):
             with open(solution, "w") as file:
                 result = f"module {name} where\n" + contents
                 file.write(result)
+
+    def cleanup_description(self, namespace: str, description: str) -> str:
+        return re.sub(rf'{self.conventionalize_namespace(namespace)}\.',
+                      r'', description, count=1)

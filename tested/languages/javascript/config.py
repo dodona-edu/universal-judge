@@ -84,3 +84,7 @@ class JavaScript(Language):
         if len(lines) > 20:
             lines = lines[:19] + ['...\n'] + [lines[-1]]
         return "".join(lines)
+
+    def cleanup_description(self, namespace: str, description: str) -> str:
+        return re.sub(rf'{self.conventionalize_namespace(namespace)}\.',
+                      r'', description, count=1)
