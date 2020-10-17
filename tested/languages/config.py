@@ -462,6 +462,7 @@ class Language:
         TODO: in context compilation mode, this is called for each compilation,
           which can result in the same annotation 50x times.
 
+        :param namespace: Namespace of the test plan
         :param stdout: The standard output from the compiler.
         :param stderr: The standard error from the compiler.
         :return: A tuple containing:
