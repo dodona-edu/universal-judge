@@ -19,6 +19,9 @@ def jvm_cleanup_stacktrace(traceback: str,
                            submission_file: str,
                            reduce_all=False) -> str:
     context_file_regex = re.compile(r"(Context[0-9]+|Selector)")
+    unresolved_main_regex = re.compile(r"error: unresolved reference: solutionMain")
+    unresolved_reference_regex = \
+        re.compile(r"(error: unresolved reference: [a-zA-Z$_0-9]+)")
 
     if isinstance(traceback, str):
         traceback = traceback.splitlines(True)
@@ -33,6 +36,12 @@ def jvm_cleanup_stacktrace(traceback: str,
 
         # skip line if not a new File line is started
         if context_file_regex.search(line):
+            if unresolved_main_regex.search(line):
+                lines.append('error: unresolved reference: main\n')
+            else:
+                match = unresolved_reference_regex.search(line)
+                if match:
+                    lines.append(match[0] + '\n')
             skip_line = True
             continue
         elif skip_line and (line.startswith(' ') and 'at' not in line):

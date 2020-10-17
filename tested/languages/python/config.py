@@ -25,10 +25,10 @@ class Python(Language):
                   cwd: Path, file: str, arguments: List[str]) -> Command:
         return [_executable(), "-u", file, *arguments]
 
-    def compiler_output(self, stdout: str, stderr: str) \
+    def compiler_output(self, namespace: str, stdout: str, stderr: str) \
             -> Tuple[List[Message], List[AnnotateCode], str, str]:
         if match := re.search(
-                r".*: (?P<error>.+Error): (?P<message>.+) \(submission.py, "
+                rf".*: (?P<error>.+Error): (?P<message>.+) \({namespace}.py, "
                 r"line (?P<line>\d+)\)",
                 stdout):
             error = match.group('error')
@@ -41,7 +41,7 @@ class Python(Language):
                     type=Severity.ERROR
                 )
             ], stdout, stderr
-        elif stuff := self._attempt_stacktrace(stdout):
+        elif stuff := self._attempt_stacktrace(namespace, stdout):
             line, column, message = stuff
             return [], [
                 AnnotateCode(
@@ -54,10 +54,10 @@ class Python(Language):
         else:
             return [], [], stdout, stderr
 
-    def _attempt_stacktrace(self, trace: str):
+    def _attempt_stacktrace(self, namespace: str, trace: str):
         # TODO: this only works with compiler traces.
         # Find message
-        line_regex = fr'File "\.\{os.sep}submission\.py", line (?P<line>\d+)'
+        line_regex = fr'File "\.\{os.sep}{namespace}\.py", line (?P<line>\d+)'
         if match := re.search(line_regex, trace):
             line = int(match.group("line")) - 1
         else:

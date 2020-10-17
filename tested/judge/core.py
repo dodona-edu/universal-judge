@@ -75,6 +75,7 @@ def judge(bundle: Bundle):
                                                     remaining)
 
         messages, status, annotations = process_compile_results(
+            bundle.plan.namespace,
             bundle.lang_config,
             result
         )

@@ -453,7 +453,7 @@ class Language:
         pass
 
     def compiler_output(
-            self, stdout: str, stderr: str
+            self, namespace: str, stdout: str, stderr: str
     ) -> Tuple[List[Message], List[AnnotateCode], str, str]:
         """
         Callback that allows processing the output of the compiler. This might be
