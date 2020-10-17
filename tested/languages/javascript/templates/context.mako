@@ -3,7 +3,6 @@
 <%! from tested.serialisation import Statement, Expression, Assignment %>\
 <%! from tested.utils import get_args %>\
 const fs = require('fs');
-const vm = require('vm');
 const values = require("./values.js");
 
 ##################################
