@@ -19,7 +19,7 @@ def jvm_cleanup_stacktrace(traceback: str,
                            submission_file: str,
                            reduce_all=False) -> str:
     context_file_regex = re.compile(r"(Context[0-9]+|Selector)")
-    unresolved_main_regex = re.compile(r"error: unresolved reference: solutionMain")
+    unresolved_main_regex = r"error: unresolved reference: solutionMain"
     unresolved_reference_regex = \
         re.compile(r"(error: unresolved reference: [a-zA-Z$_0-9]+)")
 
@@ -36,7 +36,7 @@ def jvm_cleanup_stacktrace(traceback: str,
 
         # skip line if not a new File line is started
         if context_file_regex.search(line):
-            if unresolved_main_regex.search(line):
+            if unresolved_main_regex in line:
                 lines.append('error: unresolved reference: main\n')
             else:
                 match = unresolved_reference_regex.search(line)
