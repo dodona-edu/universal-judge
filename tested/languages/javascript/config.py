@@ -1,9 +1,9 @@
 import logging
 import re
-
-from esprima import parseScript, error_handler
 from pathlib import Path
 from typing import List
+
+from esprima import parseScript, error_handler
 
 from tested.configs import Bundle
 from tested.languages.config import Command, Config, Language
@@ -86,5 +86,5 @@ class JavaScript(Language):
         return "".join(lines)
 
     def cleanup_description(self, namespace: str, description: str) -> str:
-        return re.sub(rf'{self.conventionalize_namespace(namespace)}\.',
-                      r'', description, count=1)
+        return description.replace(rf'{self.conventionalize_namespace(namespace)}.',
+                                   r'', 1)

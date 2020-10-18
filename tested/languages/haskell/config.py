@@ -1,9 +1,9 @@
-import re
 from pathlib import Path
 from typing import List
 
 from tested.configs import Bundle
-from tested.languages.config import CallbackResult, executable_name, Command, Config, Language
+from tested.languages.config import CallbackResult, executable_name, Command, \
+    Config, Language
 
 
 # TODO: advanced type don't work very good at the moment.
@@ -32,5 +32,5 @@ class Haskell(Language):
                 file.write(result)
 
     def cleanup_description(self, namespace: str, description: str) -> str:
-        return re.sub(rf'{self.conventionalize_namespace(namespace)}\.',
-                      r'', description, count=1)
+        return description.replace(rf'{self.conventionalize_namespace(namespace)}.',
+                                   r'', 1)
