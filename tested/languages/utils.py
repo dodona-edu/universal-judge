@@ -99,6 +99,7 @@ def haskell_cleanup_stacktrace(traceback: str,
     type_conflict_regex = re.compile(
         r"Couldn.t match expected type (.*) with actual type (.*)"
     )
+    code_line_regex = re.compile(r"^(.*<code>:)([0-9]+)(:[0-9]+.*)$")
 
     parse_module = r"error: parse error on input ‘module’"
     replace_module = r"error: unexpected ‘module’"
@@ -132,6 +133,11 @@ def haskell_cleanup_stacktrace(traceback: str,
             match = called_at_regex.match(line)
             if match:
                 line = f"{match.group(1)}{int(match.group(2)) - 1}{match.group(3)}"
+            else:
+                match = code_line_regex.match(line)
+                if match:
+                    line = f"{match.group(1)}{int(match.group(2)) - 1}" \
+                           f"{match.group(3)}"
         elif 'at ' in line:
             skip_line = True
             continue
