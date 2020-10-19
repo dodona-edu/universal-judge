@@ -95,6 +95,10 @@ def haskell_cleanup_stacktrace(traceback: str,
                                reduce_all=False):
     context_file_regex = re.compile(r"(Context[0-9]+|Selector)")
     called_at_regex = re.compile(r"^(.*called at ./<code>:)([0-9]+)(:[0-9]+) .*$")
+    compile_line_regex = re.compile(r"^([0-9]+)(\s*\|.*)$")
+    type_conflict_regex = re.compile(
+        r"Couldn.t match expected type (.*) with actual type (.*)"
+    )
 
     parse_module = r"error: parse error on input ‘module’"
     replace_module = r"error: unexpected ‘module’"
@@ -114,7 +118,12 @@ def haskell_cleanup_stacktrace(traceback: str,
         if context_file_regex.search(line):
             skip_line = True
             continue
-        elif skip_line and (line.startswith(' ')):
+        elif skip_line and (line.startswith(' ') or line[0].isdigit()):
+            match = type_conflict_regex.search(line)
+            if match:
+                lines.append("Argument type conflict: Couldn't match expected type "
+                             f"{match.group(2)} with actual type "
+                             f"{match.group(1)}\n")
             continue
 
         # replace references to local names
@@ -128,7 +137,12 @@ def haskell_cleanup_stacktrace(traceback: str,
             continue
         skip_line = False
 
-        logger.info(line)
+        if parse_module in line:
+            line = line.replace(parse_module, replace_module)
+        else:
+            match = compile_line_regex.match(line)
+            if match:
+                line = f"{int(match.group(1)) - 1}{match.group(2)}"
 
         if not (reduce_all and line.startswith(' ')):
             lines.append(line + '\n')

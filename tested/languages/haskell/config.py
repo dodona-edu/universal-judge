@@ -40,7 +40,7 @@ class Haskell(Language):
     def compiler_output(
             self, namespace: str, stdout: str, stderr: str
     ) -> Tuple[List[Message], List[AnnotateCode], str, str]:
-        return [], [], limit_output(stdout), haskell_cleanup_stacktrace(
+        return [], [], "", haskell_cleanup_stacktrace(
             stderr,
             self.with_extension(self.conventionalize_namespace(namespace))
         )
