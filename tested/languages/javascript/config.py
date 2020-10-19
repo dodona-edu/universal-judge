@@ -1,11 +1,12 @@
 import logging
 import re
 from pathlib import Path
-from typing import List
+from typing import List, Tuple
 
 from esprima import parseScript, error_handler
 
 from tested.configs import Bundle
+from tested.dodona import Message, AnnotateCode
 from tested.languages.config import Command, Config, Language
 from tested.languages.utils import cleanup_description
 
@@ -88,3 +89,35 @@ class JavaScript(Language):
 
     def cleanup_description(self, namespace: str, description: str) -> str:
         return cleanup_description(self, namespace, description)
+
+    def stderr(self,
+               bundle: Bundle,
+               stderr: str) -> Tuple[List[Message], List[AnnotateCode], str]:
+        # Identifier to separate testcase output
+        identifier = f"--{bundle.secret}-- SEP"
+        submission_file = self.with_extension(
+            self.conventionalize_namespace(bundle.plan.namespace))
+        # Assume stacktrace when line is equal the submission_file path with
+        # line number
+        line_start_with_submission_file = re.compile(
+            rf'^(\\?([^\\/]*[\\/])*)({submission_file}):[0-9]+'
+        )
+        logger.debug(line_start_with_submission_file.pattern)
+        cases = stderr.split(identifier)
+        cleaned_cases = []
+        # Process each case
+        for case in cases:
+            keep_until = 0
+            case = case.splitlines(keepends=True)
+            for index, line in enumerate(case):
+                line = line.rstrip('\n')
+                if not line_start_with_submission_file.match(line):
+                    keep_until = index + 1
+                else:
+                    break
+            keep_lines = "".join(case[:keep_until])
+            stacktrace = "".join(case[keep_until:])
+            stacktrace = self.cleanup_stacktrace(stacktrace, submission_file)
+            cleaned_cases.append(f'{keep_lines}{stacktrace}')
+
+        return [], [], identifier.join(cleaned_cases)
