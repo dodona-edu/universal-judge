@@ -73,14 +73,14 @@ class C(Language):
         # We use regex to find the main function.
         # First, check if we have a no-arg main function.
         # If so, replace it with a renamed main function that does have args.
-        no_args = re.compile(r"(int|void)\s+main\s*\(\s*\)\s*{")
-        replacement = "int solution_main(int argc, char** argv){"
+        no_args = re.compile(r"(int|void)(\s+)main(\s*)\((\s*)\)(\s*{)")
+        replacement = r"int\2solution_main\3(\4int argc, char** argv)\5"
         contents, nr = re.subn(no_args, replacement, contents, count=1)
         if nr == 0:
             # There was no main function without arguments. Now we try a main
             # function with arguments.
-            with_args = re.compile(r"(int|void)\s+main\s*\(\s*int")
-            replacement = "int solution_main(int"
+            with_args = re.compile(r"(int|void)(\s+)main(\s*)\((\s*)int")
+            replacement = r"int\2solution_main\3(\4int"
             contents = re.sub(with_args, replacement, contents, count=1)
         with open(solution, "w") as file:
             header = "#pragma once\n\n"
