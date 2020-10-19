@@ -13,7 +13,7 @@ from tested.configs import Bundle
 from tested.dodona import Update, Status, report_update, StatusMessage, \
     CloseTab, CloseContext, CloseTestcase, StartJudgment, CloseJudgment, \
     StartTab, StartContext, StartTestcase, close_for, ExtendedMessage, \
-    EscalateStatus, update_size, limit_size
+    EscalateStatus, update_size, limit_size, AnnotateCode
 
 _logger = logging.getLogger(__name__)
 
@@ -70,6 +70,7 @@ class OutputManager:
 
     The collector has a few fields:
 
+    :ivar seen_annotations: Set of all seen code annotations, to avoid duplicates
     :ivar tree_stack: A stack of the structure. This enables us to automatically
                       close stuff if needed.
     :ivar prepared: The fallback.
@@ -81,10 +82,12 @@ class OutputManager:
                         counts the "content", not other stuff. You should add a
                         buffer for the other stuff.
     """
-    __slots__ = ["tree_stack", "collected", "prepared", "bundle", "tab", "context",
+    __slots__ = ["seen_annotations", "tree_stack", "collected", "prepared",
+                 "bundle", "tab", "context",
                  "output_limit"]
 
     def __init__(self, bundle: Bundle):
+        self.seen_annotations: List[AnnotateCode] = list()
         self.tree_stack: List[str] = []
         self.collected = False
         self.prepared = _ExpectedJudgment()
@@ -152,6 +155,17 @@ class OutputManager:
         assert not isinstance(command,
                               (StartTab, StartContext, CloseContext, CloseTab))
         assert not self.collected, "OutputManager already finished!"
+
+        # Check if command is code annotations
+        if isinstance(command, AnnotateCode):
+            # If annotation al ready seen skip annotation
+            if command in self.seen_annotations:
+                return
+            # Annotation not yet seen add to seen list
+            else:
+                _logger.debug(f"Not seen annotation: {command}")
+                self.seen_annotations.append(command)
+
         size = update_size(command)
         if size > self.output_limit:
             command = limit_size(command, self.output_limit - size)
