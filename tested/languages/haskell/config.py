@@ -1,12 +1,18 @@
 from pathlib import Path
-from typing import List
+from typing import List, Tuple
 
+from dodona import Message
 from tested.configs import Bundle
+from tested.dodona import AnnotateCode
 from tested.languages.config import CallbackResult, executable_name, Command, \
-    Config, Language
+    Config, Language, limit_output
+from tested.languages.utils import haskell_solution, cleanup_description, \
+    haskell_cleanup_stacktrace
 
 
 # TODO: advanced type don't work very good at the moment.
+
+
 class Haskell(Language):
 
     def compilation(self, config: Config, files: List[str]) -> CallbackResult:
@@ -20,17 +26,21 @@ class Haskell(Language):
         return [str(local_file.absolute()), *arguments]
 
     def solution(self, solution: Path, bundle: Bundle):
-        """Support implicit modules if needed."""
-        if bundle.config.config_for().get("implicitModule", True):
-            name = self.submission_name(bundle.plan)
-            # noinspection PyTypeChecker
-            with open(solution, "r") as file:
-                contents = file.read()
-            # noinspection PyTypeChecker
-            with open(solution, "w") as file:
-                result = f"module {name} where\n" + contents
-                file.write(result)
+        haskell_solution(self, solution, bundle)
 
     def cleanup_description(self, namespace: str, description: str) -> str:
-        return description.replace(rf'{self.conventionalize_namespace(namespace)}.',
-                                   r'', 1)
+        return cleanup_description(self, namespace, description)
+
+    def cleanup_stacktrace(self,
+                           traceback: str,
+                           submission_file: str,
+                           reduce_all=False) -> str:
+        return haskell_cleanup_stacktrace(traceback, submission_file, reduce_all)
+
+    def compiler_output(
+            self, namespace: str, stdout: str, stderr: str
+    ) -> Tuple[List[Message], List[AnnotateCode], str, str]:
+        return [], [], limit_output(stdout), haskell_cleanup_stacktrace(
+            stderr,
+            self.with_extension(self.conventionalize_namespace(namespace))
+        )

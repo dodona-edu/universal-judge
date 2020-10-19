@@ -280,7 +280,7 @@ sendEvaluatedH file r =
 
 sendException :: Exception e => FilePath -> Maybe e -> IO ()
 sendException file (Just ex) = LBS.appendFile file (encode (object [
-        "message" .= toJSON (show ex),
-        "stacktrace" .= toJSON (show "-")
+        "message" .= toJSON ([] :: String),
+        "stacktrace" .= toJSON (show ex)
     ]))
 sendException _ Nothing = return ()
