@@ -8,12 +8,12 @@ from tested.dodona import AnnotateCode, Message
 from tested.languages.config import CallbackResult, executable_name, Command, \
     Config, Language, limit_output
 
-
 logger = logging.getLogger(__name__)
 
 
-def cleanup_compilation_stderr(traceback: str) -> str:
+def cleanup_compilation_stderr(submission_file: str, traceback: str) -> str:
     context_file_regex = re.compile(r"(context_[0-9]+_[0-9]+|selector)")
+    code_line_regex = re.compile(r"(<code>:|\s+)([0-9]+)(:|\s+\|)")
 
     if isinstance(traceback, str):
         traceback = traceback.splitlines(True)
@@ -36,7 +36,15 @@ def cleanup_compilation_stderr(traceback: str) -> str:
         elif skip_line:
             continue
 
+        line = line.replace(submission_file, '<code>')
         line = line.replace("solution_main", "main")
+
+        match = code_line_regex.search(line)
+        if match:
+            # update line number to compensate for #pragma once
+            replace = rf"{match.group(1)}{int(match.group(2)) - 2}{match.group(3)}"
+            line = code_line_regex.sub(replace, line, 1)
+
         lines.append(line + '\n')
 
     if len(lines) > 20:
@@ -65,14 +73,14 @@ class C(Language):
         # We use regex to find the main function.
         # First, check if we have a no-arg main function.
         # If so, replace it with a renamed main function that does have args.
-        no_args = re.compile(r"(int|void)\s+main\s*\(\s*\)\s*{")
-        replacement = "int solution_main(int argc, char** argv){"
+        no_args = re.compile(r"(int|void)(\s+)main(\s*)\((\s*)\)(\s*{)")
+        replacement = r"int\2solution_main\3(\4int argc, char** argv)\5"
         contents, nr = re.subn(no_args, replacement, contents, count=1)
         if nr == 0:
             # There was no main function without arguments. Now we try a main
             # function with arguments.
-            with_args = re.compile(r"(int|void)\s+main\s*\(\s*int")
-            replacement = "int solution_main(int"
+            with_args = re.compile(r"(int|void)(\s+)main(\s*)\((\s*)int")
+            replacement = r"int\2solution_main\3(\4int"
             contents = re.sub(with_args, replacement, contents, count=1)
         with open(solution, "w") as file:
             header = "#pragma once\n\n"
@@ -81,4 +89,5 @@ class C(Language):
     def compiler_output(
             self, namespace: str, stdout: str, stderr: str
     ) -> Tuple[List[Message], List[AnnotateCode], str, str]:
-        return [], [], limit_output(stdout), cleanup_compilation_stderr(stderr)
+        return [], [], limit_output(stdout), cleanup_compilation_stderr(
+            self.with_extension(self.conventionalize_namespace(namespace)), stderr)
