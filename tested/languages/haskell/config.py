@@ -1,18 +1,15 @@
 from pathlib import Path
 from typing import List, Tuple
 
-from dodona import Message
 from tested.configs import Bundle
-from tested.dodona import AnnotateCode
+from tested.dodona import Message, AnnotateCode
 from tested.languages.config import CallbackResult, executable_name, Command, \
-    Config, Language, limit_output
+    Config, Language
 from tested.languages.utils import haskell_solution, cleanup_description, \
     haskell_cleanup_stacktrace
 
 
 # TODO: advanced type don't work very good at the moment.
-
-
 class Haskell(Language):
 
     def compilation(self, config: Config, files: List[str]) -> CallbackResult:
