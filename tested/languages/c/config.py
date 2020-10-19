@@ -8,12 +8,12 @@ from tested.dodona import AnnotateCode, Message
 from tested.languages.config import CallbackResult, executable_name, Command, \
     Config, Language, limit_output
 
-
 logger = logging.getLogger(__name__)
 
 
-def cleanup_compilation_stderr(traceback: str) -> str:
+def cleanup_compilation_stderr(submission_file: str, traceback: str) -> str:
     context_file_regex = re.compile(r"(context_[0-9]+_[0-9]+|selector)")
+    code_line_regex = re.compile(r"(<code>:|\s+)([0-9]+)(:|\s+\|)")
 
     if isinstance(traceback, str):
         traceback = traceback.splitlines(True)
@@ -36,7 +36,15 @@ def cleanup_compilation_stderr(traceback: str) -> str:
         elif skip_line:
             continue
 
+        line = line.replace(submission_file, '<code>')
         line = line.replace("solution_main", "main")
+
+        match = code_line_regex.search(line)
+        if match:
+            # update line number to compensate for #pragma once
+            replace = rf"{match.group(1)}{int(match.group(2)) - 2}{match.group(3)}"
+            line = code_line_regex.sub(replace, line, 1)
+
         lines.append(line + '\n')
 
     if len(lines) > 20:
@@ -81,4 +89,5 @@ class C(Language):
     def compiler_output(
             self, namespace: str, stdout: str, stderr: str
     ) -> Tuple[List[Message], List[AnnotateCode], str, str]:
-        return [], [], limit_output(stdout), cleanup_compilation_stderr(stderr)
+        return [], [], limit_output(stdout), cleanup_compilation_stderr(
+            self.with_extension(self.conventionalize_namespace(namespace)), stderr)
