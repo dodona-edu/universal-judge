@@ -355,6 +355,7 @@ def get_readable_input(bundle: Bundle,
     elif isinstance(case, Testcase):
         format_ = bundle.config.programming_language
         text = convert_statement(bundle, case.input)
+        text = bundle.lang_config.cleanup_description(bundle.plan.namespace, text)
     elif isinstance(case, ContextTestcase):
         if case.input.main_call:
             arguments = " ".join(case.input.arguments)

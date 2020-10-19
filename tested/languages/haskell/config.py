@@ -2,7 +2,8 @@ from pathlib import Path
 from typing import List
 
 from tested.configs import Bundle
-from tested.languages.config import CallbackResult, executable_name, Command, Config, Language
+from tested.languages.config import CallbackResult, executable_name, Command, \
+    Config, Language
 
 
 # TODO: advanced type don't work very good at the moment.
@@ -29,3 +30,7 @@ class Haskell(Language):
             with open(solution, "w") as file:
                 result = f"module {name} where\n" + contents
                 file.write(result)
+
+    def cleanup_description(self, namespace: str, description: str) -> str:
+        return description.replace(rf'{self.conventionalize_namespace(namespace)}.',
+                                   r'', 1)
