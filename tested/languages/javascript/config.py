@@ -44,11 +44,18 @@ class JavaScript(Language):
                            submission_file: str,
                            reduce_all=False) -> str:
         namespace = submission_file[:submission_file.rfind('.')]
+        line_start_with_submission_file = re.compile(
+            rf'^(\\?([^\\/]*[\\/])*)({submission_file}:)(?P<loc>[0-9]+)'
+        )
         ref_not_found_regex = re.compile(rf"TypeError: {namespace}.([a-zA-Z0-9_]*) "
                                          r"is not a (function|constructor)")
         ref_not_found_replace = r'ReferenceError: \1 is not defined'
 
         context_file_regex = re.compile(r"context[0-9]+\.js")
+        submission_file_regex = re.compile(rf'\(.*{submission_file}(.*)\)')
+        submission_file_replace = r'(<code>\1)'
+        at_code_regex = re.compile(r'at .* \((<code>:[0-9]+:[0-9]+)\)')
+        at_code_replace = r'at \1'
 
         if isinstance(traceback, str):
             traceback = traceback.splitlines(True)
@@ -74,11 +81,19 @@ class JavaScript(Language):
 
             # replace references to local names
             if submission_file in line:
-                line = re.sub(rf'\(.*{submission_file}(.*)\)', r'(<code>\1)', line)
+                line = submission_file_regex.sub(submission_file_replace, line)
             elif 'at ' in line:
                 skip_line = True
                 continue
             skip_line = False
+
+            # Replace submission file line
+            match = line_start_with_submission_file.match(line)
+            if match:
+                line = f"<code>:{match.group('loc')}"
+
+            # Remove textual location information
+            line = at_code_regex.sub(at_code_replace, line)
 
             if not (reduce_all and line.startswith(' ')):
                 lines.append(line + '\n')
@@ -102,7 +117,6 @@ class JavaScript(Language):
         line_start_with_submission_file = re.compile(
             rf'^(\\?([^\\/]*[\\/])*)({submission_file}):[0-9]+'
         )
-        logger.debug(line_start_with_submission_file.pattern)
         cases = stderr.split(identifier)
         cleaned_cases = []
         # Process each case
