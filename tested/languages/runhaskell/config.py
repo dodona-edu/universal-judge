@@ -3,6 +3,8 @@ from typing import List
 
 from tested.configs import Bundle
 from tested.languages.config import Command, Config, Language
+from tested.languages.utils import haskell_solution, cleanup_description, \
+    haskell_cleanup_stacktrace
 
 
 class RunHaskell(Language):
@@ -12,19 +14,19 @@ class RunHaskell(Language):
         return ["runhaskell", file, *arguments]
 
     def solution(self, solution: Path, bundle: Bundle):
-        """Support implicit modules if needed."""
-        if bundle.config.config_for().get("implicitModule", True):
-            name = self.submission_name(bundle.plan)
-            # noinspection PyTypeChecker
-            with open(solution, "r") as file:
-                contents = file.read()
-            # noinspection PyTypeChecker
-            with open(solution, "w") as file:
-                result = f"module {name} where\n" + contents
-                file.write(result)
+        haskell_solution(self, solution, bundle)
 
     def filter_dependencies(self,
                             bundle: Bundle,
                             files: List[str],
                             context_name: str) -> List[str]:
         return files
+
+    def cleanup_description(self, namespace: str, description: str) -> str:
+        return cleanup_description(self, namespace, description)
+
+    def cleanup_stacktrace(self,
+                           traceback: str,
+                           submission_file: str,
+                           reduce_all=False) -> str:
+        return haskell_cleanup_stacktrace(traceback, submission_file, reduce_all)

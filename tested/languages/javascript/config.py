@@ -7,6 +7,7 @@ from esprima import parseScript, error_handler
 
 from tested.configs import Bundle
 from tested.languages.config import Command, Config, Language
+from tested.languages.utils import cleanup_description
 
 logger = logging.getLogger(__name__)
 
@@ -86,5 +87,4 @@ class JavaScript(Language):
         return "".join(lines)
 
     def cleanup_description(self, namespace: str, description: str) -> str:
-        return description.replace(rf'{self.conventionalize_namespace(namespace)}.',
-                                   r'', 1)
+        return cleanup_description(self, namespace, description)
