@@ -5,7 +5,6 @@ from pathlib import Path
 from tested.configs import Bundle
 from tested.languages.config import Config, Language
 
-
 logger = logging.getLogger(__name__)
 
 

@@ -22,6 +22,7 @@ import json
 import logging
 import math
 import os
+import re
 from collections import defaultdict
 from dataclasses import dataclass
 from enum import Enum, auto
@@ -32,7 +33,7 @@ import sys
 
 from ..configs import Bundle
 from ..datatypes import AllTypes
-from ..dodona import AnnotateCode, Message, Status
+from ..dodona import AnnotateCode, Message, Status, ExtendedMessage
 from ..features import Construct
 from ..serialisation import ExceptionValue
 from ..testplan import Plan
@@ -157,6 +158,27 @@ def limit_output(output: str,
                 break
     # Concat buffer
     return '\n'.join(forward_buffer + [ellipsis_str] + backward_buffer[::-1])
+
+
+def convert_to_markdown_add_code_links(traceback: str, python=False) -> str:
+    # Escape special characters
+    import html
+    traceback = html.escape(traceback)
+    # Convert line breaks
+    traceback = traceback.replace('\n', "<br/>\n")
+    # Compile regex for python stacktrace
+    if python:
+        link_regex = re.compile(r'File &quot;&lt;code&gt;&quot;, line ([0-9]+)')
+        link_subs = r'File [&quot;&lt;code&gt;&quot;, line \1](#){: .tab-link ' \
+                    r' data-tab="code" data-line="\1"}'
+    # Compile regex for other stacktrace
+    else:
+        link_regex = re.compile(r'&lt;code&gt;:([0-9]+)')
+        link_subs = r'[&lt;code&gt;:\1](#){: .tab-link data-tab="code"' \
+                    r' data-line="\1"}'
+    # Add links to
+    traceback = link_regex.sub(link_subs, traceback)
+    return traceback
 
 
 class TypeSupport(Enum):
@@ -591,3 +613,12 @@ class Language:
 
     def cleanup_description(self, namespace: str, description: str) -> str:
         return description
+
+    def clean_stacktrace_to_message(self, stacktrace: str) -> Optional[Message]:
+        if stacktrace:
+            return ExtendedMessage(
+                description=convert_to_markdown_add_code_links(stacktrace),
+                format="markdown"
+            )
+        else:
+            return None

@@ -1,11 +1,13 @@
 import os
 import re
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 from tested.configs import Bundle
-from tested.dodona import AnnotateCode, Severity, Message
-from tested.languages.config import Language, CallbackResult, Command, Config
+from tested.dodona import AnnotateCode, Severity, Message, ExtendedMessage
+from tested.languages.config import Language, CallbackResult, Command, Config, \
+    convert_to_markdown_add_code_links
+
 
 def _executable():
     if os.name == 'nt':
@@ -135,3 +137,13 @@ class Python(Language):
         if len(lines) > 20:
             lines = lines[:19] + ['...\n'] + [lines[-1]]
         return "".join(lines)
+
+    def clean_stacktrace_to_message(self, stacktrace: str) -> Optional[Message]:
+        if stacktrace:
+            return ExtendedMessage(
+                description=convert_to_markdown_add_code_links(stacktrace,
+                                                                      True),
+                format="markdown"
+            )
+        else:
+            return None

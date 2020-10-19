@@ -2,8 +2,9 @@
 Exception evaluator.
 """
 import logging
-from typing import Optional
+from typing import Optional, Tuple
 
+from dodona import Message
 from . import EvaluationResult, EvaluatorConfig
 from ..dodona import StatusMessage, Status, ExtendedMessage, Permission
 from ..serialisation import ExceptionValue
@@ -23,15 +24,17 @@ def try_as_exception(config: EvaluatorConfig,
         return Either(e)
 
 
-def try_as_readable_exception(config: EvaluatorConfig,
-                              value: str) -> Optional[str]:
+def try_as_readable_exception(config: EvaluatorConfig, value: str) \
+        -> Tuple[Optional[str], Optional[Message]]:
     try:
         actual = ExceptionValue.parse_raw(value)
         actual = config.bundle.lang_config.exception_output(config.bundle, actual)
     except (TypeError, ValueError):
-        return None
+        return None, None
     else:
-        return actual.readable()
+        readable = actual.readable()
+        message = config.bundle.lang_config.clean_stacktrace_to_message(readable)
+        return readable, message
 
 
 def evaluate(config: EvaluatorConfig,
@@ -72,11 +75,19 @@ def evaluate(config: EvaluatorConfig,
             messages=[staff_message, student_message]
         )
 
+    message = config.bundle.lang_config.clean_stacktrace_to_message(
+        actual.stacktrace)
+    if message:
+        messages = [message]
+    else:
+        messages = []
+
     return EvaluationResult(
         result=StatusMessage(
             enum=Status.CORRECT if expected.message == actual.message else
             Status.WRONG
         ),
         readable_expected=expected.readable(),
-        readable_actual=actual.readable()
+        readable_actual=actual.readable(),
+        messages=messages
     )

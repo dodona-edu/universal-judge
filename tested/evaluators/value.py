@@ -4,6 +4,7 @@ Value evaluator.
 import logging
 from typing import Union, Tuple, Optional
 
+from dodona import Message
 from . import EvaluationResult, EvaluatorConfig
 from ..configs import Bundle
 from ..datatypes import AdvancedTypes, BasicTypes, BasicStringTypes
@@ -26,13 +27,14 @@ def try_as_value(value: str) -> Either[Value]:
         return Either(e)
 
 
-def try_as_readable_value(bundle: Bundle, value: str) -> Optional[str]:
+def try_as_readable_value(bundle: Bundle, value: str) \
+        -> Tuple[Optional[str], Optional[Message]]:
     try:
         actual = parse_value(value)
     except (ValueError, TypeError):
-        return None
+        return None, None
     else:
-        return convert_statement(bundle, actual)
+        return convert_statement(bundle, actual), None
 
 
 def get_values(bundle: Bundle, output_channel: ValueOutputChannel, actual) \
