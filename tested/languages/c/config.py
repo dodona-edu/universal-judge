@@ -79,6 +79,6 @@ class C(Language):
             file.write(header + contents)
 
     def compiler_output(
-            self, stdout: str, stderr: str
+            self, namespace: str, stdout: str, stderr: str
     ) -> Tuple[List[Message], List[AnnotateCode], str, str]:
         return [], [], limit_output(stdout), cleanup_compilation_stderr(stderr)

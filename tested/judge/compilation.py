@@ -64,6 +64,7 @@ def run_compilation(
 
 
 def process_compile_results(
+        namespace: str,
         language_config: Language,
         results: Optional[BaseExecutionResult]
 ) -> Tuple[List[Message], Status, List[AnnotateCode]]:
@@ -81,7 +82,7 @@ def process_compile_results(
 
     show_stdout = False
     compiler_messages, annotations, stdout, stderr = \
-        language_config.compiler_output(results.stdout, results.stderr)
+        language_config.compiler_output(namespace, results.stdout, results.stderr)
     messages.extend(compiler_messages)
     shown_messages = annotations or compiler_messages
 

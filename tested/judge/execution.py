@@ -142,6 +142,7 @@ def execute_context(bundle: Bundle, args: ContextExecution, max_time: float) \
 
         # Process compilation results.
         messages, status, annotations = process_compile_results(
+            bundle.plan.namespace,
             lang_config,
             result
         )
