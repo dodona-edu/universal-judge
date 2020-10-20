@@ -4,7 +4,8 @@ from pathlib import Path
 from typing import List, Tuple, Optional
 
 from tested.configs import Bundle
-from tested.dodona import AnnotateCode, Severity, Message, ExtendedMessage
+from tested.dodona import AnnotateCode, Severity, Message, ExtendedMessage, \
+    Permission
 from tested.languages.config import Language, CallbackResult, Command, Config, \
     convert_to_markdown_add_code_links
 
@@ -141,9 +142,9 @@ class Python(Language):
     def clean_stacktrace_to_message(self, stacktrace: str) -> Optional[Message]:
         if stacktrace:
             return ExtendedMessage(
-                description=convert_to_markdown_add_code_links(stacktrace,
-                                                                      True),
-                format="markdown"
+                description=convert_to_markdown_add_code_links(stacktrace, True),
+                format="markdown",
+                permission=Permission.STUDENT
             )
         else:
             return None

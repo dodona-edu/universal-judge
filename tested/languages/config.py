@@ -33,7 +33,7 @@ import sys
 
 from ..configs import Bundle
 from ..datatypes import AllTypes
-from ..dodona import AnnotateCode, Message, Status, ExtendedMessage
+from ..dodona import AnnotateCode, Message, Status, ExtendedMessage, Permission
 from ..features import Construct
 from ..serialisation import ExceptionValue
 from ..testplan import Plan
@@ -618,7 +618,8 @@ class Language:
         if stacktrace:
             return ExtendedMessage(
                 description=convert_to_markdown_add_code_links(stacktrace),
-                format="markdown"
+                format="markdown",
+                permission=Permission.STUDENT
             )
         else:
             return None
