@@ -81,6 +81,7 @@ def process_compile_results(
         return messages, Status.CORRECT, []
 
     show_stdout = False
+    _logger.debug("Received stderr from compiler: " + results.stderr)
     compiler_messages, annotations, stdout, stderr = \
         language_config.compiler_output(namespace, results.stdout, results.stderr)
     messages.extend(compiler_messages)
@@ -90,10 +91,7 @@ def process_compile_results(
     if stderr:
         # Append compiler messages to the output.
         messages.append("De compiler produceerde volgende uitvoer op stderr:")
-        messages.append(ExtendedMessage(
-            description=stderr,
-            format='code'
-        ))
+        messages.append(language_config.clean_stacktrace_to_message(stderr))
         _logger.debug("Received stderr from compiler: " + stderr)
         show_stdout = True
         shown_messages = True

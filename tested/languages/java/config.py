@@ -1,9 +1,10 @@
 import logging
-import re
 from pathlib import Path
-from typing import List
+from typing import List, Tuple
 
-from tested.languages.config import CallbackResult, Command, Config, Language
+from tested.dodona import Message, AnnotateCode
+from tested.languages.config import CallbackResult, Command, Config, Language, \
+    limit_output
 from tested.languages.utils import jvm_memory_limit, jvm_cleanup_stacktrace
 
 logger = logging.getLogger(__name__)
@@ -28,3 +29,11 @@ class Java(Language):
                            submission_file: str,
                            reduce_all=False) -> str:
         return jvm_cleanup_stacktrace(traceback, submission_file, reduce_all)
+
+    def compiler_output(
+            self, namespace: str, stdout: str, stderr: str
+    ) -> Tuple[List[Message], List[AnnotateCode], str, str]:
+        return [], [], limit_output(stdout), jvm_cleanup_stacktrace(
+            stderr,
+            self.with_extension(self.conventionalize_namespace(namespace))
+        )

@@ -18,6 +18,7 @@ There are a few callbacks that must be implemented. These raise a
 `NotImplementedError`, so proper editors will warn you (or TESTed will crash when
 using your language).
 """
+import html
 import json
 import logging
 import math
@@ -160,25 +161,27 @@ def limit_output(output: str,
     return '\n'.join(forward_buffer + [ellipsis_str] + backward_buffer[::-1])
 
 
-def convert_to_markdown_add_code_links(traceback: str, python=False) -> str:
+def trace_to_html(traceback: str, python=False) -> Message:
     # Escape special characters
-    import html
     traceback = html.escape(traceback)
-    # Convert line breaks
-    traceback = traceback.replace('\n', "<br/>\n")
     # Compile regex for python stacktrace
     if python:
         link_regex = re.compile(r'File &quot;&lt;code&gt;&quot;, line ([0-9]+)')
-        link_subs = r'File [&quot;&lt;code&gt;&quot;, line \1](#){: .tab-link ' \
-                    r' data-tab="code" data-line="\1"}'
+        link_subs = r'File <a href="#" class="tab-link" data-tab="code" ' \
+                    r'data-line="\1">&quot;&lt;code&gt;&quot;, line \1</a>'
     # Compile regex for other stacktrace
     else:
         link_regex = re.compile(r'&lt;code&gt;:([0-9]+)')
-        link_subs = r'[&lt;code&gt;:\1](#){: .tab-link data-tab="code"' \
-                    r' data-line="\1"}'
+        link_subs = r'File <a href="#" class="tab-link" data-tab="code" ' \
+                    r'data-line="\1">&lt;code&gt;:\1</a>'
     # Add links to
     traceback = link_regex.sub(link_subs, traceback)
-    return traceback
+    logger.debug(f'<pre><code>{traceback}</code></pre>')
+    return ExtendedMessage(
+        description=f'<pre><code>{traceback}</code></pre>',
+        format="html",
+        permission=Permission.STUDENT
+    )
 
 
 class TypeSupport(Enum):
@@ -616,10 +619,6 @@ class Language:
 
     def clean_stacktrace_to_message(self, stacktrace: str) -> Optional[Message]:
         if stacktrace:
-            return ExtendedMessage(
-                description=convert_to_markdown_add_code_links(stacktrace),
-                format="markdown",
-                permission=Permission.STUDENT
-            )
+            return trace_to_html(stacktrace)
         else:
             return None

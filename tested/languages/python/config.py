@@ -7,7 +7,7 @@ from tested.configs import Bundle
 from tested.dodona import AnnotateCode, Severity, Message, ExtendedMessage, \
     Permission
 from tested.languages.config import Language, CallbackResult, Command, Config, \
-    convert_to_markdown_add_code_links
+    trace_to_html
 
 
 def _executable():
@@ -141,10 +141,6 @@ class Python(Language):
 
     def clean_stacktrace_to_message(self, stacktrace: str) -> Optional[Message]:
         if stacktrace:
-            return ExtendedMessage(
-                description=convert_to_markdown_add_code_links(stacktrace, True),
-                format="markdown",
-                permission=Permission.STUDENT
-            )
+            return trace_to_html(stacktrace, True)
         else:
             return None

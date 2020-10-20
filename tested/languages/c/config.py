@@ -11,7 +11,7 @@ from tested.languages.config import CallbackResult, executable_name, Command, \
 logger = logging.getLogger(__name__)
 
 
-def cleanup_compilation_stderr(submission_file: str, traceback: str) -> str:
+def cleanup_compilation_stderr(traceback: str, submission_file: str) -> str:
     context_file_regex = re.compile(r"(context_[0-9]+_[0-9]+|selector)")
     code_line_regex = re.compile(r"(<code>:|\s+)([0-9]+)(:|\s+\|)")
 
@@ -89,5 +89,6 @@ class C(Language):
     def compiler_output(
             self, namespace: str, stdout: str, stderr: str
     ) -> Tuple[List[Message], List[AnnotateCode], str, str]:
-        return [], [], limit_output(stdout), cleanup_compilation_stderr(
-            self.with_extension(self.conventionalize_namespace(namespace)), stderr)
+        clean_stacktrace = cleanup_compilation_stderr(
+            stderr, self.with_extension(self.conventionalize_namespace(namespace)))
+        return [], [], limit_output(stdout), clean_stacktrace
