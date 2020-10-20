@@ -1,13 +1,15 @@
+import logging
 import os
 import re
 from pathlib import Path
 from typing import List, Tuple, Optional
 
 from tested.configs import Bundle
-from tested.dodona import AnnotateCode, Severity, Message, ExtendedMessage, \
-    Permission
+from tested.dodona import AnnotateCode, Severity, Message
 from tested.languages.config import Language, CallbackResult, Command, Config, \
     trace_to_html
+
+logger = logging.getLogger(__name__)
 
 
 def _executable():
@@ -29,13 +31,12 @@ class Python(Language):
 
     def compiler_output(self, namespace: str, stdout: str, stderr: str) \
             -> Tuple[List[Message], List[AnnotateCode], str, str]:
-        if match := re.search(
-                rf".*: (?P<error>.+Error): (?P<message>.+) \({namespace}.py, "
-                r"line (?P<line>\d+)\)",
-                stdout):
-            error = match.group('error')
-            message = match.group('message')
-            line = match.group('line')
+        stdout = self.cleanup_stacktrace(stdout, self.with_extension(namespace))
+        if match := re.search(r".*: (.+Error): (.+) \(<code>, line (\d+)\)",
+                              stdout):
+            error = match.group(1)
+            message = match.group(2)
+            line = match.group(3)
             return [], [
                 AnnotateCode(
                     row=int(line),
@@ -43,7 +44,7 @@ class Python(Language):
                     type=Severity.ERROR
                 )
             ], stdout, stderr
-        elif stuff := self._attempt_stacktrace(namespace, stdout):
+        elif stuff := self._attempt_stacktrace(stdout):
             line, column, message = stuff
             return [], [
                 AnnotateCode(
@@ -56,10 +57,10 @@ class Python(Language):
         else:
             return [], [], stdout, stderr
 
-    def _attempt_stacktrace(self, namespace: str, trace: str):
+    def _attempt_stacktrace(self, trace: str):
         # TODO: this only works with compiler traces.
         # Find message
-        line_regex = fr'File "\.\{os.sep}{namespace}\.py", line (?P<line>\d+)'
+        line_regex = fr'File "<code>", line (?P<line>\d+)'
         if match := re.search(line_regex, trace):
             line = int(match.group("line")) - 1
         else:
@@ -90,6 +91,7 @@ class Python(Language):
                            submission_file: str,
                            reduce_all=False) -> str:
         context_file_regex = re.compile(r"context_[0-9]+_[0-9]+\.py")
+        file_line_regex = re.compile(rf'\({submission_file}, line (\d+)\)')
 
         if isinstance(traceback, str):
             traceback = traceback.splitlines(True)
@@ -119,6 +121,10 @@ class Python(Language):
             # replace references to local names
             if f'File "./{submission_file}"' in line:
                 line = line.replace(f'File "./{submission_file}"', 'File "<code>"')
+            elif line.startswith("*** Error compiling"):
+                line = line.replace(f'./{submission_file}', '<code>')
+            elif file_line_regex.search(line):
+                line = file_line_regex.sub(r'(<code>, line \1)', line)
             elif 'File "<string>"' in line:
                 line = line.replace('File "<string>"', 'File "<code>"')
             elif 'File "<doctest>"' in line:
@@ -141,10 +147,17 @@ class Python(Language):
 
     def clean_stacktrace_to_message(self, stacktrace: str) -> Optional[Message]:
         if stacktrace:
-            return trace_to_html(stacktrace,
-                                 r'File &quot;&lt;code&gt;&quot;, line ([0-9]+)',
-                                 r'File <a href="#" class="tab-link" '
-                                 r'data-tab="code" data-line="\1">'
-                                 r'&quot;&lt;code&gt;&quot;, line \1</a>')
+            trace = trace_to_html(stacktrace,
+                                  r'File &quot;&lt;code&gt;&quot;, line ([0-9]+)',
+                                  r'File <a href="#" class="tab-link" '
+                                  r'data-tab="code" data-line="\1">'
+                                  r'&quot;&lt;code&gt;&quot;, line \1</a>')
+            additional_regex = re.compile(r'\(&lt;code&gt;, line (\d+)\)')
+            additional_sub = r'(<a href="#" class="tab-link" data-tab="code" ' \
+                             r'data-line="\1">&lt;code&gt;, line \1</a>)'
+            trace.description = additional_regex.sub(additional_sub,
+                                                     trace.description)
+            logger.debug(trace.description)
+            return trace
         else:
             return None

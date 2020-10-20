@@ -24,13 +24,12 @@ import logging
 import math
 import os
 import re
+import sys
 from collections import defaultdict
 from dataclasses import dataclass
 from enum import Enum, auto
 from pathlib import Path
 from typing import List, Tuple, Mapping, Union, Callable, Set, Dict, Optional, Any
-
-import sys
 
 from ..configs import Bundle
 from ..datatypes import AllTypes
@@ -165,7 +164,7 @@ def trace_to_html(traceback: str,
                   link_regex: str = r'&lt;code&gt;:([0-9]+)',
                   link_subs: str = r'<a href="#" class="tab-link" data-tab="code" '
                                    r'data-line="\1">&lt;code&gt;:\1</a>'
-                  ) -> Message:
+                  ) -> ExtendedMessage:
     # Escape special characters
     traceback = html.escape(traceback)
     # Compile regex
