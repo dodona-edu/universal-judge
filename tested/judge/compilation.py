@@ -100,11 +100,8 @@ def process_compile_results(
     if stdout and (show_stdout or results.exit != 0):
         # Append compiler messages to the output.
         messages.append("De compiler produceerde volgende uitvoer op stdout:")
-        messages.append(ExtendedMessage(
-            description=stdout,
-            format='code'
-        ))
-        _logger.debug("Received stdout from compiler: " + stderr)
+        messages.append(language_config.clean_stacktrace_to_message(stdout))
+        _logger.debug("Received stdout from compiler: " + stdout)
         shown_messages = True
 
     # Report errors if needed.
