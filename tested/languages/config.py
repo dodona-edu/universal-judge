@@ -172,7 +172,7 @@ def trace_to_html(traceback: str, python=False) -> Message:
     # Compile regex for other stacktrace
     else:
         link_regex = re.compile(r'&lt;code&gt;:([0-9]+)')
-        link_subs = r'File <a href="#" class="tab-link" data-tab="code" ' \
+        link_subs = r'<a href="#" class="tab-link" data-tab="code" ' \
                     r'data-line="\1">&lt;code&gt;:\1</a>'
     # Add links to
     traceback = link_regex.sub(link_subs, traceback)

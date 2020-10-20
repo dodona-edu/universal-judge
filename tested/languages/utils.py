@@ -63,6 +63,7 @@ def jvm_cleanup_stacktrace(traceback: str,
         # replace references to local names
         if submission_file in line:
             line = line.replace(submission_file, '<code>')
+            line = line.replace('Kt.solutionMain', 'Kt.main')
         elif 'at ' in line:
             skip_line = True
             continue
@@ -93,7 +94,7 @@ def haskell_cleanup_stacktrace(traceback: str,
                                submission_file: str,
                                reduce_all=False):
     context_file_regex = re.compile(r"(Context[0-9]+|Selector)")
-    called_at_regex = re.compile(r"^(.*called at ./<code>:)([0-9]+)(:[0-9]+) .*$")
+    called_at_regex = re.compile(r"^(.*called at )./(<code>:)([0-9]+)(:[0-9]+) .*$")
     compile_line_regex = re.compile(r"^([0-9]+)(\s*\|.*)$")
     type_conflict_regex = re.compile(
         r"Couldn.t match expected type (.*) with actual type (.*)"
@@ -131,7 +132,8 @@ def haskell_cleanup_stacktrace(traceback: str,
             line = line.replace(submission_file, '<code>')
             match = called_at_regex.match(line)
             if match:
-                line = f"{match.group(1)}{int(match.group(2)) - 1}{match.group(3)}"
+                line = f"{match.group(1)}{match.group(2)}" \
+                       f"{int(match.group(3)) - 1}{match.group(4)}"
             else:
                 match = code_line_regex.match(line)
                 if match:
