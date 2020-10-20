@@ -19,10 +19,12 @@ def evaluate(config: EvaluatorConfig, channel: IgnoredChannel,
         functools.partial(exception.try_as_readable_exception, config),
         functools.partial(value.try_as_readable_value, config.bundle)
     ]
-    actual = try_outputs(actual, parsers)
+    actual, msg = try_outputs(actual, parsers)
+    messages = [msg] if msg else []
 
     return EvaluationResult(
         result=StatusMessage(enum=Status.CORRECT),
         readable_expected="",
-        readable_actual=actual
+        readable_actual=actual,
+        messages=messages
     )

@@ -12,13 +12,16 @@ from ..testplan import EmptyChannel
 def evaluate(config: EvaluatorConfig, channel: EmptyChannel,
              actual: str) -> EvaluationResult:
     assert isinstance(channel, EmptyChannel)
+    messages = []
 
     if actual:
         parsers = [
             functools.partial(exception.try_as_readable_exception, config),
             functools.partial(value.try_as_readable_value, config.bundle)
         ]
-        actual = try_outputs(actual, parsers)
+        actual, msg = try_outputs(actual, parsers)
+        if msg:
+            messages.append(msg)
         result = StatusMessage(
             enum=Status.WRONG,
             human="Onverwachte uitvoer."
@@ -29,5 +32,6 @@ def evaluate(config: EvaluatorConfig, channel: EmptyChannel,
     return EvaluationResult(
         result=result,
         readable_expected="",
-        readable_actual=actual
+        readable_actual=actual,
+        messages=messages
     )

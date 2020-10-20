@@ -18,10 +18,12 @@ There are a few callbacks that must be implemented. These raise a
 `NotImplementedError`, so proper editors will warn you (or TESTed will crash when
 using your language).
 """
+import html
 import json
 import logging
 import math
 import os
+import re
 from collections import defaultdict
 from dataclasses import dataclass
 from enum import Enum, auto
@@ -32,7 +34,7 @@ import sys
 
 from ..configs import Bundle
 from ..datatypes import AllTypes
-from ..dodona import AnnotateCode, Message, Status
+from ..dodona import AnnotateCode, Message, Status, ExtendedMessage, Permission
 from ..features import Construct
 from ..serialisation import ExceptionValue
 from ..testplan import Plan
@@ -157,6 +159,25 @@ def limit_output(output: str,
                 break
     # Concat buffer
     return '\n'.join(forward_buffer + [ellipsis_str] + backward_buffer[::-1])
+
+
+def trace_to_html(traceback: str,
+                  link_regex: str = r'&lt;code&gt;:([0-9]+)',
+                  link_subs: str = r'<a href="#" class="tab-link" data-tab="code" '
+                                   r'data-line="\1">&lt;code&gt;:\1</a>'
+                  ) -> Message:
+    # Escape special characters
+    traceback = html.escape(traceback)
+    # Compile regex
+    link_regex = re.compile(link_regex)
+    # Add links to
+    traceback = link_regex.sub(link_subs, traceback)
+    logger.debug(f'<pre><code>{traceback}</code></pre>')
+    return ExtendedMessage(
+        description=f'<pre><code>{traceback}</code></pre>',
+        format="html",
+        permission=Permission.STUDENT
+    )
 
 
 class TypeSupport(Enum):
@@ -591,3 +612,9 @@ class Language:
 
     def cleanup_description(self, namespace: str, description: str) -> str:
         return description
+
+    def clean_stacktrace_to_message(self, stacktrace: str) -> Optional[Message]:
+        if stacktrace:
+            return trace_to_html(stacktrace)
+        else:
+            return None

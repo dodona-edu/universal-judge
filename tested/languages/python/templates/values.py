@@ -59,7 +59,8 @@ def send_exception(stream, exception):
     traceback.print_tb(exception.__traceback__, file=tracer)
     data = {
         "message": f"{exception.__class__.__name__}: {exception}",
-        "stacktrace": tracer.getvalue()
+        "stacktrace": f"{exception.__class__.__name__}: {exception}\n"
+                      f"{tracer.getvalue()}"
     }
     json.dump(data, stream)
 

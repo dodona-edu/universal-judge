@@ -487,7 +487,7 @@ class ExceptionValue(WithFeatures, BaseModel):
         return FeatureSet({Construct.EXCEPTIONS}, types=set())
 
     def readable(self) -> str:
-        return f"{self.message}\n{self.stacktrace}".strip()
+        return f"{self.message}".strip()
 
 
 if __name__ == '__main__':

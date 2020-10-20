@@ -72,7 +72,7 @@ function sendException(stream, exception) {
         return;
     }
     fs.writeSync(stream, JSON.stringify({
-        "message": "",
+        "message": exception.message,
         "stacktrace": exception.stack ? exception.stack : ""
     }));
 }

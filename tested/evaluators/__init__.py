@@ -25,7 +25,7 @@ For example, such a function looks like this:
 import functools
 from dataclasses import field
 from pathlib import Path
-from typing import List, Dict, Any, NamedTuple
+from typing import List, Dict, Any, NamedTuple, Tuple
 from typing import Union, Callable, Optional
 
 from pydantic.dataclasses import dataclass
@@ -64,7 +64,6 @@ RawEvaluator = Callable[
     [EvaluatorConfig, OutputChannel, str],
     EvaluationResult
 ]
-
 
 Evaluator = Callable[
     [OutputChannel, str],
@@ -135,11 +134,13 @@ def get_evaluator(
         raise AssertionError(f"Unknown evaluator type: {type(evaluator)}")
 
 
-def try_outputs(actual: str, parsers: List[Callable[[str], Optional[str]]]) -> str:
+def try_outputs(actual: str, parsers: List[
+    Callable[[str], Tuple[Optional[str], Optional[Message]]]
+]) -> Tuple[str, Optional[Message]]:
     if not actual:
-        return actual
+        return actual, None
     for parser in parsers:
-        possible = parser(actual)
+        possible, msg = parser(actual)
         if possible is not None:
-            return possible
-    return actual
+            return possible, msg
+    return actual, None
