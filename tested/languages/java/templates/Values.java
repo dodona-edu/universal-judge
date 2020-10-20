@@ -108,7 +108,9 @@ public class Values {
         var sw = new StringWriter();
         exception.printStackTrace(new PrintWriter(sw));
         var trace = sw.toString();
-        var result = "{ \"message\": \"\", \"stacktrace\": \"" + escape(trace) + "\"}";
+        var msg = exception.getMessage();
+        var result = "{ \"message\": \"" + escape(msg == null ? "" : msg) +
+                     "\", \"stacktrace\": \"" + escape(trace) + "\"}";
         writer.write(result);
     }
 

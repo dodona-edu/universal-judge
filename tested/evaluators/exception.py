@@ -4,7 +4,6 @@ Exception evaluator.
 import logging
 from typing import Optional, Tuple
 
-from dodona import Message
 from . import EvaluationResult, EvaluatorConfig
 from ..dodona import StatusMessage, Status, ExtendedMessage, Permission
 from ..serialisation import ExceptionValue
@@ -25,7 +24,7 @@ def try_as_exception(config: EvaluatorConfig,
 
 
 def try_as_readable_exception(config: EvaluatorConfig, value: str) \
-        -> Tuple[Optional[str], Optional[Message]]:
+        -> Tuple[Optional[str], Optional[ExtendedMessage]]:
     try:
         actual = ExceptionValue.parse_raw(value)
         actual = config.bundle.lang_config.exception_output(config.bundle, actual)
@@ -33,7 +32,9 @@ def try_as_readable_exception(config: EvaluatorConfig, value: str) \
         return None, None
     else:
         readable = actual.readable()
-        message = config.bundle.lang_config.clean_stacktrace_to_message(readable)
+        message = config.bundle.lang_config.clean_stacktrace_to_message(
+            actual.stacktrace
+        )
         return readable, message
 
 
