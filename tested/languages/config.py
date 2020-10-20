@@ -161,19 +161,15 @@ def limit_output(output: str,
     return '\n'.join(forward_buffer + [ellipsis_str] + backward_buffer[::-1])
 
 
-def trace_to_html(traceback: str, python=False) -> Message:
+def trace_to_html(traceback: str,
+                  link_regex: str = r'&lt;code&gt;:([0-9]+)',
+                  link_subs: str = r'<a href="#" class="tab-link" data-tab="code" '
+                                   r'data-line="\1">&lt;code&gt;:\1</a>'
+                  ) -> Message:
     # Escape special characters
     traceback = html.escape(traceback)
-    # Compile regex for python stacktrace
-    if python:
-        link_regex = re.compile(r'File &quot;&lt;code&gt;&quot;, line ([0-9]+)')
-        link_subs = r'File <a href="#" class="tab-link" data-tab="code" ' \
-                    r'data-line="\1">&quot;&lt;code&gt;&quot;, line \1</a>'
-    # Compile regex for other stacktrace
-    else:
-        link_regex = re.compile(r'&lt;code&gt;:([0-9]+)')
-        link_subs = r'<a href="#" class="tab-link" data-tab="code" ' \
-                    r'data-line="\1">&lt;code&gt;:\1</a>'
+    # Compile regex
+    link_regex = re.compile(link_regex)
     # Add links to
     traceback = link_regex.sub(link_subs, traceback)
     logger.debug(f'<pre><code>{traceback}</code></pre>')

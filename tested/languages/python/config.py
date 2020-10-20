@@ -141,6 +141,10 @@ class Python(Language):
 
     def clean_stacktrace_to_message(self, stacktrace: str) -> Optional[Message]:
         if stacktrace:
-            return trace_to_html(stacktrace, True)
+            return trace_to_html(stacktrace,
+                                 r'File &quot;&lt;code&gt;&quot;, line ([0-9]+)',
+                                 r'File <a href="#" class="tab-link" '
+                                 r'data-tab="code" data-line="\1">'
+                                 r'&quot;&lt;code&gt;&quot;, line \1</a>')
         else:
             return None
