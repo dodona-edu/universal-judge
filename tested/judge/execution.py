@@ -91,6 +91,7 @@ def execute_file(
     _logger.debug("Executing %s in directory %s", command, working_directory)
 
     result = run_command(working_directory, remaining, command, stdin)
+
     assert result is not None
     return result
 
@@ -225,6 +226,19 @@ def execute_context(bundle: Bundle, args: ContextExecution, max_time: float) \
         argument=argument,
         remaining=remaining
     )
+
+    # Cleanup stderr
+    msgs, annotations, base_result.stderr = lang_config.stderr(bundle,
+                                                               base_result.stderr)
+    for annotation in annotations:
+        args.collector.add(annotation)
+    messages.extend(msgs)
+    # Cleanup stdout
+    msgs, annotation, base_result.stdout = lang_config.stdout(bundle,
+                                                              base_result.stdout)
+    for annotation in annotations:
+        args.collector.add(annotation)
+    messages.extend(msgs)
 
     identifier = f"--{bundle.secret}-- SEP"
 

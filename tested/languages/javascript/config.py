@@ -1,11 +1,12 @@
 import logging
 import re
 from pathlib import Path
-from typing import List
+from typing import List, Tuple
 
 from esprima import parseScript, error_handler
 
 from tested.configs import Bundle
+from tested.dodona import Message, AnnotateCode
 from tested.languages.config import Command, Config, Language
 from tested.languages.utils import cleanup_description
 
@@ -43,11 +44,18 @@ class JavaScript(Language):
                            submission_file: str,
                            reduce_all=False) -> str:
         namespace = submission_file[:submission_file.rfind('.')]
+        line_start_with_submission_file = re.compile(
+            rf'^(\\?([^\\/]*[\\/])*)({submission_file}:)(?P<loc>[0-9]+)'
+        )
         ref_not_found_regex = re.compile(rf"TypeError: {namespace}.([a-zA-Z0-9_]*) "
                                          r"is not a (function|constructor)")
         ref_not_found_replace = r'ReferenceError: \1 is not defined'
 
         context_file_regex = re.compile(r"context[0-9]+\.js")
+        submission_file_regex = re.compile(rf'\(.*{submission_file}(.*)\)')
+        submission_file_replace = r'(<code>\1)'
+        at_code_regex = re.compile(r'at .* \((<code>:[0-9]+:[0-9]+)\)')
+        at_code_replace = r'at \1'
 
         if isinstance(traceback, str):
             traceback = traceback.splitlines(True)
@@ -73,11 +81,19 @@ class JavaScript(Language):
 
             # replace references to local names
             if submission_file in line:
-                line = re.sub(rf'\(.*{submission_file}(.*)\)', r'(<code>\1)', line)
+                line = submission_file_regex.sub(submission_file_replace, line)
             elif 'at ' in line:
                 skip_line = True
                 continue
             skip_line = False
+
+            # Replace submission file line
+            match = line_start_with_submission_file.match(line)
+            if match:
+                line = f"<code>:{match.group('loc')}"
+
+            # Remove textual location information
+            line = at_code_regex.sub(at_code_replace, line)
 
             if not (reduce_all and line.startswith(' ')):
                 lines.append(line + '\n')
@@ -88,3 +104,34 @@ class JavaScript(Language):
 
     def cleanup_description(self, namespace: str, description: str) -> str:
         return cleanup_description(self, namespace, description)
+
+    def stderr(self,
+               bundle: Bundle,
+               stderr: str) -> Tuple[List[Message], List[AnnotateCode], str]:
+        # Identifier to separate testcase output
+        identifier = f"--{bundle.secret}-- SEP"
+        submission_file = self.with_extension(
+            self.conventionalize_namespace(bundle.plan.namespace))
+        # Assume stacktrace when line is equal the submission_file path with
+        # line number
+        line_start_with_submission_file = re.compile(
+            rf'^(\\?([^\\/]*[\\/])*)({submission_file}):[0-9]+'
+        )
+        cases = stderr.split(identifier)
+        cleaned_cases = []
+        # Process each case
+        for case in cases:
+            keep_until = 0
+            case = case.splitlines(keepends=True)
+            for index, line in enumerate(case):
+                line = line.rstrip('\n')
+                if not line_start_with_submission_file.match(line):
+                    keep_until = index + 1
+                else:
+                    break
+            keep_lines = "".join(case[:keep_until])
+            stacktrace = "".join(case[keep_until:])
+            stacktrace = self.cleanup_stacktrace(stacktrace, submission_file)
+            cleaned_cases.append(f'{keep_lines}{stacktrace}')
+
+        return [], [], identifier.join(cleaned_cases)
