@@ -58,7 +58,7 @@ def send_exception(stream, exception):
     tracer = io.StringIO()
     traceback.print_tb(exception.__traceback__, file=tracer)
     data = {
-        "message": f"{exception.__class__.__name__}: {exception}",
+        "message": str(exception),
         "stacktrace": f"{exception.__class__.__name__}: {exception}\n"
                       f"{tracer.getvalue()}"
     }
