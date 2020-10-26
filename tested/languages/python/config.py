@@ -100,6 +100,7 @@ class Python(Language):
         for line in traceback:
 
             line = line.strip('\n')
+            logger.debug(line)
 
             if not line:
                 continue
