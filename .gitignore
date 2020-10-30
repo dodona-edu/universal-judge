@@ -78,3 +78,4 @@ ipython_config.py
 workdir/
 generated/
 venv/
+venv3.9/
