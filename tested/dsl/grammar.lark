@@ -1,0 +1,111 @@
+INTEGER: "integer"
+RATIONAL: "rational"
+CHAR: "char"
+TEXT: "text"
+BOOLEAN: "boolean"
+SEQUENCE: "sequence"
+SET: "set"
+MAP: "map"
+NOTHING: "nothing"
+ANY: "any"
+INT8: "int8"
+UINT8: "uint8"
+INT16: "int16"
+UINT16: "uint16"
+INT32: "int32"
+UINT32: "uint32"
+INT64: "int64"
+UINT64: "uint64"
+BIGINT: "bigint"
+SINGLE_PRECISION: "single_precision"
+DOUBLE_PRECISION: "double_precision"
+DOUBLE_EXTENDED: "double_extended"
+FIXED_PRECISION: "fixed_precision"
+ARRAY: "array"
+LIST: "list"
+
+?collections: SEQUENCE
+            | SET
+            | ARRAY
+            | LIST
+
+?datatype: INTEGER
+        | RATIONAL
+        | CHAR
+        | TEXT
+        | BOOLEAN
+        | MAP
+        | NOTHING
+        | ANY
+        | INT8
+        | UINT8
+        | INT16
+        | UINT16
+        | INT32
+        | UINT32
+        | INT64
+        | UINT64
+        | BIGINT
+        | SINGLE_PRECISION
+        | DOUBLE_PRECISION
+        | DOUBLE_EXTENDED
+        | FIXED_PRECISION
+        | collections
+
+?assign_datatype: datatype
+                | CNAME
+
+TRUE: "true"
+FALSE: "false"
+?boolean: TRUE
+        | FALSE
+
+?value_raw: SIGNED_FLOAT
+      | SIGNED_INT
+      | boolean
+      | dict
+      | set
+      | list
+      | tuple
+      | string
+      | null
+
+value_cast: value_raw "::" datatype
+
+?value: value_raw
+      | CNAME
+      | value_cast
+
+?return_value: value_raw
+             | value_cast
+
+assign: datatype? CNAME "=" value
+      | assign_datatype CNAME "=" expr
+
+?expr: value
+     | fun
+fun: CNAME "(" args ")"
+?stmt: assign
+     | expr
+
+args: [value ("," value)*]
+
+dict: "{" [dict_pair ("," dict_pair)*] "}"
+list: "[" [expr ("," expr)*] "]"
+set: "{" [expr ("," expr)*] "}"
+tuple: "(" [expr ("," expr)*] ")"
+dict_pair: string ":" expr
+
+null: "null"
+    | "nothing"
+    | "undefined"
+
+
+?string: ESCAPED_STRING
+
+%import common.CNAME
+%import common.ESCAPED_STRING
+%import common.SIGNED_INT
+%import common.SIGNED_FLOAT
+%import common.WS
+%ignore WS
