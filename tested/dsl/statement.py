@@ -89,6 +89,16 @@ class Parser:
         expression.type = expr_type
         return expression
 
+    def analyse_constructor(self, tree: Tree) -> FunctionCall:
+        # Find constructor name
+        namespace, constr_name = self.analyse_namespace(tree.children[0])
+        # Analyse arguments
+        args = self.analyse_arguments(tree.children[1])
+        return FunctionCall(type=FunctionType.CONSTRUCTOR,
+                            name=constr_name,
+                            namespace=namespace,
+                            arguments=args)
+
     def analyse_dict(self, tree: Tree, allow_functions: bool = True) -> dict:
         def analyse_pair(pair: Tree) -> tuple:
             if pair.data != 'dict_pair':
@@ -138,17 +148,51 @@ class Parser:
                 return self.analyse_function(tree)
             else:
                 raise ParseError("Function call not allowed for return values")
+        elif tree.data == 'constructor':
+            if allow_functions:
+                return self.analyse_constructor(tree)
+            else:
+                raise ParseError("Constructor not allowed for return values")
+        elif tree.data == 'property':
+            if allow_functions:
+                return self.analyse_property(tree)
+            else:
+                raise ParseError("Constructor not allowed for return values")
         elif tree.data == 'dict':
             return ObjectType(type=ObjectTypes.MAP, data=self.analyse_dict(tree))
         raise ParseError("Invalid expression tree")
 
     def analyse_function(self, tree: Tree) -> FunctionCall:
         # Find function name
-        fun_name = self.analyse_name(tree.children[0])
+        namespace, fun_name = self.analyse_namespace(tree.children[0])
+        # Analyse arguments
         args = self.analyse_arguments(tree.children[1])
         return FunctionCall(type=FunctionType.FUNCTION,
                             name=fun_name,
+                            namespace=namespace,
                             arguments=args)
+
+    def analyse_property(self, tree: Tree) -> FunctionCall:
+        # Find namespace name
+        namespace = self.analyse_name(tree.children[0])
+        # Find property name
+        prop_name = self.analyse_name(tree.children[1])
+        return FunctionCall(type=FunctionType.PROPERTY,
+                            name=prop_name,
+                            namespace=namespace)
+
+    def analyse_name(self, token: Token) -> str:
+        if token.type != 'CNAME':
+            raise ParseError("Invalid variable/function name")
+        return token.value
+
+    def analyse_namespace(self, tree: Tree):
+        if tree.data != 'name':
+            raise ParseError("Invalid name construction")
+        if len(tree.children) == 1:
+            return None, self.analyse_name(tree.children[0])
+        return (self.analyse_name(tree.children[0]),
+                self.analyse_name(tree.children[1]))
 
     def analyse_type_token(self, token: Token,
                            assign=False) -> Union[VariableType, AllTypes]:
@@ -158,11 +202,6 @@ class Parser:
             return string_to_type(token.type)
         else:
             raise ParseError("Invalid variable type")
-
-    def analyse_name(self, token: Token) -> str:
-        if token.type != 'CNAME':
-            raise ParseError("Invalid variable/function name")
-        return token.value
 
     def parse_statement(self, statement: str) -> Statement:
         try:

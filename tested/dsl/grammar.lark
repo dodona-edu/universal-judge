@@ -81,10 +81,22 @@ value_cast: value_raw "::" datatype
 
 assign: datatype? CNAME "=" value
       | assign_datatype CNAME "=" expr
+      | CNAME "=" constructor
+
+name: CNAME
+    | CNAME "." CNAME
+
+property: CNAME "." CNAME
+
+constructor: "new" name "(" args ")"
 
 ?expr: value
      | fun
-fun: CNAME "(" args ")"
+     | constructor
+     | property
+
+fun: name "(" args ")"
+
 ?stmt: assign
      | expr
 
