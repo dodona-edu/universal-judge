@@ -35,8 +35,8 @@ class Parser:
         if not grammar_file:
             grammar_file = join(dirname(realpath(__file__)), "grammar.lark")
         self.grammar_file = grammar_file
-        self.parser = Lark.open(grammar_file, start='stmt', lexer='standard')
-        self.parse = self.parser.parse
+        self.parser = Lark.open(grammar_file, start=['stmt', 'return'],
+                                lexer='standard')
 
     def analyse_arguments(self, tree: Tree) -> List[Expression]:
         if tree.data != 'args':
@@ -65,12 +65,12 @@ class Parser:
 
     def analyse_cast(self, tree: Tree, allow_functions: bool = True) -> Expression:
         expression = self.analyse_expression(tree.children[0], allow_functions)
-        expr_type = string_to_type(tree.children[1])
+        expr_type = string_to_type(tree.children[1].type)
         if isinstance(expression, SequenceType):
-            if not isinstance(expr_type, SequenceTypes):
+            if not isinstance(expr_type, SequenceTypes.__args__):
                 raise ParseError("Can't cast sequence type to non-sequence type")
         elif isinstance(expression, NumberType):
-            if not isinstance(expr_type, NumericTypes):
+            if not isinstance(expr_type, NumericTypes.__args__):
                 raise ParseError("Can't cast numeric type to non-numeric type")
         elif isinstance(expression, BooleanType):
             if not isinstance(expr_type, BooleanTypes):
@@ -157,9 +157,10 @@ class Parser:
             if allow_functions:
                 return self.analyse_property(tree)
             else:
-                raise ParseError("Constructor not allowed for return values")
+                raise ParseError("Property not allowed for return values")
         elif tree.data == 'dict':
-            return ObjectType(type=ObjectTypes.MAP, data=self.analyse_dict(tree))
+            return ObjectType(type=ObjectTypes.MAP,
+                              data=self.analyse_dict(tree, allow_functions))
         raise ParseError("Invalid expression tree")
 
     def analyse_function(self, tree: Tree) -> FunctionCall:
@@ -205,7 +206,7 @@ class Parser:
 
     def parse_statement(self, statement: str) -> Statement:
         try:
-            parse_tree = self.parse(statement)
+            parse_tree = self.parser.parse(statement, start='stmt')
             if isinstance(parse_tree, Tree) and parse_tree.data == 'assign':
                 return self.analyse_assign(parse_tree)
             return self.analyse_expression(parse_tree, True)
@@ -214,7 +215,7 @@ class Parser:
 
     def parse_value(self, value: str) -> Value:
         try:
-            parse_tree = self.parser.parse(value, start='return_value')
+            parse_tree = self.parser.parse(value, start='return')
             return self.analyse_expression(parse_tree, False)
         except UnexpectedToken as e:
             raise ParseError("Bad token") from e

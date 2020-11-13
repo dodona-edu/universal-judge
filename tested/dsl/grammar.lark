@@ -8,19 +8,19 @@ SET: "set"
 MAP: "map"
 NOTHING: "nothing"
 ANY: "any"
-INT8: "int8"
-UINT8: "uint8"
-INT16: "int16"
-UINT16: "uint16"
-INT32: "int32"
-UINT32: "uint32"
-INT64: "int64"
-UINT64: "uint64"
-BIGINT: "bigint"
-SINGLE_PRECISION: "single_precision"
-DOUBLE_PRECISION: "double_precision"
-DOUBLE_EXTENDED: "double_extended"
-FIXED_PRECISION: "fixed_precision"
+INT_8: "int8"
+U_INT_8: "uint8"
+INT_16: "int16"
+U_INT_16: "uint16"
+INT_32: "int32"
+U_INT_32: "uint32"
+INT_64: "int64"
+U_INT_64: "uint64"
+BIG_INT: "bigint"
+SINGLE_PRECISION: "single"
+DOUBLE_PRECISION: "double"
+DOUBLE_EXTENDED: "extended"
+FIXED_PRECISION: "fixed"
 ARRAY: "array"
 LIST: "list"
 
@@ -37,15 +37,15 @@ LIST: "list"
         | MAP
         | NOTHING
         | ANY
-        | INT8
-        | UINT8
-        | INT16
-        | UINT16
-        | INT32
-        | UINT32
-        | INT64
-        | UINT64
-        | BIGINT
+        | INT_8
+        | U_INT_8
+        | INT_16
+        | U_INT_16
+        | INT_32
+        | U_INT_32
+        | INT_64
+        | U_INT_64
+        | BIG_INT
         | SINGLE_PRECISION
         | DOUBLE_PRECISION
         | DOUBLE_EXTENDED
@@ -76,8 +76,8 @@ value_cast: value_raw "::" datatype
       | CNAME
       | value_cast
 
-?return_value: value_raw
-             | value_cast
+?return: value_raw
+       | value_cast
 
 assign: datatype? CNAME "=" value
       | assign_datatype CNAME "=" expr

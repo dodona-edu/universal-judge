@@ -1,0 +1,37 @@
+# New tab on dodona
+- tab: "Tabname"
+  # All testcase in the tabblad, combination of input-output and function calls
+  testcases:
+    # Arguments list
+  - args: [ "data", 5 ]
+    # Standard input
+    stdin: "invoer"
+    # Standard output
+    stdout: "uitvoer"
+    # Standard error
+    stderr: "error"
+    # Exitcode
+    exit_code: 0
+    # Dependent statement and function tests:
+    tests:
+      # Assignment
+    - statement: "data = ['list\nline', 'data'] :: list"
+      # Function call
+    - statement: 'function(data, 0.5 :: double)'
+      # Return value
+      return: [ 0, 0 ]
+  - tests:
+    - statement: 'echo(5 :: uint8)'
+        # Raw Return value
+        return-raw: "5 :: uint8"
+      
+- tab: "Exception"
+  testcase:
+  - tests:      
+    - statement: 'function_error()'
+      # Standard output
+      stdout: "Invalid"
+      # Standard error
+      stderr: "Error"
+      # Exceptions
+      exception: "Unknown"
