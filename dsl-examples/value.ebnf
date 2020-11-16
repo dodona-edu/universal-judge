@@ -1,0 +1,25 @@
+FloatTypes ::= "rational" | "single" | "double" | "extended" | "fixed"
+UnsignedIntegerTypes ::= "uint8" | "uint16" | "uint32" | "uint64"
+SignedIntegerTypes ::= "int8" | "int16" |"int32" | "int64"
+IntegerTypes ::= "integer" | "bigint" | UnsignedIntegerTypes | SignedIntegerTypes
+NumberTypes ::= FloatTypes | IntegerTypes
+TextualTypes ::= "char" | "text"
+SingleTypes ::= "boolean" |  "nothing" | NumberTypes | TextualTypes
+SequenceTypes ::= "sequence" | "set" | "array" | "list" | "tuple"
+ObjectTypes ::= "map"
+DataTypes ::= SingleType | SequenceTypes | ObjectTypes
+
+Boolean ::= "true" | "false"
+Integer ::= ("+" | "-")? [0-9]+
+Float ::= ("+" | "-")? (([0-9]* . [0-9]+) ([eE][+-]?[0-9]+)?|[0-9]+[eE][+-]?[0-9]+)
+String ::= '"'  ((ALL_CHARS - ["\\]) | ('\' ALL_CHARS))* '"'
+Null ::= "null" | "nothing" | "undefined"
+Map ::= "{" (String ':' Expression (',' String ':' Expression)*)? "}"
+List ::= "[" (Expression ("," Expression)*)? "]"
+Set ::= "[" Expression ("," Expression)* "]"
+Tuple ::= "[" (Expression ("," Expression)*)? "]"
+
+Value ::= Boolean | Integer | Float | String | Null | Map | List | Set | Tuple
+ValueCast ::= Value '::' DataTypes
+
+Expression ::= Value | ValueCast
