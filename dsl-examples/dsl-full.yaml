@@ -3,7 +3,7 @@
   # All testcase in the tabblad, combination of input-output and function calls
   testcases:
     # Arguments list
-  - args: [ "data", 5 ]
+  - arguments: [ "data", 5 ]
     # Standard input
     stdin: "invoer"
     # Standard output
