@@ -15,7 +15,7 @@
     # Dependent statement and function tests:
     tests:
       # Assignment
-    - statement: "data = ['list\nline', 'data'] :: list"
+    - statement: 'data = ["list\nline", "data"] :: list'
       # Function call
     - statement: 'function(data, 0.5 :: double)'
       # Return value
@@ -35,3 +35,16 @@
       stderr: "Error"
       # Exceptions
       exception: "Unknown"
+
+- tab: "Config"
+  # Configuration options for textual comparisons, only for stdout, stderr, exception
+  config:
+    stdout:
+      tryFloatingPoint: true
+      applyRounding: true
+      roundTo: 2
+    stderr:
+      tryFloatingPoint: true
+    exception:
+      ignoreWhitespace: true
+      caseInsensitive: true

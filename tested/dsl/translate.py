@@ -6,7 +6,7 @@ import yaml
 
 from os import path
 
-from typing import Optional, Any, Union, Callable
+from typing import Optional, Any, Union, Callable, Tuple
 
 from tested.datatypes import BasicStringTypes, BasicNumericTypes, \
     BasicBooleanTypes, \
@@ -16,7 +16,8 @@ from tested.serialisation import StringType, NumberType, Value, NothingType, \
 from tested.testplan import Plan, Tab, Context, Testcase, TextOutputChannel, \
     Output, \
     ExceptionOutputChannel, ValueOutputChannel, BaseOutput, ContextTestcase, \
-    ContextOutput, ExitCodeOutputChannel, ContextInput, TextData
+    ContextOutput, ExitCodeOutputChannel, ContextInput, TextData, \
+    GenericExceptionEvaluator, GenericTextEvaluator
 from tested.dsl.statement import Parser
 
 
@@ -53,6 +54,24 @@ def ensure_no_null(yaml_obj: dict, key: str) -> Any:
         raise TranslateError(f"Property {key} is not defined") from e
 
 
+def get_or_none(yaml_obj: dict, key: str) -> Any:
+    try:
+        value = yaml_obj[key]
+        return value
+    except KeyError:
+        return None
+
+
+def get_text(stream: Union[Any, dict], config: Optional[dict]) -> Tuple[str, dict]:
+    if isinstance(stream, dict):
+        value = str(ensure_no_null(stream, 'data'))
+        config = translate_config(get_or_none(stream, 'config'), config)
+    else:
+        value = str(stream)
+        config = translate_config(config)
+    return value, config
+
+
 def translate_file(yaml_file: str, json_file: Optional[str] = None):
     if json_file is None:
         directory = path.dirname(yaml_file)
@@ -70,22 +89,139 @@ def translate(yaml_str: str) -> str:
     return json.dumps(plan, cls=DataclassJSONEncoder, indent=2)
 
 
-def translate_common_output(yaml_test: dict, config,
+def translate_common_output(yaml_test: dict, config: Optional[dict],
                             constructor: Callable = Output) -> BaseOutput():
     output = constructor()
     try:
-        output.stdout = translate_stream(yaml_test['stdout'], config)
+        output.stdout = translate_stream(yaml_test['stdout'],
+                                         get_or_none(config, 'stdout'))
     except KeyError:
         pass
     try:
-        output.stderr = translate_stream(yaml_test['stderr'], config)
+        output.stderr = translate_stream(yaml_test['stderr'],
+                                         get_or_none(config, 'stderr'))
     except KeyError:
         pass
     try:
-        output.exception = translate_stream(yaml_test['exception'], config)
+        output.exception = translate_stream(yaml_test['exception'],
+                                            get_or_none(config, 'exception'))
     except KeyError:
         pass
     return output
+
+
+def translate_config(new_config: Optional[dict] = None,
+                     old_config: Optional[dict] = None) -> dict:
+    def merge(dict0, dict1):
+        merged_dict = dict()
+        for key in set(dict0.keys()).union(set(dict1.keys())):
+            if key in dict0 and key in dict1:
+                # Both dictionaries contains the key
+                if isinstance(dict0[key], dict) and isinstance(dict1[key], dict):
+                    # Merge subsequence dictionaries
+                    merged_dict[key] = merge(dict0[key], dict1[key])
+                else:
+                    # Non subsequence dictionaries, keep value of dict1
+                    merged_dict[key] = dict1[key]
+            # Just copy unique keys
+            elif key in dict0:
+                merged_dict[key] = dict0[key]
+            else:
+                merged_dict[key] = dict1[key]
+
+        return merged_dict
+
+    # Fast exit if possible
+    if old_config is None:
+        if new_config is None:
+            return {}
+        else:
+            return new_config
+    if new_config is None:
+        return old_config
+    # Merge config dictionaries
+    return merge(old_config, new_config)
+
+
+def translate_ctx(yaml_context, config: Optional[dict]) -> Context:
+    config = translate_config(get_or_none(yaml_context, 'config'), config)
+    try:
+        testcases = [translate_test(test, config) for test in yaml_context[
+            'tests']]
+    except KeyError:
+        testcases = []
+    ctx_testcase = translate_ctx_test(yaml_context, config)
+    return Context(context_testcase=ctx_testcase, testcases=testcases)
+
+
+def translate_ctx_input(yaml_context: dict) -> ContextInput:
+    ctx_input = ContextInput()
+    try:
+        ctx_input.arguments = [str(val) for val in yaml_context['arguments']]
+        ctx_input.main_call = True
+    except KeyError:
+        pass
+    try:
+        ctx_input.stdin = TextData(data=str(yaml_context['stdin']))
+        ctx_input.main_call = True
+    except KeyError:
+        pass
+    return ctx_input
+
+
+def translate_ctx_test(yaml_context: dict,
+                       config: Optional[dict]) -> ContextTestcase:
+    output = translate_common_output(yaml_context, config,
+                                     constructor=ContextOutput)
+    ctx_input = translate_ctx_input(yaml_context)
+    ctx_input.main_call = (ctx_input.main_call or
+                           isinstance(output.stdout, TextOutputChannel) or
+                           isinstance(output.stderr, TextOutputChannel) or
+                           isinstance(output.exception, ExceptionOutputChannel))
+
+    try:
+        exit_code = yaml_context["exit_code"]
+        output.exit_code = ExitCodeOutputChannel(value=exit_code)
+        ctx_input.main_call = True
+    except KeyError:
+        pass
+    return ContextTestcase(output=output, input=ctx_input)
+
+
+def translate_exception(stream: Union[Any, dict],
+                        config: Optional[dict]) -> ExceptionOutputChannel:
+    value, config = get_text(stream, config)
+    return ExceptionOutputChannel(exception=value,
+                                  evaluator=GenericExceptionEvaluator(
+                                      options=config))
+
+
+def translate_stream(stream: Union[str, dict],
+                     config: Optional[dict]) -> TextOutputChannel:
+    value, config = get_text(stream, config)
+    return TextOutputChannel(data=value,
+                             evaluator=GenericTextEvaluator(options=config))
+
+
+def translate_tab(yaml_tab: dict) -> Tab:
+    config = translate_config(get_or_none(yaml_tab, 'config'))
+    return Tab(name=ensure_no_null(yaml_tab, 'tab'),
+               contexts=[translate_ctx(ctx, config) for ctx in
+                         ensure_no_null(yaml_tab, 'testcases')])
+
+
+def translate_test(yaml_test: dict, config: Optional[dict]) -> Testcase:
+    stmt = parser.parse_statement(ensure_no_null(yaml_test, 'statement'))
+    output = translate_common_output(yaml_test, config)
+    try:
+        output.result = translate_value_output(yaml_test['return'])
+    except KeyError:
+        try:
+            value = parser.parse_value(str(yaml_test['return-raw']))
+            output.result = ValueOutputChannel(value=value)
+        except KeyError:
+            pass
+    return Testcase(input=stmt, output=output)
 
 
 def translate_value_output(value: Optional[
@@ -114,74 +250,3 @@ def translate_value_output(value: Optional[
             ))
 
     return ValueOutputChannel(value=parse_value(value))
-
-
-def translate_ctx(yaml_context, config) -> Context:
-    try:
-        testcases = [translate_test(test, config) for test in yaml_context['tests']]
-    except KeyError as e:
-        testcases = []
-    ctx_testcase = translate_ctx_test(yaml_context, config)
-    return Context(context_testcase=ctx_testcase, testcases=testcases)
-
-
-def translate_ctx_input(yaml_context: dict) -> ContextInput:
-    ctx_input = ContextInput()
-    try:
-        ctx_input.arguments = [str(val) for val in yaml_context['arguments']]
-        ctx_input.main_call = True
-    except KeyError:
-        pass
-    try:
-        ctx_input.stdin = TextData(data=str(yaml_context['stdin']))
-        ctx_input.main_call = True
-    except KeyError:
-        pass
-    return ctx_input
-
-
-def translate_ctx_test(yaml_context: dict, config) -> ContextTestcase:
-    output = translate_common_output(yaml_context, config,
-                                     constructor=ContextOutput)
-    ctx_input = translate_ctx_input(yaml_context)
-    ctx_input.main_call = (ctx_input.main_call or
-                           isinstance(output.stdout, TextOutputChannel) or
-                           isinstance(output.stderr, TextOutputChannel) or
-                           isinstance(output.exception, ExceptionOutputChannel))
-
-    try:
-        exit_code = yaml_context["exit_code"]
-        output.exit_code = ExitCodeOutputChannel(value=exit_code)
-        ctx_input.main_call = True
-    except KeyError:
-        pass
-    return ContextTestcase(output=output, input=ctx_input)
-
-
-def translate_exception(stream: Union[str, dict], config) -> ExceptionOutputChannel:
-    if isinstance(stream, str):
-        return ExceptionOutputChannel(exception=stream)
-    raise TranslateError("Failure")
-
-
-def translate_stream(stream: Union[str, dict], config) -> TextOutputChannel:
-    if isinstance(stream, str):
-        return TextOutputChannel(data=stream)
-    raise TranslateError("Failure")
-
-
-def translate_tab(yaml_tab: dict) -> Tab:
-    config = {}
-    return Tab(name=ensure_no_null(yaml_tab, 'tab'),
-               contexts=[translate_ctx(ctx, config) for ctx in
-                         ensure_no_null(yaml_tab, 'testcases')])
-
-
-def translate_test(yaml_test: dict, config) -> Testcase:
-    stmt = parser.parse_statement(ensure_no_null(yaml_test, 'statement'))
-    output = translate_common_output(yaml_test, config)
-    try:
-        output.result = translate_value_output(yaml_test['return'])
-    except KeyError:
-        pass
-    return Testcase(input=stmt, output=output)
