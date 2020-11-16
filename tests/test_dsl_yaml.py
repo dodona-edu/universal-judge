@@ -216,3 +216,20 @@ def test_statement_and_main():
     assert isinstance(test.input, FunctionCall)
     assert test.output.result.value.data == 12
     assert test.output.result.value.type == BasicNumericTypes.INTEGER
+
+
+def test_invalid_yaml(caplog):
+    yaml_str = """
+- tab: "Tab"
+  testcases:
+  - arguments: ['-a', 1, 1.2, true, no]
+    stdin:
+      key: value
+  - arguments: ['-a', 1, 1.2, true, no]
+    stderr: []
+    tests:
+    - statement: 'data = () ()'
+      return-raw: '() {}'
+    """
+    assert translate(yaml_str) is None
+    assert len(caplog.record_tuples) == 8
