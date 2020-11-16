@@ -4,6 +4,8 @@ Exception evaluator.
 import logging
 from typing import Optional, Tuple
 
+from pydantic import BaseModel
+
 from . import EvaluationResult, EvaluatorConfig
 from ..dodona import StatusMessage, Status, ExtendedMessage, Permission
 from ..serialisation import ExceptionValue
@@ -13,10 +15,14 @@ from ..utils import Either
 logger = logging.getLogger(__name__)
 
 
+class _ExceptionValue(BaseModel):
+    __root__: ExceptionValue
+
+
 def try_as_exception(config: EvaluatorConfig,
                      value: str) -> Either[ExceptionValue]:
     try:
-        actual = ExceptionValue.parse_raw(value)
+        actual = _ExceptionValue.parse_raw(value).__root__
         actual = config.bundle.lang_config.exception_output(config.bundle, actual)
         return Either(actual)
     except (TypeError, ValueError) as e:
@@ -26,7 +32,7 @@ def try_as_exception(config: EvaluatorConfig,
 def try_as_readable_exception(config: EvaluatorConfig, value: str) \
         -> Tuple[Optional[str], Optional[ExtendedMessage]]:
     try:
-        actual = ExceptionValue.parse_raw(value)
+        actual = _ExceptionValue.parse_raw(value).__root__
         actual = config.bundle.lang_config.exception_output(config.bundle, actual)
     except (TypeError, ValueError):
         return None, None

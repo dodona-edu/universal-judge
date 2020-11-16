@@ -2,7 +2,7 @@
 - tab: "Tabname"
   # All testcase in the tabblad, combination of input-output and function calls
   testcases:
-    # Arguments list
+  # Arguments list
   - arguments: [ "data", 5 ]
     # Standard input
     stdin: "invoer"
@@ -14,7 +14,7 @@
     exit_code: 0
     # Dependent statement and function tests:
     tests:
-      # Assignment
+    # Assignment
     - statement: 'data = ["list\nline", "data"] :: list'
       # Function call
     - statement: 'function(data, 0.5 :: double)'
@@ -22,12 +22,12 @@
       return: [ 0, 0 ]
   - tests:
     - statement: 'echo(5 :: uint8)'
-        # Raw Return value
-        return-raw: "5 :: uint8"
-      
+      # Raw Return value
+      return-raw: "5 :: uint8"
+
 - tab: "Exception"
-  testcase:
-  - tests:      
+  testcases:
+  - tests:
     - statement: 'function_error()'
       # Standard output
       stdout: "Invalid"
@@ -44,7 +44,17 @@
       applyRounding: true
       roundTo: 2
     stderr:
-      tryFloatingPoint: true
-    exception:
       ignoreWhitespace: true
       caseInsensitive: true
+  testcases:
+  - config:
+      stdout:
+        roundTo: 0
+    tests:
+    - statement: 'diff(5, 2)'
+      stdout: "2"
+    - statement: 'diff(5, 2)'
+      stdout:
+        data: "2.5"
+        config:
+          roundTo: 4

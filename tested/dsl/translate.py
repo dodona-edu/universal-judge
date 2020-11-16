@@ -12,7 +12,7 @@ from tested.datatypes import BasicStringTypes, BasicNumericTypes, \
     BasicBooleanTypes, \
     BasicSequenceTypes, BasicObjectTypes
 from tested.serialisation import StringType, NumberType, Value, NothingType, \
-    SequenceType, BooleanType, ObjectType
+    SequenceType, BooleanType, ObjectType, ExceptionValue
 from tested.testplan import Plan, Tab, Context, Testcase, TextOutputChannel, \
     Output, \
     ExceptionOutputChannel, ValueOutputChannel, BaseOutput, ContextTestcase, \
@@ -103,8 +103,7 @@ def translate_common_output(yaml_test: dict, config: Optional[dict],
     except KeyError:
         pass
     try:
-        output.exception = translate_stream(yaml_test['exception'],
-                                            get_or_none(config, 'exception'))
+        output.exception = translate_exception(yaml_test['exception'])
     except KeyError:
         pass
     return output
@@ -188,12 +187,8 @@ def translate_ctx_test(yaml_context: dict,
     return ContextTestcase(output=output, input=ctx_input)
 
 
-def translate_exception(stream: Union[Any, dict],
-                        config: Optional[dict]) -> ExceptionOutputChannel:
-    value, config = get_text(stream, config)
-    return ExceptionOutputChannel(exception=value,
-                                  evaluator=GenericExceptionEvaluator(
-                                      options=config))
+def translate_exception(stream: str) -> ExceptionOutputChannel:
+    return ExceptionOutputChannel(exception=ExceptionValue(message=stream))
 
 
 def translate_stream(stream: Union[str, dict],
