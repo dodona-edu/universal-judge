@@ -277,8 +277,9 @@ def translate_test(yaml_test: dict, config: Optional[dict],
                    indices: Tuple[int, int, int]) -> Optional[Testcase]:
     fault = False
     try:
-        stmt = parser.parse_statement(ensure_no_null(yaml_test, 'statement'))
-    except ParseError as e:
+        stmt = parser.parse_statement(
+            valid_text_translatable_type(ensure_no_null(yaml_test, 'statement')))
+    except (ParseError, TranslateError) as e:
         logger.error(f"Tab {indices[0]}, context {indices[1]}, test {indices[2]}: "
                      f"Invalid statement: {str(e)}")
         fault = True
