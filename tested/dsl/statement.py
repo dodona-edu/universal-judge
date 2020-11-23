@@ -56,7 +56,16 @@ class Parser:
         # Detect variable type
         if index_type == -1:
             # Type not given: derive
-            var_type = expression.type
+            if isinstance(expression, Value.__args__):
+                var_type = expression.type
+            elif isinstance(expression, FunctionCall):
+                if expression.type == FunctionType.CONSTRUCTOR:
+                    var_type = VariableType(data=expression.name)
+                else:
+                    raise ParseError(
+                        "Can't derive variable type from function call")
+            else:
+                raise ParseError("Can't derive variable type from identifier")
         else:
             # Type is given
             var_type = self.analyse_type_token(tree.children[index_type], True)

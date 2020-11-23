@@ -12,6 +12,7 @@
     "config": {
       "type": "object",
       "description": "Configuration properties for textual comparison",
+      "minProperties": 1,
       "properties": {
         "applyRounding": {
           "description": "Apply rounding when comparing as float",
@@ -38,6 +39,10 @@
     "localConfig": {
       "type": "object",
       "description": "Specific configuration properties for textual comparison of one value",
+      "required": [
+        "data",
+        "config"
+      ],
       "properties": {
         "data": {
           "$ref": "#/definitions/textualTypes"
@@ -50,6 +55,7 @@
     "globalConfig": {
       "type": "object",
       "description": "Global configuration properties for textual comparison",
+      "minProperties": 1,
       "properties": {
         "stdout": {
           "$ref": "#/definitions/config"
@@ -182,7 +188,7 @@
           "description": "Value string to parse to the expected return value"
         },
         "statement": {
-          "$ref": "#/definitions/streamOutput",
+          "$ref": "#/definitions/textualTypes",
           "description": "Statement or expression to evaluate"
         },
         "stderr": {

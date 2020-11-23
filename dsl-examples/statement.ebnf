@@ -18,16 +18,16 @@ Identifier ::= [_A-Za-z][_A-Za-z0-9]*
 Null ::= "null" | "nothing" | "undefined"
 Map ::= "{" (String ':' Expression (',' String ':' Expression)*)? "}"
 List ::= "[" (Expression ("," Expression)*)? "]"
-Set ::= "[" Expression ("," Expression)* "]"
-Tuple ::= "[" (Expression ("," Expression)*)? "]"
+Set ::= "{" Expression ("," Expression)* "}"
+Tuple ::= "(" (Expression ("," Expression)*)? ")"
 
 Value ::= Boolean | Integer | Float | String | Null | Map | List | Set | Tuple
 ValueCast ::= Value '::' DataTypes
 
-Assignment ::= DataType? Identifier "=" Value
+Assignment ::= Identifier "=" Value
              | Types Identifier "=" Expression
              | Identifier "=" Constructor
 Constructor ::= "new" Identifier ('.' Identifier)? "(" (Expression (',' Expression)*)? ")"
 Function ::= Identifier ('.' Identifier)? "(" (Expression (',' Expression)*)? ")"
-Expression ::= Value | ValueCast | Identifier | Constructor | Function
+Expression ::= Value | ValueCast | Identifier ('.' Identifier)? | Constructor | Function
 Statement ::= Assignment | Expression

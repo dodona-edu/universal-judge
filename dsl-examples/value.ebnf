@@ -16,8 +16,8 @@ String ::= '"'  ((ALL_CHARS - ["\\]) | ('\' ALL_CHARS))* '"'
 Null ::= "null" | "nothing" | "undefined"
 Map ::= "{" (String ':' Expression (',' String ':' Expression)*)? "}"
 List ::= "[" (Expression ("," Expression)*)? "]"
-Set ::= "[" Expression ("," Expression)* "]"
-Tuple ::= "[" (Expression ("," Expression)*)? "]"
+Set ::= "{" Expression ("," Expression)* "}"
+Tuple ::= "(" (Expression ("," Expression)*)? ")"
 
 Value ::= Boolean | Integer | Float | String | Null | Map | List | Set | Tuple
 ValueCast ::= Value '::' DataTypes
