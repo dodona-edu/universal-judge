@@ -16,12 +16,6 @@ def test_parse_value_null():
     assert parsed.data is None
 
 
-def test_parse_value_nothing():
-    parsed = parser.parse_value("nothing :: nothing")
-    assert parsed.type == BasicNothingTypes.NOTHING
-    assert parsed.data is None
-
-
 def test_parse_value_undefined():
     parsed = parser.parse_value("undefined")
     assert parsed.type == BasicNothingTypes.NOTHING
