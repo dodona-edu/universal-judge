@@ -29,7 +29,7 @@ jobs:
         with:
           node-version: 12.x  
       - name: Setup Kotlin
-        uses: fwilhe2/setup-kotlin@main
+        uses: fwilhe2/setup-kotlin@bb0e1ead85a7f840e9d2bc4bdd2c3950b080a449
       - name: Run tests
         run: |
           python -m pytest tests/ --ignore tests/test_slow.py
