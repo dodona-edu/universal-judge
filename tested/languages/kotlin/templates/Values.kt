@@ -100,7 +100,7 @@ private fun internalEncode(value: Any?): Array<String> {
                 .joinToString(separator = ", ", prefix = "{", postfix = "}")
     } else {
         type = "unknown"
-        data = value.toString()
+        data = String.format("\"%s\"", escape(value.toString()));
     }
 
     return arrayOf(type, data)
