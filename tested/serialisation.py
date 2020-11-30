@@ -478,10 +478,11 @@ class EvalResult(BaseModel):
     messages: List[ExtendedMessage] = field(default_factory=list)
 
 
-class ExceptionValue(WithFeatures, BaseModel):
+@dataclass
+class ExceptionValue(WithFeatures):
     """An exception that was thrown while executing the user context."""
     message: str
-    stacktrace: str
+    stacktrace: str = ""
 
     def get_used_features(self) -> FeatureSet:
         return FeatureSet({Construct.EXCEPTIONS}, types=set())

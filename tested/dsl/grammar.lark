@@ -1,0 +1,122 @@
+INTEGER: "integer"
+RATIONAL: "rational"
+CHAR: "char"
+TEXT: "text"
+BOOLEAN: "boolean"
+SEQUENCE: "sequence"
+SET: "set"
+MAP: "map"
+NOTHING: "nothing"
+ANY: "any"
+INT_8: "int8"
+U_INT_8: "uint8"
+INT_16: "int16"
+U_INT_16: "uint16"
+INT_32: "int32"
+U_INT_32: "uint32"
+INT_64: "int64"
+U_INT_64: "uint64"
+BIG_INT: "bigint"
+SINGLE_PRECISION: "single"
+DOUBLE_PRECISION: "double"
+DOUBLE_EXTENDED: "extended"
+FIXED_PRECISION: "fixed"
+ARRAY: "array"
+LIST: "list"
+
+?collections: SEQUENCE
+            | SET
+            | ARRAY
+            | LIST
+
+?datatype: INTEGER
+        | RATIONAL
+        | CHAR
+        | TEXT
+        | BOOLEAN
+        | MAP
+        | NOTHING
+        | ANY
+        | INT_8
+        | U_INT_8
+        | INT_16
+        | U_INT_16
+        | INT_32
+        | U_INT_32
+        | INT_64
+        | U_INT_64
+        | BIG_INT
+        | SINGLE_PRECISION
+        | DOUBLE_PRECISION
+        | DOUBLE_EXTENDED
+        | FIXED_PRECISION
+        | collections
+
+?assign_datatype: datatype
+                | CNAME
+
+TRUE: "true"
+FALSE: "false"
+?boolean: TRUE
+        | FALSE
+
+?value_raw: SIGNED_FLOAT
+      | SIGNED_INT
+      | boolean
+      | dict
+      | set
+      | list
+      | tuple
+      | string
+      | null
+
+value_cast: value_raw "::" datatype
+
+?value: value_raw
+      | CNAME
+      | value_cast
+
+?return: value_raw
+       | value_cast
+
+assign: datatype? CNAME "=" value
+      | assign_datatype CNAME "=" expr
+      | CNAME "=" constructor
+
+name: CNAME
+    | CNAME "." CNAME
+
+property: CNAME "." CNAME
+
+constructor: "new" name "(" args ")"
+
+?expr: value
+     | fun
+     | constructor
+     | property
+
+fun: name "(" args ")"
+
+?stmt: assign
+     | expr
+
+args: [value ("," value)*]
+
+dict: "{" [dict_pair ("," dict_pair)*] "}"
+list: "[" [expr ("," expr)*] "]"
+set: "{" expr ("," expr)* "}"
+tuple: "(" [expr ("," expr)*] ")"
+dict_pair: string ":" expr
+
+null: "null"
+    | "undefined"
+
+
+?string: ESCAPED_STRING
+
+%import common.CNAME
+%import common.ESCAPED_STRING
+%import common.SIGNED_INT
+%import common.SIGNED_FLOAT
+%import common.WS
+%ignore WS

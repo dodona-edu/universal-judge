@@ -1,0 +1,60 @@
+# New tab on dodona
+- tab: "Tabname"
+  # All testcase in the tabblad, combination of input-output and function calls
+  testcases:
+  # Arguments list
+  - arguments: [ "data", 5 ]
+    # Standard input
+    stdin: "invoer"
+    # Standard output
+    stdout: "uitvoer"
+    # Standard error
+    stderr: "error"
+    # Exitcode
+    exit_code: 0
+    # Dependent statement and function tests:
+    tests:
+    # Assignment
+    - statement: 'data = ["list\nline", "data"] :: list'
+      # Function call
+    - statement: 'function(data, 0.5 :: double)'
+      # Return value
+      return: [ 0, 0 ]
+  - tests:
+    - statement: 'echo(5 :: uint8)'
+      # Raw Return value
+      return-raw: "5 :: uint8"
+
+- tab: "Exception"
+  testcases:
+  - tests:
+    - statement: 'function_error()'
+      # Standard output
+      stdout: "Invalid"
+      # Standard error
+      stderr: "Error"
+      # Exceptions
+      exception: "Unknown"
+
+- tab: "Config"
+  # Configuration options for textual comparisons, only for stdout, stderr, exception
+  config:
+    stdout:
+      tryFloatingPoint: true
+      applyRounding: true
+      roundTo: 2
+    stderr:
+      ignoreWhitespace: true
+      caseInsensitive: true
+  testcases:
+  - config:
+      stdout:
+        roundTo: 0
+    tests:
+    - statement: 'diff(5, 2)'
+      stdout: "2"
+    - statement: 'diff(5, 2)'
+      stdout:
+        data: "2.5"
+        config:
+          roundTo: 4
