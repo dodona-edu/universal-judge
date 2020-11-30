@@ -87,7 +87,7 @@ public class Values {
             data = "{" + String.join(", ", elements) + "}";
         } else {
             type = "unknown";
-            data = value.toString();
+            data = "\"" + escape(value.toString()) + "\"";
         }
         return List.of(type, data);
     }
