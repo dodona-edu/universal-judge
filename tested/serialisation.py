@@ -264,7 +264,7 @@ class FunctionCall(WithFeatures, WithFunctions):
         return combine_features([base_features] + argument_features)
 
     def get_functions(self) -> Iterable['FunctionCall']:
-        return [self, *[x.get_functions() for x in self.arguments]]
+        return [self, *[list(x.get_functions()) for x in self.arguments]]
 
 
 @dataclass
