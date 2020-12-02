@@ -1,9 +1,12 @@
+import functools
 import logging
+import operator
 import re
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Tuple, Iterable
 
 from esprima import parseScript, error_handler
+from esprima.nodes import Node
 
 from tested.configs import Bundle
 from tested.dodona import Message, AnnotateCode
@@ -21,21 +24,42 @@ class JavaScript(Language):
 
     # noinspection PyTypeChecker
     def solution(self, solution: Path, bundle: Bundle):
+        def map_variables(node: Node) -> Iterable[str]:
+            if node.type == "ArrayPattern":
+                return iter(e.name for e in node.elements)
+            elif node.type == "Identifier":
+                return [node.name]
+            else:
+                return []
+
         try:
             with open(solution, "r") as file:
                 contents = file.read()
             body = parseScript(contents).body
-            functions = filter(
-                lambda x: x.type in ('FunctionDeclaration', 'ClassDeclaration'),
-                body
+            possible_positions = (
+                'FunctionDeclaration', 'ClassDeclaration', 'VariableDeclaration',
+                'ExpressionStatement'
             )
-            functions = filter(
-                lambda x: x.id and x.id.type == 'Identifier',
-                functions
+            # Filter variable declarations
+            identifiers = filter(lambda x: x.type in possible_positions, body)
+            # Map identifier locations
+            identifiers = map(
+                lambda x: x.declarations if x.declarations else [
+                    x.expression.left
+                ] if x.expression else [x],
+                identifiers
             )
-            functions = map(lambda x: x.id.name, functions)
+            # Flatten
+            identifiers = functools.reduce(operator.iconcat, identifiers, [])
+            # Get variable id component
+            identifiers = map(lambda x: x.id if x.id else x, identifiers)
+            identifiers = map(map_variables, identifiers)
+            # Flatten
+            identifiers = functools.reduce(operator.iconcat, identifiers, [])
+
             with open(solution, "a") as file:
-                print("\nmodule.exports = {", ", ".join(functions), "};", file=file)
+                print("\nmodule.exports = {", ", ".join(set(identifiers)), "};",
+                      file=file)
         except error_handler.Error:
             logger.debug("Failing to parse submission")
 
