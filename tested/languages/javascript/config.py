@@ -32,6 +32,17 @@ class JavaScript(Language):
             else:
                 return []
 
+        def map_root_node(node: Node) -> List[Node]:
+            if node.type == 'VariableDeclaration':
+                return node.declarations
+            elif node.type == 'ExpressionStatement':
+                if node.expression.type == 'AssignmentExpression':
+                    return [node.expression.left]
+                else:
+                    return []
+            else:
+                return [node]
+
         try:
             with open(solution, "r") as file:
                 contents = file.read()
@@ -43,12 +54,7 @@ class JavaScript(Language):
             # Filter variable declarations
             identifiers = filter(lambda x: x.type in possible_positions, body)
             # Map identifier locations
-            identifiers = map(
-                lambda x: x.declarations if x.declarations else [
-                    x.expression.left
-                ] if x.expression else [x],
-                identifiers
-            )
+            identifiers = map(map_root_node, identifiers)
             # Flatten
             identifiers = functools.reduce(operator.iconcat, identifiers, [])
             # Get variable id component
