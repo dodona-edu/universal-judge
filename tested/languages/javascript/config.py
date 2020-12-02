@@ -129,6 +129,9 @@ class JavaScript(Language):
     def cleanup_description(self, namespace: str, description: str) -> str:
         return cleanup_description(self, namespace, description)
 
+    def clean_exception_message(self, message: str, namespace: str) -> str:
+        return message.replace(f'{namespace}.', '', 1)
+
     def stderr(self,
                bundle: Bundle,
                stderr: str) -> Tuple[List[Message], List[AnnotateCode], str]:
