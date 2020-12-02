@@ -503,12 +503,12 @@ class Language:
         :param exception: The exception.
         :return: The modified exception.
         """
+        namespace = self.conventionalize_namespace(bundle.plan.namespace)
         exception.stacktrace = self.cleanup_stacktrace(
-            exception.stacktrace,
-            self.with_extension(
-                self.conventionalize_namespace(bundle.plan.namespace)
-            )
+            exception.stacktrace, self.with_extension(namespace)
         )
+        exception.message = self.clean_exception_message(exception.message,
+                                                         namespace)
         return exception
 
     def stdout(self,
@@ -623,3 +623,13 @@ class Language:
             return trace_to_html(stacktrace)
         else:
             return None
+
+    def clean_exception_message(self, message: str, namespace: str) -> str:
+        """
+        Cleanup exception message
+
+        :param message: Exception message
+        :param namespace: Namespace name
+        :return: Processed message
+        """
+        return message
