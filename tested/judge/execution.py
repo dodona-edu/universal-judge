@@ -96,6 +96,17 @@ def execute_file(
     return result
 
 
+def copy_workdir_files(bundle: Bundle, context_dir: Path):
+    prefix = bundle.lang_config.context_prefix()
+    for origin in bundle.config.workdir.iterdir():
+        file = origin.name.lower()
+        _logger.debug("Copying %s to %s", origin, context_dir)
+        if origin.is_file():
+            shutil.copy2(origin, context_dir)
+        elif origin.is_dir() and not file.startswith(prefix) and file != "common":
+            shutil.copytree(origin, context_dir / file)
+
+
 def execute_context(bundle: Bundle, args: ContextExecution, max_time: float) \
         -> Tuple[Optional[ExecutionResult], List[Message], Status, Path]:
     """
@@ -118,6 +129,7 @@ def execute_context(bundle: Bundle, args: ContextExecution, max_time: float) \
     dependencies = bundle.lang_config.filter_dependencies(
         bundle, dependencies, args.context_name
     )
+    copy_workdir_files(bundle, context_dir)
 
     # Copy files from the common directory to the context directory.
     for file in dependencies:
