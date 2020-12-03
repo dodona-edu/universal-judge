@@ -13,19 +13,20 @@ from pathlib import Path
 from .configs import DodonaConfig
 from .main import run
 
+path = "/home/boris/Documenten/School/2020-2021/Masterproef/TESTed_challenges/exercises/advent of code/2020/tobbogan trajectory - 1/python"
 
 def read_config() -> DodonaConfig:
     """Read the configuration from stdout"""
     return DodonaConfig(**{
         "memory_limit":         536870912,
         "time_limit":           60,
-        "programming_language": 'javascript',
+        "programming_language": 'python',
         "natural_language":     'nl',
-        "resources":            Path('exercise/echo-function/evaluation'),
-        "source":               Path('exercise/echo-function/solution/correct.js'),
+        "resources":            Path(f'{path}/evaluation'),
+        "source":               Path(f'{path}/solution/solution.py'),
         "judge":                Path('.'),
-        "workdir":              Path('workdir'),
-        "plan_name":            "one.tson",
+        "workdir":              Path(f'{path}/workdir'),
+        "plan_name":            "plan.tson",
         "options":              {
             "parallel": True,
             "mode":     "batch",
@@ -58,9 +59,9 @@ if __name__ == '__main__':
     # noinspection PyTypeChecker
     for root, dirs, files in os.walk(config.workdir):
         for f in files:
-            os.unlink(os.path.join(root, f))
+            pass # os.unlink(os.path.join(root, f))
         for d in dirs:
-            shutil.rmtree(os.path.join(root, d), ignore_errors=True)
+            pass # shutil.rmtree(os.path.join(root, d), ignore_errors=True)
 
     start = time.time()
     # run(configs, open(os.devnull, "w"))
