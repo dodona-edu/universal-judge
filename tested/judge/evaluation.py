@@ -1,3 +1,4 @@
+import html
 import logging
 from pathlib import Path
 from typing import Tuple, List
@@ -108,7 +109,23 @@ def evaluate_results(bundle: Bundle, context: Context,
     # Even if there is no main testcase, we can still proceed, since the defaults
     # should take care of this.
 
-    # Handle the compiler output. If there is compiler output, there is no point in
+    # Add file links
+    if context.link_files:
+        dict_links = dict((link_file.name, dataclasses.asdict(link_file))
+                          for link_file in context.link_files)
+        dict_json = json.dumps(dict_links)
+        link_list = ''.join(
+            f'<li><a href="{link_file.content}" class="file-link" target="_blank">'
+            f'{html.escape(link_file.name)}</a></li>'
+            for link_file in context.link_files
+        )
+        description = f"<div class='contains-file' data-files='{dict_json}'>" \
+                      f"<p>Files:</p><ul>{link_list}</ul></div>"
+        message = ExtendedMessage(description=description, format="html")
+        collector.add(AppendMessage(message=message))
+
+    # Handle the compiler output. If there is compiler output, there is no
+    # point in
     # checking additional testcases, so stop early.
     # Handle compiler results
     if compiler_results[1] != Status.CORRECT:

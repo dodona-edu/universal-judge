@@ -449,6 +449,14 @@ Code = Dict[str, TextData]
 
 
 @dataclass
+class FileUrl:
+    content: str
+    name: str
+    location: str = "href"
+    storage: str = "disk"
+
+
+@dataclass
 class Context(WithFeatures, WithFunctions):
     """
     A test case is an independent run of the solution.
@@ -458,6 +466,7 @@ class Context(WithFeatures, WithFunctions):
     before: Code = field(default_factory=dict)
     after: Code = field(default_factory=dict)
     description: Optional[str] = None
+    link_files: List[FileUrl] = field(default_factory=list)
 
     # noinspection PyMethodParameters
     @root_validator
