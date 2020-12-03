@@ -99,14 +99,11 @@ def execute_file(
 def copy_workdir_files(bundle: Bundle, context_dir: Path):
     prefix = bundle.lang_config.context_prefix()
     for origin in bundle.config.workdir.iterdir():
-        file = os.path.basename(origin)
+        file = origin.name.lower()
         _logger.debug("Copying %s to %s", origin, context_dir)
-        if os.path.isfile(origin):
+        if origin.is_file():
             shutil.copy2(origin, context_dir)
-        elif os.path.isdir(origin) and (
-                not str(file).lower().startswith(prefix) and
-                str(file).lower() != "common"
-        ):
+        elif origin.is_dir() and not file.startswith(prefix) and file != "common":
             shutil.copytree(origin, context_dir / file)
 
 
