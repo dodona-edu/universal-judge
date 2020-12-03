@@ -97,7 +97,7 @@ def translate(yaml_str: str) -> Optional[str]:
     yaml_obj: list = yaml.safe_load(yaml_str)
     tabs = [
         translate_tab(yaml_tab=tab, index_tab=index)
-        for index, tab in enumerate(yaml_obj)
+        for index, tab in enumerate(yaml_obj if yaml_obj else [])
     ]
     if None in tabs:
         logger.error(f"Fault in at least one tab")
