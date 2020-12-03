@@ -114,13 +114,13 @@ def evaluate_results(bundle: Bundle, context: Context,
         dict_links = dict((link_file.name, dataclasses.asdict(link_file))
                           for link_file in context.link_files)
         dict_json = json.dumps(dict_links)
-        link_list = ''.join(
-            f'<li><a href="{link_file.content}" class="file-link" target="_blank">'
-            f'{html.escape(link_file.name)}</a></li>'
+        link_list = ', '.join(
+            f'<a href="{link_file.content}" class="file-link" target="_blank">'
+            f'<span class="code">{html.escape(link_file.name)}</span></a>'
             for link_file in context.link_files
         )
         description = f"<div class='contains-file' data-files='{dict_json}'>" \
-                      f"<p>Files:</p><ul>{link_list}</ul></div>"
+                      f"<p>File: {link_list}<p></div>"
         message = ExtendedMessage(description=description, format="html")
         collector.add(AppendMessage(message=message))
 
