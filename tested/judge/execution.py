@@ -100,11 +100,13 @@ def copy_workdir_files(bundle: Bundle, context_dir: Path):
     for file in os.listdir(bundle.config.workdir):
         origin = bundle.config.workdir / file
         _logger.debug("Copying %s to %s", origin, context_dir)
-        if os.path.isfile(file) or (
+        if os.path.isfile(origin):
+            shutil.copy2(origin, context_dir)
+        elif os.path.isdir(origin) and (
                 not str(file).startswith("context") and
                 str(file) != "common"
         ):
-            shutil.copy2(origin, context_dir)
+            shutil.copytree(origin, context_dir / file)
 
 
 def execute_context(bundle: Bundle, args: ContextExecution, max_time: float) \
