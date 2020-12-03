@@ -119,8 +119,9 @@ def evaluate_results(bundle: Bundle, context: Context,
             f'<span class="code">{html.escape(link_file.name)}</span></a>'
             for link_file in context.link_files
         )
+        name = "File" if len(context.link_files) == 1 else "Files"
         description = f"<div class='contains-file' data-files='{dict_json}'>" \
-                      f"<p>File: {link_list}<p></div>"
+                      f"<p>{name}: {link_list}<p></div>"
         message = ExtendedMessage(description=description, format="html")
         collector.add(AppendMessage(message=message))
 
