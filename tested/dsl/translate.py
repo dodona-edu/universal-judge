@@ -17,7 +17,7 @@ from tested.testplan import Plan, Tab, Context, Testcase, TextOutputChannel, \
     Output, \
     ExceptionOutputChannel, ValueOutputChannel, BaseOutput, ContextTestcase, \
     ContextOutput, ExitCodeOutputChannel, ContextInput, TextData, \
-    GenericTextEvaluator
+    GenericTextEvaluator, FileUrl
 from tested.dsl.statement import Parser, ParseError
 
 logger = logging.getLogger(__name__)
@@ -68,6 +68,13 @@ def get_or_none(yaml_obj: dict, key: str) -> Any:
         return value
     except KeyError:
         return None
+
+
+def get_list(yaml_obj: dict, key: str) -> Any:
+    try:
+        return yaml_obj[key]
+    except KeyError:
+        return []
 
 
 def get_text(stream: Union[Any, dict],
@@ -177,7 +184,7 @@ def translate_config(new_config: Optional[dict] = None,
     return merge(old_config, new_config)
 
 
-def translate_ctx(yaml_context, indices: Tuple[int, int],
+def translate_ctx(yaml_context: dict, indices: Tuple[int, int],
                   config: Optional[dict]) -> Optional[Context]:
     config = translate_config(get_or_none(yaml_context, 'config'), config)
     try:
@@ -186,11 +193,16 @@ def translate_ctx(yaml_context, indices: Tuple[int, int],
     except KeyError:
         testcases = []
     ctx_testcase = translate_ctx_test(yaml_context, config, indices)
-    if testcases is None or ctx_testcase is None:
+    link_list = [translate_link_file(link_file, (indices[0], indices[1], index))
+                 for index, link_file in
+                 enumerate(get_list(yaml_context, 'link_files'))]
+
+    if None in testcases or ctx_testcase is None or None in link_list:
         logger.error(
             f"At least one fault in context {indices[1]} at tab {indices[0]}")
         return None
-    return Context(context_testcase=ctx_testcase, testcases=testcases)
+    return Context(context_testcase=ctx_testcase, testcases=testcases,
+                   link_files=link_list)
 
 
 def translate_ctx_input(yaml_context: dict,
@@ -250,6 +262,20 @@ def translate_ctx_test(yaml_context: dict,
 def translate_exception(stream: str) -> ExceptionOutputChannel:
     return ExceptionOutputChannel(
         exception=ExceptionValue(message=valid_text_translatable_type(stream)))
+
+
+def translate_link_file(link_file: dict,
+                        indices: Tuple[int, int, int]) -> Optional[FileUrl]:
+    try:
+        name = ensure_no_null(link_file, "name")
+        content = ensure_no_null(link_file, "content")
+    except TranslateError:
+        logger.error(
+            f"Tab {indices[0]}, context {indices[1]}, link file {indices[2]}: "
+            f"name and content may not be null"
+        )
+        return None
+    return FileUrl(name=name, content=content)
 
 
 def translate_stream(
