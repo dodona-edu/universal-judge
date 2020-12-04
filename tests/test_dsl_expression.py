@@ -323,3 +323,11 @@ def test_parse_value():
     parsed = parser.parse_statement('5.5')
     assert parsed.type == BasicNumericTypes.RATIONAL
     assert math.isclose(parsed.data, 5.5)
+
+
+def test_parse_cast_set():
+    parsed = parser.parse_statement('{} :: set')
+    assert parsed.type == BasicSequenceTypes.SET
+    assert parsed.data == []
+    with pytest.raises(ParseError):
+        parser.parse_statement('{"data": "data"} :: set')

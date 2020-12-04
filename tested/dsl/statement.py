@@ -91,7 +91,12 @@ class Parser:
             if not isinstance(expr_type, StringTypes):
                 raise ParseError("Can't cast string type to non-string type")
         elif isinstance(expression, ObjectType):
-            if not isinstance(expr_type, ObjectTypes):
+            if isinstance(expr_type, SequenceTypes.__args__):
+                if len(expression.data) == 0:
+                    return SequenceType(type=expr_type, data=[])
+                else:
+                    raise ParseError("Can't cast non-empty dict to non-object type")
+            elif not isinstance(expr_type, ObjectTypes):
                 raise ParseError("Can't cast object type to non-object type")
         else:
             raise ParseError("Non-value expression can not be casted")

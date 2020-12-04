@@ -1,5 +1,5 @@
 {
-  "$id": "https://github.com/dodona-edu/universal-judge/tree/dsl/dsl-examples/dsl-schema.json",
+  "$id": "https://github.com/dodona-edu/universal-judge/blob/master/dsl-examples/dsl-schema.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "DSL Schema",
   "description": "YAML DSL TESTed test plan",
@@ -75,6 +75,23 @@
         }
       ]
     },
+    "link_file": {
+      "type": "object",
+      "required": [
+        "name",
+        "content"
+      ],
+      "description": "Tab definition with testcases",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "File name"
+        },
+        "content": {
+          "type": "string",
+          "description": "Relative path to the file in the `description` folder of a Dodona exercise"
+        }
+      },
     "tab": {
       "type": "object",
       "required": [
@@ -97,6 +114,13 @@
           "minItems": 1,
           "items": {
             "$ref": "#/definitions/testcase"
+          }
+        },
+        "link_files": {
+          "type": "array",
+          "description": "Files to link in the evaluation report",
+          "items": {
+            "$ref": "#/definitions/link_file"
           }
         }
       }

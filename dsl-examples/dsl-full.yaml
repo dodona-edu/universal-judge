@@ -3,7 +3,10 @@
   # All testcase in the tabblad, combination of input-output and function calls
   testcases:
   # Arguments list
-  - arguments: [ "data", 5 ]
+  - link_files:
+    - name: "file.txt"
+      content: "media/workdir/file.txt"
+    arguments: [ "data", 5 ]
     # Standard input
     stdin: "invoer"
     # Standard output

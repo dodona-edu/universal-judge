@@ -29,6 +29,7 @@ Other modes are also available:
 - `python -m tested.testplan` will print the JSON Schema of the testplan.
 - `python -m tested.manual` will run a hard-coded exercise and solution with logs enabled.
 - `python -m tested.serialisation` will print the JSON Schema for only the serialization format (this is also included if you print the testplan schema).
+- _`python -m tested.translate_dsl`_ will a DSL testplan to a JSON testplan
 
 
 Tests should also be run from this directory:
