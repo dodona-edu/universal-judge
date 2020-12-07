@@ -38,7 +38,8 @@ def _evaluate_channel(
         out: TestcaseCollector,
         channel: Channel,
         output: OutputChannel,
-        actual: Optional[str]) -> Optional[bool]:
+        actual: Optional[str],
+        unexpected_status: Status = Status.WRONG) -> Optional[bool]:
     """
     Evaluate the output on a given channel. This function will output the
     appropriate messages to start and end a new test in Dodona.
@@ -62,7 +63,8 @@ def _evaluate_channel(
 
     :return: True if successful, otherwise False.
     """
-    evaluator = get_evaluator(bundle, context_directory, output)
+    evaluator = get_evaluator(bundle, context_directory, output,
+                              unexpected_status=unexpected_status)
     # Run the evaluator.
     evaluation_result = evaluator(
         output,
@@ -222,7 +224,8 @@ def evaluate_results(bundle: Bundle, context: Context,
         ),
         _evaluate_channel(
             bundle, context_dir, context_collector, Channel.EXCEPTION,
-            output.exception, actual_exception
+            output.exception, actual_exception,
+            unexpected_status=Status.RUNTIME_ERROR
         ),
         _evaluate_channel(
             bundle, context_dir, context_collector, Channel.STDOUT, output.stdout,
@@ -291,7 +294,8 @@ def evaluate_results(bundle: Bundle, context: Context,
             ),
             _evaluate_channel(
                 bundle, context_dir, t_col, Channel.EXCEPTION, output.exception,
-                actual_exception
+                actual_exception,
+                unexpected_status=Status.RUNTIME_ERROR
             ),
             _evaluate_channel(
                 bundle, context_dir, t_col, Channel.STDOUT, output.stdout,

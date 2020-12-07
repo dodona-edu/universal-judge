@@ -31,7 +31,7 @@ from typing import Union, Callable, Optional
 from pydantic.dataclasses import dataclass
 
 from ..configs import Bundle
-from ..dodona import StatusMessage, Message
+from ..dodona import StatusMessage, Message, Status
 from ..testplan import GenericTextEvaluator, TextBuiltin, \
     GenericValueEvaluator, ValueBuiltin, GenericExceptionEvaluator, \
     ExceptionBuiltin, ProgrammedEvaluator, SpecificEvaluator
@@ -87,7 +87,8 @@ def _curry_evaluator(
 def get_evaluator(
         bundle: Bundle,
         context_dir: Path,
-        output: Union[NormalOutputChannel, SpecialOutputChannel]
+        output: Union[NormalOutputChannel, SpecialOutputChannel],
+        unexpected_status: Status = Status.WRONG
 ) -> Evaluator:
     """
     Get the evaluator for a given output channel.
@@ -99,7 +100,8 @@ def get_evaluator(
 
     # Handle channel states.
     if output == EmptyChannel.NONE:
-        return currier(nothing.evaluate)
+        return currier(functools.partial(nothing.evaluate,
+                                         unexpected_status=unexpected_status))
     if output == IgnoredChannel.IGNORED:
         return currier(ignored.evaluate)
     if isinstance(output, ExitCodeOutputChannel):
