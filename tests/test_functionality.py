@@ -127,7 +127,7 @@ def test_crashing_assignment_with_before(lang: str, tmp_path: Path, pytestconfig
     updates = assert_valid_output(result, pytestconfig)
     # Only the assignment was started.
     assert len(updates.find_all("start-testcase")) == 1
-    assert updates.find_status_enum() == ["wrong"]
+    assert updates.find_status_enum() == ["runtime error"]
     # Assert the exception is included.
     assert updates.find_next("start-test")["channel"] == "exception"
 
@@ -210,7 +210,7 @@ def test_batch_compilation_fallback(language: str, tmp_path: Path, pytestconfig,
     assert class_instance.compilation.call_count == 3
 
 
-@pytest.mark.parametrize("language", ALL_LANGUAGES)
+@pytest.mark.parametrize("language", COMPILE_LANGUAGES)
 def test_batch_compilation_no_fallback(language: str, tmp_path: Path, pytestconfig, mocker):
     config_ = {
         "options": {
@@ -224,12 +224,12 @@ def test_batch_compilation_no_fallback(language: str, tmp_path: Path, pytestconf
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert len(updates.find_all("start-testcase")) == 2
-    assert updates.find_status_enum() == ["compilation error"] * 3
+    assert updates.find_status_enum() == ["compilation error"] * 4
     assert class_instance.compilation.call_count == 1
 
 
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
-def test_batch_compilation_no_fallback(language: str, tmp_path: Path, pytestconfig):
+def test_batch_compilation_no_fallback_runtime(language: str, tmp_path: Path, pytestconfig):
     config_ = {
         "options": {
             "allow_fallback": False
@@ -242,7 +242,8 @@ def test_batch_compilation_no_fallback(language: str, tmp_path: Path, pytestconf
     # One wrong status for every stderr + stdout
     assert len(updates.find_status_enum()) >= 4
     # There could be more wrongs: some languages might modify the exit code
-    assert all(s == "wrong" for s in updates.find_status_enum())
+    print(updates.find_status_enum())
+    assert all(s in ("runtime error", "wrong") for s in updates.find_status_enum())
 
 
 @pytest.mark.parametrize("lang", ["python", "java", "c", "javascript", "kotlin"])
