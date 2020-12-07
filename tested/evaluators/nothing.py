@@ -10,7 +10,8 @@ from ..testplan import EmptyChannel
 
 
 def evaluate(config: EvaluatorConfig, channel: EmptyChannel,
-             actual: str) -> EvaluationResult:
+             actual: str,
+             unexpected_status: Status = Status.WRONG) -> EvaluationResult:
     assert isinstance(channel, EmptyChannel)
     messages = []
 
@@ -23,8 +24,10 @@ def evaluate(config: EvaluatorConfig, channel: EmptyChannel,
         if msg:
             messages.append(msg)
         result = StatusMessage(
-            enum=Status.WRONG,
-            human="Onverwachte uitvoer."
+            enum=unexpected_status,
+            human="Runtime error" if unexpected_status == Status.RUNTIME_ERROR
+            else "Onverwachte uitvoer."
+
         )
     else:
         result = StatusMessage(enum=Status.CORRECT)
