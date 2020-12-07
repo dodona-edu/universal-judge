@@ -23,7 +23,8 @@ class Python(Language):
 
     def compilation(self, config: Config, files: List[str]) -> CallbackResult:
         result = [x.replace(".py", ".pyc") for x in files]
-        return [_executable(), "-m", "compileall", "-q", "-b", "."], result
+        return [_executable(), "-W", "ignore", "-m", "compileall", "-q", "-b",
+                "."], result
 
     def execution(self, config: Config,
                   cwd: Path, file: str, arguments: List[str]) -> Command:
