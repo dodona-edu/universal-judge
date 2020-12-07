@@ -242,7 +242,6 @@ def test_batch_compilation_no_fallback_runtime(language: str, tmp_path: Path, py
     # One wrong status for every stderr + stdout
     assert len(updates.find_status_enum()) >= 4
     # There could be more wrongs: some languages might modify the exit code
-    print(updates.find_status_enum())
     assert all(s in ("runtime error", "wrong") for s in updates.find_status_enum())
 
 
