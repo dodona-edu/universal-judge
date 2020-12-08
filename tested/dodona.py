@@ -78,6 +78,7 @@ class StartTab:
     title: str
     hidden: Optional[bool] = None
     command: Literal["start-tab"] = "start-tab"
+    permission: Optional[Permission] = None
 
 
 @dataclass

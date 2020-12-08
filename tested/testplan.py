@@ -546,6 +546,7 @@ class Tab(WithFeatures, WithFunctions):
 
     name: str
     contexts: List[Context]
+    hidden: Optional[bool] = None
 
     def get_used_features(self) -> FeatureSet:
         return combine_features(x.get_used_features() for x in self.contexts)
