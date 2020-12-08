@@ -54,6 +54,7 @@ class Status(str, Enum):
     WRONG = "wrong"
     INTERNAL_ERROR = "internal error"
     OUTPUT_LIMIT_EXCEEDED = "output limit exceeded"
+    NOT_EXECUTED = "wrong"
 
 
 @dataclass

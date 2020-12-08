@@ -413,7 +413,7 @@ def _add_channel(bundle: Bundle, output: OutputChannel, channel: Channel,
         updates.append(CloseTest(
             generated="",
             status=StatusMessage(
-                enum=Status.WRONG,
+                enum=Status.NOT_EXECUTED,
                 human="Test niet uitgevoerd."
             ),
             accepted=False
@@ -433,8 +433,11 @@ def prepare_evaluation(bundle: Bundle, collector: OutputManager):
     for i, tab in enumerate(bundle.plan.tabs):
         collector.prepare_tab(StartTab(title=tab.name), i)
         for j, context in enumerate(tab.contexts):
+            description = context.description if context.description else \
+                "Context niet uitgevoerd."
+
             collector.prepare_context(
-                StartContext(description=context.description), i, j
+                StartContext(description=description), i, j
             )
 
             # Start with the context testcase.
@@ -455,7 +458,8 @@ def prepare_evaluation(bundle: Bundle, collector: OutputManager):
             if not context.testcases:
                 _add_channel(bundle, exit_output, Channel.EXIT, updates)
 
-            updates.append(AppendMessage("Testgeval niet uitgevoerd."))
+            if context.description:
+                updates.append(AppendMessage("Context niet uitgevoerd."))
             updates.append(CloseTestcase(accepted=False))
 
             # Begin normal testcases.
@@ -476,7 +480,6 @@ def prepare_evaluation(bundle: Bundle, collector: OutputManager):
                 if t == len(context.testcases):
                     _add_channel(bundle, exit_output, Channel.EXIT, updates)
 
-                updates.append(AppendMessage("Testgeval niet uitgevoerd."))
                 updates.append(CloseTestcase(accepted=False))
 
             collector.prepare_context(updates, i, j)
