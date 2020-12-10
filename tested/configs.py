@@ -6,7 +6,7 @@ import json
 import logging
 from dataclasses import field
 from pathlib import Path
-from typing import Optional, Dict, IO, TYPE_CHECKING, Any
+from typing import Optional, Dict, IO, TYPE_CHECKING, Any, List
 
 from pydantic import BaseModel
 from pydantic.dataclasses import dataclass
@@ -17,7 +17,6 @@ import tested.utils as utils
 # Prevent circular imports
 if TYPE_CHECKING:
     from tested.languages import Language
-
 
 _logger = logging.getLogger(__name__)
 
@@ -72,7 +71,9 @@ class DodonaConfig(BaseModel):
     judge: Path
     plan_name: str = "plan.json"  # Name of the testplan file.
     options: Options = Options()
-    output_limit: int = 10*1024*1024  # Default value for backwards compatibility.
+    output_limit: int = 10 * 1024 * 1024  # Default value for backwards
+
+    # compatibility.
 
     def config_for(self) -> Dict[str, Any]:
         return self.options.language.get(self.programming_language, dict())
@@ -105,11 +106,12 @@ class Bundle:
     out: IO
     lang_config: 'Language'
     secret: str
+    context_separator_secret: str
     plan: testplan.Plan
+    execution_tabs: List[testplan.InternalTab] = field(default_factory=list)
 
 
 def _get_language(config: DodonaConfig) -> str:
-
     import tested.languages as langs
 
     bang = utils.consume_shebang(config.source)
@@ -121,6 +123,31 @@ def _get_language(config: DodonaConfig) -> str:
         _logger.debug(f"No shebang found or it doesn't exist: {bang}. Using "
                       f"configuration language {config.programming_language}.")
         return config.programming_language
+
+
+def _internal_tabs(plan: testplan.Plan) -> List[testplan.InternalTab]:
+    def separate_executions(
+            contexts: List[testplan.Context]
+    ) -> List[testplan.InternalExecution]:
+        if not contexts:
+            return []
+        executions = [testplan.InternalExecution()]
+        executions[-1].contexts.append(contexts[0])
+        for context in contexts[1:]:
+            # Add new execution when asked or
+            # when the context contains the main call
+            if context.force_execution_break or \
+                    context.context_testcase.input.main_call:
+                executions.append(testplan.InternalExecution())
+            # Add context to execution
+            executions[-1].contexts.append(context)
+        return executions
+
+    return [
+        testplan.InternalTab(name=tab.name,
+                             executions=separate_executions(tab.contexts))
+        for tab in plan.tabs
+    ]
 
 
 def create_bundle(config: DodonaConfig,
@@ -150,5 +177,7 @@ def create_bundle(config: DodonaConfig,
         out=output,
         lang_config=lang_config,
         secret=utils.get_identifier(),
-        plan=plan
+        context_separator_secret=utils.get_identifier(),
+        plan=plan,
+        execution_tabs=_internal_tabs(plan)
     )

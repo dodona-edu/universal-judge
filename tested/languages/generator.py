@@ -18,7 +18,7 @@ from ..serialisation import (Value, SequenceType, Identifier, FunctionType,
                              NothingType)
 from ..testplan import (EmptyChannel, IgnoredChannel, TextData, ProgrammedEvaluator,
                         SpecificEvaluator, Testcase, ContextTestcase, Context,
-                        ExceptionOutput, ValueOutput)
+                        ExceptionOutput, ValueOutput, InternalExecution)
 from ..utils import get_args
 
 _logger = logging.getLogger(__name__)
@@ -104,18 +104,19 @@ class _ContextTestcaseArguments:
 @dataclass
 class _ContextArguments:
     """Arguments for a plan template for the contexts."""
-    # The name of the context.
-    context_name: str
     # The "before" code.
     before: str
     # The after code.
     after: str
-    # The context testcase.
-    context_testcase: _ContextTestcaseArguments
     # A list of the other testcases.
     testcases: List[_TestcaseArguments]
-    # A set of the names of the language specific evaluators we will need.
-    evaluator_names: Set[str]
+
+
+@dataclass
+class _ExecutionArguments:
+    """Arguments for a plan template for the executions."""
+    # The name of the execution.
+    execution_name: str
     # The name of the file for the return channel.
     value_file: str
     # The name of the file for the exception channel.
@@ -124,6 +125,14 @@ class _ContextArguments:
     submission_name: str
     # The secret ID.
     secret_id: str
+    # The secret context ID.
+    context_secret_id: str
+    # The context testcase for the first context, only for the first context.
+    context_testcase: _ContextTestcaseArguments
+    # The contexts
+    contexts: List[_ContextArguments]
+    # A set of the names of the language specific evaluators we will need.
+    evaluator_names: Set[str]
 
 
 @dataclass
@@ -430,60 +439,83 @@ def convert_statement(bundle: Bundle, statement: Statement) -> str:
         raise e
 
 
-def generate_context(bundle: Bundle,
-                     destination: Path,
-                     context: Context,
-                     context_name: str) -> Tuple[str, List[str]]:
+def _generate_context(bundle: Bundle,
+                      context: Context) -> Tuple[_ContextArguments, Set[str]]:
     """
-    Generate the files related to the context.
+    Prepare one context for the execution
 
     :param bundle: The configuration bundle.
-    :param destination: Where the generated files should go.
-    :param context: The context for which generation is happening.
-    :param context_name: The name of the context module.
+    :param context: The context to prepare
 
-    :return: The name of the generated file in the given destination and a list
-             of evaluator files that will also be needed.
+    :return: The prepared context arguments and a set
+             of evaluator names.
     """
     language = bundle.config.programming_language
-    lang_config = bundle.lang_config
     resources = bundle.config.resources
     before_code = context.before.get(language, TextData(data="")) \
         .get_data_as_string(resources)
     after_code = context.after.get(language, TextData(data="")) \
         .get_data_as_string(resources)
+    testcases, evaluator_names = _prepare_testcases(bundle, context)
+    return _ContextArguments(
+        before=before_code,
+        after=after_code,
+        testcases=testcases
+    ), evaluator_names
+
+
+def generate_execution(bundle: Bundle,
+                       destination: Path,
+                       execution: InternalExecution,
+                       execution_name: str) -> Tuple[str, List[str]]:
+    """
+    Generate the files related to the execution.
+
+    :param bundle: The configuration bundle.
+    :param destination: Where the generated files should go.
+    :param execution: The execution for which generation is happening.
+    :param execution_name: The name of the execution module.
+
+    :return: The name of the generated file in the given destination and a set
+             of evaluator names that will also be needed.
+    """
+    lang_config = bundle.lang_config
+    evaluator_names = set()
+    context_testcase, name = _prepare_context_testcase(bundle,
+                                                       execution.contexts[0])
+    contexts = []
+    if name:
+        evaluator_names.add(name)
+    for context in execution.contexts:
+        context_args, context_evaluator_names = _generate_context(bundle, context)
+        contexts.append(context_args)
+        evaluator_names.update(context_evaluator_names)
 
     value_file_name = value_file(bundle, destination).name
     exception_file_name = exception_file(bundle, destination).name
 
-    testcases, evaluator_names = _prepare_testcases(bundle, context)
-    context_testcase, context_eval_name = _prepare_context_testcase(bundle, context)
-    if context_eval_name:
-        evaluator_names.add(context_eval_name)
-
     submission_name = lang_config.submission_name(bundle.plan)
 
-    context_argument = _ContextArguments(
-        context_name=context_name,
-        before=before_code,
-        after=after_code,
-        context_testcase=context_testcase,
-        testcases=testcases,
+    execution_args = _ExecutionArguments(
+        execution_name=execution_name,
         value_file=value_file_name,
         exception_file=exception_file_name,
         submission_name=submission_name,
         secret_id=bundle.secret,
+        context_secret_id=bundle.context_separator_secret,
+        context_testcase=context_testcase,
+        contexts=contexts,
         evaluator_names=evaluator_names
     )
 
     evaluator_files = [f"{x}.{lang_config.extension_file()}"
                        for x in evaluator_names]
 
-    context_destination = destination / lang_config.with_extension(context_name)
-    template = lang_config.template_name(TemplateType.CONTEXT)
+    execution_destination = destination / lang_config.with_extension(execution_name)
+    template = lang_config.template_name(TemplateType.EXECUTION)
 
     return find_and_write_template(
-        bundle, context_argument, context_destination, template
+        bundle, execution_args, execution_destination, template
     ), evaluator_files
 
 

@@ -467,6 +467,7 @@ class Context(WithFeatures, WithFunctions):
     after: Code = field(default_factory=dict)
     description: Optional[str] = None
     link_files: List[FileUrl] = field(default_factory=list)
+    force_execution_break: bool = False
 
     # noinspection PyMethodParameters
     @root_validator
@@ -673,6 +674,17 @@ def generate_schema():
     sc['$id'] = "tested/testplan"
     sc['title'] = "Testplan"
     print(json.dumps(sc, indent=2))
+
+
+@dataclass
+class InternalExecution:
+    contexts: List[Context] = field(default_factory=list)
+
+
+@dataclass
+class InternalTab:
+    name: str
+    executions: List[InternalExecution] = field(default_factory=list)
 
 
 if __name__ == '__main__':
