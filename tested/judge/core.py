@@ -311,29 +311,15 @@ def _generate_files(bundle: Bundle,
                 execution=execution,
                 execution_name=execution_name
             )
+            # Copy evaluators to the directory.
+            for evaluator in evaluators:
+                source = Path(bundle.config.resources) / evaluator
+                _logger.debug("Copying evaluator from %s to %s",
+                              source, common_dir)
+                shutil.copy2(source, common_dir)
+            dependencies.extend(evaluators)
+            dependencies.append(generated)
             execution_names.append(execution_name)
-    # The names of the contexts in the testplan.
-    # context_names = []
-    # Generate the files for each context.
-    # for tab_i, tab in enumerate(bundle.plan.tabs):
-    #     for context_i, context in enumerate(tab.contexts):
-    #         context_name = bundle.lang_config.execution_name(tab_i, context_i)
-    #         _logger.debug(f"Generating file for context {context_name}")
-    #         generated, evaluators = generate_context(
-    #             bundle=bundle,
-    #             destination=common_dir,
-    #             context=context,
-    #             context_name=context_name
-    #         )
-    #         # Copy evaluators to the directory.
-    #         for evaluator in evaluators:
-    #             source = Path(bundle.config.resources) / evaluator
-    #             _logger.debug("Copying evaluator from %s to %s",
-    #                           source, common_dir)
-    #             shutil.copy2(source, common_dir)
-    #         dependencies.extend(evaluators)
-    #         dependencies.append(generated)
-    #         context_names.append(context_name)
 
     if mode == ExecutionMode.PRECOMPILATION \
             and bundle.lang_config.needs_selector():
