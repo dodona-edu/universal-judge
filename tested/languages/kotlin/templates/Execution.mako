@@ -49,7 +49,7 @@ class ${execution_name} : AutoCloseable {
 
     fun execute() {
         ${contexts[0].before}
-        this.write_context_separator()
+        this.writeContextSeparator()
         this.writeSeparator()
 
         % if context_testcase.exists:
@@ -69,7 +69,7 @@ class ${execution_name} : AutoCloseable {
 
         % for i, ctx in enumerate(contexts):
             % if i != 0:
-                this.write_context_separator()
+                this.writeContextSeparator()
                 ${ctx.before}
             % endif
             % for testcase in ctx.testcases:
