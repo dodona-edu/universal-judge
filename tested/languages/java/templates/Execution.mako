@@ -90,7 +90,7 @@ public class ${execution_name} implements Closeable {
 
         % for i, ctx in enumerate(contexts):
             % if i != 0:
-                write_context_separator()
+                this.writeContextSeparator()
                 ${ctx.before}
             % endif
             % for testcase in ctx.testcases:
