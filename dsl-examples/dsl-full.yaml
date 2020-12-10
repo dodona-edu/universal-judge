@@ -1,11 +1,11 @@
 # New tab on dodona
 - tab: "Tabname"
   # All testcase in the tabblad, combination of input-output and function calls
-  testcases:
+  runs:
   # Arguments list
-  - link_files:
+  - files:
     - name: "file.txt"
-      content: "media/workdir/file.txt"
+      url: "media/workdir/file.txt"
     arguments: [ "data", 5 ]
     # Standard input
     stdin: "invoer"
@@ -16,7 +16,7 @@
     # Exitcode
     exit_code: 0
     # Dependent statement and function tests:
-    tests:
+    testcases:
     # Assignment
     - statement: 'data = ["list\nline", "data"] :: list'
       # Function call
@@ -29,8 +29,8 @@
       return-raw: "5 :: uint8"
 
 - tab: "Exception"
-  testcases:
-  - tests:
+  runs:
+  - testcases:
     - statement: 'function_error()'
       # Standard output
       stdout: "Invalid"
@@ -49,11 +49,11 @@
     stderr:
       ignoreWhitespace: true
       caseInsensitive: true
-  testcases:
+  runs:
   - config:
       stdout:
         roundTo: 0
-    tests:
+    testcases:
     - statement: 'diff(5, 2)'
       stdout: "2"
     - statement: 'diff(5, 2)'

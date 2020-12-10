@@ -7,7 +7,7 @@ from tested.testplan import _PlanModel
 def test_parse_one_tab_ctx():
     yaml_str = """
 - tab: "Ctx"
-  testcases:
+  runs:
   - arguments: [ "--arg", "argument" ]
     stdin: "Input string"
     stdout: "Output string"
@@ -35,13 +35,13 @@ def test_parse_one_tab_ctx():
 def test_parse_ctx_exception():
     yaml_str = """
 - tab: "Ctx Exception"
-  testcases:
+  runs:
   - arguments: [ "--arg", "fail" ]
     exception: "Exception message"
   - arguments: [ "--arg", "fail2" ]
     exit_code: 10
 - tab: "Ctx Error"
-  testcases:
+  runs:
   - arguments: [ "--arg", "error" ]
     exception: "Error"
     """
@@ -79,7 +79,7 @@ def test_parse_ctx_with_config():
     stderr:
       ignoreWhitespace: true
       caseInsensitive: false
-  testcases:
+  runs:
   - arguments: [ '-a', 2.125, 1.212 ]
     stdout: "3.34"
   - arguments: [ '-a', 2.125, 1.212 ]
@@ -146,13 +146,13 @@ def test_statements():
   config:
     stdout:
       ignoreWhitespace: true
-  testcases:
-  - tests:
+  runs:
+  - testcases:
     - statement: 'Safe safe = new Safe("Ignore whitespace")'
       stdout: "New safe"
     - statement: 'safe.content()'
       return: "Ignore whitespace"
-  - tests:
+  - testcases:
     - statement: 'Safe safe = new Safe(5 :: uint8)'
       stdout:
         data: "New safe"
@@ -190,13 +190,13 @@ def test_statements():
 def test_statement_and_main():
     yaml_str = """
 - tab: "Statement and main"
-  testcases:
+  runs:
   - arguments: [ '-a', 5, 7 ]
     stdout:
       data: 12
       config:
         tryFloatingPoint: true
-    tests:
+    testcases:
     - statement: 'add(5, 7)'
       return: 12
     """
@@ -221,13 +221,13 @@ def test_statement_and_main():
 def test_invalid_yaml(caplog):
     yaml_str = """
 - tab: "Tab"
-  testcases:
+  runs:
   - arguments: ['-a', 1, 1.2, true, no]
     stdin:
       key: value
   - arguments: ['-a', 1, 1.2, true, no]
     stderr: []
-    tests:
+    testcases:
     - statement: 'data = () ()'
       return-raw: '() {}'
     """

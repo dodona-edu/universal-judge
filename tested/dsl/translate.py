@@ -189,13 +189,13 @@ def translate_ctx(yaml_context: dict, indices: Tuple[int, int],
     config = translate_config(get_or_none(yaml_context, 'config'), config)
     try:
         testcases = [translate_test(test, config, (indices[0], indices[1], index))
-                     for index, test in enumerate(yaml_context['tests'])]
+                     for index, test in enumerate(yaml_context['testcases'])]
     except KeyError:
         testcases = []
     ctx_testcase = translate_ctx_test(yaml_context, config, indices)
     link_list = [translate_link_file(link_file, (indices[0], indices[1], index))
                  for index, link_file in
-                 enumerate(get_list(yaml_context, 'link_files'))]
+                 enumerate(get_list(yaml_context, 'files'))]
 
     if None in testcases or ctx_testcase is None or None in link_list:
         logger.error(
@@ -268,7 +268,7 @@ def translate_link_file(link_file: dict,
                         indices: Tuple[int, int, int]) -> Optional[FileUrl]:
     try:
         name = ensure_no_null(link_file, "name")
-        content = ensure_no_null(link_file, "content")
+        content = ensure_no_null(link_file, "url")
     except TranslateError:
         logger.error(
             f"Tab {indices[0]}, context {indices[1]}, link file {indices[2]}: "
@@ -291,7 +291,7 @@ def translate_tab(yaml_tab: dict, index_tab: int) -> Optional[Tab]:
     config = translate_config(get_or_none(yaml_tab, 'config'))
     contexts = [
         translate_ctx(ctx, (index_tab, index), config)
-        for index, ctx in enumerate(ensure_no_null(yaml_tab, 'testcases'))
+        for index, ctx in enumerate(ensure_no_null(yaml_tab, 'runs'))
     ]
     if None in contexts:
         logger.error(f"At least one context fault in tab {index_tab}")
