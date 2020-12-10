@@ -5,7 +5,7 @@
 
 import java.io.PrintWriter
 
-class ${context_name} : AutoCloseable {
+class ${execution_name} : AutoCloseable {
     private val valueWriter = PrintWriter("${value_file}")
     private val exceptionWriter = PrintWriter("${exception_file}")
 
@@ -17,6 +17,17 @@ class ${context_name} : AutoCloseable {
         print("--${secret_id}-- SEP")
         System.out.flush()
         System.err.print("--${secret_id}-- SEP")
+        System.err.flush()
+    }
+
+    private fun writeContextSeparator() {
+        valueWriter.print("--${context_secret_id}-- SEP")
+        valueWriter.flush()
+        exceptionWriter.print("--${context_secret_id}-- SEP")
+        exceptionWriter.flush()
+        print("--${context_secret_id}-- SEP")
+        System.out.flush()
+        System.err.print("--${context_secret_id}-- SEP")
         System.err.flush()
     }
 
@@ -37,8 +48,8 @@ class ${context_name} : AutoCloseable {
     }
 
     fun execute() {
-        ${before}
-
+        ${contexts[0].before}
+        this.write_context_separator()
         this.writeSeparator()
 
         % if context_testcase.exists:
@@ -56,22 +67,27 @@ class ${context_name} : AutoCloseable {
             }
         % endif
 
-        % for testcase in testcases:
-            this.writeSeparator()
-            % if isinstance(testcase.command, get_args(Assignment)):
-                var ${testcase.command.variable} : <%include file = "declaration.mako" args = "tp=testcase.command.type,value=testcase.command.expression" /> = null
+        % for i, ctx in enumerate(contexts):
+            % if i != 0:
+                this.write_context_separator()
+                ${ctx.before}
             % endif
-            try {
-                <%include file = "statement.mako" args = "statement=testcase.input_statement()" />
-                <%include file = "statement.mako" args = "statement=testcase.exception_statement()" />
-            } catch (e: Exception) {
-                <%include file = "statement.mako" args = "statement=testcase.exception_statement('e')" />
-            } catch (e: AssertionError) {
-                <%include file = "statement.mako" args = "statement=testcase.exception_statement('e')" />
-            }
+            % for testcase in ctx.testcases:
+                this.writeSeparator()
+                % if isinstance(testcase.command, get_args(Assignment)):
+                    var ${testcase.command.variable} : <%include file = "declaration.mako" args = "tp=testcase.command.type,value=testcase.command.expression" /> = null
+                % endif
+                try {
+                    <%include file = "statement.mako" args = "statement=testcase.input_statement()" />
+                    <%include file = "statement.mako" args = "statement=testcase.exception_statement()" />
+                } catch (e: Exception) {
+                    <%include file = "statement.mako" args = "statement=testcase.exception_statement('e')" />
+                } catch (e: AssertionError) {
+                    <%include file = "statement.mako" args = "statement=testcase.exception_statement('e')" />
+                }
+            % endfor
+            ${ctx.after}
         % endfor
-
-        ${after}
     }
 
     override fun close() {
@@ -81,10 +97,10 @@ class ${context_name} : AutoCloseable {
 }
 
 fun main(args: Array<String> = emptyArray()) {
-    val context = ${context_name}()
+    val execution = ${execution_name}()
     try {
-        context.execute();
+        execution.execute();
     } finally {
-        context.close()
+        execution.close()
     }
 }

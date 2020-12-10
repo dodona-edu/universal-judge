@@ -311,6 +311,7 @@ def _generate_files(bundle: Bundle,
                 execution=execution,
                 execution_name=execution_name
             )
+            execution_names.append(execution_name)
     # The names of the contexts in the testplan.
     # context_names = []
     # Generate the files for each context.
@@ -337,7 +338,7 @@ def _generate_files(bundle: Bundle,
     if mode == ExecutionMode.PRECOMPILATION \
             and bundle.lang_config.needs_selector():
         _logger.debug("Generating selector for PRECOMPILATION mode.")
-        generated = generate_selector(bundle, common_dir, context_names)
+        generated = generate_selector(bundle, common_dir, execution_names)
     else:
         generated = None
     return common_dir, dependencies, generated
