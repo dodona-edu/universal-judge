@@ -75,11 +75,11 @@
         }
       ]
     },
-    "link_file": {
+    "files": {
       "type": "object",
       "required": [
         "name",
-        "content"
+        "url"
       ],
       "description": "Tab definition with testcases",
       "properties": {
@@ -87,11 +87,13 @@
           "type": "string",
           "description": "File name"
         },
-        "content": {
+        "url": {
           "type": "string",
+          "format": "uri",
           "description": "Relative path to the file in the `description` folder of a Dodona exercise"
         }
-      },
+      }
+    },
     "tab": {
       "type": "object",
       "required": [
@@ -108,24 +110,24 @@
           "type": "string",
           "description": "Name for the tab on Dodona"
         },
-        "testcases": {
+        "runs": {
           "type": "array",
           "description": "Testcases to evaluate",
           "minItems": 1,
           "items": {
-            "$ref": "#/definitions/testcase"
+            "$ref": "#/definitions/run"
           }
         },
-        "link_files": {
+        "files": {
           "type": "array",
           "description": "Files to link in the evaluation report",
           "items": {
-            "$ref": "#/definitions/link_file"
+            "$ref": "#/definitions/files"
           }
         }
       }
     },
-    "testcase": {
+    "run": {
       "type": "object",
       "description": "Independent test context",
       "minProperties": 1,
@@ -161,16 +163,16 @@
           "description": "Expected output for main call at stdout",
           "$ref": "#/definitions/streamOutput"
         },
-        "tests": {
+        "testcases": {
           "type": "array",
           "description": "Array of statements and expression tests",
           "items": {
-            "$ref": "#/definitions/test"
+            "$ref": "#/definitions/testcase"
           }
         }
       }
     },
-    "test": {
+    "testcase": {
       "type": "object",
       "required": [
         "statement"
