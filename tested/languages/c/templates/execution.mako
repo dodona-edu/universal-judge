@@ -41,32 +41,35 @@ int ${execution_name}() {
 
     ${execution_name}_value_file = fopen("${value_file}", "w");
     ${execution_name}_exception_file = fopen("${exception_file}", "w");
+    {
+        ${contexts[0].before}
 
-    ${contexts[0].before}
+        ${execution_name}_write_context_separator();
+        ${execution_name}_write_separator();
 
-    ${execution_name}_write_context_separator();
-    ${execution_name}_write_separator();
-
-    % if context_testcase.exists:
-        char* args[] = {\
-        % for argument in ["solution"] + context_testcase.arguments:
-            "${argument}", \
-        % endfor
-        };
-        solution_main(${len(context_testcase.arguments) + 1}, args);
-    % endif
-
-    % for i, ctx in enumerate(contexts):
-        % if i != 0:
-            ${execution_name}_write_context_separator();
-            ${ctx.before}
+        % if context_testcase.exists:
+            char* args[] = {\
+            % for argument in ["solution"] + context_testcase.arguments:
+                "${argument}", \
+            % endfor
+            };
+            solution_main(${len(context_testcase.arguments) + 1}, args);
         % endif
-        % for testcase in ctx.testcases:
-            ${execution_name}_write_separator();
-            <%include file="statement.mako" args="statement=testcase.input_statement()" />;
+
+        % for i, ctx in enumerate(contexts):
+            % if i != 0:
+                }
+                {
+                ${execution_name}_write_context_separator();
+                ${ctx.before}
+            % endif
+            % for testcase in ctx.testcases:
+                ${execution_name}_write_separator();
+                <%include file="statement.mako" args="statement=testcase.input_statement()" />;
+            % endfor
+            ${ctx.after}
         % endfor
-        ${ctx.after}
-    % endfor
+    }
 
     fclose(${execution_name}_value_file);
     fclose(${execution_name}_exception_file);

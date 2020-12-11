@@ -48,46 +48,50 @@ class ${execution_name} : AutoCloseable {
     }
 
     fun execute() {
-        ${contexts[0].before}
-        this.writeContextSeparator()
-        this.writeSeparator()
+        run {
+            ${contexts[0].before}
+            this.writeContextSeparator()
+            this.writeSeparator()
 
-        % if context_testcase.exists:
-            try {
-                solutionMain(arrayOf( \
-                    % for argument in context_testcase.arguments:
-                        "${argument}", \
-                    % endfor
-                ))
-                <%include file = "statement.mako" args = "statement=context_testcase.exception_statement()" />
-            } catch (e: Exception) {
-                <%include file = "statement.mako" args = "statement=context_testcase.exception_statement('e')" />
-            } catch (e: AssertionError) {
-                <%include file = "statement.mako" args = "statement=context_testcase.exception_statement('e')" />
-            }
-        % endif
-
-        % for i, ctx in enumerate(contexts):
-            % if i != 0:
-                this.writeContextSeparator()
-                ${ctx.before}
-            % endif
-            % for testcase in ctx.testcases:
-                this.writeSeparator()
-                % if isinstance(testcase.command, get_args(Assignment)):
-                    var ${testcase.command.variable} : <%include file = "declaration.mako" args = "tp=testcase.command.type,value=testcase.command.expression" /> = null
-                % endif
+            % if context_testcase.exists:
                 try {
-                    <%include file = "statement.mako" args = "statement=testcase.input_statement()" />
-                    <%include file = "statement.mako" args = "statement=testcase.exception_statement()" />
+                    solutionMain(arrayOf( \
+                        % for argument in context_testcase.arguments:
+                            "${argument}", \
+                        % endfor
+                    ))
+                    <%include file = "statement.mako" args = "statement=context_testcase.exception_statement()" />
                 } catch (e: Exception) {
-                    <%include file = "statement.mako" args = "statement=testcase.exception_statement('e')" />
+                    <%include file = "statement.mako" args = "statement=context_testcase.exception_statement('e')" />
                 } catch (e: AssertionError) {
-                    <%include file = "statement.mako" args = "statement=testcase.exception_statement('e')" />
+                    <%include file = "statement.mako" args = "statement=context_testcase.exception_statement('e')" />
                 }
+            % endif
+
+            % for i, ctx in enumerate(contexts):
+                % if i != 0:
+                    }
+                    run {
+                    this.writeContextSeparator()
+                    ${ctx.before}
+                % endif
+                % for testcase in ctx.testcases:
+                    this.writeSeparator()
+                    % if isinstance(testcase.command, get_args(Assignment)):
+                        var ${testcase.command.variable} : <%include file = "declaration.mako" args = "tp=testcase.command.type,value=testcase.command.expression" /> = null
+                    % endif
+                    try {
+                        <%include file = "statement.mako" args = "statement=testcase.input_statement()" />
+                        <%include file = "statement.mako" args = "statement=testcase.exception_statement()" />
+                    } catch (e: Exception) {
+                        <%include file = "statement.mako" args = "statement=testcase.exception_statement('e')" />
+                    } catch (e: AssertionError) {
+                        <%include file = "statement.mako" args = "statement=testcase.exception_statement('e')" />
+                    }
+                % endfor
+                ${ctx.after}
             % endfor
-            ${ctx.after}
-        % endfor
+        }
     }
 
     override fun close() {
