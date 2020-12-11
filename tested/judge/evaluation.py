@@ -433,8 +433,7 @@ def prepare_evaluation(bundle: Bundle, collector: OutputManager):
     for i, tab in enumerate(bundle.plan.tabs):
         collector.prepare_tab(StartTab(title=tab.name), i)
         for j, context in enumerate(tab.contexts):
-            description = context.description if context.description else \
-                "Context niet uitgevoerd."
+            description = context.description or "Context niet uitgevoerd."
 
             collector.prepare_context(
                 StartContext(description=description), i, j
