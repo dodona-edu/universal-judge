@@ -98,7 +98,7 @@
       "type": "object",
       "required": [
         "tab",
-        "testcases"
+        "runs"
       ],
       "description": "Tab definition with testcases",
       "properties": {
