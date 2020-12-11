@@ -106,6 +106,10 @@
           "description": "Configuration of textual comparison at tab level",
           "$ref": "#/definitions/globalConfig"
         },
+        "hidden": {
+          "type": "boolean",
+          "description": "Defines if the tab is hidden for the student or not"
+        },
         "tab": {
           "type": "string",
           "description": "Name for the tab on Dodona"
