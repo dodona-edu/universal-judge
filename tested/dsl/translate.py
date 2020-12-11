@@ -296,7 +296,8 @@ def translate_tab(yaml_tab: dict, index_tab: int) -> Optional[Tab]:
     if None in contexts:
         logger.error(f"At least one context fault in tab {index_tab}")
         return None
-    return Tab(name=ensure_no_null(yaml_tab, 'tab'), contexts=contexts)
+    return Tab(name=ensure_no_null(yaml_tab, 'tab'), contexts=contexts,
+               hidden=get_or_none(yaml_tab, "hidden"))
 
 
 def translate_test(yaml_test: dict, config: Optional[dict],

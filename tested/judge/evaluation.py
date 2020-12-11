@@ -431,7 +431,7 @@ def prepare_evaluation(bundle: Bundle, collector: OutputManager):
     """
     collector.prepare_judgment(StartJudgment())
     for i, tab in enumerate(bundle.plan.tabs):
-        collector.prepare_tab(StartTab(title=tab.name), i)
+        collector.prepare_tab(StartTab(title=tab.name, hidden=tab.hidden), i)
         for j, context in enumerate(tab.contexts):
             collector.prepare_context(
                 StartContext(description=context.description), i, j

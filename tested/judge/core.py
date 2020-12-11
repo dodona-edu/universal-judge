@@ -154,7 +154,7 @@ def judge(bundle: Bundle):
 
     # Create a list of contexts we want to execute.
     for tab_index, tab in enumerate(bundle.plan.tabs):
-        collector.add_tab(StartTab(title=tab.name), tab_index)
+        collector.add_tab(StartTab(title=tab.name, hidden=tab.hidden), tab_index)
         executions = []
         for context_index, context in enumerate(tab.contexts):
             execution = ContextExecution(

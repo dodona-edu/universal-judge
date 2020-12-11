@@ -7,6 +7,7 @@ from tested.testplan import _PlanModel
 def test_parse_one_tab_ctx():
     yaml_str = """
 - tab: "Ctx"
+  hidden: true
   runs:
   - arguments: [ "--arg", "argument" ]
     stdin: "Input string"
@@ -18,6 +19,7 @@ def test_parse_one_tab_ctx():
     plan = _PlanModel.parse_raw(json_str).__root__
     assert len(plan.tabs) == 1
     tab = plan.tabs[0]
+    assert tab.hidden
     assert tab.name == "Ctx"
     assert len(tab.contexts) == 1
     context = tab.contexts[0]
@@ -35,6 +37,7 @@ def test_parse_one_tab_ctx():
 def test_parse_ctx_exception():
     yaml_str = """
 - tab: "Ctx Exception"
+  hidden: false
   runs:
   - arguments: [ "--arg", "fail" ]
     exception: "Exception message"
@@ -49,6 +52,7 @@ def test_parse_ctx_exception():
     plan = _PlanModel.parse_raw(json_str).__root__
     assert len(plan.tabs) == 2
     tab = plan.tabs[0]
+    assert not tab.hidden
     assert tab.name == "Ctx Exception"
     assert len(tab.contexts) == 2
     context = tab.contexts[0]
@@ -100,6 +104,7 @@ def test_parse_ctx_with_config():
     plan = _PlanModel.parse_raw(json_str).__root__
     assert len(plan.tabs) == 1
     tab = plan.tabs[0]
+    assert tab.hidden is None
     assert len(tab.contexts) == 4
     ctx0, ctx1, ctx2, ctx3 = tab.contexts
     # Check argument list
