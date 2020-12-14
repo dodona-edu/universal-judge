@@ -71,7 +71,7 @@ class Kotlin(Language):
         def filter_function(file: str) -> bool:
             # We don't want files for contexts that are not the one we use.
             prefix = bundle.lang_config.conventionalize_namespace(
-                bundle.lang_config.context_prefix()
+                bundle.lang_config.execution_prefix()
             )
             is_context = file.startswith(prefix)
             is_our_context = (file.startswith(context_name + ".") or

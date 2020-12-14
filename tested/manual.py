@@ -21,13 +21,13 @@ def read_config() -> DodonaConfig:
         "time_limit":           60,
         "programming_language": 'c',
         "natural_language":     'nl',
-        "resources":            Path('exercise/echo-function/evaluation'),
-        "source":               Path('exercise/echo-function/solution/correct.c'),
+        "resources":            Path('exercise/echo/evaluation'),
+        "source":               Path('exercise/echo/solution/correct.c'),
         "judge":                Path('.'),
         "workdir":              Path('workdir'),
         "plan_name":            "full.tson",
         "options":              {
-            "parallel": False,
+            "parallel": True,
             "mode":     "batch",
             "linter": {
                 "python": True

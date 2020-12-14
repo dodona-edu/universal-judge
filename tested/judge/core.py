@@ -201,8 +201,11 @@ def _single_execution(bundle: Bundle,
         remaining = max_time - (time.perf_counter() - start)
         execution_result, m, s, p = execute_execution(bundle, execution, remaining)
 
-        context_results = execution_result.to_context_execution_results(
-            len(execution.execution.contexts))
+        if execution_result:
+            context_results = execution_result.to_context_execution_results(
+                len(execution.execution.contexts))
+        else:
+            context_results = [None] * len(execution.execution.contexts)
 
         for context, context_result in zip(execution.execution.contexts,
                                            context_results):
@@ -233,8 +236,6 @@ def _parallel_execution(bundle: Bundle,
     :param items: The contexts to execute.
     :param max_time: The max amount of time.
     """
-    # TODO: parallelize multiple executions
-    return Status.INTERNAL_ERROR
     start = time.perf_counter()  # Accessed from threads.
 
     def threaded_execution(execution: Execution):
@@ -243,17 +244,26 @@ def _parallel_execution(bundle: Bundle,
         execution_result, m, s, p = execute_execution(bundle, execution, remainder)
 
         def evaluation_function(eval_remainder):
-            execution.collector.add_context(
-                StartContext(description=execution.context.description),
-                execution.context_index
-            )
-            continue_ = evaluate_results(bundle, context=execution.context,
-                                         exec_results=execution_result,
-                                         compiler_results=(m, s), context_dir=p,
-                                         collector=execution.collector)
-            execution.collector.add_context(CloseContext(), execution.context_index)
-            if execution.collector.is_full():
-                return Status.OUTPUT_LIMIT_EXCEEDED
+
+            context_results = execution_result.to_context_execution_results(
+                len(execution.execution.contexts))
+
+            for context, context_result in zip(execution.execution.contexts,
+                                               context_results):
+                execution.collector.add_context(
+                    StartContext(description=context.description),
+                    context.context_index
+                )
+
+                continue_ = evaluate_results(bundle, context=context,
+                                             exec_results=context_result,
+                                             compiler_results=(m, s), context_dir=p,
+                                             collector=execution.collector)
+                execution.collector.add_context(CloseContext(),
+                                                context.context_index)
+
+                if execution.collector.is_full():
+                    return Status.OUTPUT_LIMIT_EXCEEDED
             return continue_
 
         return evaluation_function
