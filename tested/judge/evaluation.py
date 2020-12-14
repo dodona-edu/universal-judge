@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Tuple, List
 
 from .collector import OutputManager, TestcaseCollector
-from .execution import ExecutionResult
+from .execution import ExecutionResult, ContextExecutionResult
 from ..configs import Bundle
 from ..dodona import *
 from ..dodona import StartTestcase, CloseTestcase
@@ -110,7 +110,7 @@ def _evaluate_channel(
 
 
 def evaluate_results(bundle: Bundle, context: Context,
-                     exec_results: Optional[ExecutionResult],
+                     exec_results: Optional[ContextExecutionResult],
                      compiler_results: Tuple[List[Message], Status],
                      context_dir: Path,
                      collector: OutputManager) -> Optional[Status]:

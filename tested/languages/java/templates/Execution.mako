@@ -95,6 +95,7 @@ public class ${execution_name} implements Closeable {
                     {
                     this.writeContextSeparator();
                     ${ctx.before}
+                    this.writeSeparator();
                 % endif
                 % for testcase in ctx.testcases:
                     ## In Java, we need special code to make variables available outside of

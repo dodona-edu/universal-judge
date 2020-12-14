@@ -97,6 +97,7 @@ except Exception as e:
     % if i != 0:
         write_context_separator()
         ${ctx.before}
+        write_separator()
     % endif
     % for testcase in ctx.testcases:
         write_separator()

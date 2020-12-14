@@ -62,6 +62,7 @@ int ${execution_name}() {
                 {
                 ${execution_name}_write_context_separator();
                 ${ctx.before}
+                ${execution_name}_write_separator();
             % endif
             % for testcase in ctx.testcases:
                 ${execution_name}_write_separator();

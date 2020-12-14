@@ -95,6 +95,7 @@ let ${submission_name};
             {
             writeContextSeparator();
             ${ctx.before}
+            writeSeparator();
         % endif
         % for testcase in ctx.testcases:
             writeSeparator();

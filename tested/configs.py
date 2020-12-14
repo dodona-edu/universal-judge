@@ -126,25 +126,39 @@ def _get_language(config: DodonaConfig) -> str:
 
 
 def _internal_tabs(plan: testplan.Plan) -> List[testplan.InternalTab]:
+    def wrap_context(context: testplan.Context,
+                     index: int) -> testplan.InternalContext:
+        return testplan.InternalContext(
+            context_testcase=context.context_testcase,
+            testcases=context.testcases,
+            before=context.before,
+            after=context.after,
+            description=context.description,
+            link_files=context.link_files,
+            force_execution_break=context.force_execution_break,
+            context_index=index
+        )
+
     def separate_executions(
             contexts: List[testplan.Context]
     ) -> List[testplan.InternalExecution]:
         if not contexts:
             return []
         executions = [testplan.InternalExecution()]
-        executions[-1].contexts.append(contexts[0])
-        for context in contexts[1:]:
+        executions[-1].contexts.append(wrap_context(contexts[0], 0))
+        for index, context in enumerate(contexts[1:], 1):
             # Add new execution when asked or
             # when the context contains the main call
             if context.force_execution_break or \
                     context.context_testcase.input.main_call:
                 executions.append(testplan.InternalExecution())
             # Add context to execution
-            executions[-1].contexts.append(context)
+            executions[-1].contexts.append(wrap_context(context, index))
         return executions
 
     return [
         testplan.InternalTab(name=tab.name,
+                             hidden=tab.hidden,
                              executions=separate_executions(tab.contexts))
         for tab in plan.tabs
     ]

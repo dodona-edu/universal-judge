@@ -74,6 +74,7 @@ class ${execution_name} : AutoCloseable {
                     run {
                     this.writeContextSeparator()
                     ${ctx.before}
+                    this.writeSeparator()
                 % endif
                 % for testcase in ctx.testcases:
                     this.writeSeparator()

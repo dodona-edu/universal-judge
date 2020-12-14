@@ -677,13 +677,25 @@ def generate_schema():
 
 
 @dataclass
+class InternalContext(Context):
+    context_index: int = -1
+
+
+@dataclass
 class InternalExecution:
-    contexts: List[Context] = field(default_factory=list)
+    contexts: List[InternalContext] = field(default_factory=list)
+
+    def get_stdin(self, resources: Path):
+        try:
+            return self.contexts[0].context_testcase.input.get_as_string(resources)
+        except IndexError:
+            return ""
 
 
 @dataclass
 class InternalTab:
     name: str
+    hidden: Optional[bool] = None
     executions: List[InternalExecution] = field(default_factory=list)
 
 

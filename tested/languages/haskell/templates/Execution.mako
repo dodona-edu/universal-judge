@@ -96,6 +96,7 @@ main = do
         % if i != 0:
             writeContextSeparator
             ${ctx.before}
+            writeSeparator
         % endif
         % for testcase in ctx.testcases:
             writeSeparator
