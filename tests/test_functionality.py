@@ -126,8 +126,9 @@ def test_crashing_assignment_with_before(lang: str, tmp_path: Path, pytestconfig
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     # Only the assignment was started.
-    assert len(updates.find_all("start-testcase")) == 1
-    assert updates.find_status_enum() == ["runtime error"]
+    assert len(updates.find_all("start-testcase")) == 2
+    print(updates.find_status_enum())
+    assert updates.find_status_enum() == ["runtime error", "runtime error", "wrong"]
     # Assert the exception is included.
     assert updates.find_next("start-test")["channel"] == "exception"
 

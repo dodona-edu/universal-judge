@@ -236,10 +236,7 @@ def evaluate_results(bundle: Bundle, context: Context,
     # Check if we should stop now or proceed to the next testcase.
     # This is needed when there is no main testcase and the first normal testcase
     # failed.
-    mem_or_time = exec_results.timeout or exec_results.memory
     has_main = testcase.input.main_call
-    is_correct = all(results)
-    should_stop = has_main and (not is_correct or mem_or_time)
 
     if has_main:
         for u in missing_values:
@@ -247,7 +244,7 @@ def evaluate_results(bundle: Bundle, context: Context,
 
     # If we must stop due to errors are there no further testcases, evaluate the
     # exit channel.
-    if should_stop or not context.testcases:
+    if not context.testcases:
         _evaluate_channel(
             bundle, context_dir, context_collector, Channel.EXIT, exit_output,
             str(exec_results.exit)
@@ -255,14 +252,6 @@ def evaluate_results(bundle: Bundle, context: Context,
 
     # Done with the context testcase.
     context_collector.to_manager(collector, CloseTestcase())
-
-    # Decide if we want to proceed.
-    if should_stop:
-        if exec_results.timeout:
-            return Status.TIME_LIMIT_EXCEEDED
-        if exec_results.memory:
-            return Status.MEMORY_LIMIT_EXCEEDED
-        return None  # Stop now.
 
     # Begin processing the normal testcases.
     for i, testcase in enumerate(context.testcases, 1):
@@ -307,21 +296,8 @@ def evaluate_results(bundle: Bundle, context: Context,
             )
         ]
 
-        should_stop = False
-        # If there are missing values, stop.
-        if None in (actual_stderr, actual_exception, actual_stdout, actual_value):
-            should_stop = True
-
-        # If there was a memory or time error, stop.
-        if exec_results.timeout or exec_results.memory:
-            should_stop = True
-
-        # If this testcase is essential and there were errors, stop.
-        if testcase.essential and not all(results):
-            should_stop = True
-
         # If we will stop or this is the last one, do the exit channel.
-        if should_stop or i == len(context.testcases):
+        if i == len(context.testcases):
             _evaluate_channel(
                 bundle, context_dir, t_col, Channel.EXIT, exit_output,
                 str(exec_results.exit)
@@ -331,17 +307,14 @@ def evaluate_results(bundle: Bundle, context: Context,
         if missing_values and not has_main:
             for u in missing_values:
                 t_col.add(u)
-            should_stop = True
 
         # Stop with this testcase.
         t_col.to_manager(collector, CloseTestcase())
 
-        if should_stop:
-            if exec_results.timeout:
-                return Status.TIME_LIMIT_EXCEEDED
-            if exec_results.memory:
-                return Status.MEMORY_LIMIT_EXCEEDED
-            return None  # Stop evaluation now.
+    if exec_results.timeout:
+        return Status.TIME_LIMIT_EXCEEDED
+    if exec_results.memory:
+        return Status.MEMORY_LIMIT_EXCEEDED
 
 
 def should_show(test: OutputChannel, channel: Channel) -> bool:
