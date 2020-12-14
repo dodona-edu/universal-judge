@@ -54,6 +54,9 @@ class Status(str, Enum):
     WRONG = "wrong"
     INTERNAL_ERROR = "internal error"
     OUTPUT_LIMIT_EXCEEDED = "output limit exceeded"
+    # Dodona issue NOT PROCESSED STATE:
+    # https://github.com/dodona-edu/dodona/issues/1785
+    NOT_EXECUTED = "wrong"
 
 
 @dataclass
