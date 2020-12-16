@@ -1,8 +1,10 @@
 import logging
 import re
 from pathlib import Path
+from typing import Tuple, List
 
 from tested.configs import Bundle
+from tested.dodona import Message, AnnotateCode
 from tested.languages.config import Config, Language
 
 logger = logging.getLogger(__name__)
@@ -75,6 +77,35 @@ def jvm_cleanup_stacktrace(traceback: str,
     if len(lines) > 20:
         lines = lines[:19] + ['...\n'] + [lines[-1]]
     return "".join(lines)
+
+
+def jvm_stderr(
+        self: Language,
+        bundle: Bundle,
+        stderr: str,
+        context_only: bool = True
+) -> Tuple[List[Message], List[AnnotateCode], str]:
+    # Identifier to separate testcase output
+    identifier = f"--{bundle.secret}-- SEP"
+    submission_file = self.with_extension(
+        self.conventionalize_namespace(bundle.plan.namespace))
+
+    if context_only:
+        cleaned_cases = stderr.split(identifier, maxsplit=3)
+        try:
+            cleaned_cases[1] = self.cleanup_stacktrace(
+                cleaned_cases[1], submission_file)
+        except IndexError:
+            pass
+    else:
+        cases = stderr.split(identifier)
+        cleaned_cases = []
+        # Process each case
+        for case in cases:
+            stacktrace = self.cleanup_stacktrace(case, submission_file)
+            cleaned_cases.append(stacktrace)
+
+    return [], [], identifier.join(cleaned_cases)
 
 
 def haskell_solution(lang_config: Language, solution: Path, bundle: Bundle):

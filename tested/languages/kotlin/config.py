@@ -8,7 +8,8 @@ from tested.configs import Bundle
 from tested.dodona import Message, Status, AnnotateCode
 from tested.languages.config import CallbackResult, Command, Config, Language, \
     limit_output
-from tested.languages.utils import jvm_memory_limit, jvm_cleanup_stacktrace
+from tested.languages.utils import jvm_memory_limit, jvm_cleanup_stacktrace, \
+    jvm_stderr
 
 logger = logging.getLogger(__name__)
 
@@ -93,3 +94,8 @@ class Kotlin(Language):
             stderr,
             self.with_extension(self.conventionalize_namespace(namespace))
         )
+
+    def stderr(self,
+               bundle: Bundle,
+               stderr: str) -> Tuple[List[Message], List[AnnotateCode], str]:
+        return jvm_stderr(self, bundle, stderr)
