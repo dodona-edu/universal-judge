@@ -94,13 +94,13 @@ def _evaluate_channel(
         out.add(AppendMessage(
             message="De beoordeling is vroegtijdig gestopt."
         ))
-    elif timeout and not is_correct:
+    elif should_show(output, channel) and timeout and not is_correct:
         status.human = "Tijdslimiet overschreden."
         status.enum = Status.TIME_LIMIT_EXCEEDED
         out.add(AppendMessage(
             message=status.human
         ))
-    elif memory and not is_correct:
+    elif should_show(output, channel) and memory and not is_correct:
         status.human = "Geheugenlimiet overschreden."
         status.enum = Status.TIME_LIMIT_EXCEEDED
         out.add(AppendMessage(
