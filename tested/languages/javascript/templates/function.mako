@@ -1,5 +1,6 @@
 ## This translates a function call to JavaScript.
 <%! from tested.serialisation import FunctionType %>\
+await \
 <%page args="function" />\
 % if function.type == FunctionType.CONSTRUCTOR:
     new \
