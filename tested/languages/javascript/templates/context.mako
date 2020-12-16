@@ -53,6 +53,8 @@ function sendSpecificException(exception) {
     values.sendEvaluated(exceptionFile, exception);
 }
 
+(async () => {
+
 ${before}
 
 ## Prepare the command line arguments if needed.
@@ -103,3 +105,5 @@ ${after}
 ## Close output files.
 fs.closeSync(valueFile);
 fs.closeSync(exceptionFile);
+
+})();
