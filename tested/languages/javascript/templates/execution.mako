@@ -61,6 +61,8 @@ function sendSpecificException(exception) {
 }
 
 
+(async () => {
+
 let ${submission_name};
 
 {
@@ -119,3 +121,5 @@ let ${submission_name};
 ## Close output files.
 fs.closeSync(valueFile);
 fs.closeSync(exceptionFile);
+
+})();
