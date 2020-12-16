@@ -40,7 +40,8 @@ def _evaluate_channel(
         output: OutputChannel,
         actual: Optional[str],
         unexpected_status: Status = Status.WRONG,
-        timeout: bool = False) -> Optional[bool]:
+        timeout: bool = False,
+        memory: bool = False) -> Optional[bool]:
     """
     Evaluate the output on a given channel. This function will output the
     appropriate messages to start and end a new test in Dodona.
@@ -97,7 +98,13 @@ def _evaluate_channel(
         status.human = "Tijdslimiet overschreden."
         status.enum = Status.TIME_LIMIT_EXCEEDED
         out.add(AppendMessage(
-            message="Tijdslimiet overschreden."
+            message=status.human
+        ))
+    elif memory and not is_correct:
+        status.human = "Geheugenlimiet overschreden."
+        status.enum = Status.TIME_LIMIT_EXCEEDED
+        out.add(AppendMessage(
+            message=status.human
         ))
 
     # Close the test.
@@ -224,7 +231,7 @@ def evaluate_results(bundle: Bundle, context: Context,
         could_delete,
         _evaluate_channel(
             bundle, context_dir, context_collector, Channel.FILE, output.file, "",
-            timeout=exec_results.timeout
+            timeout=exec_results.timeout, memory=exec_results.memory
         ),
         _evaluate_channel(
             bundle, context_dir, context_collector, Channel.STDERR, output.stderr,
@@ -233,11 +240,12 @@ def evaluate_results(bundle: Bundle, context: Context,
         _evaluate_channel(
             bundle, context_dir, context_collector, Channel.EXCEPTION,
             output.exception, actual_exception,
-            unexpected_status=Status.RUNTIME_ERROR, timeout=exec_results.timeout
+            unexpected_status=Status.RUNTIME_ERROR, timeout=exec_results.timeout,
+            memory=exec_results.memory
         ),
         _evaluate_channel(
             bundle, context_dir, context_collector, Channel.STDOUT, output.stdout,
-            actual_stdout, timeout=exec_results.timeout
+            actual_stdout, timeout=exec_results.timeout, memory=exec_results.memory
         )
     ]
 
@@ -255,7 +263,8 @@ def evaluate_results(bundle: Bundle, context: Context,
     if not context.testcases:
         _evaluate_channel(
             bundle, context_dir, context_collector, Channel.EXIT, exit_output,
-            str(exec_results.exit), timeout=exec_results.timeout
+            str(exec_results.exit), timeout=exec_results.timeout,
+            memory=exec_results.memory
         )
 
     # Done with the context testcase.
@@ -284,24 +293,27 @@ def evaluate_results(bundle: Bundle, context: Context,
         results = [
             _evaluate_channel(
                 bundle, context_dir, t_col, Channel.FILE, output.file, "",
-                timeout=exec_results.timeout
+                timeout=exec_results.timeout, memory=exec_results.memory
             ),
             _evaluate_channel(
                 bundle, context_dir, t_col, Channel.STDERR, output.stderr,
-                actual_stderr, timeout=exec_results.timeout
+                actual_stderr, timeout=exec_results.timeout,
+                memory=exec_results.memory
             ),
             _evaluate_channel(
                 bundle, context_dir, t_col, Channel.EXCEPTION, output.exception,
-                actual_exception,
-                unexpected_status=Status.RUNTIME_ERROR, timeout=exec_results.timeout
+                actual_exception, unexpected_status=Status.RUNTIME_ERROR,
+                timeout=exec_results.timeout, memory=exec_results.memory
             ),
             _evaluate_channel(
                 bundle, context_dir, t_col, Channel.STDOUT, output.stdout,
-                actual_stdout, timeout=exec_results.timeout
+                actual_stdout, timeout=exec_results.timeout,
+                memory=exec_results.memory
             ),
             _evaluate_channel(
                 bundle, context_dir, t_col, Channel.RETURN, output.result,
-                actual_value, timeout=exec_results.timeout
+                actual_value, timeout=exec_results.timeout,
+                memory=exec_results.memory
             )
         ]
 
@@ -309,7 +321,8 @@ def evaluate_results(bundle: Bundle, context: Context,
         if i == len(context.testcases):
             _evaluate_channel(
                 bundle, context_dir, t_col, Channel.EXIT, exit_output,
-                str(exec_results.exit), timeout=exec_results.timeout
+                str(exec_results.exit), timeout=exec_results.timeout,
+                memory=exec_results.memory
             )
 
         # Add messages if there was no main file.
