@@ -196,8 +196,9 @@ class OutputManager:
 
         # Ensure we use the given status.
         self._add(EscalateStatus(status=status))
-
         to_add = self._get_to_add()
+        _logger.info(list(
+            filter(lambda x: isinstance(x, (StartTab, CloseTab)), to_add)))
         for added in to_add:
             modified = _replace_status(added, status)
             self._add(modified)
@@ -221,18 +222,19 @@ class OutputManager:
         assert self.tab < len(self.bundle.plan.tabs)
         assert self.context < len(self.bundle.plan.tabs[self.tab].contexts)
 
+        to_write = []
+
         if self.context + 1 == len(self.bundle.plan.tabs[self.tab].contexts):
             self.context = 0
+            to_write.append(self.prepared.tabs[self.tab].end)
             self.tab += 1
+            if self.tab == len(self.bundle.plan.tabs):
+                return to_write
+            to_write.append(self.prepared.tabs[self.tab].start)
         else:
             self.context += 1
 
-        if self.tab == len(self.bundle.plan.tabs):
-            return []
-
-        to_write = []
         if self.tab == -1:
-            self.tab += 1
             to_write.append(self.prepared.tabs[self.tab].start)
         # Do remainder of current tab.
         for c in range(self.context, len(self.bundle.plan.tabs[self.tab].contexts)):
