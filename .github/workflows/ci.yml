@@ -17,13 +17,13 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: '11'
-      - name: Install GHC 8.10
-        uses: actions/setup-haskell@v1.1.4
-        with:
-          ghc-version: '8.10.2'
-          cabal-version: '2.2'
-      - name: Install Haskell dependencies
-        run: sudo cabal install --lib aeson --global
+#      - name: Install GHC 8.10
+#        uses: actions/setup-haskell@v1.1.4
+#        with:
+#          ghc-version: '8.10.2'
+#          cabal-version: '2.2'
+#      - name: Install Haskell dependencies
+#        run: sudo cabal install --lib aeson --global
       - name: Use node 12
         uses: actions/setup-node@v1
         with:
