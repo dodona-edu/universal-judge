@@ -148,6 +148,7 @@ def test_kotlin_escape(tmp_path: Path, pytestconfig):
     assert_serialisation(bundle, tmp_path, StringType(type=BasicStringTypes.CHAR, data="'"))
 
 
+@pytest.mark.skip(reason="No more haskell")
 def no_test_haskell_escape(tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "", "runhaskell", tmp_path)
     plan = Plan()
