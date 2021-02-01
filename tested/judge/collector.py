@@ -235,6 +235,7 @@ class OutputManager:
             self.context += 1
 
         if self.tab == -1:
+            self.tab += 1
             to_write.append(self.prepared.tabs[self.tab].start)
         # Do remainder of current tab.
         for c in range(self.context, len(self.bundle.plan.tabs[self.tab].contexts)):
