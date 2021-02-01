@@ -73,8 +73,8 @@ def test_programmed_evaluation(language: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "echo-function", language, tmp_path, "programmed-no-haskell.tson", "correct")
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["correct"] * 5
-    assert len(updates.find_all("append-message")) == 5
+    assert updates.find_status_enum() == ["correct"] * 4
+    assert len(updates.find_all("append-message")) == 4
 
 
 @pytest.mark.parametrize("lang", ["python", "java", "kotlin"])  # , "haskell", "runhaskell"
