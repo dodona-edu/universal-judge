@@ -24,7 +24,7 @@ from enum import Enum
 from typing import Union, List, Dict, Literal, Optional, Any, Iterable
 
 import math
-from pydantic import BaseModel, root_validator
+from pydantic import BaseModel, root_validator, Field
 from pydantic.dataclasses import dataclass
 
 from tested.dodona import ExtendedMessage, Status
@@ -475,7 +475,7 @@ class EvalResult(BaseModel):
     result: Union[bool, Status]
     readable_expected: Optional[str] = None
     readable_actual: Optional[str] = None
-    messages: List[ExtendedMessage] = field(default_factory=list)
+    messages: List[ExtendedMessage] = Field(default_factory=list)
 
 
 @dataclass
