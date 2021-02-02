@@ -50,16 +50,18 @@ class ExecutionResult(BaseExecutionResult):
     results: str
     exceptions: str
 
-    def to_context_execution_results(self, number_of_contexts: int) -> \
+    def to_context_execution_results(self) -> \
             List[ContextExecutionResult]:
         results = self.results.split(self.context_separator)[1:]
         executions = self.exceptions.split(self.context_separator)[1:]
         stderr = self.stderr.split(self.context_separator)[1:]
         stdout = self.stdout.split(self.context_separator)[1:]
 
+        size = max(len(results), len(executions), len(stderr), len(stdout)) - 1
+
         context_execution_results = []
-        for r, e, err, out in itertools.zip_longest(results, executions, stderr,
-                                                    stdout):
+        for index, (r, e, err, out) in enumerate(
+                itertools.zip_longest(results, executions, stderr, stdout)):
             context_execution_results.append(ContextExecutionResult(
                 separator=self.separator,
                 exit=self.exit,
@@ -67,20 +69,8 @@ class ExecutionResult(BaseExecutionResult):
                 exceptions=e or "",
                 stdout=out or "",
                 stderr=err or "",
-                timeout=self.timeout,
-                memory=self.memory
-            ))
-
-        for i in range(len(context_execution_results), number_of_contexts):
-            context_execution_results.append(ContextExecutionResult(
-                separator=self.separator,
-                exit=self.exit,
-                results="",
-                exceptions="",
-                stdout="",
-                stderr="",
-                timeout=self.timeout,
-                memory=self.memory
+                timeout=self.timeout and size == index,
+                memory=self.memory and size == index
             ))
 
         return context_execution_results

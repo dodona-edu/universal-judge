@@ -10,7 +10,7 @@ import time
 from .collector import OutputManager
 from .compilation import run_compilation, process_compile_results
 from .evaluation import evaluate_results
-from .execution import Execution, execute_execution
+from .execution import Execution, execute_execution, ExecutionResult
 from .linter import run_linter
 from .utils import copy_from_paths_to_path
 from ..configs import Bundle
@@ -201,29 +201,10 @@ def _single_execution(bundle: Bundle,
         remaining = max_time - (time.perf_counter() - start)
         execution_result, m, s, p = execute_execution(bundle, execution, remaining)
 
-        if execution_result:
-            context_results = execution_result.to_context_execution_results(
-                len(execution.execution.contexts))
-        else:
-            context_results = [None] * len(execution.execution.contexts)
+        status = _process_results(bundle, execution, execution_result, m, s, p)
 
-        for context, context_result in zip(execution.execution.contexts,
-                                           context_results):
-            execution.collector.add_context(
-                StartContext(description=context.description),
-                context.context_index
-            )
-
-            continue_ = evaluate_results(bundle, context=context,
-                                         exec_results=context_result,
-                                         compiler_results=(m, s), context_dir=p,
-                                         collector=execution.collector)
-            execution.collector.add_context(CloseContext(), context.context_index)
-            if execution.collector.is_full():
-                return Status.OUTPUT_LIMIT_EXCEEDED
-            if continue_ in (Status.TIME_LIMIT_EXCEEDED,
-                             Status.MEMORY_LIMIT_EXCEEDED):
-                return continue_
+        if status:
+            return status
 
 
 def _parallel_execution(bundle: Bundle,
@@ -244,27 +225,11 @@ def _parallel_execution(bundle: Bundle,
         execution_result, m, s, p = execute_execution(bundle, execution, remainder)
 
         def evaluation_function(eval_remainder):
+            _status = _process_results(bundle, execution, execution_result, m, s, p)
 
-            context_results = execution_result.to_context_execution_results(
-                len(execution.execution.contexts))
-
-            for context, context_result in zip(execution.execution.contexts,
-                                               context_results):
-                execution.collector.add_context(
-                    StartContext(description=context.description),
-                    context.context_index
-                )
-
-                continue_ = evaluate_results(bundle, context=context,
-                                             exec_results=context_result,
-                                             compiler_results=(m, s), context_dir=p,
-                                             collector=execution.collector)
-                execution.collector.add_context(CloseContext(),
-                                                context.context_index)
-
-                if execution.collector.is_full():
-                    return Status.OUTPUT_LIMIT_EXCEEDED
-            return continue_
+            if _status and _status not in (Status.TIME_LIMIT_EXCEEDED,
+                                           Status.MEMORY_LIMIT_EXCEEDED):
+                return _status
 
         return evaluation_function
 
@@ -345,3 +310,35 @@ def _generate_files(bundle: Bundle,
     else:
         generated = None
     return common_dir, dependencies, generated
+
+
+def _process_results(bundle: Bundle, execution: Execution,
+                     execution_result: Optional[ExecutionResult], m: List[Message],
+                     s: Status, p: Path) -> Optional[Status]:
+    if execution_result:
+        context_results = execution_result.to_context_execution_results()
+    else:
+        context_results = [None] * len(execution.execution.contexts)
+
+    for index, (context, context_result) in enumerate(
+            zip(execution.execution.contexts, context_results)):
+        execution.collector.add_context(
+            StartContext(description=context.description),
+            context.context_index
+        )
+
+        if index == 0:
+            mi = m
+        else:
+            mi = []
+
+        continue_ = evaluate_results(bundle, context=context,
+                                     exec_results=context_result,
+                                     compiler_results=(mi, s), context_dir=p,
+                                     collector=execution.collector)
+        execution.collector.add_context(CloseContext(), context.context_index)
+        if execution.collector.is_full():
+            return Status.OUTPUT_LIMIT_EXCEEDED
+        if continue_ in (Status.TIME_LIMIT_EXCEEDED,
+                         Status.MEMORY_LIMIT_EXCEEDED):
+            return continue_
