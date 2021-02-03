@@ -1,5 +1,4 @@
 ## Code to execute_module one context.
-
 #include <stdio.h>
 
 #include "values.h"
@@ -41,36 +40,28 @@ int ${execution_name}() {
 
     ${execution_name}_value_file = fopen("${value_file}", "w");
     ${execution_name}_exception_file = fopen("${exception_file}", "w");
-    {
-        ${contexts[0].before}
 
-        ${execution_name}_write_context_separator();
-        ${execution_name}_write_separator();
+    ${execution_name}_write_context_separator();
+    % if run_testcase.exists:
+        char* args[] = {\
+        % for argument in ["solution"] + run_testcase.arguments:
+            "${argument}", \
+        % endfor
+        };
+        solution_main(${len(context_testcase.arguments) + 1}, args);
+    % endif
 
-        % if context_testcase.exists:
-            char* args[] = {\
-            % for argument in ["solution"] + context_testcase.arguments:
-                "${argument}", \
-            % endfor
-            };
-            solution_main(${len(context_testcase.arguments) + 1}, args);
-        % endif
-
-        % for i, ctx in enumerate(contexts):
-            % if i != 0:
-                }
-                {
-                ${execution_name}_write_context_separator();
-                ${ctx.before}
-                ${execution_name}_write_separator();
-            % endif
+    % for i, ctx in enumerate(contexts):
+        {
+            ${execution_name}_write_context_separator();
+            ${ctx.before}
             % for testcase in ctx.testcases:
                 ${execution_name}_write_separator();
                 <%include file="statement.mako" args="statement=testcase.input_statement()" />;
             % endfor
             ${ctx.after}
-        % endfor
-    }
+        }
+    % endfor
 
     fclose(${execution_name}_value_file);
     fclose(${execution_name}_exception_file);

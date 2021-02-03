@@ -77,27 +77,21 @@ handleException (Right _) = Nothing
 
 ## Main function of the context.
 main = do
-    ${contexts[0].before}
-
     writeContextSeparator
-    writeSeparator
 
-    % if context_testcase.exists:
+    % if run_testcase.exists:
         let mainArgs = [\
-            % for argument in context_testcase.arguments:
+            % for argument in run_testcase.arguments:
                 <%include file="value.mako" args="value=argument"/>\
             % endfor
         ]
         result <- try (withArgs mainArgs ${submission_name}.main) :: IO (Either SomeException ())
-        let ee = handleException result in <%include file="statement.mako" args="statement=context_testcase.exception_statement('ee')"/>
+        let ee = handleException result in <%include file="statement.mako" args="statement=run_testcase.exception_statement('ee')"/>
     % endif
 
     % for i, ctx in enumerate(contexts):
-        % if i != 0:
-            writeContextSeparator
-            ${ctx.before}
-            writeSeparator
-        % endif
+        writeContextSeparator
+        ${ctx.before}
         % for testcase in ctx.testcases:
             writeSeparator
 

@@ -48,34 +48,27 @@ class ${execution_name} : AutoCloseable {
     }
 
     fun execute() {
-        run {
-            ${contexts[0].before}
-            this.writeContextSeparator()
-            this.writeSeparator()
+        this.writeContextSeparator()
 
-            % if context_testcase.exists:
-                try {
-                    solutionMain(arrayOf( \
-                        % for argument in context_testcase.arguments:
-                            "${argument}", \
-                        % endfor
-                    ))
-                    <%include file = "statement.mako" args = "statement=context_testcase.exception_statement()" />
-                } catch (e: Exception) {
-                    <%include file = "statement.mako" args = "statement=context_testcase.exception_statement('e')" />
-                } catch (e: AssertionError) {
-                    <%include file = "statement.mako" args = "statement=context_testcase.exception_statement('e')" />
-                }
-            % endif
+        % if run_testcase.exists:
+            try {
+                solutionMain(arrayOf( \
+                    % for argument in run_testcase.arguments:
+                        "${argument}", \
+                    % endfor
+                ))
+                <%include file = "statement.mako" args = "statement=run_testcase.exception_statement()" />
+            } catch (e: Exception) {
+                <%include file = "statement.mako" args = "statement=run_testcase.exception_statement('e')" />
+            } catch (e: AssertionError) {
+                <%include file = "statement.mako" args = "statement=run_testcase.exception_statement('e')" />
+            }
+        % endif
 
-            % for i, ctx in enumerate(contexts):
-                % if i != 0:
-                    }
-                    run {
-                    this.writeContextSeparator()
-                    ${ctx.before}
-                    this.writeSeparator()
-                % endif
+        % for i, ctx in enumerate(contexts):
+            run {
+                this.writeContextSeparator()
+                ${ctx.before}
                 % for testcase in ctx.testcases:
                     this.writeSeparator()
                     % if isinstance(testcase.command, get_args(Assignment)):
@@ -91,8 +84,8 @@ class ${execution_name} : AutoCloseable {
                     }
                 % endfor
                 ${ctx.after}
-            % endfor
-        }
+            }
+        % endfor
     }
 
     override fun close() {

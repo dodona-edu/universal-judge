@@ -19,13 +19,13 @@ def read_config() -> DodonaConfig:
     return DodonaConfig(**{
         "memory_limit":         536870912,
         "time_limit":           60,
-        "programming_language": 'java',
+        "programming_language": 'python',
         "natural_language":     'nl',
-        "resources":            Path('exercise/echo-function/evaluation'),
-        "source":               Path('exercise/echo-function/solution/wrong.java'),
+        "resources":            Path('exercise/sum/evaluation'),
+        "source":               Path('exercise/sum/solution/correct.py'),
         "judge":                Path('.'),
         "workdir":              Path('workdir'),
-        "plan_name":            "full.tson",
+        "plan_name":            "short.tson",
         "options":              {
             "parallel": True,
             "mode":     "batch",

@@ -187,6 +187,7 @@ class TypeSupport(Enum):
 
 class TemplateType(str, Enum):
     EXECUTION = "execution"
+    RUN = "run"
     STATEMENT = "statement"
     CONTEXT = "context"
     SELECTOR = "selector"

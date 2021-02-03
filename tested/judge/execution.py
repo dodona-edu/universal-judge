@@ -15,20 +15,33 @@ from ..configs import Bundle
 from ..dodona import Message, Status
 from ..languages.config import FileFilter, Config
 from ..languages.generator import value_file, exception_file
-from ..testplan import ExecutionMode, InternalExecution
+from ..testplan import ExecutionMode, Run
 
 _logger = logging.getLogger(__name__)
 
 
 @dataclass
-class ContextExecutionResult(BaseExecutionResult):
+class RunTestcaseResult(BaseExecutionResult):
     """
-    The result of a context_testcase testcase execution.
+    The result of a run testcase execution.
+
+    All output streams are divided per testcase, in the same order as the
+    context that was used to execute_module the test. E.g. the string at
+    position 0 in stdout is the result of executing the testcase at position 0 in
+    the context.
+    """
+    exception: str
+
+
+@dataclass
+class TestcaseResult(BaseExecutionResult):
+    """
+    The result of a testcase execution.
 
     All output streams are divided per testcase, in the same order as the
     context that was used to execute_module the test. E.g. the string at position
-    0 in
-    stdout is the result of executing the testcase at position 0 in the context.
+    0 in stdout is the result of executing the testcase at position 0 in the
+    context.
     """
     separator: str
     results: str
@@ -42,8 +55,8 @@ class ExecutionResult(BaseExecutionResult):
 
     All output streams are divided per testcase, in the same order as the
     context that was used to execute_module the test. E.g. the string at position
-    0 in
-    stdout is the result of executing the testcase at position 0 in the context.
+    0 in stdout is the result of executing the testcase at position 0 in the
+    context.
     """
     context_separator: str
     separator: str
@@ -51,18 +64,39 @@ class ExecutionResult(BaseExecutionResult):
     exceptions: str
 
     def to_context_execution_results(self) -> \
-            List[ContextExecutionResult]:
+            Tuple[List[TestcaseResult], RunTestcaseResult]:
         results = self.results.split(self.context_separator)[1:]
-        executions = self.exceptions.split(self.context_separator)[1:]
+        exceptions = self.exceptions.split(self.context_separator)[1:]
         stderr = self.stderr.split(self.context_separator)[1:]
         stdout = self.stdout.split(self.context_separator)[1:]
 
-        size = max(len(results), len(executions), len(stderr), len(stdout)) - 1
+        size = max(len(results), len(exceptions), len(stderr), len(stdout))
+
+        if size == 0:
+            return [], RunTestcaseResult(
+                exit=self.exit,
+                exception="",
+                stdout="",
+                stderr="",
+                timeout=self.timeout,
+                memory=self.memory
+            )
+        run_testcase = RunTestcaseResult(
+            exit=self.exit,
+            exception=(exceptions or [""])[0] or "",
+            stdout=(stdout or [""])[0] or "",
+            stderr=(stderr or [""])[0] or "",
+            timeout=self.timeout and size == 0,
+            memory=self.memory and size == 0
+        )
+
+        size = size - 1
 
         context_execution_results = []
         for index, (r, e, err, out) in enumerate(
-                itertools.zip_longest(results, executions, stderr, stdout)):
-            context_execution_results.append(ContextExecutionResult(
+                itertools.zip_longest(results[1:], exceptions[1:], stderr[1:],
+                                      stdout[1:])):
+            context_execution_results.append(TestcaseResult(
                 separator=self.separator,
                 exit=self.exit,
                 results=r or "",
@@ -73,14 +107,15 @@ class ExecutionResult(BaseExecutionResult):
                 memory=self.memory and size == index
             ))
 
-        return context_execution_results
+        return context_execution_results, run_testcase
 
 
 class Execution(NamedTuple):
     """
     Arguments used to execute_module a single execution derived from the testplan.
     """
-    execution: InternalExecution
+    run: Run
+    context_offset: int
     execution_name: str
     execution_index: int
     mode: ExecutionMode
@@ -90,8 +125,7 @@ class Execution(NamedTuple):
     collector: OutputManager
 
 
-def filter_files(files: Union[List[str], FileFilter],
-                 directory: Path) -> List[str]:
+def filter_files(files: Union[List[str], FileFilter], directory: Path) -> List[str]:
     if callable(files):
         return list(x.name for x in filter(files, directory.glob("*")))
     else:
@@ -142,10 +176,11 @@ def copy_workdir_files(bundle: Bundle, context_dir: Path):
     prefix = bundle.lang_config.execution_prefix()
     for origin in bundle.config.workdir.iterdir():
         file = origin.name.lower()
-        _logger.debug("Copying %s to %s", origin, context_dir)
         if origin.is_file():
+            _logger.debug("Copying %s to %s", origin, context_dir)
             shutil.copy2(origin, context_dir)
         elif origin.is_dir() and not file.startswith(prefix) and file != "common":
+            _logger.debug("Copying %s to %s", origin, context_dir)
             shutil.copytree(origin, context_dir / file)
 
 
@@ -224,7 +259,7 @@ def execute_execution(bundle: Bundle, args: Execution, max_time: float) \
             return None, messages, status, execution_dir
 
         files.remove(executable)
-        stdin = args.execution.get_stdin(bundle.config.resources)
+        stdin = args.run.get_stdin(bundle.config.resources)
         argument = None
     else:
         result, files = None, list(dependencies)
@@ -253,7 +288,7 @@ def execute_execution(bundle: Bundle, args: Execution, max_time: float) \
                 return None, messages, status, execution_dir
 
             files.remove(executable)
-            stdin = args.execution.get_stdin(bundle.config.resources)
+            stdin = args.run.get_stdin(bundle.config.resources)
             argument = args.execution_name
         else:
             _logger.debug("Selector is not needed, using individual execution.")
@@ -268,7 +303,7 @@ def execute_execution(bundle: Bundle, args: Execution, max_time: float) \
                 return None, messages, status, execution_dir
 
             files.remove(executable)
-            stdin = args.execution.get_stdin(bundle.config.resources)
+            stdin = args.run.get_stdin(bundle.config.resources)
             argument = None
 
     remaining = max_time - (time.perf_counter() - start)

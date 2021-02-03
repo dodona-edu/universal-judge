@@ -6,7 +6,7 @@ import java.io.*;
 import java.util.*;
 import java.util.function.*;
 
-public class ${context_name} implements Closeable {
+public class ${execution_name} implements Closeable {
 
     ##################################
     ## Setup                        ##
@@ -16,7 +16,7 @@ public class ${context_name} implements Closeable {
     private final PrintWriter valueWriter;
     private final PrintWriter exceptionWriter;
 
-    public ${context_name}() throws Exception {
+    public ${execution_name}() throws Exception {
         this.valueWriter = new PrintWriter("${value_file}");
         this.exceptionWriter = new PrintWriter("${exception_file}");
     }
@@ -26,6 +26,17 @@ public class ${context_name} implements Closeable {
         exceptionWriter.write("--${secret_id}-- SEP");
         System.err.print("--${secret_id}-- SEP");
         System.out.print("--${secret_id}-- SEP");
+        valueWriter.flush();
+        exceptionWriter.flush();
+        System.err.flush();
+        System.out.flush();
+    }
+
+    private void writeContextSeparator() throws Exception {
+        valueWriter.write("--${context_secret_id}-- SEP");
+        exceptionWriter.write("--${context_secret_id}-- SEP");
+        System.err.print("--${context_secret_id}-- SEP");
+        System.out.print("--${context_secret_id}-- SEP");
         valueWriter.flush();
         exceptionWriter.flush();
         System.err.flush();
@@ -59,40 +70,43 @@ public class ${context_name} implements Closeable {
     ## Most important function: actual execution happens here.
     void execute() throws Exception {
         ## In Java, we must execute_module the before and after code in the context.
-        ${before}
-
         ## Call the main function if needed.
-        this.writeSeparator();
-        % if context_testcase.exists:
+        this.writeContextSeparator();
+        % if run_testcase.exists:
             try {
                 ${submission_name}.main(new String[]{\
-                % for argument in context_testcase.arguments:
-                    "${argument}", \
-                % endfor
+                    % for argument in run_testcase.arguments:
+                        "${argument}", \
+                    % endfor
                 });
-                <%include file="statement.mako" args="statement=context_testcase.exception_statement()" />;
+                <%include file="statement.mako" args="statement=run_testcase.exception_statement()" />;
             } catch (Exception | AssertionError e) {
-                <%include file="statement.mako" args="statement=context_testcase.exception_statement('e')" />;
+                <%include file="statement.mako" args="statement=run_testcase.exception_statement('e')" />;
             }
         % endif
-
-        ## Generate the actual tests based on the context.
-        % for testcase in testcases:
-            ## In Java, we need special code to make variables available outside of
-            ## the try-catch block.
-            this.writeSeparator();
-            % if isinstance(testcase.command, get_args(Assignment)):
-                <%include file="declaration.mako" args="tp=testcase.command.type,value=testcase.command.expression" /> ${testcase.command.variable} = null;
-            % endif
-            try {
-                <%include file="statement.mako" args="statement=testcase.input_statement()" />;
-                <%include file="statement.mako" args="statement=testcase.exception_statement()" />;
-            } catch (Exception | AssertionError e) {
-                <%include file="statement.mako" args="statement=testcase.exception_statement('e')" />;
+        % for i, ctx in enumerate(contexts):
+            {
+                this.writeContextSeparator();
+                ${ctx.before}
+                % for testcase in ctx.testcases:
+                    ## In Java, we need special code to make variables available outside of
+                    ## the try-catch block.
+                    this.writeSeparator();
+                    % if isinstance(testcase.command, get_args(Assignment)):
+                        <%include file="declaration.mako"
+                                  args="tp=testcase.command.type,value=testcase.command.expression" /> \
+                        ${testcase.command.variable} = null;
+                    % endif
+                    try {
+                        <%include file="statement.mako" args="statement=testcase.input_statement()" />;
+                        <%include file="statement.mako" args="statement=testcase.exception_statement()" />;
+                    } catch (Exception | AssertionError e) {
+                        <%include file="statement.mako" args="statement=testcase.exception_statement('e')" />;
+                    }
+                % endfor
+                ${ctx.after}
             }
         % endfor
-
-        ${after}
     }
 
     @Override
@@ -102,8 +116,8 @@ public class ${context_name} implements Closeable {
     }
 
     public static void main(String[] a) throws Exception {
-        try(${context_name} context = new ${context_name}()) {
-            context.execute();
+        try(${execution_name} execution = new ${execution_name}()) {
+            execution.execute();
         }
     }
 }

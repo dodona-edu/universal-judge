@@ -32,6 +32,16 @@ def write_separator():
     value_file.flush()
     exception_file.flush()
 
+def write_context_separator():
+    value_file.write("--${context_secret_id}-- SEP")
+    exception_file.write("--${context_secret_id}-- SEP")
+    sys.stderr.write("--${context_secret_id}-- SEP")
+    sys.stdout.write("--${context_secret_id}-- SEP")
+    sys.stdout.flush()
+    sys.stderr.flush()
+    value_file.flush()
+    exception_file.flush()
+
 
 ##################################
 ## Predefined functions         ##
@@ -53,51 +63,49 @@ def send_specific_value(value):
 def send_specific_exception(exception):
     values.send_evaluated(exception_file, exception)
 
-${before}
-
 ## Prepare the command line arguments if needed.
-% if context_testcase.exists and context_testcase.arguments:
+% if run_testcase.exists and run_testcase.arguments:
     new_args = [sys.argv[0]]
     new_args.extend([\
-        % for argument in context_testcase.arguments:
+        % for argument in run_testcase.arguments:
             "${argument}", \
         % endfor
     ])
     sys.argv = new_args
 % endif
 
-
 ## Import the code for the first time, which will run the code.
 try:
-    write_separator()
+    write_context_separator()
     from ${submission_name} import *
 except Exception as e:
     ## If there is a main test case, pass the exception to it.
-    % if context_testcase.exists:
-        <%include file="statement.mako" args="statement=context_testcase.exception_statement('e')" />
+    % if run_testcase.exists:
+        <%include file="statement.mako" args="statement=run_testcase.exception_statement('e')" />
     % else:
         raise e
     % endif
-% if context_testcase.exists:
+% if run_testcase.exists:
     else:
-        <%include file="statement.mako" args="statement=context_testcase.exception_statement()" />
+        <%include file="statement.mako" args="statement=run_testcase.exception_statement()" />
 % endif
 
-
-## Generate the actual tests based on the context.
-% for testcase in testcases:
-    write_separator()
-    <% testcase: _TestcaseArguments %>
-    try:
-        ## If we have a value function, we have an expression.
-        <%include file="statement.mako" args="statement=testcase.input_statement()" />
-    except Exception as e:
-        <%include file="statement.mako" args="statement=testcase.exception_statement('e')" />
-    else:
-        <%include file="statement.mako" args="statement=testcase.exception_statement()" />
+% for i, ctx in enumerate(contexts):
+    write_context_separator()
+    ${ctx.before}
+    % for testcase in ctx.testcases:
+        write_separator()
+        <% testcase: _TestcaseArguments %>
+        try:
+            ## If we have a value function, we have an expression.
+            <%include file="statement.mako" args="statement=testcase.input_statement()" />
+        except Exception as e:
+            <%include file="statement.mako" args="statement=testcase.exception_statement('e')" />
+        else:
+            <%include file="statement.mako" args="statement=testcase.exception_statement()" />
+    % endfor
+    ${ctx.after}
 % endfor
-
-${after}
 
 ## Close output files.
 value_file.close()

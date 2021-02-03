@@ -2,9 +2,9 @@
   "tabs": [
     {
       "name": "Feedback",
-      "contexts": [
+      "runs": [
         {
-          "context_testcase": {
+          "run": {
             "description": "Uitvoeren code",
             "input": {
               "main_call": true
@@ -14,11 +14,21 @@
                 "evaluator": {
                   "type": "specific",
                   "evaluators": {
-                    "python": {"file": "evaluator.py"},
-                    "java": {"file": "Evaluator.java"},
-                    "kotlin": {"file": "Evaluator.kt"},
-                    "haskell": {"file": "Evaluator.hs"},
-                    "runhaskell": {"file": "Evaluator.hs"}
+                    "python": {
+                      "file": "evaluator.py"
+                    },
+                    "java": {
+                      "file": "Evaluator.java"
+                    },
+                    "kotlin": {
+                      "file": "Evaluator.kt"
+                    },
+                    "haskell": {
+                      "file": "Evaluator.hs"
+                    },
+                    "runhaskell": {
+                      "file": "Evaluator.hs"
+                    }
                   }
                 }
               }

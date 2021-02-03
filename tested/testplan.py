@@ -399,7 +399,7 @@ class Testcase(WithFeatures, WithFunctions):
 
 
 @dataclass
-class ContextInput(WithFeatures):
+class RunInput(WithFeatures):
     """Input at a context-level."""
 
     stdin: Union[TextData, EmptyChannel] = EmptyChannel.NONE
@@ -420,23 +420,32 @@ class ContextInput(WithFeatures):
 
 
 @dataclass
-class ContextOutput(BaseOutput):
+class RunOutput(BaseOutput):
     """Output on a context level."""
     exit_code: ExitCodeOutputChannel = ExitCodeOutputChannel()
 
 
 @dataclass
-class ContextTestcase(WithFeatures):
+class FileUrl:
+    content: str
+    name: str
+    location: str = "href"
+    storage: str = "disk"
+
+
+@dataclass
+class RunTestcase(WithFeatures):
     """
-    The context test case. This test case contains various things related to the
+    The run test case. This test case contains various things related to the
     context itself, such as:
-    - Execution of the context_testcase function.
+    - Execution of the run_testcase function.
     - Exit codes.
     - Standard input.
     """
-    input: ContextInput = ContextInput()
-    output: ContextOutput = ContextOutput()
+    input: RunInput = RunInput()
+    output: RunOutput = RunOutput()
     description: Optional[str] = None
+    link_files: List[FileUrl] = field(default_factory=list)
 
     def get_used_features(self) -> FeatureSet:
         return combine_features([
@@ -449,82 +458,105 @@ Code = Dict[str, TextData]
 
 
 @dataclass
-class FileUrl:
-    content: str
-    name: str
-    location: str = "href"
-    storage: str = "disk"
-
-
-@dataclass
 class Context(WithFeatures, WithFunctions):
     """
     A test case is an independent run of the solution.
     """
-    context_testcase: ContextTestcase = ContextTestcase()
     testcases: List[Testcase] = field(default_factory=list)
     before: Code = field(default_factory=dict)
     after: Code = field(default_factory=dict)
     description: Optional[str] = None
     link_files: List[FileUrl] = field(default_factory=list)
-    force_execution_break: bool = False
 
     # noinspection PyMethodParameters
     @root_validator
     def check_testcases_exist(cls, values):
-        context = values.get('context_testcase')
         additional = values.get('testcases')
-        if not context.input.main_call and not additional:
-            raise ValueError("A context needs a context testcase or at least one "
-                             "normal testcase.")
+        if not additional:
+            raise ValueError("A context needs at least one testcase.")
         return values
 
     def get_used_features(self) -> FeatureSet:
-        return combine_features([
-            self.context_testcase.get_used_features(),
-            combine_features([x.get_used_features() for x in self.testcases])
-        ])
-
-    def get_stdin(self, resources: Path):
-        return self.context_testcase.input.get_as_string(resources)
+        return combine_features([x.get_used_features() for x in self.testcases])
 
     def get_functions(self) -> Iterable[FunctionCall]:
         return flatten(x.get_functions() for x in self.testcases)
 
-    def all_testcases(self) -> List[Union[ContextTestcase, Testcase]]:
-        result = [self.context_testcase]
+    def all_testcases(self) -> List[Union[RunTestcase, Testcase]]:
+        result = []
         result.extend(self.testcases)
+        return result
+
+
+@dataclass
+class Run(WithFeatures, WithFunctions):
+    """
+    A run is a combination of contexts and a run testcase.
+    """
+    run: RunTestcase = RunTestcase()
+    contexts: List[Context] = field(default_factory=list)
+
+    def all_testcases(self) -> List[Union[RunTestcase, Testcase]]:
+        result = [self.run]
+        result.extend(
+            flatten((context.all_testcases() for context in self.contexts)))
         return result
 
     # noinspection PyMethodParameters
     @root_validator
+    def check_testcases_exist(cls, values):
+        run = values.get('run')
+        additional = values.get('contexts')
+        if not run.input.main_call and not additional:
+            raise ValueError("A run needs a run testcase or at least one context.")
+        return values
+
+    def get_functions(self) -> Iterable[FunctionCall]:
+        return flatten(x.get_functions() for x in self.contexts)
+
+    def get_stdin(self, resources: Path):
+        return self.run.input.get_as_string(resources)
+
+    def get_used_features(self) -> FeatureSet:
+        return combine_features([
+            self.run.get_used_features(),
+            combine_features([x.get_used_features() for x in self.contexts])
+        ])
+
+    # noinspection PyMethodParameters
+    @root_validator
     def unique_evaluation_functions(cls, values):
-        other_testcases: List[Testcase] = values.get("testcases")
-        context_testcase: ContextTestcase = values.get("context_testcase")
+        contexts: List[Context] = values.get("contexts")
+        run_testcase: RunTestcase = values.get("run")
 
         eval_functions: Dict[str, List[EvaluationFunction]] = defaultdict(list)
 
-        output = context_testcase.output
+        output = run_testcase.output
         if (isinstance(output.exception, ExceptionOutputChannel)
                 and isinstance(output.exception.evaluator, SpecificEvaluator)):
-            for language, function in output.exception.evaluator.evaluators.items():
+            for language, function in \
+                    output.exception.evaluator.evaluators.items():
                 eval_functions[language].append(function)
 
-        for testcase in other_testcases:
-            output = testcase.output
-            if (isinstance(output.result, ValueOutputChannel)
-                    and isinstance(output.result.evaluator, SpecificEvaluator)):
-                evaluator = output.result.evaluator
-                for language, function in evaluator.evaluators.items():
-                    eval_functions[language].append(function)
-            if (isinstance(output.exception, ExceptionOutputChannel)
-                    and isinstance(output.exception.evaluator, SpecificEvaluator)):
-                evaluator = output.exception.evaluator
-                for language, function in evaluator.evaluators.items():
-                    eval_functions[language].append(function)
+        for context in contexts:
+            for testcase in context.all_testcases():
+                output = testcase.output
+                if (isinstance(output.result, ValueOutputChannel)
+                        and isinstance(output.result.evaluator, SpecificEvaluator)):
+                    evaluator = output.result.evaluator
+                    for language, function in evaluator.evaluators.items():
+                        eval_functions[language].append(function)
+                if (isinstance(output.exception, ExceptionOutputChannel)
+                        and isinstance(output.exception.evaluator,
+                                       SpecificEvaluator)):
+                    evaluator = output.exception.evaluator
+                    for language, function in evaluator.evaluators.items():
+                        eval_functions[language].append(function)
 
-        # Check within each language that the functions are unique over the files.
-        # Two calls to a function with the same name in the same file is obviously
+        # Check within each language that the functions are unique over the
+        # files.
+        # Two calls to a function with the same name in the same file is
+        # obviously
         # allowed, as they refer to the same function.
         for language, functions in eval_functions.items():
             # Map every function name to the files it is present in.
@@ -535,8 +567,8 @@ class Context(WithFeatures, WithFunctions):
             for function, file in function_file.items():
                 if len(file) > 1:
                     raise ValueError(
-                        "Evaluator function names must be unique within the same "
-                        f"context. {function} was used in multiple files: {file}")
+                        f"Evaluator function names must be unique within the same "
+                        f"run. {function} was used in multiple files: {file}")
 
         return values
 
@@ -546,14 +578,14 @@ class Tab(WithFeatures, WithFunctions):
     """Represents a tab on Dodona."""
 
     name: str
-    contexts: List[Context]
+    runs: List[Run]
     hidden: Optional[bool] = None
 
     def get_used_features(self) -> FeatureSet:
-        return combine_features(x.get_used_features() for x in self.contexts)
+        return combine_features(x.get_used_features() for x in self.runs)
 
     def get_functions(self) -> Iterable[FunctionCall]:
-        return flatten(x.get_functions() for x in self.contexts)
+        return flatten(x.get_functions() for x in self.runs)
 
 
 class ExecutionMode(str, Enum):
@@ -674,29 +706,6 @@ def generate_schema():
     sc['$id'] = "tested/testplan"
     sc['title'] = "Testplan"
     print(json.dumps(sc, indent=2))
-
-
-@dataclass
-class InternalContext(Context):
-    context_index: int = -1
-
-
-@dataclass
-class InternalExecution:
-    contexts: List[InternalContext] = field(default_factory=list)
-
-    def get_stdin(self, resources: Path):
-        try:
-            return self.contexts[0].context_testcase.input.get_as_string(resources)
-        except IndexError:
-            return ""
-
-
-@dataclass
-class InternalTab:
-    name: str
-    hidden: Optional[bool] = None
-    executions: List[InternalExecution] = field(default_factory=list)
 
 
 if __name__ == '__main__':

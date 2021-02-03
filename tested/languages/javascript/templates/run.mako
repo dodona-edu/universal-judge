@@ -65,40 +65,31 @@ function sendSpecificException(exception) {
 
 let ${submission_name};
 
-{
-    ${contexts[0].before}
+## Prepare the command line arguments if needed.
+% if run_testcase.exists:
+    let new_args = [process.argv[0]]
+    new_args = new_args.concat([\
+    % for argument in run_testcase.arguments:
+        "${argument}", \
+    % endfor
+    ])
+    process.argv = new_args
+% endif
+## Import the code for the first time, which will run the code.
+try {
+    writeContextSeparator();
+    ${submission_name} = require("./${submission_name}.js");
 
-    ## Prepare the command line arguments if needed.
-    % if context_testcase.exists:
-        let new_args = [process.argv[0]]
-        new_args = new_args.concat([\
-        % for argument in context_testcase.arguments:
-            "${argument}", \
-        % endfor
-        ])
-        process.argv = new_args
-    % endif
-    ## Import the code for the first time, which will run the code.
-    try {
+    <%include file="statement.mako" args="statement=run_testcase.exception_statement()" />
+} catch(e) {
+    ## If there is a main test case, pass the exception to it.
+    <%include file="statement.mako" args="statement=run_testcase.exception_statement('e')" />
+}
+
+% for i, ctx in enumerate(contexts):
+    {
         writeContextSeparator();
-        writeSeparator();
-
-        ${submission_name} = require("./${submission_name}.js");
-
-        <%include file="statement.mako" args="statement=context_testcase.exception_statement()" />
-    } catch(e) {
-        ## If there is a main test case, pass the exception to it.
-        <%include file="statement.mako" args="statement=context_testcase.exception_statement('e')" />
-    }
-
-    % for i, ctx in enumerate(contexts):
-        % if i != 0:
-            }
-            {
-            writeContextSeparator();
-            ${ctx.before}
-            writeSeparator();
-        % endif
+        ${ctx.before}
         % for testcase in ctx.testcases:
             writeSeparator();
             try {
@@ -116,8 +107,9 @@ let ${submission_name};
             }
         % endfor
         ${ctx.after}
-    % endfor
-}
+    }
+% endfor
+
 ## Close output files.
 fs.closeSync(valueFile);
 fs.closeSync(exceptionFile);
