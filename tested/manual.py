@@ -21,12 +21,13 @@ def read_config() -> DodonaConfig:
         "time_limit":           60,
         "programming_language": 'python',
         "natural_language":     'nl',
-        "resources":            Path('exercise/sum/evaluation'),
-        "source":               Path('exercise/sum/solution/correct.py'),
+        "resources":            Path('exercise/echo/evaluation'),
+        "source":               Path('exercise/echo/solution/comp-error.py'),
         "judge":                Path('.'),
         "workdir":              Path('workdir'),
-        "plan_name":            "short.tson",
+        "plan_name":            "two.tson",
         "options":              {
+            "allow_fallback": False,
             "parallel": True,
             "mode":     "batch",
             "linter": {

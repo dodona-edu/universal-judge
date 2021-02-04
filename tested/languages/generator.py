@@ -388,7 +388,7 @@ def get_readable_input(bundle: Bundle,
 
 
 def attempt_run_readable_input(bundle: Bundle, run: RunTestcase) -> ExtendedMessage:
-    result = get_readable_input(bundle, [run])
+    result = get_readable_input(bundle, run)
     if result.description:
         return result
 

@@ -474,7 +474,9 @@ def prepare_evaluation(bundle: Bundle, collector: OutputManager):
                 if not run.contexts:
                     _add_channel(bundle, exit_output, Channel.EXIT, updates)
 
-                collector.prepare_context(updates, i, 0)
+                updates.append(CloseTestcase(accepted=False))
+
+                collector.prepare_context(updates, i, context_index)
                 collector.prepare_context(CloseContext(accepted=False), i,
                                           context_index)
                 context_index += 1
@@ -502,7 +504,8 @@ def prepare_evaluation(bundle: Bundle, collector: OutputManager):
                     _add_channel(bundle, output.result, Channel.RETURN, updates)
 
                     # If last testcase, do exit code.
-                    if t == len(context.testcases):
+                    if j == int(has_main) + len(run.contexts) - 1 and \
+                            t == len(context.testcases):
                         _add_channel(bundle, exit_output, Channel.EXIT, updates)
 
                     updates.append(CloseTestcase(accepted=False))

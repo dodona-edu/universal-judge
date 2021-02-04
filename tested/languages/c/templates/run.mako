@@ -48,7 +48,7 @@ int ${execution_name}() {
             "${argument}", \
         % endfor
         };
-        solution_main(${len(context_testcase.arguments) + 1}, args);
+        solution_main(${len(run_testcase.arguments) + 1}, args);
     % endif
 
     % for i, ctx in enumerate(contexts):
