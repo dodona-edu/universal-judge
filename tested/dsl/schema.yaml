@@ -67,7 +67,7 @@ definitions:
         description: "Relative path to the file in the `description` folder of a Dodona exercise"
   tab:
     type: "object"
-    description: "Tab definition with testcases"
+    description: "Tab definition with runs"
     properties:
       config:
         $ref: "#/definitions/globalConfig"
@@ -81,13 +81,11 @@ definitions:
       runs:
         type: "array"
         description: "Execution run"
-        minItems: 1
         items:
           $ref: "#/definitions/run"
       contexts:
         type: "array"
         description: "Context test sequence"
-        minItems: 1
         items:
           $ref: "#/definitions/context"
     oneOf:
@@ -173,19 +171,6 @@ definitions:
   testcase:
     type: "object"
     description: "An individual test for a statement or expression"
-    oneOf:
-      - required:
-          - "statement"
-          - "return"
-        not:
-          required:
-            - "return-raw"
-      - required:
-          - "statement"
-          - "return-raw"
-        not:
-          required:
-            - "return"
     properties:
       exception:
         description: "Expected exception message"
@@ -212,6 +197,17 @@ definitions:
       stdout:
         description: "Expected output at stdout"
         $ref: "#/definitions/streamOutput"
+    required:
+      - "statement"
+    dependencies:
+      return:
+        not:
+          required:
+            - "return-raw"
+      return-raw:
+        not:
+          required:
+            - "return"
   textualTypes:
     anyOf:
       - type: "boolean"

@@ -1,5 +1,5 @@
 from argparse import ArgumentParser, FileType
-from tested.dsl import translate
+from tested.dsl import SchemaParser
 from tested.utils import smart_close
 
 if __name__ == "__main__":
@@ -21,6 +21,7 @@ if __name__ == "__main__":
                              "override option when given.")
 
     parser = parser.parse_args()
+    schema_parser = SchemaParser()
     if parser.dsl_file is not None:
         smart_close(parser.dsl)
         parser.dsl = parser.dsl_file
@@ -30,7 +31,7 @@ if __name__ == "__main__":
 
     with smart_close(parser.dsl) as test_plan:
         yaml_str = test_plan.read()
-    json_str = translate(yaml_str=yaml_str)
+    json_str = schema_parser.translate_str(yaml_str=yaml_str)
 
     with smart_close(parser.json) as json_test_plan:
         print(json_str, file=json_test_plan)

@@ -1,8 +1,8 @@
 {
-  "$id": "https://github.com/dodona-edu/universal-judge/blob/master/dsl-examples/dsl-schema.json",
+  "$id": "https://github.com/dodona-edu/universal-judge/blob/master/tested/dsl/schema.yaml",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "DSL Schema",
-  "description": "YAML DSL TESTed test plan",
+  "description": "YAML DSL TESTed testplan",
   "type": "array",
   "minItems": 1,
   "items": {
@@ -75,13 +75,13 @@
         }
       ]
     },
-    "files": {
+    "file": {
       "type": "object",
+      "description": "Tab definition with testcases",
       "required": [
         "name",
         "url"
       ],
-      "description": "Tab definition with testcases",
       "properties": {
         "name": {
           "type": "string",
@@ -96,15 +96,11 @@
     },
     "tab": {
       "type": "object",
-      "required": [
-        "tab",
-        "runs"
-      ],
-      "description": "Tab definition with testcases",
+      "description": "Tab definition with runs",
       "properties": {
         "config": {
-          "description": "Configuration of textual comparison at tab level",
-          "$ref": "#/definitions/globalConfig"
+          "$ref": "#/definitions/globalConfig",
+          "description": "Configuration of textual comparison at tab level"
         },
         "hidden": {
           "type": "boolean",
@@ -116,24 +112,85 @@
         },
         "runs": {
           "type": "array",
-          "description": "Testcases to evaluate",
-          "minItems": 1,
+          "description": "Execution run",
           "items": {
             "$ref": "#/definitions/run"
           }
         },
+        "contexts": {
+          "type": "array",
+          "description": "Context test sequence",
+          "items": {
+            "$ref": "#/definitions/context"
+          }
+        }
+      },
+      "oneOf": [
+        {
+          "required": [
+            "runs",
+            "tab"
+          ],
+          "not": {
+            "required": [
+              "contexts"
+            ]
+          }
+        },
+        {
+          "required": [
+            "contexts",
+            "tab"
+          ],
+          "not": {
+            "required": [
+              "runs"
+            ]
+          }
+        }
+      ]
+    },
+    "run": {
+      "type": "object",
+      "description": "A run collects multiple contexts",
+      "anyOf": [
+        {
+          "required": [
+            "run"
+          ]
+        },
+        {
+          "required": [
+            "contexts"
+          ]
+        }
+      ],
+      "properties": {
+        "config": {
+          "$ref": "#/definitions/globalConfig",
+          "description": "Configuration of textual comparison at run level"
+        },
         "files": {
           "type": "array",
-          "description": "Files to link in the evaluation report",
           "items": {
-            "$ref": "#/definitions/files"
+            "$ref": "#/definitions/file"
+          }
+        },
+        "run": {
+          "$ref": "#/definitions/runTestcase"
+        },
+        "contexts": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/definitions/context"
           }
         }
       }
     },
-    "run": {
+    "runTestcase": {
       "type": "object",
-      "description": "Independent test context",
+      "description": "Information for the run testcase",
       "minProperties": 1,
       "properties": {
         "arguments": {
@@ -143,21 +200,17 @@
             "$ref": "#/definitions/textualTypes"
           }
         },
-        "config": {
-          "description": "Configuration of textual comparison at context level",
-          "$ref": "#/definitions/globalConfig"
-        },
         "exception": {
           "description": "Expected exception for main call",
           "$ref": "#/definitions/textualTypes"
         },
         "exit_code": {
           "type": "integer",
-          "description": "Expected exit code for the context"
+          "description": "Expected exit code for the run"
         },
         "stdin": {
-          "$ref": "#/definitions/textualTypes",
-          "description": "Given input at stdin for main call"
+          "description": "Given input at stdin for main call",
+          "$ref": "#/definitions/textualTypes"
         },
         "stderr": {
           "description": "Expected output for main call at stderr",
@@ -166,10 +219,30 @@
         "stdout": {
           "description": "Expected output for main call at stdout",
           "$ref": "#/definitions/streamOutput"
+        }
+      }
+    },
+    "context": {
+      "type": "object",
+      "description": "Information to execute one context",
+      "required": [
+        "testcases"
+      ],
+      "properties": {
+        "config": {
+          "$ref": "#/definitions/globalConfig",
+          "description": "Configuration of textual comparison at context level"
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/file"
+          }
         },
         "testcases": {
           "type": "array",
           "description": "Array of statements and expression tests",
+          "minItems": 1,
           "items": {
             "$ref": "#/definitions/testcase"
           }
@@ -178,9 +251,6 @@
     },
     "testcase": {
       "type": "object",
-      "required": [
-        "statement"
-      ],
       "description": "An individual test for a statement or expression",
       "properties": {
         "exception": {
@@ -214,12 +284,12 @@
           ]
         },
         "return-raw": {
-          "$ref": "#/definitions/textualTypes",
-          "description": "Value string to parse to the expected return value"
+          "description": "Value string to parse to the expected return value",
+          "$ref": "#/definitions/textualTypes"
         },
         "statement": {
-          "$ref": "#/definitions/textualTypes",
-          "description": "Statement or expression to evaluate"
+          "description": "Statement or expression to evaluate",
+          "$ref": "#/definitions/textualTypes"
         },
         "stderr": {
           "description": "Expected output at stderr",
@@ -228,6 +298,25 @@
         "stdout": {
           "description": "Expected output at stdout",
           "$ref": "#/definitions/streamOutput"
+        }
+      },
+      "required": [
+        "statement"
+      ],
+      "dependencies": {
+        "return": {
+          "not": {
+            "required": [
+              "return-raw"
+            ]
+          }
+        },
+        "return-raw": {
+          "not": {
+            "required": [
+              "return"
+            ]
+          }
         }
       }
     },
