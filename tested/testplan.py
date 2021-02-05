@@ -374,7 +374,7 @@ class Testcase(WithFeatures, WithFunctions):
     input: Statement
     description: Optional[str] = None  # Will be generated if None.
     essential: bool = True
-    output: Output = Output()
+    output: Output = field(default_factory=Output)
 
     def get_used_features(self) -> FeatureSet:
         return combine_features([
@@ -422,7 +422,7 @@ class RunInput(WithFeatures):
 @dataclass
 class RunOutput(BaseOutput):
     """Output on a context level."""
-    exit_code: ExitCodeOutputChannel = ExitCodeOutputChannel()
+    exit_code: ExitCodeOutputChannel = field(default_factory=ExitCodeOutputChannel)
 
 
 @dataclass
@@ -442,8 +442,8 @@ class RunTestcase(WithFeatures):
     - Exit codes.
     - Standard input.
     """
-    input: RunInput = RunInput()
-    output: RunOutput = RunOutput()
+    input: RunInput = field(default_factory=RunInput)
+    output: RunOutput = field(default_factory=RunOutput)
     description: Optional[str] = None
     link_files: List[FileUrl] = field(default_factory=list)
 
@@ -493,7 +493,7 @@ class Run(WithFeatures, WithFunctions):
     """
     A run is a combination of contexts and a run testcase.
     """
-    run: RunTestcase = RunTestcase()
+    run: RunTestcase = field(default_factory=RunTestcase)
     contexts: List[Context] = field(default_factory=list)
 
     def all_testcases(self) -> List[Union[RunTestcase, Testcase]]:
@@ -528,7 +528,6 @@ class Run(WithFeatures, WithFunctions):
     def unique_evaluation_functions(cls, values):
         contexts: List[Context] = values.get("contexts")
         run_testcase: RunTestcase = values.get("run")
-
         eval_functions: Dict[str, List[EvaluationFunction]] = defaultdict(list)
 
         output = run_testcase.output

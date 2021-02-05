@@ -9,12 +9,13 @@ from yaml import safe_load
 
 from tested.datatypes import BasicBooleanTypes, BasicNumericTypes, \
     BasicObjectTypes, BasicSequenceTypes, BasicStringTypes
-from tested.dsl.statement import Parser, ParseError
+from tested.dsl.statement import Parser
 from tested.serialisation import ExceptionValue, Value, NothingType, StringType, \
     BooleanType, NumberType, SequenceType, ObjectType
-from tested.testplan import BaseOutput, Context, ExceptionOutputChannel, FileUrl, \
-    GenericTextEvaluator, Plan, Run, RunTestcase, Tab, Testcase, \
-    TextOutputChannel, ValueOutputChannel
+from tested.testplan import BaseOutput, Context, EmptyChannel, \
+    ExceptionOutputChannel, FileUrl, GenericTextEvaluator, Output, Plan, Run, \
+    RunTestcase, RunInput, RunOutput, Tab, Testcase, TextData, TextOutputChannel, \
+    ValueOutputChannel
 
 from .JSONEncoder import DataclassJSONEncoder
 
@@ -63,7 +64,8 @@ class SchemaParser:
         yaml_obj = self._load_yaml_object(yaml_str)
         self._validate(yaml_obj)
         plan = self._translate_plan(yaml_obj)
-        return self._write_to_json_string(plan)
+        json_str = self._write_to_json_string(plan)
+        return json_str
 
     # noinspection PyMethodMayBeStatic
     def _enforce_dict(self, yaml_obj: YAML_OBJECT) -> YAML_DICT:
@@ -98,7 +100,10 @@ class SchemaParser:
     # noinspection PyMethodMayBeStatic
     def _get_int_safe(self, yaml_dict: YAML_DICT, key: str) -> Optional[int]:
         try:
-            return int(yaml_dict[key])
+            x = yaml_dict[key]
+            if isinstance(x, int):
+                return x
+            return None
         except KeyError:
             return None
 
@@ -157,7 +162,7 @@ class SchemaParser:
                 stack_frame.options_stderr
             )
         if "stdout" in yaml_dict:
-            output.stderr = self._translate_stream(
+            output.stdout = self._translate_stream(
                 self._get_str_dict_safe(yaml_dict, "stdout"),
                 stack_frame.options_stdout
             )
@@ -171,10 +176,20 @@ class SchemaParser:
         if config is None:
             return old_stack_frame
         new_stack_frame = StackFrame()
-        new_stack_frame.options_stdout = merge(config,
-                                               old_stack_frame.options_stdout)
-        new_stack_frame.options_stderr = merge(config,
-                                               old_stack_frame.options_stderr)
+        if "stdout" in config:
+            new_stack_frame.options_stdout = merge(
+                old_stack_frame.options_stdout,
+                self._get_dict_safe(config, "stdout")
+            )
+        else:
+            new_stack_frame.options_stdout = old_stack_frame.options_stdout
+        if "stderr" in config:
+            new_stack_frame.options_stderr = merge(
+                old_stack_frame.options_stderr,
+                self._get_dict_safe(config, "stderr")
+            )
+        else:
+            new_stack_frame.options_stderr = old_stack_frame.options_stderr
         new_stack_frame.link_files = deepcopy(old_stack_frame.link_files)
         return new_stack_frame
 
@@ -185,10 +200,8 @@ class SchemaParser:
             self._get_dict_safe(context, "config"),
             stack_frame
         )
-        testcases = [
-            self._translate_testcase(testcase, stack_frame)
-            for testcase in self._get_list_safe(context, "testcases")
-        ]
+        testcases = [self._translate_testcase(testcase, stack_frame)
+                     for testcase in self._get_list_safe(context, "testcases")]
         if "files" in context:
             stack_frame.link_files.extend(
                 self._translate_file(file)
@@ -241,29 +254,33 @@ class SchemaParser:
             run_testcase: YAML_DICT,
             stack_frame: StackFrame = StackFrame()
     ) -> RunTestcase:
-        run = RunTestcase()
-        run.input.main_call = True
-
         if "arguments" in run_testcase:
-            run.input.arguments = [
+            arguments = [
                 str(argument)
                 for argument in self._get_list_safe(run_testcase, "arguments")
             ]
+        else:
+            arguments = []
         if "stdin" in run_testcase:
-            run.input.stdin = self._get_str_safe(run_testcase, "stdin")
+            stdin = TextData(data=self._get_str_safe(run_testcase, "stdin"))
+        else:
+            stdin = EmptyChannel.NONE
 
+        run_input = RunInput(stdin=stdin, arguments=arguments, main_call=True)
+
+        run_output = RunOutput()
         if "exit_code" in run_testcase:
-            run.output.exit_code.value = self._get_int_safe(run_testcase,
+            run_output.exit_code.value = self._get_int_safe(run_testcase,
                                                             "exit_code")
-        self._translate_base_output(run_testcase, run.output, stack_frame)
-        return run
+        self._translate_base_output(run_testcase, run_output, stack_frame)
+        return RunTestcase(input=run_input, output=run_output)
 
     def _translate_stream(self,
                           stream: YAML_OBJECT,
                           config: OPTION_DICT) -> TextOutputChannel:
         if isinstance(stream, (bool, float, int, str)):
-            return TextOutputChannel(data=stream)
-        stream = self._enforce_dict(stream)
+            return TextOutputChannel(data=stream,
+                                     evaluator=GenericTextEvaluator(options=config))
         config = merge(config, self._get_dict_safe(stream, "config"))
         return TextOutputChannel(data=self._get_str_safe(stream, "data"),
                                  evaluator=GenericTextEvaluator(options=config))
@@ -293,18 +310,18 @@ class SchemaParser:
     def _translate_testcase(self,
                             testcase: YAML_DICT,
                             stack_frame: StackFrame = StackFrame()) -> Testcase:
-        testcase_value = Testcase(input=parser.parse_statement(
-            self._get_str_safe(testcase, "statement")))
-        self._translate_base_output(testcase, testcase_value.output,
-                                    stack_frame)
+        code = self._get_str_safe(testcase, "statement")
+        output = Output()
+        self._translate_base_output(testcase, output, stack_frame)
         if "return" in testcase:
-            testcase_value.output.result = ValueOutputChannel(
+            output.result = ValueOutputChannel(
                 value=self._translate_value(
                     self._get_any_safe(testcase, "return")))
-        elif "return-raw" in testcase:
-            testcase_value.output.result = ValueOutputChannel(
+        if "return-raw" in testcase:
+            output.result = ValueOutputChannel(
                 value=parser.parse_value(
                     self._get_str_safe(testcase, "return-raw")))
+        testcase_value = Testcase(input=parser.parse_statement(code), output=output)
         return testcase_value
 
     def _translate_value(self, value: YAML_DICT) -> Value:
