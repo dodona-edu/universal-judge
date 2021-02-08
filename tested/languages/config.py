@@ -31,9 +31,10 @@ from enum import Enum, auto
 from pathlib import Path
 from typing import List, Tuple, Mapping, Union, Callable, Set, Dict, Optional, Any
 
-from ..configs import Bundle
+from ..configs import Bundle, DodonaConfig
 from ..datatypes import AllTypes
 from ..dodona import AnnotateCode, Message, Status, ExtendedMessage, Permission
+from ..dsl import Parser
 from ..features import Construct
 from ..serialisation import ExceptionValue
 from ..testplan import Plan
@@ -49,6 +50,8 @@ _case_mapping = {
     "pascal_case": pascalize,
     "snake_case":  snake_case
 }
+
+TYPE_ARG = Union[str, Tuple[str, Union[List['TYPE_ARG'], Tuple['TYPE_ARG', ...]]]]
 
 
 @dataclass
@@ -203,7 +206,8 @@ class Language:
     """
     __slots__ = ["options"]
 
-    def __init__(self, config_file: str = "config.json"):
+    def __init__(self, config_file: str = "config.json",
+                 types_file: str = "types.json"):
         """
         Initialise a language configuration. Subclasses can modify the name of the
         toml configuration file. By default, a "config.json" file is expected in the
@@ -216,6 +220,11 @@ class Language:
                           / config_file)
         with open(path_to_config, "r") as f:
             self.options = json.load(f)
+
+        path_to_types = (Path(sys.modules[self.__module__].__file__).parent
+                         / types_file)
+        with open(path_to_types, "r") as f:
+            self.types = json.load(f)
 
     def compilation(self, config: Config, files: List[str]) -> CallbackResult:
         """
@@ -633,3 +642,83 @@ class Language:
         :return: Processed message
         """
         return message
+
+    def get_type_name(self,
+                      args: TYPE_ARG,
+                      custom_type_map: Dict[
+                          str, Dict[str, Union[str, Dict[str, str]]]
+                      ] = None,
+                      is_inner: bool = False) -> str:
+        language_name = self.types['console']['name']
+
+        def _get_type():
+            try:
+                return custom_type_map[language_name][args]
+            except KeyError:
+                return self.types[args]
+
+        if custom_type_map is None:
+            custom_type_map = dict()
+
+        if isinstance(args, str):
+            if not is_inner:
+                return _get_type()
+            else:
+                try:
+                    return custom_type_map[language_name]['inner'][args]
+                except KeyError:
+                    try:
+                        return self.types['inner'][args]
+                    except KeyError:
+                        return _get_type()
+        else:
+            types = ', '.join(
+                self.get_type_name(arg, custom_type_map, True) for arg in args[1]
+            )
+            return f"{self.types[args[0]]}{self.types['hooks']['open']}" \
+                   f"{types}{self.types['hooks']['close']}"
+
+    def get_function_name(self, name: str):
+        return self.conventionalize_function(name)
+
+    def get_code_start(self, is_html: bool = True):
+        if is_html:
+            pass
+        else:
+            prompt = self.types['console']['prompt']
+            language_name = self.types['console']['name']
+            return f"'''console?lang={language_name}&prompt={prompt}"
+
+    def get_code_end(self, is_html: bool = True):
+        return "</pre>" if is_html else "'''"
+
+    def get_code(self, stmt: str, statement: bool = False, is_html: bool = True):
+        from .generator import convert_statement
+        parser = Parser()
+        if statement:
+            stmt = parser.parse_statement(stmt)
+        else:
+            stmt = parser.parse_value(stmt)
+        bundle = Bundle(
+            config=DodonaConfig(
+                resources="",
+                source="",
+                time_limit=0,
+                memory_limit=0,
+                natural_language="",
+                programming_language=self.types['console']['name'],
+                workdir="",
+                judge=""
+            ),
+            out=open(os.devnull, 'w'),
+            lang_config=self,
+            secret="",
+            plan=Plan()
+        )
+        stmt = convert_statement(bundle, stmt)
+        stmt = self.cleanup_description(bundle.plan.namespace, stmt)
+        return (self.types['console']['prompt'] + ' ' if statement else "") + stmt
+
+    def get_appendix(self, is_html: bool = True, i18n: str = 'nl'):
+        return ""
+
