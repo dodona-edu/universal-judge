@@ -256,3 +256,35 @@ def test_invalid_yaml():
         translate(yaml_str)
     assert e.type == SystemExit
     assert e.value.code != 0
+
+
+def test_invalid_mutual_exclusive_yaml():
+    yaml_str = """
+- tab: "Tab"
+  runs:
+  - run:
+      arguments: ['-a', 1, 1.2, true, no]
+      stdin: "data"
+  contexts:
+  - testcases:
+    - statement: "Data data = new Data()"
+    """
+    with pytest.raises(SystemExit) as e:
+        translate(yaml_str)
+    assert e.type == SystemExit
+    assert e.value.code != 0
+
+
+def test_invalid_mutual_exclusive_return_yaml():
+    yaml_str = """
+- tab: "Tab"
+  contexts:
+  - testcases:
+    - statement: "5"
+      return: 5
+      return-raw: "5"
+    """
+    with pytest.raises(SystemExit) as e:
+        translate(yaml_str)
+    assert e.type == SystemExit
+    assert e.value.code != 0

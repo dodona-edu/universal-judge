@@ -4,7 +4,7 @@ from logging import getLogger
 from json import dumps
 from jsonschema import Draft7Validator
 from os.path import basename, dirname, join, splitext
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, Tuple
 from yaml import safe_load
 
 from tested.datatypes import BasicBooleanTypes, BasicNumericTypes, \
@@ -200,14 +200,20 @@ class SchemaParser:
             self._get_dict_safe(context, "config"),
             stack_frame
         )
-        testcases = [self._translate_testcase(testcase, stack_frame)
-                     for testcase in self._get_list_safe(context, "testcases")]
+        testcases = []
+        for testcase, files in (self._translate_testcase(testcase, stack_frame)
+                                for testcase in
+                                self._get_list_safe(context, "testcases")):
+            testcases.append(testcase)
+            stack_frame.link_files.extend(files)
+
         if "files" in context:
             stack_frame.link_files.extend(
                 self._translate_file(file)
                 for file in self._get_list_safe(context, "files")
             )
-        return Context(testcases=testcases, link_files=stack_frame.link_files)
+        return Context(testcases=testcases,
+                       link_files=list(set(stack_frame.link_files)))
 
     def _translate_file(self, link_file: YAML_DICT) -> FileUrl:
         name = self._get_str_safe(link_file, "name")
@@ -309,7 +315,8 @@ class SchemaParser:
 
     def _translate_testcase(self,
                             testcase: YAML_DICT,
-                            stack_frame: StackFrame = StackFrame()) -> Testcase:
+                            stack_frame: StackFrame = StackFrame()
+                            ) -> Tuple[Testcase, List[FileUrl]]:
         code = self._get_str_safe(testcase, "statement")
         output = Output()
         self._translate_base_output(testcase, output, stack_frame)
@@ -322,7 +329,15 @@ class SchemaParser:
                 value=parser.parse_value(
                     self._get_str_safe(testcase, "return-raw")))
         testcase_value = Testcase(input=parser.parse_statement(code), output=output)
-        return testcase_value
+
+        if "files" in testcase:
+            files = [
+                self._translate_file(file)
+                for file in self._get_list_safe(testcase, "files")
+            ]
+        else:
+            files = []
+        return testcase_value, files
 
     def _translate_value(self, value: YAML_DICT) -> Value:
         if value is None:

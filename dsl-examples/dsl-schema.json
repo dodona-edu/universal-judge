@@ -257,6 +257,12 @@
           "description": "Expected exception message",
           "$ref": "#/definitions/textualTypes"
         },
+        "files": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/file"
+          }
+        },
         "return": {
           "description": "Expected return value",
           "anyOf": [
