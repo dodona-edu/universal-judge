@@ -36,6 +36,18 @@ static void ${execution_name}_write_context_separator() {
 #define send_specific_value(value) write_evaluated(${execution_name}_value_file, value)
 
 
+
+% for i, ctx in enumerate(contexts):
+    void ${execution_name}_context_${i}(void) {
+        ${ctx.before}
+        % for testcase in ctx.testcases:
+            ${execution_name}_write_separator();
+            <%include file="statement.mako" args="statement=testcase.input_statement()" />;
+        % endfor
+        ${ctx.after}
+    }
+% endfor
+
 int ${execution_name}() {
 
     ${execution_name}_value_file = fopen("${value_file}", "w");
@@ -52,15 +64,8 @@ int ${execution_name}() {
     % endif
 
     % for i, ctx in enumerate(contexts):
-        {
-            ${execution_name}_write_context_separator();
-            ${ctx.before}
-            % for testcase in ctx.testcases:
-                ${execution_name}_write_separator();
-                <%include file="statement.mako" args="statement=testcase.input_statement()" />;
-            % endfor
-            ${ctx.after}
-        }
+        ${execution_name}_write_context_separator();
+        ${execution_name}_context_${i}();
     % endfor
 
     fclose(${execution_name}_value_file);

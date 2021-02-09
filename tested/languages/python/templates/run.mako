@@ -63,6 +63,23 @@ def send_specific_value(value):
 def send_specific_exception(exception):
     values.send_evaluated(exception_file, exception)
 
+% for i, ctx in enumerate(contexts):
+    def ${execution_name}_context_${i}():
+        ${ctx.before}
+        % for testcase in ctx.testcases:
+            write_separator()
+            <% testcase: _TestcaseArguments %>
+            try:
+                ## If we have a value function, we have an expression.
+                <%include file="statement.mako" args="statement=testcase.input_statement()" />
+            except Exception as e:
+                <%include file="statement.mako" args="statement=testcase.exception_statement('e')" />
+            else:
+                <%include file="statement.mako" args="statement=testcase.exception_statement()" />
+        % endfor
+        ${ctx.after}
+% endfor
+
 ## Prepare the command line arguments if needed.
 % if run_testcase.exists and run_testcase.arguments:
     new_args = [sys.argv[0]]
@@ -92,19 +109,7 @@ except Exception as e:
 
 % for i, ctx in enumerate(contexts):
     write_context_separator()
-    ${ctx.before}
-    % for testcase in ctx.testcases:
-        write_separator()
-        <% testcase: _TestcaseArguments %>
-        try:
-            ## If we have a value function, we have an expression.
-            <%include file="statement.mako" args="statement=testcase.input_statement()" />
-        except Exception as e:
-            <%include file="statement.mako" args="statement=testcase.exception_statement('e')" />
-        else:
-            <%include file="statement.mako" args="statement=testcase.exception_statement()" />
-    % endfor
-    ${ctx.after}
+    ${execution_name}_context_${i}()
 % endfor
 
 ## Close output files.

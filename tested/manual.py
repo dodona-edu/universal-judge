@@ -19,13 +19,13 @@ def read_config() -> DodonaConfig:
     return DodonaConfig(**{
         "memory_limit":         536870912,
         "time_limit":           60,
-        "programming_language": 'python',
+        "programming_language": 'kotlin',
         "natural_language":     'nl',
-        "resources":            Path('exercise/echo/evaluation'),
-        "source":               Path('exercise/echo/solution/comp-error.py'),
+        "resources":            Path('exercise/echo-function/evaluation'),
+        "source":               Path('exercise/echo-function/solution/correct.kt'),
         "judge":                Path('.'),
         "workdir":              Path('workdir'),
-        "plan_name":            "two.tson",
+        "plan_name":            "full.tson",
         "options":              {
             "allow_fallback": False,
             "parallel": True,

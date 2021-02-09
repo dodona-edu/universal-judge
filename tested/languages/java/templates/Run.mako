@@ -67,6 +67,29 @@ public class ${execution_name} implements Closeable {
         Values.sendEvaluated(exceptionWriter, exception);
     }
 
+    % for i, ctx in enumerate(contexts):
+        private void context${i}() throws Exception {
+            ${ctx.before}
+            % for testcase in ctx.testcases:
+                ## In Java, we need special code to make variables available outside of
+                ## the try-catch block.
+                this.writeSeparator();
+                % if isinstance(testcase.command, get_args(Assignment)):
+                    <%include file="declaration.mako"
+                              args="tp=testcase.command.type,value=testcase.command.expression" /> \
+                    ${testcase.command.variable} = null;
+                % endif
+                try {
+                    <%include file="statement.mako" args="statement=testcase.input_statement()" />;
+                    <%include file="statement.mako" args="statement=testcase.exception_statement()" />;
+                } catch (Exception | AssertionError e) {
+                    <%include file="statement.mako" args="statement=testcase.exception_statement('e')" />;
+                }
+            % endfor
+            ${ctx.after}
+        }
+    % endfor
+
     ## Most important function: actual execution happens here.
     void execute() throws Exception {
         ## In Java, we must execute_module the before and after code in the context.
@@ -85,27 +108,8 @@ public class ${execution_name} implements Closeable {
             }
         % endif
         % for i, ctx in enumerate(contexts):
-            {
-                this.writeContextSeparator();
-                ${ctx.before}
-                % for testcase in ctx.testcases:
-                    ## In Java, we need special code to make variables available outside of
-                    ## the try-catch block.
-                    this.writeSeparator();
-                    % if isinstance(testcase.command, get_args(Assignment)):
-                        <%include file="declaration.mako"
-                                  args="tp=testcase.command.type,value=testcase.command.expression" /> \
-                        ${testcase.command.variable} = null;
-                    % endif
-                    try {
-                        <%include file="statement.mako" args="statement=testcase.input_statement()" />;
-                        <%include file="statement.mako" args="statement=testcase.exception_statement()" />;
-                    } catch (Exception | AssertionError e) {
-                        <%include file="statement.mako" args="statement=testcase.exception_statement('e')" />;
-                    }
-                % endfor
-                ${ctx.after}
-            }
+            this.writeContextSeparator();
+            this.context${i}();
         % endfor
     }
 

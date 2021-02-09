@@ -87,8 +87,7 @@ try {
 }
 
 % for i, ctx in enumerate(contexts):
-    {
-        writeContextSeparator();
+    async function context${i}() {
         ${ctx.before}
         % for testcase in ctx.testcases:
             writeSeparator();
@@ -108,6 +107,13 @@ try {
         % endfor
         ${ctx.after}
     }
+% endfor
+
+
+
+% for i, ctx in enumerate(contexts):
+    writeContextSeparator();
+    await context${i}();
 % endfor
 
 ## Close output files.
