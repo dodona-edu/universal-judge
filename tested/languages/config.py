@@ -31,7 +31,7 @@ from enum import Enum, auto
 from pathlib import Path
 from typing import List, Tuple, Mapping, Union, Callable, Set, Dict, Optional, Any
 
-from ..configs import Bundle, DodonaConfig
+from ..configs import Bundle
 from ..datatypes import AllTypes
 from ..dodona import AnnotateCode, Message, Status, ExtendedMessage, Permission
 from ..dsl import Parser
@@ -645,69 +645,74 @@ class Language:
 
     def get_type_name(self,
                       args: TYPE_ARG,
-                      custom_type_map: Dict[
+                      custom_type_map: Optional[Dict[
                           str, Dict[str, Union[str, Dict[str, str]]]
-                      ] = None,
-                      language_name: Optional[str] = None,
-                      is_inner: bool = False) -> str:
+                      ]] = None,
+                      bundle: Optional[Bundle] = None,
+                      is_inner: bool = False,
+                      is_html: bool = True) -> str:
+        if bundle is None:
+            raise ValueError("Bundle must be specified")
+
+        programming_language = bundle.config.programming_language
+
         def _get_type(arg: str) -> Union[str, bool]:
             try:
-                return custom_type_map[language_name][args]
+                return custom_type_map[programming_language][args]
             except KeyError:
                 return self.types[arg]
 
+        def _get_type_or_conventionalize(arg: str) -> str:
+            try:
+                return _get_type(arg)
+            except KeyError:
+                return self.conventionalize_namespace(arg)
+
         def _get_type_name(arg: str) -> Union[str, bool]:
             if not is_inner:
-                try:
-                    return _get_type(arg)
-                except KeyError:
-                    return self.conventionalize_namespace(arg)
+                return _get_type_or_conventionalize(arg)
             else:
                 try:
-                    return custom_type_map[language_name]['inner'][arg]
+                    return custom_type_map[programming_language]['inner'][arg]
                 except KeyError:
                     try:
                         return self.types['inner'][arg]
                     except KeyError:
-                        try:
-                            return _get_type(arg)
-                        except KeyError:
-                            return self.conventionalize_namespace(arg)
-
-        if language_name is None:
-            language_name = self.types['console']['name']
+                        return _get_type_or_conventionalize(arg)
 
         if custom_type_map is None:
             custom_type_map = dict()
 
         if isinstance(args, str):
             name = _get_type_name(args)
-            return name if isinstance(name, str) else args
+            type_name = name if isinstance(name, str) else args
         else:
             main_type = _get_type_name(args[0])
             types = [
-                self.get_type_name(arg, custom_type_map, language_name,
-                                   bool(main_type))
+                self.get_type_name(arg, custom_type_map, bundle, bool(main_type),
+                                   False)
                 for arg in args[1]
             ]
             if isinstance(main_type, str):
-                return f"{self.types[args[0]]}{self.types['hooks']['open']}" \
-                       f"{', '.join(types)}{self.types['hooks']['close']}"
+                type_name = f"{self.types[args[0]]}{self.types['hooks']['open']}" \
+                            f"{', '.join(types)}{self.types['hooks']['close']}"
             elif main_type:
-                return f"{self.types['hooks'][args[0]]['open']}" \
-                       f"{', '.join(types)}{self.types['hooks'][args[0]]['close']}"
+                type_name = f"{self.types['hooks'][args[0]]['open']}" \
+                            f"{', '.join(types)}" \
+                            f"{self.types['hooks'][args[0]]['close']}"
             elif len(types) == 1:
-                return f"{types[0]}{self.types['hooks'][args[0]]['open']}" \
-                       f"{self.types['hooks'][args[0]]['close']}"
+                type_name = f"{types[0]}{self.types['hooks'][args[0]]['open']}" \
+                            f"{self.types['hooks'][args[0]]['close']}"
             else:
                 raise ValueError(f"Type {main_type} expects only one subtype")
+        return html.escape(type_name) if is_html else type_name
 
     def get_function_name(self, name: str):
         return self.conventionalize_function(name)
 
     def get_code_start(self, is_html: bool = True):
         if is_html:
-            pass
+            return "<pre>"
         else:
             prompt = self.types['console']['prompt']
             language_name = self.types['console']['name']
@@ -716,7 +721,8 @@ class Language:
     def get_code_end(self, is_html: bool = True):
         return "</pre>" if is_html else "'''"
 
-    def get_code(self, stmt: str, statement: bool = False, is_html: bool = True):
+    def get_code(self, stmt: str, bundle: Bundle, statement: bool = False,
+                 is_html: bool = True):
         from .generator import convert_statement
         parser = Parser()
         if statement:
@@ -728,32 +734,25 @@ class Language:
         available = self.supported_constructs()
 
         if not (required.constructs <= available):
-            logger.warning("This plan is not compatible!")
+            logger.warning("This statement is not compatible!")
             logger.warning(f"Required constructs are {required.constructs}.")
             logger.warning(f"The language supports {available}.")
             missing = (required.constructs ^ available) & required.constructs
             logger.warning(f"Missing features are: {missing}.")
             raise Exception("Missing features")
 
-        bundle = Bundle(
-            config=DodonaConfig(
-                resources="",
-                source="",
-                time_limit=0,
-                memory_limit=0,
-                natural_language="",
-                programming_language=self.types['console']['name'],
-                workdir="",
-                judge=""
-            ),
-            out=open(os.devnull, 'w'),
-            lang_config=self,
-            secret="",
-            plan=Plan()
-        )
         stmt = convert_statement(bundle, stmt)
         stmt = self.cleanup_description(bundle.plan.namespace, stmt)
-        return (self.types['console']['prompt'] + ' ' if statement else "") + stmt
+        if is_html:
+            return (
+                       html.escape(self.types['console']['prompt']).strip() + ' '
+                       if statement else ""
+                   ) + html.escape(stmt)
+        else:
+            return (
+                       self.types['console']['prompt'].strip() + ' '
+                       if statement else ""
+                   ) + stmt
 
     def get_appendix(self, is_html: bool = True, i18n: str = 'nl'):
         return ""
