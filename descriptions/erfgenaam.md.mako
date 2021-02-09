@@ -43,11 +43,11 @@ ${get_appendix()}
 
 ${"### Voorbeeld"}
 
-${get_code_start()}
+${get_code_start()}\
 ${get_code('heir(8, 10)', statement=True)}
 ${get_code('[10, 4, 15, 11, 7, 5, 3, 2, 16, 12, 1, 6, 13, 9, 14, 8]', statement=False)}
 ${get_code('heir(8, 3)', statement=True)}
 ${get_code('[3, 6, 9, 12, 15, 2, 7, 1, 13, 8, 16, 10, 14, 4, 11, 5]', statement=False)}
 ${get_code('heir(10, 5)', statement=True)}
-${get_code('[5, 10, 15, 20, 6, 12, 18, 4, 13, 3, 16, 7, 14, 1, 8, 9, 2, 17, 11, 19]', statement=False)}
+${get_code('[5, 10, 15, 20, 6, 12, 18, 4, 13, 3, 16, 7, 14, 1, 8, 9, 2, 17, 11, 19]', statement=False)}\
 ${get_code_end()}

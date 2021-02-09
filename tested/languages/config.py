@@ -29,6 +29,9 @@ from collections import defaultdict
 from dataclasses import dataclass
 from enum import Enum, auto
 from pathlib import Path
+from pygments import highlight
+from pygments.formatters.html import HtmlFormatter
+from pygments.lexers import get_lexer_by_name
 from typing import List, Tuple, Mapping, Union, Callable, Set, Dict, Optional, Any
 
 from ..configs import Bundle
@@ -52,6 +55,8 @@ _case_mapping = {
 }
 
 TYPE_ARG = Union[str, Tuple[str, Union[List['TYPE_ARG'], Tuple['TYPE_ARG', ...]]]]
+
+_html_formatter = HtmlFormatter()
 
 
 @dataclass
@@ -204,7 +209,7 @@ class Language:
     is the case, it is recommended to modify the value in the config.json file
     instead of overriding the function in a subclass.
     """
-    __slots__ = ["options"]
+    __slots__ = ["options", "types", "_lexer"]
 
     def __init__(self, config_file: str = "config.json",
                  types_file: str = "types.json"):
@@ -225,6 +230,9 @@ class Language:
                          / types_file)
         with open(path_to_types, "r") as f:
             self.types = json.load(f)
+
+        self._lexer = get_lexer_by_name(self.types["console"]["name"],
+                                        stripall=True)
 
     def compilation(self, config: Config, files: List[str]) -> CallbackResult:
         """
@@ -712,14 +720,14 @@ class Language:
 
     def get_code_start(self, is_html: bool = True):
         if is_html:
-            return "<pre>"
+            return '<div class="highlight"><pre>'
         else:
             prompt = self.types['console']['prompt']
             language_name = self.types['console']['name']
             return f"'''console?lang={language_name}&prompt={prompt}"
 
     def get_code_end(self, is_html: bool = True):
-        return "</pre>" if is_html else "'''"
+        return "</pre></div>" if is_html else "'''"
 
     def get_code(self, stmt: str, bundle: Bundle, statement: bool = False,
                  is_html: bool = True):
@@ -744,15 +752,14 @@ class Language:
         stmt = convert_statement(bundle, stmt)
         stmt = self.cleanup_description(bundle.plan.namespace, stmt)
         if is_html:
-            return (
-                       html.escape(self.types['console']['prompt']).strip() + ' '
-                       if statement else ""
-                   ) + html.escape(stmt)
+            prompt = html.escape(self.types['console']['prompt']).strip()
+            stmt = highlight(stmt, self._lexer, _html_formatter)[41:-13].strip()
+            return (prompt + ' ' if statement else "") + stmt
         else:
-            return (
-                       self.types['console']['prompt'].strip() + ' '
-                       if statement else ""
-                   ) + stmt
+            return ((
+                        self.types['console']['prompt'].strip() + ' '
+                        if statement else ""
+                    ) + stmt).strip()
 
     def get_appendix(self, is_html: bool = True, i18n: str = 'nl'):
         return ""
