@@ -571,6 +571,9 @@ class Run(WithFeatures, WithFunctions):
 
         return values
 
+    def count_contexts(self):
+        return int(self.run.input.main_call) + len(self.contexts)
+
 
 @dataclass
 class Tab(WithFeatures, WithFunctions):
@@ -585,6 +588,9 @@ class Tab(WithFeatures, WithFunctions):
 
     def get_functions(self) -> Iterable[FunctionCall]:
         return flatten(x.get_functions() for x in self.runs)
+
+    def count_contexts(self):
+        return sum(run.count_contexts() for run in self.runs)
 
 
 class ExecutionMode(str, Enum):

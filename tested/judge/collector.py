@@ -219,13 +219,10 @@ class OutputManager:
         assert self.tree_stack == []
 
     def _get_to_add(self) -> List[Update]:
-        def count_contexts(run: Run):
-            return int(run.run.input.main_call) + len(run.contexts)
-
         # Determine which default still need to written.
         assert self.tab < len(self.bundle.plan.tabs)
         tab = self.bundle.plan.tabs[self.tab]
-        contexts_count = sum(count_contexts(run) for run in tab.runs)
+        contexts_count = tab.count_contexts()
         assert self.context < contexts_count
 
         to_write = []
@@ -256,7 +253,7 @@ class OutputManager:
         # Do remainder of tabs.
         for t in range(self.tab + 1, len(self.bundle.plan.tabs)):
             to_write.append(self.prepared.tabs[t].start)
-            for c in range(0, sum(count_contexts(run) for run in tab.runs)):
+            for c in range(0, tab.count_contexts()):
                 context = self.prepared.tabs[t].contexts[c]
                 to_write.append(context.start)
                 to_write.extend(context.content)
