@@ -720,14 +720,16 @@ class Language:
 
     def get_code_start(self, is_html: bool = True):
         if is_html:
-            return '<div class="highlight"><pre>'
+            return f'<div class="highlighter-rouge language-' \
+                   f'{self.types["console"]["name"]}">\n' \
+                   f'<pre class="highlight"><code>'
         else:
             prompt = self.types['console']['prompt']
             language_name = self.types['console']['name']
             return f"'''console?lang={language_name}&prompt={prompt}"
 
     def get_code_end(self, is_html: bool = True):
-        return "</pre></div>" if is_html else "'''"
+        return "</code></pre></div>" if is_html else "'''"
 
     def get_code(self, stmt: str, bundle: Bundle, statement: bool = False,
                  is_html: bool = True):
