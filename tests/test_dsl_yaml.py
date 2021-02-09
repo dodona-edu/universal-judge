@@ -13,13 +13,13 @@ def test_parse_one_tab_ctx():
     yaml_str = """
 - tab: "Ctx"
   hidden: true
-  runs:
-  - run:
-      arguments: [ "--arg", "argument" ]
-      stdin: "Input string"
-      stdout: "Output string"
-      stderr: "Error string"
-      exit_code: 1
+  disable_optimizations: true
+  contexts:
+  - arguments: [ "--arg", "argument" ]
+    stdin: "Input string"
+    stdout: "Output string"
+    stderr: "Error string"
+    exit_code: 1
     """
     json_str = translate(yaml_str)
     plan = _PlanModel.parse_raw(json_str).__root__
@@ -44,18 +44,15 @@ def test_parse_ctx_exception():
     yaml_str = """
 - tab: "Ctx Exception"
   hidden: false
-  runs:
-  - run:
-      arguments: [ "--arg", "fail" ]
-      exception: "Exception message"
-  - run:
-      arguments: [ "--arg", "fail2" ]
-      exit_code: 10
+  contexts:
+  - arguments: [ "--arg", "fail" ]
+    exception: "Exception message"
+  - arguments: [ "--arg", "fail2" ]
+    exit_code: 10
 - tab: "Ctx Error"
-  runs:
-  - run:
-      arguments: [ "--arg", "error" ]
-      exception: "Error"
+  contexts:
+  - arguments: [ "--arg", "error" ]
+    exception: "Error"
     """
     json_str = translate(yaml_str)
     plan = _PlanModel.parse_raw(json_str).__root__
@@ -92,25 +89,21 @@ def test_parse_ctx_with_config():
     stderr:
       ignoreWhitespace: true
       caseInsensitive: false
-  runs:
-  - run:
-      arguments: [ '-a', 2.125, 1.212 ]
-      stdout: "3.34"
-  - run:
-      arguments: [ '-a', 2.125, 1.212 ]
-      stdout:
-        data: "3.337"
-        config:
-          roundTo: 3
+  contexts:
+  - arguments: [ '-a', 2.125, 1.212 ]
+    stdout: "3.34"
+  - arguments: [ '-a', 2.125, 1.212 ]
+    stdout:
+      data: "3.337"
+      config:
+        roundTo: 3
   - config:
       stdout:
         roundTo: 1
-    run:
-      arguments: [ '-a', 2.125, 1.212 ]
-      stdout: "3.3"
-  - run:
-      arguments: [ '-e' ]
-      stderr: " Fail "
+    arguments: [ '-a', 2.125, 1.212 ]
+    stdout: "3.3"
+  - arguments: [ '-e' ]
+    stderr: " Fail "
     """
     args = ['-a', "2.125", "1.212"]
     json_str = translate(yaml_str)
@@ -208,17 +201,15 @@ def test_statements():
 def test_statement_and_main():
     yaml_str = """
 - tab: "Statement and main"
-  runs:
-  - run:
-      arguments: [ '-a', 5, 7 ]
-      stdout:
-        data: 12
-        config:
-          tryFloatingPoint: true
-    contexts:
-      - testcases:
-        - statement: 'add(5, 7)'
-          return: 12
+  contexts:
+  - arguments: [ '-a', 5, 7 ]
+    stdout:
+      data: 12
+      config:
+        tryFloatingPoint: true
+    testcases:
+      - statement: 'add(5, 7)'
+        return: 12
     """
     json_str = translate(yaml_str)
     plan = _PlanModel.parse_raw(json_str).__root__
@@ -251,23 +242,6 @@ def test_invalid_yaml():
     testcases:
     - statement: 'data = () ()'
       return-raw: '() {}'
-    """
-    with pytest.raises(SystemExit) as e:
-        translate(yaml_str)
-    assert e.type == SystemExit
-    assert e.value.code != 0
-
-
-def test_invalid_mutual_exclusive_yaml():
-    yaml_str = """
-- tab: "Tab"
-  runs:
-  - run:
-      arguments: ['-a', 1, 1.2, true, no]
-      stdin: "data"
-  contexts:
-  - testcases:
-    - statement: "Data data = new Data()"
     """
     with pytest.raises(SystemExit) as e:
         translate(yaml_str)

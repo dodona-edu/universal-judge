@@ -194,25 +194,33 @@ class SchemaParser:
 
     def _translate_context(self,
                            context: YAML_DICT,
-                           stack_frame: StackFrame = StackFrame()) -> Context:
+                           stack_frame: StackFrame = StackFrame()
+                           ) -> Tuple[RunTestcase, Optional[Context]]:
         stack_frame = self._translate_config(
             self._get_dict_safe(context, "config"),
             stack_frame
         )
+        run_testcase = self._translate_context_testcase(context, stack_frame)
+
         testcases = []
-        for testcase, files in (self._translate_testcase(testcase, stack_frame)
-                                for testcase in
-                                self._get_list_safe(context, "testcases")):
-            testcases.append(testcase)
-            stack_frame.link_files.extend(files)
+
+        if "testcases" in context:
+            for testcase, files in (self._translate_testcase(testcase, stack_frame)
+                                    for testcase in
+                                    self._get_list_safe(context, "testcases")):
+                testcases.append(testcase)
+                stack_frame.link_files.extend(files)
 
         if "files" in context:
             stack_frame.link_files.extend(
                 self._translate_file(file)
                 for file in self._get_list_safe(context, "files")
             )
-        return Context(testcases=testcases,
-                       link_files=list(set(stack_frame.link_files)))
+
+        if len(testcases) == 0:
+            return run_testcase, None
+        return run_testcase, Context(testcases=testcases,
+                                     link_files=list(set(stack_frame.link_files)))
 
     def _translate_file(self, link_file: YAML_DICT) -> FileUrl:
         name = self._get_str_safe(link_file, "name")
@@ -229,55 +237,36 @@ class SchemaParser:
             tabs = []
         return Plan(tabs=tabs)
 
-    def _translate_run(self, run: YAML_DICT,
-                       stack_frame: StackFrame = StackFrame()) -> Run:
-        stack_frame = self._translate_config(
-            self._get_dict_safe(run, "config"),
-            stack_frame
-        )
-        if "files" in run:
-            stack_frame.link_files.extend(
-                self._translate_file(file)
-                for file in self._get_list_safe(run, "files")
-            )
-        if "contexts" in run:
-            contexts = [
-                self._translate_context(context, stack_frame)
-                for context in self._get_list_safe(run, "contexts")
-            ]
-        else:
-            contexts = []
-        if "run" in run:
-            run_testcase = self._translate_run_testcase(
-                self._get_dict_safe(run, "run"), stack_frame)
-        else:
-            run_testcase = RunTestcase()
-        return Run(contexts=contexts, run=run_testcase)
-
-    def _translate_run_testcase(
+    def _translate_context_testcase(
             self,
-            run_testcase: YAML_DICT,
+            context: YAML_DICT,
             stack_frame: StackFrame = StackFrame()
     ) -> RunTestcase:
-        if "arguments" in run_testcase:
+        main_call = (
+                "arguments" in context or "exception" in context or
+                "exit_code" in context or "stdin" in context or
+                "stdout" in context or "stderr" in context
+        )
+
+        if "arguments" in context:
             arguments = [
                 str(argument)
-                for argument in self._get_list_safe(run_testcase, "arguments")
+                for argument in self._get_list_safe(context, "arguments")
             ]
         else:
             arguments = []
-        if "stdin" in run_testcase:
-            stdin = TextData(data=self._get_str_safe(run_testcase, "stdin"))
+        if "stdin" in context:
+            stdin = TextData(data=self._get_str_safe(context, "stdin"))
         else:
             stdin = EmptyChannel.NONE
 
-        run_input = RunInput(stdin=stdin, arguments=arguments, main_call=True)
+        run_input = RunInput(stdin=stdin, arguments=arguments, main_call=main_call)
 
         run_output = RunOutput()
-        if "exit_code" in run_testcase:
-            run_output.exit_code.value = self._get_int_safe(run_testcase,
+        if "exit_code" in context:
+            run_output.exit_code.value = self._get_int_safe(context,
                                                             "exit_code")
-        self._translate_base_output(run_testcase, run_output, stack_frame)
+        self._translate_base_output(context, run_output, stack_frame)
         return RunTestcase(input=run_input, output=run_output)
 
     def _translate_stream(self,
@@ -299,17 +288,40 @@ class SchemaParser:
         )
         hidden = self._get_bool_safe(tab, "hidden")
         name = self._get_str_safe(tab, "tab")
-        if "contexts" in tab:
-            contexts = [
-                self._translate_context(context, stack_frame)
-                for context in self._get_list_safe(tab, "contexts")
-            ]
-            runs = [Run(contexts=contexts)]
+        optimize = self._get_bool_safe(tab, "disable_optimizations") is not True
+
+        translated_contexts = [
+            self._translate_context(context, stack_frame)
+            for context in self._get_list_safe(tab, "contexts")
+        ]
+
+        if len(translated_contexts) == 0:
+            return Tab(name=name, hidden=hidden, runs=[])
+
+        runs = []
+        if optimize:
+            new_run = False
+            for context_testcase, context in translated_contexts:
+                if context_testcase.input.main_call:
+                    runs.append(Run(run=context_testcase))
+                    if context_testcase.output.exit_code.value != 0:
+                        new_run = True
+                if context is not None:
+                    if new_run:
+                        new_run = False
+                        runs.append(Run(contexts=[context]))
+                    else:
+                        try:
+                            runs[-1].contexts.append(context)
+                        except IndexError:
+                            runs.append(Run(contexts=[context]))
         else:
             runs = [
-                self._translate_run(run, stack_frame)
-                for run in self._get_list_safe(tab, "runs")
+                Run(contexts=[context] if context is not None else [],
+                    run=context_testcase)
+                for context_testcase, context in translated_contexts
             ]
+
         return Tab(name=name, hidden=hidden, runs=runs)
 
     def _translate_testcase(self,
