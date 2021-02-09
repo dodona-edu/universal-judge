@@ -1,0 +1,36 @@
+{
+  "hooks": {
+    "open": "<",
+    "close": ">"
+  },
+  "console": {
+    "name": "kotlin",
+    "prompt": ">"
+  },
+  "integer": "Int",
+  "rational": "Double",
+  "char": "Char",
+  "text": "String",
+  "boolean": "Boolean",
+  "sequence": "List",
+  "set": "Set",
+  "map": "Map",
+  "nothing": "Void",
+  "int8": "Byte",
+  "uint8": "Short",
+  "int16": "Short",
+  "uint16": "Int",
+  "int32": "Int",
+  "uint32": "Long",
+  "int64": "Long",
+  "uint64": "BigInteger",
+  "bigint": "BigInteger",
+  "single_precision": "Float",
+  "double_precision": "Double",
+  "double_extended": "BigDecimal",
+  "fixed_precision": "BigDecimal",
+  "array": "Array",
+  "list": "List",
+  "inner": {
+  }
+}

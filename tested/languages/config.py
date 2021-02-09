@@ -648,35 +648,59 @@ class Language:
                       custom_type_map: Dict[
                           str, Dict[str, Union[str, Dict[str, str]]]
                       ] = None,
+                      language_name: Optional[str] = None,
                       is_inner: bool = False) -> str:
-        language_name = self.types['console']['name']
-
-        def _get_type():
+        def _get_type(arg: str) -> Union[str, bool]:
             try:
                 return custom_type_map[language_name][args]
             except KeyError:
-                return self.types[args]
+                return self.types[arg]
+
+        def _get_type_name(arg: str) -> Union[str, bool]:
+            if not is_inner:
+                try:
+                    return _get_type(arg)
+                except KeyError:
+                    return self.conventionalize_namespace(arg)
+            else:
+                try:
+                    return custom_type_map[language_name]['inner'][arg]
+                except KeyError:
+                    try:
+                        return self.types['inner'][arg]
+                    except KeyError:
+                        try:
+                            return _get_type(arg)
+                        except KeyError:
+                            return self.conventionalize_namespace(arg)
+
+        if language_name is None:
+            language_name = self.types['console']['name']
 
         if custom_type_map is None:
             custom_type_map = dict()
 
         if isinstance(args, str):
-            if not is_inner:
-                return _get_type()
-            else:
-                try:
-                    return custom_type_map[language_name]['inner'][args]
-                except KeyError:
-                    try:
-                        return self.types['inner'][args]
-                    except KeyError:
-                        return _get_type()
+            name = _get_type_name(args)
+            return name if isinstance(name, str) else args
         else:
-            types = ', '.join(
-                self.get_type_name(arg, custom_type_map, True) for arg in args[1]
-            )
-            return f"{self.types[args[0]]}{self.types['hooks']['open']}" \
-                   f"{types}{self.types['hooks']['close']}"
+            main_type = _get_type_name(args[0])
+            types = [
+                self.get_type_name(arg, custom_type_map, language_name,
+                                   bool(main_type))
+                for arg in args[1]
+            ]
+            if isinstance(main_type, str):
+                return f"{self.types[args[0]]}{self.types['hooks']['open']}" \
+                       f"{', '.join(types)}{self.types['hooks']['close']}"
+            elif main_type:
+                return f"{self.types['hooks'][args[0]]['open']}" \
+                       f"{', '.join(types)}{self.types['hooks'][args[0]]['close']}"
+            elif len(types) == 1:
+                return f"{types[0]}{self.types['hooks'][args[0]]['open']}" \
+                       f"{self.types['hooks'][args[0]]['close']}"
+            else:
+                raise ValueError(f"Type {main_type} expects only one subtype")
 
     def get_function_name(self, name: str):
         return self.conventionalize_function(name)
@@ -699,6 +723,18 @@ class Language:
             stmt = parser.parse_statement(stmt)
         else:
             stmt = parser.parse_value(stmt)
+
+        required = stmt.get_used_features()
+        available = self.supported_constructs()
+
+        if not (required.constructs <= available):
+            logger.warning("This plan is not compatible!")
+            logger.warning(f"Required constructs are {required.constructs}.")
+            logger.warning(f"The language supports {available}.")
+            missing = (required.constructs ^ available) & required.constructs
+            logger.warning(f"Missing features are: {missing}.")
+            raise Exception("Missing features")
+
         bundle = Bundle(
             config=DodonaConfig(
                 resources="",
@@ -721,4 +757,3 @@ class Language:
 
     def get_appendix(self, is_html: bool = True, i18n: str = 'nl'):
         return ""
-

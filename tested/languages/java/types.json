@@ -1,0 +1,53 @@
+{
+  "hooks": {
+    "open": "<",
+    "close": ">",
+    "array": {
+      "open": "[",
+      "close": "]"
+    }
+  },
+  "console": {
+    "name": "java",
+    "prompt": ">"
+  },
+  "integer": "int",
+  "rational": "float",
+  "char": "char",
+  "text": "String",
+  "boolean": "boolean",
+  "sequence": "List",
+  "set": "Set",
+  "map": "Map",
+  "nothing": "Void",
+  "int8": "byte",
+  "uint8": "short",
+  "int16": "short",
+  "uint16": "int",
+  "int32": "int",
+  "uint32": "long",
+  "int64": "long",
+  "uint64": "BigInteger",
+  "bigint": "BigInteger",
+  "single_precision": "float",
+  "double_precision": "double",
+  "double_extended": "BigDecimal",
+  "fixed_precision": "BigDecimal",
+  "array": false,
+  "list": "List",
+  "inner": {
+    "boolean": "Boolean",
+    "char": "Character",
+    "integer": "Integer",
+    "rational": "Double",
+    "single_precision": "Float",
+    "double_precision": "Double",
+    "int8": "Byte",
+    "uint8": "Short",
+    "int16": "Short",
+    "uint16": "Integer",
+    "int32": "Integer",
+    "uint32": "Long",
+    "int64": "Long"
+  }
+}

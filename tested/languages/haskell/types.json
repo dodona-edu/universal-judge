@@ -1,0 +1,42 @@
+{
+  "hooks": {
+    "tuple": {
+      "open": "(",
+      "close": ")"
+    },
+    "list": {
+      "open": "[",
+      "close": "]"
+    },
+    "sequence": {
+      "open": "[",
+      "close": "]"
+    }
+  },
+  "console": {
+    "name": "haskell",
+    "prompt": ">"
+  },
+  "integer": "Int",
+  "rational": "Double",
+  "char": "Char",
+  "text": "String",
+  "boolean": "Bool",
+  "sequence": true,
+  "nothing": "nothing",
+  "int8": "Data.Int.Int8",
+  "uint8": "Data.Word.Word8",
+  "int16": "Data.Int.Int16",
+  "uint16": "Data.Word.Word16",
+  "int32": "Data.Int.Int32",
+  "uint32": "Data.Word.Word32",
+  "int64": "Data.Int.Int64",
+  "uint64": "Data.Word.Word64",
+  "bigint": "Integer",
+  "single_precision": "Float",
+  "double_precision": "Double",
+  "list": true,
+  "tuple": true,
+  "inner": {
+  }
+}
