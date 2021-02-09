@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 from logging import getLogger
 from json import dumps
 from jsonschema import Draft7Validator
+from pydantic.json import pydantic_encoder
 from os.path import basename, dirname, join, splitext
 from typing import Any, Dict, List, Optional, Union, Tuple
 from yaml import safe_load
@@ -16,8 +17,6 @@ from tested.testplan import BaseOutput, Context, EmptyChannel, \
     ExceptionOutputChannel, FileUrl, GenericTextEvaluator, Output, Plan, Run, \
     RunTestcase, RunInput, RunOutput, Tab, Testcase, TextData, TextOutputChannel, \
     ValueOutputChannel
-
-from .JSONEncoder import DataclassJSONEncoder
 
 logger = getLogger(__name__)
 
@@ -360,7 +359,7 @@ class SchemaParser:
             ))
 
     def _write_to_json_string(self, json_object: Any) -> str:
-        return dumps(json_object, cls=DataclassJSONEncoder, indent=self.indent)
+        return dumps(json_object, default=pydantic_encoder, indent=self.indent)
 
     def _validate(self, instance: YAML_OBJECT):
         if not self.validator.is_valid(instance):
