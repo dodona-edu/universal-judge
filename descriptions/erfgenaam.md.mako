@@ -31,23 +31,23 @@ We beginnen in wijzerzin af te tellen vanaf kind nummer $1$, waarbij elk $n$-de 
 Nadat $k-1$ kinderen uit de cirkel verwijderd werden, wordt verder geteld in tegenwijzerzin.
 De cirkel wordt steeds kleiner en kleiner en het laatste kind dat overblijft wordt de erfgenaam van de boer.
 
-Schrijf een statische functie ${get_function_name("heir")},
-waaraan de waarden $k$ en $n$, van het type ${get_type_name("integer")},
+Schrijf een statische functie ${function_name("heir")},
+waaraan de waarden $k$ en $n$, van het type ${type_name("integer")},
 moeten doorgegeven worden, waarbij je er mag van uitgaan dat $k >= 2$.
-De functie moet een lijst, van het type ${get_type_name(("list", ("integer",)), {"java": {"integer": "Integer"}})}
+De functie moet een lijst, van het type ${type_name(("list", "integer"))}
 teruggeven die de volgorde aangeeft waarin de kinderen uit de cirkel verwijderd werden.
 Het eerst verwijderde kind staat daarbij als eerste in de lijst, en de uiteindelijke erfgenaam als laatste in de lijst.
 Gebruik de volgnummers waarmee de kinderen in de lijst genummerd werden als elementen in de lijst.
 
-${get_appendix()}
+${appendix()}
 
 ${"### Voorbeeld"}
 
-${get_code_start()}\
-${get_code('heir(8, 10)', statement=True)}
-${get_code('[10, 4, 15, 11, 7, 5, 3, 2, 16, 12, 1, 6, 13, 9, 14, 8]', statement=False)}
-${get_code('heir(8, 3)', statement=True)}
-${get_code('[3, 6, 9, 12, 15, 2, 7, 1, 13, 8, 16, 10, 14, 4, 11, 5]', statement=False)}
-${get_code('heir(10, 5)', statement=True)}
-${get_code('[5, 10, 15, 20, 6, 12, 18, 4, 13, 3, 16, 7, 14, 1, 8, 9, 2, 17, 11, 19]', statement=False)}\
-${get_code_end()}
+${code_start()}
+${statement('heir(8, 10)')}
+${expression('[10, 4, 15, 11, 7, 5, 3, 2, 16, 12, 1, 6, 13, 9, 14, 8]')}
+${statement('heir(8, 3)')}
+${expression('[3, 6, 9, 12, 15, 2, 7, 1, 13, 8, 16, 10, 14, 4, 11, 5]')}
+${statement('heir(10, 5)')}
+${expression('[5, 10, 15, 20, 6, 12, 18, 4, 13, 3, 16, 7, 14, 1, 8, 9, 2, 17, 11, 19]')}
+${code_end()}

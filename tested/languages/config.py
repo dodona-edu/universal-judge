@@ -54,7 +54,9 @@ _case_mapping = {
     "snake_case":  snake_case
 }
 
-TYPE_ARG = Union[str, Tuple[str, Union[List['TYPE_ARG'], Tuple['TYPE_ARG', ...]]]]
+TYPE_ARG = Union[
+    str, Tuple[str, Union[str, List['TYPE_ARG'], Tuple['TYPE_ARG', ...]]]
+]
 
 _html_formatter = HtmlFormatter()
 
@@ -696,11 +698,15 @@ class Language:
             type_name = name if isinstance(name, str) else args
         else:
             main_type = _get_type_name(args[0])
-            types = [
-                self.get_type_name(arg, custom_type_map, bundle, bool(main_type),
-                                   False)
-                for arg in args[1]
-            ]
+            if isinstance(args[1], str):
+                types = [self.get_type_name(args[1], custom_type_map, bundle,
+                                            bool(main_type), False)]
+            else:
+                types = [
+                    self.get_type_name(arg, custom_type_map, bundle,
+                                       bool(main_type), False)
+                    for arg in args[1]
+                ]
             if isinstance(main_type, str):
                 type_name = f"{self.types[args[0]]}{self.types['hooks']['open']}" \
                             f"{', '.join(types)}{self.types['hooks']['close']}"
@@ -763,5 +769,22 @@ class Language:
                         if statement else ""
                     ) + stmt).strip()
 
-    def get_appendix(self, is_html: bool = True, i18n: str = 'nl'):
-        return ""
+    def get_appendix(self, bundle: Bundle, is_html: bool = True):
+        i18n = bundle.config.natural_language
+        if "appendix" not in self.types:
+            return ""
+        appendix = self.types["appendix"]
+
+        if isinstance(appendix, dict):
+            if i18n in appendix:
+                appendix = appendix[i18n]
+            else:
+                try:
+                    appendix = appendix["default"]
+                except KeyError:
+                    return ""
+
+        appendix = appendix.format(
+            namespace=self.conventionalize_namespace(bundle.plan.namespace))
+
+        return f"<p>{html.escape(appendix)}</p>" if is_html else appendix
