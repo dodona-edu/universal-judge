@@ -102,6 +102,10 @@
           "$ref": "#/definitions/globalConfig",
           "description": "Configuration of textual comparison at tab level"
         },
+        "disable_optimizations": {
+          "type": "boolean",
+          "description": "Disable performance optimizations"
+        },
         "hidden": {
           "type": "boolean",
           "description": "Defines if the tab is hidden for the student or not"
@@ -109,13 +113,6 @@
         "tab": {
           "type": "string",
           "description": "Name for the tab on Dodona"
-        },
-        "runs": {
-          "type": "array",
-          "description": "Execution run",
-          "items": {
-            "$ref": "#/definitions/run"
-          }
         },
         "contexts": {
           "type": "array",
@@ -125,50 +122,55 @@
           }
         }
       },
-      "oneOf": [
-        {
-          "required": [
-            "runs",
-            "tab"
-          ],
-          "not": {
-            "required": [
-              "contexts"
-            ]
-          }
-        },
-        {
-          "required": [
-            "contexts",
-            "tab"
-          ],
-          "not": {
-            "required": [
-              "runs"
-            ]
-          }
-        }
+      "required": [
+        "contexts",
+        "tab"
       ]
     },
-    "run": {
+    "context": {
       "type": "object",
-      "description": "A run collects multiple contexts",
+      "description": "Information to execute one context",
       "anyOf": [
         {
           "required": [
-            "run"
+            "testcases"
           ]
         },
         {
           "required": [
-            "contexts"
+            "arguments"
+          ]
+        },
+        {
+          "required": [
+            "exception"
+          ]
+        },
+        {
+          "required": [
+            "exit_code"
+          ]
+        },
+        {
+          "required": [
+            "stdin"
+          ]
+        },
+        {
+          "required": [
+            "stderr"
+          ]
+        },
+        {
+          "required": [
+            "stdout"
           ]
         }
       ],
       "properties": {
         "config": {
           "$ref": "#/definitions/globalConfig",
-          "description": "Configuration of textual comparison at run level"
+          "description": "Configuration of textual comparison at context level"
         },
         "files": {
           "type": "array",
@@ -176,23 +178,14 @@
             "$ref": "#/definitions/file"
           }
         },
-        "run": {
-          "$ref": "#/definitions/runTestcase"
-        },
-        "contexts": {
+        "testcases": {
           "type": "array",
+          "description": "Array of statements and expression tests",
           "minItems": 1,
           "items": {
-            "$ref": "#/definitions/context"
+            "$ref": "#/definitions/testcase"
           }
-        }
-      }
-    },
-    "runTestcase": {
-      "type": "object",
-      "description": "Information for the run testcase",
-      "minProperties": 1,
-      "properties": {
+        },
         "arguments": {
           "type": "array",
           "description": "Array of program call arguments",
@@ -219,33 +212,6 @@
         "stdout": {
           "description": "Expected output for main call at stdout",
           "$ref": "#/definitions/streamOutput"
-        }
-      }
-    },
-    "context": {
-      "type": "object",
-      "description": "Information to execute one context",
-      "required": [
-        "testcases"
-      ],
-      "properties": {
-        "config": {
-          "$ref": "#/definitions/globalConfig",
-          "description": "Configuration of textual comparison at context level"
-        },
-        "files": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/file"
-          }
-        },
-        "testcases": {
-          "type": "array",
-          "description": "Array of statements and expression tests",
-          "minItems": 1,
-          "items": {
-            "$ref": "#/definitions/testcase"
-          }
         }
       }
     },
