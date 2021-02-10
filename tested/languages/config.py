@@ -708,15 +708,16 @@ class Language:
                     for arg in args[1]
                 ]
             if isinstance(main_type, str):
-                type_name = f"{self.types[args[0]]}{self.types['hooks']['open']}" \
-                            f"{', '.join(types)}{self.types['hooks']['close']}"
+                type_name = f"{self.types[args[0]]}" \
+                            f"{self.types['brackets']['open']}" \
+                            f"{', '.join(types)}{self.types['brackets']['close']}"
             elif main_type:
-                type_name = f"{self.types['hooks'][args[0]]['open']}" \
+                type_name = f"{self.types['brackets'][args[0]]['open']}" \
                             f"{', '.join(types)}" \
-                            f"{self.types['hooks'][args[0]]['close']}"
+                            f"{self.types['brackets'][args[0]]['close']}"
             elif len(types) == 1:
-                type_name = f"{types[0]}{self.types['hooks'][args[0]]['open']}" \
-                            f"{self.types['hooks'][args[0]]['close']}"
+                type_name = f"{types[0]}{self.types['brackets'][args[0]]['open']}" \
+                            f"{self.types['brackets'][args[0]]['close']}"
             else:
                 raise ValueError(f"Type {main_type} expects only one subtype")
         return html.escape(type_name) if is_html else type_name

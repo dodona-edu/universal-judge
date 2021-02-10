@@ -1,5 +1,5 @@
 {
-  "hooks": {
+  "brackets": {
     "tuple": {
       "open": "(",
       "close": ")"
