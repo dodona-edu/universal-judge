@@ -10,6 +10,8 @@ import Control.Exception
 import qualified Data.ByteString.Lazy as LBS
 import EvaluationUtils
 import System.IO (Handle)
+import System.IO.Unsafe (unsafePerformIO)
+
 
 -- Typeable things are convertible to our format
 class Typeable a where
@@ -27,6 +29,13 @@ instance (Typeable a) => Typeable (Maybe a) where
     toJson m = case m of
         Just n -> toJson n
         Nothing -> Null
+
+instance (Typeable a) => Typeable (IO a) where
+    {-# NOINLINE toType #-}
+    toType = toType . unsafePerformIO
+    {-# NOINLINE toJson #-}
+    toJson = toJson . unsafePerformIO
+
 instance Typeable W.Word8 where toType _ = "uint8"
 instance Typeable W.Word16 where toType _ = "uint16"
 instance Typeable W.Word32 where toType _ = "uint32"
