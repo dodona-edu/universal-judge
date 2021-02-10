@@ -57,7 +57,7 @@ if __name__ == "__main__":
         description="Translate description for language"
     )
     parser.add_argument('-d', '--description', type=FileType('r'),
-                        help="Description", default="-")
+                        help="Description template", default="-")
     parser.add_argument('-l', '--language', type=str, help="Programming language",
                         default="python")
     parser.add_argument('-o', '--output', type=FileType('w'),
