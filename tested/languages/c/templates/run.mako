@@ -50,8 +50,6 @@ static void ${execution_name}_write_context_separator() {
 
 int ${execution_name}() {
 
-    int ${execution_name}_exit_code = 0;
-
     ${execution_name}_value_file = fopen("${value_file}", "w");
     ${execution_name}_exception_file = fopen("${exception_file}", "w");
 
@@ -62,7 +60,10 @@ int ${execution_name}() {
             "${argument}", \
         % endfor
         };
-        ${execution_name}_exit_code = solution_main(${len(run_testcase.arguments) + 1}, args);
+        int exit_code = solution_main(${len(run_testcase.arguments) + 1}, args);
+        if (exit_code != 0) {
+            return exit_code;
+        }
     % endif
 
     % for i, ctx in enumerate(contexts):
@@ -72,7 +73,7 @@ int ${execution_name}() {
 
     fclose(${execution_name}_value_file);
     fclose(${execution_name}_exception_file);
-    return ${execution_name}_exit_code;
+    return 0;
 }
 
 #ifndef INCLUDED
