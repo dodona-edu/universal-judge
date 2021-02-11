@@ -720,12 +720,17 @@ class Language:
                             f"{self.types['brackets'][args[0]]['close']}"
             else:
                 raise ValueError(f"Type {main_type} expects only one subtype")
-        return html.escape(type_name) if is_html else type_name
+        if is_html:
+            return f"<code>{html.escape(type_name)}</code>"
+        return f"`{type_name}`" if not is_inner else type_name
 
-    def get_function_name(self, name: str):
-        return self.conventionalize_function(name)
+    def get_function_name(self, name: str, is_html: bool = True) -> str:
+        function_name = self.conventionalize_function(name)
+        if is_html:
+            return f"<code>{html.escape(function_name)}</code>"
+        return f"`{function_name}`"
 
-    def get_code_start(self, is_html: bool = True):
+    def get_code_start(self, is_html: bool = True) -> str:
         if is_html:
             return f'<div class="highlighter-rouge language-' \
                    f'{self.types["console"]["name"]}">\n' \
@@ -733,13 +738,13 @@ class Language:
         else:
             prompt = self.types['console']['prompt']
             language_name = self.types['console']['name']
-            return f"'''console?lang={language_name}&prompt={prompt}"
+            return f"```console?lang={language_name}&prompt={prompt}"
 
-    def get_code_end(self, is_html: bool = True):
-        return "</code></pre></div>" if is_html else "'''"
+    def get_code_end(self, is_html: bool = True) -> str:
+        return "</code></pre></div>" if is_html else "```"
 
     def get_code(self, stmt: str, bundle: Bundle, statement: bool = False,
-                 is_html: bool = True):
+                 is_html: bool = True) -> str:
         from .generator import convert_statement
         parser = Parser()
         if statement:
@@ -770,7 +775,7 @@ class Language:
                         if statement else ""
                     ) + stmt).strip()
 
-    def get_appendix(self, bundle: Bundle, is_html: bool = True):
+    def get_appendix(self, bundle: Bundle, is_html: bool = True) -> str:
         i18n = bundle.config.natural_language
         if "appendix" not in self.types:
             return ""

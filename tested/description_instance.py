@@ -41,7 +41,7 @@ def create_description_instance(mako_template: str,
 
     return template.render(
         appendix=partial(language.get_appendix, bundle=bundle, is_html=is_html),
-        function_name=language.get_function_name,
+        function_name=partial(language.get_function_name, is_html=is_html),
         type_name=partial(language.get_type_name, bundle=bundle, is_html=is_html),
         code_start=partial(language.get_code_start, is_html=is_html),
         code_end=partial(language.get_code_end, is_html=is_html),

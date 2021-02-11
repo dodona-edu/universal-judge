@@ -1,6 +1,6 @@
 <p>
     In the <span style="font-style: italic;">rail fence cipher</span>
-    (also called <span style="font-style: italic;">zigzag cipher<span>),
+    (also called <span style="font-style: italic;">zigzag cipher</span>),
     the letters of the plaintext are initially written downwards and diagonally on successive "rails" of an imaginary
     fence, and then moving up after the bottom rail has been reached. When the top rail is reached,
     the message is again written downwards until the whole plaintext is written out.
@@ -20,7 +20,7 @@
 <p>
     The encoded message is then formed by reading the letters on each rail from left to right,
     and going through the rails top to bottom. The encoded message for the above example thus reads as
-    "<code>Awsimlf.no  ohnopeyfetdnfrmtgclt irn oe ede</code>".
+    "<code>Awsimlf.no&nbsp; ohnopeyfetdnfrmtgclt irn oe ede</code>".
 </p>
 
 <h3>Assignment</h3>
