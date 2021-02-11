@@ -25,9 +25,9 @@ from tested.serialisation import NumberType, Value, parse_value, StringType, \
     BooleanType, SequenceType, ObjectType, \
     NothingType, as_basic_type, to_python_comparable
 from tested.testplan import Plan
-from tests.manual_utils import configuration
+from tests.manual_utils import configuration, mark_haskell
 
-LANGUAGES = ["python", "java", "c", "javascript", "kotlin"]  # , "haskell"
+LANGUAGES = ["python", "java", "c", "javascript", "kotlin", pytest.param("runhaskell", marks=mark_haskell)]
 
 
 @dataclass
@@ -70,7 +70,7 @@ def assert_serialisation(bundle: Bundle, tmp_path: Path, expected: Value):
     assert actual.data == expected.data
 
 
-@pytest.mark.parametrize("language", ["javascript", "python", "c", "java", "kotlin"])  # , "runhaskell"
+@pytest.mark.parametrize("language", LANGUAGES)
 def test_basic_types(language, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "", language, tmp_path)
     plan = Plan()
@@ -148,8 +148,8 @@ def test_kotlin_escape(tmp_path: Path, pytestconfig):
     assert_serialisation(bundle, tmp_path, StringType(type=BasicStringTypes.CHAR, data="'"))
 
 
-@pytest.mark.skip(reason="No more haskell")
-def no_test_haskell_escape(tmp_path: Path, pytestconfig):
+@mark_haskell
+def test_haskell_escape(tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "", "runhaskell", tmp_path)
     plan = Plan()
     bundle = create_bundle(conf, sys.stdout, plan)

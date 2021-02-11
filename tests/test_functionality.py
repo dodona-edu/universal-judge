@@ -13,10 +13,10 @@ from pathlib import Path
 import pytest
 
 from tested.languages import LANGUAGES
-from tests.manual_utils import assert_valid_output, configuration, execute_config
+from tests.manual_utils import assert_valid_output, configuration, execute_config, mark_haskell
 
-COMPILE_LANGUAGES = ["python", "java", "c", "kotlin"]  # ", haskell"
-ALL_LANGUAGES = COMPILE_LANGUAGES + ["javascript"]  # ", runhaskell"
+COMPILE_LANGUAGES = ["python", "java", "c", "kotlin", pytest.param("haskell", marks=mark_haskell)]
+ALL_LANGUAGES = COMPILE_LANGUAGES + ["javascript", pytest.param("runhaskell", marks=mark_haskell)]
 
 
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
@@ -77,7 +77,8 @@ def test_programmed_evaluation(language: str, tmp_path: Path, pytestconfig):
     assert len(updates.find_all("append-message")) == 4
 
 
-@pytest.mark.parametrize("lang", ["python", "java", "kotlin"])  # , "haskell", "runhaskell"
+@pytest.mark.parametrize("lang", ["python", "java", "javascript", "kotlin", pytest.param("haskell", marks=mark_haskell),
+                                  pytest.param("runhaskell", marks=mark_haskell)])
 def test_language_evaluator_exception(lang: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "division", lang, tmp_path, "plan.json", "correct")
     result = execute_config(conf)
@@ -85,7 +86,8 @@ def test_language_evaluator_exception(lang: str, tmp_path: Path, pytestconfig):
     assert updates.find_status_enum() == ["correct"]
 
 
-@pytest.mark.parametrize("lang", ["python", "java", "kotlin"])  # , "haskell", "runhaskell"
+@pytest.mark.parametrize("lang", ["python", "java", "kotlin", pytest.param("haskell", marks=mark_haskell),
+                                  pytest.param("runhaskell", marks=mark_haskell)])
 def test_language_evaluator_exception(lang: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "division", lang, tmp_path, "plan.json", "wrong")
     result = execute_config(conf)
@@ -107,7 +109,8 @@ def test_assignment_and_use_in_expression(lang: str, tmp_path: Path, pytestconfi
     assert len(updates.find_all("start-test")) == 1
 
 
-@pytest.mark.parametrize("lang", ["python", "java", "kotlin"])  # , "haskell", "runhaskell"
+@pytest.mark.parametrize("lang", ["python", "java", "kotlin", pytest.param("haskell", marks=mark_haskell),
+                                  pytest.param("runhaskell", marks=mark_haskell)])
 def test_assignment_and_use_in_expression_list(lang: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "isbn-list", lang, tmp_path, "one-with-assignment.tson", "solution")
     result = execute_config(conf)
@@ -133,7 +136,8 @@ def test_crashing_assignment_with_before(lang: str, tmp_path: Path, pytestconfig
     assert updates.find_next("start-test")["channel"] == "exception"
 
 
-@pytest.mark.parametrize("lang", ["c"])  # , "haskell", "runhaskell"
+@pytest.mark.parametrize("lang", ["c", pytest.param("haskell", marks=mark_haskell),
+                                  pytest.param("runhaskell", marks=mark_haskell)])
 def test_heterogeneous_arguments_are_detected(lang: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "isbn", lang, tmp_path, "full.tson", "solution")
     result = execute_config(conf)
@@ -265,7 +269,8 @@ def test_objects(language: str, tmp_path: Path, pytestconfig):
     assert len(updates.find_all("start-testcase")) == 3
 
 
-@pytest.mark.parametrize("language", ["c"])  # , "haskell", "runhaskell"
+@pytest.mark.parametrize("language", ["c", pytest.param("haskell", marks=mark_haskell),
+                                      pytest.param("runhaskell", marks=mark_haskell)])
 def test_objects_error(language: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "objects", language, tmp_path, "plan.tson", "correct")
     result = execute_config(conf)
@@ -291,7 +296,8 @@ def test_named_parameters_supported(tmp_path: Path, pytestconfig):
     assert updates.find_status_enum() == ["correct"]
 
 
-@pytest.mark.parametrize("language", ["java", "c", "javascript"])  # , "runhaskell"
+@pytest.mark.parametrize("language", ["java", "c", "javascript", pytest.param("haskell", marks=mark_haskell),
+                                      pytest.param("runhaskell", marks=mark_haskell)])
 def test_named_parameters_not_supported(language, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "echo-function", language, tmp_path, "one-named.tson", "correct")
     result = execute_config(conf)
