@@ -1,6 +1,7 @@
 from copy import deepcopy
 from dataclasses import dataclass, field
 from logging import getLogger
+from itertools import groupby
 from json import dumps
 from jsonschema import Draft7Validator
 from pydantic.json import pydantic_encoder
@@ -219,8 +220,12 @@ class SchemaParser:
 
         if len(testcases) == 0:
             return run_testcase, None
+
+        unique_file_urls = list(
+            k for k, _ in groupby(sorted(stack_frame.link_files,
+                                         key=lambda x: (x.name, x.content))))
         return run_testcase, Context(testcases=testcases,
-                                     link_files=list(set(stack_frame.link_files)))
+                                     link_files=unique_file_urls)
 
     def _translate_file(self, link_file: YAML_DICT) -> FileUrl:
         name = self._get_str_safe(link_file, "name")

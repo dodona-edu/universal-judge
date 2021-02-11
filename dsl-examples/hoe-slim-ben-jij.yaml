@@ -3,157 +3,107 @@
 # For each tab we will use on dodona, we need a 'tab' field
 - tab: "Feedback"
   # Each tab needs te field 'test' which contains a list of tests to be evaluated
-  runs:
+  contexts:
   # Our example tests contains an input on stdin, notated with the field 'stdin'
   # Our tests expect some output on stdout, notated with the field 'stdout'
-  - run:
-      stdin: "8809"
-      stdout: "6"
-  - run:
-      stdin: "7111"
-      stdout: "0"
-  - run:
-      stdin: "2172"
-      stdout: "0"
-  - run:
-      stdin: "6666"
-      stdout: "4"
-  - run:
-      stdin: "1111"
-      stdout: "0"
-  - run:
-      stdin: "3213"
-      stdout: "0"
-  - run:
-      stdin: "7662"
-      stdout: "2"
-  - run:
-      stdin: "9313"
-      stdout: "1"
-  - run:
-      stdin: "0000"
-      stdout: "4"
-  - run:
-      stdin: "2222"
-      stdout: "0"
-  - run:
-      stdin: "3333"
-      stdout: "0"
-  - run:
-      stdin: "5555"
-      stdout: "0"
-  - run:
-      stdin: "8193"
-      stdout: "3"
-  - run:
-      stdin: "8096"
-      stdout: "5"
-  - run:
-      stdin: "1012"
-      stdout: "1"
-  - run:
-      stdin: "7777"
-      stdout: "0"
-  - run:
-      stdin: "9999"
-      stdout: "4"
-  - run:
-      stdin: "7756"
-      stdout: "1"
-  - run:
-      stdin: "6855"
-      stdout: "3"
-  - run:
-      stdin: "9881"
-      stdout: "5"
-  - run:
-      stdin: "5531"
-      stdout: "0"
-  - run:
-      stdin: "2581"
-      stdout: "2"
-  - run:
-      stdin: "8964768"
-      stdout: "8"
-  - run:
-      stdin: "678390"
-      stdout: "5"
-  - run:
-      stdin: "920925"
-      stdout: "3"
-  - run:
-      stdin: "9414560"
-      stdout: "5"
-  - run:
-      stdin: "1681"
-      stdout: "3"
-  - run:
-      stdin: "9847"
-      stdout: "4"
-  - run:
-      stdin: "1704433"
-      stdout: "3"
-  - run:
-      stdin: "4815"
-      stdout: "3"
-  - run:
-      stdin: "3382515"
-      stdout: "1"
-  - run:
-      stdin: "58698634"
-      stdout: "8"
-  - run:
-      stdin: "98666"
-      stdout: "6"
-  - run:
-      stdin: "14767969"
-      stdout: "5"
-  - run:
-      stdin: "682184"
-      stdout: "6"
-  - run:
-      stdin: "7804"
-      stdout: "4"
-  - run:
-      stdin: "209438"
-      stdout: "5"
-  - run:
-      stdin: "464631"
-      stdout: "4"
-  - run:
-      stdin: "347675"
-      stdout: "2"
-  - run:
-      stdin: "325179"
-      stdout: "1"
-  - run:
-      stdin: "88001"
-      stdout: "6"
-  - run:
-      stdin: "6678397"
-      stdout: "5"
-  - run:
-      stdin: "33414066"
-      stdout: "5"
-  - run:
-      stdin: "948078"
-      stdout: "7"
-  - run:
-      stdin: "4329990"
-      stdout: "5"
-  - run:
-      stdin: "740506"
-      stdout: "4"
-  - run:
-      stdin: "169430"
-      stdout: "4"
-  - run:
-      stdin: "70297"
-      stdout: "2"
-  - run:
-      stdin: "27155"
-      stdout: "0"
-  - run:
-      stdin: "40524"
-      stdout: "3"
+  - stdin: "8809"
+    stdout: "6"
+  - stdin: "7111"
+    stdout: "0"
+  - stdin: "2172"
+    stdout: "0"
+  - stdin: "6666"
+    stdout: "4"
+  - stdin: "1111"
+    stdout: "0"
+  - stdin: "3213"
+    stdout: "0"
+  - stdin: "7662"
+    stdout: "2"
+  - stdin: "9313"
+    stdout: "1"
+  - stdin: "0000"
+    stdout: "4"
+  - stdin: "2222"
+    stdout: "0"
+  - stdin: "3333"
+    stdout: "0"
+  - stdin: "5555"
+    stdout: "0"
+  - stdin: "8193"
+    stdout: "3"
+  - stdin: "8096"
+    stdout: "5"
+  - stdin: "1012"
+    stdout: "1"
+  - stdin: "7777"
+    stdout: "0"
+  - stdin: "9999"
+    stdout: "4"
+  - stdin: "7756"
+    stdout: "1"
+  - stdin: "6855"
+    stdout: "3"
+  - stdin: "9881"
+    stdout: "5"
+  - stdin: "5531"
+    stdout: "0"
+  - stdin: "2581"
+    stdout: "2"
+  - stdin: "8964768"
+    stdout: "8"
+  - stdin: "678390"
+    stdout: "5"
+  - stdin: "920925"
+    stdout: "3"
+  - stdin: "9414560"
+    stdout: "5"
+  - stdin: "1681"
+    stdout: "3"
+  - stdin: "9847"
+    stdout: "4"
+  - stdin: "1704433"
+    stdout: "3"
+  - stdin: "4815"
+    stdout: "3"
+  - stdin: "3382515"
+    stdout: "1"
+  - stdin: "58698634"
+    stdout: "8"
+  - stdin: "98666"
+    stdout: "6"
+  - stdin: "14767969"
+    stdout: "5"
+  - stdin: "682184"
+    stdout: "6"
+  - stdin: "7804"
+    stdout: "4"
+  - stdin: "209438"
+    stdout: "5"
+  - stdin: "464631"
+    stdout: "4"
+  - stdin: "347675"
+    stdout: "2"
+  - stdin: "325179"
+    stdout: "1"
+  - stdin: "88001"
+    stdout: "6"
+  - stdin: "6678397"
+    stdout: "5"
+  - stdin: "33414066"
+    stdout: "5"
+  - stdin: "948078"
+    stdout: "7"
+  - stdin: "4329990"
+    stdout: "5"
+  - stdin: "740506"
+    stdout: "4"
+  - stdin: "169430"
+    stdout: "4"
+  - stdin: "70297"
+    stdout: "2"
+  - stdin: "27155"
+    stdout: "0"
+  - stdin: "40524"
+    stdout: "3"
 
