@@ -107,15 +107,16 @@ def is_supported(bundle: 'Bundle') -> bool:
 
     # Check language specific evaluators
     for tab in bundle.plan.tabs:
-        for context in tab.contexts:
-            for testcase in context.all_testcases():
-                languages = testcase.output.get_specific_eval_languages()
-                if languages is not None:
-                    if bundle.config.programming_language not in languages:
-                        _logger.warning(
-                            f"Specific evaluators are available only in "
-                            f"{languages}!"
-                        )
-                        return False
+        for run in tab.runs:
+            for context in run.contexts:
+                for testcase in context.all_testcases():
+                    languages = testcase.output.get_specific_eval_languages()
+                    if languages is not None:
+                        if bundle.config.programming_language not in languages:
+                            _logger.warning(
+                                f"Specific evaluators are available only in "
+                                f"{languages}!"
+                            )
+                            return False
 
     return True

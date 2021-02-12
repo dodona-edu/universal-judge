@@ -3,7 +3,7 @@
 # For each tab we will use on dodona, we need a 'tab' field
 - tab: "Feedback"
   # Each tab needs te field 'test' which contains a list of tests to be evaluated
-  tests:
+  contexts:
   # Our example tests contains an input on stdin, notated with the field 'stdin'
   # Our tests expect some output on stdout, notated with the field 'stdout'
   - stdin: "8809"

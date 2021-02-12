@@ -6,7 +6,7 @@ import json
 import logging
 from dataclasses import field
 from pathlib import Path
-from typing import Optional, Dict, IO, TYPE_CHECKING, Any
+from typing import Optional, Dict, IO, TYPE_CHECKING, Any, List
 
 from pydantic import BaseModel
 from pydantic.dataclasses import dataclass
@@ -17,7 +17,6 @@ import tested.utils as utils
 # Prevent circular imports
 if TYPE_CHECKING:
     from tested.languages import Language
-
 
 _logger = logging.getLogger(__name__)
 
@@ -72,7 +71,9 @@ class DodonaConfig(BaseModel):
     judge: Path
     plan_name: str = "plan.json"  # Name of the testplan file.
     options: Options = Options()
-    output_limit: int = 10*1024*1024  # Default value for backwards compatibility.
+    output_limit: int = 10 * 1024 * 1024  # Default value for backwards
+
+    # compatibility.
 
     def config_for(self) -> Dict[str, Any]:
         return self.options.language.get(self.programming_language, dict())
@@ -105,11 +106,11 @@ class Bundle:
     out: IO
     lang_config: 'Language'
     secret: str
+    context_separator_secret: str
     plan: testplan.Plan
 
 
 def _get_language(config: DodonaConfig) -> str:
-
     import tested.languages as langs
 
     bang = utils.consume_shebang(config.source)
@@ -150,5 +151,6 @@ def create_bundle(config: DodonaConfig,
         out=output,
         lang_config=lang_config,
         secret=utils.get_identifier(),
+        context_separator_secret=utils.get_identifier(),
         plan=plan
     )

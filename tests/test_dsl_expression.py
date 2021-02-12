@@ -331,3 +331,11 @@ def test_parse_cast_set():
     assert parsed.data == []
     with pytest.raises(ParseError):
         parser.parse_statement('{"data": "data"} :: set')
+
+
+def test_parse_property():
+    parsed = parser.parse_statement('alpha.beta')
+    assert parsed.type == FunctionType.PROPERTY
+    assert parsed.arguments == []
+    assert parsed.name == 'beta'
+    assert parsed.namespace == 'alpha'

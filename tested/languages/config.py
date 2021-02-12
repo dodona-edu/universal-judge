@@ -186,6 +186,8 @@ class TypeSupport(Enum):
 
 
 class TemplateType(str, Enum):
+    EXECUTION = "execution"
+    RUN = "run"
     STATEMENT = "statement"
     CONTEXT = "context"
     SELECTOR = "selector"
@@ -351,21 +353,21 @@ class Language:
         """
         return self.conventionalize_namespace("selector")
 
-    def context_prefix(self) -> str:
+    def execution_prefix(self) -> str:
         """The "name" or prefix for the context names. Not conventionalized."""
-        return "context"
+        return "execution"
 
-    def context_name(self, tab_number: int, context_number: int) -> str:
+    def execution_name(self, tab_number: int, execution_number: int) -> str:
         """
-        Get the name of a context. The name should be unique for the tab and context
-        number combination.
+        Get the name of an execution. The name should be unique for the tab and
+        execution number combination.
 
         :param tab_number: The number of the tab.
-        :param context_number: The number of the context.
+        :param execution_number: The number of the execution.
         :return: The name of the context, conventionalized.
         """
         return self.conventionalize_namespace(
-            f"{self.context_prefix()}_{tab_number}_{context_number}"
+            f"{self.execution_prefix()}_{tab_number}_{execution_number}"
         )
 
     def extension_file(self) -> str:
@@ -581,7 +583,7 @@ class Language:
         def filter_function(file: str) -> bool:
             # We don't want files for contexts that are not the one we use.
             prefix = bundle.lang_config.conventionalize_namespace(
-                bundle.lang_config.context_prefix()
+                bundle.lang_config.execution_prefix()
             )
             is_context = file.startswith(prefix)
             is_our_context = file.startswith(context_name + ".")

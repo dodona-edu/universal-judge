@@ -2,69 +2,73 @@
   "tabs": [
     {
       "name": "Feedback",
-      "contexts": [
+      "runs": [
         {
-          "testcases": [
+          "contexts": [
             {
-              "input": {
-                "variable": "instance",
-                "type": {
-                  "type": "custom",
-                  "data": "EqualChecker"
-                },
-                "expression": {
-                  "type": "constructor",
-                  "name": "EqualChecker",
-                  "arguments": [
-                    {
-                      "type": "integer",
-                      "data": 5
+              "testcases": [
+                {
+                  "input": {
+                    "variable": "instance",
+                    "type": {
+                      "type": "custom",
+                      "data": "EqualChecker"
+                    },
+                    "expression": {
+                      "type": "constructor",
+                      "name": "EqualChecker",
+                      "arguments": [
+                        {
+                          "type": "integer",
+                          "data": 5
+                        }
+                      ]
                     }
-                  ]
+                  }
+                },
+                {
+                  "input": {
+                    "type": "namespace",
+                    "namespace": "instance",
+                    "name": "check",
+                    "arguments": [
+                      {
+                        "type": "integer",
+                        "data": 25
+                      }
+                    ]
+                  },
+                  "output": {
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": false
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "namespace",
+                    "namespace": "instance",
+                    "name": "check",
+                    "arguments": [
+                      {
+                        "type": "integer",
+                        "data": 5
+                      }
+                    ]
+                  },
+                  "output": {
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      }
+                    }
+                  }
                 }
-              }
-            },
-            {
-              "input": {
-                "type": "namespace",
-                "namespace": "instance",
-                "name": "check",
-                "arguments": [
-                  {
-                    "type": "integer",
-                    "data": 25
-                  }
-                ]
-              },
-              "output": {
-                "result": {
-                  "value": {
-                    "type": "boolean",
-                    "data": false
-                  }
-                }
-              }
-            },
-            {
-              "input": {
-                "type": "namespace",
-                "namespace": "instance",
-                "name": "check",
-                "arguments": [
-                  {
-                    "type": "integer",
-                    "data": 5
-                  }
-                ]
-              },
-              "output": {
-                "result": {
-                  "value": {
-                    "type": "boolean",
-                    "data": true
-                  }
-                }
-              }
+              ]
             }
           ]
         }

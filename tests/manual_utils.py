@@ -5,6 +5,7 @@ from io import StringIO
 from pathlib import Path
 from typing import List
 
+import pytest
 from _pytest.config import Config
 from jsonschema import validate
 
@@ -90,3 +91,6 @@ def execute_config(config: DodonaConfig) -> str:
     result = actual.getvalue()
     print(result)
     return result
+
+
+mark_haskell = pytest.mark.haskell

@@ -2,9 +2,9 @@
   "tabs": [
     {
       "name": "Tab",
-      "contexts": [
+      "runs": [
         {
-          "context_testcase": {
+          "run": {
             "input": {
               "main_call": true,
               "stdin": {
