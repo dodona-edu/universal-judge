@@ -1,2 +1,2 @@
 from .statement import Parser, ParseError
-from .translate import translate, translate_file
+from .translate_parser import SchemaParser

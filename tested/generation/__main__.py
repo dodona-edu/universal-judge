@@ -67,7 +67,7 @@ with open(templates.parent / "config.py", "w") as f:
 
 print("Generating template stubs...")
 
-shutil.copy(dir_path / "context.mako", templates / f"context.{extension}")
+shutil.copy(dir_path / "run.mako", templates / f"run.{extension}")
 shutil.copy2(dir_path / "selector.mako", templates)
 shutil.copy2(dir_path / "value.mako", templates)
 

@@ -7,8 +7,7 @@ from lark import Lark, Tree, Token, UnexpectedToken
 from tested.datatypes import string_to_type, AllTypes, SequenceTypes, \
     NumericTypes, BooleanTypes, NothingTypes, StringTypes, ObjectTypes, \
     BasicSequenceTypes, AdvancedSequenceTypes, BasicNumericTypes, \
-    BasicStringTypes, \
-    BasicBooleanTypes
+    BasicStringTypes, BasicBooleanTypes
 from tested.serialisation import Statement, Assignment, NumberType, Expression, \
     NothingType, Identifier, BooleanType, StringType, SequenceType, FunctionCall, \
     ObjectType, FunctionType, VariableType, Value
@@ -17,7 +16,8 @@ data_types = (
     "INTEGER", "RATIONAL", "CHAR", "TEXT", "BOOLEAN", "SEQUENCE", "SET", "MAP",
     "NOTHING", "ANY", "INT8", "UINT8", "INT16", "UINT16", "INT32", "UINT32",
     "INT64", "UINT64", "BIGINT", "SINGLE_PRECISION", "DOUBLE_PRECISION",
-    "DOUBLE_EXTENDED", "FIXED_PRECISION", "ARRAY", "LIST")
+    "DOUBLE_EXTENDED", "FIXED_PRECISION", "ARRAY", "LIST"
+)
 
 default_sequence_type_map = {
     'list':  BasicSequenceTypes.SEQUENCE,

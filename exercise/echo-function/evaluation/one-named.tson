@@ -2,31 +2,35 @@
   "tabs": [
     {
       "name": "Tab",
-      "contexts": [
+      "runs": [
         {
-          "testcases": [
+          "contexts": [
             {
-              "input": {
-                "type": "function",
-                "name": "echo",
-                "arguments": [
-                  {
-                    "name": "content",
-                    "value": {
-                      "type": "text",
-                      "data": "input-1"
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "echo",
+                    "arguments": [
+                      {
+                        "name": "content",
+                        "value": {
+                          "type": "text",
+                          "data": "input-1"
+                        }
+                      }
+                    ]
+                  },
+                  "output": {
+                    "result": {
+                      "value": {
+                        "type": "text",
+                        "data": "input-1"
+                      }
                     }
                   }
-                ]
-              },
-              "output": {
-                "result": {
-                  "value": {
-                    "type": "text",
-                    "data": "input-1"
-                  }
                 }
-              }
+              ]
             }
           ]
         }

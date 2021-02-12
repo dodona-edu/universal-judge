@@ -32,4 +32,4 @@ jobs:
         uses: fwilhe2/setup-kotlin@bb0e1ead85a7f840e9d2bc4bdd2c3950b080a449
       - name: Run tests
         run: |
-          python -m pytest tests/ --ignore tests/test_slow.py
+          python -m pytest tests/ -m "not slow and not flaky and not haskell"

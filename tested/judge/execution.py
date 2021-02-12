@@ -1,3 +1,4 @@
+import itertools
 import logging
 import os
 import shutil
@@ -14,9 +15,37 @@ from ..configs import Bundle
 from ..dodona import Message, Status
 from ..languages.config import FileFilter, Config
 from ..languages.generator import value_file, exception_file
-from ..testplan import Context, ExecutionMode
+from ..testplan import ExecutionMode, Run
 
 _logger = logging.getLogger(__name__)
+
+
+@dataclass
+class RunTestcaseResult(BaseExecutionResult):
+    """
+    The result of a run testcase execution.
+
+    All output streams are divided per testcase, in the same order as the
+    context that was used to execute_module the test. E.g. the string at
+    position 0 in stdout is the result of executing the testcase at position 0 in
+    the context.
+    """
+    exception: str
+
+
+@dataclass
+class TestcaseResult(BaseExecutionResult):
+    """
+    The result of a testcase execution.
+
+    All output streams are divided per testcase, in the same order as the
+    context that was used to execute_module the test. E.g. the string at position
+    0 in stdout is the result of executing the testcase at position 0 in the
+    context.
+    """
+    separator: str
+    results: str
+    exceptions: str
 
 
 @dataclass
@@ -26,21 +55,69 @@ class ExecutionResult(BaseExecutionResult):
 
     All output streams are divided per testcase, in the same order as the
     context that was used to execute_module the test. E.g. the string at position
-    0 in
-    stdout is the result of executing the testcase at position 0 in the context.
+    0 in stdout is the result of executing the testcase at position 0 in the
+    context.
     """
+    context_separator: str
     separator: str
     results: str
     exceptions: str
 
+    def to_context_execution_results(self) -> \
+            Tuple[List[TestcaseResult], RunTestcaseResult]:
+        results = self.results.split(self.context_separator)[1:]
+        exceptions = self.exceptions.split(self.context_separator)[1:]
+        stderr = self.stderr.split(self.context_separator)[1:]
+        stdout = self.stdout.split(self.context_separator)[1:]
 
-class ContextExecution(NamedTuple):
+        size = max(len(results), len(exceptions), len(stderr), len(stdout))
+
+        if size == 0:
+            return [], RunTestcaseResult(
+                exit=self.exit,
+                exception="",
+                stdout="",
+                stderr="",
+                timeout=self.timeout,
+                memory=self.memory
+            )
+        run_testcase = RunTestcaseResult(
+            exit=self.exit,
+            exception=(exceptions or [""])[0] or "",
+            stdout=(stdout or [""])[0] or "",
+            stderr=(stderr or [""])[0] or "",
+            timeout=self.timeout and size == 0,
+            memory=self.memory and size == 0
+        )
+
+        size = size - 1
+
+        context_execution_results = []
+        for index, (r, e, err, out) in enumerate(
+                itertools.zip_longest(results[1:], exceptions[1:], stderr[1:],
+                                      stdout[1:])):
+            context_execution_results.append(TestcaseResult(
+                separator=self.separator,
+                exit=self.exit,
+                results=r or "",
+                exceptions=e or "",
+                stdout=out or "",
+                stderr=err or "",
+                timeout=self.timeout and size == index,
+                memory=self.memory and size == index
+            ))
+
+        return context_execution_results, run_testcase
+
+
+class Execution(NamedTuple):
     """
-    Arguments used to execute_module a single context of the testplan.
+    Arguments used to execute_module a single execution derived from the testplan.
     """
-    context: Context  # The context object.
-    context_name: str  # Name of the context instance (used in code)
-    context_index: int  # Index of the context within the tab.
+    run: Run
+    context_offset: int
+    execution_name: str
+    execution_index: int
     mode: ExecutionMode
     common_directory: Path
     files: Union[List[str], Callable[[Path, str], bool]]
@@ -48,8 +125,7 @@ class ContextExecution(NamedTuple):
     collector: OutputManager
 
 
-def filter_files(files: Union[List[str], FileFilter],
-                 directory: Path) -> List[str]:
+def filter_files(files: Union[List[str], FileFilter], directory: Path) -> List[str]:
     if callable(files):
         return list(x.name for x in filter(files, directory.glob("*")))
     else:
@@ -97,61 +173,63 @@ def execute_file(
 
 
 def copy_workdir_files(bundle: Bundle, context_dir: Path):
-    prefix = bundle.lang_config.context_prefix()
+    prefix = bundle.lang_config.execution_prefix()
     for origin in bundle.config.workdir.iterdir():
         file = origin.name.lower()
-        _logger.debug("Copying %s to %s", origin, context_dir)
         if origin.is_file():
+            _logger.debug("Copying %s to %s", origin, context_dir)
             shutil.copy2(origin, context_dir)
         elif origin.is_dir() and not file.startswith(prefix) and file != "common":
+            _logger.debug("Copying %s to %s", origin, context_dir)
             shutil.copytree(origin, context_dir / file)
 
 
-def execute_context(bundle: Bundle, args: ContextExecution, max_time: float) \
+def execute_execution(bundle: Bundle, args: Execution, max_time: float) \
         -> Tuple[Optional[ExecutionResult], List[Message], Status, Path]:
     """
-    Execute a context.
+    Execute an execution.
     """
     lang_config = bundle.lang_config
     start = time.perf_counter()
 
-    # Create a working directory for the context.
-    context_dir = Path(
+    # Create a working directory for the execution.
+    execution_dir = Path(
         bundle.config.workdir,
-        args.context_name
+        args.execution_name
     )
-    context_dir.mkdir()
+    execution_dir.mkdir()
 
-    _logger.info("Executing context %s in path %s", args.context_name, context_dir)
+    _logger.info("Executing execution %s in path %s", args.execution_name,
+                 execution_dir)
 
     # Filter dependencies of the global compilation results.
     dependencies = filter_files(args.files, args.common_directory)
     dependencies = bundle.lang_config.filter_dependencies(
-        bundle, dependencies, args.context_name
+        bundle, dependencies, args.execution_name
     )
-    copy_workdir_files(bundle, context_dir)
+    copy_workdir_files(bundle, execution_dir)
 
     # Copy files from the common directory to the context directory.
     for file in dependencies:
         origin = args.common_directory / file
-        _logger.debug("Copying %s to %s", origin, context_dir)
+        _logger.debug("Copying %s to %s", origin, execution_dir)
         # Fix weird OSError when copying th Haskell Selector executable
         if file.startswith(lang_config.selector_name()):
-            os.link(origin, context_dir / file)
+            os.link(origin, execution_dir / file)
         else:
             # noinspection PyTypeChecker
-            shutil.copy2(origin, context_dir)
+            shutil.copy2(origin, execution_dir)
 
     # If needed, do a compilation.
     if args.mode == ExecutionMode.INDIVIDUAL:
         _logger.info("Compiling context %s in INDIVIDUAL mode...",
-                     args.context_name)
+                     args.execution_name)
         remaining = max_time - (time.perf_counter() - start)
-        result, files = run_compilation(bundle, context_dir, dependencies,
+        result, files = run_compilation(bundle, execution_dir, dependencies,
                                         remaining)
 
         # A new compilation means a new file filtering
-        files = filter_files(files, context_dir)
+        files = filter_files(files, execution_dir)
 
         # Process compilation results.
         messages, status, annotations = process_compile_results(
@@ -166,22 +244,22 @@ def execute_context(bundle: Bundle, args: ContextExecution, max_time: float) \
         if status != Status.CORRECT:
             _logger.debug("Compilation of individual context failed.")
             _logger.debug("Aborting executing of this context.")
-            return None, messages, status, context_dir
+            return None, messages, status, execution_dir
 
         _logger.debug("Executing context %s in INDIVIDUAL mode...",
-                      args.context_name)
+                      args.execution_name)
 
         executable, messages, status, annotations = \
-            lang_config.find_main_file(files, args.context_name)
+            lang_config.find_main_file(files, args.execution_name)
 
         for annotation in annotations:
             args.collector.add(annotation)
 
         if status != Status.CORRECT:
-            return None, messages, status, context_dir
+            return None, messages, status, execution_dir
 
         files.remove(executable)
-        stdin = args.context.get_stdin(bundle.config.resources)
+        stdin = args.run.get_stdin(bundle.config.resources)
         argument = None
     else:
         result, files = None, list(dependencies)
@@ -193,7 +271,7 @@ def execute_context(bundle: Bundle, args: ContextExecution, max_time: float) \
             messages, status = [], Status.CORRECT
 
         _logger.info("Executing context %s in PRECOMPILATION mode...",
-                     args.context_name)
+                     args.execution_name)
 
         if lang_config.needs_selector():
             _logger.debug("Selector is needed, using it.")
@@ -207,33 +285,34 @@ def execute_context(bundle: Bundle, args: ContextExecution, max_time: float) \
                 args.collector.add(annotation)
 
             if status != Status.CORRECT:
-                return None, messages, status, context_dir
+                return None, messages, status, execution_dir
 
             files.remove(executable)
-            stdin = args.context.get_stdin(bundle.config.resources)
-            argument = args.context_name
+            stdin = args.run.get_stdin(bundle.config.resources)
+            argument = args.execution_name
         else:
             _logger.debug("Selector is not needed, using individual execution.")
 
             executable, messages, status, annotations = \
-                lang_config.find_main_file(files, args.context_name)
+                lang_config.find_main_file(files, args.execution_name)
 
             for annotation in annotations:
                 args.collector.add(annotation)
 
             if status != Status.CORRECT:
-                return None, messages, status, context_dir
+                return None, messages, status, execution_dir
 
             files.remove(executable)
-            stdin = args.context.get_stdin(bundle.config.resources)
+            stdin = args.run.get_stdin(bundle.config.resources)
             argument = None
 
     remaining = max_time - (time.perf_counter() - start)
+
     # Do the execution.
     base_result = execute_file(
         bundle,
         executable_name=executable,
-        working_directory=context_dir,
+        working_directory=execution_dir,
         stdin=stdin,
         argument=argument,
         remaining=remaining
@@ -253,8 +332,9 @@ def execute_context(bundle: Bundle, args: ContextExecution, max_time: float) \
     messages.extend(msgs)
 
     identifier = f"--{bundle.secret}-- SEP"
+    context_identifier = f"--{bundle.context_separator_secret}-- SEP"
 
-    value_file_path = value_file(bundle, context_dir)
+    value_file_path = value_file(bundle, execution_dir)
     try:
         with open(value_file_path, "r") as f:
             values = f.read()
@@ -262,7 +342,7 @@ def execute_context(bundle: Bundle, args: ContextExecution, max_time: float) \
         _logger.warning("Value file not found, looked in %s", value_file_path)
         values = ""
 
-    exception_file_path = exception_file(bundle, context_dir)
+    exception_file_path = exception_file(bundle, execution_dir)
     try:
         # noinspection PyTypeChecker
         with open(exception_file_path, "r") as f:
@@ -276,6 +356,7 @@ def execute_context(bundle: Bundle, args: ContextExecution, max_time: float) \
         stdout=base_result.stdout,
         stderr=base_result.stderr,
         exit=base_result.exit,
+        context_separator=context_identifier,
         separator=identifier,
         results=values,
         exceptions=exceptions,
@@ -283,4 +364,4 @@ def execute_context(bundle: Bundle, args: ContextExecution, max_time: float) \
         memory=base_result.memory
     )
 
-    return result, messages, status, context_dir
+    return result, messages, status, execution_dir

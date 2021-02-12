@@ -17,8 +17,8 @@ from ..serialisation import (Value, SequenceType, Identifier, FunctionType,
                              FunctionCall, Expression, Statement, Assignment,
                              NothingType)
 from ..testplan import (EmptyChannel, IgnoredChannel, TextData, ProgrammedEvaluator,
-                        SpecificEvaluator, Testcase, ContextTestcase, Context,
-                        ExceptionOutput, ValueOutput)
+                        SpecificEvaluator, Testcase, RunTestcase, Context,
+                        ExceptionOutput, ValueOutput, Run)
 from ..utils import get_args
 
 _logger = logging.getLogger(__name__)
@@ -80,8 +80,8 @@ class _TestcaseArguments:
 
 
 @dataclass
-class _ContextTestcaseArguments:
-    """Arguments for a context_testcase testcase template."""
+class _RunTestcaseArguments:
+    """Arguments for a run testcase template."""
     # If a context testcase exists.
     exists: bool
     # Main arguments.
@@ -104,18 +104,19 @@ class _ContextTestcaseArguments:
 @dataclass
 class _ContextArguments:
     """Arguments for a plan template for the contexts."""
-    # The name of the context.
-    context_name: str
     # The "before" code.
     before: str
     # The after code.
     after: str
-    # The context testcase.
-    context_testcase: _ContextTestcaseArguments
     # A list of the other testcases.
     testcases: List[_TestcaseArguments]
-    # A set of the names of the language specific evaluators we will need.
-    evaluator_names: Set[str]
+
+
+@dataclass
+class _ExecutionArguments:
+    """Arguments for a plan template for the executions."""
+    # The name of the execution.
+    execution_name: str
     # The name of the file for the return channel.
     value_file: str
     # The name of the file for the exception channel.
@@ -124,6 +125,14 @@ class _ContextArguments:
     submission_name: str
     # The secret ID.
     secret_id: str
+    # The secret context ID.
+    context_secret_id: str
+    # The run testcase
+    run_testcase: _RunTestcaseArguments
+    # The contexts
+    contexts: List[_ContextArguments]
+    # A set of the names of the language specific evaluators we will need.
+    evaluator_names: Set[str]
 
 
 @dataclass
@@ -218,7 +227,7 @@ def _create_handling_function(
 
 def _create_exception_function(
         bundle: Bundle,
-        testcase: Union[Testcase, ContextTestcase]
+        testcase: Union[Testcase, RunTestcase]
 ) -> Tuple[Callable[[Expression], Statement], Optional[str]]:
     """
     Create a function call for handling exceptions. These functions assume there is
@@ -309,10 +318,10 @@ def _prepare_testcases(
     return result, files
 
 
-def _prepare_context_testcase(
+def _prepare_run_testcase(
         bundle: Bundle,
-        context: Context
-) -> Tuple[_ContextTestcaseArguments, Optional[str]]:
+        run: Run
+) -> Tuple[_RunTestcaseArguments, Optional[str]]:
     """
     Prepare the context testcase for a context.
 
@@ -321,16 +330,16 @@ def _prepare_context_testcase(
 
     :return: The testcase arguments and an optional generated file name.
     """
-    testcase = context.context_testcase
+    testcase = run.run
     exception_function, name = _create_exception_function(bundle, testcase)
     if testcase.input.main_call:
-        return _ContextTestcaseArguments(
+        return _RunTestcaseArguments(
             exists=True,
             arguments=testcase.input.arguments,
             _exception_function=exception_function
         ), name
     else:
-        return _ContextTestcaseArguments(
+        return _RunTestcaseArguments(
             exists=False,
             _exception_function=exception_function,
             arguments=[]
@@ -338,7 +347,7 @@ def _prepare_context_testcase(
 
 
 def get_readable_input(bundle: Bundle,
-                       case: Union[Testcase, ContextTestcase]) -> ExtendedMessage:
+                       case: Union[Testcase, RunTestcase]) -> ExtendedMessage:
     """
     Get human readable input for a testcase. This function will use, in
     order of availability:
@@ -356,7 +365,7 @@ def get_readable_input(bundle: Bundle,
         format_ = bundle.config.programming_language
         text = convert_statement(bundle, case.input)
         text = bundle.lang_config.cleanup_description(bundle.plan.namespace, text)
-    elif isinstance(case, ContextTestcase):
+    elif isinstance(case, RunTestcase):
         if case.input.main_call:
             arguments = " ".join(case.input.arguments)
             args = f"./submission {arguments}"
@@ -378,9 +387,20 @@ def get_readable_input(bundle: Bundle,
     return ExtendedMessage(description=text, format=format_)
 
 
+def attempt_run_readable_input(bundle: Bundle, run: RunTestcase) -> ExtendedMessage:
+    result = get_readable_input(bundle, run)
+    if result.description:
+        return result
+
+    return ExtendedMessage(
+        description="Geen invoer gevonden.",
+        format="text"
+    )
+
+
 def attempt_readable_input(bundle: Bundle, context: Context) -> ExtendedMessage:
     # Try until we find a testcase with input.
-    testcases = [context.context_testcase, *context.testcases]
+    testcases = context.testcases
     for testcase in testcases:
         result = get_readable_input(bundle, testcase)
         if result.description:
@@ -430,60 +450,82 @@ def convert_statement(bundle: Bundle, statement: Statement) -> str:
         raise e
 
 
-def generate_context(bundle: Bundle,
-                     destination: Path,
-                     context: Context,
-                     context_name: str) -> Tuple[str, List[str]]:
+def _generate_context(bundle: Bundle,
+                      context: Context) -> Tuple[_ContextArguments, Set[str]]:
     """
-    Generate the files related to the context.
+    Prepare one context for the execution
 
     :param bundle: The configuration bundle.
-    :param destination: Where the generated files should go.
-    :param context: The context for which generation is happening.
-    :param context_name: The name of the context module.
+    :param context: The context to prepare
 
-    :return: The name of the generated file in the given destination and a list
-             of evaluator files that will also be needed.
+    :return: The prepared context arguments and a set
+             of evaluator names.
     """
     language = bundle.config.programming_language
-    lang_config = bundle.lang_config
     resources = bundle.config.resources
     before_code = context.before.get(language, TextData(data="")) \
         .get_data_as_string(resources)
     after_code = context.after.get(language, TextData(data="")) \
         .get_data_as_string(resources)
+    testcases, evaluator_names = _prepare_testcases(bundle, context)
+    return _ContextArguments(
+        before=before_code,
+        after=after_code,
+        testcases=testcases
+    ), evaluator_names
+
+
+def generate_execution(bundle: Bundle,
+                       destination: Path,
+                       run: Run,
+                       execution_name: str) -> Tuple[str, List[str]]:
+    """
+    Generate the files related to the execution.
+
+    :param bundle: The configuration bundle.
+    :param destination: Where the generated files should go.
+    :param run: The execution for which generation is happening.
+    :param execution_name: The name of the execution module.
+
+    :return: The name of the generated file in the given destination and a set
+             of evaluator names that will also be needed.
+    """
+    lang_config = bundle.lang_config
+    evaluator_names = set()
+    run_testcase, name = _prepare_run_testcase(bundle, run)
+    contexts = []
+    if name:
+        evaluator_names.add(name)
+    for context in run.contexts:
+        context_args, context_evaluator_names = _generate_context(bundle, context)
+        contexts.append(context_args)
+        evaluator_names.update(context_evaluator_names)
 
     value_file_name = value_file(bundle, destination).name
     exception_file_name = exception_file(bundle, destination).name
 
-    testcases, evaluator_names = _prepare_testcases(bundle, context)
-    context_testcase, context_eval_name = _prepare_context_testcase(bundle, context)
-    if context_eval_name:
-        evaluator_names.add(context_eval_name)
-
     submission_name = lang_config.submission_name(bundle.plan)
 
-    context_argument = _ContextArguments(
-        context_name=context_name,
-        before=before_code,
-        after=after_code,
-        context_testcase=context_testcase,
-        testcases=testcases,
+    execution_args = _ExecutionArguments(
+        execution_name=execution_name,
         value_file=value_file_name,
         exception_file=exception_file_name,
         submission_name=submission_name,
         secret_id=bundle.secret,
+        context_secret_id=bundle.context_separator_secret,
+        run_testcase=run_testcase,
+        contexts=contexts,
         evaluator_names=evaluator_names
     )
 
     evaluator_files = [f"{x}.{lang_config.extension_file()}"
                        for x in evaluator_names]
 
-    context_destination = destination / lang_config.with_extension(context_name)
-    template = lang_config.template_name(TemplateType.CONTEXT)
+    execution_destination = destination / lang_config.with_extension(execution_name)
+    template = lang_config.template_name(TemplateType.RUN)
 
     return find_and_write_template(
-        bundle, context_argument, context_destination, template
+        bundle, execution_args, execution_destination, template
     ), evaluator_files
 
 

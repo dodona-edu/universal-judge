@@ -14,6 +14,7 @@ from tested.dodona import Update, Status, report_update, StatusMessage, \
     CloseTab, CloseContext, CloseTestcase, StartJudgment, CloseJudgment, \
     StartTab, StartContext, StartTestcase, close_for, ExtendedMessage, \
     EscalateStatus, update_size, limit_size, AnnotateCode
+from tested.testplan import Run
 
 _logger = logging.getLogger(__name__)
 
@@ -220,11 +221,13 @@ class OutputManager:
     def _get_to_add(self) -> List[Update]:
         # Determine which default still need to written.
         assert self.tab < len(self.bundle.plan.tabs)
-        assert self.context < len(self.bundle.plan.tabs[self.tab].contexts)
+        tab = self.bundle.plan.tabs[self.tab]
+        contexts_count = tab.count_contexts()
+        assert self.context < contexts_count
 
         to_write = []
 
-        if self.context + 1 == len(self.bundle.plan.tabs[self.tab].contexts):
+        if self.context + 1 == contexts_count:
             self.context = 0
             to_write.append(self.prepared.tabs[self.tab].end)
             self.tab += 1
@@ -238,7 +241,7 @@ class OutputManager:
             self.tab += 1
             to_write.append(self.prepared.tabs[self.tab].start)
         # Do remainder of current tab.
-        for c in range(self.context, len(self.bundle.plan.tabs[self.tab].contexts)):
+        for c in range(self.context, contexts_count):
             context = self.prepared.tabs[self.tab].contexts[c]
             to_write.append(context.start)
             to_write.extend(context.content)
@@ -250,7 +253,7 @@ class OutputManager:
         # Do remainder of tabs.
         for t in range(self.tab + 1, len(self.bundle.plan.tabs)):
             to_write.append(self.prepared.tabs[t].start)
-            for c in range(0, len(self.bundle.plan.tabs[t].contexts)):
+            for c in range(0, tab.count_contexts()):
                 context = self.prepared.tabs[t].contexts[c]
                 to_write.append(context.start)
                 to_write.extend(context.content)
