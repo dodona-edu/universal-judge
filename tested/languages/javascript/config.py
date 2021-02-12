@@ -143,6 +143,7 @@ class JavaScript(Language):
                stderr: str) -> Tuple[List[Message], List[AnnotateCode], str]:
         # Identifier to separate testcase output
         identifier = f"--{bundle.secret}-- SEP"
+        context_identifier = f"--{bundle.context_separator_secret}-- SEP"
         submission_file = self.with_extension(
             self.conventionalize_namespace(bundle.plan.namespace))
         # Assume stacktrace when line is equal the submission_file path with
@@ -150,21 +151,25 @@ class JavaScript(Language):
         line_start_with_submission_file = re.compile(
             rf'^(\\?([^\\/]*[\\/])*)({submission_file}):[0-9]+'
         )
-        cases = stderr.split(identifier)
-        cleaned_cases = []
-        # Process each case
-        for case in cases:
-            keep_until = 0
-            case = case.splitlines(keepends=True)
-            for index, line in enumerate(case):
-                line = line.rstrip('\n')
-                if not line_start_with_submission_file.match(line):
-                    keep_until = index + 1
-                else:
-                    break
-            keep_lines = "".join(case[:keep_until])
-            stacktrace = "".join(case[keep_until:])
-            stacktrace = self.cleanup_stacktrace(stacktrace, submission_file)
-            cleaned_cases.append(f'{keep_lines}{stacktrace}')
+        contexts = stderr.split(context_identifier)
+        cleaned_contexts = []
+        for context in contexts:
+            cases = context.split(identifier)
+            cleaned_cases = []
+            # Process each case
+            for case in cases:
+                keep_until = 0
+                case = case.splitlines(keepends=True)
+                for index, line in enumerate(case):
+                    line = line.rstrip('\n')
+                    if not line_start_with_submission_file.match(line):
+                        keep_until = index + 1
+                    else:
+                        break
+                keep_lines = "".join(case[:keep_until])
+                stacktrace = "".join(case[keep_until:])
+                stacktrace = self.cleanup_stacktrace(stacktrace, submission_file)
+                cleaned_cases.append(f'{keep_lines}{stacktrace}')
+            cleaned_contexts.append(identifier.join(cleaned_cases))
 
-        return [], [], identifier.join(cleaned_cases)
+        return [], [], context_identifier.join(cleaned_contexts)

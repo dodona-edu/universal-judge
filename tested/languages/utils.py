@@ -82,30 +82,21 @@ def jvm_cleanup_stacktrace(traceback: str,
 def jvm_stderr(
         self: Language,
         bundle: Bundle,
-        stderr: str,
-        context_only: bool = True
+        stderr: str
 ) -> Tuple[List[Message], List[AnnotateCode], str]:
     # Identifier to separate testcase output
     identifier = f"--{bundle.secret}-- SEP"
+    context_identifier = f"--{bundle.context_separator_secret}-- SEP"
     submission_file = self.with_extension(
         self.conventionalize_namespace(bundle.plan.namespace))
 
-    if context_only:
-        cleaned_cases = stderr.split(identifier, maxsplit=3)
-        try:
-            cleaned_cases[1] = self.cleanup_stacktrace(
-                cleaned_cases[1], submission_file)
-        except IndexError:
-            pass
-    else:
-        cases = stderr.split(identifier)
-        cleaned_cases = []
-        # Process each case
-        for case in cases:
-            stacktrace = self.cleanup_stacktrace(case, submission_file)
-            cleaned_cases.append(stacktrace)
-
-    return [], [], identifier.join(cleaned_cases)
+    return [], [], context_identifier.join(
+        identifier.join(
+            self.cleanup_stacktrace(testcase, submission_file)
+            for testcase in context.split(identifier)
+        )
+        for context in stderr.split(context_identifier)
+    )
 
 
 def haskell_solution(lang_config: Language, solution: Path, bundle: Bundle):

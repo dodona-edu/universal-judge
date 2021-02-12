@@ -2,9 +2,9 @@
   "tabs": [
     {
       "name": "Feedback",
-      "contexts": [
+      "runs": [
         {
-          "context_testcase": {
+          "run": {
             "input": {
               "arguments": ["-1", "-23", "72", "84", "-38", "-61", "49", "45"],
               "main_call": true
@@ -18,7 +18,7 @@
           }
         },
         {
-          "context_testcase": {
+          "run": {
             "input": {
               "arguments": [],
               "main_call": true
@@ -32,7 +32,7 @@
           }
         },
         {
-          "context_testcase": {
+          "run": {
             "input": {
               "arguments": ["spam", "eggs", "bacon"],
               "main_call": true

@@ -26,6 +26,7 @@ from typing import Union, List, Dict, Literal, Optional, Any, Iterable
 import math
 from pydantic import BaseModel, root_validator, Field
 from pydantic.dataclasses import dataclass
+from pydantic.fields import Undefined
 
 from tested.dodona import ExtendedMessage, Status
 from .datatypes import (NumericTypes, StringTypes, BooleanTypes,
@@ -475,7 +476,7 @@ class EvalResult(BaseModel):
     result: Union[bool, Status]
     readable_expected: Optional[str] = None
     readable_actual: Optional[str] = None
-    messages: List[ExtendedMessage] = Field(default_factory=list)
+    messages: List[ExtendedMessage] = Field(Undefined, default_factory=list)
 
 
 @dataclass

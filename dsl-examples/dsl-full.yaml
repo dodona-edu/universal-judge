@@ -1,43 +1,43 @@
 # New tab on dodona
 - tab: "Tabname"
   # All testcase in the tabblad, combination of input-output and function calls
-  runs:
-  # Arguments list
-  - files:
-    - name: "file.txt"
-      url: "media/workdir/file.txt"
-    arguments: [ "data", 5 ]
-    # Standard input
-    stdin: "invoer"
-    # Standard output
-    stdout: "uitvoer"
-    # Standard error
-    stderr: "error"
-    # Exitcode
-    exit_code: 0
-    # Dependent statement and function tests:
-    testcases:
-    # Assignment
-    - statement: 'data = ["list\nline", "data"] :: list'
-      # Function call
-    - statement: 'function(data, 0.5 :: double)'
-      # Return value
-      return: [ 0, 0 ]
-  - tests:
-    - statement: 'echo(5 :: uint8)'
-      # Raw Return value
-      return-raw: "5 :: uint8"
+  contexts:
+    - files:
+        - name: "file.txt"
+          url: "media/workdir/file.txt"
+      # Arguments list
+      arguments: [ "data", 5 ]
+      # Standard input
+      stdin: "invoer"
+      # Standard output
+      stdout: "uitvoer"
+      # Standard error
+      stderr: "error"
+      # Exitcode
+      exit_code: 0
+      # Dependent statement and function tests:
+      testcases:
+        # Assignment
+        - statement: 'data = ["list\nline", "data"] :: list'
+          # Function call
+        - statement: 'function(data, 0.5 :: double)'
+          # Return value
+          return: [ 0, 0 ]
+    - testcases:
+        - statement: 'echo(5 :: uint8)'
+          # Raw Return value
+          return-raw: "5 :: uint8"
 
 - tab: "Exception"
-  runs:
-  - testcases:
-    - statement: 'function_error()'
-      # Standard output
-      stdout: "Invalid"
-      # Standard error
-      stderr: "Error"
-      # Exceptions
-      exception: "Unknown"
+  contexts:
+    - testcases:
+        - statement: 'function_error()'
+          # Standard output
+          stdout: "Invalid"
+          # Standard error
+          stderr: "Error"
+          # Exceptions
+          exception: "Unknown"
 
 - tab: "Config"
   # Configuration options for textual comparisons, only for stdout, stderr, exception
@@ -49,15 +49,15 @@
     stderr:
       ignoreWhitespace: true
       caseInsensitive: true
-  runs:
-  - config:
-      stdout:
-        roundTo: 0
-    testcases:
-    - statement: 'diff(5, 2)'
-      stdout: "2"
-    - statement: 'diff(5, 2)'
-      stdout:
-        data: "2.5"
-        config:
-          roundTo: 4
+  contexts:
+    - config:
+        stdout:
+          roundTo: 0
+      testcases:
+        - statement: 'diff(5, 2)'
+          stdout: "2"
+        - statement: 'diff(5, 2)'
+          stdout:
+            data: "2.5"
+            config:
+              roundTo: 4

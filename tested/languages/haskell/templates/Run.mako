@@ -3,7 +3,7 @@
 <%! from tested.languages.generator import _TestcaseArguments %>
 <%! from tested.serialisation import Statement, Expression, Assignment %>
 <%! from tested.utils import get_args %>
-module ${context_name} where
+module ${execution_name} where
 
 ##################################
 ## Setup                        ##
@@ -39,6 +39,16 @@ writeSeparator = do
     hFlush stderr
 
 
+writeContextSeparator :: IO ()
+writeContextSeparator = do
+    hPutStr stderr "--${context_secret_id}-- SEP"
+    hPutStr stdout "--${context_secret_id}-- SEP"
+    appendFile value_file "--${context_secret_id}-- SEP"
+    appendFile exception_file "--${context_secret_id}-- SEP"
+    hFlush stdout
+    hFlush stderr
+
+
 ##################################
 ## Predefined functions         ##
 ##################################
@@ -65,39 +75,49 @@ handleException :: Exception e => (Either e a) -> Maybe e
 handleException (Left e) = Just e
 handleException (Right _) = Nothing
 
+
+% for i, ctx in enumerate(contexts):
+    ${execution_name.lower()}Context${i} :: IO ()
+    ${execution_name.lower()}Context${i} = do
+        ${ctx.before}
+        % for testcase in ctx.testcases:
+            writeSeparator
+
+            ## In Haskell we do not actually have statements, so we need to keep them separate.
+            ## Additionally, exceptions with "statements" are not supported at this time.
+            % if isinstance(testcase.command, get_args(Assignment)):
+                <%include file="statement.mako" args="statement=testcase.command,root=False" />
+            % else:
+                result${loop.index} <- catch
+                    (<%include file="statement.mako" args="statement=testcase.command,lifting=True" />
+                        >>= \r -> <%include file="statement.mako" args="statement=testcase.input_statement('r')" />
+                        >> let ee = (Nothing :: Maybe SomeException) in <%include file="statement.mako" args="statement=testcase.exception_statement('ee')"/>)
+                    (\e -> let ee = (Just (e :: SomeException)) in <%include file="statement.mako" args="statement=testcase.exception_statement('ee')"/>)
+            % endif
+
+        % endfor
+        ${ctx.after}
+        putStr ""
+% endfor
+
 ## Main function of the context.
+main :: IO ()
 main = do
-    ${before}
+    writeContextSeparator
 
-    writeSeparator
-
-    % if context_testcase.exists:
+    % if run_testcase.exists:
         let mainArgs = [\
-            % for argument in context_testcase.arguments:
+            % for argument in run_testcase.arguments:
                 <%include file="value.mako" args="value=argument"/>\
             % endfor
         ]
         result <- try (withArgs mainArgs ${submission_name}.main) :: IO (Either SomeException ())
-        let ee = handleException result in <%include file="statement.mako" args="statement=context_testcase.exception_statement('ee')"/>
+        let ee = handleException result in <%include file="statement.mako" args="statement=run_testcase.exception_statement('ee')"/>
     % endif
 
-    % for testcase in testcases:
-        writeSeparator
-
-        ## In Haskell we do not actually have statements, so we need to keep them separate.
-        ## Additionally, exceptions with "statements" are not supported at this time.
-        % if isinstance(testcase.command, get_args(Assignment)):
-            <%include file="statement.mako" args="statement=testcase.command,root=False" />
-        % else:
-            result${loop.index} <- catch
-                (<%include file="statement.mako" args="statement=testcase.command,lifting=True" /> 
-                    >>= \r -> <%include file="statement.mako" args="statement=testcase.input_statement('r')" />
-                    >> let ee = (Nothing :: Maybe SomeException) in <%include file="statement.mako" args="statement=testcase.exception_statement('ee')"/>)
-                (\e -> let ee = (Just (e :: SomeException)) in <%include file="statement.mako" args="statement=testcase.exception_statement('ee')"/>)
-        % endif
-
+    % for i, ctx in enumerate(contexts):
+        writeContextSeparator
+        ${execution_name.lower()}Context${i}
     % endfor
 
     putStr ""
-
-    ${after}
