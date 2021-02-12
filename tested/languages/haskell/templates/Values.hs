@@ -20,6 +20,9 @@ class Typeable a where
     toJson :: a -> Value
     default toJson :: ToJSON a => a -> Value
     toJson = toJSON
+    toJsonIO :: a -> IO (String, Value)
+    default toJsonIO :: a -> IO (String, Value)
+    toJsonIO a = return ((toType a), (toJson a))
 
 -- We support maybe as the null value
 instance (Typeable a) => Typeable (Maybe a) where
@@ -35,6 +38,9 @@ instance (Typeable a) => Typeable (IO a) where
     toType = toType . unsafePerformIO
     {-# NOINLINE toJson #-}
     toJson = toJson . unsafePerformIO
+    toJsonIO m = do
+        unwrapped <- m
+        return ((toType unwrapped), (toJson unwrapped))
 
 instance Typeable W.Word8 where toType _ = "uint8"
 instance Typeable W.Word16 where toType _ = "uint16"
@@ -251,16 +257,14 @@ toObject value = object ["type" .= toJSON (toType value), "data" .= toJson value
 
 
 sendValue :: Typeable a => FilePath -> a -> IO ()
-sendValue file value = LBS.appendFile file (encode (object [
-        "type" .= toJSON (toType value),
-        "data" .= toJson value
-    ]))
+sendValue file value = do
+    (jsonType, jsonData) <- toJsonIO value
+    LBS.appendFile file (encode (object [ "type" .= toJSON jsonType, "data" .= jsonData ]))
     
 sendValueH :: Typeable a => Handle -> a -> IO ()
-sendValueH file value = LBS.hPutStr file (encode (object [
-        "type" .= toJSON (toType value),
-        "data" .= toJson value
-    ]))
+sendValueH file value = do
+    (jsonType, jsonData) <- toJsonIO value
+    LBS.hPutStr file (encode (object [ "type" .= toJSON jsonType, "data" .= jsonData ]))
 
 toMessage :: Message -> Value
 toMessage m = object [
