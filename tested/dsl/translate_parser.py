@@ -173,17 +173,15 @@ class SchemaParser:
             config: Optional[YAML_DICT] = None,
             old_stack_frame: StackFrame = StackFrame()
     ) -> StackFrame:
-        if config is None:
-            return old_stack_frame
         new_stack_frame = StackFrame()
-        if "stdout" in config:
+        if config and "stdout" in config:
             new_stack_frame.options_stdout = merge(
                 old_stack_frame.options_stdout,
                 self._get_dict_safe(config, "stdout")
             )
         else:
             new_stack_frame.options_stdout = old_stack_frame.options_stdout
-        if "stderr" in config:
+        if config and "stderr" in config:
             new_stack_frame.options_stderr = merge(
                 old_stack_frame.options_stderr,
                 self._get_dict_safe(config, "stderr")
