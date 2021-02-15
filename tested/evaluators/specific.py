@@ -1,13 +1,13 @@
 """
 Specific evaluator
 """
-from typing import Optional
 
+from . import EvaluationResult, EvaluatorConfig
 from .utils import cleanup_specific_programmed
 from ..dodona import StatusMessage, Status, ExtendedMessage, Permission
-from . import EvaluationResult, EvaluatorConfig
+from ..internationalization import get_i18n_string
 from ..serialisation import EvalResult
-from ..testplan import OutputChannel, ExceptionOutputChannel
+from ..testplan import OutputChannel
 from ..testplan import SpecificEvaluator
 
 
@@ -23,11 +23,11 @@ def evaluate(config: EvaluatorConfig, channel: OutputChannel,
         return EvaluationResult(
             result=StatusMessage(
                 enum=Status.WRONG,
-                human="Ontbrekende uitvoer."
+                human=get_i18n_string("evaluators.specific.missing.status")
             ),
             readable_actual="",
             readable_expected="",
-            messages=["Hier ontbreekt uitvoer."]
+            messages=[get_i18n_string("evaluators.specific.missing.message")]
         )
 
     # Try parsing as the result.
@@ -35,19 +35,16 @@ def evaluate(config: EvaluatorConfig, channel: OutputChannel,
         actual: EvalResult = EvalResult.parse_raw(actual)
     except (TypeError, ValueError) as e:
         staff_message = ExtendedMessage(
-            description=f"Received invalid output for specific evaluation: "
-                        f"{actual!r}. Either the testplan is invalid, the "
-                        f"evaluation code has a bug or the student is trying to "
-                        f"cheat: {e}",
+            description=get_i18n_string("evaluators.specific.staff",
+                                        actual=actual, e=e),
             format="text",
             permission=Permission.STAFF
         )
-        student_message = ("Er ging iets fout bij het beoordelen van de "
-                           "oplossing. Meld dit aan de lesgever!")
+        student_message = (get_i18n_string("evaluators.specific.student.default"))
         return EvaluationResult(
             result=StatusMessage(
                 enum=Status.INTERNAL_ERROR,
-                human="Fout bij beoordelen resultaat."
+                human=get_i18n_string("evaluators.specific.status")
             ),
             readable_expected="",
             readable_actual="",

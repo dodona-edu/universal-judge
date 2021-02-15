@@ -1,0 +1,49 @@
+en:
+  evaluators:
+    exception:
+      staff: >-
+        Expected value exception, but received %{actual}, which caused an exception
+        while parsing: %{exception}
+      student: >-
+        Dodona don't understood this exception. Report this error to the teacher.
+      status: "Invalid exception"
+    exitcode:
+      status:
+        invalid: "Invalid exitcode %{exit_code}."
+        message: "Can't parse %{exit_code} as exitcode."
+        wrong: "Wrong exitcode"
+    nothing:
+      runtime: "Runtime error"
+      unexpected: "Unexpected output"
+    programmed:
+      student:
+        default: >-
+          Something went wrong when evaluating the solution.
+          Report this to the teacher.
+      result: "This result of the programmed evaluation is invalid:"
+      stdout: "This is produced on stdout:"
+      stderr: "This is produced on stderr:"
+    specific:
+      student:
+        default: >-
+          Something went wrong when evaluating the solution.
+          Report this to the teacher.
+      missing:
+        status: "Missing output."
+        message: "Output is missing here."
+      status: "Error by evaluating the result."
+      staff: >-
+        Received invalid output for specific evaluation: %{actual}.
+        Either the testplan is invalid, the evaluation code has a bug or the student
+        is trying to cheat: %{e}
+    text:
+      file:
+        unexpected:
+          status: "Unexpected output."
+          message: "Doesn't expect output for channel, but found: %{actual}."
+        not-found: "File not found."
+    value:
+      missing: "Missing return value."
+      datatype:
+        wrong: "Return value is having the wrong datatype."
+        message: "Expected value of type %{expected}, but was type %{actual}."
