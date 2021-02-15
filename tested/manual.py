@@ -13,23 +13,25 @@ from pathlib import Path
 from .configs import DodonaConfig
 from .main import run
 
+exercise_dir = "exercise/echo-function"
+
 
 def read_config() -> DodonaConfig:
     """Read the configuration from stdout"""
     return DodonaConfig(**{
         "memory_limit":         536870912,
         "time_limit":           60,
-        "programming_language": 'haskell',
+        "programming_language": 'python',
         "natural_language":     'nl',
-        "resources":            Path('exercise/echo-function/evaluation'),
-        "source":               Path('exercise/echo-function/solution/correct.hs'),
+        "resources":            Path(exercise_dir, 'evaluation'),
+        "source":               Path(exercise_dir, 'solution/correct.py'),
         "judge":                Path('.'),
         "workdir":              Path('workdir'),
-        "plan_name":            "full.tson",
+        "plan_name":            "two-specific.tson",
         "options":              {
-            "parallel": True,
-            "mode":     "batch",
-            "linter": {
+            "parallel":       True,
+            "mode":           "batch",
+            "linter":         {
                 "python": True
             }
         }

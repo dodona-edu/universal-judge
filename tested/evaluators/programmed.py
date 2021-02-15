@@ -6,6 +6,7 @@ import traceback
 from typing import Tuple, Optional
 
 from . import EvaluationResult, EvaluatorConfig, value
+from .utils import cleanup_specific_programmed
 from .value import get_values
 from ..datatypes import StringTypes
 from ..dodona import ExtendedMessage, StatusMessage, Status, Permission
@@ -194,10 +195,16 @@ def evaluate(config: EvaluatorConfig,
         result_status = StatusMessage(
             enum=Status.CORRECT if evaluation_result.result else Status.WRONG
         )
-
-    return EvaluationResult(
-        result=result_status,
+    actual = cleanup_specific_programmed(config, channel, EvalResult(
+        result=result_status.enum,
         readable_expected=readable_expected,
         readable_actual=readable_actual,
         messages=evaluation_result.messages
+    ))
+
+    return EvaluationResult(
+        result=result_status,
+        readable_expected=actual.readable_expected,
+        readable_actual=actual.readable_actual,
+        messages=actual.messages
     )
