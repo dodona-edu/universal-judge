@@ -35,6 +35,7 @@ def create_description_instance(mako_template: str,
         ),
         out=open(os.devnull, 'w'),
         lang_config=language,
+        context_separator_secret="",
         secret="",
         plan=Plan(namespace=namespace)
     )
