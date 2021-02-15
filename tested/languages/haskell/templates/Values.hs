@@ -10,6 +10,8 @@ import Control.Exception
 import qualified Data.ByteString.Lazy as LBS
 import EvaluationUtils
 import System.IO (Handle)
+import System.IO.Unsafe (unsafePerformIO)
+
 
 -- Typeable things are convertible to our format
 class Typeable a where
@@ -18,6 +20,10 @@ class Typeable a where
     toJson :: a -> Value
     default toJson :: ToJSON a => a -> Value
     toJson = toJSON
+    -- Function needed to unwrap IO values without needing calls to unsafeIO
+    toJsonIO :: a -> IO (String, Value)
+    default toJsonIO :: a -> IO (String, Value)
+    toJsonIO a = return ((toType a), (toJson a))
 
 -- We support maybe as the null value
 instance (Typeable a) => Typeable (Maybe a) where
@@ -27,6 +33,21 @@ instance (Typeable a) => Typeable (Maybe a) where
     toJson m = case m of
         Just n -> toJson n
         Nothing -> Null
+
+instance (Typeable a) => Typeable (IO a) where
+    -- Calls to `unsafePerformIO` may not produces the expected results, there for `toJsonIO` is preferred, when called
+    -- this function, the student has written no clean haskell code
+    {-# NOINLINE toType #-}
+    toType = toType . unsafePerformIO
+    -- Calls to `unsafePerformIO` may not produces the expected results, there for `toJsonIO` is preferred, when called
+    -- this function, the student has written no clean haskell code
+    {-# NOINLINE toJson #-}
+    toJson = toJson . unsafePerformIO
+    -- Preferred function call to pass the IO monad results to the judge, avoid `unsafePerformIO`
+    toJsonIO m = do
+        unwrapped <- m
+        return ((toType unwrapped), (toJson unwrapped))
+
 instance Typeable W.Word8 where toType _ = "uint8"
 instance Typeable W.Word16 where toType _ = "uint16"
 instance Typeable W.Word32 where toType _ = "uint32"
@@ -242,16 +263,14 @@ toObject value = object ["type" .= toJSON (toType value), "data" .= toJson value
 
 
 sendValue :: Typeable a => FilePath -> a -> IO ()
-sendValue file value = LBS.appendFile file (encode (object [
-        "type" .= toJSON (toType value),
-        "data" .= toJson value
-    ]))
+sendValue file value = do
+    (jsonType, jsonData) <- toJsonIO value
+    LBS.appendFile file (encode (object [ "type" .= toJSON jsonType, "data" .= jsonData ]))
     
 sendValueH :: Typeable a => Handle -> a -> IO ()
-sendValueH file value = LBS.hPutStr file (encode (object [
-        "type" .= toJSON (toType value),
-        "data" .= toJson value
-    ]))
+sendValueH file value = do
+    (jsonType, jsonData) <- toJsonIO value
+    LBS.hPutStr file (encode (object [ "type" .= toJSON jsonType, "data" .= jsonData ]))
 
 toMessage :: Message -> Value
 toMessage m = object [
