@@ -15,7 +15,8 @@ class Haskell(Language):
     def compilation(self, config: Config, files: List[str]) -> CallbackResult:
         main_ = files[-1]
         exec_ = main_.rstrip(".hs")
-        return ["ghc", "-O0", main_, "-main-is", exec_], [executable_name(exec_)]
+        return ["ghc", "-fno-cse", "-fno-full-laziness", "-O0", main_, "-main-is",
+                exec_], [executable_name(exec_)]
 
     def execution(self, config: Config,
                   cwd: Path, file: str, arguments: List[str]) -> Command:
