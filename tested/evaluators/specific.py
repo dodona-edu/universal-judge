@@ -55,7 +55,7 @@ def evaluate(config: EvaluatorConfig, channel: OutputChannel,
         )
 
     actual = cleanup_specific_programmed(config, channel, actual)
-    print(actual)
+
     return EvaluationResult(
         result=StatusMessage(
             enum=actual.result
