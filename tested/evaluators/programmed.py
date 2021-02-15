@@ -195,6 +195,15 @@ def evaluate(config: EvaluatorConfig,
             enum=Status.CORRECT if evaluation_result.result else Status.WRONG
         )
 
+    if isinstance(channel, ExceptionOutputChannel):
+        lang_config = config.bundle.lang_config
+        namespace = lang_config.conventionalize_namespace(
+            config.bundle.plan.namespace)
+        actual.readable_expected = lang_config.cleanup_stacktrace(
+            actual.readable_expected, lang_config.with_extension(namespace))
+        actual.readable_actual = lang_config.cleanup_stacktrace(
+            actual.readable_actual, lang_config.with_extension(namespace))
+
     return EvaluationResult(
         result=result_status,
         readable_expected=readable_expected,

@@ -6,11 +6,11 @@ from typing import Optional
 from ..dodona import StatusMessage, Status, ExtendedMessage, Permission
 from . import EvaluationResult, EvaluatorConfig
 from ..serialisation import EvalResult
-from ..testplan import OutputChannel
+from ..testplan import OutputChannel, ExceptionOutputChannel
 from ..testplan import SpecificEvaluator
 
 
-def evaluate(_config: EvaluatorConfig, channel: OutputChannel,
+def evaluate(config: EvaluatorConfig, channel: OutputChannel,
              actual: str) -> EvaluationResult:
     """
     Compare the result of a specific evaluator. This evaluator has no options.
@@ -52,6 +52,14 @@ def evaluate(_config: EvaluatorConfig, channel: OutputChannel,
             readable_actual="",
             messages=[staff_message, student_message]
         )
+    if isinstance(channel, ExceptionOutputChannel):
+        lang_config = config.bundle.lang_config
+        namespace = lang_config.conventionalize_namespace(
+            config.bundle.plan.namespace)
+        actual.readable_expected = lang_config.cleanup_stacktrace(
+            actual.readable_expected, lang_config.with_extension(namespace))
+        actual.readable_actual = lang_config.cleanup_stacktrace(
+            actual.readable_actual, lang_config.with_extension(namespace))
 
     return EvaluationResult(
         result=StatusMessage(
