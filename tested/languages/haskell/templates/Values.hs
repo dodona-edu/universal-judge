@@ -20,6 +20,7 @@ class Typeable a where
     toJson :: a -> Value
     default toJson :: ToJSON a => a -> Value
     toJson = toJSON
+    -- Function needed to unwrap IO values without needing calls to unsafeIO
     toJsonIO :: a -> IO (String, Value)
     default toJsonIO :: a -> IO (String, Value)
     toJsonIO a = return ((toType a), (toJson a))
@@ -34,10 +35,15 @@ instance (Typeable a) => Typeable (Maybe a) where
         Nothing -> Null
 
 instance (Typeable a) => Typeable (IO a) where
+    -- Calls to `unsafePerformIO` may not produces the expected results, there for `toJsonIO` is preferred, when called
+    -- this function, the student has written no clean haskell code
     {-# NOINLINE toType #-}
     toType = toType . unsafePerformIO
+    -- Calls to `unsafePerformIO` may not produces the expected results, there for `toJsonIO` is preferred, when called
+    -- this function, the student has written no clean haskell code
     {-# NOINLINE toJson #-}
     toJson = toJson . unsafePerformIO
+    -- Preferred function call to pass the IO monad results to the judge, avoid `unsafePerformIO`
     toJsonIO m = do
         unwrapped <- m
         return ((toType unwrapped), (toJson unwrapped))
