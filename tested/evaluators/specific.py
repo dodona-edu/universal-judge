@@ -3,6 +3,7 @@ Specific evaluator
 """
 from typing import Optional
 
+from .utils import cleanup_specific_programmed
 from ..dodona import StatusMessage, Status, ExtendedMessage, Permission
 from . import EvaluationResult, EvaluatorConfig
 from ..serialisation import EvalResult
@@ -52,18 +53,12 @@ def evaluate(config: EvaluatorConfig, channel: OutputChannel,
             readable_actual="",
             messages=[staff_message, student_message]
         )
-    if isinstance(channel, ExceptionOutputChannel):
-        lang_config = config.bundle.lang_config
-        namespace = lang_config.conventionalize_namespace(
-            config.bundle.plan.namespace)
-        actual.readable_expected = lang_config.cleanup_stacktrace(
-            actual.readable_expected, lang_config.with_extension(namespace))
-        actual.readable_actual = lang_config.cleanup_stacktrace(
-            actual.readable_actual, lang_config.with_extension(namespace))
 
+    actual = cleanup_specific_programmed(config, channel, actual)
+    print(actual)
     return EvaluationResult(
         result=StatusMessage(
-            enum=Status.CORRECT if actual.result else Status.WRONG
+            enum=actual.result
         ),
         readable_expected=actual.readable_expected,
         readable_actual=actual.readable_actual,

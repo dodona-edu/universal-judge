@@ -13,8 +13,7 @@ from pathlib import Path
 from .configs import DodonaConfig
 from .main import run
 
-exercise_dir = "../programmeursleerling/chapters/03 expressions/06 exercises/03 " \
-               "ZeroDivisionError"
+exercise_dir = "exercise/echo-function"
 
 
 def read_config() -> DodonaConfig:
@@ -25,10 +24,10 @@ def read_config() -> DodonaConfig:
         "programming_language": 'python',
         "natural_language":     'nl',
         "resources":            Path(exercise_dir, 'evaluation'),
-        "source":               Path(exercise_dir, 'solution/solution.en.py'),
+        "source":               Path(exercise_dir, 'solution/correct.py'),
         "judge":                Path('.'),
         "workdir":              Path('workdir'),
-        "plan_name":            "plan.json",
+        "plan_name":            "two-specific.tson",
         "options":              {
             "parallel":       True,
             "mode":           "batch",
