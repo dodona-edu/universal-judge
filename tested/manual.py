@@ -13,24 +13,26 @@ from pathlib import Path
 from .configs import DodonaConfig
 from .main import run
 
+exercise_dir = "../programmeursleerling/chapters/03 expressions/06 exercises/03 " \
+               "ZeroDivisionError"
+
 
 def read_config() -> DodonaConfig:
     """Read the configuration from stdout"""
     return DodonaConfig(**{
         "memory_limit":         536870912,
         "time_limit":           60,
-        "programming_language": 'kotlin',
+        "programming_language": 'python',
         "natural_language":     'nl',
-        "resources":            Path('exercise/echo-function/evaluation'),
-        "source":               Path('exercise/echo-function/solution/correct.kt'),
+        "resources":            Path(exercise_dir, 'evaluation'),
+        "source":               Path(exercise_dir, 'solution/solution.en.py'),
         "judge":                Path('.'),
         "workdir":              Path('workdir'),
-        "plan_name":            "full.tson",
+        "plan_name":            "plan.json",
         "options":              {
-            "allow_fallback": False,
-            "parallel": True,
-            "mode":     "batch",
-            "linter": {
+            "parallel":       True,
+            "mode":           "batch",
+            "linter":         {
                 "python": True
             }
         }

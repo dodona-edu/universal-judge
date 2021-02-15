@@ -329,7 +329,7 @@ def _process_results(bundle: Bundle, execution: Execution,
 
     if has_main:
         execution.collector.add_context(
-            StartContext(description=execution.run.run.description),
+            StartContext(),
             execution.context_offset
         )
         continue_ = evaluate_run_results(bundle, execution.run.run, run_testcase,
