@@ -3,14 +3,15 @@ Specific evaluator
 """
 from typing import Optional
 
+from .utils import cleanup_specific_programmed
 from ..dodona import StatusMessage, Status, ExtendedMessage, Permission
 from . import EvaluationResult, EvaluatorConfig
 from ..serialisation import EvalResult
-from ..testplan import OutputChannel
+from ..testplan import OutputChannel, ExceptionOutputChannel
 from ..testplan import SpecificEvaluator
 
 
-def evaluate(_config: EvaluatorConfig, channel: OutputChannel,
+def evaluate(config: EvaluatorConfig, channel: OutputChannel,
              actual: str) -> EvaluationResult:
     """
     Compare the result of a specific evaluator. This evaluator has no options.
@@ -53,9 +54,11 @@ def evaluate(_config: EvaluatorConfig, channel: OutputChannel,
             messages=[staff_message, student_message]
         )
 
+    actual = cleanup_specific_programmed(config, channel, actual)
+    print(actual)
     return EvaluationResult(
         result=StatusMessage(
-            enum=Status.CORRECT if actual.result else Status.WRONG
+            enum=actual.result
         ),
         readable_expected=actual.readable_expected,
         readable_actual=actual.readable_actual,
