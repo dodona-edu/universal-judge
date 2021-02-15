@@ -12,7 +12,7 @@
     "prompt": ">"
   },
   "integer": "int",
-  "rational": "float",
+  "rational": "double",
   "char": "char",
   "text": "String",
   "boolean": "boolean",

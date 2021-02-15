@@ -55,7 +55,7 @@ _case_mapping = {
 }
 
 TYPE_ARG = Union[
-    str, Tuple[str, Union[str, List['TYPE_ARG'], Tuple['TYPE_ARG', ...]]]
+    str, Tuple[str, Union[List['TYPE_ARG'], 'TYPE_ARG']]
 ]
 
 _html_formatter = HtmlFormatter()
@@ -662,7 +662,8 @@ class Language:
                       ]] = None,
                       bundle: Optional[Bundle] = None,
                       is_inner: bool = False,
-                      is_html: bool = True) -> str:
+                      is_html: bool = True,
+                      recursive_call: bool = False) -> str:
         if bundle is None:
             raise ValueError("Bundle must be specified")
 
@@ -702,13 +703,16 @@ class Language:
             main_type = _get_type_name(args[0])
             if isinstance(args[1], str):
                 types = [self.get_type_name(args[1], custom_type_map, bundle,
-                                            bool(main_type), False)]
-            else:
+                                            bool(main_type), is_html, True)]
+            elif isinstance(args[1], list):
                 types = [
                     self.get_type_name(arg, custom_type_map, bundle,
-                                       bool(main_type), False)
+                                       bool(main_type), is_html, True)
                     for arg in args[1]
                 ]
+            else:
+                types = [self.get_type_name(args[1], custom_type_map, bundle,
+                                            bool(main_type), is_html, True)]
             if isinstance(main_type, str):
                 type_name = f"{self.types[args[0]]}" \
                             f"{self.types['brackets']['open']}" \
@@ -722,9 +726,9 @@ class Language:
                             f"{self.types['brackets'][args[0]]['close']}"
             else:
                 raise ValueError(f"Type {main_type} expects only one subtype")
-        if is_html:
+        if is_html and not recursive_call:
             return f"<code>{html.escape(type_name)}</code>"
-        return f"`{type_name}`" if not is_inner else type_name
+        return f"`{type_name}`" if not recursive_call else type_name
 
     def get_function_name(self, name: str, is_html: bool = True) -> str:
         function_name = self.conventionalize_function(name)
