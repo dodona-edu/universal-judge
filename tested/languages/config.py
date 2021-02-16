@@ -800,3 +800,11 @@ class Language:
             namespace=self.conventionalize_namespace(bundle.plan.namespace))
 
         return f"<p>{html.escape(appendix)}</p>" if is_html else appendix
+
+    def get_prompt(self, is_html: bool = True):
+        value = self.types["console"]["prompt"]
+        return html.escape(value) if is_html else value
+
+    def get_prompt_language(self, is_html: bool = True):
+        value = self.types["console"]["name"]
+        return html.escape(value) if is_html else value

@@ -23,7 +23,7 @@ De vrouw — gedwongen om snel te beslissen — ging direct akkoord omdat de kan
 kant van de familie.
 Wie werd uiteindelijk de erfgenaam van de boer?
 
-${"### Opgave"}
+### Opgave
 
 Een boer heeft $k$ kinderen bij elk van zijn twee vrouwen.
 Alle kinderen worden in een cirkel geplaatst, en in wijzerzin genummerd van $1$ tot en met $2k$.
@@ -31,7 +31,7 @@ We beginnen in wijzerzin af te tellen vanaf kind nummer $1$, waarbij elk $n$-de 
 Nadat $k-1$ kinderen uit de cirkel verwijderd werden, wordt verder geteld in tegenwijzerzin.
 De cirkel wordt steeds kleiner en kleiner en het laatste kind dat overblijft wordt de erfgenaam van de boer.
 
-Schrijf een statische functie ${function_name("heir")},
+Schrijf een functie ${function_name("heir")},
 waaraan de waarden $k$ en $n$, van het type ${type_name("integer")},
 moeten doorgegeven worden, waarbij je er mag van uitgaan dat $k >= 2$.
 De functie moet een lijst, van het type ${type_name(("list", "integer"))}
@@ -41,13 +41,19 @@ Gebruik de volgnummers waarmee de kinderen in de lijst genummerd werden als elem
 
 ${appendix()}
 
-${"### Voorbeeld"}
+### Voorbeeld
 
-${code_start()}
-${statement('heir(8, 10)')}
-${expression('[10, 4, 15, 11, 7, 5, 3, 2, 16, 12, 1, 6, 13, 9, 14, 8]')}
-${statement('heir(8, 3)')}
-${expression('[3, 6, 9, 12, 15, 2, 7, 1, 13, 8, 16, 10, 14, 4, 11, 5]')}
-${statement('heir(10, 5)')}
-${expression('[5, 10, 15, 20, 6, 12, 18, 4, 13, 3, 16, 7, 14, 1, 8, 9, 2, 17, 11, 19]')}
-${code_end()}
+```console?lang=${language}&prompt=${prompt}
+> heir(8, 10)
+= [10, 4, 15, 11, 7, 5, 3, 2, 16, 12, 1, 6, 13, 9, 14, 8]
+> heir(8, 3)
+= [3, 6, 9, 12, 15, 2, 7, 1, 13, 8, 16, 10, 14, 4, 11, 5]
+> heir(10, 5)
+= [5, 10, 15, 20, 6, 12, 18, 4, 13, 3, 16, 7, 14, 1, 8, 9, 2, 17, 11, 19]
+```
+
+
+```console?lang=${language}&prompt=${prompt}
+> heir(8, 10)
+= [10, 4, 15, 11, 7, 5, 3, 2, 16, 12, 1, 6, 13, 9, 14, 8]
+```
