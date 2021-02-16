@@ -92,21 +92,23 @@ definitions:
   context:
     type: "object"
     description: "Information to execute one context"
-    anyOf:
-      - required:
-          - "testcases"
-      - required:
-          - "arguments"
-      - required:
-          - "exception"
-      - required:
-          - "exit_code"
-      - required:
-          - "stdin"
-      - required:
-          - "stderr"
-      - required:
-          - "stdout"
+    oneOf:
+      - anyOf:
+          - required:
+              - "testcases"
+          - required:
+              - "arguments"
+          - required:
+              - "exception"
+          - required:
+              - "exit_code"
+          - required:
+              - "stdin"
+          - required:
+              - "stderr"
+          - required:
+              - "stdout"
+      - $ref: "#/definitions/testcase"
     properties:
       config:
         $ref: "#/definitions/globalConfig"
@@ -168,14 +170,20 @@ definitions:
       statement:
         description: "Statement or expression to evaluate"
         $ref: "#/definitions/textualTypes"
+      expression:
+        description: "Statement or expression to evaluate"
+        $ref: "#/definitions/textualTypes"
       stderr:
         description: "Expected output at stderr"
         $ref: "#/definitions/streamOutput"
       stdout:
         description: "Expected output at stdout"
         $ref: "#/definitions/streamOutput"
-    required:
-      - "statement"
+    oneOf:
+      - required:
+          - "statement"
+      - required:
+          - "expression"
     dependencies:
       return:
         not:
@@ -185,6 +193,14 @@ definitions:
         not:
           required:
             - "return"
+      statement:
+        not:
+          required:
+            - "expression"
+      expression:
+        not:
+          required:
+            - "statement"
   textualTypes:
     anyOf:
       - type: "boolean"
