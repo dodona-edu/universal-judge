@@ -86,4 +86,11 @@ en:
         stdout: "The evaluation code produced the following output on stdout:"
       failed: "The program language specific evaluation failed."
       invalid: "The result of the programmed evaluation is invalid:"
+  languages:
+    config:
+      unknown:
+        compilation: "Unknown compilation error"
+    generator:
+      missing:
+        input: "No input found."
 

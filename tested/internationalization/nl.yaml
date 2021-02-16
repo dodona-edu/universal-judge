@@ -86,3 +86,10 @@ nl:
         stdout: "De evaluatiecode produceerde volgende uitvoer op stdout:"
       failed: "De programmeertaalspecifieke evaluatie werkte niet."
       invalid: "Het resultaat van de geprogrammeerde evaluatie is ongeldig:"
+  languages:
+    config:
+      unknown:
+        compilation: "Ongekende compilatie fout"
+    generator:
+      missing:
+        input: "Geen invoer gevonden."
