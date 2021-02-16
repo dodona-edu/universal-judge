@@ -17,7 +17,7 @@
                     "type": "sequence",
                     "variable": "codes01",
                     "expression": {
-                      "type": "namespace",
+                      "type": "function",
                       "namespace": "ex",
                       "name": "get",
                       "arguments": []

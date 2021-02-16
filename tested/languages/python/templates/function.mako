@@ -2,7 +2,7 @@
 <%! from tested.serialisation import FunctionType, NamedArgument, Expression %>\
 <%! from tested.utils import get_args %>\
 <%page args="function" />\
-% if (not function.has_root_namespace or function.type == FunctionType.NAMESPACE):
+% if not function.has_root_namespace and function.namespace:
     ${function.namespace}.\
 % endif
 ${function.name}\

@@ -149,6 +149,7 @@ class _SelectorArguments:
 @dataclass
 class InternalFunctionCall(FunctionCall):
     has_root_namespace: bool = True
+    # TODO: find out why this variable can't be initialized by the constructor
 
 
 def _prepare_argument(
@@ -167,20 +168,26 @@ def _prepare_expression(bundle: Bundle, expression: Expression) -> Expression:
     """
 
     if isinstance(expression, FunctionCall):
-        submission_name = bundle.lang_config.submission_name(bundle.plan)
-        if expression.type == FunctionType.CONSTRUCTOR:
-            name = expression.name
+        if isinstance(expression, InternalFunctionCall):
+            expression.arguments = [_prepare_argument(bundle, arg)
+                                    for arg in expression.arguments]
+            return expression
         else:
-            name = bundle.lang_config.conventionalize_function(expression.name)
+            submission_name = bundle.lang_config.submission_name(bundle.plan)
+            if expression.type == FunctionType.CONSTRUCTOR:
+                name = expression.name
+            else:
+                name = bundle.lang_config.conventionalize_function(expression.name)
 
-        return InternalFunctionCall(
-            type=expression.type,
-            arguments=[_prepare_argument(bundle, arg)
-                       for arg in expression.arguments],
-            name=name,
-            namespace=expression.namespace or submission_name,
-            has_root_namespace=not bool(expression.namespace)
-        )
+            internal = InternalFunctionCall(
+                type=expression.type,
+                arguments=[_prepare_argument(bundle, arg)
+                           for arg in expression.arguments],
+                name=name,
+                namespace=expression.namespace or submission_name
+            )
+            internal.has_root_namespace = not bool(expression.namespace)
+            return internal
 
     return expression
 
@@ -226,22 +233,24 @@ def _create_handling_function(
         if (hasattr(output, "evaluator")
                 and isinstance(output.evaluator, SpecificEvaluator)):
             arguments = [InternalFunctionCall(
-                type=FunctionType.NAMESPACE,
+                type=FunctionType.FUNCTION,
                 name=evaluator.name,
                 namespace=evaluator_name,
-                arguments=[_prepare_expression(bundle, expression)],
-                has_root_namespace=False
+                arguments=[_prepare_expression(bundle, expression)]
             )]
+            arguments[0].has_root_namespace = False
             function_name = send_evaluated
         else:
             arguments = [expression]
             function_name = send_value
 
-        return InternalFunctionCall(
+        internal = InternalFunctionCall(
             type=FunctionType.FUNCTION,
             name=lang_config.conventionalize_function(function_name),
             arguments=[_prepare_argument(bundle, arg) for arg in arguments]
         )
+        internal.has_root_namespace = False
+        return internal
 
     return generator, evaluator_name
 
@@ -603,12 +612,12 @@ def generate_custom_evaluator(bundle: Bundle,
     arguments = custom_evaluator_arguments(evaluator)
 
     function = InternalFunctionCall(
-        type=FunctionType.NAMESPACE,
+        type=FunctionType.FUNCTION,
         namespace=evaluator_name,
         name=evaluator.function.name,
-        arguments=[expected_value, actual_value, arguments],
-        has_root_namespace=False
+        arguments=[expected_value, actual_value, arguments]
     )
+    function.has_root_namespace = False
 
     args = _CustomEvaluatorArguments(
         evaluator=evaluator_name,
