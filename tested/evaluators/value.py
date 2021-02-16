@@ -8,6 +8,7 @@ from . import EvaluationResult, EvaluatorConfig
 from ..configs import Bundle
 from ..datatypes import AdvancedTypes, BasicTypes, BasicStringTypes
 from ..dodona import ExtendedMessage, Permission, StatusMessage, Status
+from ..internationalization import get_i18n_string
 from ..languages.config import TypeSupport
 from ..languages.generator import convert_statement
 from ..serialisation import (Value, parse_value, to_python_comparable,
@@ -158,7 +159,7 @@ def evaluate(config: EvaluatorConfig, channel: OutputChannel,
         return EvaluationResult(
             result=StatusMessage(
                 enum=Status.WRONG,
-                human="Ontbrekende returnwaarde."
+                human=get_i18n_string("evaluators.value.missing")
             ),
             readable_expected=readable_expected,
             readable_actual=readable_actual
@@ -175,10 +176,10 @@ def evaluate(config: EvaluatorConfig, channel: OutputChannel,
 
     # Only add the message about the type if the content is the same.
     if content_check and not type_check:
-        type_status = "Returnwaarde heeft verkeerd gegevenstype."
+        type_status = get_i18n_string("evaluators.value.datatype.wrong")
         messages.append(
-            f"Verwachtte waarde van type {expected.type}, "
-            f"maar was type {actual.type}."
+            get_i18n_string("evaluators.value.datatype.message",
+                            expected=expected.type, actual=actual.type)
         )
 
     correct = type_check and content_check

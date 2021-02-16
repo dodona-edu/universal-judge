@@ -25,6 +25,7 @@ from ..languages.templates import path_to_templates
 from ..serialisation import Value, EvalResult
 from ..testplan import ProgrammedEvaluator
 from ..utils import get_identifier
+from ..internationalization import get_i18n_string
 
 
 def evaluate_programmed(
@@ -79,8 +80,8 @@ def _evaluate_others(bundle: Bundle,
                       f" evaluations.")
         return BaseExecutionResult(
             stdout="",
-            stderr=f"Evaluatie in {eval_bundle.config.programming_language} wordt "
-                   f"niet ondersteund.",
+            stderr=get_i18n_string("judge.programmed.unsupported",
+                                   lang=eval_bundle.config.programming_language),
             exit=-1,
             timeout=False,
             memory=False
@@ -128,7 +129,7 @@ def _evaluate_others(bundle: Bundle,
     if status != Status.CORRECT:
         return BaseExecutionResult(
             stdout="",
-            stderr="Unknown compilation error",
+            stderr=get_i18n_string("judge.programmed.unknown.compilation"),
             exit=-1,
             timeout=False,
             memory=False
@@ -225,7 +226,7 @@ def _evaluate_python(bundle: Bundle,
     messages = []
     if stdout_:
         messages.append(ExtendedMessage(
-            description="De evaluatiecode produceerde volgende uitvoer op stdout:",
+            description=get_i18n_string("judge.programmed.produced.stdout"),
             format="text"
         ))
         messages.append(ExtendedMessage(
@@ -234,7 +235,7 @@ def _evaluate_python(bundle: Bundle,
         ))
     if stderr_:
         messages.append(ExtendedMessage(
-            description="De evaluatiecode produceerde volgende uitvoer op stderr:",
+            description=get_i18n_string("judge.programmed.produced.stderr"),
             format="text",
             permission=Permission.STUDENT
         ))
@@ -250,12 +251,11 @@ def _evaluate_python(bundle: Bundle,
     # If the result is None, the evaluator is broken.
     if result_ is None:
         messages.append(ExtendedMessage(
-            description="Er ging iets verkeerds tijdens het evalueren van de "
-                        "oplossing. Contacteer de lesgever.",
+            description=get_i18n_string("judge.programmed.student"),
             format="text"
         ))
         messages.append(ExtendedMessage(
-            description="De programmeertaalspecifieke evaluatie werkte niet.",
+            description=get_i18n_string("judge.programmed.failed"),
             format="text",
             permission=Permission.STAFF
         ))
@@ -280,13 +280,11 @@ def _evaluate_python(bundle: Bundle,
         # execution, this is caught when parsing the resulting json, but this does
         # not happen when using Python, so we do it here.
         messages.append(ExtendedMessage(
-            description="Er ging iets verkeerds tijdens de evaluatie. Contacteer "
-                        "de lesgever.",
+            description=get_i18n_string("judge.programmed.student"),
             format="text"
         ))
         messages.append(ExtendedMessage(
-            description="Het resultaat van de geprogrammeerde evaluatie is "
-                        "ongeldig:",
+            description=get_i18n_string("judge.programmed.invalid"),
             format="text",
             permission=Permission.STAFF
         ))

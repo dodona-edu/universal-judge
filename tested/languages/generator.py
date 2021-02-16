@@ -13,6 +13,7 @@ from .templates import find_and_write_template, find_template
 from ..configs import Bundle
 from ..datatypes import BasicSequenceTypes
 from ..dodona import ExtendedMessage
+from ..internationalization import get_i18n_string
 from ..serialisation import (Value, SequenceType, Identifier, FunctionType,
                              FunctionCall, Expression, Statement, Assignment,
                              NothingType)
@@ -393,7 +394,7 @@ def attempt_run_readable_input(bundle: Bundle, run: RunTestcase) -> ExtendedMess
         return result
 
     return ExtendedMessage(
-        description="Geen invoer gevonden.",
+        description=get_i18n_string("languages.generator.missing.input"),
         format="text"
     )
 
@@ -407,7 +408,7 @@ def attempt_readable_input(bundle: Bundle, context: Context) -> ExtendedMessage:
             return result
 
     return ExtendedMessage(
-        description="Geen invoer gevonden.",
+        description=get_i18n_string("languages.generator.missing.input"),
         format="text"
     )
 
