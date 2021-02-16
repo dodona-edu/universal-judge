@@ -47,3 +47,42 @@ nl:
       datatype:
         wrong: "Returnwaarde heeft verkeerd gegevenstype."
         message: "Verwachtte waarde van type %{expected}, maar was type %{actual}."
+  judge:
+    compilation:
+      received:
+        stderr: "De compiler produceerde volgende uitvoer op stderr:"
+        stdout: "De compiler produceerde volgende uitvoer op stdout:"
+      exitcode: "Exitcode %{exitcode}."
+    core:
+      unsupported:
+        language: >-
+          Deze oefening kan niet opgelost worden in deze programmeertaal:
+          %{language}
+      compilation: "Compilatie"
+      invalid:
+        source-code: "Ongeldige broncode"
+    evaluation:
+      early-exit: "De beoordeling is vroegtijdig gestopt."
+      time-limit: "Tijdslimiet overschreden."
+      memory-limit: "Geheugenlimiet overschreden."
+      missing:
+        context: "Context niet uitgevoerd"
+        output: "Ontbrekende uitvoer"
+        test: "Test niet uitgevoerd"
+      files:
+        zero: "Geen bestanden"
+        one: "Bestand: %{files}"
+        many: "Bestanden: %{files}"
+      dynamic: "Dynamisch"
+    programmed:
+      student: >-
+        Er ging iets verkeerds tijdens het evalueren van de oplossing.
+        Contacteer de lesgever.
+      unsupported: "Evaluation in %{lang} wordt niet ondersteund."
+      unknown:
+        compilation: "Ongekende compilatie fout"
+      produced:
+        stderr: "De evaluatiecode produceerde volgende uitvoer op stderr:"
+        stdout: "De evaluatiecode produceerde volgende uitvoer op stdout:"
+      failed: "De programmeertaalspecifieke evaluatie werkte niet."
+      invalid: "Het resultaat van de geprogrammeerde evaluatie is ongeldig:"

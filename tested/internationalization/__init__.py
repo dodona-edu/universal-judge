@@ -1,5 +1,8 @@
 import i18n
 import os.path
+import logging
+
+_logger = logging.getLogger(__name__)
 
 i18n.set('filename_format', '{locale}.{format}')
 i18n.set('file_format', 'yaml')
@@ -10,6 +13,7 @@ i18n.load_path.append(os.path.dirname(__file__))
 
 
 def set_locale(locale: str):
+    _logger.debug(f"Change locale to {locale}")
     i18n.set('locale', locale)
 
 

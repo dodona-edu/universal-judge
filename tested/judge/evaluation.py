@@ -18,6 +18,7 @@ from ..testplan import Context, OutputChannel, IgnoredChannel, \
     ValueOutputChannel, \
     FileUrl
 from ..utils import get_args, safe_del, safe_get
+from ..internationalization import get_i18n_string
 
 _logger = logging.getLogger(__name__)
 
@@ -94,16 +95,16 @@ def _evaluate_channel(
     # Report missing output
     if actual is None:
         out.add(AppendMessage(
-            message="De beoordeling is vroegtijdig gestopt."
+            message=get_i18n_string("judge.evaluation.early-exit")
         ))
     elif should_show(output, channel) and timeout and not is_correct:
-        status.human = "Tijdslimiet overschreden."
+        status.human = get_i18n_string("judge.evaluation.time-limit")
         status.enum = Status.TIME_LIMIT_EXCEEDED
         out.add(AppendMessage(
             message=status.human
         ))
     elif should_show(output, channel) and memory and not is_correct:
-        status.human = "Geheugenlimiet overschreden."
+        status.human = get_i18n_string("judge.evaluation.memory-limit")
         status.enum = Status.TIME_LIMIT_EXCEEDED
         out.add(AppendMessage(
             message=status.human
@@ -256,11 +257,11 @@ def evaluate_context_results(bundle: Bundle, context: Context,
     if not could_delete:
         _logger.warning("Missing output in context testcase.")
         missing_values.append(AppendMessage(
-            "De beoordeling is vroegtijdig gestopt."
+            get_i18n_string("judge.evaluation.early-exit")
         ))
         missing_values.append(EscalateStatus(status=StatusMessage(
             enum=Status.WRONG,
-            human="Ontbrekende uitvoer."
+            human=get_i18n_string("judge.evaluation.missing.output")
         )))
         # Recover stdout and stderr if present.
         if recovered := "\n".join(stdout_):
@@ -350,9 +351,10 @@ def _handle_link_files(link_files: List[FileUrl], collector: OutputManager):
         f'<span class="code">{html.escape(link_file.name)}</span></a>'
         for link_file in link_files
     )
-    name = "File" if len(link_files) == 1 else "Files"
+    file_list_str = get_i18n_string("judge.evaluation.files", count=len(link_files),
+                                    files=link_list)
     description = f"<div class='contains-file' data-files='{dict_json}'>" \
-                  f"<p>{name}: {link_list}</p></div>"
+                  f"<p>{file_list_str}</p></div>"
     message = ExtendedMessage(description=description, format="html")
     collector.add(AppendMessage(message=message))
 
@@ -408,9 +410,12 @@ def guess_expected_value(bundle: Bundle, test: OutputChannel) -> str:
     elif isinstance(test, FileOutputChannel):
         return test.get_data_as_string(bundle.config.resources)
     elif isinstance(test, ExceptionOutputChannel):
-        return test.exception.message if test.exception else "Dynamisch"
+        return test.exception.message if test.exception else get_i18n_string(
+            "judge.evaluation.dynamic")
     elif isinstance(test, ValueOutputChannel):
-        return convert_statement(bundle, test.value) if test.value else "Dynamisch"
+        return convert_statement(bundle,
+                                 test.value) if test.value else get_i18n_string(
+            "judge.evaluation.dynamic")
     elif isinstance(test, ExitCodeOutputChannel):
         return str(test.value)
 
@@ -427,7 +432,7 @@ def _add_channel(bundle: Bundle, output: OutputChannel, channel: Channel,
             generated="",
             status=StatusMessage(
                 enum=Status.NOT_EXECUTED,
-                human="Test niet uitgevoerd."
+                human=get_i18n_string("judge.evaluation.missing.test")
             ),
             accepted=False
         ))
@@ -455,13 +460,18 @@ def prepare_evaluation(bundle: Bundle, collector: OutputManager):
             exit_output = run_testcase.output.exit_code
 
             if has_main:
-                description = run_testcase.description or "Context niet uitgevoerd."
+                description = run_testcase.description or get_i18n_string(
+                    "judge.evaluation.missing.context")
                 collector.prepare_context(
                     StartContext(description=description), i, context_index
                 )
 
                 readable_input = get_readable_input(bundle, run_testcase)
-                updates = [StartTestcase(description=readable_input)]
+                updates = []
+                if run_testcase.description:
+                    updates.append(AppendMessage(message=get_i18n_string(
+                        "judge.evaluation.missing.context")))
+                updates.append(StartTestcase(description=readable_input))
 
                 # Do the normal output channels.
                 output = run_testcase.output
@@ -482,12 +492,16 @@ def prepare_evaluation(bundle: Bundle, collector: OutputManager):
                 context_index += 1
 
             for j, context in enumerate(run.contexts, start=int(has_main)):
-                description = context.description or "Context niet uitgevoerd."
+                description = context.description or get_i18n_string(
+                    "judge.evaluation.missing.context")
                 updates = []
 
                 collector.prepare_context(
                     StartContext(description=description), i, context_index
                 )
+                if context.description:
+                    updates.append(AppendMessage(message=get_i18n_string(
+                        "judge.evaluation.missing.context")))
 
                 # Begin normal testcases.
                 for t, testcase in enumerate(context.testcases, 1):

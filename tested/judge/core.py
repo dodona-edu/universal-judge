@@ -19,6 +19,7 @@ from ..features import is_supported
 from ..languages.generator import generate_execution, generate_selector
 from ..languages.templates import path_to_templates
 from ..testplan import ExecutionMode
+from ..internationalization import set_locale, get_i18n_string
 
 _logger = logging.getLogger(__name__)
 
@@ -33,14 +34,15 @@ def judge(bundle: Bundle):
     """
     # Begin by checking if the given testplan is executable in this language.
     _logger.info("Checking supported features...")
+    set_locale(bundle.config.natural_language)
     if not is_supported(bundle):
         report_update(bundle.out, StartJudgment())
         report_update(bundle.out, CloseJudgment(
             accepted=False,
             status=StatusMessage(
                 enum=Status.INTERNAL_ERROR,
-                human=f"Deze oefening kan niet opgelost worden in deze "
-                      f"programmeertaal: {bundle.config.programming_language}"
+                human=get_i18n_string("judge.core.unsupported.language",
+                                      language=bundle.config.programming_language)
             )
         ))
         _logger.info("Required features not supported.")
@@ -84,31 +86,21 @@ def judge(bundle: Bundle):
             precompilation_result = None
         else:
             # Handle timout if necessary.
-            if result.timeout:
+            if result.timeout or result.memory:
                 # Show in separate tab.
                 index = len(bundle.plan.tabs) + 1
                 if messages:
-                    collector.prepare_tab(StartTab("Compilatie"), index)
+                    collector.prepare_tab(
+                        StartTab(get_i18n_string("judge.core.compilation")), index)
                 for message in messages:
                     collector.add(AppendMessage(message=message))
                 for annotation in annotations:
                     collector.add(annotation)
                 if messages:
                     collector.prepare_tab(CloseTab(), index)
-                collector.terminate(Status.TIME_LIMIT_EXCEEDED)
-                return
-            if result.memory:
-                index = len(bundle.plan.tabs) + 1
-                # Show in separate tab.
-                if messages:
-                    collector.prepare_tab(StartTab("Compilatie"), index)
-                for message in messages:
-                    collector.add(AppendMessage(message=message))
-                for annotation in annotations:
-                    collector.add(annotation)
-                if messages:
-                    collector.prepare_tab(CloseTab(), index)
-                collector.terminate(Status.MEMORY_LIMIT_EXCEEDED)
+                collector.terminate(
+                    Status.TIME_LIMIT_EXCEEDED if result.timeout else
+                    Status.MEMORY_LIMIT_EXCEEDED)
                 return
 
             assert not result.timeout
@@ -128,7 +120,8 @@ def judge(bundle: Bundle):
                 files = compilation_files
                 # Report messages.
                 if messages:
-                    collector.add_tab(StartTab("Compilatie"), -1)
+                    collector.add_tab(
+                        StartTab(get_i18n_string("judge.core.compilation")), -1)
                 for message in messages:
                     collector.add(AppendMessage(message=message))
                 for annotation in annotations:
@@ -139,7 +132,7 @@ def judge(bundle: Bundle):
                 if status != Status.CORRECT:
                     collector.terminate(StatusMessage(
                         enum=status,
-                        human="Ongeldige broncode"
+                        human=get_i18n_string("judge.core.invalid.source-code")
                     ))
                     _logger.info("Compilation error without fallback")
                     return  # Compilation error occurred, useless to continue.

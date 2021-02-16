@@ -47,3 +47,43 @@ en:
       datatype:
         wrong: "Return value is having the wrong datatype."
         message: "Expected value of type %{expected}, but was type %{actual}."
+  judge:
+    compilation:
+      received:
+        stderr: "Received stderr from compiler:"
+        stdout: "Received stdout from compiler:"
+      exitcode: "Exitcode %{exitcode}."
+    core:
+      unsupported:
+        language: >-
+          This exercise can't be solved in this programming language:
+          %{language}
+      compilation: "Compilation"
+      invalid:
+        source-code: "Invalid source code"
+    evaluation:
+      early-exit: "The evaluation has stopped early."
+      time-limit: "Time limit exceeded"
+      memory-limit: "Memory limit exceeded"
+      missing:
+        context: "Context not executed"
+        output: "Missing output"
+        test: "Test not executed"
+      files:
+        zero: "No files"
+        one: "File: %{files}"
+        many: "Files: %{files}"
+      dynamic: "Dynamic"
+    programmed:
+      student: >-
+        Something went wrong while evaluating the solution.
+        Please contact the teacher
+      unsupported: "Evaluation in %{lang} isn't supported"
+      unknown:
+        compilation: "Unknown compilation error"
+      produced:
+        stderr: "The evaluation code produced the following output on stderr:"
+        stdout: "The evaluation code produced the following output on stdout:"
+      failed: "The program language specific evaluation failed."
+      invalid: "The result of the programmed evaluation is invalid:"
+
