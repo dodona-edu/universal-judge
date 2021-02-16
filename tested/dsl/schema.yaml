@@ -92,23 +92,25 @@ definitions:
   context:
     type: "object"
     description: "Information to execute one context"
-    oneOf:
+    anyOf:
+      - oneOf:
+          - anyOf:
+              - required:
+                  - "testcases"
+              - required:
+                  - "arguments"
+              - required:
+                  - "exit_code"
+              - required:
+                  - "stdin"
+          - $ref: "#/definitions/testcase"
       - anyOf:
-          - required:
-              - "testcases"
-          - required:
-              - "arguments"
           - required:
               - "exception"
           - required:
-              - "exit_code"
-          - required:
-              - "stdin"
+              - "stdout"
           - required:
               - "stderr"
-          - required:
-              - "stdout"
-      - $ref: "#/definitions/testcase"
     properties:
       config:
         $ref: "#/definitions/globalConfig"
@@ -143,6 +145,12 @@ definitions:
       stdout:
         description: "Expected output for main call at stdout"
         $ref: "#/definitions/streamOutput"
+    dependencies:
+      stdin:
+        not:
+          required:
+            - "statement"
+            - "expression"
   testcase:
     type: "object"
     description: "An individual test for a statement or expression"
