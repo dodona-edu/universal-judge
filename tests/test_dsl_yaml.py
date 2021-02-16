@@ -161,7 +161,7 @@ def test_statements():
   - testcases:
     - statement: 'Safe safe = new Safe("Ignore whitespace")'
       stdout: "New safe"
-    - statement: 'safe.content()'
+    - expression: 'safe.content()'
       return: "Ignore whitespace"
   - testcases:
     - statement: 'Safe safe = new Safe(5 :: uint8)'
@@ -169,7 +169,7 @@ def test_statements():
         data: "New safe"
         config:
           ignoreWhitespace: false
-    - statement: 'safe.content()'
+    - expression: 'safe.content()'
       return-raw: '5 :: uint8'
     """
     json_str = translate(yaml_str)
@@ -230,6 +230,32 @@ def test_statement_and_main():
     assert test.output.result.value.type == BasicNumericTypes.INTEGER
 
 
+def test_statement():
+    yaml_str = """
+- tab: "Feedback"
+  contexts:
+  - expression: "heir(8, 10)"
+    return: [ 10, 4, 15, 11, 7, 5, 3, 2, 16, 12, 1, 6, 13, 9, 14, 8 ]
+  - statement: "heir(8, 3)"
+    return: [ 3, 6, 9, 12, 15, 2, 7, 1, 13, 8, 16, 10, 14, 4, 11, 5 ]
+"""
+    json_str = translate(yaml_str)
+    plan = _PlanModel.parse_raw(json_str).__root__
+    assert len(plan.tabs) == 1
+    tab = plan.tabs[0]
+    assert len(tab.runs) == 1
+    run = tab.runs[0]
+    assert not run.run.input.main_call
+    ctx0, ctx1 = run.contexts
+    testcases0, testcases1 = ctx0.testcases, ctx1.testcases
+    assert len(testcases0) == 1
+    assert len(testcases1) == 1
+    test0, test1 = testcases0[0], testcases1[0]
+    assert isinstance(test0.input, FunctionCall)
+    assert isinstance(test1.input, FunctionCall)
+
+
+
 def test_invalid_yaml():
     yaml_str = """
 - tab: "Tab"
@@ -257,6 +283,20 @@ def test_invalid_mutual_exclusive_return_yaml():
     - statement: "5"
       return: 5
       return-raw: "5"
+    """
+    with pytest.raises(SystemExit) as e:
+        translate(yaml_str)
+    assert e.type == SystemExit
+    assert e.value.code != 0
+
+
+def test_invalid_mutual_exclusive_context_testcase():
+    yaml_str = """
+- tab: "Tab"
+  contexts:
+  - stdin: "5"
+    statement: "5"
+    return: 5
     """
     with pytest.raises(SystemExit) as e:
         translate(yaml_str)

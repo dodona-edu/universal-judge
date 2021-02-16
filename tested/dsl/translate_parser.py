@@ -195,6 +195,10 @@ class SchemaParser:
                            context: YAML_DICT,
                            stack_frame: StackFrame = StackFrame()
                            ) -> Tuple[RunTestcase, Optional[Context]]:
+        if "statement" in context or "expression" in context:
+            testcase, files = self._translate_testcase(context, stack_frame)
+            return RunTestcase(), Context(testcases=[testcase], link_files=files)
+
         stack_frame = self._translate_config(
             self._get_dict_safe(context, "config"),
             stack_frame
@@ -331,7 +335,8 @@ class SchemaParser:
                             testcase: YAML_DICT,
                             stack_frame: StackFrame = StackFrame()
                             ) -> Tuple[Testcase, List[FileUrl]]:
-        code = self._get_str_safe(testcase, "statement")
+        code = self._get_str_safe(testcase, "statement") or \
+               self._get_str_safe(testcase, "expression")
         output = Output()
         self._translate_base_output(testcase, output, stack_frame)
         if "return" in testcase:
