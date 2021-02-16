@@ -93,3 +93,7 @@ nl:
     generator:
       missing:
         input: "Geen invoer gevonden."
+    python:
+      linter:
+        crashed: "Pylint gecrasht"
+        output: "Pylint produceerde slechte uitvoer."

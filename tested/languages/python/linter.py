@@ -14,20 +14,9 @@ from pylint.reporters import JSONReporter
 
 from tested.configs import Bundle
 from tested.dodona import *
+from tested.internationalization import get_i18n_string
 
 logger = logging.getLogger(__name__)
-
-# localize judge output
-translations = {
-    'en': {
-        'linting tab':     'code',
-        'TLE description': 'time limit exceeded',
-    },
-    'nl': {
-        'linting tab':     'code',
-        'TLE description': 'tijdslimiet overschreden',
-    },
-}
 
 message_categories = {
     'fatal':      Severity.ERROR,
@@ -59,7 +48,7 @@ def run_pylint(bundle: Bundle, submission: Path, remaining: float) \
         lint.Run(args, reporter=JSONReporter(output=pylint_out), do_exit=False)
     except Exception as e:
         logger.warning("Pylint crashed with", exc_info=e)
-        return ["Pylint crashed", ExtendedMessage(
+        return [get_i18n_string("languages.python.linter.crashed"), ExtendedMessage(
             description=str(e),
             format='code',
             permission=Permission.STAFF
@@ -69,7 +58,7 @@ def run_pylint(bundle: Bundle, submission: Path, remaining: float) \
         messages = json.loads(pylint_out.getvalue())
     except Exception as e:
         logger.warning("Pylint produced bad output", exc_info=e)
-        return ["Pylint produced bad output.", ExtendedMessage(
+        return [get_i18n_string("languages.python.linter.output"), ExtendedMessage(
             description=str(e),
             format='code',
             permission=Permission.STAFF

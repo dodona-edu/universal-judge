@@ -93,4 +93,7 @@ en:
     generator:
       missing:
         input: "No input found."
-
+    python:
+      linter:
+        crashed: "Pylint crashed"
+        output: "Pylint produced bad output."
