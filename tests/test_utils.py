@@ -162,10 +162,9 @@ def test_template_code_block_html(lang: str, prompt: str, expected_stmt: str, ex
 
 
 @pytest.mark.parametrize(("lang", "expected"), [
-    pytest.param("python", ">>> random = Random()\n>>> random.new_sequence(10, 10)\n[10, 5, 2, 8, 7, 1, 3, 4, 9, 6]",
-                 marks=pytest.mark.xfail),
+    ("python", ">>> random = Random()\n>>> random.new_sequence(10, 10)\n[10, 5, 2, 8, 7, 1, 3, 4, 9, 6]"),
     ("java", "> Random random = new Random();\n> random.newSequence(10, 10)\nList.of(10, 5, 2, 8, 7, 1, 3, 4, 9, 6)"),
-    ("kotlin", "> var random = Random()\n> newSequence(10, 10)\nlistOf(10, 5, 2, 8, 7, 1, 3, 4, 9, 6)"),
+    ("kotlin", "> var random = Random()\n> random!!.newSequence(10, 10)\nlistOf(10, 5, 2, 8, 7, 1, 3, 4, 9, 6)"),
     ("javascript", "> let random = await new Random()\n> random.newSequence(10, 10)\n[10, 5, 2, 8, 7, 1, 3, 4, 9, 6]")
 ])
 def test_template_statement_expression(lang: str, expected: str):
