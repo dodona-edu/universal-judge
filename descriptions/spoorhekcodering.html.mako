@@ -9,9 +9,7 @@
 </p>
 
 <div class="highlighter-rouge language-python">
-<pre class="highlight">
-<code>
-<span style="color:#888888;"><span style="background-color:#ffff00; color:#000000;"><strong>A</strong></span>#####<span
+<pre class="highlight"><code><span style="color:#888888;"><span style="background-color:#ffff00; color:#000000;"><strong>A</strong></span>#####<span
         style="background-color:#ffff00; color:#000000;"><strong>w</strong></span>#####<span
         style="background-color:#ffff00; color:#000000;"><strong>s</strong></span>#####<span
         style="background-color:#ffff00; color:#000000;"><strong>i</strong></span>#####<span
@@ -53,7 +51,7 @@
         style="background-color:#ffff00; color:#000000;"> </span>#####<span
         style="background-color:#ffff00; color:#000000;"><strong>e</strong></span>#####<span
         style="background-color:#ffff00; color:#000000;"><strong>d</strong></span>#####<span
-        style="background-color:#ffff00; color:#000000;"><strong>e</strong></span>###</span></code> </pre>
+        style="background-color:#ffff00; color:#000000;"><strong>e</strong></span>###</span></code></pre>
 </div>
 
 <p>
@@ -86,27 +84,28 @@ ${language_specific}
 <h3>Example</h3>
 
 <div class="highlighter-rouge language-${language}">
-<pre class="highlight"><code>\
-> encode("And now for something completely different.", 1)
-= "And now for something completely different."
+<pre class="highlight"><code class="tested" tested id="code">\
+> encode("And now for something completely different.", \
+         1)
+"And now for something completely different."
 > encode("And now for something completely different.", 2)
-= "Adnwfrsmtigcmltl ifrn.n o o oehn opeeydfeet"
+"Adnwfrsmtigcmltl ifrn.n o o oehn opeeydfeet"
 > encode("And now for something completely different.", 3)
-= "Anfstgmt fnn o o oehn opeeydfeetdwrmicllir."
+"Anfstgmt fnn o o oehn opeeydfeetdwrmicllir."
 > encode("And now for something completely different.", 4)
-= "Awsimlf.no  ohnopeyfetdnfrmtgclt irn oe ede"
+"Awsimlf.no  ohnopeyfetdnfrmtgclt irn oe ede"
 > encode("And now for something completely different.", 5)
-= "Aftm nn oehopydetdwrmicllir. o on eefensgtf"
+"Aftm nn oehopydetdwrmicllir. o on eefensgtf"
 
 > decode("And now for something completely different.", 1)
-= "And now for something completely different."
+"And now for something completely different."
 > decode("Adnwfrsmtigcmltl ifrn.n o o oehn opeeydfeet", 2)
-= "And now for something completely different."
+"And now for something completely different."
 > decode("Anfstgmt fnn o o oehn opeeydfeetdwrmicllir.", 3)
-= "And now for something completely different."
+"And now for something completely different."
 > decode("Awsimlf.no  ohnopeyfetdnfrmtgclt irn oe ede", 4)
-= "And now for something completely different."
+"And now for something completely different."
 > decode("Aftm nn oehopydetdwrmicllir. o on eefensgtf", 5)
-= "And now for something completely different."
+"And now for something completely different."
 </code></pre>
 </div>

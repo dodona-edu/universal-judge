@@ -22,6 +22,30 @@ def _mako_uncomment(m: re.Match) -> str:
     return result
 
 
+def _analyse_body(body: str) -> str:
+    expressions, same, html_tag = [], False, False
+    for line in body.splitlines(keepends=False):
+        line = line.strip()
+
+        new_same = line and line[-1] == '\\'
+        line = line[:-1] if new_same else line
+        if same:
+            expressions[-1] += line
+        else:
+            expressions.append(line)
+        same = new_same
+
+    for index, expr in enumerate(expressions):
+        if not expr:
+            continue
+        elif expr[0] == '>':
+            expressions[index] = f"${{statement({repr(expr[1:].strip())})}}"
+        else:
+            expressions[index] = f"${{expression({repr(expr.strip())})}}"
+
+    return "\n".join(expressions) + ("" if same else "\n")
+
+
 def create_description_instance(template: str,
                                 programming_language: str = "python",
                                 natural_language: str = "en",
@@ -31,18 +55,18 @@ def create_description_instance(template: str,
         raise ValueError(f"Language {programming_language} doesn't exists")
 
     if is_html:
+        re_tag = "(\"[^\"]*\"|'[^']*'|[^'\">])*"
+
         regex_code, body_index = re.compile(
-            r"(<pre(\"[^\"]*\"|'[^']*'|[^'\">])*>\s*"
-            r"<code(\"[^\"]*\"|'[^']*'|[^'\">])*>)"
-            r"((?!</code>).*?)(</code>\s*</pre>)",
+            fr"((<code{re_tag}) tested({re_tag}>))"
+            r"((?!</?code>).*?)(</code>)",
             re.MULTILINE | re.DOTALL
-        ), 3
+        ), 5
     else:
         regex_code, body_index = re.compile(
             r"^(```.*\r?\n)(((?!```).*\r?\n)*)(```)$", re.MULTILINE), 1
 
     regex_comment_mako = re.compile(r"(?m)^(\s*#.*)$")
-    regex_stmt_expr = re.compile(r"^([>=])\s*(.+(\r?\n(?![>=]).+)*)$", re.MULTILINE)
 
     last_end, mako_template = 0, []
 
@@ -52,10 +76,12 @@ def create_description_instance(template: str,
         mako_template.extend(
             regex_comment_mako.sub(_mako_uncomment, template[last_end:span[0]]))
         last_end = span[1]
-        mako_template.extend(groups[0])
-        body = groups[body_index]
-        body = regex_stmt_expr.sub(_stmt_expr, body)
-        mako_template.extend(body)
+        if is_html:
+            mako_template.extend(groups[1])
+            mako_template.extend(groups[3])
+        else:
+            mako_template.extend(groups[0])
+        mako_template.extend(_analyse_body(groups[body_index]))
         mako_template.extend(groups[-1])
 
     mako_template.extend(

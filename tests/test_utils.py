@@ -126,7 +126,7 @@ def test_template_type_name_override():
 def test_template_code_block_markdown(lang: str, prompt: str):
     template = """```console?lang=${language}&prompt=${prompt}
 > random()
-= 5
+5
 ```"""
     expected_stmt = "random" if lang == "haskell" else "Submission.random()" if lang == "java" else "random()"
     expected_expr = "5 :: Int" if lang == "haskell" else "5"
@@ -149,15 +149,15 @@ def test_template_code_block_markdown(lang: str, prompt: str):
      '<span class="mi">5</span> <span class="ow">::</span> <span class="kt">Int</span>')
 ])
 def test_template_code_block_html(lang: str, prompt: str, expected_stmt: str, expected_expr: str):
-    template = """<pre class="highlight"><code>
+    template = """<code tested>
 > random()
-= 5
-</code></pre>"""
+5
+</code>"""
     instance = create_description_instance(template, programming_language=lang, is_html=True)
-    expected = f"""<pre class="highlight"><code>
+    expected = f"""<code>
 {html.escape(prompt)} {expected_stmt}
 {expected_expr}
-</code></pre>"""
+</code>"""
     assert instance == expected
 
 
