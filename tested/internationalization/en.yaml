@@ -61,6 +61,7 @@ en:
       compilation: "Compilation"
       invalid:
         source-code: "Invalid source code"
+      initialization: "Error while initializing the code:"
     evaluation:
       early-exit: "The evaluation has stopped early."
       time-limit: "Time limit exceeded"
