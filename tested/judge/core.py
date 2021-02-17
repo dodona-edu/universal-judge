@@ -320,15 +320,22 @@ def _process_results(bundle: Bundle, execution: Execution,
     has_main = execution.run.run.input.main_call
     exit_code = execution.run.run.output.exit_code
 
-    if has_main:
+    if has_main or (len(context_results) == 0 and (
+            run_testcase.exit or run_testcase.stdout or run_testcase.stderr or
+            run_testcase.exception or run_testcase.timeout or run_testcase.memory)):
+
+        offset = execution.context_offset if has_main else None
+        if not has_main:
+            execution.run.run.description = get_i18n_string(
+                "judge.core.initialization")
         execution.collector.add_context(
             StartContext(),
-            execution.context_offset
+            offset
         )
         continue_ = evaluate_run_results(bundle, execution.run.run, run_testcase,
                                          (m, s), p, execution.collector,
                                          bool(context_results))
-        execution.collector.add_context(CloseContext(), execution.context_offset)
+        execution.collector.add_context(CloseContext(), offset)
         if execution.collector.is_full():
             return Status.OUTPUT_LIMIT_EXCEEDED
         if continue_ in (Status.TIME_LIMIT_EXCEEDED,

@@ -61,6 +61,7 @@ nl:
       compilation: "Compilatie"
       invalid:
         source-code: "Ongeldige broncode"
+      initialization: "Fout tijdens het initialiseren van de code:"
     evaluation:
       early-exit: "De beoordeling is vroegtijdig gestopt."
       time-limit: "Tijdslimiet overschreden."
