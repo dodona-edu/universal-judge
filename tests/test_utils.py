@@ -96,6 +96,24 @@ def test_template_natural_type_name(lang: str, tested_type: Any, expected: str):
     assert instance == f"{expected}"
 
 
+@pytest.mark.parametrize(("lang", "tested_type", "expected"), [
+    # Python
+    ("python", "'sequence'", "lijst"), ("python", "'map'", "dictionary"),
+    # Java
+    ("java", "'sequence'", "lijst"), ("java", "'map'", "map"),
+    # Kotlin
+    ("kotlin", "'sequence'", "lijst"), ("kotlin", "'map'", "map"),
+    # JavaScript
+    ("javascript", "'sequence'", "array"), ("javascript", "'map'", "object"),
+    # Haskell
+    ("haskell", "'sequence'", "lijst"), ("haskell", "'list'", "lijst"),
+])
+def test_template_natural_type_name_nl(lang: str, tested_type: Any, expected: str):
+    template = f"""${{natural_type_name({tested_type})}}"""
+    instance = create_description_instance(template, programming_language=lang, is_html=False, natural_language="nl")
+    assert instance == f"{expected}"
+
+
 def test_template_type_name_override():
     template = """${type_name("integer", {"java": {"integer": "long"}})}"""
     instance = create_description_instance(template, programming_language="java", is_html=False)
