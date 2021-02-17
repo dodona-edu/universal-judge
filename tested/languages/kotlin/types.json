@@ -32,5 +32,23 @@
   "array": "Array",
   "list": "List",
   "inner": {
+  },
+  "natural": {
+    "en": {
+      "text": "string",
+      "sequence": "list",
+      "set": "set",
+      "map": "map",
+      "array": "array",
+      "list": "list"
+    },
+    "nl": {
+      "text": "string",
+      "sequence": "lijst",
+      "set": "verzameling",
+      "map": "map",
+      "array": "array",
+      "list": "lijst"
+    }
   }
 }

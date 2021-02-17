@@ -81,7 +81,7 @@
     </li>
 </ul>
 
-${appendix()}
+${language_specific}
 
 <h3>Example</h3>
 

@@ -225,13 +225,15 @@ class Language:
         :param config_file: The name of the configuration file. Relative to the
                             directory in which the configuration class is.
         """
-        path_to_config = (Path(sys.modules[self.__module__].__file__).parent
-                          / config_file)
+        config_dir = Path(sys.modules[self.__module__].__file__).parent
+        path_to_config = (config_dir / config_file)
         with open(path_to_config, "r") as f:
             self.options = json.load(f)
 
-        path_to_types = (Path(sys.modules[self.__module__].__file__).parent
-                         / types_file)
+        path_to_types = (config_dir / types_file)
+        if not os.path.exists(path_to_types):
+            path_to_types = (config_dir.parent / self.inherits_from() / types_file)
+
         with open(path_to_types, "r") as f:
             self.types = json.load(f)
 
@@ -655,6 +657,11 @@ class Language:
         """
         return message
 
+    def get_natural_type_name(self, type_name: str, bundle: Bundle,
+                              is_html: bool = True) -> str:
+        value = self.types["natural"][bundle.config.natural_language][type_name]
+        return html.escape(value) if is_html else value
+
     def get_type_name(self,
                       args: TYPE_ARG,
                       custom_type_map: Optional[Dict[
@@ -735,19 +742,6 @@ class Language:
         if is_html:
             return f"<code>{html.escape(function_name)}</code>"
         return f"`{function_name}`"
-
-    def get_code_start(self, is_html: bool = True) -> str:
-        if is_html:
-            return f'<div class="highlighter-rouge language-' \
-                   f'{self.types["console"]["name"]}">\n' \
-                   f'<pre class="highlight"><code>'
-        else:
-            prompt = self.types['console']['prompt']
-            language_name = self.types['console']['name']
-            return f"```console?lang={language_name}&prompt={prompt}"
-
-    def get_code_end(self, is_html: bool = True) -> str:
-        return "</code></pre></div>" if is_html else "```"
 
     def get_code(self, stmt: str, bundle: Bundle, statement: bool = False,
                  is_html: bool = True) -> str:

@@ -33,5 +33,25 @@
   "list": "list",
   "tuple": "tuple",
   "inner": {
+  },
+  "natural": {
+    "en": {
+      "text": "text",
+      "sequence": "sequence",
+      "set": "set",
+      "map": "map",
+      "array": "array",
+      "list": "list",
+      "tuple": "tuple"
+    },
+    "nl": {
+      "text": "tekst",
+      "sequence": "sequentie",
+      "set": "verzameling",
+      "map": "afbeelding",
+      "array": "array",
+      "list": "lijst",
+      "tuple": "tupel"
+    }
   }
 }

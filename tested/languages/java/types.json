@@ -53,5 +53,23 @@
   "appendix": {
     "nl": "De functies moeten gedefinieerd worden als statische functies in de klasse {namespace}.",
     "default": "The functions must be defined as static functions in the class {namespace}."
+  },
+  "natural": {
+    "en": {
+      "text": "string",
+      "sequence": "list",
+      "set": "set",
+      "map": "map",
+      "array": "array",
+      "list": "list"
+    },
+    "nl": {
+      "text": "string",
+      "sequence": "lijst",
+      "set": "verzameling",
+      "map": "map",
+      "array": "array",
+      "list": "lijst"
+    }
   }
 }

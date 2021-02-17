@@ -1,3 +1,4 @@
+import html
 from typing import Any
 
 import pytest
@@ -77,6 +78,24 @@ def test_template_type_name(lang: str, tested_type: Any, expected: str):
     assert instance == f"`{expected}`"
 
 
+@pytest.mark.parametrize(("lang", "tested_type", "expected"), [
+    # Python
+    ("python", "'sequence'", "list"), ("python", "'map'", "dictionary"),
+    # Java
+    ("java", "'sequence'", "list"), ("java", "'map'", "map"),
+    # Kotlin
+    ("kotlin", "'sequence'", "list"), ("kotlin", "'map'", "map"),
+    # JavaScript
+    ("javascript", "'sequence'", "array"), ("javascript", "'map'", "object"),
+    # Haskell
+    ("haskell", "'sequence'", "list"), ("haskell", "'list'", "list"),
+])
+def test_template_natural_type_name(lang: str, tested_type: Any, expected: str):
+    template = f"""${{natural_type_name({tested_type})}}"""
+    instance = create_description_instance(template, programming_language=lang, is_html=False)
+    assert instance == f"{expected}"
+
+
 def test_template_type_name_override():
     template = """${type_name("integer", {"java": {"integer": "long"}})}"""
     instance = create_description_instance(template, programming_language="java", is_html=False)
@@ -87,21 +106,40 @@ def test_template_type_name_override():
     ("python", ">>>"), ("java", ">"), ("c", ">"), ("kotlin", ">"), ("javascript", ">"), ("haskell", ">")
 ])
 def test_template_code_block_markdown(lang: str, prompt: str):
-    template = """${code_start()}
-${code_end()}"""
+    template = """```console?lang=${language}&prompt=${prompt}
+> random()
+= 5
+```"""
+    expected_stmt = "random" if lang == "haskell" else "Submission.random()" if lang == "java" else "random()"
+    expected_expr = "5 :: Int" if lang == "haskell" else "5"
     instance = create_description_instance(template, programming_language=lang, is_html=False)
-    expected = f"```console?lang={lang}&prompt={prompt}\n```"
+    expected = f"""```console?lang={lang}&prompt={prompt}
+{prompt} {expected_stmt}
+{expected_expr}
+```"""
     assert instance == expected
 
 
-@pytest.mark.parametrize(("lang", "prompt"), [
-    ("python", ">>>"), ("java", ">"), ("c", ">"), ("kotlin", ">"), ("javascript", ">"), ("haskell", ">")
+@pytest.mark.parametrize(("lang", "prompt", "expected_stmt", "expected_expr"), [
+    ("python", ">>>", '<span class="n">random</span><span class="p">()</span>', '<span class="mi">5</span>'),
+    ("java", ">", '<span class="n">Submission</span><span class="p">.</span>'
+                  '<span class="na">random</span><span class="p">()</span>', '<span class="mi">5</span>'),
+    ("c", ">", '<span class="n">random</span><span class="p">()</span>', '<span class="mi">5</span>'),
+    ("kotlin", ">", '<span class="n">random</span><span class="p">()</span>', '<span class="m">5</span>'),
+    ("javascript", ">", '<span class="nx">random</span><span class="p">()</span>', '<span class="mf">5</span>'),
+    ("haskell", ">", '<span class="nf">random</span>',
+     '<span class="mi">5</span> <span class="ow">::</span> <span class="kt">Int</span>')
 ])
-def test_template_code_block_html(lang: str, prompt: str):
-    template = """${code_start()}
-${code_end()}"""
+def test_template_code_block_html(lang: str, prompt: str, expected_stmt: str, expected_expr: str):
+    template = """<pre class="highlight"><code>
+> random()
+= 5
+</code></pre>"""
     instance = create_description_instance(template, programming_language=lang, is_html=True)
-    expected = f'<div class="highlighter-rouge language-{lang}">\n<pre class="highlight"><code>\n</code></pre></div>'
+    expected = f"""<pre class="highlight"><code>
+{html.escape(prompt)} {expected_stmt}
+{expected_expr}
+</code></pre>"""
     assert instance == expected
 
 

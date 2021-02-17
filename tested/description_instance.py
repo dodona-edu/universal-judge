@@ -39,10 +39,10 @@ def create_description_instance(template: str,
         ), 3
     else:
         regex_code, body_index = re.compile(
-            r"^(```.*)\n\r?(((?!```).*\n\r?)*)(```)$", re.MULTILINE), 1
+            r"^(```.*\r?\n)(((?!```).*\r?\n)*)(```)$", re.MULTILINE), 1
 
     regex_comment_mako = re.compile(r"(?m)^(\s*#.*)$")
-    regex_stmt_expr = re.compile(r"^([>=])\s*(.+(\n\r?(?![>=]).+)*)$", re.MULTILINE)
+    regex_stmt_expr = re.compile(r"^([>=])\s*(.+(\r?\n(?![>=]).+)*)$", re.MULTILINE)
 
     last_end, mako_template = 0, []
 
@@ -85,11 +85,11 @@ def create_description_instance(template: str,
     )
 
     return template.render(
-        appendix=partial(language.get_appendix, bundle=bundle, is_html=is_html),
+        language_specific=language.get_appendix(bundle=bundle, is_html=is_html),
         function_name=partial(language.get_function_name, is_html=is_html),
+        natural_type_name=partial(language.get_natural_type_name, bundle=bundle,
+                                  is_html=is_html),
         type_name=partial(language.get_type_name, bundle=bundle, is_html=is_html),
-        code_start=partial(language.get_code_start, is_html=is_html),
-        code_end=partial(language.get_code_end, is_html=is_html),
         statement=partial(language.get_code, bundle=bundle, is_html=is_html,
                           statement=True),
         expression=partial(language.get_code, bundle=bundle, is_html=is_html,

@@ -33,5 +33,23 @@
   "list": "List",
   "tuple": "Tuple",
   "inner": {
+  },
+  "natural": {
+    "en": {
+      "text": "string",
+      "sequence": "list",
+      "set": "set",
+      "map": "dictionary",
+      "list": "list",
+      "tuple": "tuple"
+    },
+    "nl": {
+      "text": "string",
+      "sequence": "lijst",
+      "set": "verzameling",
+      "map": "dictionary",
+      "list": "lijst",
+      "tuple": "tupel"
+    }
   }
 }
