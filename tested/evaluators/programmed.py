@@ -10,6 +10,7 @@ from .utils import cleanup_specific_programmed
 from .value import get_values
 from ..datatypes import StringTypes
 from ..dodona import ExtendedMessage, StatusMessage, Status, Permission
+from ..internationalization import get_i18n_string
 from ..judge import evaluate_programmed
 from ..judge.utils import BaseExecutionResult
 from ..serialisation import StringType, EvalResult, Value
@@ -20,8 +21,7 @@ from ..utils import Either, get_args
 
 _logger = logging.getLogger(__name__)
 
-DEFAULT_STUDENT = ("Er ging iets fout op bij het evalueren van de oplossing. Meld "
-                   "dit aan de lesgever!")
+DEFAULT_STUDENT = (get_i18n_string("evaluators.programmed.student.default"))
 
 
 def _maybe_string(value_: str) -> Optional[Value]:
@@ -139,13 +139,11 @@ def evaluate(config: EvaluatorConfig,
         except (TypeError, ValueError):
             messages = [
                 ExtendedMessage(
-                    description="Er ging iets verkeerds tijdens de evaluatie. "
-                                "Contacteer de lesgever.",
+                    description=DEFAULT_STUDENT,
                     format="text"
                 ),
                 ExtendedMessage(
-                    description="Het resultaat van de geprogrammeerde evaluatie is "
-                                "ongeldig:",
+                    description=get_i18n_string("evaluators.programmed.result"),
                     format="text",
                     permission=Permission.STAFF
                 ),
@@ -155,7 +153,7 @@ def evaluate(config: EvaluatorConfig,
                     permission=Permission.STAFF
                 ),
                 ExtendedMessage(
-                    description="Dit werd geproduceerd op stdout:",
+                    description=get_i18n_string("evaluators.programmed.stdout"),
                     permission=Permission.STAFF
                 ),
                 ExtendedMessage(
@@ -164,7 +162,7 @@ def evaluate(config: EvaluatorConfig,
                     permission=Permission.STAFF
                 ),
                 ExtendedMessage(
-                    description="Dit werd geproduceerd op stderr:",
+                    description=get_i18n_string("evaluators.programmed.stderr"),
                     permission=Permission.STAFF
                 ),
                 ExtendedMessage(

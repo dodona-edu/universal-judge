@@ -13,9 +13,10 @@ from .templates import find_and_write_template, find_template
 from ..configs import Bundle
 from ..datatypes import BasicSequenceTypes
 from ..dodona import ExtendedMessage
+from ..internationalization import get_i18n_string
 from ..serialisation import (Value, SequenceType, Identifier, FunctionType,
                              FunctionCall, Expression, Statement, Assignment,
-                             NothingType)
+                             NothingType, NamedArgument, ObjectType)
 from ..testplan import (EmptyChannel, IgnoredChannel, TextData, ProgrammedEvaluator,
                         SpecificEvaluator, Testcase, RunTestcase, Context,
                         ExceptionOutput, ValueOutput, Run)
@@ -146,28 +147,57 @@ class _SelectorArguments:
     contexts: List[str]
 
 
+@dataclass
+class InternalFunctionCall(FunctionCall):
+    has_root_namespace: bool = True
+    # TODO: find out why this variable can't be initialized by the constructor
+
+
+def _prepare_argument(
+        bundle: Bundle,
+        argument: Union[Expression, NamedArgument]
+) -> Union[Expression, NamedArgument]:
+    if isinstance(argument, NamedArgument):
+        return NamedArgument(name=argument.name,
+                             value=_prepare_expression(bundle, argument.value))
+    return _prepare_expression(bundle, argument)
+
+
 def _prepare_expression(bundle: Bundle, expression: Expression) -> Expression:
     """
     Prepare an expression for use in a template.
     """
-    if isinstance(expression, FunctionCall):
+
+    if isinstance(expression, InternalFunctionCall):
+        expression.arguments = [_prepare_argument(bundle, arg)
+                                for arg in expression.arguments]
+    elif isinstance(expression, FunctionCall):
         submission_name = bundle.lang_config.submission_name(bundle.plan)
         if expression.type == FunctionType.CONSTRUCTOR:
             name = expression.name
         else:
             name = bundle.lang_config.conventionalize_function(expression.name)
-        return FunctionCall(
+
+        internal = InternalFunctionCall(
             type=expression.type,
-            arguments=expression.arguments,
+            arguments=[_prepare_argument(bundle, arg)
+                       for arg in expression.arguments],
             name=name,
             namespace=expression.namespace or submission_name
         )
-
+        internal.has_root_namespace = not bool(expression.namespace)
+        return internal
+    elif isinstance(expression, SequenceType):
+        expression.data = [_prepare_expression(bundle, expr)
+                           for expr in expression.data]
+    elif isinstance(expression, ObjectType):
+        expression.data = dict((key, _prepare_expression(bundle, value))
+                               for key, value in expression.data.items())
     return expression
 
 
 def _create_handling_function(
-        b: Bundle,
+        bundle: Bundle,
         send_value: str,
         send_evaluated: str,
         output: Union[ExceptionOutput, ValueOutput]
@@ -187,17 +217,18 @@ def _create_handling_function(
 
         send_value(value)
 
-    :param b: The configuration bundle.
+    :param bundle: The configuration bundle.
     :param send_evaluated: The name of the function that will handle sending the
                            result of an evaluation.
     :param send_value: The name of the function that will handle sending the value.
     :param output: The evaluator.
     :return: A tuple containing the call and the name of the evaluator if present.
     """
-    lang_config = b.lang_config
+    lang_config = bundle.lang_config
     if (hasattr(output, "evaluator")
             and isinstance(output.evaluator, SpecificEvaluator)):
-        evaluator = output.evaluator.for_language(b.config.programming_language)
+        evaluator = output.evaluator.for_language(
+            bundle.config.programming_language)
         evaluator_name = lang_config.conventionalize_namespace(evaluator.file.stem)
     else:
         evaluator_name = None
@@ -205,22 +236,25 @@ def _create_handling_function(
     def generator(expression: Expression) -> Statement:
         if (hasattr(output, "evaluator")
                 and isinstance(output.evaluator, SpecificEvaluator)):
-            arguments = [FunctionCall(
-                type=FunctionType.NAMESPACE,
+            arguments = [InternalFunctionCall(
+                type=FunctionType.FUNCTION,
                 name=evaluator.name,
                 namespace=evaluator_name,
-                arguments=[expression]
+                arguments=[_prepare_expression(bundle, expression)]
             )]
+            arguments[0].has_root_namespace = False
             function_name = send_evaluated
         else:
             arguments = [expression]
             function_name = send_value
 
-        return FunctionCall(
+        internal = InternalFunctionCall(
             type=FunctionType.FUNCTION,
             name=lang_config.conventionalize_function(function_name),
-            arguments=arguments
+            arguments=[_prepare_argument(bundle, arg) for arg in arguments]
         )
+        internal.has_root_namespace = False
+        return internal
 
     return generator, evaluator_name
 
@@ -393,7 +427,7 @@ def attempt_run_readable_input(bundle: Bundle, run: RunTestcase) -> ExtendedMess
         return result
 
     return ExtendedMessage(
-        description="Geen invoer gevonden.",
+        description=get_i18n_string("languages.generator.missing.input"),
         format="text"
     )
 
@@ -407,7 +441,7 @@ def attempt_readable_input(bundle: Bundle, context: Context) -> ExtendedMessage:
             return result
 
     return ExtendedMessage(
-        description="Geen invoer gevonden.",
+        description=get_i18n_string("languages.generator.missing.input"),
         format="text"
     )
 
@@ -581,12 +615,13 @@ def generate_custom_evaluator(bundle: Bundle,
     )
     arguments = custom_evaluator_arguments(evaluator)
 
-    function = FunctionCall(
-        type=FunctionType.NAMESPACE,
+    function = InternalFunctionCall(
+        type=FunctionType.FUNCTION,
         namespace=evaluator_name,
         name=evaluator.function.name,
         arguments=[expected_value, actual_value, arguments]
     )
+    function.has_root_namespace = False
 
     args = _CustomEvaluatorArguments(
         evaluator=evaluator_name,

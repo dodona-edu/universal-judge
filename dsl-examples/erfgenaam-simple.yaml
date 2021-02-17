@@ -1,0 +1,108 @@
+# Description for function program exercises
+# Example for exercise https://dodona.ugent.be/nl/courses/392/activities/1013186526/
+# For each tab we will use on dodona, we need a 'tab' field
+- tab: "Feedback"
+  # Each tab consists of a list of evaluation contexts, allow evaluation dependencies
+  contexts:
+    # Our test cases consist of a statement and a return value, this statement contains a function call
+    # a function call is notated as: function_name(<argument list>), <argument list> = (<argument> [, <argument>]*)?
+    - statement: "heir(8, 10)"
+      return: [ 10, 4, 15, 11, 7, 5, 3, 2, 16, 12, 1, 6, 13, 9, 14, 8 ]
+    - statement: "heir(8, 3)"
+      return: [ 3, 6, 9, 12, 15, 2, 7, 1, 13, 8, 16, 10, 14, 4, 11, 5 ]
+    - statement: "heir(10, 5)"
+      return: [ 5, 10, 15, 20, 6, 12, 18, 4, 13, 3, 16, 7, 14, 1, 8, 9, 2, 17, 11, 19]
+    - statement: "heir(10, 20)"
+      return: [ 20, 1, 3, 6, 10, 15, 4, 13, 7, 11, 12, 8, 18, 2, 17, 19, 5, 14, 16, 9]
+    - statement: "heir(12, 7)"
+      return: [ 7, 14, 21, 4, 12, 20, 5, 15, 24, 10, 22, 9, 19, 6, 16, 23, 2, 3, 1, 17, 8, 18, 13, 11]
+    - statement: "heir(2, 12)"
+      return: [ 4, 1, 2, 3]
+    - statement: "heir(2, 15)"
+      return: [ 3, 4, 2, 1]
+    - statement: "heir(3, 6)"
+      return: [ 6, 1, 4, 5, 2, 3]
+    - statement: "heir(3, 11)"
+      return: [ 5, 6, 2, 4, 3, 1]
+    - statement: "heir(7, 3)"
+      return: [ 3, 6, 9, 12, 1, 5, 14, 10, 4, 11, 2, 7, 13, 8]
+    - statement: "heir(9, 5)"
+      return: [ 5, 10, 15, 2, 8, 14, 3, 11, 1, 12, 18, 7, 13, 16, 9, 4, 17, 6]
+    - statement: "heir(13, 12)"
+      return: [ 12, 24, 10, 23, 11, 26, 15, 4, 20, 13, 5, 25, 3, 7, 8, 6, 1, 19, 14, 18, 21, 16, 17, 22, 2, 9]
+    - statement: "heir(7, 13)"
+      return: [ 13, 12, 14, 2, 5, 9, 3, 6, 4, 10, 8, 7, 1, 11]
+    - statement: "heir(11, 20)"
+      return: [ 20, 18, 17, 19, 22, 3, 7, 12, 1, 10, 16, 4, 5, 21, 11, 14, 9, 13, 15, 6, 8, 2]
+    - statement: "heir(13, 19)"
+      return: [ 19, 12, 6, 1, 23, 20, 17, 16, 18, 22, 26, 5, 24, 10, 25, 7, 9, 8, 2, 11, 4, 14, 21, 15, 13, 3]
+    - statement: "heir(12, 5)"
+      return: [ 5, 10, 15, 20, 1, 7, 13, 19, 2, 9, 17, 8, 23, 14, 3, 16, 24, 11, 18, 21, 12, 4, 22, 6]
+    - statement: "heir(8, 18)"
+      return: [ 2, 5, 9, 14, 6, 15, 11, 12, 8, 1, 3, 10, 4, 7, 13, 16]
+    - statement: "heir(12, 6)"
+      return: [ 6, 12, 18, 24, 7, 14, 21, 4, 13, 22, 8, 20, 10, 23, 9, 17, 2, 5, 11, 3, 19, 1, 15, 16]
+    - statement: "heir(14, 15)"
+      return: [ 15, 2, 18, 6, 23, 12, 3, 22, 14, 8, 1, 26, 24, 25, 21, 19, 13, 7, 20, 5, 10, 9, 27, 28, 11, 16, 4, 17]
+    - statement: "heir(11, 5)"
+      return: [ 5, 10, 15, 20, 3, 9, 16, 22, 7, 14, 6, 19, 11, 21, 8, 17, 1, 2, 18, 12, 4, 13]
+    - statement: "heir(8, 3)"
+      return: [ 3, 6, 9, 12, 15, 2, 7, 1, 13, 8, 16, 10, 14, 4, 11, 5]
+    - statement: "heir(2, 14)"
+      return: [ 2, 4, 1, 3]
+    - statement: "heir(13, 3)"
+      return: [ 3, 6, 9, 12, 15, 18, 21, 24, 1, 5, 10, 14, 8, 2, 23, 19, 13, 4, 22, 16, 26, 17, 25, 7, 20, 11]
+    - statement: "heir(9, 15)"
+      return: [ 15, 12, 10, 9, 11, 14, 18, 4, 16, 3, 6, 5, 17, 1, 7, 8, 2, 13]
+    - statement: "heir(11, 6)"
+      return: [ 6, 12, 18, 2, 9, 16, 1, 10, 19, 5, 17, 7, 15, 3, 11, 14, 20, 13, 4, 8, 21, 22]
+    - statement: "heir(14, 13)"
+      return: [ 13, 26, 11, 25, 12, 28, 16, 4, 21, 10, 3, 23, 18, 22, 27, 1, 24, 19, 14, 6, 15, 20, 17, 7, 5, 2, 9, 8]
+    - statement: "heir(4, 13)"
+      return: [ 5, 3, 4, 8, 7, 6, 2, 1]
+    - statement: "heir(8, 12)"
+      return: [ 12, 8, 5, 3, 2, 4, 7, 16, 11, 15, 1, 13, 14, 6, 9, 10]
+    - statement: "heir(6, 6)"
+      return: [ 6, 12, 7, 2, 10, 1, 3, 11, 8, 9, 4, 5]
+    - statement: "heir(3, 3)"
+      return: [ 3, 6, 2, 4, 1, 5]
+    - statement: "heir(14, 15)"
+      return: [ 15, 2, 18, 6, 23, 12, 3, 22, 14, 8, 1, 26, 24, 25, 21, 19, 13, 7, 20, 5, 10, 9, 27, 28, 11, 16, 4, 17]
+    - statement: "heir(5, 8)"
+      return: [ 8, 6, 5, 7, 3, 10, 1, 4, 9, 2]
+    - statement: "heir(7, 14)"
+      return: [ 14, 1, 3, 6, 10, 4, 8, 9, 5, 11, 2, 12, 13, 7]
+    - statement: "heir(5, 16)"
+      return: [ 6, 3, 2, 5, 9, 8, 10, 7, 1, 4]
+    - statement: "heir(9, 8)"
+      return: [ 8, 16, 6, 15, 7, 18, 11, 4, 10, 13, 14, 12, 5, 1, 2, 9, 17, 3]
+    - statement: "heir(8, 9)"
+      return: [ 9, 2, 12, 6, 1, 14, 11, 13, 10, 7, 3, 5, 4, 8, 16, 15]
+    - statement: "heir(8, 15)"
+      return: [ 15, 14, 16, 2, 5, 9, 1, 7, 10, 8, 3, 4, 11, 12, 6, 13]
+    - statement: "heir(13, 20)"
+      return: [ 20, 14, 9, 5, 2, 26, 25, 1, 4, 8, 13, 19, 11, 22, 7, 15, 16, 10, 23, 3, 21, 24, 6, 17, 18, 12]
+    - statement: "heir(11, 6)"
+      return: [ 6, 12, 18, 2, 9, 16, 1, 10, 19, 5, 17, 7, 15, 3, 11, 14, 20, 13, 4, 8, 21, 22]
+    - statement: "heir(10, 17)"
+      return: [ 17, 14, 12, 11, 13, 16, 20, 4, 9, 2, 7, 10, 8, 3, 6, 1, 19, 15, 5, 18]
+    - statement: "heir(3, 11)"
+      return: [ 5, 6, 2, 4, 3, 1]
+    - statement: "heir(3, 11)"
+      return: [ 5, 6, 2, 4, 3, 1]
+    - statement: "heir(2, 20)"
+      return: [ 4, 2, 3, 1]
+    - statement: "heir(4, 18)"
+      return: [ 2, 6, 5, 1, 7, 8, 3, 4]
+    - statement: "heir(2, 18)"
+      return: [ 2, 3, 4, 1]
+    - statement: "heir(14, 5)"
+      return: [ 5, 10, 15, 20, 25, 2, 8, 14, 21, 27, 6, 13, 22, 12, 3, 23, 11, 28, 17, 1, 16, 24, 4, 7, 26, 18, 9, 19]
+    - statement: "heir(9, 12)"
+      return: [ 12, 6, 1, 15, 11, 9, 8, 10, 5, 2, 14, 18, 3, 16, 17, 4, 7, 13]
+    - statement: "heir(3, 12)"
+      return: [ 6, 2, 3, 4, 5, 1]
+    - statement: "heir(13, 15)"
+      return: [ 15, 4, 20, 10, 1, 19, 12, 6, 26, 23, 21, 18, 17, 14, 9, 3, 16, 2, 7, 5, 22, 24, 8, 11, 25, 13]
+    - statement: "heir(10, 7)"
+      return: [ 7, 14, 1, 9, 17, 5, 15, 4, 16, 3, 11, 18, 20, 2, 19, 12, 6, 13, 10, 8]

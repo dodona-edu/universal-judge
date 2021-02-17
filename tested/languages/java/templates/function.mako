@@ -4,7 +4,7 @@
 % if function.type == FunctionType.CONSTRUCTOR:
     new \
 % endif
-% if function.type == FunctionType.NAMESPACE or (function.type == FunctionType.FUNCTION and function.namespace):
+% if function.namespace and not (function.has_root_namespace and function.type == FunctionType.CONSTRUCTOR):
     ${function.namespace}.\
 % endif
 ${function.name}\

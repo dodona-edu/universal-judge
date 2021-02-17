@@ -2,10 +2,9 @@
 RawEvaluator for ignored channels.
 """
 import functools
-from typing import Optional
 
-from ..dodona import StatusMessage, Status
 from . import EvaluationResult, exception, value, try_outputs, EvaluatorConfig
+from ..dodona import StatusMessage, Status
 from ..testplan import IgnoredChannel
 
 

@@ -6,6 +6,7 @@ from typing import Optional
 
 from tested.dodona import StatusMessage, Status
 from . import EvaluationResult, try_outputs, exception, value, EvaluatorConfig
+from ..internationalization import get_i18n_string
 from ..testplan import EmptyChannel
 
 
@@ -25,8 +26,10 @@ def evaluate(config: EvaluatorConfig, channel: EmptyChannel,
             messages.append(msg)
         result = StatusMessage(
             enum=unexpected_status,
-            human="Runtime error" if unexpected_status == Status.RUNTIME_ERROR
-            else "Onverwachte uitvoer."
+            human=get_i18n_string("evaluators.nothing." + (
+                "runtime" if unexpected_status == Status.RUNTIME_ERROR
+                else "unexpected"
+            ))
 
         )
     else:

@@ -93,20 +93,24 @@ definitions:
     type: "object"
     description: "Information to execute one context"
     anyOf:
-      - required:
-          - "testcases"
-      - required:
-          - "arguments"
-      - required:
-          - "exception"
-      - required:
-          - "exit_code"
-      - required:
-          - "stdin"
-      - required:
-          - "stderr"
-      - required:
-          - "stdout"
+      - oneOf:
+          - anyOf:
+              - required:
+                  - "testcases"
+              - required:
+                  - "arguments"
+              - required:
+                  - "exit_code"
+              - required:
+                  - "stdin"
+          - $ref: "#/definitions/testcase"
+      - anyOf:
+          - required:
+              - "exception"
+          - required:
+              - "stdout"
+          - required:
+              - "stderr"
     properties:
       config:
         $ref: "#/definitions/globalConfig"
@@ -141,6 +145,12 @@ definitions:
       stdout:
         description: "Expected output for main call at stdout"
         $ref: "#/definitions/streamOutput"
+    dependencies:
+      stdin:
+        not:
+          required:
+            - "statement"
+            - "expression"
   testcase:
     type: "object"
     description: "An individual test for a statement or expression"
@@ -168,14 +178,20 @@ definitions:
       statement:
         description: "Statement or expression to evaluate"
         $ref: "#/definitions/textualTypes"
+      expression:
+        description: "Statement or expression to evaluate"
+        $ref: "#/definitions/textualTypes"
       stderr:
         description: "Expected output at stderr"
         $ref: "#/definitions/streamOutput"
       stdout:
         description: "Expected output at stdout"
         $ref: "#/definitions/streamOutput"
-    required:
-      - "statement"
+    oneOf:
+      - required:
+          - "statement"
+      - required:
+          - "expression"
     dependencies:
       return:
         not:
@@ -185,6 +201,14 @@ definitions:
         not:
           required:
             - "return"
+      statement:
+        not:
+          required:
+            - "expression"
+      expression:
+        not:
+          required:
+            - "statement"
   textualTypes:
     anyOf:
       - type: "boolean"

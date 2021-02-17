@@ -175,14 +175,26 @@ class OutputManager:
 
     def add_tab(self, update: Union[StartTab, CloseTab], tab_index: int):
         assert not self.collected, "OutputManager already finished!"
+        if isinstance(update, CloseTab):
+            for _, context in sorted(self.prepared.tabs[tab_index].contexts.items(),
+                                     key=lambda x: x[0]):
+                self._add(context.start)
+                for command in context.content:
+                    self._add(command)
+                self._add(context.end)
+
         action = self._add(update)
         self.tab = tab_index
         if action == "close" and tab_index >= 0:
             del self.prepared.tabs[tab_index]
 
     def add_context(self, update: Union[StartContext, CloseContext],
-                    context_index: int):
+                    context_index: Optional[int]):
         assert not self.collected, "OutputManager already finished!"
+        if context_index is None:
+            self._add(update)
+            return
+
         self.context = context_index
         action = self._add(update)
         if action == "close":
@@ -198,8 +210,6 @@ class OutputManager:
         # Ensure we use the given status.
         self._add(EscalateStatus(status=status))
         to_add = self._get_to_add()
-        _logger.info(list(
-            filter(lambda x: isinstance(x, (StartTab, CloseTab)), to_add)))
         for added in to_add:
             modified = _replace_status(added, status)
             self._add(modified)

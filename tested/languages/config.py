@@ -39,6 +39,7 @@ from ..datatypes import AllTypes
 from ..dodona import AnnotateCode, Message, Status, ExtendedMessage, Permission
 from ..dsl import Parser
 from ..features import Construct
+from ..internationalization import get_i18n_string
 from ..serialisation import ExceptionValue
 from ..testplan import Plan
 from ..utils import camelize, pascalize, fallback, snake_case
@@ -620,7 +621,7 @@ class Language:
         if possible_main_files:
             return possible_main_files[0], messages, Status.CORRECT, []
         else:
-            messages.append("Unknown compilation error")
+            messages.append(get_i18n_string("languages.config.unknown.compilation"))
             return None, messages, Status.COMPILATION_ERROR, []
 
     def cleanup_stacktrace(self,

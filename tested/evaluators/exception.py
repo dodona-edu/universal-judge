@@ -8,6 +8,7 @@ from pydantic import BaseModel
 
 from . import EvaluationResult, EvaluatorConfig
 from ..dodona import StatusMessage, Status, ExtendedMessage, Permission
+from ..internationalization import get_i18n_string
 from ..serialisation import ExceptionValue
 from ..testplan import ExceptionOutputChannel
 from ..utils import Either
@@ -65,17 +66,16 @@ def evaluate(config: EvaluatorConfig,
         actual = try_as_exception(config, actual).get()
     except (TypeError, ValueError) as e:
         staff_message = ExtendedMessage(
-            description=f"Expected value exception, but received {actual}, which "
-                        f"caused an exception while parsing: {e}",
+            description=get_i18n_string("evaluators.exception.staff", actual=actual,
+                                        exception=e),
             format="text",
             permission=Permission.STAFF
         )
-        student_message = ("Dodona verstond de exception niet. Meld deze fout aan "
-                           "de lesgever!")
+        student_message = (get_i18n_string("evaluators.exception.student"))
         return EvaluationResult(
             result=StatusMessage(
                 enum=Status.INTERNAL_ERROR,
-                human="Ongeldige exception."
+                human=get_i18n_string("evaluators.exception.status")
             ),
             readable_expected=expected.readable(),
             readable_actual="",

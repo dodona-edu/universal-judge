@@ -1,0 +1,100 @@
+en:
+  evaluators:
+    exception:
+      staff: >-
+        Expected value exception, but received %{actual}, which caused an exception
+        while parsing: %{exception}
+      student: >-
+        Dodona don't understood this exception. Report this error to the teacher.
+      status: "Invalid exception"
+    exitcode:
+      status:
+        invalid: "Invalid exitcode %{exit_code}."
+        message: "Can't parse %{exit_code} as exitcode."
+        wrong: "Wrong exitcode"
+    nothing:
+      runtime: "Runtime error"
+      unexpected: "Unexpected output"
+    programmed:
+      student:
+        default: >-
+          Something went wrong when evaluating the solution.
+          Report this to the teacher.
+      result: "This result of the programmed evaluation is invalid:"
+      stdout: "This is produced on stdout:"
+      stderr: "This is produced on stderr:"
+    specific:
+      student:
+        default: >-
+          Something went wrong when evaluating the solution.
+          Report this to the teacher.
+      missing:
+        status: "Missing output."
+        message: "Output is missing here."
+      status: "Error by evaluating the result."
+      staff: >-
+        Received invalid output for specific evaluation: %{actual}.
+        Either the testplan is invalid, the evaluation code has a bug or the student
+        is trying to cheat: %{e}
+    text:
+      file:
+        unexpected:
+          status: "Unexpected output."
+          message: "Doesn't expect output for channel, but found: %{actual}."
+        not-found: "File not found."
+    value:
+      missing: "Missing return value."
+      datatype:
+        wrong: "Return value is having the wrong datatype."
+        message: "Expected value of type %{expected}, but was type %{actual}."
+  judge:
+    compilation:
+      received:
+        stderr: "Received stderr from compiler:"
+        stdout: "Received stdout from compiler:"
+      exitcode: "Exitcode %{exitcode}."
+    core:
+      unsupported:
+        language: >-
+          This exercise can't be solved in this programming language:
+          %{language}
+      compilation: "Compilation"
+      invalid:
+        source-code: "Invalid source code"
+      initialization: "Error while initializing the code:"
+    evaluation:
+      early-exit: "The evaluation has stopped early."
+      time-limit: "Time limit exceeded"
+      memory-limit: "Memory limit exceeded"
+      missing:
+        context: "Context not executed"
+        output: "Missing output"
+        test: "Test not executed"
+      files:
+        zero: "No files"
+        one: "File: %{files}"
+        many: "Files: %{files}"
+      dynamic: "Dynamic"
+    programmed:
+      student: >-
+        Something went wrong while evaluating the solution.
+        Please contact the teacher
+      unsupported: "Evaluation in %{lang} isn't supported"
+      unknown:
+        compilation: "Unknown compilation error"
+      produced:
+        stderr: "The evaluation code produced the following output on stderr:"
+        stdout: "The evaluation code produced the following output on stdout:"
+      failed: "The program language specific evaluation failed."
+      invalid: "The result of the programmed evaluation is invalid:"
+  languages:
+    config:
+      unknown:
+        compilation: "Unknown compilation error"
+    generator:
+      missing:
+        input: "No input found."
+    python:
+      linter:
+        crashed: "Pylint crashed"
+        output: "Pylint produced bad output."

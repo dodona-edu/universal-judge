@@ -7,6 +7,7 @@ import math
 
 from . import EvaluationResult, EvaluatorConfig
 from ..dodona import StatusMessage, Status
+from ..internationalization import get_i18n_string
 from ..testplan import TextOutputChannel, FileOutputChannel, OutputChannel
 
 
@@ -119,11 +120,12 @@ def evaluate_file(config: EvaluatorConfig,
 
     # There must be nothing as output.
     if actual:
-        message = f"Verwachtte geen uitvoer voor kanaal, maar vond {actual}."
+        message = get_i18n_string("evaluators.text.file.unexpected.message",
+                                  actual=actual)
         return EvaluationResult(
             result=StatusMessage(
                 enum=Status.WRONG,
-                human="Onverwachte uitvoer."
+                human=get_i18n_string("evaluators.text.file.unexpected.status")
             ),
             readable_expected="",
             readable_actual=actual,
@@ -147,7 +149,7 @@ def evaluate_file(config: EvaluatorConfig,
         return EvaluationResult(
             result=StatusMessage(
                 enum=Status.RUNTIME_ERROR,
-                human="Bestand niet gevonden."
+                human=get_i18n_string("evaluators.text.file.not-found")
             ),
             readable_expected=expected,
             readable_actual="",

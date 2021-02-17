@@ -7,8 +7,9 @@ from typing import List, Tuple, Optional, Union
 
 from .utils import BaseExecutionResult, run_command
 from ..configs import Bundle
-from ..dodona import Status, ExtendedMessage, Message, AnnotateCode
+from ..dodona import Status, Message, AnnotateCode
 from ..languages.config import FileFilter, Language, Config
+from ..internationalization import get_i18n_string
 
 _logger = logging.getLogger(__name__)
 
@@ -90,7 +91,7 @@ def process_compile_results(
     # Report stderr.
     if stderr:
         # Append compiler messages to the output.
-        messages.append("De compiler produceerde volgende uitvoer op stderr:")
+        messages.append(get_i18n_string("judge.compilation.received.stderr"))
         messages.append(language_config.clean_stacktrace_to_message(stderr))
         _logger.debug("Received stderr from compiler: " + stderr)
         show_stdout = True
@@ -99,7 +100,7 @@ def process_compile_results(
     # Report stdout.
     if stdout and (show_stdout or results.exit != 0):
         # Append compiler messages to the output.
-        messages.append("De compiler produceerde volgende uitvoer op stdout:")
+        messages.append(get_i18n_string("judge.compilation.received.stdout"))
         messages.append(language_config.clean_stacktrace_to_message(stdout))
         _logger.debug("Received stdout from compiler: " + stdout)
         shown_messages = True
@@ -111,7 +112,8 @@ def process_compile_results(
         return messages, Status.MEMORY_LIMIT_EXCEEDED, annotations
     if results.exit != 0:
         if not shown_messages:
-            messages.append(f"Exitcode {results.exit}.")
+            messages.append(get_i18n_string("judge.compilation.exitcode",
+                                            exitcode=results.exit))
         return messages, Status.COMPILATION_ERROR, annotations
     else:
         return messages, Status.CORRECT, annotations

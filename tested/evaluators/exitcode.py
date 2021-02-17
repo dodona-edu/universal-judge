@@ -3,6 +3,7 @@ from typing import Optional
 
 from ..dodona import StatusMessage, Status
 from . import EvaluationResult, EvaluatorConfig
+from ..internationalization import get_i18n_string
 from ..testplan import ExitCodeOutputChannel
 
 logger = logging.getLogger(__name__)
@@ -25,19 +26,23 @@ def evaluate(_config: EvaluatorConfig,
         return EvaluationResult(
             result=StatusMessage(
                 enum=Status.WRONG,
-                human=f"Ongeldige exitcode {exit_code}."
+                human=get_i18n_string("evaluators.exitcode.status.invalid",
+                                      exit_code=value)
             ),
             readable_expected=str(channel.value),
             readable_actual=str(value),
             messages=[
-                f"Kon {exit_code} niet interpreteren als exitcode."
+                get_i18n_string("evaluators.exitcode.status.message",
+                                exit_code=value)
             ]
         )
 
     expected_exit_code = channel.value
 
     if expected_exit_code != exit_code:
-        status = StatusMessage(enum=Status.WRONG, human="Verkeerde exitcode.")
+        status = StatusMessage(enum=Status.WRONG,
+                               human=get_i18n_string(
+                                   "evaluators.exitcode.status.wrong"))
     else:
         status = StatusMessage(enum=Status.CORRECT)
 
