@@ -187,10 +187,10 @@ class Identifier(str, WithFeatures, WithFunctions):
 class FunctionType(str, Enum):
     FUNCTION = "function"
     """
-    A function expression. A function can be in a namespace if it is provide.
+    A function expression. A function can be in a namespace if it is provided.
     The namespace can be an instance, in which case it is a method (e.g. Java or
     Python), but it can also be a function inside a module (e.g. Haskell).
-    For e.g. Java: a function without given namespace will have the namespace of
+    E.g. with Java: a function without a given namespace will have the namespace of
     it's implementing class
     """
     CONSTRUCTOR = "constructor"
