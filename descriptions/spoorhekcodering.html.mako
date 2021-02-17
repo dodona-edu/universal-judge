@@ -11,10 +11,49 @@
 <div class="highlighter-rouge language-python">
 <pre class="highlight">
 <code>
-<span style="color:#888888;"><span style="background-color:#ffff00; color:#000000;"><strong>A</strong></span>#####<span style="background-color:#ffff00; color:#000000;"><strong>w</strong></span>#####<span style="background-color:#ffff00; color:#000000;"><strong>s</strong></span>#####<span style="background-color:#ffff00; color:#000000;"><strong>i</strong></span>#####<span style="background-color:#ffff00; color:#000000;"><strong>m</strong></span>#####<span style="background-color:#ffff00; color:#000000;"><strong>l</strong></span>#####<span style="background-color:#ffff00; color:#000000;"><strong>f</strong></span>#####<span style="background-color:#ffff00; color:#000000;"><strong>.</strong></span></span>
-<span style="color:#888888;">#<span style="background-color:#ffff00; color:#000000;"><strong>n</strong></span>###<span style="background-color:#ffff00; color:#000000;"><strong>o</strong></span>#<span style="background-color:#ffff00; color:#000000;"> </span>###<span style="background-color:#ffff00; color:#000000;"> </span>#<span style="background-color:#ffff00; color:#000000;"><strong>o</strong></span>###<span style="background-color:#ffff00; color:#000000;"><strong>h</strong></span>#<span style="background-color:#ffff00; color:#000000;"><strong>n</strong></span>###<span style="background-color:#ffff00; color:#000000;"><strong>o</strong></span>#<span style="background-color:#ffff00; color:#000000;"><strong>p</strong></span>###<span style="background-color:#ffff00; color:#000000;"><strong>e</strong></span>#<span style="background-color:#ffff00; color:#000000;"><strong>y</strong></span>###<span style="background-color:#ffff00; color:#000000;"><strong>f</strong></span>#<span style="background-color:#ffff00; color:#000000;"><strong>e</strong></span>###<span style="background-color:#ffff00; color:#000000;"><strong>t</strong></span>#</span>
-<span style="color:#888888;">##<span style="background-color:#ffff00; color:#000000;"><strong>d</strong></span>#<span style="background-color:#ffff00; color:#000000;"><strong>n</strong></span>###<span style="background-color:#ffff00; color:#000000;"><strong>f</strong></span>#<span style="background-color:#ffff00; color:#000000;"><strong>r</strong></span>###<span style="background-color:#ffff00; color:#000000;"><strong>m</strong></span>#<span style="background-color:#ffff00; color:#000000;"><strong>t</strong></span>###<span style="background-color:#ffff00; color:#000000;"><strong>g</strong></span>#<span style="background-color:#ffff00; color:#000000;"><strong>c</strong></span>###<span style="background-color:#ffff00; color:#000000;"><strong>l</strong></span>#<span style="background-color:#ffff00; color:#000000;"><strong>t</strong></span>###<span style="background-color:#ffff00; color:#000000;"> </span>#<span style="background-color:#ffff00; color:#000000;"><strong>i</strong></span>###<span style="background-color:#ffff00; color:#000000;"><strong>r</strong></span>#<span style="background-color:#ffff00; color:#000000;"><strong>n</strong></span>##</span>
-<span style="color:#888888;">###<span style="background-color:#ffff00; color:#000000;"> </span>#####<span style="background-color:#ffff00; color:#000000;"><strong>o</strong></span>#####<span style="background-color:#ffff00; color:#000000;"><strong>e</strong></span>#####<span style="background-color:#ffff00; color:#000000;"> </span>#####<span style="background-color:#ffff00; color:#000000;"><strong>e</strong></span>#####<span style="background-color:#ffff00; color:#000000;"><strong>d</strong></span>#####<span style="background-color:#ffff00; color:#000000;"><strong>e</strong></span>###</span></code> </pre>
+<span style="color:#888888;"><span style="background-color:#ffff00; color:#000000;"><strong>A</strong></span>#####<span
+        style="background-color:#ffff00; color:#000000;"><strong>w</strong></span>#####<span
+        style="background-color:#ffff00; color:#000000;"><strong>s</strong></span>#####<span
+        style="background-color:#ffff00; color:#000000;"><strong>i</strong></span>#####<span
+        style="background-color:#ffff00; color:#000000;"><strong>m</strong></span>#####<span
+        style="background-color:#ffff00; color:#000000;"><strong>l</strong></span>#####<span
+        style="background-color:#ffff00; color:#000000;"><strong>f</strong></span>#####<span
+        style="background-color:#ffff00; color:#000000;"><strong>.</strong></span></span>
+<span style="color:#888888;">#<span style="background-color:#ffff00; color:#000000;"><strong>n</strong></span>###<span
+        style="background-color:#ffff00; color:#000000;"><strong>o</strong></span>#<span
+        style="background-color:#ffff00; color:#000000;"> </span>###<span
+        style="background-color:#ffff00; color:#000000;"> </span>#<span
+        style="background-color:#ffff00; color:#000000;"><strong>o</strong></span>###<span
+        style="background-color:#ffff00; color:#000000;"><strong>h</strong></span>#<span
+        style="background-color:#ffff00; color:#000000;"><strong>n</strong></span>###<span
+        style="background-color:#ffff00; color:#000000;"><strong>o</strong></span>#<span
+        style="background-color:#ffff00; color:#000000;"><strong>p</strong></span>###<span
+        style="background-color:#ffff00; color:#000000;"><strong>e</strong></span>#<span
+        style="background-color:#ffff00; color:#000000;"><strong>y</strong></span>###<span
+        style="background-color:#ffff00; color:#000000;"><strong>f</strong></span>#<span
+        style="background-color:#ffff00; color:#000000;"><strong>e</strong></span>###<span
+        style="background-color:#ffff00; color:#000000;"><strong>t</strong></span>#</span>
+<span style="color:#888888;">##<span style="background-color:#ffff00; color:#000000;"><strong>d</strong></span>#<span
+        style="background-color:#ffff00; color:#000000;"><strong>n</strong></span>###<span
+        style="background-color:#ffff00; color:#000000;"><strong>f</strong></span>#<span
+        style="background-color:#ffff00; color:#000000;"><strong>r</strong></span>###<span
+        style="background-color:#ffff00; color:#000000;"><strong>m</strong></span>#<span
+        style="background-color:#ffff00; color:#000000;"><strong>t</strong></span>###<span
+        style="background-color:#ffff00; color:#000000;"><strong>g</strong></span>#<span
+        style="background-color:#ffff00; color:#000000;"><strong>c</strong></span>###<span
+        style="background-color:#ffff00; color:#000000;"><strong>l</strong></span>#<span
+        style="background-color:#ffff00; color:#000000;"><strong>t</strong></span>###<span
+        style="background-color:#ffff00; color:#000000;"> </span>#<span
+        style="background-color:#ffff00; color:#000000;"><strong>i</strong></span>###<span
+        style="background-color:#ffff00; color:#000000;"><strong>r</strong></span>#<span
+        style="background-color:#ffff00; color:#000000;"><strong>n</strong></span>##</span>
+<span style="color:#888888;">###<span style="background-color:#ffff00; color:#000000;"> </span>#####<span
+        style="background-color:#ffff00; color:#000000;"><strong>o</strong></span>#####<span
+        style="background-color:#ffff00; color:#000000;"><strong>e</strong></span>#####<span
+        style="background-color:#ffff00; color:#000000;"> </span>#####<span
+        style="background-color:#ffff00; color:#000000;"><strong>e</strong></span>#####<span
+        style="background-color:#ffff00; color:#000000;"><strong>d</strong></span>#####<span
+        style="background-color:#ffff00; color:#000000;"><strong>e</strong></span>###</span></code> </pre>
 </div>
 
 <p>
@@ -35,7 +74,7 @@
     </li>
     <li>Write a function <code>${function_name("decode")}</code> that takes two arguments:
         <ol>
-            <li> a text (${type_name("text")}) encoded according to the rail fence cipher and </li>
+            <li> a text (${type_name("text")}) encoded according to the rail fence cipher and</li>
             <li>the number (${type_name("integer")}) of rails used in the coding scheme.</li>
         </ol>
         The function must return a string (${type_name("text")}) containing the original text after decoding.
@@ -46,26 +85,28 @@ ${appendix()}
 
 <h3>Example</h3>
 
-${code_start()}\
-${statement('encode("And now for something completely different.", 1)')}
-${expression('"And now for something completely different."')}
-${statement('encode("And now for something completely different.", 2)')}
-${expression('"Adnwfrsmtigcmltl ifrn.n o o oehn opeeydfeet"')}
-${statement('encode("And now for something completely different.", 3)')}
-${expression('"Anfstgmt fnn o o oehn opeeydfeetdwrmicllir."')}
-${statement('encode("And now for something completely different.", 4)')}
-${expression('"Awsimlf.no  ohnopeyfetdnfrmtgclt irn oe ede"')}
-${statement('encode("And now for something completely different.", 5)')}
-${expression('"Aftm nn oehopydetdwrmicllir. o on eefensgtf"')}
+<div class="highlighter-rouge language-${language}">
+<pre class="highlight"><code>\
+> encode("And now for something completely different.", 1)
+= "And now for something completely different."
+> encode("And now for something completely different.", 2)
+= "Adnwfrsmtigcmltl ifrn.n o o oehn opeeydfeet"
+> encode("And now for something completely different.", 3)
+= "Anfstgmt fnn o o oehn opeeydfeetdwrmicllir."
+> encode("And now for something completely different.", 4)
+= "Awsimlf.no  ohnopeyfetdnfrmtgclt irn oe ede"
+> encode("And now for something completely different.", 5)
+= "Aftm nn oehopydetdwrmicllir. o on eefensgtf"
 
-${statement('decode("And now for something completely different.", 1)')}
-${expression('"And now for something completely different."')}
-${statement('decode("Adnwfrsmtigcmltl ifrn.n o o oehn opeeydfeet", 2)')}
-${expression('"And now for something completely different."')}
-${statement('decode("Anfstgmt fnn o o oehn opeeydfeetdwrmicllir.", 3)')}
-${expression('"And now for something completely different."')}
-${statement('decode("Awsimlf.no  ohnopeyfetdnfrmtgclt irn oe ede", 4)')}
-${expression('"And now for something completely different."')}
-${statement('decode("Aftm nn oehopydetdwrmicllir. o on eefensgtf", 5)')}
-${expression('"And now for something completely different."')}\
-${code_end()}
+> decode("And now for something completely different.", 1)
+= "And now for something completely different."
+> decode("Adnwfrsmtigcmltl ifrn.n o o oehn opeeydfeet", 2)
+= "And now for something completely different."
+> decode("Anfstgmt fnn o o oehn opeeydfeetdwrmicllir.", 3)
+= "And now for something completely different."
+> decode("Awsimlf.no  ohnopeyfetdnfrmtgclt irn oe ede", 4)
+= "And now for something completely different."
+> decode("Aftm nn oehopydetdwrmicllir. o on eefensgtf", 5)
+= "And now for something completely different."
+</code></pre>
+</div>
