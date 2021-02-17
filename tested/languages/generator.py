@@ -15,7 +15,7 @@ from ..datatypes import BasicSequenceTypes
 from ..dodona import ExtendedMessage
 from ..serialisation import (Value, SequenceType, Identifier, FunctionType,
                              FunctionCall, Expression, Statement, Assignment,
-                             NothingType, NamedArgument)
+                             NothingType, NamedArgument, ObjectType)
 from ..testplan import (EmptyChannel, IgnoredChannel, TextData, ProgrammedEvaluator,
                         SpecificEvaluator, Testcase, RunTestcase, Context,
                         ExceptionOutput, ValueOutput, Run)
@@ -167,28 +167,31 @@ def _prepare_expression(bundle: Bundle, expression: Expression) -> Expression:
     Prepare an expression for use in a template.
     """
 
-    if isinstance(expression, FunctionCall):
-        if isinstance(expression, InternalFunctionCall):
-            expression.arguments = [_prepare_argument(bundle, arg)
-                                    for arg in expression.arguments]
-            return expression
+    if isinstance(expression, InternalFunctionCall):
+        expression.arguments = [_prepare_argument(bundle, arg)
+                                for arg in expression.arguments]
+    elif isinstance(expression, FunctionCall):
+        submission_name = bundle.lang_config.submission_name(bundle.plan)
+        if expression.type == FunctionType.CONSTRUCTOR:
+            name = expression.name
         else:
-            submission_name = bundle.lang_config.submission_name(bundle.plan)
-            if expression.type == FunctionType.CONSTRUCTOR:
-                name = expression.name
-            else:
-                name = bundle.lang_config.conventionalize_function(expression.name)
+            name = bundle.lang_config.conventionalize_function(expression.name)
 
-            internal = InternalFunctionCall(
-                type=expression.type,
-                arguments=[_prepare_argument(bundle, arg)
-                           for arg in expression.arguments],
-                name=name,
-                namespace=expression.namespace or submission_name
-            )
-            internal.has_root_namespace = not bool(expression.namespace)
-            return internal
-
+        internal = InternalFunctionCall(
+            type=expression.type,
+            arguments=[_prepare_argument(bundle, arg)
+                       for arg in expression.arguments],
+            name=name,
+            namespace=expression.namespace or submission_name
+        )
+        internal.has_root_namespace = not bool(expression.namespace)
+        return internal
+    elif isinstance(expression, SequenceType):
+        expression.data = [_prepare_expression(bundle, expr)
+                           for expr in expression.data]
+    elif isinstance(expression, ObjectType):
+        expression.data = dict((key, _prepare_expression(bundle, value))
+                               for key, value in expression.data.items())
     return expression
 
 
