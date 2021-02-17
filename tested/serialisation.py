@@ -187,14 +187,11 @@ class Identifier(str, WithFeatures, WithFunctions):
 class FunctionType(str, Enum):
     FUNCTION = "function"
     """
-    A top-level function expression. In some configs, this might be translated to a
-    NAMESPACE function (e.g. in Java, this is translated to a static method).
-    """
-    NAMESPACE = "namespace"
-    """
-    A function in a namespace. The namespace can be an instance, in which case it
-    is a method (e.g. Java or Python), but it can also be a function inside a module
-    (e.g. Haskell).
+    A function expression. A function can be in a namespace if it is provided.
+    The namespace can be an instance, in which case it is a method (e.g. Java or
+    Python), but it can also be a function inside a module (e.g. Haskell).
+    E.g. with Java: a function without a given namespace will have the namespace of
+    it's implementing class
     """
     CONSTRUCTOR = "constructor"
     """
@@ -237,8 +234,6 @@ class FunctionCall(WithFeatures, WithFunctions):
     def namespace_requirements(cls, values):
         type_ = values.get("type")
         namespace_ = values.get("namespace")
-        if type_ == FunctionType.NAMESPACE and not namespace_:
-            raise ValueError("Namespace functions must have a namespace.")
         if type_ == FunctionType.PROPERTY and not namespace_:
             raise ValueError("Property functions must have a namespace.")
         return values

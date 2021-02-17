@@ -5,8 +5,7 @@ await \
 % if function.type == FunctionType.CONSTRUCTOR:
     new \
 % endif
-% if function.type == FunctionType.NAMESPACE or (function.type in (FunctionType.FUNCTION, FunctionType.CONSTRUCTOR) \
-                                                     and function.namespace):
+% if function.namespace:
     ${function.namespace}.\
 % endif
 ${function.name}\
