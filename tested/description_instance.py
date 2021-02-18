@@ -17,11 +17,6 @@ open_brackets = ('(', '[', '{')
 close_brackets = {')': '(', ']': '[', '}': '{'}
 
 
-def _stmt_expr(m: re.Match) -> str:
-    func = "statement" if m.group(1) == ">" else "expression"
-    return f"${{{func}({repr(m.group(2))})}}"
-
-
 def _mako_uncomment(m: re.Match) -> str:
     result = f"${{{repr(m.group(1))}}}"
     return result
@@ -70,11 +65,15 @@ def _analyse_line(line: str, stack: List[str]) -> List[str]:
         elif c in open_brackets:
             stack.append(c)
         elif c in close_brackets:
-            if close_brackets[c] != stack[-1]:
+            try:
+                if close_brackets[c] != stack[-1]:
+                    raise ValueError(
+                        "Statement or expression brackets are not balanced")
+                else:
+                    stack.pop()
+            except IndexError:
                 raise ValueError(
                     "Statement or expression brackets are not balanced")
-            else:
-                stack.pop()
         else:
             continue
     if is_string:

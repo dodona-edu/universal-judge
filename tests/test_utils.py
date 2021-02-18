@@ -194,3 +194,57 @@ data(1, 2,
 {prompt} {expected}
 ```"""
     assert instance == expected
+
+
+@pytest.mark.parametrize(("lang", "prompt"), [
+    ("python", ">>>"),
+    ("java", ">"),
+    ("c", ">"),
+    ("kotlin", ">"),
+    ("javascript", ">"),
+    ("haskell", ">")
+])
+@pytest.mark.xfail
+def test_template_escaped_string_code_block_markdown(lang: str, prompt: str):
+    template = r"""```tested
+"alpha\"beta\tname"
+```"""
+    instance = create_description_instance(template, programming_language=lang, is_html=False)
+    expected_str = r"'alpha\\\"beta\tname'" if lang == "python" else r"alpha\"beta\tname"
+    expected = f"""```console?lang={lang}&prompt={prompt}
+${expected_str}
+```"""
+    assert instance == expected
+
+
+def test_template_failed_string():
+    template = r"""```tested
+> integer x = \
+data(1, 2,
+"alpha   
+ beta")
+```"""
+    with pytest.raises(ValueError):
+        create_description_instance(template, programming_language="java", is_html=False)
+
+
+def test_template_failed_brackets_mismatch():
+    template = r"""```tested
+> integer x = \
+data(1, 2,
+("alpha   
+ beta"})
+```"""
+    with pytest.raises(ValueError):
+        create_description_instance(template, programming_language="java", is_html=False)
+
+
+def test_template_failed_unbalanced_brackets():
+    template = r"""```tested
+> integer x = \
+data(1, 2,
+"alpha   
+ beta"
+```"""
+    with pytest.raises(ValueError):
+        create_description_instance(template, programming_language="java", is_html=False)
