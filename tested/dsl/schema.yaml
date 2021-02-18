@@ -165,8 +165,16 @@ definitions:
         description: "Expected exception for main call"
         $ref: "#/definitions/textualTypes"
       exit_code:
-        type: "integer"
+        type:  ["integer", "object"]
         description: "Expected exit code for the run"
+        required:
+          - "data"
+          - "config"
+        properties:
+          data:
+            type: "integer"
+          config:
+            $ref: "#/definitions/configGeneral"
       stdin:
         description: "Given input at stdin for main call"
         $ref: "#/definitions/textualTypes"
