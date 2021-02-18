@@ -45,7 +45,7 @@ ${language_specific}
 
 ### Voorbeeld
 
-```console?lang=${language}&prompt=${prompt}
+```tested
 > heir(8, 10)
 [10, 4, 15, 11, 7, 5, 3, \
  2, 16, 12, 1, 6, 13, 9, 14, 8]
@@ -60,7 +60,7 @@ ${language_specific}
 ```
 
 
-```console?lang=${language}&prompt=${prompt}
+```tested
 > heir(8, 10)
 [10, 4, 15, 11, 7, 5, 3, 2, 16, 12, 1, 6, 13, 9, 14, 8]
 ```

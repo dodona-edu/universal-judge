@@ -124,7 +124,7 @@ def test_template_type_name_override():
     ("python", ">>>"), ("java", ">"), ("c", ">"), ("kotlin", ">"), ("javascript", ">"), ("haskell", ">")
 ])
 def test_template_code_block_markdown(lang: str, prompt: str):
-    template = """```console?lang=${language}&prompt=${prompt}
+    template = """```tested
 > random()
 5
 ```"""

@@ -64,7 +64,7 @@ def create_description_instance(template: str,
         ), 5
     else:
         regex_code, body_index = re.compile(
-            r"^(```.*\r?\n)(((?!```).*\r?\n)*)(```)$", re.MULTILINE), 1
+            r"^(```tested\r?\n)(((?!```).*\r?\n)*)(```)$", re.MULTILINE), 1
 
     regex_comment_mako = re.compile(r"(?m)^(\s*#.*)$")
 
@@ -80,7 +80,7 @@ def create_description_instance(template: str,
             mako_template.extend(groups[1])
             mako_template.extend(groups[3])
         else:
-            mako_template.extend(groups[0])
+            mako_template.extend("```console?lang=${language}&prompt=${prompt}\n")
         mako_template.extend(_analyse_body(groups[body_index]))
         mako_template.extend(groups[-1])
 
