@@ -101,7 +101,7 @@ void write_ulong(FILE* out, unsigned long value) {
 }
 
 void write_llong(FILE* out, long long value) {
-    const char* asString = format("bigint", %ll);
+    const char* asString = format("integer", %ll);
     fprintf(out, asString, value);
 }
 
