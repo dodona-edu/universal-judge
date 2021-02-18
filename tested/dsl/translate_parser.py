@@ -10,10 +10,10 @@ from typing import Any, Dict, List, Optional, Union, Tuple
 from yaml import safe_load
 
 from tested.datatypes import BasicBooleanTypes, BasicNumericTypes, \
-    BasicObjectTypes, BasicSequenceTypes, BasicStringTypes
+    BasicObjectTypes, BasicSequenceTypes, BasicStringTypes, StringTypes
 from tested.dsl.statement import Parser
 from tested.serialisation import ExceptionValue, Value, NothingType, StringType, \
-    BooleanType, NumberType, SequenceType, ObjectType
+    BooleanType, NumberType, SequenceType, ObjectType, ObjectKeyValuePair
 from tested.testplan import BaseOutput, Context, EmptyChannel, \
     ExceptionOutputChannel, FileUrl, GenericTextEvaluator, Output, Plan, Run, \
     RunTestcase, RunInput, RunOutput, Tab, Testcase, TextData, TextOutputChannel, \
@@ -381,8 +381,12 @@ class SchemaParser:
                 self._translate_value(part_value) for part_value in value
             ])
         else:
-            return ObjectType(type=BasicObjectTypes.MAP, data=dict(
-                (key, self._translate_value(val)) for key, val in value.items()
+            return ObjectType(type=BasicObjectTypes.MAP, data=list(
+                ObjectKeyValuePair(
+                    key=StringType(type=StringTypes.TEXT, data=key),
+                    value=self._translate_value(val)
+                )
+                for key, val in value.items()
             ))
 
     def _write_to_json_string(self, json_object: Any) -> str:

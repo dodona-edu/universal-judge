@@ -340,7 +340,8 @@ class Output(BaseOutput):
             if isinstance(value, SequenceType):
                 return all(_only_values(va) for va in value.data)
             if isinstance(value, ObjectType):
-                return all(_only_values(va) for k, va in value.data.items())
+                return all(_only_values(pair.key) and _only_values(pair.value)
+                           for pair in value.data)
 
             return True
 

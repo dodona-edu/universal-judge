@@ -374,6 +374,7 @@ ObjectType.__pydantic_model__.update_forward_refs()
 SequenceType.__pydantic_model__.update_forward_refs()
 NamedArgument.__pydantic_model__.update_forward_refs()
 FunctionCall.__pydantic_model__.update_forward_refs()
+ObjectKeyValuePair.__pydantic_model__.update_forward_refs()
 
 
 def as_basic_type(value: Value) -> Value:

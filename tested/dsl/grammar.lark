@@ -106,7 +106,7 @@ dict: "{" [dict_pair ("," dict_pair)*] "}"
 list: "[" [expr ("," expr)*] "]"
 set: "{" expr ("," expr)* "}"
 tuple: "(" [expr ("," expr)*] ")"
-dict_pair: string ":" expr
+dict_pair: expr ":" expr
 
 null: "null"
     | "undefined"
