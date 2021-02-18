@@ -138,7 +138,7 @@ class Parser:
                               data=float(token.value))
         elif token.type == 'ESCAPED_STRING':
             return StringType(type=BasicStringTypes.TEXT,
-                              data=literal_eval(token.value))
+                              data=token.value[1:-1])
         elif token.type == 'TRUE':
             return BooleanType(type=BasicBooleanTypes.BOOLEAN, data=True)
         elif token.type == 'FALSE':

@@ -4,7 +4,7 @@
 % if value.type in (BasicNumericTypes.INTEGER, BasicNumericTypes.RATIONAL):
     ${value.data}\
 % elif value.type in (BasicStringTypes.TEXT, BasicStringTypes.CHAR):
-    ${repr(value.data)}\
+    ${repr(value.data).replace("\\\\", "\\")}\
 % elif value.type == BasicBooleanTypes.BOOLEAN:
     ${str(value.data)}\
 % elif value.type == BasicNothingTypes.NOTHING:
