@@ -85,10 +85,11 @@ ${language_specific}
 
 <div class="highlighter-rouge language-${language}">
 <pre class="highlight"><code class="tested" tested id="code">\
-> encode("And now for something completely different.", \
+> encode("And now for something completely different.",
          1)
 "And now for something completely different."
-> encode("And now for something completely different.", 2)
+> encode\
+    ("And now for something completely different.", 2)
 "Adnwfrsmtigcmltl ifrn.n o o oehn opeeydfeet"
 > encode("And now for something completely different.", 3)
 "Anfstgmt fnn o o oehn opeeydfeetdwrmicllir."

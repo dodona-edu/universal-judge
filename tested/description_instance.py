@@ -4,12 +4,17 @@ import sys
 
 from argparse import ArgumentParser, FileType
 from functools import partial
+from typing import List
+
 from mako.template import Template
 
 from tested.configs import Bundle, DodonaConfig
 from tested.testplan import Plan
 from tested.utils import smart_close
 from tested.languages import get_language, language_exists
+
+open_brackets = ('(', '[', '{')
+close_brackets = {')': '(', ']': '[', '}': '{'}
 
 
 def _stmt_expr(m: re.Match) -> str:
@@ -23,17 +28,20 @@ def _mako_uncomment(m: re.Match) -> str:
 
 
 def _analyse_body(body: str) -> str:
-    expressions, same, html_tag = [], False, False
+    expressions, same, html_tag, stack = [], False, False, []
     for line in body.splitlines(keepends=False):
-        line = line.strip()
-
+        line = line.lstrip()
         new_same = line and line[-1] == '\\'
         line = line[:-1] if new_same else line
-        if same:
+        if same or stack:
             expressions[-1] += line
         else:
             expressions.append(line)
+        stack = _analyse_line(line, stack)
         same = new_same
+
+    if stack:
+        raise ValueError("Statement or expression brackets are not balanced")
 
     for index, expr in enumerate(expressions):
         if not expr:
@@ -46,14 +54,35 @@ def _analyse_body(body: str) -> str:
     return "\n".join(expressions) + ("" if same else "\n")
 
 
-def create_description_instance(template: str,
-                                programming_language: str = "python",
-                                natural_language: str = "en",
-                                namespace: str = "submission",
-                                is_html: bool = True) -> str:
-    if not language_exists(programming_language):
-        raise ValueError(f"Language {programming_language} doesn't exists")
+def _analyse_line(line: str, stack: List[str]) -> List[str]:
+    is_string, escape = False, False
+    for c in line:
+        if is_string:
+            if c == '\\':
+                escape = True
+            elif c == '"':
+                if not escape:
+                    is_string = False
+            else:
+                escape = False
+        elif c == '"':
+            is_string = True
+        elif c in open_brackets:
+            stack.append(c)
+        elif c in close_brackets:
+            if close_brackets[c] != stack[-1]:
+                raise ValueError(
+                    "Statement or expression brackets are not balanced")
+            else:
+                stack.pop()
+        else:
+            continue
+    if is_string:
+        raise ValueError("String is not closed on this line")
+    return stack
 
+
+def _prepare_template(template: str, is_html: bool = True) -> str:
     if is_html:
         re_tag = "(\"[^\"]*\"|'[^']*'|[^'\">])*"
 
@@ -86,8 +115,18 @@ def create_description_instance(template: str,
 
     mako_template.extend(
         regex_comment_mako.sub(_mako_uncomment, template[last_end:]))
-    mako_template = ''.join(mako_template)
+    return ''.join(mako_template)
 
+
+def create_description_instance(template: str,
+                                programming_language: str = "python",
+                                natural_language: str = "en",
+                                namespace: str = "submission",
+                                is_html: bool = True) -> str:
+    if not language_exists(programming_language):
+        raise ValueError(f"Language {programming_language} doesn't exists")
+
+    mako_template = _prepare_template(template, is_html)
     template = Template(mako_template, cache_enabled=False)
 
     language = get_language(programming_language)
