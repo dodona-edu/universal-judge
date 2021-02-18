@@ -10,7 +10,7 @@
     <% type_ = value.get_content_type() %>\
     <% assert value is not None, "Value is needed for arrays!" %>\
     <%include file="declaration.mako" args="tp=type_,value=None"/>[]\
-% elif tp in (AdvancedNumericTypes.U_INT_64, AdvancedNumericTypes.BIG_INT, AdvancedNumericTypes.DOUBLE_EXTENDED):
+% elif tp in (AdvancedNumericTypes.U_INT_64, AdvancedNumericTypes.BIG_INT):
     BigInteger\
 % elif tp in (AdvancedNumericTypes.DOUBLE_EXTENDED, AdvancedNumericTypes.FIXED_PRECISION):
     BigDecimal\
@@ -45,7 +45,7 @@
     % elif basic == BasicNumericTypes.RATIONAL:
         double\
     % elif basic == BasicObjectTypes.MAP:
-        Map<Object, Object>\
+        Map${'<String, Object>'}\
     % elif basic in (BasicNothingTypes.NOTHING, BasicStringTypes.ANY):
         Object\
     % endif
