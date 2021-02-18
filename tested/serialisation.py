@@ -18,12 +18,12 @@ classes for implementations in other configs.
 """
 import json
 import logging
+import math
 from dataclasses import field, replace
 from decimal import Decimal
 from enum import Enum
-from typing import Union, List, Dict, Literal, Optional, Any, Iterable
+from typing import Union, List, Literal, Optional, Any, Iterable
 
-import math
 from pydantic import BaseModel, root_validator, Field
 from pydantic.dataclasses import dataclass
 from pydantic.fields import Undefined
@@ -130,17 +130,86 @@ class SequenceType(WithFeatures, WithFunctions):
 
 
 @dataclass
-class ObjectType(WithFeatures, WithFunctions):
-    type: ObjectTypes
-    data: Dict[str, 'Expression']
+class ObjectKeyValuePair(WithFeatures, WithFunctions):
+    key: 'Expression'
+    value: 'Expression'
+
+    def get_key_type(self) -> AllTypes:
+        """
+        Attempt to get a type for the key of the key-value pair. The function will
+        attempt to get the most specific type possible.
+        """
+        if isinstance(self.value, SequenceType):
+            return self.value.get_content_type()
+        elif isinstance(self.value, get_args(Value)):
+            return self.value.type
+        else:
+            return BasicStringTypes.ANY
+
+    def get_value_type(self) -> AllTypes:
+        """
+        Attempt to get a type for the value of the key-value pair. The function will
+        attempt to get the most specific type possible.
+        """
+        if isinstance(self.value, SequenceType):
+            return self.value.get_content_type()
+        elif isinstance(self.value, get_args(Value)):
+            return self.value.type
+        else:
+            return BasicStringTypes.ANY
 
     def get_used_features(self) -> FeatureSet:
-        base_features = FeatureSet(set(), {self.type})
-        nested_features = [y.get_used_features() for x, y in self.data]
+        base_features = FeatureSet(set())
+        nested_features = [self.key.get_used_features(),
+                           self.value.get_used_features()]
         return combine_features([base_features] + nested_features)
 
     def get_functions(self) -> Iterable['FunctionCall']:
-        return flatten(x.get_functions() for x in self.data.values())
+        return self.value.get_functions()
+
+
+@dataclass
+class ObjectType(WithFeatures, WithFunctions):
+    type: ObjectTypes
+    data: List[ObjectKeyValuePair]
+
+    def get_key_type(self) -> AllTypes:
+        """
+        Attempt to get a type for the keys of the object. The function will
+        attempt to get the most specific type possible.
+        """
+        types = set()
+        for element in self.data:
+            types.add(element.get_key_type())
+
+        if len(types) == 1:
+            # noinspection PyTypeChecker
+            return next(iter(types))
+        else:
+            return BasicStringTypes.ANY
+
+    def get_value_type(self) -> AllTypes:
+        """
+        Attempt to get a type for the values of the object. The function will
+        attempt to get the most specific type possible.
+        """
+        types = set()
+        for element in self.data:
+            types.add(element.get_value_type())
+
+        if len(types) == 1:
+            # noinspection PyTypeChecker
+            return next(iter(types))
+        else:
+            return BasicStringTypes.ANY
+
+    def get_used_features(self) -> FeatureSet:
+        base_features = FeatureSet(set(), {self.type})
+        nested_features = [x.get_used_features() for x in self.data]
+        return combine_features([base_features] + nested_features)
+
+    def get_functions(self) -> Iterable['FunctionCall']:
+        return flatten(x.get_functions() for _, x in self.data)
 
 
 @dataclass
