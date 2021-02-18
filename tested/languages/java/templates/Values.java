@@ -81,10 +81,10 @@ public class Values {
         } else if (value instanceof Map) {
             type = "map";
             var elements = new ArrayList<String>();
-            for (Map.Entry<Object, Object> entry : ((Map<Object, Object>) value).entrySet()) {
-                elements.add("\"" + entry.getKey().toString() + "\": " + encode(entry.getValue()));
+            for (Map.Entry<?, ?> entry : ((Map<?, ?>) value).entrySet()) {
+                elements.add("{ \"key\":" + encode(entry.getKey()) + ",\"value\": " + encode(entry.getValue()) + "}");
             }
-            data = "{" + String.join(", ", elements) + "}";
+            data = "[" + String.join(", ", elements) + "]";
         } else {
             type = "unknown";
             data = "\"" + escape(value.toString()) + "\"";

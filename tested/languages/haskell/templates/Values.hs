@@ -46,7 +46,7 @@ instance (Typeable a) => Typeable (IO a) where
     -- Preferred function call to pass the IO monad results to the judge, avoid `unsafePerformIO`
     toJsonIO m = do
         unwrapped <- m
-        return ((toType unwrapped), (toJson unwrapped))
+        toJsonIO unwrapped
 
 instance Typeable W.Word8 where toType _ = "uint8"
 instance Typeable W.Word16 where toType _ = "uint16"

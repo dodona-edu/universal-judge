@@ -15,8 +15,9 @@
     {<%include file="value_arguments.mako" args="arguments=value.data" />}\
 % elif value.type == BasicObjectTypes.MAP:
     {\
-    % for key, item in value.data.items():
-        "${key}": <%include file="statement.mako" args="statement=item" />\
+    % for pair in value.data:
+        <%include file="statement.mako" args="statement=pair.key" />: \
+        <%include file="statement.mako" args="statement=pair.value" />\
         % if not loop.last:
             , \
         % endif

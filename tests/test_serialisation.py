@@ -23,7 +23,7 @@ from tested.languages.config import TypeSupport
 from tested.languages.templates import find_and_write_template, path_to_templates
 from tested.serialisation import NumberType, Value, parse_value, StringType, \
     BooleanType, SequenceType, ObjectType, \
-    NothingType, as_basic_type, to_python_comparable
+    NothingType, as_basic_type, to_python_comparable, ObjectKeyValuePair
 from tested.testplan import Plan
 from tests.manual_utils import configuration, mark_haskell
 
@@ -98,9 +98,12 @@ def test_basic_types(language, tmp_path: Path, pytestconfig):
             NumberType(type=BasicNumericTypes.INTEGER, data=20)
         ]))
     if type_map[BasicObjectTypes.MAP] != TypeSupport.UNSUPPORTED:
-        types.append(ObjectType(type=BasicObjectTypes.MAP, data={
-            "data": NumberType(type=BasicNumericTypes.INTEGER, data=5)
-        }))
+        types.append(ObjectType(type=BasicObjectTypes.MAP, data=[
+            ObjectKeyValuePair(
+                key=StringType(type=BasicStringTypes.TEXT, data="data"),
+                value=NumberType(type=BasicNumericTypes.INTEGER, data=5)
+            )
+        ]))
     if type_map[BasicNothingTypes.NOTHING] != TypeSupport.UNSUPPORTED:
         types.append(NothingType())
 

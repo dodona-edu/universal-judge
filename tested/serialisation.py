@@ -525,7 +525,8 @@ def to_python_comparable(value: Optional[Value]):
     if basic_type == BasicSequenceTypes.SET:
         return {to_python_comparable(x) for x in value.data}
     if basic_type == BasicObjectTypes.MAP:
-        return {key: to_python_comparable(val) for key, val in value.data.items()}
+        return [(to_python_comparable(pair.key), to_python_comparable(pair.value))
+                for pair in value.data]
     if basic_type == BasicNumericTypes.RATIONAL:
         return ComparableFloat(float(value.data))
     if basic_type == BasicNumericTypes.INTEGER:
