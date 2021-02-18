@@ -151,7 +151,7 @@ def test_parse_value_text():
 def test_parse_value_text_cast():
     parsed = parser.parse_value(r'"this\nis\na\nstring" :: text')
     assert parsed.type == BasicStringTypes.TEXT
-    assert parsed.data == "this\nis\na\nstring"
+    assert parsed.data == r"this\nis\na\nstring"
 
 
 def test_parse_value_char():
