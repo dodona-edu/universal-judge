@@ -16,6 +16,8 @@ void write_bool(FILE*, bool);
 
 void write_char(FILE*, char);
 
+void write_signed_char(FILE*, signed char);
+void write_unsigned_char(FILE*, unsigned char);
 void write_sint(FILE*, short int);
 void write_usint(FILE*, unsigned short int);
 void write_int(FILE*, int);
@@ -40,8 +42,8 @@ void write_void(FILE*, void*);
                                                 \
         /* Number types */                      \
         char: write_char,                       \
-        unsigned char: write_char,             \
-        signed char: write_char,               \
+        unsigned char: write_unsigned_char,     \
+        signed char: write_signed_char,         \
         short int: write_sint,                  \
         unsigned short int: write_usint,        \
         int: write_int,                         \
