@@ -75,6 +75,7 @@ en:
         one: "File: %{files}"
         many: "Files: %{files}"
       dynamic: "Dynamic"
+      hidden_expected: "\U0001f937 You must find the correct solution by your own."
     programmed:
       student: >-
         Something went wrong while evaluating the solution.

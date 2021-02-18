@@ -75,6 +75,7 @@ nl:
         one: "Bestand: %{files}"
         many: "Bestanden: %{files}"
       dynamic: "Dynamisch"
+      hidden_expected: "\U0001f937 Je zult het juiste antwoord zelf moeten vinden."
     programmed:
       student: >-
         Er ging iets verkeerds tijdens het evalueren van de oplossing.
