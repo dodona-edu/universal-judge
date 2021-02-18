@@ -34,7 +34,7 @@ def _analyse_body(body: str) -> str:
         new_same = line and line[-1] == '\\'
         line = line[:-1] if new_same else line
         if same or stack:
-            expressions[-1] += line
+            expressions[-1] += ' ' + line
         else:
             expressions.append(line)
         stack = _analyse_line(line, stack)

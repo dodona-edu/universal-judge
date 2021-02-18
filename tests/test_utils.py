@@ -173,3 +173,24 @@ ${statement('random.new_sequence(10, 10)')}
 ${expression('[10, 5, 2, 8, 7, 1, 3, 4, 9, 6]')}"""
     instance = create_description_instance(template, programming_language=lang, is_html=False)
     assert instance == f"{expected}"
+
+
+@pytest.mark.parametrize(("lang", "prompt", "expected"), [
+    ("python", ">>>", "x = data(1, 2, 'alpha')"),
+    ("java", ">", 'long x = Submission.data(1, 2, "alpha");'),
+    pytest.param("c", ">", 'long long x = data(1, 2, "alpha");', marks=pytest.mark.xfail),
+    ("kotlin", ">", 'var x = data(1, 2, "alpha")'),
+    ("javascript", ">", 'let x = await data(1, 2, "alpha")'),
+    ("haskell", ">", 'let x = data (1 :: Int) (2 :: Int) ("alpha")')
+])
+def test_template_multi_line_code_block_markdown(lang: str, prompt: str, expected: str):
+    template = r"""```tested
+> integer x = \
+data(1, 2,
+"alpha")
+```"""
+    instance = create_description_instance(template, programming_language=lang, is_html=False)
+    expected = f"""```console?lang={lang}&prompt={prompt}
+{prompt} {expected}
+```"""
+    assert instance == expected
