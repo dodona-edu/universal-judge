@@ -61,11 +61,18 @@ class SchemaParser:
             print(json_str, file=fd)
 
     def translate_str(self, yaml_str: str) -> str:
-        yaml_obj = self._load_yaml_object(yaml_str)
-        self._validate(yaml_obj)
-        plan = self._translate_plan(yaml_obj)
+        plan = self.load_str(yaml_str)
         json_str = self._write_to_json_string(plan)
         return json_str
+
+    def load(self, yaml_file: str) -> Plan:
+        yaml_str = open(yaml_file, 'r').read()
+        return self.load_str(yaml_str)
+
+    def load_str(self, yaml_str: str) -> Plan:
+        yaml_obj = self._load_yaml_object(yaml_str)
+        self._validate(yaml_obj)
+        return self._translate_plan(yaml_obj)
 
     # noinspection PyMethodMayBeStatic
     def _enforce_dict(self, yaml_obj: YAML_OBJECT) -> YAML_DICT:
