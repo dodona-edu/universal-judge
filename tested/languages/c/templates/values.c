@@ -50,33 +50,53 @@ void write_char(FILE* out, char value) {
     }
 }
 
+void write_signed_char(FILE* out, signed char value) {
+    if (value == '\'') {
+        const char* asString = format("int8", %s);
+        fprintf(out, asString, "\"'\"");
+    } else {
+        const char* asString = format("int8", %c);
+        fprintf(out, asString, value);
+    }
+}
+
+void write_unsigned_char(FILE* out, unsigned char value) {
+    if (value == '\'') {
+        const char* asString = format("uint8", %s);
+        fprintf(out, asString, "\"'\"");
+    } else {
+        const char* asString = format("uint8", %c);
+        fprintf(out, asString, value);
+    }
+}
+
 void write_sint(FILE* out, short int value) {
-    const char* asString = format("integer", %d);
+    const char* asString = format("int16", %d);
     fprintf(out, asString, value);
 }
 
 void write_usint(FILE* out, unsigned short int value) {
-    const char* asString = format("integer", %u);
+    const char* asString = format("uint16", %u);
     fprintf(out, asString, value);
 }
 
 void write_int(FILE* out, int value) {
-    const char* asString = format("integer", %d);
+    const char* asString = format("int32", %d);
     fprintf(out, asString, value);
 }
 
 void write_uint(FILE* out, unsigned int value) {
-    const char* asString = format("integer", %u);
+    const char* asString = format("uint32", %u);
     fprintf(out, asString, value);
 }
 
 void write_long(FILE* out, long value) {
-    const char* asString = format("integer", %l);
+    const char* asString = format("int64", %l);
     fprintf(out, asString, value);
 }
 
 void write_ulong(FILE* out, unsigned long value) {
-    const char* asString = format("integer", %ul);
+    const char* asString = format("uint64", %ul);
     fprintf(out, asString, value);
 }
 
@@ -86,22 +106,22 @@ void write_llong(FILE* out, long long value) {
 }
 
 void write_ullong(FILE* out, unsigned long long value) {
-    const char* asString = format("integer", %ull);
+    const char* asString = format("bigint", %ull);
     fprintf(out, asString, value);
 }
 
 void write_float(FILE* out, float value) {
-    const char* asString = format("rational", %f);
+    const char* asString = format("single_precision", %f);
     fprintf(out, asString, value);
 }
 
 void write_double(FILE* out, double value) {
-    const char* asString = format("rational", %f);
+    const char* asString = format("double_precision", %f);
     fprintf(out, asString, value);
 }
 
 void write_ldouble(FILE* out, long double value) {
-    const char* asString = format("rational", %Lf);
+    const char* asString = format("double_extended", %Lf);
     fprintf(out, asString, value);
 }
 
