@@ -79,7 +79,7 @@ private fun internalEncode(value: Any?): Array<String> {
         type = "double_precision"
         data = value.toString()
     } else if (value is Char) {
-        type = "character"
+        type = "char"
         data = String.format("\"%s\"", escape(value.toString()))
     } else if (value is CharSequence) {
         type = "text"

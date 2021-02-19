@@ -67,7 +67,7 @@ public class Values {
             type = "double_precision";
             data = value.toString();
         } else if (value instanceof Character) {
-            type = "character";
+            type = "char";
             data = "\"" + escape(value.toString()) + "\"";
         } else if (value instanceof CharSequence) {
             type = "text";

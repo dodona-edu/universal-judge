@@ -63,7 +63,7 @@ instance Typeable Integer where toType _ = "bigint"
 instance Typeable Int where toType _ = "integer"
 
 instance Typeable Bool where toType _ = "boolean"
-instance Typeable Char where toType _ = "character"
+instance Typeable Char where toType _ = "char"
 
 instance Typeable Text where toType _ = "text"
 instance {-# OVERLAPPABLE #-} Typeable String where toType _ = "text"

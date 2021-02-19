@@ -41,33 +41,18 @@ void write_bool(FILE* out, bool value) {
 }
 
 void write_char(FILE* out, char value) {
-    if (value == '\'') {
-        const char* asString = format("character", %s);
-        fprintf(out, asString, "\"'\"");
-    } else {
-        const char* asString = format("character", %c);
-        fprintf(out, asString, value);
-    }
+    const char* asString = format("char", "%c");
+    fprintf(out, asString, value);
 }
 
 void write_signed_char(FILE* out, signed char value) {
-    if (value == '\'') {
-        const char* asString = format("int8", %s);
-        fprintf(out, asString, "\"'\"");
-    } else {
-        const char* asString = format("int8", %c);
-        fprintf(out, asString, value);
-    }
+    const char* asString = format("char", "%c");
+    fprintf(out, asString, value);
 }
 
 void write_unsigned_char(FILE* out, unsigned char value) {
-    if (value == '\'') {
-        const char* asString = format("uint8", %s);
-        fprintf(out, asString, "\"'\"");
-    } else {
-        const char* asString = format("uint8", %c);
-        fprintf(out, asString, value);
-    }
+    const char* asString = format("char", "%uc");
+    fprintf(out, asString, value);
 }
 
 void write_sint(FILE* out, short int value) {
