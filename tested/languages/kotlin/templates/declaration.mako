@@ -45,7 +45,10 @@
     % elif basic == BasicNumericTypes.RATIONAL:
         Double?\
     % elif basic == BasicObjectTypes.MAP:
-        Map${'<String, Any?>?'}\
+        <% key_type_ = (value.get_key_type() or "Object") if isinstance(value, get_args(Value)) else "Object" %>\
+        <% value_type_ = (value.get_value_type() or "Object") if isinstance(value, get_args(Value)) else "Object" %>\
+        Map<<%include file="declaration.mako" args="tp=key_type_,value=None"/>, \
+        <%include file="declaration.mako" args="tp=value_type_,value=None"/>?>\
     % elif basic in (BasicNothingTypes.NOTHING, BasicStringTypes.ANY):
         Any?\
     % endif
