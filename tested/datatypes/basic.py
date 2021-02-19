@@ -11,7 +11,7 @@ class BasicNumericTypes(str, Enum):
 
 
 class BasicStringTypes(str, Enum):
-    CHAR = "character"
+    CHAR = "char"
     TEXT = "text"
     ANY = "any"  # Cannot be used in testplan.
 
