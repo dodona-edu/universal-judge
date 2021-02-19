@@ -22,7 +22,7 @@ import math
 from dataclasses import field, replace
 from decimal import Decimal
 from enum import Enum
-from typing import Union, List, Literal, Optional, Any, Iterable, Tuple
+from typing import Union, List, Literal, Optional, Any, Iterable, Tuple, Dict
 
 from pydantic import BaseModel, root_validator, Field
 from pydantic.dataclasses import dataclass
@@ -54,6 +54,38 @@ def _get_type_for(expression: 'Expression') -> WrappedAllTypes:
         )
     elif isinstance(expression, get_args(Value)):
         return expression.type
+    else:
+        return BasicStringTypes.ANY
+
+
+def _get_combined_types(types: Iterable[WrappedAllTypes]) -> WrappedAllTypes:
+    type_dict = dict()
+    for data_type in types:
+        if isinstance(data_type, tuple):
+            if isinstance(data_type[1], tuple):
+                try:
+                    type_dict[data_type[0]][0].add(data_type[1][0])
+                    type_dict[data_type[0]][1].add(data_type[1][1])
+                except KeyError:
+                    type_dict[data_type[0]] = (set(data_type[1][0]),
+                                               set(data_type[1][1]))
+            else:
+                try:
+                    type_dict[data_type[0]].add(data_type[1])
+                except KeyError:
+                    type_dict[data_type[0]] = {data_type[1]}
+        else:
+            type_dict[data_type] = None
+    if len(type_dict) == 1:
+        # noinspection PyTypeChecker
+        key_type, sub_type = next(iter(type_dict.items()))
+        if sub_type is None:
+            return key_type
+        elif isinstance(sub_type, tuple):
+            return key_type, (_get_combined_types(sub_type[0]),
+                              _get_combined_types(sub_type[1]))
+        else:
+            return key_type, _get_combined_types(sub_type)
     else:
         return BasicStringTypes.ANY
 
@@ -128,15 +160,7 @@ class SequenceType(WithFeatures, WithFunctions):
         Attempt to get a type for the content of the container. The function will
         attempt to get the most specific type possible.
         """
-        types = set()
-        for element in self.data:
-            types.add(_get_type_for(element))
-
-        if len(types) == 1:
-            # noinspection PyTypeChecker
-            return next(iter(types))
-        else:
-            return BasicStringTypes.ANY
+        return _get_combined_types(_get_type_for(element) for element in self.data)
 
     def get_functions(self) -> Iterable['FunctionCall']:
         return flatten(x.get_functions() for x in self.data)
@@ -180,30 +204,15 @@ class ObjectType(WithFeatures, WithFunctions):
         Attempt to get a type for the keys of the object. The function will
         attempt to get the most specific type possible.
         """
-        types = set()
-        for element in self.data:
-            types.add(element.get_key_type())
-
-        if len(types) == 1:
-            # noinspection PyTypeChecker
-            return next(iter(types))
-        else:
-            return BasicStringTypes.ANY
+        return _get_combined_types(element.get_key_type() for element in self.data)
 
     def get_value_type(self) -> WrappedAllTypes:
         """
         Attempt to get a type for the values of the object. The function will
         attempt to get the most specific type possible.
         """
-        types = set()
-        for element in self.data:
-            types.add(element.get_value_type())
-
-        if len(types) == 1:
-            # noinspection PyTypeChecker
-            return next(iter(types))
-        else:
-            return BasicStringTypes.ANY
+        return _get_combined_types(
+            element.get_value_type() for element in self.data)
 
     def get_used_features(self) -> FeatureSet:
         base_features = FeatureSet(set(), {self.type})

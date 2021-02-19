@@ -1,4 +1,5 @@
 - tab: "Feedback"
   contexts:
     - statement: 'x = [[{"a"}], [{"b"}, {"c"}]]::array'
-    - statement: 'x = {{"a"}: [1::int32], {"b"}: [2::int32]}'
+    - statement: 'x = {{"a"}: [1::int32], {"b"}: [-1::int32]}'
+    - statement: 'x = {{"a"}: [1::int32], {"b"}: "a"}'
