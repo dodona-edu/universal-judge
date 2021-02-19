@@ -22,7 +22,7 @@ import math
 from dataclasses import field, replace
 from decimal import Decimal
 from enum import Enum
-from typing import Union, List, Literal, Optional, Any, Iterable
+from typing import Union, List, Literal, Optional, Any, Iterable, Tuple
 
 from pydantic import BaseModel, root_validator, Field
 from pydantic.dataclasses import dataclass
@@ -38,6 +38,24 @@ from .features import FeatureSet, combine_features, WithFeatures, Construct
 from .utils import get_args, flatten
 
 logger = logging.getLogger(__name__)
+
+WrappedAllTypes = Union[
+    AllTypes, Tuple[SequenceTypes, 'WrappedAllTypes'],
+    Tuple[ObjectTypes, Tuple['WrappedAllTypes', 'WrappedAllTypes']]
+]
+
+
+def _get_type_for(expression: 'Expression') -> WrappedAllTypes:
+    if isinstance(expression, SequenceType):
+        return expression.type, expression.get_content_type()
+    elif isinstance(expression, ObjectType):
+        return expression.type, (
+            expression.get_key_type(), expression.get_value_type()
+        )
+    elif isinstance(expression, get_args(Value)):
+        return expression.type
+    else:
+        return BasicStringTypes.ANY
 
 
 class WithFunctions:
@@ -105,19 +123,14 @@ class SequenceType(WithFeatures, WithFunctions):
             )])
         return combined
 
-    def get_content_type(self) -> AllTypes:
+    def get_content_type(self) -> WrappedAllTypes:
         """
         Attempt to get a type for the content of the container. The function will
         attempt to get the most specific type possible.
         """
         types = set()
         for element in self.data:
-            if isinstance(element, SequenceType):
-                types.add(element.get_content_type())
-            elif isinstance(element, get_args(Value)):
-                types.add(element.type)
-            else:
-                types.add(BasicStringTypes.ANY)
+            types.add(_get_type_for(element))
 
         if len(types) == 1:
             # noinspection PyTypeChecker
@@ -134,35 +147,24 @@ class ObjectKeyValuePair(WithFeatures, WithFunctions):
     key: 'Expression'
     value: 'Expression'
 
-    def get_key_type(self) -> AllTypes:
+    def get_key_type(self) -> WrappedAllTypes:
         """
         Attempt to get a type for the key of the key-value pair. The function will
         attempt to get the most specific type possible.
         """
-        if isinstance(self.value, SequenceType):
-            return self.value.get_content_type()
-        elif isinstance(self.value, get_args(Value)):
-            return self.value.type
-        else:
-            return BasicStringTypes.ANY
+        return _get_type_for(self.key)
 
-    def get_value_type(self) -> AllTypes:
+    def get_value_type(self) -> WrappedAllTypes:
         """
         Attempt to get a type for the value of the key-value pair. The function will
         attempt to get the most specific type possible.
         """
-        if isinstance(self.value, SequenceType):
-            return self.value.get_content_type()
-        elif isinstance(self.value, get_args(Value)):
-            return self.value.type
-        else:
-            return BasicStringTypes.ANY
+        return _get_type_for(self.value)
 
     def get_used_features(self) -> FeatureSet:
-        base_features = FeatureSet(set())
         nested_features = [self.key.get_used_features(),
                            self.value.get_used_features()]
-        return combine_features([base_features] + nested_features)
+        return combine_features(nested_features)
 
     def get_functions(self) -> Iterable['FunctionCall']:
         return self.value.get_functions()
@@ -173,7 +175,7 @@ class ObjectType(WithFeatures, WithFunctions):
     type: ObjectTypes
     data: List[ObjectKeyValuePair]
 
-    def get_key_type(self) -> AllTypes:
+    def get_key_type(self) -> WrappedAllTypes:
         """
         Attempt to get a type for the keys of the object. The function will
         attempt to get the most specific type possible.
@@ -188,7 +190,7 @@ class ObjectType(WithFeatures, WithFunctions):
         else:
             return BasicStringTypes.ANY
 
-    def get_value_type(self) -> AllTypes:
+    def get_value_type(self) -> WrappedAllTypes:
         """
         Attempt to get a type for the values of the object. The function will
         attempt to get the most specific type possible.
@@ -209,7 +211,9 @@ class ObjectType(WithFeatures, WithFunctions):
         return combine_features([base_features] + nested_features)
 
     def get_functions(self) -> Iterable['FunctionCall']:
-        return flatten(x.get_functions() for _, x in self.data)
+        return flatten(flatten(
+            (pair.key.get_functions(), pair.value.get_functions())
+        ) for pair in self.data)
 
 
 @dataclass

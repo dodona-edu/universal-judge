@@ -16,7 +16,8 @@ from ..dodona import ExtendedMessage
 from ..internationalization import get_i18n_string
 from ..serialisation import (Value, SequenceType, Identifier, FunctionType,
                              FunctionCall, Expression, Statement, Assignment,
-                             NothingType, NamedArgument, ObjectType)
+                             NothingType, NamedArgument, ObjectType,
+                             ObjectKeyValuePair)
 from ..testplan import (EmptyChannel, IgnoredChannel, TextData, ProgrammedEvaluator,
                         SpecificEvaluator, Testcase, RunTestcase, Context,
                         ExceptionOutput, ValueOutput, Run)
@@ -191,8 +192,10 @@ def _prepare_expression(bundle: Bundle, expression: Expression) -> Expression:
         expression.data = [_prepare_expression(bundle, expr)
                            for expr in expression.data]
     elif isinstance(expression, ObjectType):
-        expression.data = dict((key, _prepare_expression(bundle, value))
-                               for key, value in expression.data.items())
+        expression.data = [ObjectKeyValuePair(
+            key=_prepare_expression(bundle, pair.key),
+            value=_prepare_expression(bundle, pair.value)
+        ) for pair in expression.data]
     return expression
 
 
