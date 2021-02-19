@@ -9,6 +9,7 @@
 %>\
 % if value.type == BasicNumericTypes.INTEGER:
     ## Basic heuristic for long/int
+    ## TODO: Discuss which type we want to use, because Java conversion problems with generic types
     % if len(str(value.data)) >= 10:
         ${value.data}L\
     % else:
