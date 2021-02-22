@@ -3,3 +3,5 @@
     - statement: 'x = [[{"a"::char}], [{"b"::char}, {"c"::char}]]::array'
     - statement: 'x = {{"a"}: [1::int16], {"b"}: [0::int16]}'
     - statement: 'x = {{"a"}: [1::int32], {"b"}: "a"}'
+    - expression: '{{"a"}: [1::int32], {"b"}: "a"}'
+      return-raw: '{{"a"}: [1::int32], {"b"}: "a"}'

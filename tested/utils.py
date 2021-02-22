@@ -5,6 +5,7 @@ import random
 import stat
 import string
 import typing
+from decimal import Decimal
 from os import PathLike
 from pathlib import Path
 from typing import (IO, Union, Generator, TypeVar, Generic, Optional, Mapping,
@@ -290,3 +291,39 @@ def safe_get(l: List[T], index: int) -> Optional[T]:
         return l[index]
     except IndexError:
         return None
+
+
+def sorted_no_duplicates(iterable: Iterable[T],
+                         key: Optional[Callable[[T], K]] = None) -> List[T]:
+    def identity(x: T) -> T:
+        return x
+
+    def any_sortable(x: K) -> typing.Tuple[bool, bool, bool, bool, bool, K]:
+        return (
+            x is not None,  # First all None, then bool
+            not isinstance(x, (int, float, Decimal)),  # Then numbers
+            not isinstance(x, str),  # Then strings
+            not isinstance(x, tuple),  # Then tuples
+            not isinstance(x, list),  # Then lists
+            x  # Original sort value
+        )
+
+    if key is None:
+        key = identity
+
+    def _key(x):
+        return any_sortable(key(x))
+
+    first, key_last, no_dup = True, None, []
+    for v in sorted(iterable, key=_key):
+        if not first:
+            key_v = _key(v)
+            if key_v == key_last:
+                continue
+            else:
+                no_dup.append(v)
+                key_last = key_v
+        else:
+            first = False
+            no_dup.append(v)
+    return no_dup

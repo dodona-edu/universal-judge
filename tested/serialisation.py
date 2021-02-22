@@ -35,7 +35,7 @@ from .datatypes import (NumericTypes, StringTypes, BooleanTypes,
                         BasicObjectTypes, BasicNumericTypes, BasicBooleanTypes,
                         BasicStringTypes, BasicNothingTypes)
 from .features import FeatureSet, combine_features, WithFeatures, Construct
-from .utils import get_args, flatten
+from .utils import get_args, flatten, sorted_no_duplicates
 
 logger = logging.getLogger(__name__)
 
@@ -481,12 +481,14 @@ def _convert_to_python(value: Optional[Value], for_printing=False) -> Any:
         if basic_type == SequenceTypes.SEQUENCE:
             return values
         if basic_type == SequenceTypes.SET:
-            return set(values)
+            return sorted_no_duplicates(_convert_to_python(x) for x in value.data)
         raise AssertionError(f"Unknown basic sequence type {basic_type}.")
 
     if isinstance(value.type, get_args(ObjectTypes)):
-        values = {x: _convert_to_python(y) for x, y in value.data.items()}
-        return values
+        return sorted_no_duplicates(
+            ((_convert_to_python(pair.key), _convert_to_python(pair.value))
+             for pair in value.data), key=lambda x: x[0]
+        )
 
     if isinstance(value, NothingType):
         return None
@@ -536,10 +538,12 @@ def to_python_comparable(value: Optional[Value]):
     if basic_type == BasicSequenceTypes.SEQUENCE:
         return [to_python_comparable(x) for x in value.data]
     if basic_type == BasicSequenceTypes.SET:
-        return {to_python_comparable(x) for x in value.data}
+        return sorted_no_duplicates(to_python_comparable(x) for x in value.data)
     if basic_type == BasicObjectTypes.MAP:
-        return [(to_python_comparable(pair.key), to_python_comparable(pair.value))
-                for pair in value.data]
+        return sorted_no_duplicates(
+            ((to_python_comparable(pair.key), to_python_comparable(pair.value))
+             for pair in value.data), key=lambda x: x[0]
+        )
     if basic_type == BasicNumericTypes.RATIONAL:
         return ComparableFloat(float(value.data))
     if basic_type == BasicNumericTypes.INTEGER:
