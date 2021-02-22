@@ -16,6 +16,7 @@ class BenchmarkExercise:
     name: str
     plan: str
     solution: str
+    language: str = "python"
 
 
 @dataclass
@@ -51,6 +52,78 @@ all_exercises = [
         name="combo_breaker",
         plan="plan_no_opt.json",
         solution="solution.old.py"
+    ),
+    BenchmarkExercise(
+        name="password_policy",
+        language="c",
+        plan="plan_opt.json",
+        solution="solution.c"
+    ),
+    BenchmarkExercise(
+        name="password_policy",
+        language="c",
+        plan="plan_no_opt.json",
+        solution="solution.c"
+    ),
+    BenchmarkExercise(
+        name="password_policy",
+        language="python",
+        plan="plan_opt.json",
+        solution="solution.py"
+    ),
+    BenchmarkExercise(
+        name="password_policy",
+        language="python",
+        plan="plan_no_opt.json",
+        solution="solution.py"
+    ),
+    BenchmarkExercise(
+        name="password_policy",
+        language="haskell",
+        plan="plan_opt.json",
+        solution="solution.hs"
+    ),
+    BenchmarkExercise(
+        name="password_policy",
+        language="haskell",
+        plan="plan_no_opt.json",
+        solution="solution.hs"
+    ),
+    BenchmarkExercise(
+        name="password_policy",
+        language="java",
+        plan="plan_opt.json",
+        solution="solution.java"
+    ),
+    BenchmarkExercise(
+        name="password_policy",
+        language="java",
+        plan="plan_no_opt.json",
+        solution="solution.java"
+    ),
+    BenchmarkExercise(
+        name="password_policy",
+        language="kotlin",
+        plan="plan_opt.json",
+        solution="solution.kt"
+    ),
+    BenchmarkExercise(
+        name="password_policy",
+        language="kotlin",
+        plan="plan_no_opt.json",
+        solution="solution.kt"
+    ),
+    BenchmarkExercise(
+        name="password_policy",
+        language="javascript",
+        plan="plan_opt.json",
+        solution="solution.js"
+    ),
+    BenchmarkExercise(
+        name="password_policy",
+        language="javascript",
+        plan="plan_no_opt.json",
+        solution="solution.js"
     )
 ]
 
@@ -60,14 +133,15 @@ def get_config(exercise: BenchmarkExercise,
                parallel: bool = True, ) -> DodonaConfig:
     exercise_dir = Path(__file__).parent / 'tests' / exercise.name
     exercise_tmp_dir = get_temp_dir(
-        f"{exercise.name}_{exercise.solution.replace('.', '_')}_"
+        f"{exercise.name}_{exercise.language}_"
+        f"{exercise.solution.replace('.', '_')}_"
         f"{exercise.plan.replace('.', '_')}_{index}"
     )
     exercise_tmp_dir.mkdir(parents=True)
     return DodonaConfig(**{
         "memory_limit":         536870912,  # 500 MB
         "time_limit":           120,  # Two minutes
-        "programming_language": "python",
+        "programming_language": exercise.language,
         "natural_language":     'nl',
         "resources":            exercise_dir / 'evaluation',
         "source":               exercise_dir / 'solution' / exercise.solution,
