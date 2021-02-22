@@ -5,6 +5,8 @@
 ## First, add support for the advanced types in Java.
 % if value.type == AdvancedSequenceTypes.ARRAY:
     new <%include file="declaration.mako" args="tp=value.type,value=value"/>{<%include file="value_arguments.mako" args="arguments=value.data"/>}\
+% elif value.type == AdvancedNumericTypes.SINGLE_PRECISION:
+    ${value.data}f\
 % elif value.type == AdvancedNumericTypes.INT_8:
     (byte) ${value.data}\
 % elif value.type in (AdvancedNumericTypes.U_INT_8, AdvancedNumericTypes.INT_16):
