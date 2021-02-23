@@ -1,3 +1,4 @@
+import html
 import os
 import re
 import sys
@@ -157,7 +158,9 @@ def create_description_instance(template: str,
         expression=partial(language.get_code, bundle=bundle, is_html=is_html,
                            statement=False),
         prompt=language.get_prompt(is_html=is_html),
-        language=language.get_prompt_language(is_html=is_html),
+        language_html=language.get_prompt_language(is_html=True),
+        language=language.get_prompt_language(is_html=False),
+        namespace_html=html.escape(language.conventionalize_namespace(namespace)),
         namespace=language.conventionalize_namespace(namespace)
     )
 

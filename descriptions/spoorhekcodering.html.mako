@@ -80,7 +80,7 @@
 </ul>
 
 % if language == 'java':
-<p> The functions must be static declared in the class ${namespace}.</p>
+<p> The functions must be static declared in the class ${namespace_html}.</p>
 % endif
 
 <h3>Example</h3>
