@@ -18,12 +18,12 @@ classes for implementations in other configs.
 """
 import json
 import logging
+import math
 from dataclasses import field, replace
 from decimal import Decimal
 from enum import Enum
-from typing import Union, List, Dict, Literal, Optional, Any, Iterable
+from typing import Union, List, Literal, Optional, Any, Iterable, Tuple, Dict
 
-import math
 from pydantic import BaseModel, root_validator, Field
 from pydantic.dataclasses import dataclass
 from pydantic.fields import Undefined
@@ -35,9 +35,59 @@ from .datatypes import (NumericTypes, StringTypes, BooleanTypes,
                         BasicObjectTypes, BasicNumericTypes, BasicBooleanTypes,
                         BasicStringTypes, BasicNothingTypes)
 from .features import FeatureSet, combine_features, WithFeatures, Construct
-from .utils import get_args, flatten
+from .utils import get_args, flatten, sorted_no_duplicates
 
 logger = logging.getLogger(__name__)
+
+WrappedAllTypes = Union[
+    AllTypes, Tuple[SequenceTypes, 'WrappedAllTypes'],
+    Tuple[ObjectTypes, Tuple['WrappedAllTypes', 'WrappedAllTypes']]
+]
+
+
+def _get_type_for(expression: 'Expression') -> WrappedAllTypes:
+    if isinstance(expression, SequenceType):
+        return expression.type, expression.get_content_type()
+    elif isinstance(expression, ObjectType):
+        return expression.type, (
+            expression.get_key_type(), expression.get_value_type()
+        )
+    elif isinstance(expression, get_args(Value)):
+        return expression.type
+    else:
+        return BasicStringTypes.ANY
+
+
+def _get_combined_types(types: Iterable[WrappedAllTypes]) -> WrappedAllTypes:
+    type_dict = dict()
+    for data_type in types:
+        if isinstance(data_type, tuple):
+            if isinstance(data_type[1], tuple):
+                try:
+                    type_dict[data_type[0]][0].add(data_type[1][0])
+                    type_dict[data_type[0]][1].add(data_type[1][1])
+                except KeyError:
+                    type_dict[data_type[0]] = (set(data_type[1][0]),
+                                               set(data_type[1][1]))
+            else:
+                try:
+                    type_dict[data_type[0]].add(data_type[1])
+                except KeyError:
+                    type_dict[data_type[0]] = {data_type[1]}
+        else:
+            type_dict[data_type] = None
+    if len(type_dict) == 1:
+        # noinspection PyTypeChecker
+        key_type, sub_type = next(iter(type_dict.items()))
+        if sub_type is None:
+            return key_type
+        elif isinstance(sub_type, tuple):
+            return key_type, (_get_combined_types(sub_type[0]),
+                              _get_combined_types(sub_type[1]))
+        else:
+            return key_type, _get_combined_types(sub_type)
+    else:
+        return BasicStringTypes.ANY
 
 
 class WithFunctions:
@@ -105,42 +155,74 @@ class SequenceType(WithFeatures, WithFunctions):
             )])
         return combined
 
-    def get_content_type(self) -> AllTypes:
+    def get_content_type(self) -> WrappedAllTypes:
         """
         Attempt to get a type for the content of the container. The function will
         attempt to get the most specific type possible.
         """
-        types = set()
-        for element in self.data:
-            if isinstance(element, SequenceType):
-                types.add(element.get_content_type())
-            elif isinstance(element, get_args(Value)):
-                types.add(element.type)
-            else:
-                types.add(BasicStringTypes.ANY)
-
-        if len(types) == 1:
-            # noinspection PyTypeChecker
-            return next(iter(types))
-        else:
-            return BasicStringTypes.ANY
+        return _get_combined_types(_get_type_for(element) for element in self.data)
 
     def get_functions(self) -> Iterable['FunctionCall']:
         return flatten(x.get_functions() for x in self.data)
 
 
 @dataclass
+class ObjectKeyValuePair(WithFeatures, WithFunctions):
+    key: 'Expression'
+    value: 'Expression'
+
+    def get_key_type(self) -> WrappedAllTypes:
+        """
+        Attempt to get a type for the key of the key-value pair. The function will
+        attempt to get the most specific type possible.
+        """
+        return _get_type_for(self.key)
+
+    def get_value_type(self) -> WrappedAllTypes:
+        """
+        Attempt to get a type for the value of the key-value pair. The function will
+        attempt to get the most specific type possible.
+        """
+        return _get_type_for(self.value)
+
+    def get_used_features(self) -> FeatureSet:
+        nested_features = [self.key.get_used_features(),
+                           self.value.get_used_features()]
+        return combine_features(nested_features)
+
+    def get_functions(self) -> Iterable['FunctionCall']:
+        return self.value.get_functions()
+
+
+@dataclass
 class ObjectType(WithFeatures, WithFunctions):
     type: ObjectTypes
-    data: Dict[str, 'Expression']
+    data: List[ObjectKeyValuePair]
+
+    def get_key_type(self) -> WrappedAllTypes:
+        """
+        Attempt to get a type for the keys of the object. The function will
+        attempt to get the most specific type possible.
+        """
+        return _get_combined_types(element.get_key_type() for element in self.data)
+
+    def get_value_type(self) -> WrappedAllTypes:
+        """
+        Attempt to get a type for the values of the object. The function will
+        attempt to get the most specific type possible.
+        """
+        return _get_combined_types(
+            element.get_value_type() for element in self.data)
 
     def get_used_features(self) -> FeatureSet:
         base_features = FeatureSet(set(), {self.type})
-        nested_features = [y.get_used_features() for x, y in self.data]
+        nested_features = [x.get_used_features() for x in self.data]
         return combine_features([base_features] + nested_features)
 
     def get_functions(self) -> Iterable['FunctionCall']:
-        return flatten(x.get_functions() for x in self.data.values())
+        return flatten(flatten(
+            (pair.key.get_functions(), pair.value.get_functions())
+        ) for pair in self.data)
 
 
 @dataclass
@@ -305,6 +387,7 @@ ObjectType.__pydantic_model__.update_forward_refs()
 SequenceType.__pydantic_model__.update_forward_refs()
 NamedArgument.__pydantic_model__.update_forward_refs()
 FunctionCall.__pydantic_model__.update_forward_refs()
+ObjectKeyValuePair.__pydantic_model__.update_forward_refs()
 
 
 def as_basic_type(value: Value) -> Value:
@@ -398,12 +481,14 @@ def _convert_to_python(value: Optional[Value], for_printing=False) -> Any:
         if basic_type == SequenceTypes.SEQUENCE:
             return values
         if basic_type == SequenceTypes.SET:
-            return set(values)
+            return sorted_no_duplicates(_convert_to_python(x) for x in value.data)
         raise AssertionError(f"Unknown basic sequence type {basic_type}.")
 
     if isinstance(value.type, get_args(ObjectTypes)):
-        values = {x: _convert_to_python(y) for x, y in value.data.items()}
-        return values
+        return sorted_no_duplicates(
+            ((_convert_to_python(pair.key), _convert_to_python(pair.value))
+             for pair in value.data), key=lambda x: x[0]
+        )
 
     if isinstance(value, NothingType):
         return None
@@ -453,15 +538,19 @@ def to_python_comparable(value: Optional[Value]):
     if basic_type == BasicSequenceTypes.SEQUENCE:
         return [to_python_comparable(x) for x in value.data]
     if basic_type == BasicSequenceTypes.SET:
-        return {to_python_comparable(x) for x in value.data}
+        return sorted_no_duplicates(to_python_comparable(x) for x in value.data)
     if basic_type == BasicObjectTypes.MAP:
-        return {key: to_python_comparable(val) for key, val in value.data.items()}
+        return sorted_no_duplicates(
+            ((to_python_comparable(pair.key), to_python_comparable(pair.value))
+             for pair in value.data), key=lambda x: x[0]
+        )
     if basic_type == BasicNumericTypes.RATIONAL:
         return ComparableFloat(float(value.data))
     if basic_type == BasicNumericTypes.INTEGER:
         return value.data
     if basic_type in (BasicBooleanTypes.BOOLEAN, BasicStringTypes.TEXT,
-                      BasicNothingTypes.NOTHING, BasicStringTypes.ANY):
+                      BasicNothingTypes.NOTHING, BasicStringTypes.ANY,
+                      BasicStringTypes.CHAR):
         return value.data
 
     raise AssertionError(f"Unknown value type: {value}")

@@ -5,10 +5,12 @@ import random
 import stat
 import string
 import typing
+from decimal import Decimal
 from os import PathLike
+from itertools import zip_longest
 from pathlib import Path
 from typing import (IO, Union, Generator, TypeVar, Generic, Optional, Mapping,
-                    Iterable, List, Callable)
+                    Iterable, List, Callable, Any)
 
 import itertools
 import sys
@@ -290,3 +292,153 @@ def safe_get(l: List[T], index: int) -> Optional[T]:
         return l[index]
     except IndexError:
         return None
+
+
+def sorted_no_duplicates(iterable: Iterable[T],
+                         key: Optional[Callable[[T], K]] = None) -> List[T]:
+    # Identity key function
+    def identity(x: T) -> T:
+        return x
+
+    # Order functions
+    def type_order(x: Any) -> int:
+        """
+        Determine order for different types
+        :param x: value to check
+        :return: order index of type
+        """
+        if x is None:
+            return 0
+        elif isinstance(x, (int, float, Decimal)):
+            return 1
+        elif isinstance(x, str):
+            return 2
+        elif isinstance(x, tuple):
+            return 3
+        elif isinstance(x, list):
+            return 4
+        else:
+            return 5
+
+    def order_iterable(iter0: Iterable[Any], iter1: Iterable[Any]) -> int:
+        """
+        Determine order between two iterables
+
+        :param iter0: first iterable
+        :param iter1: second iterable
+        :return: 1 if iter0 < iter1 else -1 if iter0 > iter1 else 0
+        """
+        for x, y in zip_longest(iter0, iter1):
+            cmp = order(x, y)
+            if cmp == 0:
+                continue
+            else:
+                return cmp
+        return 0
+
+    def order(x: Any, y: Any) -> int:
+        """
+        Determine order between two types
+
+        :param x: first value
+        :param x: second value
+        :return: 1 if x < y else -1 if x > y else 0
+        """
+        t_x, t_y = type_order(x), type_order(y)
+        if t_x < t_y:
+            return 1
+        elif t_x > t_y:
+            return -1
+        elif not isinstance(x, str) and isinstance(x, Iterable):
+            return order_iterable(x, y)
+        elif x < y:
+            return 1
+        elif x > y:
+            return -1
+        else:
+            return 0
+
+    # Sort functions, custom implementation needed for efficient recursive ordering
+    # of values that have different types
+    def insertion_sort(list_t: List[T], start: int, end: int) -> List[T]:
+        """
+        Insertion sort
+        :param list_t: list to sort
+        :param start: start of range to sort
+        :param end: end of range to sort
+        :return: the list itself
+        """
+        for i in range(start + 1, end):
+            j = i - 1
+            item = list_t[i]
+            item_key = key(item)
+            while j >= start and order(key(list_t[j]), item_key) < 0:
+                list_t[j + 1] = list_t[j]
+                j -= 1
+            list_t[j + 1] = item
+        return list_t
+
+    def merge(to_list: List[T], from_list: List[T], start: int, middle: int,
+              end: int):
+        """
+        Merge two sorted sublist to sorted list
+
+        :param to_list: output list
+        :param from_list: input list
+        :param start: start of first half
+        :param middle: end of first half, start of second half
+        :param end: end of second half
+        :return: No return value
+        """
+        i, j, k = start, middle, start
+        while i < middle and j < end:
+            if order(key(from_list[i]), key(from_list[j])) > 0:
+                to_list[k] = from_list[i]
+                i += 1
+            else:
+                to_list[k] = from_list[j]
+                j += 1
+            k += 1
+        if i < middle:
+            to_list[k:end] = from_list[i:middle]
+        else:
+            to_list[k:end] = from_list[j:end]
+
+    def timsort(list_t: List[T], timgroup: int = 32) -> List[T]:
+        """
+        Time sort algorithm
+        :param list_t: the modifiable list to sort
+        :param timgroup: the number of elements to sort with insertion sort
+        :return: The sort list
+        """
+        len_list_t = len(list_t)
+        for i in range(0, len_list_t, timgroup):
+            insertion_sort(list_t, i, min(i + timgroup, len_list_t))
+        copy = list(list_t)
+        while timgroup < len_list_t:
+            for start in range(0, len_list_t, 2 * timgroup):
+                middle = min(len_list_t, start + timgroup)
+                end = min(len_list_t, start + 2 * timgroup)
+                merge(list_t, copy, start, middle, end)
+            list_t, copy = copy, list_t
+            timgroup *= 2
+        return copy
+
+    # Check if key function is not none
+    if key is None:
+        key = identity
+
+    # Sort and filterout duplicates
+    first, last_key, no_dup, list_iter = True, None, [], list(iterable)
+    for v in timsort(list_iter):
+        if not first:
+            key_v = key(v)
+            if order(key_v, last_key) == 0:
+                continue
+            else:
+                no_dup.append(v)
+                last_key = key_v
+        else:
+            first, last_key = False, key(v)
+            no_dup.append(v)
+    return no_dup

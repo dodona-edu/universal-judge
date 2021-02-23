@@ -79,7 +79,7 @@ private fun internalEncode(value: Any?): Array<String> {
         type = "double_precision"
         data = value.toString()
     } else if (value is Char) {
-        type = "character"
+        type = "char"
         data = String.format("\"%s\"", escape(value.toString()))
     } else if (value is CharSequence) {
         type = "text"
@@ -94,10 +94,10 @@ private fun internalEncode(value: Any?): Array<String> {
         type = "map"
         data = value.asSequence()
                 .map { e ->
-                    String.format("\"%s\": %s", e.key.toString(),
+                    String.format("{\"key\": %s, \"value\": %s }", encode(e.key),
                             encode(e.value))
                 }
-                .joinToString(separator = ", ", prefix = "{", postfix = "}")
+                .joinToString(separator = ", ", prefix = "[", postfix = "]")
     } else {
         type = "unknown"
         data = String.format("\"%s\"", escape(value.toString()));

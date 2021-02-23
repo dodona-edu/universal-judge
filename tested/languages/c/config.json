@@ -48,7 +48,7 @@
     "bigint": "reduced",
     "single_precision": "supported",
     "double_precision": "supported",
-    "double_extended": "unsupported",
+    "double_extended": "supported",
     "fixed_precision": "unsupported",
     "array": "unsupported",
     "list": "unsupported",

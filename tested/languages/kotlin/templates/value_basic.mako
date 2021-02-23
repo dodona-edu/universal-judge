@@ -8,12 +8,7 @@
         return text.replace("'", "\\'")
 %>\
 % if value.type == BasicNumericTypes.INTEGER:
-    ## Basic heuristic for long/int
-    % if len(str(value.data)) >= 10:
-        ${value.data}L\
-    % else:
-        ${value.data}\
-    % endif
+    ${value.data}\
 % elif value.type == BasicNumericTypes.RATIONAL:
     ${value.data}\
 % elif value.type == BasicStringTypes.TEXT:
@@ -30,8 +25,9 @@
     setOf(<%include file="value_arguments.mako" args="arguments=value.data" />)\
 % elif value.type == BasicObjectTypes.MAP:
     mapOf(\
-    % for key, item in value.data.items():
-        Pair("${key}", <%include file="statement.mako" args="statement=item" />)\
+    % for pair in value.data:
+        Pair(<%include file="statement.mako" args="statement=pair.key" />, \
+        <%include file="statement.mako" args="statement=pair.value" />)\
         % if not loop.last:
             , \
         % endif

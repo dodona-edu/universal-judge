@@ -5,9 +5,10 @@ import pytest
 
 from tested.description_instance import create_description_instance
 from tested.languages.config import limit_output
+from tested.utils import sorted_no_duplicates
 
 
-def test_limit_output_no_limit(pytestconfig):
+def test_limit_output_no_limit():
     text = "aaaaa\nbbbbb\nccccc".strip()
     limited = limit_output(output=text, max_lines=3, limit_characters=17)
     assert text == limited
@@ -163,7 +164,7 @@ def test_template_code_block_html(lang: str, prompt: str, expected_stmt: str, ex
 
 @pytest.mark.parametrize(("lang", "expected"), [
     ("python", ">>> random = Random()\n>>> random.new_sequence(10, 10)\n[10, 5, 2, 8, 7, 1, 3, 4, 9, 6]"),
-    ("java", "> Random random = new Random();\n> random.newSequence(10, 10)\nList.of(10, 5, 2, 8, 7, 1, 3, 4, 9, 6)"),
+    ("java", "> Random random = new Random()\n> random.newSequence(10, 10)\nList.of(10, 5, 2, 8, 7, 1, 3, 4, 9, 6)"),
     ("kotlin", "> var random = Random()\n> random!!.newSequence(10, 10)\nlistOf(10, 5, 2, 8, 7, 1, 3, 4, 9, 6)"),
     ("javascript", "> let random = await new Random()\n> random.newSequence(10, 10)\n[10, 5, 2, 8, 7, 1, 3, 4, 9, 6]")
 ])
@@ -177,8 +178,8 @@ ${expression('[10, 5, 2, 8, 7, 1, 3, 4, 9, 6]')}"""
 
 @pytest.mark.parametrize(("lang", "prompt", "expected"), [
     ("python", ">>>", "x = data(1, 2, 'alpha')"),
-    ("java", ">", 'long x = Submission.data(1, 2, "alpha");'),
-    pytest.param("c", ">", 'long long x = data(1, 2, "alpha");', marks=pytest.mark.xfail),
+    ("java", ">", 'int x = Submission.data(1, 2, "alpha")'),
+    ("c", ">", 'long long x = data(1, 2, "alpha");'),
     ("kotlin", ">", 'var x = data(1, 2, "alpha")'),
     ("javascript", ">", 'let x = await data(1, 2, "alpha")'),
     ("haskell", ">", 'let x = data (1 :: Int) (2 :: Int) ("alpha")')
@@ -204,15 +205,14 @@ data(1, 2,
     ("javascript", ">"),
     ("haskell", ">")
 ])
-@pytest.mark.xfail
 def test_template_escaped_string_code_block_markdown(lang: str, prompt: str):
     template = r"""```tested
 "alpha\"beta\tname"
 ```"""
     instance = create_description_instance(template, programming_language=lang, is_html=False)
-    expected_str = r"'alpha\\\"beta\tname'" if lang == "python" else r"alpha\"beta\tname"
+    expected_str = r"'alpha\"beta\tname'" if lang == "python" else r'"alpha\\"beta\tname"'
     expected = f"""```console?lang={lang}&prompt={prompt}
-${expected_str}
+{expected_str}
 ```"""
     assert instance == expected
 
@@ -221,8 +221,8 @@ def test_template_failed_string():
     template = r"""```tested
 > integer x = \
 data(1, 2,
-"alpha   
- beta")
+"alpha 
+beta")
 ```"""
     with pytest.raises(ValueError):
         create_description_instance(template, programming_language="java", is_html=False)
@@ -232,8 +232,7 @@ def test_template_failed_brackets_mismatch():
     template = r"""```tested
 > integer x = \
 data(1, 2,
-("alpha   
- beta"})
+("alpha beta"})
 ```"""
     with pytest.raises(ValueError):
         create_description_instance(template, programming_language="java", is_html=False)
@@ -243,8 +242,18 @@ def test_template_failed_unbalanced_brackets():
     template = r"""```tested
 > integer x = \
 data(1, 2,
-"alpha   
- beta"
+"alpha beta"
 ```"""
     with pytest.raises(ValueError):
         create_description_instance(template, programming_language="java", is_html=False)
+
+
+def test_sort_no_duplicates():
+    data = ['a', 5, 8, 3, 7, 6, 28, 'b', 5, (True, False), ('a', ('b', 'c')), 'data', 0, 1, 2, 4, 5, 6, 7, 8, 9, 10, 11,
+            12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 'a', 5, 8, 3, 7, 6, 28,
+            'b', 5, (True, False), ('a', ('b', 'c')), 'data', 0, 1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
+            18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32]
+    expected = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27,
+                28, 29, 30, 31, 32, 'a', 'b', 'data', (True, False), ('a', ('b', 'c'))]
+    result = sorted_no_duplicates(data)
+    assert expected == result

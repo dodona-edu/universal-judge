@@ -46,7 +46,7 @@ instance (Typeable a) => Typeable (IO a) where
     -- Preferred function call to pass the IO monad results to the judge, avoid `unsafePerformIO`
     toJsonIO m = do
         unwrapped <- m
-        return ((toType unwrapped), (toJson unwrapped))
+        toJsonIO unwrapped
 
 instance Typeable W.Word8 where toType _ = "uint8"
 instance Typeable W.Word16 where toType _ = "uint16"
@@ -63,7 +63,7 @@ instance Typeable Integer where toType _ = "bigint"
 instance Typeable Int where toType _ = "integer"
 
 instance Typeable Bool where toType _ = "boolean"
-instance Typeable Char where toType _ = "character"
+instance Typeable Char where toType _ = "char"
 
 instance Typeable Text where toType _ = "text"
 instance {-# OVERLAPPABLE #-} Typeable String where toType _ = "text"

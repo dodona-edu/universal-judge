@@ -91,12 +91,11 @@ try {
         ${ctx.before}
         % for testcase in ctx.testcases:
             writeSeparator();
+            <% testcase: _TestcaseArguments %>\
+            % if isinstance(testcase.command, get_args(Assignment)):
+                let ${testcase.command.variable};
+            % endif
             try {
-                <% testcase: _TestcaseArguments %>\
-                % if isinstance(testcase.command, get_args(Assignment)):
-                    let ${testcase.command.variable};
-                % endif
-
                 ## If we have a value function, we have an expression.
                 <%include file="statement.mako" args="statement=testcase.input_statement()" />;
 

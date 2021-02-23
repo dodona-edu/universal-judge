@@ -269,9 +269,18 @@ def test_program_params(lang: str, tmp_path: Path, pytestconfig):
     assert len(updates.find_all("start-test")) == 4
 
 
-@pytest.mark.parametrize("language", ["python", "java", "kotlin"])
+@pytest.mark.parametrize("language", ["python", "java", "kotlin", "javascript"])
 def test_objects(language: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "objects", language, tmp_path, "plan.tson", "correct")
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"] * 2
+    assert len(updates.find_all("start-testcase")) == 3
+
+
+@pytest.mark.parametrize("language", ["python", "java", "kotlin", "javascript"])
+def test_objects_yaml(language: str, tmp_path: Path, pytestconfig):
+    conf = configuration(pytestconfig, "objects", language, tmp_path, "plan.yaml", "correct")
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["correct"] * 2

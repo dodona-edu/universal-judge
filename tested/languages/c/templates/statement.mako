@@ -14,7 +14,7 @@
 % else:
     <% assert isinstance(statement, get_args(Assignment)) %>\
     % if full:
-        <%include file="declaration.mako" args="value=statement.expression" /> \
+        <%include file="declaration.mako" args="tp=statement.type, value=statement.expression" /> \
     % endif
     ${statement.variable} = <%include file="statement.mako" args="statement=statement.expression"/>;
 % endif

@@ -10,7 +10,7 @@ from tested.datatypes import string_to_type, AllTypes, SequenceTypes, \
     BasicStringTypes, BasicBooleanTypes
 from tested.serialisation import Statement, Assignment, NumberType, Expression, \
     NothingType, Identifier, BooleanType, StringType, SequenceType, FunctionCall, \
-    ObjectType, FunctionType, VariableType, Value
+    ObjectType, FunctionType, VariableType, Value, ObjectKeyValuePair
 
 data_types = (
     "INTEGER", "RATIONAL", "CHAR", "TEXT", "BOOLEAN", "SEQUENCE", "SET", "MAP",
@@ -113,14 +113,17 @@ class Parser:
                             namespace=namespace,
                             arguments=args)
 
-    def analyse_dict(self, tree: Tree, allow_functions: bool = True) -> dict:
-        def analyse_pair(pair: Tree) -> tuple:
+    def analyse_dict(self, tree: Tree,
+                     allow_functions: bool = True) -> List[ObjectKeyValuePair]:
+        def analyse_pair(pair: Tree) -> ObjectKeyValuePair:
             if pair.data != 'dict_pair':
                 raise ParseError("Key-value pair expected in map")
-            return (self.analyse_expression(pair.children[0]).data,
-                    self.analyse_expression(pair.children[1], allow_functions))
+            return ObjectKeyValuePair(key=self.analyse_expression(pair.children[0],
+                                                                  allow_functions),
+                                      value=self.analyse_expression(
+                                          pair.children[1], allow_functions))
 
-        return dict(analyse_pair(pair) for pair in tree.children)
+        return [analyse_pair(pair) for pair in tree.children]
 
     def analyse_expression(self, tree: Union[Tree, Token],
                            allow_functions: bool = True) -> Expression:
@@ -138,7 +141,7 @@ class Parser:
                               data=float(token.value))
         elif token.type == 'ESCAPED_STRING':
             return StringType(type=BasicStringTypes.TEXT,
-                              data=literal_eval(token.value))
+                              data=token.value[1:-1])
         elif token.type == 'TRUE':
             return BooleanType(type=BasicBooleanTypes.BOOLEAN, data=True)
         elif token.type == 'FALSE':
