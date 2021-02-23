@@ -150,12 +150,12 @@ def test_template_code_block_markdown(lang: str, prompt: str):
      '<span class="mi">5</span> <span class="ow">::</span> <span class="kt">Int</span>')
 ])
 def test_template_code_block_html(lang: str, prompt: str, expected_stmt: str, expected_expr: str):
-    template = """<code tested>
+    template = """<code class="tested">
 > random()
 5
 </code>"""
     instance = create_description_instance(template, programming_language=lang, is_html=True)
-    expected = f"""<code>
+    expected = f"""<code class="tested">
 {html.escape(prompt)} {expected_stmt}
 {expected_expr}
 </code>"""
