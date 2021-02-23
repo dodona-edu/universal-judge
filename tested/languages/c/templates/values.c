@@ -41,33 +41,23 @@ void write_bool(FILE* out, bool value) {
 }
 
 void write_char(FILE* out, char value) {
-    if (value == '\'') {
-        const char* asString = format("character", %s);
-        fprintf(out, asString, "\"'\"");
-    } else {
-        const char* asString = format("character", %c);
-        fprintf(out, asString, value);
-    }
+    const char* asString = format("char", "%s");
+    char buffer[2];
+    sprintf(buffer, "%c", value);
+    char* result = str_replace(buffer, '"', "\\\"");
+    fprintf(out, asString, result);
+    free(result);
+
 }
 
 void write_signed_char(FILE* out, signed char value) {
-    if (value == '\'') {
-        const char* asString = format("int8", %s);
-        fprintf(out, asString, "\"'\"");
-    } else {
-        const char* asString = format("int8", %c);
-        fprintf(out, asString, value);
-    }
+    const char* asString = format("int8", %d);
+    fprintf(out, asString, ((int) value));
 }
 
 void write_unsigned_char(FILE* out, unsigned char value) {
-    if (value == '\'') {
-        const char* asString = format("uint8", %s);
-        fprintf(out, asString, "\"'\"");
-    } else {
-        const char* asString = format("uint8", %c);
-        fprintf(out, asString, value);
-    }
+    const char* asString = format("uint8", %u);
+    fprintf(out, asString, ((unsigned int) value));
 }
 
 void write_sint(FILE* out, short int value) {
@@ -116,7 +106,7 @@ void write_float(FILE* out, float value) {
 }
 
 void write_double(FILE* out, double value) {
-    const char* asString = format("double_precision", %f);
+    const char* asString = format("double_precision", %lf);
     fprintf(out, asString, value);
 }
 

@@ -5,7 +5,8 @@ import pytest
 from tested.datatypes import BasicNothingTypes, BasicNumericTypes, AdvancedNumericTypes, BasicBooleanTypes, \
     BasicStringTypes, BasicSequenceTypes, AdvancedSequenceTypes, ObjectTypes
 from tested.dsl import Parser, ParseError
-from tested.serialisation import Assignment, FunctionCall, FunctionType, VariableType, SequenceType, Identifier
+from tested.serialisation import Assignment, FunctionCall, FunctionType, VariableType, SequenceType, Identifier, \
+    StringType, ObjectKeyValuePair, ObjectType
 
 parser = Parser()
 
@@ -205,13 +206,20 @@ def test_parse_value_adv_sequence():
 
 
 def test_parse_value_dict():
-    parsed = parser.parse_value('{"ignore": true, "unknown": 0}')
+    parsed = parser.parse_value('{"ignore": true, 5: 0}')
     assert parsed.type == ObjectTypes.MAP
+    parsed: ObjectType
     assert len(parsed.data) == 2
-    assert parsed.data["ignore"].type == BasicBooleanTypes.BOOLEAN
-    assert parsed.data["ignore"].data is True
-    assert parsed.data["unknown"].type == BasicNumericTypes.INTEGER
-    assert parsed.data["unknown"].data == 0
+    key, value = parsed.data[0].key, parsed.data[0].value
+    assert key.type == BasicStringTypes.TEXT
+    assert key.data == "ignore"
+    assert value.type == BasicBooleanTypes.BOOLEAN
+    assert value.data is True
+    key, value = parsed.data[1].key, parsed.data[1].value
+    assert key.type == BasicNumericTypes.INTEGER
+    assert key.data == 5
+    assert value.type == BasicNumericTypes.INTEGER
+    assert value.data == 0
 
 
 def test_parse_error_fun_in_return_value():
@@ -227,6 +235,11 @@ def test_parse_error_property_in_return_value():
 def test_parse_error_constructor_in_return_value():
     with pytest.raises(ParseError):
         parser.parse_value('{"data": new data.Object()}')
+
+
+def test_parse_error_constructor_in_return_value2():
+    with pytest.raises(ParseError):
+        parser.parse_value('{new data.Object(): "data"}')
 
 
 def test_parse_fun_assign():
@@ -304,8 +317,12 @@ def test_parse_function():
     assert len(function.arguments) == 1
     arg = function.arguments[0]
     assert arg.type == ObjectTypes.MAP
+    arg: ObjectType
     assert len(arg.data) == 1
-    value = arg.data["size"]
+    pair: ObjectKeyValuePair = arg.data[0]
+    key, value = pair.key, pair.value
+    assert isinstance(key, StringType)
+    assert key.data == "size"
     assert isinstance(value, FunctionCall)
     assert value.type == FunctionType.FUNCTION
     assert value.namespace is None

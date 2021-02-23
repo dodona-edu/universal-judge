@@ -33,22 +33,25 @@ function encode(value) {
             type = "set";
             value = Array.from(value).map(encode);
         } else if (value instanceof Map) {
-            type = "set";
+            type = "map";
             value = Array
-                .from(value)
-                .reduce(
-                    (obj, [key, value]) => (
-                        // Be careful! Maps can have non-String keys; object literals can't.
-                        Object.assign(obj, { [key]: encode(value) })
-                    ),
-                    {}
-                );
+                    .from(value)
+                    .map(([key, value]) => {
+                                return {
+                                    key: encode(key),
+                                    value: encode(value)
+                                };
+                            }
+                    );
         } else {
             type = "map";
             // Process the elements of the object.
-            for (let [key, v] of Object.entries(value)) {
-                value[key] = encode(v);
-            } 
+            value = Object.entries(value).map(([key, value]) => {
+                return {
+                    key: encode(key),
+                    value: encode(value)
+                };
+            });
         }
     } else {
         type = "unknown";

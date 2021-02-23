@@ -2,7 +2,7 @@ import pytest
 
 from tested.datatypes import AdvancedNumericTypes, BasicNumericTypes
 from tested.dsl import SchemaParser, ParseError
-from tested.serialisation import Assignment, FunctionCall
+from tested.serialisation import Assignment, FunctionCall, ObjectType
 from tested.testplan import _PlanModel
 
 parser = SchemaParser()
@@ -255,7 +255,6 @@ def test_statement():
     assert isinstance(test1.input, FunctionCall)
 
 
-
 def test_invalid_yaml():
     yaml_str = """
 - tab: "Tab"
@@ -302,3 +301,28 @@ def test_invalid_mutual_exclusive_context_testcase():
         translate(yaml_str)
     assert e.type == SystemExit
     assert e.value.code != 0
+
+
+def test_statement_with_yaml_dict():
+    yaml_str = """
+- tab: "Feedback"
+  contexts:
+  - expression: "get_dict()"
+    return:
+        alpha: 5
+        beta: 6
+"""
+    json_str = translate(yaml_str)
+    plan = _PlanModel.parse_raw(json_str).__root__
+    assert len(plan.tabs) == 1
+    tab = plan.tabs[0]
+    assert len(tab.runs) == 1
+    run = tab.runs[0]
+    assert not run.run.input.main_call
+    testcases = run.contexts[0].testcases
+    assert len(testcases) == 1
+    test = testcases[0]
+    assert isinstance(test.input, FunctionCall)
+    assert isinstance(test.output.result.value, ObjectType)
+
+    pass

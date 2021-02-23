@@ -13,7 +13,7 @@ from pathlib import Path
 from .configs import DodonaConfig
 from .main import run
 
-exercise_dir = "exercise/echo-function"
+exercise_dir = "exercise/objects"
 
 
 def read_config() -> DodonaConfig:
@@ -21,13 +21,13 @@ def read_config() -> DodonaConfig:
     return DodonaConfig(**{
         "memory_limit":         536870912,
         "time_limit":           60,
-        "programming_language": 'python',
+        "programming_language": 'java',
         "natural_language":     'nl',
         "resources":            Path(exercise_dir, 'evaluation'),
-        "source":               Path(exercise_dir, 'solution/correct.py'),
+        "source":               Path(exercise_dir, 'solution/correct.java'),
         "judge":                Path('.'),
         "workdir":              Path('workdir'),
-        "plan_name":            "two-specific.tson",
+        "plan_name":            "no-test.yaml",
         "options":              {
             "parallel":       True,
             "mode":           "batch",
