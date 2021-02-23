@@ -86,10 +86,10 @@ def _prepare_template(template: str, is_html: bool = True) -> str:
         re_tag = "(\"[^\"]*\"|'[^']*'|[^'\">])*"
 
         regex_code, body_index = re.compile(
-            fr"((<code{re_tag}) tested({re_tag}>))"
-            r"((?!</?code>).*?)(</code>)",
+            fr"((<code{re_tag}) (class=\"([^\"]* )*tested( [^\"]*)*\")("
+            fr"{re_tag}>)(\s*\\?))((?!</?code>).*?)(</code>)",
             re.MULTILINE | re.DOTALL
-        ), 5
+        ), -2
     else:
         regex_code, body_index = re.compile(
             r"^(```tested\r?\n)(((?!```).*\r?\n)*)(```)$", re.MULTILINE), 1
@@ -105,8 +105,7 @@ def _prepare_template(template: str, is_html: bool = True) -> str:
             regex_comment_mako.sub(_mako_uncomment, template[last_end:span[0]]))
         last_end = span[1]
         if is_html:
-            mako_template.extend(groups[1])
-            mako_template.extend(groups[3])
+            mako_template.extend(groups[0])
         else:
             mako_template.extend("```console?lang=${language}&prompt=${prompt}\n")
         mako_template.extend(_analyse_body(groups[body_index]))
@@ -149,7 +148,6 @@ def create_description_instance(template: str,
     )
 
     return template.render(
-        language_specific=language.get_appendix(bundle=bundle, is_html=is_html),
         function_name=partial(language.get_function_name, is_html=is_html),
         natural_type_name=partial(language.get_natural_type_name, bundle=bundle,
                                   is_html=is_html),

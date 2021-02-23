@@ -86,7 +86,7 @@
 <h3>Example</h3>
 
 <div class="highlighter-rouge language-${language}">
-<pre class="highlight"><code class="tested" tested id="code">\
+<pre class="highlight"><code class="color tested code" id="code">\
 > encode("And now for something completely different.",
          1)
 "And now for something completely different."
