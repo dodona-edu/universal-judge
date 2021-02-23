@@ -50,7 +50,7 @@
     % elif basic == BasicStringTypes.CHAR:
         Char?\
     % elif basic == BasicNumericTypes.INTEGER:
-        Long?\
+        Int?\
     % elif basic == BasicNumericTypes.RATIONAL:
         Double?\
     % elif basic == BasicObjectTypes.MAP:

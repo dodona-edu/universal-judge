@@ -53,7 +53,7 @@
     % elif basic == BasicStringTypes.CHAR:
         ${("Character" if inner else "char")}\
     % elif basic == BasicNumericTypes.INTEGER:
-        ${("Long" if inner else "long")}\
+        ${("Integer" if inner else "int")}\
     % elif basic == BasicNumericTypes.RATIONAL:
         ${("Double" if inner else "double")}\
     % elif basic == BasicObjectTypes.MAP:
