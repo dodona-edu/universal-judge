@@ -776,26 +776,6 @@ class Language:
                         if statement else ""
                     ) + stmt).strip()
 
-    def get_appendix(self, bundle: Bundle, is_html: bool = True) -> str:
-        i18n = bundle.config.natural_language
-        if "appendix" not in self.types:
-            return ""
-        appendix = self.types["appendix"]
-
-        if isinstance(appendix, dict):
-            if i18n in appendix:
-                appendix = appendix[i18n]
-            else:
-                try:
-                    appendix = appendix["default"]
-                except KeyError:
-                    return ""
-
-        appendix = appendix.format(
-            namespace=self.conventionalize_namespace(bundle.plan.namespace))
-
-        return f"<p>{html.escape(appendix)}</p>" if is_html else appendix
-
     def get_prompt(self, is_html: bool = True):
         value = self.types["console"]["prompt"]
         return html.escape(value) if is_html else value

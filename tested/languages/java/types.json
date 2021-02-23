@@ -50,10 +50,6 @@
     "uint32": "Long",
     "int64": "Long"
   },
-  "appendix": {
-    "nl": "De functies moeten gedefinieerd worden als statische functies in de klasse {namespace}.",
-    "default": "The functions must be defined as static functions in the class {namespace}."
-  },
   "natural": {
     "en": {
       "text": "string",

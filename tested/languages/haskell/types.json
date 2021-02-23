@@ -39,10 +39,6 @@
   "tuple": true,
   "inner": {
   },
-  "appendix": {
-    "nl": "Wanneer nodig kunnen de resultaten gewrapt worden in de IO monad. De Maybe monad kan gebruikt worden om null waarden voor te stellen",
-    "default": "When needed the results could be wrapped in the IO monad. The Maybe monad could be used to represent null values"
-  },
   "natural": {
     "en": {
       "text": "string",

@@ -105,31 +105,3 @@ Example Java:
     }
 }
 ```
-
-## Appendix
-
-`appendix` is an optional object and could be a general string or object with internalization strings. One it is an
-object it has one mandatory key `default` which specifies the text that must be used when the custom i18n string is not
-found. The different languages should be specified with their `ISO 639-1 language code` as key.
-
-The appendix strings can use the parameter `{namespace}` for the conventionalized namespace name used in the appendix
-string.
-
-Basic example:
-
-```json
-{
-    "appendix": "The function results may be wrapped in the IO monad"
-}
-```
-
-I18N example:
-
-```json
-{
-    "appendix": {
-        "nl": "De functies moeten gedefinieerd worden als statische functies in de klasse {namespace}.",
-        "default": "The functions must be defined as static functions in the class {namespace}."
-    }
-}
-```
