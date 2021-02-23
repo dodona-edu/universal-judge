@@ -79,7 +79,9 @@
     </li>
 </ul>
 
-${language_specific}
+% if language == 'java':
+<p> The functions must be static declared in the class ${namespace}.</p>
+% endif
 
 <h3>Example</h3>
 

@@ -159,7 +159,8 @@ def create_description_instance(template: str,
         expression=partial(language.get_code, bundle=bundle, is_html=is_html,
                            statement=False),
         prompt=language.get_prompt(is_html=is_html),
-        language=language.get_prompt_language(is_html=is_html)
+        language=language.get_prompt_language(is_html=is_html),
+        namespace=language.conventionalize_namespace(namespace)
     )
 
 
