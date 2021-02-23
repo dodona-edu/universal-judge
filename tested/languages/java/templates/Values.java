@@ -2,6 +2,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -10,12 +11,24 @@ import java.util.stream.Collectors;
  */
 public class Values {
 
-    private static String encodeSequence(Iterable<Object> objects) {
+    private static String encodeSequence(Iterable<?> objects) {
         var results = new ArrayList<String>();
         for (Object obj : objects) {
             results.add(encode(obj));
         }
         return "[" + String.join(", ", results) + "]";
+    }
+
+    public static List<Object> getListFromArray(Object value) {
+        if (value instanceof Object[]) {
+            return Arrays.asList((Object[]) value);
+        }
+        int arrayLength = Array.getLength(value);
+        List<Object> list = new ArrayList<>();
+        for (int i = 0; i < arrayLength; i++) {
+            list.add(Array.get(value, i));
+        }
+        return list;
     }
         
     private static String escape(String string) {
@@ -41,7 +54,8 @@ public class Values {
             data = value.toString();
         } else if (value.getClass().isArray()) {
             type = "array";
-            data = encodeSequence(Arrays.asList((Object[]) value));
+            List<Object> list = new ArrayList<>();
+            data = encodeSequence(getListFromArray(value));
         } else if (value instanceof BigInteger) {
             type = "bigint";
             data = value.toString();
@@ -74,10 +88,10 @@ public class Values {
             data = "\"" + escape(value.toString()) + "\"";
         } else if (value instanceof List) {
             type = "list";
-            data = encodeSequence((Iterable<Object>) value);
+            data = encodeSequence((Iterable<?>) value);
         } else if (value instanceof Set) {
             type = "set";
-            data = encodeSequence((Iterable<Object>) value);
+            data = encodeSequence((Iterable<?>) value);
         } else if (value instanceof Map) {
             type = "map";
             var elements = new ArrayList<String>();
