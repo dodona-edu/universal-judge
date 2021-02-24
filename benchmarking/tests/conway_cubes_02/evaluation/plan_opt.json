@@ -1,0 +1,1665 @@
+{
+  "tabs": [
+    {
+      "name": "Active cubes",
+      "runs": [
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "active_cubes",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "cubes01.txt"
+                      },
+                      {
+                        "type": "integer",
+                        "data": 0.0
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 5.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/cubes01.txt",
+                  "name": "cubes01.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "active_cubes",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "cubes01.txt"
+                      },
+                      {
+                        "type": "integer",
+                        "data": 1.0
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 29.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/cubes01.txt",
+                  "name": "cubes01.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "active_cubes",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "cubes01.txt"
+                      },
+                      {
+                        "type": "integer",
+                        "data": 2.0
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 60.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/cubes01.txt",
+                  "name": "cubes01.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "active_cubes",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "cubes01.txt"
+                      },
+                      {
+                        "type": "integer",
+                        "data": 3.0
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 320.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/cubes01.txt",
+                  "name": "cubes01.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "active_cubes",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "cubes01.txt"
+                      },
+                      {
+                        "type": "integer",
+                        "data": 4.0
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 188.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/cubes01.txt",
+                  "name": "cubes01.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "active_cubes",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "cubes01.txt"
+                      },
+                      {
+                        "type": "integer",
+                        "data": 5.0
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 1056.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/cubes01.txt",
+                  "name": "cubes01.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "active_cubes",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "cubes01.txt"
+                      },
+                      {
+                        "type": "integer",
+                        "data": 6.0
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 848.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/cubes01.txt",
+                  "name": "cubes01.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "active_cubes",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "cubes02.txt"
+                      },
+                      {
+                        "type": "integer",
+                        "data": 5.0
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 320.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/cubes02.txt",
+                  "name": "cubes02.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "active_cubes",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "cubes03.txt"
+                      },
+                      {
+                        "type": "integer",
+                        "data": 4.0
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 172.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/cubes03.txt",
+                  "name": "cubes03.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "active_cubes",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "cubes04.txt"
+                      },
+                      {
+                        "type": "integer",
+                        "data": 4.0
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 200.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/cubes04.txt",
+                  "name": "cubes04.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "active_cubes",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "cubes05.txt"
+                      },
+                      {
+                        "type": "integer",
+                        "data": 4.0
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 120.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/cubes05.txt",
+                  "name": "cubes05.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "active_cubes",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "cubes06.txt"
+                      },
+                      {
+                        "type": "integer",
+                        "data": 5.0
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 1152.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/cubes06.txt",
+                  "name": "cubes06.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "active_cubes",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "cubes07.txt"
+                      },
+                      {
+                        "type": "integer",
+                        "data": 5.0
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 1152.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/cubes07.txt",
+                  "name": "cubes07.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "active_cubes",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "cubes08.txt"
+                      },
+                      {
+                        "type": "integer",
+                        "data": 4.0
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 268.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/cubes08.txt",
+                  "name": "cubes08.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "active_cubes",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "cubes09.txt"
+                      },
+                      {
+                        "type": "integer",
+                        "data": 4.0
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 368.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/cubes09.txt",
+                  "name": "cubes09.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "active_cubes",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "cubes10.txt"
+                      },
+                      {
+                        "type": "integer",
+                        "data": 4.0
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 372.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/cubes10.txt",
+                  "name": "cubes10.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "active_cubes",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "cubes11.txt"
+                      },
+                      {
+                        "type": "integer",
+                        "data": 4.0
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 324.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/cubes11.txt",
+                  "name": "cubes11.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "active_cubes",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "cubes12.txt"
+                      },
+                      {
+                        "type": "integer",
+                        "data": 4.0
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 280.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/cubes12.txt",
+                  "name": "cubes12.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "active_cubes",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "cubes13.txt"
+                      },
+                      {
+                        "type": "integer",
+                        "data": 3.0
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 696.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/cubes13.txt",
+                  "name": "cubes13.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "active_cubes",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "cubes14.txt"
+                      },
+                      {
+                        "type": "integer",
+                        "data": 4.0
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 252.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/cubes14.txt",
+                  "name": "cubes14.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "active_cubes",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "cubes15.txt"
+                      },
+                      {
+                        "type": "integer",
+                        "data": 4.0
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 476.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/cubes15.txt",
+                  "name": "cubes15.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "active_cubes",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "cubes16.txt"
+                      },
+                      {
+                        "type": "integer",
+                        "data": 5.0
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 1848.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/cubes16.txt",
+                  "name": "cubes16.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "active_cubes",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "cubes17.txt"
+                      },
+                      {
+                        "type": "integer",
+                        "data": 5.0
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 2236.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/cubes17.txt",
+                  "name": "cubes17.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "active_cubes",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "cubes18.txt"
+                      },
+                      {
+                        "type": "integer",
+                        "data": 3.0
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 956.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/cubes18.txt",
+                  "name": "cubes18.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "active_cubes",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "cubes19.txt"
+                      },
+                      {
+                        "type": "integer",
+                        "data": 4.0
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 432.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/cubes19.txt",
+                  "name": "cubes19.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "active_cubes",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "cubes20.txt"
+                      },
+                      {
+                        "type": "integer",
+                        "data": 0.0
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 36.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/cubes20.txt",
+                  "name": "cubes20.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "active_cubes",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "cubes20.txt"
+                      },
+                      {
+                        "type": "integer",
+                        "data": 1.0
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 136.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/cubes20.txt",
+                  "name": "cubes20.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "active_cubes",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "cubes20.txt"
+                      },
+                      {
+                        "type": "integer",
+                        "data": 2.0
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 240.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/cubes20.txt",
+                  "name": "cubes20.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "active_cubes",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "cubes20.txt"
+                      },
+                      {
+                        "type": "integer",
+                        "data": 3.0
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 936.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/cubes20.txt",
+                  "name": "cubes20.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "active_cubes",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "cubes20.txt"
+                      },
+                      {
+                        "type": "integer",
+                        "data": 4.0
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 612.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/cubes20.txt",
+                  "name": "cubes20.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "active_cubes",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "cubes20.txt"
+                      },
+                      {
+                        "type": "integer",
+                        "data": 5.0
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 2336.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/cubes20.txt",
+                  "name": "cubes20.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "active_cubes",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "cubes20.txt"
+                      },
+                      {
+                        "type": "integer",
+                        "data": 6.0
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 2552.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/cubes20.txt",
+                  "name": "cubes20.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "hidden": null
+    }
+  ],
+  "namespace": "submission"
+}

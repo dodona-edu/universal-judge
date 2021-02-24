@@ -14,7 +14,7 @@ for root, dirs, files in os.walk(tmp_dir):
     for d in dirs:
         shutil.rmtree(os.path.join(root, d), ignore_errors=True)
 
-results = time_exercises(get_all_benchmark_exercises(), times=1)
+results = time_exercises(get_all_benchmark_exercises()[:1], times=1)
 
 with open("benchmarks.json", "w") as json_fp:
     json.dump(results, fp=json_fp, default=pydantic_encoder, indent=2)

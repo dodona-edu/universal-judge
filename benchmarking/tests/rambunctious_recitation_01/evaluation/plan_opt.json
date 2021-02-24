@@ -1,0 +1,2033 @@
+{
+  "tabs": [
+    {
+      "name": "Recitation",
+      "runs": [
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "recitation",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "0,3,6"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 436.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "recitation",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "1,3,2"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 1.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "recitation",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "2,1,3"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 10.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "recitation",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "1,2,3"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 27.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "recitation",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "2,3,1"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 78.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "recitation",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "3,2,1"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 438.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "recitation",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "3,1,2"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 1836.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "recitation",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "17,12,9,14,18,8"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 297.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "recitation",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "12,14,17,6,0"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 0.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "recitation",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "19,5,0,4,10"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 1024.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "recitation",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "18,9,2,19,10,6"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 1617.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "recitation",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "0,3,13"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 12.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "recitation",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "0,16,9"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 63.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "recitation",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "12,3,14,0,8,4"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 6.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "recitation",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "7,1,8,2"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 429.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "recitation",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "15,7,6,16,4"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 0.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "recitation",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "3,10,17,11,13"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 8.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "recitation",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "6,9,4,13,12,19"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 0.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "recitation",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "8,15,12"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 7.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "recitation",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "18,12,8,19,4,1"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 43.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "recitation",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "0,14,16,1,8"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 0.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "recitation",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "4,0,8,6,10"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 255.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "recitation",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "12,8,19,6,3"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 30.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "recitation",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "6,9,14,12,15"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 4.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "recitation",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "10,7,4,19,3"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 160.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "recitation",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "19,6,16,17,1,0"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 69.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "recitation",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "13,19,12"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 10.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "recitation",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "16,7,14,19,18,3"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 10.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "recitation",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "3,8,1,12,13"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 18.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "recitation",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "19,9,16,0,15"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 7.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "recitation",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "9,7,4,1,8,18"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 0.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "recitation",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "1,10,0,12,8"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 67.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "recitation",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "12,8,7"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 244.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "recitation",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "5,14,1"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 34.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "recitation",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "18,14,5,4"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 14.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "recitation",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "3,10,11,7,8,0"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 0.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "recitation",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "4,9,14,3,15"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 17.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "recitation",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "16,0,5,4,3"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 5.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "recitation",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "7,16,9"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 21.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "recitation",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "4,14,3"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 20.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "recitation",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "15,12,8,17,1"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 388.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "recitation",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "14,10,13,5"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 657.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "recitation",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "9,13,7,14,15"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 45.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "recitation",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "4,15,2,0,16,8"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 27.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "recitation",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "11,14,4,2,19,3"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 829.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "recitation",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "6,4,0,13,17"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 4.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "recitation",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "6,10,4,9,5"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 14.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "recitation",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "0,13,1,10,16"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 5.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "recitation",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "4,3,8"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 0.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "recitation",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "6,3,15,13,1,0"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 700.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            }
+          ]
+        }
+      ],
+      "hidden": null
+    }
+  ],
+  "namespace": "submission"
+}

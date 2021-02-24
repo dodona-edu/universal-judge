@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import List
 
 from tested.configs import DodonaConfig
+from tested.dsl import SchemaParser
 from tested.main import run
 
 tmp_dir = Path("generated")
@@ -46,7 +47,7 @@ class BenchmarkResults:
 def get_all_benchmark_exercises() -> List[BenchmarkExercise]:
     benchmark_dir = Path(__file__).parent / 'tests'
     exercises = []
-    for p in benchmark_dir.iterdir():
+    for p in sorted(benchmark_dir.iterdir()):
         evaluation_dir = p / 'evaluation'
         solution_dir = p / 'solution'
         if not evaluation_dir.exists() or not solution_dir.exists() or \
@@ -72,6 +73,7 @@ def get_all_benchmark_exercises() -> List[BenchmarkExercise]:
 def get_config(exercise: BenchmarkExercise,
                parallel: bool = True, ) -> DodonaConfig:
     exercise_dir = Path(__file__).parent / 'tests' / exercise.name
+    workdir = exercise_dir / 'workdir'
     exercise_tmp_dir = get_temp_dir(
         f"{exercise.name}_{exercise.language}_"
         f"{exercise.solution.replace('.', '_').replace(' ', '_')}_"
@@ -80,6 +82,8 @@ def get_config(exercise: BenchmarkExercise,
     if exercise_tmp_dir.exists():
         shutil.rmtree(exercise_tmp_dir, ignore_errors=True)
     exercise_tmp_dir.mkdir(parents=True)
+    if workdir.exists() and workdir.is_dir():
+        shutil.copytree(workdir, exercise_tmp_dir, dirs_exist_ok=True)
     return DodonaConfig(**{
         "memory_limit":         536870912,  # 500 MB
         "time_limit":           120,  # Two minutes

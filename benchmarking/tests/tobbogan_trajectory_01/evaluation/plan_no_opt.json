@@ -1,0 +1,1391 @@
+{
+  "tabs": [
+    {
+      "name": "Trees",
+      "runs": [
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "count_trees",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "slope01.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 7.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/slope01.txt",
+                  "name": "slope01.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "count_trees",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "slope02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 11.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/slope02.txt",
+                  "name": "slope02.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "count_trees",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "slope03.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 4.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/slope03.txt",
+                  "name": "slope03.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "count_trees",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "slope04.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 4.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/slope04.txt",
+                  "name": "slope04.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "count_trees",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "slope05.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 8.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/slope05.txt",
+                  "name": "slope05.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "count_trees",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "slope06.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 5.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/slope06.txt",
+                  "name": "slope06.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "count_trees",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "slope07.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 24.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/slope07.txt",
+                  "name": "slope07.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "count_trees",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "slope08.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 3.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/slope08.txt",
+                  "name": "slope08.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "count_trees",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "slope09.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 27.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/slope09.txt",
+                  "name": "slope09.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "count_trees",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "slope10.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 2.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/slope10.txt",
+                  "name": "slope10.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "count_trees",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "slope11.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 12.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/slope11.txt",
+                  "name": "slope11.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "count_trees",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "slope12.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 6.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/slope12.txt",
+                  "name": "slope12.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "count_trees",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "slope13.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 3.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/slope13.txt",
+                  "name": "slope13.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "count_trees",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "slope14.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 6.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/slope14.txt",
+                  "name": "slope14.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "count_trees",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "slope15.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 17.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/slope15.txt",
+                  "name": "slope15.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "count_trees",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "slope16.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 7.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/slope16.txt",
+                  "name": "slope16.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "count_trees",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "slope17.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 2.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/slope17.txt",
+                  "name": "slope17.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "count_trees",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "slope18.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 7.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/slope18.txt",
+                  "name": "slope18.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "count_trees",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "slope19.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 7.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/slope19.txt",
+                  "name": "slope19.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "count_trees",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "slope20.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 259.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/slope20.txt",
+                  "name": "slope20.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "hidden": null
+    }
+  ],
+  "namespace": "submission"
+}
