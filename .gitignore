@@ -75,7 +75,7 @@ ipython_config.py
 .python-version
 
 # workdir for judge
-workdir/
+/workdir/
 generated/
 venv/
 venv-*/

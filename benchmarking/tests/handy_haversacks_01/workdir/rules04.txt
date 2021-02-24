@@ -1,0 +1,19 @@
+dotted gray bags contain no other bags.
+bright red bags contain no other bags.
+striped crimson bags contain 3 dark black bags, 3 dim crimson bags.
+bright olive bags contain 4 plaid salmon bags.
+dark white bags contain no other bags.
+plaid teal bags contain 1 dark black bag.
+dark black bags contain 1 striped olive bag, 1 dotted gray bag.
+wavy beige bags contain 5 dotted gray bags, 4 shiny gold bags.
+plaid salmon bags contain no other bags.
+striped olive bags contain no other bags.
+dull coral bags contain 5 bright red bags.
+drab olive bags contain 5 dotted gray bags.
+faded beige bags contain no other bags.
+dotted salmon bags contain 3 dark gold bags, 2 drab olive bags, 1 bright olive bag.
+dark gold bags contain 4 faded beige bags, 2 plaid salmon bags, 4 dotted gray bags.
+dim crimson bags contain 3 plaid salmon bags, 3 shiny gold bags.
+clear olive bags contain 4 bright olive bags, 4 dark black bags, 5 drab olive bags.
+bright gray bags contain 5 dull coral bags, 2 drab olive bags.
+shiny gold bags contain no other bags.

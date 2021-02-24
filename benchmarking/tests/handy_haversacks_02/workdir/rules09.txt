@@ -1,0 +1,9 @@
+dark green bags contain no other bags.
+shiny gold bags contain 4 plaid magenta bags, 4 striped plum bags.
+muted maroon bags contain no other bags.
+muted tan bags contain no other bags.
+plaid magenta bags contain 5 vibrant silver bags.
+plaid coral bags contain no other bags.
+striped plum bags contain 1 vibrant silver bag.
+vibrant silver bags contain 1 muted tan bag, 2 plaid coral bags, 4 wavy chartreuse bags.
+wavy chartreuse bags contain no other bags.

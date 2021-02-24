@@ -1,0 +1,20 @@
+pale tan bags contain 5 clear tomato bags, 3 muted black bags, 3 shiny gold bags.
+dark orange bags contain 4 muted gold bags.
+shiny salmon bags contain 3 pale orange bags, 1 pale tan bag.
+clear lime bags contain 1 light tomato bag, 4 clear tomato bags, 5 shiny gold bags.
+muted gold bags contain 2 mirrored lavender bags, 1 shiny gold bag.
+muted gray bags contain no other bags.
+mirrored lavender bags contain no other bags.
+striped brown bags contain 5 muted gold bags, 2 clear lime bags, 2 bright aqua bags.
+bright black bags contain 3 muted gold bags, 1 bright aqua bag, 1 pale tan bag.
+clear tomato bags contain no other bags.
+muted black bags contain no other bags.
+posh white bags contain no other bags.
+pale orange bags contain 5 muted black bags, 2 shiny gold bags, 4 light tomato bags.
+shiny gold bags contain no other bags.
+wavy tan bags contain 3 muted gold bags.
+posh olive bags contain 4 pale orange bags.
+dim indigo bags contain no other bags.
+bright aqua bags contain 4 dim indigo bags, 1 light tomato bag, 2 muted black bags.
+light tomato bags contain no other bags.
+dark green bags contain 3 muted gold bags, 4 clear lime bags.
