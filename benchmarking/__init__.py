@@ -1,4 +1,5 @@
 import os
+import shutil
 import sys
 import time
 from dataclasses import dataclass
@@ -9,6 +10,16 @@ from tested.configs import DodonaConfig
 from tested.main import run
 
 tmp_dir = Path("generated")
+debug = False
+
+extension_name = {
+    ".c":    "c",
+    ".hs":   "haskell",
+    ".java": "java",
+    ".js":   "javascript",
+    ".kt":   "kotlin",
+    ".py":   "python"
+}
 
 
 @dataclass
@@ -32,111 +43,42 @@ class BenchmarkResults:
     results: List[BenchmarkResult]
 
 
-all_exercises = [
-    BenchmarkExercise(
-        name="combo_breaker",
-        plan="plan_opt.json",
-        solution="solution.py"
-    ),
-    BenchmarkExercise(
-        name="combo_breaker",
-        plan="plan_opt.json",
-        solution="solution.old.py"
-    ),
-    BenchmarkExercise(
-        name="combo_breaker",
-        plan="plan_no_opt.json",
-        solution="solution.py"
-    ),
-    BenchmarkExercise(
-        name="combo_breaker",
-        plan="plan_no_opt.json",
-        solution="solution.old.py"
-    ),
-    BenchmarkExercise(
-        name="password_policy",
-        language="c",
-        plan="plan_opt.json",
-        solution="solution.c"
-    ),
-    BenchmarkExercise(
-        name="password_policy",
-        language="c",
-        plan="plan_no_opt.json",
-        solution="solution.c"
-    ),
-    BenchmarkExercise(
-        name="password_policy",
-        language="python",
-        plan="plan_opt.json",
-        solution="solution.py"
-    ),
-    BenchmarkExercise(
-        name="password_policy",
-        language="python",
-        plan="plan_no_opt.json",
-        solution="solution.py"
-    ),
-    BenchmarkExercise(
-        name="password_policy",
-        language="haskell",
-        plan="plan_opt.json",
-        solution="solution.hs"
-    ),
-    BenchmarkExercise(
-        name="password_policy",
-        language="haskell",
-        plan="plan_no_opt.json",
-        solution="solution.hs"
-    ),
-    BenchmarkExercise(
-        name="password_policy",
-        language="java",
-        plan="plan_opt.json",
-        solution="solution.java"
-    ),
-    BenchmarkExercise(
-        name="password_policy",
-        language="java",
-        plan="plan_no_opt.json",
-        solution="solution.java"
-    ),
-    BenchmarkExercise(
-        name="password_policy",
-        language="kotlin",
-        plan="plan_opt.json",
-        solution="solution.kt"
-    ),
-    BenchmarkExercise(
-        name="password_policy",
-        language="kotlin",
-        plan="plan_no_opt.json",
-        solution="solution.kt"
-    ),
-    BenchmarkExercise(
-        name="password_policy",
-        language="javascript",
-        plan="plan_opt.json",
-        solution="solution.js"
-    ),
-    BenchmarkExercise(
-        name="password_policy",
-        language="javascript",
-        plan="plan_no_opt.json",
-        solution="solution.js"
-    )
-]
+def get_all_benchmark_exercises() -> List[BenchmarkExercise]:
+    benchmark_dir = Path(__file__).parent / 'tests'
+    exercises = []
+    for p in benchmark_dir.iterdir():
+        evaluation_dir = p / 'evaluation'
+        solution_dir = p / 'solution'
+        if not evaluation_dir.exists() or not solution_dir.exists() or \
+                not evaluation_dir.is_dir() or not solution_dir.is_dir():
+            continue
+        evaluations = list(filter(lambda x: x.suffix == ".json",
+                                  evaluation_dir.iterdir()))
+        solutions = list(filter(lambda x: x.suffix in extension_name,
+                                solution_dir.iterdir()))
+        for solution in solutions:
+            for evaluation in evaluations:
+                exercises.append(BenchmarkExercise(
+                    name=p.name,
+                    plan=evaluation.name,
+                    solution=solution.name,
+                    language=extension_name[solution.suffix]
+                ))
+                if debug:
+                    print(exercises[-1])
+    return exercises
 
 
 def get_config(exercise: BenchmarkExercise,
-               index: int,
                parallel: bool = True, ) -> DodonaConfig:
     exercise_dir = Path(__file__).parent / 'tests' / exercise.name
     exercise_tmp_dir = get_temp_dir(
         f"{exercise.name}_{exercise.language}_"
-        f"{exercise.solution.replace('.', '_')}_"
-        f"{exercise.plan.replace('.', '_')}_{index}"
+        f"{exercise.solution.replace('.', '_').replace(' ', '_')}_"
+        f"{exercise.plan.replace('.', '_').replace(' ', '_')}"
     )
+    if exercise_tmp_dir.exists():
+        shutil.rmtree(exercise_tmp_dir, ignore_errors=True)
     exercise_tmp_dir.mkdir(parents=True)
     return DodonaConfig(**{
         "memory_limit":         536870912,  # 500 MB
@@ -165,10 +107,12 @@ def get_temp_dir(exercise_name: str) -> Path:
 def time_exercise(exercise: BenchmarkExercise,
                   times: int = 10) -> BenchmarkResult:
     def timing() -> float:
-        config = get_config(exercise, i)
+        config = get_config(exercise)
         start = time.perf_counter()
-        run(config, open(os.devnull, "w"))
-        # run(config, sys.stdout)
+        if not debug:
+            run(config, open(os.devnull, "w"))
+        else:
+            run(config, sys.stdout)
         end = time.perf_counter()
         return end - start
 
@@ -188,6 +132,9 @@ def time_exercise(exercise: BenchmarkExercise,
 
 def time_exercises(exercises: List[BenchmarkExercise],
                    times: int = 10) -> BenchmarkResults:
+    print("Start warmup")
+    time_exercise(exercises[0], 1)
+    print("Finished warmup")
     len_exercise = len(exercises)
     exercise_results = []
     for index, exercise in enumerate(exercises, start=1):
