@@ -66,8 +66,8 @@ def test_template_function_name(lang: str, expected: str):
     ("kotlin", '("sequence", "integer")', "List<Int>"), ("kotlin", '("array", ("set", "integer"))', "Array<Set<Int>>"),
     # JavaScript
     ("javascript", "'integer'", "number"), ("javascript", "'rational'", "number"), ("javascript", "'text'", "string"),
-    ("javascript", '("sequence", "integer")', "list<number>"),
-    ("javascript", '("array", ("set", "integer"))', "list<set<number>>"),
+    ("javascript", '("sequence", "integer")', "array<number>"),
+    ("javascript", '("array", ("set", "integer"))', "array<set<number>>"),
     # Haskell
     ("haskell", "'integer'", "Int"), ("haskell", "'rational'", "Double"), ("haskell", "'text'", "String"),
     ("haskell", '("sequence", "integer")', "[Int]"),
