@@ -88,9 +88,9 @@ def _prepare_template(template: str, is_html: bool = True) -> str:
 
         regex_code, body_index = re.compile(
             fr"((<code{re_tag}) (class=\"([^\"]* )*tested( [^\"]*)*\")("
-            fr"{re_tag}>)(\s*\\?))((?!</?code>).*?)(</code>)",
+            fr"{re_tag}>)(\s*\\?))((?!</?code{re_tag}>).*?)(</code>)",
             re.MULTILINE | re.DOTALL
-        ), -2
+        ), -3
     else:
         regex_code, body_index = re.compile(
             r"^(```tested\r?\n)(((?!```).*\r?\n)*)(```)$", re.MULTILINE), 1
