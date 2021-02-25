@@ -167,7 +167,10 @@ def create_description_instance(template: str,
 
 if __name__ == "__main__":
     parser = ArgumentParser(
-        description="Translate description for language"
+        description="Translate description for language",
+        usage='%(prog)s [-h] [-d TEMPLATE] [-o INSTANCE] [-l PROGRAMMING_LANGUAGE] '
+              '[-i NATURAL_LANGUAGE] [-n NAMESPACE] [(-M | -H)] '
+              '[template [instance]]'
     )
     parser.add_argument('-d', '--description', type=FileType('r'),
                         help="Description template", default="-")
@@ -186,7 +189,21 @@ if __name__ == "__main__":
     type_group.add_argument('-H', '--html', action='store_true',
                             help="Generate html (default)")
 
+    parser.add_argument('template', metavar='template', nargs='?', type=FileType('r'),
+                        help="Where the template should be read from, override "
+                             "option when given.")
+    parser.add_argument('instance', metavar='instance', nargs='?', type=FileType('w'),
+                        help="Where the translate instance should be written to, "
+                             "override option when given.")
+
     parser = parser.parse_args()
+    if parser.template is not None:
+        smart_close(parser.description)
+        parser.description = parser.template
+        if parser.instance is not None:
+            smart_close(parser.output)
+            parser.output = parser.instance
+
     with smart_close(parser.description) as template_fd:
         template_str = template_fd.read()
 
