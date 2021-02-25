@@ -12,7 +12,7 @@
   "char": "string",
   "text": "string",
   "boolean": "boolean",
-  "sequence": "list",
+  "sequence": "array",
   "set": "set",
   "map": "map",
   "nothing": "undefined",
@@ -29,8 +29,8 @@
   "double_precision": "number",
   "double_extended": "number",
   "fixed_precision": "number",
-  "array": "list",
-  "list": "list",
+  "array": "array",
+  "list": "array",
   "inner": {
   },
   "natural": {
