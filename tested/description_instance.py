@@ -10,6 +10,7 @@ from typing import List
 from mako.template import Template
 
 from tested.configs import Bundle, DodonaConfig
+from tested.languages.description_generator import TYPE_ARG, TYPE_CONFIG_NAME
 from tested.testplan import Plan
 from tested.utils import smart_close
 from tested.languages import get_language, language_exists
@@ -148,18 +149,28 @@ def create_description_instance(template: str,
         plan=Plan(namespace=namespace)
     )
 
+    description_generator = language.get_description_generator()
+
+    # Partial function doesn't work because of bundle must be given,
+    # but custom_type_map not
+    def get_type_name(args: TYPE_ARG,
+                      custom_type_map: TYPE_CONFIG_NAME = None) -> str:
+        return description_generator.get_type_name(args, bundle, custom_type_map,
+                                                   is_html=is_html)
+
     return template.render(
-        function_name=partial(language.get_function_name, is_html=is_html),
-        natural_type_name=partial(language.get_natural_type_name, bundle=bundle,
-                                  is_html=is_html),
-        type_name=partial(language.get_type_name, bundle=bundle, is_html=is_html),
-        statement=partial(language.get_code, bundle=bundle, is_html=is_html,
-                          statement=True),
-        expression=partial(language.get_code, bundle=bundle, is_html=is_html,
-                           statement=False),
-        prompt=language.get_prompt(is_html=is_html),
-        language_html=language.get_prompt_language(is_html=True),
-        language=language.get_prompt_language(is_html=False),
+        function_name=partial(description_generator.get_function_name,
+                              is_html=is_html),
+        natural_type_name=partial(description_generator.get_natural_type_name,
+                                  bundle=bundle, is_html=is_html),
+        type_name=get_type_name,
+        statement=partial(description_generator.get_code, bundle=bundle,
+                          is_html=is_html, statement=True),
+        expression=partial(description_generator.get_code, bundle=bundle,
+                           is_html=is_html, statement=False),
+        prompt=description_generator.get_prompt(is_html=is_html),
+        language_html=description_generator.get_prompt_language(is_html=True),
+        language=description_generator.get_prompt_language(is_html=False),
         namespace_html=html.escape(language.conventionalize_namespace(namespace)),
         namespace=language.conventionalize_namespace(namespace)
     )
@@ -189,10 +200,12 @@ if __name__ == "__main__":
     type_group.add_argument('-H', '--html', action='store_true',
                             help="Generate html (default)")
 
-    parser.add_argument('template', metavar='template', nargs='?', type=FileType('r'),
+    parser.add_argument('template', metavar='template', nargs='?',
+                        type=FileType('r'),
                         help="Where the template should be read from, override "
                              "option when given.")
-    parser.add_argument('instance', metavar='instance', nargs='?', type=FileType('w'),
+    parser.add_argument('instance', metavar='instance', nargs='?',
+                        type=FileType('w'),
                         help="Where the translate instance should be written to, "
                              "override option when given.")
 

@@ -29,15 +29,12 @@ from collections import defaultdict
 from dataclasses import dataclass
 from enum import Enum, auto
 from pathlib import Path
-from pygments import highlight
-from pygments.formatters.html import HtmlFormatter
-from pygments.lexers import get_lexer_by_name
 from typing import List, Tuple, Mapping, Union, Callable, Set, Dict, Optional, Any
 
+from .description_generator import DescriptionGenerator
 from ..configs import Bundle
 from ..datatypes import AllTypes
 from ..dodona import AnnotateCode, Message, Status, ExtendedMessage, Permission
-from ..dsl import Parser
 from ..features import Construct
 from ..internationalization import get_i18n_string
 from ..serialisation import ExceptionValue
@@ -54,12 +51,6 @@ _case_mapping = {
     "pascal_case": pascalize,
     "snake_case":  snake_case
 }
-
-TYPE_ARG = Union[
-    str, Tuple[str, Union[List['TYPE_ARG'], 'TYPE_ARG']]
-]
-
-_html_formatter = HtmlFormatter()
 
 
 @dataclass
@@ -214,10 +205,9 @@ class Language:
     is the case, it is recommended to modify the value in the config.json file
     instead of overriding the function in a subclass.
     """
-    __slots__ = ["options", "types", "_lexer"]
+    __slots__ = ["options", "config_dir"]
 
-    def __init__(self, config_file: str = "config.json",
-                 types_file: str = "types.json"):
+    def __init__(self, config_file: str = "config.json"):
         """
         Initialise a language configuration. Subclasses can modify the name of the
         toml configuration file. By default, a "config.json" file is expected in the
@@ -226,20 +216,10 @@ class Language:
         :param config_file: The name of the configuration file. Relative to the
                             directory in which the configuration class is.
         """
-        config_dir = Path(sys.modules[self.__module__].__file__).parent
-        path_to_config = (config_dir / config_file)
+        self.config_dir = Path(sys.modules[self.__module__].__file__).parent
+        path_to_config = (self.config_dir / config_file)
         with open(path_to_config, "r") as f:
             self.options = json.load(f)
-
-        path_to_types = (config_dir / types_file)
-        if not os.path.exists(path_to_types):
-            path_to_types = (config_dir.parent / self.inherits_from() / types_file)
-
-        with open(path_to_types, "r") as f:
-            self.types = json.load(f)
-
-        self._lexer = get_lexer_by_name(self.types["console"]["name"],
-                                        stripall=True)
 
     def compilation(self, config: Config, files: List[str]) -> CallbackResult:
         """
@@ -658,128 +638,5 @@ class Language:
         """
         return message
 
-    def get_natural_type_name(self, type_name: str, bundle: Bundle,
-                              is_html: bool = True) -> str:
-        value = self.types["natural"][bundle.config.natural_language][type_name]
-        return html.escape(value) if is_html else value
-
-    def get_type_name(self,
-                      args: TYPE_ARG,
-                      custom_type_map: Optional[Dict[
-                          str, Dict[str, Union[str, Dict[str, str]]]
-                      ]] = None,
-                      bundle: Optional[Bundle] = None,
-                      is_inner: bool = False,
-                      is_html: bool = True,
-                      recursive_call: bool = False) -> str:
-        if bundle is None:
-            raise ValueError("Bundle must be specified")
-
-        programming_language = bundle.config.programming_language
-
-        def _get_type(arg: str) -> Union[str, bool]:
-            try:
-                return custom_type_map[programming_language][args]
-            except KeyError:
-                return self.types[arg]
-
-        def _get_type_or_conventionalize(arg: str) -> str:
-            try:
-                return _get_type(arg)
-            except KeyError:
-                return self.conventionalize_namespace(arg)
-
-        def _get_type_name(arg: str) -> Union[str, bool]:
-            if not is_inner:
-                return _get_type_or_conventionalize(arg)
-            else:
-                try:
-                    return custom_type_map[programming_language]['inner'][arg]
-                except KeyError:
-                    try:
-                        return self.types['inner'][arg]
-                    except KeyError:
-                        return _get_type_or_conventionalize(arg)
-
-        if custom_type_map is None:
-            custom_type_map = dict()
-
-        if isinstance(args, str):
-            name = _get_type_name(args)
-            type_name = name if isinstance(name, str) else args
-        else:
-            main_type = _get_type_name(args[0])
-            if isinstance(args[1], str):
-                types = [self.get_type_name(args[1], custom_type_map, bundle,
-                                            bool(main_type), is_html, True)]
-            elif isinstance(args[1], list):
-                types = [
-                    self.get_type_name(arg, custom_type_map, bundle,
-                                       bool(main_type), is_html, True)
-                    for arg in args[1]
-                ]
-            else:
-                types = [self.get_type_name(args[1], custom_type_map, bundle,
-                                            bool(main_type), is_html, True)]
-            if isinstance(main_type, str):
-                type_name = f"{self.types[args[0]]}" \
-                            f"{self.types['brackets']['open']}" \
-                            f"{', '.join(types)}{self.types['brackets']['close']}"
-            elif main_type:
-                type_name = f"{self.types['brackets'][args[0]]['open']}" \
-                            f"{', '.join(types)}" \
-                            f"{self.types['brackets'][args[0]]['close']}"
-            elif len(types) == 1:
-                type_name = f"{types[0]}{self.types['brackets'][args[0]]['open']}" \
-                            f"{self.types['brackets'][args[0]]['close']}"
-            else:
-                raise ValueError(f"Type {main_type} expects only one subtype")
-        if is_html and not recursive_call:
-            return f"<code>{html.escape(type_name)}</code>"
-        return f"`{type_name}`" if not recursive_call else type_name
-
-    def get_function_name(self, name: str, is_html: bool = True) -> str:
-        function_name = self.conventionalize_function(name)
-        if is_html:
-            return f"<code>{html.escape(function_name)}</code>"
-        return f"`{function_name}`"
-
-    def get_code(self, stmt: str, bundle: Bundle, statement: bool = False,
-                 is_html: bool = True) -> str:
-        from .generator import convert_statement
-        parser = Parser()
-        if statement:
-            stmt = parser.parse_statement(stmt)
-        else:
-            stmt = parser.parse_value(stmt)
-
-        required = stmt.get_used_features()
-        available = self.supported_constructs()
-
-        if not (required.constructs <= available):
-            logger.warning("This statement is not compatible!")
-            logger.warning(f"Required constructs are {required.constructs}.")
-            logger.warning(f"The language supports {available}.")
-            missing = (required.constructs ^ available) & required.constructs
-            logger.warning(f"Missing features are: {missing}.")
-            raise Exception("Missing features")
-
-        stmt = convert_statement(bundle, stmt)
-        stmt = self.cleanup_description(bundle.plan.namespace, stmt)
-        if is_html:
-            prompt = html.escape(self.types['console']['prompt']).strip()
-            stmt = highlight(stmt, self._lexer, _html_formatter)[41:-13].strip()
-            return (prompt + ' ' if statement else "") + stmt
-        else:
-            return ((
-                        self.types['console']['prompt'].strip() + ' '
-                        if statement else ""
-                    ) + stmt).strip()
-
-    def get_prompt(self, is_html: bool = True):
-        value = self.types["console"]["prompt"]
-        return html.escape(value) if is_html else value
-
-    def get_prompt_language(self, is_html: bool = True):
-        value = self.types["console"]["name"]
-        return html.escape(value) if is_html else value
+    def get_description_generator(self) -> DescriptionGenerator:
+        return DescriptionGenerator(self, self.config_dir)
