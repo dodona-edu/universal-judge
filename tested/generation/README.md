@@ -18,7 +18,7 @@ This file contains 4 parts: _brackets_, _console_, _appendix_ and _datatype name
 For each TESTed datatype supported by your programming language you should define the type name at the root level, this
 name must be a string for single datatypes.
 
-For collection datatypes this can be a name or a boolean, which than specifies how the bracket must be place for the
+For collection datatypes this can be a name or a boolean, which then specifies how the bracket must be place for the
 collection type.
 
 - `false` means the brackets should be after the inner datatype
