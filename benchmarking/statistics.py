@@ -1,9 +1,9 @@
 from collections import defaultdict
-from typing import Tuple, Dict, Any, List
+from typing import Tuple, Dict, List
 
 from pydantic import BaseModel
 
-from benchmarking import BenchmarkResults, BenchmarkResult, BenchmarkExercise
+from benchmarking import BenchmarkResults, BenchmarkResult
 
 
 class _BenchmarkResultsModel(BaseModel):
