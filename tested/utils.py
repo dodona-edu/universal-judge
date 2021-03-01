@@ -296,7 +296,7 @@ def safe_get(l: List[T], index: int) -> Optional[T]:
 
 def sorted_no_duplicates(iterable: Iterable[T],
                          key: Optional[Callable[[T], K]] = None,
-                         recursive_key: Optional[Callable[[T], K]] = None
+                         recursive_key: Optional[Callable[[K], K]] = None
                          ) -> List[T]:
     # Identity key function
     def identity(x: T) -> T:
