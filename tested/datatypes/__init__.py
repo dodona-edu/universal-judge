@@ -18,7 +18,7 @@ from .basic import *
 from ..utils import get_args
 
 NumericTypes = Union[BasicNumericTypes, AdvancedNumericTypes]
-StringTypes = Union[BasicStringTypes]
+StringTypes = Union[BasicStringTypes, AdvancedStringTypes]
 BooleanTypes = Union[BasicBooleanTypes]
 NothingTypes = Union[BasicNothingTypes]
 SequenceTypes = Union[BasicSequenceTypes, AdvancedSequenceTypes]

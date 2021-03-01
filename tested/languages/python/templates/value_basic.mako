@@ -3,7 +3,7 @@
 <%page args="value" />\
 % if value.type in (BasicNumericTypes.INTEGER, BasicNumericTypes.RATIONAL):
     ${value.data}\
-% elif value.type in (BasicStringTypes.TEXT, BasicStringTypes.CHAR):
+% elif value.type == BasicStringTypes.TEXT:
     ${repr(value.data).replace("\\\\", "\\")}\
 % elif value.type == BasicBooleanTypes.BOOLEAN:
     ${str(value.data)}\
