@@ -3,7 +3,7 @@ import math
 import pytest
 
 from tested.datatypes import BasicNothingTypes, BasicNumericTypes, AdvancedNumericTypes, BasicBooleanTypes, \
-    BasicStringTypes, BasicSequenceTypes, AdvancedSequenceTypes, ObjectTypes
+    BasicStringTypes, BasicSequenceTypes, AdvancedSequenceTypes, ObjectTypes, AdvancedStringTypes
 from tested.dsl import Parser, ParseError
 from tested.serialisation import Assignment, FunctionCall, FunctionType, VariableType, SequenceType, Identifier, \
     StringType, ObjectKeyValuePair, ObjectType
@@ -157,7 +157,7 @@ def test_parse_value_text_cast():
 
 def test_parse_value_char():
     parsed = parser.parse_value('"c" :: char')
-    assert parsed.type == BasicStringTypes.CHAR
+    assert parsed.type == AdvancedStringTypes.CHAR
     assert parsed.data == "c"
 
 
@@ -175,7 +175,7 @@ def test_parse_value_set():
     parsed = parser.parse_value('{"d" :: char, 8 :: uint8}')
     assert parsed.type == BasicSequenceTypes.SET
     assert len(parsed.data) == 2
-    assert parsed.data[0].type == BasicStringTypes.CHAR
+    assert parsed.data[0].type == AdvancedStringTypes.CHAR
     assert parsed.data[0].data == "d"
     assert parsed.data[1].type == AdvancedNumericTypes.U_INT_8
     assert parsed.data[1].data == 8

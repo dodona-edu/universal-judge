@@ -24,7 +24,7 @@
 
     "integer": "supported",
     "rational": "supported",
-    "char": "unsupported",
+    "char": "reduced",
     "text": "supported",
     "boolean": "supported",
     "sequence": "supported",

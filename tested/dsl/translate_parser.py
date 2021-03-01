@@ -502,7 +502,7 @@ class SchemaParser:
         else:
             return ObjectType(type=BasicObjectTypes.MAP, data=list(
                 ObjectKeyValuePair(
-                    key=StringType(type=StringTypes.TEXT, data=key),
+                    key=StringType(type=BasicStringTypes.TEXT, data=key),
                     value=self._translate_value(val)
                 )
                 for key, val in value.items()

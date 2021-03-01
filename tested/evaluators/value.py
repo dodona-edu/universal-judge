@@ -6,15 +6,17 @@ from typing import Union, Tuple, Optional
 
 from . import EvaluationResult, EvaluatorConfig
 from ..configs import Bundle
-from ..datatypes import AdvancedTypes, BasicTypes, BasicStringTypes
+from ..datatypes import AdvancedTypes, BasicTypes, BasicStringTypes, SimpleTypes, \
+    BasicSequenceTypes
 from ..dodona import ExtendedMessage, Permission, StatusMessage, Status
 from ..internationalization import get_i18n_string
 from ..languages.config import TypeSupport
 from ..languages.generator import convert_statement
 from ..serialisation import (Value, parse_value, to_python_comparable,
-                             as_basic_type, StringType)
+                             as_basic_type, StringType, SequenceType, ObjectType,
+                             ObjectKeyValuePair)
 from ..testplan import ValueOutputChannel, OutputChannel, TextOutputChannel
-from ..utils import Either, get_args
+from ..utils import Either, get_args, sorted_no_duplicates
 
 logger = logging.getLogger(__name__)
 
@@ -79,6 +81,55 @@ def get_values(bundle: Bundle, output_channel: ValueOutputChannel, actual) \
 
 
 def _check_type(
+        bundle: Bundle, expected: Value, actual: Value
+) -> Tuple[bool, Value]:
+    valid, value = _check_data_type(bundle, expected, actual)
+    if not valid:
+        return False, value
+    elif isinstance(value.type, get_args(SimpleTypes)):
+        return True, value
+    elif isinstance(value, SequenceType):
+        if as_basic_type(value).type == BasicSequenceTypes.SET:
+            actual_object = sorted_no_duplicates(
+                value.data, recursive_key=lambda x: x.data
+            )
+            expected_object = sorted_no_duplicates(
+                expected.data, recursive_key=lambda x: x.data
+            )
+        else:
+            actual_object, expected_object = value.data, expected.data
+        data = []
+        for actual_element, expected_element in zip(actual_object,
+                                                    expected_object):
+            element_valid, element_value = _check_type(bundle, expected_element,
+                                                       actual_element)
+            valid = valid and element_valid
+            data.append(element_value)
+        value.data = data
+        return valid, value
+    else:
+        assert isinstance(value, ObjectType)
+        data = []
+        actual_object = sorted_no_duplicates(
+            value.data, key=lambda x: x.key, recursive_key=lambda x: x.data
+        )
+        expected_object = sorted_no_duplicates(
+            expected.data, key=lambda x: x.key, recursive_key=lambda x: x.data
+        )
+
+        for actual_element, expected_element in zip(actual_object, expected_object):
+            actual_key, actual_value = actual_element.key, actual_element.value
+            expected_key, expected_value = actual_element.key, actual_element.value
+            key_valid, key_value = _check_type(bundle, expected_key, actual_key)
+            value_valid, value_value = _check_type(bundle, expected_value,
+                                                   actual_value)
+            valid = valid and key_valid and value_valid
+            data.append(ObjectKeyValuePair(key=key_value, value=value_value))
+        value.data = data
+        return valid, value
+
+
+def _check_data_type(
         bundle: Bundle, expected: Value, actual: Value
 ) -> Tuple[bool, Value]:
     """

@@ -7,7 +7,7 @@
 %>\
 % if value.type in (BasicNumericTypes.INTEGER, BasicNumericTypes.RATIONAL):
     ${value.data}\
-% elif value.type in (BasicStringTypes.TEXT, BasicStringTypes.CHAR):
+% elif value.type == BasicStringTypes.TEXT:
     "${escape_string(value.data)}"\
 % elif value.type == BasicBooleanTypes.BOOLEAN:
     ## JavaScript Boolean literals (true, false) are lowercase (pascal case in Python)

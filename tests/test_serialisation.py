@@ -15,7 +15,7 @@ import sys
 from tested.configs import create_bundle, Bundle
 from tested.datatypes import BasicNumericTypes, BasicStringTypes, BasicBooleanTypes, \
     BasicSequenceTypes, \
-    BasicObjectTypes, BasicNothingTypes
+    BasicObjectTypes, BasicNothingTypes, AdvancedStringTypes
 from tested.judge.compilation import run_compilation
 from tested.judge.execution import execute_file
 from tested.judge.utils import copy_from_paths_to_path, BaseExecutionResult
@@ -83,8 +83,6 @@ def test_basic_types(language, tmp_path: Path, pytestconfig):
         types.append(NumberType(type=BasicNumericTypes.INTEGER, data=5))
     if type_map[BasicNumericTypes.RATIONAL] != TypeSupport.UNSUPPORTED:
         types.append(NumberType(type=BasicNumericTypes.RATIONAL, data=5.5))
-    if type_map[BasicStringTypes.CHAR] != TypeSupport.UNSUPPORTED:
-        types.append(StringType(type=BasicStringTypes.CHAR, data="c"))
     if type_map[BasicStringTypes.TEXT] != TypeSupport.UNSUPPORTED:
         types.append(StringType(type=BasicStringTypes.TEXT, data="hallo"))
     if type_map[BasicBooleanTypes.BOOLEAN] != TypeSupport.UNSUPPORTED:
@@ -140,7 +138,7 @@ def test_java_escape(tmp_path: Path, pytestconfig):
     plan = Plan()
     bundle = create_bundle(conf, sys.stdout, plan)
     assert_serialisation(bundle, tmp_path, StringType(type=BasicStringTypes.TEXT, data='"hallo"'))
-    assert_serialisation(bundle, tmp_path, StringType(type=BasicStringTypes.CHAR, data="'"))
+    assert_serialisation(bundle, tmp_path, StringType(type=AdvancedStringTypes.CHAR, data="'"))
 
 
 def test_kotlin_escape(tmp_path: Path, pytestconfig):
@@ -148,7 +146,7 @@ def test_kotlin_escape(tmp_path: Path, pytestconfig):
     plan = Plan()
     bundle = create_bundle(conf, sys.stdout, plan)
     assert_serialisation(bundle, tmp_path, StringType(type=BasicStringTypes.TEXT, data='"hallo"'))
-    assert_serialisation(bundle, tmp_path, StringType(type=BasicStringTypes.CHAR, data="'"))
+    assert_serialisation(bundle, tmp_path, StringType(type=AdvancedStringTypes.CHAR, data="'"))
 
 
 @mark_haskell
@@ -157,7 +155,7 @@ def test_haskell_escape(tmp_path: Path, pytestconfig):
     plan = Plan()
     bundle = create_bundle(conf, sys.stdout, plan)
     assert_serialisation(bundle, tmp_path, StringType(type=BasicStringTypes.TEXT, data='"hallo"'))
-    assert_serialisation(bundle, tmp_path, StringType(type=BasicStringTypes.CHAR, data="'"))
+    assert_serialisation(bundle, tmp_path, StringType(type=AdvancedStringTypes.CHAR, data="'"))
 
 
 def test_c_escape(tmp_path: Path, pytestconfig):
@@ -165,4 +163,4 @@ def test_c_escape(tmp_path: Path, pytestconfig):
     plan = Plan()
     bundle = create_bundle(conf, sys.stdout, plan)
     assert_serialisation(bundle, tmp_path, StringType(type=BasicStringTypes.TEXT, data='"hallo"'))
-    assert_serialisation(bundle, tmp_path, StringType(type=BasicStringTypes.CHAR, data="'"))
+    assert_serialisation(bundle, tmp_path, StringType(type=AdvancedStringTypes.CHAR, data="'"))

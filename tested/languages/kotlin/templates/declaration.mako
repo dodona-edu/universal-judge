@@ -1,7 +1,7 @@
 ## Convert a Value to a type.
 <%! from tested.utils import get_args %>\
 <%! from tested.serialisation import VariableType, as_basic_type, resolve_to_basic, Value %>\
-<%! from tested.datatypes import AdvancedNumericTypes, AdvancedSequenceTypes  %>\
+<%! from tested.datatypes import AdvancedNumericTypes, AdvancedSequenceTypes, AdvancedStringTypes  %>\
 <%! from tested.datatypes import BasicNumericTypes, BasicStringTypes, BasicBooleanTypes, BasicNothingTypes, BasicSequenceTypes, BasicObjectTypes  %>\
 <%page args="tp,value,nt=None,inner=False" />\
 <%!
@@ -31,6 +31,8 @@
     Long?\
 % elif tp == AdvancedNumericTypes.SINGLE_PRECISION:
     Float?\
+% elif tp == AdvancedStringTypes.CHAR:
+    Char?\
 % elif tp == "Object":
     Any?\
 % else:
@@ -47,8 +49,6 @@
         Boolean?\
     % elif basic == BasicStringTypes.TEXT:
         String?\
-    % elif basic == BasicStringTypes.CHAR:
-        Char?\
     % elif basic == BasicNumericTypes.INTEGER:
         Int?\
     % elif basic == BasicNumericTypes.RATIONAL:
