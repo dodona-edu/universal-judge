@@ -307,8 +307,12 @@ class SchemaParser:
             optimize = self._get_bool_safe(yaml_obj,
                                            "disable_optimizations") is not True
             namespace = self._get_str_safe(yaml_obj, "namespace") or "submission"
+            stack_frame = self._translate_config(
+                self._get_dict_safe(yaml_obj, "config"),
+            )
             tabs = [
-                self._translate_tab(self._enforce_dict(yaml_obj), optimize)
+                self._translate_tab(self._enforce_dict(yaml_obj), optimize,
+                                    stack_frame)
                 for yaml_obj in self._get_list_safe(yaml_obj, "tabs")
             ]
         return Plan(tabs=tabs, namespace=namespace)

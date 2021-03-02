@@ -14,6 +14,9 @@ definitions:
   _rootObject:
     type: "object"
     properties:
+      config:
+        $ref: "#/definitions/globalConfig"
+        description: "Configuration settings at plan level"
       disable_optimizations:
         type: "boolean"
         description: "Disable performance optimizations"
