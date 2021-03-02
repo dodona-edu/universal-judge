@@ -431,7 +431,7 @@ class RunOutput(BaseOutput):
     exit_code: ExitCodeOutputChannel = field(default_factory=ExitCodeOutputChannel)
 
 
-@dataclass
+@dataclass(frozen=True)
 class FileUrl:
     content: str
     name: str

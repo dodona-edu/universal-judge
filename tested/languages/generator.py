@@ -1,12 +1,14 @@
 """
 Translates items from the testplan into the actual programming language.
 """
+import dataclasses
 import html
+import json
 import logging
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Union, Tuple, Optional, Set, Callable, Match
+from typing import List, Union, Tuple, Optional, Set, Callable, Match, Iterable
 
 from mako import exceptions
 from pygments import highlight
@@ -389,6 +391,15 @@ def _prepare_run_testcase(
         ), name
 
 
+def _handle_link_files(link_files: Iterable[FileUrl],
+                       language: str) -> Tuple[str, str]:
+    dict_links = dict((link_file.name, dataclasses.asdict(link_file))
+                      for link_file in link_files)
+    files = json.dumps(dict_links)
+    return f"<div class='contains-file highlight-{language}' data-files=" \
+           f"{repr(files)}>", "</div>"
+
+
 def get_readable_input(bundle: Bundle,
                        files: List[FileUrl],
                        case: Union[Testcase, RunTestcase]) -> ExtendedMessage:
@@ -457,16 +468,25 @@ def get_readable_input(bundle: Bundle,
         )
         is_args = False
     url_map = dict(
-        map(lambda x: (re.escape(html.escape(x.name)), x.content), files))
+        map(lambda x: (re.escape(html.escape(x.name)), x), files))
+
+    seen: Set[FileUrl] = set()
 
     def replace_link(match: Match) -> str:
         groups = match.groups()
         if is_args:
-            return f'<a href={repr(url_map[groups[0]])}>{groups[0]}</a>'
-        return f'<a href={repr(url_map[groups[1]])}>' \
+            file = url_map[groups[0]]
+            seen.add(file)
+            return f'<a href={repr(file.content)} class="file-link" ' \
+                   f'target="_blank">{groups[0]}</a>'
+        file = url_map[groups[1]]
+        seen.add(file)
+        return f'<a href={repr(file.content)} class="file-link" target="_blank">' \
                f'{groups[0]}{groups[1]}{groups[2]}</a>'
 
     generated_html = regex.sub(replace_link, generated_html)
+    prefix, suffix = _handle_link_files(seen, format_)
+    generated_html = f"{prefix}{generated_html}{suffix}"
     return ExtendedMessage(description=generated_html, format="html")
 
 
