@@ -402,7 +402,8 @@ def _handle_link_files(link_files: Iterable[FileUrl],
 
 def get_readable_input(bundle: Bundle,
                        files: List[FileUrl],
-                       case: Union[Testcase, RunTestcase]) -> ExtendedMessage:
+                       case: Union[Testcase, RunTestcase]
+                       ) -> Tuple[ExtendedMessage, Set[FileUrl]]:
     """
     Get human readable input for a testcase. This function will use, in
     order of availability:
@@ -445,14 +446,14 @@ def get_readable_input(bundle: Bundle,
         raise AssertionError("Unknown testcase type.")
 
     if not analyse_files or not files:
-        return ExtendedMessage(description=text, format=format_)
+        return ExtendedMessage(description=text, format=format_), set()
     if isinstance(case, RunTestcase):
         regex = re.compile('|'.join(map(lambda x: re.escape(x.name), files)))
     else:
         regex = re.compile(
             f'\"{"|".join(map(lambda x: re.escape(x.name), files))}\"')
     if not regex.search(text):
-        return ExtendedMessage(description=text, format=format_)
+        return ExtendedMessage(description=text, format=format_), set()
     lexer = get_lexer_by_name(format_)
     generated_html = highlight(text, lexer, _html_formatter)
 
@@ -487,11 +488,11 @@ def get_readable_input(bundle: Bundle,
     generated_html = regex.sub(replace_link, generated_html)
     prefix, suffix = _handle_link_files(seen, format_)
     generated_html = f"{prefix}{generated_html}{suffix}"
-    return ExtendedMessage(description=generated_html, format="html")
+    return ExtendedMessage(description=generated_html, format="html"), seen
 
 
 def attempt_run_readable_input(bundle: Bundle, run: RunTestcase) -> ExtendedMessage:
-    result = get_readable_input(bundle, run.link_files, run)
+    result, _ = get_readable_input(bundle, run.link_files, run)
     if result.description:
         return result
 
@@ -505,7 +506,7 @@ def attempt_readable_input(bundle: Bundle, context: Context) -> ExtendedMessage:
     # Try until we find a testcase with input.
     testcases = context.testcases
     for testcase in testcases:
-        result = get_readable_input(bundle, context.link_files, testcase)
+        result, _ = get_readable_input(bundle, context.link_files, testcase)
         if result.description:
             return result
 

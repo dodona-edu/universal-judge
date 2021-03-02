@@ -8,3 +8,5 @@
       files:
         - name: "a"
           url: "a.txt"
+        - name: "alpha.log"
+          url: "alpha.log"
