@@ -440,8 +440,7 @@ def get_readable_input(bundle: Bundle,
     else:
         regex = re.compile(
             f'\"{"|".join(map(lambda x: re.escape(x.name), files))}\"')
-    match = regex.findall(text)
-    if not match:
+    if not regex.search(text):
         return ExtendedMessage(description=text, format=format_)
     lexer = get_lexer_by_name(format_)
     generated_html = highlight(text, lexer, _html_formatter)
