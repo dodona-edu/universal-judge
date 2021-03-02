@@ -156,7 +156,7 @@ def evaluate_run_results(bundle: Bundle, run: RunTestcase,
         collector.add(CloseTestcase(accepted=False))
         return None
 
-    readable_input = get_readable_input(bundle, run)
+    readable_input = get_readable_input(bundle, run.link_files, run)
 
     run_collector = TestcaseCollector(StartTestcase(description=readable_input))
 
@@ -289,7 +289,7 @@ def evaluate_context_results(bundle: Bundle, context: Context,
     for i, testcase in enumerate(context.testcases):
         _logger.debug(f"Evaluating testcase {i}")
 
-        readable_input = get_readable_input(bundle, testcase)
+        readable_input = get_readable_input(bundle, context.link_files, testcase)
         t_col = TestcaseCollector(StartTestcase(description=readable_input))
 
         # Get the evaluators
@@ -476,7 +476,8 @@ def prepare_evaluation(bundle: Bundle, collector: OutputManager):
                     StartContext(description=description), i, context_index
                 )
 
-                readable_input = get_readable_input(bundle, run_testcase)
+                readable_input = get_readable_input(bundle, run_testcase.link_files,
+                                                    run_testcase)
                 updates = []
                 if run_testcase.description:
                     updates.append(AppendMessage(message=get_i18n_string(
@@ -515,7 +516,8 @@ def prepare_evaluation(bundle: Bundle, collector: OutputManager):
 
                 # Begin normal testcases.
                 for t, testcase in enumerate(context.testcases, 1):
-                    readable_input = get_readable_input(bundle, testcase)
+                    readable_input = get_readable_input(bundle, context.link_files,
+                                                        testcase)
                     updates.append(StartTestcase(description=readable_input))
 
                     # Do the normal output channels.
