@@ -1,7 +1,7 @@
 import html
 import logging
 from pathlib import Path
-from typing import Tuple, List
+from typing import Tuple, List, Set, Iterable
 
 from .collector import OutputManager, TestcaseCollector
 from .execution import TestcaseResult, RunTestcaseResult
@@ -9,6 +9,7 @@ from ..configs import Bundle
 from ..dodona import *
 from ..dodona import StartTestcase, CloseTestcase
 from ..evaluators import get_evaluator
+from ..internationalization import get_i18n_string
 from ..languages.generator import get_readable_input, attempt_readable_input, \
     convert_statement, attempt_run_readable_input
 from ..testplan import Context, OutputChannel, IgnoredChannel, \
@@ -18,7 +19,6 @@ from ..testplan import Context, OutputChannel, IgnoredChannel, \
     ValueOutputChannel, \
     FileUrl
 from ..utils import get_args, safe_del, safe_get
-from ..internationalization import get_i18n_string
 
 _logger = logging.getLogger(__name__)
 
@@ -134,10 +134,6 @@ def evaluate_run_results(bundle: Bundle, run: RunTestcase,
                          compiler_results: Tuple[List[Message], Status],
                          context_dir: Path, collector: OutputManager,
                          has_contexts_next: bool) -> Optional[Status]:
-    # First link files
-    if run.link_files:
-        _handle_link_files(run.link_files, collector)
-
     # Handle the compiler output. If there is compiler output, there is no point
     # in checking additional testcases, so stop early.
     # Handle compiler results
@@ -156,7 +152,12 @@ def evaluate_run_results(bundle: Bundle, run: RunTestcase,
         collector.add(CloseTestcase(accepted=False))
         return None
 
-    readable_input = get_readable_input(bundle, run)
+    readable_input, seen = get_readable_input(bundle, run.link_files, run)
+
+    # Link not inlined files
+    non_inlined = set(run.link_files).difference(seen)
+    if non_inlined:
+        _link_files_message(non_inlined, collector)
 
     run_collector = TestcaseCollector(StartTestcase(description=readable_input))
 
@@ -215,10 +216,6 @@ def evaluate_context_results(bundle: Bundle, context: Context,
                              context_dir: Path, collector: OutputManager,
                              exit_output: Optional[ExitCodeOutputChannel]) -> \
         Optional[Status]:
-    # Add file links
-    if context.link_files:
-        _handle_link_files(context.link_files, collector)
-
     # Handle the compiler output. If there is compiler output, there is no
     # point in
     # checking additional testcases, so stop early.
@@ -285,11 +282,16 @@ def evaluate_context_results(bundle: Bundle, context: Context,
                 format="code"
             )))
 
+    collectors = []
+    inlined_files: Set[FileUrl] = set()
+
     # Begin processing the normal testcases.
     for i, testcase in enumerate(context.testcases):
         _logger.debug(f"Evaluating testcase {i}")
 
-        readable_input = get_readable_input(bundle, testcase)
+        readable_input, seen = get_readable_input(bundle, context.link_files,
+                                                  testcase)
+        inlined_files = inlined_files.union(seen)
         t_col = TestcaseCollector(StartTestcase(description=readable_input))
 
         # Get the evaluators
@@ -344,6 +346,15 @@ def evaluate_context_results(bundle: Bundle, context: Context,
                 t_col.add(u)
 
         # Stop with this testcase.
+        collectors.append(t_col)
+
+    # Add file links
+    non_inlined = set(context.link_files).difference(inlined_files)
+    if non_inlined:
+        _link_files_message(non_inlined, collector)
+
+    # Add all testcases to collector
+    for t_col in collectors:
         t_col.to_manager(collector, CloseTestcase())
 
     if exec_results.timeout:
@@ -352,7 +363,9 @@ def evaluate_context_results(bundle: Bundle, context: Context,
         return Status.MEMORY_LIMIT_EXCEEDED
 
 
-def _handle_link_files(link_files: List[FileUrl], collector: OutputManager):
+def _link_files_message(link_files: Iterable[FileUrl],
+                        collector: Optional[OutputManager] = None
+                        ) -> Optional[AppendMessage]:
     dict_links = dict((link_file.name, dataclasses.asdict(link_file))
                       for link_file in link_files)
     dict_json = json.dumps(dict_links)
@@ -366,7 +379,10 @@ def _handle_link_files(link_files: List[FileUrl], collector: OutputManager):
     description = f"<div class='contains-file' data-files='{dict_json}'>" \
                   f"<p>{file_list_str}</p></div>"
     message = ExtendedMessage(description=description, format="html")
-    collector.add(AppendMessage(message=message))
+    if collector is not None:
+        collector.add(AppendMessage(message=message))
+    else:
+        return AppendMessage(message=message)
 
 
 def should_show(test: OutputChannel, channel: Channel) -> bool:
@@ -476,7 +492,15 @@ def prepare_evaluation(bundle: Bundle, collector: OutputManager):
                     StartContext(description=description), i, context_index
                 )
 
-                readable_input = get_readable_input(bundle, run_testcase)
+                readable_input, inlined_files = get_readable_input(
+                    bundle, run_testcase.link_files, run_testcase
+                )
+
+                # Add file links
+                non_inlined = set(run_testcase.link_files).difference(inlined_files)
+                if non_inlined:
+                    _link_files_message(non_inlined, collector)
+
                 updates = []
                 if run_testcase.description:
                     updates.append(AppendMessage(message=get_i18n_string(
@@ -513,9 +537,13 @@ def prepare_evaluation(bundle: Bundle, collector: OutputManager):
                     updates.append(AppendMessage(message=get_i18n_string(
                         "judge.evaluation.missing.context")))
 
+                inlined_files: Set[FileUrl] = set()
                 # Begin normal testcases.
                 for t, testcase in enumerate(context.testcases, 1):
-                    readable_input = get_readable_input(bundle, testcase)
+                    readable_input, seen = get_readable_input(bundle,
+                                                              context.link_files,
+                                                              testcase)
+                    inlined_files = inlined_files.union(seen)
                     updates.append(StartTestcase(description=readable_input))
 
                     # Do the normal output channels.
@@ -533,6 +561,11 @@ def prepare_evaluation(bundle: Bundle, collector: OutputManager):
                         _add_channel(bundle, exit_output, Channel.EXIT, updates)
 
                     updates.append(CloseTestcase(accepted=False))
+
+                # Add file links
+                non_inlined = set(context.link_files).difference(inlined_files)
+                if non_inlined:
+                    updates.insert(0, _link_files_message(non_inlined))
 
                 collector.prepare_context(updates, i, context_index)
                 collector.prepare_context(CloseContext(accepted=False), i,
