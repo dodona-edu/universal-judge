@@ -1,0 +1,4497 @@
+{
+  "tabs": [
+    {
+      "name": "Evaluate",
+      "runs": [
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "evaluate",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "1 + 2 * 3 + 4 * 5 + 6"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 231.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "evaluate",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "1 + (2 * 3) + (4 * (5 + 6))"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 51.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "evaluate",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "2 * 3 + (4 * 5)"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 46.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "evaluate",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "5 + (8 * 3 + 9 + 3 * 4 * 3)"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 1445.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "evaluate",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "5 * 9 * (7 * 3 * 3 + 9 * 3 + (8 + 6 * 4))"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 669060.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "evaluate",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 23340.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "evaluate",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "2 + (2 + 6 * (4 * 5 * 8 * 7) + 3) * (9 + (4 * 3 * 7 * 9)) * 7"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 48120030.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "evaluate",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "7 * ((9 + 3 + 2 * 8 + 8 + 6) * 5 * 7 * 4 * 9 * 4) + (2 + 9 * (7 * 8 * 2 + 9 + 7) + 8 + (4 + 9 * 7) * 3) * 4 + 9 * (4 * 8 * 4)"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 18506936448.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "evaluate",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "9 * 2 + (9 * 7 * 4 + 4 * 6 + (8 + 9 + 3 * 3))"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 299394.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "evaluate",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "(2 * (2 + 4 * 7 + 8) * 5 * 7) * 6 + 4 + 4"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 88200.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "evaluate",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "9 + 7 * (2 * (3 * 3 + 9 + 8 * 4) + 8 * 9) * 6 * 9 + 8"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 7285248.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "evaluate",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "7 + (9 + 4 * 5 * 4 + 6 + (8 + 7 + 4 + 7 + 6)) + (3 * 7 * 8 * 2) * 3 * 3 + 5"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 73752.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "evaluate",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "7 * 2 + (2 + 5 + 4 * 5) + (4 * 2 * 5 * (5 * 2 * 6 * 9)) * (7 + 6 + 5 + (4 * 2 + 4 + 6 + 6) + 9 + 2)"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 15311499.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "evaluate",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "((4 * 4 + 4) + 3 * 2) * 3 * 8 + 7 + 8 + 6"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 6090.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "evaluate",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "(4 + 8 + 5 + 3 + (8 + 8 + 4)) * 5 + 5 * (9 * 8 * 2 + (4 * 3)) + 7"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 406000.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "evaluate",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "2 * 7 + 8 * 3 + 8"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 330.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "evaluate",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "8 + 7 * ((4 + 4 + 3 * 8 + 3) * 7 * 6 * 6 * 2)"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 914760.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "evaluate",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "4 + 2 + (6 * 4) * 5 + 7 * 9"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 3240.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "evaluate",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "8 * 6 + 9 * (8 + 4) + 3"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 1800.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "evaluate",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "9 + 2 + 2 + ((4 + 4 * 8 + 6 * 6 * 5) * 8 * 2) * 9 * (6 + 3)"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 4355613.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "evaluate",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "(2 * 7 + 7 + 9 + 3) * (3 + 8 + 7) + 4 * (9 + 9 + (2 + 2 + 3 * 5 * 5 * 3) * (6 * 2) + 9) * 3"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 39135096.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "evaluate",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "(2 + 4 * 6 * (5 * 8) * 2) * 3 * 3 + 3 * 3"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 155520.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "evaluate",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "(5 + 4 * (3 * 2 * 9 * 4 + 9) * 4) * 5"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 126360.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "evaluate",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "2 * (4 + (7 * 9 * 9) + 8 * (8 * 4 + 5 + 2) + 4) + 7 + (5 * 5 + 7 + (4 * 8 * 5 * 2 * 2)) * (4 + 5 + 4 + 8 + 6) + 4"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 3505170.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "evaluate",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "4 * 2 * ((6 * 2 * 5) * 8 * (5 + 8 * 7))"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 349440.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "evaluate",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "9 * (7 + 2 + 7 * 3) * 6 * 3"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 7776.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "evaluate",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "6 * 6 * 8 + 6"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 504.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "evaluate",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "2 * 2 + 8 + 3 * (6 + 3 + (9 + 2 * 3 * 5 * 4 * 2) * 7)"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 241878.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "evaluate",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "((8 * 9) + 6 + (2 + 7 * 9 + 8 + 3 * 8) * 8) + 6 + 6 * (9 * (5 + 7 + 3 + 8 + 8 * 3) + (2 + 4 + 2 + 5) + (2 * 8 * 8 * 9 * 4 * 4) + 3 * 2) + (5 * 7 + 3)"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 4057526928.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "evaluate",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "4 + 6 * 7 * 7 * (9 * (2 + 8) + 3 + 4 * 2 * (2 * 8 + 9 * 9))"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 45881640.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "evaluate",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "(5 + 3) * (5 * (4 * 4) + (7 * 7 + 7 * 5 + 6) + 3 * (8 + 7 + 4 * 8 + 8 + 5) + 5) * 8 * 9"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 1276381440.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "evaluate",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "(7 * 8 * 3 * 4 + 7 * 3) + 9 * 2 + 7 * (8 * 2 + 8 * 2)"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 7996320.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "evaluate",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "7 + 5 + 4 + (9 + 7 * 9 * 4) + 2 * 6"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 3564.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "evaluate",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "((3 * 5 + 4) + 3 * 4) + 2 * 3"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 366.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "evaluate",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "8 + (5 * 5 + (2 + 4) + 3 + (5 + 9 + 4) * 6) + ((5 * 7 + 4 + 8 * 2) + 3 * 4) + 5 * (7 * (7 + 2) * (5 + 5) + 5 * (6 * 4 + 8) * (3 * 6 + 5 * 2 * 2 * 3)) + 6"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 47017011270.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "evaluate",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "4 * (7 * 2 * 2 + 7 + 3 + (7 * 4 + 4 + 4)) + 4 + 8 * 5 * 4"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 108480.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "evaluate",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "6 + 3 * 7 * ((5 + 9 + 3 * 2 + 5) + (8 * 8 * 4 * 4 * 7 * 2))"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 910665.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "evaluate",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "8 + 5 * 8 * 4 * (6 * 5 + 3 * (6 * 3 * 7) * 6)"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 15095808.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "evaluate",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "((7 * 5) * (3 * 3 * 5 * 8 + 8) + 4 * (6 * 8 * 6) * 9) + 8 * 7 + 9 * 6"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 6305403648.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "evaluate",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "(2 * 5 * 3 * 3 + 6) + (8 * 4 + (2 + 3 * 8) * 6) + 2 + 5"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 2389.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "evaluate",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "(5 + 2 * 6 * 7 * 3 * 7) + (7 + (3 + 2))"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 6186.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "evaluate",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "6 + (8 + 7 + 5 + (2 * 5 + 4 + 5 * 7 * 3) * 7) * 7 * 5"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 149170.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "evaluate",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "4 + 4 + 4 * 6 * 2 * 5"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 720.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "evaluate",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "4 + (3 * (3 * 2 * 5 * 8 * 3)) + 5 * 9"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 19521.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "evaluate",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "8 + 6 + (2 + 2 * 7 + 3)"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 54.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "evaluate",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "5 * 6 * 5 + 5"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 300.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "evaluate",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "(7 * 2 * 8 * 6 + 7) * 9 + 9"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 26208.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "evaluate",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "5 + 3 + (5 * (7 * 5)) * (7 + 2 * 3 + (3 * 6 + 3) * 3) + 6 + 4"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 150060.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "evaluate",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "(5 + (9 + 5 + 7 + 3 + 9 * 8) + 4 + 5 * 9) * 4 * 5"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 50040.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "evaluate",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "4 + ((9 * 6 + 8) * 6 * (8 + 9 + 3) * 8) * 9"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 1088676.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": []
+            }
+          ]
+        }
+      ],
+      "hidden": null
+    },
+    {
+      "name": "Homework",
+      "runs": [
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "homework",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "homework01.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 694173.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/homework01.txt",
+                  "name": "homework01.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "homework",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "homework02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 18627081766.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/homework02.txt",
+                  "name": "homework02.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "homework",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "homework03.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 58726740851.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/homework03.txt",
+                  "name": "homework03.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "homework",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "homework04.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 173110305754.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/homework04.txt",
+                  "name": "homework04.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "homework",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "homework05.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 7206424796.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/homework05.txt",
+                  "name": "homework05.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "homework",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "homework06.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 2827154164393.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/homework06.txt",
+                  "name": "homework06.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "homework",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "homework07.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 1204735400.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/homework07.txt",
+                  "name": "homework07.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "homework",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "homework08.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 132114645525.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/homework08.txt",
+                  "name": "homework08.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "homework",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "homework09.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 1708121674481.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/homework09.txt",
+                  "name": "homework09.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "homework",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "homework10.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 390524029.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/homework10.txt",
+                  "name": "homework10.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "homework",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "homework11.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 88202603.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/homework11.txt",
+                  "name": "homework11.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "homework",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "homework12.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 3198411790817.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/homework12.txt",
+                  "name": "homework12.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "homework",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "homework13.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 52775817666912.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/homework13.txt",
+                  "name": "homework13.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "homework",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "homework14.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 8324915772195.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/homework14.txt",
+                  "name": "homework14.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "homework",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "homework15.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 4174266766.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/homework15.txt",
+                  "name": "homework15.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "homework",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "homework16.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 167139971.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/homework16.txt",
+                  "name": "homework16.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "homework",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "homework17.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 43347537292539.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/homework17.txt",
+                  "name": "homework17.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "homework",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "homework18.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 244120333030.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/homework18.txt",
+                  "name": "homework18.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "homework",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "homework19.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 475866587.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/homework19.txt",
+                  "name": "homework19.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "homework",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "homework20.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 112899558798666.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/homework20.txt",
+                  "name": "homework20.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "hidden": null
+    }
+  ],
+  "namespace": "submission"
+}

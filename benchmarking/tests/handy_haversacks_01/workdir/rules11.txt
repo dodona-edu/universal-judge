@@ -1,0 +1,14 @@
+clear yellow bags contain no other bags.
+pale white bags contain 4 striped black bags.
+striped lime bags contain 2 light purple bags, 1 pale white bag.
+posh tomato bags contain no other bags.
+dull green bags contain 2 posh tomato bags, 4 dim violet bags.
+plaid tomato bags contain 2 striped lime bags.
+light purple bags contain 5 striped black bags.
+shiny gold bags contain 3 clear yellow bags.
+dim violet bags contain no other bags.
+striped maroon bags contain 2 striped lime bags.
+striped black bags contain 5 dim violet bags.
+dark chartreuse bags contain 3 striped lime bags.
+dark coral bags contain 4 shiny gold bags.
+plaid blue bags contain 1 striped lime bag.

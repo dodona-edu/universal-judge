@@ -1,0 +1,16 @@
+plaid olive bags contain no other bags.
+faded lime bags contain no other bags.
+dotted white bags contain no other bags.
+pale green bags contain 1 faded lime bag.
+light white bags contain 2 dark silver bags.
+dark green bags contain 1 drab crimson bag, 1 dotted green bag.
+bright green bags contain no other bags.
+shiny white bags contain no other bags.
+posh tan bags contain no other bags.
+faded plum bags contain 4 drab crimson bags, 1 posh tan bag, 4 dark silver bags.
+dark silver bags contain no other bags.
+drab indigo bags contain 3 dotted white bags, 3 posh tan bags, 5 drab crimson bags.
+drab crimson bags contain no other bags.
+shiny gold bags contain 1 bright green bag, 4 dotted white bags, 1 posh tan bag.
+dotted green bags contain no other bags.
+pale magenta bags contain 2 dotted green bags, 5 faded lime bags.

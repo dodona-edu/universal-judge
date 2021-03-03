@@ -1,0 +1,38 @@
+vibrant turquoise bags contain 4 dark salmon bags, 5 dotted black bags.
+light aqua bags contain 5 faded violet bags, 4 muted crimson bags.
+posh yellow bags contain 2 dotted black bags, 3 dark salmon bags.
+mirrored chartreuse bags contain no other bags.
+muted crimson bags contain 3 mirrored indigo bags, 1 dotted black bag, 3 dark salmon bags.
+plaid turquoise bags contain 5 posh cyan bags.
+striped yellow bags contain 3 plaid turquoise bags.
+dark salmon bags contain 2 faded purple bags, 4 dotted orange bags.
+dotted orange bags contain no other bags.
+dim violet bags contain no other bags.
+muted cyan bags contain 5 faded silver bags, 2 pale black bags.
+dotted green bags contain 1 striped blue bag.
+dull crimson bags contain 4 dim violet bags.
+mirrored tan bags contain 1 posh cyan bag, 3 light aqua bags, 5 muted maroon bags.
+faded violet bags contain 3 dark salmon bags.
+dotted black bags contain 1 dim violet bag.
+pale purple bags contain 3 posh cyan bags.
+dark brown bags contain 1 faded silver bag.
+mirrored indigo bags contain 5 light salmon bags.
+mirrored violet bags contain 5 pale black bags, 1 plaid turquoise bag, 1 pale purple bag.
+striped brown bags contain 4 striped blue bags, 2 pale black bags.
+posh cyan bags contain 4 faded violet bags.
+muted tan bags contain 5 striped blue bags.
+muted gray bags contain no other bags.
+striped chartreuse bags contain 3 faded violet bags, 2 shiny gold bags.
+drab lavender bags contain 5 clear black bags.
+light salmon bags contain no other bags.
+muted bronze bags contain 3 clear tan bags, 2 shiny gold bags.
+clear black bags contain 5 light aqua bags, 2 muted maroon bags.
+dotted indigo bags contain 1 shiny gold bag, 5 posh yellow bags.
+shiny gold bags contain 4 dark salmon bags, 5 mirrored indigo bags.
+drab purple bags contain 3 pale black bags, 5 striped blue bags, 3 clear black bags.
+pale black bags contain 4 dotted indigo bags, 4 muted bronze bags, 2 striped chartreuse bags.
+faded purple bags contain no other bags.
+muted maroon bags contain 2 faded violet bags.
+clear tan bags contain 3 dull crimson bags, 3 dotted black bags, 2 mirrored indigo bags.
+striped blue bags contain 5 light aqua bags, 3 dotted indigo bags.
+faded silver bags contain 4 light aqua bags.

@@ -1,0 +1,19 @@
+muted chartreuse bags contain no other bags.
+wavy magenta bags contain no other bags.
+plaid tan bags contain 2 faded tan bags, 4 dotted red bags.
+dotted red bags contain 5 dim crimson bags, 4 pale beige bags, 5 wavy magenta bags.
+faded tan bags contain 4 dim crimson bags, 4 dim lime bags.
+dim crimson bags contain no other bags.
+dotted silver bags contain no other bags.
+plaid yellow bags contain 4 dotted red bags, 4 vibrant plum bags.
+pale olive bags contain 5 wavy blue bags.
+vibrant plum bags contain 4 pale beige bags, 4 dotted silver bags, 2 wavy magenta bags.
+dark silver bags contain 5 vibrant plum bags.
+muted black bags contain no other bags.
+plaid beige bags contain 4 vibrant plum bags, 2 faded tan bags.
+shiny gold bags contain 2 plaid yellow bags, 3 drab lavender bags, 4 dark silver bags.
+drab lavender bags contain 2 dotted red bags, 2 faded tan bags.
+wavy blue bags contain 3 dotted red bags, 4 vibrant plum bags.
+dim lime bags contain no other bags.
+pale beige bags contain no other bags.
+dull orange bags contain no other bags.

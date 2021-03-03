@@ -1,0 +1,17 @@
+striped teal bags contain 4 vibrant tan bags.
+vibrant red bags contain 2 shiny lime bags.
+plaid violet bags contain 3 wavy gray bags.
+striped indigo bags contain no other bags.
+shiny gold bags contain 5 wavy gray bags.
+clear salmon bags contain 1 wavy gray bag.
+dull gray bags contain 3 striped indigo bags, 1 mirrored lavender bag.
+wavy gray bags contain 3 dull gray bags, 1 bright yellow bag, 4 plaid cyan bags.
+shiny lime bags contain 2 wavy gray bags.
+clear purple bags contain no other bags.
+bright yellow bags contain 2 clear purple bags, 4 mirrored lavender bags.
+mirrored lavender bags contain no other bags.
+plaid cyan bags contain 4 mirrored lavender bags, 1 clear purple bag.
+vibrant tan bags contain 2 wavy gray bags.
+wavy teal bags contain 5 plaid violet bags.
+dark green bags contain 5 vibrant tan bags, 3 clear salmon bags.
+bright olive bags contain 5 plaid violet bags.

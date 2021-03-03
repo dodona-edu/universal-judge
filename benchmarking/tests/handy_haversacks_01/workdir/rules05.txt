@@ -1,0 +1,21 @@
+muted black bags contain 3 wavy coral bags, 3 light aqua bags.
+muted orange bags contain no other bags.
+wavy red bags contain no other bags.
+shiny gold bags contain no other bags.
+dark red bags contain 2 faded brown bags, 1 dotted black bag, 2 dotted bronze bags.
+mirrored turquoise bags contain 1 shiny gold bag.
+wavy teal bags contain 3 dotted black bags.
+faded red bags contain 3 faded indigo bags, 4 dotted bronze bags.
+striped salmon bags contain 3 light aqua bags, 1 posh gray bag.
+dull crimson bags contain 4 shiny gold bags, 4 dotted black bags.
+pale bronze bags contain 4 posh gray bags, 4 wavy teal bags, 2 mirrored turquoise bags.
+posh gray bags contain 2 faded indigo bags.
+dotted bronze bags contain no other bags.
+faded brown bags contain no other bags.
+dotted black bags contain no other bags.
+light aqua bags contain 2 muted orange bags.
+faded indigo bags contain no other bags.
+mirrored aqua bags contain 4 wavy red bags, 4 muted orange bags, 4 faded indigo bags.
+wavy coral bags contain 4 faded brown bags, 3 dotted black bags.
+dull indigo bags contain 3 mirrored turquoise bags, 3 wavy teal bags, 4 faded red bags.
+muted gray bags contain 4 wavy teal bags.
