@@ -11,9 +11,11 @@ translate = parser.translate_str
 
 def test_parse_one_tab_ctx():
     yaml_str = """
+disable_optimizations: true
+namespace: "solution"
+tabs:
 - tab: "Ctx"
   hidden: true
-  disable_optimizations: true
   contexts:
   - arguments: [ "--arg", "argument" ]
     stdin: "Input string"
@@ -23,6 +25,7 @@ def test_parse_one_tab_ctx():
     """
     json_str = translate(yaml_str)
     plan = _PlanModel.parse_raw(json_str).__root__
+    assert plan.namespace == "solution"
     assert len(plan.tabs) == 1
     tab = plan.tabs[0]
     assert tab.hidden

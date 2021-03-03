@@ -1,0 +1,18 @@
+wavy violet bags contain 1 wavy tomato bag, 5 dim salmon bags, 2 clear gold bags.
+vibrant cyan bags contain no other bags.
+dull orange bags contain 3 striped beige bags.
+dim salmon bags contain 1 vibrant cyan bag, 3 muted tan bags, 1 clear lime bag.
+clear gold bags contain 4 vibrant cyan bags.
+dotted black bags contain no other bags.
+light maroon bags contain 3 dotted lime bags, 5 dull orange bags, 2 wavy violet bags.
+striped beige bags contain 2 clear lime bags, 2 striped fuchsia bags.
+muted red bags contain no other bags.
+muted tomato bags contain no other bags.
+striped fuchsia bags contain no other bags.
+dotted lime bags contain 2 dim gray bags.
+muted tan bags contain no other bags.
+wavy tomato bags contain 2 muted red bags, 2 clear lime bags, 1 muted tan bag.
+clear lime bags contain no other bags.
+drab fuchsia bags contain 1 muted red bag, 2 muted tan bags, 3 muted tomato bags.
+dim gray bags contain 4 muted red bags, 4 muted tan bags.
+shiny gold bags contain 2 muted red bags, 2 muted tan bags, 1 vibrant cyan bag.

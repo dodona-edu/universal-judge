@@ -16,7 +16,7 @@ from typing import (List, Optional, Dict, Any, Literal, Union, NamedTuple, Itera
 from pydantic import BaseModel, root_validator, validator
 from pydantic.dataclasses import dataclass
 
-from .datatypes import StringTypes
+from .datatypes import BasicStringTypes
 from .features import FeatureSet, combine_features, WithFeatures, NOTHING, Construct
 from .serialisation import (ExceptionValue, Value, Expression, Statement,
                             Identifier, FunctionCall, SequenceType, ObjectType,
@@ -172,7 +172,8 @@ class TextOutputChannel(TextData):
     """Describes the output for textual channels."""
     evaluator: Union[
         GenericTextEvaluator, ProgrammedEvaluator
-    ] = GenericTextEvaluator()
+    ] = field(default_factory=GenericTextEvaluator)
+    show_expected: bool = True
 
 
 @dataclass
@@ -182,7 +183,8 @@ class FileOutputChannel(WithFeatures):
     actual_path: str  # Path to the generated file (by the users code)
     evaluator: Union[
         GenericTextEvaluator, ProgrammedEvaluator
-    ] = GenericTextEvaluator(name=TextBuiltin.FILE)
+    ] = field(default_factory=lambda: GenericTextEvaluator(name=TextBuiltin.FILE))
+    show_expected: bool = True
 
     def get_used_features(self) -> FeatureSet:
         return NOTHING
@@ -199,7 +201,8 @@ class ValueOutputChannel(WithFeatures):
     value: Optional[Value] = None
     evaluator: Union[
         GenericValueEvaluator, ProgrammedEvaluator, SpecificEvaluator
-    ] = GenericValueEvaluator()
+    ] = field(default_factory=GenericValueEvaluator)
+    show_expected: bool = True
 
     def get_used_features(self) -> FeatureSet:
         if self.value:
@@ -222,7 +225,8 @@ class ExceptionOutputChannel(WithFeatures):
     exception: Optional[ExceptionValue] = None
     evaluator: Union[
         GenericExceptionEvaluator, SpecificEvaluator
-    ] = GenericExceptionEvaluator()
+    ] = field(default_factory=GenericExceptionEvaluator)
+    show_expected: bool = True
 
     def get_used_features(self) -> FeatureSet:
         if self.exception:
@@ -243,6 +247,7 @@ class ExceptionOutputChannel(WithFeatures):
 class ExitCodeOutputChannel(WithFeatures):
     """Handles exit codes."""
     value: int = 0
+    show_expected: bool = True
 
     def get_used_features(self) -> FeatureSet:
         return NOTHING
@@ -415,7 +420,7 @@ class RunInput(WithFeatures):
 
     def get_used_features(self) -> FeatureSet:
         if self.arguments:
-            return FeatureSet(set(), {StringTypes.TEXT})
+            return FeatureSet(set(), {BasicStringTypes.TEXT})
         else:
             return NOTHING
 
@@ -426,7 +431,7 @@ class RunOutput(BaseOutput):
     exit_code: ExitCodeOutputChannel = field(default_factory=ExitCodeOutputChannel)
 
 
-@dataclass
+@dataclass(frozen=True)
 class FileUrl:
     content: str
     name: str

@@ -6,7 +6,7 @@ from json import dumps
 from jsonschema import Draft7Validator
 from pydantic.json import pydantic_encoder
 from os.path import basename, dirname, join, splitext
-from typing import Any, Dict, List, Optional, Union, Tuple
+from typing import Any, Dict, List, Optional, Union, Tuple, Callable
 from yaml import safe_load
 
 from tested.datatypes import BasicBooleanTypes, BasicNumericTypes, \
@@ -17,7 +17,7 @@ from tested.serialisation import ExceptionValue, Value, NothingType, StringType,
 from tested.testplan import BaseOutput, Context, EmptyChannel, \
     ExceptionOutputChannel, FileUrl, GenericTextEvaluator, Output, Plan, Run, \
     RunTestcase, RunInput, RunOutput, Tab, Testcase, TextData, TextOutputChannel, \
-    ValueOutputChannel
+    ValueOutputChannel, ExitCodeOutputChannel
 
 logger = getLogger(__name__)
 
@@ -32,12 +32,18 @@ parser = Parser()
 
 @dataclass
 class StackFrame:
-    """Options for processing standard output"""
     options_stdout: OPTION_DICT = field(default_factory=dict)
-    """Options for processing standard error"""
+    """Options for processing standard output"""
     options_stderr: OPTION_DICT = field(default_factory=dict)
-    """Collect files to link in feedback"""
+    """Options for processing standard error"""
+    options_exception: OPTION_DICT = field(default_factory=dict)
+    """Options for processing exception"""
+    options_exit_code: OPTION_DICT = field(default_factory=dict)
+    """Options for processing exit codes"""
+    options_return: OPTION_DICT = field(default_factory=dict)
+    """Options for processing return values"""
     link_files: List[FileUrl] = field(default_factory=list)
+    """Collect files to link in feedback"""
 
 
 class SchemaParser:
@@ -143,11 +149,40 @@ class SchemaParser:
                            key: str) -> Optional[Union[str, OPTION_DICT]]:
         try:
             x = yaml_dict[key]
-            if isinstance(x, (str, dict)):
+            if isinstance(x, dict):
+                return x
+            return str(x)
+        except KeyError:
+            return None
+
+    # noinspection PyMethodMayBeStatic
+    def _get_int_dict_safe(self,
+                           yaml_dict: YAML_DICT,
+                           key: str) -> Optional[Union[str, OPTION_DICT]]:
+        try:
+            x = yaml_dict[key]
+            if isinstance(x, (int, dict)):
                 return x
             return None
         except KeyError:
             return None
+
+    def _get_str_and_hide_expected(self,
+                                   stack_frame: StackFrame,
+                                   yaml_object: YAML_OBJECT,
+                                   extract_config: Callable[[StackFrame], YAML_DICT]
+                                   ) -> Tuple[str, bool]:
+        if isinstance(yaml_object, str):
+            data = yaml_object
+            hide_expected = self._get_bool_safe(extract_config(stack_frame),
+                                                "hide_expected") or False
+        else:
+            data = self._get_str_safe(yaml_object, "data")
+            hide_expected = self._get_bool_safe(
+                merge(extract_config(stack_frame),
+                      self._get_dict_safe(yaml_object, "config")),
+                "hide_expected") or False
+        return data, hide_expected
 
     # noinspection PyMethodMayBeStatic
     def _load_yaml_object(self, yaml_str: str) -> YAML_OBJECT:
@@ -158,10 +193,9 @@ class SchemaParser:
                                output: BaseOutput,
                                stack_frame: StackFrame = StackFrame()):
         if "exception" in yaml_dict:
-            output.exception = ExceptionOutputChannel(
-                exception=ExceptionValue(
-                    message=self._get_str_safe(yaml_dict, "exception")
-                )
+            output.exception = self._translate_exception(
+                stack_frame,
+                self._get_str_dict_safe(yaml_dict, "exception")
             )
         if "stderr" in yaml_dict:
             output.stderr = self._translate_stream(
@@ -195,6 +229,27 @@ class SchemaParser:
             )
         else:
             new_stack_frame.options_stderr = old_stack_frame.options_stderr
+        if config and "exit_code" in config:
+            new_stack_frame.options_exit_code = merge(
+                old_stack_frame.options_exit_code,
+                self._get_dict_safe(config, "exit_code")
+            )
+        else:
+            new_stack_frame.options_exit_code = old_stack_frame.options_exit_code
+        if config and "exception" in config:
+            new_stack_frame.options_exception = merge(
+                old_stack_frame.options_exception,
+                self._get_dict_safe(config, "exception")
+            )
+        else:
+            new_stack_frame.options_exception = old_stack_frame.options_exception
+        if config and "return" in config:
+            new_stack_frame.options_return = merge(
+                old_stack_frame.options_return,
+                self._get_dict_safe(config, "return")
+            )
+        else:
+            new_stack_frame.options_return = old_stack_frame.options_return
         new_stack_frame.link_files = deepcopy(old_stack_frame.link_files)
         return new_stack_frame
 
@@ -247,9 +302,20 @@ class SchemaParser:
                 self._translate_tab(self._enforce_dict(yaml_obj))
                 for yaml_obj in yaml_obj
             ]
+            return Plan(tabs=tabs)
         else:
-            tabs = []
-        return Plan(tabs=tabs)
+            optimize = self._get_bool_safe(yaml_obj,
+                                           "disable_optimizations") is not True
+            namespace = self._get_str_safe(yaml_obj, "namespace") or "submission"
+            stack_frame = self._translate_config(
+                self._get_dict_safe(yaml_obj, "config"),
+            )
+            tabs = [
+                self._translate_tab(self._enforce_dict(yaml_obj), optimize,
+                                    stack_frame)
+                for yaml_obj in self._get_list_safe(yaml_obj, "tabs")
+            ]
+        return Plan(tabs=tabs, namespace=namespace)
 
     def _translate_context_testcase(
             self,
@@ -278,23 +344,66 @@ class SchemaParser:
 
         run_output = RunOutput()
         if "exit_code" in context:
-            run_output.exit_code.value = self._get_int_safe(context,
-                                                            "exit_code")
+            run_output.exit_code = self._translate_exit_code(
+                stack_frame,
+                self._get_int_dict_safe(context, "exit_code")
+            )
+
         self._translate_base_output(context, run_output, stack_frame)
         return RunTestcase(input=run_input, output=run_output)
 
     def _translate_stream(self,
                           stream: YAML_OBJECT,
                           config: OPTION_DICT) -> TextOutputChannel:
-        if isinstance(stream, (bool, float, int, str)):
-            return TextOutputChannel(data=stream,
-                                     evaluator=GenericTextEvaluator(options=config))
-        config = merge(config, self._get_dict_safe(stream, "config"))
-        return TextOutputChannel(data=self._get_str_safe(stream, "data"),
-                                 evaluator=GenericTextEvaluator(options=config))
+        if isinstance(stream, str):
+            data, config = stream, config
+        else:
+            data = self._get_str_safe(stream, "data")
+            config = merge(config, self._get_dict_safe(stream, "config"))
+
+        hide_expected = self._get_bool_safe(config, "hide_expected") or False
+
+        return TextOutputChannel(data=data,
+                                 evaluator=GenericTextEvaluator(options=config),
+                                 show_expected=not hide_expected)
+
+    def _translate_exit_code(self,
+                             stack_frame: StackFrame,
+                             exit_code: YAML_OBJECT) -> ExitCodeOutputChannel:
+        if isinstance(exit_code, int):
+            exit_code: int
+            hide_expected = self._get_bool_safe(stack_frame.options_exit_code,
+                                                "hide_expected") or False
+        else:
+            exit_code: YAML_DICT
+            hide_expected = self._get_bool_safe(
+                merge(stack_frame.options_exit_code,
+                      self._get_dict_safe(exit_code, "config")),
+                "hide_expected"
+            ) or False
+            exit_code: int = self._get_bool_safe(exit_code, "data") or 0
+        return ExitCodeOutputChannel(value=exit_code,
+                                     show_expected=not hide_expected)
+
+    def _translate_exception(self,
+                             stack_frame: StackFrame,
+                             exception: YAML_OBJECT) -> ExceptionOutputChannel:
+        data, hide_expected = self._get_str_and_hide_expected(
+            stack_frame,
+            exception,
+            lambda x: x.options_exception
+        )
+
+        return ExceptionOutputChannel(
+            exception=ExceptionValue(
+                message=data
+            ),
+            show_expected=not hide_expected
+        )
 
     def _translate_tab(self,
                        tab: YAML_DICT,
+                       optimize: bool = True,
                        stack_frame: StackFrame = StackFrame()) -> Tab:
         stack_frame = self._translate_config(
             self._get_dict_safe(tab, "config"),
@@ -302,7 +411,6 @@ class SchemaParser:
         )
         hidden = self._get_bool_safe(tab, "hidden")
         name = self._get_str_safe(tab, "tab")
-        optimize = self._get_bool_safe(tab, "disable_optimizations") is not True
 
         translated_contexts = [
             self._translate_context(context, stack_frame)
@@ -342,18 +450,28 @@ class SchemaParser:
                             testcase: YAML_DICT,
                             stack_frame: StackFrame = StackFrame()
                             ) -> Tuple[Testcase, List[FileUrl]]:
-        code = self._get_str_safe(testcase, "statement") or \
-               self._get_str_safe(testcase, "expression")
+        stack_frame = self._translate_config(
+            self._get_dict_safe(testcase, "config"),
+            stack_frame
+        )
+        code = (self._get_str_safe(testcase, "statement") or
+                self._get_str_safe(testcase, "expression"))
         output = Output()
         self._translate_base_output(testcase, output, stack_frame)
         if "return" in testcase:
+            hide_expected = self._get_bool_safe(stack_frame.options_return,
+                                                "hide_expected") or False
             output.result = ValueOutputChannel(
                 value=self._translate_value(
-                    self._get_any_safe(testcase, "return")))
-        if "return-raw" in testcase:
-            output.result = ValueOutputChannel(
-                value=parser.parse_value(
-                    self._get_str_safe(testcase, "return-raw")))
+                    self._get_any_safe(testcase, "return")),
+                show_expected=not hide_expected
+            )
+        elif "return-raw" in testcase:
+            output.result = self._translate_raw_return(
+                stack_frame,
+                self._get_str_dict_safe(testcase, "return-raw")
+            )
+
         testcase_value = Testcase(input=parser.parse_statement(code), output=output)
 
         if "files" in testcase:
@@ -364,6 +482,18 @@ class SchemaParser:
         else:
             files = []
         return testcase_value, files
+
+    def _translate_raw_return(self, stack_frame: StackFrame,
+                              value: YAML_OBJECT) -> ValueOutputChannel:
+        data, hide_expected = self._get_str_and_hide_expected(
+            stack_frame,
+            value,
+            lambda x: x.options_return
+        )
+        return ValueOutputChannel(
+            value=parser.parse_value(data),
+            show_expected=not hide_expected
+        )
 
     def _translate_value(self, value: YAML_DICT) -> Value:
         if value is None:
@@ -383,7 +513,7 @@ class SchemaParser:
         else:
             return ObjectType(type=BasicObjectTypes.MAP, data=list(
                 ObjectKeyValuePair(
-                    key=StringType(type=StringTypes.TEXT, data=key),
+                    key=StringType(type=BasicStringTypes.TEXT, data=key),
                     value=self._translate_value(val)
                 )
                 for key, val in value.items()

@@ -7,7 +7,8 @@ cases.
 from enum import Enum
 from typing import Union
 
-from .basic import BasicNumericTypes, BasicSequenceTypes, BasicTypes
+from .basic import BasicNumericTypes, BasicSequenceTypes, BasicTypes, \
+    BasicStringTypes
 
 
 class _AdvancedDataType(str, Enum):
@@ -85,6 +86,13 @@ class AdvancedSequenceTypes(_AdvancedDataType):
     """A tuple is read-only, immutable list."""
 
 
+class AdvancedStringTypes(_AdvancedDataType):
+    CHAR = "char", BasicStringTypes.TEXT
+    """
+    A single character
+    """
+
+
 AdvancedTypes = Union[
-    AdvancedNumericTypes, AdvancedSequenceTypes
+    AdvancedNumericTypes, AdvancedSequenceTypes, AdvancedStringTypes
 ]

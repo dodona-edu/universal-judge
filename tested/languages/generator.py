@@ -1,12 +1,19 @@
 """
 Translates items from the testplan into the actual programming language.
 """
+import dataclasses
+import html
+import json
 import logging
+import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Union, Tuple, Optional, Set, Callable
+from typing import List, Union, Tuple, Optional, Set, Callable, Match, Iterable
 
 from mako import exceptions
+from pygments import highlight
+from pygments.formatters.html import HtmlFormatter
+from pygments.lexers import get_lexer_by_name
 
 from .config import TemplateType
 from .templates import find_and_write_template, find_template
@@ -20,10 +27,11 @@ from ..serialisation import (Value, SequenceType, Identifier, FunctionType,
                              ObjectKeyValuePair)
 from ..testplan import (EmptyChannel, IgnoredChannel, TextData, ProgrammedEvaluator,
                         SpecificEvaluator, Testcase, RunTestcase, Context,
-                        ExceptionOutput, ValueOutput, Run)
+                        ExceptionOutput, ValueOutput, Run, FileUrl)
 from ..utils import get_args
 
 _logger = logging.getLogger(__name__)
+_html_formatter = HtmlFormatter()
 
 # Names of the predefined functions that must be available.
 SEND_VALUE = "send_value"
@@ -383,8 +391,20 @@ def _prepare_run_testcase(
         ), name
 
 
+def _handle_link_files(link_files: Iterable[FileUrl],
+                       language: str) -> Tuple[str, str]:
+    dict_links = dict((link_file.name, dataclasses.asdict(link_file))
+                      for link_file in link_files)
+    files = json.dumps(dict_links)
+    return f"<div class='contains-file highlight-{language} highlighter-rouge' " \
+           f"data-files={repr(files)}><pre style='padding: 2px; margin-bottom: " \
+           f"1px; background: none;'><code>", "</code></pre></div>"
+
+
 def get_readable_input(bundle: Bundle,
-                       case: Union[Testcase, RunTestcase]) -> ExtendedMessage:
+                       files: List[FileUrl],
+                       case: Union[Testcase, RunTestcase]
+                       ) -> Tuple[ExtendedMessage, Set[FileUrl]]:
     """
     Get human readable input for a testcase. This function will use, in
     order of availability:
@@ -396,12 +416,14 @@ def get_readable_input(bundle: Bundle,
         a. The stdin and the arguments.
     """
     format_ = 'text'  # By default, we use text as input.
+    analyse_files = False
     if case.description:
         text = case.description
     elif isinstance(case, Testcase):
         format_ = bundle.config.programming_language
         text = convert_statement(bundle, case.input)
         text = bundle.lang_config.cleanup_description(bundle.plan.namespace, text)
+        analyse_files = True
     elif isinstance(case, RunTestcase):
         if case.input.main_call:
             arguments = " ".join(case.input.arguments)
@@ -412,20 +434,66 @@ def get_readable_input(bundle: Bundle,
                 stdin = ""
             if not stdin:
                 text = args
+                analyse_files = bool(arguments)
             else:
                 if case.input.arguments:
                     text = f"{args}\n{stdin}"
+                    analyse_files = True
                 else:
                     text = stdin
         else:
             text = ""
     else:
         raise AssertionError("Unknown testcase type.")
-    return ExtendedMessage(description=text, format=format_)
+
+    if not analyse_files or not files:
+        return ExtendedMessage(description=text, format=format_), set()
+    if isinstance(case, RunTestcase):
+        regex = re.compile('|'.join(map(lambda x: re.escape(x.name), files)))
+    else:
+        regex = re.compile(
+            f'\"{"|".join(map(lambda x: re.escape(x.name), files))}\"')
+    if not regex.search(text):
+        return ExtendedMessage(description=text, format=format_), set()
+    lexer = get_lexer_by_name(format_)
+    generated_html = highlight(text, lexer, _html_formatter)[28:-14]
+
+    if isinstance(case, RunTestcase):
+        regex = re.compile(
+            f'({"|".join(map(lambda x: re.escape(html.escape(x.name)), files))})')
+        is_args = True
+    else:
+        regex = re.compile(
+            f'(&quot;)'
+            f'({"|".join(map(lambda x: re.escape(html.escape(x.name)), files))})'
+            f'(&quot;)'
+        )
+        is_args = False
+    url_map = dict(
+        map(lambda x: (html.escape(x.name), x), files))
+
+    seen: Set[FileUrl] = set()
+
+    def replace_link(match: Match) -> str:
+        groups = match.groups()
+        if is_args:
+            file = url_map[groups[0]]
+            seen.add(file)
+            return f'<a href={repr(file.content)} class="file-link" ' \
+                   f'target="_blank">{groups[0]}</a>'
+        file = url_map[groups[1]]
+        seen.add(file)
+        return f'<a href={repr(file.content)} class="file-link" target="_blank">' \
+               f'{groups[0]}{groups[1]}{groups[2]}</a>'
+
+    generated_html = regex.sub(replace_link, generated_html)
+    prefix, suffix = _handle_link_files(seen, format_)
+    generated_html = f"{prefix}{generated_html}{suffix}"
+    return ExtendedMessage(description=generated_html, format="html"), seen
 
 
 def attempt_run_readable_input(bundle: Bundle, run: RunTestcase) -> ExtendedMessage:
-    result = get_readable_input(bundle, run)
+    result, _ = get_readable_input(bundle, run.link_files, run)
     if result.description:
         return result
 
@@ -439,7 +507,7 @@ def attempt_readable_input(bundle: Bundle, context: Context) -> ExtendedMessage:
     # Try until we find a testcase with input.
     testcases = context.testcases
     for testcase in testcases:
-        result = get_readable_input(bundle, testcase)
+        result, _ = get_readable_input(bundle, context.link_files, testcase)
         if result.description:
             return result
 

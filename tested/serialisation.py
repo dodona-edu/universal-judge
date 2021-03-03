@@ -549,8 +549,7 @@ def to_python_comparable(value: Optional[Value]):
     if basic_type == BasicNumericTypes.INTEGER:
         return value.data
     if basic_type in (BasicBooleanTypes.BOOLEAN, BasicStringTypes.TEXT,
-                      BasicNothingTypes.NOTHING, BasicStringTypes.ANY,
-                      BasicStringTypes.CHAR):
+                      BasicNothingTypes.NOTHING, BasicStringTypes.ANY):
         return value.data
 
     raise AssertionError(f"Unknown value type: {value}")

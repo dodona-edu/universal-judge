@@ -4,8 +4,6 @@
 <%!
     def escape_string(text):
         return text.replace('"', '\\"')
-    def escape_char(text):
-        return text.replace("'", "\\'")
 %>\
 % if value.type == BasicNumericTypes.INTEGER:
     ${value.data}\
@@ -13,8 +11,6 @@
     ${value.data}\
 % elif value.type == BasicStringTypes.TEXT:
     "${escape_string(value.data)}"\
-% elif value.type == BasicStringTypes.CHAR:
-    '${escape_char(value.data)}'\
 % elif value.type == BasicBooleanTypes.BOOLEAN:
     ${str(value.data).lower()}\
 % elif value.type == BasicNothingTypes.NOTHING:

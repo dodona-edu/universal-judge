@@ -1,0 +1,39 @@
+shiny bronze bags contain 5 light bronze bags, 1 clear red bag, 2 muted silver bags.
+clear red bags contain 5 dim cyan bags.
+muted silver bags contain 5 dim cyan bags.
+bright violet bags contain no other bags.
+striped lime bags contain 3 shiny tomato bags.
+pale olive bags contain 2 light olive bags.
+dotted red bags contain 1 striped maroon bag, 4 wavy green bags, 3 dim cyan bags.
+dotted bronze bags contain 1 clear gray bag.
+drab gray bags contain 1 bright violet bag, 2 pale yellow bags.
+light bronze bags contain 1 muted cyan bag.
+dim beige bags contain 2 bright violet bags.
+bright indigo bags contain 2 muted silver bags.
+pale plum bags contain 4 plaid lime bags, 4 light olive bags, 1 faded red bag.
+pale chartreuse bags contain 5 striped maroon bags, 5 dotted bronze bags, 2 wavy green bags.
+dull yellow bags contain 5 dotted red bags, 3 posh lime bags, 5 pale chartreuse bags.
+dull indigo bags contain 1 faded red bag.
+striped tomato bags contain 4 faded red bags, 5 plaid lime bags, 5 light olive bags.
+dark brown bags contain 2 faded red bags, 4 light olive bags, 1 plaid lime bag.
+clear gray bags contain 4 bright violet bags, 5 pale yellow bags.
+faded cyan bags contain 4 clear gray bags.
+dim cyan bags contain 1 muted yellow bag.
+shiny gold bags contain 3 wavy green bags, 1 striped maroon bag, 1 posh bronze bag.
+wavy blue bags contain 2 wavy green bags, 1 striped maroon bag, 2 dotted bronze bags.
+wavy green bags contain 4 drab gray bags.
+posh lime bags contain 1 muted cyan bag.
+posh bronze bags contain 2 striped purple bags.
+muted cyan bags contain 3 clear gray bags.
+dull purple bags contain 5 shiny tomato bags, 2 clear red bags.
+faded red bags contain 4 faded white bags.
+muted yellow bags contain 4 pale yellow bags.
+striped plum bags contain 5 plaid lime bags.
+striped purple bags contain 3 bright violet bags, 5 pale yellow bags.
+dark plum bags contain 2 bright violet bags, 4 pale yellow bags.
+faded white bags contain 2 dotted red bags.
+light olive bags contain 4 striped lime bags.
+shiny tomato bags contain 1 striped maroon bag.
+striped maroon bags contain 1 muted yellow bag, 4 dark plum bags, 4 clear gray bags.
+pale yellow bags contain no other bags.
+plaid lime bags contain 2 faded white bags.

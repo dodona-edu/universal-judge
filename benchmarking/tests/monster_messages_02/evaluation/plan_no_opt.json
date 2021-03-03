@@ -1,0 +1,2589 @@
+{
+  "tabs": [
+    {
+      "name": "Match",
+      "runs": [
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "abbbbbabbbaaaababbaabbbbabababbbabbbbbbabaaaa"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.01.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": false
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "bbabbbbaabaabba"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.01.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "babbbbaabbbbbabbbbbbaabaaabaaa"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.01.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "aaabbbbbbaaaabaababaabababbabaaabbababababaaa"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.01.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "bbbbbbbaaaabbbbaaabbabaaa"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.01.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "bbbababbbbaaaaaaaabbababaaababaabab"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.01.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "ababaaaaaabaaab"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.01.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "ababaaaaabbbaba"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.01.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "baabbaaaabbaaaababbaababb"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.01.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "abbbbabbbbaaaababbbbbbaaaababb"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.01.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "aaaaabbaabaaaaababaa"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.01.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "aaaabbaaaabbaaa"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.01.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": false
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "aaaabbaabbaaaaaaabbbabbbaaabbaabaaa"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.01.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "babaaabbbaaabaababbaabababaaab"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.01.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": false
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "aabbbbbaabbbaaaaaabbbbbababaaaaabbaaabba"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.01.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/rules.01.txt",
+                  "name": "rules.01.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "babaaabbbababababbbbabbaabbaabaa"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "babaaaabaaaaababbbbaaaaa"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "abbabaabbaaabababaabbbbabbbbbaabbbbabababaaaabbbbababbbb"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "bbbabababbabbbabbbabbbbb"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "babaabbbababbbabaabaaaaa"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "abbabaabbaababbabababbbababbbabbabbabbbabbaabbbb"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "aaaaabaabbbbbaabbbbbbbbbbaaabbaaabbaabab"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "baababbabbbabbaaaaaababbaabbababbbabbbbb"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "aaabaaaabbabbbabbabaabbbabaabbbbaaaaabaaaabaabaaababaabbabbaaaabbbbaabbabbabaaaaaaaabaab"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": false
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "ababaaabababbbababaaabab"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "bbbbabbbbbaabaaaaaabbbbbbabbbabaabbaaababbbaaaaababaabaabaabababbabbbabbabaaabbaaabbaaaa"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": false
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "babaabaaababaaabaaaababa"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "aabaaabbaabbbabbabaabaab"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "bbbaabaaaabaaabbbaaabbbabbbaaabb"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "aaaaaaabaaababbbbbbbbbbbbaaabaabbaaabbab"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "bbabbabbaaaaabababaababa"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "babbababbbabbaababaababbaaaaabaaabbbabba"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "bbbbbbbababbaaaaabaaabbaabbaaaab"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "bbbbbaaabbbbbaaaaaabaaaabbbaaabb"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "babbababaababbbbbbbaaabb"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "abaabbaabbababaabbababba"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "abaaabbaaabaabbbabababba"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "babaaaabaaaababbabbbbaaa"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "bbbbbbbabaababbaaaaababbabbaabbabbbaabaababaabbbbbbaabab"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "aaabbabbbaabababbaabaaba"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "bbbababbabaabbabbbabaaaa"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "baabbabababaaaabbbbbbaab"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": false
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "bbabbbbabaababbabbbaabab"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "abaabbabbbabbabbabbbabba"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "bbbbbbbaaababaaabbaabbbabbaaabbbbabababb"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "aabbaaabbabbabaaaabbabaababbbaababaabababaaabbaa"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "aaabaababbbabbbbaaababbbbaaabbbb"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "aaaaaaaaaaabaaaababbabbb"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "bbbabbbbaabaababaabbabab"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "baaabaabbaaaabbbbaaaaaaa"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "bbbbbbbaabbabbaabaabaaaa"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "aaaaabaabbabbaaaaaaaaabb"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "aabaaabbaabbabaaabbabaabbaababaaabbbaaaaababbaabaaabbaaabbaaabaa"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": false
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "bababbbaaabaababbbababaabbaabaabbaaaabbabbaabababbbabbbababbabbb"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "abbbaababbaabaaaaababbbaaaabbbaa"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "aababbbaaaabaabbbbabaaaa"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "aaaaabbaaabaaabbbababaaa"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "bbbababaaabaaaabbabbabaabbababababababbbabbaaaaabbababbabbbbabbbabbbaabb"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "bbbabababbbabababababbbb"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "bbaaababbbabbbbaabbbbbaa"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "bbababaabaaaabbaabbbbaaa"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "bbbbabbababbbbaabbaaaababbababbaabaaabababbabbabbbbbbaababbbbabbbbaaaaabbbaabbba"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": false
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "abbabbabbbbbbaabaaaaabababaaaaabaaabbaaaabababba"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "bbbabaabaababaaabaabbaaa"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "match",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "bbababbbbaaababaaaabbabbaaabbbaa"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/rules.02.txt",
+                  "name": "rules.02.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "hidden": null
+    },
+    {
+      "name": "Matches",
+      "runs": [
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "matches",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "messages.01.txt"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.01.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 12.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/messages.01.txt",
+                  "name": "messages.01.txt",
+                  "location": "href",
+                  "storage": "disk"
+                },
+                {
+                  "content": "media/workdir/rules.01.txt",
+                  "name": "rules.01.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "matches",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "messages.02.txt"
+                      },
+                      {
+                        "type": "text",
+                        "data": "rules.02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 346.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/messages.02.txt",
+                  "name": "messages.02.txt",
+                  "location": "href",
+                  "storage": "disk"
+                },
+                {
+                  "content": "media/workdir/rules.02.txt",
+                  "name": "rules.02.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "hidden": null
+    }
+  ],
+  "namespace": "submission"
+}

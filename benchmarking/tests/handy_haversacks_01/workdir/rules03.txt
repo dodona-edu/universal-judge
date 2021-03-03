@@ -1,0 +1,11 @@
+shiny green bags contain no other bags.
+vibrant crimson bags contain 3 wavy yellow bags, 1 light blue bag.
+striped chartreuse bags contain 3 shiny gold bags, 2 shiny green bags, 3 dim crimson bags.
+bright green bags contain 4 shiny green bags, 4 wavy yellow bags, 2 light blue bags.
+shiny gold bags contain no other bags.
+clear lavender bags contain 4 wavy yellow bags, 4 dim crimson bags.
+dim crimson bags contain no other bags.
+wavy yellow bags contain no other bags.
+bright white bags contain 2 dim crimson bags, 5 shiny gold bags, 1 shiny green bag.
+light blue bags contain no other bags.
+plaid bronze bags contain 4 dim crimson bags, 3 light blue bags, 4 wavy yellow bags.

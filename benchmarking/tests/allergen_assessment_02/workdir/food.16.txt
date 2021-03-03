@@ -1,0 +1,8 @@
+pxt kfvhgf zpzp zqcbw jio fpqbi (contains dairy)
+unkob zpzp argspw zmk bzez zqcbw kfvhgf jwaqe (contains dairy, nuts)
+bzez zpzp ich fpqbi kfvhgf zmk argspw zqcbw (contains dairy, nuts)
+wspka zqcbw cazn jwaqe klx ich zpzp bzez (contains dairy, nuts)
+cazn unkob iznthq ovtgbt jwaqe kfvhgf ich zpzp (contains dairy)
+zpzp klx kfvhgf jwaqe oseeyl ovtgbt iznthq (contains dairy, eggs)
+zqcbw bzez oseeyl jio zpzp zmk (contains eggs, dairy, nuts)
+cazn ich unkob bzez oseeyl zmk zpzp klx (contains dairy, nuts, eggs)

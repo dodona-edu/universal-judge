@@ -1,0 +1,973 @@
+{
+  "tabs": [
+    {
+      "name": "Differences",
+      "runs": [
+        {
+          "run": {
+            "input": {
+              "stdin": "none",
+              "arguments": [],
+              "main_call": false
+            },
+            "output": {
+              "stdout": "none",
+              "stderr": "none",
+              "file": "ignored",
+              "exception": "none",
+              "exit_code": {
+                "value": 0
+              }
+            },
+            "description": null,
+            "link_files": []
+          },
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "differences",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "adapters01.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 35.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/adapters01.txt",
+                  "name": "adapters01.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "differences",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "adapters02.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 220.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/adapters02.txt",
+                  "name": "adapters02.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "differences",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "adapters03.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 20.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/adapters03.txt",
+                  "name": "adapters03.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "differences",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "adapters04.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 42.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/adapters04.txt",
+                  "name": "adapters04.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "differences",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "adapters05.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 24.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/adapters05.txt",
+                  "name": "adapters05.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "differences",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "adapters06.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 24.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/adapters06.txt",
+                  "name": "adapters06.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "differences",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "adapters07.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 20.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/adapters07.txt",
+                  "name": "adapters07.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "differences",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "adapters08.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 8.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/adapters08.txt",
+                  "name": "adapters08.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "differences",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "adapters09.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 14.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/adapters09.txt",
+                  "name": "adapters09.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "differences",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "adapters10.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 15.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/adapters10.txt",
+                  "name": "adapters10.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "differences",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "adapters11.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 20.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/adapters11.txt",
+                  "name": "adapters11.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "differences",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "adapters12.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 36.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/adapters12.txt",
+                  "name": "adapters12.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "differences",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "adapters13.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 18.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/adapters13.txt",
+                  "name": "adapters13.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "differences",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "adapters14.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 25.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/adapters14.txt",
+                  "name": "adapters14.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "differences",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "adapters15.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 8.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/adapters15.txt",
+                  "name": "adapters15.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "differences",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "adapters16.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 20.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/adapters16.txt",
+                  "name": "adapters16.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "differences",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "adapters17.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 36.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/adapters17.txt",
+                  "name": "adapters17.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "differences",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "adapters18.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 39.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/adapters18.txt",
+                  "name": "adapters18.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "differences",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "adapters19.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 42.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/adapters19.txt",
+                  "name": "adapters19.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "differences",
+                    "namespace": null,
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "adapters20.txt"
+                      }
+                    ]
+                  },
+                  "description": null,
+                  "essential": true,
+                  "output": {
+                    "stdout": "none",
+                    "stderr": "none",
+                    "file": "ignored",
+                    "exception": "none",
+                    "result": {
+                      "value": {
+                        "type": "integer",
+                        "data": 2112.0
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {},
+                        "name": "value"
+                      }
+                    }
+                  }
+                }
+              ],
+              "before": {},
+              "after": {},
+              "description": null,
+              "link_files": [
+                {
+                  "content": "media/workdir/adapters20.txt",
+                  "name": "adapters20.txt",
+                  "location": "href",
+                  "storage": "disk"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "hidden": null
+    }
+  ],
+  "namespace": "submission"
+}

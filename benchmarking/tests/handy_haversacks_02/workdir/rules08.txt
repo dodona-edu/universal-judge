@@ -1,0 +1,24 @@
+muted purple bags contain 2 drab yellow bags.
+clear turquoise bags contain no other bags.
+clear beige bags contain 3 clear coral bags, 2 muted lime bags.
+dark lavender bags contain no other bags.
+drab beige bags contain 3 clear olive bags, 5 mirrored silver bags.
+shiny gold bags contain 1 dark white bag.
+dark white bags contain 4 faded black bags.
+dim gold bags contain 5 bright purple bags, 2 clear coral bags, 5 dark lavender bags.
+vibrant bronze bags contain no other bags.
+drab yellow bags contain 2 clear beige bags, 4 dim gold bags, 1 dark white bag.
+muted lime bags contain no other bags.
+clear tomato bags contain 1 shiny gold bag, 4 mirrored silver bags, 5 faded lavender bags.
+mirrored silver bags contain 5 dim gold bags.
+bright purple bags contain no other bags.
+dull silver bags contain no other bags.
+dim blue bags contain no other bags.
+dim bronze bags contain 3 shiny gold bags.
+faded black bags contain no other bags.
+mirrored gold bags contain 5 dim blue bags, 1 shiny olive bag.
+clear coral bags contain no other bags.
+dim aqua bags contain 1 clear olive bag.
+clear olive bags contain 2 mirrored gold bags.
+faded lavender bags contain 2 mirrored gold bags, 1 clear beige bag.
+shiny olive bags contain no other bags.

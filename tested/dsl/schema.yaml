@@ -2,14 +2,45 @@ $id: "https://github.com/dodona-edu/universal-judge/blob/master/tested/dsl/schem
 $schema: "http://json-schema.org/draft-07/schema#"
 title: "DSL Schema"
 description: "YAML DSL TESTed testplan"
-type: "array"
-minItems: 1
-items:
-  $ref: "#/definitions/tab"
+oneOf:
+  - $ref: "#/definitions/_rootList"
+  - $ref: "#/definitions/_rootObject"
 definitions:
-  config:
+  _rootList:
+    type: "array"
+    minItems: 1
+    items:
+      $ref: "#/definitions/tab"
+  _rootObject:
     type: "object"
-    description: "Configuration properties for textual comparison"
+    properties:
+      config:
+        $ref: "#/definitions/globalConfig"
+        description: "Configuration settings at plan level"
+      disable_optimizations:
+        type: "boolean"
+        description: "Disable performance optimizations"
+      namespace:
+        type: "string"
+        default: "submission"
+        description: "Namespace of the submitted solution, best in `snake_case`"
+      tabs:
+        type: "array"
+        descriptions: "List of all tabs to test"
+        items:
+          $ref: "#/definitions/tab"
+    required:
+      - "tabs"
+  configGeneral:
+    hide_expected:
+      description: "Hide the expected value in feedback (default: false), not recommended to use!"
+      type: "boolean"
+    required:
+      - "hide_expected"
+  configText:
+    type: "object"
+    description: >-
+      Configuration properties for textual comparison and to configure if the expected value should be hidden or not
     minProperties: 1
     properties:
       applyRounding:
@@ -27,9 +58,12 @@ definitions:
       tryFloatingPoint:
         description: "Try comparing text as floating point numbers"
         type: "boolean"
-  localConfig:
+      hide_expected:
+        description: "Hide the expected value in feedback (default: false), not recommended to use!"
+        type: "boolean"
+  localConfigGeneral:
     type: "object"
-    description: "Specific configuration properties for textual comparison of one value"
+    description: "General configuration properties for one test"
     required:
       - "data"
       - "config"
@@ -37,20 +71,41 @@ definitions:
       data:
         $ref: "#/definitions/textualTypes"
       config:
-        $ref: "#/definitions/config"
+        $ref: "#/definitions/configGeneral"
+  localConfigText:
+    type: "object"
+    description: "Textual configuration properties of one test"
+    required:
+      - "data"
+      - "config"
+    properties:
+      data:
+        $ref: "#/definitions/textualTypes"
+      config:
+        $ref: "#/definitions/configText"
   globalConfig:
     type: "object"
-    description: "Global configuration properties for textual comparison"
+    description: "Global configuration properties"
     minProperties: 1
     properties:
       stdout:
-        $ref: "#/definitions/config"
+        $ref: "#/definitions/configText"
       stderr:
-        $ref: "#/definitions/config"
+        $ref: "#/definitions/configText"
+      exception:
+        $ref: "#/definitions/configGeneral"
+      exit_code:
+        $ref: "#/definitions/configGeneral"
+      return:
+        $ref: "#/definitions/configGeneral"
   streamOutput:
     anyOf:
       - $ref: "#/definitions/textualTypes"
-      - $ref: "#/definitions/localConfig"
+      - $ref: "#/definitions/localConfigText"
+  generalOutput:
+    anyOf:
+      - $ref: "#/definitions/textualTypes"
+      - $ref: "#/definitions/localConfigGeneral"
   file:
     type: "object"
     description: "Tab definition with testcases"
@@ -71,10 +126,7 @@ definitions:
     properties:
       config:
         $ref: "#/definitions/globalConfig"
-        description: "Configuration of textual comparison at tab level"
-      disable_optimizations:
-        type: "boolean"
-        description: "Disable performance optimizations"
+        description: "Configuration settings at tab level"
       hidden:
         type: "boolean"
         description: "Defines if the tab is hidden for the student or not"
@@ -114,7 +166,7 @@ definitions:
     properties:
       config:
         $ref: "#/definitions/globalConfig"
-        description: "Configuration of textual comparison at context level"
+        description: "Configuration settings at context level"
       files:
         type: "array"
         items:
@@ -134,8 +186,16 @@ definitions:
         description: "Expected exception for main call"
         $ref: "#/definitions/textualTypes"
       exit_code:
-        type: "integer"
+        type:  ["integer", "object"]
         description: "Expected exit code for the run"
+        required:
+          - "data"
+          - "config"
+        properties:
+          data:
+            type: "integer"
+          config:
+            $ref: "#/definitions/configGeneral"
       stdin:
         description: "Given input at stdin for main call"
         $ref: "#/definitions/textualTypes"
@@ -145,19 +205,13 @@ definitions:
       stdout:
         description: "Expected output for main call at stdout"
         $ref: "#/definitions/streamOutput"
-    dependencies:
-      stdin:
-        not:
-          required:
-            - "statement"
-            - "expression"
   testcase:
     type: "object"
     description: "An individual test for a statement or expression"
     properties:
       exception:
         description: "Expected exception message"
-        $ref: "#/definitions/textualTypes"
+        $ref: "#/definitions/generalOutput"
       files:
         type: "array"
         items:
@@ -174,7 +228,7 @@ definitions:
           - type: "string"
       return-raw:
         description: "Value string to parse to the expected return value"
-        $ref: "#/definitions/textualTypes"
+        $ref: "#/definitions/generalOutput"
       statement:
         description: "Statement or expression to evaluate"
         $ref: "#/definitions/textualTypes"
@@ -187,6 +241,9 @@ definitions:
       stdout:
         description: "Expected output at stdout"
         $ref: "#/definitions/streamOutput"
+      config:
+        $ref: "#/definitions/globalConfig"
+        description: "Configuration settings at testcase level"
     oneOf:
       - required:
           - "statement"

@@ -1,6 +1,6 @@
 from ast import literal_eval
 from os.path import join, dirname, realpath
-from typing import Optional, Union, List
+from typing import Optional, Union, List, get_args
 
 from lark import Lark, Tree, Token, UnexpectedToken
 
@@ -76,10 +76,10 @@ class Parser:
         expression = self.analyse_expression(tree.children[0], allow_functions)
         expr_type = string_to_type(tree.children[1].type)
         if isinstance(expression, SequenceType):
-            if not isinstance(expr_type, SequenceTypes.__args__):
+            if not isinstance(expr_type, get_args(SequenceTypes)):
                 raise ParseError("Can't cast sequence type to non-sequence type")
         elif isinstance(expression, NumberType):
-            if not isinstance(expr_type, NumericTypes.__args__):
+            if not isinstance(expr_type, get_args(NumericTypes)):
                 raise ParseError("Can't cast numeric type to non-numeric type")
         elif isinstance(expression, BooleanType):
             if not isinstance(expr_type, BooleanTypes):
@@ -88,10 +88,10 @@ class Parser:
             if not isinstance(expr_type, NothingTypes):
                 raise ParseError("Can't cast nothing type to non-nothing type")
         elif isinstance(expression, StringType):
-            if not isinstance(expr_type, StringTypes):
+            if not isinstance(expr_type, get_args(StringTypes)):
                 raise ParseError("Can't cast string type to non-string type")
         elif isinstance(expression, ObjectType):
-            if isinstance(expr_type, SequenceTypes.__args__):
+            if isinstance(expr_type, get_args(SequenceTypes)):
                 if len(expression.data) == 0:
                     return SequenceType(type=expr_type, data=[])
                 else:
