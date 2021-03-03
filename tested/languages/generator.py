@@ -396,8 +396,9 @@ def _handle_link_files(link_files: Iterable[FileUrl],
     dict_links = dict((link_file.name, dataclasses.asdict(link_file))
                       for link_file in link_files)
     files = json.dumps(dict_links)
-    return f"<div class='contains-file highlight-{language}' data-files=" \
-           f"{repr(files)}>", "</div>"
+    return f"<div class='contains-file highlight-{language} highlighter-rouge' " \
+           f"data-files={repr(files)}><pre style='padding: 2px; margin-bottom: " \
+           f"1px; background: none;'><code>", "</code></pre></div>"
 
 
 def get_readable_input(bundle: Bundle,
@@ -455,7 +456,7 @@ def get_readable_input(bundle: Bundle,
     if not regex.search(text):
         return ExtendedMessage(description=text, format=format_), set()
     lexer = get_lexer_by_name(format_)
-    generated_html = highlight(text, lexer, _html_formatter)
+    generated_html = highlight(text, lexer, _html_formatter)[28:-14]
 
     if isinstance(case, RunTestcase):
         regex = re.compile(
