@@ -205,7 +205,7 @@ class Language:
     is the case, it is recommended to modify the value in the config.json file
     instead of overriding the function in a subclass.
     """
-    __slots__ = ["options", "config_dir"]
+    __slots__ = ["options", "config_dir", "_description_generator"]
 
     def __init__(self, config_file: str = "config.json"):
         """
@@ -216,6 +216,7 @@ class Language:
         :param config_file: The name of the configuration file. Relative to the
                             directory in which the configuration class is.
         """
+        self._description_generator = None
         self.config_dir = Path(sys.modules[self.__module__].__file__).parent
         path_to_config = (self.config_dir / config_file)
         with open(path_to_config, "r") as f:
@@ -639,4 +640,7 @@ class Language:
         return message
 
     def get_description_generator(self) -> DescriptionGenerator:
-        return DescriptionGenerator(self, self.config_dir)
+        if self._description_generator is None:
+            self._description_generator = DescriptionGenerator(self,
+                                                               self.config_dir)
+        return self._description_generator
