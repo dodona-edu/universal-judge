@@ -21,6 +21,9 @@ def _executable():
 
 class Python(Language):
 
+    def get_string_quote(self):
+        return '\''
+
     def compilation(self, config: Config, files: List[str]) -> CallbackResult:
         result = [x.replace(".py", ".pyc") for x in files]
         return [_executable(), "-W", "ignore", "-m", "compileall", "-q", "-b",

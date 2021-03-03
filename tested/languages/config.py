@@ -220,6 +220,9 @@ class Language:
         with open(path_to_config, "r") as f:
             self.options = json.load(f)
 
+    def get_string_quote(self):
+        return '"'
+
     def compilation(self, config: Config, files: List[str]) -> CallbackResult:
         """
         Callback for generating the compilation command.
