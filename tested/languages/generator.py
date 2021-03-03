@@ -446,13 +446,14 @@ def get_readable_input(bundle: Bundle,
     else:
         raise AssertionError("Unknown testcase type.")
 
+    quote = bundle.lang_config.get_string_quote()
     if not analyse_files or not files:
         return ExtendedMessage(description=text, format=format_), set()
     if isinstance(case, RunTestcase):
         regex = re.compile('|'.join(map(lambda x: re.escape(x.name), files)))
     else:
         regex = re.compile(
-            f'\"{"|".join(map(lambda x: re.escape(x.name), files))}\"')
+            f'{quote}{"|".join(map(lambda x: re.escape(x.name), files))}{quote}')
     if not regex.search(text):
         return ExtendedMessage(description=text, format=format_), set()
     lexer = get_lexer_by_name(format_)
@@ -463,10 +464,11 @@ def get_readable_input(bundle: Bundle,
             f'({"|".join(map(lambda x: re.escape(html.escape(x.name)), files))})')
         is_args = True
     else:
+        quote = '&#39;' if quote == '\'' else html.escape(quote)
         regex = re.compile(
-            f'(&quot;)'
+            f'({quote})'
             f'({"|".join(map(lambda x: re.escape(html.escape(x.name)), files))})'
-            f'(&quot;)'
+            f'({quote})'
         )
         is_args = False
     url_map = dict(
