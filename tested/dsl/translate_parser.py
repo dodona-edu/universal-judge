@@ -302,9 +302,20 @@ class SchemaParser:
                 self._translate_tab(self._enforce_dict(yaml_obj))
                 for yaml_obj in yaml_obj
             ]
+            return Plan(tabs=tabs)
         else:
-            tabs = []
-        return Plan(tabs=tabs)
+            optimize = self._get_bool_safe(yaml_obj,
+                                           "disable_optimizations") is not True
+            namespace = self._get_str_safe(yaml_obj, "namespace") or "submission"
+            stack_frame = self._translate_config(
+                self._get_dict_safe(yaml_obj, "config"),
+            )
+            tabs = [
+                self._translate_tab(self._enforce_dict(yaml_obj), optimize,
+                                    stack_frame)
+                for yaml_obj in self._get_list_safe(yaml_obj, "tabs")
+            ]
+        return Plan(tabs=tabs, namespace=namespace)
 
     def _translate_context_testcase(
             self,
@@ -392,6 +403,7 @@ class SchemaParser:
 
     def _translate_tab(self,
                        tab: YAML_DICT,
+                       optimize: bool = True,
                        stack_frame: StackFrame = StackFrame()) -> Tab:
         stack_frame = self._translate_config(
             self._get_dict_safe(tab, "config"),
@@ -399,7 +411,6 @@ class SchemaParser:
         )
         hidden = self._get_bool_safe(tab, "hidden")
         name = self._get_str_safe(tab, "tab")
-        optimize = self._get_bool_safe(tab, "disable_optimizations") is not True
 
         translated_contexts = [
             self._translate_context(context, stack_frame)
