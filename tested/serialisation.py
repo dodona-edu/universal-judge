@@ -62,17 +62,23 @@ def _get_combined_types(types: Iterable[WrappedAllTypes]) -> WrappedAllTypes:
     type_dict = dict()
     for data_type in types:
         if isinstance(data_type, tuple):
-            if isinstance(data_type[1], tuple):
-                try:
-                    type_dict[data_type[0]][0].add(data_type[1][0])
-                    type_dict[data_type[0]][1].add(data_type[1][1])
-                except KeyError:
-                    type_dict[data_type[0]] = (set(data_type[1][0]),
-                                               set(data_type[1][1]))
-            else:
-                try:
-                    type_dict[data_type[0]].add(data_type[1])
-                except KeyError:
+            try:
+                type_item = type_dict[data_type[0]]
+                if isinstance(type_item, tuple):
+                    if isinstance(data_type[1], tuple):
+                        type_dict[data_type[0]][0].add(data_type[1][0])
+                        type_dict[data_type[0]][1].add(data_type[1][1])
+                    else:
+                        type_dict[data_type[0]] = {BasicStringTypes.ANY}
+                else:
+                    if isinstance(data_type[1], tuple):
+                        type_item.add(BasicStringTypes.ANY)
+                    else:
+                        type_item.add(data_type[1])
+            except KeyError:
+                if isinstance(data_type[1], tuple):
+                    type_dict[data_type[0]] = ({data_type[1][0]}, {data_type[1][1]})
+                else:
                     type_dict[data_type[0]] = {data_type[1]}
         else:
             type_dict[data_type] = None
