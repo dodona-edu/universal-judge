@@ -469,7 +469,7 @@ def get_readable_input(bundle: Bundle,
         )
         is_args = False
     url_map = dict(
-        map(lambda x: (re.escape(html.escape(x.name)), x), files))
+        map(lambda x: (html.escape(x.name), x), files))
 
     seen: Set[FileUrl] = set()
 
