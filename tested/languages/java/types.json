@@ -35,6 +35,7 @@
   "fixed_precision": "BigDecimal",
   "array": false,
   "list": "List",
+  "any": "Object",
   "inner": {
     "boolean": "Boolean",
     "char": "Character",

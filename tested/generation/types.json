@@ -32,6 +32,7 @@
   "array": "array",
   "list": "list",
   "tuple": "tuple",
+  "any": "any",
   "inner": {
   },
   "natural": {
