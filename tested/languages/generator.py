@@ -45,6 +45,7 @@ EVALUATION_ARGS = "value"
 # Names of predefined templates.
 STATEMENT = "statement"
 
+
 @dataclass
 class _TestcaseArguments:
     """Arguments for a testcases testcase template."""
@@ -484,8 +485,8 @@ def get_readable_input(bundle: Bundle,
                    f'target="_blank">{groups[0]}</a>'
         file = url_map[groups[1]]
         seen.add(file)
-        return f'<a href={repr(file.content)} class="file-link" target="_blank">' \
-               f'{groups[0]}{groups[1]}{groups[2]}</a>'
+        return f'{groups[0]}<a href={repr(file.content)} class="file-link" ' \
+               f'target="_blank">{groups[1]}</a>{groups[2]}'
 
     generated_html = regex.sub(replace_link, generated_html)
     prefix, suffix = _handle_link_files(seen, format_)
