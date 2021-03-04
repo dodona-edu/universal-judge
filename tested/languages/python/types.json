@@ -1,0 +1,56 @@
+{
+  "brackets": {
+    "open": "[",
+    "close": "]"
+  },
+  "console": {
+    "name": "python",
+    "prompt": ">>>"
+  },
+  "integer": "int",
+  "rational": "float",
+  "char": "str",
+  "text": "str",
+  "boolean": "bool",
+  "sequence": "List",
+  "set": "Set",
+  "map": "Dict",
+  "nothing": "None",
+  "int8": "int",
+  "uint8": "int",
+  "int16": "int",
+  "uint16": "int",
+  "int32": "int",
+  "uint32": "int",
+  "int64": "int",
+  "uint64": "int",
+  "bigint": "int",
+  "single_precision": "float",
+  "double_precision": "float",
+  "double_extended": "Decimal",
+  "fixed_precision": "Decimal",
+  "array": "List",
+  "list": "List",
+  "tuple": "Tuple",
+  "any": "Any",
+  "inner": {
+  },
+  "natural": {
+    "en": {
+      "text": "string",
+      "sequence": "list",
+      "set": "set",
+      "map": "dictionary",
+      "list": "list",
+      "tuple": "tuple"
+    },
+    "nl": {
+      "text": "string",
+      "sequence": "lijst",
+      "set": "verzameling",
+      "map": "dictionary",
+      "list": "lijst",
+      "tuple": "tuple"
+    }
+  }
+}

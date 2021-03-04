@@ -11,9 +11,7 @@ from pathlib import Path
 from typing import List, Union, Tuple, Optional, Set, Callable, Match, Iterable
 
 from mako import exceptions
-from pygments import highlight
 from pygments.formatters.html import HtmlFormatter
-from pygments.lexers import get_lexer_by_name
 
 from .config import TemplateType
 from .templates import find_and_write_template, find_template
@@ -456,8 +454,13 @@ def get_readable_input(bundle: Bundle,
             f'{quote}{"|".join(map(lambda x: re.escape(x.name), files))}{quote}')
     if not regex.search(text):
         return ExtendedMessage(description=text, format=format_), set()
-    lexer = get_lexer_by_name(format_)
-    generated_html = highlight(text, lexer, _html_formatter)[28:-14]
+
+    if format_ == 'text':
+        generated_html = html.escape(text)
+    else:
+        generator = bundle.lang_config.get_description_generator()
+        # Slice to unwrapped generated div and pre tags
+        generated_html = generator.generate_html_code(text)[28:-14]
 
     if isinstance(case, RunTestcase):
         regex = re.compile(
@@ -485,8 +488,8 @@ def get_readable_input(bundle: Bundle,
                    f'target="_blank">{groups[0]}</a>'
         file = url_map[groups[1]]
         seen.add(file)
-        return f'<a href={repr(file.content)} class="file-link" target="_blank">' \
-               f'{groups[0]}{groups[1]}{groups[2]}</a>'
+        return f'{groups[0]}<a href={repr(file.content)} class="file-link" ' \
+               f'target="_blank">{groups[1]}</a>{groups[2]}'
 
     generated_html = regex.sub(replace_link, generated_html)
     prefix, suffix = _handle_link_files(seen, format_)

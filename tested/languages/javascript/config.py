@@ -133,7 +133,10 @@ class JavaScript(Language):
         return "".join(lines)
 
     def cleanup_description(self, namespace: str, description: str) -> str:
-        return cleanup_description(self, namespace, description)
+        description = cleanup_description(self, namespace, description)
+        if description.startswith("await "):
+            return description[6:]
+        return description
 
     def clean_exception_message(self, message: str, namespace: str) -> str:
         return message.replace(f'{namespace}.', '', 1)

@@ -1,0 +1,34 @@
+{
+  "console": {
+    "name": "c",
+    "prompt": ">"
+  },
+  "integer": "int",
+  "rational": "double",
+  "char": "char",
+  "text": "char*",
+  "boolean": "bool",
+  "nothing": "void",
+  "int8": "signed char",
+  "uint8": "unsigned char",
+  "int16": "short",
+  "uint16": "unsigned short",
+  "int32": "int",
+  "uint32": "unsigned int",
+  "int64": "long",
+  "uint64": "unsigned long",
+  "bigint": "long long",
+  "single_precision": "float",
+  "double_precision": "double",
+  "any": "void*",
+  "inner": {
+  },
+  "natural": {
+    "en": {
+      "text": "string"
+    },
+    "nl": {
+      "text": "string"
+    }
+  }
+}

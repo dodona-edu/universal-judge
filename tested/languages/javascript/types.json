@@ -1,0 +1,55 @@
+{
+  "brackets": {
+    "open": "<",
+    "close": ">"
+  },
+  "console": {
+    "name": "javascript",
+    "prompt": ">"
+  },
+  "integer": "number",
+  "rational": "number",
+  "char": "string",
+  "text": "string",
+  "boolean": "boolean",
+  "sequence": "array",
+  "set": "set",
+  "map": "object",
+  "nothing": "undefined",
+  "int8": "number",
+  "uint8": "number",
+  "int16": "number",
+  "uint16": "number",
+  "int32": "number",
+  "uint32": "number",
+  "int64": "number",
+  "uint64": "number",
+  "bigint": "number",
+  "single_precision": "number",
+  "double_precision": "number",
+  "double_extended": "number",
+  "fixed_precision": "number",
+  "array": "array",
+  "list": "array",
+  "any": "object",
+  "inner": {
+  },
+  "natural": {
+    "en": {
+      "text": "string",
+      "sequence": "array",
+      "set": "set",
+      "map": "object",
+      "array": "array",
+      "list": "array"
+    },
+    "nl": {
+      "text": "string",
+      "sequence": "array",
+      "set": "verzameling",
+      "map": "object",
+      "array": "array",
+      "list": "array"
+    }
+  }
+}

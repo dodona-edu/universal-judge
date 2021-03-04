@@ -26,6 +26,10 @@ extension = input(
     "What extension does this language use (without dot, e.g. py, java or c)?"
 )
 
+prompt = input(
+    "What is the console prompt prefix of the language (e.g. Python: '>>>', "
+    "Haskell: '>')?\n")
+
 print("Creating directories...")
 
 templates = dir_path.parent / "languages" / name / "templates"
@@ -41,6 +45,17 @@ contents['extensions']['file'] = extension
 contents['general']['selector'] = selector
 
 with open(templates.parent / "config.json", "w") as f:
+    json.dump(contents, f, indent=2)
+
+print("Generating types.json...")
+
+with open(dir_path / 'types.json', 'r') as f:
+    contents = json.load(f)
+
+contents['console']['name'] = name
+contents['console']['prompt'] = prompt
+
+with open(templates.parent / "types.json", "w") as f:
     json.dump(contents, f, indent=2)
 
 print("Generating config class...")
