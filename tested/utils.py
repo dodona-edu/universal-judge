@@ -347,7 +347,10 @@ def sorted_no_duplicates(iterable: Iterable[T],
         :return: 1 if x < y else -1 if x > y else 0
         """
         if recursive_key:
-            x, y = recursive_key(x), recursive_key(y)
+            if x is not None:
+                x = recursive_key(x)
+            if y is not None:
+                y = recursive_key(y)
         t_x, t_y = type_order(x), type_order(y)
         if t_x < t_y:
             return 1
