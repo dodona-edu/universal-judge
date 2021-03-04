@@ -52,7 +52,7 @@
       "sequence": "lijst",
       "set": "verzameling",
       "list": "lijst",
-      "tuple": "tupel"
+      "tuple": "tuple"
     }
   }
 }

@@ -458,6 +458,7 @@ def get_readable_input(bundle: Bundle,
         generated_html = html.escape(text)
     else:
         generator = bundle.lang_config.get_description_generator()
+        # Slice to unwrapped generated div and pre tags
         generated_html = generator.generate_html_code(text)[28:-14]
 
     if isinstance(case, RunTestcase):

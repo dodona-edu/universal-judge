@@ -50,7 +50,7 @@
       "set": "verzameling",
       "map": "dictionary",
       "list": "lijst",
-      "tuple": "tupel"
+      "tuple": "tuple"
     }
   }
 }
