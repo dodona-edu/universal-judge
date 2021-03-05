@@ -123,6 +123,8 @@ def create_description_instance_from_template(template: Template,
                                               natural_language: str = "en",
                                               namespace: str = "submission",
                                               is_html: bool = True) -> str:
+    from pathlib import Path
+    judge_directory = Path(__file__).parent.parent
     language = get_language(programming_language)
 
     bundle = Bundle(
@@ -134,7 +136,7 @@ def create_description_instance_from_template(template: Template,
             natural_language=natural_language,
             programming_language=programming_language,
             workdir="",
-            judge=""
+            judge=str(judge_directory)
         ),
         out=open(os.devnull, 'w'),
         lang_config=language,
