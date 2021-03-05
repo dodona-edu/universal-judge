@@ -63,6 +63,12 @@ def _analyse_description_dir(description_dir: Path,
 
 
 def _check_if_all_languages_exists(languages: List[str]):
+    """
+    Check if all languages to check exists in TESTed
+
+    :param languages: list of the languages to test
+    :return:
+    """
     for language in languages:
         if not language_exists(language):
             raise InstantiateError(
@@ -70,6 +76,13 @@ def _check_if_all_languages_exists(languages: List[str]):
 
 
 def _check_if_directory_exists(name: str, path: Path):
+    """
+    Check if the given directory exist
+
+    :param name: Name of the directory
+    :param path: Location of the directory
+    :return:
+    """
     if not path.exists():
         raise InstantiateError(f"{name} directory '{path}' doesn't exists")
     elif not path.is_dir():
@@ -77,6 +90,13 @@ def _check_if_directory_exists(name: str, path: Path):
 
 
 def _check_if_file_exists(name: str, path: Path):
+    """
+    Check if the given file exist
+
+    :param name: Name of the file
+    :param path: Location of the file
+    :return:
+    """
     if not path.exists():
         raise InstantiateError(f"{name} file '{path}' doesn't exists")
     elif not path.is_file():
@@ -84,6 +104,15 @@ def _check_if_file_exists(name: str, path: Path):
 
 
 def _copy_all(template_dir: Path, instance_dir: Path):
+    """
+    Copy all files and directories except from the description directory and the
+    config.template.json file
+
+    :param template_dir: The template directory as source
+    :param instance_dir: The instance directory as destination
+    :return:
+    """
+
     for path in template_dir.iterdir():
         if path.name in ("config.template.json", "description"):
             continue
@@ -96,6 +125,7 @@ def _copy_all(template_dir: Path, instance_dir: Path):
 def _filter_valid_languages(languages: List[str], testplan: Plan) -> List[str]:
     """
     Filter out all languages for which the testplan isn't supported
+
     :param languages: languages to check
     :param testplan: testplan to support
     :return: all given languages which support the testplan
@@ -132,6 +162,12 @@ def _filter_valid_languages(languages: List[str], testplan: Plan) -> List[str]:
 
 
 def _get_config(config_json_path: Path) -> Dict[str, Any]:
+    """
+    Load exercise configuration
+
+    :param config_json_path: Configuration file location
+    :return: The loaded configuration dictionary
+    """
     with open(config_json_path, 'r') as json_fd:
         return json.load(json_fd)
 
@@ -145,6 +181,20 @@ def _instantiate(template_dir: Path,
                  language: str,
                  human_readable: bool = False,
                  backup_descriptions: bool = False):
+    """
+    Instantiate template for a specific programming language
+
+    :param template_dir: The template directory
+    :param instance_dir: The instance directory
+    :param testplan: The testplan to use
+    :param descriptions: The description file list
+    :param other_files_descriptions: The other files from the description folders
+    :param config_json_dict: Configuration dictionary
+    :param language: The programming language
+    :param human_readable: If the converted testplan must be human readable
+    :param backup_descriptions: Keep the old description folder
+    :return:
+    """
     config_dict = deepcopy(config_json_dict)
     config_json_file = instance_dir / "config.json"
     existing: bool
@@ -194,6 +244,16 @@ def _instantiate_descriptions(instance_dir: Path,
                               other_files_descriptions: List[Path],
                               testplan: Plan,
                               language: str):
+    """
+    Instantiate description directory
+
+    :param instance_dir: The instance directory
+    :param descriptions: The description files to use
+    :param other_files_descriptions: All other files and directories to copy
+    :param testplan: The testplan to determine the namespace
+    :param language: Programming language
+    :return:
+    """
     description_dir = instance_dir / "description"
     description_dir.mkdir()
     # Copy the other files
@@ -204,7 +264,7 @@ def _instantiate_descriptions(instance_dir: Path,
             shutil.copy2(path, instance_dir)
     # Copy or generate descriptions
     for description in descriptions:
-        # Prepare output name
+        # Prepare output file location
         if description.is_natural_language_explicit:
             file_name = f"description.{description.natural_language}." \
                         f"{description.type}"
@@ -226,6 +286,11 @@ def _instantiate_descriptions(instance_dir: Path,
 
 
 def _parser_instance() -> ArgumentParser:
+    """
+    Get argument parser
+
+    :return: the prepared argument parser
+    """
     info = "Included - Excluded = Programming languages that are candidates to " \
            "generate instances for"
 
@@ -260,6 +325,12 @@ def _parser_instance() -> ArgumentParser:
 
 
 def _prepare_templates(descriptions: List[DescriptionFile]):
+    """
+    Prepare all description templates
+
+    :param descriptions: list of the description files
+    :return:
+    """
     for description in descriptions:
         if not description.is_template:
             continue
@@ -270,6 +341,14 @@ def _prepare_templates(descriptions: List[DescriptionFile]):
 
 
 def _read_plan(config_dict: Dict[str, Any], evaluation_dir: Path) -> Plan:
+    """
+    Read testplan from JSON or YAML DSL
+
+    :param config_dict: Configuration information
+    :param evaluation_dir: Directory which must contain the testplan
+    :return: The testplan
+    """
+
     try:
         plan_file = evaluation_dir / config_dict["evaluation"]["plan_name"]
     except KeyError:
@@ -289,9 +368,26 @@ def _read_plan(config_dict: Dict[str, Any], evaluation_dir: Path) -> Plan:
 
 
 def _remove_existing(instance_dir: Path, backup_descriptions: bool = False):
+    """
+    Remove existing content of the instance directory
+
+    :param instance_dir: The instance directory
+    :param backup_descriptions: Keep the old descriptions directory or not
+    :return:
+    """
+    updated = False
     for path in instance_dir.iterdir():
-        if backup_descriptions and path.name == "description":
+        if updated and path.name == "description.bak":
+            continue
+        elif backup_descriptions and path.name == "description":
+            new_name = path.with_name("description.bak")
+            if new_name.exists():
+                if path.is_dir():
+                    shutil.rmtree(new_name)
+                else:
+                    new_name.unlink()
             path.rename(path.with_name("description.bak"))
+            updated = True
         elif path.is_dir():
             shutil.rmtree(path)
         else:
@@ -302,6 +398,7 @@ def _select_descriptions(descriptions: List[DescriptionFile]
                          ) -> List[DescriptionFile]:
     """
     Select best suited descriptions, templates and prefer markdown before html
+
     :param descriptions: list of all descriptions files
     :return: description files to use
     """
@@ -326,6 +423,21 @@ def instantiate(template_dir: Path,
                 default_i18n: str = "en",
                 human_readable: bool = False,
                 backup_descriptions: bool = False):
+    """
+    Instantiate a template exercise for all the supported programming language in
+    the given list of programming languages
+
+    :param template_dir: The template exercise directory
+    :param instances_dir: The instances directory
+    :param programming_languages: An optional list of possible programming language,
+    if no list given al languages from TESTed
+    :param default_i18n: The default language for the description files without
+    language
+    :param human_readable: Generated JSON testplan must be human readable
+    :param backup_descriptions: Keep the old description folder
+    :return:
+    """
+
     if programming_languages is None:
         programming_languages = [lang for lang in LANGUAGES if lang != "runhaskell"]
 
