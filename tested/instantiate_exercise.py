@@ -464,7 +464,7 @@ def instantiate(template_dir: Path,
     programming_languages = _filter_valid_languages(programming_languages, plan)
     for language in programming_languages:
         _instantiate(
-            template_dir=temp_dir,
+            template_dir=template_dir,
             instance_dir=instances_dir / language,
             testplan=plan,
             descriptions=descriptions_files,
