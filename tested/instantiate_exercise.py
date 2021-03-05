@@ -1,19 +1,25 @@
 import json
+import shutil
 import sys
 from argparse import ArgumentParser
+from copy import deepcopy
 from dataclasses import dataclass
 from itertools import groupby
 from pathlib import Path
 from typing import List, Any, Dict, Tuple, Optional
 
 from mako.template import Template
+from pydantic.json import pydantic_encoder
 
-from tested.description_instance import prepare_template
+from tested.description_instance import prepare_template, \
+    create_description_instance_from_template
 from tested.dsl import SchemaParser
 from tested.languages import LANGUAGES, language_exists, Language, get_language
 from tested.testplan import Plan, _PlanModel
 
-config_json = "config.json"
+
+class InstantiateError(Exception):
+    pass
 
 
 @dataclass
@@ -56,30 +62,35 @@ def _analyse_description_dir(description_dir: Path,
     return descriptions, other
 
 
-def _check_if_all_languages_exists_or_exit(languages: List[str]):
+def _check_if_all_languages_exists(languages: List[str]):
     for language in languages:
         if not language_exists(language):
-            print(f"Programming language '{language}' isn't supported by TESTed",
-                  file=sys.stderr)
-            sys.exit(3)
+            raise InstantiateError(
+                f"Programming language '{language}' isn't supported by TESTed")
 
 
-def _check_if_directory_exists_or_exit(name: str, path: Path):
+def _check_if_directory_exists(name: str, path: Path):
     if not path.exists():
-        print(f"{name} directory '{path}' doesn't exists", file=sys.stderr)
-        sys.exit(1)
+        raise InstantiateError(f"{name} directory '{path}' doesn't exists")
     elif not path.is_dir():
-        print(f"{name} path '{path}' isn't a directory", file=sys.stderr)
-        sys.exit(2)
+        raise InstantiateError(f"{name} path '{path}' isn't a directory")
 
 
-def _check_if_file_exists_or_exit(name: str, path: Path):
+def _check_if_file_exists(name: str, path: Path):
     if not path.exists():
-        print(f"{name} file '{path}' doesn't exists", file=sys.stderr)
-        sys.exit(1)
+        raise InstantiateError(f"{name} file '{path}' doesn't exists")
     elif not path.is_file():
-        print(f"{name} path '{path}' isn't a file", file=sys.stderr)
-        sys.exit(5)
+        raise InstantiateError(f"{name} path '{path}' isn't a file")
+
+
+def _copy_all(template_dir: Path, instance_dir: Path):
+    for path in template_dir.iterdir():
+        if path.name in ("config.template.json", "description"):
+            continue
+        elif path.is_dir():
+            shutil.copytree(path, instance_dir / path.name)
+        else:
+            shutil.copy2(path, instance_dir)
 
 
 def _filter_valid_languages(languages: List[str], testplan: Plan) -> List[str]:
@@ -120,9 +131,98 @@ def _filter_valid_languages(languages: List[str], testplan: Plan) -> List[str]:
     return list(filter(is_supported, languages))
 
 
-def _get_template_config(config_template_json: Path) -> Dict[str, Any]:
-    with open(config_template_json, 'r') as json_fd:
+def _get_config(config_json_path: Path) -> Dict[str, Any]:
+    with open(config_json_path, 'r') as json_fd:
         return json.load(json_fd)
+
+
+def _instantiate(template_dir: Path,
+                 instance_dir: Path,
+                 testplan: Plan,
+                 descriptions: List[DescriptionFile],
+                 other_files_descriptions: List[Path],
+                 config_json_dict: Dict[str, Any],
+                 language: str,
+                 human_readable: bool = False,
+                 backup_descriptions: bool = False):
+    config_dict = deepcopy(config_json_dict)
+    config_json_file = instance_dir / "config.json"
+    existing: bool
+    if instance_dir.exists():
+        if not instance_dir.is_dir():
+            print(f"{instance_dir} is not a directory, instantiating {language} "
+                  f"failed!", file=sys.stderr)
+        if config_json_file.exists() and config_json_file.is_file():
+            config = _get_config(config_json_file)
+            try:
+                dodona_internals = "internals"
+                config_dict[dodona_internals] = config[dodona_internals]
+            except KeyError:
+                pass
+        _remove_existing(instance_dir, backup_descriptions)
+    else:
+        instance_dir.mkdir(parents=True)
+    # Copy all except descriptions
+    _copy_all(template_dir, instance_dir)
+    # Check testplan
+    testplan_file = template_dir / "evaluation" / config_dict["evaluation"][
+        "plan_name"]
+    if testplan_file.suffix.lower() in (".yml", ".yaml"):
+        testplan_file_new = testplan_file.with_suffix(
+            f"{testplan_file.suffix}.json")
+        config_dict["evaluation"]["plan_name"] = testplan_file_new.name
+        with open(testplan_file_new, 'w') as fd:
+            json.dump(testplan, fd, default=pydantic_encoder,
+                      indent=2 if human_readable else None)
+    # Copy or generate descriptions
+    _instantiate_descriptions(instance_dir, descriptions, other_files_descriptions,
+                              testplan, language)
+    # Prepare configuration
+    config_dict["programming_language"] = language
+    try:
+        for i18n in config_dict["description"]["names"]:
+            name = config_dict["description"]["names"][i18n]
+            config_dict["description"]["names"][i18n] = f'{name} ({language})'
+    except KeyError:
+        pass
+    with open(config_json_file, 'w') as fd:
+        json.dump(config_dict, fd, indent=2)
+
+
+def _instantiate_descriptions(instance_dir: Path,
+                              descriptions: List[DescriptionFile],
+                              other_files_descriptions: List[Path],
+                              testplan: Plan,
+                              language: str):
+    description_dir = instance_dir / "description"
+    description_dir.mkdir()
+    # Copy the other files
+    for path in other_files_descriptions:
+        if path.is_dir():
+            shutil.copytree(path, description_dir / path.name)
+        else:
+            shutil.copy2(path, instance_dir)
+    # Copy or generate descriptions
+    for description in descriptions:
+        # Prepare output name
+        if description.is_natural_language_explicit:
+            file_name = f"description.{description.natural_language}." \
+                        f"{description.type}"
+            output_file = description_dir / file_name
+        else:
+            output_file = description_dir / f"description.{description.type}"
+        # Copy or generate
+        if description.is_template:
+            # Generate
+            instance = create_description_instance_from_template(
+                description.template, language, description.natural_language,
+                testplan.namespace, description.type == "html"
+            )
+            with open(output_file, 'w') as fd:
+                print(instance, file=fd)
+        else:
+            # Copy files
+            shutil.copy2(description.location, output_file)
 
 
 def _parser_instance() -> ArgumentParser:
@@ -150,7 +250,9 @@ def _parser_instance() -> ArgumentParser:
                              "derived from the filename (options: 'en' or 'nl', "
                              "default: 'en')",
                         default="en")
-    parser.add_argument("-b", "--backup", action='store_true',
+    parser.add_argument("-H", "--human_readable", action='store_true',
+                        help="Generated testplan in human readable format")
+    parser.add_argument("-b", "--backup_descriptions", action='store_true',
                         help="Keep old descriptions (with '.bak' extension)")
     parser.add_argument("template_dir", type=str, help="Template directory")
     parser.add_argument("instances_dir", type=str, help="Instances directory")
@@ -174,7 +276,7 @@ def _read_plan(config_dict: Dict[str, Any], evaluation_dir: Path) -> Plan:
         print(f"Not testplan given in the template configuration file",
               file=sys.stderr)
         sys.exit(6)
-    _check_if_file_exists_or_exit("Testplan", plan_file)
+    _check_if_file_exists("Testplan", plan_file)
 
     with open(plan_file, 'r') as file:
         loaded_plan = file.read()
@@ -184,6 +286,16 @@ def _read_plan(config_dict: Dict[str, Any], evaluation_dir: Path) -> Plan:
         schema_parser = SchemaParser()
         return schema_parser.load_str(loaded_plan)
     return _PlanModel.parse_raw(loaded_plan).__root__
+
+
+def _remove_existing(instance_dir: Path, backup_descriptions: bool = False):
+    for path in instance_dir.iterdir():
+        if backup_descriptions and path.name == "description":
+            path.rename(path.with_name("description.bak"))
+        elif path.is_dir():
+            shutil.rmtree(path)
+        else:
+            path.unlink()
 
 
 def _select_descriptions(descriptions: List[DescriptionFile]
@@ -208,37 +320,60 @@ def _select_descriptions(descriptions: List[DescriptionFile]
     return selected
 
 
+def instantiate(template_dir: Path,
+                instances_dir: Path,
+                programming_languages: Optional[List[str]] = None,
+                default_i18n: str = "en",
+                human_readable: bool = False,
+                backup_descriptions: bool = False):
+    if programming_languages is None:
+        programming_languages = [lang for lang in LANGUAGES if lang != "runhaskell"]
+
+    evaluation_dir = template_dir / "evaluation"
+    description_dir = template_dir / "description"
+    config_template = template_dir / "config.template.json"
+
+    _check_if_all_languages_exists(programming_languages)
+
+    _check_if_directory_exists("Template", template_dir)
+    _check_if_directory_exists("Instances", instances_dir)
+    _check_if_directory_exists("Evaluation", evaluation_dir)
+    _check_if_directory_exists("Description", description_dir)
+
+    _check_if_file_exists("Template config", config_template)
+
+    template_config_dict = _get_config(config_template)
+    plan = _read_plan(template_config_dict, evaluation_dir)
+    descriptions_files, other_files_description = _analyse_description_dir(
+        description_dir=description_dir, default_i18n=default_i18n
+    )
+    descriptions_files = _select_descriptions(descriptions_files)
+    _prepare_templates(descriptions_files)
+    programming_languages = _filter_valid_languages(programming_languages, plan)
+    for language in programming_languages:
+        _instantiate(
+            template_dir=temp_dir,
+            instance_dir=instances_dir / language,
+            testplan=plan,
+            descriptions=descriptions_files,
+            other_files_descriptions=other_files_description,
+            config_json_dict=template_config_dict,
+            language=language,
+            human_readable=human_readable,
+            backup_descriptions=backup_descriptions
+        )
+
+
 if __name__ == "__main__":
     args = _parser_instance().parse_args()
     temp_dir, inst_dir = Path(args.template_dir), Path(args.instances_dir)
 
-    eval_dir = temp_dir / "evaluation"
-    desc_dir = temp_dir / "description"
-    config_template = temp_dir / "config.template.json"
+    prog_langs = list(sorted(set(args.programming_languages_included) -
+                             set(args.programming_languages_excluded)))
 
-    prog_langs = list(set(args.programming_languages_included) -
-                      set(args.programming_languages_excluded))
-
-    _check_if_all_languages_exists_or_exit(prog_langs)
-
-    _check_if_directory_exists_or_exit("Template", temp_dir)
-    _check_if_directory_exists_or_exit("Instances", inst_dir)
-    _check_if_directory_exists_or_exit("Evaluation", eval_dir)
-    _check_if_directory_exists_or_exit("Description", desc_dir)
-
-    _check_if_file_exists_or_exit("Template config", config_template)
-
-    other_files = [
-        path for path in temp_dir.iterdir()
-        if path not in (eval_dir, desc_dir, config_template)
-    ]
-
-    template_config_dict = _get_template_config(config_template)
-    plan = _read_plan(template_config_dict, eval_dir)
-    descriptions_files, other_files_description = _analyse_description_dir(
-        description_dir=desc_dir, default_i18n=args.i18n
-    )
-    descriptions_files = _select_descriptions(descriptions_files)
-    _prepare_templates(descriptions_files)
-    prog_langs = _filter_valid_languages(prog_langs, plan)
-    pass
+    try:
+        instantiate(temp_dir, inst_dir, prog_langs, args.i18n, args.human_readable,
+                    args.backup_descriptions)
+    except InstantiateError as e:
+        print(e, file=sys.stderr)
+        sys.exit(-1)
