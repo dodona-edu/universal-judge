@@ -262,7 +262,7 @@ def _instantiate_descriptions(instance_dir: Path,
         if path.is_dir():
             shutil.copytree(path, description_dir / path.name)
         else:
-            shutil.copy2(path, instance_dir)
+            shutil.copy2(path, description_dir)
     # Copy or generate descriptions
     for description in descriptions:
         # Prepare output file location
