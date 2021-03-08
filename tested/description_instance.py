@@ -83,7 +83,7 @@ def _analyse_line(line: str, stack: List[str]) -> List[str]:
     return stack
 
 
-def _prepare_template(template: str, is_html: bool = True) -> str:
+def prepare_template(template: str, is_html: bool = True) -> Template:
     if is_html:
         re_tag = "(\"[^\"]*\"|'[^']*'|[^'\">])*"
 
@@ -115,20 +115,16 @@ def _prepare_template(template: str, is_html: bool = True) -> str:
 
     mako_template.extend(
         regex_comment_mako.sub(_mako_uncomment, template[last_end:]))
-    return ''.join(mako_template)
+    return Template(''.join(mako_template), cache_enabled=False)
 
 
-def create_description_instance(template: str,
-                                programming_language: str = "python",
-                                natural_language: str = "en",
-                                namespace: str = "submission",
-                                is_html: bool = True) -> str:
-    if not language_exists(programming_language):
-        raise ValueError(f"Language {programming_language} doesn't exists")
-
-    mako_template = _prepare_template(template, is_html)
-    template = Template(mako_template, cache_enabled=False)
-
+def create_description_instance_from_template(template: Template,
+                                              programming_language: str = "python",
+                                              natural_language: str = "en",
+                                              namespace: str = "submission",
+                                              is_html: bool = True) -> str:
+    from pathlib import Path
+    judge_directory = Path(__file__).parent.parent
     language = get_language(programming_language)
 
     bundle = Bundle(
@@ -140,7 +136,7 @@ def create_description_instance(template: str,
             natural_language=natural_language,
             programming_language=programming_language,
             workdir="",
-            judge=""
+            judge=str(judge_directory)
         ),
         out=open(os.devnull, 'w'),
         lang_config=language,
@@ -174,6 +170,20 @@ def create_description_instance(template: str,
         namespace_html=html.escape(language.conventionalize_namespace(namespace)),
         namespace=language.conventionalize_namespace(namespace)
     )
+
+
+def create_description_instance(template: str,
+                                programming_language: str = "python",
+                                natural_language: str = "en",
+                                namespace: str = "submission",
+                                is_html: bool = True) -> str:
+    if not language_exists(programming_language):
+        raise ValueError(f"Language {programming_language} doesn't exists")
+
+    template = prepare_template(template, is_html)
+    return create_description_instance_from_template(template, programming_language,
+                                                     natural_language, namespace,
+                                                     is_html)
 
 
 if __name__ == "__main__":
