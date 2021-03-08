@@ -220,7 +220,7 @@ def _instantiate(template_dir: Path,
     if testplan_file.suffix.lower() in (".yml", ".yaml"):
         testplan_file_new = testplan_file.with_suffix(
             f"{testplan_file.suffix}.json")
-        testplan_file_new = template_dir / "evaluation" / testplan_file_new.name
+        testplan_file_new = instance_dir / "evaluation" / testplan_file_new.name
         config_dict["evaluation"]["plan_name"] = testplan_file_new.name
         with open(testplan_file_new, 'w') as fd:
             json.dump(testplan, fd, default=pydantic_encoder,
