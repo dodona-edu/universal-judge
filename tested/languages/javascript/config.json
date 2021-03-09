@@ -49,5 +49,38 @@
     "array": "reduced",
     "list": "reduced",
     "tuple": "unsupported"
+  },
+  "restrictions": {
+    "map_key": [
+      "char",
+      "text"
+    ],
+    "set": [
+      "integer",
+      "rational",
+      "char",
+      "text",
+      "boolean",
+      "sequence",
+      "set",
+      "map",
+      "int8",
+      "uint8",
+      "int16",
+      "uint16",
+      "int32",
+      "uint32",
+      "int64",
+      "uint64",
+      "bigint",
+      "single_precision",
+      "double_precision",
+      "double_extended",
+      "fixed_precision",
+      "array",
+      "list",
+      "function_calls",
+      "identifiers"
+    ]
   }
 }
