@@ -6,34 +6,29 @@
 
 #define format(name, x) "{\"type\": " #name ", \"data\":" #x "}"
 
-// Replace a character with a substring.
-// Not very efficient.
-char* str_replace(const char* stack, char needle, char* with) {
-    const size_t length = strlen(stack);
-    const size_t added = strlen(with);
-    char* result = calloc(length + 1, sizeof(char));
-    size_t totalLength = length;
-
-    size_t j = 0;
-    for (size_t i = 0; i < length; i++) {
-        const char current = stack[i];
-        if (current == needle) {
-            // Enlarge the result.
-            totalLength += added;
-            result = realloc(result, sizeof(char) * (totalLength + 1));
-            for (size_t k = 0; k < added; k++) {
-                result[j + k] = with[k];
+// Escape string characters
+char* escape(char* buffer){
+    int i,j;
+    int l = strlen(buffer) + 1;
+    char esc_char[]= { '\a','\b','\f','\n','\r','\t','\v','\\','\"','\''};
+    char essc_str[]= {  'a', 'b', 'f', 'n', 'r', 't', 'v','\\','\"','\''};
+    char *dest = (char*) calloc(l*2, sizeof(char));
+    char *ptr = dest;
+    for(i=0;i<l;i++){
+        for(j=0; j< 10 ;j++){
+            if( buffer[i]==esc_char[j] ){
+              *ptr++ = '\\';
+              *ptr++ = essc_str[j];
+                 break;
             }
-            j += added;
-        } else {
-            result[j] = current;
-            j++;
+        }
+        if(j >= 10) {
+            *ptr++ = buffer[i];
         }
     }
-
-    return result;
+    *ptr='\0';
+    return dest;
 }
-
 
 void write_bool(FILE* out, bool value) {
     const char* asString = format("boolean", %s);
@@ -44,7 +39,7 @@ void write_char(FILE* out, char value) {
     const char* asString = format("char", "%s");
     char buffer[2];
     sprintf(buffer, "%c", value);
-    char* result = str_replace(buffer, '"', "\\\"");
+    char* result = escape(buffer);
     fprintf(out, asString, result);
     free(result);
 
@@ -117,7 +112,7 @@ void write_ldouble(FILE* out, long double value) {
 
 void write_string(FILE* out, const char* value) {
     const char* asString = format("text", "%s");
-    char* result = str_replace(value, '"', "\\\"");
+    char* result = escape(value);
     fprintf(out, asString, result);
     free(result);
 }
