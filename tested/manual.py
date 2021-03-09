@@ -13,7 +13,7 @@ from pathlib import Path
 from .configs import DodonaConfig
 from .main import run
 
-exercise_dir = "exercise/objects"
+exercise_dir = "exercise/echo-function"
 
 
 def read_config() -> DodonaConfig:
@@ -27,7 +27,7 @@ def read_config() -> DodonaConfig:
         "source":               Path(exercise_dir, 'solution/correct.java'),
         "judge":                Path('.'),
         "workdir":              Path('workdir'),
-        "plan_name":            "no-test.yaml",
+        "plan_name":            "one-escape.tson",
         "options":              {
             "parallel":       True,
             "mode":           "batch",

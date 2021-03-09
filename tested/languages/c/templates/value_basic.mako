@@ -1,16 +1,13 @@
 ## Convert a Value to a literal type in Java.
 <%! from tested.datatypes import BasicNumericTypes, BasicStringTypes, BasicBooleanTypes, BasicNothingTypes, BasicSequenceTypes, BasicObjectTypes  %>\
+<%! from json import dumps %>\
 <%page args="value" />\
-<%!
-    def escape_string(text):
-        return text.replace('"', '\\"')
-%>\
 % if value.type == BasicNumericTypes.INTEGER:
     ${value.data}\
 % elif value.type == BasicNumericTypes.RATIONAL:
     ${value.data}\
 % elif value.type == BasicStringTypes.TEXT:
-    "${escape_string(value.data)}"\
+    ${dumps(value.data)}\
 % elif value.type == BasicBooleanTypes.BOOLEAN:
     (bool) ${str(value.data).lower()}\
 % elif value.type == BasicNothingTypes.NOTHING:

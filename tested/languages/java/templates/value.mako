@@ -1,6 +1,7 @@
 ## Convert a Value to a literal type in Java.
 <%! from tested.datatypes import AdvancedSequenceTypes, AdvancedNumericTypes, AdvancedStringTypes %>\
 <%! from tested.serialisation import as_basic_type %>\
+<%! from json import dumps %>\
 <%page args="value" />\
 <%!
     def escape_char(text):
@@ -24,7 +25,7 @@
 % elif value.type in (AdvancedNumericTypes.DOUBLE_EXTENDED, AdvancedNumericTypes.FIXED_PRECISION):
     new BigDecimal("${value.data}")\
 % elif value.type == AdvancedStringTypes.CHAR:
-    '${escape_char(value.data)}'\
+    '${escape_char(dumps(value.data)[1:-1])}'\
 % else:
     ## Handle the base types
     <% basic = as_basic_type(value) %>\

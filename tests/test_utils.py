@@ -210,7 +210,7 @@ def test_template_escaped_string_code_block_markdown(lang: str, prompt: str):
 "alpha\"beta\tname"
 ```"""
     instance = create_description_instance(template, programming_language=lang, is_html=False)
-    expected_str = r"'alpha\"beta\tname'" if lang == "python" else r'"alpha\\"beta\tname"'
+    expected_str = "'alpha\"beta\\tname'" if lang == "python" else r'"alpha\"beta\tname"'
     expected = f"""```console?lang={lang}&prompt={prompt}
 {expected_str}
 ```"""
