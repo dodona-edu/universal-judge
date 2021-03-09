@@ -7,7 +7,7 @@
 #define format(name, x) "{\"type\": " #name ", \"data\":" #x "}"
 
 // Escape string characters
-char* escape(char* buffer){
+char* escape(const char* buffer){
     int i,j;
     int l = strlen(buffer) + 1;
     char esc_char[]= { '\a','\b','\f','\n','\r','\t','\v','\\','\"','\''};
