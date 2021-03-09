@@ -7,22 +7,23 @@
 #define format(name, x) "{\"type\": " #name ", \"data\":" #x "}"
 
 // Escape string characters
+// Idea: https://stackoverflow.com/questions/3201451/how-to-convert-a-c-string-into-its-escaped-version-in-c
 char* escape(const char* buffer){
     int i,j;
     int l = strlen(buffer) + 1;
-    char esc_char[]= { '\a','\b','\f','\n','\r','\t','\v','\\','\"','\''};
-    char essc_str[]= {  'a', 'b', 'f', 'n', 'r', 't', 'v','\\','\"','\''};
+    char esc_char[]= { '\a','\b','\f','\n','\r','\t','\v','\\','\"'};
+    char essc_str[]= {  'a', 'b', 'f', 'n', 'r', 't', 'v','\\','\"'};
     char *dest = (char*) calloc(l*2, sizeof(char));
     char *ptr = dest;
     for(i=0;i<l;i++){
-        for(j=0; j< 10 ;j++){
+        for(j=0; j< 9 ;j++){
             if( buffer[i]==esc_char[j] ){
               *ptr++ = '\\';
               *ptr++ = essc_str[j];
                  break;
             }
         }
-        if(j >= 10) {
+        if(j >= 9) {
             *ptr++ = buffer[i];
         }
     }
@@ -37,8 +38,7 @@ void write_bool(FILE* out, bool value) {
 
 void write_char(FILE* out, char value) {
     const char* asString = format("char", "%s");
-    char buffer[2];
-    sprintf(buffer, "%c", value);
+    char buffer[2] = {value, '\0'};
     char* result = escape(buffer);
     fprintf(out, asString, result);
     free(result);
