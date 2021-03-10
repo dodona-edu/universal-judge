@@ -33,7 +33,7 @@ from typing import List, Tuple, Mapping, Union, Callable, Set, Dict, Optional, A
 
 from .description_generator import DescriptionGenerator
 from ..configs import Bundle
-from ..datatypes import AllTypes, string_to_type, ExpressionTypes
+from ..datatypes import AllTypes, string_to_type, ExpressionTypes, AdvancedTypes
 from ..dodona import AnnotateCode, Message, Status, ExtendedMessage, Permission
 from ..features import Construct
 from ..internationalization import get_i18n_string
@@ -467,10 +467,20 @@ class Language:
                     if type_str == enum[m].value:
                         return enum[m]
             raise ValueError(f"Unknown type string {type_str}")
+
         raw_config: Dict[str, List[str]] = self.options.get("restrictions", {})
         config = {string_to_type(
-            "MAP" if x == "map_key" else x.upper()): frozenset(
+            "MAP" if x == "map_key" else x.upper()): set(
             (get_expression_type(t) for t in y)) for x, y in raw_config.items()}
+        mappings = self.type_support_map()
+        for data_type, type_support in mappings.items():
+            data_type = get_expression_type(data_type)
+            if (type_support is TypeSupport.REDUCED and
+                    isinstance(data_type, get_args(AdvancedTypes))):
+                basic_type = data_type.base_type
+                for _, restricted in config.items():
+                    if basic_type in restricted:
+                        restricted.add(data_type)
         return fallback(defaultdict(set), config)
 
     def solution(self, solution: Path, bundle: Bundle):
