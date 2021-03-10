@@ -136,15 +136,15 @@ def is_supported(bundle: 'Bundle') -> bool:
                             )
                             return False
 
-    nested_types = defaultdict(frozenset, filter(lambda x: x[0] in (
-        BasicSequenceTypes.SET, BasicObjectTypes.MAP), required.nested_types))
+    nested_types = filter(lambda x: x[0] in (
+        BasicSequenceTypes.SET, BasicObjectTypes.MAP), required.nested_types)
     restricted = bundle.lang_config.restriction_map()
-    for key in (BasicSequenceTypes.SET, BasicObjectTypes.MAP):
-        if not (nested_types[key] <= restricted[key]):
+    for key, value_types in nested_types:
+        if not (value_types <= restricted[key]):
             _logger.warning("This plan is not compatible!")
-            _logger.warning(f"Required {key} types are {nested_types[key]}.")
+            _logger.warning(f"Required {key} types are {value_types}.")
             _logger.warning(f"The language supports {restricted[key]}.")
-            missing = (nested_types[key] ^ restricted[key]) & nested_types[key]
+            missing = (value_types ^ restricted[key]) & value_types
             _logger.warning(f"Missing types are: {missing}.")
             return False
 

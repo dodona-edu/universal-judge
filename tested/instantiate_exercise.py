@@ -159,11 +159,11 @@ def _filter_valid_languages(languages: List[str], testplan: Plan) -> List[str]:
             if eval_langs is not None and language not in eval_langs:
                 return False
 
-        nested_types = defaultdict(frozenset, filter(lambda x: x[0] in (
-            BasicSequenceTypes.SET, BasicObjectTypes.MAP), required.nested_types))
+        nested_types = filter(lambda x: x[0] in (
+            BasicSequenceTypes.SET, BasicObjectTypes.MAP), required.nested_types)
         restricted = language.restriction_map()
-        for key in (BasicSequenceTypes.SET, BasicObjectTypes.MAP):
-            if not (nested_types[key] <= restricted[key]):
+        for key, value_types in nested_types:
+            if not (value_types <= restricted[key]):
                 return False
 
         return True
