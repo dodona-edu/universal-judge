@@ -33,9 +33,9 @@ from typing import List, Tuple, Mapping, Union, Callable, Set, Dict, Optional, A
 
 from .description_generator import DescriptionGenerator
 from ..configs import Bundle
-from ..datatypes import AllTypes, string_to_type
+from ..datatypes import AllTypes, string_to_type, ExpressionTypes
 from ..dodona import AnnotateCode, Message, Status, ExtendedMessage, Permission
-from ..features import Construct, ExpressionTypes, ComplexExpressionTypes
+from ..features import Construct
 from ..internationalization import get_i18n_string
 from ..serialisation import ExceptionValue
 from ..testplan import Plan

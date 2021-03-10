@@ -3,12 +3,11 @@ Module containing the definitions of the features we can support.
 """
 import logging
 import operator
-from collections import defaultdict
 from enum import Enum
 from functools import reduce
-from typing import Iterable, Set, NamedTuple, TYPE_CHECKING, Tuple, Union, FrozenSet
+from typing import Iterable, Set, NamedTuple, TYPE_CHECKING
 
-from .datatypes import AllTypes, BasicSequenceTypes, BasicObjectTypes
+from .datatypes import AllTypes, BasicSequenceTypes, BasicObjectTypes, NestedTypes
 
 if TYPE_CHECKING:
     from .configs import Bundle
@@ -38,15 +37,6 @@ class Construct(str, Enum):
 
 Types = Set[AllTypes]
 Constructs = Set[Construct]
-
-
-class ComplexExpressionTypes(str, Enum):
-    FUNCTION_CALLS = "function_calls"
-    IDENTIFIERS = "identifiers"
-
-
-ExpressionTypes = Union[AllTypes, ComplexExpressionTypes]
-NestedTypes = Set[Tuple[ExpressionTypes, FrozenSet[ExpressionTypes]]]
 
 
 class FeatureSet(NamedTuple):

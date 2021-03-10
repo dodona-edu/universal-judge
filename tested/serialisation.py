@@ -35,9 +35,9 @@ from .datatypes import (NumericTypes, StringTypes, BooleanTypes,
                         SequenceTypes, ObjectTypes, NothingTypes, SimpleTypes,
                         resolve_to_basic, AllTypes, BasicSequenceTypes,
                         BasicObjectTypes, BasicNumericTypes, BasicBooleanTypes,
-                        BasicStringTypes, BasicNothingTypes)
-from .features import FeatureSet, combine_features, WithFeatures, Construct, \
-    NestedTypes, ComplexExpressionTypes, ExpressionTypes
+                        BasicStringTypes, BasicNothingTypes,
+                        ComplexExpressionTypes, ExpressionTypes, NestedTypes)
+from .features import FeatureSet, combine_features, WithFeatures, Construct
 from .utils import get_args, flatten, sorted_no_duplicates
 
 logger = logging.getLogger(__name__)
