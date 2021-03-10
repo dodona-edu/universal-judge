@@ -49,5 +49,9 @@
     "array": "unsupported",
     "list": "supported",
     "tuple": "supported"
+  },
+  "restrictions": {
+    "map_key": [],
+    "set": []
   }
 }

@@ -43,10 +43,34 @@
     "bigint": "reduced",
     "single_precision": "reduced",
     "double_precision": "reduced",
-    "double_extended": "supported",
+    "double_extended": "reduced",
     "fixed_precision": "supported",
     "array": "reduced",
     "list": "supported",
     "tuple": "supported"
+  },
+  "restrictions": {
+    "map_key": [
+      "integer",
+      "rational",
+      "text",
+      "boolean",
+      "tuple",
+      "bigint",
+      "fixed_precision",
+      "function_calls",
+      "identifiers"
+    ],
+    "set": [
+      "integer",
+      "rational",
+      "text",
+      "boolean",
+      "tuple",
+      "bigint",
+      "fixed_precision",
+      "function_calls",
+      "identifiers"
+    ]
   }
 }

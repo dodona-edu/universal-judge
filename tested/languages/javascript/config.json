@@ -49,5 +49,21 @@
     "array": "reduced",
     "list": "reduced",
     "tuple": "unsupported"
+  },
+  "restrictions": {
+    "map_key": [
+      "text"
+    ],
+    "set": [
+      "integer",
+      "rational",
+      "text",
+      "boolean",
+      "sequence",
+      "set",
+      "map",
+      "function_calls",
+      "identifiers"
+    ]
   }
 }

@@ -12,9 +12,11 @@ As mentioned in the manuscript, the context_testcase use is scenario 1.
 Additionally, the types in this file are organised by their JSON encoding type.
 They are also split in "basic types" and "advanced types".
 """
+from typing import Set, Tuple, FrozenSet
 
 from .advanced import *
 from .basic import *
+from .complex import *
 from ..utils import get_args
 
 NumericTypes = Union[BasicNumericTypes, AdvancedNumericTypes]
@@ -29,6 +31,10 @@ SimpleTypes = Union[NumericTypes, StringTypes, BooleanTypes, NothingTypes]
 ComplexTypes = Union[SequenceTypes, ObjectTypes]
 
 AllTypes = Union[BasicTypes, AdvancedTypes]
+
+
+ExpressionTypes = Union[AllTypes, ComplexExpressionTypes]
+NestedTypes = Set[Tuple[ExpressionTypes, FrozenSet[ExpressionTypes]]]
 
 # Test that our aliases are correct.
 assert set(get_args(AllTypes)) == set(get_args(Union[SimpleTypes, ComplexTypes]))

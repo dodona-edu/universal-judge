@@ -19,10 +19,12 @@ classes for implementations in other configs.
 import json
 import logging
 import math
+import operator
 from dataclasses import field, replace
 from decimal import Decimal
 from enum import Enum
-from typing import Union, List, Literal, Optional, Any, Iterable, Tuple, Dict
+from functools import reduce
+from typing import Union, List, Literal, Optional, Any, Iterable, Tuple
 
 from pydantic import BaseModel, root_validator, Field
 from pydantic.dataclasses import dataclass
@@ -33,7 +35,8 @@ from .datatypes import (NumericTypes, StringTypes, BooleanTypes,
                         SequenceTypes, ObjectTypes, NothingTypes, SimpleTypes,
                         resolve_to_basic, AllTypes, BasicSequenceTypes,
                         BasicObjectTypes, BasicNumericTypes, BasicBooleanTypes,
-                        BasicStringTypes, BasicNothingTypes)
+                        BasicStringTypes, BasicNothingTypes,
+                        ComplexExpressionTypes, ExpressionTypes, NestedTypes)
 from .features import FeatureSet, combine_features, WithFeatures, Construct
 from .utils import get_args, flatten, sorted_no_duplicates
 
@@ -96,6 +99,21 @@ def _get_combined_types(types: Iterable[WrappedAllTypes]) -> WrappedAllTypes:
         return BasicStringTypes.ANY
 
 
+def _combine_nested_types(data_type: AllTypes,
+                          features: Iterable[FeatureSet]) -> NestedTypes:
+    nested_types: Iterable[ExpressionTypes] = {y[0] for f in features for y in
+                                               f.nested_types}
+    return {(data_type, frozenset(reduce(
+        operator.or_,
+        (x[1] for f in features for x in f.nested_types),
+        nested_types
+    )))}
+
+
+def _get_self_nested_type(data_type: AllTypes) -> NestedTypes:
+    return {(data_type, frozenset())}
+
+
 class WithFunctions:
     def get_functions(self) -> Iterable['FunctionCall']:
         raise NotImplementedError
@@ -107,7 +125,7 @@ class NumberType(WithFeatures, WithFunctions):
     data: Union[Decimal, int, float]
 
     def get_used_features(self) -> FeatureSet:
-        return FeatureSet(set(), {self.type})
+        return FeatureSet(set(), {self.type}, _get_self_nested_type(self.type))
 
     def get_functions(self) -> Iterable['FunctionCall']:
         return []
@@ -127,7 +145,7 @@ class StringType(WithFeatures, WithFunctions):
     data: str
 
     def get_used_features(self) -> FeatureSet:
-        return FeatureSet(set(), {self.type})
+        return FeatureSet(set(), {self.type}, _get_self_nested_type(self.type))
 
     def get_functions(self) -> Iterable['FunctionCall']:
         return []
@@ -139,7 +157,7 @@ class BooleanType(WithFeatures, WithFunctions):
     data: bool
 
     def get_used_features(self) -> FeatureSet:
-        return FeatureSet(set(), {self.type})
+        return FeatureSet(set(), {self.type}, _get_self_nested_type(self.type))
 
     def get_functions(self) -> Iterable['FunctionCall']:
         return []
@@ -151,14 +169,16 @@ class SequenceType(WithFeatures, WithFunctions):
     data: List['Expression']
 
     def get_used_features(self) -> FeatureSet:
-        base_features = FeatureSet(set(), {self.type})
         nested_features = [x.get_used_features() for x in self.data]
+        combined_nested_types = _combine_nested_types(self.type, nested_features)
+        base_features = FeatureSet(set(), {self.type}, combined_nested_types)
         combined = combine_features([base_features] + nested_features)
         content_type = self.get_content_type()
         if content_type == BasicStringTypes.ANY:
             combined = combine_features([FeatureSet(
-                {Construct.HETEROGENEOUS_COLLECTIONS}, set()
-            )])
+                {Construct.HETEROGENEOUS_COLLECTIONS}, {self.type},
+                combined_nested_types
+            )] + nested_features)
         return combined
 
     def get_content_type(self) -> WrappedAllTypes:
@@ -221,9 +241,12 @@ class ObjectType(WithFeatures, WithFunctions):
             element.get_value_type() for element in self.data)
 
     def get_used_features(self) -> FeatureSet:
-        base_features = FeatureSet(set(), {self.type})
-        nested_features = [x.get_used_features() for x in self.data]
-        return combine_features([base_features] + nested_features)
+        key_nested_features = [x.key.get_used_features() for x in self.data]
+        key_combined = _combine_nested_types(self.type, key_nested_features)
+        base_features = FeatureSet(set(), {self.type}, key_combined)
+        value_nested_features = [x.value.get_used_features() for x in self.data]
+        return combine_features(
+            [base_features] + value_nested_features + key_nested_features)
 
     def get_functions(self) -> Iterable['FunctionCall']:
         return flatten(flatten(
@@ -237,7 +260,7 @@ class NothingType(WithFeatures, WithFunctions):
     data: Literal[None] = None
 
     def get_used_features(self) -> FeatureSet:
-        return FeatureSet(set(), {self.type})
+        return FeatureSet(set(), {self.type}, _get_self_nested_type(self.type))
 
     def get_functions(self) -> Iterable['FunctionCall']:
         return []
@@ -253,7 +276,8 @@ class Identifier(str, WithFeatures, WithFunctions):
     """Represents an identifier."""
 
     def get_used_features(self) -> FeatureSet:
-        return FeatureSet(set(), set())
+        return FeatureSet(set(), set(),
+                          {(ComplexExpressionTypes.IDENTIFIERS, frozenset())})
 
     def get_functions(self) -> Iterable['FunctionCall']:
         return []
@@ -298,7 +322,8 @@ class NamedArgument(WithFeatures, WithFunctions):
     value: 'Expression'
 
     def get_used_features(self) -> FeatureSet:
-        this = FeatureSet(constructs={Construct.NAMED_ARGUMENTS}, types=set())
+        this = FeatureSet(constructs={Construct.NAMED_ARGUMENTS}, types=set(),
+                          nested_types=set())
         expression = self.value.get_used_features()
         return combine_features([this, expression])
 
@@ -342,7 +367,10 @@ class FunctionCall(WithFeatures, WithFunctions):
         if self.type in (FunctionType.PROPERTY, FunctionType.CONSTRUCTOR):
             constructs.add(Construct.OBJECTS)
 
-        base_features = FeatureSet(constructs=constructs, types=set())
+        base_features = FeatureSet(constructs=constructs, types=set(),
+                                   nested_types={
+                                       (ComplexExpressionTypes.FUNCTION_CALLS,
+                                        frozenset())})
         argument_features = [x.get_used_features() for x in self.arguments]
 
         return combine_features([base_features] + argument_features)
@@ -377,7 +405,7 @@ class Assignment(WithFeatures, WithFunctions):
                           type=self.type)
 
     def get_used_features(self) -> FeatureSet:
-        base = FeatureSet({Construct.ASSIGNMENTS}, set())
+        base = FeatureSet({Construct.ASSIGNMENTS}, set(), set())
         other = self.expression.get_used_features()
 
         return combine_features([base, other])

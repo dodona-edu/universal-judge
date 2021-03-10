@@ -50,5 +50,49 @@
     "array": "supported",
     "list": "supported",
     "tuple": "unsupported"
+  },
+  "restrictions": {
+    "map_key": [
+      "integer",
+      "rational",
+      "char",
+      "text",
+      "boolean",
+      "sequence",
+      "set",
+      "map",
+      "int8",
+      "int16",
+      "int32",
+      "int64",
+      "single_precision",
+      "double_precision",
+      "fixed_precision",
+      "array",
+      "list",
+      "function_calls",
+      "identifiers"
+    ],
+    "set": [
+      "integer",
+      "rational",
+      "char",
+      "text",
+      "boolean",
+      "sequence",
+      "set",
+      "map",
+      "int8",
+      "int16",
+      "int32",
+      "int64",
+      "single_precision",
+      "double_precision",
+      "fixed_precision",
+      "array",
+      "list",
+      "function_calls",
+      "identifiers"
+    ]
   }
 }
