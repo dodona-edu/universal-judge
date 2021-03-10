@@ -3,6 +3,7 @@ Module containing the definitions of the features we can support.
 """
 import logging
 import operator
+from collections import defaultdict
 from enum import Enum
 from functools import reduce
 from typing import Iterable, Set, NamedTuple, TYPE_CHECKING, Tuple, Union, FrozenSet
@@ -135,9 +136,8 @@ def is_supported(bundle: 'Bundle') -> bool:
                             )
                             return False
 
-    nested_types = dict(
-        filter(lambda x: x[0] in (BasicSequenceTypes.SET, BasicObjectTypes.MAP),
-               required.nested_types))
+    nested_types = defaultdict(frozenset, filter(lambda x: x[0] in (
+        BasicSequenceTypes.SET, BasicObjectTypes.MAP), required.nested_types))
     restricted = bundle.lang_config.restriction_map()
     for key in (BasicSequenceTypes.SET, BasicObjectTypes.MAP):
         if not (nested_types[key] <= restricted[key]):

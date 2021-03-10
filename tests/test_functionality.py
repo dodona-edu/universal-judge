@@ -155,6 +155,15 @@ def test_heterogeneous_arguments_are_detected(lang: str, tmp_path: Path, pytestc
     assert updates.find_status_enum() == ["internal error"]
 
 
+@pytest.mark.parametrize("lang", ["python", "javascript"])
+def test_missing_key_types_detected(lang: str, tmp_path: Path, pytestconfig):
+    conf = configuration(pytestconfig, "objects", lang, tmp_path, "missing_key_types.yaml", "solution")
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert len(updates.find_all("start-testcase")) == 0
+    assert updates.find_status_enum() == ["internal error"]
+
+
 @pytest.mark.parametrize("lang", ["python", "java", "kotlin"])
 def test_programmed_evaluator_lotto(lang: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "lotto", lang, tmp_path, "one-programmed-python.tson", "correct")
