@@ -17,7 +17,8 @@ from pydantic import BaseModel, root_validator, validator
 from pydantic.dataclasses import dataclass
 
 from .datatypes import BasicStringTypes
-from .features import FeatureSet, combine_features, WithFeatures, NOTHING, Construct
+from .features import FeatureSet, combine_features, WithFeatures, NOTHING, \
+    Construct
 from .serialisation import (ExceptionValue, Value, Expression, Statement,
                             Identifier, FunctionCall, SequenceType, ObjectType,
                             FunctionType, WithFunctions)
@@ -420,7 +421,7 @@ class RunInput(WithFeatures):
 
     def get_used_features(self) -> FeatureSet:
         if self.arguments:
-            return FeatureSet(set(), {BasicStringTypes.TEXT})
+            return FeatureSet(set(), {BasicStringTypes.TEXT}, set())
         else:
             return NOTHING
 

@@ -5,9 +5,9 @@ import logging
 import operator
 from enum import Enum
 from functools import reduce
-from typing import Iterable, Set, NamedTuple, TYPE_CHECKING
+from typing import Iterable, Set, NamedTuple, TYPE_CHECKING, Tuple, Union, FrozenSet
 
-from .datatypes import AllTypes
+from .datatypes import AllTypes, BasicSequenceTypes, BasicObjectTypes
 
 if TYPE_CHECKING:
     from .configs import Bundle
@@ -39,9 +39,19 @@ Types = Set[AllTypes]
 Constructs = Set[Construct]
 
 
+class ComplexExpressionTypes(str, Enum):
+    FUNCTION_CALLS = "function_calls"
+    IDENTIFIERS = "identifiers"
+
+
+ExpressionTypes = Union[AllTypes, ComplexExpressionTypes]
+NestedTypes = Set[Tuple[ExpressionTypes, FrozenSet[ExpressionTypes]]]
+
+
 class FeatureSet(NamedTuple):
     constructs: Constructs
     types: Types
+    nested_types: NestedTypes
 
 
 class WithFeatures:
@@ -49,7 +59,7 @@ class WithFeatures:
         raise NotImplementedError
 
 
-NOTHING = FeatureSet(constructs=set(), types=set())
+NOTHING = FeatureSet(constructs=set(), types=set(), nested_types=set())
 
 
 def combine_features(iterable: Iterable[FeatureSet]) -> FeatureSet:
@@ -68,10 +78,16 @@ def combine_features(iterable: Iterable[FeatureSet]) -> FeatureSet:
         (x.types for x in features),
         set()
     )
+    nexted_types = reduce(
+        operator.or_,
+        (x.nested_types for x in features),
+        set()
+    )
 
     return FeatureSet(
         constructs=constructs,
-        types=types
+        types=types,
+        nested_types=nexted_types
     )
 
 
@@ -118,5 +134,18 @@ def is_supported(bundle: 'Bundle') -> bool:
                                 f"{languages}!"
                             )
                             return False
+
+    nested_types = dict(
+        filter(lambda x: x[0] in (BasicSequenceTypes.SET, BasicObjectTypes.MAP),
+               required.nested_types))
+    restricted = bundle.lang_config.restriction_map()
+    for key in (BasicSequenceTypes.SET, BasicObjectTypes.MAP):
+        if restricted[key] < nested_types[key]:
+            _logger.warning("This plan is not compatible!")
+            _logger.warning(f"Required {key} types are {nested_types[key]}.")
+            _logger.warning(f"The language supports {restricted[key]}.")
+            missing = (nested_types[key] ^ restricted[key]) & nested_types[key]
+            _logger.warning(f"Missing types are: {missing}.")
+            return False
 
     return True
