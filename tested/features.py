@@ -140,7 +140,7 @@ def is_supported(bundle: 'Bundle') -> bool:
                required.nested_types))
     restricted = bundle.lang_config.restriction_map()
     for key in (BasicSequenceTypes.SET, BasicObjectTypes.MAP):
-        if restricted[key] < nested_types[key]:
+        if not (nested_types[key] <= restricted[key]):
             _logger.warning("This plan is not compatible!")
             _logger.warning(f"Required {key} types are {nested_types[key]}.")
             _logger.warning(f"The language supports {restricted[key]}.")

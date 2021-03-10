@@ -21,10 +21,10 @@ def read_config() -> DodonaConfig:
     return DodonaConfig(**{
         "memory_limit":         536870912,
         "time_limit":           60,
-        "programming_language": 'java',
+        "programming_language": 'python',
         "natural_language":     'nl',
         "resources":            Path(exercise_dir, 'evaluation'),
-        "source":               Path(exercise_dir, 'solution/correct.java'),
+        "source":               Path(exercise_dir, 'solution/correct.py'),
         "judge":                Path('.'),
         "workdir":              Path('workdir'),
         "plan_name":            "no-test.yaml",
