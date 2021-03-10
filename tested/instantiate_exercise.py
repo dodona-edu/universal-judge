@@ -2,6 +2,7 @@ import json
 import shutil
 import sys
 from argparse import ArgumentParser
+from collections import defaultdict
 from copy import deepcopy
 from dataclasses import dataclass
 from itertools import groupby
@@ -11,6 +12,7 @@ from typing import List, Any, Dict, Tuple, Optional
 from mako.template import Template
 from pydantic.json import pydantic_encoder
 
+from tested.datatypes import BasicSequenceTypes, BasicObjectTypes
 from tested.description_instance import prepare_template, \
     create_description_instance_from_template
 from tested.dsl import SchemaParser
@@ -156,6 +158,14 @@ def _filter_valid_languages(languages: List[str], testplan: Plan) -> List[str]:
             eval_langs = testcase.output.get_specific_eval_languages()
             if eval_langs is not None and language not in eval_langs:
                 return False
+
+        nested_types = defaultdict(frozenset, filter(lambda x: x[0] in (
+            BasicSequenceTypes.SET, BasicObjectTypes.MAP), required.nested_types))
+        restricted = language.restriction_map()
+        for key in (BasicSequenceTypes.SET, BasicObjectTypes.MAP):
+            if not (nested_types[key] <= restricted[key]):
+                return False
+
         return True
 
     return list(filter(is_supported, languages))
