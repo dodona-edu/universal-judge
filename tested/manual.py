@@ -13,7 +13,7 @@ from pathlib import Path
 from .configs import DodonaConfig
 from .main import run
 
-exercise_dir = "exercise/echo-function"
+exercise_dir = "exercise/counter"
 
 
 def read_config() -> DodonaConfig:
@@ -24,10 +24,10 @@ def read_config() -> DodonaConfig:
         "programming_language": 'python',
         "natural_language":     'nl',
         "resources":            Path(exercise_dir, 'evaluation'),
-        "source":               Path(exercise_dir, 'solution/correct.py'),
+        "source":               Path(exercise_dir, 'solution/solution.py'),
         "judge":                Path('.'),
         "workdir":              Path('workdir'),
-        "plan_name":            "one-escape.tson",
+        "plan_name":            "plan.yaml",
         "options":              {
             "parallel":       True,
             "mode":           "batch",
