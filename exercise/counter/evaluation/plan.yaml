@@ -1,0 +1,15 @@
+namespace: "counter"
+tabs:
+- tab: "Counter"
+  contexts:
+    - testcases:
+        - statement: "c = new Counter()"
+        - expression: "c.get()"
+          return: 0
+        - statement: "c.add()"
+        - expression: "c.get()"
+          return: 1
+        - statement: "c.add()"
+        - statement: "c.add()"
+        - expression: "c.get()"
+          return: 3
