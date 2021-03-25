@@ -21,10 +21,10 @@ def read_config() -> DodonaConfig:
     return DodonaConfig(**{
         "memory_limit":         536870912,
         "time_limit":           60,
-        "programming_language": 'python',
+        "programming_language": 'javascript',
         "natural_language":     'nl',
         "resources":            Path(exercise_dir, 'evaluation'),
-        "source":               Path(exercise_dir, 'solution/solution.py'),
+        "source":               Path(exercise_dir, 'solution/solution-eslint.js'),
         "judge":                Path('.'),
         "workdir":              Path('workdir'),
         "plan_name":            "plan.yaml",
@@ -32,7 +32,8 @@ def read_config() -> DodonaConfig:
             "parallel":       True,
             "mode":           "batch",
             "linter":         {
-                "python": True
+                "python": True,
+                "javascript": True
             }
         }
     })

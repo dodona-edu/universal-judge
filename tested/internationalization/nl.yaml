@@ -99,3 +99,8 @@ nl:
       linter:
         crashed: "Pylint gecrasht"
         output: "Pylint produceerde slechte uitvoer."
+    javascript:
+      linter:
+        timeout: "ESLint overschreed tijdslimiet."
+        memory: "ESLint overschreed geheugenlimiet."
+        output: "ESLint produceerde slechte uitvoer."

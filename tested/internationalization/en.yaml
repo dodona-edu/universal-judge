@@ -99,3 +99,8 @@ en:
       linter:
         crashed: "Pylint crashed"
         output: "Pylint produced bad output."
+    javascript:
+      linter:
+        timeout: "ESLint exceeded time limit"
+        memory: "ESLint exceeded memory limit"
+        output: "ESLint produced bad output."

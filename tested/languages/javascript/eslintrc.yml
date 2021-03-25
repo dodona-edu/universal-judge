@@ -1,0 +1,10 @@
+extends: "eslint:recommended"
+rules:
+    no-var: "error"
+    no-unused-vars: ["warn", { "vars": "local", "args": "after-used", "ignoreRestSiblings": false }]
+parserOptions:
+    ecmaVersion: 6
+    sourceType: "script"
+    ecmaFeatures: {}
+    
+# eslint -f json --no-inline-config -c eslintrc.yml
