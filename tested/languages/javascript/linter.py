@@ -46,7 +46,7 @@ def run_eslint(bundle: Bundle, submission: Path, remaining: float) \
     try:
         eslint_objects = json.loads(execution_results.stdout)
     except Exception as e:
-        logger.warning("Pylint produced bad output", exc_info=e)
+        logger.warning("ESLint produced bad output", exc_info=e)
         return [get_i18n_string("languages.javascript.linter.output"),
                 ExtendedMessage(
                     description=str(e),
@@ -65,4 +65,6 @@ def run_eslint(bundle: Bundle, submission: Path, remaining: float) \
             type=severity[int(x['severity'])],
         ), eslint_object['messages']))
 
+    # sort linting messages on line, column and code
+    annotations.sort(key=lambda a: (a.row, a.column, a.text))
     return [], annotations
