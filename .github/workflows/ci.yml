@@ -24,6 +24,16 @@ jobs:
           cabal-version: '3.4'
       - name: Install Haskell dependencies
         run: cabal v1-install aeson
+      - uses: actions/cache@v2
+        name: Cache ~/.cabal/packages, ~/.cabal/store and dist-newstyle
+        with:
+          path: |
+            ~/.cabal/packages
+            ~/.cabal/store
+            dist-newstyle
+          key: ${{ runner.os }}-cabal-aeson
+          restore-keys: |
+            ${{ runner.os }}-cabal-
       - name: Use node 12
         uses: actions/setup-node@v1
         with:
