@@ -104,3 +104,8 @@ en:
         timeout: "ESLint exceeded time limit"
         memory: "ESLint exceeded memory limit"
         output: "ESLint produced bad output."
+    haskell:
+      linter:
+        timeout: "HLint exceeded time limit"
+        memory: "HLint exceeded memory limit"
+        output: "HLint produced bad output."

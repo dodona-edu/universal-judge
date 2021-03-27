@@ -104,3 +104,8 @@ nl:
         timeout: "ESLint overschreed tijdslimiet."
         memory: "ESLint overschreed geheugenlimiet."
         output: "ESLint produceerde slechte uitvoer."
+    haskell:
+      linter:
+        timeout: "HLint overschreed tijdslimiet."
+        memory: "HLint overschreed geheugenlimiet."
+        output: "HLint produceerde slechte uitvoer."

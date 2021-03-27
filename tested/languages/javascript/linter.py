@@ -26,7 +26,7 @@ def run_eslint(bundle: Bundle, submission: Path, remaining: float) \
     else:
         # Use the default file.
         config_path = config.judge / "tested/languages/javascript/eslintrc.yml"
-        config_path = config_path.absolute()
+    config_path = config_path.absolute()
 
     execution_results = run_command(
         directory=submission.parent,

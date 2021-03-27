@@ -13,7 +13,7 @@ from pathlib import Path
 from .configs import DodonaConfig
 from .main import run
 
-exercise_dir = "exercise/counter"
+exercise_dir = "exercise/echo-function"
 
 
 def read_config() -> DodonaConfig:
@@ -21,19 +21,21 @@ def read_config() -> DodonaConfig:
     return DodonaConfig(**{
         "memory_limit":         536870912,
         "time_limit":           60,
-        "programming_language": 'javascript',
+        "programming_language": 'haskell',
         "natural_language":     'nl',
         "resources":            Path(exercise_dir, 'evaluation'),
-        "source":               Path(exercise_dir, 'solution/solution-eslint.js'),
+        "source":               Path(exercise_dir, 'solution/correct_io.hs'),
         "judge":                Path('.'),
         "workdir":              Path('workdir'),
-        "plan_name":            "plan.yaml",
+        "plan_name":            "one.tson",
         "options":              {
             "parallel":       True,
             "mode":           "batch",
             "linter":         {
                 "python": True,
-                "javascript": True
+                "javascript": True,
+                "haskell": True,
+                "runhaskell": True
             }
         }
     })
