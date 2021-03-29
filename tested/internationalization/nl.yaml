@@ -109,3 +109,8 @@ nl:
         timeout: "HLint overschreed tijdslimiet."
         memory: "HLint overschreed geheugenlimiet."
         output: "HLint produceerde slechte uitvoer."
+    kotlin:
+      linter:
+        timeout: "KTLint overschreed tijdslimiet."
+        memory: "KTLint overschreed geheugenlimiet."
+        output: "KTLint produceerde slechte uitvoer."

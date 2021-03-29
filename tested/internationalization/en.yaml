@@ -109,3 +109,9 @@ en:
         timeout: "HLint exceeded time limit"
         memory: "HLint exceeded memory limit"
         output: "HLint produced bad output."
+    kotlin:
+      linter:
+        timeout: "KTLint exceeded time limit"
+        memory: "KTLint exceeded memory limit"
+        output: "KTLint produced bad output."
+
