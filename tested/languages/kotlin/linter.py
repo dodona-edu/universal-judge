@@ -42,6 +42,9 @@ def run_ktlint(bundle: Bundle, submission: Path, remaining: float) \
             f"--ruleset={config.resources / language_options.get('ktlint_ruleset')}"
         )
 
+    if language_options.get("ktlint_experimental", True):
+        command.append("--experimental")
+
     command.append(submission.absolute())
 
     execution_results = run_command(
