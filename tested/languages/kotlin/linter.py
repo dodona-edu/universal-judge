@@ -21,13 +21,33 @@ def run_ktlint(bundle: Bundle, submission: Path, remaining: float) \
     config = bundle.config
     language_options = bundle.config.config_for()
 
+    command = ["ktlint", "--reporter=json"]
+
+    if language_options.get("editorconfig", None):
+        command.append("--editorconfig="
+                       f"{config.resources / language_options.get('editorconfig')}")
+
+    if language_options.get("disabled_rules_ktlint", None):
+        rules = language_options["disabled_rules_ktlint"]
+        if isinstance(rules, list):
+            rules = ",".join(rules)
+        if "filename" not in rules:
+            rules += ",filename"
+        command.append(f"--disabled_rules={rules}")
+    else:
+        command.append("--disabled_rules=filename")
+
+    if language_options.get("ktlint_ruleset", None):
+        command.append(
+            f"--ruleset={config.resources / language_options.get('ktlint_ruleset')}"
+        )
+
+    command.append(submission.absolute())
+
     execution_results = run_command(
         directory=submission.parent,
         timeout=remaining,
-        command=["ktlint",
-                 "--reporter=json",
-                 "--disabled_rules=filename",
-                 submission.absolute()]
+        command=command
     )
 
     if execution_results is None:
