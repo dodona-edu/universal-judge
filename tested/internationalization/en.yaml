@@ -114,4 +114,9 @@ en:
         timeout: "KTLint exceeded time limit"
         memory: "KTLint exceeded memory limit"
         output: "KTLint produced bad output."
+    java:
+      linter:
+        timeout: "Checkstyle exceeded time limit"
+        memory: "Checkstyle exceeded memory limit"
+        output: "Checkstyle produced bad output."
 

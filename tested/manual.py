@@ -21,10 +21,11 @@ def read_config() -> DodonaConfig:
     return DodonaConfig(**{
         "memory_limit":         536870912,
         "time_limit":           60,
-        "programming_language": 'kotlin',
+        "programming_language": 'java',
         "natural_language":     'nl',
         "resources":            Path(exercise_dir, 'evaluation'),
-        "source":               Path(exercise_dir, 'solution/solution.kt'),
+        "source":               Path(exercise_dir,
+                                     'solution/solution-checkstyle.java'),
         "judge":                Path('.'),
         "workdir":              Path('workdir'),
         "plan_name":            "plan.yaml",
@@ -36,7 +37,8 @@ def read_config() -> DodonaConfig:
                 "javascript": True,
                 "haskell": True,
                 "runhaskell": True,
-                "kotlin": True
+                "kotlin": True,
+                "java": True
             }
         }
     })

@@ -114,3 +114,8 @@ nl:
         timeout: "KTLint overschreed tijdslimiet."
         memory: "KTLint overschreed geheugenlimiet."
         output: "KTLint produceerde slechte uitvoer."
+    java:
+      linter:
+        timeout: "Checkstyle overschreed tijdslimiet."
+        memory: "Checkstyle overschreed geheugenlimiet."
+        output: "Checkstyle produceerde slechte uitvoer."

@@ -26,6 +26,12 @@ class Java(Language):
         limit = jvm_memory_limit(config)
         return ["java", f"-Xmx{limit}", "-cp", ".", Path(file).stem, *arguments]
 
+    def linter(self, bundle: Bundle, submission: Path, remaining: float) \
+            -> Tuple[List[Message], List[AnnotateCode]]:
+        # Import locally to prevent errors.
+        from tested.languages.java import linter
+        return linter.run_checkstyle(bundle, submission, remaining)
+
     def cleanup_stacktrace(self,
                            traceback: str,
                            submission_file: str,
