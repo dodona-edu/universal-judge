@@ -1,8 +1,8 @@
 path_classifiers:
   test:
-    - exclude: "/"
-    - tested
-    - tests
+    - exclude: "exercise"
+    - exclude: "thesis"
+    - exclude: "dsl-examples"
+    - exclude: "descriptions"
     - exclude: "tested/languages/**/templates"
-    - benchmarking
     - exclude: "benchmarking/tests"
