@@ -2,7 +2,7 @@ FROM python:3.9.1-slim-buster
 
 # First, install all necessary packages for running things.
 RUN mkdir -p /usr/share/man/man1/
-RUN apt-get update && apt-get install -y --no-install-recommends openjdk-11-jdk=11.0.9.1+1-1~deb10u2 haskell-platform gcc-8 nodejs dos2unix curl zip unzip eslint=5.16.0~dfsg+~4.16.8-5 hlint=2.1.10-2+b1 cppcheck=1.86-1
+RUN apt-get update && apt-get install -y --no-install-recommends openjdk-11-jdk=11.0.9.1+1-1~deb10u2 haskell-platform gcc-8 nodejs dos2unix curl zip unzip npm=5.8.0+ds6-4+deb10u2 hlint=2.1.10-2+b1 cppcheck=1.86-1
 ENV SDKMAN_DIR /usr/local/sdkman
 RUN curl -s "https://get.sdkman.io?rcupdate=false" | bash
 RUN chmod a+x "$SDKMAN_DIR/bin/sdkman-init.sh"
@@ -12,6 +12,7 @@ RUN curl -sSLO https://github.com/pinterest/ktlint/releases/download/0.41.0/ktli
 
 RUN pip install jsonschema psutil mako pydantic==1.7.3 toml typing_inspect pylint esprima==4.0.1 lark==0.10.1 pyyaml==5.3.1 python-i18n==0.3.9
 RUN cabal update && cabal install aeson --global --force-reinstalls
+RUN npm install -g eslint@7.23.0
 
 RUN chmod 711 /mnt
 
