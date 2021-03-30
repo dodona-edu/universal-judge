@@ -119,3 +119,8 @@ nl:
         timeout: "Checkstyle overschreed tijdslimiet."
         memory: "Checkstyle overschreed geheugenlimiet."
         output: "Checkstyle produceerde slechte uitvoer."
+    c:
+      linter:
+        timeout: "CPPCheck overschreed tijdslimiet."
+        memory: "CPPCheck overschreed geheugenlimiet."
+        output: "CPPCheck produceerde slechte uitvoer."

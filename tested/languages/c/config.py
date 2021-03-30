@@ -86,6 +86,12 @@ class C(Language):
             header = "#pragma once\n\n"
             file.write(header + contents)
 
+    def linter(self, bundle: Bundle, submission: Path, remaining: float) \
+            -> Tuple[List[Message], List[AnnotateCode]]:
+        # Import locally to prevent errors.
+        from tested.languages.c import linter
+        return linter.run_cppcheck(bundle, submission, remaining)
+
     def compiler_output(
             self, namespace: str, stdout: str, stderr: str
     ) -> Tuple[List[Message], List[AnnotateCode], str, str]:

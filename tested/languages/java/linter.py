@@ -73,8 +73,8 @@ def run_checkstyle(bundle: Bundle, submission: Path, remaining: float) \
                 row=max(int(error_element.attrib['line']) - 1, 0),
                 text=error_element.attrib['message'],
                 column=max(int(error_element.attrib['column']) - 1, 0),
-                type=message_categories[error_element.attrib.get('severity',
-                                                                 Severity.WARNING)],
+                type=message_categories.get(error_element.attrib['severity'],
+                                            Severity.WARNING),
             ))
 
     # sort linting messages on line, column and code

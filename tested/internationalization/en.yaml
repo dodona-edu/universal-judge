@@ -119,4 +119,9 @@ en:
         timeout: "Checkstyle exceeded time limit"
         memory: "Checkstyle exceeded memory limit"
         output: "Checkstyle produced bad output."
+    c:
+      linter:
+        timeout: "CPPCheck exceeded time limit"
+        memory: "CPPCheck exceeded memory limit"
+        output: "CPPCheck produced bad output."
 
