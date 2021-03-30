@@ -1,8 +1,8 @@
 path_classifiers:
   test:
-    - exclude: /
+    - exclude: "/"
     - tested
     - tests
-    - exclude: tested/languages/**/templates
+    - exclude: "tested/languages/**/templates"
     - benchmarking
-    - exclude: benchmarking/tests
+    - exclude: "benchmarking/tests"
