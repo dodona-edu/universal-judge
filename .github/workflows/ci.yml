@@ -39,6 +39,7 @@ jobs:
             dist-newstyle
           key: ${{ runner.os }}-cabalghc-20210330
           restore-keys: |
+            ${{ runner.os }}-cabalghc-
             ${{ runner.os }}-cabal-
       - name: Install Haskell dependencies
         run: cabal v1-install aeson
