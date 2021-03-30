@@ -99,3 +99,29 @@ en:
       linter:
         crashed: "Pylint crashed"
         output: "Pylint produced bad output."
+    javascript:
+      linter:
+        timeout: "ESLint exceeded time limit"
+        memory: "ESLint exceeded memory limit"
+        output: "ESLint produced bad output."
+    haskell:
+      linter:
+        timeout: "HLint exceeded time limit"
+        memory: "HLint exceeded memory limit"
+        output: "HLint produced bad output."
+    kotlin:
+      linter:
+        timeout: "KTLint exceeded time limit"
+        memory: "KTLint exceeded memory limit"
+        output: "KTLint produced bad output."
+    java:
+      linter:
+        timeout: "Checkstyle exceeded time limit"
+        memory: "Checkstyle exceeded memory limit"
+        output: "Checkstyle produced bad output."
+    c:
+      linter:
+        timeout: "CPPCheck exceeded time limit"
+        memory: "CPPCheck exceeded memory limit"
+        output: "CPPCheck produced bad output."
+

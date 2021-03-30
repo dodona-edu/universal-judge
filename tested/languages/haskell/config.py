@@ -26,6 +26,12 @@ class Haskell(Language):
     def solution(self, solution: Path, bundle: Bundle):
         haskell_solution(self, solution, bundle)
 
+    def linter(self, bundle: Bundle, submission: Path, remaining: float) \
+            -> Tuple[List[Message], List[AnnotateCode]]:
+        # Import locally to prevent errors.
+        from tested.languages.haskell import linter
+        return linter.run_hlint(bundle, submission, remaining)
+
     def cleanup_description(self, namespace: str, description: str) -> str:
         return cleanup_description(self, namespace, description)
 

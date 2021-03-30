@@ -82,6 +82,17 @@ def configuration(config, exercise: str, language: str, work_dir: Path,
         "judge":                Path(f'{config.rootdir}'),
         "workdir":              work_dir,
         "plan_name":            plan,
+        "options": {
+            "linter":   {
+                "python":     False,
+                "javascript": False,
+                "haskell":    False,
+                "runhaskell": False,
+                "kotlin":     False,
+                "java":       False,
+                "c":          False
+            }
+        }
     }, options))
 
 

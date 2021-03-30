@@ -56,6 +56,12 @@ class Kotlin(Language):
         with open(solution, "w") as file:
             file.write(contents)
 
+    def linter(self, bundle: Bundle, submission: Path, remaining: float) \
+            -> Tuple[List[Message], List[AnnotateCode]]:
+        # Import locally to prevent errors.
+        from tested.languages.kotlin import linter
+        return linter.run_ktlint(bundle, submission, remaining)
+
     def find_main_file(self, files: List[str], name: str)  \
             -> Tuple[Optional[str], List[Message], Status, List[AnnotateCode]]:
         logger.debug("Finding %s in %s", name, files)

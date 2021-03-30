@@ -69,6 +69,12 @@ class JavaScript(Language):
         except error_handler.Error:
             logger.debug("Failing to parse submission")
 
+    def linter(self, bundle: Bundle, submission: Path, remaining: float) \
+            -> Tuple[List[Message], List[AnnotateCode]]:
+        # Import locally to prevent errors.
+        from tested.languages.javascript import linter
+        return linter.run_eslint(bundle, submission, remaining)
+
     def cleanup_stacktrace(self,
                            traceback: str,
                            submission_file: str,

@@ -1,7 +1,8 @@
 from pathlib import Path
-from typing import List
+from typing import List, Tuple
 
 from tested.configs import Bundle
+from tested.dodona import Message, AnnotateCode
 from tested.languages.config import Command, Config, Language
 from tested.languages.utils import haskell_solution, cleanup_description, \
     haskell_cleanup_stacktrace
@@ -15,6 +16,12 @@ class RunHaskell(Language):
 
     def solution(self, solution: Path, bundle: Bundle):
         haskell_solution(self, solution, bundle)
+
+    def linter(self, bundle: Bundle, submission: Path, remaining: float) \
+            -> Tuple[List[Message], List[AnnotateCode]]:
+        # Import locally to prevent errors.
+        from tested.languages.haskell import linter
+        return linter.run_hlint(bundle, submission, remaining)
 
     def filter_dependencies(self,
                             bundle: Bundle,
