@@ -51,7 +51,7 @@ jobs:
         uses: fwilhe2/setup-kotlin@bb0e1ead85a7f840e9d2bc4bdd2c3950b080a449
       - name: Install linters
         run: >
-          sudo apt -y install eslint=5.16.0~dfsg+~4.16.8-5 hlint=2.1.10-2+b1 cppcheck=1.86-1 &&
+          sudo apt -y install eslint=5.0.1~dfsg-4build3 hlint=2.1.11-1build4 cppcheck=1.90-4build1 &&
           curl -sSLO https://github.com/pinterest/ktlint/releases/download/0.41.0/ktlint &&
           chmod a+x ktlint &&
           sudo mv ktlint /usr/local/bin/
