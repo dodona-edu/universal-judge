@@ -1,13 +1,13 @@
 extraction:
   javascript:
     index:
-      excluded:
+      exclude:
         - thesis
         - exercise
         - "tested/languages/*/templates"
   python:
     index:
-      excluded:
+      exclude:
         - thesis
         - exercise
         - "tested/languages/*/templates"
