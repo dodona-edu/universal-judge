@@ -62,7 +62,9 @@ def test_hlint(language: str, tmp_path: Path, pytestconfig):
     updates = assert_valid_output(result, pytestconfig)
     assert len(updates.find_all("annotate-code")) > 0
 
+
 @pytest.mark.linter
+@pytest.mark.ktlint
 def test_ktlint(tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "counter", "kotlin", tmp_path, "plan.yaml", "solution", {
         "options": {

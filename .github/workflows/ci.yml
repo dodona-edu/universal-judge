@@ -52,12 +52,7 @@ jobs:
       - name: Install linters
         run: >
           sudo apt -y install hlint=2.1.11-1build4 cppcheck=1.90-4build1 &&
-          curl -sSLO https://github.com/pinterest/ktlint/releases/download/0.41.0/ktlint &&
-          chmod a+x ktlint &&
-          mkdir -p "$HOME/.local/bin/" &&
-          mv ktlint "$HOME/.local/bin/" &&
-          echo "$HOME/.local/bin" >> $GITHUB_PATH &&
           sudo npm install -g eslint@7.23.0
       - name: Run tests
         run: |
-          python -m pytest tests/ -m "not slow and not flaky"
+          python -m pytest tests/ -m "not slow and not flaky and not ktlint"
