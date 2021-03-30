@@ -1,8 +1,14 @@
-path_classifiers:
-  test:
-    - exclude: "exercise"
-    - exclude: "thesis"
-    - exclude: "dsl-examples"
-    - exclude: "descriptions"
-    - exclude: "tested/languages/**/templates"
-    - exclude: "benchmarking/tests"
+extraction:
+  javascript:
+    index:
+      excluded:
+        - thesis
+        - exercise
+        - "tested/languages/*/templates"
+  python:
+    index:
+      excluded:
+        - thesis
+        - exercise
+        - "tested/languages/*/templates"
+
