@@ -20,7 +20,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
       - name: Install Python dependencies
-        run: python -m pip install -r requirements.txt -r requirements-test.txt
+        run: python -m pip install -r requirements.txt -r requirements-test.txt -r tested/languages/python/requirements.txt
       - name: Install Java 11
         uses: actions/setup-java@v1
         with:
@@ -49,6 +49,12 @@ jobs:
           node-version: 12.x  
       - name: Setup Kotlin
         uses: fwilhe2/setup-kotlin@bb0e1ead85a7f840e9d2bc4bdd2c3950b080a449
+      - name: Install linters
+        run: >
+          sudo apt -y install eslint=5.16.0~dfsg+~4.16.8-5 hlint=2.1.10-2+b1 cppcheck=1.86-1 &&
+          curl -sSLO https://github.com/pinterest/ktlint/releases/download/0.41.0/ktlint &&
+          chmod a+x ktlint &&
+          sudo mv ktlint /usr/local/bin/
       - name: Run tests
         run: |
-          python -m pytest tests/ -m "not slow and not flaky and not linter"
+          python -m pytest tests/ -m "not slow and not flaky"
