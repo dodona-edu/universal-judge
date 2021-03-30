@@ -27,7 +27,6 @@ jobs:
           java-version: '11'
       - name: Install GHC 8.10
         uses: actions/setup-haskell@v1.1.4
-        id: setup-haskell-cabal
         with:
           ghc-version: '8.10.3'
           cabal-version: '3.4'
@@ -36,8 +35,9 @@ jobs:
         with:
           path: |
             ~/.cabal
+            ~/.ghc
             dist-newstyle
-          key: ${{ runner.os }}-cabal-20210330
+          key: ${{ runner.os }}-cabalghc-20210330
           restore-keys: |
             ${{ runner.os }}-cabal-
       - name: Install Haskell dependencies
