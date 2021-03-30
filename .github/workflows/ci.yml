@@ -52,9 +52,7 @@ jobs:
       - name: Install linters
         run: >
           sudo apt -y install hlint=2.1.11-1build4 cppcheck=1.90-4build1 &&
-          curl -sSLO https://github.com/pinterest/ktlint/releases/download/0.41.0/ktlint &&
-          chmod a+x ktlint &&
-          sudo mv ktlint /usr/local/bin/ &&
+          brew install ktlint@0.41.0 &&
           sudo npm install -g eslint@7.23.0
       - name: Run tests
         run: |
