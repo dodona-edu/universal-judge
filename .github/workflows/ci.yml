@@ -11,6 +11,14 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.9.1
+      - uses: actions/cache@v2
+        name: Cache pip
+        # Idea: https://medium.com/ai2-blog/python-caching-in-github-actions-e9452698e98d
+        with:
+          path: ${{ env.pythonLocation }}
+          key: ${{ runner.os }}-${{ env.pythonLocation }}-pip-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
       - name: Install Python dependencies
         run: python -m pip install -r requirements.txt -r requirements-test.txt
       - name: Install Java 11
@@ -22,6 +30,17 @@ jobs:
         with:
           ghc-version: '8.10.3'
           cabal-version: '3.4'
+      - uses: actions/cache@v2
+        name: Cache cabal
+        with:
+          path: |
+            ~/.cabal
+            ~/.ghc
+            dist-newstyle
+          key: ${{ runner.os }}-cabalghc-20210330
+          restore-keys: |
+            ${{ runner.os }}-cabalghc-
+            ${{ runner.os }}-cabal-
       - name: Install Haskell dependencies
         run: cabal v1-install aeson
       - name: Use node 12
