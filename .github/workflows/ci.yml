@@ -40,9 +40,9 @@ jobs:
         name: Cache ~/.cabal/packages, ~/.cabal/store and dist-newstyle
         with:
           path: |
-            ${{ steps.setup-haskell-cabal.outputs.cabal-store }}
+            ~/.cabal
             dist-newstyle
-          key: ${{ runner.os }}-cabal-aeson.2021.03.30
+          key: ${{ runner.os }}-cabal-20210330
           restore-keys: |
             ${{ runner.os }}-cabal-
       - name: Install Haskell dependencies
