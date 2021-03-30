@@ -31,6 +31,7 @@ jobs:
           java-version: '11'
       - name: Install GHC 8.10
         uses: actions/setup-haskell@v1.1.4
+        id: setup-haskell-cabal
         with:
           ghc-version: '8.10.3'
           cabal-version: '3.4'
@@ -39,8 +40,7 @@ jobs:
         name: Cache ~/.cabal/packages, ~/.cabal/store and dist-newstyle
         with:
           path: |
-            ~/.cabal/packages
-            ~/.cabal/store
+            ${{ steps.setup-haskell-cabal.outputs.cabal-store }}
             dist-newstyle
           key: ${{ runner.os }}-cabal-aeson.2021.03.30
           restore-keys: |
