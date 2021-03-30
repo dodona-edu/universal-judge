@@ -79,7 +79,7 @@ class DodonaConfig(BaseModel):
         return self.options.language.get(self.programming_language, dict())
 
     def linter(self) -> bool:
-        return self.options.linter.get(self.programming_language, False)
+        return self.options.linter.get(self.programming_language, True)
 
 
 def read_config(config_in: IO) -> DodonaConfig:
