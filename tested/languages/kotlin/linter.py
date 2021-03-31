@@ -77,14 +77,18 @@ def run_ktlint(bundle: Bundle, submission: Path, remaining: float) \
     annotations = []
 
     for ktlint_object in ktlint_objects:
-        if Path(ktlint_object['file']).name != submission.name:
+        if Path(ktlint_object.get('file', submission)).name != submission.name:
             continue
-        annotations.extend(map(lambda x: AnnotateCode(
-            row=max(int(x['line']) - 1, 0),
-            text=x['message'],
-            column=max(int(x['column']) - 1, 0),
-            type=Severity.ERROR,
-        ), ktlint_object['errors']))
+        for error in ktlint_object.get('errors', []):
+            message = error.get('message', None)
+            if not message:
+                continue
+            annotations.append(AnnotateCode(
+                row=max(int(error.get('line', "-1")) - 1, 0),
+                text=message,
+                column=max(int(error.get('column', "-1")) - 1, 0),
+                type=Severity.ERROR,
+            ))
 
     # sort linting messages on line, column and code
     annotations.sort(key=lambda a: (a.row, a.column, a.text))
