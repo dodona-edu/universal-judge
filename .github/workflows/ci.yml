@@ -55,4 +55,4 @@ jobs:
           sudo npm install -g eslint@7.23.0
       - name: Run tests
         run: |
-          python -m pytest tests/ -m "not slow and not flaky and not ktlint"
+          python -m pytest tests/ -m "not slow and not flaky"
