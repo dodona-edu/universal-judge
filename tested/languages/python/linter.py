@@ -67,12 +67,23 @@ def run_pylint(bundle: Bundle, submission: Path, remaining: float) \
     annotations = []
 
     for message in messages:
-        category = message_categories.get(message["type"], Severity.WARNING)
+        category = message_categories.get(message.get("type", "warning"),
+                                          Severity.WARNING)
         logger.debug("Handling message %s", str(message))
+        message_id = message.get('message-id', None)
+        message_text = message.get('message', None)
+        if not message_id and not message_text:
+            continue
+        elif not message_id:
+            text = message_text
+        elif not message_text:
+            text = f"({message_id})"
+        else:
+            text = f"{message_text} ({message_id})"
         annotations.append(AnnotateCode(
-            row=max(int(message["line"]) - 1, 0),
-            column=max(int(message["column"]) - 1, 0),
-            text=f"{message['message']} ({message['message-id']})",
+            row=max(int(message.get("line", "-1")) - 1, 0),
+            column=max(int(message.get("column", "-1")) - 1, 0),
+            text=text,
             type=category
         ))
 
