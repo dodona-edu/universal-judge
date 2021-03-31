@@ -61,14 +61,16 @@ def run_cppcheck(bundle: Bundle, submission: Path, remaining: float,
         if element.tag != 'errors':
             continue
         for error in element:
-            message = error.attrib["verbose"]
-            severity = error.attrib["severity"]
+            message = error.attrib.get("verbose", None)
+            if not message:
+                continue
+            severity = error.attrib.get("severity", "warning")
             position = None
             for el in error:
                 if el.tag != 'location':
                     continue
-                position = (max(int(el.attrib["line"]) - 1, 0),
-                            max(int(el.attrib["column"]) - 1, 0))
+                position = (max(int(el.attrib.get("line", "-1")) - 1, 0),
+                            max(int(el.attrib.get("column", "-1")) - 1, 0))
                 break
             annotations.append(AnnotateCode(
                 row=position[0],

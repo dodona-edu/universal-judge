@@ -66,15 +66,19 @@ def run_checkstyle(bundle: Bundle, submission: Path, remaining: float) \
     annotations = []
 
     for file_tree in xml_tree:
-        if Path(file_tree.attrib['name']).name != submission.name:
+        if Path(file_tree.attrib.get('name', submission)).name != submission.name:
             continue
         for error_element in file_tree:
+            message = error_element.attrib.get('message', None)
+            if not message:
+                continue
             annotations.append(AnnotateCode(
-                row=max(int(error_element.attrib['line']) - 1, 0),
-                text=error_element.attrib['message'],
-                column=max(int(error_element.attrib['column']) - 1, 0),
-                type=message_categories.get(error_element.attrib['severity'],
-                                            Severity.WARNING),
+                row=max(int(error_element.attrib.get('line', "-1")) - 1, 0),
+                text=message,
+                column=max(int(error_element.attrib.get('column', "-1")) - 1, 0),
+                type=message_categories.get(
+                    error_element.attrib.get('severity', "warning"),
+                    Severity.WARNING),
             ))
 
     # sort linting messages on line, column and code

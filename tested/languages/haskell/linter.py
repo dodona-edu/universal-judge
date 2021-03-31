@@ -61,15 +61,24 @@ def run_hlint(bundle: Bundle, submission: Path, remaining: float) \
     annotations = []
 
     for hlint_message in hlint_messages:
-        if Path(hlint_message['file']).name != submission.name:
+        if Path(hlint_message.get('file', submission)).name != submission.name:
             continue
-        notes = '\n'.join(hlint_message['note'])
+        notes = '\n'.join(hlint_message.get('note', []))
+        hint = hlint_message.get('hint', None)
+        if not hint:
+            continue
+        hint_from = hlint_message.get('from', None)
+        hint_to = hlint_message.get('to', None)
+        if hint_from and hint_to:
+            hint = f"{hint}\nfrom: `{hint_from}`\nto: `{hint_to}`"
+        if notes:
+            hint = f"{hint}\n{notes}"
+
         annotations.append(AnnotateCode(
-            row=max(int(hlint_message['startLine']) - 1, 0),
-            text=f"{hlint_message['hint']}\nfrom: `{hlint_message['from']}`\n"
-                 f"to: `{hlint_message['to']}`\n{notes}",
-            column=max(int(hlint_message['startColumn']) - 1, 0),
-            type=message_categories.get(hlint_message['severity'],
+            row=max(int(hlint_message.get('startLine', "-1")) - 1, 0),
+            text=hint,
+            column=max(int(hlint_message.get('startColumn', "-1")) - 1, 0),
+            type=message_categories.get(hlint_message.get('severity', "warning"),
                                         Severity.WARNING),
         ))
     # sort linting messages on line, column and code
