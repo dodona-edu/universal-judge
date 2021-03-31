@@ -21,7 +21,10 @@ def run_ktlint(bundle: Bundle, submission: Path, remaining: float) \
     config = bundle.config
     language_options = bundle.config.config_for()
 
-    command = ["ktlint", "--reporter=json"]
+    ktlint_jar = config.judge / "tested/languages/kotlin/ktlint.jar"
+    ktlint_jar = ktlint_jar.absolute()
+
+    command = ["java", "-jar", ktlint_jar, "--reporter=json"]
 
     if language_options.get("editorconfig", None):
         command.append("--editorconfig="
