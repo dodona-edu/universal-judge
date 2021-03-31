@@ -486,10 +486,9 @@ def prepare_evaluation(bundle: Bundle, collector: OutputManager):
             exit_output = run_testcase.output.exit_code
 
             if has_main:
-                description = run_testcase.description or get_i18n_string(
-                    "judge.evaluation.missing.context")
                 collector.prepare_context(
-                    StartContext(description=description), i, context_index
+                    StartContext(description=run_testcase.description), i,
+                    context_index
                 )
 
                 readable_input, inlined_files = get_readable_input(
@@ -501,11 +500,9 @@ def prepare_evaluation(bundle: Bundle, collector: OutputManager):
                 if non_inlined:
                     _link_files_message(non_inlined, collector)
 
-                updates = []
-                if run_testcase.description:
-                    updates.append(AppendMessage(message=get_i18n_string(
-                        "judge.evaluation.missing.context")))
-                updates.append(StartTestcase(description=readable_input))
+                updates = [AppendMessage(
+                    message=get_i18n_string("judge.evaluation.missing.context")),
+                    StartTestcase(description=readable_input)]
 
                 # Do the normal output channels.
                 output = run_testcase.output
@@ -526,16 +523,13 @@ def prepare_evaluation(bundle: Bundle, collector: OutputManager):
                 context_index += 1
 
             for j, context in enumerate(run.contexts, start=int(has_main)):
-                description = context.description or get_i18n_string(
-                    "judge.evaluation.missing.context")
                 updates = []
 
                 collector.prepare_context(
-                    StartContext(description=description), i, context_index
+                    StartContext(description=context.description), i, context_index
                 )
-                if context.description:
-                    updates.append(AppendMessage(message=get_i18n_string(
-                        "judge.evaluation.missing.context")))
+                updates.append(AppendMessage(message=get_i18n_string(
+                    "judge.evaluation.missing.context")))
 
                 inlined_files: Set[FileUrl] = set()
                 # Begin normal testcases.
