@@ -1,10 +1,13 @@
 extends: "eslint:recommended"
+env:
+  node: yes
 rules:
     no-var: "error"
-    no-unused-vars: ["warn", { "vars": "local", "args": "after-used", "ignoreRestSiblings": false }]
+    # Disable unused vars, otherwise written classes, functions and variables will be detected as unused,
+    # even when the student is expected to write these classes, functions and variables
+    # TODO: Add module.export before linting, to allow detecting unused vars in classes and functions
+    no-unused-vars: ["off", { "vars": "local", "args": "after-used", "ignoreRestSiblings": false }]
 parserOptions:
     ecmaVersion: 6
     sourceType: "script"
     ecmaFeatures: {}
-    
-# eslint -f json --no-inline-config -c eslintrc.yml

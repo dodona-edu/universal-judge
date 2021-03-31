@@ -1,3 +1,5 @@
+const fs = require("fs");
+
 class Counter {
     constructor() {
         this.counter = 0;
