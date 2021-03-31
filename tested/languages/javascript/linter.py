@@ -56,14 +56,18 @@ def run_eslint(bundle: Bundle, submission: Path, remaining: float) \
     annotations = []
 
     for eslint_object in eslint_objects:
-        if Path(eslint_object['filePath']).name != submission.name:
+        if Path(eslint_object.get('filePath', submission)).name != submission.name:
             continue
-        annotations.extend(map(lambda x: AnnotateCode(
-            row=max(int(x['line']) - 1, 0),
-            text=x['message'],
-            column=max(int(x['column']) - 1, 0),
-            type=severity[int(x['severity'])],
-        ), eslint_object['messages']))
+        for message in eslint_object.get('messages', []):
+            text = message.get('message', None)
+            if not text:
+                continue
+            annotations.append(AnnotateCode(
+                row=max(int(message.get('line', "-1")) - 1, 0),
+                text=text,
+                column=max(int(message.get('column', "-1")) - 1, 0),
+                type=severity[int(message.get('severity', 1))],
+            ))
 
     # sort linting messages on line, column and code
     annotations.sort(key=lambda a: (a.row, a.column, a.text))
