@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import List, Tuple, Optional
 
 from tested.configs import Bundle
-from tested.dodona import Message, Status, AnnotateCode
+from tested.dodona import Message, Status, AnnotateCode, ExtendedMessage, Permission
 from tested.languages.config import CallbackResult, Command, Config, Language, \
     limit_output
 from tested.languages.utils import jvm_memory_limit, jvm_cleanup_stacktrace, \
@@ -27,13 +27,15 @@ class Kotlin(Language):
             return file.suffix == ".class"
 
         others = [x for x in files if not x.endswith(".jar")]
-        return [get_executable("kotlinc"), "-nowarn", "-jvm-target", "11", "-cp", ".",
+        return [get_executable("kotlinc"), "-nowarn", "-jvm-target", "11", "-cp",
+                ".",
                 *others], file_filter
 
     def execution(self, config: Config, cwd: Path, file: str,
                   arguments: List[str]) -> Command:
         limit = jvm_memory_limit(config)
-        return [get_executable("kotlin"), f"-J-Xmx{limit}", "-cp", ".", Path(file).stem, *arguments]
+        return [get_executable("kotlin"), f"-J-Xmx{limit}", "-cp", ".",
+                Path(file).stem, *arguments]
 
     # noinspection PyTypeChecker
     def solution(self, solution: Path, bundle: Bundle):
@@ -62,7 +64,7 @@ class Kotlin(Language):
         from tested.languages.kotlin import linter
         return linter.run_ktlint(bundle, submission, remaining)
 
-    def find_main_file(self, files: List[str], name: str)  \
+    def find_main_file(self, files: List[str], name: str) \
             -> Tuple[Optional[str], List[Message], Status, List[AnnotateCode]]:
         logger.debug("Finding %s in %s", name, files)
         main, msgs, status, ants = Language.find_main_file(self, files, name + 'Kt')
@@ -96,7 +98,13 @@ class Kotlin(Language):
     def compiler_output(
             self, namespace: str, stdout: str, stderr: str
     ) -> Tuple[List[Message], List[AnnotateCode], str, str]:
-        return [], [], limit_output(stdout), jvm_cleanup_stacktrace(
+        staff_messages = [
+            ExtendedMessage(description=f"Stdout:\n{stdout}", format="text",
+                            permission=Permission.STAFF),
+            ExtendedMessage(description=f"Stderr:\n{stderr}", format="text",
+                            permission=Permission.STAFF)
+        ]
+        return staff_messages, [], limit_output(stdout), jvm_cleanup_stacktrace(
             stderr,
             self.with_extension(self.conventionalize_namespace(namespace))
         )
