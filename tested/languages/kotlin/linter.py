@@ -87,7 +87,7 @@ def run_ktlint(bundle: Bundle, submission: Path, remaining: float) \
                 row=max(int(error.get('line', "-1")) - 1, 0),
                 text=message,
                 column=max(int(error.get('column', "-1")) - 1, 0),
-                type=Severity.ERROR,
+                type=Severity.INFO,
             ))
 
     # sort linting messages on line, column and code
