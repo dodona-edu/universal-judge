@@ -116,8 +116,13 @@ def judge(bundle: Bundle):
                 # Otherwise, it will keep being compiled, which we want to avoid.
                 if bundle.lang_config.needs_selector():
                     files.remove(selector)
-            else:
+            # When compilation succeeded, only add annotations
+            elif status == Status.CORRECT:
                 files = compilation_files
+                for annotation in annotations:
+                    collector.add(annotation)
+            # Add compilation tab when compilation failed
+            else:
                 # Report messages.
                 if messages:
                     collector.add_tab(
@@ -129,13 +134,12 @@ def judge(bundle: Bundle):
                 if messages:
                     collector.add_tab(CloseTab(), -1)
 
-                if status != Status.CORRECT:
-                    collector.terminate(StatusMessage(
-                        enum=status,
-                        human=get_i18n_string("judge.core.invalid.source-code")
-                    ))
-                    _logger.info("Compilation error without fallback")
-                    return  # Compilation error occurred, useless to continue.
+                collector.terminate(StatusMessage(
+                    enum=status,
+                    human=get_i18n_string("judge.core.invalid.source-code")
+                ))
+                _logger.info("Compilation error without fallback")
+                return  # Compilation error occurred, useless to continue.
     else:
         precompilation_result = None
 
