@@ -82,7 +82,7 @@ def test_specific_evaluation(language: str, tmp_path: Path, pytestconfig):
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["wrong", "correct"]
-    assert len(updates.find_all("append-message")) == 2
+    assert len(updates.find_all("append-message")) == (4 if language == "kotlin" else 2)
 
 
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
@@ -91,7 +91,7 @@ def test_programmed_evaluation(language: str, tmp_path: Path, pytestconfig):
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["correct"] * 4
-    assert len(updates.find_all("append-message")) == 4
+    assert len(updates.find_all("append-message")) == (6 if language == "kotlin" else 4)
 
 
 @pytest.mark.parametrize("lang", ["python", "java", "javascript", "kotlin", pytest.param("haskell", marks=mark_haskell),
@@ -110,7 +110,7 @@ def test_language_evaluator_exception(lang: str, tmp_path: Path, pytestconfig):
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["wrong"]
-    assert len(updates.find_all("append-message")) == 1
+    assert len(updates.find_all("append-message")) == (3 if lang == "kotlin" else 1)
 
 
 @pytest.mark.parametrize("lang", ["python", "java", "kotlin"])
@@ -188,7 +188,7 @@ def test_programmed_evaluator_wrong(lang: str, tmp_path: Path, pytestconfig):
     updates = assert_valid_output(result, pytestconfig)
     assert len(updates.find_all("start-testcase")) == 1
     assert updates.find_status_enum() == ["wrong"]
-    assert len(updates.find_all("append-message")) == 1
+    assert len(updates.find_all("append-message")) == (3 if lang == "kotlin" else 1)
 
 
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
