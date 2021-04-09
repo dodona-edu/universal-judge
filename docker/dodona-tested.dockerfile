@@ -2,7 +2,9 @@ FROM python:3.9.1-slim-buster
 
 # First, install all necessary packages for running things.
 RUN mkdir -p /usr/share/man/man1/
-RUN apt-get update && apt-get install -y --no-install-recommends openjdk-11-jdk=11.0.9.1+1-1~deb10u2 haskell-platform gcc-8 nodejs dos2unix curl zip unzip npm=5.8.0+ds6-4+deb10u2 hlint=2.1.10-2+b1 cppcheck=1.86-1
+RUN apt-get update && apt-get install -y --no-install-recommends dos2unix curl zip unzip
+RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash -
+RUN apt-get update && apt-get install -y --no-install-recommends openjdk-11-jdk=11.0.9.1+1-1~deb10u2 haskell-platform gcc-8 nodejs hlint=2.1.10-2+b1 cppcheck=1.86-1
 ENV SDKMAN_DIR /usr/local/sdkman
 RUN curl -s "https://get.sdkman.io?rcupdate=false" | bash
 RUN chmod a+x "$SDKMAN_DIR/bin/sdkman-init.sh"

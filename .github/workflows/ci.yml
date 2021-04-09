@@ -43,10 +43,10 @@ jobs:
             ${{ runner.os }}-cabal-
       - name: Install Haskell dependencies
         run: cabal v1-install aeson
-      - name: Use node 12
-        uses: actions/setup-node@v1
+      - name: Use node 14
+        uses: actions/setup-node@v2
         with:
-          node-version: 12.x  
+          node-version: 14
       - name: Setup Kotlin
         uses: fwilhe2/setup-kotlin@bb0e1ead85a7f840e9d2bc4bdd2c3950b080a449
       - name: Install linters
