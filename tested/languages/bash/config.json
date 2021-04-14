@@ -13,19 +13,19 @@
   "constructs": {
     "objects": false,
     "exceptions": false,
-    "function_calls": false,
-    "assignments": false,
+    "function_calls": true,
+    "assignments": true,
     "heterogeneous_collections": false,
     "heterogeneous_arguments": false,
     "evaluation": false,
     "named_arguments": false,
-    "default_parameters": false
+    "default_parameters": true
   },
   "datatypes": {
     "integer": "unsupported",
     "rational": "unsupported",
     "char": "unsupported",
-    "text": "unsupported",
+    "text": "supported",
     "boolean": "unsupported",
     "sequence": "unsupported",
     "set": "unsupported",
