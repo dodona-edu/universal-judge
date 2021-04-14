@@ -8,4 +8,5 @@ class Bash(Language):
 
     def execution(self, config: Config, cwd: Path, file: str,
                   arguments: List[str]) -> Command:
-        return [f'./{file}', *arguments]
+
+        return ['bash', file, *arguments]

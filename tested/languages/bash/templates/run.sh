@@ -1,6 +1,4 @@
-#!/usr/bin/env bash
 <%! from json import dumps %>\
-
 function write_context_separator {
     echo -n "--${context_secret_id}-- SEP" >${value_file}
     echo -n "--${context_secret_id}-- SEP" >${exception_file}
