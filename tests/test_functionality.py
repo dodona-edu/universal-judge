@@ -16,7 +16,8 @@ from tested.languages import LANGUAGES
 from tests.manual_utils import assert_valid_output, configuration, execute_config, mark_haskell
 
 COMPILE_LANGUAGES = ["python", "java", "c", "kotlin", pytest.param("haskell", marks=mark_haskell)]
-ALL_LANGUAGES = COMPILE_LANGUAGES + ["javascript", pytest.param("runhaskell", marks=mark_haskell)]
+ALL_FUNCTION_LANGUAGES = COMPILE_LANGUAGES + ["javascript", pytest.param("runhaskell", marks=mark_haskell)]
+ALL_LANGUAGES = ALL_FUNCTION_LANGUAGES + ["bash"]
 
 
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
@@ -51,7 +52,7 @@ def test_simple_programmed_eval_wrong(language: str, tmp_path: Path, pytestconfi
     assert updates.find_status_enum() == ["wrong"]
 
 
-@pytest.mark.parametrize("language", ALL_LANGUAGES)
+@pytest.mark.parametrize("language", ALL_FUNCTION_LANGUAGES)
 def test_io_function_exercise(language: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "echo-function", language, tmp_path, "one.tson", "correct")
     result = execute_config(conf)
@@ -59,7 +60,7 @@ def test_io_function_exercise(language: str, tmp_path: Path, pytestconfig):
     assert updates.find_status_enum() == ["correct"]
 
 
-@pytest.mark.parametrize("language", ALL_LANGUAGES)
+@pytest.mark.parametrize("language", ALL_FUNCTION_LANGUAGES)
 def test_io_function_escape_exercise(language: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "echo-function", language, tmp_path, "one-escape.tson", "correct")
     result = execute_config(conf)
@@ -76,7 +77,7 @@ def test_io_function_exercise_haskell_io(language: str, tmp_path: Path, pytestco
     assert updates.find_status_enum() == ["correct"]
 
 
-@pytest.mark.parametrize("language", ALL_LANGUAGES)
+@pytest.mark.parametrize("language", ALL_FUNCTION_LANGUAGES)
 def test_specific_evaluation(language: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "echo-function", language, tmp_path, "two-specific.tson", "correct")
     result = execute_config(conf)
@@ -85,7 +86,7 @@ def test_specific_evaluation(language: str, tmp_path: Path, pytestconfig):
     assert len(updates.find_all("append-message")) == 2
 
 
-@pytest.mark.parametrize("language", ALL_LANGUAGES)
+@pytest.mark.parametrize("language", ALL_FUNCTION_LANGUAGES)
 def test_programmed_evaluation(language: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "echo-function", language, tmp_path, "programmed-no-haskell.tson", "correct")
     result = execute_config(conf)
@@ -191,7 +192,7 @@ def test_programmed_evaluator_wrong(lang: str, tmp_path: Path, pytestconfig):
     assert len(updates.find_all("append-message")) == 1
 
 
-@pytest.mark.parametrize("language", ALL_LANGUAGES)
+@pytest.mark.parametrize("language", ALL_FUNCTION_LANGUAGES)
 def test_context_compilation(language: str, tmp_path: Path, pytestconfig, mocker):
     config_ = {
         "options": {
@@ -210,7 +211,7 @@ def test_context_compilation(language: str, tmp_path: Path, pytestconfig, mocker
     assert class_instance.compilation.call_count == 2
 
 
-@pytest.mark.parametrize("language", ALL_LANGUAGES)
+@pytest.mark.parametrize("language", ALL_FUNCTION_LANGUAGES)
 def test_batch_compilation(language: str, tmp_path: Path, pytestconfig, mocker):
     config_ = {
         "options": {
@@ -259,7 +260,7 @@ def test_batch_compilation_no_fallback(language: str, tmp_path: Path, pytestconf
     assert class_instance.compilation.call_count == 1
 
 
-@pytest.mark.parametrize("language", ALL_LANGUAGES)
+@pytest.mark.parametrize("language", ALL_FUNCTION_LANGUAGES)
 def test_batch_compilation_no_fallback_runtime(language: str, tmp_path: Path, pytestconfig):
     config_ = {
         "options": {
@@ -349,7 +350,7 @@ def test_named_parameters_not_supported(language, tmp_path: Path, pytestconfig):
     assert updates.find_status_enum() == ["internal error"]
 
 
-@pytest.mark.parametrize("language", ALL_LANGUAGES)
+@pytest.mark.parametrize("language", ALL_FUNCTION_LANGUAGES)
 def test_hide_expected_correct(language: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "echo", language, tmp_path, "one-hide-expected.tson", "correct")
     result = execute_config(conf)
@@ -358,7 +359,7 @@ def test_hide_expected_correct(language: str, tmp_path: Path, pytestconfig):
     assert len(list(filter(lambda x: bool(x["expected"]), updates.find_all("start-test")))) == 1
 
 
-@pytest.mark.parametrize("language", ALL_LANGUAGES)
+@pytest.mark.parametrize("language", ALL_FUNCTION_LANGUAGES)
 def test_hide_expected_wrong(language: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "echo", language, tmp_path, "one-hide-expected.tson", "wrong")
     result = execute_config(conf)
