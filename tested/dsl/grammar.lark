@@ -100,7 +100,7 @@ fun: name "(" args ")"
 ?stmt: assign
      | expr
 
-args: [value ("," value)*]
+args: [expr ("," expr)*]
 
 dict: "{" [dict_pair ("," dict_pair)*] "}"
 list: "[" [expr ("," expr)*] "]"
