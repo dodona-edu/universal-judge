@@ -24,7 +24,7 @@ def read_config() -> DodonaConfig:
         "programming_language": 'bash',
         "natural_language":     'nl',
         "resources":            Path(exercise_dir, 'evaluation'),
-        "source":               Path(exercise_dir, 'solution/correct.sh'),
+        "source":               Path(exercise_dir, 'solution/run-error.sh'),
         "judge":                Path('.'),
         "workdir":              Path('workdir'),
         "plan_name":            "one.tson",
