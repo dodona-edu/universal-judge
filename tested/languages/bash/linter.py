@@ -75,7 +75,7 @@ def run_shellcheck(bundle: Bundle, submission: Path, remaining: float,
             row=max(int(shellcheck_object.get('line', "-1")) - 1, 0),
             text=text,
             column=max(int(shellcheck_object.get('column', "-1")) - 1, 0),
-            type=message_categories.get(shellcheck_object.get('level', ""),
+            type=message_categories.get(shellcheck_object.get('level', "warning"),
                                         Severity.WARNING),
         ))
 
