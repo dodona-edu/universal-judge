@@ -8,7 +8,7 @@
 
         return text.replace("'", "\\'")
 %>\
-<%page args="function,index_fun,index_map" />\
+<%page args="function,index,index_fun,index_map" />\
 <% index_map.append({}) %>\
 % for i, argument in enumerate(function.arguments):
     % if isinstance(argument, FunctionCall):
@@ -21,7 +21,7 @@
         % endif
     % endif
 % endfor
-${function.name} \
+ARG${index}=$(${function.name} \
 % if function.type != FunctionType.PROPERTY:
     % for i, argument in enumerate(function.arguments):
         % if isinstance(argument, Identifier):
@@ -36,4 +36,5 @@ ${function.name} \
         % endif
     % endfor
 % endif
+)\
 <% index_map.pop() %>

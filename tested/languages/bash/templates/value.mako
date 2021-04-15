@@ -2,5 +2,5 @@
 <%! from tested.datatypes import BasicStringTypes %>\
 <%page args="value" />\
 % if value.type == BasicStringTypes.TEXT:
-    ${repr(value.data)}\
+    "${value.data.replace("\\", "\\\\").replace('"', '\\"')}"\
 % endif
