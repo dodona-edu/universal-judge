@@ -13,7 +13,7 @@ from pathlib import Path
 from .configs import DodonaConfig
 from .main import run
 
-exercise_dir = "exercise/echo-function"
+exercise_dir = "exercise/echo"
 
 
 def read_config() -> DodonaConfig:
@@ -24,10 +24,10 @@ def read_config() -> DodonaConfig:
         "programming_language": 'bash',
         "natural_language":     'nl',
         "resources":            Path(exercise_dir, 'evaluation'),
-        "source":               Path(exercise_dir, 'solution/correct.sh'),
+        "source":               Path(exercise_dir, 'solution/wrong.sh'),
         "judge":                Path('.'),
         "workdir":              Path('workdir'),
-        "plan_name":            "one-nested.yaml",
+        "plan_name":            "one.tson",
         "options":              {
             "parallel":       True,
             "mode":           "batch",
