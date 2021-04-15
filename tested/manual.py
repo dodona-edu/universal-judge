@@ -27,7 +27,7 @@ def read_config() -> DodonaConfig:
         "source":               Path(exercise_dir, 'solution/correct.sh'),
         "judge":                Path('.'),
         "workdir":              Path('workdir'),
-        "plan_name":            "one.tson",
+        "plan_name":            "one-nested.yaml",
         "options":              {
             "parallel":       True,
             "mode":           "batch",
