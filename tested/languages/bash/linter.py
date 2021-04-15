@@ -1,5 +1,6 @@
 import json
 import logging
+import shutil
 from pathlib import Path
 from typing import Tuple, List
 
@@ -22,17 +23,15 @@ def run_shellcheck(bundle: Bundle, submission: Path, remaining: float,
                    language: str = "bash") \
         -> Tuple[List[Message], List[AnnotateCode]]:
     """
-    Calls eslint to annotate submitted source code and adds resulting score and
+    Calls shellcheck to annotate submitted source code and adds resulting score and
     annotations to tab.
     """
     config = bundle.config
     language_options = bundle.config.config_for()
-    if language_options.get("spellcheck_config", None):
-        config_path = config.resources / language_options.get('eslint_config')
-    else:
-        # Use the default file.
-        config_path = config.judge / "tested/languages/javascript/spellcheckrc"
-    config_path = config_path.absolute()
+    if language_options.get("shellcheck_config", None):
+        config_path = config.resources / language_options.get('shellcheck_config')
+        # Add shellcheck file in home folder
+        shutil.copy2(Path(config_path), Path(Path.home(), ".shellcheckrc"))
 
     execution_results = run_command(
         directory=submission.parent,
