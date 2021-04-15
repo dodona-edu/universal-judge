@@ -51,7 +51,7 @@ jobs:
         uses: fwilhe2/setup-kotlin@bb0e1ead85a7f840e9d2bc4bdd2c3950b080a449
       - name: Install linters
         run: >
-          sudo apt -y install hlint=2.1.11-1build4 cppcheck=1.90-4build1 &&
+          sudo apt -y install hlint=2.1.11-1build4 cppcheck=1.90-4build1 shellcheck=0.7.0-2build2 &&
           sudo npm install -g eslint@7.23.0
       - name: Run tests
         run: |

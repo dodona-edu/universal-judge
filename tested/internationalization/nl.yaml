@@ -124,3 +124,8 @@ nl:
         timeout: "CPPCheck overschreed tijdslimiet."
         memory: "CPPCheck overschreed geheugenlimiet."
         output: "CPPCheck produceerde slechte uitvoer."
+    bash:
+      linter:
+        timeout: "ShellCheck overschreed tijdslimiet."
+        memory: "ShellCheck overschreed geheugenlimiet."
+        output: "ShellCheck produceerde slechte uitvoer."

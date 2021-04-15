@@ -124,4 +124,9 @@ en:
         timeout: "CPPCheck exceeded time limit"
         memory: "CPPCheck exceeded memory limit"
         output: "CPPCheck produced bad output."
+    bash:
+      linter:
+        timeout: "ShellCheck exceeded time limit"
+        memory: "ShellCheck exceeded memory limit"
+        output: "ShellCheck produced bad output."
 

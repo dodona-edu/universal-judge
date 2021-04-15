@@ -28,3 +28,9 @@ class Bash(Language):
                bundle: Bundle,
                stdout: str) -> Tuple[List[Message], List[AnnotateCode], str]:
         return self.stderr(bundle, stdout)
+
+    def linter(self, bundle: Bundle, submission: Path, remaining: float) \
+            -> Tuple[List[Message], List[AnnotateCode]]:
+        # Import locally to prevent errors.
+        from tested.languages.bash import linter
+        return linter.run_shellcheck(bundle, submission, remaining)
