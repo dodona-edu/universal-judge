@@ -17,7 +17,7 @@
         % if has_nested_function_call(argument):
             <%include file="function-nested.mako" args="function=argument,index=index_map[-1][i],index_fun=index_fun,index_map=index_map"/>
         % else:
-            ARG${index_map[-1][i]}=$(<%include file="function.mako" args="function=argument,index_fun=index_fun,index_map=index_map"/>)
+            local ARG${index_map[-1][i]}=$(<%include file="function.mako" args="function=argument,index_fun=index_fun,index_map=index_map"/>)
         % endif
     % endif
 % endfor

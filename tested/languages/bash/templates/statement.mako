@@ -26,5 +26,5 @@
     <%include file="value.mako" args="value=statement" />\
 % else:
     <% assert isinstance(statement, get_args(Assignment)) %>\
-    ${statement.variable}=<%include file="statement.mako" args="statement=statement.expression"/>\
+    local ${statement.variable}=<%include file="statement.mako" args="statement=statement.expression"/>\
 % endif
