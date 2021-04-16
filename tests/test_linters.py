@@ -90,3 +90,17 @@ def test_pylint(tmp_path: Path, pytestconfig):
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert len(updates.find_all("annotate-code")) > 0
+
+
+@pytest.mark.linter
+def test_shellcheck(tmp_path: Path, pytestconfig):
+    conf = configuration(pytestconfig, "echo", "bash", tmp_path, "one.tson", "wrong", {
+        "options": {
+            "linter": {
+                "bash": True
+            }
+        }
+    })
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert len(updates.find_all("annotate-code")) > 0

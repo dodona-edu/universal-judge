@@ -80,7 +80,7 @@ def test_timeout(language_and_time: Tuple[str, int], tmp_path: Path, pytestconfi
 
 
 @pytest.mark.slow
-@pytest.mark.parametrize("lang", ["java", "python", "c", "javascript", "kotlin",
+@pytest.mark.parametrize("lang", ["java", "python", "c", "javascript", "kotlin", "bash",
                                   pytest.param("haskell", marks=mark_haskell)])
 def test_full_echo(lang: str, tmp_path: Path, pytestconfig):
     config_ = {

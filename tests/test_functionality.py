@@ -16,7 +16,8 @@ from tested.languages import LANGUAGES
 from tests.manual_utils import assert_valid_output, configuration, execute_config, mark_haskell
 
 COMPILE_LANGUAGES = ["python", "java", "c", "kotlin", pytest.param("haskell", marks=mark_haskell)]
-ALL_LANGUAGES = COMPILE_LANGUAGES + ["javascript", pytest.param("runhaskell", marks=mark_haskell)]
+ALL_SPECIFIC_LANGUAGES = COMPILE_LANGUAGES + ["javascript", pytest.param("runhaskell", marks=mark_haskell)]
+ALL_LANGUAGES = ALL_SPECIFIC_LANGUAGES + ["bash"]
 
 
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
@@ -84,7 +85,7 @@ def test_io_function_exercise_haskell_io(language: str, tmp_path: Path, pytestco
     assert updates.find_status_enum() == ["correct"]
 
 
-@pytest.mark.parametrize("language", ALL_LANGUAGES)
+@pytest.mark.parametrize("language", ALL_SPECIFIC_LANGUAGES)
 def test_specific_evaluation(language: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "echo-function", language, tmp_path, "two-specific.tson", "correct")
     result = execute_config(conf)

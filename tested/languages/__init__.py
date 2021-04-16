@@ -13,9 +13,11 @@ from tested.languages.javascript.config import JavaScript
 from tested.languages.kotlin.config import Kotlin
 from tested.languages.python.config import Python
 from tested.languages.runhaskell.config import RunHaskell
+from .bash.config import Bash
 from .config import Language
 
 LANGUAGES = {
+    'bash':       Bash,
     'c':          C,
     'haskell':    Haskell,
     'java':       Java,
