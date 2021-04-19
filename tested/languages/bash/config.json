@@ -24,7 +24,7 @@
   "datatypes": {
     "integer": "unsupported",
     "rational": "unsupported",
-    "char": "unsupported",
+    "char": "reduced",
     "text": "supported",
     "boolean": "unsupported",
     "sequence": "unsupported",
