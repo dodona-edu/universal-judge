@@ -1,9 +1,11 @@
 ## Convert a literal into JavaScript.
-<%! from tested.datatypes import AdvancedNumericTypes, AdvancedSequenceTypes  %>\
+<%! from tested.datatypes import AdvancedNumericTypes, AdvancedSequenceTypes, AdvancedNothingTypes %>\
 <%! from tested.serialisation import as_basic_type %>\
 <%page args="value" />\
-## First, add support for the advanced types in Python.
-% if value.type == AdvancedSequenceTypes.TUPLE:
+## First, add support for the advanced types in JavaScript.
+% if value.type == AdvancedNothingTypes.UNDEFINED:
+    undefined\
+% elif value.type == AdvancedSequenceTypes.TUPLE:
     <% assert False, "tuples are not supported in JavaScript" %>\
 % elif value.type == AdvancedNumericTypes.DOUBLE_EXTENDED:
     <% assert False, "extended doubles are not supported in Javascript" %>\
