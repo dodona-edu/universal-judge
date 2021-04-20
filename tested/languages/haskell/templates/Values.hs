@@ -57,8 +57,20 @@ instance Typeable I.Int16 where toType _ = "int16"
 instance Typeable I.Int32 where toType _ = "int32"
 instance Typeable I.Int64 where toType _ = "int64"
 
-instance Typeable Float where toType _ = "single_precision"
-instance Typeable Double where toType _ = "double_precision"
+instance Typeable Float where
+    toType _ = "single_precision"
+    toJson f =
+        if (isNaN f) then (toJSON ("nan":: Text))
+        else if (isInfinite f) && f < 0 then (toJSON ("-inf" :: Text))
+        else if (isInfinite f) && f > 0 then (toJSON ("inf" :: Text))
+        else (toJSON f)
+instance Typeable Double where
+    toType _ = "double_precision"
+    toJson f =
+        if (isNaN f) then (toJSON ("nan":: Text))
+        else if (isInfinite f) && f < 0 then (toJSON ("-inf" :: Text))
+        else if (isInfinite f) && f > 0 then (toJSON ("inf" :: Text))
+        else (toJSON f)
 instance Typeable Integer where toType _ = "bigint"
 instance Typeable Int where toType _ = "integer"
 
