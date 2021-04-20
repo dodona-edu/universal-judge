@@ -37,7 +37,7 @@ touch ${value_file} ${exception_file}
 write_context_separator
 source ./${submission_name}.sh \
 % for argument in run_testcase.arguments:
-    ${dumps(value.data)} \
+    "${argument.replace("\\", "\\\\").replace('"', '\\"')}" \
 % endfor
 
 
