@@ -1,6 +1,7 @@
 extends: "eslint:recommended"
 env:
   node: yes
+  es6: yes
 rules:
     no-var: "error"
     # Disable unused vars, otherwise written classes, functions and variables will be detected as unused,
