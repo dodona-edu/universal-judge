@@ -30,6 +30,7 @@
     "sequence": "unsupported",
     "set": "unsupported",
     "map": "unsupported",
+    "undefined": "unsupported",
     "nothing": "unsupported",
     "int8": "unsupported",
     "uint8": "unsupported",

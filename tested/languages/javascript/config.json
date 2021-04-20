@@ -32,6 +32,7 @@
     "set": "supported",
     "map": "supported",
     "nothing": "supported",
+    "undefined": "supported",
 
     "int8": "reduced",
     "uint8": "reduced",
