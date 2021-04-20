@@ -34,7 +34,7 @@
     % if not isinstance(value.data, SpecialNumbers):
         new BigDecimal("${value.data}")\
     % else:
-        <% raise ValueError("Special numbers not supported") %>\
+        <% raise ValueError("Special numbers not supported for BigDecimal") %>\
     % endif
 % elif value.type == AdvancedStringTypes.CHAR:
     '${escape_char(dumps(value.data)[1:-1])}'\

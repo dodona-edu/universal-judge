@@ -23,7 +23,11 @@
 % elif value.type in (AdvancedNumericTypes.U_INT_64, AdvancedNumericTypes.BIG_INT):
     BigInteger("${value.data}")\
 % elif value.type in (AdvancedNumericTypes.DOUBLE_EXTENDED, AdvancedNumericTypes.FIXED_PRECISION):
-    BigDecimal("${value.data}")\
+    % if not isinstance(value.data, SpecialNumbers):
+        new BigDecimal("${value.data}")\
+    % else:
+        <% raise ValueError("Special numbers not supported for BigDecimal") %>\
+    % endif
 % elif value.type == AdvancedStringTypes.CHAR:
     '${escape_char(dumps(value.data)[1:-1])}'\
 % else:
