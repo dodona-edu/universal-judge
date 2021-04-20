@@ -167,7 +167,7 @@ def test_c_escape(tmp_path: Path, pytestconfig):
     assert_serialisation(bundle, tmp_path, StringType(type=AdvancedStringTypes.CHAR, data="'"))
 
 
-@pytest.mark.parametrize("language", ["c"])
+@pytest.mark.parametrize("language", LANGUAGES)
 def test_special_numbers(language, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "", language, tmp_path)
     plan = Plan()
@@ -177,8 +177,7 @@ def test_special_numbers(language, tmp_path: Path, pytestconfig):
     # Create a list of basic types we want to test.
     types = []
     for t, n in itertools.product(
-            [BasicNumericTypes.RATIONAL, AdvancedNumericTypes.DOUBLE_EXTENDED, AdvancedNumericTypes.DOUBLE_PRECISION,
-             AdvancedNumericTypes.FIXED_PRECISION, AdvancedNumericTypes.SINGLE_PRECISION],
+            [BasicNumericTypes.RATIONAL, AdvancedNumericTypes.DOUBLE_PRECISION, AdvancedNumericTypes.SINGLE_PRECISION],
             [SpecialNumbers.NOT_A_NUMBER, SpecialNumbers.POS_INFINITY, SpecialNumbers.NEG_INFINITY]):
         if type_map[t] == TypeSupport.SUPPORTED:
             types.append(NumberType(type=t, data=n))
