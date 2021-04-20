@@ -285,7 +285,7 @@ def test_batch_compilation_no_fallback_runtime(language: str, tmp_path: Path, py
     assert all(s in ("runtime error", "wrong") for s in updates.find_status_enum())
 
 
-@pytest.mark.parametrize("lang", ["python", "java", "c", "javascript", "kotlin"])
+@pytest.mark.parametrize("lang", ["python", "java", "c", "javascript", "kotlin", "bash"])
 def test_program_params(lang: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "sum", lang, tmp_path, "short.tson", "correct")
     result = execute_config(conf)
