@@ -22,7 +22,7 @@ from ..utils import get_args
 NumericTypes = Union[BasicNumericTypes, AdvancedNumericTypes]
 StringTypes = Union[BasicStringTypes, AdvancedStringTypes]
 BooleanTypes = Union[BasicBooleanTypes]
-NothingTypes = Union[BasicNothingTypes]
+NothingTypes = Union[BasicNothingTypes, AdvancedNothingTypes]
 SequenceTypes = Union[BasicSequenceTypes, AdvancedSequenceTypes]
 ObjectTypes = Union[BasicObjectTypes]
 

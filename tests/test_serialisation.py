@@ -15,7 +15,7 @@ import sys
 
 from tested.configs import create_bundle, Bundle
 from tested.datatypes import BasicNumericTypes, BasicStringTypes, BasicBooleanTypes, \
-    BasicSequenceTypes, \
+    BasicSequenceTypes, AdvancedNothingTypes, \
     BasicObjectTypes, BasicNothingTypes, AdvancedStringTypes, AdvancedNumericTypes
 from tested.judge.compilation import run_compilation
 from tested.judge.execution import execute_file
@@ -113,6 +113,32 @@ def test_basic_types(language, tmp_path: Path, pytestconfig):
 
     for result, expected in zip(results, types):
         actual = as_basic_type(parse_value(result))
+        assert expected.type == actual.type
+        py_expected = to_python_comparable(expected)
+        py_actual = to_python_comparable(actual)
+        assert py_expected == py_actual
+
+
+@pytest.mark.parametrize("language", LANGUAGES)
+def test_advanced_types(language, tmp_path: Path, pytestconfig):
+    conf = configuration(pytestconfig, "", language, tmp_path)
+    plan = Plan()
+    bundle = create_bundle(conf, sys.stdout, plan)
+    type_map = bundle.lang_config.type_support_map()
+
+    # Create a list of basic types we want to test.
+    types = []
+    # The only advanced type undefined that should be tested
+    if type_map[AdvancedNothingTypes.UNDEFINED] == TypeSupport.SUPPORTED:
+        types.append(NothingType(type=AdvancedNothingTypes.UNDEFINED))
+
+    # Run the encode templates.
+    results = run_encoder(bundle, tmp_path, types)
+
+    assert len(results) == len(types)
+
+    for result, expected in zip(results, types):
+        actual = parse_value(result)
         assert expected.type == actual.type
         py_expected = to_python_comparable(expected)
         py_actual = to_python_comparable(actual)

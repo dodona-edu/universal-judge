@@ -6,7 +6,7 @@ function encode(value) {
     let type;
 
     if (typeof value === "undefined") {
-        type = "unknown";
+        type = "undefined";
     } else if (typeof value === "boolean") {
         type = "boolean";
     } else if (typeof value === "number") {

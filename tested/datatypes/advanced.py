@@ -8,7 +8,7 @@ from enum import Enum
 from typing import Union
 
 from .basic import BasicNumericTypes, BasicSequenceTypes, BasicTypes, \
-    BasicStringTypes
+    BasicStringTypes, BasicNothingTypes
 
 
 class _AdvancedDataType(str, Enum):
@@ -93,6 +93,15 @@ class AdvancedStringTypes(_AdvancedDataType):
     """
 
 
+class AdvancedNothingTypes(_AdvancedDataType):
+    UNDEFINED = "undefined", BasicNothingTypes.NOTHING
+    """
+    Distinguish between undefined values and null values.
+    Like in JavaScript.
+    """
+
+
 AdvancedTypes = Union[
-    AdvancedNumericTypes, AdvancedSequenceTypes, AdvancedStringTypes
+    AdvancedNumericTypes, AdvancedSequenceTypes, AdvancedStringTypes,
+    AdvancedNothingTypes
 ]
