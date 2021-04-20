@@ -96,18 +96,51 @@ void write_ullong(FILE* out, unsigned long long value) {
 }
 
 void write_float(FILE* out, float value) {
-    const char* asString = format("single_precision", %f);
-    fprintf(out, asString, value);
+    if (isnan(value)) {
+        const char* asString = format("single_precision", %s);
+        fprintf(out, asString, "\"nan\"");
+    } else if (isfinite(value)) {
+        const char* asString = format("single_precision", %f);
+        fprintf(out, asString, value);
+    } else if (value < 0) {
+        const char* asString = format("single_precision", %s);
+        fprintf(out, asString, "\"-inf\"");
+    } else {
+        const char* asString = format("single_precision", %d);
+        fprintf(out, asString, "\"inf\"");
+    }
 }
 
 void write_double(FILE* out, double value) {
-    const char* asString = format("double_precision", %lf);
-    fprintf(out, asString, value);
+    if (isnan(value)) {
+        const char* asString = format("double_precision", %s);
+        fprintf(out, asString, "\"nan\"");
+    } else if (isfinite(value)) {
+        const char* asString = format("double_precision", %lf);
+        fprintf(out, asString, value);
+    } else if (value < 0) {
+        const char* asString = format("double_precision", %s);
+        fprintf(out, asString, "\"-inf\"");
+    } else {
+        const char* asString = format("double_precision", %s);
+        fprintf(out, asString, "\"inf\"");
+    }
 }
 
 void write_ldouble(FILE* out, long double value) {
-    const char* asString = format("double_extended", %Lf);
-    fprintf(out, asString, value);
+    if (isnan(value)) {
+        const char* asString = format("double_extended", %s);
+        fprintf(out, asString, "\"nan\"");
+    } else if (isfinite(value)) {
+        const char* asString = format("double_extended", %Lf);
+        fprintf(out, asString, value);
+    } else if (value < 0) {
+        const char* asString = format("double_extended", %s);
+        fprintf(out, asString, "\"-inf\"");
+    } else {
+        const char* asString = format("double_extended", %s);
+        fprintf(out, asString, "\"inf\"");
+    }
 }
 
 void write_string(FILE* out, const char* value) {

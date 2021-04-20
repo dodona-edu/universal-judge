@@ -119,10 +119,16 @@ class WithFunctions:
         raise NotImplementedError
 
 
+class SpecialNumbers(str, Enum):
+    NOT_A_NUMBER = "nan"
+    POS_INFINITY = "inf"
+    NEG_INFINITY = "-inf"
+
+
 @dataclass
 class NumberType(WithFeatures, WithFunctions):
     type: NumericTypes
-    data: Union[Decimal, int, float]
+    data: Union[SpecialNumbers, Decimal, int, float]
 
     def get_used_features(self) -> FeatureSet:
         return FeatureSet(set(), {self.type}, _get_self_nested_type(self.type))
@@ -133,6 +139,12 @@ class NumberType(WithFeatures, WithFunctions):
     # noinspection PyMethodParameters
     @root_validator
     def check_passwords_match(cls, values):
+        if isinstance(values.get("data"), SpecialNumbers) and \
+                resolve_to_basic(values.get("type")) == BasicNumericTypes.INTEGER:
+            raise ValueError(
+                f"SpecialNumber '{values.get('data')}' is only supported for "
+                f"rational numbers.")
+
         if resolve_to_basic(values.get("type")) == BasicNumericTypes.INTEGER:
             values["data"] = values["data"].to_integral_value()
 
@@ -540,6 +552,8 @@ class ComparableFloat:
     def __eq__(self, other):
         # noinspection PyBroadException
         try:
+            if math.isnan(self.value) and math.isnan(other.value):
+                return True
             return math.isclose(self.value, other.value)
         except Exception:
             return False
