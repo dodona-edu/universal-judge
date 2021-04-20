@@ -14,6 +14,15 @@ function encode(value) {
             type = "integer";
         } else {
             type = "rational";
+            if (Number.isNaN(value)) {
+                value = "nan";
+            } else if (!Number.isFinite(value)) {
+                if (value < 0) {
+                    value = "-inf";
+                } else {
+                    value = "inf";
+                }
+            }
         }
     } else if (typeof value === "string") {
         type = "text";

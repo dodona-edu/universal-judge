@@ -74,10 +74,26 @@ private fun internalEncode(value: Any?): Array<String> {
         data = value.toString()
     } else if (value is Float) {
         type = "single_precision"
-        data = value.toString()
+        if (value.isNaN()) {
+            data = "\"nan\"";
+        } else if (!value.isInfinite()) {
+            data = value.toString();
+        } else if (value < 0.0) {
+            data = "\"-inf\"";
+        } else {
+            data = "\"inf\"";
+        }
     } else if (value is Double) {
         type = "double_precision"
-        data = value.toString()
+        if (value.isNaN()) {
+            data = "\"nan\"";
+        } else if (!value.isInfinite()) {
+            data = value.toString();
+        } else if (value < 0.0) {
+            data = "\"-inf\"";
+        } else {
+            data = "\"inf\"";
+        }
     } else if (value is Char) {
         type = "char"
         data = String.format("\"%s\"", escape(value.toString()))

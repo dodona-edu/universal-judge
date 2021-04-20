@@ -1,8 +1,17 @@
 ## Convert a Value to a literal type in Python.
 <%! from tested.datatypes import BasicNumericTypes, BasicStringTypes, BasicBooleanTypes, BasicNothingTypes, BasicSequenceTypes, BasicObjectTypes  %>\
+<%! from tested.serialisation import SpecialNumbers %>\
 <%page args="value" />\
 % if value.type in (BasicNumericTypes.INTEGER, BasicNumericTypes.RATIONAL):
-    ${value.data}\
+    % if not isinstance(value.data, SpecialNumbers):
+        ${value.data}\
+    % elif value.data == SpecialNumbers.NOT_A_NUMBER:
+        float('nan')\
+    % elif value.data == SpecialNumbers.POS_INFINITY:
+        float('inf')\
+    % else:
+        float('-inf')\
+    % endif
 % elif value.type == BasicStringTypes.TEXT:
     ${repr(value.data)}\
 % elif value.type == BasicBooleanTypes.BOOLEAN:

@@ -9,20 +9,21 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import List
 
+import itertools
 import pytest
 import sys
 
 from tested.configs import create_bundle, Bundle
 from tested.datatypes import BasicNumericTypes, BasicStringTypes, BasicBooleanTypes, \
-    BasicSequenceTypes, \
-    BasicObjectTypes, BasicNothingTypes, AdvancedStringTypes, AdvancedNothingTypes
+    BasicSequenceTypes, AdvancedNothingTypes, \
+    BasicObjectTypes, BasicNothingTypes, AdvancedStringTypes, AdvancedNumericTypes
 from tested.judge.compilation import run_compilation
 from tested.judge.execution import execute_file
 from tested.judge.utils import copy_from_paths_to_path, BaseExecutionResult
 from tested.languages.config import TypeSupport
 from tested.languages.templates import find_and_write_template, path_to_templates
 from tested.serialisation import NumberType, Value, parse_value, StringType, \
-    BooleanType, SequenceType, ObjectType, \
+    BooleanType, SequenceType, ObjectType, SpecialNumbers, \
     NothingType, as_basic_type, to_python_comparable, ObjectKeyValuePair
 from tested.testplan import Plan
 from tests.manual_utils import configuration, mark_haskell
@@ -190,3 +191,32 @@ def test_c_escape(tmp_path: Path, pytestconfig):
     bundle = create_bundle(conf, sys.stdout, plan)
     assert_serialisation(bundle, tmp_path, StringType(type=BasicStringTypes.TEXT, data='"hallo"'))
     assert_serialisation(bundle, tmp_path, StringType(type=AdvancedStringTypes.CHAR, data="'"))
+
+
+@pytest.mark.parametrize("language", LANGUAGES)
+def test_special_numbers(language, tmp_path: Path, pytestconfig):
+    conf = configuration(pytestconfig, "", language, tmp_path)
+    plan = Plan()
+    bundle = create_bundle(conf, sys.stdout, plan)
+    type_map = bundle.lang_config.type_support_map()
+
+    # Create a list of basic types we want to test.
+    types = []
+    for t, n in itertools.product(
+            [BasicNumericTypes.RATIONAL, AdvancedNumericTypes.DOUBLE_PRECISION, AdvancedNumericTypes.SINGLE_PRECISION],
+            [SpecialNumbers.NOT_A_NUMBER, SpecialNumbers.POS_INFINITY, SpecialNumbers.NEG_INFINITY]):
+        if type_map[t] == TypeSupport.SUPPORTED:
+            types.append(NumberType(type=t, data=n))
+
+    # Run the encode templates.
+    results = run_encoder(bundle, tmp_path, types)
+
+    assert len(results) == len(types)
+
+    for result, expected in zip(results, types):
+        actual = as_basic_type(parse_value(result))
+        expected = as_basic_type(expected)
+        assert expected.type == actual.type
+        py_expected = to_python_comparable(expected)
+        py_actual = to_python_comparable(actual)
+        assert py_expected == py_actual

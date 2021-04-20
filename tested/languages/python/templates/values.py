@@ -2,6 +2,7 @@
 import dataclasses
 import io
 import json
+import math
 import traceback
 import decimal
 
@@ -21,10 +22,24 @@ def encode(value):
         data_ = value
     elif isinstance(value, float):
         type_ = "rational"
-        data_ = value
+        if math.isnan(value):
+            data_ = "nan"
+        elif math.isfinite(value):
+            data_ = value
+        elif value < 0:
+            data_ = "-inf"
+        else:
+            data_ = "inf"
     elif isinstance(value, decimal.Decimal):
         type_ = "fixed_precision"
-        data_ = str(value)
+        if math.isnan(value):
+            data_ = "nan"
+        elif math.isfinite(value):
+            data_ = str(value)
+        elif value < 0:
+            data_ = "-inf"
+        else:
+            data_ = "inf"
     elif isinstance(value, list):
         type_ = "list"
         data_ = [encode(x) for x in value]

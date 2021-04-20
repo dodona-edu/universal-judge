@@ -75,11 +75,29 @@ public class Values {
             type = "int64";
             data = value.toString();
         } else if (value instanceof Float) {
+            Float v = (Float) value;
             type = "single_precision";
-            data = value.toString();
+            if (v.isNaN()) {
+                data = "\"nan\"";
+            } else if (!v.isInfinite()) {
+                data = v.toString();
+            } else if (v < 0.0f) {
+                data = "\"-inf\"";
+            } else {
+                data = "\"inf\"";
+            }
         } else if (value instanceof Double) {
+            Double v = (Double) value;
             type = "double_precision";
-            data = value.toString();
+            if (v.isNaN()) {
+                data = "\"nan\"";
+            } else if (!v.isInfinite()) {
+                data = v.toString();
+            } else if (v < 0.0) {
+                data = "\"-inf\"";
+            } else {
+                data = "\"inf\"";
+            }
         } else if (value instanceof Character) {
             type = "char";
             data = "\"" + escape(value.toString()) + "\"";

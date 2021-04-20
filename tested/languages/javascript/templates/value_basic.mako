@@ -1,9 +1,18 @@
 ## Convert a base type literal into Javascript.
 <%! from tested.datatypes import BasicNumericTypes, BasicStringTypes, BasicBooleanTypes, BasicNothingTypes, BasicSequenceTypes, BasicObjectTypes  %>\
+<%! from tested.serialisation import SpecialNumbers %>\
 <%! from json import dumps %>\
 <%page args="value" />\
 % if value.type in (BasicNumericTypes.INTEGER, BasicNumericTypes.RATIONAL):
-    ${value.data}\
+    % if not isinstance(value.data, SpecialNumbers):
+        ${value.data}\
+    % elif value.data == SpecialNumbers.NOT_A_NUMBER:
+        NaN\
+    % elif value.data == SpecialNumbers.POS_INFINITY:
+        Infinity\
+    % else:
+        (-Infinity)\
+    % endif
 % elif value.type == BasicStringTypes.TEXT:
     ${dumps(value.data)}\
 % elif value.type == BasicBooleanTypes.BOOLEAN:

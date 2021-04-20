@@ -6,7 +6,15 @@
 % if value.type == AdvancedSequenceTypes.TUPLE:
     (<%include file="value_arguments.mako" args="arguments=value.data" />)\
 % elif value.type in (AdvancedNumericTypes.DOUBLE_EXTENDED, AdvancedNumericTypes.FIXED_PRECISION):
-    Decimal("${value.data}")\
+    % if not isinstance(value.data, SpecialNumbers):
+        Decimal("${value.data}")\
+    % elif value.data == SpecialNumbers.NOT_A_NUMBER:
+        Decimal(float('nan'))\
+    % elif value.data == SpecialNumbers.POS_INFINITY:
+        Decimal(float('inf'))\
+    % else:
+        Decimal(float('-inf'))\
+    % endif
 % else:
     ## Handle the base types
     <% basic = as_basic_type(value) %>\
