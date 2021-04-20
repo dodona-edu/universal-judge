@@ -1,11 +1,20 @@
 ## Convert a Value to a literal type in Kotlin.
 <%! from tested.datatypes import BasicNumericTypes, BasicStringTypes, BasicBooleanTypes, BasicNothingTypes, BasicSequenceTypes, BasicObjectTypes  %>\
+<%! from tested.serialisation import SpecialNumbers %>\
 <%! from json import dumps %>\
 <%page args="value" />\
 % if value.type == BasicNumericTypes.INTEGER:
     ${value.data}\
 % elif value.type == BasicNumericTypes.RATIONAL:
-    ${value.data}\
+    % if not isinstance(value.data, SpecialNumbers):
+        ${value.data}\
+    % elif value.data == SpecialNumbers.NOT_A_NUMBER:
+        Double.NaN\
+    % elif value.data == SpecialNumbers.POS_INFINITY:
+        Double.POSITIVE_INFINITY\
+    % else:
+        Double.NEGATIVE_INFINITY\
+    % endif
 % elif value.type == BasicStringTypes.TEXT:
     ${dumps(value.data)}\
 % elif value.type == BasicBooleanTypes.BOOLEAN:
