@@ -3,7 +3,7 @@
 sum=0
 for var in "$@"
 do
-    re='^[0-9]+$'
+    re='^-?[0-9]+$'
     if ! [[ $var =~ $re ]] ; then
        echo "som: ongeldige argumenten" >&2
        exit 1
