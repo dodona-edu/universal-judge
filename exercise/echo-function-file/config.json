@@ -1,0 +1,18 @@
+{
+  "description": {
+    "difficulty": 0.5,
+    "names": {
+      "en": "Echo file (function) [UNIVERSEEL]",
+      "nl": "Echo bestand (functie) [UNIVERSEEL]"
+    }
+  },
+  "evaluation": {
+    "memory_limit": 500000000,
+    "plan_name": "one.tson"
+  },
+  "programming_language": "python",
+  "access": "public",
+  "labels": [
+
+  ]
+}

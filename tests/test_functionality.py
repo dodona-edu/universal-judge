@@ -11,6 +11,7 @@ tests/) as the working directory.
 from pathlib import Path
 
 import pytest
+import shutil
 
 from tested.languages import LANGUAGES
 from tests.manual_utils import assert_valid_output, configuration, execute_config, mark_haskell
@@ -55,6 +56,15 @@ def test_simple_programmed_eval_wrong(language: str, tmp_path: Path, pytestconfi
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
 def test_io_function_exercise(language: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "echo-function", language, tmp_path, "one.tson", "correct")
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]
+
+
+@pytest.mark.parametrize("language", ALL_LANGUAGES)
+def test_io_function_file_exercise(language: str, tmp_path: Path, pytestconfig):
+    conf = configuration(pytestconfig, "echo-function-file", language, tmp_path, "one.tson", "correct")
+    shutil.copytree(Path(conf.resources).parent / "workdir", tmp_path, dirs_exist_ok=True)
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["correct"]
