@@ -261,7 +261,7 @@ def test_sort_no_duplicates():
 
 def test_sort_key():
     data = [("alpha", 5), (1, 0), (8.4, "beta")]
-    expected = [(1, 0), (8.4, "beta"), ("alpha", 5)]
+    expected = [(8.4, "beta"), (1, 0), ("alpha", 5)]
     result = sorted_no_duplicates(data, key=lambda x: x[0])
     assert expected == result
 
