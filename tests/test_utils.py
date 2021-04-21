@@ -257,3 +257,21 @@ def test_sort_no_duplicates():
                 28, 29, 30, 31, 32, 'a', 'b', 'data', (True, False), ('a', ('b', 'c'))]
     result = sorted_no_duplicates(data)
     assert expected == result
+
+
+def test_sort_key():
+    data = [("alpha", 5), (1, 0), (8.4, "beta")]
+    expected = [(8.4, "beta"), (1, 0), ("alpha", 5)]
+    result = sorted_no_duplicates(data, key=lambda x: x[0])
+    assert expected == result
+
+
+def test_sort_recursive():
+    data = [(("alpha", 5), 5), ((1, 0), 0), ((1, "beta"), "beta")]
+    expected = [((1, 0), 0), (("alpha", 5), 5), ((1, "beta"), "beta")]
+    result = sorted_no_duplicates(data, key=lambda x: x[0], recursive_key=lambda x: x[1])
+    assert expected == result
+
+
+def test_sort_empty():
+    assert [] == sorted_no_duplicates([])

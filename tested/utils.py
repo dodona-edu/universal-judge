@@ -303,24 +303,15 @@ def sorted_no_duplicates(iterable: Iterable[T],
         return x
 
     # Order functions
-    def type_order(x: Any) -> int:
+    def type_order(x: Any, y: Any) -> int:
         """
         Determine order for different types
-        :param x: value to check
+        :param x: value one
+        :param y: value two
         :return: order index of type
         """
-        if x is None:
-            return 0
-        elif isinstance(x, (int, float, Decimal)):
-            return 1
-        elif isinstance(x, str):
-            return 2
-        elif isinstance(x, tuple):
-            return 3
-        elif isinstance(x, list):
-            return 4
-        else:
-            return 5
+        x, y = str(type(x)), str(type(y))
+        return int(x < y) - int(x > y)
 
     def order_iterable(iter0: Iterable[Any], iter1: Iterable[Any]) -> int:
         """
@@ -332,9 +323,7 @@ def sorted_no_duplicates(iterable: Iterable[T],
         """
         for x, y in zip_longest(iter0, iter1):
             cmp = order(x, y)
-            if cmp == 0:
-                continue
-            else:
+            if cmp != 0:
                 return cmp
         return 0
 
@@ -346,24 +335,18 @@ def sorted_no_duplicates(iterable: Iterable[T],
         :param y: second value
         :return: 1 if x < y else -1 if x > y else 0
         """
-        if recursive_key:
+        if recursive_key:  # Parent function parameter
             if x is not None:
                 x = recursive_key(x)
             if y is not None:
                 y = recursive_key(y)
-        t_x, t_y = type_order(x), type_order(y)
-        if t_x < t_y:
-            return 1
-        elif t_x > t_y:
-            return -1
+        cmp = type_order(x, y)
+        if cmp != 0:
+            return cmp
         elif not isinstance(x, str) and isinstance(x, Iterable):
             return order_iterable(x, y)
-        elif x < y:
-            return 1
-        elif x > y:
-            return -1
         else:
-            return 0
+            return int(x < y) - int(x > y)
 
     # Sort functions, custom implementation needed for efficient recursive ordering
     # of values that have different types
