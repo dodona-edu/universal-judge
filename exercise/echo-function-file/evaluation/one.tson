@@ -27,6 +27,12 @@
                     }
                   }
                 }
+              ],
+              "link_files": [
+                {
+                  "url": "media/workdir/adapters02.txt",
+                  "name": "adapters02.txt"
+                }
               ]
             }
           ]
