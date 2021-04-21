@@ -11,7 +11,7 @@ translate = parser.translate_str
 
 def test_parse_one_tab_ctx():
     yaml_str = """
-disable_optimizations: true
+disableOptimizations: true
 namespace: "solution"
 tabs:
 - tab: "Ctx"
@@ -21,7 +21,7 @@ tabs:
     stdin: "Input string"
     stdout: "Output string"
     stderr: "Error string"
-    exit_code: 1
+    exitCode: 1
     """
     json_str = translate(yaml_str)
     plan = _PlanModel.parse_raw(json_str).__root__
@@ -51,7 +51,7 @@ def test_parse_ctx_exception():
   - arguments: [ "--arg", "fail" ]
     exception: "Exception message"
   - arguments: [ "--arg", "fail2" ]
-    exit_code: 10
+    exitCode: 10
 - tab: "Ctx Error"
   contexts:
   - arguments: [ "--arg", "error" ]
