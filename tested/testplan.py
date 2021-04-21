@@ -434,10 +434,8 @@ class RunOutput(BaseOutput):
 
 @dataclass(frozen=True)
 class FileUrl:
-    content: str
+    url: str
     name: str
-    location: str = "href"
-    storage: str = "disk"
 
 
 @dataclass
