@@ -28,7 +28,7 @@ from tested.serialisation import NumberType, Value, parse_value, StringType, \
 from tested.testplan import Plan
 from tests.manual_utils import configuration, mark_haskell
 
-LANGUAGES = ["python", "java", "c", "javascript", "kotlin", pytest.param("runhaskell", marks=mark_haskell)]
+LANGUAGES = ["python", "java", "c", "javascript", "kotlin", pytest.param("runhaskell", marks=mark_haskell), "bash"]
 
 
 @dataclass
@@ -145,48 +145,9 @@ def test_advanced_types(language, tmp_path: Path, pytestconfig):
         assert py_expected == py_actual
 
 
-def test_javascript_escape(tmp_path: Path, pytestconfig):
-    conf = configuration(pytestconfig, "", "javascript", tmp_path)
-    plan = Plan()
-    bundle = create_bundle(conf, sys.stdout, plan)
-    assert_serialisation(bundle, tmp_path, StringType(type=BasicStringTypes.TEXT, data='"hallo"'))
-
-
-def test_python_escape(tmp_path: Path, pytestconfig):
-    conf = configuration(pytestconfig, "", "python", tmp_path)
-    plan = Plan()
-    bundle = create_bundle(conf, sys.stdout, plan)
-    assert_serialisation(bundle, tmp_path, StringType(type=BasicStringTypes.TEXT, data='"hallo"'))
-    assert_serialisation(bundle, tmp_path, StringType(type=BasicStringTypes.TEXT, data="'hallo'"))
-
-
-def test_java_escape(tmp_path: Path, pytestconfig):
-    conf = configuration(pytestconfig, "", "java", tmp_path)
-    plan = Plan()
-    bundle = create_bundle(conf, sys.stdout, plan)
-    assert_serialisation(bundle, tmp_path, StringType(type=BasicStringTypes.TEXT, data='"hallo"'))
-    assert_serialisation(bundle, tmp_path, StringType(type=AdvancedStringTypes.CHAR, data="'"))
-
-
-def test_kotlin_escape(tmp_path: Path, pytestconfig):
-    conf = configuration(pytestconfig, "", "kotlin", tmp_path)
-    plan = Plan()
-    bundle = create_bundle(conf, sys.stdout, plan)
-    assert_serialisation(bundle, tmp_path, StringType(type=BasicStringTypes.TEXT, data='"hallo"'))
-    assert_serialisation(bundle, tmp_path, StringType(type=AdvancedStringTypes.CHAR, data="'"))
-
-
-@mark_haskell
-def test_haskell_escape(tmp_path: Path, pytestconfig):
-    conf = configuration(pytestconfig, "", "runhaskell", tmp_path)
-    plan = Plan()
-    bundle = create_bundle(conf, sys.stdout, plan)
-    assert_serialisation(bundle, tmp_path, StringType(type=BasicStringTypes.TEXT, data='"hallo"'))
-    assert_serialisation(bundle, tmp_path, StringType(type=AdvancedStringTypes.CHAR, data="'"))
-
-
-def test_c_escape(tmp_path: Path, pytestconfig):
-    conf = configuration(pytestconfig, "", "c", tmp_path)
+@pytest.mark.parametrize("language", LANGUAGES)
+def test_escape(language, tmp_path: Path, pytestconfig):
+    conf = configuration(pytestconfig, "", language, tmp_path)
     plan = Plan()
     bundle = create_bundle(conf, sys.stdout, plan)
     assert_serialisation(bundle, tmp_path, StringType(type=BasicStringTypes.TEXT, data='"hallo"'))
