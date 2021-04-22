@@ -287,14 +287,14 @@ class SchemaParser:
 
         unique_file_urls = list(
             k for k, _ in groupby(sorted(stack_frame.link_files,
-                                         key=lambda x: (x.name, x.content))))
+                                         key=lambda x: (x.name, x.url))))
         return run_testcase, Context(testcases=testcases,
                                      link_files=unique_file_urls)
 
     def _translate_file(self, link_file: YAML_DICT) -> FileUrl:
         name = self._get_str_safe(link_file, "name")
         url = self._get_str_safe(link_file, "url")
-        return FileUrl(name=name, content=url)
+        return FileUrl(name=name, url=url)
 
     def _translate_plan(self, yaml_obj: YAML_OBJECT) -> Plan:
         if isinstance(yaml_obj, list):

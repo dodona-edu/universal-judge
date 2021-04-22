@@ -484,11 +484,11 @@ def get_readable_input(bundle: Bundle,
         if is_args:
             file = url_map[groups[0]]
             seen.add(file)
-            return f'<a href={repr(file.content)} class="file-link" ' \
+            return f'<a href={repr(file.url)} class="file-link" ' \
                    f'target="_blank">{groups[0]}</a>'
         file = url_map[groups[1]]
         seen.add(file)
-        return f'{groups[0]}<a href={repr(file.content)} class="file-link" ' \
+        return f'{groups[0]}<a href={repr(file.url)} class="file-link" ' \
                f'target="_blank">{groups[1]}</a>{groups[2]}'
 
     generated_html = regex.sub(replace_link, generated_html)

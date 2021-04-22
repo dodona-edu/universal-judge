@@ -368,16 +368,14 @@ def _link_files_message(link_files: Iterable[FileUrl],
                         ) -> Optional[AppendMessage]:
     dict_links = dict((link_file.name, dataclasses.asdict(link_file))
                       for link_file in link_files)
-    dict_json = json.dumps(dict_links)
     link_list = ', '.join(
-        f'<a href="{link_file.content}" class="file-link" target="_blank">'
+        f'<a href="{link_file.url}" class="file-link" target="_blank">'
         f'<span class="code">{html.escape(link_file.name)}</span></a>'
         for link_file in link_files
     )
     file_list_str = get_i18n_string("judge.evaluation.files", count=len(link_files),
                                     files=link_list)
-    description = f"<div class='contains-file' data-files='{dict_json}'>" \
-                  f"<p>{file_list_str}</p></div>"
+    description = f"<div class='contains-file''><p>{file_list_str}</p></div>"
     message = ExtendedMessage(description=description, format="html")
     if collector is not None:
         collector.add(AppendMessage(message=message))
