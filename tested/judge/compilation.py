@@ -56,7 +56,7 @@ def run_compilation(
              not positive.
     """
     config = Config.from_bundle(bundle)
-    command, files = bundle.lang_config.compilation(config, dependencies)
+    command, files = bundle.lang_config.compilation(bundle, dependencies)
     _logger.debug("Generating files with command %s in directory %s",
                   command, directory)
     result = run_command(directory, remaining, command)

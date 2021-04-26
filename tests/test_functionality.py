@@ -16,8 +16,8 @@ import shutil
 from tested.languages import LANGUAGES
 from tests.manual_utils import assert_valid_output, configuration, execute_config, mark_haskell
 
-COMPILE_LANGUAGES = ["python", "java", "c", "kotlin", pytest.param("haskell", marks=mark_haskell)]
-ALL_SPECIFIC_LANGUAGES = COMPILE_LANGUAGES + ["javascript", pytest.param("runhaskell", marks=mark_haskell)]
+COMPILE_LANGUAGES = ["python", "java", "c", "kotlin", "javascript", pytest.param("haskell", marks=mark_haskell)]
+ALL_SPECIFIC_LANGUAGES = COMPILE_LANGUAGES + [pytest.param("runhaskell", marks=mark_haskell)]
 ALL_LANGUAGES = ALL_SPECIFIC_LANGUAGES + ["bash"]
 
 

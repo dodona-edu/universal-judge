@@ -12,7 +12,7 @@ from tested.languages.utils import haskell_solution, cleanup_description, \
 # TODO: advanced type don't work very good at the moment.
 class Haskell(Language):
 
-    def compilation(self, config: Config, files: List[str]) -> CallbackResult:
+    def compilation(self, bundle: Bundle, files: List[str]) -> CallbackResult:
         main_ = files[-1]
         exec_ = main_.rstrip(".hs")
         return ["ghc", "-fno-cse", "-fno-full-laziness", "-O0", main_, "-main-is",
