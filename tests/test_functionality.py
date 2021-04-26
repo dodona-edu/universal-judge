@@ -16,8 +16,8 @@ import shutil
 from tested.languages import LANGUAGES
 from tests.manual_utils import assert_valid_output, configuration, execute_config, mark_haskell
 
-COMPILE_LANGUAGES = ["python", "java", "c", "kotlin", "javascript", pytest.param("haskell", marks=mark_haskell)]
-ALL_SPECIFIC_LANGUAGES = COMPILE_LANGUAGES + [pytest.param("runhaskell", marks=mark_haskell)]
+COMPILE_LANGUAGES = ["python", "java", "c", "kotlin", pytest.param("haskell", marks=mark_haskell)]
+ALL_SPECIFIC_LANGUAGES = COMPILE_LANGUAGES + ["javascript", pytest.param("runhaskell", marks=mark_haskell)]
 ALL_LANGUAGES = ALL_SPECIFIC_LANGUAGES + ["bash"]
 
 
@@ -247,7 +247,7 @@ def test_batch_compilation(language: str, tmp_path: Path, pytestconfig, mocker):
     assert class_instance.compilation.call_count == 1
 
 
-@pytest.mark.parametrize("language", COMPILE_LANGUAGES + ["bash"])
+@pytest.mark.parametrize("language", ALL_LANGUAGES)
 def test_batch_compilation_fallback(language: str, tmp_path: Path, pytestconfig, mocker):
     lang_class = LANGUAGES[language]
     class_instance = lang_class()
@@ -260,7 +260,7 @@ def test_batch_compilation_fallback(language: str, tmp_path: Path, pytestconfig,
     assert class_instance.compilation.call_count == 3
 
 
-@pytest.mark.parametrize("language", COMPILE_LANGUAGES + ["bash"])
+@pytest.mark.parametrize("language", ALL_LANGUAGES)
 def test_batch_compilation_no_fallback(language: str, tmp_path: Path, pytestconfig, mocker):
     config_ = {
         "options": {

@@ -3,12 +3,29 @@ from typing import List, Tuple
 
 from tested.configs import Bundle
 from tested.dodona import Message, AnnotateCode
-from tested.languages.config import Command, Config, Language
+from tested.languages.config import Command, Config, Language, CallbackResult
 from tested.languages.utils import haskell_solution, cleanup_description, \
     haskell_cleanup_stacktrace
 
 
 class RunHaskell(Language):
+
+    def compilation(self, bundle: Bundle, files: List[str]) -> CallbackResult:
+        submission_file = self.with_extension(
+            self.conventionalize_namespace(self.submission_name(bundle.plan)))
+        main_file = list(filter(lambda x: x == submission_file, files))
+        if main_file:
+            return ["ghc", "-fno-code", main_file[0]], files
+        else:
+            return [], files
+
+    def compiler_output(
+            self, namespace: str, stdout: str, stderr: str
+    ) -> Tuple[List[Message], List[AnnotateCode], str, str]:
+        return [], [], "", haskell_cleanup_stacktrace(
+            stderr,
+            self.with_extension(self.conventionalize_namespace(namespace))
+        )
 
     def execution(self, config: Config,
                   cwd: Path, file: str, arguments: List[str]) -> Command:
