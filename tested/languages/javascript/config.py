@@ -157,9 +157,8 @@ class JavaScript(Language):
 
     def cleanup_description(self, namespace: str, description: str) -> str:
         description = cleanup_description(self, namespace, description)
-        if description.startswith("await "):
-            return description[6:]
-        return description
+        await_regex = re.compile(r"await\s+")
+        return await_regex.sub("", description)
 
     def clean_exception_message(self, message: str, namespace: str) -> str:
         return message.replace(f'{namespace}.', '', 1)
