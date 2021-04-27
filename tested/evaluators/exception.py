@@ -62,6 +62,14 @@ def evaluate(config: EvaluatorConfig,
 
     expected = channel.exception
 
+    if not actual:
+        return EvaluationResult(
+            result=StatusMessage(enum=Status.WRONG),
+            readable_expected=expected.readable(),
+            readable_actual='',
+            messages=[]
+        )
+
     try:
         actual = try_as_exception(config, actual).get()
     except (TypeError, ValueError) as e:
