@@ -617,7 +617,7 @@ class ExceptionValue(WithFeatures):
     stacktrace: str = ""
 
     def get_used_features(self) -> FeatureSet:
-        return FeatureSet({Construct.EXCEPTIONS}, types=set())
+        return FeatureSet({Construct.EXCEPTIONS}, types=set(), nested_types=set())
 
     def readable(self) -> str:
         return f"{self.message}".strip()
