@@ -54,7 +54,7 @@ def cleanup_compilation_stderr(traceback: str, submission_file: str) -> str:
 
 class C(Language):
 
-    def compilation(self, config: Config, files: List[str]) -> CallbackResult:
+    def compilation(self, bundle: Bundle, files: List[str]) -> CallbackResult:
         main_file = files[-1]
         exec_file = Path(main_file).stem
         result = executable_name(exec_file)
