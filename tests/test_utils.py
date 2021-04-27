@@ -166,7 +166,7 @@ def test_template_code_block_html(lang: str, prompt: str, expected_stmt: str, ex
     ("python", ">>> random = Random()\n>>> random.new_sequence(10, 10)\n[10, 5, 2, 8, 7, 1, 3, 4, 9, 6]"),
     ("java", "> Random random = new Random()\n> random.newSequence(10, 10)\nList.of(10, 5, 2, 8, 7, 1, 3, 4, 9, 6)"),
     ("kotlin", "> var random = Random()\n> random!!.newSequence(10, 10)\nlistOf(10, 5, 2, 8, 7, 1, 3, 4, 9, 6)"),
-    ("javascript", "> let random = await new Random()\n> random.newSequence(10, 10)\n[10, 5, 2, 8, 7, 1, 3, 4, 9, 6]")
+    ("javascript", "> let random = new Random()\n> random.newSequence(10, 10)\n[10, 5, 2, 8, 7, 1, 3, 4, 9, 6]")
 ])
 def test_template_statement_expression(lang: str, expected: str):
     template = """${statement('random = new Random()')}
@@ -181,7 +181,7 @@ ${expression('[10, 5, 2, 8, 7, 1, 3, 4, 9, 6]')}"""
     ("java", ">", 'int x = Submission.data(1, 2, "alpha")'),
     ("c", ">", 'long long x = data(1, 2, "alpha");'),
     ("kotlin", ">", 'var x = data(1, 2, "alpha")'),
-    ("javascript", ">", 'let x = await data(1, 2, "alpha")'),
+    ("javascript", ">", 'let x = data(1, 2, "alpha")'),
     ("haskell", ">", 'let x = data (1 :: Int) (2 :: Int) ("alpha")')
 ])
 def test_template_multi_line_code_block_markdown(lang: str, prompt: str, expected: str):
