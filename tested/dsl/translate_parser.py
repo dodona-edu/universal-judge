@@ -175,13 +175,13 @@ class SchemaParser:
         if isinstance(yaml_object, str):
             data = yaml_object
             hide_expected = self._get_bool_safe(extract_config(stack_frame),
-                                                "hide_expected") or False
+                                                "hideExpected") or False
         else:
             data = self._get_str_safe(yaml_object, "data")
             hide_expected = self._get_bool_safe(
                 merge(extract_config(stack_frame),
                       self._get_dict_safe(yaml_object, "config")),
-                "hide_expected") or False
+                "hideExpected") or False
         return data, hide_expected
 
     # noinspection PyMethodMayBeStatic
@@ -229,10 +229,10 @@ class SchemaParser:
             )
         else:
             new_stack_frame.options_stderr = old_stack_frame.options_stderr
-        if config and "exit_code" in config:
+        if config and "exitCode" in config:
             new_stack_frame.options_exit_code = merge(
                 old_stack_frame.options_exit_code,
-                self._get_dict_safe(config, "exit_code")
+                self._get_dict_safe(config, "exitCode")
             )
         else:
             new_stack_frame.options_exit_code = old_stack_frame.options_exit_code
@@ -305,7 +305,7 @@ class SchemaParser:
             return Plan(tabs=tabs)
         else:
             optimize = self._get_bool_safe(yaml_obj,
-                                           "disable_optimizations") is not True
+                                           "disableOptimizations") is not True
             namespace = self._get_str_safe(yaml_obj, "namespace") or "submission"
             stack_frame = self._translate_config(
                 self._get_dict_safe(yaml_obj, "config"),
@@ -324,7 +324,7 @@ class SchemaParser:
     ) -> RunTestcase:
         main_call = (
                 "arguments" in context or "exception" in context or
-                "exit_code" in context or "stdin" in context or
+                "exitCode" in context or "stdin" in context or
                 "stdout" in context or "stderr" in context
         )
 
@@ -343,10 +343,10 @@ class SchemaParser:
         run_input = RunInput(stdin=stdin, arguments=arguments, main_call=main_call)
 
         run_output = RunOutput()
-        if "exit_code" in context:
+        if "exitCode" in context:
             run_output.exit_code = self._translate_exit_code(
                 stack_frame,
-                self._get_int_dict_safe(context, "exit_code")
+                self._get_int_dict_safe(context, "exitCode")
             )
 
         self._translate_base_output(context, run_output, stack_frame)
@@ -361,7 +361,7 @@ class SchemaParser:
             data = self._get_str_safe(stream, "data")
             config = merge(config, self._get_dict_safe(stream, "config"))
 
-        hide_expected = self._get_bool_safe(config, "hide_expected") or False
+        hide_expected = self._get_bool_safe(config, "hideExpected") or False
 
         return TextOutputChannel(data=data,
                                  evaluator=GenericTextEvaluator(options=config),
@@ -373,13 +373,13 @@ class SchemaParser:
         if isinstance(exit_code, int):
             exit_code: int
             hide_expected = self._get_bool_safe(stack_frame.options_exit_code,
-                                                "hide_expected") or False
+                                                "hideExpected") or False
         else:
             exit_code: YAML_DICT
             hide_expected = self._get_bool_safe(
                 merge(stack_frame.options_exit_code,
                       self._get_dict_safe(exit_code, "config")),
-                "hide_expected"
+                "hideExpected"
             ) or False
             exit_code: int = self._get_bool_safe(exit_code, "data") or 0
         return ExitCodeOutputChannel(value=exit_code,
@@ -460,7 +460,7 @@ class SchemaParser:
         self._translate_base_output(testcase, output, stack_frame)
         if "return" in testcase:
             hide_expected = self._get_bool_safe(stack_frame.options_return,
-                                                "hide_expected") or False
+                                                "hideExpected") or False
             output.result = ValueOutputChannel(
                 value=self._translate_value(
                     self._get_any_safe(testcase, "return")),

@@ -14,7 +14,7 @@
       # Standard error
       stderr: "error"
       # Exitcode
-      exit_code: 0
+      exitCode: 0
       # Dependent statement and function tests:
       testcases:
         # Assignment

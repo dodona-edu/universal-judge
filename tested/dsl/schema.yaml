@@ -17,7 +17,7 @@ definitions:
       config:
         $ref: "#/definitions/globalConfig"
         description: "Configuration settings at plan level"
-      disable_optimizations:
+      disableOptimizations:
         type: "boolean"
         description: "Disable performance optimizations"
       namespace:
@@ -32,11 +32,11 @@ definitions:
     required:
       - "tabs"
   configGeneral:
-    hide_expected:
+    hideExpected:
       description: "Hide the expected value in feedback (default: false), not recommended to use!"
       type: "boolean"
     required:
-      - "hide_expected"
+      - "hideExpected"
   configText:
     type: "object"
     description: >-
@@ -58,7 +58,7 @@ definitions:
       tryFloatingPoint:
         description: "Try comparing text as floating point numbers"
         type: "boolean"
-      hide_expected:
+      hideExpected:
         description: "Hide the expected value in feedback (default: false), not recommended to use!"
         type: "boolean"
   localConfigGeneral:
@@ -94,7 +94,7 @@ definitions:
         $ref: "#/definitions/configText"
       exception:
         $ref: "#/definitions/configGeneral"
-      exit_code:
+      exitCode:
         $ref: "#/definitions/configGeneral"
       return:
         $ref: "#/definitions/configGeneral"
@@ -152,7 +152,7 @@ definitions:
               - required:
                   - "arguments"
               - required:
-                  - "exit_code"
+                  - "exitCode"
               - required:
                   - "stdin"
           - $ref: "#/definitions/testcase"
@@ -185,7 +185,7 @@ definitions:
       exception:
         description: "Expected exception for main call"
         $ref: "#/definitions/textualTypes"
-      exit_code:
+      exitCode:
         type:  ["integer", "object"]
         description: "Expected exit code for the run"
         required:
