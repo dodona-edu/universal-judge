@@ -62,6 +62,10 @@ def run_eslint(bundle: Bundle, submission: Path, remaining: float) \
             text = message.get('message', None)
             if not text:
                 continue
+            rule_id = message.get('ruleId')
+            if rule_id:
+                text += f' (<a href="https://eslint.org/docs/rules/{rule_id}" ' \
+                        f'target="_blank">{rule_id}</a>)'
             annotations.append(AnnotateCode(
                 row=max(int(message.get('line', "-1")) - 1, 0),
                 text=text,
