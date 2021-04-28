@@ -93,9 +93,9 @@ def _evaluate_channel(
     else:
         expected = evaluation_result.readable_expected
 
-    channel_test = "return (String)" if channel is Channel.RETURN and \
-                                   evaluation_result.is_multiline_string else \
-        channel
+    channel_test = ("return (String)" if (channel is Channel.RETURN and
+                                          evaluation_result.is_multiline_string)
+                    else channel)
 
     out.add(StartTest(
         expected=expected,
