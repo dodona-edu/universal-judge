@@ -23,7 +23,7 @@ definitions:
       namespace:
         type: "string"
         default: "submission"
-        description: "Namespace of the submitted solution, best in `snakeCase`"
+        description: "Namespace of the submitted solution, best in `snake_case`"
       tabs:
         type: "array"
         descriptions: "List of all tabs to test"
