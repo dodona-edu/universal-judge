@@ -1,23 +1,24 @@
 from copy import deepcopy
 from dataclasses import dataclass, field
-from logging import getLogger
 from itertools import groupby
 from json import dumps
-from jsonschema import Draft7Validator
-from pydantic.json import pydantic_encoder
+from logging import getLogger
 from os.path import basename, dirname, join, splitext
 from typing import Any, Dict, List, Optional, Union, Tuple, Callable
+
+from jsonschema import Draft7Validator
+from pydantic.json import pydantic_encoder
 from yaml import safe_load
 
 from tested.datatypes import BasicBooleanTypes, BasicNumericTypes, \
-    BasicObjectTypes, BasicSequenceTypes, BasicStringTypes, StringTypes
+    BasicObjectTypes, BasicSequenceTypes, BasicStringTypes
 from tested.dsl.statement import Parser
 from tested.serialisation import ExceptionValue, Value, NothingType, StringType, \
     BooleanType, NumberType, SequenceType, ObjectType, ObjectKeyValuePair
 from tested.testplan import BaseOutput, Context, EmptyChannel, \
     ExceptionOutputChannel, FileUrl, GenericTextEvaluator, Output, Plan, Run, \
     RunTestcase, RunInput, RunOutput, Tab, Testcase, TextData, TextOutputChannel, \
-    ValueOutputChannel, ExitCodeOutputChannel
+    ValueOutputChannel, ExitCodeOutputChannel, ValueOutput
 
 logger = getLogger(__name__)
 
@@ -183,6 +184,15 @@ class SchemaParser:
                       self._get_dict_safe(yaml_object, "config")),
                 "hideExpected") or False
         return data, hide_expected
+
+    # noinspection PyMethodMayBeStatic
+    def _heuristic_check_multiline_value(self, output_channel: ValueOutput):
+        if isinstance(output_channel, ValueOutputChannel):
+            output_channel.evaluator.options["stringsAsText"] = (
+                    output_channel.value and
+                    output_channel.value.type == BasicStringTypes.TEXT and
+                    '\n' in output_channel.value.data
+            )
 
     # noinspection PyMethodMayBeStatic
     def _load_yaml_object(self, yaml_str: str) -> YAML_OBJECT:
@@ -472,6 +482,7 @@ class SchemaParser:
                 self._get_str_dict_safe(testcase, "return-raw")
             )
 
+        self._heuristic_check_multiline_value(output.result)
         testcase_value = Testcase(input=parser.parse_statement(code), output=output)
 
         if "files" in testcase:
