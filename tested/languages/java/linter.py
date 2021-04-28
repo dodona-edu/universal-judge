@@ -72,6 +72,12 @@ def run_checkstyle(bundle: Bundle, submission: Path, remaining: float) \
             message = error_element.attrib.get('message', None)
             if not message:
                 continue
+            source = error_element.attrib.get('source', None)
+            if source:
+                more_info = get_i18n_string("languages.linter.more-info")
+                message += f' (https://checkstyle.sourceforge.io/apidocs/' \
+                           f'index.html?{source.replace(".", "/")}.html" ' \
+                           f'target="_blank">{more_info}</a>)'
             annotations.append(AnnotateCode(
                 row=max(int(error_element.attrib.get('line', "-1")) - 1, 0),
                 text=message,
