@@ -83,6 +83,12 @@ def run_ktlint(bundle: Bundle, submission: Path, remaining: float) \
             message = error.get('message', None)
             if not message:
                 continue
+            rule = error.get('rule', None)
+            if rule:
+                more_info = get_i18n_string("languages.linter.more-info")
+                message += f'({rule}, <a href="https://ktlint.github.io/#rules" ' \
+                           f'target="_blank">{more_info}</a>)'
+
             annotations.append(AnnotateCode(
                 row=max(int(error.get('line', "-1")) - 1, 0),
                 text=message,
