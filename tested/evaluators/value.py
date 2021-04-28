@@ -235,12 +235,27 @@ def evaluate(config: EvaluatorConfig, channel: OutputChannel,
 
     correct = type_check and content_check
 
+    is_multiline_string = is_multiline(actual) or is_multiline(expected)
+
     return EvaluationResult(
         result=StatusMessage(
             human=type_status,
             enum=Status.CORRECT if correct else Status.WRONG
         ),
-        readable_expected=readable_expected,
-        readable_actual=readable_actual,
-        messages=messages
+        readable_expected=get_multiline(expected,
+                                        readable_expected) if is_multiline_string
+        else readable_expected,
+        readable_actual=get_multiline(actual,
+                                      readable_actual) if is_multiline_string
+        else readable_expected,
+        messages=messages,
+        is_multiline_string=is_multiline_string
     )
+
+
+def is_multiline(value: Value):
+    return value.type == BasicStringTypes.TEXT and '\n' in value.data
+
+
+def get_multiline(value: Value, readable: str):
+    return value.data if is_multiline(value) else readable

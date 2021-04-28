@@ -52,6 +52,10 @@ class EvaluationResult:
     A human-friendly version (on a best-efforts basis) of what the channel is.
     """
     messages: List[Message] = field(default_factory=list)
+    is_multiline_string: bool = False
+    """
+    Indicates if the evaluation result is a multiline string
+    """
 
 
 class EvaluatorConfig(NamedTuple):
