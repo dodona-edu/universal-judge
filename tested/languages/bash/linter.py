@@ -67,9 +67,11 @@ def run_shellcheck(bundle: Bundle, submission: Path, remaining: float,
         if not text and code is None:
             continue
         elif not text:
-            text = f"(code {code})"
+            text = f'(code <a href="https://github.com/koalaman/shellcheck/wiki/' \
+                   f'SC{code}" target="_blank">{code}</a>)'
         elif code is not None:
-            text = f"{text} (code {code})"
+            text = f'{text} (code <a href="https://github.com/koalaman/' \
+                   f'shellcheck/wiki/SC{code}" target="_blank">{code}</a>)'
         annotations.append(AnnotateCode(
             row=max(int(shellcheck_object.get('line', "-1")) - 1, 0),
             text=text,
