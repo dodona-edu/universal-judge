@@ -1,0 +1,43 @@
+{
+  "tabs": [
+    {
+      "name": "Tab",
+      "runs": [
+        {
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "echo",
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "\tinput-1\ninput-2\"\\\r"
+                      }
+                    ]
+                  },
+                  "output": {
+                    "result": {
+                      "value": {
+                        "type": "text",
+                        "data": "\tinput-1\ninput-2\"\\\r"
+                      },
+                      "evaluator": {
+                        "type": "builtin",
+                        "options": {
+                          "stringsAsText": true
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
