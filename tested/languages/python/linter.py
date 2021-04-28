@@ -72,14 +72,20 @@ def run_pylint(bundle: Bundle, submission: Path, remaining: float) \
         logger.debug("Handling message %s", str(message))
         message_id = message.get('message-id', None)
         message_text = message.get('message', None)
+        more_info = get_i18n_string("languages.linter.more-info")
         if not message_id and not message_text:
             continue
         elif not message_id:
             text = message_text
         elif not message_text:
-            text = f"({message_id})"
+            text = f'({message_id}, <a href="https://pylint.pycqa.org/en/latest/' \
+                   f'technical_reference/features.html#basic-checker-messages" ' \
+                   f'target="_blank">{more_info}</a>)'
         else:
-            text = f"{message_text} ({message_id})"
+            text = f'{message_text} ({message_id},' \
+                   f'<a href="https://pylint.pycqa.org/en/latest/' \
+                   f'technical_reference/features.html#basic-checker-messages" ' \
+                   f'target="_blank">{more_info}</a>)'
         annotations.append(AnnotateCode(
             row=max(int(message.get("line", "-1")) - 1, 0),
             column=max(int(message.get("column", "-1")) - 1, 0),

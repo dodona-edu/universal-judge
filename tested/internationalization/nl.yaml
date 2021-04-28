@@ -95,6 +95,8 @@ nl:
     generator:
       missing:
         input: "Geen invoer gevonden."
+    linter:
+      more-info: "meer informatie"
     python:
       linter:
         crashed: "Pylint gecrasht"
