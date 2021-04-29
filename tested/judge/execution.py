@@ -86,8 +86,8 @@ class ExecutionResult(BaseExecutionResult):
             exception=(exceptions or [""])[0] or "",
             stdout=(stdout or [""])[0] or "",
             stderr=(stderr or [""])[0] or "",
-            timeout=self.timeout and size == 0,
-            memory=self.memory and size == 0
+            timeout=self.timeout and size <= 1,
+            memory=self.memory and size <= 1
         )
 
         size = size - 1
@@ -95,7 +95,7 @@ class ExecutionResult(BaseExecutionResult):
         context_execution_results = []
         for index, (r, e, err, out) in enumerate(
                 itertools.zip_longest(results[1:], exceptions[1:], stderr[1:],
-                                      stdout[1:])):
+                                      stdout[1:]), start=1):
             context_execution_results.append(TestcaseResult(
                 separator=self.separator,
                 exit=self.exit,
