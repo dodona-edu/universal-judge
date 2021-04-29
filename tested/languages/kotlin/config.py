@@ -27,9 +27,8 @@ class Kotlin(Language):
             return file.suffix == ".class"
 
         others = [x for x in files if not x.endswith(".jar")]
-        return [get_executable("kotlinc"), "-nowarn", "-jvm-target", "11", "-cp",
-                ".",
-                *others], file_filter
+        return [get_executable("kotlinc"), f"-J-Xmx192M", "-nowarn", "-jvm-target",
+                "11", "-cp", ".", *others], file_filter
 
     def execution(self, config: Config, cwd: Path, file: str,
                   arguments: List[str]) -> Command:
