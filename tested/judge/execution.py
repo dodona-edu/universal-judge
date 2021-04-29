@@ -63,7 +63,7 @@ class ExecutionResult(BaseExecutionResult):
     results: str
     exceptions: str
 
-    def to_context_execution_results(self, has_main: bool = False) -> \
+    def to_context_execution_results(self) -> \
             Tuple[List[TestcaseResult], RunTestcaseResult]:
         results = self.results.split(self.context_separator)[1:]
         exceptions = self.exceptions.split(self.context_separator)[1:]
