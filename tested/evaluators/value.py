@@ -254,7 +254,9 @@ def evaluate(config: EvaluatorConfig, channel: OutputChannel,
     )
 
 
-def get_as_string(value: Value, readable: str):
+def get_as_string(value: Optional[Value], readable: str):
     # Replace tab by 4 spaces
+    if value is None:
+        return readable
     return value.data.replace("\t", "    ") if value.type == BasicStringTypes.TEXT \
         else readable
