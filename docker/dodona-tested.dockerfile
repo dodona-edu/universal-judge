@@ -15,6 +15,11 @@ RUN pip install jsonschema psutil mako pydantic==1.7.3 toml typing_inspect pylin
 RUN cabal update && cabal install aeson --global --force-reinstalls
 RUN npm install -g eslint@7.23.0
 
+ENV CHECKSTYLE_JAR /opt/checkstyle-8.41-all.jar
+RUN curl -H 'Accept: application/vnd.github.v4.raw' -L  https://github.com/checkstyle/checkstyle/releases/download/checkstyle-8.41/checkstyle-8.41-all.jar --output "$CHECKSTYLE_JAR"
+ENV KTLINT_JAR /opt/ktlint.jar
+RUN curl -H 'Accept: application/vnd.github.v4.raw' -L https://github.com/pinterest/ktlint/releases/download/0.41.0/ktlint --output "$KTLINT_JAR"
+
 RUN chmod 711 /mnt
 
 RUN useradd -m runner

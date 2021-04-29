@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 from pathlib import Path
 from typing import List, Tuple
 
@@ -12,6 +13,9 @@ from tested.judge.utils import run_command
 logger = logging.getLogger(__name__)
 
 
+ENV_KTLINT = "KTLINT_JAR"
+
+
 def run_ktlint(bundle: Bundle, submission: Path, remaining: float) \
         -> Tuple[List[Message], List[AnnotateCode]]:
     """
@@ -21,8 +25,15 @@ def run_ktlint(bundle: Bundle, submission: Path, remaining: float) \
     config = bundle.config
     language_options = bundle.config.config_for()
 
-    ktlint_jar = config.judge / "tested/languages/kotlin/ktlint.jar"
-    ktlint_jar = ktlint_jar.absolute()
+    if ENV_KTLINT not in os.environ:
+        return [ExtendedMessage(
+            description=get_i18n_string("languages.linter.not-found",
+                                        linter="KTLint"),
+            format='text',
+            permission=Permission.STAFF
+        )], []
+
+    ktlint_jar = Path(os.environ[ENV_KTLINT])
 
     command = ["java", "-jar", ktlint_jar, "--reporter=json"]
 
@@ -48,7 +59,7 @@ def run_ktlint(bundle: Bundle, submission: Path, remaining: float) \
     if language_options.get("ktlint_experimental", True):
         command.append("--experimental")
 
-    command.append(submission.absolute())
+    command.append(submission.absolute().relative_to(submission.parent))
 
     execution_results = run_command(
         directory=submission.parent,

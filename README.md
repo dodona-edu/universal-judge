@@ -9,6 +9,14 @@ Organisation of the repository:
 - `run` (file): Needed for the Docker image, starts the judge
 - `thesis`: LaTeX files for the actual text. See the readme in that folder for compilation instructions.
 
+## Setup linter jars
+
+To use the Checkstyle linter, you need to set the environment variable
+`CHECKSTYLE_JAR` which must locate to the checkstyle jar file.
+
+To use the KTLint linter, you need to set the environment variable
+`KTLINT_JAR` which must locate to the ktlint jar file.
+
 
 ## Judge
 
