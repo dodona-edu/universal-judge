@@ -67,6 +67,11 @@ def run_hlint(bundle: Bundle, submission: Path, remaining: float) \
         hint = hlint_message.get('hint', None)
         if not hint:
             continue
+
+        more_info = get_i18n_string("languages.linter.more-info")
+        hint = f'{hint} <a href="https://github.com/ndmitchell/hlint/blob/master/' \
+               f'hints.md" target="_blank">({more_info})</a>'
+
         hint_from = hlint_message.get('from', None)
         hint_to = hlint_message.get('to', None)
         if hint_from and hint_to:

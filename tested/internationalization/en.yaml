@@ -95,6 +95,8 @@ en:
     generator:
       missing:
         input: "No input found."
+    linter:
+      more-info: "more information"
     python:
       linter:
         crashed: "Pylint crashed"
