@@ -20,6 +20,16 @@ COMPILE_LANGUAGES = ["python", "java", "c", "kotlin", pytest.param("haskell", ma
 ALL_SPECIFIC_LANGUAGES = COMPILE_LANGUAGES + ["javascript", pytest.param("runhaskell", marks=mark_haskell)]
 ALL_LANGUAGES = ALL_SPECIFIC_LANGUAGES + ["bash"]
 
+quotes = {
+    "python": "'",
+    "java": '"',
+    "c": '"',
+    "kotlin": '"',
+    "haskell": '"',
+    "javascript": '"',
+    "runhaskell": '"',
+    "bash": '"'
+}
 
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
 def test_io_exercise(language: str, tmp_path: Path, pytestconfig):
@@ -76,6 +86,40 @@ def test_io_function_escape_exercise(language: str, tmp_path: Path, pytestconfig
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["correct"]
+
+
+@pytest.mark.parametrize("language", ALL_LANGUAGES)
+def test_io_function_display_multiline_exercise(language: str, tmp_path: Path, pytestconfig):
+    conf = configuration(pytestconfig, "echo-function", language, tmp_path, "one-display-multiline.tson", "correct")
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]
+    start_test = updates.find_all('start-test')
+    close_test = updates.find_all('close-test')
+    assert 1 == len(start_test)
+    assert 1 == len(close_test)
+    assert "return (String)" == start_test[0].get("channel", '')
+    expected, actual = start_test[0].get("expected", ''), close_test[0].get("generated", '')
+    quote = quotes[language]
+    assert expected[0] != quote and expected[-1] != quote
+    assert actual[0] != quote and actual[-1] != quote
+
+
+@pytest.mark.parametrize("language", ALL_LANGUAGES)
+def test_io_function_display_no_multiline_exercise(language: str, tmp_path: Path, pytestconfig):
+    conf = configuration(pytestconfig, "echo-function", language, tmp_path, "one-display-no-multiline.tson", "correct")
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]
+    start_test = updates.find_all('start-test')
+    close_test = updates.find_all('close-test')
+    assert 1 == len(start_test)
+    assert 1 == len(close_test)
+    assert "return" == start_test[0].get("channel", '')
+    expected, actual = start_test[0].get("expected", ''), close_test[0].get("generated", '')
+    quote = quotes[language]
+    assert expected[0] == quote and expected[-1] == quote
+    assert actual[0] == quote and actual[-1] == quote
 
 
 @pytest.mark.parametrize("language", ALL_LANGUAGES)

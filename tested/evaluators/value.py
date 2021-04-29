@@ -235,12 +235,29 @@ def evaluate(config: EvaluatorConfig, channel: OutputChannel,
 
     correct = type_check and content_check
 
+    is_multiline_string = (config.options.get("stringsAsText", True) and
+                           expected.type == BasicStringTypes.TEXT)
+
     return EvaluationResult(
         result=StatusMessage(
             human=type_status,
             enum=Status.CORRECT if correct else Status.WRONG
         ),
-        readable_expected=readable_expected,
-        readable_actual=readable_actual,
-        messages=messages
+        readable_expected=get_as_string(expected,
+                                        readable_expected) if is_multiline_string
+        else readable_expected,
+        readable_actual=get_as_string(actual,
+                                      readable_actual) if is_multiline_string
+        else readable_expected,
+        messages=messages,
+        is_multiline_string=is_multiline_string
     )
+
+
+def get_as_string(value: Optional[Value], readable: str):
+    # Return readable if value is none
+    if value is None:
+        return readable
+    # Replace tab by 4 spaces
+    return value.data.replace("\t", "    ") if value.type == BasicStringTypes.TEXT \
+        else readable
