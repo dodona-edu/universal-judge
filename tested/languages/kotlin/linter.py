@@ -59,7 +59,7 @@ def run_ktlint(bundle: Bundle, submission: Path, remaining: float) \
     if language_options.get("ktlint_experimental", True):
         command.append("--experimental")
 
-    command.append(submission.absolute())
+    command.append(submission.absolute().relative_to(submission.parent))
 
     execution_results = run_command(
         directory=submission.parent,
@@ -79,7 +79,6 @@ def run_ktlint(bundle: Bundle, submission: Path, remaining: float) \
         ktlint_objects = json.loads(execution_results.stdout)
     except Exception as e:
         logger.warning("KTLint produced bad output", exc_info=e)
-        logger.warning(f"Output: {execution_results.stdout}")
         return [get_i18n_string("languages.kotlin.linter.output"),
                 ExtendedMessage(
                     description=str(e),
