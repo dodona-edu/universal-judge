@@ -97,6 +97,7 @@ en:
         input: "No input found."
     linter:
       more-info: "more information"
+      not-found: "%{linter} not found!"
     python:
       linter:
         crashed: "Pylint crashed"

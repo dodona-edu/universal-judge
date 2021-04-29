@@ -97,6 +97,7 @@ nl:
         input: "Geen invoer gevonden."
     linter:
       more-info: "meer informatie"
+      not-found: "%{linter} niet gevonden!"
     python:
       linter:
         crashed: "Pylint gecrasht"
