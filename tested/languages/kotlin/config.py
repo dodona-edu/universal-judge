@@ -97,13 +97,7 @@ class Kotlin(Language):
     def compiler_output(
             self, namespace: str, stdout: str, stderr: str
     ) -> Tuple[List[Message], List[AnnotateCode], str, str]:
-        staff_messages = [
-            ExtendedMessage(description=f"Stdout:\n{stdout}", format="text",
-                            permission=Permission.STAFF),
-            ExtendedMessage(description=f"Stderr:\n{stderr}", format="text",
-                            permission=Permission.STAFF)
-        ]
-        return staff_messages, [], limit_output(stdout), jvm_cleanup_stacktrace(
+        return [], [], limit_output(stdout), jvm_cleanup_stacktrace(
             stderr,
             self.with_extension(self.conventionalize_namespace(namespace))
         )
