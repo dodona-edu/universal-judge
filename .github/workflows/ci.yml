@@ -6,7 +6,8 @@ jobs:
   test:
     runs-on: ubuntu-20.04
     env:
-      CHECKSTYLE_JAR: "/opt/checkstyle-8.41.1-all.jar"
+      CHECKSTYLE_JAR: "/opt/checkstyle-8.41-all.jar"
+      KTLINT_JAR: "/opt/ktlint.jar"
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python 3.9
@@ -56,7 +57,8 @@ jobs:
           sudo apt -y install hlint=2.1.11-1build4 cppcheck=1.90-4build1 shellcheck=0.7.0-2build2 &&
           sudo npm install -g eslint@7.23.0 &&
           sudo curl https://github.com/checkstyle/checkstyle/releases/download/checkstyle-8.41.1/checkstyle-8.41.1-all.jar
-          --output "$CHECKSTYLE_JAR"
+          --output "$CHECKSTYLE_JAR" &&
+          sudo curl https://github.com/pinterest/ktlint/releases/download/0.41.0/ktlint --output "$KTLINT_JAR"
       - name: Run tests
         run: |
           python -m pytest tests/ -m "not slow and not flaky"
