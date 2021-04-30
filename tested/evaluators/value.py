@@ -248,7 +248,7 @@ def evaluate(config: EvaluatorConfig, channel: OutputChannel,
         else readable_expected,
         readable_actual=get_as_string(actual,
                                       readable_actual) if is_multiline_string
-        else readable_expected,
+        else readable_actual,
         messages=messages,
         is_multiline_string=is_multiline_string
     )
