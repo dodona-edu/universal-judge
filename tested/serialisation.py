@@ -29,6 +29,7 @@ from typing import Union, List, Literal, Optional, Any, Iterable, Tuple
 from pydantic import BaseModel, root_validator, Field
 from pydantic.dataclasses import dataclass
 from pydantic.fields import Undefined
+from pydantic.typing import NoneType
 
 from tested.dodona import ExtendedMessage, Status
 from .datatypes import (NumericTypes, StringTypes, BooleanTypes,
@@ -377,7 +378,7 @@ class FunctionCall(WithFeatures, WithFunctions):
 
         # Get OOP features.
         if self.type in (FunctionType.PROPERTY, FunctionType.CONSTRUCTOR) or \
-                not isinstance(self.namespace, Identifier):
+                not isinstance(self.namespace, (Identifier, NoneType)):
             constructs.add(Construct.OBJECTS)
 
         base_features = FeatureSet(constructs=constructs, types=set(),
