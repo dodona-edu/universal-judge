@@ -235,7 +235,7 @@ def test_missing_key_types_detected(lang: str, tmp_path: Path, pytestconfig):
     assert updates.find_status_enum() == ["internal error"]
 
 
-@pytest.mark.parametrize("lang", ["python", "java", "kotlin"])
+@pytest.mark.parametrize("lang", ["python", "java", "kotlin", "javascript"])
 def test_programmed_evaluator_lotto(lang: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "lotto", lang, tmp_path, "one-programmed-python.tson", "correct")
     result = execute_config(conf)
@@ -244,7 +244,7 @@ def test_programmed_evaluator_lotto(lang: str, tmp_path: Path, pytestconfig):
     assert updates.find_status_enum() == ["correct"]
 
 
-@pytest.mark.parametrize("lang", ["python", "java", "kotlin"])
+@pytest.mark.parametrize("lang", ["python", "java", "kotlin", "javascript"])
 def test_programmed_evaluator_wrong(lang: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "lotto", lang, tmp_path, "one-programmed-python.tson", "wrong")
     result = execute_config(conf)

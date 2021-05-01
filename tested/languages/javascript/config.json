@@ -20,7 +20,8 @@
     "assignments": true,
     "heterogeneous_collections": true,
     "heterogeneous_arguments": true,
-    "evaluation": true
+    "evaluation": true,
+    "default_parameters": true
   },
   "datatypes": {
     "integer": "supported",
