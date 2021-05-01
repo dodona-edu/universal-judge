@@ -21,15 +21,16 @@ ALL_SPECIFIC_LANGUAGES = COMPILE_LANGUAGES + ["javascript", pytest.param("runhas
 ALL_LANGUAGES = ALL_SPECIFIC_LANGUAGES + ["bash"]
 
 quotes = {
-    "python": "'",
-    "java": '"',
-    "c": '"',
-    "kotlin": '"',
-    "haskell": '"',
+    "python":     "'",
+    "java":       '"',
+    "c":          '"',
+    "kotlin":     '"',
+    "haskell":    '"',
     "javascript": '"',
     "runhaskell": '"',
-    "bash": '"'
+    "bash":       '"'
 }
+
 
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
 def test_io_exercise(language: str, tmp_path: Path, pytestconfig):
@@ -355,6 +356,15 @@ def test_objects(language: str, tmp_path: Path, pytestconfig):
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["correct"] * 2
+    assert len(updates.find_all("start-testcase")) == 3
+
+
+@pytest.mark.parametrize("language", ["python", "java", "kotlin", "javascript"])
+def test_objects_chained(language: str, tmp_path: Path, pytestconfig):
+    conf = configuration(pytestconfig, "objects", language, tmp_path, "chained.tson", "correct")
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"] * 3
     assert len(updates.find_all("start-testcase")) == 3
 
 

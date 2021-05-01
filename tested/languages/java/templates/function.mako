@@ -5,7 +5,7 @@
     new \
 % endif
 % if function.namespace and not (function.has_root_namespace and function.type == FunctionType.CONSTRUCTOR):
-    ${function.namespace}.\
+    <%include file="statement.mako" args="statement=function.namespace"/>.\
 % endif
 ${function.name}\
 % if function.type != FunctionType.PROPERTY:
