@@ -83,10 +83,10 @@ assign: datatype? CNAME "=" value
       | assign_datatype CNAME "=" expr
       | CNAME "=" constructor
 
-name: CNAME
-    | CNAME "." CNAME
+?name: CNAME
+    | expr "." CNAME
 
-property: CNAME "." CNAME
+property: expr "." CNAME
 
 constructor: "new" name "(" args ")"
 

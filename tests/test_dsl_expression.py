@@ -356,3 +356,50 @@ def test_parse_property():
     assert parsed.arguments == []
     assert parsed.name == 'beta'
     assert parsed.namespace == 'alpha'
+
+
+def test_parse_chained_constructor():
+    parsed = parser.parse_statement('new Container(5).get()')
+    assert parsed.type == FunctionType.FUNCTION
+    assert parsed.name == "get"
+    namespace = parsed.namespace
+    assert namespace.namespace is None
+    assert namespace.type == FunctionType.CONSTRUCTOR
+
+
+def test_parse_chained_function():
+    parsed = parser.parse_statement('get_container().get()')
+    assert parsed.type == FunctionType.FUNCTION
+    assert parsed.name == "get"
+    namespace = parsed.namespace
+    assert namespace.namespace is None
+    assert namespace.type == FunctionType.FUNCTION
+    assert namespace.name == "get_container"
+
+
+def test_parse_chained_function2():
+    parsed = parser.parse_statement('get_container().get().get()')
+    assert parsed.type == FunctionType.FUNCTION
+    assert parsed.name == "get"
+    namespace = parsed.namespace
+    assert namespace.namespace is not None
+    assert namespace.type == FunctionType.FUNCTION
+    assert namespace.name == "get"
+    namespace = namespace.namespace
+    assert namespace.namespace is None
+    assert namespace.type == FunctionType.FUNCTION
+    assert namespace.name == "get_container"
+
+
+def test_parse_chained_property():
+    parsed = parser.parse_statement('get_container().property.data')
+    assert parsed.type == FunctionType.PROPERTY
+    assert parsed.name == "data"
+    namespace = parsed.namespace
+    assert namespace.namespace is not None
+    assert namespace.type == FunctionType.PROPERTY
+    assert namespace.name == "property"
+    namespace = namespace.namespace
+    assert namespace.namespace is None
+    assert namespace.type == FunctionType.FUNCTION
+    assert namespace.name == "get_container"

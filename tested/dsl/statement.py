@@ -192,24 +192,26 @@ class Parser:
 
     def analyse_property(self, tree: Tree) -> FunctionCall:
         # Find namespace name
-        namespace = self.analyse_name(tree.children[0])
+        _a, namespace = self.analyse_namespace(tree.children[0])
         # Find property name
         prop_name = self.analyse_name(tree.children[1])
-        return FunctionCall(type=FunctionType.PROPERTY,
-                            name=prop_name,
-                            namespace=namespace)
+        return FunctionCall(name=prop_name,
+                            namespace=namespace,
+                            type=FunctionType.PROPERTY)
 
     def analyse_name(self, token: Token) -> str:
         if token.type != 'CNAME':
             raise ParseError("Invalid variable/function name")
         return token.value
 
-    def analyse_namespace(self, tree: Tree):
+    def analyse_namespace(self, tree: Union[Tree, Token]):
+        if isinstance(tree, Token):
+            return None, self.analyse_expression_token(tree)
         if tree.data != 'name':
-            raise ParseError("Invalid name construction")
+            return None, self.analyse_expression_tree(tree)
         if len(tree.children) == 1:
             return None, self.analyse_name(tree.children[0])
-        return (self.analyse_name(tree.children[0]),
+        return (self.analyse_expression(tree.children[0], allow_functions=True),
                 self.analyse_name(tree.children[1]))
 
     def analyse_type_token(self, token: Token,
