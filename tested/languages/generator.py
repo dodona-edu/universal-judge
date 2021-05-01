@@ -423,6 +423,7 @@ def get_readable_input(bundle: Bundle,
         text = bundle.lang_config.cleanup_description(bundle.plan.namespace, text)
         analyse_files = True
     elif isinstance(case, RunTestcase):
+        format_ = "code"
         if case.input.main_call:
             arguments = " ".join(case.input.arguments)
             args = f"./submission {arguments}"
