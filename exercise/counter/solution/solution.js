@@ -5,6 +5,7 @@ class Counter {
 
     add() {
         this.counter += 1;
+        return this;
     }
 
     get() {

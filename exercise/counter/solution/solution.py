@@ -5,6 +5,7 @@ class Counter:
 
     def add(self):
         self.counter += 1
+        return self
 
     def get(self):
         return self.counter
