@@ -7,7 +7,7 @@ from lark import Lark, Tree, Token, UnexpectedToken
 from tested.datatypes import string_to_type, AllTypes, SequenceTypes, \
     NumericTypes, BooleanTypes, NothingTypes, StringTypes, ObjectTypes, \
     BasicSequenceTypes, AdvancedSequenceTypes, BasicNumericTypes, \
-    BasicStringTypes, BasicBooleanTypes
+    BasicStringTypes, BasicBooleanTypes, AdvancedNothingTypes, BasicNothingTypes
 from tested.serialisation import Statement, Assignment, NumberType, Expression, \
     NothingType, Identifier, BooleanType, StringType, SequenceType, FunctionCall, \
     ObjectType, FunctionType, VariableType, Value, ObjectKeyValuePair
@@ -151,7 +151,10 @@ class Parser:
     def analyse_expression_tree(self, tree: Tree,
                                 allow_functions: bool = True) -> Expression:
         if tree.data == 'null':
-            return NothingType()
+            nothing_type = (BasicNothingTypes.NOTHING
+                            if tree.children[0].type == "NULL"
+                            else AdvancedNothingTypes.UNDEFINED)
+            return NothingType(type=nothing_type)
         elif tree.data in ('list', 'set', 'tuple'):
             return SequenceType(type=default_sequence_type_map[tree.data],
                                 data=[
