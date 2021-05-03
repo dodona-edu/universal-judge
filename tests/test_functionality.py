@@ -21,15 +21,24 @@ ALL_SPECIFIC_LANGUAGES = COMPILE_LANGUAGES + ["javascript", pytest.param("runhas
 ALL_LANGUAGES = ALL_SPECIFIC_LANGUAGES + ["bash"]
 
 quotes = {
-    "python": "'",
-    "java": '"',
-    "c": '"',
-    "kotlin": '"',
-    "haskell": '"',
+    "python":     "'",
+    "java":       '"',
+    "c":          '"',
+    "kotlin":     '"',
+    "haskell":    '"',
     "javascript": '"',
     "runhaskell": '"',
-    "bash": '"'
+    "bash":       '"'
 }
+
+
+@pytest.mark.parametrize("language", ALL_LANGUAGES)
+def test_global_variable(language: str, tmp_path: Path, pytestconfig):
+    conf = configuration(pytestconfig, "global", language, tmp_path, "one.tson", "correct")
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]
+
 
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
 def test_io_exercise(language: str, tmp_path: Path, pytestconfig):

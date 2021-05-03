@@ -180,7 +180,11 @@ def _prepare_expression(bundle: Bundle, expression: Expression) -> Expression:
                                 for arg in expression.arguments]
     elif isinstance(expression, FunctionCall):
         submission_name = bundle.lang_config.submission_name(bundle.plan)
+        # TODO: conventionalize constructor and global variables
         if expression.type == FunctionType.CONSTRUCTOR:
+            name = expression.name
+        elif expression.type == FunctionType.PROPERTY and expression.namespace is\
+                None:
             name = expression.name
         else:
             name = bundle.lang_config.conventionalize_function(expression.name)
