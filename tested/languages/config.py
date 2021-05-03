@@ -361,9 +361,9 @@ class Language:
         snake case.
 
         :param identifier: The name of the property_name to conventionalize.
-        :return: The conventionalized property_name.
+        :return: The conventionalized identifier.
         """
-        return _conventionalize(self.options, "property_name", identifier)
+        return _conventionalize(self.options, "identifier", identifier)
 
     def conventionalize_namespace(self, namespace: str) -> str:
         """
