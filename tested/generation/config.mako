@@ -1,13 +1,16 @@
 from pathlib import Path
 from typing import List
 
+% if compiled:
+from tested.configs import Bundle
+% endif
 from tested.languages.config import CallbackResult, Command, Config, Language
 
 
 class ${name}(Language):
 
     % if compiled:
-    def compilation(self, config: Config, files: List[str]) -> CallbackResult:
+    def compilation(self, bundle: Bundle, files: List[str]) -> CallbackResult:
         raise NotImplementedError
     % endif
 
