@@ -83,16 +83,7 @@ def configuration(config, exercise: str, language: str, work_dir: Path,
         "workdir":              work_dir,
         "plan_name":            plan,
         "options":              {
-            "linter": {
-                "python":     False,
-                "javascript": False,
-                "haskell":    False,
-                "runhaskell": False,
-                "kotlin":     False,
-                "java":       False,
-                "c":          False,
-                "bash":       False
-            }
+            "linter": False
         }
     }, options))
 

@@ -24,22 +24,14 @@ def read_config() -> DodonaConfig:
         "programming_language": 'bash',
         "natural_language":     'nl',
         "resources":            Path(exercise_dir, 'evaluation'),
-        "source":               Path(exercise_dir, 'solution/wrong.sh'),
+        "source":               Path(exercise_dir, 'solution/correct.sh'),
         "judge":                Path('.'),
         "workdir":              Path('workdir'),
         "plan_name":            "one.tson",
         "options":              {
-            "parallel":       True,
-            "mode":           "batch",
-            "linter":         {
-                "python": True,
-                "javascript": True,
-                "haskell": True,
-                "runhaskell": True,
-                "kotlin": True,
-                "java": True,
-                "c": True
-            }
+            "parallel": True,
+            "mode":     "batch",
+            "linter":   True
         }
     })
 
