@@ -108,8 +108,11 @@ set: "{" expr ("," expr)* "}"
 tuple: "(" [expr ("," expr)*] ")"
 dict_pair: expr ":" expr
 
-null: "null"
-    | "undefined"
+NULL: "null"
+UNDEFINED: "undefined"
+
+null: NULL
+    | UNDEFINED
 
 
 ?string: ESCAPED_STRING

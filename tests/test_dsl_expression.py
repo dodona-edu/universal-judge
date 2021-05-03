@@ -3,7 +3,7 @@ import math
 import pytest
 
 from tested.datatypes import BasicNothingTypes, BasicNumericTypes, AdvancedNumericTypes, BasicBooleanTypes, \
-    BasicStringTypes, BasicSequenceTypes, AdvancedSequenceTypes, ObjectTypes, AdvancedStringTypes
+    BasicStringTypes, BasicSequenceTypes, AdvancedSequenceTypes, ObjectTypes, AdvancedStringTypes, AdvancedNothingTypes
 from tested.dsl import Parser, ParseError
 from tested.serialisation import Assignment, FunctionCall, FunctionType, VariableType, SequenceType, Identifier, \
     StringType, ObjectKeyValuePair, ObjectType
@@ -19,7 +19,7 @@ def test_parse_value_null():
 
 def test_parse_value_undefined():
     parsed = parser.parse_value("undefined")
-    assert parsed.type == BasicNothingTypes.NOTHING
+    assert parsed.type == AdvancedNothingTypes.UNDEFINED
     assert parsed.data is None
 
 
