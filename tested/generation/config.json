@@ -8,7 +8,10 @@
   },
   "naming_conventions": {
     "namespace": "snake_case",
-    "function": "snake_case"
+    "function": "snake_case",
+    "identifier": "snake_case",
+    "property": "snake_case",
+    "class": "snake_case"
   },
   "constructs": {
     "objects": false,
