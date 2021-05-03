@@ -131,6 +131,7 @@ class Parser:
             return self.analyse_expression_token(tree)
         return self.analyse_expression_tree(tree, allow_functions)
 
+    # noinspection PyMethodMayBeStatic
     def analyse_expression_token(self, token: Token) -> Expression:
         if token.type == 'CNAME':
             return Identifier.validate(token.value)
@@ -181,6 +182,11 @@ class Parser:
         elif tree.data == 'dict':
             return ObjectType(type=ObjectTypes.MAP,
                               data=self.analyse_dict(tree, allow_functions))
+        elif tree.data == 'global_variable':
+            if allow_functions:
+                return self.analyse_global_variable(tree)
+            else:
+                raise ParseError("Global variables not allowed for return values")
         raise ParseError("Invalid expression tree")
 
     def analyse_function(self, tree: Tree) -> FunctionCall:
@@ -193,6 +199,11 @@ class Parser:
                             namespace=namespace,
                             arguments=args)
 
+    # noinspection PyMethodMayBeStatic
+    def analyse_global_variable(self, tree: Tree) -> FunctionCall:
+        return FunctionCall(type=FunctionType.PROPERTY,
+                            name=self.analyse_name(tree.children[1]))
+
     def analyse_property(self, tree: Tree) -> FunctionCall:
         # Find namespace name
         namespace = self.analyse_name(tree.children[0])
@@ -202,6 +213,7 @@ class Parser:
                             name=prop_name,
                             namespace=namespace)
 
+    # noinspection PyMethodMayBeStatic
     def analyse_name(self, token: Token) -> str:
         if token.type != 'CNAME':
             raise ParseError("Invalid variable/function name")
@@ -215,6 +227,7 @@ class Parser:
         return (self.analyse_name(tree.children[0]),
                 self.analyse_name(tree.children[1]))
 
+    # noinspection PyMethodMayBeStatic
     def analyse_type_token(self, token: Token,
                            assign=False) -> Union[VariableType, AllTypes]:
         if assign and token.type == 'CNAME':

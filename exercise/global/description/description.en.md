@@ -1,1 +1,1 @@
-Define a global variable `global` with the value "GLOBAL".
+Define a global variable `global_var` with the value "GLOBAL".

@@ -83,6 +83,10 @@ assign: datatype? CNAME "=" value
       | assign_datatype CNAME "=" expr
       | CNAME "=" constructor
 
+LCROOK: "<"
+RCROOK: ">"
+
+global_variable: LCROOK CNAME RCROOK
 name: CNAME
     | CNAME "." CNAME
 
@@ -94,6 +98,7 @@ constructor: "new" name "(" args ")"
      | fun
      | constructor
      | property
+     | global_variable
 
 fun: name "(" args ")"
 

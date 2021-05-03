@@ -1,0 +1,4 @@
+- tab: "Global variable"
+  contexts:
+    - expression: "<global_var>"
+      return: "GLOBAL"
