@@ -329,6 +329,18 @@ class Language:
         """
         raise NotImplementedError
 
+    def conventionalize_class(self, class_identifier: str) -> str:
+        """
+        Conventionalize the name of a class. This function uses the format
+        specified in the config.json file. If no format is specified, the function
+        name is unchanged, which is the same as snake_case, since the testplan uses
+        snake case.
+
+        :param class_identifier: The name of the class to conventionalize.
+        :return: The conventionalized class name.
+        """
+        return _conventionalize(self.options, "class", class_identifier)
+
     def conventionalize_function(self, function: str) -> str:
         """
         Conventionalize the name of a function. This function uses the format
@@ -341,6 +353,18 @@ class Language:
         """
         return _conventionalize(self.options, "function", function)
 
+    def conventionalize_identifier(self, identifier: str) -> str:
+        """
+        Conventionalize the name of an property_name. This function uses the format
+        specified in the config.json file. If no format is specified, the function
+        name is unchanged, which is the same as snake_case, since the testplan uses
+        snake case.
+
+        :param identifier: The name of the property_name to conventionalize.
+        :return: The conventionalized property_name.
+        """
+        return _conventionalize(self.options, "property_name", identifier)
+
     def conventionalize_namespace(self, namespace: str) -> str:
         """
         Conventionalize the name of a namespace (class/module). This function uses
@@ -352,6 +376,18 @@ class Language:
         :return: The conventionalized namespace.
         """
         return _conventionalize(self.options, "namespace", namespace)
+
+    def conventionalize_property(self, property_name: str) -> str:
+        """
+        Conventionalize the name of a property. This function uses the format
+        specified in the config.json file. If no format is specified, the function
+        name is unchanged, which is the same as snake_case, since the testplan uses
+        snake case.
+
+        :param property_name: The name of the property to conventionalize.
+        :return: The conventionalized property.
+        """
+        return _conventionalize(self.options, "property", property_name)
 
     def submission_name(self, plan: Plan) -> str:
         """
