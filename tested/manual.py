@@ -13,7 +13,7 @@ from pathlib import Path
 from .configs import DodonaConfig
 from .main import run
 
-exercise_dir = "exercise/echo"
+exercise_dir = "exercise/global"
 
 
 def read_config() -> DodonaConfig:

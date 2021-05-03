@@ -22,7 +22,8 @@
     "heterogeneous_arguments": true,
     "evaluation": true,
     "named_arguments": true,
-    "default_parameters": true
+    "default_parameters": true,
+    "global_variables": true
   },
   "datatypes": {
     "integer": "supported",

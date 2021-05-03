@@ -356,15 +356,6 @@ class FunctionCall(WithFeatures, WithFunctions):
 
     # noinspection PyMethodParameters
     @root_validator
-    def namespace_requirements(cls, values):
-        type_ = values.get("type")
-        namespace_ = values.get("namespace")
-        if type_ == FunctionType.PROPERTY and not namespace_:
-            raise ValueError("Property functions must have a namespace.")
-        return values
-
-    # noinspection PyMethodParameters
-    @root_validator
     def properties_have_no_args(cls, values):
         type_ = values.get("type")
         args = values.get("args")
@@ -373,6 +364,9 @@ class FunctionCall(WithFeatures, WithFunctions):
         return values
 
     def get_used_features(self) -> FeatureSet:
+        if self.type == FunctionType.PROPERTY and self.namespace is None:
+            return FeatureSet({Construct.GLOBAL_VARIABLES}, set(), set())
+
         constructs = {Construct.FUNCTION_CALLS}
 
         # Get OOP features.
