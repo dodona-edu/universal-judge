@@ -369,7 +369,7 @@ class FunctionCall(WithFeatures, WithFunctions):
         type_ = values.get("type")
         args = values.get("args")
         if type_ == FunctionType.PROPERTY and args:
-            raise ValueError("You cannot have arguments for a property_name!")
+            raise ValueError("You cannot have arguments for a property!")
         return values
 
     def get_used_features(self) -> FeatureSet:
