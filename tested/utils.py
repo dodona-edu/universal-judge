@@ -180,10 +180,35 @@ def flatten(nested: Iterable[Iterable[T]]) -> Iterable[T]:
     """
     Flatten a list of lists one level.
 
-    >>> flatten([[0], [1], [2]])
+    >>> list(flatten([[0], [1], [2]]))
     [0, 1, 2]
     """
-    return filter(None, itertools.chain.from_iterable(nested))
+    return itertools.chain.from_iterable(nested)
+
+
+def camel_snake_case(what: str) -> str:
+    """
+    Convert a string to camel_Snake_Case from snake_case. The algorithm is 
+    simple: each
+    underscore is removed and the letter behind it will be capitalized. The first
+    letter will be downcased.
+
+    >>> camel_snake_case("__foo_bar__")
+    '__Foo_Bar__'
+    >>> camel_snake_case("this_is_snake_case")
+    'this_Is_Snake_Case'
+    >>> camel_snake_case("_Weird_cases_aRe_mostly_KEPT")
+    '_Weird_Cases_ARe_Mostly_KEPT'
+    >>> camel_snake_case("numbers_1_2_are_not_special")
+    'numbers_1_2_Are_Not_Special'
+    >>> camel_snake_case("________________")
+    '________________'
+
+    :param what: The string to convert.
+    :return: The converted string.
+    """
+    result = pascal_snake_case(what)
+    return (result[0].lower() + result[1:]) if result else ""
 
 
 def camelize(what: str) -> str:
@@ -210,6 +235,158 @@ def camelize(what: str) -> str:
     return (result[0].lower() + result[1:]) if result else ""
 
 
+def cobol_case(what: str) -> str:
+    """
+    Convert a string to Train-Case from snake_case. The algorithm is
+    simple: each
+    underscore is removed and the letter behind it will be capitalized. The first
+    letter will be downcased.
+
+    >>> cobol_case("__foo_bar__")
+    '--FOO-BAR--'
+    >>> cobol_case("this_is_snake_case")
+    'THIS-IS-SNAKE-CASE'
+    >>> cobol_case("_Weird_cases_aRe_mostly_KEPT")
+    '-WEIRD-CASES-ARE-MOSTLY-KEPT'
+    >>> cobol_case("numbers_1_2_are_not_special")
+    'NUMBERS-1-2-ARE-NOT-SPECIAL'
+    >>> cobol_case("________________")
+    '----------------'
+
+    :param what: The string to convert.
+    :return: The converted string.
+    """
+    return pascal_snake_case(what).replace('_', '-').upper()
+
+
+def dash_case(what: str) -> str:
+    """
+    Convert a string to doner|case from snake_case.
+
+    >>> dash_case("__foo_bar__")
+    '--foo-bar--'
+    >>> dash_case("this_is_snake_case")
+    'this-is-snake-case'
+    >>> dash_case("_Weird_cases_aRe_mostly_KEPT")
+    '-Weird-cases-aRe-mostly-KEPT'
+    >>> dash_case("numbers_1_2_are_not_special")
+    'numbers-1-2-are-not-special'
+    >>> dash_case("________________")
+    '----------------'
+
+    :param what: The string to convert.
+    :return: The converted string.
+    """
+    return what.replace('_', '-')
+
+
+def doner_case(what: str) -> str:
+    """
+    Convert a string to doner|case from snake_case.
+
+    >>> doner_case("__foo_bar__")
+    '||foo|bar||'
+    >>> doner_case("this_is_snake_case")
+    'this|is|snake|case'
+    >>> doner_case("_Weird_cases_aRe_mostly_KEPT")
+    '|Weird|cases|aRe|mostly|KEPT'
+    >>> doner_case("numbers_1_2_are_not_special")
+    'numbers|1|2|are|not|special'
+    >>> doner_case("________________")
+    '||||||||||||||||'
+
+    :param what: The string to convert.
+    :return: The converted string.
+    """
+    return what.replace('_', '|')
+
+
+def flat_case(what: str) -> str:
+    """
+    Convert a string to flatcase from snake_case.
+
+    >>> flat_case("__foo_bar__")
+    'foobar'
+    >>> flat_case("this_is_snake_case")
+    'thisissnakecase'
+    >>> flat_case("_Weird_cases_aRe_mostly_KEPT")
+    'WeirdcasesaRemostlyKEPT'
+    >>> flat_case("numbers_1_2_are_not_special")
+    'numbers12arenotspecial'
+    >>> flat_case("________________")
+    ''
+
+    :param what: The string to convert.
+    :return: The converted string.
+    """
+    return what.replace('_', '')
+
+
+def macro_case(what: str) -> str:
+    """
+    Convert a string to MACRO_CASE from snake_case.
+
+    >>> macro_case("__foo_bar__")
+    '__FOO_BAR__'
+    >>> macro_case("this_is_snake_case")
+    'THIS_IS_SNAKE_CASE'
+    >>> macro_case("_Weird_cases_aRe_mostly_KEPT")
+    '_WEIRD_CASES_ARE_MOSTLY_KEPT'
+    >>> macro_case("numbers_1_2_are_not_special")
+    'NUMBERS_1_2_ARE_NOT_SPECIAL'
+    >>> macro_case("________________")
+    '________________'
+
+    :param what: The string to convert.
+    :return: The converted string.
+    """
+    return what.upper()
+
+
+def pascal_snake_case(what: str) -> str:
+    """
+    Convert a string to Pascal_Snake_Case from snake_case. The algorithm is 
+    simple: each
+    underscore is removed and the letter behind it will be capitalized. The first
+    letter will be downcased.
+
+    >>> pascal_snake_case("__foo_bar__")
+    '__Foo_Bar__'
+    >>> pascal_snake_case("this_is_snake_case")
+    'This_Is_Snake_Case'
+    >>> pascal_snake_case("_Weird_cases_aRe_mostly_KEPT")
+    '_Weird_Cases_ARe_Mostly_KEPT'
+    >>> pascal_snake_case("numbers_1_2_are_not_special")
+    'Numbers_1_2_Are_Not_Special'
+    >>> pascal_snake_case("________________")
+    '________________'
+
+    :param what: The string to convert.
+    :return: The converted string.
+    """
+    result = ""
+    i = 0
+    while i < len(what):
+        this = what[i]
+        if this == "_":
+            i += 1
+            result += "_"
+            if i < len(what):
+                while i < len(what) - 1 and what[i] == "_":
+                    i += 1
+                    result += "_"
+                r = what[i]
+                if r != "_":
+                    result += r.upper()
+                else:
+                    result += "_"
+        else:
+            result += this
+        i += 1
+
+    return (result[0].upper() + result[1:]) if result else ""
+
+
 def pascalize(what: str) -> str:
     """
     Convert a string to PascalCase from snake_case.
@@ -228,22 +405,7 @@ def pascalize(what: str) -> str:
     :param what: The string to convert.
     :return: The converted string.
     """
-    result = ""
-    i = 0
-    while i < len(what):
-        this = what[i]
-        if this == "_":
-            i += 1
-            if i < len(what):
-                while i < len(what) - 1 and what[i] == "_":
-                    i += 1
-                r = what[i]
-                if r != "_":
-                    result += r.upper()
-        else:
-            result += this
-        i += 1
-    return (result[0].upper() + result[1:]) if result else ""
+    return pascal_snake_case(what).replace('_', '')
 
 
 def snake_case(what: str) -> str:
@@ -259,6 +421,51 @@ def snake_case(what: str) -> str:
             f"A name '{what}' is not in snake_case. This might cause problems."
         )
     return what
+
+
+def train_case(what: str) -> str:
+    """
+    Convert a string to Train-Case from snake_case. The algorithm is 
+    simple: each
+    underscore is removed and the letter behind it will be capitalized. The first
+    letter will be downcased.
+
+    >>> train_case("__foo_bar__")
+    '--Foo-Bar--'
+    >>> train_case("this_is_snake_case")
+    'This-Is-Snake-Case'
+    >>> train_case("_Weird_cases_aRe_mostly_KEPT")
+    '-Weird-Cases-ARe-Mostly-KEPT'
+    >>> train_case("numbers_1_2_are_not_special")
+    'Numbers-1-2-Are-Not-Special'
+    >>> train_case("________________")
+    '----------------'
+
+    :param what: The string to convert.
+    :return: The converted string.
+    """
+    return pascal_snake_case(what).replace('_', '-')
+
+
+def upper_flat_case(what: str) -> str:
+    """
+    Convert a string to UPPERFLATCASE from snake_case.
+
+    >>> upper_flat_case("__foo_bar__")
+    'FOOBAR'
+    >>> upper_flat_case("this_is_snake_case")
+    'THISISSNAKECASE'
+    >>> upper_flat_case("_Weird_cases_aRe_mostly_KEPT")
+    'WEIRDCASESAREMOSTLYKEPT'
+    >>> upper_flat_case("numbers_1_2_are_not_special")
+    'NUMBERS12ARENOTSPECIAL'
+    >>> upper_flat_case("________________")
+    ''
+
+    :param what: The string to convert.
+    :return: The converted string.
+    """
+    return flat_case(what).upper()
 
 
 def safe_del(l: List[T], index: int, f: Callable[[T], bool]) -> bool:

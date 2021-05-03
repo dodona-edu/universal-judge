@@ -39,7 +39,9 @@ from ..features import Construct
 from ..internationalization import get_i18n_string
 from ..serialisation import ExceptionValue
 from ..testplan import Plan
-from ..utils import camelize, pascalize, fallback, snake_case, get_args
+from ..utils import camelize, pascalize, fallback, snake_case, get_args, \
+    flat_case, upper_flat_case, macro_case, camel_snake_case, pascal_snake_case, \
+    doner_case, dash_case, train_case, cobol_case
 
 Command = List[str]
 FileFilter = Callable[[Path], bool]
@@ -47,9 +49,18 @@ CallbackResult = Tuple[Command, Union[List[str], FileFilter]]
 logger = logging.getLogger(__name__)
 
 _case_mapping = {
-    "camel_case":  camelize,
-    "pascal_case": pascalize,
-    "snake_case":  snake_case
+    "camel_case":        camelize,
+    "camel_snake_case":  camel_snake_case,
+    "cobol_case":        cobol_case,
+    "dash_case":         dash_case,
+    "donor_case":        doner_case,
+    "flat_case":         flat_case,
+    "macro_case":        macro_case,
+    "pascal_case":       pascalize,
+    "pascal_snake_case": pascal_snake_case,
+    "snake_case":        snake_case,
+    "train_case":        train_case,
+    "upper_flat_case":   upper_flat_case
 }
 
 
