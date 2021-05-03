@@ -19,7 +19,8 @@
     "heterogeneous_arguments": false,
     "evaluation": false,
     "named_arguments": false,
-    "default_parameters": false
+    "default_parameters": false,
+    "global_variables": false
   },
   "datatypes": {
     "integer": "unsupported",
