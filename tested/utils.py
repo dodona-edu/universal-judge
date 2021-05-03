@@ -1,19 +1,17 @@
 import contextlib
+import itertools
 import logging
 import os
 import random
 import stat
 import string
+import sys
 import typing
-from decimal import Decimal
-from os import PathLike
 from itertools import zip_longest
+from os import PathLike
 from pathlib import Path
 from typing import (IO, Union, Generator, TypeVar, Generic, Optional, Mapping,
                     Iterable, List, Callable, Any)
-
-import itertools
-import sys
 
 _logger = logging.getLogger(__name__)
 
@@ -189,8 +187,7 @@ def flatten(nested: Iterable[Iterable[T]]) -> Iterable[T]:
 def camel_snake_case(what: str) -> str:
     """
     Convert a string to camel_Snake_Case from snake_case. The algorithm is 
-    simple: each
-    underscore is removed and the letter behind it will be capitalized. The first
+    simple: each letter behind an underscore will be capitalized. The first
     letter will be downcased.
 
     >>> camel_snake_case("__foo_bar__")
@@ -237,10 +234,9 @@ def camelize(what: str) -> str:
 
 def cobol_case(what: str) -> str:
     """
-    Convert a string to Train-Case from snake_case. The algorithm is
-    simple: each
-    underscore is removed and the letter behind it will be capitalized. The first
-    letter will be downcased.
+    Convert a string to Train-Case from snake_case. The algorithm is simple:
+    each underscore is replaced by a dash and all letters will becapitalized.
+    The first letter will be downcased.
 
     >>> cobol_case("__foo_bar__")
     '--FOO-BAR--'
@@ -261,7 +257,8 @@ def cobol_case(what: str) -> str:
 
 def dash_case(what: str) -> str:
     """
-    Convert a string to doner|case from snake_case.
+    Convert a string to doner|case from snake_case. The algorithm is simple:
+    each underscore is replaced by a dash.
 
     >>> dash_case("__foo_bar__")
     '--foo-bar--'
@@ -282,7 +279,8 @@ def dash_case(what: str) -> str:
 
 def doner_case(what: str) -> str:
     """
-    Convert a string to doner|case from snake_case.
+    Convert a string to doner|case from snake_case. The algorithm is simple:
+    each underscore is replaced by a `|`.
 
     >>> doner_case("__foo_bar__")
     '||foo|bar||'
@@ -303,7 +301,8 @@ def doner_case(what: str) -> str:
 
 def flat_case(what: str) -> str:
     """
-    Convert a string to flatcase from snake_case.
+    Convert a string to flatcase from snake_case. The algorithm is simple:
+    each underscore is removed.
 
     >>> flat_case("__foo_bar__")
     'foobar'
@@ -324,7 +323,8 @@ def flat_case(what: str) -> str:
 
 def macro_case(what: str) -> str:
     """
-    Convert a string to MACRO_CASE from snake_case.
+    Convert a string to MACRO_CASE from snake_case. The algorithm is simple:
+    the string will be capitalized.
 
     >>> macro_case("__foo_bar__")
     '__FOO_BAR__'
@@ -346,8 +346,7 @@ def macro_case(what: str) -> str:
 def pascal_snake_case(what: str) -> str:
     """
     Convert a string to Pascal_Snake_Case from snake_case. The algorithm is 
-    simple: each
-    underscore is removed and the letter behind it will be capitalized. The first
+    simple: each letter behind the underscore will be capitalized. The first
     letter will be downcased.
 
     >>> pascal_snake_case("__foo_bar__")
@@ -425,10 +424,9 @@ def snake_case(what: str) -> str:
 
 def train_case(what: str) -> str:
     """
-    Convert a string to Train-Case from snake_case. The algorithm is 
-    simple: each
-    underscore is removed and the letter behind it will be capitalized. The first
-    letter will be downcased.
+    Convert a string to Train-Case from snake_case. The algorithm is simple: each
+    underscore is replaced by a dash and the letter behind it will be capitalized.
+    The first letter will be downcased.
 
     >>> train_case("__foo_bar__")
     '--Foo-Bar--'
@@ -449,7 +447,8 @@ def train_case(what: str) -> str:
 
 def upper_flat_case(what: str) -> str:
     """
-    Convert a string to UPPERFLATCASE from snake_case.
+    Convert a string to UPPERFLATCASE from snake_case. The algorithm is simple:
+    each underscore is removed and all letters will becapitalized.
 
     >>> upper_flat_case("__foo_bar__")
     'FOOBAR'

@@ -332,7 +332,7 @@ class Language:
     def conventionalize_class(self, class_identifier: str) -> str:
         """
         Conventionalize the name of a class. This function uses the format
-        specified in the config.json file. If no format is specified, the function
+        specified in the config.json file. If no format is specified, the class
         name is unchanged, which is the same as snake_case, since the testplan uses
         snake case.
 
@@ -356,7 +356,7 @@ class Language:
     def conventionalize_identifier(self, identifier: str) -> str:
         """
         Conventionalize the name of an property_name. This function uses the format
-        specified in the config.json file. If no format is specified, the function
+        specified in the config.json file. If no format is specified, the identifier
         name is unchanged, which is the same as snake_case, since the testplan uses
         snake case.
 
@@ -380,7 +380,7 @@ class Language:
     def conventionalize_property(self, property_name: str) -> str:
         """
         Conventionalize the name of a property. This function uses the format
-        specified in the config.json file. If no format is specified, the function
+        specified in the config.json file. If no format is specified, the property
         name is unchanged, which is the same as snake_case, since the testplan uses
         snake case.
 

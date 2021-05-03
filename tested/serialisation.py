@@ -138,16 +138,14 @@ class NumberType(WithFeatures, WithFunctions):
 
     # noinspection PyMethodParameters
     @root_validator
-    def check_passwords_match(cls, values):
+    def check_number_types(cls, values):
         if isinstance(values.get("data"), SpecialNumbers) and \
-                resolve_to_basic(
-                    values.get("type")) == BasicNumericTypes.INTEGER:
+                resolve_to_basic(values.get("type")) == BasicNumericTypes.INTEGER:
             raise ValueError(
                 f"SpecialNumber '{values.get('data')}' is only supported for "
                 f"rational numbers.")
 
-        if resolve_to_basic(
-                values.get("type")) == BasicNumericTypes.INTEGER:
+        if resolve_to_basic(values.get("type")) == BasicNumericTypes.INTEGER:
             values["data"] = values["data"].to_integral_value()
 
         return values
@@ -197,8 +195,7 @@ class SequenceType(WithFeatures, WithFunctions):
 
     def get_content_type(self) -> WrappedAllTypes:
         """
-        Attempt to get a type for the content of the container. The
-        function will
+        Attempt to get a type for the content of the container. The function will
         attempt to get the most specific type possible.
         """
         return _get_combined_types(_get_type_for(element) for element in self.data)
@@ -214,16 +211,14 @@ class ObjectKeyValuePair(WithFeatures, WithFunctions):
 
     def get_key_type(self) -> WrappedAllTypes:
         """
-        Attempt to get a type for the key of the key-value pair. The
-        function will
+        Attempt to get a type for the key of the key-value pair. The function will
         attempt to get the most specific type possible.
         """
         return _get_type_for(self.key)
 
     def get_value_type(self) -> WrappedAllTypes:
         """
-        Attempt to get a type for the value of the key-value pair. The
-        function will
+        Attempt to get a type for the value of the key-value pair. The function will
         attempt to get the most specific type possible.
         """
         return _get_type_for(self.value)
@@ -251,8 +246,7 @@ class ObjectType(WithFeatures, WithFunctions):
 
     def get_value_type(self) -> WrappedAllTypes:
         """
-        Attempt to get a type for the values of the object. The function
-        will
+        Attempt to get a type for the values of the object. The function will
         attempt to get the most specific type possible.
         """
         return _get_combined_types(
@@ -291,7 +285,7 @@ Value = Union[
 
 
 class Identifier(str, WithFeatures, WithFunctions):
-    """Represents an property_name."""
+    """Represents an variable name."""
 
     def get_used_features(self) -> FeatureSet:
         return FeatureSet(set(), set(),
@@ -327,9 +321,9 @@ class FunctionType(str, Enum):
     """
     A constructor.
     """
-    PROPERTY = "property_name"
+    PROPERTY = "property"
     """
-    Access a property_name on an object.
+    Access a property on an object.
     """
 
 
@@ -410,10 +404,8 @@ Expression = Union[Identifier, FunctionCall, Value]
 class Assignment(WithFeatures, WithFunctions):
     """
     Assigns the return value of a function to a variable. Because the expression
-    part is pretty simple, the type of the value is determined by
-    looking at the
-    expression. It is also possible to define the type. If the
-    type cannot be
+    part is pretty simple, the type of the value is determined by looking at the
+    expression. It is also possible to define the type. If the type cannot be
     determined and it is not specified, this is an error.
     """
     variable: str
@@ -467,8 +459,7 @@ class _SerialisationSchema(BaseModel):
 
 def generate_schema():
     """
-    Generate a json schema for the serialisation type. It will be
-    printed on stdout.
+    Generate a json schema for the serialisation type. It will be printed on stdout.
     """
     sc = _SerialisationSchema.schema()
     sc['$id'] = "tested/serialisation"
@@ -516,8 +507,7 @@ class PrintingDecimal:
 
 def _convert_to_python(value: Optional[Value], for_printing=False) -> Any:
     """
-    Convert the parsed values into the proper Python type. This is
-    basically
+    Convert the parsed values into the proper Python type. This is basically
     the same as de-serialising a value, but this function is currently not re-used
     in the Python implementation, since run-time de-serialisation is not supported.
     :param value: The parsed value.
@@ -559,8 +549,7 @@ def _convert_to_python(value: Optional[Value], for_printing=False) -> Any:
         return None
 
     # Unknown type.
-    logger.warning(
-        f"Unknown data type {value.type} will be interpreted as string.")
+    logger.warning(f"Unknown data type {value.type} will be interpreted as string.")
     return str(value.data)
 
 
