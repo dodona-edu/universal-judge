@@ -172,6 +172,21 @@ def _prepare_argument(
     return _prepare_expression(bundle, argument)
 
 
+def _prepare_assignment(
+        bundle: Bundle,
+        assignment: Assignment
+) -> Assignment:
+    if isinstance(assignment.type, VariableType):
+        class_type = bundle.lang_config.conventionalize_class(
+            assignment.type.data)
+        assignment = assignment.replace_type(VariableType(data=class_type))
+
+    assignment = assignment.replace_variable(
+        bundle.lang_config.conventionalize_identifier(assignment.variable))
+    prepared = _prepare_expression(bundle, assignment.expression)
+    return assignment.replace_expression(prepared)
+
+
 def _prepare_expression(bundle: Bundle, expression: Expression) -> Expression:
     """
     Prepare an expression for use in a template.
@@ -338,16 +353,7 @@ def _prepare_testcase(
         command = _prepare_expression(bundle, testcase.input)
     else:
         assert isinstance(testcase.input, get_args(Assignment))
-        assignment = testcase.input
-        if isinstance(assignment.type, VariableType):
-            class_type = bundle.lang_config.conventionalize_class(
-                assignment.type.data)
-            assignment.replace_type(VariableType(class_type))
-
-        assignment = assignment.replace_variable(
-            bundle.lang_config.conventionalize_identifier(assignment.variable))
-        prepared = _prepare_expression(bundle, assignment.expression)
-        command = assignment.replace_expression(prepared)
+        command = _prepare_assignment(bundle, testcase.input)
 
     return _TestcaseArguments(
         command=command,
@@ -567,8 +573,7 @@ def convert_statement(bundle: Bundle, statement: Statement) -> str:
             raise e
 
     assert isinstance(statement, get_args(Assignment))
-    prepared_expression = _prepare_expression(bundle, statement.expression)
-    statement = statement.replace_expression(prepared_expression)
+    statement = _prepare_assignment(bundle, statement)
     template = find_template(bundle, template)
     try:
         return template.render(statement=statement, full=True)

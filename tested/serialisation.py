@@ -429,9 +429,9 @@ class Assignment(WithFeatures, WithFunctions):
                           type=self.type)
 
     def replace_type(self,
-                     type: Union[AllTypes, VariableType]) -> 'Assignment':
+                     type_name: Union[AllTypes, VariableType]) -> 'Assignment':
         return Assignment(variable=self.variable, expression=self.expression,
-                          type=type)
+                          type=type_name)
 
     def get_used_features(self) -> FeatureSet:
         base = FeatureSet({Construct.ASSIGNMENTS}, set(), set())
