@@ -84,10 +84,20 @@ function sendException(stream, exception) {
         return;
     }
     if (typeof exception === "object") {
-        fs.writeSync(stream, JSON.stringify({
-            "message": exception.message,
-            "stacktrace": exception.stack ? exception.stack : ""
-        }));
+        if (typeof exception.message === "undefined" || exception.message === null) {
+            fs.writeSync(stream, JSON.stringify({
+                "message": "",
+                "stacktrace": exception.stack ? exception.stack : "",
+                "tested": {
+                    "i18n_key": "languages.javascript.runtime.invalid.message"
+                }
+            }));
+        } else {
+            fs.writeSync(stream, JSON.stringify({
+                "message": exception.message.toString(),
+                "stacktrace": exception.stack ? exception.stack : ""
+            }));
+        }
     } else {
         fs.writeSync(stream, JSON.stringify({
             "message": JSON.stringify(exception),

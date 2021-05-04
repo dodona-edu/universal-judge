@@ -106,6 +106,7 @@ en:
       runtime:
         invalid:
           exception: "An object is expected as exception and not %{actual_type}."
+          message: "The exception must have a message (field `message`)"
       linter:
         timeout: "ESLint exceeded time limit"
         memory: "ESLint exceeded memory limit"

@@ -106,6 +106,7 @@ nl:
       runtime:
         invalid:
           exception: "Er wordt een object verwacht als exceptie en geen %{actual_type}."
+          message: "De exceptie moet een tekstuele boodschap bevatten (veld `message`)"
       linter:
         timeout: "ESLint overschreed tijdslimiet."
         memory: "ESLint overschreed geheugenlimiet."
