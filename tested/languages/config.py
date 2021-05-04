@@ -355,7 +355,7 @@ class Language:
 
     def conventionalize_identifier(self, identifier: str) -> str:
         """
-        Conventionalize the name of an property_name. This function uses the format
+        Conventionalize the name of an identifier. This function uses the format
         specified in the config.json file. If no format is specified, the identifier
         name is unchanged, which is the same as snake_case, since the testplan uses
         snake case.
@@ -364,6 +364,18 @@ class Language:
         :return: The conventionalized identifier.
         """
         return _conventionalize(self.options, "identifier", identifier)
+
+    def conventionalize_global_identifier(self, identifier: str) -> str:
+        """
+        Conventionalize the name of an global variable. This function uses the format
+        specified in the config.json file. If no format is specified, the identifier
+        name is unchanged, which is the same as snake_case, since the testplan uses
+        snake case.
+
+        :param identifier: The name of the property_name to conventionalize.
+        :return: The conventionalized identifier.
+        """
+        return _conventionalize(self.options, "global_identifier", identifier)
 
     def conventionalize_namespace(self, namespace: str) -> str:
         """

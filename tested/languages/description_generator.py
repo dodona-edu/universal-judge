@@ -145,6 +145,12 @@ class DescriptionGenerator:
             return f"<code>{html.escape(name)}</code>"
         return f"`{name}`"
 
+    def get_global_variable_name(self, name: str, is_html: bool = True) -> str:
+        name = self.language.conventionalize_global_identifier(name)
+        if is_html:
+            return f"<code>{html.escape(name)}</code>"
+        return f"`{name}`"
+
     def get_code(self, stmt: str, bundle: Bundle, statement: bool = False,
                  is_html: bool = True) -> str:
         from .generator import convert_statement

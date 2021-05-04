@@ -204,7 +204,8 @@ def _prepare_expression(bundle: Bundle, expression: Expression) -> Expression:
             name = bundle.lang_config.conventionalize_class(expression.name)
         elif expression.type == FunctionType.PROPERTY:
             if expression.namespace is None:
-                name = expression.name
+                name = bundle.lang_config.conventionalize_global_identifier(
+                    expression.name)
             else:
                 name = bundle.lang_config.conventionalize_property(expression.name)
         else:
