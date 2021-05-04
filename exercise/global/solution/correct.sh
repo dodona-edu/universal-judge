@@ -1,0 +1,1 @@
+export GLOBAL_VAR="GLOBAL"

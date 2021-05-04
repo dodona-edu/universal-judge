@@ -12,6 +12,8 @@
   },
   "naming_conventions": {
     "namespace": "pascal_case",
+    "identifier": "camel_case",
+    "global_identifier": "camel_case",
     "function": "camel_case"
   },
   "constructs": {
@@ -21,7 +23,8 @@
     "assignments": true,
     "heterogeneous_collections": false,
     "heterogeneous_arguments": false,
-    "evaluation": true
+    "evaluation": true,
+    "global_variables": true
   },
   "datatypes": {
     "integer": "supported",

@@ -34,6 +34,8 @@ class Construct(str, Enum):
     # Programmed evaluation is possible in this language.
     EVALUATION = "evaluation"
 
+    # Global variables
+    GLOBAL_VARIABLES = "global_variables"
 
 Types = Set[AllTypes]
 Constructs = Set[Construct]

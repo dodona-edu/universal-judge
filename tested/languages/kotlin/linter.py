@@ -59,7 +59,9 @@ def run_ktlint(bundle: Bundle, submission: Path, remaining: float) \
     if language_options.get("ktlint_experimental", True):
         command.append("--experimental")
 
-    command.append(submission.absolute().relative_to(submission.parent))
+    submission = submission.absolute()
+
+    command.append(submission.relative_to(submission.parent))
 
     execution_results = run_command(
         directory=submission.parent,

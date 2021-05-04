@@ -9,6 +9,10 @@
   "extensions": {
     "file": "py"
   },
+  "naming_conventions": {
+    "class": "pascal_case",
+    "global_identifier": "macro_case"
+  },
   "constructs": {
     "objects": true,
     "exceptions": true,
@@ -18,7 +22,8 @@
     "heterogeneous_arguments": true,
     "named_arguments": true,
     "evaluation": true,
-    "default_parameters": true
+    "default_parameters": true,
+    "global_variables": true
   },
   "datatypes": {
 

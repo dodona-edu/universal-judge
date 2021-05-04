@@ -13,7 +13,7 @@ from pathlib import Path
 from .configs import DodonaConfig
 from .main import run
 
-exercise_dir = "exercise/echo"
+exercise_dir = "exercise/global"
 
 
 def read_config() -> DodonaConfig:
@@ -27,7 +27,7 @@ def read_config() -> DodonaConfig:
         "source":               Path(exercise_dir, 'solution/correct.sh'),
         "judge":                Path('.'),
         "workdir":              Path('workdir'),
-        "plan_name":            "one.tson",
+        "plan_name":            "plan.yaml",
         "options":              {
             "parallel": True,
             "mode":     "batch",

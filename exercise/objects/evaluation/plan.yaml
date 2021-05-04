@@ -1,7 +1,7 @@
 - tab: "Feedback"
   contexts:
     - testcases:
-        - statement: 'EqualChecker instance = new EqualChecker(5)'
+        - statement: 'equal_checker instance = new equal_checker(5)'
         - expression: 'instance.check(25)'
           return: no
         - expression: 'instance.check(5)'

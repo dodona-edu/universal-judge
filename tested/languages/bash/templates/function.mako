@@ -11,7 +11,7 @@
 <%page args="function,index_fun,index_map" />\
 <% index_map.append({}) %>\
 % for i, argument in enumerate(function.arguments):
-    % if isinstance(argument, FunctionCall):
+    % if isinstance(argument, FunctionCall) and argument.type == FunctionType.FUNCTION:
         ## Delegate to the function template for function calls.
         <% index_map[-1][i] = index_fun() %>\
         % if has_nested_function_call(argument):
@@ -21,19 +21,29 @@
         % endif
     % endif
 % endfor
-${function.name} \
+% if function.type == FunctionType.PROPERTY:
+    "$\
+% endif
+${function.name}\
 % if function.type != FunctionType.PROPERTY:
+     \
     % for i, argument in enumerate(function.arguments):
         % if isinstance(argument, Identifier):
             ## If the expression is an identifier, just echo it.
             "${'$'}${argument}" \
         % elif isinstance(argument, FunctionCall):
             ## Delegate to the function template for function calls.
-            "${'$'}ARG${index_map[-1][i]}" \
+            % if argument.type == FunctionType.PROPERTY:
+                <%include file="function.mako" args="function=argument,index_fun=index_fun,index_map=index_map"/>
+            % else:
+                "${'$'}ARG${index_map[-1][i]}" \
+            % endif
         % elif isinstance(argument, get_args(Value)):
             ## We have a value, delegate to the value template.
             <%include file="value.mako" args="value=argument" /> \
         % endif
     % endfor
+% else:
+    "\
 % endif
 <% index_map.pop() %>

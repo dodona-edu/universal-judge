@@ -8,7 +8,10 @@
   },
   "naming_conventions": {
     "namespace": "snake_case",
-    "function": "snake_case"
+    "function": "snake_case",
+    "identifier": "snake_case",
+    "property": "snake_case",
+    "class": "snake_case"
   },
   "constructs": {
     "objects": false,
@@ -19,7 +22,8 @@
     "heterogeneous_arguments": false,
     "evaluation": false,
     "named_arguments": false,
-    "default_parameters": false
+    "default_parameters": false,
+    "global_variables": false
   },
   "datatypes": {
     "integer": "unsupported",
