@@ -5,8 +5,9 @@ public class Counter {
         counter = 0;
     }
 
-    public void add() {
+    public Counter add() {
         counter++;
+        return this;
     }
 
     public int get() {

@@ -3,7 +3,8 @@
 <%! from tested.utils import get_args %>\
 <%page args="function" />\
 % if not function.has_root_namespace and function.namespace:
-    ${function.namespace}!!.\
+    ## Kotlin has the !! (non-value assertion) operator
+    <%include file="statement.mako" args="statement=function.namespace"/>!!.\
 % endif
 ${function.name}\
 % if function.type != FunctionType.PROPERTY:

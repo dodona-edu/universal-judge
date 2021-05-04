@@ -376,12 +376,30 @@ def test_objects(language: str, tmp_path: Path, pytestconfig):
 
 
 @pytest.mark.parametrize("language", ["python", "java", "kotlin", "javascript"])
+def test_objects_chained(language: str, tmp_path: Path, pytestconfig):
+    conf = configuration(pytestconfig, "objects", language, tmp_path, "chained.tson", "correct")
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"] * 3
+    assert len(updates.find_all("start-testcase")) == 3
+
+
+@pytest.mark.parametrize("language", ["python", "java", "kotlin", "javascript"])
 def test_counter(language: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "counter", language, tmp_path, "plan.yaml", "solution")
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["correct"] * 3
     assert len(updates.find_all("start-testcase")) == 7
+
+
+@pytest.mark.parametrize("language", ["python", "java", "kotlin", "javascript"])
+def test_counter_chained(language: str, tmp_path: Path, pytestconfig):
+    conf = configuration(pytestconfig, "counter", language, tmp_path, "chained.yaml", "solution")
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"] * 3
+    assert len(updates.find_all("start-testcase")) == 4
 
 
 @pytest.mark.parametrize("language", ["python", "java", "kotlin", "javascript"])

@@ -211,13 +211,17 @@ def _prepare_expression(bundle: Bundle, expression: Expression) -> Expression:
         else:
             name = bundle.lang_config.conventionalize_function(expression.name)
 
+        if expression.namespace is None:
+            namespace = Identifier(submission_name)
+        else:
+            namespace = _prepare_expression(bundle, expression.namespace)
+
         internal = InternalFunctionCall(
             type=expression.type,
             arguments=[_prepare_argument(bundle, arg)
                        for arg in expression.arguments],
             name=name,
-            namespace=bundle.lang_config.conventionalize_identifier(
-                expression.namespace) if expression.namespace else submission_name
+            namespace=namespace
         )
         internal.has_root_namespace = not bool(expression.namespace)
         return internal
@@ -275,7 +279,7 @@ def _create_handling_function(
             arguments = [InternalFunctionCall(
                 type=FunctionType.FUNCTION,
                 name=evaluator.name,
-                namespace=evaluator_name,
+                namespace=Identifier(evaluator_name),
                 arguments=[_prepare_expression(bundle, expression)]
             )]
             arguments[0].has_root_namespace = False
@@ -720,7 +724,7 @@ def generate_custom_evaluator(bundle: Bundle,
 
     function = InternalFunctionCall(
         type=FunctionType.FUNCTION,
-        namespace=evaluator_name,
+        namespace=Identifier(evaluator_name),
         name=evaluator.function.name,
         arguments=[expected_value, actual_value, arguments]
     )

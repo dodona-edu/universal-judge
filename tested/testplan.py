@@ -635,7 +635,13 @@ class _FunctionSignature(NamedTuple):
 
     @classmethod
     def from_call(cls, call: FunctionCall):
-        return _FunctionSignature(call.name, call.namespace, call.type)
+        if call.namespace is None:
+            namespace_signature = ""
+        elif isinstance(call.namespace, FunctionCall):
+            namespace_signature = str(_FunctionSignature.from_call(call.namespace))
+        else:
+            namespace_signature = str(call.namespace)
+        return _FunctionSignature(call.name, namespace_signature, call.type)
 
 
 def _resolve_function_calls(function_calls: Iterable[FunctionCall]):

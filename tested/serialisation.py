@@ -29,6 +29,7 @@ from typing import Union, List, Literal, Optional, Any, Iterable, Tuple, Dict
 from pydantic import BaseModel, root_validator, Field
 from pydantic.dataclasses import dataclass
 from pydantic.fields import Undefined
+from pydantic.typing import NoneType
 
 from tested.dodona import ExtendedMessage, Status
 from .datatypes import (NumericTypes, StringTypes, BooleanTypes,
@@ -350,7 +351,7 @@ class FunctionCall(WithFeatures, WithFunctions):
     """
     type: FunctionType
     name: str
-    namespace: Optional[str] = None
+    namespace: Optional['Expression'] = None
     arguments: List[Union['Expression', NamedArgument]] \
         = field(default_factory=list)
 
@@ -370,7 +371,8 @@ class FunctionCall(WithFeatures, WithFunctions):
         constructs = {Construct.FUNCTION_CALLS}
 
         # Get OOP features.
-        if self.type in (FunctionType.PROPERTY, FunctionType.CONSTRUCTOR):
+        if self.type in (FunctionType.PROPERTY, FunctionType.CONSTRUCTOR) or \
+                not isinstance(self.namespace, (Identifier, NoneType)):
             constructs.add(Construct.OBJECTS)
 
         base_features = FeatureSet(constructs=constructs, types=set(),
@@ -382,7 +384,12 @@ class FunctionCall(WithFeatures, WithFunctions):
         return combine_features([base_features] + argument_features)
 
     def get_functions(self) -> Iterable['FunctionCall']:
-        return flatten([[self], *[list(x.get_functions()) for x in self.arguments]])
+        if self.namespace is None:
+            namespace_nested = []
+        else:
+            namespace_nested = [list(self.namespace.get_functions())]
+        return flatten([[self], *[list(x.get_functions()) for x in self.arguments],
+                        *namespace_nested])
 
 
 @dataclass

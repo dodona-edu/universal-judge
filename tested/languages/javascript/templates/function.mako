@@ -6,7 +6,7 @@ await \
     new \
 % endif
 % if function.namespace:
-    ${function.namespace}.\
+    <%include file="statement.mako" args="statement=function.namespace"/>.\
 % endif
 ${function.name}\
 % if function.type != FunctionType.PROPERTY:

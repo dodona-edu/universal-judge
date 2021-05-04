@@ -1,0 +1,115 @@
+{
+  "tabs": [
+    {
+      "name": "Feedback",
+      "runs": [
+        {
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "namespace": {
+                      "type": "constructor",
+                      "name": "EqualChecker",
+                      "arguments": [
+                        {
+                          "type": "integer",
+                          "data": 5
+                        }
+                      ]
+                    },
+                    "name": "check",
+                    "arguments": [
+                      {
+                        "type": "integer",
+                        "data": 25
+                      }
+                    ]
+                  },
+                  "output": {
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": false
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "namespace": {
+                      "type": "constructor",
+                      "name": "EqualChecker",
+                      "arguments": [
+                        {
+                          "type": "integer",
+                          "data": 5
+                        }
+                      ]
+                    },
+                    "name": "check",
+                    "arguments": [
+                      {
+                        "type": "integer",
+                        "data": 5
+                      }
+                    ]
+                  },
+                  "output": {
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": true
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "namespace": {
+                      "type": "constructor",
+                      "name": "EqualChecker",
+                      "arguments": [
+                        {
+                          "type": "integer",
+                          "data": 25
+                        }
+                      ]
+                    },
+                    "name": "check",
+                    "arguments": [
+                      {
+                        "type": "integer",
+                        "data": 5
+                      }
+                    ]
+                  },
+                  "output": {
+                    "result": {
+                      "value": {
+                        "type": "boolean",
+                        "data": false
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
