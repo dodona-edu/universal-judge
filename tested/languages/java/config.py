@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 class Java(Language):
 
-    def compilation(self, config: Config, files: List[str]) -> CallbackResult:
+    def compilation(self, bundle: Bundle, files: List[str]) -> CallbackResult:
         def file_filter(file: Path) -> bool:
             return file.suffix == ".class"
 

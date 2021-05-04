@@ -7,7 +7,7 @@ from lark import Lark, Tree, Token, UnexpectedToken
 from tested.datatypes import string_to_type, AllTypes, SequenceTypes, \
     NumericTypes, BooleanTypes, NothingTypes, StringTypes, ObjectTypes, \
     BasicSequenceTypes, AdvancedSequenceTypes, BasicNumericTypes, \
-    BasicStringTypes, BasicBooleanTypes
+    BasicStringTypes, BasicBooleanTypes, AdvancedNothingTypes, BasicNothingTypes
 from tested.serialisation import Statement, Assignment, NumberType, Expression, \
     NothingType, Identifier, BooleanType, StringType, SequenceType, FunctionCall, \
     ObjectType, FunctionType, VariableType, Value, ObjectKeyValuePair
@@ -131,6 +131,7 @@ class Parser:
             return self.analyse_expression_token(tree)
         return self.analyse_expression_tree(tree, allow_functions)
 
+    # noinspection PyMethodMayBeStatic
     def analyse_expression_token(self, token: Token) -> Expression:
         if token.type == 'CNAME':
             return Identifier.validate(token.value)
@@ -151,7 +152,10 @@ class Parser:
     def analyse_expression_tree(self, tree: Tree,
                                 allow_functions: bool = True) -> Expression:
         if tree.data == 'null':
-            return NothingType()
+            nothing_type = (BasicNothingTypes.NOTHING
+                            if tree.children[0].type == "NULL"
+                            else AdvancedNothingTypes.UNDEFINED)
+            return NothingType(type=nothing_type)
         elif tree.data in ('list', 'set', 'tuple'):
             return SequenceType(type=default_sequence_type_map[tree.data],
                                 data=[
@@ -178,6 +182,11 @@ class Parser:
         elif tree.data == 'dict':
             return ObjectType(type=ObjectTypes.MAP,
                               data=self.analyse_dict(tree, allow_functions))
+        elif tree.data == 'global_variable':
+            if allow_functions:
+                return self.analyse_global_variable(tree)
+            else:
+                raise ParseError("Global variables not allowed for return values")
         raise ParseError("Invalid expression tree")
 
     def analyse_function(self, tree: Tree) -> FunctionCall:
@@ -190,6 +199,11 @@ class Parser:
                             namespace=namespace,
                             arguments=args)
 
+    # noinspection PyMethodMayBeStatic
+    def analyse_global_variable(self, tree: Tree) -> FunctionCall:
+        return FunctionCall(type=FunctionType.PROPERTY,
+                            name=self.analyse_name(tree.children[1]))
+
     def analyse_property(self, tree: Tree) -> FunctionCall:
         # Find namespace name
         _a, namespace = self.analyse_namespace(tree.children[0])
@@ -199,6 +213,7 @@ class Parser:
                             namespace=namespace,
                             type=FunctionType.PROPERTY)
 
+    # noinspection PyMethodMayBeStatic
     def analyse_name(self, token: Token) -> str:
         if token.type != 'CNAME':
             raise ParseError("Invalid variable/function name")
@@ -214,6 +229,7 @@ class Parser:
         return (self.analyse_expression(tree.children[0], allow_functions=True),
                 self.analyse_name(tree.children[1]))
 
+    # noinspection PyMethodMayBeStatic
     def analyse_type_token(self, token: Token,
                            assign=False) -> Union[VariableType, AllTypes]:
         if assign and token.type == 'CNAME':

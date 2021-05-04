@@ -1,0 +1,1 @@
+#define GLOBAL_VAR "GLOBAL"

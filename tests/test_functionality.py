@@ -33,6 +33,22 @@ quotes = {
 
 
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
+def test_global_variable(language: str, tmp_path: Path, pytestconfig):
+    conf = configuration(pytestconfig, "global", language, tmp_path, "one.tson", "correct")
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]
+
+
+@pytest.mark.parametrize("language", ALL_LANGUAGES)
+def test_global_variable_yaml(language: str, tmp_path: Path, pytestconfig):
+    conf = configuration(pytestconfig, "global", language, tmp_path, "plan.yaml", "correct")
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]
+
+
+@pytest.mark.parametrize("language", ALL_LANGUAGES)
 def test_io_exercise(language: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "echo", language, tmp_path, "one.tson", "correct")
     result = execute_config(conf)
@@ -447,3 +463,27 @@ def test_hide_expected_wrong(language: str, tmp_path: Path, pytestconfig):
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["wrong"]
     assert len(list(filter(lambda x: not bool(x["expected"]), updates.find_all("start-test")))) == 1
+
+
+def test_javascript_exception_correct(tmp_path: Path, pytestconfig):
+    conf = configuration(pytestconfig, "js-exceptions", "javascript", tmp_path, "plan.yaml", "correct")
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]
+    assert len(updates.find_all("append-message")) == 0
+
+
+def test_javascript_exception_wrong(tmp_path: Path, pytestconfig):
+    conf = configuration(pytestconfig, "js-exceptions", "javascript", tmp_path, "plan.yaml", "wrong")
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["wrong"]
+    assert len(updates.find_all("append-message")) == 1
+
+
+def test_javascript_exception_missing_message(tmp_path: Path, pytestconfig):
+    conf = configuration(pytestconfig, "js-exceptions", "javascript", tmp_path, "plan.yaml", "wrong-message")
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["wrong"]
+    assert len(updates.find_all("append-message")) == 1

@@ -103,6 +103,10 @@ en:
         crashed: "Pylint crashed"
         output: "Pylint produced bad output."
     javascript:
+      runtime:
+        invalid:
+          exception: "An object is expected as exception and not %{actual_type}."
+          message: "The exception must have a message (field `message`)"
       linter:
         timeout: "ESLint exceeded time limit"
         memory: "ESLint exceeded memory limit"
@@ -132,4 +136,3 @@ en:
         timeout: "ShellCheck exceeded time limit"
         memory: "ShellCheck exceeded memory limit"
         output: "ShellCheck produced bad output."
-

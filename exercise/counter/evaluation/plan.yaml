@@ -3,13 +3,13 @@ tabs:
 - tab: "Counter"
   contexts:
     - testcases:
-        - statement: "c = new Counter()"
-        - expression: "c.get()"
+        - statement: "c_01 = new counter()"
+        - expression: "c_01.get()"
           return: 0
-        - statement: "c.add()"
-        - expression: "c.get()"
+        - statement: "c_01.add()"
+        - expression: "c_01.get()"
           return: 1
-        - statement: "c.add()"
-        - statement: "c.add()"
-        - expression: "c.get()"
+        - statement: "c_01.add()"
+        - statement: "c_01.add()"
+        - expression: "c_01.get()"
           return: 3

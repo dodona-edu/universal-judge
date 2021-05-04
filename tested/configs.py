@@ -48,7 +48,7 @@ class Options:
     Language-specific options for the judge. These depend on the language
     implementation; the judge itself does nothing with it.
     """
-    linter: Dict[str, bool] = field(default_factory=dict)
+    linter: bool = True
     """
     Controls running the linter for languages. Default is True. Of course, for
     languages without linter implementation, this does nothing.
@@ -79,7 +79,10 @@ class DodonaConfig(BaseModel):
         return self.options.language.get(self.programming_language, dict())
 
     def linter(self) -> bool:
-        return self.options.linter.get(self.programming_language, True)
+        local_config = self.config_for().get("linter", None)
+        if local_config is None:
+            return self.options.linter
+        return local_config
 
 
 def read_config(config_in: IO) -> DodonaConfig:

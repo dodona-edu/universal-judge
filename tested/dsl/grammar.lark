@@ -86,6 +86,11 @@ assign: datatype? CNAME "=" value
 ?name: CNAME
     | expr "." CNAME
 
+LCROOK: "<"
+RCROOK: ">"
+
+global_variable: LCROOK CNAME RCROOK
+
 property: expr "." CNAME
 
 constructor: "new" name "(" args ")"
@@ -94,6 +99,7 @@ constructor: "new" name "(" args ")"
      | fun
      | constructor
      | property
+     | global_variable
 
 fun: name "(" args ")"
 
@@ -108,8 +114,11 @@ set: "{" expr ("," expr)* "}"
 tuple: "(" [expr ("," expr)*] ")"
 dict_pair: expr ":" expr
 
-null: "null"
-    | "undefined"
+NULL: "null"
+UNDEFINED: "undefined"
+
+null: NULL
+    | UNDEFINED
 
 
 ?string: ESCAPED_STRING

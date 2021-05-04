@@ -8,6 +8,8 @@
   },
   "naming_conventions": {
     "namespace": "snake_case",
+    "identifier": "snake_case",
+    "global_identifier": "macro_case",
     "function": "snake_case"
   },
   "constructs": {
@@ -19,7 +21,8 @@
     "heterogeneous_arguments": false,
     "evaluation": false,
     "named_arguments": false,
-    "default_parameters": true
+    "default_parameters": true,
+    "global_variables": true
   },
   "datatypes": {
     "integer": "unsupported",
