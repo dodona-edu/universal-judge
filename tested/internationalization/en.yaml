@@ -105,7 +105,7 @@ en:
     javascript:
       runtime:
         invalid:
-          exception: "There is an object expected as exception and not %{actual_type}."
+          exception: "An object is expected as exception and not %{actual_type}."
       linter:
         timeout: "ESLint exceeded time limit"
         memory: "ESLint exceeded memory limit"
@@ -135,4 +135,3 @@ en:
         timeout: "ShellCheck exceeded time limit"
         memory: "ShellCheck exceeded memory limit"
         output: "ShellCheck produced bad output."
-
