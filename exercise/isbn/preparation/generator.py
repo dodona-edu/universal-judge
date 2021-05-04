@@ -13,7 +13,7 @@ random.seed(123456789)
 # We halen de naam van het testplan op uit de configuratie van de oefening.
 with open("../config.json", "r") as config_file:
     config = json.load(config_file)
-testplan_name = config["evaluation"].get("plan_name", "full.tson")
+testplan_name = config["evaluation"].get("testplan", "full.tson")
 
 # Of alle testgevallen in dezelfde context moeten plaatsvinden of niet.
 # Aangezien ze onafhankelijk zijn, doen we dit niet.
