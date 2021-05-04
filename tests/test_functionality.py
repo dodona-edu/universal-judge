@@ -448,7 +448,8 @@ def test_hide_expected_wrong(language: str, tmp_path: Path, pytestconfig):
 
 
 def test_javascript_exception_correct(tmp_path: Path, pytestconfig):
-    conf = configuration(pytestconfig, "js-exceptions", "javascript", tmp_path, "plan.yaml", "correct")
+    conf = configuration(pytestconfig, "js-exceptions", "javascript", tmp_path, "plan.yaml", "correct",
+                         backward_compatibility_plan=True)
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["correct"]
@@ -456,7 +457,8 @@ def test_javascript_exception_correct(tmp_path: Path, pytestconfig):
 
 
 def test_javascript_exception_wrong(tmp_path: Path, pytestconfig):
-    conf = configuration(pytestconfig, "js-exceptions", "javascript", tmp_path, "plan.yaml", "wrong")
+    conf = configuration(pytestconfig, "js-exceptions", "javascript", tmp_path, "plan.yaml", "wrong",
+                         backward_compatibility_plan=True)
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["wrong"]
@@ -464,7 +466,8 @@ def test_javascript_exception_wrong(tmp_path: Path, pytestconfig):
 
 
 def test_javascript_exception_missing_message(tmp_path: Path, pytestconfig):
-    conf = configuration(pytestconfig, "js-exceptions", "javascript", tmp_path, "plan.yaml", "wrong-message")
+    conf = configuration(pytestconfig, "js-exceptions", "javascript", tmp_path, "plan.yaml", "wrong-message",
+                         backward_compatibility_plan=True)
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["wrong"]

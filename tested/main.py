@@ -16,10 +16,10 @@ def run(config: DodonaConfig, judge_output: IO):
     :param config: The configuration, as received from Dodona.
     :param judge_output: Where the judge output will be written to.
     """
-    with open(f"{config.resources}/{config.plan_name}", "r") as t:
+    with open(f"{config.resources}/{config.testplan}", "r") as t:
         textual_plan = t.read()
 
-    _, ext = splitext(config.plan_name)
+    _, ext = splitext(config.testplan)
     is_yaml = ext.lower() in (".yaml", ".yml")
     if is_yaml:
         parser = SchemaParser()

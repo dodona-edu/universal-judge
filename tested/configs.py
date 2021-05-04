@@ -8,7 +8,7 @@ from dataclasses import field
 from pathlib import Path
 from typing import Optional, Dict, IO, TYPE_CHECKING, Any, List
 
-from pydantic import BaseModel
+from pydantic import BaseModel, root_validator
 from pydantic.dataclasses import dataclass
 
 import tested.testplan as testplan
@@ -69,11 +69,9 @@ class DodonaConfig(BaseModel):
     # noinspection SpellCheckingInspection
     workdir: Path
     judge: Path
-    plan_name: str = "plan.json"  # Name of the testplan file.
+    testplan: str = "plan.json"  # Name of the testplan file.
     options: Options = Options()
-    output_limit: int = 10 * 1024 * 1024  # Default value for backwards
-
-    # compatibility.
+    output_limit: int = 10240 * 1024  # Default value for backwards compatibility.
 
     def config_for(self) -> Dict[str, Any]:
         return self.options.language.get(self.programming_language, dict())
@@ -83,6 +81,14 @@ class DodonaConfig(BaseModel):
         if local_config is None:
             return self.options.linter
         return local_config
+
+    # noinspection PyMethodParameters
+    @root_validator(pre=True)
+    def backward_compatibility_plan_name(cls, values):
+        if "testplan" not in values and "plan_name" in values:
+            values["testplan"] = values["plan_name"]
+            del values["plan_name"]
+        return values
 
 
 def read_config(config_in: IO) -> DodonaConfig:

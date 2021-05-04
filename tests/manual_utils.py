@@ -1,6 +1,5 @@
 import json
 import re
-import threading
 from io import StringIO
 from pathlib import Path
 from typing import List
@@ -64,7 +63,7 @@ def assert_valid_output(output: str, config: Config) -> CommandDict:
 
 def configuration(config, exercise: str, language: str, work_dir: Path,
                   plan: str = "plan.json", solution: str = "solution",
-                  options=None) -> DodonaConfig:
+                  options=None, backward_compatibility_plan: bool = False) -> DodonaConfig:
     """Create a config."""
     # Get the file extension for this language.
     ext = get_language(language).extension_file()
@@ -72,6 +71,7 @@ def configuration(config, exercise: str, language: str, work_dir: Path,
         options = {}
     exercise_dir = Path(config.rootdir) / "exercise"
     ep = f'{exercise_dir}/{exercise}'
+    testplan = "plan_name" if backward_compatibility_plan else "testplan"
     return DodonaConfig(**merge({
         "memory_limit":         536870912,
         "time_limit":           3600,  # One hour
@@ -81,7 +81,7 @@ def configuration(config, exercise: str, language: str, work_dir: Path,
         "source":               Path(f'{ep}/solution/{solution}.{ext}'),
         "judge":                Path(f'{config.rootdir}'),
         "workdir":              work_dir,
-        "plan_name":            plan,
+        testplan:               plan,
         "options":              {
             "linter": False
         }

@@ -226,12 +226,12 @@ def _instantiate(template_dir: Path,
     _copy_all(template_dir, instance_dir)
     # Check testplan
     testplan_file = template_dir / "evaluation" / config_dict["evaluation"][
-        "plan_name"]
+        "testplan"]
     if testplan_file.suffix.lower() in (".yml", ".yaml"):
         testplan_file_new = testplan_file.with_suffix(
             f"{testplan_file.suffix}.json")
         testplan_file_new = instance_dir / "evaluation" / testplan_file_new.name
-        config_dict["evaluation"]["plan_name"] = testplan_file_new.name
+        config_dict["evaluation"]["testplan"] = testplan_file_new.name
         with open(testplan_file_new, 'w') as fd:
             json.dump(testplan, fd, default=pydantic_encoder,
                       indent=2 if human_readable else None)
@@ -361,7 +361,7 @@ def _read_plan(config_dict: Dict[str, Any], evaluation_dir: Path) -> Plan:
     """
 
     try:
-        plan_file = evaluation_dir / config_dict["evaluation"]["plan_name"]
+        plan_file = evaluation_dir / config_dict["evaluation"]["testplan"]
     except KeyError:
         print(f"Not testplan given in the template configuration file",
               file=sys.stderr)
