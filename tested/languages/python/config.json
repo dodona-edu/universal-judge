@@ -9,6 +9,9 @@
   "extensions": {
     "file": "py"
   },
+  "naming_conventions": {
+    "class": "pascal_case"
+  },
   "constructs": {
     "objects": true,
     "exceptions": true,

@@ -138,7 +138,7 @@ class NumberType(WithFeatures, WithFunctions):
 
     # noinspection PyMethodParameters
     @root_validator
-    def check_passwords_match(cls, values):
+    def check_number_types(cls, values):
         if isinstance(values.get("data"), SpecialNumbers) and \
                 resolve_to_basic(values.get("type")) == BasicNumericTypes.INTEGER:
             raise ValueError(
@@ -285,7 +285,7 @@ Value = Union[
 
 
 class Identifier(str, WithFeatures, WithFunctions):
-    """Represents an identifier."""
+    """Represents an variable name."""
 
     def get_used_features(self) -> FeatureSet:
         return FeatureSet(set(), set(),
@@ -415,6 +415,15 @@ class Assignment(WithFeatures, WithFunctions):
     def replace_expression(self, expression: Expression) -> 'Assignment':
         return Assignment(variable=self.variable, expression=expression,
                           type=self.type)
+
+    def replace_variable(self, variable: str) -> 'Assignment':
+        return Assignment(variable=variable, expression=self.expression,
+                          type=self.type)
+
+    def replace_type(self,
+                     type_name: Union[AllTypes, VariableType]) -> 'Assignment':
+        return Assignment(variable=self.variable, expression=self.expression,
+                          type=type_name)
 
     def get_used_features(self) -> FeatureSet:
         base = FeatureSet({Construct.ASSIGNMENTS}, set(), set())
