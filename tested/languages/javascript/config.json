@@ -11,7 +11,10 @@
   },
   "naming_conventions": {
     "namespace": "camel_case",
-    "function": "camel_case"
+    "function": "camel_case",
+    "identifier": "camel_case",
+    "property": "camel_case",
+    "class": "pascal_case"
   },
   "constructs": {
     "objects": true,

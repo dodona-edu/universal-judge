@@ -12,6 +12,7 @@
   },
   "naming_conventions": {
     "namespace": "pascal_case",
+    "identifier": "camel_case",
     "function": "camel_case"
   },
   "constructs": {

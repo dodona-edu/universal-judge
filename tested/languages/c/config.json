@@ -14,6 +14,7 @@
   },
   "naming_conventions": {
     "namespace": "snake_case",
+    "identifier": "snake_case",
     "function": "snake_case"
   },
   "constructs": {

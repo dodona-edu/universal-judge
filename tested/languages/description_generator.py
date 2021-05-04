@@ -76,7 +76,7 @@ class DescriptionGenerator:
             try:
                 return _get_type(arg)
             except KeyError:
-                return arg
+                return self.language.conventionalize_class(arg)
 
         def _get_type_name(arg: str) -> Union[str, bool]:
             if not is_inner:
@@ -132,6 +132,18 @@ class DescriptionGenerator:
         if is_html:
             return f"<code>{html.escape(function_name)}</code>"
         return f"`{function_name}`"
+
+    def get_property_name(self, name: str, is_html: bool = True) -> str:
+        name = self.language.conventionalize_property(name)
+        if is_html:
+            return f"<code>{html.escape(name)}</code>"
+        return f"`{name}`"
+
+    def get_variable_name(self, name: str, is_html: bool = True) -> str:
+        name = self.language.conventionalize_identifier(name)
+        if is_html:
+            return f"<code>{html.escape(name)}</code>"
+        return f"`{name}`"
 
     def get_code(self, stmt: str, bundle: Bundle, statement: bool = False,
                  is_html: bool = True) -> str:

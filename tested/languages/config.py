@@ -39,7 +39,9 @@ from ..features import Construct
 from ..internationalization import get_i18n_string
 from ..serialisation import ExceptionValue
 from ..testplan import Plan
-from ..utils import camelize, pascalize, fallback, snake_case, get_args
+from ..utils import camelize, pascalize, fallback, snake_case, get_args, \
+    flat_case, upper_flat_case, macro_case, camel_snake_case, pascal_snake_case, \
+    doner_case, dash_case, train_case, cobol_case
 
 Command = List[str]
 FileFilter = Callable[[Path], bool]
@@ -47,9 +49,18 @@ CallbackResult = Tuple[Command, Union[List[str], FileFilter]]
 logger = logging.getLogger(__name__)
 
 _case_mapping = {
-    "camel_case":  camelize,
-    "pascal_case": pascalize,
-    "snake_case":  snake_case
+    "camel_case":        camelize,
+    "camel_snake_case":  camel_snake_case,
+    "cobol_case":        cobol_case,
+    "dash_case":         dash_case,
+    "donor_case":        doner_case,
+    "flat_case":         flat_case,
+    "macro_case":        macro_case,
+    "pascal_case":       pascalize,
+    "pascal_snake_case": pascal_snake_case,
+    "snake_case":        snake_case,
+    "train_case":        train_case,
+    "upper_flat_case":   upper_flat_case
 }
 
 
@@ -318,6 +329,18 @@ class Language:
         """
         raise NotImplementedError
 
+    def conventionalize_class(self, class_identifier: str) -> str:
+        """
+        Conventionalize the name of a class. This function uses the format
+        specified in the config.json file. If no format is specified, the class
+        name is unchanged, which is the same as snake_case, since the testplan uses
+        snake case.
+
+        :param class_identifier: The name of the class to conventionalize.
+        :return: The conventionalized class name.
+        """
+        return _conventionalize(self.options, "class", class_identifier)
+
     def conventionalize_function(self, function: str) -> str:
         """
         Conventionalize the name of a function. This function uses the format
@@ -330,6 +353,18 @@ class Language:
         """
         return _conventionalize(self.options, "function", function)
 
+    def conventionalize_identifier(self, identifier: str) -> str:
+        """
+        Conventionalize the name of an property_name. This function uses the format
+        specified in the config.json file. If no format is specified, the identifier
+        name is unchanged, which is the same as snake_case, since the testplan uses
+        snake case.
+
+        :param identifier: The name of the property_name to conventionalize.
+        :return: The conventionalized identifier.
+        """
+        return _conventionalize(self.options, "identifier", identifier)
+
     def conventionalize_namespace(self, namespace: str) -> str:
         """
         Conventionalize the name of a namespace (class/module). This function uses
@@ -341,6 +376,18 @@ class Language:
         :return: The conventionalized namespace.
         """
         return _conventionalize(self.options, "namespace", namespace)
+
+    def conventionalize_property(self, property_name: str) -> str:
+        """
+        Conventionalize the name of a property. This function uses the format
+        specified in the config.json file. If no format is specified, the property
+        name is unchanged, which is the same as snake_case, since the testplan uses
+        snake case.
+
+        :param property_name: The name of the property to conventionalize.
+        :return: The conventionalized property.
+        """
+        return _conventionalize(self.options, "property", property_name)
 
     def submission_name(self, plan: Plan) -> str:
         """
