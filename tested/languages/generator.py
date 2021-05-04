@@ -216,7 +216,8 @@ def _prepare_expression(bundle: Bundle, expression: Expression) -> Expression:
             arguments=[_prepare_argument(bundle, arg)
                        for arg in expression.arguments],
             name=name,
-            namespace=expression.namespace or submission_name
+            namespace=bundle.lang_config.conventionalize_identifier(
+                expression.namespace) if expression.namespace else submission_name
         )
         internal.has_root_namespace = not bool(expression.namespace)
         return internal

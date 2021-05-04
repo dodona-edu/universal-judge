@@ -355,7 +355,11 @@ class Language:
 
     def conventionalize_identifier(self, identifier: str) -> str:
         """
+<<<<<<< HEAD
         Conventionalize the name of an identifier. This function uses the format
+=======
+        Conventionalize the name of an property_name. This function uses the format
+>>>>>>> bug/fix-identifier-conflicts
         specified in the config.json file. If no format is specified, the identifier
         name is unchanged, which is the same as snake_case, since the testplan uses
         snake case.
