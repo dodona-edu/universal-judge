@@ -1,1 +1,1 @@
-const global_var = "GLOBAL";
+const GLOBAL_VAR = "GLOBAL";

@@ -1,3 +1,3 @@
 public class Submission {
-    public static final String global_var = "GLOBAL";
+    public static final String GLOBAL_VAR = "GLOBAL";
 }

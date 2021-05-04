@@ -1,1 +1,1 @@
-export global_var="GLOBAL"
+export GLOBAL_VAR="GLOBAL"

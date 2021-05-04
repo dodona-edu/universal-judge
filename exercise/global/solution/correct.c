@@ -1,1 +1,1 @@
-extern char* global_var = "GLOBAL";
+#define GLOBAL_VAR "GLOBAL"

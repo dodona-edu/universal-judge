@@ -1,1 +1,1 @@
-global_var = "GLOBAL"
+globalVar = "GLOBAL"

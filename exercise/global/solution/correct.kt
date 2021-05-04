@@ -1,1 +1,1 @@
-val global_var = "GLOBAL"
+val GLOBAL_VAR = "GLOBAL"

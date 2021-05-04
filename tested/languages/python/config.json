@@ -10,7 +10,8 @@
     "file": "py"
   },
   "naming_conventions": {
-    "class": "pascal_case"
+    "class": "pascal_case",
+    "global_identifier": "macro_case"
   },
   "constructs": {
     "objects": true,
