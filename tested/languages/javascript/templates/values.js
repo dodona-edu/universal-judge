@@ -83,10 +83,23 @@ function sendException(stream, exception) {
     if (!exception) {
         return;
     }
-    fs.writeSync(stream, JSON.stringify({
-        "message": exception.message,
-        "stacktrace": exception.stack ? exception.stack : ""
-    }));
+    if (typeof exception === "object") {
+        fs.writeSync(stream, JSON.stringify({
+            "message": exception.message,
+            "stacktrace": exception.stack ? exception.stack : ""
+        }));
+    } else {
+        fs.writeSync(stream, JSON.stringify({
+            "message": JSON.stringify(exception),
+            "stacktrace": "",
+            "tested": {
+                "i18n_key": "languages.javascript.runtime.invalid.exception",
+                "variables": {
+                    "actual_type": JSON.stringify(typeof exception)
+                }
+            }
+        }));
+    }
 }
 
 // Send an evaluation result to the given stream.
