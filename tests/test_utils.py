@@ -8,6 +8,13 @@ from tested.languages.config import limit_output
 from tested.utils import sorted_no_duplicates
 
 
+def test_run_doctests_tested_utils():
+    import doctest
+    import tested.utils
+    f, _ = doctest.testmod(tested.utils)
+    assert f == 0
+
+
 def test_limit_output_no_limit():
     text = "aaaaa\nbbbbb\nccccc".strip()
     limited = limit_output(output=text, max_lines=3, limit_characters=17)

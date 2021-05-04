@@ -22,7 +22,7 @@ from ..internationalization import get_i18n_string
 from ..serialisation import (Value, SequenceType, Identifier, FunctionType,
                              FunctionCall, Expression, Statement, Assignment,
                              NothingType, NamedArgument, ObjectType,
-                             ObjectKeyValuePair)
+                             ObjectKeyValuePair, VariableType)
 from ..testplan import (EmptyChannel, IgnoredChannel, TextData, ProgrammedEvaluator,
                         SpecificEvaluator, Testcase, RunTestcase, Context,
                         ExceptionOutput, ValueOutput, Run, FileUrl)
@@ -78,7 +78,8 @@ class _TestcaseArguments:
         """
         Get the exception statement for the testcase.
 
-        :param name: Optionally the name of an identifier containing the exception.
+        :param name: Optionally the name of an property_name containing the
+        exception.
         :return: The exception statement.
         """
         if name:
@@ -100,7 +101,8 @@ class _RunTestcaseArguments:
         """
         Get the exception statement for the testcase.
 
-        :param name: Optionally the name of an identifier containing the exception.
+        :param name: Optionally the name of an property_name containing the
+        exception.
         :return: The exception statement.
         """
         if name:
@@ -170,18 +172,38 @@ def _prepare_argument(
     return _prepare_expression(bundle, argument)
 
 
+def _prepare_assignment(
+        bundle: Bundle,
+        assignment: Assignment
+) -> Assignment:
+    if isinstance(assignment.type, VariableType):
+        class_type = bundle.lang_config.conventionalize_class(
+            assignment.type.data)
+        assignment = assignment.replace_type(VariableType(data=class_type))
+
+    assignment = assignment.replace_variable(
+        bundle.lang_config.conventionalize_identifier(assignment.variable))
+    prepared = _prepare_expression(bundle, assignment.expression)
+    return assignment.replace_expression(prepared)
+
+
 def _prepare_expression(bundle: Bundle, expression: Expression) -> Expression:
     """
     Prepare an expression for use in a template.
     """
 
-    if isinstance(expression, InternalFunctionCall):
+    if isinstance(expression, Identifier):
+        expression = Identifier(
+            bundle.lang_config.conventionalize_identifier(expression))
+    elif isinstance(expression, InternalFunctionCall):
         expression.arguments = [_prepare_argument(bundle, arg)
                                 for arg in expression.arguments]
     elif isinstance(expression, FunctionCall):
         submission_name = bundle.lang_config.submission_name(bundle.plan)
         if expression.type == FunctionType.CONSTRUCTOR:
-            name = expression.name
+            name = bundle.lang_config.conventionalize_class(expression.name)
+        elif expression.type == FunctionType.PROPERTY:
+            name = bundle.lang_config.conventionalize_property(expression.name)
         else:
             name = bundle.lang_config.conventionalize_function(expression.name)
 
@@ -331,8 +353,7 @@ def _prepare_testcase(
         command = _prepare_expression(bundle, testcase.input)
     else:
         assert isinstance(testcase.input, get_args(Assignment))
-        prepared = _prepare_expression(bundle, testcase.input.expression)
-        command = testcase.input.replace_expression(prepared)
+        command = _prepare_assignment(bundle, testcase.input)
 
     return _TestcaseArguments(
         command=command,
@@ -443,7 +464,7 @@ def get_readable_input(bundle: Bundle,
         else:
             text = ""
     else:
-        raise AssertionError("Unknown testcase type.")
+        raise AssertionError("Unknown testcase variable_type.")
 
     quote = bundle.lang_config.get_string_quote()
     if not analyse_files or not files:
@@ -526,7 +547,8 @@ def attempt_readable_input(bundle: Bundle, context: Context) -> ExtendedMessage:
 def convert_statement(bundle: Bundle, statement: Statement) -> str:
     """
     Convert a statement to actual code for the given programming language.
-    This will use the "full" mode, meaning type annotation will be present. For
+    This will use the "full" mode, meaning variable_type annotation will be
+    present. For
     example, in "default" mode, Java code will look like this:
 
         test = namespace.functionCall("Hi");
@@ -551,8 +573,7 @@ def convert_statement(bundle: Bundle, statement: Statement) -> str:
             raise e
 
     assert isinstance(statement, get_args(Assignment))
-    prepared_expression = _prepare_expression(bundle, statement.expression)
-    statement = statement.replace_expression(prepared_expression)
+    statement = _prepare_assignment(bundle, statement)
     template = find_template(bundle, template)
     try:
         return template.render(statement=statement, full=True)

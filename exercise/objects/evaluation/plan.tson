@@ -12,11 +12,11 @@
                     "variable": "instance",
                     "type": {
                       "type": "custom",
-                      "data": "EqualChecker"
+                      "data": "equal_checker"
                     },
                     "expression": {
                       "type": "constructor",
-                      "name": "EqualChecker",
+                      "name": "equal_checker",
                       "arguments": [
                         {
                           "type": "integer",
