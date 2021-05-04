@@ -97,11 +97,16 @@ def evaluate(config: EvaluatorConfig,
     else:
         messages = []
 
-    return EvaluationResult(
-        result=StatusMessage(
-            enum=Status.CORRECT if expected.message == actual.message else
+    if actual.tested is not None:
+        messages.append(
+            get_i18n_string(actual.tested.i18n_key, **actual.tested.variables))
+        status = Status.WRONG
+    else:
+        status = Status.CORRECT if expected.message == actual.message else \
             Status.WRONG
-        ),
+
+    return EvaluationResult(
+        result=StatusMessage(enum=status),
         readable_expected=expected.readable(),
         readable_actual=actual.readable(),
         messages=messages
