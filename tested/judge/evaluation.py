@@ -316,23 +316,26 @@ def evaluate_context_results(bundle: Bundle, context: Context,
             ),
             _evaluate_channel(
                 bundle, context_dir, t_col, Channel.STDERR, output.stderr,
-                actual_stderr, timeout=exec_results.timeout,
-                memory=exec_results.memory
+                actual_stderr,
+                timeout=exec_results.timeout and len(stderr_) == i + 1,
+                memory=exec_results.memory and len(stderr_) == i + 1
             ),
             _evaluate_channel(
                 bundle, context_dir, t_col, Channel.EXCEPTION, output.exception,
                 actual_exception, unexpected_status=Status.RUNTIME_ERROR,
-                timeout=exec_results.timeout, memory=exec_results.memory
+                timeout=exec_results.timeout and len(exceptions) == i + 1,
+                memory=exec_results.memory and len(exceptions) == i + 1
             ),
             _evaluate_channel(
                 bundle, context_dir, t_col, Channel.STDOUT, output.stdout,
-                actual_stdout, timeout=exec_results.timeout,
-                memory=exec_results.memory
+                actual_stdout,
+                timeout=exec_results.timeout and len(stdout_) == i + 1,
+                memory=exec_results.memory and len(stdout_) == i + 1
             ),
             _evaluate_channel(
                 bundle, context_dir, t_col, Channel.RETURN, output.result,
-                actual_value, timeout=exec_results.timeout,
-                memory=exec_results.memory
+                actual_value, timeout=exec_results.timeout and len(values) == i + 1,
+                memory=exec_results.memory and len(values) == i + 1
             )
         ]
 
