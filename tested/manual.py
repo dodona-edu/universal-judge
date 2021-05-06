@@ -12,6 +12,7 @@ from pathlib import Path
 
 from .configs import DodonaConfig
 from .main import run
+from .judge import timings
 
 exercise_dir = "exercise/global"
 
@@ -37,6 +38,8 @@ def read_config() -> DodonaConfig:
 
 
 if __name__ == '__main__':
+    timings.collect_timings(True)
+
     config = read_config()
 
     # Enable logging
@@ -69,3 +72,4 @@ if __name__ == '__main__':
     end = time.time()
     print()
     print(f"Judging took {end - start} seconds (real time)")
+    print('\n'.join(map(str, timings.timings)))
