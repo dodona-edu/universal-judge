@@ -79,7 +79,7 @@
     </li>
 </ul>
 
-% if programming_language_for_condition == 'java':
+% if programming_language_raw == 'java':
 <p> The functions must be static declared in the class ${namespace}.</p>
 % endif
 

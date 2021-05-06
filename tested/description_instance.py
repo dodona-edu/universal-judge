@@ -115,7 +115,7 @@ def prepare_template(template: str, is_html: bool = True) -> Template:
             mako_template.extend(groups[0])
         else:
             mako_template.extend(
-                "```console?lang=${programming_language}&prompt=${prompt}\n")
+                "```console?lang=${programming_language_raw}&prompt=${prompt}\n")
         mako_template.extend(_analyse_body(groups[body_index]))
         mako_template.extend(groups[-1])
 
@@ -187,7 +187,7 @@ def create_description_instance_from_template(template: Template,
         prompt=description_generator.get_prompt(is_html=is_html),
         programming_language=description_generator.get_prompt_language(
             is_html=is_html),
-        programming_language_for_condition=
+        programming_language_raw=
         description_generator.get_prompt_language(is_html=False),
         namespace=language.conventionalize_namespace(namespace),
         natural_language=natural_languages.get(natural_language, natural_language),
