@@ -43,7 +43,7 @@ en de uiteindelijke erfgenaam als laatste in de ${lijst}.
 Gebruik de volgnummers waarmee de kinderen in de ${lijst}
 genummerd werden als elementen in de ${lijst}.
 
-% if language == 'java':
+% if programming_language_for_condition == 'java':
 De functies moeten statisch gedefinieerd worden in de klasse ${namespace}.
 % endif
 

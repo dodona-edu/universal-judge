@@ -79,13 +79,13 @@
     </li>
 </ul>
 
-% if language == 'java':
-<p> The functions must be static declared in the class ${namespace_html}.</p>
+% if programming_language_for_condition == 'java':
+<p> The functions must be static declared in the class ${namespace}.</p>
 % endif
 
 <h3>Example</h3>
 
-<div class="highlighter-rouge language-${language}">
+<div class="highlighter-rouge language-${programming_language_for_condition}">
 <pre class="highlight"><code class="color tested code" id="code">\
 > encode("And now for something completely different.",
          1)

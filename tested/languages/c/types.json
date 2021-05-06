@@ -24,11 +24,21 @@
   "inner": {
   },
   "natural": {
-    "en": {
-      "text": "string"
+    "singular": {
+      "en": {
+        "text": "string"
+      },
+      "nl": {
+        "text": "string"
+      }
     },
-    "nl": {
-      "text": "string"
+    "plural": {
+      "en": {
+        "text": "strings"
+      },
+      "nl": {
+        "text": "strings"
+      }
     }
   }
 }

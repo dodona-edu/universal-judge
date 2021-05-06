@@ -35,23 +35,21 @@
   "any": "any",
   "inner": {},
   "natural": {
-    "en": {
-      "text": "text",
-      "sequence": "sequence",
-      "set": "set",
-      "map": "map",
-      "array": "array",
-      "list": "list",
-      "tuple": "tuple"
+    "singular": {
+      "en": {
+        "text": "text"
+      },
+      "nl": {
+        "text": "tekst"
+      }
     },
-    "nl": {
-      "text": "tekst",
-      "sequence": "sequentie",
-      "set": "verzameling",
-      "map": "afbeelding",
-      "array": "array",
-      "list": "lijst",
-      "tuple": "tupel"
+    "plural": {
+      "en": {
+        "text": "texts"
+      },
+      "nl": {
+        "text": "teksten"
+      }
     }
   }
 }

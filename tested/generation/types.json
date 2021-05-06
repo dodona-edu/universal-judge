@@ -36,23 +36,45 @@
   "inner": {
   },
   "natural": {
-    "en": {
-      "text": "text",
-      "sequence": "sequence",
-      "set": "set",
-      "map": "map",
-      "array": "array",
-      "list": "list",
-      "tuple": "tuple"
+    "singular": {
+      "en": {
+        "text": "text",
+        "sequence": "sequence",
+        "set": "set",
+        "map": "map",
+        "array": "array",
+        "list": "list",
+        "tuple": "tuple"
+      },
+      "nl": {
+        "text": "tekst",
+        "sequence": "sequentie",
+        "set": "verzameling",
+        "map": "afbeelding",
+        "array": "array",
+        "list": "lijst",
+        "tuple": "tuple"
+      }
     },
-    "nl": {
-      "text": "tekst",
-      "sequence": "sequentie",
-      "set": "verzameling",
-      "map": "afbeelding",
-      "array": "array",
-      "list": "lijst",
-      "tuple": "tupel"
+    "plural": {
+      "en": {
+        "text": "texts",
+        "sequence": "sequences",
+        "set": "sets",
+        "map": "maps",
+        "array": "arrays",
+        "list": "lists",
+        "tuple": "tuples"
+      },
+      "nl": {
+        "text": "teksten",
+        "sequence": "sequenties",
+        "set": "verzamelingen",
+        "map": "afbeeldingen",
+        "array": "arrays",
+        "list": "lijsten",
+        "tuple": "tuples"
+      }
     }
   }
 }

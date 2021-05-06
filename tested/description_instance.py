@@ -18,6 +18,11 @@ from tested.languages import get_language, language_exists
 open_brackets = ('(', '[', '{')
 close_brackets = {')': '(', ']': '[', '}': '{'}
 
+natural_languages = {
+    "en": "English",
+    "nl": "Nederlands"
+}
+
 
 def _mako_uncomment(m: re.Match) -> str:
     result = f"${{{repr(m.group(1))}}}"
@@ -154,6 +159,14 @@ def create_description_instance_from_template(template: Template,
         return description_generator.get_type_name(args, bundle, custom_type_map,
                                                    is_html=is_html)
 
+    def get_natural_type_name(type_name: str, plural: bool = False):
+        return description_generator.get_natural_type_name(type_name, bundle,
+                                                           plural, is_html)
+
+    namespace = language.conventionalize_namespace(namespace)
+    if is_html:
+        namespace = html.escape(namespace)
+
     return template.render(
         function_name=partial(description_generator.get_function_name,
                               is_html=is_html),
@@ -163,18 +176,20 @@ def create_description_instance_from_template(template: Template,
                          is_html=is_html),
         global_var_name=partial(description_generator.get_global_variable_name,
                                 is_html=is_html),
-        natural_type_name=partial(description_generator.get_natural_type_name,
-                                  bundle=bundle, is_html=is_html),
+        natural_type_name=get_natural_type_name,
         type_name=get_type_name,
         statement=partial(description_generator.get_code, bundle=bundle,
                           is_html=is_html, statement=True),
         expression=partial(description_generator.get_code, bundle=bundle,
                            is_html=is_html, statement=False),
         prompt=description_generator.get_prompt(is_html=is_html),
-        language_html=description_generator.get_prompt_language(is_html=True),
-        language=description_generator.get_prompt_language(is_html=False),
-        namespace_html=html.escape(language.conventionalize_namespace(namespace)),
-        namespace=language.conventionalize_namespace(namespace)
+        programming_language=description_generator.get_prompt_language(
+            is_html=is_html),
+        programming_language_for_condition=
+        description_generator.get_prompt_language(is_html=False),
+        namespace=language.conventionalize_namespace(namespace),
+        natural_language=natural_languages.get(natural_language, natural_language),
+        natural_language_iso639=natural_language
     )
 
 

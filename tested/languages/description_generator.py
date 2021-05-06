@@ -50,9 +50,10 @@ class DescriptionGenerator:
                                         stripall=True)
 
     def get_natural_type_name(self, type_name: str, bundle: Bundle,
-                              is_html: bool = True) -> str:
+                              plural: bool = False, is_html: bool = True) -> str:
         try:
-            value = self.types["natural"][bundle.config.natural_language][type_name]
+            group = self.types["natural"]["plural" if plural else "singular"]
+            value = group[bundle.config.natural_language][type_name]
         except KeyError:
             value = type_name
         return html.escape(value) if is_html else value
