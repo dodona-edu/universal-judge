@@ -12,9 +12,10 @@ from pathlib import Path
 
 from .configs import DodonaConfig
 from .main import run
-from .judge import timings
+from tested import internal_timings
 
-exercise_dir = "exercise/global"
+exercise_dir = "/home/boris/Documenten/School/2020-2021/Masterproef" \
+               "/javascript-oefeningen/reeksen/09 OOP/star battle"
 
 
 def read_config() -> DodonaConfig:
@@ -22,10 +23,10 @@ def read_config() -> DodonaConfig:
     return DodonaConfig(**{
         "memory_limit":         536870912,
         "time_limit":           60,
-        "programming_language": 'bash',
+        "programming_language": 'javascript',
         "natural_language":     'nl',
         "resources":            Path(exercise_dir, 'evaluation'),
-        "source":               Path(exercise_dir, 'solution/correct.sh'),
+        "source":               Path(exercise_dir, 'solution/solution.nl.js'),
         "judge":                Path('.'),
         "workdir":              Path('workdir'),
         "plan_name":            "plan.yaml",
@@ -38,7 +39,7 @@ def read_config() -> DodonaConfig:
 
 
 if __name__ == '__main__':
-    timings.collect_timings(True)
+    internal_timings.collect_timings(True)
 
     config = read_config()
 
@@ -70,6 +71,7 @@ if __name__ == '__main__':
     # f = open(f"tests/isbn/students/student{STUDENT}/{EXERCISE}.dson", 'w')
     run(config, sys.stdout)
     end = time.time()
+
     print()
     print(f"Judging took {end - start} seconds (real time)")
-    print('\n'.join(map(str, timings.timings)))
+    print(internal_timings.pretty_print_timings())

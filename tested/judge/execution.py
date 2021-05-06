@@ -16,6 +16,7 @@ from ..dodona import Message, Status
 from ..languages.config import FileFilter, Config
 from ..languages.generator import value_file, exception_file
 from ..testplan import ExecutionMode, Run
+from tested.internal_timings import new_stage, end_stage
 
 _logger = logging.getLogger(__name__)
 
@@ -202,6 +203,7 @@ def execute_execution(bundle: Bundle, args: Execution, max_time: float) \
     _logger.info("Executing execution %s in path %s", args.execution_name,
                  execution_dir)
 
+    new_stage("dependencies.copy", True)
     # Filter dependencies of the global compilation results.
     dependencies = filter_files(args.files, args.common_directory)
     dependencies = bundle.lang_config.filter_dependencies(
@@ -222,6 +224,7 @@ def execute_execution(bundle: Bundle, args: Execution, max_time: float) \
 
     # If needed, do a compilation.
     if args.mode == ExecutionMode.INDIVIDUAL:
+        new_stage("compilation.individual", True)
         _logger.info("Compiling context %s in INDIVIDUAL mode...",
                      args.execution_name)
         remaining = max_time - (time.perf_counter() - start)
@@ -262,6 +265,7 @@ def execute_execution(bundle: Bundle, args: Execution, max_time: float) \
         stdin = args.run.get_stdin(bundle.config.resources)
         argument = None
     else:
+        new_stage("compilation.batch.done", True)
         result, files = None, list(dependencies)
         if args.precompilation_result:
             _logger.debug("Substituting precompilation results.")
@@ -308,6 +312,7 @@ def execute_execution(bundle: Bundle, args: Execution, max_time: float) \
 
     remaining = max_time - (time.perf_counter() - start)
 
+    new_stage("run.testcode", True)
     # Do the execution.
     base_result = execute_file(
         bundle,
@@ -318,6 +323,7 @@ def execute_execution(bundle: Bundle, args: Execution, max_time: float) \
         remaining=remaining
     )
 
+    new_stage("prepare.results", True)
     # Cleanup stderr
     msgs, annotations, base_result.stderr = lang_config.stderr(bundle,
                                                                base_result.stderr)

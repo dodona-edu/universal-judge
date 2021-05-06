@@ -11,6 +11,7 @@ from .compilation import run_compilation, process_compile_results
 from .evaluation import evaluate_run_results, \
     evaluate_context_results
 from .execution import Execution, execute_execution, ExecutionResult
+from tested.internal_timings import new_stage, end_stage
 from .linter import run_linter
 from .utils import copy_from_paths_to_path
 from ..configs import Bundle
@@ -20,6 +21,7 @@ from ..languages.generator import generate_execution, generate_selector
 from ..languages.templates import path_to_templates
 from ..testplan import ExecutionMode
 from ..internationalization import set_locale, get_i18n_string
+
 
 _logger = logging.getLogger(__name__)
 
@@ -32,6 +34,7 @@ def judge(bundle: Bundle):
 
     :param bundle: The configuration bundle.
     """
+    new_stage("analyse.supported")
     # Begin by checking if the given testplan is executable in this language.
     _logger.info("Checking supported features...")
     set_locale(bundle.config.natural_language)
@@ -48,6 +51,7 @@ def judge(bundle: Bundle):
         _logger.info("Required features not supported.")
         return  # Not all required features are supported.
 
+    new_stage("prepare.output")
     mode = bundle.config.options.mode
     collector = OutputManager(bundle)
     collector.add(StartJudgment())
@@ -56,18 +60,21 @@ def judge(bundle: Bundle):
     start = time.perf_counter()
 
     # Run the linter.
+    new_stage("linter")
     run_linter(bundle, collector, max_time)
     if time.perf_counter() - start > max_time:
         collector.terminate(Status.TIME_LIMIT_EXCEEDED)
         return
 
     _logger.info("Start generating code...")
+    new_stage("generation")
     common_dir, files, selector = _generate_files(bundle, mode)
     # Add the selector to the dependencies.
     if selector:
         files.append(selector)
 
     if mode == ExecutionMode.PRECOMPILATION:
+        new_stage("compilation.pre")
         assert not bundle.lang_config.needs_selector() or selector is not None
         # Compile all code in one go.
         _logger.info("Running precompilation step...")
@@ -140,6 +147,7 @@ def judge(bundle: Bundle):
                 ))
                 _logger.info("Compilation error without fallback")
                 return  # Compilation error occurred, useless to continue.
+        end_stage("compilation.pre")
     else:
         precompilation_result = None
 
@@ -150,6 +158,7 @@ def judge(bundle: Bundle):
 
     # Create a list of runs we want to execute.
     for tab_index, tab in enumerate(bundle.plan.tabs):
+        new_stage("prepare.tab")
         collector.add_tab(StartTab(title=tab.name, hidden=tab.hidden), tab_index)
         executions = []
         offset = 0
@@ -174,6 +183,7 @@ def judge(bundle: Bundle):
         if parallel:
             result = _parallel_execution(bundle, executions, remaining)
         else:
+            new_stage("tab.start.single")
             result = _single_execution(bundle, executions, remaining)
 
         if result in (Status.TIME_LIMIT_EXCEEDED, Status.MEMORY_LIMIT_EXCEEDED,
@@ -199,9 +209,12 @@ def _single_execution(bundle: Bundle,
     start = time.perf_counter()
     for execution in items:
         remaining = max_time - (time.perf_counter() - start)
+        new_stage("run.execution")
         execution_result, m, s, p = execute_execution(bundle, execution, remaining)
 
+        new_stage("evaluate.results")
         status = _process_results(bundle, execution, execution_result, m, s, p)
+        end_stage("evaluate.results")
 
         if status:
             return status
@@ -222,10 +235,14 @@ def _parallel_execution(bundle: Bundle,
     def threaded_execution(execution: Execution):
         """The function executed in parallel."""
         remainder = max_time - (time.perf_counter() - start)
+        new_stage("run.execution")
         execution_result, m, s, p = execute_execution(bundle, execution, remainder)
+        end_stage("run.execution")
 
         def evaluation_function(eval_remainder):
+            new_stage("evaluate.results")
             _status = _process_results(bundle, execution, execution_result, m, s, p)
+            end_stage("evaluate.results")
 
             if _status and _status not in (Status.TIME_LIMIT_EXCEEDED,
                                            Status.MEMORY_LIMIT_EXCEEDED):
@@ -278,9 +295,11 @@ def _generate_files(bundle: Bundle,
     dependencies.append(submission_file)
 
     # Allow modifications of the submission file.
+    new_stage("submission.modify", sub_stage=True)
     bundle.lang_config.solution(solution_path, bundle)
 
     # The names of the executions for the testplan.
+    new_stage("generate.templates", sub_stage=True)
     execution_names = []
     # Generate the files for each execution.
     for tab_i, tab in enumerate(bundle.plan.tabs):

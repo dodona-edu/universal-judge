@@ -8,6 +8,7 @@ from functools import reduce
 from typing import Iterable, Set, NamedTuple, TYPE_CHECKING
 
 from .datatypes import AllTypes, BasicSequenceTypes, BasicObjectTypes, NestedTypes
+from tested.internal_timings import new_stage
 
 if TYPE_CHECKING:
     from .configs import Bundle
@@ -96,6 +97,7 @@ def is_supported(bundle: 'Bundle') -> bool:
     """
     from .languages.config import TypeSupport
 
+    new_stage("analyse.supported.features", sub_stage=True)
     required = bundle.plan.get_used_features()
 
     # Check constructs
@@ -108,12 +110,14 @@ def is_supported(bundle: 'Bundle') -> bool:
         _logger.warning(f"Missing features are: {missing}.")
         return False
 
+    new_stage("analyse.supported.types", sub_stage=True)
     mapping = bundle.lang_config.type_support_map()
     for t in required.types:
         if mapping[t] == TypeSupport.UNSUPPORTED:
             _logger.warning(f"Plan requires unsupported type {t}")
             return False
 
+    new_stage("analyse.supported.evaluators", sub_stage=True)
     # Check language specific evaluators
     for tab in bundle.plan.tabs:
         for run in tab.runs:
@@ -128,6 +132,7 @@ def is_supported(bundle: 'Bundle') -> bool:
                             )
                             return False
 
+    new_stage("analyse.supported.restrictions", sub_stage=True)
     nested_types = filter(lambda x: x[0] in (
         BasicSequenceTypes.SET, BasicObjectTypes.MAP), required.nested_types)
     restricted = bundle.lang_config.restriction_map()
