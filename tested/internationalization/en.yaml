@@ -136,3 +136,34 @@ en:
         timeout: "ShellCheck exceeded time limit"
         memory: "ShellCheck exceeded memory limit"
         output: "ShellCheck produced bad output."
+  timings:
+    title: "Statistics timings"
+    testplan: "Reading testplan"
+    dsl: "Parse DSL testplan"
+    json: "Parse JSON testplan"
+    bundle: "Create bundle information"
+    analyse:
+      supported: "Check if testplan is supported by the programming language"
+      features: "Analyse features"
+    prepare:
+      output: "Preparing feedback table"
+      results: "Preparing results"
+    linter: "Running linter"
+    generation: "Generate testcode"
+    submission:
+      modify: "Modify submission"
+    generate:
+      templates: "Generate testcode from templates"
+    compilation:
+      pre: "Batch compilation"
+      individual: "Individual compilation"
+      batch:
+        done: "Adding feedback from batch compilation"
+    run:
+      execution: "Running a run"
+      testcode: "Running test executables"
+    dependencies:
+      copy: "Copy dependencies"
+    evaluate:
+      results: "Evaluating results"
+

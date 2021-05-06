@@ -136,3 +136,33 @@ nl:
         timeout: "ShellCheck overschreed tijdslimiet."
         memory: "ShellCheck overschreed geheugenlimiet."
         output: "ShellCheck produceerde slechte uitvoer."
+  timings:
+    title: "Statistieken uitvoeringstijden"
+    testplan: "Inlezen testplan"
+    dsl: "Parsen DSL testplan"
+    json: "Parsen JSON testplan"
+    bundle: "Aanmaken bundle informatie"
+    analyse:
+      supported: "Controle of het testplan ondersteund is door de programmeertaal"
+      features: "Analyseren features"
+    prepare:
+      output: "Voorbereiden feedback tabel"
+      results: "Voorbereiden resultaten"
+    linter: "Uitvoeren linter"
+    generation: "Genereren testcode"
+    submission:
+      modify: "Aanpassen indiening"
+    generate:
+      templates: "Genereren testcode vanuit de sjablonen"
+    compilation:
+      pre: "Batch compilatie"
+      individual: "Individuele compilatie"
+      batch:
+        done: "Toevoegen feedback batch compilatie"
+    run:
+      execution: "Uitvoeren van een run"
+      testcode: "Uitvoeren test-uitvoerbaar bestand"
+    dependencies:
+      copy: "Kopiëren afhankelijke bestanden"
+    evaluate:
+      results: "Evalueren van de resultaten"

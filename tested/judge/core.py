@@ -11,7 +11,8 @@ from .compilation import run_compilation, process_compile_results
 from .evaluation import evaluate_run_results, \
     evaluate_context_results
 from .execution import Execution, execute_execution, ExecutionResult
-from tested.internal_timings import new_stage, end_stage
+from tested.internal_timings import new_stage, end_stage, is_collecting, \
+    pretty_print_timings
 from .linter import run_linter
 from .utils import copy_from_paths_to_path
 from ..configs import Bundle
@@ -21,7 +22,6 @@ from ..languages.generator import generate_execution, generate_selector
 from ..languages.templates import path_to_templates
 from ..testplan import ExecutionMode
 from ..internationalization import set_locale, get_i18n_string
-
 
 _logger = logging.getLogger(__name__)
 
@@ -39,6 +39,7 @@ def judge(bundle: Bundle):
     _logger.info("Checking supported features...")
     set_locale(bundle.config.natural_language)
     if not is_supported(bundle):
+        end_stage("analyse.supported")
         report_update(bundle.out, StartJudgment())
         report_update(bundle.out, CloseJudgment(
             accepted=False,
@@ -150,6 +151,7 @@ def judge(bundle: Bundle):
         end_stage("compilation.pre")
     else:
         precompilation_result = None
+        end_stage("generation")
 
     _logger.info("Starting judgement...")
     parallel = bundle.config.options.parallel
@@ -158,7 +160,6 @@ def judge(bundle: Bundle):
 
     # Create a list of runs we want to execute.
     for tab_index, tab in enumerate(bundle.plan.tabs):
-        new_stage("prepare.tab")
         collector.add_tab(StartTab(title=tab.name, hidden=tab.hidden), tab_index)
         executions = []
         offset = 0
@@ -183,7 +184,6 @@ def judge(bundle: Bundle):
         if parallel:
             result = _parallel_execution(bundle, executions, remaining)
         else:
-            new_stage("tab.start.single")
             result = _single_execution(bundle, executions, remaining)
 
         if result in (Status.TIME_LIMIT_EXCEEDED, Status.MEMORY_LIMIT_EXCEEDED,
@@ -192,6 +192,19 @@ def judge(bundle: Bundle):
             collector.terminate(result)
             return
         collector.add_tab(CloseTab(), tab_index)
+
+    # Add statistics tab for STAFF
+    if is_collecting():
+        collector.add_tab(
+            StartTab(title=get_i18n_string("timings.title"),
+                     permission=Permission.STAFF), -1)
+        collector.add(AppendMessage(message=ExtendedMessage(
+            description=pretty_print_timings(),
+            format="code",
+            permission=Permission.STAFF
+        )))
+        collector.add_tab(CloseTab(), -1)
+
     collector.add(CloseJudgment())
     collector.clean_finish()
 

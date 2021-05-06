@@ -3,6 +3,8 @@ from threading import current_thread
 from time import monotonic
 from typing import NamedTuple, List, Dict, Optional, Tuple
 
+from tested.internationalization import get_i18n_string
+
 
 class StageEntry(NamedTuple):
     thread_name: str
@@ -36,6 +38,10 @@ def _get_thread_name():
 def collect_timings(collect: bool = False):
     global collect_measures
     collect_measures = collect
+
+
+def is_collecting():
+    return collect_measures
 
 
 def end_stage(stage: str, sub_stage: bool = False):
@@ -87,6 +93,9 @@ def calculate_stages():
             else:
                 if row.is_start:
                     if stage is not None:
+                        if stage.sub_stages and stage.sub_stages[-1].duration < 0:
+                            stage.sub_stages[
+                                -1].duration = row.timestamp - sub_stage_start
                         stage.duration = row.timestamp - stage_start
                         stages.append(stage)
                     stage_start = row.timestamp
@@ -123,8 +132,10 @@ def calculate_stages():
 def pretty_print_timings():
     lines = []
     for stage in calculate_stages():
-        lines.append("{:s}: {:0.06f} s".format(stage.stage_name, stage.duration))
+        stage_name = get_i18n_string(f"timings.{stage.stage_name}")
+        lines.append("{:s}: {:0.03f} s".format(stage_name, stage.duration))
         for sub_stage in stage.sub_stages:
-            lines.append("    {:s}: {:0.06f} s".format(sub_stage.sub_stage_name,
-                                                      sub_stage.duration))
+            sub_stage_name = get_i18n_string(f"timings.{sub_stage.sub_stage_name}")
+            lines.append("    {:s}: {:0.03f} s".format(sub_stage_name,
+                                                       sub_stage.duration))
     return '\n'.join(lines)

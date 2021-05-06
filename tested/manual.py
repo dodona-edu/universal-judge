@@ -32,7 +32,7 @@ def read_config() -> DodonaConfig:
         "plan_name":            "plan.yaml",
         "options":              {
             "parallel": True,
-            "mode":     "batch",
+            "mode":     "context",
             "linter":   True
         }
     })
@@ -74,4 +74,3 @@ if __name__ == '__main__':
 
     print()
     print(f"Judging took {end - start} seconds (real time)")
-    print(internal_timings.pretty_print_timings())
