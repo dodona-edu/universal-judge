@@ -114,13 +114,15 @@ def prepare_template(template: str, is_html: bool = True) -> Template:
         if is_html:
             mako_template.extend(groups[0])
         else:
-            mako_template.extend("```console?lang=${language}&prompt=${prompt}\n")
+            mako_template.extend(
+                "```console?lang=${programming_language}&prompt=${prompt}\n")
         mako_template.extend(_analyse_body(groups[body_index]))
         mako_template.extend(groups[-1])
 
     mako_template.extend(
         regex_comment_mako.sub(_mako_uncomment, template[last_end:]))
-    return Template(''.join(mako_template), cache_enabled=False)
+    mako_template = ''.join(mako_template)
+    return Template(mako_template, cache_enabled=False)
 
 
 def create_description_instance_from_template(template: Template,
