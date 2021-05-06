@@ -167,3 +167,7 @@ nl:
     evaluate:
       results: "Evalueren van de resultaten"
     total: "Totale uitvoeringstijd"
+    parse:
+      expression: "Parsen van expressies en statements"
+      return: "Parsen van YAML returnwaarden"
+      return-raw: "Parsen return-raw waarden"

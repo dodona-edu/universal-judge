@@ -91,7 +91,8 @@ def calculate_stages():
                             -1].duration = row.timestamp - sub_stage_start
                     sub_stage_start = row.timestamp
                     stage.sub_stages.append(SubStageTiming(row.stage_name))
-                pass
+                else:
+                    stage.sub_stages[-1].duration = row.timestamp - sub_stage_start
             else:
                 if row.is_start:
                     if stage is not None:
@@ -121,7 +122,8 @@ def calculate_stages():
             sub_stages = combined[stage.stage_name][1]
             for sub_stage in stage.sub_stages:
                 try:
-                    sub_stages[sub_stage.sub_stage_name].duration += stage.duration
+                    sub_stages[
+                        sub_stage.sub_stage_name].duration += sub_stage.duration
                 except KeyError:
                     sub_stages[sub_stage.sub_stage_name] = SubStageTiming(
                         sub_stage.sub_stage_name, sub_stage.duration)

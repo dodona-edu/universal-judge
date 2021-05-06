@@ -167,4 +167,8 @@ en:
     evaluate:
       results: "Evaluating results"
     total: "Total execution time"
+    parse:
+      expression: "Parse expressions and statements"
+      return: "Parse YAML return values"
+      return-raw: "Parse return-raw values"
 
