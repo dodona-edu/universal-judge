@@ -18,6 +18,8 @@ def run(config: DodonaConfig, judge_output: IO):
     :param config: The configuration, as received from Dodona.
     :param judge_output: Where the judge output will be written to.
     """
+    internal_timings.collect_timings(config.timing_statistics)
+
     internal_timings.new_stage("testplan")
     with open(f"{config.resources}/{config.testplan}", "r") as t:
         textual_plan = t.read()

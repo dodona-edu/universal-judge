@@ -30,6 +30,8 @@ class StageTiming:
 collect_measures: bool = False
 timings: List[StageEntry] = []
 
+start_time = monotonic()
+
 
 def _get_thread_name():
     return current_thread().getName()
@@ -130,6 +132,7 @@ def calculate_stages():
 
 
 def pretty_print_timings():
+    global start_time
     lines = []
     for stage in calculate_stages():
         stage_name = get_i18n_string(f"timings.{stage.stage_name}")
@@ -138,4 +141,7 @@ def pretty_print_timings():
             sub_stage_name = get_i18n_string(f"timings.{sub_stage.sub_stage_name}")
             lines.append("    {:s}: {:0.03f} s".format(sub_stage_name,
                                                        sub_stage.duration))
+    end_time = monotonic()
+    lines.extend(["", "{:s}: {:0.03f} s".format(get_i18n_string(f"timings.total"),
+                                                end_time - start_time)])
     return '\n'.join(lines)

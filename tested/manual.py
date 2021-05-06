@@ -30,6 +30,7 @@ def read_config() -> DodonaConfig:
         "judge":                Path('.'),
         "workdir":              Path('workdir'),
         "plan_name":            "plan.yaml",
+        "timing_statistics":    True,
         "options":              {
             "parallel": True,
             "mode":     "context",
@@ -39,8 +40,6 @@ def read_config() -> DodonaConfig:
 
 
 if __name__ == '__main__':
-    internal_timings.collect_timings(True)
-
     config = read_config()
 
     # Enable logging

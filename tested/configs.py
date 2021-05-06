@@ -72,6 +72,7 @@ class DodonaConfig(BaseModel):
     testplan: str = "plan.json"  # Name of the testplan file.
     options: Options = Options()
     output_limit: int = 10240 * 1024  # Default value for backwards compatibility.
+    timing_statistics: bool = False
 
     def config_for(self) -> Dict[str, Any]:
         return self.options.language.get(self.programming_language, dict())

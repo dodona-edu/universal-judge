@@ -166,3 +166,4 @@ nl:
       copy: "Kopiëren afhankelijke bestanden"
     evaluate:
       results: "Evalueren van de resultaten"
+    total: "Totale uitvoeringstijd"

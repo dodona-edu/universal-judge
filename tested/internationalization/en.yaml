@@ -166,4 +166,5 @@ en:
       copy: "Copy dependencies"
     evaluate:
       results: "Evaluating results"
+    total: "Total execution time"
 
