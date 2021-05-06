@@ -14,8 +14,7 @@ from .configs import DodonaConfig
 from .main import run
 from tested import internal_timings
 
-exercise_dir = "/home/boris/Documenten/School/2020-2021/Masterproef" \
-               "/javascript-oefeningen/reeksen/09 OOP/star battle"
+exercise_dir = "exercise/global"
 
 
 def read_config() -> DodonaConfig:
@@ -23,23 +22,25 @@ def read_config() -> DodonaConfig:
     return DodonaConfig(**{
         "memory_limit":         536870912,
         "time_limit":           60,
-        "programming_language": 'javascript',
+        "programming_language": 'bash',
         "natural_language":     'nl',
         "resources":            Path(exercise_dir, 'evaluation'),
-        "source":               Path(exercise_dir, 'solution/solution.nl.js'),
+        "source":               Path(exercise_dir, 'solution/correct.sh'),
         "judge":                Path('.'),
         "workdir":              Path('workdir'),
         "plan_name":            "plan.yaml",
         "timing_statistics":    True,
         "options":              {
-            "parallel": True,
-            "mode":     "context",
+            "parallel": False,
+            "mode":     "batch",
             "linter":   True
         }
     })
 
 
 if __name__ == '__main__':
+    internal_timings.collect_timings(True)
+
     config = read_config()
 
     # Enable logging
@@ -70,6 +71,5 @@ if __name__ == '__main__':
     # f = open(f"tests/isbn/students/student{STUDENT}/{EXERCISE}.dson", 'w')
     run(config, sys.stdout)
     end = time.time()
-
     print()
     print(f"Judging took {end - start} seconds (real time)")
