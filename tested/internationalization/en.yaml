@@ -166,6 +166,12 @@ en:
       copy: "Copy dependencies"
     evaluate:
       results: "Evaluating results"
+      builtin:
+        text: "Evaluating text results/full file with built-in evaluator"
+        file: "Evaluating file line-by-line with built-in evaluator"
+        value: "Evaluating return values with built-in evaluator"
+        exception: "Evaluating exceptions with built-in evaluator"
+      programmed: "Evaluating results with programmed evaluator"
     total: "Total execution time"
     parse:
       expression: "Parse expressions and statements"

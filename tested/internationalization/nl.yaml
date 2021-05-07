@@ -166,6 +166,12 @@ nl:
       copy: "Kopiëren afhankelijke bestanden"
     evaluate:
       results: "Evalueren van de resultaten"
+      builtin:
+        text: "Evalueren tekstuele resultaten/volledige bestanden met de ingebouwde evaluator"
+        file: "Evalueren bestand lijn per lijn met de ingebouwde evaluator"
+        value: "Evalueren returnwaarden met de ingebouwde evaluator"
+        exception: "Evalueren fouten met de ingebouwde evaluator"
+      programmed: "Evalueren resultaten met behulp van een geprogrammeerde evaluator"
     total: "Totale uitvoeringstijd"
     parse:
       expression: "Parsen van expressies en statements"

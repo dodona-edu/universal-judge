@@ -14,7 +14,7 @@ from .configs import DodonaConfig
 from .main import run
 from tested import internal_timings
 
-exercise_dir = "exercise/global"
+exercise_dir = "exercise/echo"
 
 
 def read_config() -> DodonaConfig:
@@ -28,7 +28,7 @@ def read_config() -> DodonaConfig:
         "source":               Path(exercise_dir, 'solution/correct.sh'),
         "judge":                Path('.'),
         "workdir":              Path('workdir'),
-        "plan_name":            "plan.yaml",
+        "plan_name":            "one-programmed-correct.tson",
         "timing_statistics":    True,
         "options":              {
             "parallel": False,
