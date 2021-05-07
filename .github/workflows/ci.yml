@@ -31,7 +31,7 @@ jobs:
       - name: Install GHC 8.10
         uses: actions/setup-haskell@v1.1.4
         with:
-          ghc-version: '8.10.3'
+          ghc-version: '8.10.4'
           cabal-version: '3.4'
       - uses: actions/cache@v2
         name: Cache cabal
@@ -40,10 +40,9 @@ jobs:
             ~/.cabal
             ~/.ghc
             dist-newstyle
-          key: ${{ runner.os }}-cabalghc-20210330
+          key: ${{ runner.os }}-ghc-8.10.4-20210330
           restore-keys: |
-            ${{ runner.os }}-cabalghc-
-            ${{ runner.os }}-cabal-
+            ${{ runner.os }}-ghc-8.10.4-
       - name: Install Haskell dependencies
         run: cabal v1-install aeson
       - name: Use node 14
