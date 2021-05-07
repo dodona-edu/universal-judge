@@ -62,30 +62,30 @@
 
 <h3>Assignment</h3>
 <ul>
-    <li>Write a function <code>${function_name("encode")}</code> that takes two arguments:
+    <li>Write a function <code>${function("encode")}</code> that takes two arguments:
         <ol>
             <li>a text string (${type_name("text")}) and</li>
-            <li>the number (${type_name("integer")}) of rails used in the rail fence cipher.</li>
+            <li>the number (${datatype("integer")}) of rails used in the rail fence cipher.</li>
         </ol>
-        The function must return a string (${type_name("text")}) containing the encoded message of the given text,
+        The function must return a string (${datatype("text")}) containing the encoded message of the given text,
         according to the rail fence cipher with the given number of rails.
     </li>
-    <li>Write a function <code>${function_name("decode")}</code> that takes two arguments:
+    <li>Write a function <code>${function("decode")}</code> that takes two arguments:
         <ol>
-            <li> a text (${type_name("text")}) encoded according to the rail fence cipher and</li>
-            <li>the number (${type_name("integer")}) of rails used in the coding scheme.</li>
+            <li> a text (${datatype("text")}) encoded according to the rail fence cipher and</li>
+            <li>the number (${datatype("integer")}) of rails used in the coding scheme.</li>
         </ol>
-        The function must return a string (${type_name("text")}) containing the original text after decoding.
+        The function must return a string (${datatype("text")}) containing the original text after decoding.
     </li>
 </ul>
 
-% if language == 'java':
-<p> The functions must be static declared in the class ${namespace_html}.</p>
+% if programming_language_raw == 'java':
+<p> The functions must be static declared in the class ${namespace}.</p>
 % endif
 
 <h3>Example</h3>
 
-<div class="highlighter-rouge language-${language}">
+<div class="highlighter-rouge language-${programming_language_for_condition}">
 <pre class="highlight"><code class="color tested code" id="code">\
 > encode("And now for something completely different.",
          1)

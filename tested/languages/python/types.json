@@ -36,21 +36,41 @@
   "inner": {
   },
   "natural": {
-    "en": {
-      "text": "string",
-      "sequence": "list",
-      "set": "set",
-      "map": "dictionary",
-      "list": "list",
-      "tuple": "tuple"
+    "singular": {
+      "en": {
+        "text": "string",
+        "sequence": "list",
+        "set": "set",
+        "map": "dictionary",
+        "list": "list",
+        "tuple": "tuple"
+      },
+      "nl": {
+        "text": "string",
+        "sequence": "lijst",
+        "set": "verzameling",
+        "map": "dictionary",
+        "list": "lijst",
+        "tuple": "tuple"
+      }
     },
-    "nl": {
-      "text": "string",
-      "sequence": "lijst",
-      "set": "verzameling",
-      "map": "dictionary",
-      "list": "lijst",
-      "tuple": "tuple"
+    "plural": {
+      "en": {
+        "text": "strings",
+        "sequence": "lists",
+        "set": "sets",
+        "map": "dictionaries",
+        "list": "lists",
+        "tuple": "tuples"
+      },
+      "nl": {
+        "text": "strings",
+        "sequence": "lijsten",
+        "set": "verzamelingen",
+        "map": "dictionaries",
+        "list": "lijsten",
+        "tuple": "tuples"
+      }
     }
   }
 }

@@ -35,21 +35,41 @@
   "inner": {
   },
   "natural": {
-    "en": {
-      "text": "string",
-      "sequence": "list",
-      "set": "set",
-      "map": "map",
-      "array": "array",
-      "list": "list"
+    "singular": {
+      "en": {
+        "text": "string",
+        "sequence": "list",
+        "set": "set",
+        "map": "map",
+        "array": "array",
+        "list": "list"
+      },
+      "nl": {
+        "text": "string",
+        "sequence": "lijst",
+        "set": "verzameling",
+        "map": "map",
+        "array": "array",
+        "list": "lijst"
+      }
     },
-    "nl": {
-      "text": "string",
-      "sequence": "lijst",
-      "set": "verzameling",
-      "map": "map",
-      "array": "array",
-      "list": "lijst"
+    "plural": {
+      "en": {
+        "text": "strings",
+        "sequence": "lists",
+        "set": "sets",
+        "map": "maps",
+        "array": "arrays",
+        "list": "lists"
+      },
+      "nl": {
+        "text": "strings",
+        "sequence": "lijsten",
+        "set": "verzamelingen",
+        "map": "maps",
+        "array": "arrays",
+        "list": "lijsten"
+      }
     }
   }
 }

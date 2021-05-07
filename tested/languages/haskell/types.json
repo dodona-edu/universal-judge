@@ -40,19 +40,37 @@
   "inner": {
   },
   "natural": {
-    "en": {
-      "text": "string",
-      "sequence": "list",
-      "set": "set",
-      "list": "list",
-      "tuple": "tuple"
+    "singular": {
+      "en": {
+        "text": "string",
+        "sequence": "list",
+        "set": "set",
+        "list": "list",
+        "tuple": "tuple"
+      },
+      "nl": {
+        "text": "string",
+        "sequence": "lijst",
+        "set": "verzameling",
+        "list": "lijst",
+        "tuple": "tuple"
+      }
     },
-    "nl": {
-      "text": "string",
-      "sequence": "lijst",
-      "set": "verzameling",
-      "list": "lijst",
-      "tuple": "tuple"
+    "plural": {
+      "en": {
+        "text": "strings",
+        "sequence": "lists",
+        "set": "sets",
+        "list": "lists",
+        "tuple": "tuples"
+      },
+      "nl": {
+        "text": "strings",
+        "sequence": "lijsten",
+        "set": "verzamelingen",
+        "list": "lijsten",
+        "tuple": "tuples"
+      }
     }
   }
 }

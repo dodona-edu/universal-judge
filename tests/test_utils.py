@@ -53,9 +53,9 @@ def test_limit_output_no_limit():
     ("runhaskell", "thisIsAFunctionName")
 ])
 def test_template_function_name(lang: str, expected: str):
-    template = '${function_name("this_is_a_function_name")}'
+    template = '${function("this_is_a_function_name")}'
     instance = create_description_instance(template, programming_language=lang, is_html=False)
-    assert instance == f"`{expected}`"
+    assert instance == f"{expected}"
 
 
 @pytest.mark.parametrize(("lang", "tested_type", "expected"), [
@@ -81,9 +81,9 @@ def test_template_function_name(lang: str, expected: str):
     ("haskell", '("tuple", [("sequence", "rational"), "text"])', "([Double], String)"),
 ])
 def test_template_type_name(lang: str, tested_type: Any, expected: str):
-    template = f"""${'{'}type_name({tested_type}){'}'}"""
+    template = f"""${'{'}datatype({tested_type}){'}'}"""
     instance = create_description_instance(template, programming_language=lang, is_html=False)
-    assert instance == f"`{expected}`"
+    assert instance == f"{expected}"
 
 
 @pytest.mark.parametrize(("lang", "tested_type", "expected"), [
@@ -99,7 +99,7 @@ def test_template_type_name(lang: str, tested_type: Any, expected: str):
     ("haskell", "'sequence'", "list"), ("haskell", "'list'", "list"),
 ])
 def test_template_natural_type_name(lang: str, tested_type: Any, expected: str):
-    template = f"""${{natural_type_name({tested_type})}}"""
+    template = f"""${{datatype_common({tested_type})}}"""
     instance = create_description_instance(template, programming_language=lang, is_html=False)
     assert instance == f"{expected}"
 
@@ -117,15 +117,15 @@ def test_template_natural_type_name(lang: str, tested_type: Any, expected: str):
     ("haskell", "'sequence'", "lijst"), ("haskell", "'list'", "lijst"),
 ])
 def test_template_natural_type_name_nl(lang: str, tested_type: Any, expected: str):
-    template = f"""${{natural_type_name({tested_type})}}"""
+    template = f"""${{datatype_common({tested_type})}}"""
     instance = create_description_instance(template, programming_language=lang, is_html=False, natural_language="nl")
     assert instance == f"{expected}"
 
 
 def test_template_type_name_override():
-    template = """${type_name("integer", {"java": {"integer": "long"}})}"""
+    template = """${datatype("integer", {"java": {"integer": "long"}})}"""
     instance = create_description_instance(template, programming_language="java", is_html=False)
-    assert instance == "`long`"
+    assert instance == "long"
 
 
 @pytest.mark.parametrize(("lang", "prompt"), [
