@@ -165,21 +165,21 @@ def create_description_instance_from_template(template: Template,
         return description_generator.get_natural_type_name(type_name, bundle,
                                                            plural, is_html)
 
+    def get_variable(var_name: str, is_global: bool = True):
+        if is_global:
+            return description_generator.get_global_variable_name(var_name, is_html)
+        return description_generator.get_variable_name(var_name, is_html)
+
     namespace = language.conventionalize_namespace(namespace)
     if is_html:
         namespace = html.escape(namespace)
 
     return template.render(
-        function_name=partial(description_generator.get_function_name,
-                              is_html=is_html),
-        property_name=partial(description_generator.get_property_name,
-                              is_html=is_html),
-        var_name=partial(description_generator.get_variable_name,
-                         is_html=is_html),
-        global_var_name=partial(description_generator.get_global_variable_name,
-                                is_html=is_html),
-        natural_type_name=get_natural_type_name,
-        type_name=get_type_name,
+        function=partial(description_generator.get_function_name, is_html=is_html),
+        property=partial(description_generator.get_property_name, is_html=is_html),
+        variable=get_variable,
+        datatype_common=get_natural_type_name,
+        datatype=get_type_name,
         statement=partial(description_generator.get_code, bundle=bundle,
                           is_html=is_html, statement=True),
         expression=partial(description_generator.get_code, bundle=bundle,

@@ -125,32 +125,32 @@ class DescriptionGenerator:
             else:
                 raise ValueError(f"Type {main_type} expects only one subtype")
         if is_html and not recursive_call:
-            return f"<code>{html.escape(type_name)}</code>"
-        return f"`{type_name}`" if not recursive_call else type_name
+            return html.escape(type_name)
+        return type_name
 
     def get_function_name(self, name: str, is_html: bool = True) -> str:
         function_name = self.language.conventionalize_function(name)
         if is_html:
-            return f"<code>{html.escape(function_name)}</code>"
-        return f"`{function_name}`"
+            return html.escape(function_name)
+        return function_name
 
     def get_property_name(self, name: str, is_html: bool = True) -> str:
         name = self.language.conventionalize_property(name)
         if is_html:
-            return f"<code>{html.escape(name)}</code>"
-        return f"`{name}`"
+            return html.escape(name)
+        return name
 
     def get_variable_name(self, name: str, is_html: bool = True) -> str:
         name = self.language.conventionalize_identifier(name)
         if is_html:
-            return f"<code>{html.escape(name)}</code>"
-        return f"`{name}`"
+            return html.escape(name)
+        return name
 
     def get_global_variable_name(self, name: str, is_html: bool = True) -> str:
         name = self.language.conventionalize_global_identifier(name)
         if is_html:
-            return f"<code>{html.escape(name)}</code>"
-        return f"`{name}`"
+            return html.escape(name)
+        return name
 
     def get_code(self, stmt: str, bundle: Bundle, statement: bool = False,
                  is_html: bool = True) -> str:
