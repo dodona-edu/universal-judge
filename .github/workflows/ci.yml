@@ -40,10 +40,9 @@ jobs:
             ~/.cabal
             ~/.ghc
             dist-newstyle
-          key: ${{ runner.os }}-cabalghc-20210330
+          key: ${{ runner.os }}-ghc-8.10.4-20210330
           restore-keys: |
-            ${{ runner.os }}-cabalghc-
-            ${{ runner.os }}-cabal-
+            ${{ runner.os }}-ghc-8.10.4-
       - name: Install Haskell dependencies
         run: cabal v1-install aeson
       - name: Use node 14
