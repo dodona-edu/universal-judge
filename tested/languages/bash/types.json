@@ -7,48 +7,28 @@
     "name": "bash",
     "prompt": "$"
   },
-  "integer": "integer",
-  "rational": "rational",
   "char": "char",
   "text": "text",
-  "boolean": "boolean",
-  "sequence": "sequence",
-  "set": "set",
-  "map": "map",
-  "nothing": "nothing",
-  "int8": "int8",
-  "uint8": "uint8",
-  "int16": "int16",
-  "uint16": "uint16",
-  "int32": "int32",
-  "uint32": "uint32",
-  "int64": "int64",
-  "uint64": "uint64",
-  "bigint": "bigint",
-  "single_precision": "single_precision",
-  "double_precision": "double_precision",
-  "double_extended": "double_extended",
-  "fixed_precision": "fixed_precision",
-  "array": "array",
-  "list": "list",
-  "tuple": "tuple",
-  "any": "any",
   "inner": {},
   "natural": {
     "singular": {
       "en": {
-        "text": "text"
+        "char": "character",
+        "text": "string"
       },
       "nl": {
-        "text": "tekst"
+        "char": "karakter",
+        "text": "string"
       }
     },
     "plural": {
       "en": {
-        "text": "texts"
+        "char": "characters",
+        "text": "strings"
       },
       "nl": {
-        "text": "teksten"
+        "char": "karakters",
+        "text": "strings"
       }
     }
   }

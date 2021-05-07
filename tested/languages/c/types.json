@@ -9,6 +9,7 @@
   "text": "char*",
   "boolean": "bool",
   "nothing": "void",
+  "undefined": "void",
   "int8": "signed char",
   "uint8": "unsigned char",
   "int16": "short",
@@ -26,18 +27,90 @@
   "natural": {
     "singular": {
       "en": {
-        "text": "string"
+        "integer": "integer",
+        "rational": "rational number",
+        "char": "character",
+        "text": "string",
+        "boolean": "boolean",
+        "nothing": "nothing",
+        "undefined": "nothing",
+        "int8": "8-bit integer",
+        "uint8": "8-bit natural number",
+        "int16": "16-bit integer",
+        "uint16": "16-bit natural number",
+        "int32": "32-bit integer",
+        "uint32": "32-bit natural number",
+        "int64": "64-bit integer",
+        "uint64": "64-bit natural number",
+        "bigint": "big integer",
+        "single_precision": "single precision floating point number",
+        "double_precision": "double precision floating point number",
+        "any": "any"
       },
       "nl": {
-        "text": "string"
+        "integer": "geheel getal",
+        "rational": "rationaal getal",
+        "char": "karakter",
+        "text": "string",
+        "boolean": "booleaanse waarde",
+        "nothing": "niets",
+        "undefined": "niet gedefinieerd",
+        "int8": "8-bit geheel getal",
+        "uint8": "8-bit natuurlijk getal",
+        "int16": "16-bit geheel getal",
+        "uint16": "16-bit natuurlijk getal",
+        "int32": "32-bit geheel getal",
+        "uint32": "32-bit natuurlijk getal",
+        "int64": "64-bit geheel getal",
+        "uint64": "64-bit natuurlijk getal",
+        "bigint": "groot geheel getal",
+        "single_precision": "enkele precisie vlottende kommagetal",
+        "double_precision": "dubbele precisie vlottende kommagetal",
+        "any": "ieder"
       }
     },
     "plural": {
       "en": {
-        "text": "strings"
+        "integer": "integers",
+        "rational": "rational numbers",
+        "char": "characters",
+        "text": "strings",
+        "boolean": "booleans",
+        "nothing": "nothing",
+        "undefined": "nothing",
+        "int8": "8-bit integers",
+        "uint8": "8-bit natural numbers",
+        "int16": "16-bit integers",
+        "uint16": "16-bit natural numbers",
+        "int32": "32-bit integers",
+        "uint32": "32-bit natural numbers",
+        "int64": "64-bit integers",
+        "uint64": "64-bit natural numbers",
+        "bigint": "big integers",
+        "single_precision": "single precision floating point numbers",
+        "double_precision": "double precision floating point numbers",
+        "any": "any"
       },
       "nl": {
-        "text": "strings"
+        "integer": "gehele getallen",
+        "rational": "rationale getallen",
+        "char": "karakters",
+        "text": "strings",
+        "boolean": "booleaanse waarden",
+        "nothing": "niets",
+        "undefined": "niets",
+        "int8": "8-bit gehele getallen",
+        "uint8": "8-bit natuurlijke getallen",
+        "int16": "16-bit gehele getallen",
+        "uint16": "16-bit natuurlijke getallen",
+        "int32": "32-bit gehele getallen",
+        "uint32": "32-bit natuurlijke getallen",
+        "int64": "64-bit gehele getallen",
+        "uint64": "64-bit natuurlijke getallen",
+        "bigint": "grote gehele getallen",
+        "single_precision": "enkele precisie vlottende kommagetallen",
+        "double_precision": "dubbele precisie vlottende kommagetallen",
+        "any": "ieder"
       }
     }
   }
