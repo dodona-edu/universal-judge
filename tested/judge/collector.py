@@ -247,9 +247,7 @@ class OutputManager:
         else:
             self.context += 1
 
-        if self.tab == -1:
-            self.tab += 1
-        else:
+        if self.tab != -1:
             # Do remainder of current tab.
             for c in range(self.context, contexts_count):
                 context = self.prepared.tabs[self.tab].contexts[c]
