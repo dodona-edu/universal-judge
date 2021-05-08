@@ -138,6 +138,8 @@ nl:
         output: "ShellCheck produceerde slechte uitvoer."
   timings:
     title: "Statistieken uitvoeringstijden"
+    parallel: |
+      Bij parallelle uitvoering kunnen de cumulatieve uitvoeringstijden groter zijn dan de totale uitvoeringstijd.
     testplan: "Inlezen testplan"
     dsl: "Parsen DSL testplan"
     json: "Parsen JSON testplan"

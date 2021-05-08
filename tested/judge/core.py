@@ -199,8 +199,8 @@ def judge(bundle: Bundle):
             StartTab(title=get_i18n_string("timings.title"),
                      permission=Permission.STAFF), -1)
         collector.add(AppendMessage(message=ExtendedMessage(
-            description=pretty_print_timings(),
-            format="code",
+            description=pretty_print_timings(bundle.config.options.parallel),
+            format="markdown",
             permission=Permission.STAFF
         )))
         collector.add_tab(CloseTab(), -1)

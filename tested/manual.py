@@ -14,7 +14,7 @@ from .configs import DodonaConfig
 from .main import run
 from tested import internal_timings
 
-exercise_dir = "exercise/echo"
+exercise_dir = "exercise/objects"
 
 
 def read_config() -> DodonaConfig:
@@ -22,16 +22,16 @@ def read_config() -> DodonaConfig:
     return DodonaConfig(**{
         "memory_limit":         536870912,
         "time_limit":           60,
-        "programming_language": 'bash',
+        "programming_language": 'java',
         "natural_language":     'nl',
         "resources":            Path(exercise_dir, 'evaluation'),
-        "source":               Path(exercise_dir, 'solution/correct.sh'),
+        "source":               Path(exercise_dir, 'solution/correct.java'),
         "judge":                Path('.'),
         "workdir":              Path('workdir'),
-        "plan_name":            "one-programmed-correct.tson",
+        "plan_name":            "plan.yaml",
         "timing_statistics":    True,
         "options":              {
-            "parallel": False,
+            "parallel": True,
             "mode":     "batch",
             "linter":   True
         }

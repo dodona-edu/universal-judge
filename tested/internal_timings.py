@@ -133,17 +133,19 @@ def calculate_stages():
     return (stage for stage, _ in combined.values())
 
 
-def pretty_print_timings():
+def pretty_print_timings(is_parallel: bool = False):
     global start_time
     lines = []
+    if is_parallel:
+        lines.append(f'_{get_i18n_string("timings.parallel")}_')
     for stage in calculate_stages():
         stage_name = get_i18n_string(f"timings.{stage.stage_name}")
-        lines.append("{:s}: {:0.03f} s".format(stage_name, stage.duration))
+        lines.append("{:s}: **{:0.03f} s**".format(stage_name, stage.duration))
         for sub_stage in stage.sub_stages:
             sub_stage_name = get_i18n_string(f"timings.{sub_stage.sub_stage_name}")
-            lines.append("    {:s}: {:0.03f} s".format(sub_stage_name,
-                                                       sub_stage.duration))
+            lines.append("- {:s}: **{:0.03f} s**".format(sub_stage_name,
+                                                         sub_stage.duration))
     end_time = monotonic()
     lines.extend(["", "{:s}: {:0.03f} s".format(get_i18n_string(f"timings.total"),
                                                 end_time - start_time)])
-    return '\n'.join(lines)
+    return '\n\n'.join(lines)
