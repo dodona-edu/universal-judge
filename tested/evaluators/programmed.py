@@ -10,6 +10,7 @@ from .utils import cleanup_specific_programmed
 from .value import get_values
 from ..datatypes import StringTypes
 from ..dodona import ExtendedMessage, StatusMessage, Status, Permission
+from ..internal_timings import new_stage, end_stage
 from ..internationalization import get_i18n_string
 from ..judge import evaluate_programmed
 from ..judge.utils import BaseExecutionResult
@@ -101,13 +102,14 @@ def evaluate(config: EvaluatorConfig,
     _logger.debug(f"Calling programmed evaluation with params:\n"
                   f"expected: {expected}\n"
                   f"actual: {actual}")
-
+    new_stage("evaluate.programmed", True)
     result = evaluate_programmed(
         config.bundle,
         evaluator=channel.evaluator,
         expected=expected,
         actual=actual
     )
+    end_stage("evaluate.programmed", True)
 
     if isinstance(result, BaseExecutionResult):
         if result.timeout:

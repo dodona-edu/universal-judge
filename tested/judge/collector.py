@@ -175,7 +175,7 @@ class OutputManager:
 
     def add_tab(self, update: Union[StartTab, CloseTab], tab_index: int):
         assert not self.collected, "OutputManager already finished!"
-        if isinstance(update, CloseTab):
+        if isinstance(update, CloseTab) and tab_index >= 0:
             for _, context in sorted(self.prepared.tabs[tab_index].contexts.items(),
                                      key=lambda x: x[0]):
                 self._add(context.start)

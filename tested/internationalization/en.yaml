@@ -136,3 +136,47 @@ en:
         timeout: "ShellCheck exceeded time limit"
         memory: "ShellCheck exceeded memory limit"
         output: "ShellCheck produced bad output."
+  timings:
+    parallel: |
+      In parallel execution, the cumulative execution times can be greater than the total execution time.
+    title: "Statistics timings"
+    testplan: "Reading testplan"
+    dsl: "Parse DSL testplan"
+    json: "Parse JSON testplan"
+    bundle: "Create bundle information"
+    analyse:
+      supported: "Check if testplan is supported by the programming language"
+      features: "Analyse features"
+    prepare:
+      output: "Preparing feedback table"
+      results: "Preparing results"
+    linter: "Running linter"
+    generation: "Generate testcode"
+    submission:
+      modify: "Modify submission"
+    generate:
+      templates: "Generate testcode from templates"
+    compilation:
+      pre: "Batch compilation"
+      individual: "Individual compilation"
+      batch:
+        done: "Adding feedback from batch compilation"
+    run:
+      execution: "Running a run"
+      testcode: "Running test executables"
+    dependencies:
+      copy: "Copy dependencies"
+    evaluate:
+      results: "Evaluating results"
+      builtin:
+        text: "Evaluating text results/full file with built-in evaluator"
+        file: "Evaluating file line-by-line with built-in evaluator"
+        value: "Evaluating return values with built-in evaluator"
+        exception: "Evaluating exceptions with built-in evaluator"
+      programmed: "Evaluating results with programmed evaluator"
+    total: "Total execution time"
+    parse:
+      expression: "Parse expressions and statements"
+      return: "Parse YAML return values"
+      return-raw: "Parse return-raw values"
+

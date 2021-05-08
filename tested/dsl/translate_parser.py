@@ -13,6 +13,7 @@ from yaml import safe_load
 from tested.datatypes import BasicBooleanTypes, BasicNumericTypes, \
     BasicObjectTypes, BasicSequenceTypes, BasicStringTypes
 from tested.dsl.statement import Parser
+from tested.internal_timings import new_stage, end_stage
 from tested.serialisation import ExceptionValue, Value, NothingType, StringType, \
     BooleanType, NumberType, SequenceType, ObjectType, ObjectKeyValuePair
 from tested.testplan import BaseOutput, Context, EmptyChannel, \
@@ -468,22 +469,31 @@ class SchemaParser:
                 self._get_str_safe(testcase, "expression"))
         output = Output()
         self._translate_base_output(testcase, output, stack_frame)
+
         if "return" in testcase:
             hide_expected = self._get_bool_safe(stack_frame.options_return,
                                                 "hideExpected") or False
+
+            new_stage("parse.return", True)
             output.result = ValueOutputChannel(
                 value=self._translate_value(
                     self._get_any_safe(testcase, "return")),
                 show_expected=not hide_expected
             )
+            end_stage("parse.return", True)
         elif "return-raw" in testcase:
+            new_stage("parse.return-raw", True)
             output.result = self._translate_raw_return(
                 stack_frame,
                 self._get_str_dict_safe(testcase, "return-raw")
             )
+            end_stage("parse.return-raw", True)
 
         self._heuristic_check_multiline_value(output.result)
+
+        new_stage("parse.expression", True)
         testcase_value = Testcase(input=parser.parse_statement(code), output=output)
+        end_stage("parse.expression", True)
 
         if "files" in testcase:
             files = [
@@ -506,7 +516,7 @@ class SchemaParser:
             show_expected=not hide_expected
         )
 
-    def _translate_value(self, value: YAML_DICT) -> Value:
+    def _translate_value(self, value: YAML_OBJECT) -> Value:
         if value is None:
             return NothingType()
         elif isinstance(value, str):
