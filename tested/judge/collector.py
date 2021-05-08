@@ -249,16 +249,16 @@ class OutputManager:
 
         if self.tab == -1:
             self.tab += 1
-            to_write.append(self.prepared.tabs[self.tab].start)
-        # Do remainder of current tab.
-        for c in range(self.context, contexts_count):
-            context = self.prepared.tabs[self.tab].contexts[c]
-            to_write.append(context.start)
-            to_write.extend(context.content)
-            to_write.append(context.end)
-            del self.prepared.tabs[self.tab].contexts[c]
-        to_write.append(self.prepared.tabs[self.tab].end)
-        del self.prepared.tabs[self.tab]
+        else:
+            # Do remainder of current tab.
+            for c in range(self.context, contexts_count):
+                context = self.prepared.tabs[self.tab].contexts[c]
+                to_write.append(context.start)
+                to_write.extend(context.content)
+                to_write.append(context.end)
+                del self.prepared.tabs[self.tab].contexts[c]
+            to_write.append(self.prepared.tabs[self.tab].end)
+            del self.prepared.tabs[self.tab]
 
         # Do remainder of tabs.
         for t in range(self.tab + 1, len(self.bundle.plan.tabs)):
