@@ -31,19 +31,19 @@ We beginnen in wijzerzin af te tellen vanaf kind nummer $1$, waarbij elk $n$-de 
 Nadat $k-1$ kinderen uit de cirkel verwijderd werden, wordt verder geteld in tegenwijzerzin.
 De cirkel wordt steeds kleiner en kleiner en het laatste kind dat overblijft wordt de erfgenaam van de boer.
 
-<% lijst = natural_type_name("list") %>\
+<% lijst = datatype_common("list") %>\
 
-Schrijf een functie ${function_name("heir")},
-waaraan de waarden $k$ en $n$, van het type ${type_name("integer")},
+Schrijf een functie ${function("heir")},
+waaraan de waarden $k$ en $n$, van het type ${datatype("integer")},
 moeten doorgegeven worden, waarbij je er mag van uitgaan dat $k >= 2$.
-De functie moet een ${lijst}, van het type ${type_name(("list", "integer"))}
+De functie moet een ${lijst}, van het type ${datatype(("list", "integer"))}
 teruggeven die de volgorde aangeeft waarin de kinderen uit de cirkel verwijderd werden.
 Het eerst verwijderde kind staat daarbij als eerste in de ${lijst},
 en de uiteindelijke erfgenaam als laatste in de ${lijst}.
 Gebruik de volgnummers waarmee de kinderen in de ${lijst}
 genummerd werden als elementen in de ${lijst}.
 
-% if language == 'java':
+% if programming_language_raw == 'java':
 De functies moeten statisch gedefinieerd worden in de klasse ${namespace}.
 % endif
 

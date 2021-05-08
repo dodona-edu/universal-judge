@@ -18,6 +18,11 @@ from tested.languages import get_language, language_exists
 open_brackets = ('(', '[', '{')
 close_brackets = {')': '(', ']': '[', '}': '{'}
 
+natural_languages = {
+    "en": "English",
+    "nl": "Nederlands"
+}
+
 
 def _mako_uncomment(m: re.Match) -> str:
     result = f"${{{repr(m.group(1))}}}"
@@ -109,13 +114,15 @@ def prepare_template(template: str, is_html: bool = True) -> Template:
         if is_html:
             mako_template.extend(groups[0])
         else:
-            mako_template.extend("```console?lang=${language}&prompt=${prompt}\n")
+            mako_template.extend(
+                "```console?lang=${programming_language_raw}&prompt=${prompt}\n")
         mako_template.extend(_analyse_body(groups[body_index]))
         mako_template.extend(groups[-1])
 
     mako_template.extend(
         regex_comment_mako.sub(_mako_uncomment, template[last_end:]))
-    return Template(''.join(mako_template), cache_enabled=False)
+    mako_template = ''.join(mako_template)
+    return Template(mako_template, cache_enabled=False)
 
 
 def create_description_instance_from_template(template: Template,
@@ -154,27 +161,37 @@ def create_description_instance_from_template(template: Template,
         return description_generator.get_type_name(args, bundle, custom_type_map,
                                                    is_html=is_html)
 
+    def get_natural_type_name(type_name: str, plural: bool = False):
+        return description_generator.get_natural_type_name(type_name, bundle,
+                                                           plural, is_html)
+
+    def get_variable(var_name: str, is_global: bool = True):
+        if is_global:
+            return description_generator.get_global_variable_name(var_name, is_html)
+        return description_generator.get_variable_name(var_name, is_html)
+
+    namespace = language.conventionalize_namespace(namespace)
+    if is_html:
+        namespace = html.escape(namespace)
+
     return template.render(
-        function_name=partial(description_generator.get_function_name,
-                              is_html=is_html),
-        property_name=partial(description_generator.get_property_name,
-                              is_html=is_html),
-        var_name=partial(description_generator.get_variable_name,
-                         is_html=is_html),
-        global_var_name=partial(description_generator.get_global_variable_name,
-                                is_html=is_html),
-        natural_type_name=partial(description_generator.get_natural_type_name,
-                                  bundle=bundle, is_html=is_html),
-        type_name=get_type_name,
+        function=partial(description_generator.get_function_name, is_html=is_html),
+        property=partial(description_generator.get_property_name, is_html=is_html),
+        variable=get_variable,
+        datatype_common=get_natural_type_name,
+        datatype=get_type_name,
         statement=partial(description_generator.get_code, bundle=bundle,
                           is_html=is_html, statement=True),
         expression=partial(description_generator.get_code, bundle=bundle,
                            is_html=is_html, statement=False),
         prompt=description_generator.get_prompt(is_html=is_html),
-        language_html=description_generator.get_prompt_language(is_html=True),
-        language=description_generator.get_prompt_language(is_html=False),
-        namespace_html=html.escape(language.conventionalize_namespace(namespace)),
-        namespace=language.conventionalize_namespace(namespace)
+        programming_language=description_generator.get_prompt_language(
+            is_html=is_html),
+        programming_language_raw=
+        description_generator.get_prompt_language(is_html=False),
+        namespace=language.conventionalize_namespace(namespace),
+        natural_language=natural_languages.get(natural_language, natural_language),
+        natural_language_iso639=natural_language
     )
 
 

@@ -32,6 +32,7 @@ def read_config() -> DodonaConfig:
         "timing_statistics":    True,
         "options":              {
             "parallel": True,
+            "allow_fallback": False,
             "mode":     "batch",
             "linter":   True
         }
