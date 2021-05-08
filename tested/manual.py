@@ -13,7 +13,7 @@ from pathlib import Path
 from .configs import DodonaConfig
 from .main import run
 
-exercise_dir = "/home/boris/Documenten/School/2020-2021/Masterproef/javascript-oefeningen/reeksen/09 OOP/star battle"
+exercise_dir = "exercise/global"
 
 
 def read_config() -> DodonaConfig:
@@ -24,7 +24,7 @@ def read_config() -> DodonaConfig:
         "programming_language": 'javascript',
         "natural_language":     'nl',
         "resources":            Path(exercise_dir, 'evaluation'),
-        "source":               Path(exercise_dir, 'solution/star-battle.js'),
+        "source":               Path(exercise_dir, 'solution/correct.js'),
         "judge":                Path('.'),
         "workdir":              Path('workdir'),
         "plan_name":            "plan.yaml",
