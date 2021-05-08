@@ -261,7 +261,7 @@ class OutputManager:
         # Do remainder of tabs.
         for t in range(self.tab + 1, len(self.bundle.plan.tabs)):
             to_write.append(self.prepared.tabs[t].start)
-            for c in range(0, tab.count_contexts()):
+            for c in range(0, len(self.prepared.tabs[t].contexts)):
                 context = self.prepared.tabs[t].contexts[c]
                 to_write.append(context.start)
                 to_write.extend(context.content)
