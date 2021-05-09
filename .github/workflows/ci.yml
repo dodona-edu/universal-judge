@@ -8,7 +8,6 @@ jobs:
     env:
       CHECKSTYLE_JAR: "/opt/checkstyle-8.41-all.jar"
       KTLINT_JAR: "/opt/ktlint.jar"
-      NODE_PATH: "/usr/lib/node_modules"
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python 3.9
@@ -50,6 +49,8 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: 14
+      - name: Export  node_modules
+        run: export NODE_PATH=$(npm root --quiet -g)
       - name: Setup Kotlin
         uses: fwilhe2/setup-kotlin@bb0e1ead85a7f840e9d2bc4bdd2c3950b080a449
       - name: Install linters
