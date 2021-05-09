@@ -60,9 +60,11 @@ jobs:
           --output "$CHECKSTYLE_JAR" &&
           sudo curl -H 'Accept: application/vnd.github.v4.raw' -L
           https://github.com/pinterest/ktlint/releases/download/0.41.0/ktlint --output "$KTLINT_JAR"
-      - name: Export  node_modules
+      - name: Export node_modules
         run: >
-          echo "NODE_PATH=$(npm root --quiet -g)" >> $GITHUB_ENV &&
+          echo "NODE_PATH=$(npm root --quiet -g)" >> $GITHUB_ENV
+      - name: List content node_modules
+        run: >
           ls $NODE_PATH &&
           exit 1
       - name: Run tests
