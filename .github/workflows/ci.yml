@@ -8,7 +8,6 @@ jobs:
     env:
       CHECKSTYLE_JAR: "/opt/checkstyle-8.41-all.jar"
       KTLINT_JAR: "/opt/ktlint.jar"
-      NODE_PATH: "/usr/lib/node_modules"
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python 3.9
@@ -61,11 +60,6 @@ jobs:
           --output "$CHECKSTYLE_JAR" &&
           sudo curl -H 'Accept: application/vnd.github.v4.raw' -L
           https://github.com/pinterest/ktlint/releases/download/0.41.0/ktlint --output "$KTLINT_JAR"
-      - name: List content node_modules
-        run: >
-          ls -a $NODE_PATH &&
-          ls -a $HOME &&
-          exit 1
       - name: Run tests
         run: |
           python -m pytest tests/ -m "not slow and not flaky"
