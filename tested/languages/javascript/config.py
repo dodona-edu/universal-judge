@@ -1,12 +1,7 @@
-import functools
 import logging
-import operator
 import re
 from pathlib import Path
-from typing import List, Tuple, Iterable
-
-from esprima import parseScript, error_handler
-from esprima.nodes import Node
+from typing import List, Tuple
 
 from tested.configs import Bundle
 from tested.dodona import Message, AnnotateCode
@@ -41,50 +36,17 @@ class JavaScript(Language):
 
     # noinspection PyTypeChecker
     def solution(self, solution: Path, bundle: Bundle):
-        def map_variables(node: Node) -> Iterable[str]:
-            if node.type == "ArrayPattern":
-                return iter(e.name for e in node.elements)
-            elif node.type == "Identifier":
-                return [node.name]
-            else:
-                return []
-
-        def map_root_node(node: Node) -> List[Node]:
-            if node.type == 'VariableDeclaration':
-                return node.declarations
-            elif node.type == 'ExpressionStatement':
-                if node.expression.type == 'AssignmentExpression':
-                    return [node.expression.left]
-                else:
-                    return []
-            else:
-                return [node]
-
+        # import local to prevent errors
+        from tested.judge.utils import run_command
+        parse_file = Path(__file__).parent / "parseAst.js"
         try:
-            with open(solution, "r") as file:
-                contents = file.read()
-            body = parseScript(contents).body
-            possible_positions = (
-                'FunctionDeclaration', 'ClassDeclaration', 'VariableDeclaration',
-                'ExpressionStatement'
-            )
-            # Filter variable declarations
-            identifiers = filter(lambda x: x.type in possible_positions, body)
-            # Map identifier locations
-            identifiers = map(map_root_node, identifiers)
-            # Flatten
-            identifiers = functools.reduce(operator.iconcat, identifiers, [])
-            # Get variable id component
-            identifiers = map(lambda x: x.id if x.id else x, identifiers)
-            identifiers = map(map_variables, identifiers)
-            # Flatten
-            identifiers = functools.reduce(operator.iconcat, identifiers, [])
-
+            output = run_command(solution.parent, timeout=None,
+                                 command=["node", parse_file, solution.absolute()])
+            namings = output.stdout.strip().strip('"').replace('","', ', ')
             with open(solution, "a") as file:
-                print("\nmodule.exports = {", ", ".join(set(identifiers)), "};",
-                      file=file)
-        except error_handler.Error:
-            logger.debug("Failing to parse submission")
+                print(f"\nmodule.exports = {{{namings}}};", file=file)
+        except TimeoutError:
+            pass
 
     def linter(self, bundle: Bundle, submission: Path, remaining: float) \
             -> Tuple[List[Message], List[AnnotateCode]]:
