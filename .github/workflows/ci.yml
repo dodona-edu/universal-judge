@@ -49,9 +49,6 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: 14
-      - name: Export  node_modules
-        run: >
-          echo "NODE_PATH=$(npm root --quiet -g)" >> $GITHUB_ENV
       - name: Setup Kotlin
         uses: fwilhe2/setup-kotlin@bb0e1ead85a7f840e9d2bc4bdd2c3950b080a449
       - name: Install linters
@@ -63,6 +60,11 @@ jobs:
           --output "$CHECKSTYLE_JAR" &&
           sudo curl -H 'Accept: application/vnd.github.v4.raw' -L
           https://github.com/pinterest/ktlint/releases/download/0.41.0/ktlint --output "$KTLINT_JAR"
+      - name: Export  node_modules
+        run: >
+          echo "NODE_PATH=$(npm root --quiet -g)" >> $GITHUB_ENV &&
+          ls $NODE_PATH &&
+          exit 1
       - name: Run tests
         run: |
           python -m pytest tests/ -m "not slow and not flaky"
