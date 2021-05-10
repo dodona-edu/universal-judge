@@ -137,8 +137,7 @@ en:
         memory: "ShellCheck exceeded memory limit"
         output: "ShellCheck produced bad output."
   timings:
-    parallel: |
-      In parallel execution, the cumulative execution times can be greater than the total execution time.
+    parallel: "In parallel execution, the cumulative execution times can be greater than the total execution time."
     title: "Stats"
     testplan: "Reading testplan"
     dsl: "Parse DSL testplan"
