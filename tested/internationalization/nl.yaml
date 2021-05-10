@@ -137,7 +137,7 @@ nl:
         memory: "ShellCheck overschreed geheugenlimiet."
         output: "ShellCheck produceerde slechte uitvoer."
   timings:
-    title: "Statistieken uitvoeringstijden"
+    title: "Stats"
     parallel: |
       Bij parallelle uitvoering kunnen de cumulatieve uitvoeringstijden groter zijn dan de totale uitvoeringstijd.
     testplan: "Inlezen testplan"

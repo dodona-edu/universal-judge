@@ -139,7 +139,7 @@ en:
   timings:
     parallel: |
       In parallel execution, the cumulative execution times can be greater than the total execution time.
-    title: "Statistics timings"
+    title: "Stats"
     testplan: "Reading testplan"
     dsl: "Parse DSL testplan"
     json: "Parse JSON testplan"
@@ -167,9 +167,9 @@ en:
     dependencies:
       copy: "Copy dependencies"
     evaluate:
+        text: "Evaluating text results/full file with built-in evaluator"
       results: "Evaluating results"
       builtin:
-        text: "Evaluating text results/full file with built-in evaluator"
         file: "Evaluating file line-by-line with built-in evaluator"
         value: "Evaluating return values with built-in evaluator"
         exception: "Evaluating exceptions with built-in evaluator"

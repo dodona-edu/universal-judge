@@ -146,6 +146,7 @@ def pretty_print_timings(is_parallel: bool = False):
             lines.append("- {:s}: **{:0.03f} s**".format(sub_stage_name,
                                                          sub_stage.duration))
     end_time = monotonic()
-    lines.extend(["", "{:s}: {:0.03f} s".format(get_i18n_string(f"timings.total"),
-                                                end_time - start_time)])
+    lines.extend(
+        ["", "{:s}: _**{:0.03f} s**_".format(get_i18n_string(f"timings.total"),
+                                             end_time - start_time)])
     return '\n\n'.join(lines)
