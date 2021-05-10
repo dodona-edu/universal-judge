@@ -59,7 +59,8 @@ jobs:
           https://github.com/checkstyle/checkstyle/releases/download/checkstyle-8.41/checkstyle-8.41-all.jar
           --output "$CHECKSTYLE_JAR" &&
           sudo curl -H 'Accept: application/vnd.github.v4.raw' -L
-          https://github.com/pinterest/ktlint/releases/download/0.41.0/ktlint --output "$KTLINT_JAR"
+          https://github.com/pinterest/ktlint/releases/download/0.41.0/ktlint --output "$KTLINT_JAR" &&
+          npm install abstract-syntax-tree@2.17.6
       - name: Run tests
         run: |
           python -m pytest tests/ -m "not slow and not flaky"

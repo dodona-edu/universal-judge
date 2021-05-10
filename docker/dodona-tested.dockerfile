@@ -20,6 +20,9 @@ RUN curl -H 'Accept: application/vnd.github.v4.raw' -L  https://github.com/check
 ENV KTLINT_JAR /opt/ktlint.jar
 RUN curl -H 'Accept: application/vnd.github.v4.raw' -L https://github.com/pinterest/ktlint/releases/download/0.41.0/ktlint --output "$KTLINT_JAR"
 
+RUN npm install -g abstract-syntax-tree
+ENV NODE_PATH /usr/lib/node_modules
+
 RUN chmod 711 /mnt
 
 RUN useradd -m runner
