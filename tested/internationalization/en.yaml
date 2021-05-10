@@ -166,7 +166,7 @@ en:
     dependencies:
       copy: "Copy dependencies"
     evaluate:
-        text: "Evaluating text results/full file with built-in evaluator"
+      text: "Evaluating text results/full file with built-in evaluator"
       results: "Evaluating results"
       builtin:
         file: "Evaluating file line-by-line with built-in evaluator"
