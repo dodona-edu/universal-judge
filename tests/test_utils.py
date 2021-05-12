@@ -1,5 +1,5 @@
-import html
 import json
+import html
 from pathlib import Path
 from typing import Any, Iterator
 
@@ -9,6 +9,18 @@ import yaml
 from tested.description_instance import create_description_instance
 from tested.languages.config import limit_output
 from tested.utils import sorted_no_duplicates
+
+
+def test_javascript_ast_parse():
+    expected = frozenset(
+        ['readFileSync', 'a', 'b', 'x', 'y', 'demoFunction', 'SimpleClass', 'StaticClass', 'tryCatch', 'z'])
+    from tested.judge.utils import run_command
+    test_dir = Path(__file__).parent
+    parse_file = test_dir.parent / "tested" / "languages" / "javascript" / "parseAst.js"
+    demo_file = test_dir / "testJavascriptAstParserFile.js"
+    output = run_command(demo_file.parent, timeout=None, command=["node", parse_file, demo_file.absolute()])
+    namings = frozenset(output.stdout.strip().split(', '))
+    assert namings == expected
 
 
 def test_run_doctests_tested_utils():

@@ -1,7 +1,8 @@
 const { parse } = require('abstract-syntax-tree');
 const fs = require('fs');
 const source = fs.readFileSync(process.argv[2], 'utf-8');
-const ast = parse(source).body;
+// Add next option to support more javascript features
+const ast = parse(source, {next: true}).body;
 
 function mapSubTreeToIds(subtree) {
     const type = subtree.type;
@@ -23,10 +24,13 @@ function mapIdToName(id) {
         return id.name;
     } else if (type === 'ArrayPattern') {
         return id.elements.flatMap(mapIdToName);
+    } else if (type === 'ObjectPattern') {
+        return id.properties.map(d => d.key).flatMap(mapIdToName);
     } else {
         return [];
     }
 }
 
-const array = JSON.stringify(ast.flatMap(mapSubTreeToIds).flatMap(mapIdToName));
-console.log(array.substring(1, array.length - 1));
+// Use Set to remove duplicates
+const array = Array.from(new Set(ast.flatMap(mapSubTreeToIds).flatMap(mapIdToName)));
+console.log(array.join(', '));
