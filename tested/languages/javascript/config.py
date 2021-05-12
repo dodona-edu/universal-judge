@@ -42,7 +42,7 @@ class JavaScript(Language):
         try:
             output = run_command(solution.parent, timeout=None,
                                  command=["node", parse_file, solution.absolute()])
-            namings = output.stdout.strip().strip('"').replace('","', ', ')
+            namings = output.stdout.strip()
             with open(solution, "a") as file:
                 print(f"\nmodule.exports = {{{namings}}};", file=file)
         except TimeoutError:

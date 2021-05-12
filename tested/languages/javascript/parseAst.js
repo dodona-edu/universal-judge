@@ -31,5 +31,6 @@ function mapIdToName(id) {
     }
 }
 
-const array = JSON.stringify(ast.flatMap(mapSubTreeToIds).flatMap(mapIdToName));
-console.log(array.substring(1, array.length - 1));
+// Use Set to remove duplicates
+const array = Array.from(new Set(ast.flatMap(mapSubTreeToIds).flatMap(mapIdToName)));
+console.log(array.join(', '));
