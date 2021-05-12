@@ -23,7 +23,7 @@ class StaticClass extends SimpleClass {
     constants;
 }
 
-// Test try-except
+// Test try-catch
 function tryCatch() {
     try {
         let demoe = readFileSync("0");
