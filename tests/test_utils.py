@@ -1,7 +1,10 @@
 import html
-from typing import Any
+import json
+from pathlib import Path
+from typing import Any, Iterator
 
 import pytest
+import yaml
 
 from tested.description_instance import create_description_instance
 from tested.languages.config import limit_output
@@ -282,3 +285,31 @@ def test_sort_recursive():
 
 def test_sort_empty():
     assert [] == sorted_no_duplicates([])
+
+
+def test_valid_yaml_and_json():
+    """
+    Test to validate if all YAML and JSON can be parsed correctly.
+    """
+    def recursive_iter_dir(directory: Path) -> Iterator[Path]:
+        yaml_and_json_files = []
+        for file in directory.iterdir():
+            if file.is_file() and (file.name.endswith(".yml") or
+                                   file.name.endswith(".yaml") or
+                                   file.name.endswith(".json")):
+                yaml_and_json_files.append(file)
+            elif file.is_dir():
+                yaml_and_json_files.extend(recursive_iter_dir(file))
+        return yaml_and_json_files
+
+    data_dir = (Path(__file__).parent / '..' / 'tested').resolve()
+    files = recursive_iter_dir(data_dir)
+    for f in files:
+        # Parse to validate
+        with open(f, 'r') as fd:
+            if f.name.endswith(".json"):
+                json.load(fd)
+            else:
+                yaml.safe_load(fd)
+    # Test will always succeed if no exception is thrown
+    assert True
