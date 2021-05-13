@@ -26,10 +26,15 @@ class StaticClass extends SimpleClass {
 // Test try-catch
 function tryCatch() {
     try {
-        let demoe = readFileSync("0");
+        let demo = readFileSync("0");
     } catch {
         // Do nothing
     }
+}
+
+// Test async function
+async function asyncFunction() {
+    await readFileSync(1);
 }
 
 // Test second Reassignment

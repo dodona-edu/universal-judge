@@ -29,8 +29,8 @@
 % elif value.type == BasicObjectTypes.MAP:
     {\
     % for pair in value.data:
-        <%include file="statement.mako" args="statement=pair.key" />: \
-        <%include file="statement.mako" args="statement=pair.value" />\
+        <%include file="statement.mako" args="statement=pair.key,internal=True" />: \
+        <%include file="statement.mako" args="statement=pair.value,internal=True" />\
         % if not loop.last:
             , \
         % endif

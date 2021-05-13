@@ -5,5 +5,5 @@ const ${evaluator} = require('./${evaluator}.js');
 const values = require('./values.js');
 
 const result = <%include file="function.mako" args="function=function" />;
-values.sendEvaluated(process.stdout.fd, result);
+values.sendEvaluated(process.stdout.fd, await result);
 })();
