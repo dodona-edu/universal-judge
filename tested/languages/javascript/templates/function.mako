@@ -1,18 +1,20 @@
 ## This translates a function call to JavaScript.
 <%! from tested.serialisation import FunctionType %>\
-await \
-<%page args="function" />\
+<%page args="function,internal=False" />\
+% if not internal:
+    await \
+% endif
 % if function.type == FunctionType.CONSTRUCTOR:
     new \
 % endif
 % if function.namespace:
-    <%include file="statement.mako" args="statement=function.namespace"/>.\
+    <%include file="statement.mako" args="statement=function.namespace,internal=True"/>.\
 % endif
 ${function.name}\
 % if function.type != FunctionType.PROPERTY:
     (\
     % for argument in function.arguments:
-        <%include file="statement.mako" args="statement=argument"/>\
+        <%include file="statement.mako" args="statement=argument,internal=True"/>\
         % if not loop.last:
             , \
         % endif

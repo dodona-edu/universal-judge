@@ -14,7 +14,6 @@ const values = require("./values.js");
     const ${name} = require("./${name}.js");
 % endfor
 
-
 ## Open the files to which we write results.
 const valueFile = fs.openSync("${value_file}", "w");
 const exceptionFile = fs.openSync("${exception_file}", "w");
@@ -41,23 +40,23 @@ function writeContextSeparator() {
 ##################################
 
 ## Send a value to TESTed.
-function sendValue(value) {
-    values.sendValue(valueFile, value);
+async function sendValue(value) {
+    values.sendValue(valueFile, await value);
 }
 
 ## Send an exception to TESTed.
-function sendException(exception) {
-    values.sendException(exceptionFile, exception);
+async function sendException(exception) {
+    values.sendException(exceptionFile, await exception);
 }
 
 ## Send the result of a language specific value evaluator to TESTed.
-function sendSpecificValue(value) {
-    values.sendEvaluated(valueFile, value);
+async function sendSpecificValue(value) {
+    values.sendEvaluated(valueFile, await value);
 }
 
 ## Send the result of a language specific exception evaluator to TESTed.
-function sendSpecificException(exception) {
-    values.sendEvaluated(exceptionFile, exception);
+async function sendSpecificException(exception) {
+    values.sendEvaluated(exceptionFile, await exception);
 }
 
 

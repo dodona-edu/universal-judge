@@ -13,7 +13,8 @@ from tested.utils import sorted_no_duplicates
 
 def test_javascript_ast_parse():
     expected = frozenset(
-        ['readFileSync', 'a', 'b', 'x', 'y', 'demoFunction', 'SimpleClass', 'StaticClass', 'tryCatch', 'z'])
+        ['readFileSync', 'a', 'b', 'x', 'y', 'demoFunction', 'SimpleClass', 'StaticClass', 'tryCatch', 'z',
+         'asyncFunction'])
     from tested.judge.utils import run_command
     test_dir = Path(__file__).parent
     parse_file = test_dir.parent / "tested" / "languages" / "javascript" / "parseAst.js"
