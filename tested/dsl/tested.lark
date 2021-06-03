@@ -119,6 +119,7 @@ function: name arguments
 constructor: "new" function
 
 ?expression: "(" expression ")"
+    | "(" constructor ")"
     | global_variable
     | variable
     | value
