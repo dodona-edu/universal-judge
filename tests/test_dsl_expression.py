@@ -408,3 +408,10 @@ def test_parse_chained_property():
     assert namespace.namespace is None
     assert namespace.type == FunctionType.FUNCTION
     assert namespace.name == "get_container"
+
+
+def test_parse_global_variable():
+    parsed = parser.parse_statement('<data>')
+    assert parsed.type == FunctionType.PROPERTY
+    assert parsed.name == "data"
+    assert parsed.namespace is None

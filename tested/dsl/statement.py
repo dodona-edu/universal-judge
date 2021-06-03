@@ -201,7 +201,7 @@ class Parser:
     # noinspection PyMethodMayBeStatic
     def analyse_global_variable(self, tree: Tree) -> FunctionCall:
         return FunctionCall(type=FunctionType.PROPERTY,
-                            name=self.analyse_name(tree.children[1]))
+                            name=self.analyse_name(tree.children[0]))
 
     def analyse_property(self, tree: Tree) -> FunctionCall:
         # Find namespace name
