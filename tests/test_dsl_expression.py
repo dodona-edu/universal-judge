@@ -242,6 +242,11 @@ def test_parse_error_constructor_in_return_value2():
         parser.parse_value('{new data.Object(): "data"}')
 
 
+def test_parse_error_fun_assign():
+    with pytest.raises(ParseError):
+        parser.parse_statement('data = first([object.gen_int()])')
+
+
 def test_parse_fun_assign():
     assign = parser.parse_statement('integer data = first([object.gen_int()])')
     assert isinstance(assign, Assignment)
@@ -359,7 +364,7 @@ def test_parse_property():
 
 
 def test_parse_chained_constructor():
-    parsed = parser.parse_statement('new Container(5).get()')
+    parsed = parser.parse_statement('(new Container(5)).get()')
     assert parsed.type == FunctionType.FUNCTION
     assert parsed.name == "get"
     namespace = parsed.namespace

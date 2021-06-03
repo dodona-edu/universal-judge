@@ -1,3 +1,10 @@
+%import common.CNAME
+%import common.ESCAPED_STRING
+%import common.SIGNED_INT
+%import common.SIGNED_FLOAT
+%import common.WS
+%ignore WS
+
 INTEGER: "integer"
 RATIONAL: "rational"
 CHAR: "char"
@@ -23,6 +30,10 @@ DOUBLE_EXTENDED: "extended"
 FIXED_PRECISION: "fixed"
 ARRAY: "array"
 LIST: "list"
+NULL: "null"
+UNDEFINED: "undefined"
+TRUE: "true"
+FALSE: "false"
 
 ?collections: SEQUENCE
             | SET
@@ -55,10 +66,19 @@ LIST: "list"
 ?assign_datatype: datatype
                 | CNAME
 
-TRUE: "true"
-FALSE: "false"
+?null: NULL
+    | UNDEFINED
+
 ?boolean: TRUE
         | FALSE
+
+?string: ESCAPED_STRING
+
+dict: "{" [dict_pair ("," dict_pair)*] "}"
+list: "[" args "]"
+set: "{" expression ("," expression)* "}"
+tuple: "("args ")"
+dict_pair: expression ":" expression
 
 ?value_raw: SIGNED_FLOAT
       | SIGNED_INT
@@ -73,59 +93,40 @@ FALSE: "false"
 value_cast: value_raw "::" datatype
 
 ?value: value_raw
-      | CNAME
-      | value_cast
+    | value_cast
 
-?return: value_raw
-       | value_cast
+?return: value
 
-assign: datatype? CNAME "=" value
-      | assign_datatype CNAME "=" expr
-      | CNAME "=" constructor
+_property: "." CNAME
 
+property: "(" constructor ")" _property
+    | "(" expression ")" _property
+    | function _property
+    | property _property
+    | value _property
+    | variable _property
+    | global_variable _property
+
+
+args: [expression ("," expression)*]
+?arguments: "(" args ")"
+global_variable: "<" CNAME ">"
+?variable: CNAME
 ?name: CNAME
-    | expr "." CNAME
+    | property
 
-LCROOK: "<"
-RCROOK: ">"
+function: name arguments
+constructor: "new" function
 
-global_variable: LCROOK CNAME RCROOK
+?expression: "(" expression ")"
+    | global_variable
+    | variable
+    | value
+    | property
+    | function
+    | constructor
 
-property: expr "." CNAME
+assignment: assign_datatype? CNAME "=" expression
 
-constructor: "new" name "(" args ")"
-
-?expr: value
-     | fun
-     | constructor
-     | property
-     | global_variable
-
-fun: name "(" args ")"
-
-?stmt: assign
-     | expr
-
-args: [expr ("," expr)*]
-
-dict: "{" [dict_pair ("," dict_pair)*] "}"
-list: "[" [expr ("," expr)*] "]"
-set: "{" expr ("," expr)* "}"
-tuple: "(" [expr ("," expr)*] ")"
-dict_pair: expr ":" expr
-
-NULL: "null"
-UNDEFINED: "undefined"
-
-null: NULL
-    | UNDEFINED
-
-
-?string: ESCAPED_STRING
-
-%import common.CNAME
-%import common.ESCAPED_STRING
-%import common.SIGNED_INT
-%import common.SIGNED_FLOAT
-%import common.WS
-%ignore WS
+?statements: expression
+    | assignment
