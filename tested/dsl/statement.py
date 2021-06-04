@@ -35,6 +35,8 @@ class Parser:
         if not grammar_file:
             grammar_file = join(dirname(realpath(__file__)), "tested.lark")
         self.grammar_file = grammar_file
+        # Don't modify the parser, the parser must be 'lalr' for fast parsing
+        # Modify the grammar instead to be unambiguous
         self.parser = Lark.open(grammar_file, start=['statements', 'return'],
                                 lexer='standard', parser='lalr')
 

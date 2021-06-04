@@ -99,12 +99,14 @@ value_cast: value_raw "::" datatype
 
 _property: "." CNAME
 
-property: "(" expression ")" _property
-    | function _property
-    | property _property
-    | value _property
-    | variable _property
-    | global_variable _property
+?internal_expression: "(" expression ")"
+    | function
+    | property
+    | value_raw
+    | variable
+    | global_variable
+
+property: internal_expression _property
 
 
 args: [expression ("," expression)*]
