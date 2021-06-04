@@ -99,8 +99,7 @@ value_cast: value_raw "::" datatype
 
 _property: "." CNAME
 
-property: "(" constructor ")" _property
-    | "(" expression ")" _property
+property: "(" expression ")" _property
     | function _property
     | property _property
     | value _property
@@ -119,7 +118,6 @@ function: name arguments
 constructor: "new" function
 
 ?expression: "(" expression ")"
-    | "(" constructor ")"
     | global_variable
     | variable
     | value
