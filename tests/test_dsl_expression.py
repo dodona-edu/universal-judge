@@ -292,6 +292,29 @@ def test_parse_constructor_assign():
     assert len(data.arguments) == 0
 
 
+def test_parse_constructor_assign2():
+    assign = parser.parse_statement("cont = new Container({object.version})")
+    assert isinstance(assign, Assignment)
+    assert isinstance(assign.type, VariableType)
+    assert assign.type.data == "Container"
+    assert assign.variable == "cont"
+    expr = assign.expression
+    assert isinstance(expr, FunctionCall)
+    assert expr.namespace is None
+    assert expr.name == 'Container'
+    assert expr.type == FunctionType.CONSTRUCTOR
+    assert len(expr.arguments) == 1
+    arg = expr.arguments[0]
+    assert arg.type == BasicSequenceTypes.SET
+    assert len(arg.data) == 1
+    data = arg.data[0]
+    assert isinstance(data, FunctionCall)
+    assert data.type == FunctionType.PROPERTY
+    assert data.namespace == "object"
+    assert data.name == "version"
+    assert len(data.arguments) == 0
+
+
 def test_parse_value_assign():
     assign = parser.parse_statement("list lijst = [new Container(5, True)] :: list")
     assert isinstance(assign, Assignment)
