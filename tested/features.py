@@ -23,6 +23,7 @@ class Construct(str, Enum):
     # Main function. Does not necessarily imply FUNCTION_CALLS.
     FUNCTION_CALLS = "function_calls"
     ASSIGNMENTS = "assignments"
+    METHOD_REFERENCES = "method_references"
 
     HETEROGENEOUS_COLLECTIONS = "heterogeneous_collections"
 

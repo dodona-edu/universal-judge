@@ -318,9 +318,17 @@ class FunctionType(str, Enum):
     E.g. with Java: a function without a given namespace will have the namespace of
     it's implementing class
     """
+    FUNCTION_REFERENCE = "function_reference"
+    """
+    A function reference
+    """
     CONSTRUCTOR = "constructor"
     """
     A constructor.
+    """
+    CONSTRUCTOR_REFERENCE = "constructor_reference"
+    """
+    A constructor reference.
     """
     PROPERTY = "property"
     """
@@ -357,11 +365,13 @@ class FunctionCall(WithFeatures, WithFunctions):
 
     # noinspection PyMethodParameters
     @root_validator
-    def properties_have_no_args(cls, values):
+    def properties_or_references_have_no_args(cls, values):
         type_ = values.get("type")
         args = values.get("args")
-        if type_ == FunctionType.PROPERTY and args:
-            raise ValueError("You cannot have arguments for a property!")
+        if type_ in (FunctionType.PROPERTY, FunctionType.FUNCTION_REFERENCE,
+                     FunctionType.CONSTRUCTOR_REFERENCE) and args:
+            raise ValueError("You cannot have arguments for a property or "
+                             "reference!")
         return values
 
     def get_used_features(self) -> FeatureSet:
@@ -371,9 +381,14 @@ class FunctionCall(WithFeatures, WithFunctions):
         constructs = {Construct.FUNCTION_CALLS}
 
         # Get OOP features.
-        if self.type in (FunctionType.PROPERTY, FunctionType.CONSTRUCTOR) or \
+        if self.type in (FunctionType.PROPERTY, FunctionType.CONSTRUCTOR,
+                         FunctionType.CONSTRUCTOR_REFERENCE) or \
                 not isinstance(self.namespace, (Identifier, NoneType)):
             constructs.add(Construct.OBJECTS)
+        # Method references
+        if self.type in (FunctionType.FUNCTION_REFERENCE,
+                         FunctionType.CONSTRUCTOR_REFERENCE):
+            constructs.add(Construct.METHOD_REFERENCES)
 
         base_features = FeatureSet(constructs=constructs, types=set(),
                                    nested_types={
