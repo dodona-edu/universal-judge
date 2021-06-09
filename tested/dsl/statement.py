@@ -114,6 +114,14 @@ class Parser:
         function.type = FunctionType.CONSTRUCTOR
         return function
 
+    def analyse_constructor_reference(self, tree: Tree) -> FunctionCall:
+        # Analyse constructor function
+        function = self.analyse_function_reference(tree)
+        # Update function type
+        function.type = FunctionType.CONSTRUCTOR_REFERENCE
+        return function
+
+
     def analyse_dict(self, tree: Tree,
                      allow_functions: bool = True) -> List[ObjectKeyValuePair]:
         def analyse_pair(pair: Tree) -> ObjectKeyValuePair:
@@ -188,6 +196,18 @@ class Parser:
                 return self.analyse_global_variable(tree)
             else:
                 raise ParseError("Global variables not allowed for return values")
+        elif tree.data == "function_reference":
+            if allow_functions:
+                return self.analyse_function_reference(tree)
+            else:
+                raise ParseError(
+                    "Function references not allowed for return values")
+        elif tree.data == "constructor_reference":
+            if allow_functions:
+                return self.analyse_constructor_reference(tree)
+            else:
+                raise ParseError(
+                    "Constructor references not allowed for return values")
         raise ParseError("Invalid expression tree")
 
     def analyse_function(self, tree: Tree) -> FunctionCall:
@@ -199,6 +219,18 @@ class Parser:
                             name=fun_name,
                             namespace=namespace,
                             arguments=args)
+
+    def analyse_function_reference(self, tree: Tree) -> FunctionCall:
+        if len(tree.children) == 1:
+            namespace, name = None, self.analyse_name(tree.children[0])
+        else:
+            namespace = self.analyse_expression(tree.children[0],
+                                                allow_functions=True)
+            name = self.analyse_name(tree.children[1])
+
+        return FunctionCall(type=FunctionType.FUNCTION_REFERENCE,
+                            name=name,
+                            namespace=namespace)
 
     # noinspection PyMethodMayBeStatic
     def analyse_global_variable(self, tree: Tree) -> FunctionCall:

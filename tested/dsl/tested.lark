@@ -117,7 +117,11 @@ global_variable: "<" CNAME ">"
     | property
 
 function: name arguments
+function_reference: [internal_expression] "::" CNAME
 constructor: "new" function
+
+// No spaces between "::" and "new", otherwise parsing troubles with the function references
+constructor_reference: [internal_expression "."] CNAME "::new"
 
 ?expression: "(" expression ")"
     | global_variable
@@ -125,7 +129,9 @@ constructor: "new" function
     | value
     | property
     | function
+    | function_reference
     | constructor
+    | constructor_reference
 
 assignment: assign_datatype? CNAME "=" expression
 

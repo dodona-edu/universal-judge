@@ -438,3 +438,36 @@ def test_parse_global_variable():
     assert parsed.type == FunctionType.PROPERTY
     assert parsed.name == "data"
     assert parsed.namespace is None
+
+
+def test_parse_function_reference():
+    parsed = parser.parse_statement('::sum')
+    assert parsed.type == FunctionType.FUNCTION_REFERENCE
+    assert parsed.name == "sum"
+    assert parsed.namespace is None
+
+
+def test_parse_function_reference_with_namespace():
+    parsed = parser.parse_statement('object::sum')
+    assert parsed.type == FunctionType.FUNCTION_REFERENCE
+    assert parsed.name == "sum"
+    assert parsed.namespace == "object"
+
+
+def test_parse_constructor_reference():
+    parsed = parser.parse_statement('data::new')
+    assert parsed.type == FunctionType.CONSTRUCTOR_REFERENCE
+    assert parsed.name == "data"
+    assert parsed.namespace is None
+
+
+def test_parse_constructor_reference_with_namespace():
+    parsed = parser.parse_statement('call().data::new')
+    assert parsed.type == FunctionType.CONSTRUCTOR_REFERENCE
+    assert parsed.name == "data"
+    assert parsed.namespace is not None
+    namespace = parsed.namespace
+    assert namespace.type == FunctionType.FUNCTION
+    assert namespace.name == "call"
+    assert namespace.arguments == []
+    assert namespace.namespace is None
