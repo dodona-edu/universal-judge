@@ -501,3 +501,19 @@ def test_javascript_exception_missing_message(tmp_path: Path, pytestconfig):
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["wrong"]
     assert len(updates.find_all("append-message")) == 1
+
+
+@pytest.mark.parametrize("language", ["python", "java", "kotlin", "javascript"])
+def test_method_constructor_references(language: str, tmp_path: Path, pytestconfig):
+    conf = configuration(pytestconfig, "lambdas", language, tmp_path, "methods.yaml", "solution")
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]
+
+
+@pytest.mark.parametrize("language", ALL_SPECIFIC_LANGUAGES)
+def test_method_references(language: str, tmp_path: Path, pytestconfig):
+    conf = configuration(pytestconfig, "lambdas", language, tmp_path, "only-methods.yaml", "solution")
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]
