@@ -413,7 +413,47 @@ class VariableType:
     type: Literal['custom'] = 'custom'
 
 
-Expression = Union[Identifier, FunctionCall, Value]
+@dataclass
+class TypedLambdaArgument:
+    type: Union[AllTypes, VariableType]
+    name: str
+
+
+@dataclass
+class Lambda(WithFeatures, WithFunctions):
+    body: 'Expression'
+    parameters: Union[List[str], List[TypedLambdaArgument]] \
+        = field(default_factory=list)
+
+    def get_functions(self) -> Iterable['FunctionCall']:
+        return self.body.get_functions()
+
+    def get_used_features(self) -> FeatureSet:
+        base = FeatureSet({Construct.LAMBDAS}, set(), set())
+        other = self.body.get_used_features()
+
+        if self.parameters:
+            if isinstance(self.parameters[0], str):
+                base.constructs.add(Construct.UNTYPED_LAMBDA_PARAMETERS)
+            else:
+                base.constructs.add(Construct.TYPED_LAMBDA_PARAMETERS)
+
+        return combine_features([base, other])
+
+    # noinspection PyMethodParameters
+    @root_validator
+    def consistent_parameters(cls, values):
+        parameters_ = values.get("parameters")
+        if parameters_:
+            types = set(map(type, parameters_))
+            if len(types) > 1:
+                raise ValueError(
+                    "You must be consistent with the type of parameters, "
+                    "either untyped or typed parameters.")
+        return values
+
+
+Expression = Union[Identifier, FunctionCall, Value, Lambda]
 
 
 @dataclass
@@ -459,6 +499,7 @@ SequenceType.__pydantic_model__.update_forward_refs()
 NamedArgument.__pydantic_model__.update_forward_refs()
 FunctionCall.__pydantic_model__.update_forward_refs()
 ObjectKeyValuePair.__pydantic_model__.update_forward_refs()
+Lambda.__pydantic_model__.update_forward_refs()
 
 
 def as_basic_type(value: Value) -> Value:

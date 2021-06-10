@@ -39,6 +39,12 @@ class Construct(str, Enum):
     # Global variables
     GLOBAL_VARIABLES = "global_variables"
 
+    # Lambda
+    LAMBDAS = "lambdas"
+    UNTYPED_LAMBDA_PARAMETERS = "untyped_lambda_parameters"
+    TYPED_LAMBDA_PARAMETERS = "typed_lambda_parameters"
+
+
 Types = Set[AllTypes]
 Constructs = Set[Construct]
 
