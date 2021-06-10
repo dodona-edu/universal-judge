@@ -13,9 +13,8 @@ logger = logging.getLogger(__name__)
 def cleanup_description(lang_config: Language,
                         namespace: str,
                         description: str) -> str:
-    return description.replace(
-        rf'{lang_config.conventionalize_namespace(namespace)}.',
-        r'', 1)
+    return re.sub(rf'(?!\.){lang_config.conventionalize_namespace(namespace)}\.',
+                  '', description)
 
 
 def jvm_memory_limit(config: Config) -> int:

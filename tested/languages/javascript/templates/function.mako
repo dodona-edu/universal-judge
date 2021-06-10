@@ -11,7 +11,7 @@
     <%include file="statement.mako" args="statement=function.namespace,internal=True"/>.\
 % endif
 ${function.name}\
-% if function.type != FunctionType.PROPERTY:
+% if function.type in (FunctionType.CONSTRUCTOR, FunctionType.FUNCTION):
     (\
     % for argument in function.arguments:
         <%include file="statement.mako" args="statement=argument,internal=True"/>\

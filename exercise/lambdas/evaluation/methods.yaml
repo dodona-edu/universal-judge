@@ -1,0 +1,8 @@
+namespace: "store"
+tabs:
+- tab: "Reference"
+  contexts:
+    - testcases:
+        - statement: "store s = create_store(store::new, 5, 5)"
+        - expression: "s.apply(::add)"
+          return: 10

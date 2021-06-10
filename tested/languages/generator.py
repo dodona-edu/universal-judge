@@ -200,7 +200,8 @@ def _prepare_expression(bundle: Bundle, expression: Expression) -> Expression:
                                 for arg in expression.arguments]
     elif isinstance(expression, FunctionCall):
         submission_name = bundle.lang_config.submission_name(bundle.plan)
-        if expression.type == FunctionType.CONSTRUCTOR:
+        if expression.type in (FunctionType.CONSTRUCTOR,
+                               FunctionType.CONSTRUCTOR_REFERENCE):
             name = bundle.lang_config.conventionalize_class(expression.name)
         elif expression.type == FunctionType.PROPERTY:
             if expression.namespace is None:
