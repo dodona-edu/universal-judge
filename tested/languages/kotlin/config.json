@@ -28,7 +28,10 @@
     "named_arguments": true,
     "default_parameters": true,
     "global_variables": true,
-    "method_references": true
+    "method_references": true,
+    "lambdas": true,
+    "untyped_lambda_parameters": true,
+    "typed_lambda_parameters": true
   },
   "datatypes": {
     "integer": "supported",
