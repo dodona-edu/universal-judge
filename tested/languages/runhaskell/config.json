@@ -24,7 +24,8 @@
     "heterogeneous_collections": false,
     "heterogeneous_arguments": false,
     "evaluation": true,
-    "global_variables": true
+    "global_variables": true,
+    "method_references": true
   },
   "datatypes": {
     "integer": "supported",
