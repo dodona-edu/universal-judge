@@ -221,7 +221,7 @@ class Parser:
                             arguments=args)
 
     def analyse_function_reference(self, tree: Tree) -> FunctionCall:
-        if len(tree.children) == 1:
+        if len(tree.children) == (1 if tree.data == "function_reference" else 2):
             namespace, name = None, self.analyse_name(tree.children[0])
         else:
             namespace = self.analyse_expression(tree.children[0],

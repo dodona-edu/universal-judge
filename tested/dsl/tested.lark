@@ -120,8 +120,8 @@ function: name arguments
 function_reference: [internal_expression] "::" CNAME
 constructor: "new" function
 
-// No spaces between "::" and "new", otherwise parsing troubles with the function references
-constructor_reference: [internal_expression "."] CNAME "::new"
+NEW_REF: /::\s*new/
+constructor_reference: [internal_expression "."] CNAME NEW_REF
 
 ?expression: "(" expression ")"
     | global_variable

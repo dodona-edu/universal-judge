@@ -462,7 +462,7 @@ def test_parse_constructor_reference():
 
 
 def test_parse_constructor_reference_with_namespace():
-    parsed = parser.parse_statement('call().data::new')
+    parsed = parser.parse_statement('call().data:: new')
     assert parsed.type == FunctionType.CONSTRUCTOR_REFERENCE
     assert parsed.name == "data"
     assert parsed.namespace is not None
