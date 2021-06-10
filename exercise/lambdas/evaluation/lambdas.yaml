@@ -1,0 +1,9 @@
+namespace: "store"
+tabs:
+- tab: "Reference"
+  contexts:
+    - testcases:
+        - expression: "apply((a, b) -> add(a, b), 6, 4)"
+          return: 10
+        - expression: "apply((integer a, integer b) -> add(a, b), 1, 11)"
+          return: 12

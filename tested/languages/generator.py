@@ -22,7 +22,7 @@ from ..internationalization import get_i18n_string
 from ..serialisation import (Value, SequenceType, Identifier, FunctionType,
                              FunctionCall, Expression, Statement, Assignment,
                              NothingType, NamedArgument, ObjectType,
-                             ObjectKeyValuePair, VariableType)
+                             ObjectKeyValuePair, VariableType, Lambda)
 from ..testplan import (EmptyChannel, IgnoredChannel, TextData, ProgrammedEvaluator,
                         SpecificEvaluator, Testcase, RunTestcase, Context,
                         ExceptionOutput, ValueOutput, Run, FileUrl)
@@ -195,6 +195,9 @@ def _prepare_expression(bundle: Bundle, expression: Expression) -> Expression:
     if isinstance(expression, Identifier):
         expression = Identifier(
             bundle.lang_config.conventionalize_identifier(expression))
+    elif isinstance(expression, Lambda):
+        expression = Lambda(body=_prepare_expression(bundle, expression.body),
+                            parameters=expression.parameters)
     elif isinstance(expression, InternalFunctionCall):
         expression.arguments = [_prepare_argument(bundle, arg)
                                 for arg in expression.arguments]
