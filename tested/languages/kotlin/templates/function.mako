@@ -4,10 +4,17 @@
 <%page args="function" />\
 % if not function.has_root_namespace and function.namespace:
     ## Kotlin has the !! (non-value assertion) operator
-    <%include file="statement.mako" args="statement=function.namespace"/>!!.\
+    <%include file="statement.mako" args="statement=function.namespace"/>!!\
+    % if function.type not in (FunctionType.FUNCTION_REFERENCE, FunctionType.CONSTRUCTOR_REFERENCE):
+        .\
+    % endif
 % endif
-${function.name}\
-% if function.type != FunctionType.PROPERTY:
+% if function.type in (FunctionType.CONSTRUCTOR_REFERENCE, FunctionType.FUNCTION_REFERENCE):
+    ::${function.name}\
+% else:
+    ${function.name}\
+% endif
+% if function.type in (FunctionType.CONSTRUCTOR, FunctionType.FUNCTION):
     (\
     % for argument in function.arguments:
         % if isinstance(argument, NamedArgument):
