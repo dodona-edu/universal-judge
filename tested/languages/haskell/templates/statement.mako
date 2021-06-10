@@ -1,6 +1,6 @@
 ## Translate "statements" and expressions to Haskell.
 <%! from tested.utils import get_args %>\
-<%! from tested.serialisation import Value, Identifier, FunctionCall, Expression, Assignment %>\
+<%! from tested.serialisation import Value, Identifier, FunctionCall, Expression, Assignment, Lambda %>\
 <%page args="statement,root=False,lifting=False"/>\
 % if isinstance(statement, get_args(Expression)):
     % if lifting:
@@ -12,6 +12,9 @@
     % elif isinstance(statement, FunctionCall):
         ## Delegate to the function template for function calls.
     <%include file="function.mako" args="function=statement"/>\
+    % elif isinstance(statement, Lambda):
+        ## Delegate to the lambda template for lambdas.
+    <%include file="lambda.mako" args="lambda_expr=statement"/>\
     % else:
         <% assert isinstance(statement, get_args(Value)) %>\
         ## We have a value, delegate to the value template.
