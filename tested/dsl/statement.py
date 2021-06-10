@@ -10,7 +10,8 @@ from tested.datatypes import string_to_type, AllTypes, SequenceTypes, \
     BasicStringTypes, BasicBooleanTypes, AdvancedNothingTypes, BasicNothingTypes
 from tested.serialisation import Statement, Assignment, NumberType, Expression, \
     NothingType, Identifier, BooleanType, StringType, SequenceType, FunctionCall, \
-    ObjectType, FunctionType, VariableType, Value, ObjectKeyValuePair
+    ObjectType, FunctionType, VariableType, Value, ObjectKeyValuePair, Lambda, \
+    TypedLambdaArgument
 
 data_types = (
     "INTEGER", "RATIONAL", "CHAR", "TEXT", "BOOLEAN", "SEQUENCE", "SET", "MAP",
@@ -208,6 +209,8 @@ class Parser:
             else:
                 raise ParseError(
                     "Constructor references not allowed for return values")
+        elif tree.data == "lambda":
+            return self.analyse_lambda(tree)
         raise ParseError("Invalid expression tree")
 
     def analyse_function(self, tree: Tree) -> FunctionCall:
@@ -236,6 +239,30 @@ class Parser:
     def analyse_global_variable(self, tree: Tree) -> FunctionCall:
         return FunctionCall(type=FunctionType.PROPERTY,
                             name=self.analyse_name(tree.children[0]))
+
+    def analyse_typed_lambda_parameter(self, tree: Tree) -> TypedLambdaArgument:
+        type_ = self.analyse_type_token(tree.children[0], assign=True)
+        name = self.analyse_name(tree.children[1])
+        return TypedLambdaArgument(
+            type=type_,
+            name=name
+        )
+
+    def analyse_lambda_parameters(self, tree: Tree
+                                  ) -> Union[List[str], List[TypedLambdaArgument]]:
+        if not tree.children:
+            return []
+        if tree.data == 'typed_lambda_parameters':
+            return list(map(self.analyse_typed_lambda_parameter, tree.children))
+        return list(map(self.analyse_name, tree.children))
+
+    def analyse_lambda(self, tree: Tree) -> Lambda:
+        parameters = self.analyse_lambda_parameters(tree.children[0])
+        body = self.analyse_expression(tree.children[1], True)
+        return Lambda(
+            body=body,
+            parameters=parameters
+        )
 
     def analyse_property(self, tree: Tree) -> FunctionCall:
         # Find namespace name

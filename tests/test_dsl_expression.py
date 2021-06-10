@@ -6,7 +6,7 @@ from tested.datatypes import BasicNothingTypes, BasicNumericTypes, AdvancedNumer
     BasicStringTypes, BasicSequenceTypes, AdvancedSequenceTypes, ObjectTypes, AdvancedStringTypes, AdvancedNothingTypes
 from tested.dsl import Parser, ParseError
 from tested.serialisation import Assignment, FunctionCall, FunctionType, VariableType, SequenceType, Identifier, \
-    StringType, ObjectKeyValuePair, ObjectType
+    StringType, ObjectKeyValuePair, ObjectType, Lambda, TypedLambdaArgument
 
 parser = Parser()
 
@@ -471,3 +471,45 @@ def test_parse_constructor_reference_with_namespace():
     assert namespace.name == "call"
     assert namespace.arguments == []
     assert namespace.namespace is None
+
+
+def test_lambda_no_arg():
+    parsed = parser.parse_statement("() -> 0")
+    assert isinstance(parsed, Lambda)
+    assert parsed.parameters == []
+    assert parsed.body.data == 0
+
+
+def test_lambda_untyped_single():
+    parsed = parser.parse_statement("a -> a")
+    assert isinstance(parsed, Lambda)
+    assert parsed.parameters == ["a"]
+    assert parsed.body == "a"
+
+
+def test_lambda_untyped_multiple():
+    parsed = parser.parse_statement('(a, b, c) -> "data"')
+    assert isinstance(parsed, Lambda)
+    assert parsed.parameters == ["a", "b", "c"]
+    assert parsed.body.data == "data"
+
+
+def test_lambda_typed_single():
+    parsed = parser.parse_statement("(integer a) -> a")
+    assert isinstance(parsed, Lambda)
+    assert parsed.parameters == [TypedLambdaArgument(type=BasicNumericTypes.INTEGER, name="a")]
+    assert parsed.body == "a"
+
+
+def test_lambda_typed_multiple():
+    parsed = parser.parse_statement('(integer a, rational b, text c) -> call(a, b, c)')
+    assert isinstance(parsed, Lambda)
+    assert parsed.parameters == [
+        TypedLambdaArgument(type=BasicNumericTypes.INTEGER, name="a"),
+        TypedLambdaArgument(type=BasicNumericTypes.RATIONAL, name="b"),
+        TypedLambdaArgument(type=BasicStringTypes.TEXT, name="c")
+    ]
+    assert parsed.body.type == FunctionType.FUNCTION
+    assert parsed.body.name == "call"
+    assert parsed.body.namespace is None
+    assert parsed.body.arguments == ["a", "b", "c"]

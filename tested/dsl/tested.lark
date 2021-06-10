@@ -123,6 +123,16 @@ constructor: "new" function
 NEW_REF: /::\s*new/
 constructor_reference: [internal_expression "."] CNAME NEW_REF
 
+// Lambda's
+typed_lambda_parameter: assign_datatype CNAME
+typed_lambda_parameters: "(" typed_lambda_parameter ("," typed_lambda_parameter )* ")"
+untyped_lambda_parameters: CNAME
+    | "(" [CNAME ("," CNAME)*] ")"
+?lambda_parameters: typed_lambda_parameters
+    | untyped_lambda_parameters
+
+lambda: lambda_parameters "->" expression
+
 ?expression: "(" expression ")"
     | global_variable
     | variable
@@ -132,6 +142,7 @@ constructor_reference: [internal_expression "."] CNAME NEW_REF
     | function_reference
     | constructor
     | constructor_reference
+    | lambda
 
 assignment: assign_datatype? CNAME "=" expression
 
