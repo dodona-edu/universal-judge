@@ -6,7 +6,7 @@
     <%include file="statement.mako" args="statement=function.namespace"/>.\
 % endif
 ${function.name}\
-% if function.type != FunctionType.PROPERTY:
+% if function.type in (FunctionType.FUNCTION, FunctionType.CONSTRUCTOR):
     (\
     % for argument in function.arguments:
         % if isinstance(argument, NamedArgument):

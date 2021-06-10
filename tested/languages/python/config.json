@@ -23,7 +23,8 @@
     "named_arguments": true,
     "evaluation": true,
     "default_parameters": true,
-    "global_variables": true
+    "global_variables": true,
+    "method_references": true
   },
   "datatypes": {
 
