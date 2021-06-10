@@ -16,3 +16,7 @@ function createStore(constructor, a, b) {
 function add(a, b) {
     return a + b;
 }
+
+function apply(fun, a, b) {
+    return fun(a, b);
+}

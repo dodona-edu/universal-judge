@@ -21,4 +21,8 @@ public class Store {
     public static Store createStore(BiFunction<Integer, Integer, Store> supplier, int a, int b) {
         return supplier.apply(a, b);
     }
+
+    public static int apply(BinaryOperator<Integer> operator, int a, int b) {
+        return operator.apply(a, b);
+    }
 }

@@ -11,3 +11,7 @@ fun add(a: Int, b: Int): Int {
 fun createStore(c: (Int, Int) -> Store, a: Int, b: Int): Store {
     return c(a, b)
 }
+
+fun apply(c: (Int, Int) -> Int, a: Int, b: Int): Int {
+    return c(a, b)
+}

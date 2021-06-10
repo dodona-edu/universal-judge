@@ -1,0 +1,7 @@
+namespace: "store"
+tabs:
+- tab: "Reference"
+  contexts:
+    - testcases:
+        - expression: "apply(::add, 6, 4)"
+          return: 10

@@ -13,3 +13,7 @@ def add(a, b):
 
 def create_store(constructor, a, b):
     return constructor(a, b)
+
+
+def apply(fun, a, b):
+    return fun(a, b)
