@@ -517,3 +517,13 @@ def test_method_references(language: str, tmp_path: Path, pytestconfig):
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["correct"]
+
+
+@pytest.mark.parametrize("language", ["python", "java", "kotlin", "javascript",
+                                      pytest.param("haskell", marks=mark_haskell),
+                                      pytest.param("runhaskell", marks=mark_haskell)])
+def test_lambdas(language: str, tmp_path: Path, pytestconfig):
+    conf = configuration(pytestconfig, "lambdas", language, tmp_path, "lambdas.yaml", "solution")
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"] * 2
