@@ -28,7 +28,8 @@
     "evaluation": false,
     "named_arguments": false,
     "default_parameters": false,
-    "global_variables": true
+    "global_variables": true,
+    "method_references": true
   },
   "datatypes": {
     "integer": "supported",
