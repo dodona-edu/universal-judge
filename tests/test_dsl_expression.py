@@ -6,7 +6,7 @@ from tested.datatypes import BasicNothingTypes, BasicNumericTypes, AdvancedNumer
     BasicStringTypes, BasicSequenceTypes, AdvancedSequenceTypes, ObjectTypes, AdvancedStringTypes, AdvancedNothingTypes
 from tested.dsl import Parser, ParseError
 from tested.serialisation import Assignment, FunctionCall, FunctionType, VariableType, SequenceType, Identifier, \
-    StringType, ObjectKeyValuePair, ObjectType, Lambda, TypedLambdaArgument
+    StringType, ObjectKeyValuePair, ObjectType, Lambda, TypedLambdaArgument, LambdaType
 
 parser = Parser()
 
@@ -513,3 +513,38 @@ def test_lambda_typed_multiple():
     assert parsed.body.name == "call"
     assert parsed.body.namespace is None
     assert parsed.body.arguments == ["a", "b", "c"]
+
+
+def test_lambda_assignment_no_params_no_return():
+    parsed = parser.parse_statement("lambda l = () -> run()")
+    assert isinstance(parsed, Assignment)
+    assert isinstance(parsed.expression, Lambda)
+    assert parsed.variable == "l"
+    assert isinstance(parsed.type, LambdaType)
+    assert parsed.type.parameter_types == []
+    assert parsed.type.return_type is None
+
+
+def test_lambda_assignment_no_params_no_return2():
+    parsed = parser.parse_statement("lambda<;> l = () -> run()")
+    assert isinstance(parsed, Assignment)
+    assert isinstance(parsed.expression, Lambda)
+    assert parsed.variable == "l"
+    assert isinstance(parsed.type, LambdaType)
+    assert parsed.type.parameter_types == []
+    assert parsed.type.return_type is None
+
+
+def test_lambda_assignment_identity():
+    parsed = parser.parse_statement("lambda<integer;integer> l = x -> x")
+    assert isinstance(parsed, Assignment)
+    assert isinstance(parsed.expression, Lambda)
+    assert parsed.variable == "l"
+    assert isinstance(parsed.type, LambdaType)
+    assert parsed.type.parameter_types == [BasicNumericTypes.INTEGER]
+    assert parsed.type.return_type == BasicNumericTypes.INTEGER
+
+
+def test_parse_error_lambda_assign():
+    with pytest.raises(ParseError):
+        parser.parse_statement('data = x -> call(x)')

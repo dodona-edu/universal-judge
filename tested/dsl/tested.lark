@@ -64,6 +64,7 @@ FALSE: "false"
         | collections
 
 ?assign_datatype: datatype
+                | lambda_type
                 | CNAME
 
 ?null: NULL
@@ -132,6 +133,10 @@ untyped_lambda_parameters: CNAME
     | untyped_lambda_parameters
 
 lambda: lambda_parameters "->" expression
+lambda_type_parameters: [assign_datatype ("," assign_datatype)*]
+lambda_type_return: [assign_datatype]
+lambda_type: "lambda" "<" lambda_type_parameters ";" lambda_type_return ">"
+    | "lambda"
 
 ?expression: "(" expression ")"
     | global_variable

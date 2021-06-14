@@ -11,7 +11,7 @@ from tested.datatypes import string_to_type, AllTypes, SequenceTypes, \
 from tested.serialisation import Statement, Assignment, NumberType, Expression, \
     NothingType, Identifier, BooleanType, StringType, SequenceType, FunctionCall, \
     ObjectType, FunctionType, VariableType, Value, ObjectKeyValuePair, Lambda, \
-    TypedLambdaArgument
+    TypedLambdaArgument, AllDataTypes, LambdaType
 
 data_types = (
     "INTEGER", "RATIONAL", "CHAR", "TEXT", "BOOLEAN", "SEQUENCE", "SET", "MAP",
@@ -48,6 +48,29 @@ class Parser:
         return [self.analyse_expression(arg, allow_functions)
                 for arg in tree.children]
 
+    def analyse_lambda_parameter_types(self, tree: Tree) -> List[AllDataTypes]:
+        return list(map(self.analyse_assign_datatype, tree.children))
+
+    def analyse_lambda_return_type(self, tree: Tree) -> Optional[AllDataTypes]:
+        if tree.children:
+            return self.analyse_assign_datatype(tree.children[0])
+        return None
+
+    def analyse_assign_datatype(self, tree: Union[Tree, Token]) -> AllDataTypes:
+        if isinstance(tree, Token):
+            return self.analyse_type_token(tree, True)
+        else:
+            assert tree.data == "lambda_type"
+            if tree.children:
+                params = self.analyse_lambda_parameter_types(tree.children[0])
+                return_type = self.analyse_lambda_return_type(tree.children[0])
+                return LambdaType(
+                    parameter_types=params,
+                    return_type=return_type
+                )
+            else:
+                return LambdaType()
+
     def analyse_assign(self, tree: Tree) -> Assignment:
         # Determine indices
         if len(tree.children) == 2:
@@ -69,11 +92,13 @@ class Parser:
                 else:
                     raise ParseError(
                         "Can't derive variable type from function call")
+            elif isinstance(expression, Lambda):
+                raise ParseError("Can't derive variable type from lambda")
             else:
                 raise ParseError("Can't derive variable type from identifier")
         else:
             # Type is given
-            var_type = self.analyse_type_token(tree.children[index_type], True)
+            var_type = self.analyse_assign_datatype(tree.children[index_type])
         # Create assignment object
         return Assignment(variable=var_name, expression=expression, type=var_type)
 
@@ -121,7 +146,6 @@ class Parser:
         # Update function type
         function.type = FunctionType.CONSTRUCTOR_REFERENCE
         return function
-
 
     def analyse_dict(self, tree: Tree,
                      allow_functions: bool = True) -> List[ObjectKeyValuePair]:
