@@ -413,9 +413,19 @@ class VariableType:
     type: Literal['custom'] = 'custom'
 
 
+AllDataTypes = Union[AllTypes, VariableType, 'LambdaType']
+
+
+@dataclass
+class LambdaType:
+    parameter_types: List[AllDataTypes] = field(default_factory=list)
+    return_type: Optional[AllDataTypes] = None
+    type: Literal['lambda'] = 'lambda'
+
+
 @dataclass
 class TypedLambdaArgument:
-    type: Union[AllTypes, VariableType]
+    type: AllDataTypes
     name: str
 
 
@@ -466,7 +476,7 @@ class Assignment(WithFeatures, WithFunctions):
     """
     variable: str
     expression: Expression
-    type: Union[AllTypes, VariableType]
+    type: AllDataTypes
 
     def replace_expression(self, expression: Expression) -> 'Assignment':
         return Assignment(variable=self.variable, expression=expression,
@@ -484,6 +494,8 @@ class Assignment(WithFeatures, WithFunctions):
     def get_used_features(self) -> FeatureSet:
         base = FeatureSet({Construct.ASSIGNMENTS}, set(), set())
         other = self.expression.get_used_features()
+        if isinstance(self.type, LambdaType):
+            base.constructs.add(Construct.ASSIGNMENTS_LAMBDA)
 
         return combine_features([base, other])
 
@@ -500,6 +512,7 @@ NamedArgument.__pydantic_model__.update_forward_refs()
 FunctionCall.__pydantic_model__.update_forward_refs()
 ObjectKeyValuePair.__pydantic_model__.update_forward_refs()
 Lambda.__pydantic_model__.update_forward_refs()
+LambdaType.__pydantic_model__.update_forward_refs()
 
 
 def as_basic_type(value: Value) -> Value:

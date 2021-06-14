@@ -43,6 +43,7 @@ class Construct(str, Enum):
     LAMBDAS = "lambdas"
     UNTYPED_LAMBDA_PARAMETERS = "untyped_lambda_parameters"
     TYPED_LAMBDA_PARAMETERS = "typed_lambda_parameters"
+    ASSIGNMENTS_LAMBDA = "assignments_lambda"
 
 
 Types = Set[AllTypes]
