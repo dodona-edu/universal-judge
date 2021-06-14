@@ -422,6 +422,18 @@ class LambdaType:
     return_type: Optional[AllDataTypes] = None
     type: Literal['lambda'] = 'lambda'
 
+    def is_operator(self) -> bool:
+        """
+        Check if all the parameters and return type are the same.
+        :return: if the lambda is a function with the same operant type and
+        return type
+        """
+
+        if self.return_type is None:
+            return False
+        return list(filter(lambda x: x == self.return_type,
+                           self.parameter_types)) == self.parameter_types
+
 
 @dataclass
 class TypedLambdaArgument:
