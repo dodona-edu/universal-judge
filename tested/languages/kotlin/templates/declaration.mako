@@ -1,6 +1,6 @@
 ## Convert a Value to a type.
 <%! from tested.utils import get_args %>\
-<%! from tested.serialisation import VariableType, as_basic_type, resolve_to_basic, Value %>\
+<%! from tested.serialisation import LambdaType, VariableType, as_basic_type, resolve_to_basic, Value %>\
 <%! from tested.datatypes import AdvancedNumericTypes, AdvancedSequenceTypes, AdvancedStringTypes  %>\
 <%! from tested.datatypes import BasicNumericTypes, BasicStringTypes, BasicBooleanTypes, BasicNothingTypes, BasicSequenceTypes, BasicObjectTypes  %>\
 <%page args="tp,value,nt=None,inner=False,nullable=True" />\
@@ -12,7 +12,9 @@
             return type_, False
 %>\
 % if isinstance(tp, VariableType):
-    ${tp.data}\
+    ${tp.data}
+% elif isinstance(tp, LambdaType):
+    <%include file="declaration_lambda.mako", args="tp=tp"/>\
 % elif tp == AdvancedSequenceTypes.ARRAY:
     <% type_ = (value.get_content_type() or "Object") if isinstance(value, get_args(Value)) else nt if nt else 'Object' %>\
     <% base_type, sub_type = extract_type_tuple(type_) %>\
