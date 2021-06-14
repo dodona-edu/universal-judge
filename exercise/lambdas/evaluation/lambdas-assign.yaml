@@ -1,0 +1,10 @@
+namespace: "store"
+tabs:
+- tab: "Reference"
+  contexts:
+    - testcases:
+        - statement: 'lambda<integer,integer;integer> l = (integer a, integer b) -> add(a, b)'
+        - expression: "apply(l, 6, 4)"
+          return: 10
+        - expression: "apply(l, 1, 11)"
+          return: 12
