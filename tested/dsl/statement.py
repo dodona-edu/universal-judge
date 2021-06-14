@@ -1,6 +1,6 @@
 from ast import literal_eval
 from os.path import join, dirname, realpath
-from typing import Optional, Union, List, get_args
+from typing import Optional, Union, List, get_args, Tuple
 
 from lark import Lark, Tree, Token, UnexpectedToken
 
@@ -33,15 +33,19 @@ class ParseError(Exception):
 class Parser:
     def __init__(self, grammar_file: Optional[str] = None):
         if not grammar_file:
-            grammar_file = join(dirname(realpath(__file__)), "grammar.lark")
+            grammar_file = join(dirname(realpath(__file__)), "tested.lark")
         self.grammar_file = grammar_file
-        self.parser = Lark.open(grammar_file, start=['stmt', 'return'],
-                                lexer='standard')
+        # Don't modify the parser, the parser must be 'lalr' for fast parsing
+        # Modify the grammar instead to be unambiguous
+        self.parser = Lark.open(grammar_file, start=['statements', 'return'],
+                                lexer='standard', parser='lalr')
 
-    def analyse_arguments(self, tree: Tree) -> List[Expression]:
+    def analyse_arguments(self, tree: Tree,
+                          allow_functions: bool = True) -> List[Expression]:
         if tree.data != 'args':
             raise ParseError("Function expect argument list")
-        return [self.analyse_expression(arg, True) for arg in tree.children]
+        return [self.analyse_expression(arg, allow_functions)
+                for arg in tree.children]
 
     def analyse_assign(self, tree: Tree) -> Assignment:
         # Determine indices
@@ -104,14 +108,11 @@ class Parser:
         return expression
 
     def analyse_constructor(self, tree: Tree) -> FunctionCall:
-        # Find constructor name
-        namespace, constr_name = self.analyse_namespace(tree.children[0])
-        # Analyse arguments
-        args = self.analyse_arguments(tree.children[1])
-        return FunctionCall(type=FunctionType.CONSTRUCTOR,
-                            name=constr_name,
-                            namespace=namespace,
-                            arguments=args)
+        # Analyse constructor function
+        function = self.analyse_function(tree.children[0])
+        # Update function type
+        function.type = FunctionType.CONSTRUCTOR
+        return function
 
     def analyse_dict(self, tree: Tree,
                      allow_functions: bool = True) -> List[ObjectKeyValuePair]:
@@ -147,24 +148,24 @@ class Parser:
             return BooleanType(type=BasicBooleanTypes.BOOLEAN, data=True)
         elif token.type == 'FALSE':
             return BooleanType(type=BasicBooleanTypes.BOOLEAN, data=False)
+        elif token.type == 'NULL':
+            return NothingType(type=BasicNothingTypes.NOTHING)
+        elif token.type == 'UNDEFINED':
+            return NothingType(type=AdvancedNothingTypes.UNDEFINED)
         raise ParseError("Invalid value token")
 
     def analyse_expression_tree(self, tree: Tree,
                                 allow_functions: bool = True) -> Expression:
-        if tree.data == 'null':
-            nothing_type = (BasicNothingTypes.NOTHING
-                            if tree.children[0].type == "NULL"
-                            else AdvancedNothingTypes.UNDEFINED)
-            return NothingType(type=nothing_type)
-        elif tree.data in ('list', 'set', 'tuple'):
+        if tree.data in ('list', 'set', 'tuple'):
+            if tree.data == 'set':
+                tree.children = [Tree(data="args", children=tree.children)]
+            content = self.analyse_arguments(tree.children[0],
+                                             allow_functions=allow_functions)
             return SequenceType(type=default_sequence_type_map[tree.data],
-                                data=[
-                                    self.analyse_expression(t, allow_functions)
-                                    for t in tree.children
-                                ])
+                                data=content)
         elif tree.data == 'value_cast':
             return self.analyse_cast(tree)
-        elif tree.data == 'fun':
+        elif tree.data == 'function':
             if allow_functions:
                 return self.analyse_function(tree)
             else:
@@ -193,7 +194,7 @@ class Parser:
         # Find function name
         namespace, fun_name = self.analyse_namespace(tree.children[0])
         # Analyse arguments
-        args = self.analyse_arguments(tree.children[1])
+        args = self.analyse_arguments(tree.children[1], allow_functions=True)
         return FunctionCall(type=FunctionType.FUNCTION,
                             name=fun_name,
                             namespace=namespace,
@@ -202,11 +203,11 @@ class Parser:
     # noinspection PyMethodMayBeStatic
     def analyse_global_variable(self, tree: Tree) -> FunctionCall:
         return FunctionCall(type=FunctionType.PROPERTY,
-                            name=self.analyse_name(tree.children[1]))
+                            name=self.analyse_name(tree.children[0]))
 
     def analyse_property(self, tree: Tree) -> FunctionCall:
         # Find namespace name
-        _a, namespace = self.analyse_namespace(tree.children[0])
+        namespace = self.analyse_expression(tree.children[0])
         # Find property name
         prop_name = self.analyse_name(tree.children[1])
         return FunctionCall(name=prop_name,
@@ -219,15 +220,12 @@ class Parser:
             raise ParseError("Invalid variable/function name")
         return token.value
 
-    def analyse_namespace(self, tree: Union[Tree, Token]):
-        if isinstance(tree, Token):
-            return None, self.analyse_expression_token(tree)
-        if tree.data != 'name':
-            return None, self.analyse_expression_tree(tree)
-        if len(tree.children) == 1:
-            return None, self.analyse_name(tree.children[0])
-        return (self.analyse_expression(tree.children[0], allow_functions=True),
-                self.analyse_name(tree.children[1]))
+    def analyse_namespace(self, tree: Union[Tree, Token]
+                          ) -> Tuple[Optional[Expression], str]:
+        expression = self.analyse_expression(tree, allow_functions=True)
+        if isinstance(expression, str):
+            return None, expression
+        return expression.namespace, expression.name
 
     # noinspection PyMethodMayBeStatic
     def analyse_type_token(self, token: Token,
@@ -241,8 +239,8 @@ class Parser:
 
     def parse_statement(self, statement: str) -> Statement:
         try:
-            parse_tree = self.parser.parse(statement, start='stmt')
-            if isinstance(parse_tree, Tree) and parse_tree.data == 'assign':
+            parse_tree = self.parser.parse(statement, start='statements')
+            if isinstance(parse_tree, Tree) and parse_tree.data == 'assignment':
                 return self.analyse_assign(parse_tree)
             return self.analyse_expression(parse_tree, True)
         except UnexpectedToken as e:
