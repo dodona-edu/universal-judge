@@ -28,7 +28,8 @@
     "method_references": true,
     "lambdas": true,
     "untyped_lambda_parameters": true,
-    "typed_lambda_parameters": true
+    "typed_lambda_parameters": true,
+    "assignments_lambda": true
   },
   "datatypes": {
     "integer": "supported",
