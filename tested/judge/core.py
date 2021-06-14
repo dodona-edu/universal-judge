@@ -2,6 +2,7 @@ import concurrent
 import logging
 import shutil
 import time
+import traceback
 from concurrent.futures.thread import ThreadPoolExecutor
 from pathlib import Path
 from typing import Tuple, List
@@ -54,7 +55,16 @@ def judge(bundle: Bundle):
 
     new_stage("prepare.output")
     mode = bundle.config.options.mode
-    collector = OutputManager(bundle)
+    try:
+        collector = OutputManager(bundle)
+    except Exception as e:
+        bundle.plan.tabs = []
+        collector = OutputManager(bundle)
+        collector.add(StartJudgment())
+        _internal_error_tab(e, collector)
+        collector.add(CloseJudgment())
+        collector.clean_finish()
+        return
     collector.add(StartJudgment())
 
     max_time = float(bundle.config.time_limit) * 0.9
@@ -69,7 +79,12 @@ def judge(bundle: Bundle):
 
     _logger.info("Start generating code...")
     new_stage("generation")
-    common_dir, files, selector = _generate_files(bundle, mode)
+    try:
+        common_dir, files, selector = _generate_files(bundle, mode)
+    except Exception as e:
+        _internal_error_tab(e, collector)
+        collector.terminate(Status.INTERNAL_ERROR)
+        return
     # Add the selector to the dependencies.
     if selector:
         files.append(selector)
@@ -207,6 +222,29 @@ def judge(bundle: Bundle):
 
     collector.add(CloseJudgment())
     collector.clean_finish()
+
+
+def _internal_error_tab(e: Exception, output: OutputManager):
+    output.add_tab(
+        StartTab(title=get_i18n_string("judge.core.internal.error.title")), -1)
+    output.add(AppendMessage(message=ExtendedMessage(
+        description=get_i18n_string("judge.core.internal.error.student"),
+        format="text",
+        permission=Permission.STUDENT
+    )))
+    output.add(AppendMessage(message=ExtendedMessage(
+        description=get_i18n_string("judge.core.internal.error.staff"),
+        format="text",
+        permission=Permission.STAFF
+    )))
+    output.add(AppendMessage(message=ExtendedMessage(
+        description=''.join(
+            traceback.format_exception(etype=type(e), value=e, tb=e.__traceback__)),
+        format="code",
+        permission=Permission.STAFF
+    )))
+    output.add(EscalateStatus(status=StatusMessage(enum=Status.INTERNAL_ERROR)))
+    output.add_tab(CloseTab(), -1)
 
 
 def _single_execution(bundle: Bundle,

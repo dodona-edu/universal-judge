@@ -62,6 +62,11 @@ nl:
       invalid:
         source-code: "Ongeldige broncode"
       initialization: "Fout tijdens het initialiseren van de code:"
+      internal:
+        error:
+          title: "Interne fout"
+          student: "Er is een interne fout opgetreden, contacteer de lesgever voor meer informatie."
+          staff: "Er is een interne fout opgetreden:"
     evaluation:
       early-exit: "De beoordeling is vroegtijdig gestopt."
       time-limit: "Tijdslimiet overschreden."

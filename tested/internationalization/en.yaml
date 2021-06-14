@@ -62,6 +62,11 @@ en:
       invalid:
         source-code: "Invalid source code"
       initialization: "Error while initializing the code:"
+      internal:
+        error:
+          title: "Internal error"
+          student: "An internal error is thrown, contact staff for more information."
+          staff: "An internal error is thrown:"
     evaluation:
       early-exit: "The evaluation has stopped early."
       time-limit: "Time limit exceeded"
