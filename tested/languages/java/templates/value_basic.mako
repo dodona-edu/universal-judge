@@ -7,7 +7,7 @@
     ${value.data}\
 % elif value.type == BasicNumericTypes.RATIONAL:
     % if not isinstance(value.data, SpecialNumbers):
-        ${value.data}f\
+        ${value.data}\
     % elif value.data == SpecialNumbers.NOT_A_NUMBER:
         Double.NaN\
     % elif value.data == SpecialNumbers.POS_INFINITY:
