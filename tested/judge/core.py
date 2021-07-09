@@ -425,6 +425,5 @@ def _copy_workdir_source_files(bundle: Bundle, common_dir: Path):
                     prefix) and file != "common":
                 _logger.debug("Iterate subdir %s", dst / file)
                 shutil.copytree(origin, dst / file)
-                pass
 
     recursive_copy(bundle.config.workdir, common_dir)
