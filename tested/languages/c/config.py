@@ -98,3 +98,6 @@ class C(Language):
         clean_stacktrace = cleanup_compilation_stderr(
             stderr, self.with_extension(self.conventionalize_namespace(namespace)))
         return [], [], limit_output(stdout), clean_stacktrace
+
+    def is_source_file(self, file: Path) -> bool:
+        return file.suffix in ('.c', '.h')
