@@ -446,6 +446,15 @@ class Language:
         """
         return self.options["extensions"]["file"]
 
+    def is_source_file(self, file: Path) -> bool:
+        """
+        Check if the given file is a valid source file
+
+        :param file: File to check if it's a valid source
+        :return: If the file is valid source
+        """
+        return file.suffix == f'.{self.extension_file()}'
+
     def with_extension(self, file_name: str) -> str:
         """Utility function to append the file extension to a file name."""
         return f"{file_name}.{self.extension_file()}"

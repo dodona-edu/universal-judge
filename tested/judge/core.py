@@ -77,6 +77,8 @@ def judge(bundle: Bundle):
     if mode == ExecutionMode.PRECOMPILATION:
         new_stage("compilation.pre")
         assert not bundle.lang_config.needs_selector() or selector is not None
+        files = _copy_workdir_source_files(bundle, common_dir) + files
+
         # Compile all code in one go.
         _logger.info("Running precompilation step...")
         remaining = max_time - (time.perf_counter() - start)
@@ -402,3 +404,30 @@ def _process_results(bundle: Bundle, execution: Execution,
         if continue_ in (Status.TIME_LIMIT_EXCEEDED,
                          Status.MEMORY_LIMIT_EXCEEDED):
             return continue_
+
+
+def _copy_workdir_source_files(bundle: Bundle, common_dir: Path) -> List[str]:
+    """
+    Copy additional source files from the workdir to the common dir
+
+    :param bundle: Bundle information of the test plan
+    :param common_dir: The directory of the other files
+    """
+    prefix = bundle.lang_config.execution_prefix()
+    source_files = []
+
+    def recursive_copy(src: Path, dst: Path):
+        for origin in src.iterdir():
+            file = origin.name.lower()
+            if origin.is_file() and bundle.lang_config.is_source_file(origin):
+                source_files.append(str(dst / origin.name))
+                _logger.debug("Copying %s to %s", origin, dst)
+                shutil.copy2(origin, dst)
+            elif origin.is_dir() and not file.startswith(
+                    prefix) and file != "common":
+                _logger.debug("Iterate subdir %s", dst / file)
+                shutil.copytree(origin, dst / file)
+
+    recursive_copy(bundle.config.workdir, common_dir)
+
+    return source_files
