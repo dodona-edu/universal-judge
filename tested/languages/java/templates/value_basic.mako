@@ -26,10 +26,11 @@
 % elif value.type == BasicSequenceTypes.SET:
     Set.of(<%include file="value_arguments.mako" args="arguments=value.data" />)\
 % elif value.type == BasicObjectTypes.MAP:
-    Map.of(\
+    Map.ofEntries(\
     % for pair in value.data:
+        Map.entry(\
         <%include file="statement.mako" args="statement=pair.key" />, \
-        <%include file="statement.mako" args="statement=pair.value" />\
+        <%include file="statement.mako" args="statement=pair.value" />)\
         % if not loop.last:
             , \
         % endif
