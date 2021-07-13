@@ -55,7 +55,8 @@ def compare_text(
         expected = expected.lower()
         actual = actual.lower()
 
-    if options['tryFloatingPoint'] and (actual_float := _is_number(actual)):
+    if options['tryFloatingPoint'] and (
+            actual_float := _is_number(actual)) is not None:
         expected_float = float(expected)
         if options['applyRounding']:
             numbers = int(options['roundTo'])
