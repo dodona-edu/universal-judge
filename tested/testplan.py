@@ -21,7 +21,8 @@ from .features import FeatureSet, combine_features, WithFeatures, NOTHING, \
     Construct
 from .serialisation import (ExceptionValue, Value, Expression, Statement,
                             Identifier, FunctionCall, SequenceType, ObjectType,
-                            FunctionType, WithFunctions)
+                            FunctionType, WithFunctions, WithNamespaces, Namespace,
+                            _merge_namespaces)
 from .utils import get_args, flatten
 
 
@@ -376,7 +377,7 @@ class Output(BaseOutput):
 
 
 @dataclass
-class Testcase(WithFeatures, WithFunctions):
+class Testcase(WithFeatures, WithFunctions, WithNamespaces):
     """A testcase is defined by an input channel and an output channel"""
     input: Statement
     description: Optional[str] = None  # Will be generated if None.
@@ -403,6 +404,9 @@ class Testcase(WithFeatures, WithFunctions):
 
     def get_functions(self) -> Iterable[FunctionCall]:
         return self.input.get_functions()
+
+    def get_namespaces(self) -> Iterable[Namespace]:
+        return self.input.get_namespaces()
 
 
 @dataclass
@@ -463,7 +467,7 @@ Code = Dict[str, TextData]
 
 
 @dataclass
-class Context(WithFeatures, WithFunctions):
+class Context(WithFeatures, WithFunctions, WithNamespaces):
     """
     A test case is an independent run of the solution.
     """
@@ -492,9 +496,12 @@ class Context(WithFeatures, WithFunctions):
         result.extend(self.testcases)
         return result
 
+    def get_namespaces(self) -> Iterable['Namespace']:
+        return _merge_namespaces(t.get_namespaces() for t in self.testcases)
+
 
 @dataclass
-class Run(WithFeatures, WithFunctions):
+class Run(WithFeatures, WithFunctions, WithNamespaces):
     """
     A run is a combination of contexts and a run testcase.
     """
@@ -578,6 +585,9 @@ class Run(WithFeatures, WithFunctions):
 
     def count_contexts(self):
         return int(self.run.input.main_call) + len(self.contexts)
+
+    def get_namespaces(self) -> Iterable['Namespace']:
+        return _merge_namespaces(c.get_namespaces() for c in self.contexts)
 
 
 @dataclass

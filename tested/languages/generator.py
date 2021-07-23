@@ -143,6 +143,8 @@ class _ExecutionArguments:
     contexts: List[_ContextArguments]
     # A set of the names of the language specific evaluators we will need.
     evaluator_names: Set[str]
+    # All namespaces
+    namespaces: List[Namespace]
 
 
 @dataclass
@@ -661,7 +663,8 @@ def generate_execution(bundle: Bundle,
         context_secret_id=bundle.context_separator_secret,
         run_testcase=run_testcase,
         contexts=contexts,
-        evaluator_names=evaluator_names
+        evaluator_names=evaluator_names,
+        namespaces=list(run.get_namespaces())
     )
 
     evaluator_files = [f"{x}.{lang_config.extension_file()}"
