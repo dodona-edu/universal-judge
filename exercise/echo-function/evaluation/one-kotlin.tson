@@ -1,0 +1,52 @@
+{
+  "tabs": [
+    {
+      "name": "Tab",
+      "runs": [
+        {
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "echo",
+                    "arguments": [
+                      {
+                        "type": "function",
+                        "name": "format",
+                        "namespace": {
+                            "type": "namespace",
+                            "name": "string",
+                            "package_path": ["kotlin"]
+                        },
+                        "arguments": [
+                          {
+                            "type": "text",
+                            "data": "%s"
+                          },
+                          {
+                            "type": "text",
+                            "data": "input-1"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "output": {
+                    "result": {
+                      "value": {
+                        "type": "text",
+                        "data": "input-1"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

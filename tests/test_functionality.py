@@ -91,7 +91,8 @@ def test_io_function_exercise(language: str, tmp_path: Path, pytestconfig):
 @pytest.mark.parametrize(("language", "testplan"), [
     pytest.param("haskell", "one-haskell.tson", marks=mark_haskell),
     pytest.param("runhaskell", "one-haskell.tson", marks=mark_haskell),
-    ("java", "one-java.tson")
+    ("java", "one-java.tson"),
+    ("kotlin", "one-kotlin.tson")
 ])
 def test_io_function_exercise_namespace(language: str, testplan: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "echo-function", language, tmp_path, testplan, "correct")

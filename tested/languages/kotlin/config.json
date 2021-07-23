@@ -15,7 +15,8 @@
     "identifier": "camel_case",
     "global_identifier": "macro_case",
     "property": "camel_case",
-    "class": "pascal_case"
+    "class": "pascal_case",
+    "package": "flat_case"
   },
   "constructs": {
     "objects": true,
@@ -27,7 +28,8 @@
     "evaluation": true,
     "named_arguments": true,
     "default_parameters": true,
-    "global_variables": true
+    "global_variables": true,
+    "namespaces": true
   },
   "datatypes": {
     "integer": "supported",
