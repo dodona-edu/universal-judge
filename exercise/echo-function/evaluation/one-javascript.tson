@@ -1,0 +1,59 @@
+{
+  "tabs": [
+    {
+      "name": "Tab",
+      "runs": [
+        {
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "echo",
+                    "arguments": [
+                      {
+                        "type": "function",
+                        "name": "unescape",
+                        "namespace": {
+                            "type": "namespace",
+                            "name": "querystring",
+                            "package_path": []
+                        },
+                        "arguments": [
+                          {
+                            "type": "function",
+                            "name": "escape",
+                            "namespace": {
+                                "type": "namespace",
+                                "name": "querystring",
+                                "package_path": []
+                            },
+                            "arguments": [
+                              {
+                                "type": "text",
+                                "data": "input-1"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "output": {
+                    "result": {
+                      "value": {
+                        "type": "text",
+                        "data": "input-1"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -26,7 +26,8 @@
     "heterogeneous_arguments": true,
     "evaluation": true,
     "default_parameters": true,
-    "global_variables": true
+    "global_variables": true,
+    "namespaces": true
   },
   "datatypes": {
     "integer": "supported",

@@ -10,6 +10,12 @@ const values = require("./values.js");
 ##################################
 
 ## Import the language specific evaluators we will need.
+% for namespace in namespaces:
+    const ${"_".join(namespace.package_path + [namespace.name])} = \
+    require("${"/".join(namespace.package_path + [namespace.name])}");
+% endfor
+
+## Import the language specific evaluators we will need.
 % for name in evaluator_names:
     const ${name} = require("./${name}.js");
 % endfor

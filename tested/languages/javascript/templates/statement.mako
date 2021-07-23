@@ -1,6 +1,6 @@
 ## Convert a statement and/or expression into JavaScript code.
 <%! from tested.utils import get_args %>\
-<%! from tested.serialisation import Value, Identifier, FunctionCall, Assignment %>\
+<%! from tested.serialisation import Value, Identifier, FunctionCall, Assignment, Namespace %>\
 <%page args="statement,internal=False"/>\
 % if isinstance(statement, Identifier):
     ## Statement is an identifier => just echo it.
@@ -11,6 +11,8 @@
 % elif isinstance(statement, get_args(Value)):
     ## Statement is a literal => delegate to the value template.
     <%include file="value.mako", args="value=statement" />\
+% elif isinstance(statement, Namespace):
+    ${"_".join(statement.package_path + [statement.name])}\
 % elif isinstance(statement, get_args(Assignment)):
     ## Statement is an assignment => recursively delegate right-hand side to statement template.
     % if full:
