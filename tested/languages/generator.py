@@ -238,7 +238,7 @@ def _prepare_expression(bundle: Bundle, expression: Expression) -> Expression:
     elif isinstance(expression, Namespace):
         expression.name = bundle.lang_config.conventionalize_namespace(
             expression.name)
-        expression.package_path = [bundle.lang_config.conventionalize_namespace(p)
+        expression.package_path = [bundle.lang_config.conventionalize_package(p)
                                    for p in expression.package_path]
     return expression
 
