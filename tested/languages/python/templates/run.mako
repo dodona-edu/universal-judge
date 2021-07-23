@@ -9,6 +9,21 @@ import sys
 ## Setup                        ##
 ##################################
 
+## Import root-level packages
+<%!
+    n = set()
+
+    def _root(namespace):
+        return (namespace.package_path or [namespace.name])[0]
+%>\
+
+% for namespace in namespaces:
+    <% data = _root(namespace) %>\
+    % if data not in n:
+        import ${data}
+    % endif
+% endfor
+
 ## Import the language specific evaluators we will need.
 % for name in evaluator_names:
     import ${name}
