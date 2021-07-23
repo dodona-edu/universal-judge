@@ -416,7 +416,7 @@ class FunctionCall(WithFeatures, WithFunctions, WithNamespaces):
 
         # Get OOP features.
         if self.type in (FunctionType.PROPERTY, FunctionType.CONSTRUCTOR) or \
-                not isinstance(self.namespace, (Identifier, NoneType)):
+                not isinstance(self.namespace, (Identifier, NoneType, Namespace)):
             constructs.add(Construct.OBJECTS)
 
         base_features = FeatureSet(constructs=constructs, types=set(),

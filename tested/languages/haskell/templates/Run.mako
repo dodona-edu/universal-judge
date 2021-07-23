@@ -16,6 +16,10 @@ import Control.Monad.Trans.Class
 import Control.Exception
 import EvaluationUtils
 
+% for namespace in namespaces:
+    import qualified ${".".join(namespace.package_path + [namespace.name])}
+% endfor
+
 ## Import the language specific evaluators we will need.
 % for name in evaluator_names:
     import qualified ${name}

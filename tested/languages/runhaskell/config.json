@@ -14,7 +14,8 @@
     "namespace": "pascal_case",
     "identifier": "camel_case",
     "global_identifier": "camel_case",
-    "function": "camel_case"
+    "function": "camel_case",
+    "package": "pascal_case"
   },
   "constructs": {
     "objects": false,
@@ -24,7 +25,8 @@
     "heterogeneous_collections": false,
     "heterogeneous_arguments": false,
     "evaluation": true,
-    "global_variables": true
+    "global_variables": true,
+    "namespaces": true
   },
   "datatypes": {
     "integer": "supported",
