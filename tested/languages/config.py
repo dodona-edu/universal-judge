@@ -393,6 +393,18 @@ class Language:
         """
         return _conventionalize(self.options, "namespace", namespace)
 
+    def conventionalize_package(self, namespace: str) -> str:
+        """
+        Conventionalize the name of a namespace (class/module). This function uses
+        the format specified in the config.json file. If no format is specified, the
+        function name is unchanged, which is the same as snake_case, since the
+        testplan uses snake case.
+
+        :param namespace: The name of the namespace to conventionalize.
+        :return: The conventionalized namespace.
+        """
+        return _conventionalize(self.options, "package", namespace)
+
     def conventionalize_property(self, property_name: str) -> str:
         """
         Conventionalize the name of a property. This function uses the format

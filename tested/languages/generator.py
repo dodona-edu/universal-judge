@@ -22,7 +22,7 @@ from ..internationalization import get_i18n_string
 from ..serialisation import (Value, SequenceType, Identifier, FunctionType,
                              FunctionCall, Expression, Statement, Assignment,
                              NothingType, NamedArgument, ObjectType,
-                             ObjectKeyValuePair, VariableType)
+                             ObjectKeyValuePair, VariableType, Namespace)
 from ..testplan import (EmptyChannel, IgnoredChannel, TextData, ProgrammedEvaluator,
                         SpecificEvaluator, Testcase, RunTestcase, Context,
                         ExceptionOutput, ValueOutput, Run, FileUrl)
@@ -233,6 +233,11 @@ def _prepare_expression(bundle: Bundle, expression: Expression) -> Expression:
             key=_prepare_expression(bundle, pair.key),
             value=_prepare_expression(bundle, pair.value)
         ) for pair in expression.data]
+    elif isinstance(expression, Namespace):
+        expression.name = bundle.lang_config.conventionalize_namespace(
+            expression.name)
+        expression.package_path = [bundle.lang_config.conventionalize_namespace(p)
+                                   for p in expression.package_path]
     return expression
 
 

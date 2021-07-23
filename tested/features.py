@@ -23,6 +23,8 @@ class Construct(str, Enum):
     # Main function. Does not necessarily imply FUNCTION_CALLS.
     FUNCTION_CALLS = "function_calls"
     ASSIGNMENTS = "assignments"
+    # Naemspace
+    NAMESPACES = "namespaces"
 
     HETEROGENEOUS_COLLECTIONS = "heterogeneous_collections"
 

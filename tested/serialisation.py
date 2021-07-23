@@ -115,8 +115,22 @@ def _get_self_nested_type(data_type: AllTypes) -> NestedTypes:
     return {(data_type, frozenset())}
 
 
+def _merge_namespaces(namespaces: Iterable[Iterable["Namespace"]]
+                      ) -> Iterable["Namespace"]:
+    def namespace_to_tuple(namespace: "Namespace") -> Tuple[Tuple[str], str]:
+        return tuple(namespace.package_path), namespace.name
+
+    return dict((namespace_to_tuple(n), n) for namespaces_ in namespaces for n in
+                namespaces_).values()
+
+
 class WithFunctions:
     def get_functions(self) -> Iterable['FunctionCall']:
+        raise NotImplementedError
+
+
+class WithNamespaces:
+    def get_namespaces(self) -> Iterable['Namespace']:
         raise NotImplementedError
 
 
@@ -127,7 +141,7 @@ class SpecialNumbers(str, Enum):
 
 
 @dataclass
-class NumberType(WithFeatures, WithFunctions):
+class NumberType(WithFeatures, WithFunctions, WithNamespaces):
     type: NumericTypes
     data: Union[SpecialNumbers, Decimal, int, float]
 
@@ -135,6 +149,9 @@ class NumberType(WithFeatures, WithFunctions):
         return FeatureSet(set(), {self.type}, _get_self_nested_type(self.type))
 
     def get_functions(self) -> Iterable['FunctionCall']:
+        return []
+
+    def get_namespaces(self) -> Iterable['Namespace']:
         return []
 
     # noinspection PyMethodParameters
@@ -153,7 +170,7 @@ class NumberType(WithFeatures, WithFunctions):
 
 
 @dataclass
-class StringType(WithFeatures, WithFunctions):
+class StringType(WithFeatures, WithFunctions, WithNamespaces):
     type: StringTypes
     data: str
 
@@ -163,9 +180,12 @@ class StringType(WithFeatures, WithFunctions):
     def get_functions(self) -> Iterable['FunctionCall']:
         return []
 
+    def get_namespaces(self) -> Iterable['Namespace']:
+        return []
+
 
 @dataclass
-class BooleanType(WithFeatures, WithFunctions):
+class BooleanType(WithFeatures, WithFunctions, WithNamespaces):
     type: BooleanTypes
     data: bool
 
@@ -175,9 +195,12 @@ class BooleanType(WithFeatures, WithFunctions):
     def get_functions(self) -> Iterable['FunctionCall']:
         return []
 
+    def get_namespaces(self) -> Iterable['Namespace']:
+        return []
+
 
 @dataclass
-class SequenceType(WithFeatures, WithFunctions):
+class SequenceType(WithFeatures, WithFunctions, WithNamespaces):
     type: SequenceTypes
     data: List['Expression']
 
@@ -204,9 +227,13 @@ class SequenceType(WithFeatures, WithFunctions):
     def get_functions(self) -> Iterable['FunctionCall']:
         return flatten(x.get_functions() for x in self.data)
 
+    def get_namespaces(self) -> Iterable['Namespace']:
+        # Pass
+        return []
+
 
 @dataclass
-class ObjectKeyValuePair(WithFeatures, WithFunctions):
+class ObjectKeyValuePair(WithFeatures, WithFunctions, WithNamespaces):
     key: 'Expression'
     value: 'Expression'
 
@@ -232,9 +259,13 @@ class ObjectKeyValuePair(WithFeatures, WithFunctions):
     def get_functions(self) -> Iterable['FunctionCall']:
         return self.value.get_functions()
 
+    def get_namespaces(self) -> Iterable['Namespace']:
+        # Pass
+        return []
+
 
 @dataclass
-class ObjectType(WithFeatures, WithFunctions):
+class ObjectType(WithFeatures, WithFunctions, WithNamespaces):
     type: ObjectTypes
     data: List[ObjectKeyValuePair]
 
@@ -266,9 +297,13 @@ class ObjectType(WithFeatures, WithFunctions):
             (pair.key.get_functions(), pair.value.get_functions())
         ) for pair in self.data)
 
+    def get_namespaces(self) -> Iterable['Namespace']:
+        # Pass
+        return []
+
 
 @dataclass
-class NothingType(WithFeatures, WithFunctions):
+class NothingType(WithFeatures, WithFunctions, WithNamespaces):
     type: NothingTypes = BasicNothingTypes.NOTHING
     data: Literal[None] = None
 
@@ -278,6 +313,9 @@ class NothingType(WithFeatures, WithFunctions):
     def get_functions(self) -> Iterable['FunctionCall']:
         return []
 
+    def get_namespaces(self) -> Iterable['Namespace']:
+        return []
+
 
 # A value is one of the preceding types.
 Value = Union[
@@ -285,7 +323,7 @@ Value = Union[
 ]
 
 
-class Identifier(str, WithFeatures, WithFunctions):
+class Identifier(str, WithFeatures, WithFunctions, WithNamespaces):
     """Represents an variable name."""
 
     def get_used_features(self) -> FeatureSet:
@@ -293,6 +331,9 @@ class Identifier(str, WithFeatures, WithFunctions):
                           {(ComplexExpressionTypes.IDENTIFIERS, frozenset())})
 
     def get_functions(self) -> Iterable['FunctionCall']:
+        return []
+
+    def get_namespaces(self) -> Iterable['Namespace']:
         return []
 
     @classmethod
@@ -329,7 +370,7 @@ class FunctionType(str, Enum):
 
 
 @dataclass
-class NamedArgument(WithFeatures, WithFunctions):
+class NamedArgument(WithFeatures, WithFunctions, WithNamespaces):
     """Represents a named argument for a function."""
     name: str
     value: 'Expression'
@@ -343,9 +384,12 @@ class NamedArgument(WithFeatures, WithFunctions):
     def get_functions(self) -> Iterable['FunctionCall']:
         return self.value.get_functions()
 
+    def get_namespaces(self) -> Iterable['Namespace']:
+        return self.value.get_namespaces()
+
 
 @dataclass
-class FunctionCall(WithFeatures, WithFunctions):
+class FunctionCall(WithFeatures, WithFunctions, WithNamespaces):
     """
     Represents a function expression.
     """
@@ -391,6 +435,14 @@ class FunctionCall(WithFeatures, WithFunctions):
         return flatten([[self], *[list(x.get_functions()) for x in self.arguments],
                         *namespace_nested])
 
+    def get_namespaces(self) -> Iterable['Namespace']:
+        namespaces = [argument.get_namespaces() for argument in self.arguments]
+
+        if self.namespace is not None:
+            namespaces.append(self.namespace.get_namespaces())
+
+        return _merge_namespaces(namespaces)
+
 
 @dataclass
 class VariableType:
@@ -398,11 +450,27 @@ class VariableType:
     type: Literal['custom'] = 'custom'
 
 
-Expression = Union[Identifier, FunctionCall, Value]
+@dataclass
+class Namespace(WithFeatures, WithFunctions, WithNamespaces):
+    name: str
+    package_path: List[str] = field(default_factory=list)
+    type: Literal['namespace'] = 'namespace'
+
+    def get_used_features(self) -> FeatureSet:
+        return FeatureSet({Construct.NAMESPACES}, set(), set())
+
+    def get_functions(self) -> Iterable['FunctionCall']:
+        return []
+
+    def get_namespaces(self) -> Iterable['Namespace']:
+        return [self]
+
+
+Expression = Union[Identifier, FunctionCall, Value, Namespace]
 
 
 @dataclass
-class Assignment(WithFeatures, WithFunctions):
+class Assignment(WithFeatures, WithFunctions, WithNamespaces):
     """
     Assigns the return value of a function to a variable. Because the expression
     part is pretty simple, the type of the value is determined by looking at the
@@ -434,6 +502,9 @@ class Assignment(WithFeatures, WithFunctions):
 
     def get_functions(self) -> Iterable['FunctionCall']:
         return self.expression.get_functions()
+
+    def get_namespaces(self) -> Iterable['Namespace']:
+        return self.expression.get_namespaces()
 
 
 Statement = Union[Assignment, Expression]
