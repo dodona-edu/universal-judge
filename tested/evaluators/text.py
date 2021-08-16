@@ -47,17 +47,20 @@ def compare_text(
         options: Dict[str, Any],
         expected: str,
         actual: str) -> EvaluationResult:
+    # Temporary variables that may modified by the evaluation options,
+    # Don't modify the actual values, otherwise there maybe confusion with the
+    # solution submitted by the student
+    expected_eval, actual_eval = str(expected), str(actual)
+
     if options['ignoreWhitespace']:
-        expected = expected.strip()
-        actual = actual.strip()
+        expected_eval, actual_eval = expected_eval.strip(), actual_eval.strip()
 
     if options['caseInsensitive']:
-        expected = expected.lower()
-        actual = actual.lower()
+        expected_eval, actual_eval = expected_eval.lower(), actual_eval.lower()
 
     if options['tryFloatingPoint'] and (
-            actual_float := _is_number(actual)) is not None:
-        expected_float = float(expected)
+            actual_float := _is_number(actual_eval)) is not None:
+        expected_float = float(expected_eval)
         if options['applyRounding']:
             numbers = int(options['roundTo'])
             # noinspection PyUnboundLocalVariable
@@ -66,9 +69,8 @@ def compare_text(
         # noinspection PyUnboundLocalVariable
         result = math.isclose(actual_float, expected_float)
         expected = str(expected_float)
-        actual = str(actual_float)
     else:
-        result = actual == expected
+        result = actual_eval == expected_eval
 
     return EvaluationResult(
         result=StatusMessage(enum=Status.CORRECT if result else Status.WRONG),

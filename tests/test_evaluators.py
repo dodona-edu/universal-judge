@@ -53,7 +53,7 @@ def test_text_evaluator_whitespace(tmp_path: Path, pytestconfig):
     result = evaluate_text(config, channel, "expected      ")
     assert result.result.enum == Status.CORRECT
     assert result.readable_expected == "expected"
-    assert result.readable_actual == "expected"
+    assert result.readable_actual == "expected      "
 
     result = evaluate_text(config, channel, "nothing")
     assert result.result.enum == Status.WRONG
@@ -71,7 +71,7 @@ def test_text_evaluator_case_sensitive(tmp_path: Path, pytestconfig):
     result = evaluate_text(config, channel, "Expected")
     assert result.result.enum == Status.CORRECT
     assert result.readable_expected == "expected"
-    assert result.readable_actual == "expected"
+    assert result.readable_actual == "Expected"
 
     result = evaluate_text(config, channel, "nothing")
     assert result.result.enum == Status.WRONG
@@ -90,7 +90,7 @@ def test_text_evaluator_combination(tmp_path: Path, pytestconfig):
     result = evaluate_text(config, channel, "Expected     ")
     assert result.result.enum == Status.CORRECT
     assert result.readable_expected == "expected"
-    assert result.readable_actual == "expected"
+    assert result.readable_actual == "Expected     "
 
     result = evaluate_text(config, channel, "nothing")
     assert result.result.enum == Status.WRONG
@@ -109,7 +109,7 @@ def test_text_evaluator_rounding(tmp_path: Path, pytestconfig):
     result = evaluate_text(config, channel, "1.3333333")
     assert result.result.enum == Status.CORRECT
     assert result.readable_expected == "1.333"
-    assert result.readable_actual == "1.333"
+    assert result.readable_actual == "1.3333333"
 
     result = evaluate_text(config, channel, "1.5")
     assert result.result.enum == Status.WRONG
@@ -129,7 +129,7 @@ def test_text_evaluator_round_to(tmp_path: Path, pytestconfig):
     result = evaluate_text(config, channel, "1.3333333")
     assert result.result.enum == Status.CORRECT
     assert result.readable_expected == "1.3"
-    assert result.readable_actual == "1.3"
+    assert result.readable_actual == "1.3333333"
 
     result = evaluate_text(config, channel, "1.5")
     assert result.result.enum == Status.WRONG
