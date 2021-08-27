@@ -20,7 +20,9 @@
     % else:
         Float.NEGATIVE_INFINITY\
     % endif
-% elif value.type in (AdvancedNumericTypes.U_INT_64, AdvancedNumericTypes.BIG_INT):
+% elif value.type in (AdvancedNumericTypes.U_INT_8, AdvancedNumericTypes.U_INT_16, AdvancedNumericTypes.U_INT_32, AdvancedNumericTypes.U_INT_64):
+    ${value.data}u\
+% elif value.type == AdvancedNumericTypes.BIG_INT:
     BigInteger("${value.data}")\
 % elif value.type in (AdvancedNumericTypes.DOUBLE_EXTENDED, AdvancedNumericTypes.FIXED_PRECISION):
     % if not isinstance(value.data, SpecialNumbers):
