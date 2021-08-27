@@ -60,14 +60,26 @@ private fun internalEncode(value: Any?): Array<String> {
     } else if (value is BigDecimal) {
         type = "fixed_precision"
         data = value.toString()
+    } else if (value is UByte) {
+        type = "uint8"
+        data = value.toString()
     } else if (value is Byte) {
         type = "int8"
+        data = value.toString()
+    } else if (value is UShort) {
+        type = "uint16"
         data = value.toString()
     } else if (value is Short) {
         type = "int16"
         data = value.toString()
+    } else if (value is UInt) {
+        type = "uint32"
+        data = value.toString()
     } else if (value is Int) {
         type = "int32"
+        data = value.toString()
+    } else if (value is ULong) {
+        type = "uint64"
         data = value.toString()
     } else if (value is Long) {
         type = "int64"
