@@ -58,8 +58,12 @@ class C(Language):
         main_file = files[-1]
         exec_file = Path(main_file).stem
         result = executable_name(exec_file)
-        return (["gcc", "-std=c11", "-Wall", "evaluation_result.c", "values.c",
-                 main_file, "-o", result], [result])
+
+        if "values.c" in files:
+            return (["gcc", "-std=c11", "-Wall", "evaluation_result.c", "values.c",
+                     main_file, "-o", result], [result])
+        else:
+            return ["gcc", "-std=c11", "-Wall", main_file, "-o", result], [result]
 
     def execution(self, config: Config,
                   cwd: Path, file: str, arguments: List[str]) -> Command:

@@ -83,7 +83,8 @@ def configuration(config, exercise: str, language: str, work_dir: Path,
         "workdir":              work_dir,
         testplan:               plan,
         "options":              {
-            "linter": False
+            "linter": False,
+            "optimized_io": False
         }
     }, options))
 

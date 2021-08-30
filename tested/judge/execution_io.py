@@ -107,8 +107,6 @@ def execute_io_execution(bundle: Bundle, args: ExecutionIO, max_time: float) \
     if status != Status.CORRECT:
         return None, messages, status, execution_dir
 
-    dependencies.remove(executable)
-
     remaining = max_time - (time.perf_counter() - start)
 
     new_stage("run.testcode", True)

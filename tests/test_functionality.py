@@ -57,6 +57,17 @@ def test_io_exercise(language: str, tmp_path: Path, pytestconfig):
 
 
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
+def test_io_exercise_io_optimized(language: str, tmp_path: Path, pytestconfig):
+    conf = configuration(pytestconfig, "echo", language, tmp_path, "two.tson", "correct",
+                         options={
+                             "optimized_io": True
+                         })
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"] * 2
+
+
+@pytest.mark.parametrize("language", ALL_LANGUAGES)
 def test_io_exercise_wrong(language: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "echo", language, tmp_path, "one.tson", "wrong")
     result = execute_config(conf)
@@ -380,6 +391,18 @@ def test_batch_compilation_no_fallback_runtime(language: str, tmp_path: Path, py
 @pytest.mark.parametrize("lang", ["python", "java", "c", "javascript", "kotlin", "bash"])
 def test_program_params(lang: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "sum", lang, tmp_path, "short.tson", "correct")
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ['correct', 'correct', 'correct', 'correct']
+    assert len(updates.find_all("start-testcase")) == 3
+    assert len(updates.find_all("start-test")) == 4
+
+
+@pytest.mark.parametrize("lang", ["python", "java", "c", "javascript", "kotlin", "bash"])
+def test_program_params_optimized_io(lang: str, tmp_path: Path, pytestconfig):
+    conf = configuration(pytestconfig, "sum", lang, tmp_path, "short.tson", "correct", options={
+        "optimized_io": True
+    })
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ['correct', 'correct', 'correct', 'correct']

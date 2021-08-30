@@ -1,4 +1,4 @@
-const getallen = process.argv.slice(1)
+const getallen = process.argv.slice(1);
 let som = 0
 
 for (const getal of getallen) {

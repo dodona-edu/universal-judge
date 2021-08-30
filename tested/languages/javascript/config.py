@@ -32,7 +32,7 @@ class JavaScript(Language):
 
     def execution(self, config: Config,
                   cwd: Path, file: str, arguments: List[str]) -> Command:
-        return ['node', file, *arguments]
+        return ['node', file, "--", *arguments]
 
     # noinspection PyTypeChecker
     def solution(self, solution: Path, bundle: Bundle):
