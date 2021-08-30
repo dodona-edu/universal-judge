@@ -1,0 +1,368 @@
+{
+  "results": [
+    {
+      "exercise": {
+        "name": "Hoe slim ben jij?",
+        "plan": "plan.tson",
+        "solution": "solution.c",
+        "language": "c",
+        "optimized": false,
+        "root_dir": "/home/boris/Documenten/School/2020-2021/Masterproef/universal-judge/benchmarking/tests"
+      },
+      "min_time": 0.23948865700003807,
+      "avg_time": 0.24778669129973424,
+      "max_time": 0.2576946819990553
+    },
+    {
+      "exercise": {
+        "name": "Hoe slim ben jij?",
+        "plan": "plan.tson",
+        "solution": "solution.c",
+        "language": "c",
+        "optimized": true,
+        "root_dir": "/home/boris/Documenten/School/2020-2021/Masterproef/universal-judge/benchmarking/tests"
+      },
+      "min_time": 0.24139957400075218,
+      "avg_time": 0.2485277504001715,
+      "max_time": 0.266869052000402
+    },
+    {
+      "exercise": {
+        "name": "Hoe slim ben jij?",
+        "plan": "plan.tson",
+        "solution": "solution.hs",
+        "language": "haskell",
+        "optimized": false,
+        "root_dir": "/home/boris/Documenten/School/2020-2021/Masterproef/universal-judge/benchmarking/tests"
+      },
+      "min_time": 0.8616528950005886,
+      "avg_time": 0.8864992702998279,
+      "max_time": 0.9273735690003377
+    },
+    {
+      "exercise": {
+        "name": "Hoe slim ben jij?",
+        "plan": "plan.tson",
+        "solution": "solution.hs",
+        "language": "haskell",
+        "optimized": true,
+        "root_dir": "/home/boris/Documenten/School/2020-2021/Masterproef/universal-judge/benchmarking/tests"
+      },
+      "min_time": 0.8720251079994341,
+      "avg_time": 1.1233593841001492,
+      "max_time": 1.2396426470004371
+    },
+    {
+      "exercise": {
+        "name": "Hoe slim ben jij?",
+        "plan": "plan.tson",
+        "solution": "solution.java",
+        "language": "java",
+        "optimized": false,
+        "root_dir": "/home/boris/Documenten/School/2020-2021/Masterproef/universal-judge/benchmarking/tests"
+      },
+      "min_time": 1.9383443639999314,
+      "avg_time": 1.965351833800014,
+      "max_time": 2.019998667999971
+    },
+    {
+      "exercise": {
+        "name": "Hoe slim ben jij?",
+        "plan": "plan.tson",
+        "solution": "solution.java",
+        "language": "java",
+        "optimized": true,
+        "root_dir": "/home/boris/Documenten/School/2020-2021/Masterproef/universal-judge/benchmarking/tests"
+      },
+      "min_time": 1.9117062559998885,
+      "avg_time": 1.9702637689000766,
+      "max_time": 2.1361788990016066
+    },
+    {
+      "exercise": {
+        "name": "Hoe slim ben jij?",
+        "plan": "plan.tson",
+        "solution": "solution.js",
+        "language": "javascript",
+        "optimized": false,
+        "root_dir": "/home/boris/Documenten/School/2020-2021/Masterproef/universal-judge/benchmarking/tests"
+      },
+      "min_time": 1.0890009929989901,
+      "avg_time": 1.1126830494995374,
+      "max_time": 1.135687969999708
+    },
+    {
+      "exercise": {
+        "name": "Hoe slim ben jij?",
+        "plan": "plan.tson",
+        "solution": "solution.js",
+        "language": "javascript",
+        "optimized": true,
+        "root_dir": "/home/boris/Documenten/School/2020-2021/Masterproef/universal-judge/benchmarking/tests"
+      },
+      "min_time": 1.077012489999106,
+      "avg_time": 1.099357116900137,
+      "max_time": 1.1154257940015668
+    },
+    {
+      "exercise": {
+        "name": "Hoe slim ben jij?",
+        "plan": "plan.tson",
+        "solution": "solution.kt",
+        "language": "kotlin",
+        "optimized": false,
+        "root_dir": "/home/boris/Documenten/School/2020-2021/Masterproef/universal-judge/benchmarking/tests"
+      },
+      "min_time": 8.8876030370011,
+      "avg_time": 9.040486383500502,
+      "max_time": 9.22126541200123
+    },
+    {
+      "exercise": {
+        "name": "Hoe slim ben jij?",
+        "plan": "plan.tson",
+        "solution": "solution.kt",
+        "language": "kotlin",
+        "optimized": true,
+        "root_dir": "/home/boris/Documenten/School/2020-2021/Masterproef/universal-judge/benchmarking/tests"
+      },
+      "min_time": 8.833345649998591,
+      "avg_time": 9.014781386699543,
+      "max_time": 9.19379669800037
+    },
+    {
+      "exercise": {
+        "name": "Hoe slim ben jij?",
+        "plan": "plan.tson",
+        "solution": "solution.py",
+        "language": "python",
+        "optimized": false,
+        "root_dir": "/home/boris/Documenten/School/2020-2021/Masterproef/universal-judge/benchmarking/tests"
+      },
+      "min_time": 0.8870729249993019,
+      "avg_time": 0.9014250821999668,
+      "max_time": 0.9195275399997627
+    },
+    {
+      "exercise": {
+        "name": "Hoe slim ben jij?",
+        "plan": "plan.tson",
+        "solution": "solution.py",
+        "language": "python",
+        "optimized": true,
+        "root_dir": "/home/boris/Documenten/School/2020-2021/Masterproef/universal-judge/benchmarking/tests"
+      },
+      "min_time": 0.8844730309992883,
+      "avg_time": 0.8967306144000758,
+      "max_time": 0.9123779559995455
+    },
+    {
+      "exercise": {
+        "name": "Hoe slim ben jij?",
+        "plan": "plan.tson",
+        "solution": "solution.sh",
+        "language": "bash",
+        "optimized": false,
+        "root_dir": "/home/boris/Documenten/School/2020-2021/Masterproef/universal-judge/benchmarking/tests"
+      },
+      "min_time": 0.40127093399860314,
+      "avg_time": 0.4107425994996447,
+      "max_time": 0.42994789899967145
+    },
+    {
+      "exercise": {
+        "name": "Hoe slim ben jij?",
+        "plan": "plan.tson",
+        "solution": "solution.sh",
+        "language": "bash",
+        "optimized": true,
+        "root_dir": "/home/boris/Documenten/School/2020-2021/Masterproef/universal-judge/benchmarking/tests"
+      },
+      "min_time": 0.4041251100006775,
+      "avg_time": 0.41051014849999773,
+      "max_time": 0.4209344989994861
+    },
+    {
+      "exercise": {
+        "name": "echo",
+        "plan": "full.tson",
+        "solution": "correct.c",
+        "language": "c",
+        "optimized": false,
+        "root_dir": "/home/boris/Documenten/School/2020-2021/Masterproef/universal-judge/exercise"
+      },
+      "min_time": 0.34950005900100223,
+      "avg_time": 0.3585669810996478,
+      "max_time": 0.3680239879995497
+    },
+    {
+      "exercise": {
+        "name": "echo",
+        "plan": "full.tson",
+        "solution": "correct.c",
+        "language": "c",
+        "optimized": true,
+        "root_dir": "/home/boris/Documenten/School/2020-2021/Masterproef/universal-judge/exercise"
+      },
+      "min_time": 0.34432385800027987,
+      "avg_time": 0.3530373921001228,
+      "max_time": 0.36169302300004347
+    },
+    {
+      "exercise": {
+        "name": "echo",
+        "plan": "full.tson",
+        "solution": "correct.hs",
+        "language": "haskell",
+        "optimized": false,
+        "root_dir": "/home/boris/Documenten/School/2020-2021/Masterproef/universal-judge/exercise"
+      },
+      "min_time": 1.1428540380002232,
+      "avg_time": 1.1561486671003878,
+      "max_time": 1.1824035409990756
+    },
+    {
+      "exercise": {
+        "name": "echo",
+        "plan": "full.tson",
+        "solution": "correct.hs",
+        "language": "haskell",
+        "optimized": true,
+        "root_dir": "/home/boris/Documenten/School/2020-2021/Masterproef/universal-judge/exercise"
+      },
+      "min_time": 1.117060386999583,
+      "avg_time": 1.135490435599968,
+      "max_time": 1.1545744690010906
+    },
+    {
+      "exercise": {
+        "name": "echo",
+        "plan": "full.tson",
+        "solution": "correct.java",
+        "language": "java",
+        "optimized": false,
+        "root_dir": "/home/boris/Documenten/School/2020-2021/Masterproef/universal-judge/exercise"
+      },
+      "min_time": 1.8242083420009294,
+      "avg_time": 1.8374759774005724,
+      "max_time": 1.8551087260002532
+    },
+    {
+      "exercise": {
+        "name": "echo",
+        "plan": "full.tson",
+        "solution": "correct.java",
+        "language": "java",
+        "optimized": true,
+        "root_dir": "/home/boris/Documenten/School/2020-2021/Masterproef/universal-judge/exercise"
+      },
+      "min_time": 1.8019972499987489,
+      "avg_time": 1.8289902571998027,
+      "max_time": 1.8482000210005936
+    },
+    {
+      "exercise": {
+        "name": "echo",
+        "plan": "full.tson",
+        "solution": "correct.js",
+        "language": "javascript",
+        "optimized": false,
+        "root_dir": "/home/boris/Documenten/School/2020-2021/Masterproef/universal-judge/exercise"
+      },
+      "min_time": 1.062259719999929,
+      "avg_time": 1.0769222526001614,
+      "max_time": 1.0955418060002557
+    },
+    {
+      "exercise": {
+        "name": "echo",
+        "plan": "full.tson",
+        "solution": "correct.js",
+        "language": "javascript",
+        "optimized": true,
+        "root_dir": "/home/boris/Documenten/School/2020-2021/Masterproef/universal-judge/exercise"
+      },
+      "min_time": 1.0604281970008742,
+      "avg_time": 1.0829518534001181,
+      "max_time": 1.1074420500008273
+    },
+    {
+      "exercise": {
+        "name": "echo",
+        "plan": "full.tson",
+        "solution": "correct.kt",
+        "language": "kotlin",
+        "optimized": false,
+        "root_dir": "/home/boris/Documenten/School/2020-2021/Masterproef/universal-judge/exercise"
+      },
+      "min_time": 7.991841235998436,
+      "avg_time": 8.067897068799539,
+      "max_time": 8.167166512999756
+    },
+    {
+      "exercise": {
+        "name": "echo",
+        "plan": "full.tson",
+        "solution": "correct.kt",
+        "language": "kotlin",
+        "optimized": true,
+        "root_dir": "/home/boris/Documenten/School/2020-2021/Masterproef/universal-judge/exercise"
+      },
+      "min_time": 7.965402035999432,
+      "avg_time": 8.189717309700063,
+      "max_time": 8.6737235469991
+    },
+    {
+      "exercise": {
+        "name": "echo",
+        "plan": "full.tson",
+        "solution": "correct.py",
+        "language": "python",
+        "optimized": false,
+        "root_dir": "/home/boris/Documenten/School/2020-2021/Masterproef/universal-judge/exercise"
+      },
+      "min_time": 0.8737449069994909,
+      "avg_time": 0.889887897099652,
+      "max_time": 0.9199676810003439
+    },
+    {
+      "exercise": {
+        "name": "echo",
+        "plan": "full.tson",
+        "solution": "correct.py",
+        "language": "python",
+        "optimized": true,
+        "root_dir": "/home/boris/Documenten/School/2020-2021/Masterproef/universal-judge/exercise"
+      },
+      "min_time": 0.875861109001562,
+      "avg_time": 0.8923712028003138,
+      "max_time": 0.9153326600007858
+    },
+    {
+      "exercise": {
+        "name": "echo",
+        "plan": "full.tson",
+        "solution": "correct.sh",
+        "language": "bash",
+        "optimized": false,
+        "root_dir": "/home/boris/Documenten/School/2020-2021/Masterproef/universal-judge/exercise"
+      },
+      "min_time": 0.3471302359994297,
+      "avg_time": 0.35490508830007456,
+      "max_time": 0.3664406770003552
+    },
+    {
+      "exercise": {
+        "name": "echo",
+        "plan": "full.tson",
+        "solution": "correct.sh",
+        "language": "bash",
+        "optimized": true,
+        "root_dir": "/home/boris/Documenten/School/2020-2021/Masterproef/universal-judge/exercise"
+      },
+      "min_time": 0.3468703150010697,
+      "avg_time": 0.35517847389983215,
+      "max_time": 0.36959853900043527
+    }
+  ]
+}
