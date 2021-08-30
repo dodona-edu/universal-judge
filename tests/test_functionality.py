@@ -57,17 +57,6 @@ def test_io_exercise(language: str, tmp_path: Path, pytestconfig):
 
 
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
-def test_io_exercise_io_optimized(language: str, tmp_path: Path, pytestconfig):
-    conf = configuration(pytestconfig, "echo", language, tmp_path, "two.tson", "correct",
-                         options={
-                             "optimized_io": True
-                         })
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["correct"] * 2
-
-
-@pytest.mark.parametrize("language", ALL_LANGUAGES)
 def test_io_exercise_wrong(language: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "echo", language, tmp_path, "one.tson", "wrong")
     result = execute_config(conf)
@@ -81,6 +70,71 @@ def test_simple_programmed_eval(language: str, tmp_path: Path, pytestconfig):
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["correct"]
+
+
+@pytest.mark.parametrize("language", ALL_LANGUAGES)
+def test_io_exercise_io_optimized(language: str, tmp_path: Path, pytestconfig):
+    conf = configuration(pytestconfig, "echo", language, tmp_path, "two.tson", "correct",
+                         options={
+                             "options": {
+                                 "optimized_io": True
+                             }
+                         })
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"] * 2
+
+
+@pytest.mark.parametrize("language", ALL_LANGUAGES)
+def test_io_exercise_io_optimized_programmed(language: str, tmp_path: Path, pytestconfig):
+    conf = configuration(pytestconfig, "echo", language, tmp_path, "one-programmed-correct.tson", "correct",
+                         options={
+                             "options": {
+                                 "optimized_io": True
+                             }
+                         })
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]
+
+
+@pytest.mark.parametrize("language", ALL_LANGUAGES)
+def test_io_exercise_io_optimized_comp(language: str, tmp_path: Path, pytestconfig):
+    conf = configuration(pytestconfig, "echo", language, tmp_path, "one.tson", "comp-error",
+                         options={
+                             "options": {
+                                 "optimized_io": True
+                             }
+                         })
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["compilation error"] * 3
+
+
+@pytest.mark.parametrize("language", ALL_LANGUAGES)
+def test_io_exercise_io_optimized_run(language: str, tmp_path: Path, pytestconfig):
+    conf = configuration(pytestconfig, "echo", language, tmp_path, "one.tson", "run-error",
+                         options={
+                             "options": {
+                                 "optimized_io": True
+                             }
+                         })
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["wrong"] * (2 if language == 'c' else 3)
+
+
+@pytest.mark.parametrize("language", ALL_LANGUAGES)
+def test_io_exercise_io_optimized_wrong(language: str, tmp_path: Path, pytestconfig):
+    conf = configuration(pytestconfig, "echo", language, tmp_path, "one.tson", "wrong",
+                         options={
+                             "options": {
+                                 "optimized_io": True
+                             }
+                         })
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["wrong"]
 
 
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
