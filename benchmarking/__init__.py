@@ -19,7 +19,8 @@ extension_name = {
     ".java": "java",
     ".js":   "javascript",
     ".kt":   "kotlin",
-    ".py":   "python"
+    ".py":   "python",
+    ".sh":   "bash"
 }
 
 
@@ -71,8 +72,10 @@ def get_all_benchmark_exercises() -> List[BenchmarkExercise]:
 
 
 def get_config(exercise: BenchmarkExercise,
-               parallel: bool = True, ) -> DodonaConfig:
-    exercise_dir = Path(__file__).parent / 'tests' / exercise.name
+               parallel: bool = True,
+               exercise_root: Path = Path(__file__).parent / 'tests',
+               optimized: bool = False) -> DodonaConfig:
+    exercise_dir = exercise_root / exercise.name
     workdir = exercise_dir / 'workdir'
     exercise_tmp_dir = get_temp_dir(
         f"{exercise.name}_{exercise.language}_"
@@ -93,13 +96,12 @@ def get_config(exercise: BenchmarkExercise,
         "source":               exercise_dir / 'solution' / exercise.solution,
         "judge":                Path('.'),
         "workdir":              exercise_tmp_dir,
-        "testplan":            exercise.plan,
+        "testplan":             exercise.plan,
         "options":              {
-            "parallel": parallel,
-            "mode":     "batch",
-            "linter":   {
-                "python": False
-            }
+            "parallel":     parallel,
+            "mode":         "batch",
+            "linter":       False,
+            "optimized_io": optimized
         }
     })
 
