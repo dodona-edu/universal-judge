@@ -579,6 +579,10 @@ class Run(WithFeatures, WithFunctions):
     def count_contexts(self):
         return int(self.run.input.main_call) + len(self.contexts)
 
+    def is_io_only(self) -> bool:
+        return self.contexts == [] and isinstance(self.run.output.exception,
+                                                  get_args(SpecialOutputChannel))
+
 
 @dataclass
 class Tab(WithFeatures, WithFunctions):
@@ -596,6 +600,9 @@ class Tab(WithFeatures, WithFunctions):
 
     def count_contexts(self):
         return sum(run.count_contexts() for run in self.runs)
+
+    def is_io_only(self) -> bool:
+        return all(map(lambda run: run.is_io_only(), self.runs))
 
 
 class ExecutionMode(str, Enum):
@@ -626,6 +633,9 @@ class Plan(WithFeatures, WithFunctions):
 
     def get_functions(self) -> Iterable[FunctionCall]:
         return flatten(x.get_functions() for x in self.tabs)
+
+    def is_io_only(self) -> bool:
+        return all(map(lambda tab: tab.is_io_only(), self.tabs))
 
 
 class _FunctionSignature(NamedTuple):
