@@ -57,6 +57,10 @@ class Options:
     """
     If the custom Python evaluator should be optimized or not.
     """
+    optimized_io: bool = True
+    """
+    Use single compilation for IO-only testplan
+    """
 
 
 class DodonaConfig(BaseModel):

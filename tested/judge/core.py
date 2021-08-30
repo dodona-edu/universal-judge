@@ -13,6 +13,7 @@ from .evaluation import evaluate_run_results, \
 from .execution import Execution, execute_execution, ExecutionResult
 from tested.internal_timings import new_stage, end_stage, is_collecting, \
     pretty_print_timings
+from .execution_io import ExecutionIO, single_io_execution
 from .linter import run_linter
 from .utils import copy_from_paths_to_path, BaseExecutionResult
 from ..configs import Bundle
@@ -66,7 +67,7 @@ def judge(bundle: Bundle):
         collector.terminate(Status.TIME_LIMIT_EXCEEDED)
         return
 
-    if bundle.plan.is_io_only():
+    if bundle.config.options.optimized_io and bundle.plan.is_io_only():
         cont = _judge_io(bundle, collector, max_time, start)
     else:
         cont = _judge(bundle, collector, max_time, start)
@@ -286,7 +287,32 @@ def _judge_io(bundle: Bundle, collector: OutputManager, max_time: float,
             return False  # Compilation error occurred, useless to continue.
     end_stage("compilation.pre")
     # Compilation done
-    pass
+    # Create a list of runs we want to execute.
+    for tab_index, tab in enumerate(bundle.plan.tabs):
+        collector.add_tab(StartTab(title=tab.name, hidden=tab.hidden), tab_index)
+        executions = []
+        for execution_index, run in enumerate(tab.runs):
+            executions.append(ExecutionIO(
+                run=run.run,
+                context_offset=execution_index,
+                execution_name=submission_name,
+                execution_index=execution_index,
+                tab_index=tab_index,
+                common_directory=common_dir,
+                files=files,
+                collector=collector
+            ))
+
+        remaining = max_time - (time.perf_counter() - start)
+        # Execute
+        result = single_io_execution(bundle, executions, remaining)
+
+        if result in (Status.TIME_LIMIT_EXCEEDED, Status.MEMORY_LIMIT_EXCEEDED,
+                      Status.OUTPUT_LIMIT_EXCEEDED):
+            assert not collector.collected
+            collector.terminate(result)
+            return False
+        collector.add_tab(CloseTab(), tab_index)
     # Succesfull terminated
     return True
 
