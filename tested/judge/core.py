@@ -14,7 +14,7 @@ from .execution import Execution, execute_execution, ExecutionResult
 from tested.internal_timings import new_stage, end_stage, is_collecting, \
     pretty_print_timings
 from .linter import run_linter
-from .utils import copy_from_paths_to_path
+from .utils import copy_from_paths_to_path, BaseExecutionResult
 from ..configs import Bundle
 from ..dodona import *
 from ..features import is_supported
@@ -53,7 +53,6 @@ def judge(bundle: Bundle):
         return  # Not all required features are supported.
 
     new_stage("prepare.output")
-    mode = bundle.config.options.mode
     collector = OutputManager(bundle)
     collector.add(StartJudgment())
 
@@ -67,6 +66,34 @@ def judge(bundle: Bundle):
         collector.terminate(Status.TIME_LIMIT_EXCEEDED)
         return
 
+    if bundle.plan.is_io_only():
+        cont = _judge_io(bundle, collector, max_time, start)
+    else:
+        cont = _judge(bundle, collector, max_time, start)
+
+    # Terminate if judge may not continue
+    if not cont:
+        return
+
+    # Add statistics tab for STAFF
+    if is_collecting():
+        collector.add_tab(
+            StartTab(title=get_i18n_string("timings.title"),
+                     permission=Permission.STAFF), -1)
+        collector.add(AppendMessage(message=ExtendedMessage(
+            description=pretty_print_timings(bundle.config.options.parallel),
+            format="markdown",
+            permission=Permission.STAFF
+        )))
+        collector.add_tab(CloseTab(), -1)
+
+    collector.add(CloseJudgment())
+    collector.clean_finish()
+
+
+def _judge(bundle: Bundle, collector: OutputManager, max_time: float,
+           start: float) -> bool:
+    mode = bundle.config.options.mode
     _logger.info("Start generating code...")
     new_stage("generation")
     common_dir, files, selector = _generate_files(bundle, mode)
@@ -97,21 +124,9 @@ def judge(bundle: Bundle):
         else:
             # Handle timout if necessary.
             if result.timeout or result.memory:
-                # Show in separate tab.
-                index = len(bundle.plan.tabs) + 1
-                if messages:
-                    collector.prepare_tab(
-                        StartTab(get_i18n_string("judge.core.compilation")), index)
-                for message in messages:
-                    collector.add(AppendMessage(message=message))
-                for annotation in annotations:
-                    collector.add(annotation)
-                if messages:
-                    collector.prepare_tab(CloseTab(), index)
-                collector.terminate(
-                    Status.TIME_LIMIT_EXCEEDED if result.timeout else
-                    Status.MEMORY_LIMIT_EXCEEDED)
-                return
+                _handle_out_of_memory_timeout(bundle, collector, annotations,
+                                              messages, result)
+                return False
 
             assert not result.timeout
             assert not result.memory
@@ -149,7 +164,7 @@ def judge(bundle: Bundle):
                     human=get_i18n_string("judge.core.invalid.source-code")
                 ))
                 _logger.info("Compilation error without fallback")
-                return  # Compilation error occurred, useless to continue.
+                return False  # Compilation error occurred, useless to continue.
         end_stage("compilation.pre")
     else:
         precompilation_result = None
@@ -192,23 +207,108 @@ def judge(bundle: Bundle):
                       Status.OUTPUT_LIMIT_EXCEEDED):
             assert not collector.collected
             collector.terminate(result)
-            return
+            return False
         collector.add_tab(CloseTab(), tab_index)
+    return True
 
-    # Add statistics tab for STAFF
-    if is_collecting():
-        collector.add_tab(
-            StartTab(title=get_i18n_string("timings.title"),
-                     permission=Permission.STAFF), -1)
-        collector.add(AppendMessage(message=ExtendedMessage(
-            description=pretty_print_timings(bundle.config.options.parallel),
-            format="markdown",
-            permission=Permission.STAFF
-        )))
-        collector.add_tab(CloseTab(), -1)
 
-    collector.add(CloseJudgment())
-    collector.clean_finish()
+def _judge_io(bundle: Bundle, collector: OutputManager, max_time: float,
+              start: float):
+    _logger.info("Copy all dependencies...")
+    new_stage("dependencies.copy")
+    common_dir = Path(bundle.config.workdir, f"common")
+    common_dir.mkdir()
+
+    # Submission filename
+    submission_name = bundle.lang_config.submission_name(bundle.plan)
+
+    # Copy the submission file.
+    submission_file = f"{submission_name}" \
+                      f".{bundle.lang_config.extension_file()}"
+    solution_path = common_dir / submission_file
+    # noinspection PyTypeChecker
+    shutil.copy2(bundle.config.source, solution_path)
+    files = [submission_file]
+
+    # Copy workdir source files
+    files.extend(_copy_workdir_source_files(bundle, common_dir))
+
+    # Compilation
+    new_stage("compilation.pre")
+
+    # Compile all code in one go.
+    _logger.info("Running precompilation step...")
+    remaining = max_time - (time.perf_counter() - start)
+    result, compilation_files = run_compilation(bundle, common_dir, files,
+                                                remaining)
+
+    messages, status, annotations = process_compile_results(
+        bundle.plan.namespace,
+        bundle.lang_config,
+        result
+    )
+
+    # If there is no result, there was no compilation.
+    if result:
+        # Handle timout if necessary.
+        if result.timeout or result.memory:
+            _handle_out_of_memory_timeout(bundle, collector, annotations, messages,
+                                          result)
+            return False
+
+        assert not result.timeout
+        assert not result.memory
+
+        precompilation_result = (messages, status)
+
+        # When compilation succeeded, only add annotations
+        if status == Status.CORRECT:
+            files = compilation_files
+            for annotation in annotations:
+                collector.add(annotation)
+        # Add compilation tab when compilation failed
+        else:
+            # Report messages.
+            collector.add_tab(StartTab(get_i18n_string("judge.core.compilation")),
+                              -1)
+            for message in messages:
+                collector.add(AppendMessage(message=message))
+            for annotation in annotations:
+                collector.add(annotation)
+
+            collector.add_tab(CloseTab(), -1)
+
+            collector.terminate(StatusMessage(
+                enum=status,
+                human=get_i18n_string("judge.core.invalid.source-code")
+            ))
+            _logger.info("Compilation error without fallback")
+            return False  # Compilation error occurred, useless to continue.
+    end_stage("compilation.pre")
+    # Compilation done
+    pass
+    # Succesfull terminated
+    return True
+
+
+def _handle_out_of_memory_timeout(bundle: Bundle, collector: OutputManager,
+                                  annotations: List[AnnotateCode],
+                                  messages: List[Message],
+                                  result: BaseExecutionResult):
+    # Show in separate tab.
+    index = len(bundle.plan.tabs) + 1
+    if messages:
+        collector.prepare_tab(StartTab(get_i18n_string("judge.core.compilation")),
+                              index)
+    for message in messages:
+        collector.add(AppendMessage(message=message))
+    for annotation in annotations:
+        collector.add(annotation)
+    if messages:
+        collector.prepare_tab(CloseTab(), index)
+    collector.terminate(
+        Status.TIME_LIMIT_EXCEEDED if result.timeout else
+        Status.MEMORY_LIMIT_EXCEEDED)
 
 
 def _single_execution(bundle: Bundle,
