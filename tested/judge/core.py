@@ -13,7 +13,7 @@ from .evaluation import evaluate_run_results, \
 from .execution import Execution, execute_execution, ExecutionResult
 from tested.internal_timings import new_stage, end_stage, is_collecting, \
     pretty_print_timings
-from .execution_io import ExecutionIO, single_io_execution
+from .execution_io import ExecutionIO, single_io_execution, parallel_io_execution
 from .linter import run_linter
 from .utils import copy_from_paths_to_path, BaseExecutionResult
 from ..configs import Bundle
@@ -305,7 +305,10 @@ def _judge_io(bundle: Bundle, collector: OutputManager, max_time: float,
 
         remaining = max_time - (time.perf_counter() - start)
         # Execute
-        result = single_io_execution(bundle, executions, remaining)
+        if bundle.config.options.parallel:
+            result = parallel_io_execution(bundle, executions, remaining)
+        else:
+            result = single_io_execution(bundle, executions, remaining)
 
         if result in (Status.TIME_LIMIT_EXCEEDED, Status.MEMORY_LIMIT_EXCEEDED,
                       Status.OUTPUT_LIMIT_EXCEEDED):

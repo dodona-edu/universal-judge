@@ -26,13 +26,13 @@ class BenchmarkExerciseIO(BenchmarkExercise):
 
 def time_io_exercises(exercises: List[BenchmarkExerciseIO],
                       times: int = 10) -> BenchmarkResults:
-    print("Start warmup")
-    time_io_exercise(exercises[0], 1)
-    print("Finished warmup")
     len_exercise = len(exercises)
     exercise_results = []
     for index, exercise in enumerate(exercises, start=1):
         print(f"Start exercise {index}/{len_exercise}")
+        print("Start warmup")
+        time_io_exercise(exercise, 1)
+        print("Finished warmup")
         exercise_results.append(time_io_exercise(exercise, times))
         print(f"Finished exercise {index}/{len_exercise}")
     return BenchmarkResults(

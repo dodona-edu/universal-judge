@@ -1,7 +1,9 @@
+import concurrent
 import logging
 import os
 import shutil
 import time
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import NamedTuple, Callable, List, Union, Optional, Tuple
 
@@ -60,6 +62,54 @@ def single_io_execution(bundle: Bundle,
             return status
 
 
+def parallel_io_execution(bundle: Bundle,
+                          items: List[ExecutionIO],
+                          max_time: float) -> Optional[Status]:
+    """
+    Execute a list of contexts in parallel.
+
+    :param bundle: The configuration bundle.
+    :param items: The contexts to execute.
+    :param max_time: The max amount of time.
+    """
+    start = time.perf_counter()  # Accessed from threads.
+
+    def threaded_execution(execution: ExecutionIO):
+        """The function executed in parallel."""
+        remainder = max_time - (time.perf_counter() - start)
+        new_stage("run.execution")
+        execution_result, m, s, p = execute_io_execution(bundle, execution,
+                                                         remainder)
+        end_stage("run.execution")
+
+        def evaluation_function(eval_remainder):
+            new_stage("evaluate.results")
+            _status = _process_results(bundle, execution, execution_result, m, s, p)
+            end_stage("evaluate.results")
+
+            if _status and _status not in (Status.TIME_LIMIT_EXCEEDED,
+                                           Status.MEMORY_LIMIT_EXCEEDED):
+                return _status
+
+        return evaluation_function
+
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        remaining = max_time - (time.perf_counter() - start)
+        results = executor.map(threaded_execution, items, timeout=remaining)
+        try:
+            for eval_function in list(results):
+                remaining = max_time - (time.perf_counter() - start)
+                if (status := eval_function(remaining)) in (
+                        Status.TIME_LIMIT_EXCEEDED, Status.MEMORY_LIMIT_EXCEEDED,
+                        Status.OUTPUT_LIMIT_EXCEEDED):
+                    # Ensure finally is called NOW and cancels remaining tasks.
+                    del results
+                    return status
+        except concurrent.futures.TimeoutError:
+            _logger.warning("Futures did not end soon enough.", exc_info=True)
+            return Status.TIME_LIMIT_EXCEEDED
+
+
 def execute_io_execution(bundle: Bundle, args: ExecutionIO, max_time: float) \
         -> Tuple[Optional[RunTestcaseResult], List[Message], Status, Path]:
     """
@@ -90,8 +140,8 @@ def execute_io_execution(bundle: Bundle, args: ExecutionIO, max_time: float) \
     for file in dependencies:
         origin = args.common_directory / file
         _logger.debug("Copying %s to %s", origin, execution_dir)
-        # Fix weird OSError when copying th Haskell Selector executable
-        if file.startswith(lang_config.selector_name()):
+        # Fix weird OSError when copying the submission executable
+        if file.startswith(lang_config.submission_name(bundle.plan)):
             os.link(origin, execution_dir / file)
         else:
             # noinspection PyTypeChecker
