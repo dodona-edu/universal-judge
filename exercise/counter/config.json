@@ -12,5 +12,10 @@
   },
   "access": "public",
   "labels": [
-  ]
+
+  ],
+  "internals": {
+    "token": "-Y_eCgaTyHDA-GI5ibK-IJN7x3qzzKkvNrdfS8mUINtmvxNMb-AbC6XM3TIhex5r",
+    "_info": "These fields are used for internal bookkeeping in Dodona, please do not change them."
+  }
 }

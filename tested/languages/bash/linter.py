@@ -78,6 +78,7 @@ def run_shellcheck(bundle: Bundle, submission: Path, remaining: float,
             column=max(int(shellcheck_object.get('column', "-1")) - 1, 0),
             type=message_categories.get(shellcheck_object.get('level', "warning"),
                                         Severity.WARNING),
+            externalUrl= f'https://github.com/koalaman/shellcheck/wiki/SC{code}'
         ))
 
     # sort linting messages on line, column and code
