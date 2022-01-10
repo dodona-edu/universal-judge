@@ -126,7 +126,7 @@ class AnnotateCode:
     """Annotate a piece of user_code."""
     row: Index
     text: str
-    externalURL: str = None
+    externalUrl: str = None
     column: Optional[Index] = None
     type: Optional[Severity] = None
     rows: Optional[Index] = None

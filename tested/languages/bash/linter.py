@@ -67,18 +67,16 @@ def run_shellcheck(bundle: Bundle, submission: Path, remaining: float,
         if not text and code is None:
             continue
         elif not text:
-            text = f'(code <a href="https://github.com/koalaman/shellcheck/wiki/' \
-                   f'SC{code}" target="_blank">{code}</a>)'
+            text = f'(code {code})'
         elif code is not None:
-            text = f'{text} (code <a href="https://github.com/koalaman/' \
-                   f'shellcheck/wiki/SC{code}" target="_blank">{code}</a>)'
+            text = f'{text} (code {code})'
         annotations.append(AnnotateCode(
             row=max(int(shellcheck_object.get('line', "-1")) - 1, 0),
             text=text,
             column=max(int(shellcheck_object.get('column', "-1")) - 1, 0),
             type=message_categories.get(shellcheck_object.get('level', "warning"),
                                         Severity.WARNING),
-            externalUrl= f'https://github.com/koalaman/shellcheck/wiki/SC{code}'
+            externalUrl=f'https://github.com/koalaman/shellcheck/wiki/SC{code}'
         ))
 
     # sort linting messages on line, column and code
