@@ -1,9 +1,0 @@
-{
-  "return": {
-    "value": {
-      "type": "set",
-      "data": [{"type": "integer", "data": 5}, {"type": "integer", "data": 10}, {"type": "integer", "data": 15}]
-    },
-    "evaluator": {"type": "builtin", "name": "value"}
-  }
-}
