@@ -87,7 +87,7 @@ $ cabal v1-install aeson
 Install npm packages as follows:
 
 ```shell
-$ npm install -g eslint@7 abstract-syntax-tree@2.16
+$ npm install eslint@7 abstract-syntax-tree@2.16
 ```
 
 ## Kotlin
