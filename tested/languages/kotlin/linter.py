@@ -1,6 +1,5 @@
 import json
 import logging
-import os
 from pathlib import Path
 from typing import List, Tuple
 
@@ -13,9 +12,6 @@ from tested.judge.utils import run_command
 logger = logging.getLogger(__name__)
 
 
-ENV_KTLINT = "KTLINT_JAR"
-
-
 def run_ktlint(bundle: Bundle, submission: Path, remaining: float) \
         -> Tuple[List[Message], List[AnnotateCode]]:
     """
@@ -25,17 +21,7 @@ def run_ktlint(bundle: Bundle, submission: Path, remaining: float) \
     config = bundle.config
     language_options = bundle.config.config_for()
 
-    if ENV_KTLINT not in os.environ:
-        return [ExtendedMessage(
-            description=get_i18n_string("languages.linter.not-found",
-                                        linter="KTLint"),
-            format='text',
-            permission=Permission.STAFF
-        )], []
-
-    ktlint_jar = Path(os.environ[ENV_KTLINT])
-
-    command = ["java", "-jar", ktlint_jar, "--reporter=json"]
+    command = ["ktlint", "--reporter=json"]
 
     if language_options.get("editorconfig", None):
         command.append("--editorconfig="
