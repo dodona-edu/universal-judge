@@ -2,7 +2,7 @@
 
 Organization of the repository:
 
-- `exercise`: contains a test exercise (TODO: move this to somewhere else)
+- `exercise`: contains a series of test exercises, useful as examples and for the test suite
 - `tested`: Python project containing the code of the actual judge that will be run by Dodona
 - `tests`: Tests for TESTed
 - `run` (file): Needed for the Docker image, starts the judge
