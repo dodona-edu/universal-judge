@@ -1,6 +1,6 @@
 # TESTed: universal judge for educational software testing
 
-Organisation of the repository:
+Organization of the repository:
 
 - `docker`: Docker files for creating a Docker image of the judge
 - `exercise`: contains a test exercise (TODO: move this to somewhere else)
@@ -8,14 +8,10 @@ Organisation of the repository:
 - `tests`: Tests for TESTed
 - `run` (file): Needed for the Docker image, starts the judge
 
-## Setup linter jars
+## Setup
 
-To use the Checkstyle linter, you need to set the environment variable
-`CHECKSTYLE_JAR` which must locate to the checkstyle jar file.
-
-To use the KTLint linter, you need to set the environment variable
-`KTLINT_JAR` which must locate to the ktlint jar file.
-
+The run TESTed, you need to set up various programming languages and libraries.
+See the [dependencies.md](./dependencies.md) file for more information.
 
 ## Judge
 
