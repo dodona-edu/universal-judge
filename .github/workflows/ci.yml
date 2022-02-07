@@ -5,33 +5,19 @@ on: [ push ]
 jobs:
   test:
     runs-on: ubuntu-20.04
-    env:
-      CHECKSTYLE_JAR: "/opt/checkstyle-8.41-all.jar"
-      KTLINT_JAR: "/opt/ktlint.jar"
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python 3.9
-        uses: actions/setup-python@v2
+      - uses: actions/setup-python@v2
         with:
-          python-version: 3.9.1
-      - uses: actions/cache@v2
-        name: Cache pip
-        # Idea: https://medium.com/ai2-blog/python-caching-in-github-actions-e9452698e98d
-        with:
-          path: ${{ env.pythonLocation }}
-          key: ${{ runner.os }}-${{ env.pythonLocation }}-pip3-${{ hashFiles('**/requirements*.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip3-
-      - name: Install Python dependencies
-        run: python -m pip install -r requirements.txt -r requirements-test.txt -r tested/languages/python/requirements.txt
-      - name: Install Java 11
-        uses: actions/setup-java@v1
+          python-version: 3.9.9
+          cache: 'pip'
+      - run: pip install -r requirements.txt -r requirements-test.txt -r tested/languages/python/requirements.txt
+      - uses: actions/setup-java@v1
         with:
           java-version: '11'
-      - name: Install GHC 9.2
-        uses: actions/setup-haskell@v1.1.4
+      - uses: haskell/actions/setup@v1
         with:
-          ghc-version: '9.2.1'
+          ghc-version: '9.2'
           cabal-version: '3.6'
       - uses: actions/cache@v2
         name: Cache cabal
@@ -43,24 +29,12 @@ jobs:
           key: ${{ runner.os }}-ghc-9.2.1-20220111
           restore-keys: |
             ${{ runner.os }}-ghc-9.2.1-
-      - name: Install Haskell dependencies
-        run: cabal v1-install aeson
-      - name: Use node 14
-        uses: actions/setup-node@v2
+      - run: cabal v1-install aeson
+      - uses: actions/setup-node@v2
         with:
-          node-version: 14
-      - name: Setup Kotlin
-        uses: fwilhe2/setup-kotlin@bb0e1ead85a7f840e9d2bc4bdd2c3950b080a449
-      - name: Install linters
-        run: >
-          sudo apt -y install hlint=2.1.11-1build4 cppcheck=1.90-4build1 shellcheck=0.7.0-2build2 &&
-          sudo npm install -g eslint@7.23.0 &&
-          sudo curl -H 'Accept: application/vnd.github.v4.raw' -L
-          https://github.com/checkstyle/checkstyle/releases/download/checkstyle-8.41/checkstyle-8.41-all.jar
-          --output "$CHECKSTYLE_JAR" &&
-          sudo curl -H 'Accept: application/vnd.github.v4.raw' -L
-          https://github.com/pinterest/ktlint/releases/download/0.41.0/ktlint --output "$KTLINT_JAR" &&
-          npm install abstract-syntax-tree@2.17.6
-      - name: Run tests
-        run: |
-          python -m pytest tests/ -m "not slow and not flaky"
+          node-version: 16
+      - run: npm install abstract-syntax-tree@2.20
+      - run: npm install -g eslint@8.7
+      - run: sudo apt -y install hlint cppcheck shellcheck checkstyle
+      - run: curl -sSLO https://github.com/pinterest/ktlint/releases/download/0.43.2/ktlint && chmod a+x ktlint
+      - run: python -m pytest tests/ -m "not slow and not flaky"

@@ -1,7 +1,7 @@
 # Dependencies for TESTed
 
-This file contains an overview of the various dependencies used by TESTed, and which versions are known to work.
-For each language, we list the required dependencies, and their install instructions.
+This file contains an overview of the various dependencies used by TESTed, and which versions are known to work. For
+each language, we list the required dependencies, and their install instructions.
 
 ## I just want a Docker file
 
@@ -11,22 +11,23 @@ You can also take a look at the `.github/workflows/ci.yml` file, as it will also
 
 ## Languages
 
-All versions in this document are known to work; other versions might also work.
+All versions in this document are known to work; other versions might also work. For example, the version in the table
+below are the ones we currently use to run the test suite.
 
 | Language            | Version |
 |---------------------|---------|
-| Python              | 3.9.x   |
-| Bash                | 5       |
-| gcc (C)             | 10      |
+| Python              | 3.9     |
+| Bash                | 5.1     |
+| gcc (C)             | 10.3    |
 | ghc (Haskell)       | 9.2     |
 | Java                | 11      |
-| NodeJS (Javascript) | 14      |
-| Kotlin              | 1.4     |
+| NodeJS (Javascript) | 16      |
+| Kotlin              | 1.6     |
 
 ## Core
 
-The Python dependencies are a special case, since TESTed itself is also written in Python.
-Therefor, the core Python dependencies are not optional.
+The Python dependencies are a special case, since TESTed itself is also written in Python. Therefor, the core Python
+dependencies are not optional.
 
 Installing dependencies:
 
@@ -48,22 +49,20 @@ $ pip install -r requirements.txt -r tested/languages/python/requirements.txt
 
 | Name         | Versions | Installation |
 |--------------|----------|--------------|
-| `shellcheck` | >= 0.7   | OS package   |
-
+| `shellcheck` | 0.8      | OS package   |
 
 ## C
 
 | Name       | Versions | Installation |
 |------------|----------|--------------|
-| `cppcheck` | >= 1.90  | OS package   |
-
+| `cppcheck` | 2.6      | OS package   |
 
 ## Haskell
 
-| Name      | Versions   | Installation          |
-|-----------|------------|-----------------------|
-| `aeson`   | latest     | Global cabal package* |
-| `hlint`   | 2.x or 3.x | OS package            |
+| Name      | Versions | Installation          |
+|-----------|----------|-----------------------|
+| `aeson`   | latest   | Global cabal package* |
+| `hlint`   | 3.2      | OS package            |
 
 Installing global cabal packages can be done as follows:
 
@@ -75,13 +74,13 @@ $ cabal v1-install aeson
 
 | Name         | Versions | Installation |
 |--------------|----------|--------------|
-| `checkstyle` | >= 8     | OS package   |
+| `checkstyle` | 9.2      | OS package   |
 
 ## Javascript
 
 | Name                    | Versions | Installation |
 |-------------------------|----------|--------------|
-| `eslint`                | >= 7     | npm package  |
+| `eslint`                | 8.7      | npm package  |
 | `abstract-syntax-tree`  | 2.16     | npm package  |
 
 Install npm packages as follows:
