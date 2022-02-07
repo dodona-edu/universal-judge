@@ -1,5 +1,4 @@
 import logging
-import os
 from pathlib import Path
 from typing import Tuple, List
 from xml.etree import ElementTree
@@ -19,8 +18,6 @@ message_categories = {
     'ignore':  Severity.INFO
 }
 
-ENV_CHECKSTYLE = "CHECKSTYLE_JAR"
-
 
 def run_checkstyle(bundle: Bundle, submission: Path, remaining: float) \
         -> Tuple[List[Message], List[AnnotateCode]]:
@@ -30,16 +27,6 @@ def run_checkstyle(bundle: Bundle, submission: Path, remaining: float) \
     """
     config = bundle.config
     language_options = bundle.config.config_for()
-
-    if ENV_CHECKSTYLE not in os.environ:
-        return [ExtendedMessage(
-            description=get_i18n_string("languages.linter.not-found",
-                                        linter="Checkstyle"),
-            format='text',
-            permission=Permission.STAFF
-        )], []
-
-    checkstyle_jar = Path(os.environ[ENV_CHECKSTYLE])
 
     if language_options.get("checkstyle_config", None):
         config_path = config.resources / language_options.get('checkstyle_config')
@@ -51,8 +38,7 @@ def run_checkstyle(bundle: Bundle, submission: Path, remaining: float) \
     execution_results = run_command(
         directory=submission.parent,
         timeout=remaining,
-        command=["java", "-jar", checkstyle_jar, "-f", "xml", "-c", config_path,
-                 submission.name]
+        command=["checkstyle", "-f", "xml", "-c", config_path, submission.name]
     )
 
     if execution_results is None:
