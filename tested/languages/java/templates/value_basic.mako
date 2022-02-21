@@ -5,7 +5,7 @@
 <%page args="value" />\
 % if value.type == BasicNumericTypes.INTEGER:
     ## Basic heuristic for long numbers
-    % if value.data > (2**31 - 1):
+    % if (value.data > (2**31 - 1)) or (value.data < -2**31):
         ${value.data}L\
     % else:
         ${value.data}\
