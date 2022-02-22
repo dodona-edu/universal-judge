@@ -16,10 +16,10 @@ below are the ones we currently use to run the test suite.
 
 | Language            | Version |
 |---------------------|---------|
-| Python              | 3.9     |
+| Python              | 3.10    |
 | Bash                | 5.1     |
-| gcc (C)             | 10.3    |
-| ghc (Haskell)       | 9.2     |
+| gcc (C)             | 10      |
+| ghc (Haskell)       | 8 or 9  |
 | Java                | 17      |
 | NodeJS (Javascript) | 16      |
 | Kotlin              | 1.6     |
@@ -55,7 +55,7 @@ $ pip install -r tested/languages/python/requirements.txt
 
 | Name       | Versions | Installation |
 |------------|----------|--------------|
-| `cppcheck` | 2.6      | OS package   |
+| `cppcheck` | 2.3-2.6  | OS package   |
 
 ## Haskell
 
@@ -74,7 +74,7 @@ $ cabal v1-install aeson
 
 | Name         | Versions | Installation |
 |--------------|----------|--------------|
-| `checkstyle` | 9.2      | OS package   |
+| `checkstyle` | 8 or  9  | OS package   |
 
 ## Javascript
 
