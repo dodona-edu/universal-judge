@@ -180,3 +180,9 @@ Organization of the repository:
 - `tested`: Python project containing the code of the actual judge that will be run by Dodona
 - `tests`: Unit tests for TESTed
 - `benchmarking`: Some utilities to benchmark TESTed
+
+You can run the tests with:
+
+```bash
+$ python -m pytest tests/test_functionality.py
+```
