@@ -20,7 +20,7 @@ below are the ones we currently use to run the test suite.
 | Bash                | 5.1     |
 | gcc (C)             | 10.3    |
 | ghc (Haskell)       | 9.2     |
-| Java                | 11      |
+| Java                | 17      |
 | NodeJS (Javascript) | 16      |
 | Kotlin              | 1.6     |
 
