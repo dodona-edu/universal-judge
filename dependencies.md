@@ -42,7 +42,7 @@ $ pip install -r requirements-tests.txt
 The dependencies needed to evaluate Python submissions are listed in `tested/languages/python/requirements.txt`.
 
 ```shell
-$ pip install -r requirements.txt -r tested/languages/python/requirements.txt
+$ pip install -r tested/languages/python/requirements.txt
 ```
 
 ## Bash
