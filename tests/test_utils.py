@@ -166,11 +166,11 @@ def test_template_code_block_markdown(lang: str, prompt: str):
     ("python", ">>>", '<span class="n">random</span><span class="p">()</span>', '<span class="mi">5</span>'),
     ("java", ">", '<span class="n">Submission</span><span class="p">.</span>'
                   '<span class="na">random</span><span class="p">()</span>', '<span class="mi">5</span>'),
-    ("c", ">", '<span class="n">random</span><span class="p">()</span>', '<span class="mi">5</span>'),
+    ("c", ">", '<span class="n">random</span><span class="p">()</span><span class="w"></span>', '<span class="mi">5</span><span class="w"></span>'),
     ("kotlin", ">", '<span class="n">random</span><span class="p">()</span>', '<span class="m">5</span>'),
     ("javascript", ">", '<span class="nx">random</span><span class="p">()</span>', '<span class="mf">5</span>'),
-    ("haskell", ">", '<span class="nf">random</span>',
-     '<span class="mi">5</span> <span class="ow">::</span> <span class="kt">Int</span>')
+    ("haskell", ">", '<span class="nf">random</span><span class="w"></span>',
+     '<span class="mi">5</span><span class="w"> </span><span class="ow">::</span><span class="w"> </span><span class="kt">Int</span><span class="w"></span>')
 ])
 def test_template_code_block_html(lang: str, prompt: str, expected_stmt: str, expected_expr: str):
     template = """<code class="tested">
