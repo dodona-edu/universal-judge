@@ -136,6 +136,7 @@ class AnnotateCode:
 
     row: Index
     text: str
+    externalUrl: str = None
     column: Optional[Index] = None
     type: Optional[Severity] = None
     rows: Optional[Index] = None
