@@ -4,7 +4,12 @@
 <%! from json import dumps %>\
 <%page args="value" />\
 % if value.type == BasicNumericTypes.INTEGER:
-    ${value.data}\
+    ## Basic heuristic for long numbers
+    % if (value.data > (2**31 - 1)) or (value.data < -2**31):
+        ${value.data}L\
+    % else:
+        ${value.data}\
+    % endif
 % elif value.type == BasicNumericTypes.RATIONAL:
     % if not isinstance(value.data, SpecialNumbers):
         ${value.data}\
