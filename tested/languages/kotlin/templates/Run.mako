@@ -4,6 +4,8 @@
 <%! from tested.utils import get_args %>
 
 import java.io.PrintWriter
+import java.math.BigInteger
+import java.math.BigDecimal
 
 class ${execution_name} : AutoCloseable {
     private val valueWriter = PrintWriter("${value_file}")

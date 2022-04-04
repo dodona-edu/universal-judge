@@ -76,12 +76,12 @@ void write_uint(FILE* out, unsigned int value) {
 }
 
 void write_long(FILE* out, long value) {
-    const char* asString = format("int64", %l);
+    const char* asString = format("int64", %li);
     fprintf(out, asString, value);
 }
 
 void write_ulong(FILE* out, unsigned long value) {
-    const char* asString = format("uint64", %ul);
+    const char* asString = format("uint64", %lu);
     fprintf(out, asString, value);
 }
 
@@ -99,15 +99,16 @@ void write_float(FILE* out, float value) {
     if (isnan(value)) {
         const char* asString = format("single_precision", %s);
         fprintf(out, asString, "\"nan\"");
-    } else if (isfinite(value)) {
+    } else if (isinf(value)) {
+        const char* asString = format("single_precision", %s);
+        if (value < 0) {
+          fprintf(out, asString, "\"-inf\"");
+        } else {
+          fprintf(out, asString, "\"inf\"");
+        }
+    } else {
         const char* asString = format("single_precision", %f);
         fprintf(out, asString, value);
-    } else if (value < 0) {
-        const char* asString = format("single_precision", %s);
-        fprintf(out, asString, "\"-inf\"");
-    } else {
-        const char* asString = format("single_precision", %d);
-        fprintf(out, asString, "\"inf\"");
     }
 }
 
@@ -115,15 +116,16 @@ void write_double(FILE* out, double value) {
     if (isnan(value)) {
         const char* asString = format("double_precision", %s);
         fprintf(out, asString, "\"nan\"");
-    } else if (isfinite(value)) {
+    } else if (isinf(value)) {
+        const char* asString = format("double_precision", %s);
+        if (value < 0) {
+          fprintf(out, asString, "\"-inf\"");
+        } else {
+          fprintf(out, asString, "\"inf\"");
+        }
+    } else {
         const char* asString = format("double_precision", %lf);
         fprintf(out, asString, value);
-    } else if (value < 0) {
-        const char* asString = format("double_precision", %s);
-        fprintf(out, asString, "\"-inf\"");
-    } else {
-        const char* asString = format("double_precision", %s);
-        fprintf(out, asString, "\"inf\"");
     }
 }
 

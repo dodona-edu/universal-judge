@@ -12,7 +12,7 @@
     arrayOf(<%include file="value_arguments.mako" args="arguments=value.data"/>)\
 % elif value.type == AdvancedNumericTypes.SINGLE_PRECISION:
     % if not isinstance(value.data, SpecialNumbers):
-        ${value.data}\
+        ${value.data}f\
     % elif value.data == SpecialNumbers.NOT_A_NUMBER:
         Float.NaN\
     % elif value.data == SpecialNumbers.POS_INFINITY:
@@ -20,11 +20,25 @@
     % else:
         Float.NEGATIVE_INFINITY\
     % endif
-% elif value.type in (AdvancedNumericTypes.U_INT_64, AdvancedNumericTypes.BIG_INT):
+% elif value.type == AdvancedNumericTypes.U_INT_32:
+    ${value.data}U\
+% elif value.type == AdvancedNumericTypes.U_INT_8:
+    (${value.data}).toUByte()\
+% elif value.type == AdvancedNumericTypes.INT_8:
+    (${value.data}).toByte()\
+% elif value.type == AdvancedNumericTypes.INT_16:
+    (${value.data}).toShort()\
+% elif value.type == AdvancedNumericTypes.U_INT_16:
+    (${value.data}).toUShort()\
+% elif value.type == AdvancedNumericTypes.INT_64:
+    ${value.data}L\
+% elif value.type == AdvancedNumericTypes.U_INT_64:
+    ${value.data}UL\
+% elif value.type == AdvancedNumericTypes.BIG_INT:
     BigInteger("${value.data}")\
 % elif value.type in (AdvancedNumericTypes.DOUBLE_EXTENDED, AdvancedNumericTypes.FIXED_PRECISION):
     % if not isinstance(value.data, SpecialNumbers):
-        new BigDecimal("${value.data}")\
+        BigDecimal("${value.data}")\
     % else:
         <% raise ValueError("Special numbers not supported for BigDecimal") %>\
     % endif

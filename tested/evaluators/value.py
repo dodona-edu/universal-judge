@@ -84,7 +84,7 @@ def get_values(bundle: Bundle, output_channel: ValueOutputChannel, actual) \
 def _check_type(
         bundle: Bundle, expected: Value, actual: Value
 ) -> Tuple[bool, Value]:
-    valid, value = _check_data_type(bundle, expected, actual)
+    valid, value = check_data_type(bundle, expected, actual)
     if not valid:
         return False, value
     elif isinstance(value.type, get_args(SimpleTypes)):
@@ -130,7 +130,7 @@ def _check_type(
         return valid, value
 
 
-def _check_data_type(
+def check_data_type(
         bundle: Bundle, expected: Value, actual: Value
 ) -> Tuple[bool, Value]:
     """

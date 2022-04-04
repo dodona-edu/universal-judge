@@ -1,4 +1,3 @@
-## Convert a Value to a literal type in Java.
 <%! from tested.datatypes import BasicNumericTypes, BasicStringTypes, BasicBooleanTypes, BasicNothingTypes, BasicSequenceTypes, BasicObjectTypes  %>\
 <%! from tested.serialisation import SpecialNumbers %>\
 <%! from json import dumps %>\

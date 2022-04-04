@@ -4,12 +4,12 @@ The data types.
 The data type system is used in two ways:
 
 1. As a describing system: the types are used to denote the datatype of actual data.
-2. As a prescribing system: the types are used to denoted the channel type of some
+2. As a prescribing system: the types are used to denote the channel type of some
    variable.
 
 As mentioned in the manuscript, the context_testcase use is scenario 1.
 
-Additionally, the types in this file are organised by their JSON encoding type.
+Additionally, the types in this file are organized by their JSON encoding type.
 They are also split in "basic types" and "advanced types".
 """
 from typing import Set, Tuple, FrozenSet

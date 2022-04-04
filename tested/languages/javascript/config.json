@@ -48,14 +48,14 @@
     "uint32": "reduced",
     "int64": "reduced",
     "uint64": "reduced",
-    "bigint": "reduced",
+    "bigint": "supported",
     "single_precision": "reduced",
     "double_precision": "reduced",
     "double_extended": "reduced",
-    "fixed_precision": "reduced",
+    "fixed_precision": "unsupported",
     "array": "reduced",
     "list": "reduced",
-    "tuple": "unsupported"
+    "tuple": "reduced"
   },
   "restrictions": {
     "map_key": [
