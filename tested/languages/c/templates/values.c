@@ -76,12 +76,12 @@ void write_uint(FILE* out, unsigned int value) {
 }
 
 void write_long(FILE* out, long value) {
-    const char* asString = format("int64", %l);
+    const char* asString = format("int64", %li);
     fprintf(out, asString, value);
 }
 
 void write_ulong(FILE* out, unsigned long value) {
-    const char* asString = format("uint64", %ul);
+    const char* asString = format("uint64", %lu);
     fprintf(out, asString, value);
 }
 
