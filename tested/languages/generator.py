@@ -19,13 +19,35 @@ from ..configs import Bundle
 from ..datatypes import BasicSequenceTypes
 from ..dodona import ExtendedMessage
 from ..internationalization import get_i18n_string
-from ..serialisation import (Value, SequenceType, Identifier, FunctionType,
-                             FunctionCall, Expression, Statement, Assignment,
-                             NothingType, NamedArgument, ObjectType,
-                             ObjectKeyValuePair, VariableType)
-from ..testplan import (EmptyChannel, IgnoredChannel, TextData, ProgrammedEvaluator,
-                        SpecificEvaluator, Testcase, RunTestcase, Context,
-                        ExceptionOutput, ValueOutput, Run, FileUrl)
+from ..serialisation import (
+    Value,
+    SequenceType,
+    Identifier,
+    FunctionType,
+    FunctionCall,
+    Expression,
+    Statement,
+    Assignment,
+    NothingType,
+    NamedArgument,
+    ObjectType,
+    ObjectKeyValuePair,
+    VariableType,
+)
+from ..testplan import (
+    EmptyChannel,
+    IgnoredChannel,
+    TextData,
+    ProgrammedEvaluator,
+    SpecificEvaluator,
+    Testcase,
+    RunTestcase,
+    Context,
+    ExceptionOutput,
+    ValueOutput,
+    Run,
+    FileUrl,
+)
 from ..utils import get_args
 
 _logger = logging.getLogger(__name__)
@@ -49,6 +71,7 @@ STATEMENT = "statement"
 @dataclass
 class _TestcaseArguments:
     """Arguments for a testcases testcase template."""
+
     # The input command. In most languages, you can use input_statement instead.
     command: Statement
     _value_function: Optional[Callable[[Expression], Statement]]
@@ -91,6 +114,7 @@ class _TestcaseArguments:
 @dataclass
 class _RunTestcaseArguments:
     """Arguments for a run testcase template."""
+
     # If a context testcase exists.
     exists: bool
     # Main arguments.
@@ -114,6 +138,7 @@ class _RunTestcaseArguments:
 @dataclass
 class _ContextArguments:
     """Arguments for a plan template for the contexts."""
+
     # The "before" code.
     before: str
     # The after code.
@@ -125,6 +150,7 @@ class _ContextArguments:
 @dataclass
 class _ExecutionArguments:
     """Arguments for a plan template for the executions."""
+
     # The name of the execution.
     execution_name: str
     # The name of the file for the return channel.
@@ -163,26 +189,23 @@ class InternalFunctionCall(FunctionCall):
 
 
 def _prepare_argument(
-        bundle: Bundle,
-        argument: Union[Expression, NamedArgument]
+    bundle: Bundle, argument: Union[Expression, NamedArgument]
 ) -> Union[Expression, NamedArgument]:
     if isinstance(argument, NamedArgument):
-        return NamedArgument(name=argument.name,
-                             value=_prepare_expression(bundle, argument.value))
+        return NamedArgument(
+            name=argument.name, value=_prepare_expression(bundle, argument.value)
+        )
     return _prepare_expression(bundle, argument)
 
 
-def _prepare_assignment(
-        bundle: Bundle,
-        assignment: Assignment
-) -> Assignment:
+def _prepare_assignment(bundle: Bundle, assignment: Assignment) -> Assignment:
     if isinstance(assignment.type, VariableType):
-        class_type = bundle.lang_config.conventionalize_class(
-            assignment.type.data)
+        class_type = bundle.lang_config.conventionalize_class(assignment.type.data)
         assignment = assignment.replace_type(VariableType(data=class_type))
 
     assignment = assignment.replace_variable(
-        bundle.lang_config.conventionalize_identifier(assignment.variable))
+        bundle.lang_config.conventionalize_identifier(assignment.variable)
+    )
     prepared = _prepare_expression(bundle, assignment.expression)
     return assignment.replace_expression(prepared)
 
@@ -194,10 +217,12 @@ def _prepare_expression(bundle: Bundle, expression: Expression) -> Expression:
 
     if isinstance(expression, Identifier):
         expression = Identifier(
-            bundle.lang_config.conventionalize_identifier(expression))
+            bundle.lang_config.conventionalize_identifier(expression)
+        )
     elif isinstance(expression, InternalFunctionCall):
-        expression.arguments = [_prepare_argument(bundle, arg)
-                                for arg in expression.arguments]
+        expression.arguments = [
+            _prepare_argument(bundle, arg) for arg in expression.arguments
+        ]
     elif isinstance(expression, FunctionCall):
         submission_name = bundle.lang_config.submission_name(bundle.plan)
         if expression.type == FunctionType.CONSTRUCTOR:
@@ -205,7 +230,8 @@ def _prepare_expression(bundle: Bundle, expression: Expression) -> Expression:
         elif expression.type == FunctionType.PROPERTY:
             if expression.namespace is None:
                 name = bundle.lang_config.conventionalize_global_identifier(
-                    expression.name)
+                    expression.name
+                )
             else:
                 name = bundle.lang_config.conventionalize_property(expression.name)
         else:
@@ -218,29 +244,32 @@ def _prepare_expression(bundle: Bundle, expression: Expression) -> Expression:
 
         internal = InternalFunctionCall(
             type=expression.type,
-            arguments=[_prepare_argument(bundle, arg)
-                       for arg in expression.arguments],
+            arguments=[_prepare_argument(bundle, arg) for arg in expression.arguments],
             name=name,
-            namespace=namespace
+            namespace=namespace,
         )
         internal.has_root_namespace = not bool(expression.namespace)
         return internal
     elif isinstance(expression, SequenceType):
-        expression.data = [_prepare_expression(bundle, expr)
-                           for expr in expression.data]
+        expression.data = [
+            _prepare_expression(bundle, expr) for expr in expression.data
+        ]
     elif isinstance(expression, ObjectType):
-        expression.data = [ObjectKeyValuePair(
-            key=_prepare_expression(bundle, pair.key),
-            value=_prepare_expression(bundle, pair.value)
-        ) for pair in expression.data]
+        expression.data = [
+            ObjectKeyValuePair(
+                key=_prepare_expression(bundle, pair.key),
+                value=_prepare_expression(bundle, pair.value),
+            )
+            for pair in expression.data
+        ]
     return expression
 
 
 def _create_handling_function(
-        bundle: Bundle,
-        send_value: str,
-        send_evaluated: str,
-        output: Union[ExceptionOutput, ValueOutput]
+    bundle: Bundle,
+    send_value: str,
+    send_evaluated: str,
+    output: Union[ExceptionOutput, ValueOutput],
 ) -> Tuple[Callable[[Expression], Statement], Optional[str]]:
     """
     Create a function to handle the result of a return value or an exception.
@@ -265,23 +294,24 @@ def _create_handling_function(
     :return: A tuple containing the call and the name of the evaluator if present.
     """
     lang_config = bundle.lang_config
-    if (hasattr(output, "evaluator")
-            and isinstance(output.evaluator, SpecificEvaluator)):
-        evaluator = output.evaluator.for_language(
-            bundle.config.programming_language)
+    if hasattr(output, "evaluator") and isinstance(output.evaluator, SpecificEvaluator):
+        evaluator = output.evaluator.for_language(bundle.config.programming_language)
         evaluator_name = lang_config.conventionalize_namespace(evaluator.file.stem)
     else:
         evaluator_name = None
 
     def generator(expression: Expression) -> Statement:
-        if (hasattr(output, "evaluator")
-                and isinstance(output.evaluator, SpecificEvaluator)):
-            arguments = [InternalFunctionCall(
-                type=FunctionType.FUNCTION,
-                name=evaluator.name,
-                namespace=Identifier(evaluator_name),
-                arguments=[_prepare_expression(bundle, expression)]
-            )]
+        if hasattr(output, "evaluator") and isinstance(
+            output.evaluator, SpecificEvaluator
+        ):
+            arguments = [
+                InternalFunctionCall(
+                    type=FunctionType.FUNCTION,
+                    name=evaluator.name,
+                    namespace=Identifier(evaluator_name),
+                    arguments=[_prepare_expression(bundle, expression)],
+                )
+            ]
             arguments[0].has_root_namespace = False
             function_name = send_evaluated
         else:
@@ -291,7 +321,7 @@ def _create_handling_function(
         internal = InternalFunctionCall(
             type=FunctionType.FUNCTION,
             name=lang_config.conventionalize_function(function_name),
-            arguments=[_prepare_argument(bundle, arg) for arg in arguments]
+            arguments=[_prepare_argument(bundle, arg) for arg in arguments],
         )
         internal.has_root_namespace = False
         return internal
@@ -300,8 +330,7 @@ def _create_handling_function(
 
 
 def _create_exception_function(
-        bundle: Bundle,
-        testcase: Union[Testcase, RunTestcase]
+    bundle: Bundle, testcase: Union[Testcase, RunTestcase]
 ) -> Tuple[Callable[[Expression], Statement], Optional[str]]:
     """
     Create a function call for handling exceptions. These functions assume there is
@@ -322,8 +351,8 @@ def _create_exception_function(
 
 
 def _prepare_testcase(
-        bundle: Bundle,
-        testcase: Testcase) -> Tuple[_TestcaseArguments, List[str]]:
+    bundle: Bundle, testcase: Testcase
+) -> Tuple[_TestcaseArguments, List[str]]:
     """
     Prepare a testcase. This will prepare any function calls or assignments, and
     extract functions for handling return values and exceptions.
@@ -352,8 +381,9 @@ def _prepare_testcase(
         value_function_call = None
         assert evaluator_name is None
 
-    (exception_function_call,
-     exception_evaluator_name) = _create_exception_function(bundle, testcase)
+    (exception_function_call, exception_evaluator_name) = _create_exception_function(
+        bundle, testcase
+    )
 
     if exception_evaluator_name:
         names.append(exception_evaluator_name)
@@ -364,16 +394,19 @@ def _prepare_testcase(
         assert isinstance(testcase.input, get_args(Assignment))
         command = _prepare_assignment(bundle, testcase.input)
 
-    return _TestcaseArguments(
-        command=command,
-        _value_function=value_function_call,
-        _exception_function=exception_function_call,
-    ), names
+    return (
+        _TestcaseArguments(
+            command=command,
+            _value_function=value_function_call,
+            _exception_function=exception_function_call,
+        ),
+        names,
+    )
 
 
 def _prepare_testcases(
-        bundle: Bundle,
-        context: Context) -> Tuple[List[_TestcaseArguments], Set[str]]:
+    bundle: Bundle, context: Context
+) -> Tuple[List[_TestcaseArguments], Set[str]]:
     """
     Prepare all testcase in a context.
 
@@ -392,8 +425,7 @@ def _prepare_testcases(
 
 
 def _prepare_run_testcase(
-        bundle: Bundle,
-        run: Run
+    bundle: Bundle, run: Run
 ) -> Tuple[_RunTestcaseArguments, Optional[str]]:
     """
     Prepare the context testcase for a context.
@@ -406,33 +438,39 @@ def _prepare_run_testcase(
     testcase = run.run
     exception_function, name = _create_exception_function(bundle, testcase)
     if testcase.input.main_call:
-        return _RunTestcaseArguments(
-            exists=True,
-            arguments=testcase.input.arguments,
-            _exception_function=exception_function
-        ), name
+        return (
+            _RunTestcaseArguments(
+                exists=True,
+                arguments=testcase.input.arguments,
+                _exception_function=exception_function,
+            ),
+            name,
+        )
     else:
-        return _RunTestcaseArguments(
-            exists=False,
-            _exception_function=exception_function,
-            arguments=[]
-        ), name
+        return (
+            _RunTestcaseArguments(
+                exists=False, _exception_function=exception_function, arguments=[]
+            ),
+            name,
+        )
 
 
-def _handle_link_files(link_files: Iterable[FileUrl],
-                       language: str) -> Tuple[str, str]:
-    dict_links = dict((link_file.name, dataclasses.asdict(link_file))
-                      for link_file in link_files)
+def _handle_link_files(link_files: Iterable[FileUrl], language: str) -> Tuple[str, str]:
+    dict_links = dict(
+        (link_file.name, dataclasses.asdict(link_file)) for link_file in link_files
+    )
     files = json.dumps(dict_links)
-    return f"<div class='contains-file highlight-{language} highlighter-rouge' " \
-           f"data-files={repr(files)}><pre style='padding: 2px; margin-bottom: " \
-           f"1px; background: none;'><code>", "</code></pre></div>"
+    return (
+        f"<div class='contains-file highlight-{language} highlighter-rouge' "
+        f"data-files={repr(files)}><pre style='padding: 2px; margin-bottom: "
+        f"1px; background: none;'><code>",
+        "</code></pre></div>",
+    )
 
 
-def get_readable_input(bundle: Bundle,
-                       files: List[FileUrl],
-                       case: Union[Testcase, RunTestcase]
-                       ) -> Tuple[ExtendedMessage, Set[FileUrl]]:
+def get_readable_input(
+    bundle: Bundle, files: List[FileUrl], case: Union[Testcase, RunTestcase]
+) -> Tuple[ExtendedMessage, Set[FileUrl]]:
     """
     Get human readable input for a testcase. This function will use, in
     order of availability:
@@ -443,7 +481,7 @@ def get_readable_input(bundle: Bundle,
     3. If it is a context testcase:
         a. The stdin and the arguments.
     """
-    format_ = 'text'  # By default, we use text as input.
+    format_ = "text"  # By default, we use text as input.
     analyse_files = False
     if case.description:
         text = case.description
@@ -479,14 +517,15 @@ def get_readable_input(bundle: Bundle,
     if not analyse_files or not files:
         return ExtendedMessage(description=text, format=format_), set()
     if isinstance(case, RunTestcase):
-        regex = re.compile('|'.join(map(lambda x: re.escape(x.name), files)))
+        regex = re.compile("|".join(map(lambda x: re.escape(x.name), files)))
     else:
         regex = re.compile(
-            f'{quote}{"|".join(map(lambda x: re.escape(x.name), files))}{quote}')
+            f'{quote}{"|".join(map(lambda x: re.escape(x.name), files))}{quote}'
+        )
     if not regex.search(text):
         return ExtendedMessage(description=text, format=format_), set()
 
-    if format_ == 'text':
+    if format_ == "text":
         generated_html = html.escape(text)
     else:
         generator = bundle.lang_config.get_description_generator()
@@ -495,18 +534,18 @@ def get_readable_input(bundle: Bundle,
 
     if isinstance(case, RunTestcase):
         regex = re.compile(
-            f'({"|".join(map(lambda x: re.escape(html.escape(x.name)), files))})')
+            f'({"|".join(map(lambda x: re.escape(html.escape(x.name)), files))})'
+        )
         is_args = True
     else:
-        quote = '&#39;' if quote == '\'' else html.escape(quote)
+        quote = "&#39;" if quote == "'" else html.escape(quote)
         regex = re.compile(
-            f'({quote})'
+            f"({quote})"
             f'({"|".join(map(lambda x: re.escape(html.escape(x.name)), files))})'
-            f'({quote})'
+            f"({quote})"
         )
         is_args = False
-    url_map = dict(
-        map(lambda x: (html.escape(x.name), x), files))
+    url_map = dict(map(lambda x: (html.escape(x.name), x), files))
 
     seen: Set[FileUrl] = set()
 
@@ -515,12 +554,16 @@ def get_readable_input(bundle: Bundle,
         if is_args:
             file = url_map[groups[0]]
             seen.add(file)
-            return f'<a href={repr(file.url)} class="file-link" ' \
-                   f'target="_blank">{groups[0]}</a>'
+            return (
+                f'<a href={repr(file.url)} class="file-link" '
+                f'target="_blank">{groups[0]}</a>'
+            )
         file = url_map[groups[1]]
         seen.add(file)
-        return f'{groups[0]}<a href={repr(file.url)} class="file-link" ' \
-               f'target="_blank">{groups[1]}</a>{groups[2]}'
+        return (
+            f'{groups[0]}<a href={repr(file.url)} class="file-link" '
+            f'target="_blank">{groups[1]}</a>{groups[2]}'
+        )
 
     generated_html = regex.sub(replace_link, generated_html)
     prefix, suffix = _handle_link_files(seen, format_)
@@ -534,8 +577,7 @@ def attempt_run_readable_input(bundle: Bundle, run: RunTestcase) -> ExtendedMess
         return result
 
     return ExtendedMessage(
-        description=get_i18n_string("languages.generator.missing.input"),
-        format="text"
+        description=get_i18n_string("languages.generator.missing.input"), format="text"
     )
 
 
@@ -548,8 +590,7 @@ def attempt_readable_input(bundle: Bundle, context: Context) -> ExtendedMessage:
             return result
 
     return ExtendedMessage(
-        description=get_i18n_string("languages.generator.missing.input"),
-        format="text"
+        description=get_i18n_string("languages.generator.missing.input"), format="text"
     )
 
 
@@ -591,8 +632,9 @@ def convert_statement(bundle: Bundle, statement: Statement) -> str:
         raise e
 
 
-def _generate_context(bundle: Bundle,
-                      context: Context) -> Tuple[_ContextArguments, Set[str]]:
+def _generate_context(
+    bundle: Bundle, context: Context
+) -> Tuple[_ContextArguments, Set[str]]:
     """
     Prepare one context for the execution
 
@@ -604,22 +646,22 @@ def _generate_context(bundle: Bundle,
     """
     language = bundle.config.programming_language
     resources = bundle.config.resources
-    before_code = context.before.get(language, TextData(data="")) \
-        .get_data_as_string(resources)
-    after_code = context.after.get(language, TextData(data="")) \
-        .get_data_as_string(resources)
+    before_code = context.before.get(language, TextData(data="")).get_data_as_string(
+        resources
+    )
+    after_code = context.after.get(language, TextData(data="")).get_data_as_string(
+        resources
+    )
     testcases, evaluator_names = _prepare_testcases(bundle, context)
-    return _ContextArguments(
-        before=before_code,
-        after=after_code,
-        testcases=testcases
-    ), evaluator_names
+    return (
+        _ContextArguments(before=before_code, after=after_code, testcases=testcases),
+        evaluator_names,
+    )
 
 
-def generate_execution(bundle: Bundle,
-                       destination: Path,
-                       run: Run,
-                       execution_name: str) -> Tuple[str, List[str]]:
+def generate_execution(
+    bundle: Bundle, destination: Path, run: Run, execution_name: str
+) -> Tuple[str, List[str]]:
     """
     Generate the files related to the execution.
 
@@ -656,23 +698,25 @@ def generate_execution(bundle: Bundle,
         context_secret_id=bundle.context_separator_secret,
         run_testcase=run_testcase,
         contexts=contexts,
-        evaluator_names=evaluator_names
+        evaluator_names=evaluator_names,
     )
 
-    evaluator_files = [f"{x}.{lang_config.extension_file()}"
-                       for x in evaluator_names]
+    evaluator_files = [f"{x}.{lang_config.extension_file()}" for x in evaluator_names]
 
     execution_destination = destination / lang_config.with_extension(execution_name)
     template = lang_config.template_name(TemplateType.RUN)
 
-    return find_and_write_template(
-        bundle, execution_args, execution_destination, template
-    ), evaluator_files
+    return (
+        find_and_write_template(
+            bundle, execution_args, execution_destination, template
+        ),
+        evaluator_files,
+    )
 
 
-def generate_selector(bundle: Bundle,
-                      destination: Path,
-                      context_names: List[str]) -> str:
+def generate_selector(
+    bundle: Bundle, destination: Path, context_names: List[str]
+) -> str:
     """
     Generate the file to execute_module a single context.
 
@@ -690,22 +734,21 @@ def generate_selector(bundle: Bundle,
         bundle=bundle,
         template_args=_SelectorArguments(contexts=context_names),
         destination=destination,
-        template_name=selector
+        template_name=selector,
     )
 
 
 def custom_evaluator_arguments(evaluator: ProgrammedEvaluator) -> Value:
-    return SequenceType(
-        type=BasicSequenceTypes.SEQUENCE,
-        data=evaluator.arguments
-    )
+    return SequenceType(type=BasicSequenceTypes.SEQUENCE, data=evaluator.arguments)
 
 
-def generate_custom_evaluator(bundle: Bundle,
-                              destination: Path,
-                              evaluator: ProgrammedEvaluator,
-                              expected_value: Value,
-                              actual_value: Value) -> str:
+def generate_custom_evaluator(
+    bundle: Bundle,
+    destination: Path,
+    evaluator: ProgrammedEvaluator,
+    expected_value: Value,
+    actual_value: Value,
+) -> str:
     """
     Generate the code for running a programmed evaluator.
 
@@ -726,17 +769,13 @@ def generate_custom_evaluator(bundle: Bundle,
         type=FunctionType.FUNCTION,
         namespace=Identifier(evaluator_name),
         name=evaluator.function.name,
-        arguments=[expected_value, actual_value, arguments]
+        arguments=[expected_value, actual_value, arguments],
     )
     function.has_root_namespace = False
 
-    args = _CustomEvaluatorArguments(
-        evaluator=evaluator_name,
-        function=function
-    )
+    args = _CustomEvaluatorArguments(evaluator=evaluator_name, function=function)
 
-    template = bundle.lang_config \
-        .template_name(TemplateType.EVALUATOR_EXECUTOR)
+    template = bundle.lang_config.template_name(TemplateType.EVALUATOR_EXECUTOR)
     return find_and_write_template(bundle, args, destination, template)
 
 

@@ -10,34 +10,44 @@ from dataclasses import field
 from enum import Enum
 from os import path
 from pathlib import Path
-from typing import (List, Optional, Dict, Any, Literal, Union, NamedTuple, Iterable,
-                    Set)
+from typing import List, Optional, Dict, Any, Literal, Union, NamedTuple, Iterable, Set
 
 from pydantic import BaseModel, root_validator, validator
 from pydantic.dataclasses import dataclass
 
 from .datatypes import BasicStringTypes
-from .features import FeatureSet, combine_features, WithFeatures, NOTHING, \
-    Construct
-from .serialisation import (ExceptionValue, Value, Expression, Statement,
-                            Identifier, FunctionCall, SequenceType, ObjectType,
-                            FunctionType, WithFunctions)
+from .features import FeatureSet, combine_features, WithFeatures, NOTHING, Construct
+from .serialisation import (
+    ExceptionValue,
+    Value,
+    Expression,
+    Statement,
+    Identifier,
+    FunctionCall,
+    SequenceType,
+    ObjectType,
+    FunctionType,
+    WithFunctions,
+)
 from .utils import get_args, flatten
 
 
 class TextBuiltin(str, Enum):
     """Textual built in evaluators."""
+
     TEXT = "text"
     FILE = "file"
 
 
 class ValueBuiltin(str, Enum):
     """Built in evaluators for values."""
+
     VALUE = "value"
 
 
 class ExceptionBuiltin(str, Enum):
     """Built in evaluators for exceptions."""
+
     EXCEPTION = "exception"
 
 
@@ -51,6 +61,7 @@ class BaseBuiltinEvaluator:
     This is the recommended and default evaluator, since it is a) the least amount
     of work and b) the most language independent.
     """
+
     type: Literal["builtin"] = "builtin"
     options: Dict[str, Any] = field(default_factory=dict)
 
@@ -76,6 +87,7 @@ class EvaluationFunction:
     An evaluation function. This not a normal function call; only the name may be
     specified, and the file should also be specified.
     """
+
     file: Path
     name: str = "evaluate"
 
@@ -88,6 +100,7 @@ class ProgrammedEvaluator:
     that judge. This type is useful, for example, when doing exercises on sequence
     alignments.
     """
+
     language: str
     function: EvaluationFunction
     arguments: List[Value] = field(default_factory=list)
@@ -113,6 +126,7 @@ class SpecificEvaluator:
     calls. If you want to evaluate_text stdout you should use the custom evaluator
     instead.
     """
+
     evaluators: Dict[str, EvaluationFunction]
     type: Literal["specific"] = "specific"
 
@@ -159,7 +173,7 @@ class TextData(WithFeatures):
             return self.data
         elif self.type == TextChannelType.FILE:
             file_path = self._resolve_path(working_directory, self.data)
-            with open(file_path, 'r') as file:
+            with open(file_path, "r") as file:
                 return file.read()
         else:
             raise AssertionError(f"Unknown enum type {self.type}")
@@ -171,20 +185,22 @@ class TextData(WithFeatures):
 @dataclass
 class TextOutputChannel(TextData):
     """Describes the output for textual channels."""
-    evaluator: Union[
-        GenericTextEvaluator, ProgrammedEvaluator
-    ] = field(default_factory=GenericTextEvaluator)
+
+    evaluator: Union[GenericTextEvaluator, ProgrammedEvaluator] = field(
+        default_factory=GenericTextEvaluator
+    )
     show_expected: bool = True
 
 
 @dataclass
 class FileOutputChannel(WithFeatures):
     """Describes the output for files."""
+
     expected_path: str  # Path to the file to compare to.
     actual_path: str  # Path to the generated file (by the users code)
-    evaluator: Union[
-        GenericTextEvaluator, ProgrammedEvaluator
-    ] = field(default_factory=lambda: GenericTextEvaluator(name=TextBuiltin.FILE))
+    evaluator: Union[GenericTextEvaluator, ProgrammedEvaluator] = field(
+        default_factory=lambda: GenericTextEvaluator(name=TextBuiltin.FILE)
+    )
     show_expected: bool = True
 
     def get_used_features(self) -> FeatureSet:
@@ -192,13 +208,14 @@ class FileOutputChannel(WithFeatures):
 
     def get_data_as_string(self, resources: Path) -> str:
         file_path = self._resolve_path(resources, self.expected_path)
-        with open(file_path, 'r') as file:
+        with open(file_path, "r") as file:
             return file.read()
 
 
 @dataclass
 class ValueOutputChannel(WithFeatures):
     """Handles return values of function calls."""
+
     value: Optional[Value] = None
     evaluator: Union[
         GenericValueEvaluator, ProgrammedEvaluator, SpecificEvaluator
@@ -223,10 +240,11 @@ class ValueOutputChannel(WithFeatures):
 @dataclass
 class ExceptionOutputChannel(WithFeatures):
     """Handles exceptions caused by the submission."""
+
     exception: Optional[ExceptionValue] = None
-    evaluator: Union[
-        GenericExceptionEvaluator, SpecificEvaluator
-    ] = field(default_factory=GenericExceptionEvaluator)
+    evaluator: Union[GenericExceptionEvaluator, SpecificEvaluator] = field(
+        default_factory=GenericExceptionEvaluator
+    )
     show_expected: bool = True
 
     def get_used_features(self) -> FeatureSet:
@@ -247,6 +265,7 @@ class ExceptionOutputChannel(WithFeatures):
 @dataclass
 class ExitCodeOutputChannel(WithFeatures):
     """Handles exit codes."""
+
     value: int = 0
     show_expected: bool = True
 
@@ -256,6 +275,7 @@ class ExitCodeOutputChannel(WithFeatures):
 
 class EmptyChannel(WithFeatures, str, Enum):
     """There is nothing on this output channel."""
+
     NONE = "none"
 
     def get_used_features(self) -> FeatureSet:
@@ -264,6 +284,7 @@ class EmptyChannel(WithFeatures, str, Enum):
 
 class IgnoredChannel(WithFeatures, str, Enum):
     """A file channel is ignored by default."""
+
     IGNORED = "ignored"
 
     def get_used_features(self) -> FeatureSet:
@@ -277,7 +298,7 @@ NormalOutputChannel = Union[
     FileOutputChannel,
     ValueOutputChannel,
     ExceptionOutputChannel,
-    ExitCodeOutputChannel
+    ExitCodeOutputChannel,
 ]
 
 OutputChannel = Union[NormalOutputChannel, SpecialOutputChannel]
@@ -298,12 +319,14 @@ class BaseOutput(WithFeatures):
     exception: ExceptionOutput = EmptyChannel.NONE
 
     def get_used_features(self) -> FeatureSet:
-        return combine_features([
-            self.stdout.get_used_features(),
-            self.stderr.get_used_features(),
-            self.file.get_used_features(),
-            self.exception.get_used_features(),
-        ])
+        return combine_features(
+            [
+                self.stdout.get_used_features(),
+                self.stderr.get_used_features(),
+                self.file.get_used_features(),
+                self.exception.get_used_features(),
+            ]
+        )
 
     def get_specific_eval_languages(self) -> Optional[Set[str]]:
         """
@@ -321,13 +344,13 @@ class BaseOutput(WithFeatures):
 @dataclass
 class Output(BaseOutput):
     """The output channels for a testcase."""
+
     result: ValueOutput = EmptyChannel.NONE
 
     def get_used_features(self) -> FeatureSet:
-        return combine_features([
-            super().get_used_features(),
-            self.result.get_used_features()
-        ])
+        return combine_features(
+            [super().get_used_features(), self.result.get_used_features()]
+        )
 
     # noinspection PyMethodParameters
     @validator("result")
@@ -346,8 +369,10 @@ class Output(BaseOutput):
             if isinstance(value, SequenceType):
                 return all(_only_values(va) for va in value.data)
             if isinstance(value, ObjectType):
-                return all(_only_values(pair.key) and _only_values(pair.value)
-                           for pair in value.data)
+                return all(
+                    _only_values(pair.key) and _only_values(pair.value)
+                    for pair in value.data
+                )
 
             return True
 
@@ -378,15 +403,16 @@ class Output(BaseOutput):
 @dataclass
 class Testcase(WithFeatures, WithFunctions):
     """A testcase is defined by an input channel and an output channel"""
+
     input: Statement
     description: Optional[str] = None  # Will be generated if None.
     essential: bool = True
     output: Output = field(default_factory=Output)
 
     def get_used_features(self) -> FeatureSet:
-        return combine_features([
-            self.input.get_used_features(), self.output.get_used_features()
-        ])
+        return combine_features(
+            [self.input.get_used_features(), self.output.get_used_features()]
+        )
 
     # noinspection PyMethodParameters
     @root_validator
@@ -396,8 +422,7 @@ class Testcase(WithFeatures, WithFunctions):
         result = output_.result
         # If the statement is not an expression, but we do expect a return value,
         # it is an error.
-        if not isinstance(input_, get_args(Expression)) \
-                and result != EmptyChannel.NONE:
+        if not isinstance(input_, get_args(Expression)) and result != EmptyChannel.NONE:
             raise ValueError(f"Only an expression can be evaluated as a value.")
         return values
 
@@ -429,6 +454,7 @@ class RunInput(WithFeatures):
 @dataclass
 class RunOutput(BaseOutput):
     """Output on a context level."""
+
     exit_code: ExitCodeOutputChannel = field(default_factory=ExitCodeOutputChannel)
 
 
@@ -447,16 +473,16 @@ class RunTestcase(WithFeatures):
     - Exit codes.
     - Standard input.
     """
+
     input: RunInput = field(default_factory=RunInput)
     output: RunOutput = field(default_factory=RunOutput)
     description: Optional[str] = None
     link_files: List[FileUrl] = field(default_factory=list)
 
     def get_used_features(self) -> FeatureSet:
-        return combine_features([
-            self.input.get_used_features(),
-            self.output.get_used_features()
-        ])
+        return combine_features(
+            [self.input.get_used_features(), self.output.get_used_features()]
+        )
 
 
 Code = Dict[str, TextData]
@@ -467,6 +493,7 @@ class Context(WithFeatures, WithFunctions):
     """
     A test case is an independent run of the solution.
     """
+
     testcases: List[Testcase] = field(default_factory=list)
     before: Code = field(default_factory=dict)
     after: Code = field(default_factory=dict)
@@ -476,7 +503,7 @@ class Context(WithFeatures, WithFunctions):
     # noinspection PyMethodParameters
     @root_validator
     def check_testcases_exist(cls, values):
-        additional = values.get('testcases')
+        additional = values.get("testcases")
         if not additional:
             raise ValueError("A context needs at least one testcase.")
         return values
@@ -498,20 +525,20 @@ class Run(WithFeatures, WithFunctions):
     """
     A run is a combination of contexts and a run testcase.
     """
+
     run: RunTestcase = field(default_factory=RunTestcase)
     contexts: List[Context] = field(default_factory=list)
 
     def all_testcases(self) -> List[Union[RunTestcase, Testcase]]:
         result = [self.run]
-        result.extend(
-            flatten((context.all_testcases() for context in self.contexts)))
+        result.extend(flatten((context.all_testcases() for context in self.contexts)))
         return result
 
     # noinspection PyMethodParameters
     @root_validator
     def check_testcases_exist(cls, values):
-        run = values.get('run')
-        additional = values.get('contexts')
+        run = values.get("run")
+        additional = values.get("contexts")
         if not run.input.main_call and not additional:
             raise ValueError("A run needs a run testcase or at least one context.")
         return values
@@ -523,10 +550,12 @@ class Run(WithFeatures, WithFunctions):
         return self.run.input.get_as_string(resources)
 
     def get_used_features(self) -> FeatureSet:
-        return combine_features([
-            self.run.get_used_features(),
-            combine_features([x.get_used_features() for x in self.contexts])
-        ])
+        return combine_features(
+            [
+                self.run.get_used_features(),
+                combine_features([x.get_used_features() for x in self.contexts]),
+            ]
+        )
 
     # noinspection PyMethodParameters
     @root_validator
@@ -536,23 +565,24 @@ class Run(WithFeatures, WithFunctions):
         eval_functions: Dict[str, List[EvaluationFunction]] = defaultdict(list)
 
         output = run_testcase.output
-        if (isinstance(output.exception, ExceptionOutputChannel)
-                and isinstance(output.exception.evaluator, SpecificEvaluator)):
-            for language, function in \
-                    output.exception.evaluator.evaluators.items():
+        if isinstance(output.exception, ExceptionOutputChannel) and isinstance(
+            output.exception.evaluator, SpecificEvaluator
+        ):
+            for language, function in output.exception.evaluator.evaluators.items():
                 eval_functions[language].append(function)
 
         for context in contexts:
             for testcase in context.all_testcases():
                 output = testcase.output
-                if (isinstance(output.result, ValueOutputChannel)
-                        and isinstance(output.result.evaluator, SpecificEvaluator)):
+                if isinstance(output.result, ValueOutputChannel) and isinstance(
+                    output.result.evaluator, SpecificEvaluator
+                ):
                     evaluator = output.result.evaluator
                     for language, function in evaluator.evaluators.items():
                         eval_functions[language].append(function)
-                if (isinstance(output.exception, ExceptionOutputChannel)
-                        and isinstance(output.exception.evaluator,
-                                       SpecificEvaluator)):
+                if isinstance(output.exception, ExceptionOutputChannel) and isinstance(
+                    output.exception.evaluator, SpecificEvaluator
+                ):
                     evaluator = output.exception.evaluator
                     for language, function in evaluator.evaluators.items():
                         eval_functions[language].append(function)
@@ -572,7 +602,8 @@ class Run(WithFeatures, WithFunctions):
                 if len(file) > 1:
                     raise ValueError(
                         f"Evaluator function names must be unique within the same "
-                        f"run. {function} was used in multiple files: {file}")
+                        f"run. {function} was used in multiple files: {file}"
+                    )
 
         return values
 
@@ -606,6 +637,7 @@ class ExecutionMode(str, Enum):
 @dataclass
 class Plan(WithFeatures, WithFunctions):
     """General test plan, which is used to run tests of some code."""
+
     tabs: List[Tab] = field(default_factory=list)
     namespace: str = "submission"
 
@@ -675,7 +707,8 @@ def _resolve_function_calls(function_calls: Iterable[FunctionCall]):
         # same amount of arguments.
         if len(set(len(x.arguments) for x in calls)) != 1:
             used_features.append(
-                FeatureSet({Construct.DEFAULT_PARAMETERS}, set(), set()))
+                FeatureSet({Construct.DEFAULT_PARAMETERS}, set(), set())
+            )
         # Create mapping [arg position] -> arguments for each call
         argument_map: Dict[Any, List[Expression]] = defaultdict(list)
         for call in calls:
@@ -695,9 +728,9 @@ def _resolve_function_calls(function_calls: Iterable[FunctionCall]):
                     types.add(argument.type)
             type_use.append(types)
         if not all(len(x) <= 1 for x in type_use):
-            used_features.append(FeatureSet(
-                {Construct.HETEROGENEOUS_ARGUMENTS}, set(), set()
-            ))
+            used_features.append(
+                FeatureSet({Construct.HETEROGENEOUS_ARGUMENTS}, set(), set())
+            )
 
         assert all(x for x in used_features)
     return combine_features(used_features)
@@ -719,9 +752,9 @@ def generate_schema():
     import json
 
     sc = Plan.__pydantic_model__.schema()
-    sc['$schema'] = "http://json-schema.org/draft-07/schema#"
+    sc["$schema"] = "http://json-schema.org/draft-07/schema#"
     print(json.dumps(sc, indent=2))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     generate_schema()

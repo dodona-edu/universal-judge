@@ -10,14 +10,29 @@ from ..dodona import *
 from ..dodona import StartTestcase, CloseTestcase
 from ..evaluators import get_evaluator
 from ..internationalization import get_i18n_string
-from ..languages.generator import get_readable_input, attempt_readable_input, \
-    convert_statement, attempt_run_readable_input
-from ..testplan import Context, OutputChannel, IgnoredChannel, \
-    ExitCodeOutputChannel, RunTestcase, TextOutput, \
-    FileOutput, ValueOutput, TextOutputChannel, SpecialOutputChannel, \
-    FileOutputChannel, ExceptionOutput, ExceptionOutputChannel, \
-    ValueOutputChannel, \
-    FileUrl
+from ..languages.generator import (
+    get_readable_input,
+    attempt_readable_input,
+    convert_statement,
+    attempt_run_readable_input,
+)
+from ..testplan import (
+    Context,
+    OutputChannel,
+    IgnoredChannel,
+    ExitCodeOutputChannel,
+    RunTestcase,
+    TextOutput,
+    FileOutput,
+    ValueOutput,
+    TextOutputChannel,
+    SpecialOutputChannel,
+    FileOutputChannel,
+    ExceptionOutput,
+    ExceptionOutputChannel,
+    ValueOutputChannel,
+    FileUrl,
+)
 from ..utils import get_args, safe_del, safe_get
 
 _logger = logging.getLogger(__name__)
@@ -27,6 +42,7 @@ class Channel(str, Enum):
     """
     The different output channels.
     """
+
     FILE = "file"
     EXCEPTION = "exception"
     STDOUT = "stdout"
@@ -36,15 +52,16 @@ class Channel(str, Enum):
 
 
 def _evaluate_channel(
-        bundle: Bundle,
-        context_directory: Path,
-        out: TestcaseCollector,
-        channel: Channel,
-        output: OutputChannel,
-        actual: Optional[str],
-        unexpected_status: Status = Status.WRONG,
-        timeout: bool = False,
-        memory: bool = False) -> Optional[bool]:
+    bundle: Bundle,
+    context_directory: Path,
+    out: TestcaseCollector,
+    channel: Channel,
+    output: OutputChannel,
+    actual: Optional[str],
+    unexpected_status: Status = Status.WRONG,
+    timeout: bool = False,
+    memory: bool = False,
+) -> Optional[bool]:
     """
     Evaluate the output on a given channel. This function will output the
     appropriate messages to start and end a new test in Dodona.
@@ -68,13 +85,11 @@ def _evaluate_channel(
 
     :return: True if successful, otherwise False.
     """
-    evaluator = get_evaluator(bundle, context_directory, output,
-                              unexpected_status=unexpected_status)
-    # Run the evaluator.
-    evaluation_result = evaluator(
-        output,
-        actual if actual else ""
+    evaluator = get_evaluator(
+        bundle, context_directory, output, unexpected_status=unexpected_status
     )
+    # Run the evaluator.
+    evaluation_result = evaluator(output, actual if actual else "")
     status = evaluation_result.result
 
     # Decide if we should show this channel or not.
@@ -84,23 +99,27 @@ def _evaluate_channel(
         return True
 
     expected: str
-    if not isinstance(output, get_args(SpecialOutputChannel)) \
-            and not output.show_expected and not is_correct:
+    if (
+        not isinstance(output, get_args(SpecialOutputChannel))
+        and not output.show_expected
+        and not is_correct
+    ):
         expected = ""
-        evaluation_result.messages.append(ExtendedMessage(
-            description=get_i18n_string("judge.evaluation.hidden_expected")
-        ))
+        evaluation_result.messages.append(
+            ExtendedMessage(
+                description=get_i18n_string("judge.evaluation.hidden_expected")
+            )
+        )
     else:
         expected = evaluation_result.readable_expected
 
-    channel_test = ("return (String)" if (channel is Channel.RETURN and
-                                          evaluation_result.is_multiline_string)
-                    else channel)
+    channel_test = (
+        "return (String)"
+        if (channel is Channel.RETURN and evaluation_result.is_multiline_string)
+        else channel
+    )
 
-    out.add(StartTest(
-        expected=expected,
-        channel=channel_test
-    ))
+    out.add(StartTest(expected=expected, channel=channel_test))
 
     # Report any messages we received.
     for message in evaluation_result.messages:
@@ -108,36 +127,31 @@ def _evaluate_channel(
 
     # Report missing output
     if actual is None:
-        out.add(AppendMessage(
-            message=get_i18n_string("judge.evaluation.early-exit")
-        ))
+        out.add(AppendMessage(message=get_i18n_string("judge.evaluation.early-exit")))
     elif should_show(output, channel) and timeout and not is_correct:
         status.human = get_i18n_string("judge.evaluation.time-limit")
         status.enum = Status.TIME_LIMIT_EXCEEDED
-        out.add(AppendMessage(
-            message=status.human
-        ))
+        out.add(AppendMessage(message=status.human))
     elif should_show(output, channel) and memory and not is_correct:
         status.human = get_i18n_string("judge.evaluation.memory-limit")
         status.enum = Status.TIME_LIMIT_EXCEEDED
-        out.add(AppendMessage(
-            message=status.human
-        ))
+        out.add(AppendMessage(message=status.human))
 
     # Close the test.
-    out.add(CloseTest(
-        generated=evaluation_result.readable_actual,
-        status=status
-    ))
+    out.add(CloseTest(generated=evaluation_result.readable_actual, status=status))
 
     return is_correct
 
 
-def evaluate_run_results(bundle: Bundle, run: RunTestcase,
-                         exec_results: Optional[RunTestcaseResult],
-                         compiler_results: Tuple[List[Message], Status],
-                         context_dir: Path, collector: OutputManager,
-                         has_contexts_next: bool) -> Optional[Status]:
+def evaluate_run_results(
+    bundle: Bundle,
+    run: RunTestcase,
+    exec_results: Optional[RunTestcaseResult],
+    compiler_results: Tuple[List[Message], Status],
+    context_dir: Path,
+    collector: OutputManager,
+    has_contexts_next: bool,
+) -> Optional[Status]:
     # Handle the compiler output. If there is compiler output, there is no point
     # in checking additional testcases, so stop early.
     # Handle compiler results
@@ -148,9 +162,7 @@ def evaluate_run_results(bundle: Bundle, run: RunTestcase,
         for message in compiler_results[0]:
             collector.add(AppendMessage(message=message))
         # Escalate the compiler status to every testcase.
-        collector.add(EscalateStatus(status=StatusMessage(
-            enum=compiler_results[1]
-        )))
+        collector.add(EscalateStatus(status=StatusMessage(enum=compiler_results[1])))
 
         # Finish evaluation, since there is nothing we can do.
         collector.add(CloseTestcase(accepted=False))
@@ -182,44 +194,74 @@ def evaluate_run_results(bundle: Bundle, run: RunTestcase,
     # further down)
     results = [
         _evaluate_channel(
-            bundle, context_dir, run_collector, Channel.FILE, output.file, "",
-            timeout=exec_results.timeout, memory=exec_results.memory
+            bundle,
+            context_dir,
+            run_collector,
+            Channel.FILE,
+            output.file,
+            "",
+            timeout=exec_results.timeout,
+            memory=exec_results.memory,
         ),
         _evaluate_channel(
-            bundle, context_dir, run_collector, Channel.STDERR, output.stderr,
-            actual_stderr, timeout=exec_results.timeout
+            bundle,
+            context_dir,
+            run_collector,
+            Channel.STDERR,
+            output.stderr,
+            actual_stderr,
+            timeout=exec_results.timeout,
         ),
         _evaluate_channel(
-            bundle, context_dir, run_collector, Channel.EXCEPTION,
-            output.exception, actual_exception,
-            unexpected_status=Status.RUNTIME_ERROR, timeout=exec_results.timeout,
-            memory=exec_results.memory
+            bundle,
+            context_dir,
+            run_collector,
+            Channel.EXCEPTION,
+            output.exception,
+            actual_exception,
+            unexpected_status=Status.RUNTIME_ERROR,
+            timeout=exec_results.timeout,
+            memory=exec_results.memory,
         ),
         _evaluate_channel(
-            bundle, context_dir, run_collector, Channel.STDOUT, output.stdout,
-            actual_stdout, timeout=exec_results.timeout, memory=exec_results.memory
-        )
+            bundle,
+            context_dir,
+            run_collector,
+            Channel.STDOUT,
+            output.stdout,
+            actual_stdout,
+            timeout=exec_results.timeout,
+            memory=exec_results.memory,
+        ),
     ]
 
     # If we must stop due to errors are there no further testcases, evaluate the
     # exit channel.
     if not has_contexts_next:
         _evaluate_channel(
-            bundle, context_dir, run_collector, Channel.EXIT, run.output.exit_code,
-            str(exec_results.exit), timeout=exec_results.timeout,
-            memory=exec_results.memory
+            bundle,
+            context_dir,
+            run_collector,
+            Channel.EXIT,
+            run.output.exit_code,
+            str(exec_results.exit),
+            timeout=exec_results.timeout,
+            memory=exec_results.memory,
         )
 
     # Done with the run testcase.
     run_collector.to_manager(collector, CloseTestcase())
 
 
-def evaluate_context_results(bundle: Bundle, context: Context,
-                             exec_results: Optional[TestcaseResult],
-                             compiler_results: Tuple[List[Message], Status],
-                             context_dir: Path, collector: OutputManager,
-                             exit_output: Optional[ExitCodeOutputChannel]) -> \
-        Optional[Status]:
+def evaluate_context_results(
+    bundle: Bundle,
+    context: Context,
+    exec_results: Optional[TestcaseResult],
+    compiler_results: Tuple[List[Message], Status],
+    context_dir: Path,
+    collector: OutputManager,
+    exit_output: Optional[ExitCodeOutputChannel],
+) -> Optional[Status]:
     # Handle the compiler output. If there is compiler output, there is no
     # point in
     # checking additional testcases, so stop early.
@@ -231,9 +273,7 @@ def evaluate_context_results(bundle: Bundle, context: Context,
         for message in compiler_results[0]:
             collector.add(AppendMessage(message=message))
         # Escalate the compiler status to every testcase.
-        collector.add(EscalateStatus(status=StatusMessage(
-            enum=compiler_results[1]
-        )))
+        collector.add(EscalateStatus(status=StatusMessage(enum=compiler_results[1])))
 
         # Finish evaluation, since there is nothing we can do.
         collector.add(CloseTestcase(accepted=False))
@@ -255,10 +295,10 @@ def evaluate_context_results(bundle: Bundle, context: Context,
     # messages present for debugging.
 
     deletions = (
-        safe_del(stdout_, 0, lambda e: e == ''),
-        safe_del(stderr_, 0, lambda e: e == ''),
-        safe_del(exceptions, 0, lambda e: e == ''),
-        safe_del(values, 0, lambda e: e == '')
+        safe_del(stdout_, 0, lambda e: e == ""),
+        safe_del(stderr_, 0, lambda e: e == ""),
+        safe_del(exceptions, 0, lambda e: e == ""),
+        safe_del(values, 0, lambda e: e == ""),
     )
 
     could_delete = all(deletions)
@@ -267,24 +307,34 @@ def evaluate_context_results(bundle: Bundle, context: Context,
     missing_values = []
     if not could_delete:
         _logger.warning("Missing output in context testcase.")
-        missing_values.append(AppendMessage(
-            get_i18n_string("judge.evaluation.early-exit")
-        ))
-        missing_values.append(EscalateStatus(status=StatusMessage(
-            enum=Status.WRONG,
-            human=get_i18n_string("judge.evaluation.missing.output")
-        )))
+        missing_values.append(
+            AppendMessage(get_i18n_string("judge.evaluation.early-exit"))
+        )
+        missing_values.append(
+            EscalateStatus(
+                status=StatusMessage(
+                    enum=Status.WRONG,
+                    human=get_i18n_string("judge.evaluation.missing.output"),
+                )
+            )
+        )
         # Recover stdout and stderr if present.
         if recovered := "\n".join(stdout_):
-            missing_values.append(AppendMessage(ExtendedMessage(
-                description="Standaarduitvoer was:\n" + recovered,
-                format="code"
-            )))
+            missing_values.append(
+                AppendMessage(
+                    ExtendedMessage(
+                        description="Standaarduitvoer was:\n" + recovered, format="code"
+                    )
+                )
+            )
         if recovered := "\n".join(stderr_):
-            missing_values.append(AppendMessage(ExtendedMessage(
-                description="Standaardfout was:\n" + recovered,
-                format="code"
-            )))
+            missing_values.append(
+                AppendMessage(
+                    ExtendedMessage(
+                        description="Standaardfout was:\n" + recovered, format="code"
+                    )
+                )
+            )
 
     collectors = []
     inlined_files: Set[FileUrl] = set()
@@ -293,8 +343,7 @@ def evaluate_context_results(bundle: Bundle, context: Context,
     for i, testcase in enumerate(context.testcases):
         _logger.debug(f"Evaluating testcase {i}")
 
-        readable_input, seen = get_readable_input(bundle, context.link_files,
-                                                  testcase)
+        readable_input, seen = get_readable_input(bundle, context.link_files, testcase)
         inlined_files = inlined_files.union(seen)
         t_col = TestcaseCollector(StartTestcase(description=readable_input))
 
@@ -311,40 +360,69 @@ def evaluate_context_results(bundle: Bundle, context: Context,
 
         results = [
             _evaluate_channel(
-                bundle, context_dir, t_col, Channel.FILE, output.file, "",
-                timeout=exec_results.timeout, memory=exec_results.memory
+                bundle,
+                context_dir,
+                t_col,
+                Channel.FILE,
+                output.file,
+                "",
+                timeout=exec_results.timeout,
+                memory=exec_results.memory,
             ),
             _evaluate_channel(
-                bundle, context_dir, t_col, Channel.STDERR, output.stderr,
+                bundle,
+                context_dir,
+                t_col,
+                Channel.STDERR,
+                output.stderr,
                 actual_stderr,
                 timeout=exec_results.timeout and len(stderr_) == i + 1,
-                memory=exec_results.memory and len(stderr_) == i + 1
+                memory=exec_results.memory and len(stderr_) == i + 1,
             ),
             _evaluate_channel(
-                bundle, context_dir, t_col, Channel.EXCEPTION, output.exception,
-                actual_exception, unexpected_status=Status.RUNTIME_ERROR,
+                bundle,
+                context_dir,
+                t_col,
+                Channel.EXCEPTION,
+                output.exception,
+                actual_exception,
+                unexpected_status=Status.RUNTIME_ERROR,
                 timeout=exec_results.timeout and len(exceptions) == i + 1,
-                memory=exec_results.memory and len(exceptions) == i + 1
+                memory=exec_results.memory and len(exceptions) == i + 1,
             ),
             _evaluate_channel(
-                bundle, context_dir, t_col, Channel.STDOUT, output.stdout,
+                bundle,
+                context_dir,
+                t_col,
+                Channel.STDOUT,
+                output.stdout,
                 actual_stdout,
                 timeout=exec_results.timeout and len(stdout_) == i + 1,
-                memory=exec_results.memory and len(stdout_) == i + 1
+                memory=exec_results.memory and len(stdout_) == i + 1,
             ),
             _evaluate_channel(
-                bundle, context_dir, t_col, Channel.RETURN, output.result,
-                actual_value, timeout=exec_results.timeout and len(values) == i + 1,
-                memory=exec_results.memory and len(values) == i + 1
-            )
+                bundle,
+                context_dir,
+                t_col,
+                Channel.RETURN,
+                output.result,
+                actual_value,
+                timeout=exec_results.timeout and len(values) == i + 1,
+                memory=exec_results.memory and len(values) == i + 1,
+            ),
         ]
 
         # If we will stop or this is the last one, do the exit channel.
         if i == len(context.testcases):
             _evaluate_channel(
-                bundle, context_dir, t_col, Channel.EXIT, exit_output,
-                str(exec_results.exit), timeout=exec_results.timeout,
-                memory=exec_results.memory
+                bundle,
+                context_dir,
+                t_col,
+                Channel.EXIT,
+                exit_output,
+                str(exec_results.exit),
+                timeout=exec_results.timeout,
+                memory=exec_results.memory,
             )
 
         # Add messages if there was no main file.
@@ -370,18 +448,20 @@ def evaluate_context_results(bundle: Bundle, context: Context,
         return Status.MEMORY_LIMIT_EXCEEDED
 
 
-def _link_files_message(link_files: Iterable[FileUrl],
-                        collector: Optional[OutputManager] = None
-                        ) -> Optional[AppendMessage]:
-    dict_links = dict((link_file.name, dataclasses.asdict(link_file))
-                      for link_file in link_files)
-    link_list = ', '.join(
+def _link_files_message(
+    link_files: Iterable[FileUrl], collector: Optional[OutputManager] = None
+) -> Optional[AppendMessage]:
+    dict_links = dict(
+        (link_file.name, dataclasses.asdict(link_file)) for link_file in link_files
+    )
+    link_list = ", ".join(
         f'<a href="{link_file.url}" class="file-link" target="_blank">'
         f'<span class="code">{html.escape(link_file.name)}</span></a>'
         for link_file in link_files
     )
-    file_list_str = get_i18n_string("judge.evaluation.files", count=len(link_files),
-                                    files=link_list)
+    file_list_str = get_i18n_string(
+        "judge.evaluation.files", count=len(link_files), files=link_list
+    )
     description = f"<div class='contains-file''><p>{file_list_str}</p></div>"
     message = ExtendedMessage(description=description, format="html")
     if collector is not None:
@@ -441,32 +521,39 @@ def guess_expected_value(bundle: Bundle, test: OutputChannel) -> str:
     elif isinstance(test, FileOutputChannel):
         return test.get_data_as_string(bundle.config.resources)
     elif isinstance(test, ExceptionOutputChannel):
-        return test.exception.message if test.exception else get_i18n_string(
-            "judge.evaluation.dynamic")
+        return (
+            test.exception.message
+            if test.exception
+            else get_i18n_string("judge.evaluation.dynamic")
+        )
     elif isinstance(test, ValueOutputChannel):
-        return convert_statement(bundle,
-                                 test.value) if test.value else get_i18n_string(
-            "judge.evaluation.dynamic")
+        return (
+            convert_statement(bundle, test.value)
+            if test.value
+            else get_i18n_string("judge.evaluation.dynamic")
+        )
     elif isinstance(test, ExitCodeOutputChannel):
         return str(test.value)
 
 
-def _add_channel(bundle: Bundle, output: OutputChannel, channel: Channel,
-                 updates: List[Update]):
+def _add_channel(
+    bundle: Bundle, output: OutputChannel, channel: Channel, updates: List[Update]
+):
     """Add a channel to the output if it should be shown."""
     if should_show(output, channel):
-        updates.append(StartTest(
-            expected=guess_expected_value(bundle, output),
-            channel=channel
-        ))
-        updates.append(CloseTest(
-            generated="",
-            status=StatusMessage(
-                enum=Status.NOT_EXECUTED,
-                human=get_i18n_string("judge.evaluation.missing.test")
-            ),
-            accepted=False
-        ))
+        updates.append(
+            StartTest(expected=guess_expected_value(bundle, output), channel=channel)
+        )
+        updates.append(
+            CloseTest(
+                generated="",
+                status=StatusMessage(
+                    enum=Status.NOT_EXECUTED,
+                    human=get_i18n_string("judge.evaluation.missing.test"),
+                ),
+                accepted=False,
+            )
+        )
 
 
 def prepare_evaluation(bundle: Bundle, collector: OutputManager):
@@ -492,8 +579,7 @@ def prepare_evaluation(bundle: Bundle, collector: OutputManager):
 
             if has_main:
                 collector.prepare_context(
-                    StartContext(description=run_testcase.description), i,
-                    context_index
+                    StartContext(description=run_testcase.description), i, context_index
                 )
 
                 readable_input, inlined_files = get_readable_input(
@@ -505,9 +591,12 @@ def prepare_evaluation(bundle: Bundle, collector: OutputManager):
                 if non_inlined:
                     _link_files_message(non_inlined, collector)
 
-                updates = [AppendMessage(
-                    message=get_i18n_string("judge.evaluation.missing.context")),
-                    StartTestcase(description=readable_input)]
+                updates = [
+                    AppendMessage(
+                        message=get_i18n_string("judge.evaluation.missing.context")
+                    ),
+                    StartTestcase(description=readable_input),
+                ]
 
                 # Do the normal output channels.
                 output = run_testcase.output
@@ -523,8 +612,9 @@ def prepare_evaluation(bundle: Bundle, collector: OutputManager):
                 updates.append(CloseTestcase(accepted=False))
 
                 collector.prepare_context(updates, i, context_index)
-                collector.prepare_context(CloseContext(accepted=False), i,
-                                          context_index)
+                collector.prepare_context(
+                    CloseContext(accepted=False), i, context_index
+                )
                 context_index += 1
 
             for j, context in enumerate(run.contexts, start=int(has_main)):
@@ -533,15 +623,18 @@ def prepare_evaluation(bundle: Bundle, collector: OutputManager):
                 collector.prepare_context(
                     StartContext(description=context.description), i, context_index
                 )
-                updates.append(AppendMessage(message=get_i18n_string(
-                    "judge.evaluation.missing.context")))
+                updates.append(
+                    AppendMessage(
+                        message=get_i18n_string("judge.evaluation.missing.context")
+                    )
+                )
 
                 inlined_files: Set[FileUrl] = set()
                 # Begin normal testcases.
                 for t, testcase in enumerate(context.testcases, 1):
-                    readable_input, seen = get_readable_input(bundle,
-                                                              context.link_files,
-                                                              testcase)
+                    readable_input, seen = get_readable_input(
+                        bundle, context.link_files, testcase
+                    )
                     inlined_files = inlined_files.union(seen)
                     updates.append(StartTestcase(description=readable_input))
 
@@ -550,13 +643,13 @@ def prepare_evaluation(bundle: Bundle, collector: OutputManager):
                     _add_channel(bundle, output.stdout, Channel.STDOUT, updates)
                     _add_channel(bundle, output.stderr, Channel.STDERR, updates)
                     _add_channel(bundle, output.file, Channel.FILE, updates)
-                    _add_channel(bundle, output.exception, Channel.EXCEPTION,
-                                 updates)
+                    _add_channel(bundle, output.exception, Channel.EXCEPTION, updates)
                     _add_channel(bundle, output.result, Channel.RETURN, updates)
 
                     # If last testcase, do exit code.
-                    if j == int(has_main) + len(run.contexts) - 1 and \
-                            t == len(context.testcases):
+                    if j == int(has_main) + len(run.contexts) - 1 and t == len(
+                        context.testcases
+                    ):
                         _add_channel(bundle, exit_output, Channel.EXIT, updates)
 
                     updates.append(CloseTestcase(accepted=False))
@@ -567,8 +660,9 @@ def prepare_evaluation(bundle: Bundle, collector: OutputManager):
                     updates.insert(0, _link_files_message(non_inlined))
 
                 collector.prepare_context(updates, i, context_index)
-                collector.prepare_context(CloseContext(accepted=False), i,
-                                          context_index)
+                collector.prepare_context(
+                    CloseContext(accepted=False), i, context_index
+                )
                 context_index += 1
         collector.prepare_tab(CloseTab(), i)
     collector.prepare_judgment(CloseJudgment(accepted=False))

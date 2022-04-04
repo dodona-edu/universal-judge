@@ -108,7 +108,7 @@ def test_parse_ctx_with_config():
   - arguments: [ '-e' ]
     stderr: " Fail "
     """
-    args = ['-a', "2.125", "1.212"]
+    args = ["-a", "2.125", "1.212"]
     json_str = translate(yaml_str)
     plan = _PlanModel.parse_raw(json_str).__root__
     assert len(plan.tabs) == 1
@@ -120,10 +120,10 @@ def test_parse_ctx_with_config():
     assert ctx0.run.input.arguments == args
     assert ctx1.run.input.arguments == args
     assert ctx2.run.input.arguments == args
-    assert ctx3.run.input.arguments == ['-e']
+    assert ctx3.run.input.arguments == ["-e"]
 
     stdout = ctx0.run.output.stdout
-    assert stdout.data == '3.34'
+    assert stdout.data == "3.34"
     options = stdout.evaluator.options
     assert len(options) == 3
     assert options["tryFloatingPoint"]
@@ -131,7 +131,7 @@ def test_parse_ctx_with_config():
     assert options["roundTo"] == 2
 
     stdout = ctx1.run.output.stdout
-    assert stdout.data == '3.337'
+    assert stdout.data == "3.337"
     options = stdout.evaluator.options
     assert len(options) == 3
     assert options["tryFloatingPoint"]
@@ -139,7 +139,7 @@ def test_parse_ctx_with_config():
     assert options["roundTo"] == 3
 
     stdout = ctx2.run.output.stdout
-    assert stdout.data == '3.3'
+    assert stdout.data == "3.3"
     options = stdout.evaluator.options
     assert len(options) == 3
     assert options["tryFloatingPoint"]
@@ -221,9 +221,9 @@ def test_statement_and_main():
     assert len(tab.runs) == 1
     run = tab.runs[0]
     assert run.run.input.main_call
-    assert run.run.input.arguments == ['-a', '5', '7']
-    assert run.run.output.stdout.data == '12'
-    assert run.run.output.stdout.evaluator.options['tryFloatingPoint']
+    assert run.run.input.arguments == ["-a", "5", "7"]
+    assert run.run.output.stdout.data == "12"
+    assert run.run.output.stdout.evaluator.options["tryFloatingPoint"]
     assert len(run.contexts) == 1
     ctx = run.contexts[0]
     assert len(ctx.testcases) == 1

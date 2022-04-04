@@ -10,10 +10,26 @@ from math import floor
 from typing import List, Union, Optional, Generator
 
 from tested.configs import Bundle
-from tested.dodona import Update, Status, report_update, StatusMessage, \
-    CloseTab, CloseContext, CloseTestcase, StartJudgment, CloseJudgment, \
-    StartTab, StartContext, StartTestcase, close_for, ExtendedMessage, \
-    EscalateStatus, update_size, limit_size, AnnotateCode
+from tested.dodona import (
+    Update,
+    Status,
+    report_update,
+    StatusMessage,
+    CloseTab,
+    CloseContext,
+    CloseTestcase,
+    StartJudgment,
+    CloseJudgment,
+    StartTab,
+    StartContext,
+    StartTestcase,
+    close_for,
+    ExtendedMessage,
+    EscalateStatus,
+    update_size,
+    limit_size,
+    AnnotateCode,
+)
 from tested.testplan import Run
 
 _logger = logging.getLogger(__name__)
@@ -83,9 +99,17 @@ class OutputManager:
                         counts the "content", not other stuff. You should add a
                         buffer for the other stuff.
     """
-    __slots__ = ["seen_annotations", "tree_stack", "collected", "prepared",
-                 "bundle", "tab", "context",
-                 "output_limit"]
+
+    __slots__ = [
+        "seen_annotations",
+        "tree_stack",
+        "collected",
+        "prepared",
+        "bundle",
+        "tab",
+        "context",
+        "output_limit",
+    ]
 
     def __init__(self, bundle: Bundle):
         self.seen_annotations: List[AnnotateCode] = list()
@@ -97,6 +121,7 @@ class OutputManager:
         self.context = -1
         self.output_limit = int(floor(bundle.config.output_limit * 0.8))
         from .evaluation import prepare_evaluation
+
         prepare_evaluation(bundle, self)
 
     def is_full(self) -> bool:
@@ -118,9 +143,12 @@ class OutputManager:
             assert isinstance(update, CloseTab)
             self.prepared.tabs[tab_index].end = update
 
-    def prepare_context(self,
-                        update: Union[StartContext, CloseContext, List[Update]],
-                        tab_index: int, context_index: int):
+    def prepare_context(
+        self,
+        update: Union[StartContext, CloseContext, List[Update]],
+        tab_index: int,
+        context_index: int,
+    ):
         assert not self.collected, "OutputManager already finished!"
         if isinstance(update, StartContext):
             self.prepared.tabs[tab_index].contexts[context_index].start = update
@@ -128,9 +156,22 @@ class OutputManager:
             self.prepared.tabs[tab_index].contexts[context_index].end = update
         else:
             assert isinstance(update, list)
-            assert all((not isinstance(x, (
-                StartTab, CloseTab, StartContext, CloseContext, StartJudgment,
-                CloseJudgment)) for x in update))
+            assert all(
+                (
+                    not isinstance(
+                        x,
+                        (
+                            StartTab,
+                            CloseTab,
+                            StartContext,
+                            CloseContext,
+                            StartJudgment,
+                            CloseJudgment,
+                        ),
+                    )
+                    for x in update
+                )
+            )
             self.prepared.tabs[tab_index].contexts[context_index].content = update
 
     def _add(self, command: Update):
@@ -153,8 +194,7 @@ class OutputManager:
         return action
 
     def add(self, command: Update):
-        assert not isinstance(command,
-                              (StartTab, StartContext, CloseContext, CloseTab))
+        assert not isinstance(command, (StartTab, StartContext, CloseContext, CloseTab))
         assert not self.collected, "OutputManager already finished!"
 
         # Check if command is code annotations
@@ -176,8 +216,9 @@ class OutputManager:
     def add_tab(self, update: Union[StartTab, CloseTab], tab_index: int):
         assert not self.collected, "OutputManager already finished!"
         if isinstance(update, CloseTab) and tab_index >= 0:
-            for _, context in sorted(self.prepared.tabs[tab_index].contexts.items(),
-                                     key=lambda x: x[0]):
+            for _, context in sorted(
+                self.prepared.tabs[tab_index].contexts.items(), key=lambda x: x[0]
+            ):
                 self._add(context.start)
                 for command in context.content:
                     self._add(command)
@@ -188,8 +229,9 @@ class OutputManager:
         if action == "close" and tab_index >= 0:
             del self.prepared.tabs[tab_index]
 
-    def add_context(self, update: Union[StartContext, CloseContext],
-                    context_index: Optional[int]):
+    def add_context(
+        self, update: Union[StartContext, CloseContext], context_index: Optional[int]
+    ):
         assert not self.collected, "OutputManager already finished!"
         if context_index is None:
             self._add(update)
@@ -293,6 +335,7 @@ class TestcaseCollector:
     be started without problem, but if nothing is written during evaluation, they
     will not be shown in Dodona.
     """
+
     __slots__ = ["start", "content"]
 
     def __init__(self, start: StartTestcase):
@@ -308,12 +351,12 @@ class TestcaseCollector:
         for command in self._generate(end):
             manager.add(command)
 
-    def _generate(self, end: Optional[CloseTestcase]) \
-            -> Generator[Update, None, None]:
-        has_text = (isinstance(self.start.description, str)
-                    and self.start.description)
-        has_extended = (isinstance(self.start.description, ExtendedMessage)
-                        and self.start.description.description)
+    def _generate(self, end: Optional[CloseTestcase]) -> Generator[Update, None, None]:
+        has_text = isinstance(self.start.description, str) and self.start.description
+        has_extended = (
+            isinstance(self.start.description, ExtendedMessage)
+            and self.start.description.description
+        )
         if has_text or has_extended:
             yield self.start
             yield from self.content

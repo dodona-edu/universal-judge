@@ -19,13 +19,9 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .config import Language
 
-TYPE_ARG = Union[
-    str, Tuple[str, Union[List['TYPE_ARG'], 'TYPE_ARG']]
-]
+TYPE_ARG = Union[str, Tuple[str, Union[List["TYPE_ARG"], "TYPE_ARG"]]]
 
-TYPE_CONFIG_NAME = Optional[Dict[
-    str, Dict[str, Union[str, Dict[str, str]]]
-]]
+TYPE_CONFIG_NAME = Optional[Dict[str, Dict[str, Union[str, Dict[str, str]]]]]
 
 logger = logging.getLogger(__name__)
 
@@ -35,22 +31,22 @@ _html_formatter = HtmlFormatter()
 class DescriptionGenerator:
     __slots__ = ["language", "types", "_lexer"]
 
-    def __init__(self, language: Language, config_dir: Path,
-                 types_file: str = "types.json"):
+    def __init__(
+        self, language: Language, config_dir: Path, types_file: str = "types.json"
+    ):
         self.language = language
-        path_to_types = (config_dir / types_file)
+        path_to_types = config_dir / types_file
         if not os.path.exists(path_to_types):
-            path_to_types = (
-                    config_dir.parent / language.inherits_from() / types_file)
+            path_to_types = config_dir.parent / language.inherits_from() / types_file
 
         with open(path_to_types, "r") as f:
             self.types = json.load(f)
 
-        self._lexer = get_lexer_by_name(self.types["console"]["name"],
-                                        stripall=True)
+        self._lexer = get_lexer_by_name(self.types["console"]["name"], stripall=True)
 
-    def get_natural_type_name(self, type_name: str, bundle: Bundle,
-                              plural: bool = False, is_html: bool = True) -> str:
+    def get_natural_type_name(
+        self, type_name: str, bundle: Bundle, plural: bool = False, is_html: bool = True
+    ) -> str:
         try:
             group = self.types["natural"]["plural" if plural else "singular"]
             value = group[bundle.config.natural_language][type_name]
@@ -58,13 +54,15 @@ class DescriptionGenerator:
             value = type_name
         return html.escape(value) if is_html else value
 
-    def get_type_name(self,
-                      args: TYPE_ARG,
-                      bundle: Bundle,
-                      custom_type_map: TYPE_CONFIG_NAME = None,
-                      is_inner: bool = False,
-                      is_html: bool = True,
-                      recursive_call: bool = False) -> str:
+    def get_type_name(
+        self,
+        args: TYPE_ARG,
+        bundle: Bundle,
+        custom_type_map: TYPE_CONFIG_NAME = None,
+        is_inner: bool = False,
+        is_html: bool = True,
+        recursive_call: bool = False,
+    ) -> str:
         programming_language = bundle.config.programming_language
 
         def _get_type(arg: str) -> Union[str, bool]:
@@ -84,10 +82,10 @@ class DescriptionGenerator:
                 return _get_type_or_conventionalize(arg)
             else:
                 try:
-                    return custom_type_map[programming_language]['inner'][arg]
+                    return custom_type_map[programming_language]["inner"][arg]
                 except KeyError:
                     try:
-                        return self.types['inner'][arg]
+                        return self.types["inner"][arg]
                     except KeyError:
                         return _get_type_or_conventionalize(arg)
 
@@ -100,28 +98,41 @@ class DescriptionGenerator:
         else:
             main_type = _get_type_name(args[0])
             if isinstance(args[1], str):
-                types = [self.get_type_name(args[1], bundle, custom_type_map,
-                                            bool(main_type), is_html, True)]
+                types = [
+                    self.get_type_name(
+                        args[1], bundle, custom_type_map, bool(main_type), is_html, True
+                    )
+                ]
             elif isinstance(args[1], list):
                 types = [
-                    self.get_type_name(arg, bundle, custom_type_map,
-                                       bool(main_type), is_html, True)
+                    self.get_type_name(
+                        arg, bundle, custom_type_map, bool(main_type), is_html, True
+                    )
                     for arg in args[1]
                 ]
             else:
-                types = [self.get_type_name(args[1], bundle, custom_type_map,
-                                            bool(main_type), is_html, True)]
+                types = [
+                    self.get_type_name(
+                        args[1], bundle, custom_type_map, bool(main_type), is_html, True
+                    )
+                ]
             if isinstance(main_type, str):
-                type_name = f"{self.types[args[0]]}" \
-                            f"{self.types['brackets']['open']}" \
-                            f"{', '.join(types)}{self.types['brackets']['close']}"
+                type_name = (
+                    f"{self.types[args[0]]}"
+                    f"{self.types['brackets']['open']}"
+                    f"{', '.join(types)}{self.types['brackets']['close']}"
+                )
             elif main_type:
-                type_name = f"{self.types['brackets'][args[0]]['open']}" \
-                            f"{', '.join(types)}" \
-                            f"{self.types['brackets'][args[0]]['close']}"
+                type_name = (
+                    f"{self.types['brackets'][args[0]]['open']}"
+                    f"{', '.join(types)}"
+                    f"{self.types['brackets'][args[0]]['close']}"
+                )
             elif len(types) == 1:
-                type_name = f"{types[0]}{self.types['brackets'][args[0]]['open']}" \
-                            f"{self.types['brackets'][args[0]]['close']}"
+                type_name = (
+                    f"{types[0]}{self.types['brackets'][args[0]]['open']}"
+                    f"{self.types['brackets'][args[0]]['close']}"
+                )
             else:
                 raise ValueError(f"Type {main_type} expects only one subtype")
         if is_html and not recursive_call:
@@ -152,9 +163,11 @@ class DescriptionGenerator:
             return html.escape(name)
         return name
 
-    def get_code(self, stmt: str, bundle: Bundle, statement: bool = False,
-                 is_html: bool = True) -> str:
+    def get_code(
+        self, stmt: str, bundle: Bundle, statement: bool = False, is_html: bool = True
+    ) -> str:
         from .generator import convert_statement
+
         parser = Parser()
         if statement:
             stmt = parser.parse_statement(stmt)
@@ -175,14 +188,14 @@ class DescriptionGenerator:
         stmt = convert_statement(bundle, stmt)
         stmt = self.language.cleanup_description(bundle.plan.namespace, stmt)
         if is_html:
-            prompt = html.escape(self.types['console']['prompt']).strip()
+            prompt = html.escape(self.types["console"]["prompt"]).strip()
             stmt = self.generate_html_code(stmt)[41:-13].strip()
-            return (prompt + ' ' if statement else "") + stmt
+            return (prompt + " " if statement else "") + stmt
         else:
-            return ((
-                        self.types['console']['prompt'].strip() + ' '
-                        if statement else ""
-                    ) + stmt).strip()
+            return (
+                (self.types["console"]["prompt"].strip() + " " if statement else "")
+                + stmt
+            ).strip()
 
     def generate_html_code(self, stmt: str) -> str:
         return highlight(stmt, self._lexer, _html_formatter)

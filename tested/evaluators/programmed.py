@@ -15,14 +15,19 @@ from ..internationalization import get_i18n_string
 from ..judge import evaluate_programmed
 from ..judge.utils import BaseExecutionResult
 from ..serialisation import StringType, EvalResult, Value
-from ..testplan import (TextOutputChannel, FileOutputChannel, ValueOutputChannel,
-                        NormalOutputChannel, ExceptionOutputChannel,
-                        ProgrammedEvaluator)
+from ..testplan import (
+    TextOutputChannel,
+    FileOutputChannel,
+    ValueOutputChannel,
+    NormalOutputChannel,
+    ExceptionOutputChannel,
+    ProgrammedEvaluator,
+)
 from ..utils import Either, get_args
 
 _logger = logging.getLogger(__name__)
 
-DEFAULT_STUDENT = (get_i18n_string("evaluators.programmed.student.default"))
+DEFAULT_STUDENT = get_i18n_string("evaluators.programmed.student.default")
 
 
 def _maybe_string(value_: str) -> Optional[Value]:
@@ -36,9 +41,9 @@ def _try_specific(value_: str) -> EvalResult:
     return EvalResult.parse_raw(value_)
 
 
-def expected_as_value(config: EvaluatorConfig,
-                      channel: NormalOutputChannel,
-                      actual: str) -> Tuple[Optional[Value], Either[Value]]:
+def expected_as_value(
+    config: EvaluatorConfig, channel: NormalOutputChannel, actual: str
+) -> Tuple[Optional[Value], Either[Value]]:
     if isinstance(channel, TextOutputChannel):
         expected = channel.get_data_as_string(config.bundle.config.resources)
         expected_value = _maybe_string(expected)
@@ -47,10 +52,7 @@ def expected_as_value(config: EvaluatorConfig,
 
     if isinstance(channel, FileOutputChannel):
         expected = _maybe_string(channel.expected_path)
-        actual = StringType(
-            type=StringTypes.TEXT,
-            data=channel.actual_path
-        )
+        actual = StringType(type=StringTypes.TEXT, data=channel.actual_path)
         return expected, Either(actual)
 
     if isinstance(channel, ValueOutputChannel):
@@ -67,15 +69,15 @@ def expected_as_value(config: EvaluatorConfig,
     raise AssertionError(f"Unknown channel type for {channel}.")
 
 
-def evaluate(config: EvaluatorConfig,
-             channel: NormalOutputChannel,
-             actual: str) -> EvaluationResult:
+def evaluate(
+    config: EvaluatorConfig, channel: NormalOutputChannel, actual: str
+) -> EvaluationResult:
     """
     Evaluate using a programmed evaluator. This evaluator is unique, in that it is
     also responsible for running the evaluator (all other evaluators don't do that).
     """
     assert isinstance(channel, get_args(NormalOutputChannel))
-    assert hasattr(channel, 'evaluator')
+    assert hasattr(channel, "evaluator")
     assert isinstance(channel.evaluator, ProgrammedEvaluator)
 
     _logger.debug(f"Programmed evaluator for output {actual}")
@@ -96,18 +98,17 @@ def evaluate(config: EvaluatorConfig,
         return EvaluationResult(
             result=StatusMessage(enum=Status.WRONG),
             readable_expected=readable_expected,
-            readable_actual=readable_actual
+            readable_actual=readable_actual,
         )
 
-    _logger.debug(f"Calling programmed evaluation with params:\n"
-                  f"expected: {expected}\n"
-                  f"actual: {actual}")
+    _logger.debug(
+        f"Calling programmed evaluation with params:\n"
+        f"expected: {expected}\n"
+        f"actual: {actual}"
+    )
     new_stage("evaluate.programmed", True)
     result = evaluate_programmed(
-        config.bundle,
-        evaluator=channel.evaluator,
-        expected=expected,
-        actual=actual
+        config.bundle, evaluator=channel.evaluator, expected=expected, actual=actual
     )
     end_stage("evaluate.programmed", True)
 
@@ -117,14 +118,14 @@ def evaluate(config: EvaluatorConfig,
                 result=StatusMessage(enum=Status.TIME_LIMIT_EXCEEDED),
                 readable_expected=readable_expected,
                 readable_actual=readable_actual,
-                messages=[result.stdout, result.stderr]
+                messages=[result.stdout, result.stderr],
             )
         if result.memory:
             return EvaluationResult(
                 result=StatusMessage(enum=Status.MEMORY_LIMIT_EXCEEDED),
                 readable_expected=readable_expected,
                 readable_actual=readable_actual,
-                messages=[result.stdout, result.stderr]
+                messages=[result.stdout, result.stderr],
             )
 
         if not result.stdout:
@@ -134,50 +135,47 @@ def evaluate(config: EvaluatorConfig,
                 result=StatusMessage(enum=Status.INTERNAL_ERROR),
                 readable_expected=readable_expected,
                 readable_actual=readable_actual,
-                messages=[stdout, stderr, DEFAULT_STUDENT]
+                messages=[stdout, stderr, DEFAULT_STUDENT],
             )
         try:
             evaluation_result = _try_specific(result.stdout)
         except (TypeError, ValueError):
             messages = [
-                ExtendedMessage(
-                    description=DEFAULT_STUDENT,
-                    format="text"
-                ),
+                ExtendedMessage(description=DEFAULT_STUDENT, format="text"),
                 ExtendedMessage(
                     description=get_i18n_string("evaluators.programmed.result"),
                     format="text",
-                    permission=Permission.STAFF
+                    permission=Permission.STAFF,
                 ),
                 ExtendedMessage(
                     description=traceback.format_exc(),
                     format="code",
-                    permission=Permission.STAFF
+                    permission=Permission.STAFF,
                 ),
                 ExtendedMessage(
                     description=get_i18n_string("evaluators.programmed.stdout"),
-                    permission=Permission.STAFF
+                    permission=Permission.STAFF,
                 ),
                 ExtendedMessage(
                     description=result.stdout,
                     format="code",
-                    permission=Permission.STAFF
+                    permission=Permission.STAFF,
                 ),
                 ExtendedMessage(
                     description=get_i18n_string("evaluators.programmed.stderr"),
-                    permission=Permission.STAFF
+                    permission=Permission.STAFF,
                 ),
                 ExtendedMessage(
                     description=result.stderr,
                     format="code",
-                    permission=Permission.STAFF
-                )
+                    permission=Permission.STAFF,
+                ),
             ]
             return EvaluationResult(
                 result=StatusMessage(enum=Status.INTERNAL_ERROR),
                 readable_expected=readable_expected,
                 readable_actual=readable_actual,
-                messages=messages
+                messages=messages,
             )
     else:
         assert isinstance(result, EvalResult)
@@ -195,16 +193,20 @@ def evaluate(config: EvaluatorConfig,
         result_status = StatusMessage(
             enum=Status.CORRECT if evaluation_result.result else Status.WRONG
         )
-    actual = cleanup_specific_programmed(config, channel, EvalResult(
-        result=result_status.enum,
-        readable_expected=readable_expected,
-        readable_actual=readable_actual,
-        messages=evaluation_result.messages
-    ))
+    actual = cleanup_specific_programmed(
+        config,
+        channel,
+        EvalResult(
+            result=result_status.enum,
+            readable_expected=readable_expected,
+            readable_actual=readable_actual,
+            messages=evaluation_result.messages,
+        ),
+    )
 
     return EvaluationResult(
         result=result_status,
         readable_expected=actual.readable_expected,
         readable_actual=actual.readable_actual,
-        messages=actual.messages
+        messages=actual.messages,
     )

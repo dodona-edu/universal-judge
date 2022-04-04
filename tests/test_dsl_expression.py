@@ -2,11 +2,30 @@ import math
 
 import pytest
 
-from tested.datatypes import BasicNothingTypes, BasicNumericTypes, AdvancedNumericTypes, BasicBooleanTypes, \
-    BasicStringTypes, BasicSequenceTypes, AdvancedSequenceTypes, ObjectTypes, AdvancedStringTypes, AdvancedNothingTypes
+from tested.datatypes import (
+    BasicNothingTypes,
+    BasicNumericTypes,
+    AdvancedNumericTypes,
+    BasicBooleanTypes,
+    BasicStringTypes,
+    BasicSequenceTypes,
+    AdvancedSequenceTypes,
+    ObjectTypes,
+    AdvancedStringTypes,
+    AdvancedNothingTypes,
+)
 from tested.dsl import Parser, ParseError
-from tested.serialisation import Assignment, FunctionCall, FunctionType, VariableType, SequenceType, Identifier, \
-    StringType, ObjectKeyValuePair, ObjectType
+from tested.serialisation import (
+    Assignment,
+    FunctionCall,
+    FunctionType,
+    VariableType,
+    SequenceType,
+    Identifier,
+    StringType,
+    ObjectKeyValuePair,
+    ObjectType,
+)
 
 parser = Parser()
 
@@ -116,7 +135,7 @@ def test_parse_value_single():
 def test_parse_value_double():
     parsed = parser.parse_value("+2.5e+10 :: double")
     assert parsed.type == AdvancedNumericTypes.DOUBLE_PRECISION
-    assert math.isclose(parsed.data, 2.5e+10)
+    assert math.isclose(parsed.data, 2.5e10)
 
 
 def test_parse_value_double_extended():
@@ -182,7 +201,7 @@ def test_parse_value_set():
 
 
 def test_parse_value_tuple():
-    parsed = parser.parse_value('(true, false)')
+    parsed = parser.parse_value("(true, false)")
     assert parsed.type == AdvancedSequenceTypes.TUPLE
     assert len(parsed.data) == 2
     assert parsed.data[0].type == BasicBooleanTypes.BOOLEAN
@@ -224,12 +243,12 @@ def test_parse_value_dict():
 
 def test_parse_error_fun_in_return_value():
     with pytest.raises(ParseError):
-        parser.parse_value('[fun()]')
+        parser.parse_value("[fun()]")
 
 
 def test_parse_error_property_in_return_value():
     with pytest.raises(ParseError):
-        parser.parse_value('{data.data}')
+        parser.parse_value("{data.data}")
 
 
 def test_parse_error_constructor_in_return_value():
@@ -244,18 +263,18 @@ def test_parse_error_constructor_in_return_value2():
 
 def test_parse_error_fun_assign():
     with pytest.raises(ParseError):
-        parser.parse_statement('data = first([object.gen_int()])')
+        parser.parse_statement("data = first([object.gen_int()])")
 
 
 def test_parse_fun_assign():
-    assign = parser.parse_statement('integer data = first([object.gen_int()])')
+    assign = parser.parse_statement("integer data = first([object.gen_int()])")
     assert isinstance(assign, Assignment)
     assert assign.type == BasicNumericTypes.INTEGER
     assert assign.variable == "data"
     expr = assign.expression
     assert isinstance(expr, FunctionCall)
     assert expr.namespace is None
-    assert expr.name == 'first'
+    assert expr.name == "first"
     assert expr.type == FunctionType.FUNCTION
     assert len(expr.arguments) == 1
     arg = expr.arguments[0]
@@ -278,7 +297,7 @@ def test_parse_constructor_assign():
     expr = assign.expression
     assert isinstance(expr, FunctionCall)
     assert expr.namespace is None
-    assert expr.name == 'Container'
+    assert expr.name == "Container"
     assert expr.type == FunctionType.CONSTRUCTOR
     assert len(expr.arguments) == 1
     arg = expr.arguments[0]
@@ -301,7 +320,7 @@ def test_parse_constructor_assign2():
     expr = assign.expression
     assert isinstance(expr, FunctionCall)
     assert expr.namespace is None
-    assert expr.name == 'Container'
+    assert expr.name == "Container"
     assert expr.type == FunctionType.CONSTRUCTOR
     assert len(expr.arguments) == 1
     arg = expr.arguments[0]
@@ -333,7 +352,7 @@ def test_parse_value_assign():
     assert elem.arguments[0].type == BasicNumericTypes.INTEGER
     assert elem.arguments[0].data == 5
     assert isinstance(elem.arguments[1], Identifier)
-    assert elem.arguments[1] == 'True'
+    assert elem.arguments[1] == "True"
 
 
 def test_parse_function():
@@ -359,19 +378,19 @@ def test_parse_function():
 
 
 def test_parse_identifier():
-    parsed = parser.parse_statement('id')
+    parsed = parser.parse_statement("id")
     assert isinstance(parsed, Identifier)
-    assert parsed == 'id'
+    assert parsed == "id"
 
 
 def test_parse_value():
-    parsed = parser.parse_statement('5.5')
+    parsed = parser.parse_statement("5.5")
     assert parsed.type == BasicNumericTypes.RATIONAL
     assert math.isclose(parsed.data, 5.5)
 
 
 def test_parse_cast_set():
-    parsed = parser.parse_statement('{} :: set')
+    parsed = parser.parse_statement("{} :: set")
     assert parsed.type == BasicSequenceTypes.SET
     assert parsed.data == []
     with pytest.raises(ParseError):
@@ -379,15 +398,15 @@ def test_parse_cast_set():
 
 
 def test_parse_property():
-    parsed = parser.parse_statement('alpha.beta')
+    parsed = parser.parse_statement("alpha.beta")
     assert parsed.type == FunctionType.PROPERTY
     assert parsed.arguments == []
-    assert parsed.name == 'beta'
-    assert parsed.namespace == 'alpha'
+    assert parsed.name == "beta"
+    assert parsed.namespace == "alpha"
 
 
 def test_parse_chained_constructor():
-    parsed = parser.parse_statement('(new Container(5)).get()')
+    parsed = parser.parse_statement("(new Container(5)).get()")
     assert parsed.type == FunctionType.FUNCTION
     assert parsed.name == "get"
     namespace = parsed.namespace
@@ -396,7 +415,7 @@ def test_parse_chained_constructor():
 
 
 def test_parse_chained_function():
-    parsed = parser.parse_statement('get_container().get()')
+    parsed = parser.parse_statement("get_container().get()")
     assert parsed.type == FunctionType.FUNCTION
     assert parsed.name == "get"
     namespace = parsed.namespace
@@ -406,7 +425,7 @@ def test_parse_chained_function():
 
 
 def test_parse_chained_function2():
-    parsed = parser.parse_statement('get_container().get().get()')
+    parsed = parser.parse_statement("get_container().get().get()")
     assert parsed.type == FunctionType.FUNCTION
     assert parsed.name == "get"
     namespace = parsed.namespace
@@ -420,7 +439,7 @@ def test_parse_chained_function2():
 
 
 def test_parse_chained_property():
-    parsed = parser.parse_statement('get_container().property.data')
+    parsed = parser.parse_statement("get_container().property.data")
     assert parsed.type == FunctionType.PROPERTY
     assert parsed.name == "data"
     namespace = parsed.namespace
@@ -434,7 +453,7 @@ def test_parse_chained_property():
 
 
 def test_parse_global_variable():
-    parsed = parser.parse_statement('<data>')
+    parsed = parser.parse_statement("<data>")
     assert parsed.type == FunctionType.PROPERTY
     assert parsed.name == "data"
     assert parsed.namespace is None

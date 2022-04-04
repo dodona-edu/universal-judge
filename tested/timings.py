@@ -37,64 +37,64 @@ def timings(config: DodonaConfig, nr: int = 3) -> float:
 
 def python_lotto_config(options: Options) -> DodonaConfig:
     return DodonaConfig(
-        resources=Path('../exercise/lotto/evaluation'),
-        source=Path('../exercise/lotto/solution/correct.py'),
+        resources=Path("../exercise/lotto/evaluation"),
+        source=Path("../exercise/lotto/solution/correct.py"),
         time_limit="600",
         memory_limit="50000",
-        natural_language='nl',
-        programming_language='python',
+        natural_language="nl",
+        programming_language="python",
         workdir=Path("."),
-        judge=Path('../judge/src/'),
+        judge=Path("../judge/src/"),
         options=options,
     )
 
 
 def lotto_python_context_single():
-    return timings(python_lotto_config(Options(
-        parallel=False,
-        mode=ExecutionMode.INDIVIDUAL,
-        optimized=False
-    )))
+    return timings(
+        python_lotto_config(
+            Options(parallel=False, mode=ExecutionMode.INDIVIDUAL, optimized=False)
+        )
+    )
 
 
 def lotto_python_context_threaded():
-    return timings(python_lotto_config(Options(
-        parallel=True,
-        mode=ExecutionMode.INDIVIDUAL,
-        optimized=False
-    )))
+    return timings(
+        python_lotto_config(
+            Options(parallel=True, mode=ExecutionMode.INDIVIDUAL, optimized=False)
+        )
+    )
 
 
 def lotto_python_batch_single():
-    return timings(python_lotto_config(Options(
-        parallel=False,
-        mode=ExecutionMode.PRECOMPILATION,
-        optimized=False
-    )))
+    return timings(
+        python_lotto_config(
+            Options(parallel=False, mode=ExecutionMode.PRECOMPILATION, optimized=False)
+        )
+    )
 
 
 def lotto_python_batch_threaded():
-    return timings(python_lotto_config(Options(
-        parallel=True,
-        mode=ExecutionMode.PRECOMPILATION,
-        optimized=False
-    )))
+    return timings(
+        python_lotto_config(
+            Options(parallel=True, mode=ExecutionMode.PRECOMPILATION, optimized=False)
+        )
+    )
 
 
 def lotto_python_exec_single():
-    return timings(python_lotto_config(Options(
-        parallel=False,
-        mode=ExecutionMode.PRECOMPILATION,
-        optimized=True
-    )))
+    return timings(
+        python_lotto_config(
+            Options(parallel=False, mode=ExecutionMode.PRECOMPILATION, optimized=True)
+        )
+    )
 
 
 def lotto_python_exec_threaded():
-    return timings(python_lotto_config(Options(
-        parallel=True,
-        mode=ExecutionMode.PRECOMPILATION,
-        optimized=True
-    )))
+    return timings(
+        python_lotto_config(
+            Options(parallel=True, mode=ExecutionMode.PRECOMPILATION, optimized=True)
+        )
+    )
 
 
 def lotto_python():
@@ -112,74 +112,76 @@ def lotto_python():
     # lpes = 1
     # lpet = 1
 
-    print(f"""
+    print(
+        f"""
                   single\tparallel
 lotto   context   {lpcs}\t\t\t{lpct}
         batch     {lpbs}\t\t\t{lpbt}
         exec      {lpes}\t\t\t{lpet}  
-""")
+"""
+    )
 
 
 def java_lotto_config(options: Options) -> DodonaConfig:
     return DodonaConfig(
-        resources=Path('../exercise/lotto/evaluation'),
-        source=Path('../exercise/lotto/solution/correct.java'),
+        resources=Path("../exercise/lotto/evaluation"),
+        source=Path("../exercise/lotto/solution/correct.java"),
         time_limit="600",
         memory_limit="50000",
-        natural_language='nl',
-        programming_language='java',
+        natural_language="nl",
+        programming_language="java",
         workdir=Path("."),
-        judge=Path('../judge/src/'),
+        judge=Path("../judge/src/"),
         options=options,
     )
 
 
 def lotto_java_context_single():
-    return timings(java_lotto_config(Options(
-        parallel=False,
-        mode=ExecutionMode.INDIVIDUAL,
-        optimized=False
-    )))
+    return timings(
+        java_lotto_config(
+            Options(parallel=False, mode=ExecutionMode.INDIVIDUAL, optimized=False)
+        )
+    )
 
 
 def lotto_java_context_threaded():
-    return timings(java_lotto_config(Options(
-        parallel=True,
-        mode=ExecutionMode.INDIVIDUAL,
-        optimized=False
-    )))
+    return timings(
+        java_lotto_config(
+            Options(parallel=True, mode=ExecutionMode.INDIVIDUAL, optimized=False)
+        )
+    )
 
 
 def lotto_java_batch_single():
-    return timings(java_lotto_config(Options(
-        parallel=False,
-        mode=ExecutionMode.PRECOMPILATION,
-        optimized=False
-    )))
+    return timings(
+        java_lotto_config(
+            Options(parallel=False, mode=ExecutionMode.PRECOMPILATION, optimized=False)
+        )
+    )
 
 
 def lotto_java_batch_threaded():
-    return timings(java_lotto_config(Options(
-        parallel=True,
-        mode=ExecutionMode.PRECOMPILATION,
-        optimized=False
-    )))
+    return timings(
+        java_lotto_config(
+            Options(parallel=True, mode=ExecutionMode.PRECOMPILATION, optimized=False)
+        )
+    )
 
 
 def lotto_java_exec_single():
-    return timings(java_lotto_config(Options(
-        parallel=False,
-        mode=ExecutionMode.PRECOMPILATION,
-        optimized=True
-    )))
+    return timings(
+        java_lotto_config(
+            Options(parallel=False, mode=ExecutionMode.PRECOMPILATION, optimized=True)
+        )
+    )
 
 
 def lotto_java_exec_threaded():
-    return timings(java_lotto_config(Options(
-        parallel=True,
-        mode=ExecutionMode.PRECOMPILATION,
-        optimized=True
-    )))
+    return timings(
+        java_lotto_config(
+            Options(parallel=True, mode=ExecutionMode.PRECOMPILATION, optimized=True)
+        )
+    )
 
 
 def lotto_java():
@@ -202,14 +204,15 @@ def lotto_java():
     # ljes = 1
     # ljet = 1
 
-    print(f"""
+    print(
+        f"""
                   single\tparallel
 lotto   context   {ljcs}\t\t\t{ljct}
         batch     {ljbs}\t\t\t{ljbt}
         exec      {ljes}\t\t\t{ljet}  
-""")
+"""
+    )
 
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     lotto_java()

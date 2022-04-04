@@ -15,7 +15,8 @@ from tested.main import run
 
 def merge(a: dict, b: dict, path=None) -> dict:
     """merges b into a"""
-    if path is None: path = []
+    if path is None:
+        path = []
     for key in b:
         if key in a:
             if isinstance(a[key], dict) and isinstance(b[key], dict):
@@ -34,7 +35,6 @@ def split_output(output: str) -> List[str]:
 
 
 class CommandDict(list):
-
     def find_all(self, command: str) -> List[dict]:
         return [x for x in self if x["command"] == command]
 
@@ -42,7 +42,11 @@ class CommandDict(list):
         return next(x for x in self if x["command"] == command)
 
     def find_status_enum(self) -> List[str]:
-        commands = [x for x in self if x["command"].startswith("close-") or x["command"] == "escalate-status"]
+        commands = [
+            x
+            for x in self
+            if x["command"].startswith("close-") or x["command"] == "escalate-status"
+        ]
         return [x["status"]["enum"] for x in commands if "status" in x]
 
 
@@ -61,31 +65,41 @@ def assert_valid_output(output: str, config: Config) -> CommandDict:
     return updates
 
 
-def configuration(config, exercise: str, language: str, work_dir: Path,
-                  plan: str = "plan.json", solution: str = "solution",
-                  options=None, backward_compatibility_plan: bool = False) -> DodonaConfig:
+def configuration(
+    config,
+    exercise: str,
+    language: str,
+    work_dir: Path,
+    plan: str = "plan.json",
+    solution: str = "solution",
+    options=None,
+    backward_compatibility_plan: bool = False,
+) -> DodonaConfig:
     """Create a config."""
     # Get the file extension for this language.
     ext = get_language(language).extension_file()
     if options is None:
         options = {}
     exercise_dir = Path(config.rootdir) / "exercise"
-    ep = f'{exercise_dir}/{exercise}'
+    ep = f"{exercise_dir}/{exercise}"
     testplan = "plan_name" if backward_compatibility_plan else "testplan"
-    return DodonaConfig(**merge({
-        "memory_limit":         536870912,
-        "time_limit":           3600,  # One hour
-        "programming_language": language,
-        "natural_language":     'nl',
-        "resources":            Path(f'{ep}/evaluation'),
-        "source":               Path(f'{ep}/solution/{solution}.{ext}'),
-        "judge":                Path(f'{config.rootdir}'),
-        "workdir":              work_dir,
-        testplan:               plan,
-        "options":              {
-            "linter": False
-        }
-    }, options))
+    return DodonaConfig(
+        **merge(
+            {
+                "memory_limit": 536870912,
+                "time_limit": 3600,  # One hour
+                "programming_language": language,
+                "natural_language": "nl",
+                "resources": Path(f"{ep}/evaluation"),
+                "source": Path(f"{ep}/solution/{solution}.{ext}"),
+                "judge": Path(f"{config.rootdir}"),
+                "workdir": work_dir,
+                testplan: plan,
+                "options": {"linter": False},
+            },
+            options,
+        )
+    )
 
 
 def execute_config(config: DodonaConfig) -> str:

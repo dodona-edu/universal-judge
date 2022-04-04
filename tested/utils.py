@@ -10,8 +10,19 @@ import typing
 from itertools import zip_longest
 from os import PathLike
 from pathlib import Path
-from typing import (IO, Union, Generator, TypeVar, Generic, Optional, Mapping,
-                    Iterable, List, Callable, Any)
+from typing import (
+    IO,
+    Union,
+    Generator,
+    TypeVar,
+    Generic,
+    Optional,
+    Mapping,
+    Iterable,
+    List,
+    Callable,
+    Any,
+)
 
 _logger = logging.getLogger(__name__)
 
@@ -29,8 +40,9 @@ def smart_close(file: IO):
 
 
 @contextlib.contextmanager
-def protected_directory(directory: Union[PathLike, Path]
-                        ) -> Generator[Path, None, None]:
+def protected_directory(
+    directory: Union[PathLike, Path]
+) -> Generator[Path, None, None]:
     try:
         _logger.info("Making %s read-only", directory)
         os.chmod(directory, stat.S_IREAD)  # Disable write access
@@ -57,11 +69,10 @@ def basename(file: Union[str, Path]) -> str:
     return file.stem
 
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class Either(Generic[T]):
-
     def __init__(self, value: Union[T, Exception]):
         self.value = value
 
@@ -80,7 +91,7 @@ def get_identifier() -> str:
     """Generate a random secret valid in most configs."""
     letter = random.choice(string.ascii_letters)
     rest = random.sample(string.ascii_letters + string.digits, 8)
-    return letter + ''.join(rest)
+    return letter + "".join(rest)
 
 
 def consume_shebang(submission: Path) -> Optional[str]:
@@ -118,12 +129,11 @@ def consume_shebang(submission: Path) -> Optional[str]:
     return language
 
 
-K = TypeVar('K')
-V = TypeVar('V')
+K = TypeVar("K")
+V = TypeVar("V")
 
 
 class _FallbackDict(dict, Generic[K, V]):
-
     def __init__(self, existing: Mapping[K, V], fallback_: Mapping[K, V]):
         super().__init__(existing)
         self.fallback = fallback_
@@ -171,7 +181,7 @@ def get_args(type_):
     if a := typing.get_args(type_):
         return a
     else:
-        return type_,
+        return (type_,)
 
 
 def flatten(nested: Iterable[Iterable[T]]) -> Iterable[T]:
@@ -186,7 +196,7 @@ def flatten(nested: Iterable[Iterable[T]]) -> Iterable[T]:
 
 def camel_snake_case(what: str) -> str:
     """
-    Convert a string to camel_Snake_Case from snake_case. The algorithm is 
+    Convert a string to camel_Snake_Case from snake_case. The algorithm is
     simple: each letter behind an underscore will be capitalized. The first
     letter will be downcased.
 
@@ -252,7 +262,7 @@ def cobol_case(what: str) -> str:
     :param what: The string to convert.
     :return: The converted string.
     """
-    return pascal_snake_case(what).replace('_', '-').upper()
+    return pascal_snake_case(what).replace("_", "-").upper()
 
 
 def dash_case(what: str) -> str:
@@ -274,7 +284,7 @@ def dash_case(what: str) -> str:
     :param what: The string to convert.
     :return: The converted string.
     """
-    return what.replace('_', '-')
+    return what.replace("_", "-")
 
 
 def doner_case(what: str) -> str:
@@ -296,7 +306,7 @@ def doner_case(what: str) -> str:
     :param what: The string to convert.
     :return: The converted string.
     """
-    return what.replace('_', '|')
+    return what.replace("_", "|")
 
 
 def flat_case(what: str) -> str:
@@ -318,7 +328,7 @@ def flat_case(what: str) -> str:
     :param what: The string to convert.
     :return: The converted string.
     """
-    return what.replace('_', '')
+    return what.replace("_", "")
 
 
 def macro_case(what: str) -> str:
@@ -345,7 +355,7 @@ def macro_case(what: str) -> str:
 
 def pascal_snake_case(what: str) -> str:
     """
-    Convert a string to Pascal_Snake_Case from snake_case. The algorithm is 
+    Convert a string to Pascal_Snake_Case from snake_case. The algorithm is
     simple: each letter behind the underscore will be capitalized. The first
     letter will be downcased.
 
@@ -404,7 +414,7 @@ def pascalize(what: str) -> str:
     :param what: The string to convert.
     :return: The converted string.
     """
-    return pascal_snake_case(what).replace('_', '')
+    return pascal_snake_case(what).replace("_", "")
 
 
 def snake_case(what: str) -> str:
@@ -442,7 +452,7 @@ def train_case(what: str) -> str:
     :param what: The string to convert.
     :return: The converted string.
     """
-    return pascal_snake_case(what).replace('_', '-')
+    return pascal_snake_case(what).replace("_", "-")
 
 
 def upper_flat_case(what: str) -> str:
@@ -500,10 +510,11 @@ def safe_get(l: List[T], index: int) -> Optional[T]:
         return None
 
 
-def sorted_no_duplicates(iterable: Iterable[T],
-                         key: Optional[Callable[[T], K]] = None,
-                         recursive_key: Optional[Callable[[K], K]] = None
-                         ) -> List[T]:
+def sorted_no_duplicates(
+    iterable: Iterable[T],
+    key: Optional[Callable[[T], K]] = None,
+    recursive_key: Optional[Callable[[K], K]] = None,
+) -> List[T]:
     # Identity key function
     def identity(x: T) -> T:
         return x
@@ -574,8 +585,7 @@ def sorted_no_duplicates(iterable: Iterable[T],
             list_t[j + 1] = item
         return list_t
 
-    def merge(to_list: List[T], from_list: List[T], start: int, middle: int,
-              end: int):
+    def merge(to_list: List[T], from_list: List[T], start: int, middle: int, end: int):
         """
         Merge two sorted sublist to sorted list
 

@@ -5,8 +5,14 @@ from typing import List, Tuple
 
 from tested.configs import Bundle
 from tested.dodona import AnnotateCode, Message
-from tested.languages.config import CallbackResult, executable_name, Command, \
-    Config, Language, limit_output
+from tested.languages.config import (
+    CallbackResult,
+    executable_name,
+    Command,
+    Config,
+    Language,
+    limit_output,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +27,7 @@ def cleanup_compilation_stderr(traceback: str, submission_file: str) -> str:
     skip_line, lines = False, []
     for line in traceback:
 
-        line = line.strip('\n')
+        line = line.strip("\n")
 
         if not line:
             continue
@@ -30,13 +36,13 @@ def cleanup_compilation_stderr(traceback: str, submission_file: str) -> str:
         if context_file_regex.search(line):
             skip_line = True
             continue
-        elif skip_line and not line.startswith(' '):
+        elif skip_line and not line.startswith(" "):
             skip_line = False
             pass
         elif skip_line:
             continue
 
-        line = line.replace(submission_file, '<code>')
+        line = line.replace(submission_file, "<code>")
         line = line.replace("solution_main", "main")
 
         match = code_line_regex.search(line)
@@ -45,24 +51,35 @@ def cleanup_compilation_stderr(traceback: str, submission_file: str) -> str:
             replace = rf"{match.group(1)}{int(match.group(2)) - 2}{match.group(3)}"
             line = code_line_regex.sub(replace, line, 1)
 
-        lines.append(line + '\n')
+        lines.append(line + "\n")
 
     if len(lines) > 20:
-        lines = lines[:19] + ['...\n'] + [lines[-1]]
+        lines = lines[:19] + ["...\n"] + [lines[-1]]
     return "".join(lines)
 
 
 class C(Language):
-
     def compilation(self, bundle: Bundle, files: List[str]) -> CallbackResult:
         main_file = files[-1]
         exec_file = Path(main_file).stem
         result = executable_name(exec_file)
-        return (["gcc", "-std=c11", "-Wall", "evaluation_result.c", "values.c",
-                 main_file, "-o", result], [result])
+        return (
+            [
+                "gcc",
+                "-std=c11",
+                "-Wall",
+                "evaluation_result.c",
+                "values.c",
+                main_file,
+                "-o",
+                result,
+            ],
+            [result],
+        )
 
-    def execution(self, config: Config,
-                  cwd: Path, file: str, arguments: List[str]) -> Command:
+    def execution(
+        self, config: Config, cwd: Path, file: str, arguments: List[str]
+    ) -> Command:
         local_file = cwd / executable_name(Path(file).stem)
         return [str(local_file.absolute()), *arguments]
 
@@ -86,18 +103,21 @@ class C(Language):
             header = "#pragma once\n\n"
             file.write(header + contents)
 
-    def linter(self, bundle: Bundle, submission: Path, remaining: float) \
-            -> Tuple[List[Message], List[AnnotateCode]]:
+    def linter(
+        self, bundle: Bundle, submission: Path, remaining: float
+    ) -> Tuple[List[Message], List[AnnotateCode]]:
         # Import locally to prevent errors.
         from tested.languages.c import linter
+
         return linter.run_cppcheck(bundle, submission, remaining)
 
     def compiler_output(
-            self, namespace: str, stdout: str, stderr: str
+        self, namespace: str, stdout: str, stderr: str
     ) -> Tuple[List[Message], List[AnnotateCode], str, str]:
         clean_stacktrace = cleanup_compilation_stderr(
-            stderr, self.with_extension(self.conventionalize_namespace(namespace)))
+            stderr, self.with_extension(self.conventionalize_namespace(namespace))
+        )
         return [], [], limit_output(stdout), clean_stacktrace
 
     def is_source_file(self, file: Path) -> bool:
-        return file.suffix in ('.c', '.h')
+        return file.suffix in (".c", ".h")

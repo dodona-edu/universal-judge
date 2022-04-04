@@ -63,30 +63,14 @@ def combine_features(iterable: Iterable[FeatureSet]) -> FeatureSet:
     """
     features = list(iterable)
     assert all(isinstance(x, FeatureSet) for x in features)
-    constructs = reduce(
-        operator.or_,
-        (x.constructs for x in features),
-        set()
-    )
-    types = reduce(
-        operator.or_,
-        (x.types for x in features),
-        set()
-    )
-    nexted_types = reduce(
-        operator.or_,
-        (x.nested_types for x in features),
-        set()
-    )
+    constructs = reduce(operator.or_, (x.constructs for x in features), set())
+    types = reduce(operator.or_, (x.types for x in features), set())
+    nexted_types = reduce(operator.or_, (x.nested_types for x in features), set())
 
-    return FeatureSet(
-        constructs=constructs,
-        types=types,
-        nested_types=nexted_types
-    )
+    return FeatureSet(constructs=constructs, types=types, nested_types=nexted_types)
 
 
-def is_supported(bundle: 'Bundle') -> bool:
+def is_supported(bundle: "Bundle") -> bool:
     """
     Check if the given configuration bundle is supported. This will check if the
     testplan inside the bundle can be executed by the programming language in the
@@ -132,8 +116,10 @@ def is_supported(bundle: 'Bundle') -> bool:
                             )
                             return False
 
-    nested_types = filter(lambda x: x[0] in (
-        BasicSequenceTypes.SET, BasicObjectTypes.MAP), required.nested_types)
+    nested_types = filter(
+        lambda x: x[0] in (BasicSequenceTypes.SET, BasicObjectTypes.MAP),
+        required.nested_types,
+    )
     restricted = bundle.lang_config.restriction_map()
     for key, value_types in nested_types:
         if not (value_types <= restricted[key]):

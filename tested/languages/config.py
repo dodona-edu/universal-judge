@@ -39,9 +39,22 @@ from ..features import Construct
 from ..internationalization import get_i18n_string
 from ..serialisation import ExceptionValue
 from ..testplan import Plan
-from ..utils import camelize, pascalize, fallback, snake_case, get_args, \
-    flat_case, upper_flat_case, macro_case, camel_snake_case, pascal_snake_case, \
-    doner_case, dash_case, train_case, cobol_case
+from ..utils import (
+    camelize,
+    pascalize,
+    fallback,
+    snake_case,
+    get_args,
+    flat_case,
+    upper_flat_case,
+    macro_case,
+    camel_snake_case,
+    pascal_snake_case,
+    doner_case,
+    dash_case,
+    train_case,
+    cobol_case,
+)
 
 Command = List[str]
 FileFilter = Callable[[Path], bool]
@@ -49,18 +62,18 @@ CallbackResult = Tuple[Command, Union[List[str], FileFilter]]
 logger = logging.getLogger(__name__)
 
 _case_mapping = {
-    "camel_case":        camelize,
-    "camel_snake_case":  camel_snake_case,
-    "cobol_case":        cobol_case,
-    "dash_case":         dash_case,
-    "donor_case":        doner_case,
-    "flat_case":         flat_case,
-    "macro_case":        macro_case,
-    "pascal_case":       pascalize,
+    "camel_case": camelize,
+    "camel_snake_case": camel_snake_case,
+    "cobol_case": cobol_case,
+    "dash_case": dash_case,
+    "donor_case": doner_case,
+    "flat_case": flat_case,
+    "macro_case": macro_case,
+    "pascal_case": pascalize,
     "pascal_snake_case": pascal_snake_case,
-    "snake_case":        snake_case,
-    "train_case":        train_case,
-    "upper_flat_case":   upper_flat_case
+    "snake_case": snake_case,
+    "train_case": train_case,
+    "upper_flat_case": upper_flat_case,
 }
 
 
@@ -87,14 +100,15 @@ class Config:
         return Config(
             time_limit=bundle.config.time_limit,
             memory_limit=bundle.config.memory_limit,
-            options=bundle.config.config_for()
+            options=bundle.config.config_for(),
         )
 
 
 def _conventionalize(options: dict, what: str, name: str):
     """Conventionalize based on the options."""
     function = _case_mapping[
-        options.get("naming_conventions", {}).get(what, "snake_case")]
+        options.get("naming_conventions", {}).get(what, "snake_case")
+    ]
     return function(name)
 
 
@@ -106,16 +120,18 @@ def executable_name(basename: str) -> str:
 
     :return: The executable with extension corresponding to the platform.
     """
-    if os.name == 'nt':
+    if os.name == "nt":
         return f"{basename}.exe"
     else:
         return basename
 
 
-def limit_output(output: str,
-                 limit_characters: int = 512,
-                 max_lines: int = 20,
-                 ellipsis_str: str = '...') -> str:
+def limit_output(
+    output: str,
+    limit_characters: int = 512,
+    max_lines: int = 20,
+    ellipsis_str: str = "...",
+) -> str:
     """
     Utility function for limiting a string output
 
@@ -139,7 +155,7 @@ def limit_output(output: str,
         r = len_lines - f - 1
         # Case last lines to consider are the same
         if f == r:
-            forward_buffer.append(lines[f][:(max_chars - 1)])
+            forward_buffer.append(lines[f][: (max_chars - 1)])
         # Otherwise
         else:
             next_line, prev_line = lines[f], lines[r]
@@ -165,30 +181,31 @@ def limit_output(output: str,
                     pass
                 # Both lines needed abbreviation
                 else:
-                    forward_buffer.append(next_line[:math.ceil(half - 1)])
-                    backward_buffer.append(prev_line[-math.floor(half - 1):])
+                    forward_buffer.append(next_line[: math.ceil(half - 1)])
+                    backward_buffer.append(prev_line[-math.floor(half - 1) :])
                 # Terminate loop because character limit reached
                 break
     # Concat buffer
-    return '\n'.join(forward_buffer + [ellipsis_str] + backward_buffer[::-1])
+    return "\n".join(forward_buffer + [ellipsis_str] + backward_buffer[::-1])
 
 
-def trace_to_html(traceback: str,
-                  link_regex: str = r'&lt;code&gt;:([0-9]+)',
-                  link_subs: str = r'<a href="#" class="tab-link" data-tab="code" '
-                                   r'data-line="\1">&lt;code&gt;:\1</a>'
-                  ) -> ExtendedMessage:
+def trace_to_html(
+    traceback: str,
+    link_regex: str = r"&lt;code&gt;:([0-9]+)",
+    link_subs: str = r'<a href="#" class="tab-link" data-tab="code" '
+    r'data-line="\1">&lt;code&gt;:\1</a>',
+) -> ExtendedMessage:
     # Escape special characters
     traceback = html.escape(traceback)
     # Compile regex
     link_regex = re.compile(link_regex)
     # Add links to
     traceback = link_regex.sub(link_subs, traceback)
-    logger.debug(f'<pre><code>{traceback}</code></pre>')
+    logger.debug(f"<pre><code>{traceback}</code></pre>")
     return ExtendedMessage(
-        description=f'<pre><code>{traceback}</code></pre>',
+        description=f"<pre><code>{traceback}</code></pre>",
         format="html",
-        permission=Permission.STUDENT
+        permission=Permission.STUDENT,
     )
 
 
@@ -235,6 +252,7 @@ class Language:
     is the case, it is recommended to modify the value in the config.json file
     instead of overriding the function in a subclass.
     """
+
     __slots__ = ["options", "config_dir", "_description_generator"]
 
     def __init__(self, config_file: str = "config.json"):
@@ -248,7 +266,7 @@ class Language:
         """
         self._description_generator = None
         self.config_dir = Path(sys.modules[self.__module__].__file__).parent
-        path_to_config = (self.config_dir / config_file)
+        path_to_config = self.config_dir / config_file
         with open(path_to_config, "r") as f:
             self.options = json.load(f)
 
@@ -326,8 +344,9 @@ class Language:
         """
         return [], files
 
-    def execution(self, config: Config,
-                  cwd: Path, file: str, arguments: List[str]) -> Command:
+    def execution(
+        self, config: Config, cwd: Path, file: str, arguments: List[str]
+    ) -> Command:
         """
         Callback for generating the execution command.
 
@@ -468,7 +487,7 @@ class Language:
         :param file: File to check if it's a valid source
         :return: If the file is valid source
         """
-        return file.suffix == f'.{self.extension_file()}'
+        return file.suffix == f".{self.extension_file()}"
 
     def with_extension(self, file_name: str) -> str:
         """Utility function to append the file extension to a file name."""
@@ -548,14 +567,18 @@ class Language:
             raise ValueError(f"Unknown type string {type_str}")
 
         raw_config: Dict[str, List[str]] = self.options.get("restrictions", {})
-        config = {string_to_type(
-            "MAP" if x == "map_key" else x.upper()): set(
-            (get_expression_type(t) for t in y)) for x, y in raw_config.items()}
+        config = {
+            string_to_type("MAP" if x == "map_key" else x.upper()): set(
+                (get_expression_type(t) for t in y)
+            )
+            for x, y in raw_config.items()
+        }
         mappings = self.type_support_map()
         for data_type, type_support in mappings.items():
             data_type = get_expression_type(data_type)
-            if (type_support is TypeSupport.REDUCED and
-                    isinstance(data_type, get_args(AdvancedTypes))):
+            if type_support is TypeSupport.REDUCED and isinstance(
+                data_type, get_args(AdvancedTypes)
+            ):
                 basic_type = data_type.base_type
                 for _, restricted in config.items():
                     if basic_type in restricted:
@@ -589,7 +612,7 @@ class Language:
         pass
 
     def compiler_output(
-            self, namespace: str, stdout: str, stderr: str
+        self, namespace: str, stdout: str, stderr: str
     ) -> Tuple[List[Message], List[AnnotateCode], str, str]:
         """
         Callback that allows processing the output of the compiler. This might be
@@ -608,9 +631,9 @@ class Language:
         """
         return [], [], limit_output(stdout), limit_output(stderr)
 
-    def exception_output(self,
-                         bundle: Bundle,
-                         exception: ExceptionValue) -> ExceptionValue:
+    def exception_output(
+        self, bundle: Bundle, exception: ExceptionValue
+    ) -> ExceptionValue:
         """
         Callback that allows modifying the exception value, for example the
         stacktrace.
@@ -623,13 +646,12 @@ class Language:
         exception.stacktrace = self.cleanup_stacktrace(
             exception.stacktrace, self.with_extension(namespace)
         )
-        exception.message = self.clean_exception_message(exception.message,
-                                                         namespace)
+        exception.message = self.clean_exception_message(exception.message, namespace)
         return exception
 
-    def stdout(self,
-               _bundle: Bundle,
-               stdout: str) -> Tuple[List[Message], List[AnnotateCode], str]:
+    def stdout(
+        self, _bundle: Bundle, stdout: str
+    ) -> Tuple[List[Message], List[AnnotateCode], str]:
         """
         Callback that allows modifying the stdout.
 
@@ -639,9 +661,9 @@ class Language:
         """
         return [], [], stdout
 
-    def stderr(self,
-               bundle: Bundle,
-               stderr: str) -> Tuple[List[Message], List[AnnotateCode], str]:
+    def stderr(
+        self, bundle: Bundle, stderr: str
+    ) -> Tuple[List[Message], List[AnnotateCode], str]:
         """
         Callback that allows modifying the stderr.
 
@@ -651,8 +673,9 @@ class Language:
         """
         return [], [], stderr
 
-    def linter(self, bundle: Bundle, submission: Path, remaining: float) \
-            -> Tuple[List[Message], List[AnnotateCode]]:
+    def linter(
+        self, bundle: Bundle, submission: Path, remaining: float
+    ) -> Tuple[List[Message], List[AnnotateCode]]:
         """
         Run a linter or other code analysis tools on the submission.
         The messages that are output will be passed to Dodona.
@@ -690,10 +713,9 @@ class Language:
         """
         return self.options["general"].get("inherits")
 
-    def filter_dependencies(self,
-                            bundle: Bundle,
-                            files: List[str],
-                            context_name: str) -> List[str]:
+    def filter_dependencies(
+        self, bundle: Bundle, files: List[str], context_name: str
+    ) -> List[str]:
         def filter_function(file: str) -> bool:
             # We don't want files for contexts that are not the one we use.
             prefix = bundle.lang_config.conventionalize_namespace(
@@ -705,8 +727,9 @@ class Language:
 
         return list(x for x in files if filter_function(x))
 
-    def find_main_file(self, files: List[str], name: str) \
-            -> Tuple[Optional[str], List[Message], Status, List[AnnotateCode]]:
+    def find_main_file(
+        self, files: List[str], name: str
+    ) -> Tuple[Optional[str], List[Message], Status, List[AnnotateCode]]:
         logger.debug("Finding %s in %s", name, files)
         messages = []
         possible_main_files = [x for x in files if x.startswith(name)]
@@ -716,10 +739,9 @@ class Language:
             messages.append(get_i18n_string("languages.config.unknown.compilation"))
             return None, messages, Status.COMPILATION_ERROR, []
 
-    def cleanup_stacktrace(self,
-                           traceback: str,
-                           submission_file: str,
-                           reduce_all=False) -> str:
+    def cleanup_stacktrace(
+        self, traceback: str, submission_file: str, reduce_all=False
+    ) -> str:
         """
         Takes a traceback as a string or as a list of strings and returns a reduced
         version of the traceback as a list of strings.
@@ -752,6 +774,5 @@ class Language:
 
     def get_description_generator(self) -> DescriptionGenerator:
         if self._description_generator is None:
-            self._description_generator = DescriptionGenerator(self,
-                                                               self.config_dir)
+            self._description_generator = DescriptionGenerator(self, self.config_dir)
         return self._description_generator

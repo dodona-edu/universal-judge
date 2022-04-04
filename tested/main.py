@@ -37,4 +37,5 @@ def run(config: DodonaConfig, judge_output: IO):
     pack = create_bundle(config, judge_output, plan)
     internal_timings.end_stage("bundle")
     from .judge import judge
+
     judge(pack)

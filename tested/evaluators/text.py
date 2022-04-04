@@ -22,21 +22,19 @@ def _is_number(string: str) -> Optional[float]:
 def _text_options(config: EvaluatorConfig) -> dict:
     defaults = {
         # Options for textual comparison
-        'ignoreWhitespace': True,
-        'caseInsensitive':  False,
+        "ignoreWhitespace": True,
+        "caseInsensitive": False,
         # Options for numerical comparison
-        'tryFloatingPoint': False,
-        'applyRounding':    False,
-        'roundTo':          3
+        "tryFloatingPoint": False,
+        "applyRounding": False,
+        "roundTo": 3,
     }
     defaults.update(config.options)
     return defaults
 
 
 def _file_defaults(config: EvaluatorConfig) -> dict:
-    defaults = {
-        "mode": "exact"
-    }
+    defaults = {"mode": "exact"}
     defaults.update(config.options)
     if defaults["mode"] not in {"exact", "lines", "values"}:
         raise ValueError(f"Unknown mode for file evaluator: {defaults['mode']}")
@@ -44,25 +42,26 @@ def _file_defaults(config: EvaluatorConfig) -> dict:
 
 
 def compare_text(
-        options: Dict[str, Any],
-        expected: str,
-        actual: str) -> EvaluationResult:
+    options: Dict[str, Any], expected: str, actual: str
+) -> EvaluationResult:
     # Temporary variables that may modified by the evaluation options,
     # Don't modify the actual values, otherwise there maybe confusion with the
     # solution submitted by the student
     expected_eval, actual_eval = str(expected), str(actual)
 
-    if options['ignoreWhitespace']:
+    if options["ignoreWhitespace"]:
         expected_eval, actual_eval = expected_eval.strip(), actual_eval.strip()
 
-    if options['caseInsensitive']:
+    if options["caseInsensitive"]:
         expected_eval, actual_eval = expected_eval.lower(), actual_eval.lower()
 
-    if options['tryFloatingPoint'] and (
-            actual_float := _is_number(actual_eval)) is not None:
+    if (
+        options["tryFloatingPoint"]
+        and (actual_float := _is_number(actual_eval)) is not None
+    ):
         expected_float = float(expected_eval)
-        if options['applyRounding']:
-            numbers = int(options['roundTo'])
+        if options["applyRounding"]:
+            numbers = int(options["roundTo"])
             # noinspection PyUnboundLocalVariable
             actual_float = round(actual_float, numbers)
             expected_float = round(expected_float, numbers)
@@ -75,14 +74,13 @@ def compare_text(
     return EvaluationResult(
         result=StatusMessage(enum=Status.CORRECT if result else Status.WRONG),
         readable_expected=str(expected),
-        readable_actual=str(actual)
+        readable_actual=str(actual),
     )
 
 
 def evaluate_text(
-        config: EvaluatorConfig,
-        channel: OutputChannel,
-        actual: str) -> EvaluationResult:
+    config: EvaluatorConfig, channel: OutputChannel, actual: str
+) -> EvaluationResult:
     """
     The base evaluator, used to compare two strings. As this evaluator is
     intended for evaluating stdout, it supports various options to make life
@@ -106,9 +104,9 @@ def evaluate_text(
     return result
 
 
-def evaluate_file(config: EvaluatorConfig,
-                  channel: FileOutputChannel,
-                  actual: str) -> EvaluationResult:
+def evaluate_file(
+    config: EvaluatorConfig, channel: FileOutputChannel, actual: str
+) -> EvaluationResult:
     """
     Evaluate the contents of two files. The file evaluator supports one option,
     ``mode``, used to define in which mode the evaluator should operate:
@@ -128,16 +126,17 @@ def evaluate_file(config: EvaluatorConfig,
 
     # There must be nothing as output.
     if actual:
-        message = get_i18n_string("evaluators.text.file.unexpected.message",
-                                  actual=actual)
+        message = get_i18n_string(
+            "evaluators.text.file.unexpected.message", actual=actual
+        )
         return EvaluationResult(
             result=StatusMessage(
                 enum=Status.WRONG,
-                human=get_i18n_string("evaluators.text.file.unexpected.status")
+                human=get_i18n_string("evaluators.text.file.unexpected.status"),
             ),
             readable_expected="",
             readable_actual=actual,
-            messages=[message]
+            messages=[message],
         )
 
     expected_path = f"{config.bundle.config.resources}/{channel.expected_path}"
@@ -157,7 +156,7 @@ def evaluate_file(config: EvaluatorConfig,
         return EvaluationResult(
             result=StatusMessage(
                 enum=Status.RUNTIME_ERROR,
-                human=get_i18n_string("evaluators.text.file.not-found")
+                human=get_i18n_string("evaluators.text.file.not-found"),
             ),
             readable_expected=expected,
             readable_actual="",
@@ -179,5 +178,5 @@ def evaluate_file(config: EvaluatorConfig,
         return EvaluationResult(
             result=StatusMessage(enum=Status.CORRECT if correct else Status.WRONG),
             readable_expected=expected,
-            readable_actual=actual
+            readable_actual=actual,
         )

@@ -6,65 +6,83 @@ from typing import List, Tuple, Optional
 
 from tested.configs import Bundle
 from tested.dodona import AnnotateCode, Severity, Message
-from tested.languages.config import Language, CallbackResult, Command, Config, \
-    trace_to_html
+from tested.languages.config import (
+    Language,
+    CallbackResult,
+    Command,
+    Config,
+    trace_to_html,
+)
 
 logger = logging.getLogger(__name__)
 
 
 def _executable():
-    if os.name == 'nt':
-        return 'python'
+    if os.name == "nt":
+        return "python"
     else:
-        return 'python3'
+        return "python3"
 
 
 class Python(Language):
-
     def get_string_quote(self):
-        return '\''
+        return "'"
 
     def compilation(self, bundle: Bundle, files: List[str]) -> CallbackResult:
         result = [x.replace(".py", ".pyc") for x in files]
-        return [_executable(), "-W", "ignore", "-m", "compileall", "-q", "-b",
-                "."], result
+        return [
+            _executable(),
+            "-W",
+            "ignore",
+            "-m",
+            "compileall",
+            "-q",
+            "-b",
+            ".",
+        ], result
 
-    def execution(self, config: Config,
-                  cwd: Path, file: str, arguments: List[str]) -> Command:
+    def execution(
+        self, config: Config, cwd: Path, file: str, arguments: List[str]
+    ) -> Command:
         return [_executable(), "-u", file, *arguments]
 
-    def compiler_output(self, namespace: str, stdout: str, stderr: str) \
-            -> Tuple[List[Message], List[AnnotateCode], str, str]:
+    def compiler_output(
+        self, namespace: str, stdout: str, stderr: str
+    ) -> Tuple[List[Message], List[AnnotateCode], str, str]:
         stdout = self.cleanup_stacktrace(stdout, self.with_extension(namespace))
-        if match := re.search(r".*: (.+Error): (.+) \(<code>, line (\d+)\)",
-                              stdout):
+        if match := re.search(r".*: (.+Error): (.+) \(<code>, line (\d+)\)", stdout):
             error = match.group(1)
             message = match.group(2)
             line = match.group(3)
-            return [], [
-                AnnotateCode(
-                    row=int(line),
-                    text=f"{error}: {message}",
-                    type=Severity.ERROR
-                )
-            ], stdout, stderr
+            return (
+                [],
+                [
+                    AnnotateCode(
+                        row=int(line), text=f"{error}: {message}", type=Severity.ERROR
+                    )
+                ],
+                stdout,
+                stderr,
+            )
         elif stuff := self._attempt_stacktrace(stdout):
             line, column, message = stuff
-            return [], [
-                AnnotateCode(
-                    row=line,
-                    column=column,
-                    text=message,
-                    type=Severity.ERROR
-                )
-            ], stdout, stderr
+            return (
+                [],
+                [
+                    AnnotateCode(
+                        row=line, column=column, text=message, type=Severity.ERROR
+                    )
+                ],
+                stdout,
+                stderr,
+            )
         else:
             return [], [], stdout, stderr
 
     def _attempt_stacktrace(self, trace: str):
         # TODO: this only works with compiler traces.
         # Find message
-        line_regex = fr'File "<code>", line (?P<line>\d+)'
+        line_regex = rf'File "<code>", line (?P<line>\d+)'
         if match := re.search(line_regex, trace):
             line = int(match.group("line")) - 1
         else:
@@ -83,19 +101,20 @@ class Python(Language):
 
         return line, column, message
 
-    def linter(self, bundle: Bundle, submission: Path, remaining: float) \
-            -> Tuple[List[Message], List[AnnotateCode]]:
+    def linter(
+        self, bundle: Bundle, submission: Path, remaining: float
+    ) -> Tuple[List[Message], List[AnnotateCode]]:
         # Import locally to prevent errors.
         from tested.languages.python import linter
+
         return linter.run_pylint(bundle, submission, remaining)
 
     # Idea and original code: dodona/judge-pythia
-    def cleanup_stacktrace(self,
-                           traceback: str,
-                           submission_file: str,
-                           reduce_all=False) -> str:
+    def cleanup_stacktrace(
+        self, traceback: str, submission_file: str, reduce_all=False
+    ) -> str:
         context_file_regex = re.compile(r"context_[0-9]+_[0-9]+\.py")
-        file_line_regex = re.compile(rf'\({submission_file}, line (\d+)\)')
+        file_line_regex = re.compile(rf"\({submission_file}, line (\d+)\)")
 
         if isinstance(traceback, str):
             traceback = traceback.splitlines(True)
@@ -103,14 +122,15 @@ class Python(Language):
         skip_line, lines = False, []
         for line in traceback:
 
-            line = line.strip('\n')
+            line = line.strip("\n")
             logger.debug(line)
 
             if not line:
                 continue
 
-            if line.startswith('During handling of the above exception, another '
-                               'exception occurred:'):
+            if line.startswith(
+                "During handling of the above exception, another " "exception occurred:"
+            ):
                 lines = []
                 continue
 
@@ -118,7 +138,7 @@ class Python(Language):
             if context_file_regex.search(line):
                 skip_line = True
                 continue
-            elif skip_line and (not line.startswith(' ') or 'File' in line):
+            elif skip_line and (not line.startswith(" ") or "File" in line):
                 skip_line = False
             elif skip_line:
                 continue
@@ -127,9 +147,9 @@ class Python(Language):
             if f'File "./{submission_file}"' in line:
                 line = line.replace(f'File "./{submission_file}"', 'File "<code>"')
             elif line.startswith("*** Error compiling"):
-                line = line.replace(f'./{submission_file}', '<code>')
+                line = line.replace(f"./{submission_file}", "<code>")
             elif file_line_regex.search(line):
-                line = file_line_regex.sub(r'(<code>, line \1)', line)
+                line = file_line_regex.sub(r"(<code>, line \1)", line)
             elif 'File "<string>"' in line:
                 line = line.replace('File "<string>"', 'File "<code>"')
             elif 'File "<doctest>"' in line:
@@ -140,28 +160,31 @@ class Python(Language):
             skip_line = False
 
             # replace references to modules
-            if ', in <module>' in line:
-                line = line.replace(', in <module>', '')
+            if ", in <module>" in line:
+                line = line.replace(", in <module>", "")
 
-            if not (reduce_all and line.startswith(' ')):
-                lines.append(line + '\n')
+            if not (reduce_all and line.startswith(" ")):
+                lines.append(line + "\n")
 
         if len(lines) > 20:
-            lines = lines[:19] + ['...\n'] + [lines[-1]]
+            lines = lines[:19] + ["...\n"] + [lines[-1]]
         return "".join(lines)
 
     def clean_stacktrace_to_message(self, stacktrace: str) -> Optional[Message]:
         if stacktrace:
-            trace = trace_to_html(stacktrace,
-                                  r'File &quot;&lt;code&gt;&quot;, line ([0-9]+)',
-                                  r'File <a href="#" class="tab-link" '
-                                  r'data-tab="code" data-line="\1">'
-                                  r'&quot;&lt;code&gt;&quot;, line \1</a>')
-            additional_regex = re.compile(r'\(&lt;code&gt;, line (\d+)\)')
-            additional_sub = r'(<a href="#" class="tab-link" data-tab="code" ' \
-                             r'data-line="\1">&lt;code&gt;, line \1</a>)'
-            trace.description = additional_regex.sub(additional_sub,
-                                                     trace.description)
+            trace = trace_to_html(
+                stacktrace,
+                r"File &quot;&lt;code&gt;&quot;, line ([0-9]+)",
+                r'File <a href="#" class="tab-link" '
+                r'data-tab="code" data-line="\1">'
+                r"&quot;&lt;code&gt;&quot;, line \1</a>",
+            )
+            additional_regex = re.compile(r"\(&lt;code&gt;, line (\d+)\)")
+            additional_sub = (
+                r'(<a href="#" class="tab-link" data-tab="code" '
+                r'data-line="\1">&lt;code&gt;, line \1</a>)'
+            )
+            trace.description = additional_regex.sub(additional_sub, trace.description)
             logger.debug(trace.description)
             return trace
         else:

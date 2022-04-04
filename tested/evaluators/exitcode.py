@@ -16,9 +16,9 @@ def _as_int(value: str) -> Optional[int]:
         return None
 
 
-def evaluate(_config: EvaluatorConfig,
-             channel: ExitCodeOutputChannel,
-             value: str) -> EvaluationResult:
+def evaluate(
+    _config: EvaluatorConfig, channel: ExitCodeOutputChannel, value: str
+) -> EvaluationResult:
     assert isinstance(channel, ExitCodeOutputChannel)
     exit_code = _as_int(value)
 
@@ -26,28 +26,28 @@ def evaluate(_config: EvaluatorConfig,
         return EvaluationResult(
             result=StatusMessage(
                 enum=Status.WRONG,
-                human=get_i18n_string("evaluators.exitcode.status.invalid",
-                                      exit_code=value)
+                human=get_i18n_string(
+                    "evaluators.exitcode.status.invalid", exit_code=value
+                ),
             ),
             readable_expected=str(channel.value),
             readable_actual=str(value),
             messages=[
-                get_i18n_string("evaluators.exitcode.status.message",
-                                exit_code=value)
-            ]
+                get_i18n_string("evaluators.exitcode.status.message", exit_code=value)
+            ],
         )
 
     expected_exit_code = channel.value
 
     if expected_exit_code != exit_code:
-        status = StatusMessage(enum=Status.WRONG,
-                               human=get_i18n_string(
-                                   "evaluators.exitcode.status.wrong"))
+        status = StatusMessage(
+            enum=Status.WRONG, human=get_i18n_string("evaluators.exitcode.status.wrong")
+        )
     else:
         status = StatusMessage(enum=Status.CORRECT)
 
     return EvaluationResult(
         result=status,
         readable_expected=str(expected_exit_code),
-        readable_actual=str(exit_code)
+        readable_actual=str(exit_code),
     )

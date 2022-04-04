@@ -31,6 +31,7 @@ class RunTestcaseResult(BaseExecutionResult):
     position 0 in stdout is the result of executing the testcase at position 0 in
     the context.
     """
+
     exception: str
 
 
@@ -44,6 +45,7 @@ class TestcaseResult(BaseExecutionResult):
     0 in stdout is the result of executing the testcase at position 0 in the
     context.
     """
+
     separator: str
     results: str
     exceptions: str
@@ -59,13 +61,15 @@ class ExecutionResult(BaseExecutionResult):
     0 in stdout is the result of executing the testcase at position 0 in the
     context.
     """
+
     context_separator: str
     separator: str
     results: str
     exceptions: str
 
-    def to_context_execution_results(self) -> \
-            Tuple[List[TestcaseResult], RunTestcaseResult]:
+    def to_context_execution_results(
+        self,
+    ) -> Tuple[List[TestcaseResult], RunTestcaseResult]:
         results = self.results.split(self.context_separator)[1:]
         exceptions = self.exceptions.split(self.context_separator)[1:]
         stderr = self.stderr.split(self.context_separator)[1:]
@@ -80,7 +84,7 @@ class ExecutionResult(BaseExecutionResult):
                 stdout="",
                 stderr="",
                 timeout=self.timeout,
-                memory=self.memory
+                memory=self.memory,
             )
         run_testcase = RunTestcaseResult(
             exit=self.exit,
@@ -88,25 +92,28 @@ class ExecutionResult(BaseExecutionResult):
             stdout=(stdout or [""])[0] or "",
             stderr=(stderr or [""])[0] or "",
             timeout=self.timeout and size <= 1,
-            memory=self.memory and size <= 1
+            memory=self.memory and size <= 1,
         )
 
         size = size - 1
 
         context_execution_results = []
         for index, (r, e, err, out) in enumerate(
-                itertools.zip_longest(results[1:], exceptions[1:], stderr[1:],
-                                      stdout[1:]), start=1):
-            context_execution_results.append(TestcaseResult(
-                separator=self.separator,
-                exit=self.exit,
-                results=r or "",
-                exceptions=e or "",
-                stdout=out or "",
-                stderr=err or "",
-                timeout=self.timeout and size == index,
-                memory=self.memory and size == index
-            ))
+            itertools.zip_longest(results[1:], exceptions[1:], stderr[1:], stdout[1:]),
+            start=1,
+        ):
+            context_execution_results.append(
+                TestcaseResult(
+                    separator=self.separator,
+                    exit=self.exit,
+                    results=r or "",
+                    exceptions=e or "",
+                    stdout=out or "",
+                    stderr=err or "",
+                    timeout=self.timeout and size == index,
+                    memory=self.memory and size == index,
+                )
+            )
 
         return context_execution_results, run_testcase
 
@@ -115,6 +122,7 @@ class Execution(NamedTuple):
     """
     Arguments used to execute_module a single execution derived from the testplan.
     """
+
     run: Run
     context_offset: int
     execution_name: str
@@ -134,12 +142,12 @@ def filter_files(files: Union[List[str], FileFilter], directory: Path) -> List[s
 
 
 def execute_file(
-        bundle: Bundle,
-        executable_name: str,
-        working_directory: Path,
-        remaining: Optional[float],
-        stdin: Optional[str] = None,
-        argument: Optional[str] = None
+    bundle: Bundle,
+    executable_name: str,
+    working_directory: Path,
+    remaining: Optional[float],
+    stdin: Optional[str] = None,
+    argument: Optional[str] = None,
 ) -> BaseExecutionResult:
     """
     Execute a file.
@@ -163,7 +171,7 @@ def execute_file(
         config=Config.from_bundle(bundle),
         cwd=working_directory,
         file=executable_name,
-        arguments=[argument] if argument else []
+        arguments=[argument] if argument else [],
     )
     _logger.debug("Executing %s in directory %s", command, working_directory)
 
@@ -185,8 +193,9 @@ def copy_workdir_files(bundle: Bundle, context_dir: Path):
             shutil.copytree(origin, context_dir / file)
 
 
-def execute_execution(bundle: Bundle, args: Execution, max_time: float) \
-        -> Tuple[Optional[ExecutionResult], List[Message], Status, Path]:
+def execute_execution(
+    bundle: Bundle, args: Execution, max_time: float
+) -> Tuple[Optional[ExecutionResult], List[Message], Status, Path]:
     """
     Execute an execution.
     """
@@ -194,14 +203,12 @@ def execute_execution(bundle: Bundle, args: Execution, max_time: float) \
     start = time.perf_counter()
 
     # Create a working directory for the execution.
-    execution_dir = Path(
-        bundle.config.workdir,
-        args.execution_name
-    )
+    execution_dir = Path(bundle.config.workdir, args.execution_name)
     execution_dir.mkdir()
 
-    _logger.info("Executing execution %s in path %s", args.execution_name,
-                 execution_dir)
+    _logger.info(
+        "Executing execution %s in path %s", args.execution_name, execution_dir
+    )
 
     new_stage("dependencies.copy", True)
     # Filter dependencies of the global compilation results.
@@ -225,20 +232,16 @@ def execute_execution(bundle: Bundle, args: Execution, max_time: float) \
     # If needed, do a compilation.
     if args.mode == ExecutionMode.INDIVIDUAL:
         new_stage("compilation.individual", True)
-        _logger.info("Compiling context %s in INDIVIDUAL mode...",
-                     args.execution_name)
+        _logger.info("Compiling context %s in INDIVIDUAL mode...", args.execution_name)
         remaining = max_time - (time.perf_counter() - start)
-        result, files = run_compilation(bundle, execution_dir, dependencies,
-                                        remaining)
+        result, files = run_compilation(bundle, execution_dir, dependencies, remaining)
 
         # A new compilation means a new file filtering
         files = filter_files(files, execution_dir)
 
         # Process compilation results.
         messages, status, annotations = process_compile_results(
-            bundle.plan.namespace,
-            lang_config,
-            result
+            bundle.plan.namespace, lang_config, result
         )
 
         for annotation in annotations:
@@ -249,11 +252,11 @@ def execute_execution(bundle: Bundle, args: Execution, max_time: float) \
             _logger.debug("Aborting executing of this context.")
             return None, messages, status, execution_dir
 
-        _logger.debug("Executing context %s in INDIVIDUAL mode...",
-                      args.execution_name)
+        _logger.debug("Executing context %s in INDIVIDUAL mode...", args.execution_name)
 
-        executable, messages, status, annotations = \
-            lang_config.find_main_file(files, args.execution_name)
+        executable, messages, status, annotations = lang_config.find_main_file(
+            files, args.execution_name
+        )
 
         for annotation in annotations:
             args.collector.add(annotation)
@@ -274,16 +277,18 @@ def execute_execution(bundle: Bundle, args: Execution, max_time: float) \
             _logger.debug("No precompilation results found, using default.")
             messages, status = [], Status.CORRECT
 
-        _logger.info("Executing context %s in PRECOMPILATION mode...",
-                     args.execution_name)
+        _logger.info(
+            "Executing context %s in PRECOMPILATION mode...", args.execution_name
+        )
 
         if lang_config.needs_selector():
             _logger.debug("Selector is needed, using it.")
 
             selector_name = lang_config.selector_name()
 
-            executable, messages, status, annotations = \
-                lang_config.find_main_file(files, selector_name)
+            executable, messages, status, annotations = lang_config.find_main_file(
+                files, selector_name
+            )
 
             for annotation in annotations:
                 args.collector.add(annotation)
@@ -297,8 +302,9 @@ def execute_execution(bundle: Bundle, args: Execution, max_time: float) \
         else:
             _logger.debug("Selector is not needed, using individual execution.")
 
-            executable, messages, status, annotations = \
-                lang_config.find_main_file(files, args.execution_name)
+            executable, messages, status, annotations = lang_config.find_main_file(
+                files, args.execution_name
+            )
 
             for annotation in annotations:
                 args.collector.add(annotation)
@@ -320,19 +326,21 @@ def execute_execution(bundle: Bundle, args: Execution, max_time: float) \
         working_directory=execution_dir,
         stdin=stdin,
         argument=argument,
-        remaining=remaining
+        remaining=remaining,
     )
 
     new_stage("prepare.results", True)
     # Cleanup stderr
-    msgs, annotations, base_result.stderr = lang_config.stderr(bundle,
-                                                               base_result.stderr)
+    msgs, annotations, base_result.stderr = lang_config.stderr(
+        bundle, base_result.stderr
+    )
     for annotation in annotations:
         args.collector.add(annotation)
     messages.extend(msgs)
     # Cleanup stdout
-    msgs, annotation, base_result.stdout = lang_config.stdout(bundle,
-                                                              base_result.stdout)
+    msgs, annotation, base_result.stdout = lang_config.stdout(
+        bundle, base_result.stdout
+    )
     for annotation in annotations:
         args.collector.add(annotation)
     messages.extend(msgs)
@@ -354,8 +362,7 @@ def execute_execution(bundle: Bundle, args: Execution, max_time: float) \
         with open(exception_file_path, "r") as f:
             exceptions = f.read()
     except FileNotFoundError:
-        _logger.warning("Exception file not found, looked in %s",
-                        exception_file_path)
+        _logger.warning("Exception file not found, looked in %s", exception_file_path)
         exceptions = ""
 
     result = ExecutionResult(
@@ -367,7 +374,7 @@ def execute_execution(bundle: Bundle, args: Execution, max_time: float) \
         results=values,
         exceptions=exceptions,
         timeout=base_result.timeout,
-        memory=base_result.memory
+        memory=base_result.memory,
     )
 
     return result, messages, status, execution_dir
