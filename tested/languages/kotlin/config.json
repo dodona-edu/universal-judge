@@ -54,7 +54,8 @@
     "fixed_precision": "supported",
     "array": "supported",
     "list": "supported",
-    "tuple": "reduced"
+    "tuple": "reduced",
+    "undefined": "reduced"
   },
   "restrictions": {
     "map_key": [
