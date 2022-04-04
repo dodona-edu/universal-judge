@@ -63,24 +63,18 @@ def run_shellcheck(
     for shellcheck_object in shellcheck_objects:
         if Path(shellcheck_object.get("file", submission)).name != submission.name:
             continue
-        text = shellcheck_object.get("message", None)
+        text = shellcheck_object.get("message", "")
         code = shellcheck_object.get("code", None)
-        if not text and code is None:
+        if not text and not code:
             continue
-        elif not text:
-            text = (
-                f'(code <a href="https://github.com/koalaman/shellcheck/wiki/'
-                f'SC{code}" target="_blank">{code}</a>)'
-            )
-        elif code is not None:
-            text = (
-                f'{text} (code <a href="https://github.com/koalaman/'
-                f'shellcheck/wiki/SC{code}" target="_blank">{code}</a>)'
-            )
+        external = None
+        if code:
+            external = f"https://github.com/koalaman/shellcheck/wiki/SC{code}"
         annotations.append(
             AnnotateCode(
                 row=max(int(shellcheck_object.get("line", "-1")) - 1, 0),
                 text=text,
+                externalUrl=external,
                 column=max(int(shellcheck_object.get("column", "-1")) - 1, 0),
                 type=message_categories.get(
                     shellcheck_object.get("level", "warning"), Severity.WARNING

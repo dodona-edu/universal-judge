@@ -3,9 +3,7 @@ Support linting Python code.
 Most of this code is taken from the code from Pythia.
 """
 import logging
-import shutil
 from io import StringIO
-from os import PathLike
 from pathlib import Path
 from typing import List, Tuple
 
@@ -74,31 +72,23 @@ def run_pylint(
             message.get("type", "warning"), Severity.WARNING
         )
         logger.debug("Handling message %s", str(message))
-        message_id = message.get("message-id", None)
-        message_text = message.get("message", None)
-        more_info = get_i18n_string("languages.linter.more-info")
-        if not message_id and not message_text:
+        text = message.get("message", None)
+        symbol = message.get("symbol", None)
+        raw_type = message.get("type", None)
+
+        external = None
+        if not symbol and not text:
             continue
-        elif not message_id:
-            text = message_text
-        elif not message_text:
-            text = (
-                f'({message_id}, <a href="https://pylint.pycqa.org/en/latest/'
-                f'technical_reference/features.html#basic-checker-messages" '
-                f'target="_blank">{more_info}</a>)'
-            )
-        else:
-            text = (
-                f"{message_text} ({message_id},"
-                f'<a href="https://pylint.pycqa.org/en/latest/'
-                f'technical_reference/features.html#basic-checker-messages" '
-                f'target="_blank">{more_info}</a>)'
+        if symbol and raw_type:
+            external = (
+                f"https://pylint.pycqa.org/en/latest/messages/{raw_type}/{symbol}.html"
             )
         annotations.append(
             AnnotateCode(
                 row=max(int(message.get("line", "-1")) - 1, 0),
                 column=max(int(message.get("column", "-1")) - 1, 0),
                 text=text,
+                externalUrl=external,
                 type=category,
             )
         )

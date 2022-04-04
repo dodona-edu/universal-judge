@@ -132,3 +132,16 @@ def test_shellcheck(tmp_path: Path, config, pytestconfig):
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert len(updates.find_all("annotate-code")) > 0
+
+
+@pytest.mark.linter
+@pytest.mark.parametrize("config", _get_config_options("bash"))
+def test_shellcheck(tmp_path: Path, config, pytestconfig):
+    conf = configuration(
+        pytestconfig, "echo", "bash", tmp_path, "one.tson", "warning", config
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert len(updates.find_all("annotate-code")) == 1
+    [annotation] = updates.find_all("annotate-code")
+    assert annotation["externalUrl"]

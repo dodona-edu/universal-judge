@@ -86,16 +86,13 @@ def run_ktlint(
                 continue
             rule = error.get("rule", None)
             if rule:
-                more_info = get_i18n_string("languages.linter.more-info")
-                message += (
-                    f'({rule}, <a href="https://ktlint.github.io/#rules" '
-                    f'target="_blank">{more_info}</a>)'
-                )
+                message += f"({rule})"
 
             annotations.append(
                 AnnotateCode(
                     row=max(int(error.get("line", "-1")) - 1, 0),
                     text=message,
+                    externalUrl="https://ktlint.github.io/#rules",
                     column=max(int(error.get("column", "-1")) - 1, 0),
                     type=Severity.INFO,
                 )
