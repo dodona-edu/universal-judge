@@ -187,7 +187,7 @@ def test_basic_types(language, tmp_path: Path, pytestconfig):
 
 @pytest.mark.parametrize("language", LANGUAGES)
 def test_advanced_types(language, tmp_path: Path, pytestconfig):
-    conf = configuration(pytestconfig, "", language, "./workdir")
+    conf = configuration(pytestconfig, "", language, tmp_path)
     plan = Plan()
     bundle = create_bundle(conf, sys.stdout, plan)
     type_map = bundle.lang_config.type_support_map()
@@ -222,7 +222,7 @@ def test_escape(language, tmp_path: Path, pytestconfig):
 
 @pytest.mark.parametrize("language", LANGUAGES)
 def test_special_numbers(language, tmp_path: Path, pytestconfig):
-    conf = configuration(pytestconfig, "", language, "./workdir")
+    conf = configuration(pytestconfig, "", language, tmp_path)
     plan = Plan()
     bundle = create_bundle(conf, sys.stdout, plan)
     type_map = bundle.lang_config.type_support_map()
