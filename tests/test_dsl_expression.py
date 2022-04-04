@@ -526,7 +526,7 @@ def test_lambda_typed_single():
 
 
 def test_lambda_typed_multiple():
-    parsed = parser.parse_statement('(integer a, rational b, text c) -> call(a, b, c)')
+    parsed = parser.parse_statement("(integer a, rational b, text c) -> call(a, b, c)")
     assert isinstance(parsed, Lambda)
     assert parsed.parameters == [
         TypedLambdaArgument(type=BasicNumericTypes.INTEGER, name="a"),

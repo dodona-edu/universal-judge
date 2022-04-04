@@ -760,7 +760,7 @@ def test_method_references(language: str, tmp_path: Path, pytestconfig):
         "kotlin",
         "javascript",
         pytest.param("haskell", marks=mark_haskell),
-        pytest.param("runhaskell", marks=mark_haskell)
+        pytest.param("runhaskell", marks=mark_haskell),
     ],
 )
 def test_lambdas(language: str, tmp_path: Path, pytestconfig):
@@ -780,7 +780,7 @@ def test_lambdas(language: str, tmp_path: Path, pytestconfig):
         "kotlin",
         "javascript",
         pytest.param("haskell", marks=mark_haskell),
-        pytest.param("runhaskell", marks=mark_haskell)
+        pytest.param("runhaskell", marks=mark_haskell),
     ],
 )
 def test_lambda_assign(language: str, tmp_path: Path, pytestconfig):

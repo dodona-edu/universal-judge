@@ -414,9 +414,7 @@ class FunctionCall(WithFeatures, WithFunctions):
             )
             and args
         ):
-            raise ValueError(
-                "You cannot have arguments for a property or reference!"
-            )
+            raise ValueError("You cannot have arguments for a property or reference!")
         return values
 
     def get_used_features(self) -> FeatureSet:
@@ -475,7 +473,7 @@ AllDataTypes = Union[AllTypes, VariableType, "LambdaType"]
 class LambdaType:
     parameter_types: List[AllDataTypes] = field(default_factory=list)
     return_type: Optional[AllDataTypes] = None
-    type: Literal['lambda'] = "lambda"
+    type: Literal["lambda"] = "lambda"
 
     def is_operator(self) -> bool:
         """

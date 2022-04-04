@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 def cleanup_description(lang_config: Language, namespace: str, description: str) -> str:
     return re.sub(
-        rf'(?!\.){lang_config.conventionalize_namespace(namespace)}\.', '', description
+        rf"(?!\.){lang_config.conventionalize_namespace(namespace)}\.", "", description
     )
 
 
