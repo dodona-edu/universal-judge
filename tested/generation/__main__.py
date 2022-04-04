@@ -28,7 +28,8 @@ extension = input(
 
 prompt = input(
     "What is the console prompt prefix of the language (e.g. Python: '>>>', "
-    "Haskell: '>')?\n")
+    "Haskell: '>')?\n"
+)
 
 print("Creating directories...")
 
@@ -38,22 +39,22 @@ templates.mkdir(parents=True)
 
 print("Generating config.json...")
 
-with open(dir_path / 'config.json', 'r') as f:
+with open(dir_path / "config.json", "r") as f:
     contents = json.load(f)
 
-contents['extensions']['file'] = extension
-contents['general']['selector'] = selector
+contents["extensions"]["file"] = extension
+contents["general"]["selector"] = selector
 
 with open(templates.parent / "config.json", "w") as f:
     json.dump(contents, f, indent=2)
 
 print("Generating types.json...")
 
-with open(dir_path / 'types.json', 'r') as f:
+with open(dir_path / "types.json", "r") as f:
     contents = json.load(f)
 
-contents['console']['name'] = name
-contents['console']['prompt'] = prompt
+contents["console"]["name"] = name
+contents["console"]["prompt"] = prompt
 
 with open(templates.parent / "types.json", "w") as f:
     json.dump(contents, f, indent=2)

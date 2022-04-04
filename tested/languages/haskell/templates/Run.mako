@@ -15,6 +15,8 @@ import qualified Values
 import Control.Monad.Trans.Class
 import Control.Exception
 import EvaluationUtils
+import Data.Int
+import Data.Word
 
 ## Import the language specific evaluators we will need.
 % for name in evaluator_names:

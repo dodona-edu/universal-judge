@@ -1,8 +1,0 @@
-<specification line_terminator="\n" id="input">
-    <line>
-        <data type="text" value="racecar"/>
-    </line>
-    <line>
-        <data type="text" value="Flintstone"/>
-    </line>
-</specification>

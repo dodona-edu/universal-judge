@@ -1,5 +1,0 @@
-temp                        //Tijdelijke map
-├── buzzchecker.py          //Evaluatiecode
-├── evaluation_utils.py     //Hulpfuncties
-├── evaluator_executor.py   //Code om de evaluatiecode uit te voeren
-└── values.py               //Values-module

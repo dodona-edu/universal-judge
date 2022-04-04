@@ -15,10 +15,7 @@ _logger = logging.getLogger(__name__)
 
 
 def run_compilation(
-        bundle: Bundle,
-        directory: Path,
-        dependencies: List[str],
-        remaining: float
+    bundle: Bundle, directory: Path, dependencies: List[str], remaining: float
 ) -> Tuple[Optional[BaseExecutionResult], Union[List[str], FileFilter]]:
     """
     The compilation step in the pipeline. This callback is used in both the
@@ -57,17 +54,16 @@ def run_compilation(
     """
     config = Config.from_bundle(bundle)
     command, files = bundle.lang_config.compilation(bundle, dependencies)
-    _logger.debug("Generating files with command %s in directory %s",
-                  command, directory)
+    _logger.debug(
+        "Generating files with command %s in directory %s", command, directory
+    )
     result = run_command(directory, remaining, command)
     _logger.debug(f"Compilation dependencies are: {files}")
     return result, files
 
 
 def process_compile_results(
-        namespace: str,
-        language_config: Language,
-        results: Optional[BaseExecutionResult]
+    namespace: str, language_config: Language, results: Optional[BaseExecutionResult]
 ) -> Tuple[List[Message], Status, List[AnnotateCode]]:
     """
     Process the output of a compilation step. It will convert the result of the
@@ -83,8 +79,9 @@ def process_compile_results(
 
     show_stdout = False
     _logger.debug("Received stderr from compiler: " + results.stderr)
-    compiler_messages, annotations, stdout, stderr = \
-        language_config.compiler_output(namespace, results.stdout, results.stderr)
+    compiler_messages, annotations, stdout, stderr = language_config.compiler_output(
+        namespace, results.stdout, results.stderr
+    )
     messages.extend(compiler_messages)
     shown_messages = annotations or compiler_messages
 
@@ -112,8 +109,9 @@ def process_compile_results(
         return messages, Status.MEMORY_LIMIT_EXCEEDED, annotations
     if results.exit != 0:
         if not shown_messages:
-            messages.append(get_i18n_string("judge.compilation.exitcode",
-                                            exitcode=results.exit))
+            messages.append(
+                get_i18n_string("judge.compilation.exitcode", exitcode=results.exit)
+            )
         return messages, Status.COMPILATION_ERROR, annotations
     else:
         return messages, Status.CORRECT, annotations

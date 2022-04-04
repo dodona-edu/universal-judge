@@ -32,30 +32,44 @@ from pydantic.fields import Undefined
 from pydantic.typing import NoneType
 
 from tested.dodona import ExtendedMessage, Status
-from .datatypes import (NumericTypes, StringTypes, BooleanTypes,
-                        SequenceTypes, ObjectTypes, NothingTypes, SimpleTypes,
-                        resolve_to_basic, AllTypes, BasicSequenceTypes,
-                        BasicObjectTypes, BasicNumericTypes, BasicBooleanTypes,
-                        BasicStringTypes, BasicNothingTypes,
-                        ComplexExpressionTypes, ExpressionTypes, NestedTypes)
+from .datatypes import (
+    NumericTypes,
+    StringTypes,
+    BooleanTypes,
+    SequenceTypes,
+    ObjectTypes,
+    NothingTypes,
+    SimpleTypes,
+    resolve_to_basic,
+    AllTypes,
+    BasicSequenceTypes,
+    BasicObjectTypes,
+    BasicNumericTypes,
+    BasicBooleanTypes,
+    BasicStringTypes,
+    BasicNothingTypes,
+    ComplexExpressionTypes,
+    ExpressionTypes,
+    NestedTypes,
+    AdvancedNumericTypes,
+)
 from .features import FeatureSet, combine_features, WithFeatures, Construct
 from .utils import get_args, flatten, sorted_no_duplicates
 
 logger = logging.getLogger(__name__)
 
 WrappedAllTypes = Union[
-    AllTypes, Tuple[SequenceTypes, 'WrappedAllTypes'],
-    Tuple[ObjectTypes, Tuple['WrappedAllTypes', 'WrappedAllTypes']]
+    AllTypes,
+    Tuple[SequenceTypes, "WrappedAllTypes"],
+    Tuple[ObjectTypes, Tuple["WrappedAllTypes", "WrappedAllTypes"]],
 ]
 
 
-def _get_type_for(expression: 'Expression') -> WrappedAllTypes:
+def _get_type_for(expression: "Expression") -> WrappedAllTypes:
     if isinstance(expression, SequenceType):
         return expression.type, expression.get_content_type()
     elif isinstance(expression, ObjectType):
-        return expression.type, (
-            expression.get_key_type(), expression.get_value_type()
-        )
+        return expression.type, (expression.get_key_type(), expression.get_value_type())
     elif isinstance(expression, get_args(Value)):
         return expression.type
     else:
@@ -92,23 +106,34 @@ def _get_combined_types(types: Iterable[WrappedAllTypes]) -> WrappedAllTypes:
         if sub_type is None:
             return key_type
         elif isinstance(sub_type, tuple):
-            return key_type, (_get_combined_types(sub_type[0]),
-                              _get_combined_types(sub_type[1]))
+            return key_type, (
+                _get_combined_types(sub_type[0]),
+                _get_combined_types(sub_type[1]),
+            )
         else:
             return key_type, _get_combined_types(sub_type)
     else:
         return BasicStringTypes.ANY
 
 
-def _combine_nested_types(data_type: AllTypes,
-                          features: Iterable[FeatureSet]) -> NestedTypes:
-    nested_types: Iterable[ExpressionTypes] = {y[0] for f in features for y in
-                                               f.nested_types}
-    return {(data_type, frozenset(reduce(
-        operator.or_,
-        (x[1] for f in features for x in f.nested_types),
-        nested_types
-    )))}
+def _combine_nested_types(
+    data_type: AllTypes, features: Iterable[FeatureSet]
+) -> NestedTypes:
+    nested_types: Iterable[ExpressionTypes] = {
+        y[0] for f in features for y in f.nested_types
+    }
+    return {
+        (
+            data_type,
+            frozenset(
+                reduce(
+                    operator.or_,
+                    (x[1] for f in features for x in f.nested_types),
+                    nested_types,
+                )
+            ),
+        )
+    }
 
 
 def _get_self_nested_type(data_type: AllTypes) -> NestedTypes:
@@ -116,7 +141,7 @@ def _get_self_nested_type(data_type: AllTypes) -> NestedTypes:
 
 
 class WithFunctions:
-    def get_functions(self) -> Iterable['FunctionCall']:
+    def get_functions(self) -> Iterable["FunctionCall"]:
         raise NotImplementedError
 
 
@@ -134,17 +159,20 @@ class NumberType(WithFeatures, WithFunctions):
     def get_used_features(self) -> FeatureSet:
         return FeatureSet(set(), {self.type}, _get_self_nested_type(self.type))
 
-    def get_functions(self) -> Iterable['FunctionCall']:
+    def get_functions(self) -> Iterable["FunctionCall"]:
         return []
 
     # noinspection PyMethodParameters
     @root_validator
     def check_number_types(cls, values):
-        if isinstance(values.get("data"), SpecialNumbers) and \
-                resolve_to_basic(values.get("type")) == BasicNumericTypes.INTEGER:
+        if (
+            isinstance(values.get("data"), SpecialNumbers)
+            and resolve_to_basic(values.get("type")) == BasicNumericTypes.INTEGER
+        ):
             raise ValueError(
                 f"SpecialNumber '{values.get('data')}' is only supported for "
-                f"rational numbers.")
+                f"rational numbers."
+            )
 
         if resolve_to_basic(values.get("type")) == BasicNumericTypes.INTEGER:
             values["data"] = values["data"].to_integral_value()
@@ -160,7 +188,7 @@ class StringType(WithFeatures, WithFunctions):
     def get_used_features(self) -> FeatureSet:
         return FeatureSet(set(), {self.type}, _get_self_nested_type(self.type))
 
-    def get_functions(self) -> Iterable['FunctionCall']:
+    def get_functions(self) -> Iterable["FunctionCall"]:
         return []
 
 
@@ -172,14 +200,14 @@ class BooleanType(WithFeatures, WithFunctions):
     def get_used_features(self) -> FeatureSet:
         return FeatureSet(set(), {self.type}, _get_self_nested_type(self.type))
 
-    def get_functions(self) -> Iterable['FunctionCall']:
+    def get_functions(self) -> Iterable["FunctionCall"]:
         return []
 
 
 @dataclass
 class SequenceType(WithFeatures, WithFunctions):
     type: SequenceTypes
-    data: List['Expression']
+    data: List["Expression"]
 
     def get_used_features(self) -> FeatureSet:
         nested_features = [x.get_used_features() for x in self.data]
@@ -188,10 +216,16 @@ class SequenceType(WithFeatures, WithFunctions):
         combined = combine_features([base_features] + nested_features)
         content_type = self.get_content_type()
         if content_type == BasicStringTypes.ANY:
-            combined = combine_features([FeatureSet(
-                {Construct.HETEROGENEOUS_COLLECTIONS}, {self.type},
-                combined_nested_types
-            )] + nested_features)
+            combined = combine_features(
+                [
+                    FeatureSet(
+                        {Construct.HETEROGENEOUS_COLLECTIONS},
+                        {self.type},
+                        combined_nested_types,
+                    )
+                ]
+                + nested_features
+            )
         return combined
 
     def get_content_type(self) -> WrappedAllTypes:
@@ -201,14 +235,14 @@ class SequenceType(WithFeatures, WithFunctions):
         """
         return _get_combined_types(_get_type_for(element) for element in self.data)
 
-    def get_functions(self) -> Iterable['FunctionCall']:
+    def get_functions(self) -> Iterable["FunctionCall"]:
         return flatten(x.get_functions() for x in self.data)
 
 
 @dataclass
 class ObjectKeyValuePair(WithFeatures, WithFunctions):
-    key: 'Expression'
-    value: 'Expression'
+    key: "Expression"
+    value: "Expression"
 
     def get_key_type(self) -> WrappedAllTypes:
         """
@@ -225,11 +259,10 @@ class ObjectKeyValuePair(WithFeatures, WithFunctions):
         return _get_type_for(self.value)
 
     def get_used_features(self) -> FeatureSet:
-        nested_features = [self.key.get_used_features(),
-                           self.value.get_used_features()]
+        nested_features = [self.key.get_used_features(), self.value.get_used_features()]
         return combine_features(nested_features)
 
-    def get_functions(self) -> Iterable['FunctionCall']:
+    def get_functions(self) -> Iterable["FunctionCall"]:
         return self.value.get_functions()
 
 
@@ -250,8 +283,7 @@ class ObjectType(WithFeatures, WithFunctions):
         Attempt to get a type for the values of the object. The function will
         attempt to get the most specific type possible.
         """
-        return _get_combined_types(
-            element.get_value_type() for element in self.data)
+        return _get_combined_types(element.get_value_type() for element in self.data)
 
     def get_used_features(self) -> FeatureSet:
         key_nested_features = [x.key.get_used_features() for x in self.data]
@@ -259,12 +291,14 @@ class ObjectType(WithFeatures, WithFunctions):
         base_features = FeatureSet(set(), {self.type}, key_combined)
         value_nested_features = [x.value.get_used_features() for x in self.data]
         return combine_features(
-            [base_features] + value_nested_features + key_nested_features)
+            [base_features] + value_nested_features + key_nested_features
+        )
 
-    def get_functions(self) -> Iterable['FunctionCall']:
-        return flatten(flatten(
-            (pair.key.get_functions(), pair.value.get_functions())
-        ) for pair in self.data)
+    def get_functions(self) -> Iterable["FunctionCall"]:
+        return flatten(
+            flatten((pair.key.get_functions(), pair.value.get_functions()))
+            for pair in self.data
+        )
 
 
 @dataclass
@@ -275,7 +309,7 @@ class NothingType(WithFeatures, WithFunctions):
     def get_used_features(self) -> FeatureSet:
         return FeatureSet(set(), {self.type}, _get_self_nested_type(self.type))
 
-    def get_functions(self) -> Iterable['FunctionCall']:
+    def get_functions(self) -> Iterable["FunctionCall"]:
         return []
 
 
@@ -289,10 +323,11 @@ class Identifier(str, WithFeatures, WithFunctions):
     """Represents an variable name."""
 
     def get_used_features(self) -> FeatureSet:
-        return FeatureSet(set(), set(),
-                          {(ComplexExpressionTypes.IDENTIFIERS, frozenset())})
+        return FeatureSet(
+            set(), set(), {(ComplexExpressionTypes.IDENTIFIERS, frozenset())}
+        )
 
-    def get_functions(self) -> Iterable['FunctionCall']:
+    def get_functions(self) -> Iterable["FunctionCall"]:
         return []
 
     @classmethod
@@ -305,7 +340,7 @@ class Identifier(str, WithFeatures, WithFunctions):
     @classmethod
     def validate(cls, v):
         if not isinstance(v, str):
-            raise TypeError('string required')
+            raise TypeError("string required")
         return Identifier(v)
 
 
@@ -339,16 +374,18 @@ class FunctionType(str, Enum):
 @dataclass
 class NamedArgument(WithFeatures, WithFunctions):
     """Represents a named argument for a function."""
+
     name: str
-    value: 'Expression'
+    value: "Expression"
 
     def get_used_features(self) -> FeatureSet:
-        this = FeatureSet(constructs={Construct.NAMED_ARGUMENTS}, types=set(),
-                          nested_types=set())
+        this = FeatureSet(
+            constructs={Construct.NAMED_ARGUMENTS}, types=set(), nested_types=set()
+        )
         expression = self.value.get_used_features()
         return combine_features([this, expression])
 
-    def get_functions(self) -> Iterable['FunctionCall']:
+    def get_functions(self) -> Iterable["FunctionCall"]:
         return self.value.get_functions()
 
 
@@ -357,11 +394,11 @@ class FunctionCall(WithFeatures, WithFunctions):
     """
     Represents a function expression.
     """
+
     type: FunctionType
     name: str
-    namespace: Optional['Expression'] = None
-    arguments: List[Union['Expression', NamedArgument]] \
-        = field(default_factory=list)
+    namespace: Optional["Expression"] = None
+    arguments: List[Union["Expression", NamedArgument]] = field(default_factory=list)
 
     # noinspection PyMethodParameters
     @root_validator
@@ -381,36 +418,44 @@ class FunctionCall(WithFeatures, WithFunctions):
         constructs = {Construct.FUNCTION_CALLS}
 
         # Get OOP features.
-        if self.type in (FunctionType.PROPERTY, FunctionType.CONSTRUCTOR,
-                         FunctionType.CONSTRUCTOR_REFERENCE) or \
-                not isinstance(self.namespace, (Identifier, NoneType)):
+        if self.type in (
+            FunctionType.PROPERTY,
+            FunctionType.CONSTRUCTOR,
+            FunctionType.CONSTRUCTOR_REFERENCE,
+        ) or not isinstance(self.namespace, (Identifier, NoneType)):
             constructs.add(Construct.OBJECTS)
         # Method references
         if self.type in (FunctionType.FUNCTION_REFERENCE,
                          FunctionType.CONSTRUCTOR_REFERENCE):
             constructs.add(Construct.METHOD_REFERENCES)
 
-        base_features = FeatureSet(constructs=constructs, types=set(),
-                                   nested_types={
-                                       (ComplexExpressionTypes.FUNCTION_CALLS,
-                                        frozenset())})
+        base_features = FeatureSet(
+            constructs=constructs,
+            types=set(),
+            nested_types={(ComplexExpressionTypes.FUNCTION_CALLS, frozenset())},
+        )
         argument_features = [x.get_used_features() for x in self.arguments]
 
         return combine_features([base_features] + argument_features)
 
-    def get_functions(self) -> Iterable['FunctionCall']:
+    def get_functions(self) -> Iterable["FunctionCall"]:
         if self.namespace is None:
             namespace_nested = []
         else:
             namespace_nested = [list(self.namespace.get_functions())]
-        return flatten([[self], *[list(x.get_functions()) for x in self.arguments],
-                        *namespace_nested])
+        return flatten(
+            [
+                [self],
+                *[list(x.get_functions()) for x in self.arguments],
+                *namespace_nested,
+            ]
+        )
 
 
 @dataclass
 class VariableType:
     data: str
-    type: Literal['custom'] = 'custom'
+    type: Literal["custom"] = "custom"
 
 
 AllDataTypes = Union[AllTypes, VariableType, 'LambdaType']
@@ -486,22 +531,21 @@ class Assignment(WithFeatures, WithFunctions):
     expression. It is also possible to define the type. If the type cannot be
     determined and it is not specified, this is an error.
     """
+
     variable: str
     expression: Expression
     type: AllDataTypes
 
-    def replace_expression(self, expression: Expression) -> 'Assignment':
-        return Assignment(variable=self.variable, expression=expression,
-                          type=self.type)
+    def replace_expression(self, expression: Expression) -> "Assignment":
+        return Assignment(variable=self.variable, expression=expression, type=self.type)
 
-    def replace_variable(self, variable: str) -> 'Assignment':
-        return Assignment(variable=variable, expression=self.expression,
-                          type=self.type)
+    def replace_variable(self, variable: str) -> "Assignment":
+        return Assignment(variable=variable, expression=self.expression, type=self.type)
 
-    def replace_type(self,
-                     type_name: Union[AllTypes, VariableType]) -> 'Assignment':
-        return Assignment(variable=self.variable, expression=self.expression,
-                          type=type_name)
+    def replace_type(self, type_name: Union[AllTypes, VariableType]) -> "Assignment":
+        return Assignment(
+            variable=self.variable, expression=self.expression, type=type_name
+        )
 
     def get_used_features(self) -> FeatureSet:
         base = FeatureSet({Construct.ASSIGNMENTS}, set(), set())
@@ -511,7 +555,7 @@ class Assignment(WithFeatures, WithFunctions):
 
         return combine_features([base, other])
 
-    def get_functions(self) -> Iterable['FunctionCall']:
+    def get_functions(self) -> Iterable["FunctionCall"]:
         return self.expression.get_functions()
 
 
@@ -536,6 +580,7 @@ def as_basic_type(value: Value) -> Value:
 
 class _SerialisationSchema(BaseModel):
     """The schema for serialising data."""
+
     __root__: Value
 
 
@@ -544,8 +589,8 @@ def generate_schema():
     Generate a json schema for the serialisation type. It will be printed on stdout.
     """
     sc = _SerialisationSchema.schema()
-    sc['$id'] = "tested/serialisation"
-    sc['$schema'] = "http://json-schema.org/schema#"
+    sc["$id"] = "tested/serialisation"
+    sc["$schema"] = "http://json-schema.org/schema#"
     print(json.dumps(sc, indent=2))
 
 
@@ -573,13 +618,10 @@ def parse_value(value: str) -> Value:
 
     logger.debug(f"Could not parse value, errors are {errors}. Could be normal!")
 
-    raise TypeError(
-        f"Could not find valid type for {value}."
-    )
+    raise TypeError(f"Could not find valid type for {value}.")
 
 
 class PrintingDecimal:
-
     def __init__(self, decimal: Decimal):
         self.decimal = decimal
 
@@ -602,8 +644,7 @@ def _convert_to_python(value: Optional[Value], for_printing=False) -> Any:
     # If we have a type for which the data is usable in Python, use it.
     if isinstance(value.type, get_args(SimpleTypes)):
         # If we have floats or ints, convert them to Python.
-        if value.type in (NumericTypes.SINGLE_PRECISION,
-                          NumericTypes.DOUBLE_PRECISION):
+        if value.type in (NumericTypes.SINGLE_PRECISION, NumericTypes.DOUBLE_PRECISION):
             return float(str(value.data))
         if value.type != NumericTypes.FIXED_PRECISION:
             return int(str(value.data))
@@ -623,8 +664,11 @@ def _convert_to_python(value: Optional[Value], for_printing=False) -> Any:
 
     if isinstance(value.type, get_args(ObjectTypes)):
         return sorted_no_duplicates(
-            ((_convert_to_python(pair.key), _convert_to_python(pair.value))
-             for pair in value.data), key=lambda x: x[0]
+            (
+                (_convert_to_python(pair.key), _convert_to_python(pair.value))
+                for pair in value.data
+            ),
+            key=lambda x: x[0],
         )
 
     if isinstance(value, NothingType):
@@ -636,7 +680,6 @@ def _convert_to_python(value: Optional[Value], for_printing=False) -> Any:
 
 
 class ComparableFloat:
-
     def __init__(self, value):
         self.value = value
 
@@ -661,16 +704,16 @@ class ComparableFloat:
 
 def to_python_comparable(value: Optional[Value]):
     """
-    Convert the value into a comparable Python value. Most values are just
-    converted to their
-    builtin Python variant. Some, however, are not: floats are converted into a
-    wrapper class, that
-    allows comparison.
+    Convert the value into a comparable Python value. Most values are just converted
+    to their built-in Python variant. Some, however, are not. For example, floats
+    are converted into a wrapper class, which allows for comparison.
 
-    Note that this means that the types in the return value can be different from
-    what is channel;
-    the returning types are only guaranteed to support eq, str, repr and bool.
+    This does mean that the type of the returned value can differ from the type in
+    the return channel (in the test suite). The returned value is only guaranteed
+    to support the following operations: eq, str, repr and bool.
     """
+    if value.type == AdvancedNumericTypes.FIXED_PRECISION:
+        return Decimal(value.data)
     basic_type = resolve_to_basic(value.type)
     if value is None:
         return None
@@ -680,15 +723,22 @@ def to_python_comparable(value: Optional[Value]):
         return sorted_no_duplicates(to_python_comparable(x) for x in value.data)
     if basic_type == BasicObjectTypes.MAP:
         return sorted_no_duplicates(
-            ((to_python_comparable(pair.key), to_python_comparable(pair.value))
-             for pair in value.data), key=lambda x: x[0]
+            (
+                (to_python_comparable(pair.key), to_python_comparable(pair.value))
+                for pair in value.data
+            ),
+            key=lambda x: x[0],
         )
     if basic_type == BasicNumericTypes.RATIONAL:
         return ComparableFloat(float(value.data))
     if basic_type == BasicNumericTypes.INTEGER:
         return value.data
-    if basic_type in (BasicBooleanTypes.BOOLEAN, BasicStringTypes.TEXT,
-                      BasicNothingTypes.NOTHING, BasicStringTypes.ANY):
+    if basic_type in (
+        BasicBooleanTypes.BOOLEAN,
+        BasicStringTypes.TEXT,
+        BasicNothingTypes.NOTHING,
+        BasicStringTypes.ANY,
+    ):
         return value.data
 
     raise AssertionError(f"Unknown value type: {value}")
@@ -710,6 +760,7 @@ class InternalExceptionMessage:
 @dataclass
 class ExceptionValue(WithFeatures):
     """An exception that was thrown while executing the user context."""
+
     message: str
     stacktrace: str = ""
     tested: Optional[InternalExceptionMessage] = None
@@ -721,5 +772,5 @@ class ExceptionValue(WithFeatures):
         return f"{self.message}".strip()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     generate_schema()

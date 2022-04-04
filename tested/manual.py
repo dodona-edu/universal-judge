@@ -19,27 +19,29 @@ exercise_dir = "exercise/objects"
 
 def read_config() -> DodonaConfig:
     """Read the configuration from stdout"""
-    return DodonaConfig(**{
-        "memory_limit":         536870912,
-        "time_limit":           60,
-        "programming_language": 'java',
-        "natural_language":     'nl',
-        "resources":            Path(exercise_dir, 'evaluation'),
-        "source":               Path(exercise_dir, 'solution/correct.java'),
-        "judge":                Path('.'),
-        "workdir":              Path('workdir'),
-        "plan_name":            "plan.yaml",
-        "timing_statistics":    True,
-        "options":              {
-            "parallel": True,
-            "allow_fallback": False,
-            "mode":     "batch",
-            "linter":   True
+    return DodonaConfig(
+        **{
+            "memory_limit": 536870912,
+            "time_limit": 60,
+            "programming_language": "java",
+            "natural_language": "nl",
+            "resources": Path(exercise_dir, "evaluation"),
+            "source": Path(exercise_dir, "solution/correct.java"),
+            "judge": Path("."),
+            "workdir": Path("workdir"),
+            "plan_name": "plan.yaml",
+            "timing_statistics": True,
+            "options": {
+                "parallel": True,
+                "allow_fallback": False,
+                "mode": "batch",
+                "linter": True,
+            },
         }
-    })
+    )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     internal_timings.collect_timings(True)
 
     config = read_config()
@@ -48,7 +50,7 @@ if __name__ == '__main__':
     log = logging.getLogger()
     log.setLevel(logging.DEBUG)
     ch = logging.StreamHandler(stream=sys.stdout)
-    formatter = logging.Formatter('%(name)s:%(levelname)s:%(message)s')
+    formatter = logging.Formatter("%(name)s:%(levelname)s:%(message)s")
     ch.setFormatter(formatter)
     log.addHandler(ch)
 

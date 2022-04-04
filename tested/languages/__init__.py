@@ -17,14 +17,14 @@ from .bash.config import Bash
 from .config import Language
 
 LANGUAGES = {
-    'bash':       Bash,
-    'c':          C,
-    'haskell':    Haskell,
-    'java':       Java,
-    'javascript': JavaScript,
-    'kotlin':     Kotlin,
-    'python':     Python,
-    'runhaskell': RunHaskell,
+    "bash": Bash,
+    "c": C,
+    "haskell": Haskell,
+    "java": Java,
+    "javascript": JavaScript,
+    "kotlin": Kotlin,
+    "python": Python,
+    "runhaskell": RunHaskell,
 }
 
 

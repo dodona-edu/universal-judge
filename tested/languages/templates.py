@@ -35,8 +35,8 @@ def _write_template(arguments, template: Template, path: Path):
     # noinspection PyTypeChecker
     with open(path, "w") as file:
         file.write(result)
-        
-        
+
+
 def _language_inheritance_tree(bundle: Bundle) -> List[str]:
     current = bundle.lang_config
     result = [bundle.config.programming_language]
@@ -58,7 +58,7 @@ def path_to_templates(bundle: Bundle) -> List[Path]:
     judge_root = bundle.config.judge
     result = []
     for language in _language_inheritance_tree(bundle):
-        result.append(judge_root / 'tested' / 'languages' / language / 'templates')
+        result.append(judge_root / "tested" / "languages" / language / "templates")
     assert result, "At least one template folder is required."
     return result
 
@@ -76,10 +76,9 @@ def _get_environment(bundle: Bundle) -> TemplateLookup:
     return _env_cache[bundle.config.programming_language]
 
 
-def find_and_write_template(bundle: Bundle,
-                            template_args: Any,
-                            destination: Path,
-                            template_name: str) -> str:
+def find_and_write_template(
+    bundle: Bundle, template_args: Any, destination: Path, template_name: str
+) -> str:
     """
     Find and write using a template.
 
@@ -125,4 +124,7 @@ def find_template(bundle: Bundle, template_name: str) -> Template:
             error = e
     raise LookupError(
         f"Could not find template with name {template_name} for language "
-        f"{bundle.config.programming_language}", error, environment.directories)
+        f"{bundle.config.programming_language}",
+        error,
+        environment.directories,
+    )

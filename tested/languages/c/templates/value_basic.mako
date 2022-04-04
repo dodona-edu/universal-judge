@@ -1,19 +1,28 @@
 ## Convert a Value to a literal type in Java.
-<%! from tested.datatypes import BasicNumericTypes, BasicStringTypes, BasicBooleanTypes, BasicNothingTypes, BasicSequenceTypes, BasicObjectTypes  %>\
+<%! from tested.datatypes import AdvancedNumericTypes, BasicNumericTypes, BasicStringTypes, BasicBooleanTypes, BasicNothingTypes, BasicSequenceTypes, BasicObjectTypes  %>\
 <%! from tested.serialisation import SpecialNumbers %>\
 <%! from json import dumps %>\
-<%page args="value" />\
+<%page args="value,original" />\
 % if value.type == BasicNumericTypes.INTEGER:
     ${value.data}\
 % elif value.type == BasicNumericTypes.RATIONAL:
+    <% suffix = "f" if original.type == AdvancedNumericTypes.SINGLE_PRECISION else "" %>\
     % if not isinstance(value.data, SpecialNumbers):
-        ${value.data}\
+        ${value.data}${suffix}\
     % elif value.data == SpecialNumbers.NOT_A_NUMBER:
-        (0.0/0.0)\
+        nan${suffix}("")\
     % elif value.data == SpecialNumbers.POS_INFINITY:
-        (1.0/0.0)\
+        % if original.type == AdvancedNumericTypes.DOUBLE_PRECISION:
+          ((double) INFINITY)\
+        % else:
+          INFINITY\
+        % endif
     % else:
-        (-1.0/0.0)\
+        % if original.type == AdvancedNumericTypes.DOUBLE_PRECISION:
+          ((double) -INFINITY)\
+        % else:
+          (-INFINITY)\
+        % endif
     % endif
 % elif value.type == BasicStringTypes.TEXT:
     ${dumps(value.data)}\

@@ -8,11 +8,14 @@ from typing import Tuple, List
 
 from .collector import OutputManager
 from .compilation import run_compilation, process_compile_results
-from .evaluation import evaluate_run_results, \
-    evaluate_context_results
+from .evaluation import evaluate_run_results, evaluate_context_results
 from .execution import Execution, execute_execution, ExecutionResult
-from tested.internal_timings import new_stage, end_stage, is_collecting, \
-    pretty_print_timings
+from tested.internal_timings import (
+    new_stage,
+    end_stage,
+    is_collecting,
+    pretty_print_timings,
+)
 from .linter import run_linter
 from .utils import copy_from_paths_to_path
 from ..configs import Bundle
@@ -41,14 +44,19 @@ def judge(bundle: Bundle):
     if not is_supported(bundle):
         end_stage("analyse.supported")
         report_update(bundle.out, StartJudgment())
-        report_update(bundle.out, CloseJudgment(
-            accepted=False,
-            status=StatusMessage(
-                enum=Status.INTERNAL_ERROR,
-                human=get_i18n_string("judge.core.unsupported.language",
-                                      language=bundle.config.programming_language)
-            )
-        ))
+        report_update(
+            bundle.out,
+            CloseJudgment(
+                accepted=False,
+                status=StatusMessage(
+                    enum=Status.INTERNAL_ERROR,
+                    human=get_i18n_string(
+                        "judge.core.unsupported.language",
+                        language=bundle.config.programming_language,
+                    ),
+                ),
+            ),
+        )
         _logger.info("Required features not supported.")
         return  # Not all required features are supported.
 
@@ -77,16 +85,17 @@ def judge(bundle: Bundle):
     if mode == ExecutionMode.PRECOMPILATION:
         new_stage("compilation.pre")
         assert not bundle.lang_config.needs_selector() or selector is not None
+        files = _copy_workdir_source_files(bundle, common_dir) + files
+
         # Compile all code in one go.
         _logger.info("Running precompilation step...")
         remaining = max_time - (time.perf_counter() - start)
-        result, compilation_files = run_compilation(bundle, common_dir, files,
-                                                    remaining)
+        result, compilation_files = run_compilation(
+            bundle, common_dir, files, remaining
+        )
 
         messages, status, annotations = process_compile_results(
-            bundle.plan.namespace,
-            bundle.lang_config,
-            result
+            bundle.plan.namespace, bundle.lang_config, result
         )
 
         # If there is no result, there was no compilation.
@@ -99,7 +108,8 @@ def judge(bundle: Bundle):
                 index = len(bundle.plan.tabs) + 1
                 if messages:
                     collector.prepare_tab(
-                        StartTab(get_i18n_string("judge.core.compilation")), index)
+                        StartTab(get_i18n_string("judge.core.compilation")), index
+                    )
                 for message in messages:
                     collector.add(AppendMessage(message=message))
                 for annotation in annotations:
@@ -107,8 +117,10 @@ def judge(bundle: Bundle):
                 if messages:
                     collector.prepare_tab(CloseTab(), index)
                 collector.terminate(
-                    Status.TIME_LIMIT_EXCEEDED if result.timeout else
-                    Status.MEMORY_LIMIT_EXCEEDED)
+                    Status.TIME_LIMIT_EXCEEDED
+                    if result.timeout
+                    else Status.MEMORY_LIMIT_EXCEEDED
+                )
                 return
 
             assert not result.timeout
@@ -134,7 +146,8 @@ def judge(bundle: Bundle):
                 # Report messages.
                 if messages:
                     collector.add_tab(
-                        StartTab(get_i18n_string("judge.core.compilation")), -1)
+                        StartTab(get_i18n_string("judge.core.compilation")), -1
+                    )
                 for message in messages:
                     collector.add(AppendMessage(message=message))
                 for annotation in annotations:
@@ -142,10 +155,12 @@ def judge(bundle: Bundle):
                 if messages:
                     collector.add_tab(CloseTab(), -1)
 
-                collector.terminate(StatusMessage(
-                    enum=status,
-                    human=get_i18n_string("judge.core.invalid.source-code")
-                ))
+                collector.terminate(
+                    StatusMessage(
+                        enum=status,
+                        human=get_i18n_string("judge.core.invalid.source-code"),
+                    )
+                )
                 _logger.info("Compilation error without fallback")
                 return  # Compilation error occurred, useless to continue.
         end_stage("compilation.pre")
@@ -164,20 +179,21 @@ def judge(bundle: Bundle):
         executions = []
         offset = 0
         for execution_index, run in enumerate(tab.runs):
-            executions.append(Execution(
-                run=run,
-                context_offset=offset,
-                execution_name=bundle.lang_config.execution_name(
-                    tab_number=tab_index,
-                    execution_number=execution_index
-                ),
-                execution_index=execution_index,
-                mode=mode,
-                common_directory=common_dir,
-                files=files,
-                precompilation_result=precompilation_result,
-                collector=collector
-            ))
+            executions.append(
+                Execution(
+                    run=run,
+                    context_offset=offset,
+                    execution_name=bundle.lang_config.execution_name(
+                        tab_number=tab_index, execution_number=execution_index
+                    ),
+                    execution_index=execution_index,
+                    mode=mode,
+                    common_directory=common_dir,
+                    files=files,
+                    precompilation_result=precompilation_result,
+                    collector=collector,
+                )
+            )
             offset += int(run.run.input.main_call) + len(run.contexts)
 
         remaining = max_time - (time.perf_counter() - start)
@@ -186,8 +202,11 @@ def judge(bundle: Bundle):
         else:
             result = _single_execution(bundle, executions, remaining)
 
-        if result in (Status.TIME_LIMIT_EXCEEDED, Status.MEMORY_LIMIT_EXCEEDED,
-                      Status.OUTPUT_LIMIT_EXCEEDED):
+        if result in (
+            Status.TIME_LIMIT_EXCEEDED,
+            Status.MEMORY_LIMIT_EXCEEDED,
+            Status.OUTPUT_LIMIT_EXCEEDED,
+        ):
             assert not collector.collected
             collector.terminate(result)
             return
@@ -196,22 +215,29 @@ def judge(bundle: Bundle):
     # Add statistics tab for STAFF
     if is_collecting():
         collector.add_tab(
-            StartTab(title=get_i18n_string("timings.title"),
-                     permission=Permission.STAFF), -1)
-        collector.add(AppendMessage(message=ExtendedMessage(
-            description=pretty_print_timings(bundle.config.options.parallel),
-            format="markdown",
-            permission=Permission.STAFF
-        )))
+            StartTab(
+                title=get_i18n_string("timings.title"), permission=Permission.STAFF
+            ),
+            -1,
+        )
+        collector.add(
+            AppendMessage(
+                message=ExtendedMessage(
+                    description=pretty_print_timings(bundle.config.options.parallel),
+                    format="markdown",
+                    permission=Permission.STAFF,
+                )
+            )
+        )
         collector.add_tab(CloseTab(), -1)
 
     collector.add(CloseJudgment())
     collector.clean_finish()
 
 
-def _single_execution(bundle: Bundle,
-                      items: List[Execution],
-                      max_time: float) -> Optional[Status]:
+def _single_execution(
+    bundle: Bundle, items: List[Execution], max_time: float
+) -> Optional[Status]:
     """
     Process items in a non-threaded way.
 
@@ -233,9 +259,9 @@ def _single_execution(bundle: Bundle,
             return status
 
 
-def _parallel_execution(bundle: Bundle,
-                        items: List[Execution],
-                        max_time: float) -> Optional[Status]:
+def _parallel_execution(
+    bundle: Bundle, items: List[Execution], max_time: float
+) -> Optional[Status]:
     """
     Execute a list of contexts in parallel.
 
@@ -257,8 +283,10 @@ def _parallel_execution(bundle: Bundle,
             _status = _process_results(bundle, execution, execution_result, m, s, p)
             end_stage("evaluate.results")
 
-            if _status and _status not in (Status.TIME_LIMIT_EXCEEDED,
-                                           Status.MEMORY_LIMIT_EXCEEDED):
+            if _status and _status not in (
+                Status.TIME_LIMIT_EXCEEDED,
+                Status.MEMORY_LIMIT_EXCEEDED,
+            ):
                 return _status
 
         return evaluation_function
@@ -270,8 +298,10 @@ def _parallel_execution(bundle: Bundle,
             for eval_function in list(results):
                 remaining = max_time - (time.perf_counter() - start)
                 if (status := eval_function(remaining)) in (
-                        Status.TIME_LIMIT_EXCEEDED, Status.MEMORY_LIMIT_EXCEEDED,
-                        Status.OUTPUT_LIMIT_EXCEEDED):
+                    Status.TIME_LIMIT_EXCEEDED,
+                    Status.MEMORY_LIMIT_EXCEEDED,
+                    Status.OUTPUT_LIMIT_EXCEEDED,
+                ):
                     # Ensure finally is called NOW and cancels remaining tasks.
                     del results
                     return status
@@ -280,9 +310,9 @@ def _parallel_execution(bundle: Bundle,
             return Status.TIME_LIMIT_EXCEEDED
 
 
-def _generate_files(bundle: Bundle,
-                    mode: ExecutionMode
-                    ) -> Tuple[Path, List[str], Optional[str]]:
+def _generate_files(
+    bundle: Bundle, mode: ExecutionMode
+) -> Tuple[Path, List[str], Optional[str]]:
     """
     Generate all necessary files, using the templates. This creates a common
     directory, copies all dependencies to that folder and runs the generation.
@@ -300,8 +330,7 @@ def _generate_files(bundle: Bundle,
     submission_name = bundle.lang_config.submission_name(bundle.plan)
 
     # Copy the submission file.
-    submission_file = f"{submission_name}" \
-                      f".{bundle.lang_config.extension_file()}"
+    submission_file = f"{submission_name}" f".{bundle.lang_config.extension_file()}"
     solution_path = common_dir / submission_file
     # noinspection PyTypeChecker
     shutil.copy2(bundle.config.source, solution_path)
@@ -323,20 +352,18 @@ def _generate_files(bundle: Bundle,
                 bundle=bundle,
                 destination=common_dir,
                 run=run,
-                execution_name=execution_name
+                execution_name=execution_name,
             )
             # Copy evaluators to the directory.
             for evaluator in evaluators:
                 source = Path(bundle.config.resources) / evaluator
-                _logger.debug("Copying evaluator from %s to %s",
-                              source, common_dir)
+                _logger.debug("Copying evaluator from %s to %s", source, common_dir)
                 shutil.copy2(source, common_dir)
             dependencies.extend(evaluators)
             dependencies.append(generated)
             execution_names.append(execution_name)
 
-    if mode == ExecutionMode.PRECOMPILATION \
-            and bundle.lang_config.needs_selector():
+    if mode == ExecutionMode.PRECOMPILATION and bundle.lang_config.needs_selector():
         _logger.debug("Generating selector for PRECOMPILATION mode.")
         generated = generate_selector(bundle, common_dir, execution_names)
     else:
@@ -344,43 +371,57 @@ def _generate_files(bundle: Bundle,
     return common_dir, dependencies, generated
 
 
-def _process_results(bundle: Bundle, execution: Execution,
-                     execution_result: Optional[ExecutionResult], m: List[Message],
-                     s: Status, p: Path) -> Optional[Status]:
+def _process_results(
+    bundle: Bundle,
+    execution: Execution,
+    execution_result: Optional[ExecutionResult],
+    m: List[Message],
+    s: Status,
+    p: Path,
+) -> Optional[Status]:
     if execution_result:
-        context_results, run_testcase = \
-            execution_result.to_context_execution_results()
+        context_results, run_testcase = execution_result.to_context_execution_results()
     else:
         context_results, run_testcase = [None] * len(execution.run.contexts), None
 
     has_main = execution.run.run.input.main_call
     exit_code = execution.run.run.output.exit_code
 
-    if has_main or (len(context_results) == 0 and (
-            run_testcase.exit or run_testcase.stdout or run_testcase.stderr or
-            run_testcase.exception or run_testcase.timeout or run_testcase.memory)):
+    if has_main or (
+        len(context_results) == 0
+        and (
+            run_testcase.exit
+            or run_testcase.stdout
+            or run_testcase.stderr
+            or run_testcase.exception
+            or run_testcase.timeout
+            or run_testcase.memory
+        )
+    ):
 
         offset = execution.context_offset if has_main else None
         if not has_main:
-            execution.run.run.description = get_i18n_string(
-                "judge.core.initialization")
-        execution.collector.add_context(
-            StartContext(),
-            offset
+            execution.run.run.description = get_i18n_string("judge.core.initialization")
+        execution.collector.add_context(StartContext(), offset)
+        continue_ = evaluate_run_results(
+            bundle,
+            execution.run.run,
+            run_testcase,
+            (m, s),
+            p,
+            execution.collector,
+            bool(context_results),
         )
-        continue_ = evaluate_run_results(bundle, execution.run.run, run_testcase,
-                                         (m, s), p, execution.collector,
-                                         bool(context_results))
         execution.collector.add_context(CloseContext(), offset)
         if execution.collector.is_full():
             return Status.OUTPUT_LIMIT_EXCEEDED
-        if continue_ in (Status.TIME_LIMIT_EXCEEDED,
-                         Status.MEMORY_LIMIT_EXCEEDED):
+        if continue_ in (Status.TIME_LIMIT_EXCEEDED, Status.MEMORY_LIMIT_EXCEEDED):
             return continue_
 
     for index, (context, context_result) in enumerate(
-            zip(execution.run.contexts, context_results),
-            int(has_main) + execution.context_offset):
+        zip(execution.run.contexts, context_results),
+        int(has_main) + execution.context_offset,
+    ):
         execution.collector.add_context(
             StartContext(description=context.description), index
         )
@@ -390,15 +431,43 @@ def _process_results(bundle: Bundle, execution: Execution,
         else:
             mi = []
 
-        continue_ = evaluate_context_results(bundle, context=context,
-                                             exec_results=context_result,
-                                             compiler_results=(mi, s),
-                                             context_dir=p,
-                                             collector=execution.collector,
-                                             exit_output=exit_code)
+        continue_ = evaluate_context_results(
+            bundle,
+            context=context,
+            exec_results=context_result,
+            compiler_results=(mi, s),
+            context_dir=p,
+            collector=execution.collector,
+            exit_output=exit_code,
+        )
         execution.collector.add_context(CloseContext(), index)
         if execution.collector.is_full():
             return Status.OUTPUT_LIMIT_EXCEEDED
-        if continue_ in (Status.TIME_LIMIT_EXCEEDED,
-                         Status.MEMORY_LIMIT_EXCEEDED):
+        if continue_ in (Status.TIME_LIMIT_EXCEEDED, Status.MEMORY_LIMIT_EXCEEDED):
             return continue_
+
+
+def _copy_workdir_source_files(bundle: Bundle, common_dir: Path) -> List[str]:
+    """
+    Copy additional source files from the workdir to the common dir
+
+    :param bundle: Bundle information of the test plan
+    :param common_dir: The directory of the other files
+    """
+    prefix = bundle.lang_config.execution_prefix()
+    source_files = []
+
+    def recursive_copy(src: Path, dst: Path):
+        for origin in src.iterdir():
+            file = origin.name.lower()
+            if origin.is_file() and bundle.lang_config.is_source_file(origin):
+                source_files.append(str(dst / origin.name))
+                _logger.debug("Copying %s to %s", origin, dst)
+                shutil.copy2(origin, dst)
+            elif origin.is_dir() and not file.startswith(prefix) and file != "common":
+                _logger.debug("Iterate subdir %s", dst / file)
+                shutil.copytree(origin, dst / file)
+
+    recursive_copy(bundle.config.workdir, common_dir)
+
+    return source_files

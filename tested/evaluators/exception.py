@@ -21,8 +21,7 @@ class _ExceptionValue(BaseModel):
     __root__: ExceptionValue
 
 
-def try_as_exception(config: EvaluatorConfig,
-                     value: str) -> Either[ExceptionValue]:
+def try_as_exception(config: EvaluatorConfig, value: str) -> Either[ExceptionValue]:
     try:
         actual = _ExceptionValue.parse_raw(value).__root__
         actual = config.bundle.lang_config.exception_output(config.bundle, actual)
@@ -31,8 +30,9 @@ def try_as_exception(config: EvaluatorConfig,
         return Either(e)
 
 
-def try_as_readable_exception(config: EvaluatorConfig, value: str) \
-        -> Tuple[Optional[str], Optional[ExtendedMessage]]:
+def try_as_readable_exception(
+    config: EvaluatorConfig, value: str
+) -> Tuple[Optional[str], Optional[ExtendedMessage]]:
     try:
         actual = _ExceptionValue.parse_raw(value).__root__
         actual = config.bundle.lang_config.exception_output(config.bundle, actual)
@@ -46,9 +46,9 @@ def try_as_readable_exception(config: EvaluatorConfig, value: str) \
         return readable, message
 
 
-def evaluate(config: EvaluatorConfig,
-             channel: ExceptionOutputChannel,
-             actual: str) -> EvaluationResult:
+def evaluate(
+    config: EvaluatorConfig, channel: ExceptionOutputChannel, actual: str
+) -> EvaluationResult:
     """
     Evaluate an exception.
 
@@ -67,33 +67,33 @@ def evaluate(config: EvaluatorConfig,
         return EvaluationResult(
             result=StatusMessage(enum=Status.WRONG),
             readable_expected=expected.readable(),
-            readable_actual='',
-            messages=[]
+            readable_actual="",
+            messages=[],
         )
 
     try:
         actual = try_as_exception(config, actual).get()
     except (TypeError, ValueError) as e:
         staff_message = ExtendedMessage(
-            description=get_i18n_string("evaluators.exception.staff", actual=actual,
-                                        exception=e),
+            description=get_i18n_string(
+                "evaluators.exception.staff", actual=actual, exception=e
+            ),
             format="text",
-            permission=Permission.STAFF
+            permission=Permission.STAFF,
         )
-        student_message = (get_i18n_string("evaluators.exception.student"))
+        student_message = get_i18n_string("evaluators.exception.student")
         return EvaluationResult(
             result=StatusMessage(
                 enum=Status.INTERNAL_ERROR,
-                human=get_i18n_string("evaluators.exception.status")
+                human=get_i18n_string("evaluators.exception.status"),
             ),
             readable_expected=expected.readable(),
             readable_actual="",
-            messages=[staff_message, student_message]
+            messages=[staff_message, student_message],
         )
 
     new_stage("evaluate.builtin.exception", True)
-    message = config.bundle.lang_config.clean_stacktrace_to_message(
-        actual.stacktrace)
+    message = config.bundle.lang_config.clean_stacktrace_to_message(actual.stacktrace)
     if message:
         messages = [message]
     else:
@@ -101,16 +101,16 @@ def evaluate(config: EvaluatorConfig,
 
     if actual.tested is not None:
         messages.append(
-            get_i18n_string(actual.tested.i18n_key, **actual.tested.variables))
+            get_i18n_string(actual.tested.i18n_key, **actual.tested.variables)
+        )
         status = Status.WRONG
     else:
-        status = Status.CORRECT if expected.message == actual.message else \
-            Status.WRONG
+        status = Status.CORRECT if expected.message == actual.message else Status.WRONG
     end_stage("evaluate.builtin.exception", True)
 
     return EvaluationResult(
         result=StatusMessage(enum=status),
         readable_expected=expected.readable(),
         readable_actual=actual.readable(),
-        messages=messages
+        messages=messages,
     )

@@ -27,6 +27,7 @@ class Options:
     TESTed-specific options. Putting these options in the exercise config allows to
     override them for each exercise, and not
     """
+
     parallel: bool = False
     """
     Indicate that the contexts should be executed in parallel. It is recommended to
@@ -112,9 +113,10 @@ def read_config(config_in: IO) -> DodonaConfig:
 @dataclasses.dataclass(frozen=True)
 class Bundle:
     """A bundle of arguments and configs for running everything."""
+
     config: DodonaConfig
     out: IO
-    lang_config: 'Language'
+    lang_config: "Language"
     secret: str
     context_separator_secret: str
     plan: testplan.Plan
@@ -125,19 +127,25 @@ def _get_language(config: DodonaConfig) -> str:
 
     bang = utils.consume_shebang(config.source)
     if bang and langs.language_exists(bang):
-        _logger.debug(f"Found shebang language and it exists, using {bang} instead "
-                      f"of config language {config.programming_language}.")
+        _logger.debug(
+            f"Found shebang language and it exists, using {bang} instead "
+            f"of config language {config.programming_language}."
+        )
         return bang
     else:
-        _logger.debug(f"No shebang found or it doesn't exist: {bang}. Using "
-                      f"configuration language {config.programming_language}.")
+        _logger.debug(
+            f"No shebang found or it doesn't exist: {bang}. Using "
+            f"configuration language {config.programming_language}."
+        )
         return config.programming_language
 
 
-def create_bundle(config: DodonaConfig,
-                  output: IO,
-                  plan: testplan.Plan,
-                  language: Optional[str] = None) -> Bundle:
+def create_bundle(
+    config: DodonaConfig,
+    output: IO,
+    plan: testplan.Plan,
+    language: Optional[str] = None,
+) -> Bundle:
     """
     Create a configuration bundle.
 
@@ -162,5 +170,5 @@ def create_bundle(config: DodonaConfig,
         lang_config=lang_config,
         secret=utils.get_identifier(),
         context_separator_secret=utils.get_identifier(),
-        plan=plan
+        plan=plan,
     )

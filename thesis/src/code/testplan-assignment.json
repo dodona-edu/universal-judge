@@ -1,8 +1,0 @@
-{
-  "variable": "orakel",
-  "expression": {
-    "type": "text",
-    "value": "Dodona"
-  },
-  "type": "text"
-}

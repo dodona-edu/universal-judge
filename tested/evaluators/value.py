@@ -6,16 +6,28 @@ from typing import Union, Tuple, Optional
 
 from . import EvaluationResult, EvaluatorConfig
 from ..configs import Bundle
-from ..datatypes import AdvancedTypes, BasicTypes, BasicStringTypes, SimpleTypes, \
-    BasicSequenceTypes
+from ..datatypes import (
+    AdvancedTypes,
+    BasicTypes,
+    BasicStringTypes,
+    SimpleTypes,
+    BasicSequenceTypes,
+)
 from ..dodona import ExtendedMessage, Permission, StatusMessage, Status
 from ..internal_timings import new_stage, end_stage
 from ..internationalization import get_i18n_string
 from ..languages.config import TypeSupport
 from ..languages.generator import convert_statement
-from ..serialisation import (Value, parse_value, to_python_comparable,
-                             as_basic_type, StringType, SequenceType, ObjectType,
-                             ObjectKeyValuePair)
+from ..serialisation import (
+    Value,
+    parse_value,
+    to_python_comparable,
+    as_basic_type,
+    StringType,
+    SequenceType,
+    ObjectType,
+    ObjectKeyValuePair,
+)
 from ..testplan import ValueOutputChannel, OutputChannel, TextOutputChannel
 from ..utils import Either, get_args, sorted_no_duplicates
 
@@ -30,8 +42,9 @@ def try_as_value(value: str) -> Either[Value]:
         return Either(e)
 
 
-def try_as_readable_value(bundle: Bundle, value: str) \
-        -> Tuple[Optional[str], Optional[ExtendedMessage]]:
+def try_as_readable_value(
+    bundle: Bundle, value: str
+) -> Tuple[Optional[str], Optional[ExtendedMessage]]:
     try:
         actual = parse_value(value)
     except (ValueError, TypeError):
@@ -40,8 +53,9 @@ def try_as_readable_value(bundle: Bundle, value: str) \
         return convert_statement(bundle, actual), None
 
 
-def get_values(bundle: Bundle, output_channel: ValueOutputChannel, actual) \
-        -> Union[EvaluationResult, Tuple[Value, str, Optional[Value], str]]:
+def get_values(
+    bundle: Bundle, output_channel: ValueOutputChannel, actual
+) -> Union[EvaluationResult, Tuple[Value, str, Optional[Value], str]]:
     if isinstance(output_channel, TextOutputChannel):
         expected = output_channel.get_data_as_string(bundle.config.resources)
         expected_value = StringType(type=BasicStringTypes.TEXT, data=expected)
@@ -64,27 +78,25 @@ def get_values(bundle: Bundle, output_channel: ValueOutputChannel, actual) \
     except (TypeError, ValueError) as e:
         raw_message = f"Received {actual}, which caused {e} for get_values."
         message = ExtendedMessage(
-            description=raw_message,
-            format="text",
-            permission=Permission.STAFF
+            description=raw_message, format="text", permission=Permission.STAFF
         )
-        student = "Your return value was wrong; additionally Dodona didn't " \
-                  "recognize it. Contact staff for more information."
+        student = (
+            "Your return value was wrong; additionally Dodona didn't "
+            "recognize it. Contact staff for more information."
+        )
         return EvaluationResult(
             result=StatusMessage(enum=Status.WRONG, human=student),
             readable_expected=readable_expected,
             readable_actual=str(actual),
-            messages=[message]
+            messages=[message],
         )
 
     readable_actual = convert_statement(bundle, actual)
     return expected, readable_expected, actual, readable_actual
 
 
-def _check_type(
-        bundle: Bundle, expected: Value, actual: Value
-) -> Tuple[bool, Value]:
-    valid, value = _check_data_type(bundle, expected, actual)
+def _check_type(bundle: Bundle, expected: Value, actual: Value) -> Tuple[bool, Value]:
+    valid, value = check_data_type(bundle, expected, actual)
     if not valid:
         return False, value
     elif isinstance(value.type, get_args(SimpleTypes)):
@@ -100,10 +112,10 @@ def _check_type(
         else:
             actual_object, expected_object = value.data, expected.data
         data = []
-        for actual_element, expected_element in zip(actual_object,
-                                                    expected_object):
-            element_valid, element_value = _check_type(bundle, expected_element,
-                                                       actual_element)
+        for actual_element, expected_element in zip(actual_object, expected_object):
+            element_valid, element_value = _check_type(
+                bundle, expected_element, actual_element
+            )
             valid = valid and element_valid
             data.append(element_value)
         value.data = data
@@ -122,16 +134,15 @@ def _check_type(
             actual_key, actual_value = actual_element.key, actual_element.value
             expected_key, expected_value = actual_element.key, actual_element.value
             key_valid, key_value = _check_type(bundle, expected_key, actual_key)
-            value_valid, value_value = _check_type(bundle, expected_value,
-                                                   actual_value)
+            value_valid, value_value = _check_type(bundle, expected_value, actual_value)
             valid = valid and key_valid and value_valid
             data.append(ObjectKeyValuePair(key=key_value, value=value_value))
         value.data = data
         return valid, value
 
 
-def _check_data_type(
-        bundle: Bundle, expected: Value, actual: Value
+def check_data_type(
+    bundle: Bundle, expected: Value, actual: Value
 ) -> Tuple[bool, Value]:
     """
     Check if the type of the two values match. The following procedure is used:
@@ -181,8 +192,9 @@ def _check_data_type(
     return expected.type == actual.type, expected
 
 
-def evaluate(config: EvaluatorConfig, channel: OutputChannel,
-             actual: str) -> EvaluationResult:
+def evaluate(
+    config: EvaluatorConfig, channel: OutputChannel, actual: str
+) -> EvaluationResult:
     """
     Evaluate two values. The values must match exact. Currently, this evaluator
     has no options, but it might receive them in the future (e.g. options on how
@@ -210,11 +222,10 @@ def evaluate(config: EvaluatorConfig, channel: OutputChannel,
     if actual is None:
         return EvaluationResult(
             result=StatusMessage(
-                enum=Status.WRONG,
-                human=get_i18n_string("evaluators.value.missing")
+                enum=Status.WRONG, human=get_i18n_string("evaluators.value.missing")
             ),
             readable_expected=readable_expected,
-            readable_actual=readable_actual
+            readable_actual=readable_actual,
         )
 
     new_stage("evaluate.builtin.value", True)
@@ -232,28 +243,32 @@ def evaluate(config: EvaluatorConfig, channel: OutputChannel,
     if content_check and not type_check:
         type_status = get_i18n_string("evaluators.value.datatype.wrong")
         messages.append(
-            get_i18n_string("evaluators.value.datatype.message",
-                            expected=expected.type, actual=actual.type)
+            get_i18n_string(
+                "evaluators.value.datatype.message",
+                expected=expected.type,
+                actual=actual.type,
+            )
         )
 
     correct = type_check and content_check
 
-    is_multiline_string = (config.options.get("stringsAsText", True) and
-                           expected.type == BasicStringTypes.TEXT)
+    is_multiline_string = (
+        config.options.get("stringsAsText", True)
+        and expected.type == BasicStringTypes.TEXT
+    )
 
     return EvaluationResult(
         result=StatusMessage(
-            human=type_status,
-            enum=Status.CORRECT if correct else Status.WRONG
+            human=type_status, enum=Status.CORRECT if correct else Status.WRONG
         ),
-        readable_expected=get_as_string(expected,
-                                        readable_expected) if is_multiline_string
+        readable_expected=get_as_string(expected, readable_expected)
+        if is_multiline_string
         else readable_expected,
-        readable_actual=get_as_string(actual,
-                                      readable_actual) if is_multiline_string
+        readable_actual=get_as_string(actual, readable_actual)
+        if is_multiline_string
         else readable_actual,
         messages=messages,
-        is_multiline_string=is_multiline_string
+        is_multiline_string=is_multiline_string,
     )
 
 
@@ -262,5 +277,8 @@ def get_as_string(value: Optional[Value], readable: str):
     if value is None:
         return readable
     # Replace tab by 4 spaces
-    return value.data.replace("\t", "    ") if value.type == BasicStringTypes.TEXT \
+    return (
+        value.data.replace("\t", "    ")
+        if value.type == BasicStringTypes.TEXT
         else readable
+    )

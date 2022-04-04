@@ -4,6 +4,7 @@
 <%! from tested.utils import get_args %>\
 import values
 import sys
+from decimal import Decimal
 
 ##################################
 ## Setup                        ##

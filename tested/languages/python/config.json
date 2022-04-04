@@ -51,7 +51,7 @@
     "uint32": "reduced",
     "int64": "reduced",
     "uint64": "reduced",
-    "bigint": "reduced",
+    "bigint": "supported",
     "single_precision": "reduced",
     "double_precision": "reduced",
     "double_extended": "reduced",

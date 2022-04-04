@@ -20,6 +20,7 @@ from pydantic.dataclasses import dataclass
 
 class Permission(str, Enum):
     """To which level of user this message is visible."""
+
     STAFF = "staff"
     STUDENT = "student"
     ZEUS = "zeus"
@@ -62,6 +63,7 @@ class Status(str, Enum):
 @dataclass
 class StatusMessage:
     """Describes the outcome of the judgement."""
+
     enum: Status
     human: Optional[str] = None
 
@@ -69,6 +71,7 @@ class StatusMessage:
 @dataclass
 class StartJudgment:
     """Start on a new judgement."""
+
     command: Literal["start-judgement"] = "start-judgement"
 
 
@@ -78,6 +81,7 @@ class StartTab:
     Start on a new tab with given title. Hidden if all contexts are accepted iff
     hidden.
     """
+
     title: str
     hidden: Optional[bool] = None
     command: Literal["start-tab"] = "start-tab"
@@ -87,6 +91,7 @@ class StartTab:
 @dataclass
 class StartContext:
     """Start on a new context."""
+
     description: Optional[Message] = None
     command: Literal["start-context"] = "start-context"
 
@@ -94,6 +99,7 @@ class StartContext:
 @dataclass
 class StartTestcase:
     """Start on a new testcase with given description"""
+
     description: Message
     command: Literal["start-testcase"] = "start-testcase"
 
@@ -101,6 +107,7 @@ class StartTestcase:
 @dataclass
 class StartTest:
     """Start on a new test with given channel answer."""
+
     expected: str
     channel: Optional[str] = None
     description: Optional[Message] = None
@@ -110,6 +117,7 @@ class StartTest:
 @dataclass
 class EscalateStatus:
     """Escalate a status for the worse."""
+
     status: StatusMessage
     command: Literal["escalate-status"] = "escalate-status"
 
@@ -117,6 +125,7 @@ class EscalateStatus:
 @dataclass
 class AppendMessage:
     """Append a message to the open object."""
+
     message: Message
     command: Literal["append-message"] = "append-message"
 
@@ -124,6 +133,7 @@ class AppendMessage:
 @dataclass
 class AnnotateCode:
     """Annotate a piece of user_code."""
+
     row: Index
     text: str
     column: Optional[Index] = None
@@ -139,6 +149,7 @@ class CloseTest:
     Close the current test. Accepted iff status is correct, but you can overwrite
     this.
     """
+
     generated: str
     status: StatusMessage
     accepted: Optional[bool] = None
@@ -151,6 +162,7 @@ class CloseTestcase:
     Close the current testcase. Accepted iff all tests are accepted, but you can
     overwrite this.
     """
+
     accepted: Optional[bool] = None
     command: Literal["close-testcase"] = "close-testcase"
 
@@ -161,6 +173,7 @@ class CloseContext:
     Close the current context. Accepted iff all testcases are accepted, but you can
     overwrite this.
     """
+
     accepted: Optional[bool] = None
     command: Literal["close-context"] = "close-context"
 
@@ -168,6 +181,7 @@ class CloseContext:
 @dataclass
 class CloseTab:
     """Close the current tab."""
+
     badge_count: Optional[BadgeCount] = None
     command: Literal["close-tab"] = "close-tab"
 
@@ -179,23 +193,34 @@ class CloseJudgment:
     the worst (highest in description) of all tests, summary is the last of all
     tests, but you can overwrite this.
     """
+
     accepted: Optional[bool] = None
     status: Optional[StatusMessage] = None
     command: Literal["close-judgement"] = "close-judgement"
 
 
 Update = Union[
-    StartJudgment, StartTab, StartContext, StartTestcase, StartTest,
-    AppendMessage, AnnotateCode,
-    CloseTest, CloseTestcase, CloseContext, CloseTab, CloseJudgment, EscalateStatus
+    StartJudgment,
+    StartTab,
+    StartContext,
+    StartTestcase,
+    StartTest,
+    AppendMessage,
+    AnnotateCode,
+    CloseTest,
+    CloseTestcase,
+    CloseContext,
+    CloseTab,
+    CloseJudgment,
+    EscalateStatus,
 ]
 
 _mapping = {
     "judgement": CloseJudgment,
-    "tab":       CloseTab,
-    "context":   CloseContext,
-    "testcase":  CloseTestcase,
-    "test":      CloseTest
+    "tab": CloseTab,
+    "context": CloseContext,
+    "testcase": CloseTestcase,
+    "test": CloseTest,
 }
 
 
@@ -222,21 +247,21 @@ class _EnhancedJSONEncoder(json.JSONEncoder):
 
 def _maybe_shorten(text: str, max_chars: int) -> str:
     if len(text) > max_chars - 3:
-        text = text[:max_chars - 3] + "..."
+        text = text[: max_chars - 3] + "..."
     return text
 
 
 def update_size(update: Update) -> int:
     if isinstance(update, AppendMessage):
         if isinstance(update.message, ExtendedMessage):
-            return len(update.message.description.encode('utf-8'))
+            return len(update.message.description.encode("utf-8"))
         else:
             assert isinstance(update.message, str)
-            return len(update.message.encode('utf-8'))
+            return len(update.message.encode("utf-8"))
     if isinstance(update, CloseTest):
-        return len(update.generated.encode('utf-8'))
+        return len(update.generated.encode("utf-8"))
     if isinstance(update, AnnotateCode):
-        return len(update.text.encode('utf-8'))
+        return len(update.text.encode("utf-8"))
     return 0
 
 
@@ -252,8 +277,7 @@ def limit_size(update: Update, size: int) -> Update:
         update = dataclasses.replace(update, message=new_message)
     if isinstance(update, CloseTest):
         new_message = _maybe_shorten(update.generated, size)
-        status = dataclasses.replace(update.status,
-                                     enum=Status.OUTPUT_LIMIT_EXCEEDED)
+        status = dataclasses.replace(update.status, enum=Status.OUTPUT_LIMIT_EXCEEDED)
         update = dataclasses.replace(update, generated=new_message, status=status)
     if isinstance(update, AnnotateCode):
         new_text = _maybe_shorten(update.text, size)
@@ -275,6 +299,6 @@ def report_update(to: IO, update: Update):
         print("", file=to)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sc = _DodonaUpdate.schema()
     print(sc)

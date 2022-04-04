@@ -4,26 +4,77 @@ from typing import Optional, Union, List, get_args, Tuple
 
 from lark import Lark, Tree, Token, UnexpectedToken
 
-from tested.datatypes import string_to_type, AllTypes, SequenceTypes, \
-    NumericTypes, BooleanTypes, NothingTypes, StringTypes, ObjectTypes, \
-    BasicSequenceTypes, AdvancedSequenceTypes, BasicNumericTypes, \
-    BasicStringTypes, BasicBooleanTypes, AdvancedNothingTypes, BasicNothingTypes
-from tested.serialisation import Statement, Assignment, NumberType, Expression, \
-    NothingType, Identifier, BooleanType, StringType, SequenceType, FunctionCall, \
-    ObjectType, FunctionType, VariableType, Value, ObjectKeyValuePair, Lambda, \
-    TypedLambdaArgument, AllDataTypes, LambdaType
+from tested.datatypes import (
+    string_to_type,
+    AllTypes,
+    SequenceTypes,
+    NumericTypes,
+    BooleanTypes,
+    NothingTypes,
+    StringTypes,
+    ObjectTypes,
+    BasicSequenceTypes,
+    AdvancedSequenceTypes,
+    BasicNumericTypes,
+    BasicStringTypes,
+    BasicBooleanTypes,
+    AdvancedNothingTypes,
+    BasicNothingTypes,
+)
+from tested.serialisation import (
+    Statement,
+    Assignment,
+    NumberType,
+    Expression,
+    NothingType,
+    Identifier,
+    BooleanType,
+    StringType,
+    SequenceType,
+    FunctionCall,
+    ObjectType,
+    FunctionType,
+    VariableType,
+    Value,
+    ObjectKeyValuePair,
+    Lambda,
+    TypedLambdaArgument,
+    AllDataTypes,
+    LambdaType,
+)
 
 data_types = (
-    "INTEGER", "RATIONAL", "CHAR", "TEXT", "BOOLEAN", "SEQUENCE", "SET", "MAP",
-    "NOTHING", "ANY", "INT8", "UINT8", "INT16", "UINT16", "INT32", "UINT32",
-    "INT64", "UINT64", "BIGINT", "SINGLE_PRECISION", "DOUBLE_PRECISION",
-    "DOUBLE_EXTENDED", "FIXED_PRECISION", "ARRAY", "LIST"
+    "INTEGER",
+    "RATIONAL",
+    "CHAR",
+    "TEXT",
+    "BOOLEAN",
+    "SEQUENCE",
+    "SET",
+    "MAP",
+    "NOTHING",
+    "ANY",
+    "INT8",
+    "UINT8",
+    "INT16",
+    "UINT16",
+    "INT32",
+    "UINT32",
+    "INT64",
+    "UINT64",
+    "BIGINT",
+    "SINGLE_PRECISION",
+    "DOUBLE_PRECISION",
+    "DOUBLE_EXTENDED",
+    "FIXED_PRECISION",
+    "ARRAY",
+    "LIST",
 )
 
 default_sequence_type_map = {
-    'list':  BasicSequenceTypes.SEQUENCE,
-    'set':   BasicSequenceTypes.SET,
-    'tuple': AdvancedSequenceTypes.TUPLE
+    "list": BasicSequenceTypes.SEQUENCE,
+    "set": BasicSequenceTypes.SET,
+    "tuple": AdvancedSequenceTypes.TUPLE,
 }
 
 
@@ -38,15 +89,19 @@ class Parser:
         self.grammar_file = grammar_file
         # Don't modify the parser, the parser must be 'lalr' for fast parsing
         # Modify the grammar instead to be unambiguous
-        self.parser = Lark.open(grammar_file, start=['statements', 'return'],
-                                lexer='standard', parser='lalr')
+        self.parser = Lark.open(
+            grammar_file,
+            start=["statements", "return"],
+            lexer="standard",
+            parser="lalr",
+        )
 
-    def analyse_arguments(self, tree: Tree,
-                          allow_functions: bool = True) -> List[Expression]:
-        if tree.data != 'args':
+    def analyse_arguments(
+        self, tree: Tree, allow_functions: bool = True
+    ) -> List[Expression]:
+        if tree.data != "args":
             raise ParseError("Function expect argument list")
-        return [self.analyse_expression(arg, allow_functions)
-                for arg in tree.children]
+        return [self.analyse_expression(arg, allow_functions) for arg in tree.children]
 
     def analyse_lambda_parameter_types(self, tree: Tree) -> List[AllDataTypes]:
         return list(map(self.analyse_assign_datatype, tree.children))
@@ -90,8 +145,7 @@ class Parser:
                 if expression.type == FunctionType.CONSTRUCTOR:
                     var_type = VariableType(data=expression.name)
                 else:
-                    raise ParseError(
-                        "Can't derive variable type from function call")
+                    raise ParseError("Can't derive variable type from function call")
             elif isinstance(expression, Lambda):
                 raise ParseError("Can't derive variable type from lambda")
             else:
@@ -147,76 +201,80 @@ class Parser:
         function.type = FunctionType.CONSTRUCTOR_REFERENCE
         return function
 
-    def analyse_dict(self, tree: Tree,
-                     allow_functions: bool = True) -> List[ObjectKeyValuePair]:
+    def analyse_dict(
+        self, tree: Tree, allow_functions: bool = True
+    ) -> List[ObjectKeyValuePair]:
         def analyse_pair(pair: Tree) -> ObjectKeyValuePair:
-            if pair.data != 'dict_pair':
+            if pair.data != "dict_pair":
                 raise ParseError("Key-value pair expected in map")
-            return ObjectKeyValuePair(key=self.analyse_expression(pair.children[0],
-                                                                  allow_functions),
-                                      value=self.analyse_expression(
-                                          pair.children[1], allow_functions))
+            return ObjectKeyValuePair(
+                key=self.analyse_expression(pair.children[0], allow_functions),
+                value=self.analyse_expression(pair.children[1], allow_functions),
+            )
 
         return [analyse_pair(pair) for pair in tree.children]
 
-    def analyse_expression(self, tree: Union[Tree, Token],
-                           allow_functions: bool = True) -> Expression:
+    def analyse_expression(
+        self, tree: Union[Tree, Token], allow_functions: bool = True
+    ) -> Expression:
         if isinstance(tree, Token):
             return self.analyse_expression_token(tree)
         return self.analyse_expression_tree(tree, allow_functions)
 
     # noinspection PyMethodMayBeStatic
     def analyse_expression_token(self, token: Token) -> Expression:
-        if token.type == 'CNAME':
+        if token.type == "CNAME":
             return Identifier.validate(token.value)
-        elif token.type == 'SIGNED_INT':
+        elif token.type == "SIGNED_INT":
             return NumberType(type=BasicNumericTypes.INTEGER, data=int(token.value))
-        elif token.type == 'SIGNED_FLOAT':
-            return NumberType(type=BasicNumericTypes.RATIONAL,
-                              data=float(token.value))
-        elif token.type == 'ESCAPED_STRING':
-            return StringType(type=BasicStringTypes.TEXT,
-                              data=literal_eval(token.value))
-        elif token.type == 'TRUE':
+        elif token.type == "SIGNED_FLOAT":
+            return NumberType(type=BasicNumericTypes.RATIONAL, data=float(token.value))
+        elif token.type == "ESCAPED_STRING":
+            return StringType(
+                type=BasicStringTypes.TEXT, data=literal_eval(token.value)
+            )
+        elif token.type == "TRUE":
             return BooleanType(type=BasicBooleanTypes.BOOLEAN, data=True)
-        elif token.type == 'FALSE':
+        elif token.type == "FALSE":
             return BooleanType(type=BasicBooleanTypes.BOOLEAN, data=False)
-        elif token.type == 'NULL':
+        elif token.type == "NULL":
             return NothingType(type=BasicNothingTypes.NOTHING)
-        elif token.type == 'UNDEFINED':
+        elif token.type == "UNDEFINED":
             return NothingType(type=AdvancedNothingTypes.UNDEFINED)
         raise ParseError("Invalid value token")
 
-    def analyse_expression_tree(self, tree: Tree,
-                                allow_functions: bool = True) -> Expression:
-        if tree.data in ('list', 'set', 'tuple'):
-            if tree.data == 'set':
+    def analyse_expression_tree(
+        self, tree: Tree, allow_functions: bool = True
+    ) -> Expression:
+        if tree.data in ("list", "set", "tuple"):
+            if tree.data == "set":
                 tree.children = [Tree(data="args", children=tree.children)]
-            content = self.analyse_arguments(tree.children[0],
-                                             allow_functions=allow_functions)
-            return SequenceType(type=default_sequence_type_map[tree.data],
-                                data=content)
-        elif tree.data == 'value_cast':
+            content = self.analyse_arguments(
+                tree.children[0], allow_functions=allow_functions
+            )
+            return SequenceType(type=default_sequence_type_map[tree.data], data=content)
+        elif tree.data == "value_cast":
             return self.analyse_cast(tree)
-        elif tree.data == 'function':
+        elif tree.data == "function":
             if allow_functions:
                 return self.analyse_function(tree)
             else:
                 raise ParseError("Function call not allowed for return values")
-        elif tree.data == 'constructor':
+        elif tree.data == "constructor":
             if allow_functions:
                 return self.analyse_constructor(tree)
             else:
                 raise ParseError("Constructor not allowed for return values")
-        elif tree.data == 'property':
+        elif tree.data == "property":
             if allow_functions:
                 return self.analyse_property(tree)
             else:
                 raise ParseError("Property not allowed for return values")
-        elif tree.data == 'dict':
-            return ObjectType(type=ObjectTypes.MAP,
-                              data=self.analyse_dict(tree, allow_functions))
-        elif tree.data == 'global_variable':
+        elif tree.data == "dict":
+            return ObjectType(
+                type=ObjectTypes.MAP, data=self.analyse_dict(tree, allow_functions)
+            )
+        elif tree.data == "global_variable":
             if allow_functions:
                 return self.analyse_global_variable(tree)
             else:
@@ -242,10 +300,12 @@ class Parser:
         namespace, fun_name = self.analyse_namespace(tree.children[0])
         # Analyse arguments
         args = self.analyse_arguments(tree.children[1], allow_functions=True)
-        return FunctionCall(type=FunctionType.FUNCTION,
-                            name=fun_name,
-                            namespace=namespace,
-                            arguments=args)
+        return FunctionCall(
+            type=FunctionType.FUNCTION,
+            name=fun_name,
+            namespace=namespace,
+            arguments=args,
+        )
 
     def analyse_function_reference(self, tree: Tree) -> FunctionCall:
         if len(tree.children) == (1 if tree.data == "function_reference" else 2):
@@ -261,8 +321,9 @@ class Parser:
 
     # noinspection PyMethodMayBeStatic
     def analyse_global_variable(self, tree: Tree) -> FunctionCall:
-        return FunctionCall(type=FunctionType.PROPERTY,
-                            name=self.analyse_name(tree.children[0]))
+        return FunctionCall(
+            type=FunctionType.PROPERTY, name=self.analyse_name(tree.children[0])
+        )
 
     def analyse_typed_lambda_parameter(self, tree: Tree) -> TypedLambdaArgument:
         type_ = self.analyse_type_token(tree.children[0], assign=True)
@@ -293,27 +354,29 @@ class Parser:
         namespace = self.analyse_expression(tree.children[0])
         # Find property name
         prop_name = self.analyse_name(tree.children[1])
-        return FunctionCall(name=prop_name,
-                            namespace=namespace,
-                            type=FunctionType.PROPERTY)
+        return FunctionCall(
+            name=prop_name, namespace=namespace, type=FunctionType.PROPERTY
+        )
 
     # noinspection PyMethodMayBeStatic
     def analyse_name(self, token: Token) -> str:
-        if token.type != 'CNAME':
+        if token.type != "CNAME":
             raise ParseError("Invalid variable/function name")
         return token.value
 
-    def analyse_namespace(self, tree: Union[Tree, Token]
-                          ) -> Tuple[Optional[Expression], str]:
+    def analyse_namespace(
+        self, tree: Union[Tree, Token]
+    ) -> Tuple[Optional[Expression], str]:
         expression = self.analyse_expression(tree, allow_functions=True)
         if isinstance(expression, str):
             return None, expression
         return expression.namespace, expression.name
 
     # noinspection PyMethodMayBeStatic
-    def analyse_type_token(self, token: Token,
-                           assign=False) -> Union[VariableType, AllTypes]:
-        if assign and token.type == 'CNAME':
+    def analyse_type_token(
+        self, token: Token, assign=False
+    ) -> Union[VariableType, AllTypes]:
+        if assign and token.type == "CNAME":
             return VariableType(data=token.value)
         elif token.type in data_types:
             return string_to_type(token.type)
@@ -322,8 +385,8 @@ class Parser:
 
     def parse_statement(self, statement: str) -> Statement:
         try:
-            parse_tree = self.parser.parse(statement, start='statements')
-            if isinstance(parse_tree, Tree) and parse_tree.data == 'assignment':
+            parse_tree = self.parser.parse(statement, start="statements")
+            if isinstance(parse_tree, Tree) and parse_tree.data == "assignment":
                 return self.analyse_assign(parse_tree)
             return self.analyse_expression(parse_tree, True)
         except UnexpectedToken as e:
@@ -331,7 +394,7 @@ class Parser:
 
     def parse_value(self, value: str) -> Value:
         try:
-            parse_tree = self.parser.parse(value, start='return')
+            parse_tree = self.parser.parse(value, start="return")
             return self.analyse_expression(parse_tree, False)
         except UnexpectedToken as e:
             raise ParseError("Bad token") from e
