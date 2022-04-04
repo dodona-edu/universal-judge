@@ -142,4 +142,6 @@ def test_shellcheck(tmp_path: Path, config, pytestconfig):
     )
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
-    assert len(updates.find_all("annotate-code")) > 0
+    assert len(updates.find_all("annotate-code")) == 1
+    [annotation] = updates.find_all("annotate-code")
+    assert annotation["externalUrl"]

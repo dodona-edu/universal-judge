@@ -71,17 +71,14 @@ def run_checkstyle(
             if not message:
                 continue
             source = error_element.attrib.get("source", None)
+            external = None
             if source:
-                more_info = get_i18n_string("languages.linter.more-info")
-                message += (
-                    f" (https://checkstyle.sourceforge.io/apidocs/"
-                    f'index.html?{source.replace(".", "/")}.html" '
-                    f'target="_blank">{more_info}</a>)'
-                )
+                external = f'https://checkstyle.sourceforge.io/apidocs/index.html?{source.replace(".", "/")}.html'
             annotations.append(
                 AnnotateCode(
                     row=max(int(error_element.attrib.get("line", "-1")) - 1, 0),
                     text=message,
+                    externalUrl=external,
                     column=max(int(error_element.attrib.get("column", "-1")) - 1, 0),
                     type=message_categories.get(
                         error_element.attrib.get("severity", "warning"),
