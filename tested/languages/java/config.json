@@ -53,8 +53,7 @@
     "double_extended": "reduced",
     "fixed_precision": "supported",
     "array": "supported",
-    "list": "supported",
-    "tuple": "unsupported"
+    "list": "supported"
   },
   "restrictions": {
     "map_key": [
