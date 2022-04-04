@@ -119,10 +119,7 @@ class Parser:
             if tree.children:
                 params = self.analyse_lambda_parameter_types(tree.children[0])
                 return_type = self.analyse_lambda_return_type(tree.children[0])
-                return LambdaType(
-                    parameter_types=params,
-                    return_type=return_type
-                )
+                return LambdaType(parameter_types=params, return_type=return_type)
             else:
                 return LambdaType()
 
@@ -283,14 +280,12 @@ class Parser:
             if allow_functions:
                 return self.analyse_function_reference(tree)
             else:
-                raise ParseError(
-                    "Function references not allowed for return values")
+                raise ParseError("Function references not allowed for return values")
         elif tree.data == "constructor_reference":
             if allow_functions:
                 return self.analyse_constructor_reference(tree)
             else:
-                raise ParseError(
-                    "Constructor references not allowed for return values")
+                raise ParseError("Constructor references not allowed for return values")
         elif tree.data == "lambda":
             return self.analyse_lambda(tree)
         raise ParseError("Invalid expression tree")
@@ -311,13 +306,12 @@ class Parser:
         if len(tree.children) == (1 if tree.data == "function_reference" else 2):
             namespace, name = None, self.analyse_name(tree.children[0])
         else:
-            namespace = self.analyse_expression(tree.children[0],
-                                                allow_functions=True)
+            namespace = self.analyse_expression(tree.children[0], allow_functions=True)
             name = self.analyse_name(tree.children[1])
 
-        return FunctionCall(type=FunctionType.FUNCTION_REFERENCE,
-                            name=name,
-                            namespace=namespace)
+        return FunctionCall(
+            type=FunctionType.FUNCTION_REFERENCE, name=name, namespace=namespace
+        )
 
     # noinspection PyMethodMayBeStatic
     def analyse_global_variable(self, tree: Tree) -> FunctionCall:
@@ -328,26 +322,21 @@ class Parser:
     def analyse_typed_lambda_parameter(self, tree: Tree) -> TypedLambdaArgument:
         type_ = self.analyse_type_token(tree.children[0], assign=True)
         name = self.analyse_name(tree.children[1])
-        return TypedLambdaArgument(
-            type=type_,
-            name=name
-        )
+        return TypedLambdaArgument(type=type_, name=name)
 
-    def analyse_lambda_parameters(self, tree: Tree
-                                  ) -> Union[List[str], List[TypedLambdaArgument]]:
+    def analyse_lambda_parameters(
+        self, tree: Tree
+    ) -> Union[List[str], List[TypedLambdaArgument]]:
         if not tree.children:
             return []
-        if tree.data == 'typed_lambda_parameters':
+        if tree.data == "typed_lambda_parameters":
             return list(map(self.analyse_typed_lambda_parameter, tree.children))
         return list(map(self.analyse_name, tree.children))
 
     def analyse_lambda(self, tree: Tree) -> Lambda:
         parameters = self.analyse_lambda_parameters(tree.children[0])
         body = self.analyse_expression(tree.children[1], True)
-        return Lambda(
-            body=body,
-            parameters=parameters
-        )
+        return Lambda(body=body, parameters=parameters)
 
     def analyse_property(self, tree: Tree) -> FunctionCall:
         # Find namespace name

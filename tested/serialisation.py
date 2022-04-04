@@ -405,10 +405,18 @@ class FunctionCall(WithFeatures, WithFunctions):
     def properties_or_references_have_no_args(cls, values):
         type_ = values.get("type")
         args = values.get("args")
-        if type_ in (FunctionType.PROPERTY, FunctionType.FUNCTION_REFERENCE,
-                     FunctionType.CONSTRUCTOR_REFERENCE) and args:
-            raise ValueError("You cannot have arguments for a property or "
-                             "reference!")
+        if (
+            type_
+            in (
+                FunctionType.PROPERTY,
+                FunctionType.FUNCTION_REFERENCE,
+                FunctionType.CONSTRUCTOR_REFERENCE,
+            )
+            and args
+        ):
+            raise ValueError(
+                "You cannot have arguments for a property or reference!"
+            )
         return values
 
     def get_used_features(self) -> FeatureSet:
@@ -425,8 +433,10 @@ class FunctionCall(WithFeatures, WithFunctions):
         ) or not isinstance(self.namespace, (Identifier, NoneType)):
             constructs.add(Construct.OBJECTS)
         # Method references
-        if self.type in (FunctionType.FUNCTION_REFERENCE,
-                         FunctionType.CONSTRUCTOR_REFERENCE):
+        if self.type in (
+            FunctionType.FUNCTION_REFERENCE,
+            FunctionType.CONSTRUCTOR_REFERENCE,
+        ):
             constructs.add(Construct.METHOD_REFERENCES)
 
         base_features = FeatureSet(
@@ -458,14 +468,14 @@ class VariableType:
     type: Literal["custom"] = "custom"
 
 
-AllDataTypes = Union[AllTypes, VariableType, 'LambdaType']
+AllDataTypes = Union[AllTypes, VariableType, "LambdaType"]
 
 
 @dataclass
 class LambdaType:
     parameter_types: List[AllDataTypes] = field(default_factory=list)
     return_type: Optional[AllDataTypes] = None
-    type: Literal['lambda'] = 'lambda'
+    type: Literal['lambda'] = "lambda"
 
     def is_operator(self) -> bool:
         """
@@ -476,8 +486,10 @@ class LambdaType:
 
         if self.return_type is None:
             return False
-        return list(filter(lambda x: x == self.return_type,
-                           self.parameter_types)) == self.parameter_types
+        return (
+            list(filter(lambda x: x == self.return_type, self.parameter_types))
+            == self.parameter_types
+        )
 
 
 @dataclass
@@ -488,11 +500,12 @@ class TypedLambdaArgument:
 
 @dataclass
 class Lambda(WithFeatures, WithFunctions):
-    body: 'Expression'
-    parameters: Union[List[str], List[TypedLambdaArgument]] \
-        = field(default_factory=list)
+    body: "Expression"
+    parameters: Union[List[str], List[TypedLambdaArgument]] = field(
+        default_factory=list
+    )
 
-    def get_functions(self) -> Iterable['FunctionCall']:
+    def get_functions(self) -> Iterable["FunctionCall"]:
         return self.body.get_functions()
 
     def get_used_features(self) -> FeatureSet:
@@ -516,7 +529,8 @@ class Lambda(WithFeatures, WithFunctions):
             if len(types) > 1:
                 raise ValueError(
                     "You must be consistent with the type of parameters, "
-                    "either untyped or typed parameters.")
+                    "either untyped or typed parameters."
+                )
         return values
 
 

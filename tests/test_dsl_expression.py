@@ -463,28 +463,28 @@ def test_parse_global_variable():
 
 
 def test_parse_function_reference():
-    parsed = parser.parse_statement('::sum')
+    parsed = parser.parse_statement("::sum")
     assert parsed.type == FunctionType.FUNCTION_REFERENCE
     assert parsed.name == "sum"
     assert parsed.namespace is None
 
 
 def test_parse_function_reference_with_namespace():
-    parsed = parser.parse_statement('object::sum')
+    parsed = parser.parse_statement("object::sum")
     assert parsed.type == FunctionType.FUNCTION_REFERENCE
     assert parsed.name == "sum"
     assert parsed.namespace == "object"
 
 
 def test_parse_constructor_reference():
-    parsed = parser.parse_statement('data::new')
+    parsed = parser.parse_statement("data::new")
     assert parsed.type == FunctionType.CONSTRUCTOR_REFERENCE
     assert parsed.name == "data"
     assert parsed.namespace is None
 
 
 def test_parse_constructor_reference_with_namespace():
-    parsed = parser.parse_statement('call().data:: new')
+    parsed = parser.parse_statement("call().data:: new")
     assert parsed.type == FunctionType.CONSTRUCTOR_REFERENCE
     assert parsed.name == "data"
     assert parsed.namespace is not None
@@ -519,7 +519,9 @@ def test_lambda_untyped_multiple():
 def test_lambda_typed_single():
     parsed = parser.parse_statement("(integer a) -> a")
     assert isinstance(parsed, Lambda)
-    assert parsed.parameters == [TypedLambdaArgument(type=BasicNumericTypes.INTEGER, name="a")]
+    assert parsed.parameters == [
+        TypedLambdaArgument(type=BasicNumericTypes.INTEGER, name="a")
+    ]
     assert parsed.body == "a"
 
 
@@ -529,7 +531,7 @@ def test_lambda_typed_multiple():
     assert parsed.parameters == [
         TypedLambdaArgument(type=BasicNumericTypes.INTEGER, name="a"),
         TypedLambdaArgument(type=BasicNumericTypes.RATIONAL, name="b"),
-        TypedLambdaArgument(type=BasicStringTypes.TEXT, name="c")
+        TypedLambdaArgument(type=BasicStringTypes.TEXT, name="c"),
     ]
     assert parsed.body.type == FunctionType.FUNCTION
     assert parsed.body.name == "call"
@@ -569,4 +571,4 @@ def test_lambda_assignment_identity():
 
 def test_parse_error_lambda_assign():
     with pytest.raises(ParseError):
-        parser.parse_statement('data = x -> call(x)')
+        parser.parse_statement("data = x -> call(x)")

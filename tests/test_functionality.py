@@ -734,7 +734,9 @@ def test_javascript_exception_missing_message(tmp_path: Path, pytestconfig):
 
 @pytest.mark.parametrize("language", ["python", "java", "kotlin", "javascript"])
 def test_method_constructor_references(language: str, tmp_path: Path, pytestconfig):
-    conf = configuration(pytestconfig, "lambdas", language, tmp_path, "methods.yaml", "solution")
+    conf = configuration(
+        pytestconfig, "lambdas", language, tmp_path, "methods.yaml", "solution"
+    )
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["correct"]
@@ -742,27 +744,49 @@ def test_method_constructor_references(language: str, tmp_path: Path, pytestconf
 
 @pytest.mark.parametrize("language", ALL_SPECIFIC_LANGUAGES)
 def test_method_references(language: str, tmp_path: Path, pytestconfig):
-    conf = configuration(pytestconfig, "lambdas", language, tmp_path, "only-methods.yaml", "solution")
+    conf = configuration(
+        pytestconfig, "lambdas", language, tmp_path, "only-methods.yaml", "solution"
+    )
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["correct"]
 
 
-@pytest.mark.parametrize("language", ["python", "java", "kotlin", "javascript",
-                                      pytest.param("haskell", marks=mark_haskell),
-                                      pytest.param("runhaskell", marks=mark_haskell)])
+@pytest.mark.parametrize(
+    "language",
+    [
+        "python",
+        "java",
+        "kotlin",
+        "javascript",
+        pytest.param("haskell", marks=mark_haskell),
+        pytest.param("runhaskell", marks=mark_haskell)
+    ],
+)
 def test_lambdas(language: str, tmp_path: Path, pytestconfig):
-    conf = configuration(pytestconfig, "lambdas", language, tmp_path, "lambdas.yaml", "solution")
+    conf = configuration(
+        pytestconfig, "lambdas", language, tmp_path, "lambdas.yaml", "solution"
+    )
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["correct"] * 2
 
 
-@pytest.mark.parametrize("language", ["python", "java", "kotlin", "javascript",
-                                      pytest.param("haskell", marks=mark_haskell),
-                                      pytest.param("runhaskell", marks=mark_haskell)])
+@pytest.mark.parametrize(
+    "language",
+    [
+        "python",
+        "java",
+        "kotlin",
+        "javascript",
+        pytest.param("haskell", marks=mark_haskell),
+        pytest.param("runhaskell", marks=mark_haskell)
+    ],
+)
 def test_lambda_assign(language: str, tmp_path: Path, pytestconfig):
-    conf = configuration(pytestconfig, "lambdas", language, tmp_path, "lambdas-assign.yaml", "solution")
+    conf = configuration(
+        pytestconfig, "lambdas", language, tmp_path, "lambdas-assign.yaml", "solution"
+    )
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["correct"] * 2

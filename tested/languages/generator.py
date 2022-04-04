@@ -33,7 +33,7 @@ from ..serialisation import (
     ObjectType,
     ObjectKeyValuePair,
     VariableType,
-    Lamda,
+    Lambda,
 )
 from ..testplan import (
     EmptyChannel,
@@ -223,7 +223,7 @@ def _prepare_expression(bundle: Bundle, expression: Expression) -> Expression:
     elif isinstance(expression, Lambda):
         expression = Lambda(
             body=_prepare_expression(bundle, expression.body),
-            parameters=expression.parameters
+            parameters=expression.parameters,
         )
     elif isinstance(expression, InternalFunctionCall):
         expression.arguments = [
@@ -231,8 +231,10 @@ def _prepare_expression(bundle: Bundle, expression: Expression) -> Expression:
         ]
     elif isinstance(expression, FunctionCall):
         submission_name = bundle.lang_config.submission_name(bundle.plan)
-        if expression.type in (FunctionType.CONSTRUCTOR,
-                               FunctionType.CONSTRUCTOR_REFERENCE):
+        if expression.type in (
+            FunctionType.CONSTRUCTOR,
+            FunctionType.CONSTRUCTOR_REFERENCE,
+        ):
             name = bundle.lang_config.conventionalize_class(expression.name)
         elif expression.type == FunctionType.PROPERTY:
             if expression.namespace is None:
