@@ -1,5 +1,6 @@
 ## Code to execute_module one context.
 #include <stdio.h>
+#include <math.h>
 
 #include "values.h"
 #include "${submission_name}.c"

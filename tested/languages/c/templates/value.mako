@@ -22,10 +22,8 @@
     ${value.data}UL\
 % elif value.type == AdvancedNumericTypes.U_INT_32:
     ${value.data}U\
-% elif value.type == AdvancedNumericTypes.SINGLE_PRECISION:
-    ${value.data}f\
 % else:
     ## Handle the base types
     <% basic = as_basic_type(value) %>\
-    <%include file="value_basic.mako" args="value=basic" />\
+    <%include file="value_basic.mako" args="value=basic,original=value" />\
 % endif

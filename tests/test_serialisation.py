@@ -23,7 +23,7 @@ from tested.evaluators.value import check_data_type
 from tested.datatypes import BasicTypes, AdvancedTypes, resolve_to_basic
 from tested.configs import create_bundle, Bundle
 from tested.datatypes import BasicNumericTypes, BasicStringTypes, BasicBooleanTypes, \
-    BasicSequenceTypes, AdvancedNothingTypes, BasicObjectTypes, BasicNothingTypes,\
+    BasicSequenceTypes, AdvancedNothingTypes, BasicObjectTypes,\
     AdvancedStringTypes, AdvancedNumericTypes, AdvancedSequenceTypes
 from tested.judge.compilation import run_compilation
 from tested.judge.execution import execute_file
@@ -32,7 +32,7 @@ from tested.languages.config import TypeSupport
 from tested.languages.templates import find_and_write_template, path_to_templates
 from tested.serialisation import NumberType, Value, parse_value, StringType, \
     BooleanType, SequenceType, ObjectType, SpecialNumbers, \
-    NothingType, as_basic_type, to_python_comparable, ObjectKeyValuePair
+    NothingType, to_python_comparable, ObjectKeyValuePair
 from tested.testplan import Plan
 from tested.utils import get_args
 from tests.manual_utils import configuration, mark_haskell
@@ -124,10 +124,11 @@ ADVANCED_VALUES = [
 ]
 
 
-def run_encoder(bundle: Bundle, dest: Path, values: List[Value]) -> List[str]:
+def run_encoder(bundle: Bundle, values: List[Value]) -> List[str]:
     # Copy dependencies.
     dependency_paths = path_to_templates(bundle)
     dependencies = bundle.lang_config.initial_dependencies()
+    dest = bundle.config.workdir
     copy_from_paths_to_path(dependency_paths, dependencies, dest)
 
     name = bundle.lang_config.conventionalize_namespace("encode")
@@ -151,8 +152,8 @@ def run_encoder(bundle: Bundle, dest: Path, values: List[Value]) -> List[str]:
     return r.stdout.splitlines(keepends=False)
 
 
-def assert_serialisation(bundle: Bundle, tmp_path: Path, expected: Value):
-    results = run_encoder(bundle, tmp_path, [expected])
+def assert_serialisation(bundle: Bundle, expected: Value):
+    results = run_encoder(bundle, [expected])
     print(results)
     assert len(results) == 1
     actual = parse_value(results[0])
@@ -170,8 +171,9 @@ def test_basic_types(language, tmp_path: Path, pytestconfig):
     types = [v for v in BASIC_VALUES if type_map[v.type] != TypeSupport.UNSUPPORTED]
 
     # Run the templates to encode the data.
-    results = run_encoder(bundle, tmp_path, types)
+    results = run_encoder(bundle, types)
 
+    # Ensure each value was encoded properly.
     assert len(results) == len(types)
 
     for result, expected in zip(results, types):
@@ -195,8 +197,9 @@ def test_advanced_types(language, tmp_path: Path, pytestconfig):
     types = [v for v in ADVANCED_VALUES if type_map[v.type] != TypeSupport.UNSUPPORTED]
 
     # Run the templates to encode the data.
-    results = run_encoder(bundle, Path("./workdir"), types)
+    results = run_encoder(bundle, types)
 
+    # Ensure each value was encoded properly.
     assert len(results) == len(types)
 
     for result, expected in zip(results, types):
@@ -213,13 +216,13 @@ def test_escape(language, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "", language, tmp_path)
     plan = Plan()
     bundle = create_bundle(conf, sys.stdout, plan)
-    assert_serialisation(bundle, tmp_path, StringType(type=BasicStringTypes.TEXT, data='"hallo"'))
-    assert_serialisation(bundle, tmp_path, StringType(type=AdvancedStringTypes.CHAR, data="'"))
+    assert_serialisation(bundle, StringType(type=BasicStringTypes.TEXT, data='"hallo"'))
+    assert_serialisation(bundle, StringType(type=AdvancedStringTypes.CHAR, data="'"))
 
 
 @pytest.mark.parametrize("language", LANGUAGES)
 def test_special_numbers(language, tmp_path: Path, pytestconfig):
-    conf = configuration(pytestconfig, "", language, tmp_path)
+    conf = configuration(pytestconfig, "", language, "./workdir")
     plan = Plan()
     bundle = create_bundle(conf, sys.stdout, plan)
     type_map = bundle.lang_config.type_support_map()
@@ -232,17 +235,19 @@ def test_special_numbers(language, tmp_path: Path, pytestconfig):
         if type_map[t] == TypeSupport.SUPPORTED:
             types.append(NumberType(type=t, data=n))
 
-    # Run the encode templates.
-    results = run_encoder(bundle, tmp_path, types)
+    # Run the templates to encode the data.
+    results = run_encoder(bundle, types)
 
+    # Ensure each value was encoded properly.
     assert len(results) == len(types)
 
     for result, expected in zip(results, types):
-        actual = as_basic_type(parse_value(result))
-        expected = as_basic_type(expected)
-        assert expected.type == actual.type
+        actual = parse_value(result)
+        type_check, _ = check_data_type(bundle, expected, actual)
+        assert type_check, f"type check failure {expected} != {actual}"
         py_expected = to_python_comparable(expected)
         py_actual = to_python_comparable(actual)
+        print(f"{actual} and {expected}")
         assert py_expected == py_actual
 
 
