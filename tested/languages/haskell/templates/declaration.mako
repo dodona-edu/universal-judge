@@ -28,7 +28,7 @@
 % elif tp == AdvancedNumericTypes.DOUBLE_PRECISION:
     Double\
 % elif tp == AdvancedNumericTypes.BIG_INT:
-    Integer
+    Integer\
 % else:
     <% basic = resolve_to_basic(tp) %>\
     % if basic == BasicBooleanTypes.BOOLEAN:

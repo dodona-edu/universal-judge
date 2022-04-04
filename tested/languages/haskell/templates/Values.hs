@@ -81,7 +81,7 @@ instance Typeable Text where toType _ = "text"
 instance {-# OVERLAPPABLE #-} Typeable String where toType _ = "text"
 
 instance {-# OVERLAPPABLE #-} Typeable a => Typeable [a] where
-    toType m = "sequence"
+    toType m = "list"
     toJson l = toJSON (map toObject l)
 
 -- Tuples, up to 62 items, as in GHC
@@ -278,7 +278,7 @@ sendValue :: Typeable a => FilePath -> a -> IO ()
 sendValue file value = do
     (jsonType, jsonData) <- toJsonIO value
     LBS.appendFile file (encode (object [ "type" .= toJSON jsonType, "data" .= jsonData ]))
-    
+
 sendValueH :: Typeable a => Handle -> a -> IO ()
 sendValueH file value = do
     (jsonType, jsonData) <- toJsonIO value

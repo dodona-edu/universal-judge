@@ -1,4 +1,3 @@
-## Convert a Value to a literal type in Java.
 <%! from tested.datatypes import AdvancedSequenceTypes, AdvancedNumericTypes, AdvancedStringTypes %>\
 <%! from tested.serialisation import as_basic_type, SpecialNumbers %>\
 <%! from tested.utils import get_args %>\
