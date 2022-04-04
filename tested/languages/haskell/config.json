@@ -44,7 +44,7 @@
     "uint32": "supported",
     "int64": "supported",
     "uint64": "supported",
-    "bigint": "reduced",
+    "bigint": "supported",
     "single_precision": "supported",
     "double_precision": "supported",
     "double_extended": "unsupported",
