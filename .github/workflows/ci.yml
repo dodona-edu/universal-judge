@@ -39,3 +39,10 @@ jobs:
       - run: curl -sSLO https://github.com/pinterest/ktlint/releases/download/0.43.2/ktlint && chmod a+x ktlint
       - run: echo "${GITHUB_WORKSPACE}" >> $GITHUB_PATH
       - run: python -m pytest tests/ -m "not slow and not flaky"
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: psf/black@stable
+        with:
+          src: "./tested ./tests"

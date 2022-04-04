@@ -32,16 +32,30 @@ from pydantic.dataclasses import dataclass
 
 from ..configs import Bundle
 from ..dodona import StatusMessage, Message, Status
-from ..testplan import GenericTextEvaluator, TextBuiltin, \
-    GenericValueEvaluator, ValueBuiltin, GenericExceptionEvaluator, \
-    ExceptionBuiltin, ProgrammedEvaluator, SpecificEvaluator
-from ..testplan import OutputChannel, NormalOutputChannel, \
-    SpecialOutputChannel, EmptyChannel, IgnoredChannel, ExitCodeOutputChannel
+from ..testplan import (
+    GenericTextEvaluator,
+    TextBuiltin,
+    GenericValueEvaluator,
+    ValueBuiltin,
+    GenericExceptionEvaluator,
+    ExceptionBuiltin,
+    ProgrammedEvaluator,
+    SpecificEvaluator,
+)
+from ..testplan import (
+    OutputChannel,
+    NormalOutputChannel,
+    SpecialOutputChannel,
+    EmptyChannel,
+    IgnoredChannel,
+    ExitCodeOutputChannel,
+)
 
 
 @dataclass
 class EvaluationResult:
     """Provides the result of an evaluation for a specific output channel."""
+
     result: StatusMessage  # The result of the evaluation.
     readable_expected: str
     """
@@ -64,22 +78,16 @@ class EvaluatorConfig(NamedTuple):
     context_dir: Path
 
 
-RawEvaluator = Callable[
-    [EvaluatorConfig, OutputChannel, str],
-    EvaluationResult
-]
+RawEvaluator = Callable[[EvaluatorConfig, OutputChannel, str], EvaluationResult]
 
-Evaluator = Callable[
-    [OutputChannel, str],
-    EvaluationResult
-]
+Evaluator = Callable[[OutputChannel, str], EvaluationResult]
 
 
 def _curry_evaluator(
-        bundle: Bundle,
-        context_dir: Path,
-        function: RawEvaluator,
-        options: Optional[dict] = None
+    bundle: Bundle,
+    context_dir: Path,
+    function: RawEvaluator,
+    options: Optional[dict] = None,
 ) -> Evaluator:
     if options is None:
         options = dict()
@@ -89,29 +97,38 @@ def _curry_evaluator(
 
 
 def get_evaluator(
-        bundle: Bundle,
-        context_dir: Path,
-        output: Union[NormalOutputChannel, SpecialOutputChannel],
-        unexpected_status: Status = Status.WRONG
+    bundle: Bundle,
+    context_dir: Path,
+    output: Union[NormalOutputChannel, SpecialOutputChannel],
+    unexpected_status: Status = Status.WRONG,
 ) -> Evaluator:
     """
     Get the evaluator for a given output channel.
     """
-    from ..evaluators import nothing, exitcode, text, value, exception, \
-        programmed, specific, ignored
+    from ..evaluators import (
+        nothing,
+        exitcode,
+        text,
+        value,
+        exception,
+        programmed,
+        specific,
+        ignored,
+    )
 
     currier = functools.partial(_curry_evaluator, bundle, context_dir)
 
     # Handle channel states.
     if output == EmptyChannel.NONE:
-        return currier(functools.partial(nothing.evaluate,
-                                         unexpected_status=unexpected_status))
+        return currier(
+            functools.partial(nothing.evaluate, unexpected_status=unexpected_status)
+        )
     if output == IgnoredChannel.IGNORED:
         return currier(ignored.evaluate)
     if isinstance(output, ExitCodeOutputChannel):
         return currier(exitcode.evaluate)
 
-    assert hasattr(output, 'evaluator')
+    assert hasattr(output, "evaluator")
 
     # Handle actual evaluators.
     evaluator = output.evaluator
@@ -140,9 +157,9 @@ def get_evaluator(
         raise AssertionError(f"Unknown evaluator type: {type(evaluator)}")
 
 
-def try_outputs(actual: str, parsers: List[
-    Callable[[str], Tuple[Optional[str], Optional[Message]]]
-]) -> Tuple[str, Optional[Message]]:
+def try_outputs(
+    actual: str, parsers: List[Callable[[str], Tuple[Optional[str], Optional[Message]]]]
+) -> Tuple[str, Optional[Message]]:
     if not actual:
         return actual, None
     for parser in parsers:

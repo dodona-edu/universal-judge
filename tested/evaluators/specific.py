@@ -11,8 +11,9 @@ from ..testplan import OutputChannel
 from ..testplan import SpecificEvaluator
 
 
-def evaluate(config: EvaluatorConfig, channel: OutputChannel,
-             actual: str) -> EvaluationResult:
+def evaluate(
+    config: EvaluatorConfig, channel: OutputChannel, actual: str
+) -> EvaluationResult:
     """
     Compare the result of a specific evaluator. This evaluator has no options.
     """
@@ -23,11 +24,11 @@ def evaluate(config: EvaluatorConfig, channel: OutputChannel,
         return EvaluationResult(
             result=StatusMessage(
                 enum=Status.WRONG,
-                human=get_i18n_string("evaluators.specific.missing.status")
+                human=get_i18n_string("evaluators.specific.missing.status"),
             ),
             readable_actual="",
             readable_expected="",
-            messages=[get_i18n_string("evaluators.specific.missing.message")]
+            messages=[get_i18n_string("evaluators.specific.missing.message")],
         )
 
     # Try parsing as the result.
@@ -35,29 +36,28 @@ def evaluate(config: EvaluatorConfig, channel: OutputChannel,
         actual: EvalResult = EvalResult.parse_raw(actual)
     except (TypeError, ValueError) as e:
         staff_message = ExtendedMessage(
-            description=get_i18n_string("evaluators.specific.staff",
-                                        actual=actual, e=e),
+            description=get_i18n_string(
+                "evaluators.specific.staff", actual=actual, e=e
+            ),
             format="text",
-            permission=Permission.STAFF
+            permission=Permission.STAFF,
         )
-        student_message = (get_i18n_string("evaluators.specific.student.default"))
+        student_message = get_i18n_string("evaluators.specific.student.default")
         return EvaluationResult(
             result=StatusMessage(
                 enum=Status.INTERNAL_ERROR,
-                human=get_i18n_string("evaluators.specific.status")
+                human=get_i18n_string("evaluators.specific.status"),
             ),
             readable_expected="",
             readable_actual="",
-            messages=[staff_message, student_message]
+            messages=[staff_message, student_message],
         )
 
     actual = cleanup_specific_programmed(config, channel, actual)
 
     return EvaluationResult(
-        result=StatusMessage(
-            enum=actual.result
-        ),
+        result=StatusMessage(enum=actual.result),
         readable_expected=actual.readable_expected,
         readable_actual=actual.readable_actual,
-        messages=actual.messages
+        messages=actual.messages,
     )

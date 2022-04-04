@@ -5,20 +5,37 @@ from tested.utils import smart_close
 if __name__ == "__main__":
     parser = ArgumentParser(
         description="The universal judge for Dodona.",
-        usage='%(prog)s [-h] [-i DSL] [-o JSON] [dsl [json]]'
+        usage="%(prog)s [-h] [-i DSL] [-o JSON] [dsl [json]]",
     )
-    parser.add_argument('-i', '--dsl', type=FileType('r'),
-                        help="Where the test plan should be read from.",
-                        default="-")
-    parser.add_argument('-o', '--json', type=FileType('w'),
-                        help="Where the translate test plan should be written to.",
-                        default="-")
-    parser.add_argument('dsl_file', metavar='dsl', nargs='?', type=FileType('r'),
-                        help="Where the test plan should be read from, override "
-                             "option when given.")
-    parser.add_argument('json_file', metavar='json', nargs='?', type=FileType('w'),
-                        help="Where the translate test plan should be written to, "
-                             "override option when given.")
+    parser.add_argument(
+        "-i",
+        "--dsl",
+        type=FileType("r"),
+        help="Where the test plan should be read from.",
+        default="-",
+    )
+    parser.add_argument(
+        "-o",
+        "--json",
+        type=FileType("w"),
+        help="Where the translate test plan should be written to.",
+        default="-",
+    )
+    parser.add_argument(
+        "dsl_file",
+        metavar="dsl",
+        nargs="?",
+        type=FileType("r"),
+        help="Where the test plan should be read from, override " "option when given.",
+    )
+    parser.add_argument(
+        "json_file",
+        metavar="json",
+        nargs="?",
+        type=FileType("w"),
+        help="Where the translate test plan should be written to, "
+        "override option when given.",
+    )
 
     parser = parser.parse_args()
     schema_parser = SchemaParser()

@@ -6,18 +6,21 @@ from typing import Tuple
 
 import pytest
 
-from tests.manual_utils import configuration, execute_config, assert_valid_output, mark_haskell
+from tests.manual_utils import (
+    configuration,
+    execute_config,
+    assert_valid_output,
+    mark_haskell,
+)
 
 
 @pytest.mark.slow
 @pytest.mark.parametrize("lang", ["python", "java", "kotlin"])
 def test_full_isbn(lang: str, tmp_path: Path, pytestconfig):
-    config_ = {
-        "options": {
-            "parallel": True
-        }
-    }
-    conf = configuration(pytestconfig, "isbn", lang, tmp_path, "full.tson", "solution", options=config_)
+    config_ = {"options": {"parallel": True}}
+    conf = configuration(
+        pytestconfig, "isbn", lang, tmp_path, "full.tson", "solution", options=config_
+    )
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert len(updates.find_all("start-testcase")) == 150
@@ -25,15 +28,27 @@ def test_full_isbn(lang: str, tmp_path: Path, pytestconfig):
 
 
 @pytest.mark.slow
-@pytest.mark.parametrize("lang", ["java", "python", "kotlin", pytest.param("haskell", marks=mark_haskell),
-                                  pytest.param("runhaskell", marks=mark_haskell)])
+@pytest.mark.parametrize(
+    "lang",
+    [
+        "java",
+        "python",
+        "kotlin",
+        pytest.param("haskell", marks=mark_haskell),
+        pytest.param("runhaskell", marks=mark_haskell),
+    ],
+)
 def test_full_isbn_list(lang: str, tmp_path: Path, pytestconfig):
-    config_ = {
-        "options": {
-            "parallel": True
-        }
-    }
-    conf = configuration(pytestconfig, "isbn-list", lang, tmp_path, "plan.tson", "solution", options=config_)
+    config_ = {"options": {"parallel": True}}
+    conf = configuration(
+        pytestconfig,
+        "isbn-list",
+        lang,
+        tmp_path,
+        "plan.tson",
+        "solution",
+        options=config_,
+    )
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert len(updates.find_all("start-testcase")) == 150
@@ -43,12 +58,10 @@ def test_full_isbn_list(lang: str, tmp_path: Path, pytestconfig):
 @pytest.mark.slow
 @pytest.mark.parametrize("lang", ["java", "python", "kotlin"])
 def test_full_lotto(lang: str, tmp_path: Path, pytestconfig):
-    config_ = {
-        "options": {
-            "parallel": True
-        }
-    }
-    conf = configuration(pytestconfig, "lotto", lang, tmp_path, "plan.tson", "correct", options=config_)
+    config_ = {"options": {"parallel": True}}
+    conf = configuration(
+        pytestconfig, "lotto", lang, tmp_path, "plan.tson", "correct", options=config_
+    )
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert len(updates.find_all("start-testcase")) == 45
@@ -56,14 +69,28 @@ def test_full_lotto(lang: str, tmp_path: Path, pytestconfig):
 
 
 @pytest.mark.flaky
-@pytest.mark.parametrize("language_and_time", [("python", 2), ("java", 5), ("c", 3), ("kotlin", 5),
-                                               pytest.param(("haskell", 20), marks=mark_haskell),
-                                               pytest.param(("runhaskell", 15), marks=mark_haskell)])
+@pytest.mark.parametrize(
+    "language_and_time",
+    [
+        ("python", 2),
+        ("java", 5),
+        ("c", 3),
+        ("kotlin", 5),
+        pytest.param(("haskell", 20), marks=mark_haskell),
+        pytest.param(("runhaskell", 15), marks=mark_haskell),
+    ],
+)
 def test_timeout(language_and_time: Tuple[str, int], tmp_path: Path, pytestconfig):
-    config_ = {
-        "time_limit": language_and_time[1]  # seconds
-    }
-    conf = configuration(pytestconfig, "echo", language_and_time[0], tmp_path, "full.tson", "correct", config_)
+    config_ = {"time_limit": language_and_time[1]}  # seconds
+    conf = configuration(
+        pytestconfig,
+        "echo",
+        language_and_time[0],
+        tmp_path,
+        "full.tson",
+        "correct",
+        config_,
+    )
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert len(updates.find_all("start-testcase")) == 50
@@ -80,15 +107,23 @@ def test_timeout(language_and_time: Tuple[str, int], tmp_path: Path, pytestconfi
 
 
 @pytest.mark.slow
-@pytest.mark.parametrize("lang", ["java", "python", "c", "javascript", "kotlin", "bash",
-                                  pytest.param("haskell", marks=mark_haskell)])
+@pytest.mark.parametrize(
+    "lang",
+    [
+        "java",
+        "python",
+        "c",
+        "javascript",
+        "kotlin",
+        "bash",
+        pytest.param("haskell", marks=mark_haskell),
+    ],
+)
 def test_full_echo(lang: str, tmp_path: Path, pytestconfig):
-    config_ = {
-        "options": {
-            "parallel": True
-        }
-    }
-    conf = configuration(pytestconfig, "echo", lang, tmp_path, "full.tson", "correct", options=config_)
+    config_ = {"options": {"parallel": True}}
+    conf = configuration(
+        pytestconfig, "echo", lang, tmp_path, "full.tson", "correct", options=config_
+    )
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert len(updates.find_all("start-testcase")) == 50

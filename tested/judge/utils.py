@@ -17,6 +17,7 @@ class BaseExecutionResult:
     """
     Base result of executing a command.
     """
+
     stdout: str
     stderr: str
     exit: int
@@ -24,10 +25,12 @@ class BaseExecutionResult:
     memory: bool
 
 
-def run_command(directory: Path,
-                timeout: Optional[float],
-                command: Optional[List[str]] = None,
-                stdin: Optional[str] = None) -> Optional[BaseExecutionResult]:
+def run_command(
+    directory: Path,
+    timeout: Optional[float],
+    command: Optional[List[str]] = None,
+    stdin: Optional[str] = None,
+) -> Optional[BaseExecutionResult]:
     """
     Run a command and get the result of said command.
 
@@ -44,16 +47,21 @@ def run_command(directory: Path,
     try:
         timeout = int(timeout) if timeout is not None else None
         # noinspection PyTypeChecker
-        process = subprocess.run(command, cwd=directory, text=True,
-                                 capture_output=True, input=stdin,
-                                 timeout=timeout)
+        process = subprocess.run(
+            command,
+            cwd=directory,
+            text=True,
+            capture_output=True,
+            input=stdin,
+            timeout=timeout,
+        )
     except subprocess.TimeoutExpired as e:
         return BaseExecutionResult(
             stdout=e.stdout or "",
             stderr=e.stderr or "",
             exit=0,
             timeout=True,
-            memory=False
+            memory=False,
         )
 
     return BaseExecutionResult(
@@ -61,13 +69,11 @@ def run_command(directory: Path,
         stderr=process.stderr,
         exit=process.returncode,
         timeout=False,
-        memory=True if process.returncode == -9 else False
+        memory=True if process.returncode == -9 else False,
     )
 
 
-def copy_from_paths_to_path(origins: List[Path],
-                            files: List[str],
-                            destination: Path):
+def copy_from_paths_to_path(origins: List[Path], files: List[str], destination: Path):
     """
     Copy a list of files from a list of source folders to a destination folder. The
     source folders are searched in-order for the name of the file, which means that
@@ -86,8 +92,9 @@ def copy_from_paths_to_path(origins: List[Path],
                 files_to_copy.append(full_file)
                 break
         else:  # no break
-            raise ValueError(f"Could not find dependency file {file}, "
-                             f"looked in {origins}")
+            raise ValueError(
+                f"Could not find dependency file {file}, " f"looked in {origins}"
+            )
     for file in files_to_copy:
         # noinspection PyTypeChecker
         shutil.copy2(file, destination)

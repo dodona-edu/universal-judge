@@ -51,18 +51,12 @@ def encode(value):
         data_ = [encode(x) for x in value]
     elif isinstance(value, dict):
         type_ = "map"
-        data_ = [{
-            "key":   encode(k),
-            "value": encode(v)
-        } for k, v in value.items()]
+        data_ = [{"key": encode(k), "value": encode(v)} for k, v in value.items()]
     else:
         type_ = "unknown"
         data_ = str(value)
 
-    return {
-        "data": data_,
-        "type": type_
-    }
+    return {"data": data_, "type": type_}
 
 
 def send_value(stream, value):
@@ -76,9 +70,9 @@ def send_exception(stream, exception):
     tracer = io.StringIO()
     traceback.print_tb(exception.__traceback__, file=tracer)
     data = {
-        "message":    str(exception),
+        "message": str(exception),
         "stacktrace": f"{exception.__class__.__name__}: {exception}\n"
-                      f"{tracer.getvalue()}"
+        f"{tracer.getvalue()}",
     }
     json.dump(data, stream)
 

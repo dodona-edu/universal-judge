@@ -14,13 +14,16 @@ import sys
 
 from .core import _logger, ExtendedMessage, Permission
 from .execution import execute_file, filter_files
-from .utils import (BaseExecutionResult, copy_from_paths_to_path, run_command)
+from .utils import BaseExecutionResult, copy_from_paths_to_path, run_command
 from ..configs import Bundle, create_bundle
 from ..dodona import Status
 from ..features import Construct
 from ..languages.config import Config
-from ..languages.generator import (generate_custom_evaluator, convert_statement,
-                                   custom_evaluator_arguments)
+from ..languages.generator import (
+    generate_custom_evaluator,
+    convert_statement,
+    custom_evaluator_arguments,
+)
 from ..languages.templates import path_to_templates
 from ..serialisation import Value, EvalResult
 from ..testplan import ProgrammedEvaluator
@@ -29,10 +32,11 @@ from ..internationalization import get_i18n_string
 
 
 def evaluate_programmed(
-        bundle: Bundle,
-        evaluator: ProgrammedEvaluator,
-        expected: Optional[Value],
-        actual: Value) -> Union[BaseExecutionResult, EvalResult]:
+    bundle: Bundle,
+    evaluator: ProgrammedEvaluator,
+    expected: Optional[Value],
+    actual: Value,
+) -> Union[BaseExecutionResult, EvalResult]:
     """
     Run the custom evaluation. Concerning structure and execution, the custom
     evaluator is very similar to the execution of the whole evaluation. It a
@@ -48,10 +52,12 @@ def evaluate_programmed(
         return _evaluate_others(bundle, evaluator, expected, actual)
 
 
-def _evaluate_others(bundle: Bundle,
-                     evaluator: ProgrammedEvaluator,
-                     expected: Optional[Value],
-                     actual: Value) -> BaseExecutionResult:
+def _evaluate_others(
+    bundle: Bundle,
+    evaluator: ProgrammedEvaluator,
+    expected: Optional[Value],
+    actual: Value,
+) -> BaseExecutionResult:
     """
     Evaluate in all languages but Python. The re-uses the infrastructure of the
     templates and execution facilities of the language config.
@@ -76,15 +82,19 @@ def _evaluate_others(bundle: Bundle,
 
     # Check if the language supports this.
     if Construct.EVALUATION not in eval_bundle.lang_config.supported_constructs():
-        _logger.error(f"{eval_bundle.config.programming_language} does not support"
-                      f" evaluations.")
+        _logger.error(
+            f"{eval_bundle.config.programming_language} does not support"
+            f" evaluations."
+        )
         return BaseExecutionResult(
             stdout="",
-            stderr=get_i18n_string("judge.programmed.unsupported",
-                                   lang=eval_bundle.config.programming_language),
+            stderr=get_i18n_string(
+                "judge.programmed.unsupported",
+                lang=eval_bundle.config.programming_language,
+            ),
             exit=-1,
             timeout=False,
-            memory=False
+            memory=False,
         )
 
     # Copy the evaluator
@@ -106,7 +116,7 @@ def _evaluate_others(bundle: Bundle,
         destination=custom_path,
         evaluator=evaluator,
         expected_value=expected,
-        actual_value=actual
+        actual_value=actual,
     )
     dependencies.append(evaluator_name)
     _logger.debug("Generated evaluator executor %s", evaluator_name)
@@ -116,14 +126,12 @@ def _evaluate_others(bundle: Bundle,
     _logger.debug("Compiling custom evaluator with command %s", command)
     result = run_command(custom_path, None, command)
     if result and result.stderr:
-        raise ValueError("Error while compiling specific test case:" +
-                         result.stderr)
+        raise ValueError("Error while compiling specific test case:" + result.stderr)
 
     files = filter_files(files, custom_path)
     # Execute the custom evaluator.
     evaluator_name = Path(evaluator_name).stem
-    executable, _, status, _ = bundle.lang_config.find_main_file(files,
-                                                                 evaluator_name)
+    executable, _, status, _ = bundle.lang_config.find_main_file(files, evaluator_name)
 
     if status != Status.CORRECT:
         return BaseExecutionResult(
@@ -131,7 +139,7 @@ def _evaluate_others(bundle: Bundle,
             stderr=get_i18n_string("judge.programmed.unknown.compilation"),
             exit=-1,
             timeout=False,
-            memory=False
+            memory=False,
         )
 
     files.remove(executable)
@@ -141,7 +149,7 @@ def _evaluate_others(bundle: Bundle,
         executable_name=executable,
         working_directory=custom_path,
         stdin=None,
-        remaining=None
+        remaining=None,
     )
 
 
@@ -168,10 +176,12 @@ class _EvaluationResult:
     messages: List[ExtendedMessage] = field(default_factory=list)
 
 
-def _evaluate_python(bundle: Bundle,
-                     evaluator: ProgrammedEvaluator,
-                     expected: Optional[Value],
-                     actual: Value) -> EvalResult:
+def _evaluate_python(
+    bundle: Bundle,
+    evaluator: ProgrammedEvaluator,
+    expected: Optional[Value],
+    actual: Value,
+) -> EvalResult:
     """
     Run an evaluation in Python. While the templates are still used to generate
     code, they are not executed in a separate process, but inside python itself.
@@ -198,8 +208,7 @@ def _evaluate_python(bundle: Bundle,
 
     # The context in which to execute.
     global_env = {"__tested_test__": utils}
-    exec("import sys\n"
-         "sys.modules['evaluation_utils'] = __tested_test__", global_env)
+    exec("import sys\n" "sys.modules['evaluation_utils'] = __tested_test__", global_env)
     # Make the evaluator available.
     exec(evaluator_code, global_env)
 
@@ -213,7 +222,7 @@ def _evaluate_python(bundle: Bundle,
         exec(
             f"__tested_test__result = {evaluator.function.name}("
             f"{literal_expected}, {literal_actual}, {literal_arguments})",
-            global_env
+            global_env,
         )
 
     stdout_ = stdout_.getvalue()
@@ -224,45 +233,49 @@ def _evaluate_python(bundle: Bundle,
 
     messages = []
     if stdout_:
-        messages.append(ExtendedMessage(
-            description=get_i18n_string("judge.programmed.produced.stdout"),
-            format="text"
-        ))
-        messages.append(ExtendedMessage(
-            description=stdout_,
-            format="code"
-        ))
+        messages.append(
+            ExtendedMessage(
+                description=get_i18n_string("judge.programmed.produced.stdout"),
+                format="text",
+            )
+        )
+        messages.append(ExtendedMessage(description=stdout_, format="code"))
     if stderr_:
-        messages.append(ExtendedMessage(
-            description=get_i18n_string("judge.programmed.produced.stderr"),
-            format="text",
-            permission=Permission.STUDENT
-        ))
-        messages.append(ExtendedMessage(
-            description=stderr_,
-            format="code",
-            permission=Permission.STAFF
-        ))
+        messages.append(
+            ExtendedMessage(
+                description=get_i18n_string("judge.programmed.produced.stderr"),
+                format="text",
+                permission=Permission.STUDENT,
+            )
+        )
+        messages.append(
+            ExtendedMessage(
+                description=stderr_, format="code", permission=Permission.STAFF
+            )
+        )
 
     # noinspection PyTypeChecker
     result_: Optional[_EvaluationResult] = global_env["__tested_test__result"]
 
     # If the result is None, the evaluator is broken.
     if result_ is None:
-        messages.append(ExtendedMessage(
-            description=get_i18n_string("judge.programmed.student"),
-            format="text"
-        ))
-        messages.append(ExtendedMessage(
-            description=get_i18n_string("judge.programmed.failed"),
-            format="text",
-            permission=Permission.STAFF
-        ))
+        messages.append(
+            ExtendedMessage(
+                description=get_i18n_string("judge.programmed.student"), format="text"
+            )
+        )
+        messages.append(
+            ExtendedMessage(
+                description=get_i18n_string("judge.programmed.failed"),
+                format="text",
+                permission=Permission.STAFF,
+            )
+        )
         return EvalResult(
             result=Status.INTERNAL_ERROR,
             readable_expected=None,
             readable_actual=None,
-            messages=messages
+            messages=messages,
         )
 
     assert isinstance(result_, _EvaluationResult)
@@ -272,29 +285,34 @@ def _evaluate_python(bundle: Bundle,
             result=result_.result,
             readable_expected=result_.readable_expected,
             readable_actual=result_.readable_actual,
-            messages=messages + result_.messages
+            messages=messages + result_.messages,
         )
     except (TypeError, ValueError):
         # This happens when the messages are not in the correct format. In normal
         # execution, this is caught when parsing the resulting json, but this does
         # not happen when using Python, so we do it here.
-        messages.append(ExtendedMessage(
-            description=get_i18n_string("judge.programmed.student"),
-            format="text"
-        ))
-        messages.append(ExtendedMessage(
-            description=get_i18n_string("judge.programmed.invalid"),
-            format="text",
-            permission=Permission.STAFF
-        ))
-        messages.append(ExtendedMessage(
-            description=traceback.format_exc(),
-            format="code",
-            permission=Permission.STAFF
-        ))
+        messages.append(
+            ExtendedMessage(
+                description=get_i18n_string("judge.programmed.student"), format="text"
+            )
+        )
+        messages.append(
+            ExtendedMessage(
+                description=get_i18n_string("judge.programmed.invalid"),
+                format="text",
+                permission=Permission.STAFF,
+            )
+        )
+        messages.append(
+            ExtendedMessage(
+                description=traceback.format_exc(),
+                format="code",
+                permission=Permission.STAFF,
+            )
+        )
         return EvalResult(
             result=Status.INTERNAL_ERROR,
             readable_expected=None,
             readable_actual=None,
-            messages=messages
+            messages=messages,
         )

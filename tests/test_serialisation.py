@@ -22,22 +22,48 @@ import sys
 from tested.evaluators.value import check_data_type
 from tested.datatypes import BasicTypes, AdvancedTypes, resolve_to_basic
 from tested.configs import create_bundle, Bundle
-from tested.datatypes import BasicNumericTypes, BasicStringTypes, BasicBooleanTypes, \
-    BasicSequenceTypes, AdvancedNothingTypes, BasicObjectTypes,\
-    AdvancedStringTypes, AdvancedNumericTypes, AdvancedSequenceTypes
+from tested.datatypes import (
+    BasicNumericTypes,
+    BasicStringTypes,
+    BasicBooleanTypes,
+    BasicSequenceTypes,
+    AdvancedNothingTypes,
+    BasicObjectTypes,
+    AdvancedStringTypes,
+    AdvancedNumericTypes,
+    AdvancedSequenceTypes,
+)
 from tested.judge.compilation import run_compilation
 from tested.judge.execution import execute_file
 from tested.judge.utils import copy_from_paths_to_path, BaseExecutionResult
 from tested.languages.config import TypeSupport
 from tested.languages.templates import find_and_write_template, path_to_templates
-from tested.serialisation import NumberType, Value, parse_value, StringType, \
-    BooleanType, SequenceType, ObjectType, SpecialNumbers, \
-    NothingType, to_python_comparable, ObjectKeyValuePair
+from tested.serialisation import (
+    NumberType,
+    Value,
+    parse_value,
+    StringType,
+    BooleanType,
+    SequenceType,
+    ObjectType,
+    SpecialNumbers,
+    NothingType,
+    to_python_comparable,
+    ObjectKeyValuePair,
+)
 from tested.testplan import Plan
 from tested.utils import get_args
 from tests.manual_utils import configuration, mark_haskell
 
-LANGUAGES = ["python", "java", "c", "javascript", "kotlin", pytest.param("runhaskell", marks=mark_haskell), "bash"]
+LANGUAGES = [
+    "python",
+    "java",
+    "c",
+    "javascript",
+    "kotlin",
+    pytest.param("runhaskell", marks=mark_haskell),
+    "bash",
+]
 
 
 @dataclass
@@ -52,21 +78,30 @@ BASIC_VALUES = [
     NumberType(type=BasicNumericTypes.RATIONAL, data=5.5),
     StringType(type=BasicStringTypes.TEXT, data="hallo"),
     BooleanType(type=BasicBooleanTypes.BOOLEAN, data=True),
-    SequenceType(type=BasicSequenceTypes.SEQUENCE, data=[
-        NumberType(type=BasicNumericTypes.INTEGER, data=20),
-        NumberType(type=BasicNumericTypes.INTEGER, data=20)
-    ]),
-    SequenceType(type=BasicSequenceTypes.SEQUENCE, data=[
-        NumberType(type=BasicNumericTypes.INTEGER, data=20),
-        NumberType(type=BasicNumericTypes.INTEGER, data=21)
-    ]),
-    ObjectType(type=BasicObjectTypes.MAP, data=[
-        ObjectKeyValuePair(
-            key=StringType(type=BasicStringTypes.TEXT, data="data"),
-            value=NumberType(type=BasicNumericTypes.INTEGER, data=5)
-        )
-    ]),
-    NothingType()
+    SequenceType(
+        type=BasicSequenceTypes.SEQUENCE,
+        data=[
+            NumberType(type=BasicNumericTypes.INTEGER, data=20),
+            NumberType(type=BasicNumericTypes.INTEGER, data=20),
+        ],
+    ),
+    SequenceType(
+        type=BasicSequenceTypes.SEQUENCE,
+        data=[
+            NumberType(type=BasicNumericTypes.INTEGER, data=20),
+            NumberType(type=BasicNumericTypes.INTEGER, data=21),
+        ],
+    ),
+    ObjectType(
+        type=BasicObjectTypes.MAP,
+        data=[
+            ObjectKeyValuePair(
+                key=StringType(type=BasicStringTypes.TEXT, data="data"),
+                value=NumberType(type=BasicNumericTypes.INTEGER, data=5),
+            )
+        ],
+    ),
+    NothingType(),
 ]
 
 # Map the advanced types to actual values that are already encoded in
@@ -74,28 +109,28 @@ BASIC_VALUES = [
 ADVANCED_VALUES = [
     # Int 8
     NumberType(type=AdvancedNumericTypes.INT_8, data=5),
-    NumberType(type=AdvancedNumericTypes.INT_8, data=-(2 ** 7) + 1),
-    NumberType(type=AdvancedNumericTypes.INT_8, data=(2 ** 7) - 2),
+    NumberType(type=AdvancedNumericTypes.INT_8, data=-(2**7) + 1),
+    NumberType(type=AdvancedNumericTypes.INT_8, data=(2**7) - 2),
     NumberType(type=AdvancedNumericTypes.U_INT_8, data=0),
-    NumberType(type=AdvancedNumericTypes.U_INT_8, data=(2 ** 8) - 1),
+    NumberType(type=AdvancedNumericTypes.U_INT_8, data=(2**8) - 1),
     # Int 16
     NumberType(type=AdvancedNumericTypes.INT_16, data=5),
-    NumberType(type=AdvancedNumericTypes.INT_16, data=-(2 ** 15) + 1),
-    NumberType(type=AdvancedNumericTypes.INT_16, data=(2 ** 15) - 2),
+    NumberType(type=AdvancedNumericTypes.INT_16, data=-(2**15) + 1),
+    NumberType(type=AdvancedNumericTypes.INT_16, data=(2**15) - 2),
     NumberType(type=AdvancedNumericTypes.U_INT_16, data=0),
-    NumberType(type=AdvancedNumericTypes.U_INT_16, data=(2 ** 16) - 1),
+    NumberType(type=AdvancedNumericTypes.U_INT_16, data=(2**16) - 1),
     # Int 32
     NumberType(type=AdvancedNumericTypes.INT_32, data=5),
-    NumberType(type=AdvancedNumericTypes.INT_32, data=-(2 ** 31) + 1),
-    NumberType(type=AdvancedNumericTypes.INT_32, data=(2 ** 31) - 2),
+    NumberType(type=AdvancedNumericTypes.INT_32, data=-(2**31) + 1),
+    NumberType(type=AdvancedNumericTypes.INT_32, data=(2**31) - 2),
     NumberType(type=AdvancedNumericTypes.U_INT_32, data=0),
-    NumberType(type=AdvancedNumericTypes.U_INT_32, data=(2 ** 32) - 1),
+    NumberType(type=AdvancedNumericTypes.U_INT_32, data=(2**32) - 1),
     # Int 64
     NumberType(type=AdvancedNumericTypes.INT_64, data=5),
-    NumberType(type=AdvancedNumericTypes.INT_64, data=-(2 ** 63) + 1),
-    NumberType(type=AdvancedNumericTypes.INT_64, data=(2 ** 63) - 2),
+    NumberType(type=AdvancedNumericTypes.INT_64, data=-(2**63) + 1),
+    NumberType(type=AdvancedNumericTypes.INT_64, data=(2**63) - 2),
     NumberType(type=AdvancedNumericTypes.U_INT_64, data=0),
-    NumberType(type=AdvancedNumericTypes.U_INT_64, data=(2 ** 64) - 1),
+    NumberType(type=AdvancedNumericTypes.U_INT_64, data=(2**64) - 1),
     # Big int
     NumberType(type=AdvancedNumericTypes.BIG_INT, data=-(2**150)),
     NumberType(type=AdvancedNumericTypes.BIG_INT, data=2**150),
@@ -104,20 +139,31 @@ ADVANCED_VALUES = [
     NumberType(type=AdvancedNumericTypes.SINGLE_PRECISION, data=2.3),
     NumberType(type=AdvancedNumericTypes.DOUBLE_PRECISION, data=0.3),
     NumberType(type=AdvancedNumericTypes.DOUBLE_PRECISION, data=-0.3),
-    NumberType(type=AdvancedNumericTypes.FIXED_PRECISION, data=Decimal(1) / Decimal(32)),
+    NumberType(
+        type=AdvancedNumericTypes.FIXED_PRECISION, data=Decimal(1) / Decimal(32)
+    ),
     # Sequences
-    SequenceType(type=AdvancedSequenceTypes.ARRAY, data=[
-        StringType(type=BasicStringTypes.TEXT, data="data"),
-        StringType(type=BasicStringTypes.TEXT, data="data")
-    ]),
-    SequenceType(type=AdvancedSequenceTypes.LIST, data=[
-        StringType(type=BasicStringTypes.TEXT, data="data"),
-        StringType(type=BasicStringTypes.TEXT, data="data")
-    ]),
-    SequenceType(type=AdvancedSequenceTypes.TUPLE, data=[
-        StringType(type=BasicStringTypes.TEXT, data="data"),
-        StringType(type=BasicStringTypes.TEXT, data="data")
-    ]),
+    SequenceType(
+        type=AdvancedSequenceTypes.ARRAY,
+        data=[
+            StringType(type=BasicStringTypes.TEXT, data="data"),
+            StringType(type=BasicStringTypes.TEXT, data="data"),
+        ],
+    ),
+    SequenceType(
+        type=AdvancedSequenceTypes.LIST,
+        data=[
+            StringType(type=BasicStringTypes.TEXT, data="data"),
+            StringType(type=BasicStringTypes.TEXT, data="data"),
+        ],
+    ),
+    SequenceType(
+        type=AdvancedSequenceTypes.TUPLE,
+        data=[
+            StringType(type=BasicStringTypes.TEXT, data="data"),
+            StringType(type=BasicStringTypes.TEXT, data="data"),
+        ],
+    ),
     # Char
     StringType(type=AdvancedStringTypes.CHAR, data="h"),
     NothingType(type=AdvancedNothingTypes.UNDEFINED),
@@ -230,8 +276,17 @@ def test_special_numbers(language, tmp_path: Path, pytestconfig):
     # Create a list of basic types we want to test.
     types = []
     for t, n in itertools.product(
-            [BasicNumericTypes.RATIONAL, AdvancedNumericTypes.DOUBLE_PRECISION, AdvancedNumericTypes.SINGLE_PRECISION],
-            [SpecialNumbers.NOT_A_NUMBER, SpecialNumbers.POS_INFINITY, SpecialNumbers.NEG_INFINITY]):
+        [
+            BasicNumericTypes.RATIONAL,
+            AdvancedNumericTypes.DOUBLE_PRECISION,
+            AdvancedNumericTypes.SINGLE_PRECISION,
+        ],
+        [
+            SpecialNumbers.NOT_A_NUMBER,
+            SpecialNumbers.POS_INFINITY,
+            SpecialNumbers.NEG_INFINITY,
+        ],
+    ):
         if type_map[t] == TypeSupport.SUPPORTED:
             types.append(NumberType(type=t, data=n))
 

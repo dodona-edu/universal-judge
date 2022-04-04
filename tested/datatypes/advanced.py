@@ -7,8 +7,13 @@ cases.
 from enum import Enum
 from typing import Union
 
-from .basic import BasicNumericTypes, BasicSequenceTypes, BasicTypes, \
-    BasicStringTypes, BasicNothingTypes
+from .basic import (
+    BasicNumericTypes,
+    BasicSequenceTypes,
+    BasicTypes,
+    BasicStringTypes,
+    BasicNothingTypes,
+)
 
 
 class _AdvancedDataType(str, Enum):
@@ -37,6 +42,7 @@ class AdvancedNumericTypes(_AdvancedDataType):
     are arbitrary precision, which means Python supports all integer types.
     On the other hand, C only supports up to 64 bits.
     """
+
     INT_8 = "int8", BasicNumericTypes.INTEGER
     """Signed integer, 8 bits minimum."""
     U_INT_8 = "uint8", BasicNumericTypes.INTEGER
@@ -71,6 +77,7 @@ class AdvancedSequenceTypes(_AdvancedDataType):
     Advanced sequence types. The names of these types are kept as generic as
     possible, to accommodate as many types as possible.
     """
+
     ARRAY = "array", BasicSequenceTypes.SEQUENCE
     """
     An array is often a continuous piece of memory for elements of a fixed size.
@@ -102,6 +109,8 @@ class AdvancedNothingTypes(_AdvancedDataType):
 
 
 AdvancedTypes = Union[
-    AdvancedNumericTypes, AdvancedSequenceTypes, AdvancedStringTypes,
-    AdvancedNothingTypes
+    AdvancedNumericTypes,
+    AdvancedSequenceTypes,
+    AdvancedStringTypes,
+    AdvancedNothingTypes,
 ]
