@@ -580,15 +580,13 @@ class ComparableFloat:
 
 def to_python_comparable(value: Optional[Value]):
     """
-    Convert the value into a comparable Python value. Most values are just
-    converted to their
-    builtin Python variant. Some, however, are not: floats are converted into a
-    wrapper class, that
-    allows comparison.
+    Convert the value into a comparable Python value. Most values are just converted
+    to their built-in Python variant. Some, however, are not. For example, floats
+    are converted into a wrapper class, which allows for comparison.
 
-    Note that this means that the types in the return value can be different from
-    what is channel;
-    the returning types are only guaranteed to support eq, str, repr and bool.
+    This does mean that the type of the returned value can differ from the type in
+    the return channel (in the test suite). The returned value is only guaranteed
+    to support the following operations: eq, str, repr and bool.
     """
     basic_type = resolve_to_basic(value.type)
     if value is None:

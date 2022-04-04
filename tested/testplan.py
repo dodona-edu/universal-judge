@@ -718,10 +718,8 @@ def generate_schema():
     """
     import json
 
-    sc = _PlanModel.schema()
+    sc = Plan.__pydantic_model__.schema()
     sc['$schema'] = "http://json-schema.org/draft-07/schema#"
-    sc['$id'] = "tested/testplan"
-    sc['title'] = "Testplan"
     print(json.dumps(sc, indent=2))
 
 

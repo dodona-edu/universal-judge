@@ -8,7 +8,7 @@ from functools import reduce
 from typing import Iterable, Set, NamedTuple, TYPE_CHECKING
 
 from .datatypes import AllTypes, BasicSequenceTypes, BasicObjectTypes, NestedTypes
-from tested.internal_timings import new_stage, end_stage
+from .internal_timings import new_stage, end_stage
 
 if TYPE_CHECKING:
     from .configs import Bundle
@@ -37,6 +37,7 @@ class Construct(str, Enum):
 
     # Global variables
     GLOBAL_VARIABLES = "global_variables"
+
 
 Types = Set[AllTypes]
 Constructs = Set[Construct]

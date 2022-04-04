@@ -194,8 +194,27 @@ def trace_to_html(traceback: str,
 
 class TypeSupport(Enum):
     SUPPORTED = auto()
+    """
+    The type is fully supported.
+    
+    For advanced types, this requires the language to have a suitable, distinct
+    type. It is not enough that another type can support it. For example, Python
+    does not have support for int16, even though all int16 values can easily fit
+    into the Python integer type.
+    """
     UNSUPPORTED = auto()
+    """
+    There is no support. This is the default value to allow for expansion of the
+    types. Exercises which use these types will not be solvable in a language
+    for which the type is unsupported.
+    """
     REDUCED = auto()
+    """
+    Used for advanced types only. This means the language has no support for the
+    type with a distinct type, but there is support using other types. In this
+    case, exercises using this type are still solvable in the programming language.
+    TESTed will use the basic type in those languages.
+    """
 
 
 class TemplateType(str, Enum):
@@ -286,7 +305,7 @@ class Language:
         Note that the convention that the executable file is the last file in the
         list must be respected in the returned list as well.
 
-        The callback functions receives a filename as argument.
+        The callback function receives a filename as argument.
 
         Non-compiling languages
         -----------------------
@@ -320,7 +339,7 @@ class Language:
         on the PATH, you should use an absolute path to those instead of a relative
         one.
 
-        :param config: Various configuration options. 
+        :param config: Various configuration options.
         :param cwd: The directory in which the ``file`` is.
         :param file: The file to execute.
         :param arguments: Arguments that must be passed to the execution.
@@ -355,11 +374,7 @@ class Language:
 
     def conventionalize_identifier(self, identifier: str) -> str:
         """
-<<<<<<< HEAD
         Conventionalize the name of an identifier. This function uses the format
-=======
-        Conventionalize the name of an property_name. This function uses the format
->>>>>>> bug/fix-identifier-conflicts
         specified in the config.json file. If no format is specified, the identifier
         name is unchanged, which is the same as snake_case, since the testplan uses
         snake case.
@@ -503,24 +518,16 @@ class Language:
 
     def type_support_map(self) -> Mapping[AllTypes, TypeSupport]:
         """
-        Return a map containing the support for advanced types. The returned dict
-        influences how types are used:
+        Return a map containing the support for all types.
 
-        - If a type is not present in the keys of the dict, it will be mapped to
-          its basic type.
-        - If a type is mapped to another `AdvancedType` (often itself), it means
-          this language also supports the advanced type in question. There will be
-          no fallback to the basic types.
-        - If a type is mapped to None, the language does not support the advanced
-          type. Testplans which contain this advanced type will not be executable in
-          this language.
+        See the documentation on the TypeSupport enum for information on how
+        to interpret the results.
 
-        Note: support for basic types is not done with this method, but uses the
-        features functionality. If a language has no support for a basic type, all
-        advanced types that map to this basic type will also not be supported.
+        Note that it is considered a programming error if a basic type is not
+        supported, but the advanced type is supported. This requirement is
+        checked by TESTed when using the language.
 
-        :return: The typing support dict. By default, all types are mapped to their
-                 basic type.
+        :return: The typing support dict.
         """
         raw_config: Dict[str, str] = self.options.get("datatypes", {})
         config = {x: TypeSupport[y.upper()] for x, y in raw_config.items()}
