@@ -127,7 +127,7 @@ private fun internalEncode(value: Any?): Array<String> {
                 }
                 .joinToString(separator = ", ", prefix = "[", postfix = "]")
     } else {
-        type = "unknown"
+        type = value::class.simpleName.toString()
         data = String.format("\"%s\"", escape(value.toString()));
     }
 
