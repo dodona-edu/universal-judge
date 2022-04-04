@@ -1,6 +1,6 @@
 ## Convert a Value to a literal type in Python.
 <%! from tested.datatypes import AdvancedNumericTypes, AdvancedSequenceTypes  %>\
-<%! from tested.serialisation import as_basic_type %>\
+<%! from tested.serialisation import as_basic_type, SpecialNumbers %>\
 <%page args="value" />\
 ## First, add support for the advanced types in Python.
 % if value.type == AdvancedSequenceTypes.TUPLE:
