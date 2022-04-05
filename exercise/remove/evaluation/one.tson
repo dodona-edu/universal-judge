@@ -1,0 +1,74 @@
+{
+  "tabs": [
+    {
+      "name": "are_isbn",
+      "runs": [
+        {
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "variable": "aList",
+                    "type": "sequence",
+                    "expression": {
+                      "data": [
+                        {
+                          "data": "a",
+                          "type": "text"
+                        },
+                        {
+                          "data": "b",
+                          "type": "text"
+                        },
+                        {
+                          "data": "b",
+                          "type": "text"
+                        },
+                        {
+                          "data": "c",
+                          "type": "text"
+                        }
+                      ],
+                      "type": "sequence"
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "remove",
+                    "arguments": [
+                      "aList",
+                      {
+                        "type": "text",
+                        "data": "b"
+                      }
+                    ]
+                  },
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "data": "a",
+                            "type": "text"
+                          },
+                          {
+                            "data": "c",
+                            "type": "text"
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
