@@ -171,7 +171,7 @@ class NumberType(WithFeatures, WithFunctions):
         ):
             raise ValueError(
                 f"SpecialNumber '{values.get('data')}' is only supported for "
-                f"rational numbers."
+                f"real numbers."
             )
 
         if resolve_to_basic(values.get("type")) == BasicNumericTypes.INTEGER:
@@ -648,7 +648,7 @@ def to_python_comparable(value: Optional[Value]):
             ),
             key=lambda x: x[0],
         )
-    if basic_type == BasicNumericTypes.RATIONAL:
+    if basic_type == BasicNumericTypes.REAL:
         return ComparableFloat(float(value.data))
     if basic_type == BasicNumericTypes.INTEGER:
         return value.data

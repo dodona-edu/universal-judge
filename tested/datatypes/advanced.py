@@ -62,13 +62,13 @@ class AdvancedNumericTypes(_AdvancedDataType):
     BIG_INT = "bigint", BasicNumericTypes.INTEGER
     """Integer, arbitrary precision."""
 
-    SINGLE_PRECISION = "single_precision", BasicNumericTypes.RATIONAL
+    SINGLE_PRECISION = "single_precision", BasicNumericTypes.REAL
     """IEEE 754 single precision real number."""
-    DOUBLE_PRECISION = "double_precision", BasicNumericTypes.RATIONAL
+    DOUBLE_PRECISION = "double_precision", BasicNumericTypes.REAL
     """IEEE 754 double precision real number."""
-    DOUBLE_EXTENDED = "double_extended", BasicNumericTypes.RATIONAL
+    DOUBLE_EXTENDED = "double_extended", BasicNumericTypes.REAL
     """IEEE 754 double extended precision real number."""
-    FIXED_PRECISION = "fixed_precision", BasicNumericTypes.RATIONAL
+    FIXED_PRECISION = "fixed_precision", BasicNumericTypes.REAL
     """Fixed precision real number."""
 
 

@@ -28,7 +28,7 @@
   "datatypes": {
 
     "integer": "supported",
-    "rational": "supported",
+    "real": "supported",
     "char": "reduced",
     "text": "supported",
     "boolean": "supported",
@@ -58,7 +58,7 @@
   "restrictions": {
     "map_key": [
       "integer",
-      "rational",
+      "real",
       "text",
       "boolean",
       "tuple",
@@ -69,7 +69,7 @@
     ],
     "set": [
       "integer",
-      "rational",
+      "real",
       "text",
       "boolean",
       "tuple",

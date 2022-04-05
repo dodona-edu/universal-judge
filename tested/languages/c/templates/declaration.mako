@@ -39,7 +39,7 @@
         char*\
     % elif basic == BasicNumericTypes.INTEGER:
         long long\
-    % elif basic == BasicNumericTypes.RATIONAL:
+    % elif basic == BasicNumericTypes.REAL:
         double\
     % elif basic == BasicNothingTypes.NOTHING or value.type == BasicStringTypes.ANY:
         void*\

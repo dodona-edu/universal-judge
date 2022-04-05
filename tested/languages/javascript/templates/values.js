@@ -13,7 +13,7 @@ function encode(value) {
         if (Number.isInteger(value)) {
             type = "integer";
         } else {
-            type = "rational";
+            type = "real";
             if (Number.isNaN(value)) {
                 value = "nan";
             } else if (!Number.isFinite(value)) {

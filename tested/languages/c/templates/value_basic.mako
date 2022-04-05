@@ -5,7 +5,7 @@
 <%page args="value,original" />\
 % if value.type == BasicNumericTypes.INTEGER:
     ${value.data}\
-% elif value.type == BasicNumericTypes.RATIONAL:
+% elif value.type == BasicNumericTypes.REAL:
     <% suffix = "f" if original.type == AdvancedNumericTypes.SINGLE_PRECISION else "" %>\
     % if not isinstance(value.data, SpecialNumbers):
         ${value.data}${suffix}\

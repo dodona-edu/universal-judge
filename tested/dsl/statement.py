@@ -41,7 +41,7 @@ from tested.serialisation import (
 
 data_types = (
     "INTEGER",
-    "RATIONAL",
+    "REAL",
     "CHAR",
     "TEXT",
     "BOOLEAN",
@@ -192,7 +192,7 @@ class Parser:
         elif token.type == "SIGNED_INT":
             return NumberType(type=BasicNumericTypes.INTEGER, data=int(token.value))
         elif token.type == "SIGNED_FLOAT":
-            return NumberType(type=BasicNumericTypes.RATIONAL, data=float(token.value))
+            return NumberType(type=BasicNumericTypes.REAL, data=float(token.value))
         elif token.type == "ESCAPED_STRING":
             return StringType(
                 type=BasicStringTypes.TEXT, data=literal_eval(token.value)

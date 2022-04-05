@@ -75,7 +75,7 @@ class _Statements:
 # Add types here you want to test for all languages.
 BASIC_VALUES = [
     NumberType(type=BasicNumericTypes.INTEGER, data=5),
-    NumberType(type=BasicNumericTypes.RATIONAL, data=5.5),
+    NumberType(type=BasicNumericTypes.REAL, data=5.5),
     StringType(type=BasicStringTypes.TEXT, data="hallo"),
     BooleanType(type=BasicBooleanTypes.BOOLEAN, data=True),
     SequenceType(
@@ -277,7 +277,7 @@ def test_special_numbers(language, tmp_path: Path, pytestconfig):
     types = []
     for t, n in itertools.product(
         [
-            BasicNumericTypes.RATIONAL,
+            BasicNumericTypes.REAL,
             AdvancedNumericTypes.DOUBLE_PRECISION,
             AdvancedNumericTypes.SINGLE_PRECISION,
         ],

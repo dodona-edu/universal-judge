@@ -7,7 +7,7 @@ from typing import Union
 
 class BasicNumericTypes(str, Enum):
     INTEGER = "integer"
-    RATIONAL = "rational"
+    REAL = "real"
 
 
 class BasicStringTypes(str, Enum):

@@ -30,7 +30,7 @@
   },
   "datatypes": {
     "integer": "supported",
-    "rational": "supported",
+    "real": "supported",
     "char": "reduced",
     "text": "supported",
     "boolean": "supported",
@@ -63,7 +63,7 @@
     ],
     "set": [
       "integer",
-      "rational",
+      "real",
       "text",
       "boolean",
       "sequence",

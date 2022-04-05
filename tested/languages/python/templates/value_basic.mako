@@ -2,7 +2,7 @@
 <%! from tested.datatypes import BasicNumericTypes, BasicStringTypes, BasicBooleanTypes, BasicNothingTypes, BasicSequenceTypes, BasicObjectTypes  %>\
 <%! from tested.serialisation import SpecialNumbers %>\
 <%page args="value" />\
-% if value.type in (BasicNumericTypes.INTEGER, BasicNumericTypes.RATIONAL):
+% if value.type in (BasicNumericTypes.INTEGER, BasicNumericTypes.REAL):
     % if not isinstance(value.data, SpecialNumbers):
         ${value.data}\
     % elif value.data == SpecialNumbers.NOT_A_NUMBER:

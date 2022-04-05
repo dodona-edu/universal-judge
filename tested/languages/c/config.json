@@ -32,7 +32,7 @@
   },
   "datatypes": {
     "integer": "supported",
-    "rational": "supported",
+    "real": "supported",
     "char": "supported",
     "text": "supported",
     "boolean": "supported",

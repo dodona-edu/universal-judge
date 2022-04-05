@@ -8,7 +8,7 @@
     "prompt": ">"
   },
   "integer": "integer",
-  "rational": "rational",
+  "real": "real",
   "char": "char",
   "text": "text",
   "boolean": "boolean",
@@ -39,7 +39,7 @@
     "singular": {
       "en": {
         "integer": "integer",
-        "rational": "rational number",
+        "real": "real number",
         "char": "character",
         "text": "text",
         "boolean": "boolean",
@@ -68,7 +68,7 @@
       },
       "nl": {
         "integer": "geheel getal",
-        "rational": "rationaal getal",
+        "real": "reëel getal",
         "char": "karakter",
         "text": "tekst",
         "boolean": "booleaanse waarde",
@@ -99,7 +99,7 @@
     "plural": {
       "en": {
         "integer": "integers",
-        "rational": "rational numbers",
+        "real": "real numbers",
         "char": "characters",
         "text": "texts",
         "boolean": "booleans",
@@ -128,7 +128,7 @@
       },
       "nl": {
         "integer": "gehele getallen",
-        "rational": "rationale getallen",
+        "real": "reële getallen",
         "char": "karakters",
         "text": "teksten",
         "boolean": "booleaanse waarden",

@@ -21,7 +21,7 @@ def encode(value):
         type_ = "bigint"
         data_ = value
     elif isinstance(value, float):
-        type_ = "rational"
+        type_ = "real"
         if math.isnan(value):
             data_ = "nan"
         elif math.isfinite(value):
