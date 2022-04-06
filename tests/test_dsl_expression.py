@@ -114,15 +114,15 @@ def test_parse_value_int64():
     assert parsed.data == -10
 
 
-def test_parse_value_rational():
+def test_parse_value_real():
     parsed = parser.parse_value("1.0")
-    assert parsed.type == BasicNumericTypes.RATIONAL
+    assert parsed.type == BasicNumericTypes.REAL
     assert math.isclose(parsed.data, 1.0)
 
 
-def test_parse_value_rational_neg():
-    parsed = parser.parse_value("-1.0 :: rational")
-    assert parsed.type == BasicNumericTypes.RATIONAL
+def test_parse_value_real_neg():
+    parsed = parser.parse_value("-1.0 :: real")
+    assert parsed.type == BasicNumericTypes.REAL
     assert math.isclose(parsed.data, -1.0)
 
 
@@ -385,7 +385,7 @@ def test_parse_identifier():
 
 def test_parse_value():
     parsed = parser.parse_statement("5.5")
-    assert parsed.type == BasicNumericTypes.RATIONAL
+    assert parsed.type == BasicNumericTypes.REAL
     assert math.isclose(parsed.data, 5.5)
 
 

@@ -1,0 +1,23 @@
+{
+  "description": {
+    "difficulty": 0.5,
+    "names": {
+      "en": "Remove [UNIVERSEEL]",
+      "nl": "Remove [UNIVERSEEL]"
+    }
+  },
+  "evaluation": {
+    "memory_limit": 500000000,
+    "plan_name": "full.tson",
+    "handler": "TESTed"
+  },
+  "programming_language": "python",
+  "access": "public",
+  "internals": {
+    "token": "ErgcR2PkJTm6Nj4swbTgkP6dr59mt-3q_p9PezTXDXUZpx29WRt5W-T83KE-9PhQ",
+    "_info": "These fields are used for internal bookkeeping in Dodona, please do not change them."
+  },
+  "labels": [
+
+  ]
+}

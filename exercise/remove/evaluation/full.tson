@@ -1,0 +1,3063 @@
+{
+  "tabs": [
+    {
+      "name": "Feedback",
+      "runs": [
+        {
+          "contexts": [
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "variable": "a_list",
+                    "type": "sequence",
+                    "expression": {
+                      "type": "sequence",
+                      "data": [
+                        {
+                          "type": "integer",
+                          "data": -1
+                        },
+                        {
+                          "type": "integer",
+                          "data": 0
+                        },
+                        {
+                          "type": "integer",
+                          "data": 0
+                        },
+                        {
+                          "type": "integer",
+                          "data": 1
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "type": "integer",
+                            "data": -1
+                          },
+                          {
+                            "type": "integer",
+                            "data": 1
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  },
+                  "input": {
+                    "type": "function",
+                    "name": "remove",
+                    "arguments": [
+                      "a_list",
+                      {
+                        "data": 0,
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "variable": "a_list",
+                    "type": "sequence",
+                    "expression": {
+                      "type": "sequence",
+                      "data": [
+                        {
+                          "type": "integer",
+                          "data": 0
+                        },
+                        {
+                          "type": "integer",
+                          "data": 1
+                        },
+                        {
+                          "type": "integer",
+                          "data": 1
+                        },
+                        {
+                          "type": "integer",
+                          "data": 2
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "type": "integer",
+                            "data": 0
+                          },
+                          {
+                            "type": "integer",
+                            "data": 2
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  },
+                  "input": {
+                    "type": "function",
+                    "name": "remove",
+                    "arguments": [
+                      "a_list",
+                      {
+                        "data": 1,
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "variable": "a_list",
+                    "type": "sequence",
+                    "expression": {
+                      "type": "sequence",
+                      "data": [
+                        {
+                          "type": "integer",
+                          "data": 1
+                        },
+                        {
+                          "type": "integer",
+                          "data": 2
+                        },
+                        {
+                          "type": "integer",
+                          "data": 2
+                        },
+                        {
+                          "type": "integer",
+                          "data": 3
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "type": "integer",
+                            "data": 1
+                          },
+                          {
+                            "type": "integer",
+                            "data": 3
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  },
+                  "input": {
+                    "type": "function",
+                    "name": "remove",
+                    "arguments": [
+                      "a_list",
+                      {
+                        "data": 2,
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "variable": "a_list",
+                    "type": "sequence",
+                    "expression": {
+                      "type": "sequence",
+                      "data": [
+                        {
+                          "type": "integer",
+                          "data": 2
+                        },
+                        {
+                          "type": "integer",
+                          "data": 3
+                        },
+                        {
+                          "type": "integer",
+                          "data": 3
+                        },
+                        {
+                          "type": "integer",
+                          "data": 4
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "type": "integer",
+                            "data": 2
+                          },
+                          {
+                            "type": "integer",
+                            "data": 4
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  },
+                  "input": {
+                    "type": "function",
+                    "name": "remove",
+                    "arguments": [
+                      "a_list",
+                      {
+                        "data": 3,
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "variable": "a_list",
+                    "type": "sequence",
+                    "expression": {
+                      "type": "sequence",
+                      "data": [
+                        {
+                          "type": "integer",
+                          "data": 3
+                        },
+                        {
+                          "type": "integer",
+                          "data": 4
+                        },
+                        {
+                          "type": "integer",
+                          "data": 4
+                        },
+                        {
+                          "type": "integer",
+                          "data": 5
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "type": "integer",
+                            "data": 3
+                          },
+                          {
+                            "type": "integer",
+                            "data": 5
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  },
+                  "input": {
+                    "type": "function",
+                    "name": "remove",
+                    "arguments": [
+                      "a_list",
+                      {
+                        "data": 4,
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "variable": "a_list",
+                    "type": "sequence",
+                    "expression": {
+                      "type": "sequence",
+                      "data": [
+                        {
+                          "type": "integer",
+                          "data": 4
+                        },
+                        {
+                          "type": "integer",
+                          "data": 5
+                        },
+                        {
+                          "type": "integer",
+                          "data": 5
+                        },
+                        {
+                          "type": "integer",
+                          "data": 6
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "type": "integer",
+                            "data": 4
+                          },
+                          {
+                            "type": "integer",
+                            "data": 6
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  },
+                  "input": {
+                    "type": "function",
+                    "name": "remove",
+                    "arguments": [
+                      "a_list",
+                      {
+                        "data": 5,
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "variable": "a_list",
+                    "type": "sequence",
+                    "expression": {
+                      "type": "sequence",
+                      "data": [
+                        {
+                          "type": "integer",
+                          "data": 5
+                        },
+                        {
+                          "type": "integer",
+                          "data": 6
+                        },
+                        {
+                          "type": "integer",
+                          "data": 6
+                        },
+                        {
+                          "type": "integer",
+                          "data": 7
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "type": "integer",
+                            "data": 5
+                          },
+                          {
+                            "type": "integer",
+                            "data": 7
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  },
+                  "input": {
+                    "type": "function",
+                    "name": "remove",
+                    "arguments": [
+                      "a_list",
+                      {
+                        "data": 6,
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "variable": "a_list",
+                    "type": "sequence",
+                    "expression": {
+                      "type": "sequence",
+                      "data": [
+                        {
+                          "type": "integer",
+                          "data": 6
+                        },
+                        {
+                          "type": "integer",
+                          "data": 7
+                        },
+                        {
+                          "type": "integer",
+                          "data": 7
+                        },
+                        {
+                          "type": "integer",
+                          "data": 8
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "type": "integer",
+                            "data": 6
+                          },
+                          {
+                            "type": "integer",
+                            "data": 8
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  },
+                  "input": {
+                    "type": "function",
+                    "name": "remove",
+                    "arguments": [
+                      "a_list",
+                      {
+                        "data": 7,
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "variable": "a_list",
+                    "type": "sequence",
+                    "expression": {
+                      "type": "sequence",
+                      "data": [
+                        {
+                          "type": "integer",
+                          "data": 7
+                        },
+                        {
+                          "type": "integer",
+                          "data": 8
+                        },
+                        {
+                          "type": "integer",
+                          "data": 8
+                        },
+                        {
+                          "type": "integer",
+                          "data": 9
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "type": "integer",
+                            "data": 7
+                          },
+                          {
+                            "type": "integer",
+                            "data": 9
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  },
+                  "input": {
+                    "type": "function",
+                    "name": "remove",
+                    "arguments": [
+                      "a_list",
+                      {
+                        "data": 8,
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "variable": "a_list",
+                    "type": "sequence",
+                    "expression": {
+                      "type": "sequence",
+                      "data": [
+                        {
+                          "type": "integer",
+                          "data": 8
+                        },
+                        {
+                          "type": "integer",
+                          "data": 9
+                        },
+                        {
+                          "type": "integer",
+                          "data": 9
+                        },
+                        {
+                          "type": "integer",
+                          "data": 10
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "type": "integer",
+                            "data": 8
+                          },
+                          {
+                            "type": "integer",
+                            "data": 10
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  },
+                  "input": {
+                    "type": "function",
+                    "name": "remove",
+                    "arguments": [
+                      "a_list",
+                      {
+                        "data": 9,
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "variable": "a_list",
+                    "type": "sequence",
+                    "expression": {
+                      "type": "sequence",
+                      "data": [
+                        {
+                          "type": "integer",
+                          "data": 9
+                        },
+                        {
+                          "type": "integer",
+                          "data": 10
+                        },
+                        {
+                          "type": "integer",
+                          "data": 10
+                        },
+                        {
+                          "type": "integer",
+                          "data": 11
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "type": "integer",
+                            "data": 9
+                          },
+                          {
+                            "type": "integer",
+                            "data": 11
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  },
+                  "input": {
+                    "type": "function",
+                    "name": "remove",
+                    "arguments": [
+                      "a_list",
+                      {
+                        "data": 10,
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "variable": "a_list",
+                    "type": "sequence",
+                    "expression": {
+                      "type": "sequence",
+                      "data": [
+                        {
+                          "type": "integer",
+                          "data": 10
+                        },
+                        {
+                          "type": "integer",
+                          "data": 11
+                        },
+                        {
+                          "type": "integer",
+                          "data": 11
+                        },
+                        {
+                          "type": "integer",
+                          "data": 12
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "type": "integer",
+                            "data": 10
+                          },
+                          {
+                            "type": "integer",
+                            "data": 12
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  },
+                  "input": {
+                    "type": "function",
+                    "name": "remove",
+                    "arguments": [
+                      "a_list",
+                      {
+                        "data": 11,
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "variable": "a_list",
+                    "type": "sequence",
+                    "expression": {
+                      "type": "sequence",
+                      "data": [
+                        {
+                          "type": "integer",
+                          "data": 11
+                        },
+                        {
+                          "type": "integer",
+                          "data": 12
+                        },
+                        {
+                          "type": "integer",
+                          "data": 12
+                        },
+                        {
+                          "type": "integer",
+                          "data": 13
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "type": "integer",
+                            "data": 11
+                          },
+                          {
+                            "type": "integer",
+                            "data": 13
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  },
+                  "input": {
+                    "type": "function",
+                    "name": "remove",
+                    "arguments": [
+                      "a_list",
+                      {
+                        "data": 12,
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "variable": "a_list",
+                    "type": "sequence",
+                    "expression": {
+                      "type": "sequence",
+                      "data": [
+                        {
+                          "type": "integer",
+                          "data": 12
+                        },
+                        {
+                          "type": "integer",
+                          "data": 13
+                        },
+                        {
+                          "type": "integer",
+                          "data": 13
+                        },
+                        {
+                          "type": "integer",
+                          "data": 14
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "type": "integer",
+                            "data": 12
+                          },
+                          {
+                            "type": "integer",
+                            "data": 14
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  },
+                  "input": {
+                    "type": "function",
+                    "name": "remove",
+                    "arguments": [
+                      "a_list",
+                      {
+                        "data": 13,
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "variable": "a_list",
+                    "type": "sequence",
+                    "expression": {
+                      "type": "sequence",
+                      "data": [
+                        {
+                          "type": "integer",
+                          "data": 13
+                        },
+                        {
+                          "type": "integer",
+                          "data": 14
+                        },
+                        {
+                          "type": "integer",
+                          "data": 14
+                        },
+                        {
+                          "type": "integer",
+                          "data": 15
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "type": "integer",
+                            "data": 13
+                          },
+                          {
+                            "type": "integer",
+                            "data": 15
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  },
+                  "input": {
+                    "type": "function",
+                    "name": "remove",
+                    "arguments": [
+                      "a_list",
+                      {
+                        "data": 14,
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "variable": "a_list",
+                    "type": "sequence",
+                    "expression": {
+                      "type": "sequence",
+                      "data": [
+                        {
+                          "type": "integer",
+                          "data": 14
+                        },
+                        {
+                          "type": "integer",
+                          "data": 15
+                        },
+                        {
+                          "type": "integer",
+                          "data": 15
+                        },
+                        {
+                          "type": "integer",
+                          "data": 16
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "type": "integer",
+                            "data": 14
+                          },
+                          {
+                            "type": "integer",
+                            "data": 16
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  },
+                  "input": {
+                    "type": "function",
+                    "name": "remove",
+                    "arguments": [
+                      "a_list",
+                      {
+                        "data": 15,
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "variable": "a_list",
+                    "type": "sequence",
+                    "expression": {
+                      "type": "sequence",
+                      "data": [
+                        {
+                          "type": "integer",
+                          "data": 15
+                        },
+                        {
+                          "type": "integer",
+                          "data": 16
+                        },
+                        {
+                          "type": "integer",
+                          "data": 16
+                        },
+                        {
+                          "type": "integer",
+                          "data": 17
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "type": "integer",
+                            "data": 15
+                          },
+                          {
+                            "type": "integer",
+                            "data": 17
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  },
+                  "input": {
+                    "type": "function",
+                    "name": "remove",
+                    "arguments": [
+                      "a_list",
+                      {
+                        "data": 16,
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "variable": "a_list",
+                    "type": "sequence",
+                    "expression": {
+                      "type": "sequence",
+                      "data": [
+                        {
+                          "type": "integer",
+                          "data": 16
+                        },
+                        {
+                          "type": "integer",
+                          "data": 17
+                        },
+                        {
+                          "type": "integer",
+                          "data": 17
+                        },
+                        {
+                          "type": "integer",
+                          "data": 18
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "type": "integer",
+                            "data": 16
+                          },
+                          {
+                            "type": "integer",
+                            "data": 18
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  },
+                  "input": {
+                    "type": "function",
+                    "name": "remove",
+                    "arguments": [
+                      "a_list",
+                      {
+                        "data": 17,
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "variable": "a_list",
+                    "type": "sequence",
+                    "expression": {
+                      "type": "sequence",
+                      "data": [
+                        {
+                          "type": "integer",
+                          "data": 17
+                        },
+                        {
+                          "type": "integer",
+                          "data": 18
+                        },
+                        {
+                          "type": "integer",
+                          "data": 18
+                        },
+                        {
+                          "type": "integer",
+                          "data": 19
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "type": "integer",
+                            "data": 17
+                          },
+                          {
+                            "type": "integer",
+                            "data": 19
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  },
+                  "input": {
+                    "type": "function",
+                    "name": "remove",
+                    "arguments": [
+                      "a_list",
+                      {
+                        "data": 18,
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "variable": "a_list",
+                    "type": "sequence",
+                    "expression": {
+                      "type": "sequence",
+                      "data": [
+                        {
+                          "type": "integer",
+                          "data": 18
+                        },
+                        {
+                          "type": "integer",
+                          "data": 19
+                        },
+                        {
+                          "type": "integer",
+                          "data": 19
+                        },
+                        {
+                          "type": "integer",
+                          "data": 20
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "type": "integer",
+                            "data": 18
+                          },
+                          {
+                            "type": "integer",
+                            "data": 20
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  },
+                  "input": {
+                    "type": "function",
+                    "name": "remove",
+                    "arguments": [
+                      "a_list",
+                      {
+                        "data": 19,
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "variable": "a_list",
+                    "type": "sequence",
+                    "expression": {
+                      "type": "sequence",
+                      "data": [
+                        {
+                          "type": "integer",
+                          "data": 19
+                        },
+                        {
+                          "type": "integer",
+                          "data": 20
+                        },
+                        {
+                          "type": "integer",
+                          "data": 20
+                        },
+                        {
+                          "type": "integer",
+                          "data": 21
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "type": "integer",
+                            "data": 19
+                          },
+                          {
+                            "type": "integer",
+                            "data": 21
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  },
+                  "input": {
+                    "type": "function",
+                    "name": "remove",
+                    "arguments": [
+                      "a_list",
+                      {
+                        "data": 20,
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "variable": "a_list",
+                    "type": "sequence",
+                    "expression": {
+                      "type": "sequence",
+                      "data": [
+                        {
+                          "type": "integer",
+                          "data": 20
+                        },
+                        {
+                          "type": "integer",
+                          "data": 21
+                        },
+                        {
+                          "type": "integer",
+                          "data": 21
+                        },
+                        {
+                          "type": "integer",
+                          "data": 22
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "type": "integer",
+                            "data": 20
+                          },
+                          {
+                            "type": "integer",
+                            "data": 22
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  },
+                  "input": {
+                    "type": "function",
+                    "name": "remove",
+                    "arguments": [
+                      "a_list",
+                      {
+                        "data": 21,
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "variable": "a_list",
+                    "type": "sequence",
+                    "expression": {
+                      "type": "sequence",
+                      "data": [
+                        {
+                          "type": "integer",
+                          "data": 21
+                        },
+                        {
+                          "type": "integer",
+                          "data": 22
+                        },
+                        {
+                          "type": "integer",
+                          "data": 22
+                        },
+                        {
+                          "type": "integer",
+                          "data": 23
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "type": "integer",
+                            "data": 21
+                          },
+                          {
+                            "type": "integer",
+                            "data": 23
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  },
+                  "input": {
+                    "type": "function",
+                    "name": "remove",
+                    "arguments": [
+                      "a_list",
+                      {
+                        "data": 22,
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "variable": "a_list",
+                    "type": "sequence",
+                    "expression": {
+                      "type": "sequence",
+                      "data": [
+                        {
+                          "type": "integer",
+                          "data": 22
+                        },
+                        {
+                          "type": "integer",
+                          "data": 23
+                        },
+                        {
+                          "type": "integer",
+                          "data": 23
+                        },
+                        {
+                          "type": "integer",
+                          "data": 24
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "type": "integer",
+                            "data": 22
+                          },
+                          {
+                            "type": "integer",
+                            "data": 24
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  },
+                  "input": {
+                    "type": "function",
+                    "name": "remove",
+                    "arguments": [
+                      "a_list",
+                      {
+                        "data": 23,
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "variable": "a_list",
+                    "type": "sequence",
+                    "expression": {
+                      "type": "sequence",
+                      "data": [
+                        {
+                          "type": "integer",
+                          "data": 23
+                        },
+                        {
+                          "type": "integer",
+                          "data": 24
+                        },
+                        {
+                          "type": "integer",
+                          "data": 24
+                        },
+                        {
+                          "type": "integer",
+                          "data": 25
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "type": "integer",
+                            "data": 23
+                          },
+                          {
+                            "type": "integer",
+                            "data": 25
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  },
+                  "input": {
+                    "type": "function",
+                    "name": "remove",
+                    "arguments": [
+                      "a_list",
+                      {
+                        "data": 24,
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "variable": "a_list",
+                    "type": "sequence",
+                    "expression": {
+                      "type": "sequence",
+                      "data": [
+                        {
+                          "type": "integer",
+                          "data": 24
+                        },
+                        {
+                          "type": "integer",
+                          "data": 25
+                        },
+                        {
+                          "type": "integer",
+                          "data": 25
+                        },
+                        {
+                          "type": "integer",
+                          "data": 26
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "type": "integer",
+                            "data": 24
+                          },
+                          {
+                            "type": "integer",
+                            "data": 26
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  },
+                  "input": {
+                    "type": "function",
+                    "name": "remove",
+                    "arguments": [
+                      "a_list",
+                      {
+                        "data": 25,
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "variable": "a_list",
+                    "type": "sequence",
+                    "expression": {
+                      "type": "sequence",
+                      "data": [
+                        {
+                          "type": "integer",
+                          "data": 25
+                        },
+                        {
+                          "type": "integer",
+                          "data": 26
+                        },
+                        {
+                          "type": "integer",
+                          "data": 26
+                        },
+                        {
+                          "type": "integer",
+                          "data": 27
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "type": "integer",
+                            "data": 25
+                          },
+                          {
+                            "type": "integer",
+                            "data": 27
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  },
+                  "input": {
+                    "type": "function",
+                    "name": "remove",
+                    "arguments": [
+                      "a_list",
+                      {
+                        "data": 26,
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "variable": "a_list",
+                    "type": "sequence",
+                    "expression": {
+                      "type": "sequence",
+                      "data": [
+                        {
+                          "type": "integer",
+                          "data": 26
+                        },
+                        {
+                          "type": "integer",
+                          "data": 27
+                        },
+                        {
+                          "type": "integer",
+                          "data": 27
+                        },
+                        {
+                          "type": "integer",
+                          "data": 28
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "type": "integer",
+                            "data": 26
+                          },
+                          {
+                            "type": "integer",
+                            "data": 28
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  },
+                  "input": {
+                    "type": "function",
+                    "name": "remove",
+                    "arguments": [
+                      "a_list",
+                      {
+                        "data": 27,
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "variable": "a_list",
+                    "type": "sequence",
+                    "expression": {
+                      "type": "sequence",
+                      "data": [
+                        {
+                          "type": "integer",
+                          "data": 27
+                        },
+                        {
+                          "type": "integer",
+                          "data": 28
+                        },
+                        {
+                          "type": "integer",
+                          "data": 28
+                        },
+                        {
+                          "type": "integer",
+                          "data": 29
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "type": "integer",
+                            "data": 27
+                          },
+                          {
+                            "type": "integer",
+                            "data": 29
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  },
+                  "input": {
+                    "type": "function",
+                    "name": "remove",
+                    "arguments": [
+                      "a_list",
+                      {
+                        "data": 28,
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "variable": "a_list",
+                    "type": "sequence",
+                    "expression": {
+                      "type": "sequence",
+                      "data": [
+                        {
+                          "type": "integer",
+                          "data": 28
+                        },
+                        {
+                          "type": "integer",
+                          "data": 29
+                        },
+                        {
+                          "type": "integer",
+                          "data": 29
+                        },
+                        {
+                          "type": "integer",
+                          "data": 30
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "type": "integer",
+                            "data": 28
+                          },
+                          {
+                            "type": "integer",
+                            "data": 30
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  },
+                  "input": {
+                    "type": "function",
+                    "name": "remove",
+                    "arguments": [
+                      "a_list",
+                      {
+                        "data": 29,
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "variable": "a_list",
+                    "type": "sequence",
+                    "expression": {
+                      "type": "sequence",
+                      "data": [
+                        {
+                          "type": "integer",
+                          "data": 29
+                        },
+                        {
+                          "type": "integer",
+                          "data": 30
+                        },
+                        {
+                          "type": "integer",
+                          "data": 30
+                        },
+                        {
+                          "type": "integer",
+                          "data": 31
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "type": "integer",
+                            "data": 29
+                          },
+                          {
+                            "type": "integer",
+                            "data": 31
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  },
+                  "input": {
+                    "type": "function",
+                    "name": "remove",
+                    "arguments": [
+                      "a_list",
+                      {
+                        "data": 30,
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "variable": "a_list",
+                    "type": "sequence",
+                    "expression": {
+                      "type": "sequence",
+                      "data": [
+                        {
+                          "type": "integer",
+                          "data": 30
+                        },
+                        {
+                          "type": "integer",
+                          "data": 31
+                        },
+                        {
+                          "type": "integer",
+                          "data": 31
+                        },
+                        {
+                          "type": "integer",
+                          "data": 32
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "type": "integer",
+                            "data": 30
+                          },
+                          {
+                            "type": "integer",
+                            "data": 32
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  },
+                  "input": {
+                    "type": "function",
+                    "name": "remove",
+                    "arguments": [
+                      "a_list",
+                      {
+                        "data": 31,
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "variable": "a_list",
+                    "type": "sequence",
+                    "expression": {
+                      "type": "sequence",
+                      "data": [
+                        {
+                          "type": "integer",
+                          "data": 31
+                        },
+                        {
+                          "type": "integer",
+                          "data": 32
+                        },
+                        {
+                          "type": "integer",
+                          "data": 32
+                        },
+                        {
+                          "type": "integer",
+                          "data": 33
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "type": "integer",
+                            "data": 31
+                          },
+                          {
+                            "type": "integer",
+                            "data": 33
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  },
+                  "input": {
+                    "type": "function",
+                    "name": "remove",
+                    "arguments": [
+                      "a_list",
+                      {
+                        "data": 32,
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "variable": "a_list",
+                    "type": "sequence",
+                    "expression": {
+                      "type": "sequence",
+                      "data": [
+                        {
+                          "type": "integer",
+                          "data": 32
+                        },
+                        {
+                          "type": "integer",
+                          "data": 33
+                        },
+                        {
+                          "type": "integer",
+                          "data": 33
+                        },
+                        {
+                          "type": "integer",
+                          "data": 34
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "type": "integer",
+                            "data": 32
+                          },
+                          {
+                            "type": "integer",
+                            "data": 34
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  },
+                  "input": {
+                    "type": "function",
+                    "name": "remove",
+                    "arguments": [
+                      "a_list",
+                      {
+                        "data": 33,
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "variable": "a_list",
+                    "type": "sequence",
+                    "expression": {
+                      "type": "sequence",
+                      "data": [
+                        {
+                          "type": "integer",
+                          "data": 33
+                        },
+                        {
+                          "type": "integer",
+                          "data": 34
+                        },
+                        {
+                          "type": "integer",
+                          "data": 34
+                        },
+                        {
+                          "type": "integer",
+                          "data": 35
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "type": "integer",
+                            "data": 33
+                          },
+                          {
+                            "type": "integer",
+                            "data": 35
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  },
+                  "input": {
+                    "type": "function",
+                    "name": "remove",
+                    "arguments": [
+                      "a_list",
+                      {
+                        "data": 34,
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "variable": "a_list",
+                    "type": "sequence",
+                    "expression": {
+                      "type": "sequence",
+                      "data": [
+                        {
+                          "type": "integer",
+                          "data": 34
+                        },
+                        {
+                          "type": "integer",
+                          "data": 35
+                        },
+                        {
+                          "type": "integer",
+                          "data": 35
+                        },
+                        {
+                          "type": "integer",
+                          "data": 36
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "type": "integer",
+                            "data": 34
+                          },
+                          {
+                            "type": "integer",
+                            "data": 36
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  },
+                  "input": {
+                    "type": "function",
+                    "name": "remove",
+                    "arguments": [
+                      "a_list",
+                      {
+                        "data": 35,
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "variable": "a_list",
+                    "type": "sequence",
+                    "expression": {
+                      "type": "sequence",
+                      "data": [
+                        {
+                          "type": "integer",
+                          "data": 35
+                        },
+                        {
+                          "type": "integer",
+                          "data": 36
+                        },
+                        {
+                          "type": "integer",
+                          "data": 36
+                        },
+                        {
+                          "type": "integer",
+                          "data": 37
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "type": "integer",
+                            "data": 35
+                          },
+                          {
+                            "type": "integer",
+                            "data": 37
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  },
+                  "input": {
+                    "type": "function",
+                    "name": "remove",
+                    "arguments": [
+                      "a_list",
+                      {
+                        "data": 36,
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "variable": "a_list",
+                    "type": "sequence",
+                    "expression": {
+                      "type": "sequence",
+                      "data": [
+                        {
+                          "type": "integer",
+                          "data": 36
+                        },
+                        {
+                          "type": "integer",
+                          "data": 37
+                        },
+                        {
+                          "type": "integer",
+                          "data": 37
+                        },
+                        {
+                          "type": "integer",
+                          "data": 38
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "type": "integer",
+                            "data": 36
+                          },
+                          {
+                            "type": "integer",
+                            "data": 38
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  },
+                  "input": {
+                    "type": "function",
+                    "name": "remove",
+                    "arguments": [
+                      "a_list",
+                      {
+                        "data": 37,
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "variable": "a_list",
+                    "type": "sequence",
+                    "expression": {
+                      "type": "sequence",
+                      "data": [
+                        {
+                          "type": "integer",
+                          "data": 37
+                        },
+                        {
+                          "type": "integer",
+                          "data": 38
+                        },
+                        {
+                          "type": "integer",
+                          "data": 38
+                        },
+                        {
+                          "type": "integer",
+                          "data": 39
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "type": "integer",
+                            "data": 37
+                          },
+                          {
+                            "type": "integer",
+                            "data": 39
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  },
+                  "input": {
+                    "type": "function",
+                    "name": "remove",
+                    "arguments": [
+                      "a_list",
+                      {
+                        "data": 38,
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "variable": "a_list",
+                    "type": "sequence",
+                    "expression": {
+                      "type": "sequence",
+                      "data": [
+                        {
+                          "type": "integer",
+                          "data": 38
+                        },
+                        {
+                          "type": "integer",
+                          "data": 39
+                        },
+                        {
+                          "type": "integer",
+                          "data": 39
+                        },
+                        {
+                          "type": "integer",
+                          "data": 40
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "type": "integer",
+                            "data": 38
+                          },
+                          {
+                            "type": "integer",
+                            "data": 40
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  },
+                  "input": {
+                    "type": "function",
+                    "name": "remove",
+                    "arguments": [
+                      "a_list",
+                      {
+                        "data": 39,
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "variable": "a_list",
+                    "type": "sequence",
+                    "expression": {
+                      "type": "sequence",
+                      "data": [
+                        {
+                          "type": "integer",
+                          "data": 39
+                        },
+                        {
+                          "type": "integer",
+                          "data": 40
+                        },
+                        {
+                          "type": "integer",
+                          "data": 40
+                        },
+                        {
+                          "type": "integer",
+                          "data": 41
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "type": "integer",
+                            "data": 39
+                          },
+                          {
+                            "type": "integer",
+                            "data": 41
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  },
+                  "input": {
+                    "type": "function",
+                    "name": "remove",
+                    "arguments": [
+                      "a_list",
+                      {
+                        "data": 40,
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "variable": "a_list",
+                    "type": "sequence",
+                    "expression": {
+                      "type": "sequence",
+                      "data": [
+                        {
+                          "type": "integer",
+                          "data": 40
+                        },
+                        {
+                          "type": "integer",
+                          "data": 41
+                        },
+                        {
+                          "type": "integer",
+                          "data": 41
+                        },
+                        {
+                          "type": "integer",
+                          "data": 42
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "type": "integer",
+                            "data": 40
+                          },
+                          {
+                            "type": "integer",
+                            "data": 42
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  },
+                  "input": {
+                    "type": "function",
+                    "name": "remove",
+                    "arguments": [
+                      "a_list",
+                      {
+                        "data": 41,
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "variable": "a_list",
+                    "type": "sequence",
+                    "expression": {
+                      "type": "sequence",
+                      "data": [
+                        {
+                          "type": "integer",
+                          "data": 41
+                        },
+                        {
+                          "type": "integer",
+                          "data": 42
+                        },
+                        {
+                          "type": "integer",
+                          "data": 42
+                        },
+                        {
+                          "type": "integer",
+                          "data": 43
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "type": "integer",
+                            "data": 41
+                          },
+                          {
+                            "type": "integer",
+                            "data": 43
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  },
+                  "input": {
+                    "type": "function",
+                    "name": "remove",
+                    "arguments": [
+                      "a_list",
+                      {
+                        "data": 42,
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "variable": "a_list",
+                    "type": "sequence",
+                    "expression": {
+                      "type": "sequence",
+                      "data": [
+                        {
+                          "type": "integer",
+                          "data": 42
+                        },
+                        {
+                          "type": "integer",
+                          "data": 43
+                        },
+                        {
+                          "type": "integer",
+                          "data": 43
+                        },
+                        {
+                          "type": "integer",
+                          "data": 44
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "type": "integer",
+                            "data": 42
+                          },
+                          {
+                            "type": "integer",
+                            "data": 44
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  },
+                  "input": {
+                    "type": "function",
+                    "name": "remove",
+                    "arguments": [
+                      "a_list",
+                      {
+                        "data": 43,
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "variable": "a_list",
+                    "type": "sequence",
+                    "expression": {
+                      "type": "sequence",
+                      "data": [
+                        {
+                          "type": "integer",
+                          "data": 43
+                        },
+                        {
+                          "type": "integer",
+                          "data": 44
+                        },
+                        {
+                          "type": "integer",
+                          "data": 44
+                        },
+                        {
+                          "type": "integer",
+                          "data": 45
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "type": "integer",
+                            "data": 43
+                          },
+                          {
+                            "type": "integer",
+                            "data": 45
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  },
+                  "input": {
+                    "type": "function",
+                    "name": "remove",
+                    "arguments": [
+                      "a_list",
+                      {
+                        "data": 44,
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "variable": "a_list",
+                    "type": "sequence",
+                    "expression": {
+                      "type": "sequence",
+                      "data": [
+                        {
+                          "type": "integer",
+                          "data": 44
+                        },
+                        {
+                          "type": "integer",
+                          "data": 45
+                        },
+                        {
+                          "type": "integer",
+                          "data": 45
+                        },
+                        {
+                          "type": "integer",
+                          "data": 46
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "type": "integer",
+                            "data": 44
+                          },
+                          {
+                            "type": "integer",
+                            "data": 46
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  },
+                  "input": {
+                    "type": "function",
+                    "name": "remove",
+                    "arguments": [
+                      "a_list",
+                      {
+                        "data": 45,
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "variable": "a_list",
+                    "type": "sequence",
+                    "expression": {
+                      "type": "sequence",
+                      "data": [
+                        {
+                          "type": "integer",
+                          "data": 45
+                        },
+                        {
+                          "type": "integer",
+                          "data": 46
+                        },
+                        {
+                          "type": "integer",
+                          "data": 46
+                        },
+                        {
+                          "type": "integer",
+                          "data": 47
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "type": "integer",
+                            "data": 45
+                          },
+                          {
+                            "type": "integer",
+                            "data": 47
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  },
+                  "input": {
+                    "type": "function",
+                    "name": "remove",
+                    "arguments": [
+                      "a_list",
+                      {
+                        "data": 46,
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "variable": "a_list",
+                    "type": "sequence",
+                    "expression": {
+                      "type": "sequence",
+                      "data": [
+                        {
+                          "type": "integer",
+                          "data": 46
+                        },
+                        {
+                          "type": "integer",
+                          "data": 47
+                        },
+                        {
+                          "type": "integer",
+                          "data": 47
+                        },
+                        {
+                          "type": "integer",
+                          "data": 48
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "type": "integer",
+                            "data": 46
+                          },
+                          {
+                            "type": "integer",
+                            "data": 48
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  },
+                  "input": {
+                    "type": "function",
+                    "name": "remove",
+                    "arguments": [
+                      "a_list",
+                      {
+                        "data": 47,
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "variable": "a_list",
+                    "type": "sequence",
+                    "expression": {
+                      "type": "sequence",
+                      "data": [
+                        {
+                          "type": "integer",
+                          "data": 47
+                        },
+                        {
+                          "type": "integer",
+                          "data": 48
+                        },
+                        {
+                          "type": "integer",
+                          "data": 48
+                        },
+                        {
+                          "type": "integer",
+                          "data": 49
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "type": "integer",
+                            "data": 47
+                          },
+                          {
+                            "type": "integer",
+                            "data": 49
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  },
+                  "input": {
+                    "type": "function",
+                    "name": "remove",
+                    "arguments": [
+                      "a_list",
+                      {
+                        "data": 48,
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "testcases": [
+                {
+                  "input": {
+                    "variable": "a_list",
+                    "type": "sequence",
+                    "expression": {
+                      "type": "sequence",
+                      "data": [
+                        {
+                          "type": "integer",
+                          "data": 48
+                        },
+                        {
+                          "type": "integer",
+                          "data": 49
+                        },
+                        {
+                          "type": "integer",
+                          "data": 49
+                        },
+                        {
+                          "type": "integer",
+                          "data": 50
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "type": "integer",
+                            "data": 48
+                          },
+                          {
+                            "type": "integer",
+                            "data": 50
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  },
+                  "input": {
+                    "type": "function",
+                    "name": "remove",
+                    "arguments": [
+                      "a_list",
+                      {
+                        "data": 49,
+                        "type": "integer"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

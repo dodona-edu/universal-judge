@@ -106,45 +106,45 @@ def test_template_function_name(lang: str, expected: str):
     [
         # Python
         ("python", "'integer'", "int"),
-        ("python", "'rational'", "float"),
+        ("python", "'real'", "float"),
         ("python", "'text'", "str"),
         ("python", '("sequence", "integer")', "List[int]"),
         ("python", '("array", ("set", "integer"))', "List[Set[int]]"),
         (
             "python",
-            '("tuple", [("sequence", "rational"), "text"])',
+            '("tuple", [("sequence", "real"), "text"])',
             "Tuple[List[float], str]",
         ),
         # Java
         ("java", "'integer'", "int"),
-        ("java", "'rational'", "double"),
+        ("java", "'real'", "double"),
         ("java", "'text'", "String"),
         ("java", '("sequence", "integer")', "List<Integer>"),
         ("java", '("array", ("set", "integer"))', "Set<Integer>[]"),
         # c
         ("c", "'integer'", "int"),
-        ("c", "'rational'", "double"),
+        ("c", "'real'", "double"),
         ("c", "'text'", "char*"),
         # Kotlin
         ("kotlin", "'integer'", "Int"),
-        ("kotlin", "'rational'", "Double"),
+        ("kotlin", "'real'", "Double"),
         ("kotlin", "'text'", "String"),
         ("kotlin", '("sequence", "integer")', "List<Int>"),
         ("kotlin", '("array", ("set", "integer"))', "Array<Set<Int>>"),
         # JavaScript
         ("javascript", "'integer'", "number"),
-        ("javascript", "'rational'", "number"),
+        ("javascript", "'real'", "number"),
         ("javascript", "'text'", "string"),
         ("javascript", '("sequence", "integer")', "array<number>"),
         ("javascript", '("array", ("set", "integer"))', "array<set<number>>"),
         # Haskell
         ("haskell", "'integer'", "Int"),
-        ("haskell", "'rational'", "Double"),
+        ("haskell", "'real'", "Double"),
         ("haskell", "'text'", "String"),
         ("haskell", '("sequence", "integer")', "[Int]"),
         (
             "haskell",
-            '("tuple", [("sequence", "rational"), "text"])',
+            '("tuple", [("sequence", "real"), "text"])',
             "([Double], String)",
         ),
     ],

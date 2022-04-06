@@ -6,7 +6,7 @@
 %ignore WS
 
 INTEGER: "integer"
-RATIONAL: "rational"
+REAL: "real"
 CHAR: "char"
 TEXT: "text"
 BOOLEAN: "boolean"
@@ -41,7 +41,7 @@ FALSE: "false"
             | LIST
 
 ?datatype: INTEGER
-        | RATIONAL
+        | REAL
         | CHAR
         | TEXT
         | BOOLEAN

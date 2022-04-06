@@ -560,7 +560,7 @@ class SchemaParser:
         elif isinstance(value, int):
             return NumberType(type=BasicNumericTypes.INTEGER, data=value)
         elif isinstance(value, float):
-            return NumberType(type=BasicNumericTypes.RATIONAL, data=value)
+            return NumberType(type=BasicNumericTypes.REAL, data=value)
         elif isinstance(value, list):
             return SequenceType(
                 type=BasicSequenceTypes.SEQUENCE,

@@ -54,7 +54,7 @@
         String\
     % elif basic == BasicNumericTypes.INTEGER:
         ${("Integer" if inner else "int")}\
-    % elif basic == BasicNumericTypes.RATIONAL:
+    % elif basic == BasicNumericTypes.REAL:
         ${("Double" if inner else "double")}\
     % elif basic == BasicObjectTypes.MAP:
         % if isinstance(value, get_args(Value)):

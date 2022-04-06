@@ -51,7 +51,7 @@
         String?\
     % elif basic == BasicNumericTypes.INTEGER:
         Int?\
-    % elif basic == BasicNumericTypes.RATIONAL:
+    % elif basic == BasicNumericTypes.REAL:
         Double?\
     % elif basic == BasicObjectTypes.MAP:
         % if isinstance(value, get_args(Value)):

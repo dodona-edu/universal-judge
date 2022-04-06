@@ -54,7 +54,7 @@ void write_void(FILE*, void*);
         long long int: write_llong,             \
         unsigned long long int: write_ullong,   \
                                                 \
-        /* Rational stuff */                    \
+        /* Real stuff */                        \
         float: write_float,                     \
         double: write_double,                   \
         long double: write_ldouble,             \

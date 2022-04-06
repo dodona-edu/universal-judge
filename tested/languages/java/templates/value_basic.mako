@@ -10,7 +10,7 @@
     % else:
         ${value.data}\
     % endif
-% elif value.type == BasicNumericTypes.RATIONAL:
+% elif value.type == BasicNumericTypes.REAL:
     % if not isinstance(value.data, SpecialNumbers):
         ${value.data}\
     % elif value.data == SpecialNumbers.NOT_A_NUMBER:

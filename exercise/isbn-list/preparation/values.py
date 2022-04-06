@@ -19,7 +19,7 @@ def encode(value):
         type_ = "integer"
         data_ = value
     elif isinstance(value, float):
-        type_ = "rational"
+        type_ = "real"
         data_ = value
     elif isinstance(value, decimal.Decimal):
         type_ = "fixed_precision"

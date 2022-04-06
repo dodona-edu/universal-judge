@@ -39,7 +39,7 @@
         Char\
     % elif basic == BasicNumericTypes.INTEGER:
         Int\
-    % elif basic == BasicNumericTypes.RATIONAL:
+    % elif basic == BasicNumericTypes.REAL:
         Double\
     % elif basic == BasicNothingTypes.NOTHING:
         Nothing\
