@@ -1,15 +1,15 @@
 # TESTed: universal judge for educational software testing
 
-TESTed is an education test framework that supports evaluating submissions in multiple programmes languages for the same
-exercise. This is achieved by using a programming language agnostic test suite.
+TESTed is a software test framework to evaluate submissions for programming exercises across multiple programming languages, using a single test suite per exercise.
 
 ## Installing TESTed
 
-TESTed itself is a Python project, but you need various dependencies for the programming language specific modules. In
-the readme we will only use the Python module, but which dependencies are needed for which module can be found in the
-file [dependencies.md](./dependencies.md).
+TESTed is implemented in Python, but has various dependencies for its language-specific modules.
+We only use the Python language module in this README, but see [dependencies.md](./dependencies.md) for an overview of dependencies for each of the supported programming languages.
 
-You need a Python 3.9 install with pip. Then execute
+Install [Python 3.9](https://www.python.org/downloads/) or later (including pip).
+Next, [clone](https://github.com/git-guides/git-clone) the TESTed repository and open a command prompt in the cloned repository.
+Now you can run the following commands to install the necessary Python dependencies:
 
 ```bash
 # Core dependencies
@@ -20,56 +20,76 @@ $ pip install -r requirements-tests.txt
 $ pip install -r tested/languages/python/requirements.txt
 ```
 
-## Using TESTed
+## Running TESTed
 
-To use TESTed, you need an exercise with accompanying test suite. Some example exercises are available in the
-folder `./exercises/`. The rest of the readme guides you through setting up a basic exercise.
+TESTed evaluates a submission for a programming exercise based on a test suite that specifies some test cases for the exercise.
+In what follows, we guide you through the configuration of a simple programming exercise and running TESTed to evaluate a submission using the test suite of the exercise.
+The directory `./exercise/` in the root directory of TESTed contains some more examples of programming exercises with test suites for TESTed.
 
-### 1. Creating an exercise
+### 1. Create an exercise
 
-We will create a simple exercise where you need to implement a function called `echo`: it receives input and must return
-the same input.
+Let's configure a simple programming exercise that asks to implement a function `echo`.
+The function takes a single argument and returns its argument.
 
-Start by creating a folder for the exercise (for ease of use, we will work in this repository).
+Start creating a directory for the configuration of the exercise.
+To keep things simple, we add the exercise to the `exercise` subdirectory in the root directory of TESTed.
 
 ```bash
 mkdir exercise/simple-example
 ```
 
+Note you would normally not store your exercises in the TESTed repository.
+We recommend creating a new repository for your exercises.
+
 ### 2. Create a test suite
 
-Next, we need a test suite. This will be used to test the submissions for the exercise. To keep things brief, we only include one test case.
+The next step is to design a test suite that will be used to evaluate submission for the exercise.
+Again, to keep things simple, we will only include a single test case in the test suite.
 
 ```json
 {
-  "tabs": [{
-    "name": "Echo",
-    "runs": [{
-      "contexts": [{
-        "testcases": [{
-          "input": {
-            "type": "function",
-            "name": "echo",
-            "arguments": [{
-                "type": "text",
-                "data": "input-1"
-            }]},
-          "output": {
-            "result": {
-              "value": {
-                "type": "text",
-                "data": "input-1"
-              }
-            }
+ "tabs": [
+  {
+   "name": "Echo",
+   "runs": [
+    {
+     "contexts": [
+      {
+       "testcases": [
+        {
+         "input": {
+          "type": "function",
+          "name": "echo",
+          "arguments": [
+           {
+            "type": "text",
+            "data": "input-1"
+           }
+          ]
+         },
+         "output": {
+          "result": {
+           "value": {
+            "type": "text",
+            "data": "input-1"
+           }
           }
-        }]}]}]
-  }]
+         }
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
 }
 ```
 
-While a little verbose, the test suite is straightforward. We have a test case that will call the function `echo` with the argument `"input-1"`. The expected return value is `"input-1"`.
-
-You should put this file in the following location:
+While being somewhat verbose, the test suite is pretty straightforward.
+It contains a single tab "Echo", containing a single run, containing a single context, containing a single test case.
+The test case calls the function `echo` with string argument `"input-1"` and sets the string `"input-1"` as the expected return value.
+Put the file containing the test suite in the following location:
 
 ```bash
 # Create the file
@@ -77,9 +97,10 @@ $ touch exercise/simple-example/testsuite.json
 # Now you should put the content from above in the file.
 ```
 
-### 3. Creating a few submissions
+### 3. Create some submissions
 
-You should now create two submissions, a correct one and a wrong one.
+Now create two Python submissions for the programming exercise.
+The first one contains a correct solution, and the second one returns the wrong result.
 
 ```bash
 $ cat exercise/simple-example/correct.py
@@ -93,7 +114,9 @@ def echo(argument):
 
 ### 4. Evaluate the submissions
 
-To run TESTed, you need to provide it with a configuration. This configuration has various options. To make things easier, save the config in the same folder. In real-world usage, this config file would be generated by whatever system TESTed is integrated.
+To evaluate a submission with TESTed, you need to provide a test suite and configuration information.
+This information can be piped to TESTed via stdin, but to make things easier, we will add the information to a configuration file in the directory of the exercise.
+In practice, this configuration file could be composed by the learning environment in which TESTed is integrated.
 
 ```bash
 $ cat exercise/simple-example/config.json
@@ -110,23 +133,26 @@ $ cat exercise/simple-example/config.json
 }
 ```
 
-Some information about this config:
-- `programming_language`: the programming language of the submission
-- `resources`: path to the folder with resources the judge can use
-- `source`: path to the submission to be judged
-- `judge`: path to the root of the judge source code
-- `workdir`: temporary folder, see below
-- `plan_name`: path to the test suite file, relative to the resources
+These attributes are used by TESTed:
 
-To evaluate a submission, TESTed must generate some code. This happens in the `workdir`. Create that directory:
+- `programming_language`: programming language of the submission
+- `resources`: path of a directory with resources TESTed can use
+- `source`: path of the submission that must be evaluated
+- `judge`: path of the root directory of TESTEd
+- `workdir`: path of a temporary directory (see below)
+- `plan_name`: path of the test suite, relative to the resources directory (as defined above)
+
+Before evaluating a submission, TESTed generates test code in the workdir.
+Create that directory:
 
 ```bash
 $ mkdir workdir/
 ```
 
-This directory is kept after TESTed is run, so you can inspect what was generated. If you want to run TESTed again, you'll need to clear this directory.
+The content in this directory stays in place after TESTed finishes its evaluation, so you can inspect the generated test code.
+Before running TESTed again, you'll need to clear this directory.
 
-Finally, you can run TESTed. The output will be printed on stdout.
+With this command, TESTed will evaluate the submission and generate feedback on stdout.
 
 ```bash
 $ python -m tested -c exercise/simple-example/config.json
@@ -141,10 +167,7 @@ $ python -m tested -c exercise/simple-example/config.json
 {"command": "close-tab"}
 {"command": "close-judgement"}
 ```
-
-The output is written to stdout by default. The output is the JSONLines format, meaning each JSON object will be on a different line.
-
-All options of the command are:
+By default, TESTed generates its feedback on stdout. The feedback is formatted in the [JSON Lines](https://jsonlines.org/) text format, meaning that each line contains a JSON object. Here's how you get an overview of all options supported by TESTed:
 
 ```bash
 $ python -m tested --help
@@ -161,9 +184,9 @@ optional arguments:
   -v, --verbose         Include verbose logs. It is recommended to also use -o in this case.
 ```
 
-If you want to evaluate the wrong submission, you'll need to adjust the configuration.
+Adjust the configuration file if you want to evaluate the wrong submission.
 
-There are some other useful commands:
+Here are some more useful features of TESTed:
 
 ```bash
 # Prints the JSON Schema of the test suite format
@@ -172,16 +195,16 @@ $ python -m tested.testplan
 $ python -m tested.manual
 ```
 
-## Repo organisation
+## TESTed repository
 
-Organization of the repository:
+The repository of TESTed is organized as follows:
 
-- `exercise`: contains a series of test exercises, useful as examples and for the unit tests
-- `tested`: Python project containing the code of the actual judge that will be run by Dodona
-- `tests`: Unit tests for TESTed
-- `benchmarking`: Some utilities to benchmark TESTed
+- `exercise`: exercises with preconfigured test suites; useful to play around with TESTed and also used by unit tests for TESTed itself
+- `tested`: Python code of the actual judge (run by Dodona)
+- `tests`: unit tests for TESTed
+- `benchmarking`: utilities to benchmark TESTed
 
-You can run the tests with:
+You can run the basic unit tests with:
 
 ```bash
 $ python -m pytest tests/test_functionality.py
