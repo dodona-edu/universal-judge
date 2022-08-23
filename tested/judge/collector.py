@@ -273,6 +273,10 @@ class OutputManager:
     def _get_to_add(self) -> List[Update]:
         # Determine which default still need to written.
         assert self.tab < len(self.bundle.plan.tabs)
+        # If there are no tabs, skip.
+        if self.tab == -1:
+            return []
+
         tab = self.bundle.plan.tabs[self.tab]
         contexts_count = tab.count_contexts()
         assert self.context < contexts_count
