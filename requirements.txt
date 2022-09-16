@@ -1,5 +1,5 @@
 psutil==5.9.0
-mako==1.1.6
+mako==1.2.2
 pydantic==1.9.0
 jsonschema==4.4.0
 typing_inspect==0.7.1
