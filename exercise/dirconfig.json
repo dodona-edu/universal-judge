@@ -9,7 +9,7 @@
         "supported_programming_languages": ["python", "java", "haskell", "jshell"]
     },
     "evaluation": {
-		"handler": "universal",
+		"handler": "tested",
         "time_limit": 600,
         "memory_limit": 1073741824
     }
