@@ -494,7 +494,8 @@ def get_readable_input(
         format_ = "code"
         if case.input.main_call:
             arguments = " ".join(case.input.arguments)
-            args = f"./submission {arguments}"
+            submission_name = bundle.lang_config.submission_name(bundle.plan)
+            args = f"{submission_name} {arguments}"
             if isinstance(case.input.stdin, TextData):
                 stdin = case.input.stdin.get_data_as_string(bundle.config.resources)
             else:
