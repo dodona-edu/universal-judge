@@ -9,6 +9,7 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Union, Tuple, Optional, Set, Callable, Match, Iterable
+import shlex
 
 from mako import exceptions
 from pygments.formatters.html import HtmlFormatter
@@ -468,11 +469,20 @@ def _handle_link_files(link_files: Iterable[FileUrl], language: str) -> Tuple[st
     )
 
 
+def _escape_shell(arg: str) -> str:
+    # We want to always quote...
+    quoted = shlex.quote(arg)
+    if quoted.startswith("'") and quoted.endswith("'"):
+        return quoted
+    else:
+        return f"'{quoted}'"
+
+
 def get_readable_input(
     bundle: Bundle, files: List[FileUrl], case: Union[Testcase, RunTestcase]
 ) -> Tuple[ExtendedMessage, Set[FileUrl]]:
     """
-    Get human readable input for a testcase. This function will use, in
+    Get human-readable input for a testcase. This function will use, in
     order of availability:
 
     1. A description on the testcase.
@@ -493,7 +503,8 @@ def get_readable_input(
     elif isinstance(case, RunTestcase):
         format_ = "code"
         if case.input.main_call:
-            arguments = " ".join(case.input.arguments)
+            # TODO: evaluate if we always want to quote the arguments or not?
+            arguments = " ".join(_escape_shell(x) for x in case.input.arguments)
             submission_name = bundle.lang_config.submission_name(bundle.plan)
             args = f"{submission_name} {arguments}"
             if isinstance(case.input.stdin, TextData):
