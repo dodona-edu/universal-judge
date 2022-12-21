@@ -51,6 +51,7 @@ def run_command(
             command,
             cwd=directory,
             text=True,
+            errors="backslashreplace",
             capture_output=True,
             input=stdin,
             timeout=timeout,
