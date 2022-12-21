@@ -9,6 +9,11 @@ import yaml
 from tested.description_instance import create_description_instance
 from tested.languages.config import limit_output
 from tested.utils import sorted_no_duplicates
+from tests.manual_utils import (
+    assert_valid_output,
+    configuration,
+    execute_config,
+)
 
 
 def test_javascript_ast_parse():
@@ -619,3 +624,12 @@ def test_valid_yaml_and_json():
                 yaml.safe_load(fd)
     # Test will always succeed if no exception is thrown
     assert True
+
+
+def test_invalid_utf8_output_is_caught(tmp_path: Path, pytestconfig):
+    conf = configuration(
+        pytestconfig, "sum", "bash", tmp_path, "short.tson", "non-utf8-output"
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["wrong"] * 5
