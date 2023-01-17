@@ -506,7 +506,7 @@ def get_readable_input(
             # TODO: evaluate if we always want to quote the arguments or not?
             arguments = " ".join(_escape_shell(x) for x in case.input.arguments)
             submission_name = bundle.lang_config.submission_name(bundle.plan)
-            args = f"{submission_name} {arguments}"
+            args = f"$ {submission_name} {arguments}"
             if isinstance(case.input.stdin, TextData):
                 stdin = case.input.stdin.get_data_as_string(bundle.config.resources)
             else:
