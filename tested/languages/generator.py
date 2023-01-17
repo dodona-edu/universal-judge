@@ -501,9 +501,9 @@ def get_readable_input(
         text = bundle.lang_config.cleanup_description(bundle.plan.namespace, text)
         analyse_files = True
     elif isinstance(case, RunTestcase):
-        format_ = "code"
         if case.input.main_call:
-            # TODO: evaluate if we always want to quote the arguments or not?
+            # See https://rouge-ruby.github.io/docs/Rouge/Lexers/ConsoleLexer.html
+            format_ = "console"
             arguments = " ".join(_escape_shell(x) for x in case.input.arguments)
             submission_name = bundle.lang_config.submission_name(bundle.plan)
             args = f"$ {submission_name} {arguments}"
@@ -521,6 +521,7 @@ def get_readable_input(
                 else:
                     text = stdin
         else:
+            format_ = "code"
             text = ""
     else:
         raise AssertionError("Unknown testcase variable_type.")
