@@ -198,7 +198,7 @@ class DescriptionGenerator:
         stmt = self.language.cleanup_description(bundle.plan.namespace, stmt)
         if is_html:
             prompt = html.escape(self.types["console"]["prompt"]).strip()
-            stmt = self.generate_html_code(stmt)[41:-13].strip()
+            stmt = self.generate_html_code(stmt).strip()
             return (prompt + " " if statement else "") + stmt
         else:
             return (
