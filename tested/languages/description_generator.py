@@ -25,7 +25,16 @@ TYPE_CONFIG_NAME = Optional[Dict[str, Dict[str, Union[str, Dict[str, str]]]]]
 
 logger = logging.getLogger(__name__)
 
-_html_formatter = HtmlFormatter()
+_html_formatter = HtmlFormatter(nowrap=True)
+
+_console_lexer = get_lexer_by_name("console")
+
+
+def highlight_console(stmt):
+    """
+    Highlight a console statement.
+    """
+    return highlight(stmt, _console_lexer, _html_formatter)
 
 
 class DescriptionGenerator:
