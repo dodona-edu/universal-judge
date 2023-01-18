@@ -16,6 +16,7 @@ from pygments.formatters.html import HtmlFormatter
 
 from .config import TemplateType
 from .templates import find_and_write_template, find_template
+from .description_generator import highlight_console
 from ..configs import Bundle
 from ..datatypes import BasicSequenceTypes
 from ..dodona import ExtendedMessage
@@ -540,10 +541,11 @@ def get_readable_input(
 
     if format_ == "text":
         generated_html = html.escape(text)
+    elif format_ == "console":
+        generated_html = highlight_console(text)
     else:
         generator = bundle.lang_config.get_description_generator()
-        # Slice to unwrapped generated div and pre tags
-        generated_html = generator.generate_html_code(text)[28:-14]
+        generated_html = generator.generate_html_code(text)
 
     if isinstance(case, RunTestcase):
         regex = re.compile(
