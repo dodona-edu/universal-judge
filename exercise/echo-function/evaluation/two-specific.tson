@@ -43,6 +43,9 @@
                           },
                           "javascript": {
                             "file": "evaluator.js"
+                          },
+                          "csharp": {
+                            "file": "Evaluator.cs"
                           }
                         }
                       }
@@ -86,6 +89,9 @@
                           },
                           "javascript": {
                             "file": "evaluator.js"
+                          },
+                          "csharp": {
+                            "file": "Evaluator.cs"
                           }
                         }
                       }

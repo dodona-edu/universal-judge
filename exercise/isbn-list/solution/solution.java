@@ -57,9 +57,6 @@ class Submission {
     }
 
     public static boolean isIsbn(String isbn, boolean isbn13) {
-        if (!(isbn instanceof String)) {
-            return false;
-        }
         if (isbn13) {
             return isIsbn13(isbn);
         } else {
@@ -67,13 +64,9 @@ class Submission {
         }
     }
 
-    public static boolean isIsbnCheck(String isbn, boolean isbn13) {
-        return isIsbn(isbn, isbn13);
-    }
-
     public static Object areIsbn(List<String> codes, boolean isbn13) {
         var stream = codes.stream()
-                .map(isbn -> isIsbnCheck(isbn, isbn13));
+                .map(isbn -> isIsbn(isbn, isbn13));
         return stream.collect(Collectors.toList());
     }
 }

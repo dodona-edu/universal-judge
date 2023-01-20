@@ -95,13 +95,14 @@ class Kotlin(Language):
             return Language.find_main_file(self, files, name)
 
     def filter_dependencies(
-        self, bundle: Bundle, files: List[str], context_name: str
+        self, bundle: Bundle, files: List[Path], context_name: str
     ) -> List[str]:
-        def filter_function(file: str) -> bool:
+        def filter_function(file: Path) -> bool:
             # We don't want files for contexts that are not the one we use.
             prefix = bundle.lang_config.conventionalize_namespace(
                 bundle.lang_config.execution_prefix()
             )
+            file = str(file)
             is_context = file.startswith(prefix)
             is_our_context = file.startswith(context_name + ".") or file.startswith(
                 context_name + "$"

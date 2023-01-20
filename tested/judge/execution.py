@@ -134,11 +134,13 @@ class Execution(NamedTuple):
     collector: OutputManager
 
 
-def filter_files(files: Union[List[str], FileFilter], directory: Path) -> List[str]:
+def filter_files(files: Union[List[str], FileFilter], directory: Path) -> List[Path]:
     if callable(files):
-        return list(x.name for x in filter(files, directory.glob("*")))
+        return list(
+            x.relative_to(directory) for x in filter(files, directory.rglob("*"))
+        )
     else:
-        return files
+        return [Path(file) for file in files]
 
 
 def execute_file(
@@ -206,9 +208,7 @@ def execute_execution(
     execution_dir = Path(bundle.config.workdir, args.execution_name)
     execution_dir.mkdir()
 
-    _logger.info(
-        "Executing execution %s in path %s", args.execution_name, execution_dir
-    )
+    _logger.info("Executing %s in path %s", args.execution_name, execution_dir)
 
     new_stage("dependencies.copy", True)
     # Filter dependencies of the global compilation results.
@@ -216,18 +216,19 @@ def execute_execution(
     dependencies = bundle.lang_config.filter_dependencies(
         bundle, dependencies, args.execution_name
     )
+    _logger.debug("Dependencies are %s", dependencies)
     copy_workdir_files(bundle, execution_dir)
 
     # Copy files from the common directory to the context directory.
     for file in dependencies:
         origin = args.common_directory / file
-        _logger.debug("Copying %s to %s", origin, execution_dir)
-        # Fix weird OSError when copying th Haskell Selector executable
-        if file.startswith(lang_config.selector_name()):
-            os.link(origin, execution_dir / file)
-        else:
-            # noinspection PyTypeChecker
-            shutil.copy2(origin, execution_dir)
+        destination = execution_dir / file
+        # Ensure we preserve subdirectories.
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        _logger.debug("Copying %s to %s", origin, destination)
+        if origin == destination:
+            continue  # Don't copy the file to itself
+        shutil.copy2(origin, destination)
 
     # If needed, do a compilation.
     if args.mode == ExecutionMode.INDIVIDUAL:
@@ -290,6 +291,8 @@ def execute_execution(
                 files, selector_name
             )
 
+            _logger.debug(f"Found main file: {executable}")
+
             for annotation in annotations:
                 args.collector.add(annotation)
 
@@ -322,7 +325,7 @@ def execute_execution(
     # Do the execution.
     base_result = execute_file(
         bundle,
-        executable_name=executable,
+        executable_name=executable.name,
         working_directory=execution_dir,
         stdin=stdin,
         argument=argument,

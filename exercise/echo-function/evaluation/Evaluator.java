@@ -12,7 +12,7 @@ public class Evaluator {
     }
 
     public static EvaluationResult evaluateValue(Object expected, Object actual, List<?> arguments) {
-        return EvaluationResult.builder(expected.equals(expected))
+        return EvaluationResult.builder(expected.equals(actual))
                 .withReadableExpected(expected.toString())
                 .withReadableActual(actual != null ? actual.toString() : "")
                 .withMessage(new EvaluationResult.Message("Hallo"))

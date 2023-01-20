@@ -15,7 +15,7 @@ _logger = logging.getLogger(__name__)
 
 
 def run_compilation(
-    bundle: Bundle, directory: Path, dependencies: List[str], remaining: float
+    bundle: Bundle, directory: Path, dependencies: List[Path], remaining: float
 ) -> Tuple[Optional[BaseExecutionResult], Union[List[str], FileFilter]]:
     """
     The compilation step in the pipeline. This callback is used in both the
@@ -52,8 +52,9 @@ def run_compilation(
              decide to fallback to individual mode if the compilation result is
              not positive.
     """
-    config = Config.from_bundle(bundle)
-    command, files = bundle.lang_config.compilation(bundle, dependencies)
+    command, files = bundle.lang_config.compilation(
+        bundle, [str(x) for x in dependencies]
+    )
     _logger.debug(
         "Generating files with command %s in directory %s", command, directory
     )
