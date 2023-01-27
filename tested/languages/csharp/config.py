@@ -1,4 +1,5 @@
 import logging
+import re
 from pathlib import Path
 from typing import List, Tuple, Optional
 
@@ -32,6 +33,7 @@ class CSharp(Language):
             "--nologo",
             f"-p:AssemblyName={name}",
             f"-p:StartupObject=Tested.{name}",
+            "-consoleloggerparameters:NoSummary",
         ]
 
         return args, file_filter
@@ -87,3 +89,25 @@ class {class_name}
 
         with open(solution, "w") as file:
             file.write(result)
+
+    def compiler_output(
+        self, namespace: str, stdout: str, stderr: str
+    ) -> Tuple[List[Message], List[AnnotateCode], str, str]:
+        submission_name = self.with_extension(self.conventionalize_namespace(namespace))
+        message_regex = (
+            rf"{submission_name}\((\d+),(\d+)\): (error|warning) ([A-Z0-9]+): (.*) \["
+        )
+        messages = re.findall(message_regex, stdout)
+        annotations = []
+        for message in messages:
+            annotations.append(
+                AnnotateCode(
+                    row=int(message[0]),
+                    text=message[4],
+                    externalUrl="https://learn.microsoft.com/dotnet/csharp/language-reference/compiler-messages/",
+                    column=int(message[1]),
+                    type=message[2],
+                )
+            )
+
+        return [], annotations, stdout, stderr
