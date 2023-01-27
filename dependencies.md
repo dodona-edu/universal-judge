@@ -23,6 +23,7 @@ below are the ones we currently use to run the test suite.
 | Java                | 17      |
 | NodeJS (Javascript) | 16      |
 | Kotlin              | 1.6     |
+| C# (.NET 6)         | 10.0    |
 
 ## Core
 
@@ -95,3 +96,7 @@ $ npm install eslint@8.7 abstract-syntax-tree@2.16
 |------------------------|----------|--------------|
 | `klint`                | 0.43     | OS package   |
 
+
+## C#
+
+C# does not have other dependencies besides .NET 6.
