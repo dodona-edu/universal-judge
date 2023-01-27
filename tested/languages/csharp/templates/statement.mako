@@ -1,4 +1,4 @@
-## Convert a statement and/or expression into Java code.
+## Convert a statement and/or expression into C# code.
 <%! from tested.utils import get_args %>\
 <%! from tested.serialisation import Value, Identifier, FunctionCall, Assignment %>\
 <%page args="statement,full=False"/>\

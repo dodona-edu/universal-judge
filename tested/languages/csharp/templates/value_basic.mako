@@ -1,4 +1,4 @@
-## Convert a Value to a literal type in Java.
+## Convert a Value to a literal type in C#.
 <%! from tested.datatypes import BasicNumericTypes, BasicStringTypes, BasicBooleanTypes, BasicNothingTypes, BasicSequenceTypes, BasicObjectTypes  %>\
 <%! from tested.serialisation import SpecialNumbers, Value %>\
 <%! from json import dumps %>\
