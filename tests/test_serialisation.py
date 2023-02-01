@@ -10,6 +10,7 @@ This template takes one value and must pass it to the "values" module.
 Testing advanced types is a work-in progress at this point, since we test in Python,
 and Python does not have explicit support for e.g. int32, int64.
 """
+import shutil
 from dataclasses import dataclass
 from decimal import Decimal
 from pathlib import Path
@@ -34,7 +35,7 @@ from tested.datatypes import (
     AdvancedSequenceTypes,
 )
 from tested.judge.compilation import run_compilation
-from tested.judge.execution import execute_file
+from tested.judge.execution import execute_file, filter_files
 from tested.judge.utils import copy_from_paths_to_path, BaseExecutionResult
 from tested.languages.config import TypeSupport
 from tested.languages.templates import find_and_write_template, path_to_templates
@@ -63,6 +64,7 @@ LANGUAGES = [
     "kotlin",
     pytest.param("runhaskell", marks=mark_haskell),
     "bash",
+    "csharp",
 ]
 
 
@@ -186,14 +188,18 @@ def run_encoder(bundle: Bundle, values: List[Value]) -> List[str]:
     )
 
     # Compile if necessary.
-    e, _ = run_compilation(bundle, dest, [*dependencies, encoder], 10000)
+    e, files = run_compilation(bundle, dest, [*dependencies, encoder], 10000)
     if isinstance(e, BaseExecutionResult):
         print(e.stdout)
         print(e.stderr)
         assert e.exit == 0
 
+    files = filter_files(files, dest)
+    files = bundle.lang_config.filter_dependencies(bundle, files, name)
+    executable = bundle.lang_config.find_main_file(files, name)[0]
+
     # Run the code.
-    r = execute_file(bundle, encoder, dest, None)
+    r = execute_file(bundle, executable.name, dest, None)
     print(r.stderr)
     return r.stdout.splitlines(keepends=False)
 
@@ -258,11 +264,18 @@ def test_advanced_types(language, tmp_path: Path, pytestconfig):
 
 
 @pytest.mark.parametrize("language", LANGUAGES)
-def test_escape(language, tmp_path: Path, pytestconfig):
+def test_escape_double(language, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "", language, tmp_path)
     plan = Plan()
     bundle = create_bundle(conf, sys.stdout, plan)
     assert_serialisation(bundle, StringType(type=BasicStringTypes.TEXT, data='"hallo"'))
+
+
+@pytest.mark.parametrize("language", LANGUAGES)
+def test_escape_single(language, tmp_path: Path, pytestconfig):
+    conf = configuration(pytestconfig, "", language, tmp_path)
+    plan = Plan()
+    bundle = create_bundle(conf, sys.stdout, plan)
     assert_serialisation(bundle, StringType(type=AdvancedStringTypes.CHAR, data="'"))
 
 

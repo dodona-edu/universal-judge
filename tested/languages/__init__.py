@@ -13,6 +13,7 @@ from tested.languages.javascript.config import JavaScript
 from tested.languages.kotlin.config import Kotlin
 from tested.languages.python.config import Python
 from tested.languages.runhaskell.config import RunHaskell
+from tested.languages.csharp.config import CSharp
 from .bash.config import Bash
 from .config import Language
 
@@ -25,6 +26,7 @@ LANGUAGES = {
     "kotlin": Kotlin,
     "python": Python,
     "runhaskell": RunHaskell,
+    "csharp": CSharp,
 }
 
 

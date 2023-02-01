@@ -277,13 +277,13 @@ def _create_handling_function(
     Create a function to handle the result of a return value or an exception.
 
     There are two possibilities:
-    - There is a language specific evaluator. In that case, we wrap the value in
+    - There is a language-specific evaluator. In that case, we wrap the value in
       a function call to the evaluator, and then send off the result. An example of
       the result:
 
         send_evaluated(evaluate(value))
 
-    - There is no language specific evaluator. In that case, we just send off the
+    - There is no language-specific evaluator. In that case, we just send off the
       value directly. An example of the result:
 
         send_value(value)
@@ -309,7 +309,7 @@ def _create_handling_function(
             arguments = [
                 InternalFunctionCall(
                     type=FunctionType.FUNCTION,
-                    name=evaluator.name,
+                    name=lang_config.conventionalize_function(evaluator.name),
                     namespace=Identifier(evaluator_name),
                     arguments=[_prepare_expression(bundle, expression)],
                 )

@@ -665,9 +665,13 @@ def to_python_comparable(value: Optional[Value]):
 
 class EvalResult(BaseModel):
     result: Union[bool, Status]
-    readable_expected: Optional[str] = None
-    readable_actual: Optional[str] = None
+    readable_expected: Optional[str] = Field(None, alias="readableExpected")
+    readable_actual: Optional[str] = Field(None, alias="readableActual")
     messages: List[ExtendedMessage] = Field(Undefined, default_factory=list)
+
+    class Config:
+        # Allow both camel case and snake case fields
+        allow_population_by_field_name = True
 
 
 @dataclass

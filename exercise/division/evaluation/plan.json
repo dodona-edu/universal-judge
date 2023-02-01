@@ -28,6 +28,9 @@
                     },
                     "runhaskell": {
                       "file": "Evaluator.hs"
+                    },
+                    "csharp": {
+                      "file": "Evaluator.cs"
                     }
                   }
                 }

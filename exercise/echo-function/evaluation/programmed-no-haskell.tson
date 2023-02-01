@@ -122,6 +122,35 @@
                     }
                   },
                   "essential": false
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "echo",
+                    "arguments": [
+                      {
+                        "type": "text",
+                        "data": "input-89"
+                      }
+                    ]
+                  },
+                  "output": {
+                    "result": {
+                      "value": {
+                        "type": "text",
+                        "data": "input-89"
+                      },
+                      "evaluator": {
+                        "type": "programmed",
+                        "function": {
+                          "file": "Evaluator.cs",
+                          "name": "EvaluateValue"
+                        },
+                        "language": "csharp"
+                      }
+                    }
+                  },
+                  "essential": false
                 }
               ]
             }

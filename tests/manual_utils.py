@@ -104,6 +104,7 @@ def configuration(
 
 def execute_config(config: DodonaConfig) -> str:
     actual = StringIO()
+    # noinspection PyTypeChecker
     run(config, actual)
     result = actual.getvalue()
     print(result)

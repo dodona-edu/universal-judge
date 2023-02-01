@@ -34,7 +34,7 @@ Het controlecijfer $$x_{13}$$ kan m.a.w. de waarden 0 tot en met 9 aannemen, waa
 
 ### Voorbeeld
 
-```pydocstring
+```pycon
 >>> is_isbn('9789027439642', False)
 False
 >>> is_isbn('9789027439642', True)

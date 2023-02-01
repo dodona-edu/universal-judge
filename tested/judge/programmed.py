@@ -18,7 +18,6 @@ from .utils import BaseExecutionResult, copy_from_paths_to_path, run_command
 from ..configs import Bundle, create_bundle
 from ..dodona import Status
 from ..features import Construct
-from ..languages.config import Config
 from ..languages.generator import (
     generate_custom_evaluator,
     convert_statement,
@@ -131,7 +130,21 @@ def _evaluate_others(
     files = filter_files(files, custom_path)
     # Execute the custom evaluator.
     evaluator_name = Path(evaluator_name).stem
-    executable, _, status, _ = bundle.lang_config.find_main_file(files, evaluator_name)
+
+    files = eval_bundle.lang_config.filter_dependencies(
+        eval_bundle, files, evaluator_name
+    )
+    for file in files:
+        origin = custom_path / file
+        try:
+            shutil.copy2(origin, custom_path)
+        except shutil.SameFileError:
+            # If the file already exists, skip it.
+            pass
+
+    executable, _, status, _ = eval_bundle.lang_config.find_main_file(
+        files, evaluator_name
+    )
 
     if status != Status.CORRECT:
         return BaseExecutionResult(
@@ -146,7 +159,7 @@ def _evaluate_others(
 
     return execute_file(
         bundle=eval_bundle,
-        executable_name=executable,
+        executable_name=executable.name,
         working_directory=custom_path,
         stdin=None,
         remaining=None,

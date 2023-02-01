@@ -27,6 +27,7 @@ COMPILE_LANGUAGES = [
     "c",
     "kotlin",
     pytest.param("haskell", marks=mark_haskell),
+    "csharp",
 ]
 ALL_SPECIFIC_LANGUAGES = COMPILE_LANGUAGES + [
     "javascript",
@@ -43,6 +44,7 @@ quotes = {
     "javascript": '"',
     "runhaskell": '"',
     "bash": '"',
+    "csharp": '"',
 }
 
 
@@ -280,8 +282,8 @@ def test_programmed_evaluation(language: str, tmp_path: Path, pytestconfig):
     )
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["correct"] * 4
-    assert len(updates.find_all("append-message")) == 4
+    assert updates.find_status_enum() == ["correct"] * 5
+    assert len(updates.find_all("append-message")) == 5
 
 
 @pytest.mark.parametrize(
@@ -289,13 +291,13 @@ def test_programmed_evaluation(language: str, tmp_path: Path, pytestconfig):
     [
         "python",
         "java",
-        "javascript",
         "kotlin",
+        "csharp",
         pytest.param("haskell", marks=mark_haskell),
         pytest.param("runhaskell", marks=mark_haskell),
     ],
 )
-def test_language_evaluator_exception(lang: str, tmp_path: Path, pytestconfig):
+def test_language_evaluator_exception_correct(lang: str, tmp_path: Path, pytestconfig):
     conf = configuration(
         pytestconfig, "division", lang, tmp_path, "plan.json", "correct"
     )
@@ -310,11 +312,12 @@ def test_language_evaluator_exception(lang: str, tmp_path: Path, pytestconfig):
         "python",
         "java",
         "kotlin",
+        "csharp",
         pytest.param("haskell", marks=mark_haskell),
         pytest.param("runhaskell", marks=mark_haskell),
     ],
 )
-def test_language_evaluator_exception(lang: str, tmp_path: Path, pytestconfig):
+def test_language_evaluator_exception_wrong(lang: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "division", lang, tmp_path, "plan.json", "wrong")
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
@@ -322,7 +325,7 @@ def test_language_evaluator_exception(lang: str, tmp_path: Path, pytestconfig):
     assert len(updates.find_all("append-message")) == 1
 
 
-@pytest.mark.parametrize("lang", ["python", "java", "kotlin"])
+@pytest.mark.parametrize("lang", ["python", "java", "kotlin", "csharp"])
 def test_assignment_and_use_in_expression(lang: str, tmp_path: Path, pytestconfig):
     conf = configuration(
         pytestconfig, "isbn", lang, tmp_path, "one-with-assignment.tson", "solution"
@@ -343,6 +346,7 @@ def test_assignment_and_use_in_expression(lang: str, tmp_path: Path, pytestconfi
         "python",
         "java",
         "kotlin",
+        "csharp",
         pytest.param("haskell", marks=mark_haskell),
         pytest.param("runhaskell", marks=mark_haskell),
     ],
@@ -366,7 +370,7 @@ def test_assignment_and_use_in_expression_list(lang: str, tmp_path: Path, pytest
     assert len(updates.find_all("start-test")) == 1
 
 
-@pytest.mark.parametrize("lang", ["python", "java", "kotlin"])
+@pytest.mark.parametrize("lang", ["python", "java", "kotlin", "csharp"])
 def test_crashing_assignment_with_before(lang: str, tmp_path: Path, pytestconfig):
     conf = configuration(
         pytestconfig,
@@ -413,7 +417,7 @@ def test_missing_key_types_detected(lang: str, tmp_path: Path, pytestconfig):
     assert updates.find_status_enum() == ["internal error"]
 
 
-@pytest.mark.parametrize("lang", ["python", "java", "kotlin", "javascript"])
+@pytest.mark.parametrize("lang", ["python", "java", "kotlin", "javascript", "csharp"])
 def test_programmed_evaluator_lotto(lang: str, tmp_path: Path, pytestconfig):
     conf = configuration(
         pytestconfig, "lotto", lang, tmp_path, "one-programmed-python.tson", "correct"
@@ -424,7 +428,7 @@ def test_programmed_evaluator_lotto(lang: str, tmp_path: Path, pytestconfig):
     assert updates.find_status_enum() == ["correct"]
 
 
-@pytest.mark.parametrize("lang", ["python", "java", "kotlin", "javascript"])
+@pytest.mark.parametrize("lang", ["python", "java", "kotlin", "javascript", "csharp"])
 def test_programmed_evaluator_wrong(lang: str, tmp_path: Path, pytestconfig):
     conf = configuration(
         pytestconfig, "lotto", lang, tmp_path, "one-programmed-python.tson", "wrong"
@@ -522,7 +526,7 @@ def test_batch_compilation_no_fallback_runtime(
 
 
 @pytest.mark.parametrize(
-    "lang", ["python", "java", "c", "javascript", "kotlin", "bash"]
+    "lang", ["python", "java", "c", "javascript", "kotlin", "bash", "csharp"]
 )
 def test_program_params(lang: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "sum", lang, tmp_path, "short.tson", "correct")
@@ -533,7 +537,9 @@ def test_program_params(lang: str, tmp_path: Path, pytestconfig):
     assert len(updates.find_all("start-test")) == 4
 
 
-@pytest.mark.parametrize("language", ["python", "java", "kotlin", "javascript"])
+@pytest.mark.parametrize(
+    "language", ["python", "java", "kotlin", "javascript", "csharp"]
+)
 def test_objects(language: str, tmp_path: Path, pytestconfig):
     conf = configuration(
         pytestconfig, "objects", language, tmp_path, "plan.tson", "correct"
@@ -544,7 +550,9 @@ def test_objects(language: str, tmp_path: Path, pytestconfig):
     assert len(updates.find_all("start-testcase")) == 3
 
 
-@pytest.mark.parametrize("language", ["python", "java", "kotlin", "javascript"])
+@pytest.mark.parametrize(
+    "language", ["python", "java", "kotlin", "javascript", "csharp"]
+)
 def test_objects_chained(language: str, tmp_path: Path, pytestconfig):
     conf = configuration(
         pytestconfig, "objects", language, tmp_path, "chained.tson", "correct"
@@ -555,7 +563,9 @@ def test_objects_chained(language: str, tmp_path: Path, pytestconfig):
     assert len(updates.find_all("start-testcase")) == 3
 
 
-@pytest.mark.parametrize("language", ["python", "java", "kotlin", "javascript"])
+@pytest.mark.parametrize(
+    "language", ["python", "java", "kotlin", "javascript", "csharp"]
+)
 def test_counter(language: str, tmp_path: Path, pytestconfig):
     conf = configuration(
         pytestconfig, "counter", language, tmp_path, "plan.yaml", "solution"
@@ -566,7 +576,9 @@ def test_counter(language: str, tmp_path: Path, pytestconfig):
     assert len(updates.find_all("start-testcase")) == 7
 
 
-@pytest.mark.parametrize("language", ["python", "java", "kotlin", "javascript"])
+@pytest.mark.parametrize(
+    "language", ["python", "java", "kotlin", "javascript", "csharp"]
+)
 def test_counter_chained(language: str, tmp_path: Path, pytestconfig):
     conf = configuration(
         pytestconfig, "counter", language, tmp_path, "chained.yaml", "solution"
@@ -577,7 +589,9 @@ def test_counter_chained(language: str, tmp_path: Path, pytestconfig):
     assert len(updates.find_all("start-testcase")) == 4
 
 
-@pytest.mark.parametrize("language", ["python", "java", "kotlin", "javascript"])
+@pytest.mark.parametrize(
+    "language", ["python", "java", "kotlin", "javascript", "csharp"]
+)
 def test_objects_yaml(language: str, tmp_path: Path, pytestconfig):
     conf = configuration(
         pytestconfig, "objects", language, tmp_path, "plan.yaml", "correct"
@@ -622,9 +636,10 @@ def test_too_much_output(tmp_path: Path, pytestconfig):
     assert len(updates.find_all("close-test")) == 2
 
 
-def test_named_parameters_supported(tmp_path: Path, pytestconfig):
+@pytest.mark.parametrize("language", ["python", "csharp"])
+def test_named_parameters_supported(language: str, tmp_path: Path, pytestconfig):
     conf = configuration(
-        pytestconfig, "echo-function", "python", tmp_path, "one-named.tson", "correct"
+        pytestconfig, "echo-function", language, tmp_path, "one-named.tson", "correct"
     )
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
