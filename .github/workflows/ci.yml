@@ -45,4 +45,5 @@ jobs:
       - uses: actions/checkout@v2
       - uses: psf/black@stable
         with:
+          version: "~= 22.0"
           src: "./tested ./tests"
