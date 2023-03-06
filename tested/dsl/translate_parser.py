@@ -6,16 +6,16 @@ from pathlib import Path
 from jsonschema import Draft7Validator
 from pydantic.json import pydantic_encoder
 
-from dsl.ast_translator import parse_string
+from .ast_translator import parse_string
 
-from tested.datatypes import (
+from ..datatypes import (
     BasicBooleanTypes,
     BasicNumericTypes,
     BasicObjectTypes,
     BasicSequenceTypes,
     BasicStringTypes,
 )
-from tested.serialisation import (
+from ..serialisation import (
     Value,
     NothingType,
     StringType,
@@ -26,7 +26,7 @@ from tested.serialisation import (
     ObjectKeyValuePair,
     ExceptionValue,
 )
-from tested.testplan import (
+from ..testplan import (
     Context,
     FileUrl,
     GenericTextEvaluator,

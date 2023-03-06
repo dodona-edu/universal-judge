@@ -1,13 +1,12 @@
 import itertools
+import time
+
 import logging
 import shutil
-from pathlib import Path
-from typing import List, Optional, Tuple, Callable, Union
-
-import time
 from dataclasses import dataclass
-
-from utils import safe_del
+from pathlib import Path
+from tested.internal_timings import new_stage
+from typing import List, Optional, Tuple, Callable, Union
 from .collector import OutputManager
 from .compilation import run_compilation, process_compile_results
 from .utils import BaseExecutionResult, run_command
@@ -16,7 +15,7 @@ from ..dodona import Message, Status
 from ..languages.config import FileFilter, Config
 from ..languages.generator import value_file, exception_file
 from ..testplan import ExecutionMode, Context, EmptyChannel
-from tested.internal_timings import new_stage
+from ..utils import safe_del
 
 _logger = logging.getLogger(__name__)
 

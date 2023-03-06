@@ -30,7 +30,7 @@ from pydantic import ValidationError
 
 import ast
 import dataclasses
-from tested.datatypes import (
+from ..datatypes import (
     AdvancedNothingTypes,
     BasicNothingTypes,
     AllTypes,
@@ -38,7 +38,7 @@ from tested.datatypes import (
     AdvancedSequenceTypes,
     BasicObjectTypes,
 )
-from tested.serialisation import (
+from ..serialisation import (
     Statement,
     Assignment,
     Expression,
@@ -54,7 +54,7 @@ from tested.serialisation import (
     VariableType,
     Identifier,
 )
-from tested.utils import get_args
+from ..utils import get_args
 
 
 class InvalidDslError(Exception):

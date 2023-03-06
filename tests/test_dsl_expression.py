@@ -2,7 +2,7 @@ import math
 
 import pytest
 
-from dsl.ast_translator import parse_string, InvalidDslError
+from tested.dsl.ast_translator import parse_string, InvalidDslError
 from tested.datatypes import (
     BasicNothingTypes,
     BasicNumericTypes,
