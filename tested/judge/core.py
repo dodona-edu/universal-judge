@@ -8,8 +8,13 @@ from typing import Tuple, List
 
 from .collector import OutputManager
 from .compilation import run_compilation, process_compile_results
-from .evaluation import evaluate_run_results, evaluate_context_results
-from .execution import Execution, execute_execution, ExecutionResult
+from .evaluation import evaluate_context_results
+from .execution import (
+    Execution,
+    execute_execution,
+    ExecutionResult,
+    merge_contexts_into_units,
+)
 from tested.internal_timings import (
     new_stage,
     end_stage,
@@ -176,12 +181,13 @@ def judge(bundle: Bundle):
     # Create a list of runs we want to execute.
     for tab_index, tab in enumerate(bundle.plan.tabs):
         collector.add_tab(StartTab(title=tab.name, hidden=tab.hidden), tab_index)
+        execution_units = merge_contexts_into_units(tab.contexts)
         executions = []
         offset = 0
-        for execution_index, run in enumerate(tab.runs):
+        for execution_index, unit in enumerate(execution_units):
             executions.append(
                 Execution(
-                    run=run,
+                    unit=unit,
                     context_offset=offset,
                     execution_name=bundle.lang_config.execution_name(
                         tab_number=tab_index, execution_number=execution_index
@@ -194,7 +200,7 @@ def judge(bundle: Bundle):
                     collector=collector,
                 )
             )
-            offset += int(run.run.input.main_call) + len(run.contexts)
+            offset += len(unit.contexts)
 
         remaining = max_time - (time.perf_counter() - start)
         if parallel:
@@ -345,13 +351,14 @@ def _generate_files(
     execution_names = []
     # Generate the files for each execution.
     for tab_i, tab in enumerate(bundle.plan.tabs):
-        for run_i, run in enumerate(tab.runs):
-            execution_name = bundle.lang_config.execution_name(tab_i, run_i)
+        execution_units = merge_contexts_into_units(tab.contexts)
+        for unit_i, unit in enumerate(execution_units):
+            execution_name = bundle.lang_config.execution_name(tab_i, unit_i)
             _logger.debug(f"Generating file for execution {execution_name}")
             generated, evaluators = generate_execution(
                 bundle=bundle,
                 destination=common_dir,
-                run=run,
+                execution_unit=unit,
                 execution_name=execution_name,
             )
             # Copy evaluators to the directory.
@@ -375,71 +382,34 @@ def _process_results(
     bundle: Bundle,
     execution: Execution,
     execution_result: Optional[ExecutionResult],
-    m: List[Message],
+    compiler_messages: List[Message],
     s: Status,
     p: Path,
 ) -> Optional[Status]:
     if execution_result:
-        context_results, run_testcase = execution_result.to_context_execution_results()
+        context_results = execution_result.to_context_results()
     else:
-        context_results, run_testcase = [None] * len(execution.run.contexts), None
-
-    has_main = execution.run.run.input.main_call
-    exit_code = execution.run.run.output.exit_code
-
-    if has_main or (
-        len(context_results) == 0
-        and (
-            run_testcase.exit
-            or run_testcase.stdout
-            or run_testcase.stderr
-            or run_testcase.exception
-            or run_testcase.timeout
-            or run_testcase.memory
-        )
-    ):
-
-        offset = execution.context_offset if has_main else None
-        if not has_main:
-            execution.run.run.description = get_i18n_string("judge.core.initialization")
-        execution.collector.add_context(StartContext(), offset)
-        continue_ = evaluate_run_results(
-            bundle,
-            execution.run.run,
-            run_testcase,
-            (m, s),
-            p,
-            execution.collector,
-            bool(context_results),
-        )
-        execution.collector.add_context(CloseContext(), offset)
-        if execution.collector.is_full():
-            return Status.OUTPUT_LIMIT_EXCEEDED
-        if continue_ in (Status.TIME_LIMIT_EXCEEDED, Status.MEMORY_LIMIT_EXCEEDED):
-            return continue_
+        context_results = [None] * len(execution.unit.contexts)
 
     for index, (context, context_result) in enumerate(
-        zip(execution.run.contexts, context_results),
-        int(has_main) + execution.context_offset,
+        zip(execution.unit.contexts, context_results), execution.context_offset
     ):
         execution.collector.add_context(
             StartContext(description=context.description), index
         )
 
-        if index == 0 and not has_main:
-            mi = m
-        else:
-            mi = []
-
         continue_ = evaluate_context_results(
             bundle,
             context=context,
             exec_results=context_result,
-            compiler_results=(mi, s),
+            compiler_results=(compiler_messages, s),
             context_dir=p,
             collector=execution.collector,
-            exit_output=exit_code,
         )
+
+        # We handled the compiler messages above, so remove them.
+        compiler_messages = []
+
         execution.collector.add_context(CloseContext(), index)
         if execution.collector.is_full():
             return Status.OUTPUT_LIMIT_EXCEEDED

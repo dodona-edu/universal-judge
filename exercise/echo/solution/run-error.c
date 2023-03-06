@@ -1,5 +1,8 @@
+#include <stdio.h>;
+
 int main() {
-    int i[1] = {1};
+    fprintf(stderr, "Ooeps");
+    int i[1] = {0};
     i[8000] = 30;
     return i[0];
 }

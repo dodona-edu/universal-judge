@@ -3,7 +3,7 @@ tabs:
 - tab: "Counter"
   contexts:
     - testcases:
-        - statement: "c_01 = new counter()"
+        - statement: "c_01 = Counter()"
         - expression: "c_01.get()"
           return: 0
         - statement: "c_01.add()"

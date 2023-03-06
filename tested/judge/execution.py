@@ -1,13 +1,13 @@
 import itertools
 import logging
-import os
 import shutil
 from pathlib import Path
-from typing import List, Optional, Tuple, NamedTuple, Callable, Union
+from typing import List, Optional, Tuple, Callable, Union
 
 import time
-from pydantic.dataclasses import dataclass
+from dataclasses import dataclass
 
+from utils import safe_del
 from .collector import OutputManager
 from .compilation import run_compilation, process_compile_results
 from .utils import BaseExecutionResult, run_command
@@ -15,35 +15,20 @@ from ..configs import Bundle
 from ..dodona import Message, Status
 from ..languages.config import FileFilter, Config
 from ..languages.generator import value_file, exception_file
-from ..testplan import ExecutionMode, Run
-from tested.internal_timings import new_stage, end_stage
+from ..testplan import ExecutionMode, Context, EmptyChannel
+from tested.internal_timings import new_stage
 
 _logger = logging.getLogger(__name__)
 
 
 @dataclass
-class RunTestcaseResult(BaseExecutionResult):
+class ContextResult(BaseExecutionResult):
     """
-    The result of a run testcase execution.
+    The results of executing a context.
 
-    All output streams are divided per testcase, in the same order as the
-    context that was used to execute_module the test. E.g. the string at
-    position 0 in stdout is the result of executing the testcase at position 0 in
-    the context.
-    """
-
-    exception: str
-
-
-@dataclass
-class TestcaseResult(BaseExecutionResult):
-    """
-    The result of a testcase execution.
-
-    All output streams are divided per testcase, in the same order as the
-    context that was used to execute_module the test. E.g. the string at position
-    0 in stdout is the result of executing the testcase at position 0 in the
-    context.
+    All output streams are divided by the testcase separator, in the same order
+    as the testcases in the context in the test suite. For example, the string
+    at position 0 of the split output is the output for the first testcase.
     """
 
     separator: str
@@ -54,57 +39,56 @@ class TestcaseResult(BaseExecutionResult):
 @dataclass
 class ExecutionResult(BaseExecutionResult):
     """
-    The result of a context_testcase testcase execution.
+    The results of executing an execution unit.
 
-    All output streams are divided per testcase, in the same order as the
-    context that was used to execute_module the test. E.g. the string at position
-    0 in stdout is the result of executing the testcase at position 0 in the
-    context.
+    All the output is divided by the context separator, in the same order as
+    the contexts from the test suite. For example, the string at position 0 of
+    the split output is the output for the first context.
     """
 
     context_separator: str
-    separator: str
+    testcase_separator: str
     results: str
     exceptions: str
 
-    def to_context_execution_results(
+    def to_context_results(
         self,
-    ) -> Tuple[List[TestcaseResult], RunTestcaseResult]:
-        results = self.results.split(self.context_separator)[1:]
-        exceptions = self.exceptions.split(self.context_separator)[1:]
-        stderr = self.stderr.split(self.context_separator)[1:]
-        stdout = self.stdout.split(self.context_separator)[1:]
+    ) -> List[ContextResult]:
 
+        results = self.results.split(self.context_separator)
+        exceptions = self.exceptions.split(self.context_separator)
+        stderr = self.stderr.split(self.context_separator)
+        stdout = self.stdout.split(self.context_separator)
         size = max(len(results), len(exceptions), len(stderr), len(stdout))
 
-        if size == 0:
-            return [], RunTestcaseResult(
-                exit=self.exit,
-                exception="",
-                stdout="",
-                stderr="",
-                timeout=self.timeout,
-                memory=self.memory,
-            )
-        run_testcase = RunTestcaseResult(
-            exit=self.exit,
-            exception=(exceptions or [""])[0] or "",
-            stdout=(stdout or [""])[0] or "",
-            stderr=(stderr or [""])[0] or "",
-            timeout=self.timeout and size <= 1,
-            memory=self.memory and size <= 1,
-        )
+        # Since the context separator is first, we should have one that is empty.
+        # We only remove it if it is in fact empty, otherwise ignore it.
+        safe_del(stdout, 0, lambda e: e == "")
+        safe_del(stderr, 0, lambda e: e == "")
+        safe_del(exceptions, 0, lambda e: e == "")
+        safe_del(results, 0, lambda e: e == "")
 
-        size = size - 1
+        if size == 0:
+            return [
+                ContextResult(
+                    exit=self.exit,
+                    exceptions="",
+                    stdout="",
+                    stderr="",
+                    timeout=self.timeout,
+                    memory=self.memory,
+                    separator=self.testcase_separator,
+                    results="",
+                )
+            ]
 
         context_execution_results = []
         for index, (r, e, err, out) in enumerate(
-            itertools.zip_longest(results[1:], exceptions[1:], stderr[1:], stdout[1:]),
-            start=1,
+            itertools.zip_longest(results, exceptions, stderr, stdout)
         ):
             context_execution_results.append(
-                TestcaseResult(
-                    separator=self.separator,
+                ContextResult(
+                    separator=self.testcase_separator,
                     exit=self.exit,
                     results=r or "",
                     exceptions=e or "",
@@ -115,15 +99,34 @@ class ExecutionResult(BaseExecutionResult):
                 )
             )
 
-        return context_execution_results, run_testcase
+        return context_execution_results
 
 
-class Execution(NamedTuple):
+@dataclass
+class ExecutionUnit:
     """
-    Arguments used to execute_module a single execution derived from the testplan.
+    Combines a set of contexts that will be executed togheter.
     """
 
-    run: Run
+    contexts: List[Context]
+
+    def get_stdin(self, resources: Path) -> str:
+        return "\n".join(c.get_stdin(resources) or "" for c in self.contexts)
+
+    def has_main_testcase(self) -> bool:
+        return self.contexts[0].has_main_testcase()
+
+    def has_exit_testcase(self) -> bool:
+        return self.contexts[-1].has_exit_testcase()
+
+
+@dataclass
+class Execution:
+    """
+    Contains an execution unit and various metadata.
+    """
+
+    unit: ExecutionUnit
     context_offset: int
     execution_name: str
     execution_index: int
@@ -256,7 +259,7 @@ def execute_execution(
         _logger.debug("Executing context %s in INDIVIDUAL mode...", args.execution_name)
 
         executable, messages, status, annotations = lang_config.find_main_file(
-            files, args.execution_name
+            files, args.execution_name, messages
         )
 
         for annotation in annotations:
@@ -266,17 +269,17 @@ def execute_execution(
             return None, messages, status, execution_dir
 
         files.remove(executable)
-        stdin = args.run.get_stdin(bundle.config.resources)
+        stdin = args.unit.get_stdin(bundle.config.resources)
         argument = None
     else:
         new_stage("compilation.batch.done", True)
         result, files = None, list(dependencies)
         if args.precompilation_result:
             _logger.debug("Substituting precompilation results.")
-            messages, status = args.precompilation_result
+            messages, _ = args.precompilation_result
         else:
             _logger.debug("No precompilation results found, using default.")
-            messages, status = [], Status.CORRECT
+            messages, _ = [], Status.CORRECT
 
         _logger.info(
             "Executing context %s in PRECOMPILATION mode...", args.execution_name
@@ -288,7 +291,7 @@ def execute_execution(
             selector_name = lang_config.selector_name()
 
             executable, messages, status, annotations = lang_config.find_main_file(
-                files, selector_name
+                files, selector_name, messages
             )
 
             _logger.debug(f"Found main file: {executable}")
@@ -300,13 +303,13 @@ def execute_execution(
                 return None, messages, status, execution_dir
 
             files.remove(executable)
-            stdin = args.run.get_stdin(bundle.config.resources)
+            stdin = args.unit.get_stdin(bundle.config.resources)
             argument = args.execution_name
         else:
             _logger.debug("Selector is not needed, using individual execution.")
 
             executable, messages, status, annotations = lang_config.find_main_file(
-                files, args.execution_name
+                files, args.execution_name, messages
             )
 
             for annotation in annotations:
@@ -316,7 +319,7 @@ def execute_execution(
                 return None, messages, status, execution_dir
 
             files.remove(executable)
-            stdin = args.run.get_stdin(bundle.config.resources)
+            stdin = args.unit.get_stdin(bundle.config.resources)
             argument = None
 
     remaining = max_time - (time.perf_counter() - start)
@@ -348,7 +351,7 @@ def execute_execution(
         args.collector.add(annotation)
     messages.extend(msgs)
 
-    identifier = f"--{bundle.secret}-- SEP"
+    testcase_identifier = f"--{bundle.secret}-- SEP"
     context_identifier = f"--{bundle.context_separator_secret}-- SEP"
 
     value_file_path = value_file(bundle, execution_dir)
@@ -361,7 +364,6 @@ def execute_execution(
 
     exception_file_path = exception_file(bundle, execution_dir)
     try:
-        # noinspection PyTypeChecker
         with open(exception_file_path, "r") as f:
             exceptions = f.read()
     except FileNotFoundError:
@@ -373,7 +375,7 @@ def execute_execution(
         stderr=base_result.stderr,
         exit=base_result.exit,
         context_separator=context_identifier,
-        separator=identifier,
+        testcase_separator=testcase_identifier,
         results=values,
         exceptions=exceptions,
         timeout=base_result.timeout,
@@ -381,3 +383,38 @@ def execute_execution(
     )
 
     return result, messages, status, execution_dir
+
+
+def merge_contexts_into_units(contexts: List[Context]) -> List[ExecutionUnit]:
+    """
+    Merge contexts into as little execution units as possible.
+
+    :param contexts:
+    :return:
+    """
+    # return [ExecutionUnit(contexts=[c]) for c in contexts]
+
+    units = []
+    current_unit = []
+
+    for context in contexts:
+
+        # If we get stdin, start a new execution unit.
+        if (
+            context.has_main_testcase()
+            and context.testcases[0].input.stdin != EmptyChannel.NONE
+        ):
+            if current_unit:
+                units.append(ExecutionUnit(contexts=current_unit))
+            current_unit = []
+
+        current_unit.append(context)
+
+        if context.has_exit_testcase():
+            units.append(ExecutionUnit(contexts=current_unit))
+            current_unit = []
+
+    if current_unit:
+        units.append(ExecutionUnit(contexts=current_unit))
+
+    return units

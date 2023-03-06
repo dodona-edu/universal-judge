@@ -45,7 +45,7 @@ class CSharp(Language):
         return ["dotnet", file, *arguments]
 
     def find_main_file(
-        self, files: List[Path], name: str
+        self, files: List[Path], name: str, precompilation_messages: List[str]
     ) -> Tuple[Optional[Path], List[Message], Status, List[AnnotateCode]]:
         # TODO: specify the extension (if any) of the output files, so we don't need to
         # override this.
@@ -57,6 +57,7 @@ class CSharp(Language):
         if possible_main_files:
             return possible_main_files[0], messages, Status.CORRECT, []
         else:
+            messages.extend(precompilation_messages)
             messages.append(get_i18n_string("languages.config.unknown.compilation"))
             return None, messages, Status.COMPILATION_ERROR, []
 

@@ -50,8 +50,7 @@
                         }
                       }
                     }
-                  },
-                  "essential": false
+                  }
                 },
                 {
                   "input": {

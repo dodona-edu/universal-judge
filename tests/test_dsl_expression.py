@@ -2,6 +2,7 @@ import math
 
 import pytest
 
+from dsl.ast_translator import parse_string, InvalidDslError
 from tested.datatypes import (
     BasicNothingTypes,
     BasicNumericTypes,
@@ -14,7 +15,6 @@ from tested.datatypes import (
     AdvancedStringTypes,
     AdvancedNothingTypes,
 )
-from tested.dsl import Parser, ParseError
 from tested.serialisation import (
     Assignment,
     FunctionCall,
@@ -25,163 +25,166 @@ from tested.serialisation import (
     StringType,
     ObjectKeyValuePair,
     ObjectType,
+    BooleanType,
+    NumberType,
 )
-
-parser = Parser()
 
 
 def test_parse_value_null():
-    parsed = parser.parse_value("null")
+    parsed = parse_string("None")
+    assert parsed.type == BasicNothingTypes.NOTHING
+    assert parsed.data is None
+    parsed = parse_string("Null")
     assert parsed.type == BasicNothingTypes.NOTHING
     assert parsed.data is None
 
 
 def test_parse_value_undefined():
-    parsed = parser.parse_value("undefined")
+    parsed = parse_string("Undefined")
     assert parsed.type == AdvancedNothingTypes.UNDEFINED
     assert parsed.data is None
 
 
 def test_parse_value_pos_integer():
-    parsed = parser.parse_value("5")
+    parsed = parse_string("5")
     assert parsed.type == BasicNumericTypes.INTEGER
     assert parsed.data == 5
 
 
 def test_parse_value_neg_integer():
-    parsed = parser.parse_value("-10")
+    parsed = parse_string("-10")
     assert parsed.type == BasicNumericTypes.INTEGER
     assert parsed.data == -10
 
 
 def test_parse_value_integer():
-    parsed = parser.parse_value("-10 :: integer")
+    parsed = parse_string("integer(-10)")
     assert parsed.type == BasicNumericTypes.INTEGER
     assert parsed.data == -10
 
 
 def test_parse_value_bigint():
-    parsed = parser.parse_value("-1024 :: bigint")
+    parsed = parse_string("bigint(-1024)")
     assert parsed.type == AdvancedNumericTypes.BIG_INT
     assert parsed.data == -1024
 
 
 def test_parse_value_uint8():
-    parsed = parser.parse_value("5 :: uint8")
+    parsed = parse_string("uint8(5)")
     assert parsed.type == AdvancedNumericTypes.U_INT_8
     assert parsed.data == 5
 
 
 def test_parse_value_int8():
-    parsed = parser.parse_value("-10 :: int8")
+    parsed = parse_string("int8(-10)")
     assert parsed.type == AdvancedNumericTypes.INT_8
     assert parsed.data == -10
 
 
 def test_parse_value_uint16():
-    parsed = parser.parse_value("5 :: uint16")
+    parsed = parse_string("uint16(5)")
     assert parsed.type == AdvancedNumericTypes.U_INT_16
     assert parsed.data == 5
 
 
 def test_parse_value_int16():
-    parsed = parser.parse_value("-10 :: int16")
+    parsed = parse_string("int16(-10)")
     assert parsed.type == AdvancedNumericTypes.INT_16
     assert parsed.data == -10
 
 
 def test_parse_value_uint32():
-    parsed = parser.parse_value("5 :: uint32")
+    parsed = parse_string("uint32(5)")
     assert parsed.type == AdvancedNumericTypes.U_INT_32
     assert parsed.data == 5
 
 
 def test_parse_value_int32():
-    parsed = parser.parse_value("-10 :: int32")
+    parsed = parse_string("int32(-10)")
     assert parsed.type == AdvancedNumericTypes.INT_32
     assert parsed.data == -10
 
 
 def test_parse_value_uint64():
-    parsed = parser.parse_value("5 :: uint64")
+    parsed = parse_string("uint64(5)")
     assert parsed.type == AdvancedNumericTypes.U_INT_64
     assert parsed.data == 5
 
 
 def test_parse_value_int64():
-    parsed = parser.parse_value("-10 :: int64")
+    parsed = parse_string("int64(-10)")
     assert parsed.type == AdvancedNumericTypes.INT_64
     assert parsed.data == -10
 
 
 def test_parse_value_real():
-    parsed = parser.parse_value("1.0")
+    parsed = parse_string("1.0")
     assert parsed.type == BasicNumericTypes.REAL
     assert math.isclose(parsed.data, 1.0)
 
 
 def test_parse_value_real_neg():
-    parsed = parser.parse_value("-1.0 :: real")
+    parsed = parse_string("real(-1.0)")
     assert parsed.type == BasicNumericTypes.REAL
     assert math.isclose(parsed.data, -1.0)
 
 
 def test_parse_value_single():
-    parsed = parser.parse_value("1e-10 :: single")
+    parsed = parse_string("single_precision(1e-10)")
     assert parsed.type == AdvancedNumericTypes.SINGLE_PRECISION
     assert math.isclose(parsed.data, 1e-10)
 
 
 def test_parse_value_double():
-    parsed = parser.parse_value("+2.5e+10 :: double")
+    parsed = parse_string("double_precision(2.5e+10)")
     assert parsed.type == AdvancedNumericTypes.DOUBLE_PRECISION
     assert math.isclose(parsed.data, 2.5e10)
 
 
 def test_parse_value_double_extended():
-    parsed = parser.parse_value("-5.5e5 :: extended")
+    parsed = parse_string("double_extended(-5.5e5)")
     assert parsed.type == AdvancedNumericTypes.DOUBLE_EXTENDED
     assert math.isclose(parsed.data, -5.5e5)
 
 
 def test_parse_value_fixed_precision():
-    parsed = parser.parse_value("+5.5 :: fixed")
+    parsed = parse_string("fixed_precision(5.5)")
     assert parsed.type == AdvancedNumericTypes.FIXED_PRECISION
     assert math.isclose(parsed.data, 5.5)
 
 
 def test_parse_value_true():
-    parsed = parser.parse_value("true")
+    parsed = parse_string("True")
     assert parsed.type == BasicBooleanTypes.BOOLEAN
     assert parsed.data is True
 
 
 def test_parse_value_false():
-    parsed = parser.parse_value("false :: boolean")
+    parsed = parse_string("boolean(False)")
     assert parsed.type == BasicBooleanTypes.BOOLEAN
     assert parsed.data is False
 
 
 def test_parse_value_text():
-    parsed = parser.parse_value('"this is a string"')
+    parsed = parse_string('"this is a string"')
     assert parsed.type == BasicStringTypes.TEXT
     assert parsed.data == "this is a string"
 
 
 def test_parse_value_text_cast():
-    parsed = parser.parse_value(r'"this\nis\na\nstring" :: text')
+    parsed = parse_string(r'text("this\nis\na\nstring")')
     assert parsed.type == BasicStringTypes.TEXT
     assert parsed.data == "this\nis\na\nstring"
 
 
 def test_parse_value_char():
-    parsed = parser.parse_value('"c" :: char')
+    parsed = parse_string('char("c")')
     assert parsed.type == AdvancedStringTypes.CHAR
     assert parsed.data == "c"
 
 
 def test_parse_value_sequence():
-    parsed = parser.parse_value('[5, "text"]')
+    parsed = parse_string('[5, "text"]')
     assert parsed.type == BasicSequenceTypes.SEQUENCE
     assert len(parsed.data) == 2
     assert parsed.data[0].type == BasicNumericTypes.INTEGER
@@ -191,7 +194,7 @@ def test_parse_value_sequence():
 
 
 def test_parse_value_set():
-    parsed = parser.parse_value('{"d" :: char, 8 :: uint8}')
+    parsed = parse_string('{char("d"), uint8(8)}')
     assert parsed.type == BasicSequenceTypes.SET
     assert len(parsed.data) == 2
     assert parsed.data[0].type == AdvancedStringTypes.CHAR
@@ -201,7 +204,7 @@ def test_parse_value_set():
 
 
 def test_parse_value_tuple():
-    parsed = parser.parse_value("(true, false)")
+    parsed = parse_string("(True, False)")
     assert parsed.type == AdvancedSequenceTypes.TUPLE
     assert len(parsed.data) == 2
     assert parsed.data[0].type == BasicBooleanTypes.BOOLEAN
@@ -211,7 +214,7 @@ def test_parse_value_tuple():
 
 
 def test_parse_value_adv_sequence():
-    parsed = parser.parse_value('[5, ["text", "data"] :: array] :: list')
+    parsed = parse_string('list([5, array(["text", "data"])])')
     assert parsed.type == AdvancedSequenceTypes.LIST
     assert len(parsed.data) == 2
     assert parsed.data[0].type == BasicNumericTypes.INTEGER
@@ -225,49 +228,58 @@ def test_parse_value_adv_sequence():
 
 
 def test_parse_value_dict():
-    parsed = parser.parse_value('{"ignore": true, 5: 0}')
+    parsed = parse_string('{"ignore": True, 5: 0}')
     assert parsed.type == ObjectTypes.MAP
     parsed: ObjectType
     assert len(parsed.data) == 2
     key, value = parsed.data[0].key, parsed.data[0].value
+    assert isinstance(key, StringType)
     assert key.type == BasicStringTypes.TEXT
     assert key.data == "ignore"
+    assert isinstance(value, BooleanType)
     assert value.type == BasicBooleanTypes.BOOLEAN
     assert value.data is True
     key, value = parsed.data[1].key, parsed.data[1].value
+    assert isinstance(key, NumberType)
     assert key.type == BasicNumericTypes.INTEGER
     assert key.data == 5
+    assert isinstance(value, NumberType)
     assert value.type == BasicNumericTypes.INTEGER
     assert value.data == 0
 
 
 def test_parse_error_fun_in_return_value():
-    with pytest.raises(ParseError):
-        parser.parse_value("[fun()]")
+    with pytest.raises(InvalidDslError):
+        parse_string("[fun()]", is_return=True)
 
 
 def test_parse_error_property_in_return_value():
-    with pytest.raises(ParseError):
-        parser.parse_value("{data.data}")
+    with pytest.raises(InvalidDslError):
+        parse_string("{data.data}", is_return=True)
 
 
 def test_parse_error_constructor_in_return_value():
-    with pytest.raises(ParseError):
-        parser.parse_value('{"data": new data.Object()}')
+    with pytest.raises(InvalidDslError):
+        parse_string('{"data": data.Object()}', is_return=True)
 
 
 def test_parse_error_constructor_in_return_value2():
-    with pytest.raises(ParseError):
-        parser.parse_value('{new data.Object(): "data"}')
+    with pytest.raises(InvalidDslError):
+        parse_string('{data.Object(): "data"}', is_return=True)
+
+
+def test_syntax_error_in_parser():
+    with pytest.raises(InvalidDslError):
+        parse_string("<test>")
 
 
 def test_parse_error_fun_assign():
-    with pytest.raises(ParseError):
-        parser.parse_statement("data = first([object.gen_int()])")
+    with pytest.raises(InvalidDslError):
+        parse_string("data = first([object.gen_int()])")
 
 
 def test_parse_fun_assign():
-    assign = parser.parse_statement("integer data = first([object.gen_int()])")
+    assign = parse_string("data: integer = first([object.gen_int()])")
     assert isinstance(assign, Assignment)
     assert assign.type == BasicNumericTypes.INTEGER
     assert assign.variable == "data"
@@ -289,7 +301,7 @@ def test_parse_fun_assign():
 
 
 def test_parse_constructor_assign():
-    assign = parser.parse_statement("Container cont = new Container({object.version})")
+    assign = parse_string("cont: Container = Container({object.version})")
     assert isinstance(assign, Assignment)
     assert isinstance(assign.type, VariableType)
     assert assign.type.data == "Container"
@@ -312,7 +324,7 @@ def test_parse_constructor_assign():
 
 
 def test_parse_constructor_assign2():
-    assign = parser.parse_statement("cont = new Container({object.version})")
+    assign = parse_string("cont = Container({object.version})")
     assert isinstance(assign, Assignment)
     assert isinstance(assign.type, VariableType)
     assert assign.type.data == "Container"
@@ -335,7 +347,7 @@ def test_parse_constructor_assign2():
 
 
 def test_parse_value_assign():
-    assign = parser.parse_statement("list lijst = [new Container(5, True)] :: list")
+    assign = parse_string("lijst: list = list([Container(5, true)])")
     assert isinstance(assign, Assignment)
     assert assign.type == AdvancedSequenceTypes.LIST
     assert assign.variable == "lijst"
@@ -352,11 +364,11 @@ def test_parse_value_assign():
     assert elem.arguments[0].type == BasicNumericTypes.INTEGER
     assert elem.arguments[0].data == 5
     assert isinstance(elem.arguments[1], Identifier)
-    assert elem.arguments[1] == "True"
+    assert elem.arguments[1] == "true"
 
 
 def test_parse_function():
-    function = parser.parse_statement('generate({"size": get_size()})')
+    function = parse_string('generate({"size": get_size()})')
     assert isinstance(function, FunctionCall)
     assert function.type == FunctionType.FUNCTION
     assert function.namespace is None
@@ -378,27 +390,26 @@ def test_parse_function():
 
 
 def test_parse_identifier():
-    parsed = parser.parse_statement("id")
+    parsed = parse_string("id")
     assert isinstance(parsed, Identifier)
     assert parsed == "id"
 
 
 def test_parse_value():
-    parsed = parser.parse_statement("5.5")
+    parsed = parse_string("5.5")
     assert parsed.type == BasicNumericTypes.REAL
     assert math.isclose(parsed.data, 5.5)
 
 
 def test_parse_cast_set():
-    parsed = parser.parse_statement("{} :: set")
-    assert parsed.type == BasicSequenceTypes.SET
-    assert parsed.data == []
-    with pytest.raises(ParseError):
-        parser.parse_statement('{"data": "data"} :: set')
+    with pytest.raises(InvalidDslError):
+        parse_string("set({})")
+    with pytest.raises(InvalidDslError):
+        parse_string('set({"data": "data"})')
 
 
 def test_parse_property():
-    parsed = parser.parse_statement("alpha.beta")
+    parsed = parse_string("alpha.beta")
     assert parsed.type == FunctionType.PROPERTY
     assert parsed.arguments == []
     assert parsed.name == "beta"
@@ -406,7 +417,7 @@ def test_parse_property():
 
 
 def test_parse_chained_constructor():
-    parsed = parser.parse_statement("(new Container(5)).get()")
+    parsed = parse_string("Container(5).get()")
     assert parsed.type == FunctionType.FUNCTION
     assert parsed.name == "get"
     namespace = parsed.namespace
@@ -415,7 +426,7 @@ def test_parse_chained_constructor():
 
 
 def test_parse_chained_function():
-    parsed = parser.parse_statement("get_container().get()")
+    parsed = parse_string("get_container().get()")
     assert parsed.type == FunctionType.FUNCTION
     assert parsed.name == "get"
     namespace = parsed.namespace
@@ -425,7 +436,7 @@ def test_parse_chained_function():
 
 
 def test_parse_chained_function2():
-    parsed = parser.parse_statement("get_container().get().get()")
+    parsed = parse_string("get_container().get().get()")
     assert parsed.type == FunctionType.FUNCTION
     assert parsed.name == "get"
     namespace = parsed.namespace
@@ -439,7 +450,7 @@ def test_parse_chained_function2():
 
 
 def test_parse_chained_property():
-    parsed = parser.parse_statement("get_container().property.data")
+    parsed = parse_string("get_container().property.data")
     assert parsed.type == FunctionType.PROPERTY
     assert parsed.name == "data"
     namespace = parsed.namespace
@@ -450,10 +461,3 @@ def test_parse_chained_property():
     assert namespace.namespace is None
     assert namespace.type == FunctionType.FUNCTION
     assert namespace.name == "get_container"
-
-
-def test_parse_global_variable():
-    parsed = parser.parse_statement("<data>")
-    assert parsed.type == FunctionType.PROPERTY
-    assert parsed.name == "data"
-    assert parsed.namespace is None

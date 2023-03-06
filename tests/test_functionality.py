@@ -3,7 +3,7 @@ Testcases for specific functionality. These tests ensure the judge works.
 These tests are a compromise: they don't test the complete output, but this does
 make them usable for multiple languages.
 
-The configure which languages are tested, modify the `conftest.py` file.
+To configure which languages are tested, modify the `conftest.py` file.
 
 Running the tests should happen in with the root directory (the one with src/ and
 tests/) as the working directory.

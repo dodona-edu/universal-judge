@@ -12,7 +12,7 @@ from pygments.formatters.html import HtmlFormatter
 from pygments.lexers import get_lexer_by_name
 
 from ..configs import Bundle
-from ..dsl import Parser
+from ..dsl import parse_string
 
 from typing import TYPE_CHECKING
 
@@ -177,11 +177,10 @@ class DescriptionGenerator:
     ) -> str:
         from .generator import convert_statement
 
-        parser = Parser()
         if statement:
-            stmt = parser.parse_statement(stmt)
+            stmt = parse_string(stmt)
         else:
-            stmt = parser.parse_value(stmt)
+            stmt = parse_string(stmt, is_return=True)
 
         required = stmt.get_used_features()
         available = self.language.supported_constructs()

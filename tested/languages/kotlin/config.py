@@ -85,14 +85,16 @@ class Kotlin(Language):
         return linter.run_ktlint(bundle, submission, remaining)
 
     def find_main_file(
-        self, files: List[str], name: str
+        self, files: List[str], name: str, precompilation_messages: List[str]
     ) -> Tuple[Optional[str], List[Message], Status, List[AnnotateCode]]:
         logger.debug("Finding %s in %s", name, files)
-        main, msgs, status, ants = Language.find_main_file(self, files, name + "Kt")
+        main, msgs, status, ants = Language.find_main_file(
+            self, files, name + "Kt", precompilation_messages
+        )
         if status == Status.CORRECT:
             return main, msgs, status, ants
         else:
-            return Language.find_main_file(self, files, name)
+            return Language.find_main_file(self, files, name, precompilation_messages)
 
     def filter_dependencies(
         self, bundle: Bundle, files: List[Path], context_name: str

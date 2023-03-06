@@ -77,19 +77,29 @@ namespace Tested
         % for i, ctx in enumerate(contexts):
             private void Context${i}() {
                 ${ctx.before}
-                % for testcase in ctx.testcases:
+
+                % for tc in ctx.testcases:
                     WriteSeparator();
-                    <% testcase: _TestcaseArguments %>\
-                    <% statement = testcase.input_statement() %>\
-                    % if isinstance(testcase.command, get_args(Assignment)):
-                        <%include file="declaration.mako" args="tp=statement.type, value=statement.expression" /> ${testcase.command.variable} = null;
+
+                    ## Make a variable available outside of the try-catch block.
+                    % if not tc.testcase.is_main_testcase() and isinstance(tc.input.command, get_args(Assignment)):
+                        <%include file="declaration.mako" args="tp=tc.input.command.type, value=tc.input.command.expression" /> ${tc.input.command.variable} = null;
                     % endif
+
                     try {
-                        ## If we have a value function, we have an expression.
-                        <%include file="statement.mako" args="statement=statement" />;
-                        <%include file="statement.mako" args="statement=testcase.exception_statement()" />;
+                        % if tc.testcase.is_main_testcase():
+                            ${submission_name}.Main(new string[]{\
+                                % for argument in tc.input.arguments:
+                                    "${argument}", \
+                                % endfor
+                            });
+                        % else:
+                            ## If we have a value function, we have an expression.
+                            <%include file="statement.mako" args="statement=tc.input.input_statement()" />;
+                        % endif
+                        <%include file="statement.mako" args="statement=tc.exception_statement()" />;
                     } catch(System.Exception E) {
-                        <%include file="statement.mako" args="statement=testcase.exception_statement('e')" />;
+                        <%include file="statement.mako" args="statement=tc.exception_statement('e')" />;
                     }
                 % endfor
                 ${ctx.after}
@@ -98,20 +108,6 @@ namespace Tested
 
         void Execute()
         {
-          WriteContextSeparator();
-          % if run_testcase.exists:
-              try {
-                  ${submission_name}.Main(new string[]{\
-                      % for argument in run_testcase.arguments:
-                          "${argument}", \
-                      % endfor
-                  });
-                  <%include file="statement.mako" args="statement=run_testcase.exception_statement()" />;
-              } catch (System.Exception E) {
-                  <%include file="statement.mako" args="statement=run_testcase.exception_statement('e')" />;
-              }
-          % endif
-
           % for i, ctx in enumerate(contexts):
               WriteContextSeparator();
               Context${i}();

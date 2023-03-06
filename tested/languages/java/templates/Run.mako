@@ -72,43 +72,40 @@ public class ${execution_name} implements Closeable {
     % for i, ctx in enumerate(contexts):
         private void context${i}() throws Exception {
             ${ctx.before}
-            % for testcase in ctx.testcases:
+
+            % for tc in ctx.testcases:
+                this.writeSeparator();
+
                 ## In Java, we need special code to make variables available outside of
                 ## the try-catch block.
-                this.writeSeparator();
-                % if isinstance(testcase.command, get_args(Assignment)):
+                % if not tc.testcase.is_main_testcase() and isinstance(tc.input.command, get_args(Assignment)):
                     <%include file="declaration.mako"
-                              args="tp=testcase.command.type,value=testcase.command.expression" /> \
-                    ${testcase.command.variable} = null;
+                              args="tp=tc.input.command.type,value=tc.input.command.expression" /> \
+                    ${tc.input.command.variable} = null;
                 % endif
+
                 try {
-                    <%include file="statement.mako" args="statement=testcase.input_statement()" />;
-                    <%include file="statement.mako" args="statement=testcase.exception_statement()" />;
+                    % if tc.testcase.is_main_testcase():
+                        ${submission_name}.main(new String[]{\
+                            % for argument in tc.input.arguments:
+                                "${argument}", \
+                            % endfor
+                        });
+                    % else:
+                        <%include file="statement.mako" args="statement=tc.input.input_statement()" />;
+                    % endif
+                    <%include file="statement.mako" args="statement=tc.exception_statement()" />;
                 } catch (Exception | AssertionError e) {
-                    <%include file="statement.mako" args="statement=testcase.exception_statement('e')" />;
+                    <%include file="statement.mako" args="statement=tc.exception_statement('e')" />;
                 }
             % endfor
+
             ${ctx.after}
         }
     % endfor
 
     ## Most important function: actual execution happens here.
     void execute() throws Exception {
-        ## In Java, we must execute_module the before and after code in the context.
-        ## Call the main function if needed.
-        this.writeContextSeparator();
-        % if run_testcase.exists:
-            try {
-                ${submission_name}.main(new String[]{\
-                    % for argument in run_testcase.arguments:
-                        "${argument}", \
-                    % endfor
-                });
-                <%include file="statement.mako" args="statement=run_testcase.exception_statement()" />;
-            } catch (Exception | AssertionError e) {
-                <%include file="statement.mako" args="statement=run_testcase.exception_statement('e')" />;
-            }
-        % endif
         % for i, ctx in enumerate(contexts):
             this.writeContextSeparator();
             this.context${i}();

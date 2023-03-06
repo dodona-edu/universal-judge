@@ -59,6 +59,11 @@ class Options:
     If the custom Python evaluator should be optimized or not.
     """
 
+    use_old_parser: bool = False
+    """
+    Use the old DSL parser or not.
+    """
+
 
 class DodonaConfig(BaseModel):
     resources: Path

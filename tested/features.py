@@ -102,19 +102,18 @@ def is_supported(bundle: "Bundle") -> bool:
             _logger.warning(f"Plan requires unsupported type {t}")
             return False
 
-    # Check language specific evaluators
+    # Check language-specific evaluators
     for tab in bundle.plan.tabs:
-        for run in tab.runs:
-            for context in run.contexts:
-                for testcase in context.all_testcases():
-                    languages = testcase.output.get_specific_eval_languages()
-                    if languages is not None:
-                        if bundle.config.programming_language not in languages:
-                            _logger.warning(
-                                f"Specific evaluators are available only in "
-                                f"{languages}!"
-                            )
-                            return False
+        for context in tab.contexts:
+            for testcase in context.testcases:
+                languages = testcase.output.get_specific_eval_languages()
+                if languages is not None:
+                    if bundle.config.programming_language not in languages:
+                        _logger.warning(
+                            f"Specific evaluators are available only in "
+                            f"{languages}!"
+                        )
+                        return False
 
     nested_types = filter(
         lambda x: x[0] in (BasicSequenceTypes.SET, BasicObjectTypes.MAP),

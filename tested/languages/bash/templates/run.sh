@@ -26,20 +26,29 @@ touch ${value_file} ${exception_file}
 % for i, ctx in enumerate(contexts):
     function context_${i} {
         ${ctx.before}
-        % for testcase in ctx.testcases:
+
+        ## Import the code if there is no main testcase.
+        % if not ctx.context.has_main_testcase():
+            source ./${submission_name}.sh
+        % endif
+
+        % for tc in ctx.testcases:
             write_separator
-            <%include file="statement.mako" args="statement=testcase.input_statement()" />
+
+            % if tc.testcase.is_main_testcase():
+                ## If it is a main tc, import the code, which will call the main function.
+                source ./${submission_name}.sh \
+                % for argument in tc.input.arguments:
+                    "${argument.replace("\\", "\\\\").replace('"', '\\"')}" \
+                % endfor
+            % else:
+                ## If we have a value function, we have an expression.
+                <%include file="statement.mako" args="statement=tc.input.input_statement()" />
+            % endif
         % endfor
         ${ctx.after}
     }
 % endfor
-
-write_context_separator
-source ./${submission_name}.sh \
-% for argument in run_testcase.arguments:
-    "${argument.replace("\\", "\\\\").replace('"', '\\"')}" \
-% endfor
-
 
 % for i, ctx in enumerate(contexts):
     write_context_separator

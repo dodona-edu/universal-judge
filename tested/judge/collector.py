@@ -30,7 +30,6 @@ from tested.dodona import (
     limit_size,
     AnnotateCode,
 )
-from tested.testplan import Run
 
 _logger = logging.getLogger(__name__)
 

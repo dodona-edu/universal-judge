@@ -33,8 +33,7 @@
                         "language": "haskell"
                       }
                     }
-                  },
-                  "essential": false
+                  }
                 },
                 {
                   "input": {
@@ -62,8 +61,7 @@
                         "language": "java"
                       }
                     }
-                  },
-                  "essential": false
+                  }
                 },
                 {
                   "input": {
@@ -91,8 +89,7 @@
                         "language": "python"
                       }
                     }
-                  },
-                  "essential": false
+                  }
                 },
                 {
                   "input": {
@@ -120,8 +117,7 @@
                         "language": "javascript"
                       }
                     }
-                  },
-                  "essential": false
+                  }
                 },
                 {
                   "input": {
@@ -149,8 +145,7 @@
                         "language": "kotlin"
                       }
                     }
-                  },
-                  "essential": false
+                  }
                 }
               ]
             }

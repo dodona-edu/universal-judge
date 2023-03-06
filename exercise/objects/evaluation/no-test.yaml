@@ -1,11 +1,11 @@
 - tab: "Feedback"
-  contexts:
+  testcases:
     - statement: '{["a", "b"], ["c"]}'
       return-raw: '{["a", "b"], ["a"]}'
-    - statement: 'x = {{"a"}: [1::int16], {"b"}: [0::int16]}'
-    - statement: 'x = {{"a"}: [1::int32], {"b"}: "a"}'
-    - expression: '{{"a"}: [1::int32], {"b"}: "a.txt"}'
-      return-raw: '{{"a"}: [1::int32], {"b"}: "a.txt"}'
+    - statement: 'x = {{"a"}: [int16(1)], {"b"}: [int16(0)]}'
+    - statement: 'x = {{"a"}: [int32(1)], {"b"}: "a"}'
+    - expression: '{{"a"}: [int32(1)], {"b"}: "a.txt"}'
+      return-raw: '{{"a"}: [int32(1)], {"b"}: "a.txt"}'
       files:
         - name: "a.txt"
           url: "a.txt"

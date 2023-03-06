@@ -8,9 +8,8 @@ To make testing easy, your language module needs to implement an "encode" templa
 This template takes one value and must pass it to the "values" module.
 
 Testing advanced types is a work-in progress at this point, since we test in Python,
-and Python does not have explicit support for e.g. int32, int64.
+and Python doesn't have explicit support for e.g. int32, int64.
 """
-import shutil
 from dataclasses import dataclass
 from decimal import Decimal
 from pathlib import Path
@@ -196,7 +195,7 @@ def run_encoder(bundle: Bundle, values: List[Value]) -> List[str]:
 
     files = filter_files(files, dest)
     files = bundle.lang_config.filter_dependencies(bundle, files, name)
-    executable = bundle.lang_config.find_main_file(files, name)[0]
+    executable = bundle.lang_config.find_main_file(files, name, [])[0]
 
     # Run the code.
     r = execute_file(bundle, executable.name, dest, None)
