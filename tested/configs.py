@@ -70,7 +70,9 @@ class DodonaConfig(BaseModel):
     # noinspection SpellCheckingInspection
     workdir: Path
     judge: Path
-    test_suite: str
+    test_suite: str = (
+        "plan.json"  # We cannot change this default, as it breaks exercises.
+    )
     options: Options = Options()
     output_limit: int = 10240 * 1024  # Default value for backward compatibility.
     timing_statistics: bool = False
