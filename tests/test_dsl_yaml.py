@@ -1,9 +1,9 @@
 import pytest
 
 from tested.datatypes import AdvancedNumericTypes, BasicNumericTypes
-from tested.dsl import translate_to_testplan
+from tested.dsl import translate_to_test_suite
 from tested.serialisation import Assignment, FunctionCall, ObjectType
-from tested.testplan import parse_test_plan
+from tested.testsuite import parse_test_suite
 
 
 def test_parse_one_tab_ctx():
@@ -20,11 +20,11 @@ tabs:
     stderr: "Error string"
     exit_code: 1
     """
-    json_str = translate_to_testplan(yaml_str)
-    plan = parse_test_plan(json_str)
-    assert plan.namespace == "solution"
-    assert len(plan.tabs) == 1
-    tab = plan.tabs[0]
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    assert suite.namespace == "solution"
+    assert len(suite.tabs) == 1
+    tab = suite.tabs[0]
     assert tab.hidden
     assert tab.name == "Ctx"
     assert len(tab.contexts) == 1
@@ -53,10 +53,10 @@ def test_parse_ctx_exception():
   - arguments: [ "--arg", "error" ]
     exception: "Error"
     """
-    json_str = translate_to_testplan(yaml_str)
-    plan = parse_test_plan(json_str)
-    assert len(plan.tabs) == 2
-    tab = plan.tabs[0]
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    assert len(suite.tabs) == 2
+    tab = suite.tabs[0]
     assert not tab.hidden
     assert tab.name == "Ctx Exception"
     assert len(tab.contexts) == 2
@@ -70,7 +70,7 @@ def test_parse_ctx_exception():
     tc = context.testcases[0]
     assert tc.input.arguments == ["--arg", "fail2"]
     assert tc.output.exit_code.value == 10
-    tab = plan.tabs[1]
+    tab = suite.tabs[1]
     assert tab.name == "Ctx Error"
     assert len(tab.contexts) == 1
     context = tab.contexts[0]
@@ -108,10 +108,10 @@ def test_parse_ctx_with_config():
     stderr: " Fail "
     """
     args = ["-a", "2.125", "1.212"]
-    json_str = translate_to_testplan(yaml_str)
-    plan = parse_test_plan(json_str)
-    assert len(plan.tabs) == 1
-    tab = plan.tabs[0]
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    assert len(suite.tabs) == 1
+    tab = suite.tabs[0]
     assert tab.hidden is None
     assert len(tab.contexts) == 4
     ctx0, ctx1, ctx2, ctx3 = tab.contexts
@@ -178,10 +178,10 @@ def test_statements():
     - expression: 'safe.content()'
       return_raw: 'uint8(5)'
     """
-    json_str = translate_to_testplan(yaml_str)
-    plan = parse_test_plan(json_str)
-    assert len(plan.tabs) == 1
-    tab = plan.tabs[0]
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    assert len(suite.tabs) == 1
+    tab = suite.tabs[0]
     assert len(tab.contexts) == 2
     ctx0, ctx1 = tab.contexts
     tests0, tests1 = ctx0.testcases, ctx1.testcases
@@ -215,10 +215,10 @@ def test_statement_and_main():
       - statement: 'add(5, 7)'
         return: 12
     """
-    json_str = translate_to_testplan(yaml_str)
-    plan = parse_test_plan(json_str)
-    assert len(plan.tabs) == 1
-    tab = plan.tabs[0]
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    assert len(suite.tabs) == 1
+    tab = suite.tabs[0]
     assert len(tab.contexts) == 1
     ctx = tab.contexts[0]
     assert len(ctx.testcases) == 2
@@ -242,10 +242,10 @@ def test_statement():
   - statement: "heir(8, 3)"
     return: [ 3, 6, 9, 12, 15, 2, 7, 1, 13, 8, 16, 10, 14, 4, 11, 5 ]
 """
-    json_str = translate_to_testplan(yaml_str)
-    plan = parse_test_plan(json_str)
-    assert len(plan.tabs) == 1
-    tab = plan.tabs[0]
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    assert len(suite.tabs) == 1
+    tab = suite.tabs[0]
     assert len(tab.contexts) == 2
     ctx0, ctx1 = tab.contexts
     testcases0, testcases1 = ctx0.testcases, ctx1.testcases
@@ -270,7 +270,7 @@ def test_invalid_yaml():
       return_raw: '() {}'
     """
     with pytest.raises(ValueError):
-        translate_to_testplan(yaml_str)
+        translate_to_test_suite(yaml_str)
 
 
 def test_invalid_mutual_exclusive_return_yaml():
@@ -283,7 +283,7 @@ def test_invalid_mutual_exclusive_return_yaml():
       return_raw: "5"
     """
     with pytest.raises(ValueError):
-        translate_to_testplan(yaml_str)
+        translate_to_test_suite(yaml_str)
 
 
 def test_invalid_context_as_testcase():
@@ -295,7 +295,7 @@ def test_invalid_context_as_testcase():
     return: 5
     """
     with pytest.raises(ValueError):
-        translate_to_testplan(yaml_str)
+        translate_to_test_suite(yaml_str)
 
 
 def test_statement_with_yaml_dict():
@@ -307,10 +307,10 @@ def test_statement_with_yaml_dict():
         alpha: 5
         beta: 6
 """
-    json_str = translate_to_testplan(yaml_str)
-    plan = parse_test_plan(json_str)
-    assert len(plan.tabs) == 1
-    tab = plan.tabs[0]
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    assert len(suite.tabs) == 1
+    tab = suite.tabs[0]
     assert len(tab.contexts) == 1
     testcases = tab.contexts[0].testcases
     assert len(testcases) == 1

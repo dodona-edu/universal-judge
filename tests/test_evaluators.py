@@ -7,7 +7,7 @@ import tested
 from tested.configs import create_bundle
 from tested.dodona import Status
 from tested.evaluators.text import evaluate_text, evaluate_file
-from tested.testplan import Plan, TextOutputChannel, FileOutputChannel
+from tested.testsuite import Suite, TextOutputChannel, FileOutputChannel
 from tests.manual_utils import configuration
 from tested.evaluators import EvaluatorConfig
 
@@ -16,7 +16,7 @@ def evaluator_config(tmp_path: Path, pytestconfig, options=None) -> EvaluatorCon
     if options is None:
         options = dict()
     conf = configuration(pytestconfig, "", "python", tmp_path)
-    plan = Plan()
+    plan = Suite()
     bundle = create_bundle(conf, sys.stdout, plan)
     return EvaluatorConfig(bundle=bundle, options=options, context_dir=tmp_path)
 

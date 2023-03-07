@@ -1,5 +1,5 @@
 ## This generates a function expression in C.
-<%! from tested.testplan import FunctionType %>\
+<%! from tested.testsuite import FunctionType %>\
 <%page args="function" />\
 ${function.name}\
 % if function.type != FunctionType.PROPERTY:

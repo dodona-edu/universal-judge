@@ -25,7 +25,7 @@ from ..languages.generator import (
 )
 from ..languages.templates import path_to_templates
 from ..serialisation import Value, EvalResult
-from ..testplan import ProgrammedEvaluator
+from ..testsuite import ProgrammedEvaluator
 from ..utils import get_identifier
 from ..internationalization import get_i18n_string
 
@@ -76,7 +76,7 @@ def _evaluate_others(
 
     # Create a configs bundle for the language of the evaluator.
     eval_bundle = create_bundle(
-        bundle.config, bundle.out, bundle.plan, evaluator.language
+        bundle.config, bundle.out, bundle.suite, evaluator.language
     )
 
     # Check if the language supports this.
@@ -204,7 +204,7 @@ def _evaluate_python(
 
     # Create a configs bundle for the language of the evaluator.
     eval_bundle = create_bundle(
-        bundle.config, bundle.out, bundle.plan, evaluator.language
+        bundle.config, bundle.out, bundle.suite, evaluator.language
     )
 
     # Path to the evaluator.

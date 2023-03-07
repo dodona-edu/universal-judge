@@ -51,7 +51,7 @@ from tested.serialisation import (
     to_python_comparable,
     ObjectKeyValuePair,
 )
-from tested.testplan import Plan
+from tested.testsuite import Suite
 from tested.utils import get_args
 from tests.manual_utils import configuration
 
@@ -214,7 +214,7 @@ def assert_serialisation(bundle: Bundle, expected: Value):
 @pytest.mark.parametrize("language", LANGUAGES)
 def test_basic_types(language, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "", language, tmp_path)
-    plan = Plan()
+    plan = Suite()
     bundle = create_bundle(conf, sys.stdout, plan)
     type_map = bundle.lang_config.type_support_map()
 
@@ -239,7 +239,7 @@ def test_basic_types(language, tmp_path: Path, pytestconfig):
 @pytest.mark.parametrize("language", LANGUAGES)
 def test_advanced_types(language, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "", language, tmp_path)
-    plan = Plan()
+    plan = Suite()
     bundle = create_bundle(conf, sys.stdout, plan)
     type_map = bundle.lang_config.type_support_map()
 
@@ -265,7 +265,7 @@ def test_advanced_types(language, tmp_path: Path, pytestconfig):
 @pytest.mark.parametrize("language", LANGUAGES)
 def test_escape_double(language, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "", language, tmp_path)
-    plan = Plan()
+    plan = Suite()
     bundle = create_bundle(conf, sys.stdout, plan)
     assert_serialisation(bundle, StringType(type=BasicStringTypes.TEXT, data='"hallo"'))
 
@@ -273,7 +273,7 @@ def test_escape_double(language, tmp_path: Path, pytestconfig):
 @pytest.mark.parametrize("language", LANGUAGES)
 def test_escape_single(language, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "", language, tmp_path)
-    plan = Plan()
+    plan = Suite()
     bundle = create_bundle(conf, sys.stdout, plan)
     assert_serialisation(bundle, StringType(type=AdvancedStringTypes.CHAR, data="'"))
 
@@ -281,7 +281,7 @@ def test_escape_single(language, tmp_path: Path, pytestconfig):
 @pytest.mark.parametrize("language", LANGUAGES)
 def test_special_numbers(language, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "", language, tmp_path)
-    plan = Plan()
+    plan = Suite()
     bundle = create_bundle(conf, sys.stdout, plan)
     type_map = bundle.lang_config.type_support_map()
 
@@ -322,7 +322,7 @@ def test_special_numbers(language, tmp_path: Path, pytestconfig):
 def test_valid_type_map(language: str, tmp_path: Path, pytestconfig):
     # Get a type map.
     conf = configuration(pytestconfig, "", language, tmp_path)
-    plan = Plan()
+    plan = Suite()
     bundle = create_bundle(conf, sys.stdout, plan)
     type_map = bundle.lang_config.type_support_map()
 

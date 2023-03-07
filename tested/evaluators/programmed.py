@@ -15,7 +15,7 @@ from ..internationalization import get_i18n_string
 from ..judge import evaluate_programmed
 from ..judge.utils import BaseExecutionResult
 from ..serialisation import StringType, EvalResult, Value
-from ..testplan import (
+from ..testsuite import (
     TextOutputChannel,
     FileOutputChannel,
     ValueOutputChannel,

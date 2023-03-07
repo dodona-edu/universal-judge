@@ -706,7 +706,6 @@ def test_javascript_exception_correct(tmp_path: Path, pytestconfig):
         tmp_path,
         "plan.yaml",
         "correct",
-        backward_compatibility_plan=True,
     )
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
@@ -722,7 +721,6 @@ def test_javascript_exception_wrong(tmp_path: Path, pytestconfig):
         tmp_path,
         "plan.yaml",
         "wrong",
-        backward_compatibility_plan=True,
     )
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
@@ -738,7 +736,6 @@ def test_javascript_exception_missing_message(tmp_path: Path, pytestconfig):
         tmp_path,
         "plan.yaml",
         "wrong-message",
-        backward_compatibility_plan=True,
     )
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)

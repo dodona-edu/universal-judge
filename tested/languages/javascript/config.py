@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 class JavaScript(Language):
     def compilation(self, bundle: Bundle, files: List[str]) -> CallbackResult:
         submission_file = self.with_extension(
-            self.conventionalize_namespace(self.submission_name(bundle.plan))
+            self.conventionalize_namespace(self.submission_name(bundle.suite))
         )
         main_file = list(filter(lambda x: x == submission_file, files))
         if main_file:
@@ -150,7 +150,7 @@ class JavaScript(Language):
         identifier = f"--{bundle.secret}-- SEP"
         context_identifier = f"--{bundle.context_separator_secret}-- SEP"
         submission_file = self.with_extension(
-            self.conventionalize_namespace(bundle.plan.namespace)
+            self.conventionalize_namespace(bundle.suite.namespace)
         )
         # Assume stacktrace when line is equal the submission_file path with
         # line number

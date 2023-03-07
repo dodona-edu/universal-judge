@@ -62,9 +62,9 @@ def select_optimized_and_not_optimized(benchmark_results: List[BenchmarkResult],
     filtered = filter(lambda x: x.exercise.solution == solution_name,
                       benchmark_results)
     not_optimized = next(
-        iter(filter(lambda x: 'no_opt' in x.exercise.plan, filtered)))
+        iter(filter(lambda x: 'no_opt' in x.exercise.suite, filtered)))
     optimized = next(
-        iter(filter(lambda x: 'no_opt' not in x.exercise.plan, filtered)))
+        iter(filter(lambda x: 'no_opt' not in x.exercise.suite, filtered)))
     return optimized, not_optimized
 
 

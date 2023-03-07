@@ -160,7 +160,7 @@ Some other useful commands are:
 
 ```bash
 # Prints the JSON Schema of the (JSON) test suite format
-$ python -m tested.testplan
+$ python -m tested.testsuite
 # Run a hard-coded exercise with logs enabled, useful for debugging
 $ python -m tested.manual
 # Convert a YAML test suite into JSON

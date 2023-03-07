@@ -28,7 +28,7 @@ from ..dodona import *
 from ..features import is_supported
 from ..languages.generator import generate_execution, generate_selector
 from ..languages.templates import path_to_templates
-from ..testplan import ExecutionMode
+from ..testsuite import ExecutionMode
 from ..internationalization import set_locale, get_i18n_string
 
 _logger = logging.getLogger(__name__)
@@ -37,13 +37,13 @@ _logger = logging.getLogger(__name__)
 def judge(bundle: Bundle):
     """
     Evaluate a solution for an exercise. Execute the tests present in the
-    testplan. The result (the judgment) is sent to stdout, so Dodona can pick it
+    test_suite. The result (the judgment) is sent to stdout, so Dodona can pick it
     up.
 
     :param bundle: The configuration bundle.
     """
     new_stage("analyse.supported")
-    # Begin by checking if the given testplan is executable in this language.
+    # Begin by checking if the given test_suite is executable in this language.
     _logger.info("Checking supported features...")
     set_locale(bundle.config.natural_language)
     if not is_supported(bundle):
@@ -100,7 +100,7 @@ def judge(bundle: Bundle):
         )
 
         messages, status, annotations = process_compile_results(
-            bundle.plan.namespace, bundle.lang_config, result
+            bundle.suite.namespace, bundle.lang_config, result
         )
 
         # If there is no result, there was no compilation.
@@ -110,7 +110,7 @@ def judge(bundle: Bundle):
             # Handle timout if necessary.
             if result.timeout or result.memory:
                 # Show in separate tab.
-                index = len(bundle.plan.tabs) + 1
+                index = len(bundle.suite.tabs) + 1
                 if messages:
                     collector.prepare_tab(
                         StartTab(get_i18n_string("judge.core.compilation")), index
@@ -179,7 +179,7 @@ def judge(bundle: Bundle):
     output_limit = bundle.config.output_limit * 0.8
 
     # Create a list of runs we want to execute.
-    for tab_index, tab in enumerate(bundle.plan.tabs):
+    for tab_index, tab in enumerate(bundle.suite.tabs):
         collector.add_tab(StartTab(title=tab.name, hidden=tab.hidden), tab_index)
         execution_units = merge_contexts_into_units(tab.contexts)
         executions = []
@@ -333,7 +333,7 @@ def _generate_files(
     dependency_paths = path_to_templates(bundle)
     copy_from_paths_to_path(dependency_paths, dependencies, common_dir)
 
-    submission_name = bundle.lang_config.submission_name(bundle.plan)
+    submission_name = bundle.lang_config.submission_name(bundle.suite)
 
     # Copy the submission file.
     submission_file = f"{submission_name}" f".{bundle.lang_config.extension_file()}"
@@ -346,11 +346,11 @@ def _generate_files(
     new_stage("submission.modify", sub_stage=True)
     bundle.lang_config.solution(solution_path, bundle)
 
-    # The names of the executions for the testplan.
+    # The names of the executions for the test_suite.
     new_stage("generate.templates", sub_stage=True)
     execution_names = []
     # Generate the files for each execution.
-    for tab_i, tab in enumerate(bundle.plan.tabs):
+    for tab_i, tab in enumerate(bundle.suite.tabs):
         execution_units = merge_contexts_into_units(tab.contexts)
         for unit_i, unit in enumerate(execution_units):
             execution_name = bundle.lang_config.execution_name(tab_i, unit_i)
@@ -421,7 +421,7 @@ def _copy_workdir_source_files(bundle: Bundle, common_dir: Path) -> List[str]:
     """
     Copy additional source files from the workdir to the common dir
 
-    :param bundle: Bundle information of the test plan
+    :param bundle: Bundle information of the test suite
     :param common_dir: The directory of the other files
     """
     prefix = bundle.lang_config.execution_prefix()

@@ -7,7 +7,7 @@ from typing import Optional
 from tested.dodona import StatusMessage, Status
 from . import EvaluationResult, try_outputs, exception, value, EvaluatorConfig
 from ..internationalization import get_i18n_string
-from ..testplan import EmptyChannel
+from ..testsuite import EmptyChannel
 
 
 def evaluate(

@@ -34,7 +34,7 @@ en:
       status: "Error by evaluating the result."
       staff: >-
         Received invalid output for specific evaluation: %{actual}.
-        Either the testplan is invalid, the evaluation code has a bug or the student
+        Either the test suite is invalid, the evaluation code has a bug or the student
         is trying to cheat: %{e}
     text:
       file:
@@ -139,12 +139,12 @@ en:
   timings:
     parallel: "In parallel execution, the cumulative execution times can be greater than the total execution time."
     title: "Stats"
-    testplan: "Reading testplan"
-    dsl: "Parse DSL testplan"
-    json: "Parse JSON testplan"
+    testplan: "Reading test suite"
+    dsl: "Parse YAML test suite"
+    json: "Parse JSON test suite"
     bundle: "Create bundle information"
     analyse:
-      supported: "Check if testplan is supported by the programming language"
+      supported: "Check if test suite is supported by the programming language"
       features: "Analyse features"
     prepare:
       output: "Preparing feedback table"

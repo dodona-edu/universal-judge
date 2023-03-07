@@ -16,7 +16,7 @@ from tested.languages.config import (
 class Bash(Language):
     def compilation(self, bundle: Bundle, files: List[str]) -> CallbackResult:
         submission_file = self.with_extension(
-            self.conventionalize_namespace(self.submission_name(bundle.plan))
+            self.conventionalize_namespace(self.submission_name(bundle.suite))
         )
         main_file = list(filter(lambda x: x == submission_file, files))
         if main_file:
@@ -45,7 +45,7 @@ class Bash(Language):
             f"{self.execution_prefix()}_[0-9]+_[0-9]+\\."
             f"{self.extension_file()}: [a-zA-Z_]+ [0-9]+:"
         )
-        script = f"./{self.with_extension(self.submission_name(bundle.plan))}"
+        script = f"./{self.with_extension(self.submission_name(bundle.suite))}"
         stderr = regex.sub("<testcode>:", stderr).replace(script, "<code>")
         regex = re.compile(
             f"{self.execution_prefix()}_[0-9]+_[0-9]+\\." f"{self.extension_file()}"

@@ -194,7 +194,7 @@ class DescriptionGenerator:
             raise Exception("Missing features")
 
         stmt = convert_statement(bundle, stmt)
-        stmt = self.language.cleanup_description(bundle.plan.namespace, stmt)
+        stmt = self.language.cleanup_description(bundle.suite.namespace, stmt)
         if is_html:
             prompt = html.escape(self.types["console"]["prompt"]).strip()
             stmt = self.generate_html_code(stmt).strip()

@@ -11,7 +11,7 @@ from pathlib import Path
 import tested
 from tested.configs import DodonaConfig, Options
 from tested.main import run
-from tested.testplan import ExecutionMode
+from tested.testsuite import ExecutionMode
 
 amount = 3
 

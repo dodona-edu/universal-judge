@@ -7,8 +7,8 @@ from .utils import cleanup_specific_programmed
 from ..dodona import StatusMessage, Status, ExtendedMessage, Permission
 from ..internationalization import get_i18n_string
 from ..serialisation import EvalResult
-from ..testplan import OutputChannel
-from ..testplan import SpecificEvaluator
+from ..testsuite import OutputChannel
+from ..testsuite import SpecificEvaluator
 
 
 def evaluate(

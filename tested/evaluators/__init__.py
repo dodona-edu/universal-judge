@@ -12,7 +12,7 @@ The following parameters are passed to the function:
   - The global configuration for the run of TESTed
   - The configuration for the evaluator instance
   - The judge instance
-- The output channel from the testplan.
+- The output channel from the test_suite.
 - The raw actual output.
 - The maximum time for the evaluation. Simple evaluators can ignore this, but more
   advanced ones need more time.
@@ -32,7 +32,7 @@ from pydantic.dataclasses import dataclass
 
 from ..configs import Bundle
 from ..dodona import StatusMessage, Message, Status
-from ..testplan import (
+from ..testsuite import (
     GenericTextEvaluator,
     TextBuiltin,
     GenericValueEvaluator,
@@ -42,7 +42,7 @@ from ..testplan import (
     ProgrammedEvaluator,
     SpecificEvaluator,
 )
-from ..testplan import (
+from ..testsuite import (
     OutputChannel,
     NormalOutputChannel,
     SpecialOutputChannel,

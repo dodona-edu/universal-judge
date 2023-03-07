@@ -1,5 +1,5 @@
 """
-Translates items from the testplan into the actual programming language.
+Translates items from the test_suite into the actual programming language.
 """
 import dataclasses
 import html
@@ -49,7 +49,7 @@ from ..serialisation import (
     ObjectKeyValuePair,
     VariableType,
 )
-from ..testplan import (
+from ..testsuite import (
     EmptyChannel,
     IgnoredChannel,
     TextData,
@@ -230,7 +230,7 @@ def _prepare_expression(bundle: Bundle, expression: Expression) -> Expression:
             _prepare_argument(bundle, arg) for arg in expression.arguments
         ]
     elif isinstance(expression, FunctionCall):
-        submission_name = bundle.lang_config.submission_name(bundle.plan)
+        submission_name = bundle.lang_config.submission_name(bundle.suite)
         if expression.type == FunctionType.CONSTRUCTOR:
             name = bundle.lang_config.conventionalize_class(expression.name)
         elif expression.type == FunctionType.PROPERTY:
@@ -483,7 +483,7 @@ def get_readable_input(
         # See https://rouge-ruby.github.io/docs/Rouge/Lexers/ConsoleLexer.html
         format_ = "console"
         arguments = " ".join(_escape_shell(x) for x in case.input.arguments)
-        submission_name = bundle.lang_config.submission_name(bundle.plan)
+        submission_name = bundle.lang_config.submission_name(bundle.suite)
         args = f"$ {submission_name} {arguments}"
         if isinstance(case.input.stdin, TextData):
             stdin = case.input.stdin.get_data_as_string(bundle.config.resources)
@@ -502,7 +502,7 @@ def get_readable_input(
         format_ = bundle.config.programming_language
         # noinspection PyTypeChecker
         text = convert_statement(bundle, case.input)
-        text = bundle.lang_config.cleanup_description(bundle.plan.namespace, text)
+        text = bundle.lang_config.cleanup_description(bundle.suite.namespace, text)
         analyse_files = True
 
     quote = bundle.lang_config.get_string_quote()
@@ -682,7 +682,7 @@ def generate_execution(
 
     value_file_name = value_file(bundle, destination).name
     exception_file_name = exception_file(bundle, destination).name
-    submission_name = lang_config.submission_name(bundle.plan)
+    submission_name = lang_config.submission_name(bundle.suite)
 
     # Extract the main testcase and exit testcase.
 
@@ -751,7 +751,7 @@ def generate_custom_evaluator(
 
     :param bundle: The configuration bundle.
     :param destination: The folder where the code should be generated.
-    :param evaluator: The evaluator data from the testplan.
+    :param evaluator: The evaluator data from the test_suite.
     :param expected_value: The preprocessed expected value.
     :param actual_value: The preprocessed actual value.
 

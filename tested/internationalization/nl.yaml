@@ -140,8 +140,8 @@ nl:
     title: "Stats"
     parallel: "Bij parallelle uitvoering kunnen de cumulatieve uitvoeringstijden groter zijn dan de totale uitvoeringstijd."
     testplan: "Inlezen testplan"
-    dsl: "Parsen DSL testplan"
-    json: "Parsen JSON testplan"
+    dsl: "Parsen DSL-testplan"
+    json: "Parsen JSON-testplan"
     bundle: "Aanmaken bundle informatie"
     analyse:
       supported: "Controle of het testplan ondersteund is door de programmeertaal"

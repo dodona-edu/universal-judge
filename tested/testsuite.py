@@ -1,9 +1,9 @@
 """
-Structures that model the testplan in code.
+Structures that model the test suite in code.
 
-This module is the authoritative source on the format and behaviour of the testplan.
+This module is the authoritative source on the format and behaviour of the test_suite.
 When executing this module, a json-schema is generated for the format, which can be
-of assistance when checking existing testplans.
+of assistance when checking existing test suites.
 """
 from pydantic import BaseModel, root_validator, validator
 from pydantic.dataclasses import dataclass
@@ -585,21 +585,21 @@ class ExecutionMode(str, Enum):
 
 
 @dataclass
-class Plan(WithFeatures, WithFunctions):
-    """General test plan, which is used to run tests of some code."""
+class Suite(WithFeatures, WithFunctions):
+    """General test suite, which is used to run tests of some code."""
 
     tabs: List[Tab] = field(default_factory=list)
     namespace: str = "submission"
 
     def get_used_features(self) -> FeatureSet:
         """
-        Get the used features in the testplan.
+        Get the used features in the test_suite.
 
-        For most features, the function will recurse into the testplan to get all
+        For most features, the function will recurse into the test_suite to get all
         the features from each element individually.
 
         Detection of functions with optional parameters or parameters of different
-        types is done on a testplan level, since we need an overview of every
+        types is done on a test_suite level, since we need an overview of every
         function call to do this.
         """
         function_features = _resolve_function_calls(self.get_functions())
@@ -688,13 +688,13 @@ def _resolve_function_calls(function_calls: Iterable[FunctionCall]):
     return combine_features(used_features)
 
 
-class _PlanModel(BaseModel):
-    __root__: Plan
+class _SuiteModel(BaseModel):
+    __root__: Suite
 
 
-def parse_test_plan(json_string) -> Plan:
-    """Parse a test plan into the structures."""
-    return _PlanModel.parse_raw(json_string).__root__
+def parse_test_suite(json_string) -> Suite:
+    """Parse a test suite into the structures."""
+    return _SuiteModel.parse_raw(json_string).__root__
 
 
 def generate_schema():
@@ -703,7 +703,7 @@ def generate_schema():
     """
     import json
 
-    sc = Plan.__pydantic_model__.schema()
+    sc = Suite.__pydantic_model__.schema()
     sc["$schema"] = "http://json-schema.org/draft-07/schema#"
     print(json.dumps(sc, indent=2))
 

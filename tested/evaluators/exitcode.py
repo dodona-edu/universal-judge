@@ -4,7 +4,7 @@ from typing import Optional
 from ..dodona import StatusMessage, Status
 from . import EvaluationResult, EvaluatorConfig
 from ..internationalization import get_i18n_string
-from ..testplan import ExitCodeOutputChannel
+from ..testsuite import ExitCodeOutputChannel
 
 logger = logging.getLogger(__name__)
 

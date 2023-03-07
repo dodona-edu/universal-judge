@@ -11,7 +11,7 @@ from ..dodona import StatusMessage, Status, ExtendedMessage, Permission
 from ..internal_timings import new_stage, end_stage
 from ..internationalization import get_i18n_string
 from ..serialisation import ExceptionValue
-from ..testplan import ExceptionOutputChannel
+from ..testsuite import ExceptionOutputChannel
 from ..utils import Either
 
 logger = logging.getLogger(__name__)
@@ -53,7 +53,7 @@ def evaluate(
     Evaluate an exception.
 
     :param config: Not used.
-    :param channel: The channel from the testplan.
+    :param channel: The channel from the test_suite.
     :param actual: The raw actual value from the execution.
 
     :return: An evaluation result.
