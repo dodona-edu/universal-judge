@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import List
 
 from tested.configs import DodonaConfig
-from tested.dsl import SchemaParser
 from tested.main import run
 
 tmp_dir = Path("generated")

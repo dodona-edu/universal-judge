@@ -1,9 +1,9 @@
 """
 Main file, responsible for running TESTed based on the input given by Dodona.
 """
-from typing import IO
-from os.path import splitext
+import os
 
+from typing import IO
 from .configs import DodonaConfig, create_bundle
 from .testsuite import parse_test_suite
 from .dsl import parse_dsl
@@ -24,7 +24,7 @@ def run(config: DodonaConfig, judge_output: IO):
     with open(f"{config.resources}/{config.test_suite}", "r") as t:
         textual_suite = t.read()
 
-    _, ext = splitext(config.test_suite)
+    _, ext = os.path.splitext(config.test_suite)
     is_yaml = ext.lower() in (".yaml", ".yml")
     if is_yaml:
         internal_timings.new_stage("dsl")

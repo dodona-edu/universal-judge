@@ -100,6 +100,7 @@ def evaluate(
         messages = []
 
     if actual.tested is not None:
+        # noinspection PyArgumentList
         messages.append(
             get_i18n_string(actual.tested.i18n_key, **actual.tested.variables)
         )

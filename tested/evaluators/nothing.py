@@ -2,7 +2,6 @@
 RawEvaluator for channels without output.
 """
 import functools
-from typing import Optional
 
 from tested.dodona import StatusMessage, Status
 from . import EvaluationResult, try_outputs, exception, value, EvaluatorConfig
