@@ -6,7 +6,7 @@ from .utils import smart_close
 from .main import run
 
 parser = ArgumentParser(
-    description="The programming language agnostic educational test framework."
+    description="The programming-language-agnostic educational test framework."
 )
 parser.add_argument(
     "-c",

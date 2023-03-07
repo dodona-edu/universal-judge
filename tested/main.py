@@ -26,7 +26,6 @@ def run(config: DodonaConfig, judge_output: IO):
 
     _, ext = splitext(config.testplan)
     is_yaml = ext.lower() in (".yaml", ".yml")
-    is_old_parser = config.options.use_old_parser
     if is_yaml:
         internal_timings.new_stage("dsl")
         plan = parse_dsl(textual_plan)

@@ -38,7 +38,7 @@ To keep things simple, we add the exercise to the `exercise` subdirectory in the
 mkdir exercise/simple-example
 ```
 
-Note you would normally not store your exercises in the TESTed repository.
+Note that you would normally not store your exercises in the TESTed repository.
 We recommend creating a new repository for your exercises.
 
 ### 2. Create a test suite
@@ -46,54 +46,23 @@ We recommend creating a new repository for your exercises.
 The next step is to design a test suite that will be used to evaluate submission for the exercise.
 Again, to keep things simple, we will only include a single test case in the test suite.
 
-```json
-{
- "tabs": [
-  {
-   "name": "Echo",
-   "runs": [
-    {
-     "contexts": [
-      {
-       "testcases": [
-        {
-         "input": {
-          "type": "function",
-          "name": "echo",
-          "arguments": [
-           {
-            "type": "text",
-            "data": "input-1"
-           }
-          ]
-         },
-         "output": {
-          "result": {
-           "value": {
-            "type": "text",
-            "data": "input-1"
-           }
-          }
-         }
-        }
-       ]
-      }
-     ]
-    }
-   ]
-  }
- ]
-}
+```yaml
+- tab: Echo
+  testcases:
+    - expression: "echo('input-1')"
+      return: "input-1"
 ```
 
-While being somewhat verbose, the test suite is pretty straightforward.
-It contains a single tab "Echo", containing a single run, containing a single context, containing a single test case.
-The test case calls the function `echo` with string argument `"input-1"` and sets the string `"input-1"` as the expected return value.
+This test suite describes the following tests: we have one tab, which is named `Echo`.
+Inside this tab, there is one test case, in which we call the function `echo` with the string argument `"input-1"`.
+The expected output is a return value (again a string) of `"input-1"`.
+All other tests use the defaults: for example, no output is allowed on stderr, while stdout is ignored. 
+
 Put the file containing the test suite in the following location:
 
 ```bash
 # Create the file
-$ touch exercise/simple-example/testsuite.json
+$ touch exercise/simple-example/suite.yaml
 # Now you should put the content from above in the file.
 ```
 
@@ -116,7 +85,7 @@ def echo(argument):
 
 To evaluate a submission with TESTed, you need to provide a test suite and configuration information.
 This information can be piped to TESTed via stdin, but to make things easier, we will add the information to a configuration file in the directory of the exercise.
-In practice, this configuration file could be composed by the learning environment in which TESTed is integrated.
+In practice, this configuration file would be created by the learning environment in which TESTed is integrated.
 
 ```bash
 $ cat exercise/simple-example/config.json
@@ -127,7 +96,7 @@ $ cat exercise/simple-example/config.json
   "source": "exercise/simple-example/correct.py",
   "judge": ".",
   "workdir": "workdir/",
-  "plan_name": "testsuite.json",
+  "plan_name": "suite.yaml",
   "memory_limit": 536870912,
   "time_limit": 60
 }
@@ -173,7 +142,7 @@ By default, TESTed generates its feedback on stdout. The feedback is formatted i
 $ python -m tested --help
 usage: __main__.py [-h] [-c CONFIG] [-o OUTPUT] [-v]
 
-The programming language agnostic educational test framework.
+The programming-language-agnostic educational test framework.
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -186,13 +155,16 @@ optional arguments:
 
 Adjust the configuration file if you want to evaluate the wrong submission.
 
-Here are some more useful features of TESTed:
+For reference, the file `tested/dsl/schema.json` contains the JSON Schema of the test suite format.
+Some other useful commands are:
 
 ```bash
-# Prints the JSON Schema of the test suite format
+# Prints the JSON Schema of the (JSON) test suite format
 $ python -m tested.testplan
 # Run a hard-coded exercise with logs enabled, useful for debugging
 $ python -m tested.manual
+# Convert a YAML test suite into JSON
+$ python -m tested.dsl
 ```
 
 ## TESTed repository
