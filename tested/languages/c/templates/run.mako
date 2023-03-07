@@ -39,13 +39,35 @@ static void ${execution_name}_write_context_separator() {
 
 
 % for i, ctx in enumerate(contexts):
-    void ${execution_name}_context_${i}(void) {
+    int ${execution_name}_context_${i}(void) {
         ${ctx.before}
-        % for testcase in ctx.testcases:
+
+        ## Save the exit code
+        int exit_code;
+        % for tc in ctx.testcases:
             ${execution_name}_write_separator();
-            <%include file="statement.mako" args="statement=testcase.input_statement()" />;
+
+            ## Prepare the command line arguments if needed.
+            % if tc.testcase.is_main_testcase():
+                char* args[] = {\
+                    % for argument in ["solution"] + tc.input.arguments:
+                        "${argument}", \
+                    % endfor
+                };
+            % endif
+
+            % if tc.testcase.is_main_testcase():
+                ## If it is a main tc, import the code, which will call the main function.
+                exit_code = solution_main(${len(tc.input.arguments) + 1}, args);
+            % else:
+                exit_code = 0;
+                ## If we have a value function, we have an expression.
+                <%include file="statement.mako" args="statement=tc.input.input_statement()" />;
+            % endif
         % endfor
         ${ctx.after}
+
+        return exit_code;
     }
 % endfor
 
@@ -54,27 +76,15 @@ int ${execution_name}() {
     ${execution_name}_value_file = fopen("${value_file}", "w");
     ${execution_name}_exception_file = fopen("${exception_file}", "w");
 
-    ${execution_name}_write_context_separator();
-    % if run_testcase.exists:
-        char* args[] = {\
-        % for argument in ["solution"] + run_testcase.arguments:
-            "${argument}", \
-        % endfor
-        };
-        int exit_code = solution_main(${len(run_testcase.arguments) + 1}, args);
-        if (exit_code != 0) {
-            return exit_code;
-        }
-    % endif
-
+    int exit_code;
     % for i, ctx in enumerate(contexts):
         ${execution_name}_write_context_separator();
-        ${execution_name}_context_${i}();
+        exit_code = ${execution_name}_context_${i}();
     % endfor
 
     fclose(${execution_name}_value_file);
     fclose(${execution_name}_exception_file);
-    return 0;
+    return exit_code;
 }
 
 #ifndef INCLUDED

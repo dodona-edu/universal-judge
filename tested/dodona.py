@@ -78,8 +78,8 @@ class StartJudgment:
 @dataclass
 class StartTab:
     """
-    Start on a new tab with given title. Hidden if all contexts are accepted iff
-    hidden.
+    Start on a new tab with a given title. Hidden if all contexts are accepted
+    and hidden is true.
     """
 
     title: str
@@ -98,7 +98,7 @@ class StartContext:
 
 @dataclass
 class StartTestcase:
-    """Start on a new testcase with given description"""
+    """Start on a new testcase with a given description"""
 
     description: Message
     command: Literal["start-testcase"] = "start-testcase"
@@ -106,7 +106,7 @@ class StartTestcase:
 
 @dataclass
 class StartTest:
-    """Start on a new test with given channel answer."""
+    """Start on a new test with a given channel answer."""
 
     expected: str
     channel: Optional[str] = None
@@ -160,7 +160,7 @@ class CloseTest:
 @dataclass
 class CloseTestcase:
     """
-    Close the current testcase. Accepted iff all tests are accepted, but you can
+    Close the current testcase. Accepted if all tests are accepted, but you can
     overwrite this.
     """
 
@@ -171,7 +171,7 @@ class CloseTestcase:
 @dataclass
 class CloseContext:
     """
-    Close the current context. Accepted iff all testcases are accepted, but you can
+    Close the current context. Accepted if all testcases are accepted, but you can
     overwrite this.
     """
 
@@ -291,7 +291,7 @@ def report_update(to: IO, update: Update):
     """
     Write the given update to the given output stream.
 
-    :param to: Where to write to. Will not be closed.
+    :param to: Where to write to. It will not be closed.
     :param update: The update to write.
     """
     json.dump(update, to, cls=_EnhancedJSONEncoder)

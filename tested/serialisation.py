@@ -28,7 +28,6 @@ from typing import Union, List, Literal, Optional, Any, Iterable, Tuple, Dict
 
 from pydantic import BaseModel, root_validator, Field
 from pydantic.dataclasses import dataclass
-from pydantic.fields import Undefined
 from pydantic.typing import NoneType
 
 from tested.dodona import ExtendedMessage, Status
@@ -89,6 +88,7 @@ def _get_combined_types(types: Iterable[WrappedAllTypes]) -> WrappedAllTypes:
                     else:
                         type_dict[data_type[0]] = {BasicStringTypes.ANY}
                 else:
+                    assert isinstance(type_item, set)
                     if isinstance(data_type[1], tuple):
                         type_item.add(BasicStringTypes.ANY)
                     else:
@@ -598,6 +598,27 @@ def _convert_to_python(value: Optional[Value], for_printing=False) -> Any:
     return str(value.data)
 
 
+def serialize_from_python(value: Any, type_: str = None) -> Value:
+    """
+    Convert a (simple) Python value into a TESTed value.
+
+    While unfortunate, this should be kept in sync with the
+    JSON encoder for values of the language module for Python.
+    """
+    if value is None:
+        return NothingType(type=type_ or BasicNothingTypes.NOTHING)
+    elif isinstance(value, str):
+        return StringType(type=type_ or BasicStringTypes.TEXT, data=value)
+    elif isinstance(value, bool):
+        return BooleanType(type=type_ or BasicBooleanTypes.BOOLEAN, data=value)
+    elif isinstance(value, int):
+        return NumberType(type=type_ or BasicNumericTypes.INTEGER, data=value)
+    elif isinstance(value, float):
+        return NumberType(type=type_ or BasicNumericTypes.REAL, data=value)
+    else:
+        raise TypeError(f"No clue how to convert {value} into TESTed value.")
+
+
 class ComparableFloat:
     def __init__(self, value):
         self.value = value
@@ -667,7 +688,7 @@ class EvalResult(BaseModel):
     result: Union[bool, Status]
     readable_expected: Optional[str] = Field(None, alias="readableExpected")
     readable_actual: Optional[str] = Field(None, alias="readableActual")
-    messages: List[ExtendedMessage] = Field(Undefined, default_factory=list)
+    messages: List[ExtendedMessage] = Field(default_factory=list)
 
     class Config:
         # Allow both camel case and snake case fields

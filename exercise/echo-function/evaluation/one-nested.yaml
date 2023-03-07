@@ -1,4 +1,4 @@
 - tab: "My tab"
-  contexts:
+  testcases:
     - expression: 'echo(echo("input"))'
       return: "input"

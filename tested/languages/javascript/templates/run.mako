@@ -62,45 +62,50 @@ async function sendSpecificException(exception) {
 
 (async () => {
 
-let ${submission_name};
-
-## Prepare the command line arguments if needed.
-% if run_testcase.exists:
-    let new_args = [process.argv[0]]
-    new_args = new_args.concat([\
-    % for argument in run_testcase.arguments:
-        "${argument}", \
-    % endfor
-    ])
-    process.argv = new_args
-% endif
-## Import the code for the first time, which will run the code.
-try {
-    writeContextSeparator();
-    ${submission_name} = require("./${submission_name}.js");
-
-    <%include file="statement.mako" args="statement=run_testcase.exception_statement()" />
-} catch(e) {
-    ## If there is a main test case, pass the exception to it.
-    <%include file="statement.mako" args="statement=run_testcase.exception_statement('e')" />
-}
-
 % for i, ctx in enumerate(contexts):
     async function context${i}() {
         ${ctx.before}
-        % for testcase in ctx.testcases:
-            writeSeparator();
-            <% testcase: _TestcaseArguments %>\
-            % if isinstance(testcase.command, get_args(Assignment)):
-                let ${testcase.command.variable};
-            % endif
-            try {
-                ## If we have a value function, we have an expression.
-                <%include file="statement.mako" args="statement=testcase.input_statement()" />;
 
-                <%include file="statement.mako" args="statement=testcase.exception_statement()" />;
+        ## Import the code if there is no main testcase.
+        % if not ctx.context.has_main_testcase():
+            delete require.cache[require.resolve("./${submission_name}.js")];
+            const ${submission_name} = require("./${submission_name}.js");
+        % endif
+
+        % for tc in ctx.testcases:
+            writeSeparator();
+
+            ## Prepare the command line arguments if needed.
+            % if tc.testcase.is_main_testcase():
+                let new_args = [process.argv[0]];
+                new_args = new_args.concat([\
+                    % for argument in tc.input.arguments:
+                        "${argument}", \
+                    % endfor
+                ]);
+                process.argv = new_args;
+            % endif
+
+            ## In JavaScript, we need special code to make variables available outside of
+            ## the try-catch block.
+            % if not tc.testcase.is_main_testcase() and isinstance(tc.input.command, get_args(Assignment)):
+                let ${tc.input.command.variable};
+            % endif
+
+            try {
+
+                % if tc.testcase.is_main_testcase():
+                    ## If it is a main tc, import the code, which will call the main function.
+                    delete require.cache[require.resolve("./${submission_name}.js")];
+                    const ${submission_name} = require("./${submission_name}.js");
+                % else:
+                    ## If we have a value function, we have an expression.
+                    <%include file="statement.mako" args="statement=tc.input.input_statement()" />;
+                % endif
+
+                <%include file="statement.mako" args="statement=tc.exception_statement()" />;
             } catch(e) {
-                <%include file="statement.mako" args="statement=testcase.exception_statement('e')" />;
+                <%include file="statement.mako" args="statement=tc.exception_statement('e')" />;
             }
         % endfor
         ${ctx.after}

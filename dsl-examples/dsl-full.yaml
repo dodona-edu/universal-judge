@@ -5,28 +5,18 @@
     - files:
         - name: "file.txt"
           url: "media/workdir/file.txt"
-      # Arguments list
-      arguments: [ "data", 5 ]
-      # Standard input
-      stdin: "invoer"
-      # Standard output
-      stdout: "uitvoer"
-      # Standard error
-      stderr: "error"
-      # Exitcode
-      exitCode: 0
       # Dependent statement and function tests:
       testcases:
         # Assignment
-        - statement: 'data = ["list\nline", "data"] :: list'
+        - statement: 'data = ["list\nline", "data"]'
           # Function call
-        - statement: 'function(data, 0.5 :: double)'
+        - statement: 'function(data, 0.5)'
           # Return value
           return: [ 0, 0 ]
     - testcases:
-        - statement: 'echo(5 :: uint8)'
+        - statement: 'echo(unint8(5))'
           # Raw Return value
-          return-raw: "5 :: uint8"
+          return-raw: "uint8(5)"
 
 - tab: "Exception"
   contexts:
@@ -38,6 +28,12 @@
           stderr: "Error"
           # Exceptions
           exception: "Unknown"
+
+- tab: "Arguments"
+  testcases:
+    - stdin: "Alice"
+      arguments: ["stdin"]
+      stdout: "Hello Alice"
 
 - tab: "Config"
   # Configuration options for textual comparisons, only for stdout, stderr, exception

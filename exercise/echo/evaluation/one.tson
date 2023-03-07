@@ -2,23 +2,25 @@
   "tabs": [
     {
       "name": "Tab",
-      "runs": [
+      "contexts": [
         {
-          "run": {
-            "input": {
-              "main_call": true,
-              "stdin": {
-                "type": "text",
-                "data": "input-1"
-              }
-            },
-            "output": {
-              "stdout": {
-                "type": "text",
-                "data": "input-1"
+          "testcases": [
+            {
+              "input": {
+                "main_call": true,
+                "stdin": {
+                  "type": "text",
+                  "data": "input-1"
+                }
+              },
+              "output": {
+                "stdout": {
+                  "type": "text",
+                  "data": "input-1"
+                }
               }
             }
-          }
+          ]
         }
       ]
     }

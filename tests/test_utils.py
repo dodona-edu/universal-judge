@@ -341,7 +341,7 @@ def test_template_code_block_html(
     ],
 )
 def test_template_statement_expression(lang: str, expected: str):
-    template = """${statement('random = new Random()')}
+    template = """${statement('random = Random()')}
 ${statement('random.new_sequence(10, 10)')}
 ${expression('[10, 5, 2, 8, 7, 1, 3, 4, 9, 6]')}"""
     instance = create_description_instance(
@@ -363,7 +363,7 @@ ${expression('[10, 5, 2, 8, 7, 1, 3, 4, 9, 6]')}"""
 )
 def test_template_multi_line_code_block_markdown(lang: str, prompt: str, expected: str):
     template = r"""```tested
-> integer x = \
+> x: integer = \
 data(1, 2,
 "alpha")
 ```"""

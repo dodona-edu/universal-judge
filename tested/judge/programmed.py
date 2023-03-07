@@ -143,7 +143,7 @@ def _evaluate_others(
             pass
 
     executable, _, status, _ = eval_bundle.lang_config.find_main_file(
-        files, evaluator_name
+        files, evaluator_name, []
     )
 
     if status != Status.CORRECT:

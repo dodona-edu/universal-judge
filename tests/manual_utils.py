@@ -1,33 +1,14 @@
+from jsonschema import validate
+
 import json
 import re
 from io import StringIO
 from pathlib import Path
-from typing import List
-
-import pytest
-from _pytest.config import Config
-from jsonschema import validate
-
 from tested.configs import DodonaConfig
 from tested.languages import get_language
 from tested.main import run
-
-
-def merge(a: dict, b: dict, path=None) -> dict:
-    """merges b into a"""
-    if path is None:
-        path = []
-    for key in b:
-        if key in a:
-            if isinstance(a[key], dict) and isinstance(b[key], dict):
-                merge(a[key], b[key], path + [str(key)])
-            elif a[key] == b[key]:
-                pass  # same leaf value
-            else:
-                a[key] = b[key]
-        else:
-            a[key] = b[key]
-    return a
+from tested.utils import recursive_dict_merge
+from typing import List
 
 
 def split_output(output: str) -> List[str]:
@@ -50,8 +31,7 @@ class CommandDict(list):
         return [x["status"]["enum"] for x in commands if "status" in x]
 
 
-def assert_valid_output(output: str, config: Config) -> CommandDict:
-    # noinspection PyTypeChecker
+def assert_valid_output(output: str, config) -> CommandDict:
     with open(Path(config.rootdir) / "tests/partial_output.json", "r") as f:
         schema = json.load(f)
 
@@ -75,7 +55,6 @@ def configuration(
     options=None,
     backward_compatibility_plan: bool = False,
 ) -> DodonaConfig:
-    """Create a config."""
     # Get the file extension for this language.
     ext = get_language(language).extension_file()
     if options is None:
@@ -83,23 +62,24 @@ def configuration(
     exercise_dir = Path(config.rootdir) / "exercise"
     ep = f"{exercise_dir}/{exercise}"
     testplan = "plan_name" if backward_compatibility_plan else "testplan"
-    return DodonaConfig(
-        **merge(
-            {
-                "memory_limit": 536870912,
-                "time_limit": 3600,  # One hour
-                "programming_language": language,
-                "natural_language": "nl",
-                "resources": Path(f"{ep}/evaluation"),
-                "source": Path(f"{ep}/solution/{solution}.{ext}"),
-                "judge": Path(f"{config.rootdir}"),
-                "workdir": work_dir,
-                testplan: plan,
-                "options": {"linter": False},
-            },
-            options,
-        )
+    # noinspection PyArgumentList
+    option_dict = recursive_dict_merge(
+        {
+            "memory_limit": 536870912,
+            "time_limit": 3600,  # One hour
+            "programming_language": language,
+            "natural_language": "nl",
+            "resources": Path(f"{ep}/evaluation"),
+            "source": Path(f"{ep}/solution/{solution}.{ext}"),
+            "judge": Path(f"{config.rootdir}"),
+            "workdir": work_dir,
+            testplan: plan,
+            "options": {"linter": False},
+        },
+        options,
     )
+    # noinspection PyArgumentList
+    return DodonaConfig(**option_dict)
 
 
 def execute_config(config: DodonaConfig) -> str:
@@ -109,6 +89,3 @@ def execute_config(config: DodonaConfig) -> str:
     result = actual.getvalue()
     print(result)
     return result
-
-
-mark_haskell = pytest.mark.haskell

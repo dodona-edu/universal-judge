@@ -1,4 +1,4 @@
 - tab: "Feedback"
-  contexts:
-    - expression: '{{"a"}: [1::int32], {"b"}: "a.txt"}'
-      return-raw: '{{"a"}: [1::int32], {"b"}: "a.txt"}'
+  testcases:
+    - expression: '{{"a"}: [int32(1)], {"b"}: "a.txt"}'
+      return-raw: '{{"a"}: [int32(1)], {"b"}: "a.txt"}'

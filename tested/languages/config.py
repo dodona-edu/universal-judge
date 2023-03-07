@@ -728,7 +728,7 @@ class Language:
         return list(x for x in files if filter_function(x))
 
     def find_main_file(
-        self, files: List[Path], name: str
+        self, files: List[Path], name: str, precompilation_messages: List[str]
     ) -> Tuple[Optional[Path], List[Message], Status, List[AnnotateCode]]:
         logger.debug("Finding %s in %s", name, files)
         messages = []
@@ -736,6 +736,7 @@ class Language:
         if possible_main_files:
             return possible_main_files[0], messages, Status.CORRECT, []
         else:
+            messages.extend(precompilation_messages)
             messages.append(get_i18n_string("languages.config.unknown.compilation"))
             return None, messages, Status.COMPILATION_ERROR, []
 

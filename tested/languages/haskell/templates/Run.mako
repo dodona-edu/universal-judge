@@ -82,21 +82,30 @@ handleException (Right _) = Nothing
     ${execution_name.lower()}Context${i} :: IO ()
     ${execution_name.lower()}Context${i} = do
         ${ctx.before}
-        % for testcase in ctx.testcases:
+        % for tc in ctx.testcases:
             writeSeparator
 
-            ## In Haskell we do not actually have statements, so we need to keep them separate.
-            ## Additionally, exceptions with "statements" are not supported at this time.
-            % if isinstance(testcase.command, get_args(Assignment)):
-                <%include file="statement.mako" args="statement=testcase.command,root=False" />
+            % if tc.testcase.is_main_testcase():
+                let mainArgs = [\
+                    % for argument in tc.input.arguments:
+                        <%include file="value.mako" args="value=argument"/>\
+                    % endfor
+                ]
+                result <- try (withArgs mainArgs ${submission_name}.main) :: IO (Either SomeException ())
+                let ee = handleException result in <%include file="statement.mako" args="statement=tc.exception_statement('ee')"/>
             % else:
-                result${loop.index} <- catch
-                    (<%include file="statement.mako" args="statement=testcase.command,lifting=True" />
-                        >>= \r -> <%include file="statement.mako" args="statement=testcase.input_statement('r')" />
-                        >> let ee = (Nothing :: Maybe SomeException) in <%include file="statement.mako" args="statement=testcase.exception_statement('ee')"/>)
-                    (\e -> let ee = (Just (e :: SomeException)) in <%include file="statement.mako" args="statement=testcase.exception_statement('ee')"/>)
+                ## In Haskell we do not actually have statements, so we need to keep them separate.
+                ## Additionally, exceptions with "statements" are not supported at this time.
+                % if isinstance(tc.input.command, get_args(Assignment)):
+                    <%include file="statement.mako" args="statement=tc.input.command,root=False" />
+                % else:
+                    result${loop.index} <- catch
+                        (<%include file="statement.mako" args="statement=tc.input.command,lifting=True" />
+                            >>= \r -> <%include file="statement.mako" args="statement=tc.input.input_statement('r')" />
+                            >> let ee = (Nothing :: Maybe SomeException) in <%include file="statement.mako" args="statement=tc.exception_statement('ee')"/>)
+                        (\e -> let ee = (Just (e :: SomeException)) in <%include file="statement.mako" args="statement=tc.exception_statement('ee')"/>)
+                % endif
             % endif
-
         % endfor
         ${ctx.after}
         putStr ""
@@ -105,18 +114,6 @@ handleException (Right _) = Nothing
 ## Main function of the context.
 main :: IO ()
 main = do
-    writeContextSeparator
-
-    % if run_testcase.exists:
-        let mainArgs = [\
-            % for argument in run_testcase.arguments:
-                <%include file="value.mako" args="value=argument"/>\
-            % endfor
-        ]
-        result <- try (withArgs mainArgs ${submission_name}.main) :: IO (Either SomeException ())
-        let ee = handleException result in <%include file="statement.mako" args="statement=run_testcase.exception_statement('ee')"/>
-    % endif
-
     % for i, ctx in enumerate(contexts):
         writeContextSeparator
         ${execution_name.lower()}Context${i}

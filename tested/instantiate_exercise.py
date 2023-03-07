@@ -156,12 +156,11 @@ def _filter_valid_languages(languages: List[str], testplan: Plan) -> List[str]:
             if mapping[t] == TypeSupport.UNSUPPORTED:
                 return False
 
-        # Check language specific evaluators
+        # Check language-specific evaluators
         for testcase in (
             testcase
             for tab in testplan.tabs
-            for run in tab.runs
-            for context in run.contexts
+            for context in tab.contexts
             for testcase in context.all_testcases()
         ):
             eval_langs = testcase.output.get_specific_eval_languages()

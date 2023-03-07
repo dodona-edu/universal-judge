@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Tuple, List, Set, Iterable
 
 from .collector import OutputManager, TestcaseCollector
-from .execution import TestcaseResult, RunTestcaseResult
+from .execution import ContextResult
 from ..configs import Bundle
 from ..dodona import *
 from ..dodona import StartTestcase, CloseTestcase
@@ -14,14 +14,12 @@ from ..languages.generator import (
     get_readable_input,
     attempt_readable_input,
     convert_statement,
-    attempt_run_readable_input,
 )
 from ..testplan import (
     Context,
     OutputChannel,
     IgnoredChannel,
     ExitCodeOutputChannel,
-    RunTestcase,
     TextOutput,
     FileOutput,
     ValueOutput,
@@ -143,129 +141,31 @@ def _evaluate_channel(
     return is_correct
 
 
-def evaluate_run_results(
-    bundle: Bundle,
-    run: RunTestcase,
-    exec_results: Optional[RunTestcaseResult],
-    compiler_results: Tuple[List[Message], Status],
-    context_dir: Path,
-    collector: OutputManager,
-    has_contexts_next: bool,
-) -> Optional[Status]:
-    # Handle the compiler output. If there is compiler output, there is no point
-    # in checking additional testcases, so stop early.
-    # Handle compiler results
-    if compiler_results[1] != Status.CORRECT:
-        readable_input = attempt_run_readable_input(bundle, run)
-        collector.add(StartTestcase(description=readable_input))
-        # Report all compiler messages.
-        for message in compiler_results[0]:
-            collector.add(AppendMessage(message=message))
-        # Escalate the compiler status to every testcase.
-        collector.add(EscalateStatus(status=StatusMessage(enum=compiler_results[1])))
-
-        # Finish evaluation, since there is nothing we can do.
-        collector.add(CloseTestcase(accepted=False))
-        return None
-
-    readable_input, seen = get_readable_input(bundle, run.link_files, run)
-
-    # Link not inlined files
-    non_inlined = set(run.link_files).difference(seen)
-    if non_inlined:
-        _link_files_message(non_inlined, collector)
-
-    run_collector = TestcaseCollector(StartTestcase(description=readable_input))
-
-    # There must be execution if compilation succeeded.
-    assert exec_results is not None
-
-    # Split the basic output channels.
-    # These channels should have one additional entry for the context testcase.
-    actual_stdout = exec_results.stdout
-    actual_stderr = exec_results.stderr
-    actual_exception = exec_results.exception
-
-    output = run.output
-
-    # Actual do the evaluation.
-    # This will also print a message if there are missing values for this testcase
-    # (but not if there are missing values before the testcase, we handle this
-    # further down)
-    results = [
-        _evaluate_channel(
-            bundle,
-            context_dir,
-            run_collector,
-            Channel.FILE,
-            output.file,
-            "",
-            timeout=exec_results.timeout,
-            memory=exec_results.memory,
-        ),
-        _evaluate_channel(
-            bundle,
-            context_dir,
-            run_collector,
-            Channel.STDERR,
-            output.stderr,
-            actual_stderr,
-            timeout=exec_results.timeout,
-        ),
-        _evaluate_channel(
-            bundle,
-            context_dir,
-            run_collector,
-            Channel.EXCEPTION,
-            output.exception,
-            actual_exception,
-            unexpected_status=Status.RUNTIME_ERROR,
-            timeout=exec_results.timeout,
-            memory=exec_results.memory,
-        ),
-        _evaluate_channel(
-            bundle,
-            context_dir,
-            run_collector,
-            Channel.STDOUT,
-            output.stdout,
-            actual_stdout,
-            timeout=exec_results.timeout,
-            memory=exec_results.memory,
-        ),
-    ]
-
-    # If we must stop due to errors are there no further testcases, evaluate the
-    # exit channel.
-    if not has_contexts_next:
-        _evaluate_channel(
-            bundle,
-            context_dir,
-            run_collector,
-            Channel.EXIT,
-            run.output.exit_code,
-            str(exec_results.exit),
-            timeout=exec_results.timeout,
-            memory=exec_results.memory,
-        )
-
-    # Done with the run testcase.
-    run_collector.to_manager(collector, CloseTestcase())
-
-
 def evaluate_context_results(
     bundle: Bundle,
     context: Context,
-    exec_results: Optional[TestcaseResult],
+    exec_results: Optional[ContextResult],
     compiler_results: Tuple[List[Message], Status],
     context_dir: Path,
     collector: OutputManager,
-    exit_output: Optional[ExitCodeOutputChannel],
 ) -> Optional[Status]:
-    # Handle the compiler output. If there is compiler output, there is no
-    # point in
-    # checking additional testcases, so stop early.
-    # Handle compiler results
+    """
+    Evaluate the results for a single context.
+
+    This function is called for each context of the test suite, even if there
+    are no results for the context in question.
+
+    :param bundle: The configuration bundle.
+    :param context: The context to evaluate.
+    :param exec_results: The results of evaluating the context.
+    :param compiler_results: The compiler results.
+    :param context_dir: The directory where the execution happened.
+    :param collector: Where to put the output
+    :return: A status if of interest to the caller.
+    """
+
+    # If the compiler results are not successful, there is no point in doing more,
+    # so stop early.
     if compiler_results[1] != Status.CORRECT:
         readable_input = attempt_readable_input(bundle, context)
         collector.add(StartTestcase(description=readable_input))
@@ -277,13 +177,12 @@ def evaluate_context_results(
 
         # Finish evaluation, since there is nothing we can do.
         collector.add(CloseTestcase(accepted=False))
-        return None
+        return compiler_results[1]
 
     # There must be execution if compilation succeeded.
     assert exec_results is not None
 
     # Split the basic output channels.
-    # These channels should have one additional entry for the context testcase.
     stdout_ = exec_results.stdout.split(exec_results.separator)
     stderr_ = exec_results.stderr.split(exec_results.separator)
     exceptions = exec_results.exceptions.split(exec_results.separator)
@@ -351,8 +250,7 @@ def evaluate_context_results(
         output = testcase.output
 
         # Get the values produced by the execution. If there are no values,
-        # we use
-        # an empty string at this time. We handle missing output later.
+        # we use an empty string at this time. We handle missing output later.
         actual_stderr = safe_get(stderr_, i)
         actual_exception = safe_get(exceptions, i)
         actual_stdout = safe_get(stdout_, i)
@@ -412,25 +310,28 @@ def evaluate_context_results(
             ),
         ]
 
-        # If we will stop or this is the last one, do the exit channel.
-        if i == len(context.testcases):
+        # If this is the last testcase, do the exit channel.
+        if i == len(context.testcases) - 1:
             _evaluate_channel(
                 bundle,
                 context_dir,
                 t_col,
                 Channel.EXIT,
-                exit_output,
+                testcase.output.exit_code,
                 str(exec_results.exit),
                 timeout=exec_results.timeout,
                 memory=exec_results.memory,
             )
+        else:
+            assert (
+                testcase.output.exit_code == IgnoredChannel.IGNORED
+            ), "Only the last testcase may check the exit code."
 
-        # Add messages if there was no main file.
+        # Add messages if there was no output.
         if missing_values:
             for u in missing_values:
                 t_col.add(u)
 
-        # Stop with this testcase.
         collectors.append(t_col)
 
     # Add file links
@@ -451,9 +352,6 @@ def evaluate_context_results(
 def _link_files_message(
     link_files: Iterable[FileUrl], collector: Optional[OutputManager] = None
 ) -> Optional[AppendMessage]:
-    dict_links = dict(
-        (link_file.name, dataclasses.asdict(link_file)) for link_file in link_files
-    )
     link_list = ", ".join(
         f'<a href="{link_file.url}" class="file-link" target="_blank">'
         f'<span class="code">{html.escape(link_file.name)}</span></a>'
@@ -482,6 +380,8 @@ def should_show(test: OutputChannel, channel: Channel) -> bool:
     :return: True if the channel should be shown, false otherwise.
     """
     if channel == Channel.EXIT:
+        if test == IgnoredChannel.IGNORED:
+            return False
         assert isinstance(test, get_args(ExitCodeOutputChannel))
         return test.value != 0
     elif channel in (Channel.STDOUT, Channel.STDERR):
@@ -568,101 +468,48 @@ def prepare_evaluation(bundle: Bundle, collector: OutputManager):
     collector.prepare_judgment(StartJudgment())
     for i, tab in enumerate(bundle.plan.tabs):
         collector.prepare_tab(StartTab(title=tab.name, hidden=tab.hidden), i)
-        context_index = 0
 
-        for run in tab.runs:
-            run_testcase = run.run
-            has_main = run_testcase.input.main_call
+        for j, context in enumerate(tab.contexts):
+            updates = []
 
-            # Get exit code stuff, but don't evaluate yet.
-            exit_output = run_testcase.output.exit_code
-
-            if has_main:
-                collector.prepare_context(
-                    StartContext(description=run_testcase.description), i, context_index
+            collector.prepare_context(
+                StartContext(description=context.description), i, j
+            )
+            updates.append(
+                AppendMessage(
+                    message=get_i18n_string("judge.evaluation.missing.context")
                 )
+            )
 
-                readable_input, inlined_files = get_readable_input(
-                    bundle, run_testcase.link_files, run_testcase
+            inlined_files: Set[FileUrl] = set()
+            # Begin normal testcases.
+            for t, testcase in enumerate(context.testcases):
+                readable_input, seen = get_readable_input(
+                    bundle, context.link_files, testcase
                 )
-
-                # Add file links
-                non_inlined = set(run_testcase.link_files).difference(inlined_files)
-                if non_inlined:
-                    _link_files_message(non_inlined, collector)
-
-                updates = [
-                    AppendMessage(
-                        message=get_i18n_string("judge.evaluation.missing.context")
-                    ),
-                    StartTestcase(description=readable_input),
-                ]
+                inlined_files = inlined_files.union(seen)
+                updates.append(StartTestcase(description=readable_input))
 
                 # Do the normal output channels.
-                output = run_testcase.output
+                output = testcase.output
                 _add_channel(bundle, output.stdout, Channel.STDOUT, updates)
                 _add_channel(bundle, output.stderr, Channel.STDERR, updates)
                 _add_channel(bundle, output.file, Channel.FILE, updates)
                 _add_channel(bundle, output.exception, Channel.EXCEPTION, updates)
+                _add_channel(bundle, output.result, Channel.RETURN, updates)
 
-                # If this is the last testcase, do the exit code.
-                if not run.contexts:
-                    _add_channel(bundle, exit_output, Channel.EXIT, updates)
+                # If last testcase, do exit code.
+                if j == len(tab.contexts) - 1:
+                    _add_channel(bundle, output.exit_code, Channel.EXIT, updates)
 
                 updates.append(CloseTestcase(accepted=False))
 
-                collector.prepare_context(updates, i, context_index)
-                collector.prepare_context(
-                    CloseContext(accepted=False), i, context_index
-                )
-                context_index += 1
+            # Add file links
+            non_inlined = set(context.link_files).difference(inlined_files)
+            if non_inlined:
+                updates.insert(0, _link_files_message(non_inlined))
 
-            for j, context in enumerate(run.contexts, start=int(has_main)):
-                updates = []
-
-                collector.prepare_context(
-                    StartContext(description=context.description), i, context_index
-                )
-                updates.append(
-                    AppendMessage(
-                        message=get_i18n_string("judge.evaluation.missing.context")
-                    )
-                )
-
-                inlined_files: Set[FileUrl] = set()
-                # Begin normal testcases.
-                for t, testcase in enumerate(context.testcases, 1):
-                    readable_input, seen = get_readable_input(
-                        bundle, context.link_files, testcase
-                    )
-                    inlined_files = inlined_files.union(seen)
-                    updates.append(StartTestcase(description=readable_input))
-
-                    # Do the normal output channels.
-                    output = testcase.output
-                    _add_channel(bundle, output.stdout, Channel.STDOUT, updates)
-                    _add_channel(bundle, output.stderr, Channel.STDERR, updates)
-                    _add_channel(bundle, output.file, Channel.FILE, updates)
-                    _add_channel(bundle, output.exception, Channel.EXCEPTION, updates)
-                    _add_channel(bundle, output.result, Channel.RETURN, updates)
-
-                    # If last testcase, do exit code.
-                    if j == int(has_main) + len(run.contexts) - 1 and t == len(
-                        context.testcases
-                    ):
-                        _add_channel(bundle, exit_output, Channel.EXIT, updates)
-
-                    updates.append(CloseTestcase(accepted=False))
-
-                # Add file links
-                non_inlined = set(context.link_files).difference(inlined_files)
-                if non_inlined:
-                    updates.insert(0, _link_files_message(non_inlined))
-
-                collector.prepare_context(updates, i, context_index)
-                collector.prepare_context(
-                    CloseContext(accepted=False), i, context_index
-                )
-                context_index += 1
+            collector.prepare_context(updates, i, j)
+            collector.prepare_context(CloseContext(accepted=False), i, j)
         collector.prepare_tab(CloseTab(), i)
     collector.prepare_judgment(CloseJudgment(accepted=False))

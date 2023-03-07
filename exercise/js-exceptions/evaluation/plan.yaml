@@ -1,4 +1,4 @@
 tabs:
 - tab: "Exceptions"
-  contexts:
+  testcases:
     - exception: "Valid exceptions"

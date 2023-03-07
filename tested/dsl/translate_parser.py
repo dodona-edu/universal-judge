@@ -1,26 +1,20 @@
-from copy import deepcopy
-from dataclasses import dataclass, field
-from itertools import groupby
-from json import dumps
-from logging import getLogger
-from os.path import basename, dirname, join, splitext
-from typing import Any, Dict, List, Optional, Union, Tuple, Callable
-
+import yaml
 from jsonschema import Draft7Validator
 from pydantic.json import pydantic_encoder
-from yaml import safe_load
 
-from tested.datatypes import (
+import json
+from logging import getLogger
+from pathlib import Path
+from typing import Dict, List, Union, Callable, TextIO, TypeVar, Optional
+from .ast_translator import parse_string
+from ..datatypes import (
     BasicBooleanTypes,
     BasicNumericTypes,
     BasicObjectTypes,
     BasicSequenceTypes,
     BasicStringTypes,
 )
-from tested.dsl.statement import Parser
-from tested.internal_timings import new_stage, end_stage
-from tested.serialisation import (
-    ExceptionValue,
+from ..serialisation import (
     Value,
     NothingType,
     StringType,
@@ -29,579 +23,283 @@ from tested.serialisation import (
     SequenceType,
     ObjectType,
     ObjectKeyValuePair,
+    ExceptionValue,
 )
-from tested.testplan import (
-    BaseOutput,
+from ..testplan import (
     Context,
-    EmptyChannel,
-    ExceptionOutputChannel,
     FileUrl,
     GenericTextEvaluator,
     Output,
     Plan,
-    Run,
-    RunTestcase,
-    RunInput,
-    RunOutput,
+    MainInput,
     Tab,
     Testcase,
-    TextData,
     TextOutputChannel,
     ValueOutputChannel,
     ExitCodeOutputChannel,
-    ValueOutput,
+    TextData,
+    EmptyChannel,
+    ExceptionOutputChannel,
 )
+from ..utils import recursive_dict_merge
 
 logger = getLogger(__name__)
 
-YAML_DICT = Dict[str, "YAML_OBJECT"]
-YAML_LIST = list
-YAML_OBJECT = Union[YAML_DICT, YAML_LIST, bool, float, int, str, None]
-
-OPTION_DICT = Dict[str, Union[int, bool]]
-
-parser = Parser()
+OptionDict = Dict[str, Union[int, bool]]
+YamlDict = Dict[str, "YamlObject"]
+YamlObject = Union[YamlDict, list, bool, float, int, str, None]
 
 
-@dataclass
-class StackFrame:
-    options_stdout: OPTION_DICT = field(default_factory=dict)
-    """Options for processing standard output"""
-    options_stderr: OPTION_DICT = field(default_factory=dict)
-    """Options for processing standard error"""
-    options_exception: OPTION_DICT = field(default_factory=dict)
-    """Options for processing exception"""
-    options_exit_code: OPTION_DICT = field(default_factory=dict)
-    """Options for processing exit codes"""
-    options_return: OPTION_DICT = field(default_factory=dict)
-    """Options for processing return values"""
-    link_files: List[FileUrl] = field(default_factory=list)
-    """Collect files to link in feedback"""
+def _parse_yaml(yaml_stream: Union[str, TextIO]) -> YamlObject:
+    """
+    Parse a string or stream to YAML.
+    """
+    return yaml.load(yaml_stream, Loader=yaml.CSafeLoader)
 
 
-class SchemaParser:
-    def __init__(self, schema_path: Optional[str] = None, indent: int = 2):
-        if schema_path is None:
-            schema_path = join(dirname(__file__), "schema.yaml")
-        schema_str = open(schema_path, "r").read()
-        schema = self._load_yaml_object(schema_str)
-        Draft7Validator.check_schema(schema)
-        self.validator = Draft7Validator(schema)
-        self.indent = indent
+def _load_schema_validator():
+    """
+    Load the JSON Schema validator used to check DSL test suites.
+    """
+    path_to_schema = Path(__file__).parent / "schema.json"
+    with open(path_to_schema, "r") as schema_file:
+        schema_object = json.load(schema_file)
+    Draft7Validator.check_schema(schema_object)
+    return Draft7Validator(schema_object)
 
-    def translate(self, yaml_file: str, json_file: Optional[str] = None):
-        yaml_str = open(yaml_file, "r").read()
-        json_str = self.translate_str(yaml_str)
-        if json_file is None:
-            directory = dirname(yaml_file)
-            json_name = f"{splitext(basename(yaml_file))[0]}.json"
-            json_file = join(directory, json_name)
-        with open(json_file, "w") as fd:
-            print(json_str, file=fd)
 
-    def translate_str(self, yaml_str: str) -> str:
-        plan = self.load_str(yaml_str)
-        json_str = self._write_to_json_string(plan)
-        return json_str
+_SCHEMA_VALIDATOR = _load_schema_validator()
 
-    def load(self, yaml_file: str) -> Plan:
-        yaml_str = open(yaml_file, "r").read()
-        return self.load_str(yaml_str)
 
-    def load_str(self, yaml_str: str) -> Plan:
-        yaml_obj = self._load_yaml_object(yaml_str)
-        self._validate(yaml_obj)
-        return self._translate_plan(yaml_obj)
+def _validate_dsl(dsl_object: YamlObject, report=True) -> bool:
+    """
+    Validate a DSl object.
 
-    # noinspection PyMethodMayBeStatic
-    def _enforce_dict(self, yaml_obj: YAML_OBJECT) -> YAML_DICT:
-        if isinstance(yaml_obj, dict):
-            return yaml_obj
-        else:
-            raise Exception(f"Invalid datatype {type(yaml_obj)}: dictionary expected")
+    :param dsl_object: The object to validate.
+    :param report: If errors should be printed or not.
+    :return: True if valid, False otherwise.
+    """
+    errors = list(_SCHEMA_VALIDATOR.iter_errors(dsl_object))
+    if not errors:
+        return True
+    if report:
+        for error in errors:
+            logger.error(error)
 
-    # noinspection PyMethodMayBeStatic
-    def _enforce_list(self, yaml_obj: YAML_OBJECT) -> YAML_LIST:
-        if isinstance(yaml_obj, list):
-            return yaml_obj
-        else:
-            raise Exception(f"Invalid datatype {type(yaml_obj)}: list expected")
+    return False
 
-    # noinspection PyMethodMayBeStatic
-    def _get_any_safe(self, yaml_dict: Any, key: str) -> Optional[Any]:
-        try:
-            return yaml_dict[key]
-        except KeyError:
-            return None
 
-    # noinspection PyMethodMayBeStatic
-    def _get_bool_safe(self, yaml_dict: YAML_DICT, key: str) -> Optional[bool]:
-        try:
-            return bool(yaml_dict[key])
-        except KeyError:
-            return None
+def _deepen_config_level(
+    new_level_object: Optional[YamlDict], current_level: dict
+) -> dict:
+    """
+    Return a dict of options for the new level object.
 
-    # noinspection PyMethodMayBeStatic
-    def _get_int_safe(self, yaml_dict: YAML_DICT, key: str) -> Optional[int]:
-        try:
-            x = yaml_dict[key]
-            if isinstance(x, int):
-                return x
-            return None
-        except KeyError:
-            return None
+    This is achieved by taking a copy of the options in the existing level,
+    and overriding all options that are present on the new level.
 
-    def _get_dict_safe(self, yaml_dict: YAML_DICT, key: str) -> Optional[YAML_DICT]:
-        try:
-            x = yaml_dict[key]
-            self._enforce_dict(x)
-            return x
-        except KeyError:
-            return None
+    :param new_level_object: The object from the test suite that may have options.
+    :param current_level: The options created for the previous level.
 
-    def _get_list_safe(self, yaml_dict: YAML_DICT, key: str) -> Optional[YAML_LIST]:
-        try:
-            x = yaml_dict[key]
-            self._enforce_list(x)
-            return x
-        except KeyError:
-            return None
+    :return: A dictionary for the next level.
+    """
+    if new_level_object is None or "config" not in new_level_object:
+        return current_level
 
-    # noinspection PyMethodMayBeStatic
-    def _get_str_safe(self, yaml_dict: YAML_DICT, key: str) -> Optional[str]:
-        try:
-            return str(yaml_dict[key])
-        except KeyError:
-            return None
+    return recursive_dict_merge(current_level, new_level_object["config"])
 
-    # noinspection PyMethodMayBeStatic
-    def _get_str_dict_safe(
-        self, yaml_dict: YAML_DICT, key: str
-    ) -> Optional[Union[str, OPTION_DICT]]:
-        try:
-            x = yaml_dict[key]
-            if isinstance(x, dict):
-                return x
-            return str(x)
-        except KeyError:
-            return None
 
-    # noinspection PyMethodMayBeStatic
-    def _get_int_dict_safe(
-        self, yaml_dict: YAML_DICT, key: str
-    ) -> Optional[Union[str, OPTION_DICT]]:
-        try:
-            x = yaml_dict[key]
-            if isinstance(x, (int, dict)):
-                return x
-            return None
-        except KeyError:
-            return None
-
-    def _get_str_and_hide_expected(
-        self,
-        stack_frame: StackFrame,
-        yaml_object: YAML_OBJECT,
-        extract_config: Callable[[StackFrame], YAML_DICT],
-    ) -> Tuple[str, bool]:
-        if isinstance(yaml_object, str):
-            data = yaml_object
-            hide_expected = (
-                self._get_bool_safe(extract_config(stack_frame), "hideExpected")
-                or False
-            )
-        else:
-            data = self._get_str_safe(yaml_object, "data")
-            hide_expected = (
-                self._get_bool_safe(
-                    merge(
-                        extract_config(stack_frame),
-                        self._get_dict_safe(yaml_object, "config"),
-                    ),
-                    "hideExpected",
+def _convert_value(value: YamlObject) -> Value:
+    if value is None:
+        return NothingType()
+    elif isinstance(value, str):
+        return StringType(type=BasicStringTypes.TEXT, data=value)
+    elif isinstance(value, bool):
+        return BooleanType(type=BasicBooleanTypes.BOOLEAN, data=value)
+    elif isinstance(value, int):
+        return NumberType(type=BasicNumericTypes.INTEGER, data=value)
+    elif isinstance(value, float):
+        return NumberType(type=BasicNumericTypes.REAL, data=value)
+    elif isinstance(value, list):
+        return SequenceType(
+            type=BasicSequenceTypes.SEQUENCE,
+            data=[_convert_value(part_value) for part_value in value],
+        )
+    else:
+        data = []
+        # noinspection PyTypeChecker
+        for key, val in value.items():
+            data.append(
+                ObjectKeyValuePair(
+                    key=StringType(type=BasicStringTypes.TEXT, data=key),
+                    value=_convert_value(val),
                 )
-                or False
             )
-        return data, hide_expected
+        return ObjectType(type=BasicObjectTypes.MAP, data=data)
 
-    # noinspection PyMethodMayBeStatic
-    def _heuristic_check_multiline_value(self, output_channel: ValueOutput):
-        if isinstance(output_channel, ValueOutputChannel):
-            output_channel.evaluator.options["stringsAsText"] = (
-                output_channel.value
-                and output_channel.value.type == BasicStringTypes.TEXT
-                and "\n" in output_channel.value.data
-            )
 
-    # noinspection PyMethodMayBeStatic
-    def _load_yaml_object(self, yaml_str: str) -> YAML_OBJECT:
-        return safe_load(yaml_str)
+def _convert_file(link_file: YamlDict) -> FileUrl:
+    return FileUrl(name=link_file["name"], url=link_file["url"])
 
-    def _translate_base_output(
-        self,
-        yaml_dict: YAML_DICT,
-        output: BaseOutput,
-        stack_frame: StackFrame = StackFrame(),
-    ):
-        if "exception" in yaml_dict:
-            output.exception = self._translate_exception(
-                stack_frame, self._get_str_dict_safe(yaml_dict, "exception")
-            )
-        if "stderr" in yaml_dict:
-            output.stderr = self._translate_stream(
-                self._get_str_dict_safe(yaml_dict, "stderr"), stack_frame.options_stderr
-            )
-        if "stdout" in yaml_dict:
-            output.stdout = self._translate_stream(
-                self._get_str_dict_safe(yaml_dict, "stdout"), stack_frame.options_stdout
-            )
 
-    # noinspection PyMethodMayBeStatic
-    def _translate_config(
-        self,
-        config: Optional[YAML_DICT] = None,
-        old_stack_frame: StackFrame = StackFrame(),
-    ) -> StackFrame:
-        new_stack_frame = StackFrame()
-        if config and "stdout" in config:
-            new_stack_frame.options_stdout = merge(
-                old_stack_frame.options_stdout, self._get_dict_safe(config, "stdout")
-            )
-        else:
-            new_stack_frame.options_stdout = old_stack_frame.options_stdout
-        if config and "stderr" in config:
-            new_stack_frame.options_stderr = merge(
-                old_stack_frame.options_stderr, self._get_dict_safe(config, "stderr")
-            )
-        else:
-            new_stack_frame.options_stderr = old_stack_frame.options_stderr
-        if config and "exitCode" in config:
-            new_stack_frame.options_exit_code = merge(
-                old_stack_frame.options_exit_code,
-                self._get_dict_safe(config, "exitCode"),
-            )
-        else:
-            new_stack_frame.options_exit_code = old_stack_frame.options_exit_code
-        if config and "exception" in config:
-            new_stack_frame.options_exception = merge(
-                old_stack_frame.options_exception,
-                self._get_dict_safe(config, "exception"),
-            )
-        else:
-            new_stack_frame.options_exception = old_stack_frame.options_exception
-        if config and "return" in config:
-            new_stack_frame.options_return = merge(
-                old_stack_frame.options_return, self._get_dict_safe(config, "return")
-            )
-        else:
-            new_stack_frame.options_return = old_stack_frame.options_return
-        new_stack_frame.link_files = deepcopy(old_stack_frame.link_files)
-        return new_stack_frame
+def _convert_text_output_channel(
+    stream: YamlObject, config: dict, config_name: str
+) -> TextOutputChannel:
+    if isinstance(stream, str):
+        data = stream
+        config = config.get(config_name, {})
+    else:
+        assert isinstance(stream, dict)
+        data = stream["data"]
+        existing_config = config.get(config_name, {})
+        config = _deepen_config_level(stream, existing_config)
 
-    def _translate_context(
-        self, context: YAML_DICT, stack_frame: StackFrame = StackFrame()
-    ) -> Tuple[RunTestcase, Optional[Context]]:
-        if "statement" in context or "expression" in context:
-            testcase, files = self._translate_testcase(context, stack_frame)
-            return RunTestcase(), Context(testcases=[testcase], link_files=files)
+    return TextOutputChannel(data=data, evaluator=GenericTextEvaluator(options=config))
 
-        stack_frame = self._translate_config(
-            self._get_dict_safe(context, "config"), stack_frame
+
+def _convert_testcase(testcase: YamlDict, previous_config: dict) -> Testcase:
+    config = _deepen_config_level(testcase, previous_config)
+
+    if (expr_stmt := testcase.get("statement", testcase.get("expression"))) is not None:
+        the_input = parse_string(expr_stmt)
+    else:
+        stdin = (
+            TextData(data=testcase["stdin"])
+            if "stdin" in testcase
+            else EmptyChannel.NONE
         )
-        run_testcase = self._translate_context_testcase(context, stack_frame)
+        arguments = testcase.get("arguments", [])
+        the_input = MainInput(stdin=stdin, arguments=arguments)
 
-        testcases = []
+    output = Output()
 
-        if "testcases" in context:
-            for testcase, files in (
-                self._translate_testcase(testcase, stack_frame)
-                for testcase in self._get_list_safe(context, "testcases")
-            ):
-                testcases.append(testcase)
-                stack_frame.link_files.extend(files)
-
-        if "files" in context:
-            stack_frame.link_files.extend(
-                self._translate_file(file)
-                for file in self._get_list_safe(context, "files")
-            )
-
-        if len(testcases) == 0:
-            return run_testcase, None
-
-        unique_file_urls = list(
-            k
-            for k, _ in groupby(
-                sorted(stack_frame.link_files, key=lambda x: (x.name, x.url))
-            )
+    if (stdout := testcase.get("stdout")) is not None:
+        output.stdout = _convert_text_output_channel(stdout, config, "stdout")
+    if (stderr := testcase.get("stderr")) is not None:
+        output.stderr = _convert_text_output_channel(stderr, config, "stderr")
+    if (exception := testcase.get("exception")) is not None:
+        output.exception = ExceptionOutputChannel(
+            exception=ExceptionValue(message=exception)
         )
-        return run_testcase, Context(testcases=testcases, link_files=unique_file_urls)
-
-    def _translate_file(self, link_file: YAML_DICT) -> FileUrl:
-        name = self._get_str_safe(link_file, "name")
-        url = self._get_str_safe(link_file, "url")
-        return FileUrl(name=name, url=url)
-
-    def _translate_plan(self, yaml_obj: YAML_OBJECT) -> Plan:
-        if isinstance(yaml_obj, list):
-            tabs = [
-                self._translate_tab(self._enforce_dict(yaml_obj))
-                for yaml_obj in yaml_obj
-            ]
-            return Plan(tabs=tabs)
-        else:
-            optimize = self._get_bool_safe(yaml_obj, "disableOptimizations") is not True
-            namespace = self._get_str_safe(yaml_obj, "namespace") or "submission"
-            stack_frame = self._translate_config(
-                self._get_dict_safe(yaml_obj, "config"),
-            )
-            tabs = [
-                self._translate_tab(self._enforce_dict(yaml_obj), optimize, stack_frame)
-                for yaml_obj in self._get_list_safe(yaml_obj, "tabs")
-            ]
-        return Plan(tabs=tabs, namespace=namespace)
-
-    def _translate_context_testcase(
-        self, context: YAML_DICT, stack_frame: StackFrame = StackFrame()
-    ) -> RunTestcase:
-        main_call = (
-            "arguments" in context
-            or "exception" in context
-            or "exitCode" in context
-            or "stdin" in context
-            or "stdout" in context
-            or "stderr" in context
-        )
-
-        if "arguments" in context:
-            arguments = [
-                str(argument) for argument in self._get_list_safe(context, "arguments")
-            ]
-        else:
-            arguments = []
-        if "stdin" in context:
-            stdin = TextData(data=self._get_str_safe(context, "stdin"))
-        else:
-            stdin = EmptyChannel.NONE
-
-        run_input = RunInput(stdin=stdin, arguments=arguments, main_call=main_call)
-
-        run_output = RunOutput()
-        if "exitCode" in context:
-            run_output.exit_code = self._translate_exit_code(
-                stack_frame, self._get_int_dict_safe(context, "exitCode")
-            )
-
-        self._translate_base_output(context, run_output, stack_frame)
-        return RunTestcase(input=run_input, output=run_output)
-
-    def _translate_stream(
-        self, stream: YAML_OBJECT, config: OPTION_DICT
-    ) -> TextOutputChannel:
-        if isinstance(stream, str):
-            data, config = stream, config
-        else:
-            data = self._get_str_safe(stream, "data")
-            config = merge(config, self._get_dict_safe(stream, "config"))
-
-        hide_expected = self._get_bool_safe(config, "hideExpected") or False
-
-        return TextOutputChannel(
-            data=data,
-            evaluator=GenericTextEvaluator(options=config),
-            show_expected=not hide_expected,
-        )
-
-    def _translate_exit_code(
-        self, stack_frame: StackFrame, exit_code: YAML_OBJECT
-    ) -> ExitCodeOutputChannel:
-        if isinstance(exit_code, int):
-            exit_code: int
-            hide_expected = (
-                self._get_bool_safe(stack_frame.options_exit_code, "hideExpected")
-                or False
-            )
-        else:
-            exit_code: YAML_DICT
-            hide_expected = (
-                self._get_bool_safe(
-                    merge(
-                        stack_frame.options_exit_code,
-                        self._get_dict_safe(exit_code, "config"),
-                    ),
-                    "hideExpected",
-                )
-                or False
-            )
-            exit_code: int = self._get_bool_safe(exit_code, "data") or 0
-        return ExitCodeOutputChannel(value=exit_code, show_expected=not hide_expected)
-
-    def _translate_exception(
-        self, stack_frame: StackFrame, exception: YAML_OBJECT
-    ) -> ExceptionOutputChannel:
-        data, hide_expected = self._get_str_and_hide_expected(
-            stack_frame, exception, lambda x: x.options_exception
-        )
-
-        return ExceptionOutputChannel(
-            exception=ExceptionValue(message=data), show_expected=not hide_expected
-        )
-
-    def _translate_tab(
-        self,
-        tab: YAML_DICT,
-        optimize: bool = True,
-        stack_frame: StackFrame = StackFrame(),
-    ) -> Tab:
-        stack_frame = self._translate_config(
-            self._get_dict_safe(tab, "config"), stack_frame
-        )
-        hidden = self._get_bool_safe(tab, "hidden")
-        name = self._get_str_safe(tab, "tab")
-
-        translated_contexts = [
-            self._translate_context(context, stack_frame)
-            for context in self._get_list_safe(tab, "contexts")
-        ]
-
-        if len(translated_contexts) == 0:
-            return Tab(name=name, hidden=hidden, runs=[])
-
-        runs = []
-        if optimize:
-            new_run = False
-            for context_testcase, context in translated_contexts:
-                if context_testcase.input.main_call:
-                    runs.append(Run(run=context_testcase))
-                    if context_testcase.output.exit_code.value != 0:
-                        new_run = True
-                if context is not None:
-                    if new_run:
-                        new_run = False
-                        runs.append(Run(contexts=[context]))
-                    else:
-                        try:
-                            runs[-1].contexts.append(context)
-                        except IndexError:
-                            runs.append(Run(contexts=[context]))
-        else:
-            runs = [
-                Run(
-                    contexts=[context] if context is not None else [],
-                    run=context_testcase,
-                )
-                for context_testcase, context in translated_contexts
-            ]
-
-        return Tab(name=name, hidden=hidden, runs=runs)
-
-    def _translate_testcase(
-        self, testcase: YAML_DICT, stack_frame: StackFrame = StackFrame()
-    ) -> Tuple[Testcase, List[FileUrl]]:
-        stack_frame = self._translate_config(
-            self._get_dict_safe(testcase, "config"), stack_frame
-        )
-        code = self._get_str_safe(testcase, "statement") or self._get_str_safe(
-            testcase, "expression"
-        )
-        output = Output()
-        self._translate_base_output(testcase, output, stack_frame)
-
+    if (exit_code := testcase.get("exit_code")) is not None:
+        output.exit_code = ExitCodeOutputChannel(exit_code)
+    if (result := testcase.get("return")) is not None:
+        if "return_raw" in testcase:
+            raise ValueError("Both a return and return_raw value is not allowed.")
+        output.result = ValueOutputChannel(value=_convert_value(result))
+    if (result := testcase.get("return_raw")) is not None:
         if "return" in testcase:
-            hide_expected = (
-                self._get_bool_safe(stack_frame.options_return, "hideExpected") or False
-            )
+            raise ValueError("Both a return and return_raw value is not allowed.")
+        output.result = ValueOutputChannel(value=parse_string(result, True))
 
-            new_stage("parse.return", True)
-            output.result = ValueOutputChannel(
-                value=self._translate_value(self._get_any_safe(testcase, "return")),
-                show_expected=not hide_expected,
-            )
-            end_stage("parse.return", True)
-        elif "return-raw" in testcase:
-            new_stage("parse.return-raw", True)
-            output.result = self._translate_raw_return(
-                stack_frame, self._get_str_dict_safe(testcase, "return-raw")
-            )
-            end_stage("parse.return-raw", True)
+    # TODO: allow propagation of files...
+    files = []
+    if "files" in testcase:
+        for yaml_file in testcase["files"]:
+            files.append(_convert_file(yaml_file))
 
-        self._heuristic_check_multiline_value(output.result)
-
-        new_stage("parse.expression", True)
-        testcase_value = Testcase(input=parser.parse_statement(code), output=output)
-        end_stage("parse.expression", True)
-
-        if "files" in testcase:
-            files = [
-                self._translate_file(file)
-                for file in self._get_list_safe(testcase, "files")
-            ]
-        else:
-            files = []
-        return testcase_value, files
-
-    def _translate_raw_return(
-        self, stack_frame: StackFrame, value: YAML_OBJECT
-    ) -> ValueOutputChannel:
-        data, hide_expected = self._get_str_and_hide_expected(
-            stack_frame, value, lambda x: x.options_return
-        )
-        return ValueOutputChannel(
-            value=parser.parse_value(data), show_expected=not hide_expected
-        )
-
-    def _translate_value(self, value: YAML_OBJECT) -> Value:
-        if value is None:
-            return NothingType()
-        elif isinstance(value, str):
-            return StringType(type=BasicStringTypes.TEXT, data=value)
-        elif isinstance(value, bool):
-            return BooleanType(type=BasicBooleanTypes.BOOLEAN, data=value)
-        elif isinstance(value, int):
-            return NumberType(type=BasicNumericTypes.INTEGER, data=value)
-        elif isinstance(value, float):
-            return NumberType(type=BasicNumericTypes.REAL, data=value)
-        elif isinstance(value, list):
-            return SequenceType(
-                type=BasicSequenceTypes.SEQUENCE,
-                data=[self._translate_value(part_value) for part_value in value],
-            )
-        else:
-            return ObjectType(
-                type=BasicObjectTypes.MAP,
-                data=list(
-                    ObjectKeyValuePair(
-                        key=StringType(type=BasicStringTypes.TEXT, data=key),
-                        value=self._translate_value(val),
-                    )
-                    for key, val in value.items()
-                ),
-            )
-
-    def _write_to_json_string(self, json_object: Any) -> str:
-        return dumps(json_object, default=pydantic_encoder, indent=self.indent)
-
-    def _validate(self, instance: YAML_OBJECT):
-        if not self.validator.is_valid(instance):
-            for error in self.validator.iter_errors(instance):
-                logger.error(error.message)
-            exit(1)
+    return Testcase(input=the_input, output=output, link_files=files)
 
 
-def merge(dict0: YAML_DICT, dict1: YAML_DICT) -> YAML_DICT:
-    merged_dict = dict()
-    for key in set(dict0.keys()).union(set(dict1.keys())):
-        if key in dict0 and key in dict1:
-            # Both dictionaries contains the key
-            if isinstance(dict0[key], dict) and isinstance(dict1[key], dict):
-                # Merge subsequence dictionaries
-                merged_dict[key] = merge(dict0[key], dict1[key])
-            else:
-                # Non subsequence dictionaries, keep value of dict1
-                merged_dict[key] = dict1[key]
-        # Just copy unique keys
-        elif key in dict0:
-            merged_dict[key] = dict0[key]
-        else:
-            merged_dict[key] = dict1[key]
-    return merged_dict
+def _convert_context(context: YamlDict, previous_config: dict) -> Context:
+    config = _deepen_config_level(context, previous_config)
+    testcases = _convert_dsl_list(context["testcases"], config, _convert_testcase)
+    return Context(testcases=testcases)
+
+
+def _convert_tab(tab: YamlDict, previous_config: dict) -> Tab:
+    """
+    Translate a DSL tab to a full test suite tab.
+
+    :param tab: The tab to translate.
+    :param previous_config: The config for the parent level.
+    :return: A full tab.
+    """
+    config = _deepen_config_level(tab, previous_config)
+    hidden = tab.get("hidden", None)
+    name = tab["tab"]
+
+    # The tab can have testcases or contexts.
+    if "contexts" in tab:
+        contexts = _convert_dsl_list(tab["contexts"], config, _convert_context)
+    else:
+        assert "testcases" in tab
+        testcases = _convert_dsl_list(tab["testcases"], config, _convert_testcase)
+        contexts = [Context(testcases=[t]) for t in testcases]
+
+    return Tab(name=name, hidden=hidden, contexts=contexts)
+
+
+T = TypeVar("T")
+
+
+def _convert_dsl_list(
+    dsl_list: list, config: dict, converter: Callable[[YamlObject, dict], T]
+) -> List[T]:
+    """
+    Convert a list of YAML objects into a test suite object.
+
+    :param dsl_list: The YAML list.
+    :param config: The config
+    :param converter:
+    :return:
+    """
+    objects = []
+    for dsl_object in dsl_list:
+        assert isinstance(dsl_object, dict)
+        objects.append(converter(dsl_object, config))
+    return objects
+
+
+def _convert_dsl(dsl_object: YamlObject) -> Plan:
+    """
+    Translate a DSL test suite into a full test suite.
+
+    This function assumes the DSL object has been validated;
+    errors might not be presented in the best way here.
+
+    :param dsl_object: A validated DSL test suite object.
+    :return: A full test suite.
+    """
+    if isinstance(dsl_object, list):
+        namespace = None
+        tab_list = dsl_object
+        config = {}
+    else:
+        assert isinstance(dsl_object, dict)
+        namespace = dsl_object.get("namespace")
+        config = _deepen_config_level(dsl_object.get("config"), {})
+        tab_list = dsl_object["tabs"]
+    tabs = _convert_dsl_list(tab_list, config, _convert_tab)
+
+    if namespace:
+        return Plan(tabs=tabs, namespace=namespace)
+    else:
+        return Plan(tabs=tabs)
+
+
+def parse_dsl(dsl_string: str, validate: bool = True) -> Plan:
+    """
+    Parse a string containing a DSL test suite into our representation,
+    a test plan.
+
+    :param dsl_string: The string containing a DSL.
+    :param validate: If the test suite should be validated or not.
+    :return: The parsed and converted test plan.
+    """
+    dsl_object = _parse_yaml(dsl_string)
+    if validate and not _validate_dsl(dsl_object):
+        raise ValueError("Cannot parse invalid DSL.")
+    return _convert_dsl(dsl_object)
+
+
+def translate_to_testplan(dsl_string: str, validate: bool = True) -> str:
+    """
+    Convert a DSL to a test suite.
+
+    :param dsl_string: The DSL.
+    :param validate: Validate the DSL or not.
+    :return: The test suite.
+    """
+    plan = parse_dsl(dsl_string, validate)
+    return json.dumps(plan, default=pydantic_encoder, indent=2)

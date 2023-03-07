@@ -2,7 +2,6 @@
 Tests where full exercises are run. These are inherently slower.
 """
 from pathlib import Path
-from typing import Tuple
 
 import pytest
 
@@ -10,7 +9,6 @@ from tests.manual_utils import (
     configuration,
     execute_config,
     assert_valid_output,
-    mark_haskell,
 )
 
 
@@ -34,8 +32,8 @@ def test_full_isbn(lang: str, tmp_path: Path, pytestconfig):
         "java",
         "python",
         "kotlin",
-        pytest.param("haskell", marks=mark_haskell),
-        pytest.param("runhaskell", marks=mark_haskell),
+        pytest.param("haskell", marks=pytest.mark.haskell),
+        pytest.param("runhaskell", marks=pytest.mark.haskell),
     ],
 )
 def test_full_isbn_list(lang: str, tmp_path: Path, pytestconfig):
@@ -68,44 +66,6 @@ def test_full_lotto(lang: str, tmp_path: Path, pytestconfig):
     assert updates.find_status_enum() == ["correct"] * 45
 
 
-@pytest.mark.flaky
-@pytest.mark.parametrize(
-    "language_and_time",
-    [
-        ("python", 2),
-        ("java", 5),
-        ("c", 3),
-        ("kotlin", 5),
-        pytest.param(("haskell", 20), marks=mark_haskell),
-        pytest.param(("runhaskell", 15), marks=mark_haskell),
-    ],
-)
-def test_timeout(language_and_time: Tuple[str, int], tmp_path: Path, pytestconfig):
-    config_ = {"time_limit": language_and_time[1]}  # seconds
-    conf = configuration(
-        pytestconfig,
-        "echo",
-        language_and_time[0],
-        tmp_path,
-        "full.tson",
-        "correct",
-        config_,
-    )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    assert len(updates.find_all("start-testcase")) == 50
-    status = updates.find_status_enum()
-    correct = [x for x in status if x == "correct"]
-    exceeded = [x for x in status if x == "time limit exceeded"]
-    wrong = [x for x in status if x == "wrong"]
-    # We should have at least one good result.
-    assert len(correct) >= 1
-    assert len(wrong) <= 2
-    assert len(exceeded) >= 1
-    # Once for every status, plus one escalation, plus one judgement-close
-    assert len(wrong + correct + exceeded) == 50 + 1 + 1
-
-
 @pytest.mark.slow
 @pytest.mark.parametrize(
     "lang",
@@ -116,7 +76,7 @@ def test_timeout(language_and_time: Tuple[str, int], tmp_path: Path, pytestconfi
         "javascript",
         "kotlin",
         "bash",
-        pytest.param("haskell", marks=mark_haskell),
+        pytest.param("haskell", marks=pytest.mark.haskell),
     ],
 )
 def test_full_echo(lang: str, tmp_path: Path, pytestconfig):

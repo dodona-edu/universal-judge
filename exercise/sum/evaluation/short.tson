@@ -13,6 +13,9 @@
               "stdout": {
                 "type": "text",
                 "data": "127"
+              },
+              "exit_code": {
+                "value": 0
               }
             }
           }
@@ -27,6 +30,9 @@
               "stdout": {
                 "type": "text",
                 "data": "0"
+              },
+              "exit_code": {
+                "value": 0
               }
             }
           }

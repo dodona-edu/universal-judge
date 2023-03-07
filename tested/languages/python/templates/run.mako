@@ -1,9 +1,10 @@
 ## Code to execute one context.
-<%! from tested.languages.generator import _TestcaseArguments %>\
+<%! from tested.languages.generator import _TestcaseArguments, MainCallArguments %>\
 <%! from tested.serialisation import Statement, Expression %>\
 <%! from tested.utils import get_args %>\
 import values
 import sys
+import importlib
 from decimal import Decimal
 
 ##################################
@@ -64,49 +65,52 @@ def send_specific_value(value):
 def send_specific_exception(exception):
     values.send_evaluated(exception_file, exception)
 
+## Generate the functions that will execute for each context.
 % for i, ctx in enumerate(contexts):
     def ${execution_name}_context_${i}():
         ${ctx.before}
-        % for testcase in ctx.testcases:
+
+        ## Import the code if there is no main testcase.
+        % if not ctx.context.has_main_testcase():
+            import ${submission_name}
+            % if i != 0:
+                importlib.reload(sys.modules["${submission_name}"])
+            % endif
+        % endif
+
+        % for tc in ctx.testcases:
             write_separator()
-            <% testcase: _TestcaseArguments %>
+
+            ## Prepare the command line arguments if needed.
+            % if tc.testcase.is_main_testcase():
+                new_args = [sys.argv[0]]
+                new_args.extend([\
+                    % for argument in tc.input.arguments:
+                        "${argument}", \
+                    % endfor
+                ])
+                sys.argv = new_args
+            % endif
+
             try:
-                ## If we have a value function, we have an expression.
-                <%include file="statement.mako" args="statement=testcase.input_statement()" />
+                % if tc.testcase.is_main_testcase():
+                    ## If it is a main tc, import the code, which will call the main function.
+                    import ${submission_name}
+                    % if i != 0:
+                        importlib.reload(sys.modules["${submission_name}"])
+                    % endif
+                % else:
+                    ## If we have a value function, we have an expression.
+                    <% stmt = tc.input.input_statement() %>
+                    <%include file="statement.mako" args="statement=stmt,with_namespace=True" />
+                % endif
             except Exception as e:
-                <%include file="statement.mako" args="statement=testcase.exception_statement('e')" />
+                <%include file="statement.mako" args="statement=tc.exception_statement('e')" />
             else:
-                <%include file="statement.mako" args="statement=testcase.exception_statement()" />
+                <%include file="statement.mako" args="statement=tc.exception_statement()" />
         % endfor
         ${ctx.after}
 % endfor
-
-## Prepare the command line arguments if needed.
-% if run_testcase.exists and run_testcase.arguments:
-    new_args = [sys.argv[0]]
-    new_args.extend([\
-        % for argument in run_testcase.arguments:
-            "${argument}", \
-        % endfor
-    ])
-    sys.argv = new_args
-% endif
-
-## Import the code for the first time, which will run the code.
-try:
-    write_context_separator()
-    from ${submission_name} import *
-except Exception as e:
-    ## If there is a main test case, pass the exception to it.
-    % if run_testcase.exists:
-        <%include file="statement.mako" args="statement=run_testcase.exception_statement('e')" />
-    % else:
-        raise e
-    % endif
-% if run_testcase.exists:
-    else:
-        <%include file="statement.mako" args="statement=run_testcase.exception_statement()" />
-% endif
 
 % for i, ctx in enumerate(contexts):
     write_context_separator()

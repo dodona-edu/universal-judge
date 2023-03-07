@@ -8,12 +8,25 @@ import logging
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Union, Tuple, Optional, Set, Callable, Match, Iterable
+from typing import (
+    List,
+    Union,
+    Tuple,
+    Optional,
+    Set,
+    Callable,
+    Match,
+    Iterable,
+    TYPE_CHECKING,
+)
 import shlex
 
 from mako import exceptions
 from pygments.formatters.html import HtmlFormatter
 
+# Prevent cyclic imports for types...
+if TYPE_CHECKING:
+    from ..judge.execution import ExecutionUnit
 from .config import TemplateType
 from .templates import find_and_write_template, find_template
 from .description_generator import highlight_console
@@ -43,11 +56,9 @@ from ..testplan import (
     ProgrammedEvaluator,
     SpecificEvaluator,
     Testcase,
-    RunTestcase,
     Context,
     ExceptionOutput,
     ValueOutput,
-    Run,
     FileUrl,
 )
 from ..utils import get_args
@@ -71,13 +82,19 @@ STATEMENT = "statement"
 
 
 @dataclass
-class _TestcaseArguments:
-    """Arguments for a testcases testcase template."""
+class MainCallArguments:
+    """Arguments for the main call."""
 
-    # The input command. In most languages, you can use input_statement instead.
+    arguments: List[str]
+
+
+@dataclass
+class NormalArguments:
+    """Arguments for normal testcases."""
+
     command: Statement
+
     _value_function: Optional[Callable[[Expression], Statement]]
-    _exception_function: Callable[[Expression], Statement]
 
     def input_statement(self, override: Optional[str] = None) -> Statement:
         """
@@ -95,40 +112,26 @@ class _TestcaseArguments:
             if override:
                 return self._value_function(Identifier(override))
             else:
+                # noinspection PyTypeChecker
                 return self._value_function(self.command)
         else:
             return self.command
 
-    def exception_statement(self, name: Optional[str] = None) -> Statement:
-        """
-        Get the exception statement for the testcase.
-
-        :param name: Optionally the name of an property_name containing the
-        exception.
-        :return: The exception statement.
-        """
-        if name:
-            return self._exception_function(Identifier(name))
-        else:
-            return self._exception_function(NothingType())
-
 
 @dataclass
-class _RunTestcaseArguments:
-    """Arguments for a run testcase template."""
+class _TestcaseArguments:
+    """Arguments for a testcase template."""
 
-    # If a context testcase exists.
-    exists: bool
-    # Main arguments.
-    arguments: List[str]
+    # The arguments
+    input: Union[MainCallArguments, NormalArguments]
+    testcase: Testcase
     _exception_function: Callable[[Expression], Statement]
 
     def exception_statement(self, name: Optional[str] = None) -> Statement:
         """
         Get the exception statement for the testcase.
 
-        :param name: Optionally the name of an property_name containing the
-        exception.
+        :param name: Optional, the name of a property containing the exception.
         :return: The exception statement.
         """
         if name:
@@ -139,7 +142,7 @@ class _RunTestcaseArguments:
 
 @dataclass
 class _ContextArguments:
-    """Arguments for a plan template for the contexts."""
+    """Arguments for a context template."""
 
     # The "before" code.
     before: str
@@ -147,11 +150,13 @@ class _ContextArguments:
     after: str
     # A list of the other testcases.
     testcases: List[_TestcaseArguments]
+    # Access to the underlying context.
+    context: Context
 
 
 @dataclass
-class _ExecutionArguments:
-    """Arguments for a plan template for the executions."""
+class _ExecutionUnitArguments:
+    """Arguments for an execution unit template."""
 
     # The name of the execution.
     execution_name: str
@@ -165,12 +170,11 @@ class _ExecutionArguments:
     secret_id: str
     # The secret context ID.
     context_secret_id: str
-    # The run testcase
-    run_testcase: _RunTestcaseArguments
     # The contexts
     contexts: List[_ContextArguments]
-    # A set of the names of the language specific evaluators we will need.
+    # The names of the language-specific evaluators we will need.
     evaluator_names: Set[str]
+    execution_unit: "ExecutionUnit"
 
 
 @dataclass
@@ -297,6 +301,7 @@ def _create_handling_function(
     """
     lang_config = bundle.lang_config
     if hasattr(output, "evaluator") and isinstance(output.evaluator, SpecificEvaluator):
+        # noinspection PyUnresolvedReferences
         evaluator = output.evaluator.for_language(bundle.config.programming_language)
         evaluator_name = lang_config.conventionalize_namespace(evaluator.file.stem)
     else:
@@ -332,7 +337,7 @@ def _create_handling_function(
 
 
 def _create_exception_function(
-    bundle: Bundle, testcase: Union[Testcase, RunTestcase]
+    bundle: Bundle, testcase: Testcase
 ) -> Tuple[Callable[[Expression], Statement], Optional[str]]:
     """
     Create a function call for handling exceptions. These functions assume there is
@@ -356,32 +361,47 @@ def _prepare_testcase(
     bundle: Bundle, testcase: Testcase
 ) -> Tuple[_TestcaseArguments, List[str]]:
     """
-    Prepare a testcase. This will prepare any function calls or assignments, and
-    extract functions for handling return values and exceptions.
+    Prepare a testcase.
+
+    This will prepare any function calls or assignments, and extract functions
+    for handling return values and exceptions. It also handles main calls.
 
     :param bundle: The configuration bundle.
     :param testcase: The testcase to prepare.
 
     :return: Arguments containing the preparation results and the evaluator name or
-             None if no language specific evaluator is needed.
+             None if no language-specific evaluator is needed.
     """
     names = []
 
-    result_channel = testcase.output.result
+    if testcase.is_main_testcase():
+        input_arguments = MainCallArguments(arguments=testcase.input.arguments)
+    else:
+        if isinstance(testcase.input, get_args(Expression)):
+            # noinspection PyTypeChecker
+            command = _prepare_expression(bundle, testcase.input)
+        else:
+            assert isinstance(testcase.input, get_args(Assignment))
+            # noinspection PyTypeChecker
+            command = _prepare_assignment(bundle, testcase.input)
 
-    has_return = result_channel not in (EmptyChannel.NONE, IgnoredChannel.IGNORED)
+        result_channel = testcase.output.result
 
-    # Create the function to handle the values.
-    value_function_call, evaluator_name = _create_handling_function(
-        bundle, SEND_VALUE, SEND_SPECIFIC_VALUE, result_channel
-    )
-    if evaluator_name:
-        names.append(evaluator_name)
+        # Create the function to handle the values.
+        value_function_call, evaluator_name = _create_handling_function(
+            bundle, SEND_VALUE, SEND_SPECIFIC_VALUE, result_channel
+        )
+        if evaluator_name:
+            names.append(evaluator_name)
 
-    # A special case: if there isn't an actual value, don't call the function.
-    if not has_return:
-        value_function_call = None
-        assert evaluator_name is None
+        has_return = result_channel not in (EmptyChannel.NONE, IgnoredChannel.IGNORED)
+        # A special case: if there isn't an actual value, don't call the function.
+        if not has_return:
+            value_function_call = None
+            assert evaluator_name is None
+        input_arguments = NormalArguments(
+            command=command, _value_function=value_function_call
+        )
 
     (exception_function_call, exception_evaluator_name) = _create_exception_function(
         bundle, testcase
@@ -390,16 +410,10 @@ def _prepare_testcase(
     if exception_evaluator_name:
         names.append(exception_evaluator_name)
 
-    if isinstance(testcase.input, get_args(Expression)):
-        command = _prepare_expression(bundle, testcase.input)
-    else:
-        assert isinstance(testcase.input, get_args(Assignment))
-        command = _prepare_assignment(bundle, testcase.input)
-
     return (
         _TestcaseArguments(
-            command=command,
-            _value_function=value_function_call,
+            testcase=testcase,
+            input=input_arguments,
             _exception_function=exception_function_call,
         ),
         names,
@@ -410,7 +424,7 @@ def _prepare_testcases(
     bundle: Bundle, context: Context
 ) -> Tuple[List[_TestcaseArguments], Set[str]]:
     """
-    Prepare all testcase in a context.
+    Prepare all testcases in a context.
 
     :param bundle: The configuration bundle.
     :param context: The context to prepare the testcases for.
@@ -424,37 +438,6 @@ def _prepare_testcases(
         result.append(args)
         files.update(new_names)
     return result, files
-
-
-def _prepare_run_testcase(
-    bundle: Bundle, run: Run
-) -> Tuple[_RunTestcaseArguments, Optional[str]]:
-    """
-    Prepare the context testcase for a context.
-
-    :param bundle: The configuration bundle.
-    :param context: The context to prepare the context testcase for.
-
-    :return: The testcase arguments and an optional generated file name.
-    """
-    testcase = run.run
-    exception_function, name = _create_exception_function(bundle, testcase)
-    if testcase.input.main_call:
-        return (
-            _RunTestcaseArguments(
-                exists=True,
-                arguments=testcase.input.arguments,
-                _exception_function=exception_function,
-            ),
-            name,
-        )
-    else:
-        return (
-            _RunTestcaseArguments(
-                exists=False, _exception_function=exception_function, arguments=[]
-            ),
-            name,
-        )
 
 
 def _handle_link_files(link_files: Iterable[FileUrl], language: str) -> Tuple[str, str]:
@@ -480,7 +463,7 @@ def _escape_shell(arg: str) -> str:
 
 
 def get_readable_input(
-    bundle: Bundle, files: List[FileUrl], case: Union[Testcase, RunTestcase]
+    bundle: Bundle, files: List[FileUrl], case: Testcase
 ) -> Tuple[ExtendedMessage, Set[FileUrl]]:
     """
     Get human-readable input for a testcase. This function will use, in
@@ -496,41 +479,36 @@ def get_readable_input(
     analyse_files = False
     if case.description:
         text = case.description
-    elif isinstance(case, Testcase):
+    elif case.is_main_testcase():
+        # See https://rouge-ruby.github.io/docs/Rouge/Lexers/ConsoleLexer.html
+        format_ = "console"
+        arguments = " ".join(_escape_shell(x) for x in case.input.arguments)
+        submission_name = bundle.lang_config.submission_name(bundle.plan)
+        args = f"$ {submission_name} {arguments}"
+        if isinstance(case.input.stdin, TextData):
+            stdin = case.input.stdin.get_data_as_string(bundle.config.resources)
+        else:
+            stdin = ""
+        if not stdin:
+            text = args
+            analyse_files = bool(arguments)
+        else:
+            if case.input.arguments:
+                text = f"{args}\n{stdin}"
+                analyse_files = True
+            else:
+                text = stdin
+    else:
         format_ = bundle.config.programming_language
+        # noinspection PyTypeChecker
         text = convert_statement(bundle, case.input)
         text = bundle.lang_config.cleanup_description(bundle.plan.namespace, text)
         analyse_files = True
-    elif isinstance(case, RunTestcase):
-        if case.input.main_call:
-            # See https://rouge-ruby.github.io/docs/Rouge/Lexers/ConsoleLexer.html
-            format_ = "console"
-            arguments = " ".join(_escape_shell(x) for x in case.input.arguments)
-            submission_name = bundle.lang_config.submission_name(bundle.plan)
-            args = f"$ {submission_name} {arguments}"
-            if isinstance(case.input.stdin, TextData):
-                stdin = case.input.stdin.get_data_as_string(bundle.config.resources)
-            else:
-                stdin = ""
-            if not stdin:
-                text = args
-                analyse_files = bool(arguments)
-            else:
-                if case.input.arguments:
-                    text = f"{args}\n{stdin}"
-                    analyse_files = True
-                else:
-                    text = stdin
-        else:
-            format_ = "code"
-            text = ""
-    else:
-        raise AssertionError("Unknown testcase variable_type.")
 
     quote = bundle.lang_config.get_string_quote()
     if not analyse_files or not files:
         return ExtendedMessage(description=text, format=format_), set()
-    if isinstance(case, RunTestcase):
+    if case.is_main_testcase():
         regex = re.compile("|".join(map(lambda x: re.escape(x.name), files)))
     else:
         regex = re.compile(
@@ -547,7 +525,7 @@ def get_readable_input(
         generator = bundle.lang_config.get_description_generator()
         generated_html = generator.generate_html_code(text)
 
-    if isinstance(case, RunTestcase):
+    if case.is_main_testcase():
         regex = re.compile(
             f'({"|".join(map(lambda x: re.escape(html.escape(x.name)), files))})'
         )
@@ -586,7 +564,7 @@ def get_readable_input(
     return ExtendedMessage(description=generated_html, format="html"), seen
 
 
-def attempt_run_readable_input(bundle: Bundle, run: RunTestcase) -> ExtendedMessage:
+def attempt_run_readable_input(bundle: Bundle, run: Testcase) -> ExtendedMessage:
     result, _ = get_readable_input(bundle, run.link_files, run)
     if result.description:
         return result
@@ -669,20 +647,25 @@ def _generate_context(
     )
     testcases, evaluator_names = _prepare_testcases(bundle, context)
     return (
-        _ContextArguments(before=before_code, after=after_code, testcases=testcases),
+        _ContextArguments(
+            before=before_code, after=after_code, testcases=testcases, context=context
+        ),
         evaluator_names,
     )
 
 
 def generate_execution(
-    bundle: Bundle, destination: Path, run: Run, execution_name: str
+    bundle: Bundle,
+    destination: Path,
+    execution_unit: "ExecutionUnit",
+    execution_name: str,
 ) -> Tuple[str, List[str]]:
     """
     Generate the files related to the execution.
 
     :param bundle: The configuration bundle.
     :param destination: Where the generated files should go.
-    :param run: The execution for which generation is happening.
+    :param execution_unit: The execution for which generation is happening.
     :param execution_name: The name of the execution module.
 
     :return: The name of the generated file in the given destination and a set
@@ -690,29 +673,28 @@ def generate_execution(
     """
     lang_config = bundle.lang_config
     evaluator_names = set()
-    run_testcase, name = _prepare_run_testcase(bundle, run)
     contexts = []
-    if name:
-        evaluator_names.add(name)
-    for context in run.contexts:
+
+    for context in execution_unit.contexts:
         context_args, context_evaluator_names = _generate_context(bundle, context)
         contexts.append(context_args)
         evaluator_names.update(context_evaluator_names)
 
     value_file_name = value_file(bundle, destination).name
     exception_file_name = exception_file(bundle, destination).name
-
     submission_name = lang_config.submission_name(bundle.plan)
 
-    execution_args = _ExecutionArguments(
+    # Extract the main testcase and exit testcase.
+
+    execution_args = _ExecutionUnitArguments(
         execution_name=execution_name,
         value_file=value_file_name,
         exception_file=exception_file_name,
         submission_name=submission_name,
         secret_id=bundle.secret,
         context_secret_id=bundle.context_separator_secret,
-        run_testcase=run_testcase,
         contexts=contexts,
+        execution_unit=execution_unit,
         evaluator_names=evaluator_names,
     )
 

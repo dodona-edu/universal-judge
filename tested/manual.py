@@ -1,5 +1,5 @@
 """
-Run the judge manually from code. In this mode, the configs is hardcoded into this
+Run the judge manually from code. In this mode, the config is hardcoded into this
 file, allowing rapid testing (and, most importantly, debugging).
 """
 import logging
@@ -14,28 +14,29 @@ from .configs import DodonaConfig
 from .main import run
 from tested import internal_timings
 
-exercise_dir = "exercise/echo-function"
+exercise_dir = "exercise/objects"
 
 
 def read_config() -> DodonaConfig:
     """Read the configuration from stdout"""
+    # noinspection PyArgumentList
     return DodonaConfig(
         **{
             "memory_limit": 536870912,
             "time_limit": 60,
-            "programming_language": "csharp",
+            "programming_language": "python",
             "natural_language": "nl",
             "resources": Path(exercise_dir, "evaluation"),
-            "source": Path(exercise_dir, "solution/correct.cs"),
+            "source": Path(exercise_dir, "solution/correct.py"),
             "judge": Path("."),
             "workdir": Path("workdir"),
-            "plan_name": "one.tson",
+            "plan_name": "chained.tson",
             "timing_statistics": False,
             "options": {
-                "parallel": True,
-                "allow_fallback": False,
+                "parallel": False,
+                "allow_fallback": True,
                 "mode": "batch",
-                "linter": True,
+                "linter": False,
             },
         }
     )
@@ -70,8 +71,6 @@ if __name__ == "__main__":
             shutil.rmtree(os.path.join(root, d), ignore_errors=True)
 
     start = time.time()
-    # run(configs, open(os.devnull, "w"))
-    # f = open(f"tests/isbn/students/student{STUDENT}/{EXERCISE}.dson", 'w')
     run(config, sys.stdout)
     end = time.time()
     print()

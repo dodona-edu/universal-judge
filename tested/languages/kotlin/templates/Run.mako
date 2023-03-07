@@ -52,18 +52,27 @@ class ${execution_name} : AutoCloseable {
     % for i, ctx in enumerate(contexts):
         private fun context${i}() {
             ${ctx.before}
-            % for testcase in ctx.testcases:
+
+            % for tc in ctx.testcases:
                 this.writeSeparator()
-                % if isinstance(testcase.command, get_args(Assignment)):
-                    var ${testcase.command.variable} : <%include file = "declaration.mako" args = "tp=testcase.command.type,value=testcase.command.expression" /> = null
+                % if not tc.testcase.is_main_testcase() and isinstance(tc.input.command, get_args(Assignment)):
+                    var ${tc.input.command.variable} : <%include file = "declaration.mako" args = "tp=tc.input.command.type,value=tc.input.command.expression" /> = null
                 % endif
                 try {
-                    <%include file = "statement.mako" args = "statement=testcase.input_statement()" />
-                    <%include file = "statement.mako" args = "statement=testcase.exception_statement()" />
+                    % if tc.testcase.is_main_testcase():
+                        solutionMain(arrayOf(\
+                            % for argument in tc.input.arguments:
+                                "${argument}", \
+                            % endfor
+                        ))
+                    % else:
+                        <%include file="statement.mako" args="statement=tc.input.input_statement()" />
+                    % endif
+                    <%include file="statement.mako" args="statement=tc.exception_statement()" />
                 } catch (e: Exception) {
-                    <%include file = "statement.mako" args = "statement=testcase.exception_statement('e')" />
+                    <%include file="statement.mako" args="statement=tc.exception_statement('e')" />
                 } catch (e: AssertionError) {
-                    <%include file = "statement.mako" args = "statement=testcase.exception_statement('e')" />
+                    <%include file="statement.mako" args="statement=tc.exception_statement('e')" />
                 }
             % endfor
             ${ctx.after}
@@ -71,23 +80,6 @@ class ${execution_name} : AutoCloseable {
     % endfor
 
     fun execute() {
-        this.writeContextSeparator()
-
-        % if run_testcase.exists:
-            try {
-                solutionMain(arrayOf( \
-                    % for argument in run_testcase.arguments:
-                        "${argument}", \
-                    % endfor
-                ))
-                <%include file = "statement.mako" args = "statement=run_testcase.exception_statement()" />
-            } catch (e: Exception) {
-                <%include file = "statement.mako" args = "statement=run_testcase.exception_statement('e')" />
-            } catch (e: AssertionError) {
-                <%include file = "statement.mako" args = "statement=run_testcase.exception_statement('e')" />
-            }
-        % endif
-
         % for i, ctx in enumerate(contexts):
             this.writeContextSeparator()
             this.context${i}()

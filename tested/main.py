@@ -6,7 +6,7 @@ from os.path import splitext
 
 from .configs import DodonaConfig, create_bundle
 from .testplan import parse_test_plan
-from .dsl import SchemaParser
+from .dsl import parse_dsl
 
 from . import internal_timings
 
@@ -28,11 +28,12 @@ def run(config: DodonaConfig, judge_output: IO):
     is_yaml = ext.lower() in (".yaml", ".yml")
     if is_yaml:
         internal_timings.new_stage("dsl")
-        parser = SchemaParser()
-        plan = parser.load_str(textual_plan)
+        plan = parse_dsl(textual_plan)
+        internal_timings.end_stage("dsl")
     else:
         internal_timings.new_stage("json")
         plan = parse_test_plan(textual_plan)
+        internal_timings.end_stage("json")
     internal_timings.new_stage("bundle")
     pack = create_bundle(config, judge_output, plan)
     internal_timings.end_stage("bundle")
