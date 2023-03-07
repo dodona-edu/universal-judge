@@ -26,7 +26,7 @@ class ContextResult(BaseExecutionResult):
     The results of executing a context.
 
     All output streams are divided by the testcase separator, in the same order
-    as the testcases in the context in the test suite. For example, the string
+    as the test cases in the context in the test suite. For example, the string
     at position 0 of the split output is the output for the first testcase.
     """
 
@@ -104,7 +104,7 @@ class ExecutionResult(BaseExecutionResult):
 @dataclass
 class ExecutionUnit:
     """
-    Combines a set of contexts that will be executed togheter.
+    Combines a set of contexts that will be executed together.
     """
 
     contexts: List[Context]

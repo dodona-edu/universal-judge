@@ -1,5 +1,5 @@
 """
-Run the judge manually from code. In this mode, the configs is hardcoded into this
+Run the judge manually from code. In this mode, the config is hardcoded into this
 file, allowing rapid testing (and, most importantly, debugging).
 """
 import logging
@@ -71,8 +71,6 @@ if __name__ == "__main__":
             shutil.rmtree(os.path.join(root, d), ignore_errors=True)
 
     start = time.time()
-    # run(configs, open(os.devnull, "w"))
-    # f = open(f"tests/isbn/students/student{STUDENT}/{EXERCISE}.dson", 'w')
     run(config, sys.stdout)
     end = time.time()
     print()

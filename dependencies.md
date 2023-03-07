@@ -11,8 +11,8 @@ You can also take a look at the `.github/workflows/ci.yml` file, as it will also
 
 ## Languages
 
-All versions in this document are known to work; other versions might also work. For example, the version in the table
-below are the ones we currently use to run the test suite.
+All versions in this document are known to work; other versions might also work.
+For example, the versions in the table below are the ones we currently use to run the test suite.
 
 | Language            | Version |
 |---------------------|---------|
@@ -27,8 +27,8 @@ below are the ones we currently use to run the test suite.
 
 ## Core
 
-The Python dependencies are a special case, since TESTed itself is also written in Python. Therefor, the core Python
-dependencies are not optional.
+The Python dependencies are a special case, since TESTed itself is also written in Python.
+Therefore, the core Python dependencies are not optional.
 
 Installing dependencies:
 

@@ -221,7 +221,7 @@ def camel_snake_case(what: str) -> str:
 def camelize(what: str) -> str:
     """
     Convert a string to camelCase from snake_case. The algorithm is simple: each
-    underscore is removed and the letter behind it will be capitalized. The first
+    underscore is removed, and the letter behind it will be capitalized. The first
     letter will be downcased.
 
     >>> camelize("__foo_bar__")
@@ -245,7 +245,7 @@ def camelize(what: str) -> str:
 def cobol_case(what: str) -> str:
     """
     Convert a string to Train-Case from snake_case. The algorithm is simple:
-    each underscore is replaced by a dash and all letters will becapitalized.
+    each underscore is replaced by a dash, and all letters will becapitalized.
     The first letter will be downcased.
 
     >>> cobol_case("__foo_bar__")
@@ -435,7 +435,7 @@ def snake_case(what: str) -> str:
 def train_case(what: str) -> str:
     """
     Convert a string to Train-Case from snake_case. The algorithm is simple: each
-    underscore is replaced by a dash and the letter behind it will be capitalized.
+    underscore is replaced by a dash, and the letter behind it will be capitalized.
     The first letter will be downcased.
 
     >>> train_case("__foo_bar__")
@@ -458,7 +458,7 @@ def train_case(what: str) -> str:
 def upper_flat_case(what: str) -> str:
     """
     Convert a string to UPPERFLATCASE from snake_case. The algorithm is simple:
-    each underscore is removed and all letters will becapitalized.
+    each underscore is removed, and all letters will becapitalized.
 
     >>> upper_flat_case("__foo_bar__")
     'FOOBAR'
@@ -480,7 +480,7 @@ def upper_flat_case(what: str) -> str:
 def safe_del(l: List[T], index: int, f: Callable[[T], bool]) -> bool:
     """
     Delete an item from a list at a position if the filter is True. If the index
-    is out of ranger or the filter is False, the function will return False, else
+    is out of range or the filter is False, the function will return False, else
     True.
 
     :param l: The list to delete from.

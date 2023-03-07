@@ -6,7 +6,7 @@ import json
 import logging
 from dataclasses import field
 from pathlib import Path
-from typing import Optional, Dict, IO, TYPE_CHECKING, Any, List
+from typing import Optional, Dict, IO, TYPE_CHECKING, Any
 
 from pydantic import BaseModel, root_validator
 from pydantic.dataclasses import dataclass
@@ -24,8 +24,8 @@ _logger = logging.getLogger(__name__)
 @dataclass(frozen=True)
 class Options:
     """
-    TESTed-specific options. Putting these options in the exercise config allows to
-    override them for each exercise, and not
+    TESTed-specific options. Putting these options in the exercise config allows
+    overriding them for each exercise.
     """
 
     parallel: bool = False
@@ -72,7 +72,7 @@ class DodonaConfig(BaseModel):
     judge: Path
     testplan: str = "plan.json"  # Name of the testplan file.
     options: Options = Options()
-    output_limit: int = 10240 * 1024  # Default value for backwards compatibility.
+    output_limit: int = 10240 * 1024  # Default value for backward compatibility.
     timing_statistics: bool = False
 
     def config_for(self) -> Dict[str, Any]:
