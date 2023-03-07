@@ -73,7 +73,7 @@ def combine_features(iterable: Iterable[FeatureSet]) -> FeatureSet:
 def is_supported(bundle: "Bundle") -> bool:
     """
     Check if the given configuration bundle is supported. This will check if the
-    testplan inside the bundle can be executed by the programming language in the
+    test_suite inside the bundle can be executed by the programming language in the
     bundle.
 
     :param bundle: The configuration bundle.
@@ -83,13 +83,13 @@ def is_supported(bundle: "Bundle") -> bool:
     from .languages.config import TypeSupport
 
     new_stage("analyse.features", sub_stage=True)
-    required = bundle.plan.get_used_features()
+    required = bundle.suite.get_used_features()
     end_stage("analyse.features", sub_stage=True)
 
     # Check constructs
     available_constructs = bundle.lang_config.supported_constructs()
     if not (required.constructs <= available_constructs):
-        _logger.warning("This plan is not compatible!")
+        _logger.warning("This test suite is not compatible!")
         _logger.warning(f"Required constructs are {required.constructs}.")
         _logger.warning(f"The language supports {available_constructs}.")
         missing = (required.constructs ^ available_constructs) & required.constructs
@@ -99,11 +99,11 @@ def is_supported(bundle: "Bundle") -> bool:
     mapping = bundle.lang_config.type_support_map()
     for t in required.types:
         if mapping[t] == TypeSupport.UNSUPPORTED:
-            _logger.warning(f"Plan requires unsupported type {t}")
+            _logger.warning(f"Test suite requires unsupported type {t}")
             return False
 
     # Check language-specific evaluators
-    for tab in bundle.plan.tabs:
+    for tab in bundle.suite.tabs:
         for context in tab.contexts:
             for testcase in context.testcases:
                 languages = testcase.output.get_specific_eval_languages()
@@ -122,7 +122,7 @@ def is_supported(bundle: "Bundle") -> bool:
     restricted = bundle.lang_config.restriction_map()
     for key, value_types in nested_types:
         if not (value_types <= restricted[key]):
-            _logger.warning("This plan is not compatible!")
+            _logger.warning("This test suite is not compatible!")
             _logger.warning(f"Required {key} types are {value_types}.")
             _logger.warning(f"The language supports {restricted[key]}.")
             missing = (value_types ^ restricted[key]) & value_types

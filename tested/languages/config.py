@@ -38,7 +38,7 @@ from ..dodona import AnnotateCode, Message, Status, ExtendedMessage, Permission
 from ..features import Construct
 from ..internationalization import get_i18n_string
 from ..serialisation import ExceptionValue
-from ..testplan import Plan
+from ..testsuite import Suite
 from ..utils import (
     camelize,
     pascalize,
@@ -371,7 +371,7 @@ class Language:
         """
         Conventionalize the name of a class. This function uses the format
         specified in the config.json file. If no format is specified, the class
-        name is unchanged, which is the same as snake_case, since the testplan uses
+        name is unchanged, which is the same as snake_case, since the test_suite uses
         snake case.
 
         :param class_identifier: The name of the class to conventionalize.
@@ -383,7 +383,7 @@ class Language:
         """
         Conventionalize the name of a function. This function uses the format
         specified in the config.json file. If no format is specified, the function
-        name is unchanged, which is the same as snake_case, since the testplan uses
+        name is unchanged, which is the same as snake_case, since the test_suite uses
         snake case.
 
         :param function: The name of the function to conventionalize.
@@ -395,7 +395,7 @@ class Language:
         """
         Conventionalize the name of an identifier. This function uses the format
         specified in the config.json file. If no format is specified, the identifier
-        name is unchanged, which is the same as snake_case, since the testplan uses
+        name is unchanged, which is the same as snake_case, since the test_suite uses
         snake case.
 
         :param identifier: The name of the identifier to conventionalize.
@@ -408,7 +408,7 @@ class Language:
         Conventionalize the name of an global variable. This function uses the
         format specified in the config.json file. If no format is specified, the
         global identifier name is unchanged, which is the same as snake_case, since
-        the testplan uses snake case.
+        the test_suite uses snake case.
 
         :param identifier: The name of the global variable to conventionalize.
         :return: The conventionalized identifier.
@@ -420,7 +420,7 @@ class Language:
         Conventionalize the name of a namespace (class/module). This function uses
         the format specified in the config.json file. If no format is specified, the
         function name is unchanged, which is the same as snake_case, since the
-        testplan uses snake case.
+        test_suite uses snake case.
 
         :param namespace: The name of the namespace to conventionalize.
         :return: The conventionalized namespace.
@@ -431,7 +431,7 @@ class Language:
         """
         Conventionalize the name of a property. This function uses the format
         specified in the config.json file. If no format is specified, the property
-        name is unchanged, which is the same as snake_case, since the testplan uses
+        name is unchanged, which is the same as snake_case, since the test_suite uses
         snake case.
 
         :param property_name: The name of the property to conventionalize.
@@ -439,16 +439,16 @@ class Language:
         """
         return _conventionalize(self.options, "property", property_name)
 
-    def submission_name(self, plan: Plan) -> str:
+    def submission_name(self, suite: Suite) -> str:
         """
         Get the namespace (module/class) for the submission. This will use the
-        namespace specified in the testplan. The name is conventionalized for the
+        namespace specified in the test suite. The name is conventionalized for the
         programming language.
 
-        :param plan: The testplan we are executing.
+        :param suite: The test suite we are executing.
         :return: The name for the submission, conventionalized.
         """
-        return self.conventionalize_namespace(plan.namespace)
+        return self.conventionalize_namespace(suite.namespace)
 
     def selector_name(self) -> str:
         """
@@ -621,7 +621,7 @@ class Language:
         TODO: in context compilation mode, this is called for each compilation,
           which can result in the same annotation 50x times.
 
-        :param namespace: Namespace of the test plan
+        :param namespace: Namespace of the test suite
         :param stdout: The standard output from the compiler.
         :param stderr: The standard error from the compiler.
         :return: A tuple containing:
@@ -642,7 +642,7 @@ class Language:
         :param exception: The exception.
         :return: The modified exception.
         """
-        namespace = self.conventionalize_namespace(bundle.plan.namespace)
+        namespace = self.conventionalize_namespace(bundle.suite.namespace)
         exception.stacktrace = self.cleanup_stacktrace(
             exception.stacktrace, self.with_extension(namespace)
         )

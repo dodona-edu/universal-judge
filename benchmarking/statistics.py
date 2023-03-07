@@ -14,6 +14,7 @@ def compute_relative_average_speedups_from_language(
         exercises: Dict[str, List[BenchmarkResult]]
 ) -> Dict[str, Tuple[str, float, float, float]]:
     speedups = dict()
+    # noinspection PyTypeChecker
     for key, value in exercises.items():
         solutions = get_solution_names(value)
         for solution in solutions:
@@ -62,9 +63,9 @@ def select_optimized_and_not_optimized(benchmark_results: List[BenchmarkResult],
     filtered = filter(lambda x: x.exercise.solution == solution_name,
                       benchmark_results)
     not_optimized = next(
-        iter(filter(lambda x: 'no_opt' in x.exercise.plan, filtered)))
+        iter(filter(lambda x: 'no_opt' in x.exercise.suite, filtered)))
     optimized = next(
-        iter(filter(lambda x: 'no_opt' not in x.exercise.plan, filtered)))
+        iter(filter(lambda x: 'no_opt' not in x.exercise.suite, filtered)))
     return optimized, not_optimized
 
 
@@ -73,6 +74,7 @@ def write_csv_language(language: str,
     with open(f"statistics_{language}.csv", 'w') as csv_file:
         print('"Exercise","Solution","Speedup","Absolute time not optimized",'
               '"Absolute time optimized"', file=csv_file)
+        # noinspection PyTypeChecker
         for exercise, (
                 solution, speedup, time_not_optimized, time_optimized
         ) in statistics.items():

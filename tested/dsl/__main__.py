@@ -1,5 +1,5 @@
 from argparse import ArgumentParser, FileType
-from .translate_parser import translate_to_testplan
+from .translate_parser import translate_to_test_suite
 from ..utils import smart_close
 
 parser = ArgumentParser(description="Convert a DSL test suite to the JSON test suite.")
@@ -23,7 +23,7 @@ parser = parser.parse_args()
 with smart_close(parser.input) as input_file:
     dsl = input_file.read()
 
-suite = translate_to_testplan(dsl, validate=True)
+suite = translate_to_test_suite(dsl, validate=True)
 
 with smart_close(parser.output) as output_file:
     output_file.write(suite)

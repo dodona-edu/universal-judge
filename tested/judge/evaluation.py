@@ -15,7 +15,7 @@ from ..languages.generator import (
     attempt_readable_input,
     convert_statement,
 )
-from ..testplan import (
+from ..testsuite import (
     Context,
     OutputChannel,
     IgnoredChannel,
@@ -189,7 +189,7 @@ def evaluate_context_results(
     values = exec_results.results.split(exec_results.separator)
 
     # The first item should always be empty, since the separator must be printed
-    # before the testplan runs. We remove the first item; for stdout and stderr
+    # before the test_suite runs. We remove the first item; for stdout and stderr
     # we only remove the first item if it is indeed empty. This is to keep error
     # messages present for debugging.
 
@@ -374,7 +374,7 @@ def should_show(test: OutputChannel, channel: Channel) -> bool:
     value. This function answers the question: "Assuming the actual value is
     correct, should we show this output channel?".
 
-    :param test: The output for the channel from the testplan.
+    :param test: The output for the channel from the test_suite.
     :param channel: The channel.
 
     :return: True if the channel should be shown, false otherwise.
@@ -407,7 +407,7 @@ def guess_expected_value(bundle: Bundle, test: OutputChannel) -> str:
     """
     Try and get the expected value for a output channel. In some cases, such as
     a programmed or language specific evaluator, there is will be no expected value
-    available in the testplan. In that case, we use an empty string.
+    available in the test_suite. In that case, we use an empty string.
 
     :param bundle: Configuration bundle.
     :param test: The output channel.
@@ -458,7 +458,7 @@ def _add_channel(
 
 def prepare_evaluation(bundle: Bundle, collector: OutputManager):
     """
-    Generate output depicting the expected testplan. This output will be shown if
+    Generate output depicting the expected test_suite. This output will be shown if
     the normal execution terminates early for some reason. This function assumes
     the output is OK, but does not accept anything.
 
@@ -466,7 +466,7 @@ def prepare_evaluation(bundle: Bundle, collector: OutputManager):
     :param collector: The output collector.
     """
     collector.prepare_judgment(StartJudgment())
-    for i, tab in enumerate(bundle.plan.tabs):
+    for i, tab in enumerate(bundle.suite.tabs):
         collector.prepare_tab(StartTab(title=tab.name, hidden=tab.hidden), i)
 
         for j, context in enumerate(tab.contexts):

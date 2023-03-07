@@ -30,7 +30,7 @@ def read_config() -> DodonaConfig:
             "source": Path(exercise_dir, "solution/correct.py"),
             "judge": Path("."),
             "workdir": Path("workdir"),
-            "plan_name": "chained.tson",
+            "test_suite": "chained.tson",
             "timing_statistics": False,
             "options": {
                 "parallel": False,

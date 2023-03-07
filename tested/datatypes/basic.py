@@ -12,7 +12,7 @@ class BasicNumericTypes(str, Enum):
 
 class BasicStringTypes(str, Enum):
     TEXT = "text"
-    ANY = "any"  # Cannot be used in testplan.
+    ANY = "any"  # Cannot be used in test_suite.
 
 
 class BasicBooleanTypes(str, Enum):

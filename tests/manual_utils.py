@@ -50,10 +50,9 @@ def configuration(
     exercise: str,
     language: str,
     work_dir: Path,
-    plan: str = "plan.json",
+    suite: str = "plan.json",
     solution: str = "solution",
     options=None,
-    backward_compatibility_plan: bool = False,
 ) -> DodonaConfig:
     # Get the file extension for this language.
     ext = get_language(language).extension_file()
@@ -61,7 +60,6 @@ def configuration(
         options = {}
     exercise_dir = Path(config.rootdir) / "exercise"
     ep = f"{exercise_dir}/{exercise}"
-    testplan = "plan_name" if backward_compatibility_plan else "testplan"
     # noinspection PyArgumentList
     option_dict = recursive_dict_merge(
         {
@@ -73,7 +71,7 @@ def configuration(
             "source": Path(f"{ep}/solution/{solution}.{ext}"),
             "judge": Path(f"{config.rootdir}"),
             "workdir": work_dir,
-            testplan: plan,
+            "test_suite": suite,
             "options": {"linter": False},
         },
         options,

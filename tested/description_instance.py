@@ -11,7 +11,7 @@ from mako.template import Template
 
 from tested.configs import Bundle, DodonaConfig
 from tested.languages.description_generator import TYPE_ARG, TYPE_CONFIG_NAME
-from tested.testplan import Plan
+from tested.testsuite import Suite
 from tested.utils import smart_close
 from tested.languages import get_language, language_exists
 
@@ -150,12 +150,13 @@ def create_description_instance_from_template(
             programming_language=programming_language,
             workdir="",
             judge=str(judge_directory),
+            test_suite="suite.yaml",
         ),
         out=open(os.devnull, "w"),
         lang_config=language,
         context_separator_secret="",
         secret="",
-        plan=Plan(namespace=namespace),
+        suite=Suite(namespace=namespace),
     )
 
     description_generator = language.get_description_generator()

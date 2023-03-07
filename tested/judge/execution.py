@@ -14,7 +14,7 @@ from ..configs import Bundle
 from ..dodona import Message, Status
 from ..languages.config import FileFilter, Config
 from ..languages.generator import value_file, exception_file
-from ..testplan import ExecutionMode, Context, EmptyChannel
+from ..testsuite import ExecutionMode, Context, EmptyChannel
 from ..utils import safe_del
 
 _logger = logging.getLogger(__name__)
@@ -244,7 +244,7 @@ def execute_execution(
 
         # Process compilation results.
         messages, status, annotations = process_compile_results(
-            bundle.plan.namespace, lang_config, result
+            bundle.suite.namespace, lang_config, result
         )
 
         for annotation in annotations:

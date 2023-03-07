@@ -11,8 +11,8 @@ from typing import Optional, Dict, IO, TYPE_CHECKING, Any
 from pydantic import BaseModel, root_validator
 from pydantic.dataclasses import dataclass
 
-import tested.testplan as testplan
-import tested.utils as utils
+from .testsuite import Suite, ExecutionMode
+from .utils import smart_close, consume_shebang, get_identifier
 
 # Prevent circular imports
 if TYPE_CHECKING:
@@ -34,7 +34,7 @@ class Options:
     disable this for exercises that already are multithreaded. It may also be worth
     investigating if the exercise is computationally heady.
     """
-    mode: testplan.ExecutionMode = testplan.ExecutionMode.PRECOMPILATION
+    mode: ExecutionMode = ExecutionMode.PRECOMPILATION
     """
     The default mode for the judge.
     """
@@ -70,7 +70,7 @@ class DodonaConfig(BaseModel):
     # noinspection SpellCheckingInspection
     workdir: Path
     judge: Path
-    testplan: str = "plan.json"  # Name of the testplan file.
+    test_suite: str
     options: Options = Options()
     output_limit: int = 10240 * 1024  # Default value for backward compatibility.
     timing_statistics: bool = False
@@ -86,10 +86,12 @@ class DodonaConfig(BaseModel):
 
     # noinspection PyMethodParameters
     @root_validator(pre=True)
-    def backward_compatibility_plan_name(cls, values):
-        if "testplan" not in values and "plan_name" in values:
-            values["testplan"] = values["plan_name"]
-            del values["plan_name"]
+    def backward_compatibility_for_test_suite(cls, values):
+        compatible_names = ["testplan", "plan_name"]
+        for old_name in compatible_names:
+            if old_name in values:
+                values["test_suite"] = values[old_name]
+                del values[old_name]
         return values
 
 
@@ -98,7 +100,7 @@ def read_config(config_in: IO) -> DodonaConfig:
     Read the configuration from the given file. If the file is not stdin, it will be
     closed.
     """
-    with utils.smart_close(config_in) as input_:
+    with smart_close(config_in) as input_:
         config_json = input_.read()
     config_ = json.loads(config_json)
 
@@ -119,13 +121,13 @@ class Bundle:
     lang_config: "Language"
     secret: str
     context_separator_secret: str
-    plan: testplan.Plan
+    suite: Suite
 
 
 def _get_language(config: DodonaConfig) -> str:
     import tested.languages as langs
 
-    bang = utils.consume_shebang(config.source)
+    bang = consume_shebang(config.source)
     if bang and langs.language_exists(bang):
         _logger.debug(
             f"Found shebang language and it exists, using {bang} instead "
@@ -143,7 +145,7 @@ def _get_language(config: DodonaConfig) -> str:
 def create_bundle(
     config: DodonaConfig,
     output: IO,
-    plan: testplan.Plan,
+    suite: Suite,
     language: Optional[str] = None,
 ) -> Bundle:
     """
@@ -151,7 +153,7 @@ def create_bundle(
 
     :param config: The Dodona configuration.
     :param output: Where the output should go.
-    :param plan: The testplan.
+    :param suite: The test suite.
     :param language: Optional programming language. If None, the one from the Dodona
                      configuration will be used.
 
@@ -168,7 +170,7 @@ def create_bundle(
         config=adjusted_config,
         out=output,
         lang_config=lang_config,
-        secret=utils.get_identifier(),
-        context_separator_secret=utils.get_identifier(),
-        plan=plan,
+        secret=get_identifier(),
+        context_separator_secret=get_identifier(),
+        suite=suite,
     )

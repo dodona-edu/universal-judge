@@ -25,12 +25,12 @@ from ..serialisation import (
     ObjectKeyValuePair,
     ExceptionValue,
 )
-from ..testplan import (
+from ..testsuite import (
     Context,
     FileUrl,
     GenericTextEvaluator,
     Output,
-    Plan,
+    Suite,
     MainInput,
     Tab,
     Testcase,
@@ -251,7 +251,7 @@ def _convert_dsl_list(
     return objects
 
 
-def _convert_dsl(dsl_object: YamlObject) -> Plan:
+def _convert_dsl(dsl_object: YamlObject) -> Suite:
     """
     Translate a DSL test suite into a full test suite.
 
@@ -273,19 +273,19 @@ def _convert_dsl(dsl_object: YamlObject) -> Plan:
     tabs = _convert_dsl_list(tab_list, config, _convert_tab)
 
     if namespace:
-        return Plan(tabs=tabs, namespace=namespace)
+        return Suite(tabs=tabs, namespace=namespace)
     else:
-        return Plan(tabs=tabs)
+        return Suite(tabs=tabs)
 
 
-def parse_dsl(dsl_string: str, validate: bool = True) -> Plan:
+def parse_dsl(dsl_string: str, validate: bool = True) -> Suite:
     """
     Parse a string containing a DSL test suite into our representation,
-    a test plan.
+    a test suite.
 
     :param dsl_string: The string containing a DSL.
     :param validate: If the test suite should be validated or not.
-    :return: The parsed and converted test plan.
+    :return: The parsed and converted test suite.
     """
     dsl_object = _parse_yaml(dsl_string)
     if validate and not _validate_dsl(dsl_object):
@@ -293,7 +293,7 @@ def parse_dsl(dsl_string: str, validate: bool = True) -> Plan:
     return _convert_dsl(dsl_object)
 
 
-def translate_to_testplan(dsl_string: str, validate: bool = True) -> str:
+def translate_to_test_suite(dsl_string: str, validate: bool = True) -> str:
     """
     Convert a DSL to a test suite.
 
@@ -301,5 +301,5 @@ def translate_to_testplan(dsl_string: str, validate: bool = True) -> str:
     :param validate: Validate the DSL or not.
     :return: The test suite.
     """
-    plan = parse_dsl(dsl_string, validate)
-    return json.dumps(plan, default=pydantic_encoder, indent=2)
+    suite = parse_dsl(dsl_string, validate)
+    return json.dumps(suite, default=pydantic_encoder, indent=2)

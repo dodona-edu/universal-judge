@@ -69,7 +69,7 @@ class CSharp(Language):
         if "class" in contents:
             return  # No top-level statements; we are happy...
 
-        class_name = bundle.lang_config.submission_name(bundle.plan)
+        class_name = bundle.lang_config.submission_name(bundle.suite)
         result = f"""\
 using System;
 using System.IO;

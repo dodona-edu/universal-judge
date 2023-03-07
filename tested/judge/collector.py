@@ -60,9 +60,9 @@ class OutputManager:
     Manages and simulates the full output format, while still using the partial
     output format. The manager supports the notion of "fallback", which means the
     output is first generated in its entirety, while afterwards the updates replace
-    the output. For example, a testplan with following structure:
+    the output. For example, a test_suite with following structure:
 
-    plan:
+    suite:
         tab1:
             context1:
                 testcase1
@@ -271,12 +271,12 @@ class OutputManager:
 
     def _get_to_add(self) -> List[Update]:
         # Determine which default still need to written.
-        assert self.tab < len(self.bundle.plan.tabs)
+        assert self.tab < len(self.bundle.suite.tabs)
         # If there are no tabs, skip.
         if self.tab == -1:
             return []
 
-        tab = self.bundle.plan.tabs[self.tab]
+        tab = self.bundle.suite.tabs[self.tab]
         contexts_count = tab.count_contexts()
         assert self.context < contexts_count
 
@@ -286,7 +286,7 @@ class OutputManager:
             self.context = 0
             to_write.append(self.prepared.tabs[self.tab].end)
             self.tab += 1
-            if self.tab == len(self.bundle.plan.tabs):
+            if self.tab == len(self.bundle.suite.tabs):
                 return to_write
             to_write.append(self.prepared.tabs[self.tab].start)
         else:
@@ -304,7 +304,7 @@ class OutputManager:
             del self.prepared.tabs[self.tab]
 
         # Do remainder of tabs.
-        for t in range(self.tab + 1, len(self.bundle.plan.tabs)):
+        for t in range(self.tab + 1, len(self.bundle.suite.tabs)):
             to_write.append(self.prepared.tabs[t].start)
             for c in range(0, len(self.prepared.tabs[t].contexts)):
                 context = self.prepared.tabs[t].contexts[c]

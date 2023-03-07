@@ -1,5 +1,5 @@
 ## This generates a function expression in BASH.
-<%! from tested.testplan import FunctionType %>\
+<%! from tested.testsuite import FunctionType %>\
 <%! from tested.utils import get_args %>\
 <%! from tested.serialisation import Value, Identifier, FunctionCall, Assignment %>\
 <%!

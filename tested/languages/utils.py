@@ -85,7 +85,7 @@ def jvm_stderr(
     identifier = f"--{bundle.secret}-- SEP"
     context_identifier = f"--{bundle.context_separator_secret}-- SEP"
     submission_file = self.with_extension(
-        self.conventionalize_namespace(bundle.plan.namespace)
+        self.conventionalize_namespace(bundle.suite.namespace)
     )
 
     return (
@@ -104,7 +104,7 @@ def jvm_stderr(
 def haskell_solution(lang_config: Language, solution: Path, bundle: Bundle):
     """Support implicit modules if needed."""
     if bundle.config.config_for().get("implicitModule", True):
-        name = lang_config.submission_name(bundle.plan)
+        name = lang_config.submission_name(bundle.suite)
         # noinspection PyTypeChecker
         with open(solution, "r") as file:
             contents = file.read()

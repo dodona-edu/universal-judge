@@ -14,7 +14,7 @@ from tested.languages.utils import (
 class RunHaskell(Language):
     def compilation(self, bundle: Bundle, files: List[str]) -> CallbackResult:
         submission_file = self.with_extension(
-            self.conventionalize_namespace(self.submission_name(bundle.plan))
+            self.conventionalize_namespace(self.submission_name(bundle.suite))
         )
         main_file = list(filter(lambda x: x == submission_file, files))
         if main_file:

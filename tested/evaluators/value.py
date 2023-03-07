@@ -28,7 +28,7 @@ from ..serialisation import (
     ObjectType,
     ObjectKeyValuePair,
 )
-from ..testplan import ValueOutputChannel, OutputChannel, TextOutputChannel
+from ..testsuite import ValueOutputChannel, OutputChannel, TextOutputChannel
 from ..utils import Either, get_args, sorted_no_duplicates
 
 logger = logging.getLogger(__name__)
@@ -160,8 +160,8 @@ def check_data_type(
        type.
 
     :param bundle: The configuration bundle.
-    :param expected: The expected type from the testplan.
-    :param actual: The actual type produced by the plan.
+    :param expected: The expected type from the test_suite.
+    :param actual: The actual type produced by the suite.
 
     :return: A tuple with the result and expected value, the type that was used to
              do the check.

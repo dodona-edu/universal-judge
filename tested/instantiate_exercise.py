@@ -1,25 +1,24 @@
-import json
-import shutil
 import sys
-from argparse import ArgumentParser
-from collections import defaultdict
-from copy import deepcopy
-from dataclasses import dataclass
 from itertools import groupby
-from pathlib import Path
-from typing import List, Any, Dict, Tuple, Optional
 
 from mako.template import Template
 from pydantic.json import pydantic_encoder
 
-from tested.datatypes import BasicSequenceTypes, BasicObjectTypes
-from tested.description_instance import (
+import json
+import shutil
+from argparse import ArgumentParser
+from copy import deepcopy
+from dataclasses import dataclass
+from pathlib import Path
+from typing import List, Any, Dict, Tuple, Optional
+from .datatypes import BasicSequenceTypes, BasicObjectTypes
+from .description_instance import (
     prepare_template,
     create_description_instance_from_template,
 )
-from tested.dsl import SchemaParser
-from tested.languages import LANGUAGES, language_exists, Language, get_language
-from tested.testplan import Plan, _PlanModel
+from .dsl import parse_dsl
+from .languages import LANGUAGES, language_exists, Language, get_language
+from .testsuite import Suite, parse_test_suite
 
 
 class InstantiateError(Exception):
@@ -130,13 +129,13 @@ def _copy_all(template_dir: Path, instance_dir: Path):
             shutil.copy2(path, instance_dir)
 
 
-def _filter_valid_languages(languages: List[str], testplan: Plan) -> List[str]:
+def _filter_valid_languages(languages: List[str], test_suite: Suite) -> List[str]:
     """
-    Filter out all languages for which the testplan isn't supported
+    Filter out all languages for which the test_suite isn't supported
 
     :param languages: languages to check
-    :param testplan: testplan to support
-    :return: all given languages which support the testplan
+    :param test_suite: test_suite to support
+    :return: all given languages which support the test_suite
     """
 
     def is_supported(language: str) -> bool:
@@ -144,7 +143,7 @@ def _filter_valid_languages(languages: List[str], testplan: Plan) -> List[str]:
 
         from .languages.config import TypeSupport
 
-        required = testplan.get_used_features()
+        required = test_suite.get_used_features()
 
         # Check constructs
         available_constructs = language.supported_constructs()
@@ -159,7 +158,7 @@ def _filter_valid_languages(languages: List[str], testplan: Plan) -> List[str]:
         # Check language-specific evaluators
         for testcase in (
             testcase
-            for tab in testplan.tabs
+            for tab in test_suite.tabs
             for context in tab.contexts
             for testcase in context.all_testcases()
         ):
@@ -188,6 +187,7 @@ def _get_config(config_json_path: Path) -> Dict[str, Any]:
     :param config_json_path: Configuration file location
     :return: The loaded configuration dictionary
     """
+    # noinspection PyTypeChecker
     with open(config_json_path, "r") as json_fd:
         return json.load(json_fd)
 
@@ -195,7 +195,7 @@ def _get_config(config_json_path: Path) -> Dict[str, Any]:
 def _instantiate(
     template_dir: Path,
     instance_dir: Path,
-    testplan: Plan,
+    test_suite: Suite,
     descriptions: List[DescriptionFile],
     other_files_descriptions: List[Path],
     config_json_dict: Dict[str, Any],
@@ -208,12 +208,12 @@ def _instantiate(
 
     :param template_dir: The template directory
     :param instance_dir: The instance directory
-    :param testplan: The testplan to use
+    :param test_suite: The test suite to use
     :param descriptions: The description file list
     :param other_files_descriptions: The other files from the description folders
     :param config_json_dict: Configuration dictionary
     :param language: The programming language
-    :param human_readable: If the converted testplan must be human readable
+    :param human_readable: If the converted test_suite must be human-readable
     :param backup_descriptions: Keep the old description folder
     :return:
     """
@@ -239,22 +239,22 @@ def _instantiate(
         instance_dir.mkdir(parents=True)
     # Copy all except descriptions
     _copy_all(template_dir, instance_dir)
-    # Check testplan
-    testplan_file = template_dir / "evaluation" / config_dict["evaluation"]["testplan"]
-    if testplan_file.suffix.lower() in (".yml", ".yaml"):
-        testplan_file_new = testplan_file.with_suffix(f"{testplan_file.suffix}.json")
-        testplan_file_new = instance_dir / "evaluation" / testplan_file_new.name
-        config_dict["evaluation"]["testplan"] = testplan_file_new.name
-        with open(testplan_file_new, "w") as fd:
+    # Check test_suite
+    suite_file = template_dir / "evaluation" / config_dict["evaluation"]["test_suite"]
+    if suite_file.suffix.lower() in (".yml", ".yaml"):
+        suite_file_new = suite_file.with_suffix(f"{suite_file.suffix}.json")
+        suite_file_new = instance_dir / "evaluation" / suite_file_new.name
+        config_dict["evaluation"]["test_suite"] = suite_file_new.name
+        with open(suite_file_new, "w") as fd:
             json.dump(
-                testplan,
+                test_suite,
                 fd,
                 default=pydantic_encoder,
                 indent=2 if human_readable else None,
             )
     # Copy or generate descriptions
     _instantiate_descriptions(
-        instance_dir, descriptions, other_files_descriptions, testplan, language
+        instance_dir, descriptions, other_files_descriptions, test_suite, language
     )
     # Prepare configuration
     config_dict["programming_language"] = language
@@ -272,7 +272,7 @@ def _instantiate_descriptions(
     instance_dir: Path,
     descriptions: List[DescriptionFile],
     other_files_descriptions: List[Path],
-    testplan: Plan,
+    test_suite: Suite,
     language: str,
 ):
     """
@@ -281,7 +281,7 @@ def _instantiate_descriptions(
     :param instance_dir: The instance directory
     :param descriptions: The description files to use
     :param other_files_descriptions: All other files and directories to copy
-    :param testplan: The testplan to determine the namespace
+    :param test_suite: The test suite to determine the namespace
     :param language: Programming language
     :return:
     """
@@ -310,7 +310,7 @@ def _instantiate_descriptions(
                 description.template,
                 language,
                 description.natural_language,
-                testplan.namespace,
+                test_suite.namespace,
                 description.type == "html",
             )
             with open(output_file, "w") as fd:
@@ -367,7 +367,7 @@ def _parser_instance() -> ArgumentParser:
         "-H",
         "--human_readable",
         action="store_true",
-        help="Generated testplan in human readable format",
+        help="Generated test_suite in human readable format",
     )
     parser.add_argument(
         "-b",
@@ -396,35 +396,36 @@ def _prepare_templates(descriptions: List[DescriptionFile]):
             )
 
 
-def _read_plan(config_dict: Dict[str, Any], evaluation_dir: Path) -> Plan:
+def _read_test_suite(config_dict: Dict[str, Any], evaluation_dir: Path) -> Suite:
     """
-    Read testplan from JSON or YAML DSL
+    Read test suite from JSON or YAML.
 
     :param config_dict: Configuration information
-    :param evaluation_dir: Directory which must contain the testplan
-    :return: The testplan
+    :param evaluation_dir: Directory containing the test suite
+    :return: The test suite
     """
 
     try:
-        plan_file = evaluation_dir / config_dict["evaluation"]["testplan"]
+        suite_file = evaluation_dir / config_dict["evaluation"]["test_suite"]
     except KeyError:
-        print(f"Not testplan given in the template configuration file", file=sys.stderr)
+        print(
+            f"Not test suite given in the template configuration file", file=sys.stderr
+        )
         sys.exit(6)
-    _check_if_file_exists("Testplan", plan_file)
+    _check_if_file_exists("Test suite", suite_file)
 
-    with open(plan_file, "r") as file:
-        loaded_plan = file.read()
+    with open(suite_file, "r") as file:
+        loaded_suite = file.read()
 
-    suffix = plan_file.suffixes[-1].lower()
+    suffix = suite_file.suffixes[-1].lower()
     if suffix in (".yml", ".yaml"):
-        schema_parser = SchemaParser()
-        return schema_parser.load_str(loaded_plan)
-    return _PlanModel.parse_raw(loaded_plan).__root__
+        return parse_dsl(loaded_suite)
+    return parse_test_suite(loaded_suite)
 
 
 def _remove_existing(instance_dir: Path, backup_descriptions: bool = False):
     """
-    Remove existing content of the instance directory
+    Remove the existing content of the instance directory
 
     :param instance_dir: The instance directory
     :param backup_descriptions: Keep the old descriptions directory or not
@@ -495,7 +496,7 @@ def instantiate(
     if no list given al languages from TESTed
     :param default_i18n: The default language for the description files without
     language
-    :param human_readable: Generated JSON testplan must be human readable
+    :param human_readable: Generated JSON test_suite must be human readable
     :param backup_descriptions: Keep the old description folder
     :return:
     """
@@ -517,18 +518,18 @@ def instantiate(
     _check_if_file_exists("Template config", config_template)
 
     template_config_dict = _get_config(config_template)
-    plan = _read_plan(template_config_dict, evaluation_dir)
+    suite = _read_test_suite(template_config_dict, evaluation_dir)
     descriptions_files, other_files_description = _analyse_description_dir(
         description_dir=description_dir, default_i18n=default_i18n
     )
     descriptions_files = _select_descriptions(descriptions_files)
     _prepare_templates(descriptions_files)
-    programming_languages = _filter_valid_languages(programming_languages, plan)
+    programming_languages = _filter_valid_languages(programming_languages, suite)
     for language in programming_languages:
         _instantiate(
             template_dir=template_dir,
             instance_dir=instances_dir / language,
-            testplan=plan,
+            test_suite=suite,
             descriptions=descriptions_files,
             other_files_descriptions=other_files_description,
             config_json_dict=template_config_dict,

@@ -2,7 +2,7 @@
   "$id": "https://github.com/dodona-edu/universal-judge/blob/master/tested/dsl/schema.yaml",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "DSL Schema",
-  "description": "DSL testplan for TESTed",
+  "description": "DSL test suite for TESTed",
   "oneOf": [
     {
       "$ref": "#/definitions/_rootObject"

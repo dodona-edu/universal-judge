@@ -1,6 +1,6 @@
 from typing import Optional, Union
 
-from tested.testplan import NormalOutputChannel, ExceptionOutputChannel
+from tested.testsuite import NormalOutputChannel, ExceptionOutputChannel
 from . import EvaluatorConfig
 from ..dodona import Status
 from ..serialisation import EvalResult
@@ -21,7 +21,7 @@ def cleanup_specific_programmed(
     actual.result = get_status(actual.result)
     if isinstance(channel, ExceptionOutputChannel):
         lang_config = config.bundle.lang_config
-        namespace = lang_config.conventionalize_namespace(config.bundle.plan.namespace)
+        namespace = lang_config.conventionalize_namespace(config.bundle.suite.namespace)
         actual.readable_expected = lang_config.cleanup_stacktrace(
             actual.readable_expected, lang_config.with_extension(namespace)
         )

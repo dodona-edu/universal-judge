@@ -9,7 +9,7 @@ from . import EvaluationResult, EvaluatorConfig
 from ..dodona import StatusMessage, Status
 from ..internal_timings import new_stage, end_stage
 from ..internationalization import get_i18n_string
-from ..testplan import TextOutputChannel, FileOutputChannel, OutputChannel
+from ..testsuite import TextOutputChannel, FileOutputChannel, OutputChannel
 
 
 def _is_number(string: str) -> Optional[float]:

@@ -10,10 +10,10 @@ from isbn.solution import solution
 # Met een vaste seed krijgen we deterministische resultaten.
 random.seed(123456789)
 
-# We halen de naam van het testplan op uit de configuratie van de oefening.
+# We halen de naam van het test_suite op uit de configuratie van de oefening.
 with open("../config.json", "r") as config_file:
     config = json.load(config_file)
-testplan_name = config["evaluation"].get("testplan", "full.tson")
+testplan_name = config["evaluation"].get("test_suite", "full.tson")
 
 # Of alle testgevallen in dezelfde context moeten plaatsvinden of niet.
 # Aangezien ze onafhankelijk zijn, doen we dit niet.
@@ -116,7 +116,7 @@ def generate_are_isbn():
     :return: De gegenereerde contexten.
     """
 
-    # Vaste invoerargumenten die we zeker in het testplan willen.
+    # Vaste invoerargumenten die we zeker in het test_suite willen.
     codes = [
         '0012345678', '0012345679', '9971502100', '080442957X',
         'The Practice of Computing Using Python', '9789027439642', '5486948320146'
@@ -197,7 +197,7 @@ def flatten_contexts(contexts):
 tab_1_contexts = generate_is_isbn()
 tab_2_contexts = generate_are_isbn()
 
-# Creëer het testplan met de twee tabbladen.
+# Creëer het test_suite met de twee tabbladen.
 plan = {
     "tabs": [
         {
@@ -218,6 +218,6 @@ if ONE_CONTEXT:
     new_tab2_context = flatten_contexts(plan["tabs"][1]["contexts"])
     plan["tabs"][1]["contexts"] = [new_tab2_context]
 
-# Schrijf het testplan.
+# Schrijf het test_suite.
 with open(f"../evaluation/{testplan_name}", 'w') as fp:
     json.dump(plan, fp, indent=2)

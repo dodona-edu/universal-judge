@@ -5,7 +5,7 @@ import functools
 
 from . import EvaluationResult, exception, value, try_outputs, EvaluatorConfig
 from ..dodona import StatusMessage, Status
-from ..testplan import IgnoredChannel
+from ..testsuite import IgnoredChannel
 
 
 def evaluate(
