@@ -53,7 +53,7 @@ from tested.serialisation import (
 )
 from tested.testplan import Plan
 from tested.utils import get_args
-from tests.manual_utils import configuration, mark_haskell
+from tests.manual_utils import configuration
 
 LANGUAGES = [
     "python",
@@ -61,7 +61,7 @@ LANGUAGES = [
     "c",
     "javascript",
     "kotlin",
-    pytest.param("runhaskell", marks=mark_haskell),
+    pytest.param("runhaskell", marks=pytest.mark.haskell),
     "bash",
     "csharp",
 ]

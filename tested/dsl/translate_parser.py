@@ -1,13 +1,12 @@
 import yaml
-import json
-from logging import getLogger
-from pathlib import Path
-
 from jsonschema import Draft7Validator
 from pydantic.json import pydantic_encoder
 
+import json
+from logging import getLogger
+from pathlib import Path
+from typing import Dict, List, Union, Callable, TextIO, TypeVar, Optional
 from .ast_translator import parse_string
-
 from ..datatypes import (
     BasicBooleanTypes,
     BasicNumericTypes,
@@ -42,7 +41,7 @@ from ..testplan import (
     EmptyChannel,
     ExceptionOutputChannel,
 )
-from typing import Dict, List, Union, Callable, TextIO, TypeVar, Optional
+from ..utils import recursive_dict_merge
 
 logger = getLogger(__name__)
 
@@ -90,30 +89,6 @@ def _validate_dsl(dsl_object: YamlObject, report=True) -> bool:
     return False
 
 
-def _recursive_dict_merge(one: dict, two: dict) -> dict:
-    """
-    Recursively merge dictionaries, i.e. keys that are dictionaries are merged
-    instead of overridden.
-    :param one: Dictionary A.
-    :param two: Dictionary B.
-    :return: A new, merged dictionary.
-    """
-    new_dictionary = {}
-
-    # noinspection PyTypeChecker
-    for key, value in one.items():
-        new_dictionary[key] = value
-
-    # noinspection PyTypeChecker
-    for key, value in two.items():
-        if isinstance(value, dict) and key in one:
-            new_dictionary[key] = _recursive_dict_merge(new_dictionary[key], value)
-        else:
-            new_dictionary[key] = value
-
-    return new_dictionary
-
-
 def _deepen_config_level(
     new_level_object: Optional[YamlDict], current_level: dict
 ) -> dict:
@@ -131,7 +106,7 @@ def _deepen_config_level(
     if new_level_object is None or "config" not in new_level_object:
         return current_level
 
-    return _recursive_dict_merge(current_level, new_level_object["config"])
+    return recursive_dict_merge(current_level, new_level_object["config"])
 
 
 def _convert_value(value: YamlObject) -> Value:

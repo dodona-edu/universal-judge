@@ -9,7 +9,6 @@ from tests.manual_utils import (
     configuration,
     execute_config,
     assert_valid_output,
-    mark_haskell,
 )
 
 
@@ -33,8 +32,8 @@ def test_full_isbn(lang: str, tmp_path: Path, pytestconfig):
         "java",
         "python",
         "kotlin",
-        pytest.param("haskell", marks=mark_haskell),
-        pytest.param("runhaskell", marks=mark_haskell),
+        pytest.param("haskell", marks=pytest.mark.haskell),
+        pytest.param("runhaskell", marks=pytest.mark.haskell),
     ],
 )
 def test_full_isbn_list(lang: str, tmp_path: Path, pytestconfig):
@@ -77,7 +76,7 @@ def test_full_lotto(lang: str, tmp_path: Path, pytestconfig):
         "javascript",
         "kotlin",
         "bash",
-        pytest.param("haskell", marks=mark_haskell),
+        pytest.param("haskell", marks=pytest.mark.haskell),
     ],
 )
 def test_full_echo(lang: str, tmp_path: Path, pytestconfig):

@@ -6,7 +6,6 @@ from tests.manual_utils import (
     configuration,
     execute_config,
     assert_valid_output,
-    mark_haskell,
 )
 
 
@@ -69,7 +68,6 @@ def test_eslint(tmp_path: Path, config, pytestconfig):
 
 
 @pytest.mark.linter
-@mark_haskell
 @pytest.mark.parametrize(
     ("language", "config"),
     [
@@ -95,7 +93,6 @@ def test_hlint(language: str, config, tmp_path: Path, pytestconfig):
 
 
 @pytest.mark.linter
-@pytest.mark.ktlint
 @pytest.mark.parametrize("config", _get_config_options("kotlin"))
 def test_ktlint(tmp_path: Path, config, pytestconfig):
     conf = configuration(

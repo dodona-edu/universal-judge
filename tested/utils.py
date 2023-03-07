@@ -510,6 +510,31 @@ def safe_get(l: List[T], index: int) -> Optional[T]:
         return None
 
 
+def recursive_dict_merge(one: dict, two: dict) -> dict:
+    """
+    Recursively merge dictionaries, i.e. keys that are dictionaries are merged
+    instead of overridden.
+
+    :param one: Dictionary A.
+    :param two: Dictionary B.
+    :return: A new, merged dictionary.
+    """
+    new_dictionary = {}
+
+    # noinspection PyTypeChecker
+    for key, value in one.items():
+        new_dictionary[key] = value
+
+    # noinspection PyTypeChecker
+    for key, value in two.items():
+        if isinstance(value, dict) and key in one:
+            new_dictionary[key] = recursive_dict_merge(new_dictionary[key], value)
+        else:
+            new_dictionary[key] = value
+
+    return new_dictionary
+
+
 def sorted_no_duplicates(
     iterable: Iterable[T],
     key: Optional[Callable[[T], K]] = None,

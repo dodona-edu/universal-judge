@@ -18,7 +18,6 @@ from tests.manual_utils import (
     assert_valid_output,
     configuration,
     execute_config,
-    mark_haskell,
 )
 
 COMPILE_LANGUAGES = [
@@ -26,12 +25,12 @@ COMPILE_LANGUAGES = [
     "java",
     "c",
     "kotlin",
-    pytest.param("haskell", marks=mark_haskell),
+    pytest.param("haskell", marks=pytest.mark.haskell),
     "csharp",
 ]
 ALL_SPECIFIC_LANGUAGES = COMPILE_LANGUAGES + [
     "javascript",
-    pytest.param("runhaskell", marks=mark_haskell),
+    pytest.param("runhaskell", marks=pytest.mark.haskell),
 ]
 ALL_LANGUAGES = ALL_SPECIFIC_LANGUAGES + ["bash"]
 
@@ -243,7 +242,7 @@ def test_io_function_nested_call_exercise(language: str, tmp_path: Path, pytestc
     assert updates.find_status_enum() == ["correct"]
 
 
-@mark_haskell
+@pytest.mark.haskell
 @pytest.mark.parametrize("language", ("haskell", "runhaskell"))
 def test_io_function_exercise_haskell_io(language: str, tmp_path: Path, pytestconfig):
     conf = configuration(
@@ -293,8 +292,8 @@ def test_programmed_evaluation(language: str, tmp_path: Path, pytestconfig):
         "java",
         "kotlin",
         "csharp",
-        pytest.param("haskell", marks=mark_haskell),
-        pytest.param("runhaskell", marks=mark_haskell),
+        pytest.param("haskell", marks=pytest.mark.haskell),
+        pytest.param("runhaskell", marks=pytest.mark.haskell),
     ],
 )
 def test_language_evaluator_exception_correct(lang: str, tmp_path: Path, pytestconfig):
@@ -313,8 +312,8 @@ def test_language_evaluator_exception_correct(lang: str, tmp_path: Path, pytestc
         "java",
         "kotlin",
         "csharp",
-        pytest.param("haskell", marks=mark_haskell),
-        pytest.param("runhaskell", marks=mark_haskell),
+        pytest.param("haskell", marks=pytest.mark.haskell),
+        pytest.param("runhaskell", marks=pytest.mark.haskell),
     ],
 )
 def test_language_evaluator_exception_wrong(lang: str, tmp_path: Path, pytestconfig):
@@ -347,8 +346,8 @@ def test_assignment_and_use_in_expression(lang: str, tmp_path: Path, pytestconfi
         "java",
         "kotlin",
         "csharp",
-        pytest.param("haskell", marks=mark_haskell),
-        pytest.param("runhaskell", marks=mark_haskell),
+        pytest.param("haskell", marks=pytest.mark.haskell),
+        pytest.param("runhaskell", marks=pytest.mark.haskell),
     ],
 )
 def test_assignment_and_use_in_expression_list(lang: str, tmp_path: Path, pytestconfig):
@@ -394,8 +393,8 @@ def test_crashing_assignment_with_before(lang: str, tmp_path: Path, pytestconfig
     "lang",
     [
         "c",
-        pytest.param("haskell", marks=mark_haskell),
-        pytest.param("runhaskell", marks=mark_haskell),
+        pytest.param("haskell", marks=pytest.mark.haskell),
+        pytest.param("runhaskell", marks=pytest.mark.haskell),
     ],
 )
 def test_heterogeneous_arguments_are_detected(lang: str, tmp_path: Path, pytestconfig):
@@ -606,8 +605,8 @@ def test_objects_yaml(language: str, tmp_path: Path, pytestconfig):
     "language",
     [
         "c",
-        pytest.param("haskell", marks=mark_haskell),
-        pytest.param("runhaskell", marks=mark_haskell),
+        pytest.param("haskell", marks=pytest.mark.haskell),
+        pytest.param("runhaskell", marks=pytest.mark.haskell),
     ],
 )
 def test_objects_error(language: str, tmp_path: Path, pytestconfig):
@@ -652,8 +651,8 @@ def test_named_parameters_supported(language: str, tmp_path: Path, pytestconfig)
         "java",
         "c",
         "javascript",
-        pytest.param("haskell", marks=mark_haskell),
-        pytest.param("runhaskell", marks=mark_haskell),
+        pytest.param("haskell", marks=pytest.mark.haskell),
+        pytest.param("runhaskell", marks=pytest.mark.haskell),
     ],
 )
 def test_named_parameters_not_supported(language, tmp_path: Path, pytestconfig):
