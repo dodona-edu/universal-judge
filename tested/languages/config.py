@@ -178,7 +178,6 @@ def limit_output(
                     backward_buffer.append(prev_line)
                     max_chars -= len(prev_line) + 2
                     forward_buffer.append(next_line[:max_chars])
-                    pass
                 # Both lines needed abbreviation
                 else:
                     forward_buffer.append(next_line[: math.ceil(half - 1)])
