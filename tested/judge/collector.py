@@ -45,14 +45,14 @@ class _ExpectedTab:
     __slots__ = ["start", "end", "contexts"]
 
     def __init__(self):
-        self.contexts = defaultdict(lambda: _ExpectedContext())
+        self.contexts = defaultdict(_ExpectedContext)
 
 
 class _ExpectedJudgment:
     __slots__ = ["start", "end", "tabs"]
 
     def __init__(self):
-        self.tabs = defaultdict(lambda: _ExpectedTab())
+        self.tabs = defaultdict(_ExpectedTab)
 
 
 class OutputManager:
@@ -60,7 +60,7 @@ class OutputManager:
     Manages and simulates the full output format, while still using the partial
     output format. The manager supports the notion of "fallback", which means the
     output is first generated in its entirety, while afterwards the updates replace
-    the output. For example, a test_suite with following structure:
+    the output. For example, a test suite with the following structure:
 
     suite:
         tab1:
@@ -75,13 +75,13 @@ class OutputManager:
     context is started, but stopped after, for example, testcase 5, the rest of the
     testcase will not be shown either. This is to reduce the complexity: TESTed
     determines which testcases are shown at run time, based on the results. It is
-    very difficult and error prone to predict which ones are shown and which ones
+    very difficult and error-prone to predict which ones are shown and which ones
     are not.
 
     For example, if we need to show the fallback for context 2, we cannot output
     the "close-judgment" command yet.
 
-    Tabs, contexts and testcases are identified by there number within their parent.
+    Tabs, contexts and testcases are identified by their number within their parents.
     The context testcase has id 0, while the others start at 1.
 
     The collector has a few fields:
