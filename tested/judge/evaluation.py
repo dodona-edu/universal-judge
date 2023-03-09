@@ -189,7 +189,7 @@ def evaluate_context_results(
     values = exec_results.results.split(exec_results.separator)
 
     # The first item should always be empty, since the separator must be printed
-    # before the test_suite runs. We remove the first item; for stdout and stderr
+    # before the test suite runs. We remove the first item; for stdout and stderr
     # we only remove the first item if it is indeed empty. This is to keep error
     # messages present for debugging.
 
@@ -374,7 +374,7 @@ def should_show(test: OutputChannel, channel: Channel) -> bool:
     value. This function answers the question: "Assuming the actual value is
     correct, should we show this output channel?".
 
-    :param test: The output for the channel from the test_suite.
+    :param test: The output for the channel from the test suite.
     :param channel: The channel.
 
     :return: True if the channel should be shown, false otherwise.
@@ -460,7 +460,7 @@ def _add_channel(
 
 def prepare_evaluation(bundle: Bundle, collector: OutputManager):
     """
-    Generate output depicting the expected test_suite. This output will be shown if
+    Generate output depicting the expected test suite. This output will be shown if
     the normal execution terminates early for some reason. This function assumes
     the output is OK, but does not accept anything.
 

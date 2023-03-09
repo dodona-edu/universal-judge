@@ -37,13 +37,13 @@ _logger = logging.getLogger(__name__)
 def judge(bundle: Bundle):
     """
     Evaluate a solution for an exercise. Execute the tests present in the
-    test_suite. The result (the judgment) is sent to stdout, so Dodona can pick it
+    test suite. The result (the judgment) is sent to stdout, so Dodona can pick it
     up.
 
     :param bundle: The configuration bundle.
     """
     new_stage("analyse.supported")
-    # Begin by checking if the given test_suite is executable in this language.
+    # Begin by checking if the given test suite is executable in this language.
     _logger.info("Checking supported features...")
     set_locale(bundle.config.natural_language)
     if not is_supported(bundle):
@@ -346,7 +346,7 @@ def _generate_files(
     new_stage("submission.modify", sub_stage=True)
     bundle.lang_config.solution(solution_path, bundle)
 
-    # The names of the executions for the test_suite.
+    # The names of the executions for the test suite.
     new_stage("generate.templates", sub_stage=True)
     execution_names = []
     # Generate the files for each execution.

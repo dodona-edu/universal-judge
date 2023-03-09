@@ -160,7 +160,7 @@ def check_data_type(
        type.
 
     :param bundle: The configuration bundle.
-    :param expected: The expected type from the test_suite.
+    :param expected: The expected type from the test suite.
     :param actual: The actual type produced by the suite.
 
     :return: A tuple with the result and expected value, the type that was used to

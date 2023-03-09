@@ -3,7 +3,7 @@ from enum import Enum
 
 class ComplexExpressionTypes(str, Enum):
     """
-    These datatypes are only used in the language configs, not in the test_suite
+    These datatypes are only used in the language configs, not in the test suite
     """
 
     FUNCTION_CALLS = "function_calls"

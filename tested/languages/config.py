@@ -370,7 +370,7 @@ class Language:
         """
         Conventionalize the name of a class. This function uses the format
         specified in the config.json file. If no format is specified, the class
-        name is unchanged, which is the same as snake_case, since the test_suite uses
+        name is unchanged, which is the same as snake_case, since the test suite uses
         snake case.
 
         :param class_identifier: The name of the class to conventionalize.
@@ -382,7 +382,7 @@ class Language:
         """
         Conventionalize the name of a function. This function uses the format
         specified in the config.json file. If no format is specified, the function
-        name is unchanged, which is the same as snake_case, since the test_suite uses
+        name is unchanged, which is the same as snake_case, since the test suite uses
         snake case.
 
         :param function: The name of the function to conventionalize.
