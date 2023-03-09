@@ -37,13 +37,13 @@ _logger = logging.getLogger(__name__)
 def judge(bundle: Bundle):
     """
     Evaluate a solution for an exercise. Execute the tests present in the
-    test_suite. The result (the judgment) is sent to stdout, so Dodona can pick it
+    test suite. The result (the judgment) is sent to stdout, so Dodona can pick it
     up.
 
     :param bundle: The configuration bundle.
     """
     new_stage("analyse.supported")
-    # Begin by checking if the given test_suite is executable in this language.
+    # Begin by checking if the given test suite is executable in this language.
     _logger.info("Checking supported features...")
     set_locale(bundle.config.natural_language)
     if not is_supported(bundle):
@@ -175,8 +175,6 @@ def judge(bundle: Bundle):
 
     _logger.info("Starting judgement...")
     parallel = bundle.config.options.parallel
-    # How much of the output limit we still have.
-    output_limit = bundle.config.output_limit * 0.8
 
     # Create a list of runs we want to execute.
     for tab_index, tab in enumerate(bundle.suite.tabs):
@@ -263,6 +261,7 @@ def _single_execution(
 
         if status:
             return status
+    return None
 
 
 def _parallel_execution(
@@ -284,7 +283,7 @@ def _parallel_execution(
         execution_result, m, s, p = execute_execution(bundle, execution, remainder)
         end_stage("run.execution")
 
-        def evaluation_function(eval_remainder):
+        def evaluation_function(_eval_remainder):
             new_stage("evaluate.results")
             _status = _process_results(bundle, execution, execution_result, m, s, p)
             end_stage("evaluate.results")
@@ -294,6 +293,7 @@ def _parallel_execution(
                 Status.MEMORY_LIMIT_EXCEEDED,
             ):
                 return _status
+            return None
 
         return evaluation_function
 
@@ -346,7 +346,7 @@ def _generate_files(
     new_stage("submission.modify", sub_stage=True)
     bundle.lang_config.solution(solution_path, bundle)
 
-    # The names of the executions for the test_suite.
+    # The names of the executions for the test suite.
     new_stage("generate.templates", sub_stage=True)
     execution_names = []
     # Generate the files for each execution.
@@ -415,6 +415,7 @@ def _process_results(
             return Status.OUTPUT_LIMIT_EXCEEDED
         if continue_ in (Status.TIME_LIMIT_EXCEEDED, Status.MEMORY_LIMIT_EXCEEDED):
             return continue_
+    return None
 
 
 def _copy_workdir_source_files(bundle: Bundle, common_dir: Path) -> List[str]:

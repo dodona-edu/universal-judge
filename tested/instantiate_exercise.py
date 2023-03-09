@@ -131,11 +131,11 @@ def _copy_all(template_dir: Path, instance_dir: Path):
 
 def _filter_valid_languages(languages: List[str], test_suite: Suite) -> List[str]:
     """
-    Filter out all languages for which the test_suite isn't supported
+    Filter out all languages for which the test suite isn't supported
 
     :param languages: languages to check
-    :param test_suite: test_suite to support
-    :return: all given languages which support the test_suite
+    :param test_suite: test suite to support
+    :return: all given languages which support the test suite
     """
 
     def is_supported(language: str) -> bool:
@@ -213,7 +213,7 @@ def _instantiate(
     :param other_files_descriptions: The other files from the description folders
     :param config_json_dict: Configuration dictionary
     :param language: The programming language
-    :param human_readable: If the converted test_suite must be human-readable
+    :param human_readable: If the converted test suite must be human-readable
     :param backup_descriptions: Keep the old description folder
     :return:
     """
@@ -239,7 +239,7 @@ def _instantiate(
         instance_dir.mkdir(parents=True)
     # Copy all except descriptions
     _copy_all(template_dir, instance_dir)
-    # Check test_suite
+    # Check test suite
     suite_file = template_dir / "evaluation" / config_dict["evaluation"]["test_suite"]
     if suite_file.suffix.lower() in (".yml", ".yaml"):
         suite_file_new = suite_file.with_suffix(f"{suite_file.suffix}.json")
@@ -496,7 +496,7 @@ def instantiate(
     if no list given al languages from TESTed
     :param default_i18n: The default language for the description files without
     language
-    :param human_readable: Generated JSON test_suite must be human readable
+    :param human_readable: Generated JSON test suite must be human-readable
     :param backup_descriptions: Keep the old description folder
     :return:
     """

@@ -12,7 +12,7 @@ The following parameters are passed to the function:
   - The global configuration for the run of TESTed
   - The configuration for the evaluator instance
   - The judge instance
-- The output channel from the test_suite.
+- The output channel from the test suite.
 - The raw actual output.
 - The maximum time for the evaluation. Simple evaluators can ignore this, but more
   advanced ones need more time.

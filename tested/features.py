@@ -73,7 +73,7 @@ def combine_features(iterable: Iterable[FeatureSet]) -> FeatureSet:
 def is_supported(bundle: "Bundle") -> bool:
     """
     Check if the given configuration bundle is supported. This will check if the
-    test_suite inside the bundle can be executed by the programming language in the
+    test suite inside the bundle can be executed by the programming language in the
     bundle.
 
     :param bundle: The configuration bundle.

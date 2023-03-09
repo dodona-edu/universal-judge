@@ -1,5 +1,5 @@
 """
-Translates items from the test_suite into the actual programming language.
+Translates items from the test suite into the actual programming language.
 """
 import dataclasses
 import html
@@ -751,7 +751,7 @@ def generate_custom_evaluator(
 
     :param bundle: The configuration bundle.
     :param destination: The folder where the code should be generated.
-    :param evaluator: The evaluator data from the test_suite.
+    :param evaluator: The evaluator data from the test suite.
     :param expected_value: The preprocessed expected value.
     :param actual_value: The preprocessed actual value.
 

@@ -1,7 +1,7 @@
 """
 Structures that model the test suite in code.
 
-This module is the authoritative source on the format and behaviour of the test_suite.
+This module is the authoritative source on the format and behaviour of the test suite.
 When executing this module, a json-schema is generated for the format, which can be
 of assistance when checking existing test suites.
 """
@@ -593,13 +593,13 @@ class Suite(WithFeatures, WithFunctions):
 
     def get_used_features(self) -> FeatureSet:
         """
-        Get the used features in the test_suite.
+        Get the used features in the test suite.
 
-        For most features, the function will recurse into the test_suite to get all
+        For most features, the function will recurse into the test suite to get all
         the features from each element individually.
 
         Detection of functions with optional parameters or parameters of different
-        types is done on a test_suite level, since we need an overview of every
+        types is done on a test suite level, since we need an overview of every
         function call to do this.
         """
         function_features = _resolve_function_calls(self.get_functions())

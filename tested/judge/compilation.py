@@ -8,7 +8,7 @@ from typing import List, Tuple, Optional, Union
 from .utils import BaseExecutionResult, run_command
 from ..configs import Bundle
 from ..dodona import Status, Message, AnnotateCode
-from ..languages.config import FileFilter, Language, Config
+from ..languages.config import FileFilter, Language
 from ..internationalization import get_i18n_string
 
 _logger = logging.getLogger(__name__)

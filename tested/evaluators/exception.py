@@ -53,8 +53,8 @@ def evaluate(
     Evaluate an exception.
 
     :param config: Not used.
-    :param channel: The channel from the test_suite.
-    :param actual: The raw actual value from the execution.
+    :param channel: The channel from the test suite.
+    :param actual: The raw actual value of the execution.
 
     :return: An evaluation result.
     """

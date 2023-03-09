@@ -124,6 +124,7 @@ def consume_shebang(submission: Path) -> Optional[str]:
                     has_potential = False
             file.truncate()
     except FileNotFoundError:
+        # Nothing we can do if there is no submission.
         pass
 
     return language

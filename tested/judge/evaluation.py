@@ -189,7 +189,7 @@ def evaluate_context_results(
     values = exec_results.results.split(exec_results.separator)
 
     # The first item should always be empty, since the separator must be printed
-    # before the test_suite runs. We remove the first item; for stdout and stderr
+    # before the test suite runs. We remove the first item; for stdout and stderr
     # we only remove the first item if it is indeed empty. This is to keep error
     # messages present for debugging.
 
@@ -256,59 +256,57 @@ def evaluate_context_results(
         actual_stdout = safe_get(stdout_, i)
         actual_value = safe_get(values, i)
 
-        results = [
-            _evaluate_channel(
-                bundle,
-                context_dir,
-                t_col,
-                Channel.FILE,
-                output.file,
-                "",
-                timeout=exec_results.timeout,
-                memory=exec_results.memory,
-            ),
-            _evaluate_channel(
-                bundle,
-                context_dir,
-                t_col,
-                Channel.STDERR,
-                output.stderr,
-                actual_stderr,
-                timeout=exec_results.timeout and len(stderr_) == i + 1,
-                memory=exec_results.memory and len(stderr_) == i + 1,
-            ),
-            _evaluate_channel(
-                bundle,
-                context_dir,
-                t_col,
-                Channel.EXCEPTION,
-                output.exception,
-                actual_exception,
-                unexpected_status=Status.RUNTIME_ERROR,
-                timeout=exec_results.timeout and len(exceptions) == i + 1,
-                memory=exec_results.memory and len(exceptions) == i + 1,
-            ),
-            _evaluate_channel(
-                bundle,
-                context_dir,
-                t_col,
-                Channel.STDOUT,
-                output.stdout,
-                actual_stdout,
-                timeout=exec_results.timeout and len(stdout_) == i + 1,
-                memory=exec_results.memory and len(stdout_) == i + 1,
-            ),
-            _evaluate_channel(
-                bundle,
-                context_dir,
-                t_col,
-                Channel.RETURN,
-                output.result,
-                actual_value,
-                timeout=exec_results.timeout and len(values) == i + 1,
-                memory=exec_results.memory and len(values) == i + 1,
-            ),
-        ]
+        _evaluate_channel(
+            bundle,
+            context_dir,
+            t_col,
+            Channel.FILE,
+            output.file,
+            "",
+            timeout=exec_results.timeout,
+            memory=exec_results.memory,
+        )
+        _evaluate_channel(
+            bundle,
+            context_dir,
+            t_col,
+            Channel.STDERR,
+            output.stderr,
+            actual_stderr,
+            timeout=exec_results.timeout and len(stderr_) == i + 1,
+            memory=exec_results.memory and len(stderr_) == i + 1,
+        )
+        _evaluate_channel(
+            bundle,
+            context_dir,
+            t_col,
+            Channel.EXCEPTION,
+            output.exception,
+            actual_exception,
+            unexpected_status=Status.RUNTIME_ERROR,
+            timeout=exec_results.timeout and len(exceptions) == i + 1,
+            memory=exec_results.memory and len(exceptions) == i + 1,
+        )
+        _evaluate_channel(
+            bundle,
+            context_dir,
+            t_col,
+            Channel.STDOUT,
+            output.stdout,
+            actual_stdout,
+            timeout=exec_results.timeout and len(stdout_) == i + 1,
+            memory=exec_results.memory and len(stdout_) == i + 1,
+        )
+        _evaluate_channel(
+            bundle,
+            context_dir,
+            t_col,
+            Channel.RETURN,
+            output.result,
+            actual_value,
+            timeout=exec_results.timeout and len(values) == i + 1,
+            memory=exec_results.memory and len(values) == i + 1,
+        )
 
         # If this is the last testcase, do the exit channel.
         if i == len(context.testcases) - 1:
@@ -347,6 +345,7 @@ def evaluate_context_results(
         return Status.TIME_LIMIT_EXCEEDED
     if exec_results.memory:
         return Status.MEMORY_LIMIT_EXCEEDED
+    return None
 
 
 def _link_files_message(
@@ -364,6 +363,7 @@ def _link_files_message(
     message = ExtendedMessage(description=description, format="html")
     if collector is not None:
         collector.add(AppendMessage(message=message))
+        return None
     else:
         return AppendMessage(message=message)
 
@@ -374,7 +374,7 @@ def should_show(test: OutputChannel, channel: Channel) -> bool:
     value. This function answers the question: "Assuming the actual value is
     correct, should we show this output channel?".
 
-    :param test: The output for the channel from the test_suite.
+    :param test: The output for the channel from the test suite.
     :param channel: The channel.
 
     :return: True if the channel should be shown, false otherwise.
@@ -405,9 +405,9 @@ def should_show(test: OutputChannel, channel: Channel) -> bool:
 
 def guess_expected_value(bundle: Bundle, test: OutputChannel) -> str:
     """
-    Try and get the expected value for a output channel. In some cases, such as
-    a programmed or language specific evaluator, there is will be no expected value
-    available in the test_suite. In that case, we use an empty string.
+    Try and get the expected value for an output channel. In some cases, such as
+    a programmed or language specific evaluator, there will be no expected value
+    available in the test suite. In that case, we use an empty string.
 
     :param bundle: Configuration bundle.
     :param test: The output channel.
@@ -434,6 +434,8 @@ def guess_expected_value(bundle: Bundle, test: OutputChannel) -> str:
         )
     elif isinstance(test, ExitCodeOutputChannel):
         return str(test.value)
+    _logger.warn(f"Unknown output type {test}")
+    return ""
 
 
 def _add_channel(
@@ -458,7 +460,7 @@ def _add_channel(
 
 def prepare_evaluation(bundle: Bundle, collector: OutputManager):
     """
-    Generate output depicting the expected test_suite. This output will be shown if
+    Generate output depicting the expected test suite. This output will be shown if
     the normal execution terminates early for some reason. This function assumes
     the output is OK, but does not accept anything.
 
