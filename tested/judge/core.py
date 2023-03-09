@@ -175,8 +175,6 @@ def judge(bundle: Bundle):
 
     _logger.info("Starting judgement...")
     parallel = bundle.config.options.parallel
-    # How much of the output limit we still have.
-    output_limit = bundle.config.output_limit * 0.8
 
     # Create a list of runs we want to execute.
     for tab_index, tab in enumerate(bundle.suite.tabs):
@@ -284,7 +282,7 @@ def _parallel_execution(
         execution_result, m, s, p = execute_execution(bundle, execution, remainder)
         end_stage("run.execution")
 
-        def evaluation_function(eval_remainder):
+        def evaluation_function(_eval_remainder):
             new_stage("evaluate.results")
             _status = _process_results(bundle, execution, execution_result, m, s, p)
             end_stage("evaluate.results")

@@ -256,59 +256,57 @@ def evaluate_context_results(
         actual_stdout = safe_get(stdout_, i)
         actual_value = safe_get(values, i)
 
-        results = [
-            _evaluate_channel(
-                bundle,
-                context_dir,
-                t_col,
-                Channel.FILE,
-                output.file,
-                "",
-                timeout=exec_results.timeout,
-                memory=exec_results.memory,
-            ),
-            _evaluate_channel(
-                bundle,
-                context_dir,
-                t_col,
-                Channel.STDERR,
-                output.stderr,
-                actual_stderr,
-                timeout=exec_results.timeout and len(stderr_) == i + 1,
-                memory=exec_results.memory and len(stderr_) == i + 1,
-            ),
-            _evaluate_channel(
-                bundle,
-                context_dir,
-                t_col,
-                Channel.EXCEPTION,
-                output.exception,
-                actual_exception,
-                unexpected_status=Status.RUNTIME_ERROR,
-                timeout=exec_results.timeout and len(exceptions) == i + 1,
-                memory=exec_results.memory and len(exceptions) == i + 1,
-            ),
-            _evaluate_channel(
-                bundle,
-                context_dir,
-                t_col,
-                Channel.STDOUT,
-                output.stdout,
-                actual_stdout,
-                timeout=exec_results.timeout and len(stdout_) == i + 1,
-                memory=exec_results.memory and len(stdout_) == i + 1,
-            ),
-            _evaluate_channel(
-                bundle,
-                context_dir,
-                t_col,
-                Channel.RETURN,
-                output.result,
-                actual_value,
-                timeout=exec_results.timeout and len(values) == i + 1,
-                memory=exec_results.memory and len(values) == i + 1,
-            ),
-        ]
+        _evaluate_channel(
+            bundle,
+            context_dir,
+            t_col,
+            Channel.FILE,
+            output.file,
+            "",
+            timeout=exec_results.timeout,
+            memory=exec_results.memory,
+        )
+        _evaluate_channel(
+            bundle,
+            context_dir,
+            t_col,
+            Channel.STDERR,
+            output.stderr,
+            actual_stderr,
+            timeout=exec_results.timeout and len(stderr_) == i + 1,
+            memory=exec_results.memory and len(stderr_) == i + 1,
+        )
+        _evaluate_channel(
+            bundle,
+            context_dir,
+            t_col,
+            Channel.EXCEPTION,
+            output.exception,
+            actual_exception,
+            unexpected_status=Status.RUNTIME_ERROR,
+            timeout=exec_results.timeout and len(exceptions) == i + 1,
+            memory=exec_results.memory and len(exceptions) == i + 1,
+        )
+        _evaluate_channel(
+            bundle,
+            context_dir,
+            t_col,
+            Channel.STDOUT,
+            output.stdout,
+            actual_stdout,
+            timeout=exec_results.timeout and len(stdout_) == i + 1,
+            memory=exec_results.memory and len(stdout_) == i + 1,
+        )
+        _evaluate_channel(
+            bundle,
+            context_dir,
+            t_col,
+            Channel.RETURN,
+            output.result,
+            actual_value,
+            timeout=exec_results.timeout and len(values) == i + 1,
+            memory=exec_results.memory and len(values) == i + 1,
+        )
 
         # If this is the last testcase, do the exit channel.
         if i == len(context.testcases) - 1:
