@@ -261,6 +261,7 @@ def _single_execution(
 
         if status:
             return status
+    return None
 
 
 def _parallel_execution(
@@ -292,6 +293,7 @@ def _parallel_execution(
                 Status.MEMORY_LIMIT_EXCEEDED,
             ):
                 return _status
+            return None
 
         return evaluation_function
 
@@ -413,6 +415,7 @@ def _process_results(
             return Status.OUTPUT_LIMIT_EXCEEDED
         if continue_ in (Status.TIME_LIMIT_EXCEEDED, Status.MEMORY_LIMIT_EXCEEDED):
             return continue_
+    return None
 
 
 def _copy_workdir_source_files(bundle: Bundle, common_dir: Path) -> List[str]:

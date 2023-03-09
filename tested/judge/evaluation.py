@@ -345,6 +345,7 @@ def evaluate_context_results(
         return Status.TIME_LIMIT_EXCEEDED
     if exec_results.memory:
         return Status.MEMORY_LIMIT_EXCEEDED
+    return None
 
 
 def _link_files_message(
@@ -362,6 +363,7 @@ def _link_files_message(
     message = ExtendedMessage(description=description, format="html")
     if collector is not None:
         collector.add(AppendMessage(message=message))
+        return None
     else:
         return AppendMessage(message=message)
 
@@ -403,9 +405,9 @@ def should_show(test: OutputChannel, channel: Channel) -> bool:
 
 def guess_expected_value(bundle: Bundle, test: OutputChannel) -> str:
     """
-    Try and get the expected value for a output channel. In some cases, such as
-    a programmed or language specific evaluator, there is will be no expected value
-    available in the test_suite. In that case, we use an empty string.
+    Try and get the expected value for an output channel. In some cases, such as
+    a programmed or language specific evaluator, there will be no expected value
+    available in the test suite. In that case, we use an empty string.
 
     :param bundle: Configuration bundle.
     :param test: The output channel.
@@ -432,6 +434,8 @@ def guess_expected_value(bundle: Bundle, test: OutputChannel) -> str:
         )
     elif isinstance(test, ExitCodeOutputChannel):
         return str(test.value)
+    _logger.warn(f"Unknown output type {test}")
+    return ""
 
 
 def _add_channel(
