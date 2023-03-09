@@ -5,8 +5,11 @@ on:
     branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
+    paths-ignore:
+      - '**/*.md'
+      - '**/*.txt'
   schedule:
-    - cron: "18 21 * * 2"
+    - cron: "18 21 2 * *"
 
 jobs:
   analyze:
@@ -17,11 +20,6 @@ jobs:
       contents: read
       security-events: write
 
-    strategy:
-      fail-fast: false
-      matrix:
-        language: [ javascript, python ]
-
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -29,15 +27,14 @@ jobs:
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v2
         with:
-          languages: ${{ matrix.language }}
+          languages: python
           config-file: ./.github/codeql.yml
           queries: +security-and-quality
 
       - name: Autobuild
         uses: github/codeql-action/autobuild@v2
-        if: ${{ matrix.language == 'javascript' || matrix.language == 'python' }}
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
         with:
-          category: "/language:${{ matrix.language }}"
+          category: "/language:python"

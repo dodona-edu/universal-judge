@@ -1,5 +1,4 @@
+paths:
+  - tested
 paths-ignore:
-- exercise
-- tested/languages/*/templates
-- exercise
-- tested/languages/*/templates
+  - tested/languages
