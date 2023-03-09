@@ -1,0 +1,4 @@
+paths:
+  - tested
+paths-ignore:
+  - tested/languages
