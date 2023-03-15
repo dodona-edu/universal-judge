@@ -1,20 +1,20 @@
 import itertools
-import time
-
 import logging
 import shutil
+import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Optional, Tuple, Callable, Union
-from .collector import OutputManager
-from .compilation import run_compilation, process_compile_results
-from .utils import BaseExecutionResult, run_command
-from ..configs import Bundle
-from ..dodona import Message, Status
-from ..languages.config import FileFilter, Config
-from ..languages.generator import value_file, exception_file
-from ..testsuite import ExecutionMode, Context, EmptyChannel
-from ..utils import safe_del
+from typing import Callable, List, Optional, Tuple, Union
+
+from tested.configs import Bundle
+from tested.dodona import Message, Status
+from tested.judge.collector import OutputManager
+from tested.judge.compilation import process_compile_results, run_compilation
+from tested.judge.utils import BaseExecutionResult, run_command
+from tested.languages.config import Config, FileFilter
+from tested.languages.generator import exception_file, value_file
+from tested.testsuite import Context, EmptyChannel, ExecutionMode
+from tested.utils import safe_del
 
 _logger = logging.getLogger(__name__)
 

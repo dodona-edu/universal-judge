@@ -7,12 +7,12 @@ cases.
 from enum import Enum
 from typing import Union
 
-from .basic import (
+from tested.datatypes.basic import (
+    BasicNothingTypes,
     BasicNumericTypes,
     BasicSequenceTypes,
-    BasicTypes,
     BasicStringTypes,
-    BasicNothingTypes,
+    BasicTypes,
 )
 
 

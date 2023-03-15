@@ -7,10 +7,10 @@ from tested.configs import Bundle
 from tested.dodona import AnnotateCode, Message
 from tested.languages.config import (
     CallbackResult,
-    executable_name,
     Command,
     Config,
     Language,
+    executable_name,
     limit_output,
 )
 

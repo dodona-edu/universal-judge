@@ -30,8 +30,7 @@ ij_json_spaces_within_brackets = false
 ij_json_wrap_long_lines = false
 
 [{*.py,*.pyw}]
-profile = black
-max_line_length = 84
+max_line_length = 88
 ij_python_align_collections_and_comprehensions = true
 ij_python_align_multiline_imports = true
 ij_python_align_multiline_parameters = true

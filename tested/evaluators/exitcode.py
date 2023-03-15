@@ -1,10 +1,10 @@
 import logging
 from typing import Optional
 
-from ..dodona import StatusMessage, Status
-from . import EvaluationResult, EvaluatorConfig
-from ..internationalization import get_i18n_string
-from ..testsuite import ExitCodeOutputChannel
+from tested.dodona import Status, StatusMessage
+from tested.evaluators import EvaluationResult, EvaluatorConfig
+from tested.internationalization import get_i18n_string
+from tested.testsuite import ExitCodeOutputChannel
 
 logger = logging.getLogger(__name__)
 

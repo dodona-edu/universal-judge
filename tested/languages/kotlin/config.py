@@ -2,10 +2,10 @@ import logging
 import os
 import re
 from pathlib import Path
-from typing import List, Tuple, Optional
+from typing import List, Optional, Tuple
 
 from tested.configs import Bundle
-from tested.dodona import Message, Status, AnnotateCode, ExtendedMessage, Permission
+from tested.dodona import AnnotateCode, ExtendedMessage, Message, Permission, Status
 from tested.languages.config import (
     CallbackResult,
     Command,
@@ -13,7 +13,7 @@ from tested.languages.config import (
     Language,
     limit_output,
 )
-from tested.languages.utils import jvm_memory_limit, jvm_cleanup_stacktrace, jvm_stderr
+from tested.languages.utils import jvm_cleanup_stacktrace, jvm_memory_limit, jvm_stderr
 
 logger = logging.getLogger(__name__)
 

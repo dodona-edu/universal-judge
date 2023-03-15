@@ -5,28 +5,35 @@ This module is the authoritative source on the format and behaviour of the test 
 When executing this module, a json-schema is generated for the format, which can be
 of assistance when checking existing test suites.
 """
-from pydantic import BaseModel, root_validator, validator
-from pydantic.dataclasses import dataclass
-
 from collections import defaultdict
 from dataclasses import field
 from enum import Enum
 from os import path
 from pathlib import Path
-from typing import List, Optional, Dict, Any, Literal, Union, NamedTuple, Iterable, Set
-from .datatypes import BasicStringTypes
-from .features import FeatureSet, combine_features, WithFeatures, NOTHING, Construct
-from .serialisation import (
+from typing import Any, Dict, Iterable, List, Literal, NamedTuple, Optional, Set, Union
+
+from pydantic import BaseModel, root_validator, validator
+from pydantic.dataclasses import dataclass
+
+from tested.datatypes import BasicStringTypes
+from tested.features import (
+    NOTHING,
+    Construct,
+    FeatureSet,
+    WithFeatures,
+    combine_features,
+)
+from tested.serialisation import (
     ExceptionValue,
-    Value,
     Expression,
-    Statement,
     FunctionCall,
-    SequenceType,
     FunctionType,
+    SequenceType,
+    Statement,
+    Value,
     WithFunctions,
 )
-from .utils import get_args, flatten
+from tested.utils import flatten, get_args
 
 
 class TextBuiltin(str, Enum):

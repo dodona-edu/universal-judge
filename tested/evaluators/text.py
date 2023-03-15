@@ -1,14 +1,13 @@
 """
 Evaluators for text.
 """
-from typing import Optional, Dict, Any
-
 import math
+from typing import Any, Dict, Optional
 
-from . import EvaluationResult, EvaluatorConfig
-from ..dodona import StatusMessage, Status
-from ..internationalization import get_i18n_string
-from ..testsuite import TextOutputChannel, FileOutputChannel, OutputChannel
+from tested.dodona import Status, StatusMessage
+from tested.evaluators import EvaluationResult, EvaluatorConfig
+from tested.internationalization import get_i18n_string
+from tested.testsuite import FileOutputChannel, OutputChannel, TextOutputChannel
 
 
 def _is_number(string: str) -> Optional[float]:

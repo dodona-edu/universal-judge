@@ -1,10 +1,10 @@
 import logging
 import re
 from pathlib import Path
-from typing import Tuple, List
+from typing import List, Tuple
 
 from tested.configs import Bundle
-from tested.dodona import Message, AnnotateCode
+from tested.dodona import AnnotateCode, Message
 from tested.languages.config import Config, Language
 
 logger = logging.getLogger(__name__)

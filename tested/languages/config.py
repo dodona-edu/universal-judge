@@ -29,31 +29,31 @@ from collections import defaultdict
 from dataclasses import dataclass
 from enum import Enum, auto
 from pathlib import Path
-from typing import List, Tuple, Mapping, Union, Callable, Set, Dict, Optional, Any
+from typing import Any, Callable, Dict, List, Mapping, Optional, Set, Tuple, Union
 
-from .description_generator import DescriptionGenerator
-from ..configs import Bundle
-from ..datatypes import AllTypes, string_to_type, ExpressionTypes, AdvancedTypes
-from ..dodona import AnnotateCode, Message, Status, ExtendedMessage, Permission
-from ..features import Construct
-from ..internationalization import get_i18n_string
-from ..serialisation import ExceptionValue
-from ..testsuite import Suite
-from ..utils import (
-    camelize,
-    pascalize,
-    fallback,
-    snake_case,
-    get_args,
-    flat_case,
-    upper_flat_case,
-    macro_case,
+from tested.configs import Bundle
+from tested.datatypes import AdvancedTypes, AllTypes, ExpressionTypes, string_to_type
+from tested.dodona import AnnotateCode, ExtendedMessage, Message, Permission, Status
+from tested.features import Construct
+from tested.internationalization import get_i18n_string
+from tested.languages.description_generator import DescriptionGenerator
+from tested.serialisation import ExceptionValue
+from tested.testsuite import Suite
+from tested.utils import (
     camel_snake_case,
-    pascal_snake_case,
-    doner_case,
-    dash_case,
-    train_case,
+    camelize,
     cobol_case,
+    dash_case,
+    doner_case,
+    fallback,
+    flat_case,
+    get_args,
+    macro_case,
+    pascal_snake_case,
+    pascalize,
+    snake_case,
+    train_case,
+    upper_flat_case,
 )
 
 Command = List[str]

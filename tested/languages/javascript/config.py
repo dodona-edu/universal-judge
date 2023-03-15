@@ -4,12 +4,12 @@ from pathlib import Path
 from typing import List, Tuple
 
 from tested.configs import Bundle
-from tested.dodona import Message, AnnotateCode
+from tested.dodona import AnnotateCode, Message
 from tested.languages.config import (
+    CallbackResult,
     Command,
     Config,
     Language,
-    CallbackResult,
     limit_output,
 )
 from tested.languages.utils import cleanup_description

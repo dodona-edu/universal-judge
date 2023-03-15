@@ -1,24 +1,24 @@
+import json
+import shutil
 import sys
+from argparse import ArgumentParser
+from copy import deepcopy
+from dataclasses import dataclass
 from itertools import groupby
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
 from mako.template import Template
 from pydantic.json import pydantic_encoder
 
-import json
-import shutil
-from argparse import ArgumentParser
-from copy import deepcopy
-from dataclasses import dataclass
-from pathlib import Path
-from typing import List, Any, Dict, Tuple, Optional
-from .datatypes import BasicSequenceTypes, BasicObjectTypes
-from .description_instance import (
-    prepare_template,
+from tested.datatypes import BasicObjectTypes, BasicSequenceTypes
+from tested.description_instance import (
     create_description_instance_from_template,
+    prepare_template,
 )
-from .dsl import parse_dsl
-from .languages import LANGUAGES, language_exists, Language, get_language
-from .testsuite import Suite, parse_test_suite
+from tested.dsl import parse_dsl
+from tested.languages import LANGUAGES, Language, get_language, language_exists
+from tested.testsuite import Suite, parse_test_suite
 
 
 class InstantiateError(Exception):

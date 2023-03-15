@@ -3,9 +3,15 @@ RawEvaluator for ignored channels.
 """
 import functools
 
-from . import EvaluationResult, exception, value, try_outputs, EvaluatorConfig
-from ..dodona import StatusMessage, Status
-from ..testsuite import IgnoredChannel
+from tested.dodona import Status, StatusMessage
+from tested.evaluators import (
+    EvaluationResult,
+    EvaluatorConfig,
+    exception,
+    try_outputs,
+    value,
+)
+from tested.testsuite import IgnoredChannel
 
 
 def evaluate(

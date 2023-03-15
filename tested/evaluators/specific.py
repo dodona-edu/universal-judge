@@ -2,13 +2,12 @@
 Specific evaluator
 """
 
-from . import EvaluationResult, EvaluatorConfig
-from .utils import cleanup_specific_programmed
-from ..dodona import StatusMessage, Status, ExtendedMessage, Permission
-from ..internationalization import get_i18n_string
-from ..serialisation import EvalResult
-from ..testsuite import OutputChannel
-from ..testsuite import SpecificEvaluator
+from tested.dodona import ExtendedMessage, Permission, Status, StatusMessage
+from tested.evaluators import EvaluationResult, EvaluatorConfig
+from tested.evaluators.utils import cleanup_specific_programmed
+from tested.internationalization import get_i18n_string
+from tested.serialisation import EvalResult
+from tested.testsuite import OutputChannel, SpecificEvaluator
 
 
 def evaluate(

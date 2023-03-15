@@ -4,26 +4,38 @@ import shutil
 import time
 from concurrent.futures.thread import ThreadPoolExecutor
 from pathlib import Path
-from typing import Tuple, List
+from typing import List, Optional, Tuple
 
-from .collector import OutputManager
-from .compilation import run_compilation, process_compile_results
-from .evaluation import evaluate_context_results
-from .execution import (
+from tested.configs import Bundle
+from tested.dodona import (
+    AppendMessage,
+    CloseContext,
+    CloseJudgment,
+    CloseTab,
+    Message,
+    StartContext,
+    StartJudgment,
+    StartTab,
+    Status,
+    StatusMessage,
+    report_update,
+)
+from tested.features import is_supported
+from tested.internationalization import get_i18n_string, set_locale
+from tested.judge.collector import OutputManager
+from tested.judge.compilation import process_compile_results, run_compilation
+from tested.judge.evaluation import evaluate_context_results
+from tested.judge.execution import (
     Execution,
-    execute_execution,
     ExecutionResult,
+    execute_execution,
     merge_contexts_into_units,
 )
-from .linter import run_linter
-from .utils import copy_from_paths_to_path
-from ..configs import Bundle
-from ..dodona import *
-from ..features import is_supported
-from ..languages.generator import generate_execution, generate_selector
-from ..languages.templates import path_to_templates
-from ..testsuite import ExecutionMode
-from ..internationalization import set_locale, get_i18n_string
+from tested.judge.linter import run_linter
+from tested.judge.utils import copy_from_paths_to_path
+from tested.languages.generator import generate_execution, generate_selector
+from tested.languages.templates import path_to_templates
+from tested.testsuite import ExecutionMode
 
 _logger = logging.getLogger(__name__)
 

@@ -1,15 +1,14 @@
-from unittest.mock import ANY
-
 import sys
 from pathlib import Path
+from unittest.mock import ANY
 
 import tested
 from tested.configs import create_bundle
 from tested.dodona import Status
-from tested.evaluators.text import evaluate_text, evaluate_file
-from tested.testsuite import Suite, TextOutputChannel, FileOutputChannel
-from tests.manual_utils import configuration
 from tested.evaluators import EvaluatorConfig
+from tested.evaluators.text import evaluate_file, evaluate_text
+from tested.testsuite import FileOutputChannel, Suite, TextOutputChannel
+from tests.manual_utils import configuration
 
 
 def evaluator_config(tmp_path: Path, pytestconfig, options=None) -> EvaluatorConfig:

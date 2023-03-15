@@ -2,31 +2,31 @@ import math
 
 import pytest
 
-from tested.dsl.ast_translator import parse_string, InvalidDslError
 from tested.datatypes import (
+    AdvancedNothingTypes,
+    AdvancedNumericTypes,
+    AdvancedSequenceTypes,
+    AdvancedStringTypes,
+    BasicBooleanTypes,
     BasicNothingTypes,
     BasicNumericTypes,
-    AdvancedNumericTypes,
-    BasicBooleanTypes,
-    BasicStringTypes,
     BasicSequenceTypes,
-    AdvancedSequenceTypes,
+    BasicStringTypes,
     ObjectTypes,
-    AdvancedStringTypes,
-    AdvancedNothingTypes,
 )
+from tested.dsl.ast_translator import InvalidDslError, parse_string
 from tested.serialisation import (
     Assignment,
+    BooleanType,
     FunctionCall,
     FunctionType,
-    VariableType,
-    SequenceType,
     Identifier,
-    StringType,
+    NumberType,
     ObjectKeyValuePair,
     ObjectType,
-    BooleanType,
-    NumberType,
+    SequenceType,
+    StringType,
+    VariableType,
 )
 
 

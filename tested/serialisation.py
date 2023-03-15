@@ -24,36 +24,36 @@ from dataclasses import field, replace
 from decimal import Decimal
 from enum import Enum
 from functools import reduce
-from typing import Union, List, Literal, Optional, Any, Iterable, Tuple, Dict
+from typing import Any, Dict, Iterable, List, Literal, Optional, Tuple, Union
 
-from pydantic import BaseModel, root_validator, Field
+from pydantic import BaseModel, Field, root_validator
 from pydantic.dataclasses import dataclass
 from pydantic.typing import NoneType
 
-from tested.dodona import ExtendedMessage, Status
-from .datatypes import (
-    NumericTypes,
-    StringTypes,
-    BooleanTypes,
-    SequenceTypes,
-    ObjectTypes,
-    NothingTypes,
-    SimpleTypes,
-    resolve_to_basic,
+from tested.datatypes import (
+    AdvancedNumericTypes,
     AllTypes,
-    BasicSequenceTypes,
-    BasicObjectTypes,
-    BasicNumericTypes,
     BasicBooleanTypes,
-    BasicStringTypes,
     BasicNothingTypes,
+    BasicNumericTypes,
+    BasicObjectTypes,
+    BasicSequenceTypes,
+    BasicStringTypes,
+    BooleanTypes,
     ComplexExpressionTypes,
     ExpressionTypes,
     NestedTypes,
-    AdvancedNumericTypes,
+    NothingTypes,
+    NumericTypes,
+    ObjectTypes,
+    SequenceTypes,
+    SimpleTypes,
+    StringTypes,
+    resolve_to_basic,
 )
-from .features import FeatureSet, combine_features, WithFeatures, Construct
-from .utils import get_args, flatten, sorted_no_duplicates
+from tested.dodona import ExtendedMessage, Status
+from tested.features import Construct, FeatureSet, WithFeatures, combine_features
+from tested.utils import flatten, get_args, sorted_no_duplicates
 
 logger = logging.getLogger(__name__)
 

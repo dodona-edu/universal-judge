@@ -2,33 +2,33 @@
 Value evaluator.
 """
 import logging
-from typing import Union, Tuple, Optional
+from typing import Optional, Tuple, Union
 
-from . import EvaluationResult, EvaluatorConfig
-from ..configs import Bundle
-from ..datatypes import (
+from tested.configs import Bundle
+from tested.datatypes import (
     AdvancedTypes,
-    BasicTypes,
-    BasicStringTypes,
-    SimpleTypes,
     BasicSequenceTypes,
+    BasicStringTypes,
+    BasicTypes,
+    SimpleTypes,
 )
-from ..dodona import ExtendedMessage, Permission, StatusMessage, Status
-from ..internationalization import get_i18n_string
-from ..languages.config import TypeSupport
-from ..languages.generator import convert_statement
-from ..serialisation import (
+from tested.dodona import ExtendedMessage, Permission, Status, StatusMessage
+from tested.evaluators import EvaluationResult, EvaluatorConfig
+from tested.internationalization import get_i18n_string
+from tested.languages.config import TypeSupport
+from tested.languages.generator import convert_statement
+from tested.serialisation import (
+    ObjectKeyValuePair,
+    ObjectType,
+    SequenceType,
+    StringType,
     Value,
+    as_basic_type,
     parse_value,
     to_python_comparable,
-    as_basic_type,
-    StringType,
-    SequenceType,
-    ObjectType,
-    ObjectKeyValuePair,
 )
-from ..testsuite import ValueOutputChannel, OutputChannel, TextOutputChannel
-from ..utils import Either, get_args, sorted_no_duplicates
+from tested.testsuite import OutputChannel, TextOutputChannel, ValueOutputChannel
+from tested.utils import Either, get_args, sorted_no_duplicates
 
 logger = logging.getLogger(__name__)
 

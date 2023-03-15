@@ -1,12 +1,12 @@
 import logging
 import re
 from pathlib import Path
-from typing import List, Tuple, Optional
+from typing import List, Optional, Tuple
 
-from ..config import CallbackResult, Command, Config, Language
-from ...configs import Bundle
-from ...dodona import Message, Status, AnnotateCode
-from ...internationalization import get_i18n_string
+from tested.configs import Bundle
+from tested.dodona import AnnotateCode, Message, Status
+from tested.internationalization import get_i18n_string
+from tested.languages.config import CallbackResult, Command, Config, Language
 
 logger = logging.getLogger(__name__)
 

@@ -12,12 +12,26 @@ As mentioned in the manuscript, the context_testcase use is scenario 1.
 Additionally, the types in this file are organized by their JSON encoding type.
 They are also split in "basic types" and "advanced types".
 """
-from typing import Set, Tuple, FrozenSet
+from typing import FrozenSet, Set, Tuple, Union
 
-from .advanced import *
-from .basic import *
-from .complex import *
-from ..utils import get_args
+from tested.datatypes.advanced import (
+    AdvancedNothingTypes,
+    AdvancedNumericTypes,
+    AdvancedSequenceTypes,
+    AdvancedStringTypes,
+    AdvancedTypes,
+)
+from tested.datatypes.basic import (
+    BasicBooleanTypes,
+    BasicNothingTypes,
+    BasicNumericTypes,
+    BasicObjectTypes,
+    BasicSequenceTypes,
+    BasicStringTypes,
+    BasicTypes,
+)
+from tested.datatypes.complex import ComplexExpressionTypes
+from tested.utils import get_args
 
 NumericTypes = Union[BasicNumericTypes, AdvancedNumericTypes]
 StringTypes = Union[BasicStringTypes, AdvancedStringTypes]
@@ -26,12 +40,10 @@ NothingTypes = Union[BasicNothingTypes, AdvancedNothingTypes]
 SequenceTypes = Union[BasicSequenceTypes, AdvancedSequenceTypes]
 ObjectTypes = Union[BasicObjectTypes]
 
-
 SimpleTypes = Union[NumericTypes, StringTypes, BooleanTypes, NothingTypes]
 ComplexTypes = Union[SequenceTypes, ObjectTypes]
 
 AllTypes = Union[BasicTypes, AdvancedTypes]
-
 
 ExpressionTypes = Union[AllTypes, ComplexExpressionTypes]
 NestedTypes = Set[Tuple[ExpressionTypes, FrozenSet[ExpressionTypes]]]

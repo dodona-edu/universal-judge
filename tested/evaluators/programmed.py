@@ -3,26 +3,26 @@ Programmed evaluator.
 """
 import logging
 import traceback
-from typing import Tuple, Optional
+from typing import Optional, Tuple
 
-from . import EvaluationResult, EvaluatorConfig, value
-from .utils import cleanup_specific_programmed
-from .value import get_values
-from ..datatypes import StringTypes
-from ..dodona import ExtendedMessage, StatusMessage, Status, Permission
-from ..internationalization import get_i18n_string
-from ..judge import evaluate_programmed
-from ..judge.utils import BaseExecutionResult
-from ..serialisation import StringType, EvalResult, Value
-from ..testsuite import (
-    TextOutputChannel,
-    FileOutputChannel,
-    ValueOutputChannel,
-    NormalOutputChannel,
+from tested.datatypes import StringTypes
+from tested.dodona import ExtendedMessage, Permission, Status, StatusMessage
+from tested.evaluators import EvaluationResult, EvaluatorConfig, value
+from tested.evaluators.utils import cleanup_specific_programmed
+from tested.evaluators.value import get_values
+from tested.internationalization import get_i18n_string
+from tested.judge import evaluate_programmed
+from tested.judge.utils import BaseExecutionResult
+from tested.serialisation import EvalResult, StringType, Value
+from tested.testsuite import (
     ExceptionOutputChannel,
+    FileOutputChannel,
+    NormalOutputChannel,
     ProgrammedEvaluator,
+    TextOutputChannel,
+    ValueOutputChannel,
 )
-from ..utils import Either, get_args
+from tested.utils import Either, get_args
 
 _logger = logging.getLogger(__name__)
 

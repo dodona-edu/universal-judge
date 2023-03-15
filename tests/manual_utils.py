@@ -1,14 +1,15 @@
-from jsonschema import validate
-
 import json
 import re
 from io import StringIO
 from pathlib import Path
+from typing import List
+
+from jsonschema import validate
+
 from tested.configs import DodonaConfig
 from tested.languages import get_language
 from tested.main import run
 from tested.utils import recursive_dict_merge
-from typing import List
 
 
 def split_output(output: str) -> List[str]:

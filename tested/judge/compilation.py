@@ -3,13 +3,13 @@ Functions responsible for the compilation step.
 """
 import logging
 from pathlib import Path
-from typing import List, Tuple, Optional, Union
+from typing import List, Optional, Tuple, Union
 
-from .utils import BaseExecutionResult, run_command
-from ..configs import Bundle
-from ..dodona import Status, Message, AnnotateCode
-from ..languages.config import FileFilter, Language
-from ..internationalization import get_i18n_string
+from tested.configs import Bundle
+from tested.dodona import AnnotateCode, Message, Status
+from tested.internationalization import get_i18n_string
+from tested.judge.utils import BaseExecutionResult, run_command
+from tested.languages.config import FileFilter, Language
 
 _logger = logging.getLogger(__name__)
 

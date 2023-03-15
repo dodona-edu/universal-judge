@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import List, Tuple
 
 from tested.configs import Bundle
-from tested.dodona import Message, AnnotateCode, ExtendedMessage, Permission, Severity
+from tested.dodona import AnnotateCode, ExtendedMessage, Message, Permission, Severity
 from tested.internationalization import get_i18n_string
 from tested.judge.utils import run_command
 

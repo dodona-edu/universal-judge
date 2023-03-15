@@ -3,10 +3,16 @@ RawEvaluator for channels without output.
 """
 import functools
 
-from tested.dodona import StatusMessage, Status
-from . import EvaluationResult, try_outputs, exception, value, EvaluatorConfig
-from ..internationalization import get_i18n_string
-from ..testsuite import EmptyChannel
+from tested.dodona import Status, StatusMessage
+from tested.evaluators import (
+    EvaluationResult,
+    EvaluatorConfig,
+    exception,
+    try_outputs,
+    value,
+)
+from tested.internationalization import get_i18n_string
+from tested.testsuite import EmptyChannel
 
 
 def evaluate(

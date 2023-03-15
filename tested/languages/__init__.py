@@ -6,16 +6,16 @@ needed to execute the templates.
 In short, if it has to do with the templates or is programming language specific,
 you will probably find it in this package.
 """
+from tested.languages.bash.config import Bash
 from tested.languages.c.config import C
+from tested.languages.config import Language
+from tested.languages.csharp.config import CSharp
 from tested.languages.haskell.config import Haskell
 from tested.languages.java.config import Java
 from tested.languages.javascript.config import JavaScript
 from tested.languages.kotlin.config import Kotlin
 from tested.languages.python.config import Python
 from tested.languages.runhaskell.config import RunHaskell
-from tested.languages.csharp.config import CSharp
-from .bash.config import Bash
-from .config import Language
 
 LANGUAGES = {
     "bash": Bash,

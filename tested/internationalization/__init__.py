@@ -1,6 +1,7 @@
-import i18n
-import os.path
 import logging
+import os.path
+
+import i18n
 
 _logger = logging.getLogger(__name__)
 

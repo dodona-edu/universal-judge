@@ -25,30 +25,27 @@ For example, such a function looks like this:
 import functools
 from dataclasses import field
 from pathlib import Path
-from typing import List, Dict, Any, NamedTuple, Tuple
-from typing import Union, Callable, Optional
+from typing import Any, Callable, Dict, List, NamedTuple, Optional, Tuple, Union
 
 from pydantic.dataclasses import dataclass
 
-from ..configs import Bundle
-from ..dodona import StatusMessage, Message, Status
-from ..testsuite import (
-    GenericTextEvaluator,
-    TextBuiltin,
-    GenericValueEvaluator,
-    ValueBuiltin,
-    GenericExceptionEvaluator,
-    ExceptionBuiltin,
-    ProgrammedEvaluator,
-    SpecificEvaluator,
-)
-from ..testsuite import (
-    OutputChannel,
-    NormalOutputChannel,
-    SpecialOutputChannel,
+from tested.configs import Bundle
+from tested.dodona import Message, Status, StatusMessage
+from tested.testsuite import (
     EmptyChannel,
-    IgnoredChannel,
+    ExceptionBuiltin,
     ExitCodeOutputChannel,
+    GenericExceptionEvaluator,
+    GenericTextEvaluator,
+    GenericValueEvaluator,
+    IgnoredChannel,
+    NormalOutputChannel,
+    OutputChannel,
+    ProgrammedEvaluator,
+    SpecialOutputChannel,
+    SpecificEvaluator,
+    TextBuiltin,
+    ValueBuiltin,
 )
 
 
@@ -106,14 +103,14 @@ def get_evaluator(
     Get the evaluator for a given output channel.
     """
     from ..evaluators import (
-        nothing,
-        exitcode,
-        text,
-        value,
         exception,
+        exitcode,
+        ignored,
+        nothing,
         programmed,
         specific,
-        ignored,
+        text,
+        value,
     )
 
     currier = functools.partial(_curry_evaluator, bundle, context_dir)

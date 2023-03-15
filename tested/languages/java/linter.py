@@ -1,10 +1,10 @@
 import logging
 from pathlib import Path
-from typing import Tuple, List
+from typing import List, Tuple
 from xml.etree import ElementTree
 
 from tested.configs import Bundle
-from tested.dodona import AnnotateCode, Message, ExtendedMessage, Permission, Severity
+from tested.dodona import AnnotateCode, ExtendedMessage, Message, Permission, Severity
 from tested.internationalization import get_i18n_string
 from tested.judge.utils import run_command
 

@@ -6,12 +6,12 @@ from typing import Optional, Tuple
 
 from pydantic import BaseModel
 
-from . import EvaluationResult, EvaluatorConfig
-from ..dodona import StatusMessage, Status, ExtendedMessage, Permission
-from ..internationalization import get_i18n_string
-from ..serialisation import ExceptionValue
-from ..testsuite import ExceptionOutputChannel
-from ..utils import Either
+from tested.dodona import ExtendedMessage, Permission, Status, StatusMessage
+from tested.evaluators import EvaluationResult, EvaluatorConfig
+from tested.internationalization import get_i18n_string
+from tested.serialisation import ExceptionValue
+from tested.testsuite import ExceptionOutputChannel
+from tested.utils import Either
 
 logger = logging.getLogger(__name__)
 

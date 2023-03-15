@@ -46,6 +46,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - uses: isort/isort-action@v1.0.0
+        with:
+          sortPaths: "./tested ./tests"
       - uses: psf/black@stable
         with:
           version: "~= 22.0"

@@ -1,9 +1,9 @@
 from typing import Optional, Union
 
-from tested.testsuite import NormalOutputChannel, ExceptionOutputChannel
-from . import EvaluatorConfig
-from ..dodona import Status
-from ..serialisation import EvalResult
+from tested.dodona import Status
+from tested.evaluators import EvaluatorConfig
+from tested.serialisation import EvalResult
+from tested.testsuite import ExceptionOutputChannel, NormalOutputChannel
 
 
 def get_status(status: Optional[Union[bool, Status]]) -> Status:

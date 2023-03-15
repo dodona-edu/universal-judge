@@ -2,15 +2,15 @@ import logging
 import os
 import re
 from pathlib import Path
-from typing import List, Tuple, Optional
+from typing import List, Optional, Tuple
 
 from tested.configs import Bundle
-from tested.dodona import AnnotateCode, Severity, Message
+from tested.dodona import AnnotateCode, Message, Severity
 from tested.languages.config import (
-    Language,
     CallbackResult,
     Command,
     Config,
+    Language,
     trace_to_html,
 )
 

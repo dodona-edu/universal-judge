@@ -6,62 +6,63 @@ import html
 import json
 import logging
 import re
+import shlex
 from dataclasses import dataclass
 from pathlib import Path
 from typing import (
+    TYPE_CHECKING,
+    Callable,
+    Iterable,
     List,
-    Union,
-    Tuple,
+    Match,
     Optional,
     Set,
-    Callable,
-    Match,
-    Iterable,
-    TYPE_CHECKING,
+    Tuple,
+    Union,
 )
-import shlex
 
 from mako import exceptions
 from pygments.formatters.html import HtmlFormatter
 
 # Prevent cyclic imports for types...
 if TYPE_CHECKING:
-    from ..judge.execution import ExecutionUnit
-from .config import TemplateType
-from .templates import find_and_write_template, find_template
-from .description_generator import highlight_console
-from ..configs import Bundle
-from ..datatypes import BasicSequenceTypes
-from ..dodona import ExtendedMessage
-from ..internationalization import get_i18n_string
-from ..serialisation import (
-    Value,
-    SequenceType,
-    Identifier,
-    FunctionType,
-    FunctionCall,
-    Expression,
-    Statement,
+    from tested.judge.execution import ExecutionUnit
+
+from tested.configs import Bundle
+from tested.datatypes import BasicSequenceTypes
+from tested.dodona import ExtendedMessage
+from tested.internationalization import get_i18n_string
+from tested.languages.config import TemplateType
+from tested.languages.description_generator import highlight_console
+from tested.languages.templates import find_and_write_template, find_template
+from tested.serialisation import (
     Assignment,
-    NothingType,
+    Expression,
+    FunctionCall,
+    FunctionType,
+    Identifier,
     NamedArgument,
-    ObjectType,
+    NothingType,
     ObjectKeyValuePair,
+    ObjectType,
+    SequenceType,
+    Statement,
+    Value,
     VariableType,
 )
-from ..testsuite import (
+from tested.testsuite import (
+    Context,
     EmptyChannel,
+    ExceptionOutput,
+    FileUrl,
     IgnoredChannel,
-    TextData,
     ProgrammedEvaluator,
     SpecificEvaluator,
     Testcase,
-    Context,
-    ExceptionOutput,
+    TextData,
     ValueOutput,
-    FileUrl,
 )
-from ..utils import get_args
+from tested.utils import get_args
 
 _logger = logging.getLogger(__name__)
 _html_formatter = HtmlFormatter()

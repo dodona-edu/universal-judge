@@ -5,12 +5,12 @@ import logging
 import operator
 from enum import Enum
 from functools import reduce
-from typing import Iterable, Set, NamedTuple, TYPE_CHECKING
+from typing import TYPE_CHECKING, Iterable, NamedTuple, Set
 
-from .datatypes import AllTypes, BasicSequenceTypes, BasicObjectTypes, NestedTypes
+from tested.datatypes import AllTypes, BasicObjectTypes, BasicSequenceTypes, NestedTypes
 
 if TYPE_CHECKING:
-    from .configs import Bundle
+    from tested.configs import Bundle
 
 _logger = logging.getLogger(__name__)
 

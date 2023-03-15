@@ -8,17 +8,13 @@ To configure which languages are tested, modify the `conftest.py` file.
 Running the tests should happen in with the root directory (the one with src/ and
 tests/) as the working directory.
 """
+import shutil
 from pathlib import Path
 
 import pytest
-import shutil
 
 from tested.languages import LANGUAGES
-from tests.manual_utils import (
-    assert_valid_output,
-    configuration,
-    execute_config,
-)
+from tests.manual_utils import assert_valid_output, configuration, execute_config
 
 COMPILE_LANGUAGES = [
     "python",

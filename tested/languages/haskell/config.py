@@ -2,18 +2,18 @@ from pathlib import Path
 from typing import List, Tuple
 
 from tested.configs import Bundle
-from tested.dodona import Message, AnnotateCode
+from tested.dodona import AnnotateCode, Message
 from tested.languages.config import (
     CallbackResult,
-    executable_name,
     Command,
     Config,
     Language,
+    executable_name,
 )
 from tested.languages.utils import (
-    haskell_solution,
     cleanup_description,
     haskell_cleanup_stacktrace,
+    haskell_solution,
 )
 
 

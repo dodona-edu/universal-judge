@@ -2,11 +2,11 @@
 Main file, responsible for running TESTed based on the input given by Dodona.
 """
 import os
-
 from typing import IO
-from .configs import DodonaConfig, create_bundle
-from .testsuite import parse_test_suite
-from .dsl import parse_dsl
+
+from tested.configs import DodonaConfig, create_bundle
+from tested.dsl import parse_dsl
+from tested.testsuite import parse_test_suite
 
 
 def run(config: DodonaConfig, judge_output: IO):
