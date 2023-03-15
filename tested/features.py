@@ -8,7 +8,6 @@ from functools import reduce
 from typing import Iterable, Set, NamedTuple, TYPE_CHECKING
 
 from .datatypes import AllTypes, BasicSequenceTypes, BasicObjectTypes, NestedTypes
-from .internal_timings import new_stage, end_stage
 
 if TYPE_CHECKING:
     from .configs import Bundle
@@ -82,9 +81,7 @@ def is_supported(bundle: "Bundle") -> bool:
     """
     from .languages.config import TypeSupport
 
-    new_stage("analyse.features", sub_stage=True)
     required = bundle.suite.get_used_features()
-    end_stage("analyse.features", sub_stage=True)
 
     # Check constructs
     available_constructs = bundle.lang_config.supported_constructs()

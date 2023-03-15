@@ -5,7 +5,6 @@ import logging
 import shutil
 from dataclasses import dataclass
 from pathlib import Path
-from tested.internal_timings import new_stage
 from typing import List, Optional, Tuple, Callable, Union
 from .collector import OutputManager
 from .compilation import run_compilation, process_compile_results
@@ -212,7 +211,6 @@ def execute_execution(
 
     _logger.info("Executing %s in path %s", args.execution_name, execution_dir)
 
-    new_stage("dependencies.copy", True)
     # Filter dependencies of the global compilation results.
     dependencies = filter_files(args.files, args.common_directory)
     dependencies = bundle.lang_config.filter_dependencies(
@@ -234,7 +232,6 @@ def execute_execution(
 
     # If needed, do a compilation.
     if args.mode == ExecutionMode.INDIVIDUAL:
-        new_stage("compilation.individual", True)
         _logger.info("Compiling context %s in INDIVIDUAL mode...", args.execution_name)
         remaining = max_time - (time.perf_counter() - start)
         result, files = run_compilation(bundle, execution_dir, dependencies, remaining)
@@ -271,7 +268,6 @@ def execute_execution(
         stdin = args.unit.get_stdin(bundle.config.resources)
         argument = None
     else:
-        new_stage("compilation.batch.done", True)
         result, files = None, list(dependencies)
         if args.precompilation_result:
             _logger.debug("Substituting precompilation results.")
@@ -323,7 +319,6 @@ def execute_execution(
 
     remaining = max_time - (time.perf_counter() - start)
 
-    new_stage("run.testcode", True)
     # Do the execution.
     base_result = execute_file(
         bundle,
@@ -334,7 +329,6 @@ def execute_execution(
         remaining=remaining,
     )
 
-    new_stage("prepare.results", True)
     # Cleanup stderr
     msgs, annotations, base_result.stderr = lang_config.stderr(
         bundle, base_result.stderr

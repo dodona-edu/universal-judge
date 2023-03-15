@@ -7,7 +7,6 @@ import math
 
 from . import EvaluationResult, EvaluatorConfig
 from ..dodona import StatusMessage, Status
-from ..internal_timings import new_stage, end_stage
 from ..internationalization import get_i18n_string
 from ..testsuite import TextOutputChannel, FileOutputChannel, OutputChannel
 
@@ -97,10 +96,8 @@ def evaluate_text(
     assert isinstance(channel, TextOutputChannel)
     options = _text_options(config)
 
-    new_stage("evaluate.builtin.text", True)
     expected = channel.get_data_as_string(config.bundle.config.resources)
     result = compare_text(options, expected, actual)
-    end_stage("evaluate.builtin.text", True)
     return result
 
 
@@ -166,7 +163,6 @@ def evaluate_file(
         return compare_text(options, expected, actual)
     else:
         assert options["mode"] == "line"
-        new_stage("evaluate.builtin.file.line", True)
         strip_newlines = options.get("stripNewlines", False)
         expected_lines = expected.splitlines(keepends=not strip_newlines)
         actual_lines = actual.splitlines(keepends=not strip_newlines)
@@ -174,7 +170,6 @@ def evaluate_file(
         for (expected_line, actual_line) in zip(expected_lines, actual_lines):
             r = compare_text(options, expected_line, actual_line)
             correct = correct and r.result.enum == Status.CORRECT
-        end_stage("evaluate.builtin.file.line", True)
         return EvaluationResult(
             result=StatusMessage(enum=Status.CORRECT if correct else Status.WRONG),
             readable_expected=expected,

@@ -8,7 +8,6 @@ from pydantic import BaseModel
 
 from . import EvaluationResult, EvaluatorConfig
 from ..dodona import StatusMessage, Status, ExtendedMessage, Permission
-from ..internal_timings import new_stage, end_stage
 from ..internationalization import get_i18n_string
 from ..serialisation import ExceptionValue
 from ..testsuite import ExceptionOutputChannel
@@ -92,7 +91,6 @@ def evaluate(
             messages=[staff_message, student_message],
         )
 
-    new_stage("evaluate.builtin.exception", True)
     message = config.bundle.lang_config.clean_stacktrace_to_message(actual.stacktrace)
     if message:
         messages = [message]
@@ -107,7 +105,6 @@ def evaluate(
         status = Status.WRONG
     else:
         status = Status.CORRECT if expected.message == actual.message else Status.WRONG
-    end_stage("evaluate.builtin.exception", True)
 
     return EvaluationResult(
         result=StatusMessage(enum=status),

@@ -14,7 +14,6 @@ from ..datatypes import (
     BasicSequenceTypes,
 )
 from ..dodona import ExtendedMessage, Permission, StatusMessage, Status
-from ..internal_timings import new_stage, end_stage
 from ..internationalization import get_i18n_string
 from ..languages.config import TypeSupport
 from ..languages.generator import convert_statement
@@ -228,7 +227,6 @@ def evaluate(
             readable_actual=readable_actual,
         )
 
-    new_stage("evaluate.builtin.value", True)
     type_check, expected = _check_type(config.bundle, expected, actual)
     messages = []
     type_status = None
@@ -237,7 +235,6 @@ def evaluate(
     py_actual = to_python_comparable(actual)
 
     content_check = py_expected == py_actual
-    end_stage("evaluate.builtin.value", True)
 
     # Only add the message about the type if the content is the same.
     if content_check and not type_check:
