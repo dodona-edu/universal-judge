@@ -7,7 +7,7 @@ from typing import Optional, Tuple
 from pydantic import BaseModel
 
 from tested.dodona import ExtendedMessage, Permission, Status, StatusMessage
-from tested.evaluators import EvaluationResult, EvaluatorConfig
+from tested.evaluators.common import EvaluationResult, EvaluatorConfig
 from tested.internationalization import get_i18n_string
 from tested.serialisation import ExceptionValue
 from tested.testsuite import ExceptionOutputChannel

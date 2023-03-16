@@ -7,11 +7,14 @@ from typing import Optional, Tuple
 
 from tested.datatypes import StringTypes
 from tested.dodona import ExtendedMessage, Permission, Status, StatusMessage
-from tested.evaluators import EvaluationResult, EvaluatorConfig, value
-from tested.evaluators.utils import cleanup_specific_programmed
-from tested.evaluators.value import get_values
+from tested.evaluators.common import (
+    EvaluationResult,
+    EvaluatorConfig,
+    cleanup_specific_programmed,
+)
+from tested.evaluators.value import get_values, try_as_value
 from tested.internationalization import get_i18n_string
-from tested.judge import evaluate_programmed
+from tested.judge.programmed import evaluate_programmed
 from tested.judge.utils import BaseExecutionResult
 from tested.serialisation import EvalResult, StringType, Value
 from tested.testsuite import (
@@ -57,7 +60,7 @@ def expected_as_value(
     if isinstance(channel, ValueOutputChannel):
         expected = channel.value
         try:
-            actual = value.try_as_value(actual).get()
+            actual = try_as_value(actual).get()
         except (ValueError, TypeError) as e:
             return expected, Either(e)
         return expected, Either(actual)

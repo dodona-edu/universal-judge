@@ -7,4 +7,3 @@ the judge. All other modules might be useful, but are more for the internal code
 organization.
 """
 from tested.judge.core import judge
-from tested.judge.programmed import evaluate_programmed

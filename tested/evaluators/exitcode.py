@@ -2,7 +2,7 @@ import logging
 from typing import Optional
 
 from tested.dodona import Status, StatusMessage
-from tested.evaluators import EvaluationResult, EvaluatorConfig
+from tested.evaluators.common import EvaluationResult, EvaluatorConfig
 from tested.internationalization import get_i18n_string
 from tested.testsuite import ExitCodeOutputChannel
 

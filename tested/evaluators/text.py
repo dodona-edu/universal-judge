@@ -5,7 +5,7 @@ import math
 from typing import Any, Dict, Optional
 
 from tested.dodona import Status, StatusMessage
-from tested.evaluators import EvaluationResult, EvaluatorConfig
+from tested.evaluators.common import EvaluationResult, EvaluatorConfig
 from tested.internationalization import get_i18n_string
 from tested.testsuite import FileOutputChannel, OutputChannel, TextOutputChannel
 

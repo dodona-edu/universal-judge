@@ -3,8 +3,11 @@ Specific evaluator
 """
 
 from tested.dodona import ExtendedMessage, Permission, Status, StatusMessage
-from tested.evaluators import EvaluationResult, EvaluatorConfig
-from tested.evaluators.utils import cleanup_specific_programmed
+from tested.evaluators.common import (
+    EvaluationResult,
+    EvaluatorConfig,
+    cleanup_specific_programmed,
+)
 from tested.internationalization import get_i18n_string
 from tested.serialisation import EvalResult
 from tested.testsuite import OutputChannel, SpecificEvaluator
