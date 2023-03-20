@@ -113,7 +113,7 @@ def _convert_assignment(node: ast.Assign) -> Assignment:
 
     if not type_:
         raise InvalidDslError(
-            "Could deduce the type of the variable for assignment: add a type annotation."
+            f"Could not deduce the type of variable {variable.id}: add a type annotation."
         )
 
     return Assignment(variable=variable.id, expression=value, type=type_)
