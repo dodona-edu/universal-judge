@@ -52,7 +52,6 @@ class ExecutionResult(BaseExecutionResult):
     def to_context_results(
         self,
     ) -> List[ContextResult]:
-
         results = self.results.split(self.context_separator)
         exceptions = self.exceptions.split(self.context_separator)
         stderr = self.stderr.split(self.context_separator)
@@ -391,7 +390,6 @@ def merge_contexts_into_units(contexts: List[Context]) -> List[ExecutionUnit]:
     current_unit = []
 
     for context in contexts:
-
         # If we get stdin, start a new execution unit.
         if (
             context.has_main_testcase()

@@ -51,5 +51,5 @@ jobs:
           sortPaths: "./tested ./tests"
       - uses: psf/black@stable
         with:
-          version: "~= 22.0"
+          version: "~= 23.0"
           src: "./tested ./tests"

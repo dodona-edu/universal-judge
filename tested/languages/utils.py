@@ -42,7 +42,6 @@ def jvm_cleanup_stacktrace(
 
     skip_line, lines = False, []
     for line in traceback:
-
         line = line.strip("\n")
 
         if not line:
@@ -131,7 +130,6 @@ def haskell_cleanup_stacktrace(traceback: str, submission_file: str, reduce_all=
 
     skip_line, lines = False, []
     for line in traceback:
-
         line = line.strip("\n")
 
         if not line or line == "undefined":

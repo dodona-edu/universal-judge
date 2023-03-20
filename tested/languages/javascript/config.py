@@ -95,7 +95,6 @@ class JavaScript(Language):
 
         skip_line, lines = False, []
         for line in traceback:
-
             line = line.strip("\n")
 
             if not line:

@@ -121,7 +121,6 @@ class Python(Language):
 
         skip_line, lines = False, []
         for line in traceback:
-
             line = line.strip("\n")
             logger.debug(line)
 
