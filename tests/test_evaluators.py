@@ -5,7 +5,7 @@ from unittest.mock import ANY
 import tested
 from tested.configs import create_bundle
 from tested.dodona import Status
-from tested.evaluators import EvaluatorConfig
+from tested.evaluators.common import EvaluatorConfig
 from tested.evaluators.text import evaluate_file, evaluate_text
 from tested.testsuite import FileOutputChannel, Suite, TextOutputChannel
 from tests.manual_utils import configuration
