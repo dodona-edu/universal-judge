@@ -269,7 +269,7 @@ def _convert_dsl(dsl_object: YamlObject) -> Suite:
     else:
         assert isinstance(dsl_object, dict)
         namespace = dsl_object.get("namespace")
-        config = _deepen_config_level(dsl_object.get("config"), {})
+        config = _deepen_config_level(dsl_object, {})
         tab_list = dsl_object["tabs"]
     tabs = _convert_dsl_list(tab_list, config, _convert_tab)
 
