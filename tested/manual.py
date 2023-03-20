@@ -4,15 +4,13 @@ file, allowing rapid testing (and, most importantly, debugging).
 """
 import logging
 import os
-import sys
-
 import shutil
+import sys
 import time
 from pathlib import Path
 
-from .configs import DodonaConfig
-from .main import run
-from tested import internal_timings
+from tested.configs import DodonaConfig
+from tested.main import run
 
 exercise_dir = "exercise/objects"
 
@@ -43,8 +41,6 @@ def read_config() -> DodonaConfig:
 
 
 if __name__ == "__main__":
-    internal_timings.collect_timings(True)
-
     config = read_config()
 
     # Enable logging

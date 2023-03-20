@@ -1,5 +1,5 @@
-import json
 import html
+import json
 from pathlib import Path
 from typing import Any, Iterator
 
@@ -9,11 +9,7 @@ import yaml
 from tested.description_instance import create_description_instance
 from tested.languages.config import limit_output
 from tested.utils import sorted_no_duplicates
-from tests.manual_utils import (
-    assert_valid_output,
-    configuration,
-    execute_config,
-)
+from tests.manual_utils import assert_valid_output, configuration, execute_config
 
 
 def test_javascript_ast_parse():
@@ -48,6 +44,7 @@ def test_javascript_ast_parse():
 
 def test_run_doctests_tested_utils():
     import doctest
+
     import tested.utils
 
     f, _ = doctest.testmod(tested.utils)

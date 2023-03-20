@@ -3,27 +3,29 @@ Programmed evaluator.
 """
 import logging
 import traceback
-from typing import Tuple, Optional
+from typing import Optional, Tuple
 
-from . import EvaluationResult, EvaluatorConfig, value
-from .utils import cleanup_specific_programmed
-from .value import get_values
-from ..datatypes import StringTypes
-from ..dodona import ExtendedMessage, StatusMessage, Status, Permission
-from ..internal_timings import new_stage, end_stage
-from ..internationalization import get_i18n_string
-from ..judge import evaluate_programmed
-from ..judge.utils import BaseExecutionResult
-from ..serialisation import StringType, EvalResult, Value
-from ..testsuite import (
-    TextOutputChannel,
-    FileOutputChannel,
-    ValueOutputChannel,
-    NormalOutputChannel,
-    ExceptionOutputChannel,
-    ProgrammedEvaluator,
+from tested.datatypes import StringTypes
+from tested.dodona import ExtendedMessage, Permission, Status, StatusMessage
+from tested.evaluators.common import (
+    EvaluationResult,
+    EvaluatorConfig,
+    cleanup_specific_programmed,
 )
-from ..utils import Either, get_args
+from tested.evaluators.value import get_values, try_as_value
+from tested.internationalization import get_i18n_string
+from tested.judge.programmed import evaluate_programmed
+from tested.judge.utils import BaseExecutionResult
+from tested.serialisation import EvalResult, StringType, Value
+from tested.testsuite import (
+    ExceptionOutputChannel,
+    FileOutputChannel,
+    NormalOutputChannel,
+    ProgrammedEvaluator,
+    TextOutputChannel,
+    ValueOutputChannel,
+)
+from tested.utils import Either, get_args
 
 _logger = logging.getLogger(__name__)
 
@@ -58,7 +60,7 @@ def expected_as_value(
     if isinstance(channel, ValueOutputChannel):
         expected = channel.value
         try:
-            actual = value.try_as_value(actual).get()
+            actual = try_as_value(actual).get()
         except (ValueError, TypeError) as e:
             return expected, Either(e)
         return expected, Either(actual)
@@ -106,11 +108,9 @@ def evaluate(
         f"expected: {expected}\n"
         f"actual: {actual}"
     )
-    new_stage("evaluate.programmed", True)
     result = evaluate_programmed(
         config.bundle, evaluator=channel.evaluator, expected=expected, actual=actual
     )
-    end_stage("evaluate.programmed", True)
 
     if isinstance(result, BaseExecutionResult):
         if result.timeout:

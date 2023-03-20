@@ -26,35 +26,36 @@ the following is supported:
 - Properties (ie. attributes)
 """
 
-from pydantic import ValidationError
-
 import ast
 import dataclasses
-from ..datatypes import (
+
+from pydantic import ValidationError
+
+from tested.datatypes import (
     AdvancedNothingTypes,
-    BasicNothingTypes,
-    AllTypes,
-    BasicSequenceTypes,
     AdvancedSequenceTypes,
+    AllTypes,
+    BasicNothingTypes,
     BasicObjectTypes,
+    BasicSequenceTypes,
 )
-from ..serialisation import (
-    Statement,
+from tested.serialisation import (
     Assignment,
     Expression,
     FunctionCall,
     FunctionType,
-    Value,
-    NamedArgument,
-    serialize_from_python,
-    NumberType,
-    SequenceType,
-    ObjectType,
-    ObjectKeyValuePair,
-    VariableType,
     Identifier,
+    NamedArgument,
+    NumberType,
+    ObjectKeyValuePair,
+    ObjectType,
+    SequenceType,
+    Statement,
+    Value,
+    VariableType,
+    serialize_from_python,
 )
-from ..utils import get_args
+from tested.utils import get_args
 
 
 class InvalidDslError(Exception):
@@ -112,7 +113,7 @@ def _convert_assignment(node: ast.Assign) -> Assignment:
 
     if not type_:
         raise InvalidDslError(
-            "Could deduce the type of the variable for assignment: add a type annotation."
+            f"Could not deduce the type of variable {variable.id}: add a type annotation."
         )
 
     return Assignment(variable=variable.id, expression=value, type=type_)

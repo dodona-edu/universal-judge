@@ -1,37 +1,55 @@
 import html
 import logging
+from enum import Enum
 from pathlib import Path
-from typing import Tuple, List, Set, Iterable
+from typing import Iterable, List, Optional, Set, Tuple
 
-from .collector import OutputManager, TestcaseCollector
-from .execution import ContextResult
-from ..configs import Bundle
-from ..dodona import *
-from ..dodona import StartTestcase, CloseTestcase
-from ..evaluators import get_evaluator
-from ..internationalization import get_i18n_string
-from ..languages.generator import (
-    get_readable_input,
+from tested.configs import Bundle
+from tested.dodona import (
+    AppendMessage,
+    CloseContext,
+    CloseJudgment,
+    CloseTab,
+    CloseTest,
+    CloseTestcase,
+    EscalateStatus,
+    ExtendedMessage,
+    Message,
+    StartContext,
+    StartJudgment,
+    StartTab,
+    StartTest,
+    StartTestcase,
+    Status,
+    StatusMessage,
+    Update,
+)
+from tested.evaluators import get_evaluator
+from tested.internationalization import get_i18n_string
+from tested.judge.collector import OutputManager, TestcaseCollector
+from tested.judge.execution import ContextResult
+from tested.languages.generator import (
     attempt_readable_input,
     convert_statement,
+    get_readable_input,
 )
-from ..testsuite import (
+from tested.testsuite import (
     Context,
-    OutputChannel,
-    IgnoredChannel,
-    ExitCodeOutputChannel,
-    TextOutput,
-    FileOutput,
-    ValueOutput,
-    TextOutputChannel,
-    SpecialOutputChannel,
-    FileOutputChannel,
     ExceptionOutput,
     ExceptionOutputChannel,
-    ValueOutputChannel,
+    ExitCodeOutputChannel,
+    FileOutput,
+    FileOutputChannel,
     FileUrl,
+    IgnoredChannel,
+    OutputChannel,
+    SpecialOutputChannel,
+    TextOutput,
+    TextOutputChannel,
+    ValueOutput,
+    ValueOutputChannel,
 )
-from ..utils import get_args, safe_del, safe_get
+from tested.utils import get_args, safe_del, safe_get
 
 _logger = logging.getLogger(__name__)
 

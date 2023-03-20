@@ -1,10 +1,10 @@
 """Minimal RPC language in JSON to send data from the tests to the judge."""
 import dataclasses
+import decimal
 import io
 import json
 import math
 import traceback
-import decimal
 
 
 def encode(value):

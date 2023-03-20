@@ -5,16 +5,14 @@ import json
 import logging
 import os
 from pathlib import Path
-from typing import Union, Tuple, List, Optional, Dict
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
 
 from pygments import highlight
 from pygments.formatters.html import HtmlFormatter
 from pygments.lexers import get_lexer_by_name
 
-from ..configs import Bundle
-from ..dsl import parse_string
-
-from typing import TYPE_CHECKING
+from tested.configs import Bundle
+from tested.dsl import parse_string
 
 if TYPE_CHECKING:
     from .config import Language

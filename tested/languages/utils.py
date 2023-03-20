@@ -1,10 +1,10 @@
 import logging
 import re
 from pathlib import Path
-from typing import Tuple, List
+from typing import List, Tuple
 
 from tested.configs import Bundle
-from tested.dodona import Message, AnnotateCode
+from tested.dodona import AnnotateCode, Message
 from tested.languages.config import Config, Language
 
 logger = logging.getLogger(__name__)
@@ -42,7 +42,6 @@ def jvm_cleanup_stacktrace(
 
     skip_line, lines = False, []
     for line in traceback:
-
         line = line.strip("\n")
 
         if not line:
@@ -131,7 +130,6 @@ def haskell_cleanup_stacktrace(traceback: str, submission_file: str, reduce_all=
 
     skip_line, lines = False, []
     for line in traceback:
-
         line = line.strip("\n")
 
         if not line or line == "undefined":

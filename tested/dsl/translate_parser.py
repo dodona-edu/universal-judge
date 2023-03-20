@@ -1,47 +1,48 @@
+import json
+from logging import getLogger
+from pathlib import Path
+from typing import Callable, Dict, List, Optional, TextIO, TypeVar, Union
+
 import yaml
 from jsonschema import Draft7Validator
 from pydantic.json import pydantic_encoder
 
-import json
-from logging import getLogger
-from pathlib import Path
-from typing import Dict, List, Union, Callable, TextIO, TypeVar, Optional
-from .ast_translator import parse_string
-from ..datatypes import (
+from tested.datatypes import (
     BasicBooleanTypes,
     BasicNumericTypes,
     BasicObjectTypes,
     BasicSequenceTypes,
     BasicStringTypes,
 )
-from ..serialisation import (
-    Value,
-    NothingType,
-    StringType,
+from tested.dsl.ast_translator import parse_string
+from tested.serialisation import (
     BooleanType,
-    NumberType,
-    SequenceType,
-    ObjectType,
-    ObjectKeyValuePair,
     ExceptionValue,
+    NothingType,
+    NumberType,
+    ObjectKeyValuePair,
+    ObjectType,
+    SequenceType,
+    StringType,
+    Value,
 )
-from ..testsuite import (
+from tested.testsuite import (
     Context,
-    FileUrl,
-    GenericTextEvaluator,
-    Output,
-    Suite,
-    MainInput,
-    Tab,
-    Testcase,
-    TextOutputChannel,
-    ValueOutputChannel,
-    ExitCodeOutputChannel,
-    TextData,
     EmptyChannel,
     ExceptionOutputChannel,
+    ExitCodeOutputChannel,
+    FileUrl,
+    GenericTextEvaluator,
+    MainInput,
+    Output,
+    Suite,
+    Tab,
+    Testcase,
+    TextData,
+    TextOutputChannel,
+    ValueOutputChannel,
 )
-from ..utils import recursive_dict_merge
+from tested.utils import recursive_dict_merge
 
 logger = getLogger(__name__)
 
@@ -268,7 +269,7 @@ def _convert_dsl(dsl_object: YamlObject) -> Suite:
     else:
         assert isinstance(dsl_object, dict)
         namespace = dsl_object.get("namespace")
-        config = _deepen_config_level(dsl_object.get("config"), {})
+        config = _deepen_config_level(dsl_object, {})
         tab_list = dsl_object["tabs"]
     tabs = _convert_dsl_list(tab_list, config, _convert_tab)
 

@@ -2,32 +2,33 @@
 Programmed evaluation.
 """
 import contextlib
+import logging
 import shutil
+import sys
 import traceback
 import types
 from dataclasses import dataclass, field
 from io import StringIO
 from pathlib import Path
-from typing import Optional, List, Union, Tuple, ContextManager
+from typing import ContextManager, List, Optional, Tuple, Union
 
-import sys
-
-from .core import _logger, ExtendedMessage, Permission
-from .execution import execute_file, filter_files
-from .utils import BaseExecutionResult, copy_from_paths_to_path, run_command
-from ..configs import Bundle, create_bundle
-from ..dodona import Status
-from ..features import Construct
-from ..languages.generator import (
-    generate_custom_evaluator,
+from tested.configs import Bundle, create_bundle
+from tested.dodona import ExtendedMessage, Permission, Status
+from tested.features import Construct
+from tested.internationalization import get_i18n_string
+from tested.judge.execution import execute_file, filter_files
+from tested.judge.utils import BaseExecutionResult, copy_from_paths_to_path, run_command
+from tested.languages.generator import (
     convert_statement,
     custom_evaluator_arguments,
+    generate_custom_evaluator,
 )
-from ..languages.templates import path_to_templates
-from ..serialisation import Value, EvalResult
-from ..testsuite import ProgrammedEvaluator
-from ..utils import get_identifier
-from ..internationalization import get_i18n_string
+from tested.languages.templates import path_to_templates
+from tested.serialisation import EvalResult, Value
+from tested.testsuite import ProgrammedEvaluator
+from tested.utils import get_identifier
+
+_logger = logging.getLogger(__name__)
 
 
 def evaluate_programmed(

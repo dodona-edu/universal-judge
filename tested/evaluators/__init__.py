@@ -23,77 +23,27 @@ For example, such a function looks like this:
         pass
 """
 import functools
-from dataclasses import field
 from pathlib import Path
-from typing import List, Dict, Any, NamedTuple, Tuple
-from typing import Union, Callable, Optional
+from typing import Union
 
-from pydantic.dataclasses import dataclass
-
-from ..configs import Bundle
-from ..dodona import StatusMessage, Message, Status
-from ..testsuite import (
-    GenericTextEvaluator,
-    TextBuiltin,
-    GenericValueEvaluator,
-    ValueBuiltin,
-    GenericExceptionEvaluator,
-    ExceptionBuiltin,
-    ProgrammedEvaluator,
-    SpecificEvaluator,
-)
-from ..testsuite import (
-    OutputChannel,
-    NormalOutputChannel,
-    SpecialOutputChannel,
+from tested.configs import Bundle
+from tested.dodona import Status
+from tested.evaluators.common import Evaluator, _curry_evaluator
+from tested.testsuite import (
     EmptyChannel,
-    IgnoredChannel,
+    ExceptionBuiltin,
     ExitCodeOutputChannel,
+    GenericExceptionEvaluator,
+    GenericTextEvaluator,
+    GenericValueEvaluator,
+    IgnoredChannel,
+    NormalOutputChannel,
+    ProgrammedEvaluator,
+    SpecialOutputChannel,
+    SpecificEvaluator,
+    TextBuiltin,
+    ValueBuiltin,
 )
-
-
-@dataclass
-class EvaluationResult:
-    """Provides the result of an evaluation for a specific output channel."""
-
-    result: StatusMessage  # The result of the evaluation.
-    readable_expected: str
-    """
-    A human-friendly version of what the channel should have been.
-    """
-    readable_actual: str
-    """
-    A human-friendly version (on a best-efforts basis) of what the channel is.
-    """
-    messages: List[Message] = field(default_factory=list)
-    is_multiline_string: bool = False
-    """
-    Indicates if the evaluation result is a multiline string
-    """
-
-
-class EvaluatorConfig(NamedTuple):
-    bundle: Bundle
-    options: Dict[str, Any]
-    context_dir: Path
-
-
-RawEvaluator = Callable[[EvaluatorConfig, OutputChannel, str], EvaluationResult]
-
-Evaluator = Callable[[OutputChannel, str], EvaluationResult]
-
-
-def _curry_evaluator(
-    bundle: Bundle,
-    context_dir: Path,
-    function: RawEvaluator,
-    options: Optional[dict] = None,
-) -> Evaluator:
-    if options is None:
-        options = dict()
-    config = EvaluatorConfig(bundle, options, context_dir)
-    # noinspection PyTypeChecker
-    return functools.partial(function, config)
 
 
 def get_evaluator(
@@ -106,14 +56,14 @@ def get_evaluator(
     Get the evaluator for a given output channel.
     """
     from ..evaluators import (
-        nothing,
-        exitcode,
-        text,
-        value,
         exception,
+        exitcode,
+        ignored,
+        nothing,
         programmed,
         specific,
-        ignored,
+        text,
+        value,
     )
 
     currier = functools.partial(_curry_evaluator, bundle, context_dir)
@@ -155,15 +105,3 @@ def get_evaluator(
         return currier(specific.evaluate)
     else:
         raise AssertionError(f"Unknown evaluator type: {type(evaluator)}")
-
-
-def try_outputs(
-    actual: str, parsers: List[Callable[[str], Tuple[Optional[str], Optional[Message]]]]
-) -> Tuple[str, Optional[Message]]:
-    if not actual:
-        return actual, None
-    for parser in parsers:
-        possible, msg = parser(actual)
-        if possible is not None:
-            return possible, msg
-    return actual, None

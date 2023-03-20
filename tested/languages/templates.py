@@ -1,16 +1,16 @@
 import dataclasses
 import logging
 from pathlib import Path
-from typing import List, Any, Dict
+from typing import Any, Dict, List
 
 from mako import exceptions
 from mako.exceptions import TemplateLookupException
 from mako.lookup import TemplateLookup
 from mako.template import Template
 
+from tested.configs import Bundle
 from tested.languages import get_language
 from tested.languages._preprocessors import remove_indents
-from tested.configs import Bundle
 
 _logger = logging.getLogger(__name__)
 

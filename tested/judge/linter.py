@@ -1,8 +1,8 @@
 import logging
 
-from .collector import OutputManager
-from ..configs import Bundle
-from ..dodona import AppendMessage
+from tested.configs import Bundle
+from tested.dodona import AppendMessage
+from tested.judge.collector import OutputManager
 
 _logger = logging.getLogger(__name__)
 

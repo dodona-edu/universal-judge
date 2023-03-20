@@ -5,11 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from tests.manual_utils import (
-    configuration,
-    execute_config,
-    assert_valid_output,
-)
+from tests.manual_utils import assert_valid_output, configuration, execute_config
 
 
 @pytest.mark.slow

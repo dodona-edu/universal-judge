@@ -4,32 +4,38 @@ import shutil
 import time
 from concurrent.futures.thread import ThreadPoolExecutor
 from pathlib import Path
-from typing import Tuple, List
+from typing import List, Optional, Tuple
 
-from .collector import OutputManager
-from .compilation import run_compilation, process_compile_results
-from .evaluation import evaluate_context_results
-from .execution import (
+from tested.configs import Bundle
+from tested.dodona import (
+    AppendMessage,
+    CloseContext,
+    CloseJudgment,
+    CloseTab,
+    Message,
+    StartContext,
+    StartJudgment,
+    StartTab,
+    Status,
+    StatusMessage,
+    report_update,
+)
+from tested.features import is_supported
+from tested.internationalization import get_i18n_string, set_locale
+from tested.judge.collector import OutputManager
+from tested.judge.compilation import process_compile_results, run_compilation
+from tested.judge.evaluation import evaluate_context_results
+from tested.judge.execution import (
     Execution,
-    execute_execution,
     ExecutionResult,
+    execute_execution,
     merge_contexts_into_units,
 )
-from tested.internal_timings import (
-    new_stage,
-    end_stage,
-    is_collecting,
-    pretty_print_timings,
-)
-from .linter import run_linter
-from .utils import copy_from_paths_to_path
-from ..configs import Bundle
-from ..dodona import *
-from ..features import is_supported
-from ..languages.generator import generate_execution, generate_selector
-from ..languages.templates import path_to_templates
-from ..testsuite import ExecutionMode
-from ..internationalization import set_locale, get_i18n_string
+from tested.judge.linter import run_linter
+from tested.judge.utils import copy_from_paths_to_path
+from tested.languages.generator import generate_execution, generate_selector
+from tested.languages.templates import path_to_templates
+from tested.testsuite import ExecutionMode
 
 _logger = logging.getLogger(__name__)
 
@@ -42,12 +48,10 @@ def judge(bundle: Bundle):
 
     :param bundle: The configuration bundle.
     """
-    new_stage("analyse.supported")
     # Begin by checking if the given test suite is executable in this language.
     _logger.info("Checking supported features...")
     set_locale(bundle.config.natural_language)
     if not is_supported(bundle):
-        end_stage("analyse.supported")
         report_update(bundle.out, StartJudgment())
         report_update(
             bundle.out,
@@ -65,7 +69,6 @@ def judge(bundle: Bundle):
         _logger.info("Required features not supported.")
         return  # Not all required features are supported.
 
-    new_stage("prepare.output")
     mode = bundle.config.options.mode
     collector = OutputManager(bundle)
     collector.add(StartJudgment())
@@ -74,21 +77,18 @@ def judge(bundle: Bundle):
     start = time.perf_counter()
 
     # Run the linter.
-    new_stage("linter")
     run_linter(bundle, collector, max_time)
     if time.perf_counter() - start > max_time:
         collector.terminate(Status.TIME_LIMIT_EXCEEDED)
         return
 
     _logger.info("Start generating code...")
-    new_stage("generation")
     common_dir, files, selector = _generate_files(bundle, mode)
     # Add the selector to the dependencies.
     if selector:
         files.append(selector)
 
     if mode == ExecutionMode.PRECOMPILATION:
-        new_stage("compilation.pre")
         assert not bundle.lang_config.needs_selector() or selector is not None
         files = _copy_workdir_source_files(bundle, common_dir) + files
 
@@ -168,10 +168,8 @@ def judge(bundle: Bundle):
                 )
                 _logger.info("Compilation error without fallback")
                 return  # Compilation error occurred, useless to continue.
-        end_stage("compilation.pre")
     else:
         precompilation_result = None
-        end_stage("generation")
 
     _logger.info("Starting judgement...")
     parallel = bundle.config.options.parallel
@@ -216,25 +214,6 @@ def judge(bundle: Bundle):
             return
         collector.add_tab(CloseTab(), tab_index)
 
-    # Add statistics tab for STAFF
-    if is_collecting():
-        collector.add_tab(
-            StartTab(
-                title=get_i18n_string("timings.title"), permission=Permission.STAFF
-            ),
-            -1,
-        )
-        collector.add(
-            AppendMessage(
-                message=ExtendedMessage(
-                    description=pretty_print_timings(bundle.config.options.parallel),
-                    format="markdown",
-                    permission=Permission.STAFF,
-                )
-            )
-        )
-        collector.add_tab(CloseTab(), -1)
-
     collector.add(CloseJudgment())
     collector.clean_finish()
 
@@ -252,12 +231,9 @@ def _single_execution(
     start = time.perf_counter()
     for execution in items:
         remaining = max_time - (time.perf_counter() - start)
-        new_stage("run.execution")
         execution_result, m, s, p = execute_execution(bundle, execution, remaining)
 
-        new_stage("evaluate.results")
         status = _process_results(bundle, execution, execution_result, m, s, p)
-        end_stage("evaluate.results")
 
         if status:
             return status
@@ -279,14 +255,10 @@ def _parallel_execution(
     def threaded_execution(execution: Execution):
         """The function executed in parallel."""
         remainder = max_time - (time.perf_counter() - start)
-        new_stage("run.execution")
         execution_result, m, s, p = execute_execution(bundle, execution, remainder)
-        end_stage("run.execution")
 
         def evaluation_function(_eval_remainder):
-            new_stage("evaluate.results")
             _status = _process_results(bundle, execution, execution_result, m, s, p)
-            end_stage("evaluate.results")
 
             if _status and _status not in (
                 Status.TIME_LIMIT_EXCEEDED,
@@ -343,11 +315,9 @@ def _generate_files(
     dependencies.append(submission_file)
 
     # Allow modifications of the submission file.
-    new_stage("submission.modify", sub_stage=True)
     bundle.lang_config.solution(solution_path, bundle)
 
     # The names of the executions for the test suite.
-    new_stage("generate.templates", sub_stage=True)
     execution_names = []
     # Generate the files for each execution.
     for tab_i, tab in enumerate(bundle.suite.tabs):

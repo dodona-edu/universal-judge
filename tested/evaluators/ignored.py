@@ -3,9 +3,11 @@ RawEvaluator for ignored channels.
 """
 import functools
 
-from . import EvaluationResult, exception, value, try_outputs, EvaluatorConfig
-from ..dodona import StatusMessage, Status
-from ..testsuite import IgnoredChannel
+from tested.dodona import Status, StatusMessage
+from tested.evaluators.common import EvaluationResult, EvaluatorConfig, try_outputs
+from tested.evaluators.exception import try_as_readable_exception
+from tested.evaluators.value import try_as_readable_value
+from tested.testsuite import IgnoredChannel
 
 
 def evaluate(
@@ -16,8 +18,8 @@ def evaluate(
     # If there is something in the channel, try parsing it as
     # an exception or a value.
     parsers = [
-        functools.partial(exception.try_as_readable_exception, config),
-        functools.partial(value.try_as_readable_value, config.bundle),
+        functools.partial(try_as_readable_exception, config),
+        functools.partial(try_as_readable_value, config.bundle),
     ]
     actual, msg = try_outputs(actual, parsers)
     messages = [msg] if msg else []

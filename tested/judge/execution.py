@@ -1,21 +1,20 @@
 import itertools
-import time
-
 import logging
 import shutil
+import time
 from dataclasses import dataclass
 from pathlib import Path
-from tested.internal_timings import new_stage
-from typing import List, Optional, Tuple, Callable, Union
-from .collector import OutputManager
-from .compilation import run_compilation, process_compile_results
-from .utils import BaseExecutionResult, run_command
-from ..configs import Bundle
-from ..dodona import Message, Status
-from ..languages.config import FileFilter, Config
-from ..languages.generator import value_file, exception_file
-from ..testsuite import ExecutionMode, Context, EmptyChannel
-from ..utils import safe_del
+from typing import Callable, List, Optional, Tuple, Union
+
+from tested.configs import Bundle
+from tested.dodona import Message, Status
+from tested.judge.collector import OutputManager
+from tested.judge.compilation import process_compile_results, run_compilation
+from tested.judge.utils import BaseExecutionResult, run_command
+from tested.languages.config import Config, FileFilter
+from tested.languages.generator import exception_file, value_file
+from tested.testsuite import Context, EmptyChannel, ExecutionMode
+from tested.utils import safe_del
 
 _logger = logging.getLogger(__name__)
 
@@ -53,7 +52,6 @@ class ExecutionResult(BaseExecutionResult):
     def to_context_results(
         self,
     ) -> List[ContextResult]:
-
         results = self.results.split(self.context_separator)
         exceptions = self.exceptions.split(self.context_separator)
         stderr = self.stderr.split(self.context_separator)
@@ -212,7 +210,6 @@ def execute_execution(
 
     _logger.info("Executing %s in path %s", args.execution_name, execution_dir)
 
-    new_stage("dependencies.copy", True)
     # Filter dependencies of the global compilation results.
     dependencies = filter_files(args.files, args.common_directory)
     dependencies = bundle.lang_config.filter_dependencies(
@@ -234,7 +231,6 @@ def execute_execution(
 
     # If needed, do a compilation.
     if args.mode == ExecutionMode.INDIVIDUAL:
-        new_stage("compilation.individual", True)
         _logger.info("Compiling context %s in INDIVIDUAL mode...", args.execution_name)
         remaining = max_time - (time.perf_counter() - start)
         result, files = run_compilation(bundle, execution_dir, dependencies, remaining)
@@ -271,7 +267,6 @@ def execute_execution(
         stdin = args.unit.get_stdin(bundle.config.resources)
         argument = None
     else:
-        new_stage("compilation.batch.done", True)
         result, files = None, list(dependencies)
         if args.precompilation_result:
             _logger.debug("Substituting precompilation results.")
@@ -323,7 +318,6 @@ def execute_execution(
 
     remaining = max_time - (time.perf_counter() - start)
 
-    new_stage("run.testcode", True)
     # Do the execution.
     base_result = execute_file(
         bundle,
@@ -334,7 +328,6 @@ def execute_execution(
         remaining=remaining,
     )
 
-    new_stage("prepare.results", True)
     # Cleanup stderr
     msgs, annotations, base_result.stderr = lang_config.stderr(
         bundle, base_result.stderr
@@ -397,7 +390,6 @@ def merge_contexts_into_units(contexts: List[Context]) -> List[ExecutionUnit]:
     current_unit = []
 
     for context in contexts:
-
         # If we get stdin, start a new execution unit.
         if (
             context.has_main_testcase()

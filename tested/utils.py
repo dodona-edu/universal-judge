@@ -12,16 +12,16 @@ from os import PathLike
 from pathlib import Path
 from typing import (
     IO,
-    Union,
+    Any,
+    Callable,
     Generator,
-    TypeVar,
     Generic,
-    Optional,
-    Mapping,
     Iterable,
     List,
-    Callable,
-    Any,
+    Mapping,
+    Optional,
+    TypeVar,
+    Union,
 )
 
 _logger = logging.getLogger(__name__)

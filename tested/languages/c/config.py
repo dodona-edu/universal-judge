@@ -7,10 +7,10 @@ from tested.configs import Bundle
 from tested.dodona import AnnotateCode, Message
 from tested.languages.config import (
     CallbackResult,
-    executable_name,
     Command,
     Config,
     Language,
+    executable_name,
     limit_output,
 )
 
@@ -26,7 +26,6 @@ def cleanup_compilation_stderr(traceback: str, submission_file: str) -> str:
 
     skip_line, lines = False, []
     for line in traceback:
-
         line = line.strip("\n")
 
         if not line:

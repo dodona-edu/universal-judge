@@ -10,46 +10,48 @@ This template takes one value and must pass it to the "values" module.
 Testing advanced types is a work-in progress at this point, since we test in Python,
 and Python doesn't have explicit support for e.g. int32, int64.
 """
+import itertools
+import sys
 from dataclasses import dataclass
 from decimal import Decimal
 from pathlib import Path
 from typing import List
 
-import itertools
 import pytest
-import sys
 
-from tested.evaluators.value import check_data_type
-from tested.datatypes import BasicTypes, AdvancedTypes, resolve_to_basic
-from tested.configs import create_bundle, Bundle
+from tested.configs import Bundle, create_bundle
 from tested.datatypes import (
-    BasicNumericTypes,
-    BasicStringTypes,
-    BasicBooleanTypes,
-    BasicSequenceTypes,
     AdvancedNothingTypes,
-    BasicObjectTypes,
-    AdvancedStringTypes,
     AdvancedNumericTypes,
     AdvancedSequenceTypes,
+    AdvancedStringTypes,
+    AdvancedTypes,
+    BasicBooleanTypes,
+    BasicNumericTypes,
+    BasicObjectTypes,
+    BasicSequenceTypes,
+    BasicStringTypes,
+    BasicTypes,
+    resolve_to_basic,
 )
+from tested.evaluators.value import check_data_type
 from tested.judge.compilation import run_compilation
 from tested.judge.execution import execute_file, filter_files
-from tested.judge.utils import copy_from_paths_to_path, BaseExecutionResult
+from tested.judge.utils import BaseExecutionResult, copy_from_paths_to_path
 from tested.languages.config import TypeSupport
 from tested.languages.templates import find_and_write_template, path_to_templates
 from tested.serialisation import (
+    BooleanType,
+    NothingType,
     NumberType,
+    ObjectKeyValuePair,
+    ObjectType,
+    SequenceType,
+    SpecialNumbers,
+    StringType,
     Value,
     parse_value,
-    StringType,
-    BooleanType,
-    SequenceType,
-    ObjectType,
-    SpecialNumbers,
-    NothingType,
     to_python_comparable,
-    ObjectKeyValuePair,
 )
 from tested.testsuite import Suite
 from tested.utils import get_args

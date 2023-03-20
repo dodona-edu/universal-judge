@@ -5,13 +5,12 @@ import logging
 import operator
 from enum import Enum
 from functools import reduce
-from typing import Iterable, Set, NamedTuple, TYPE_CHECKING
+from typing import TYPE_CHECKING, Iterable, NamedTuple, Set
 
-from .datatypes import AllTypes, BasicSequenceTypes, BasicObjectTypes, NestedTypes
-from .internal_timings import new_stage, end_stage
+from tested.datatypes import AllTypes, BasicObjectTypes, BasicSequenceTypes, NestedTypes
 
 if TYPE_CHECKING:
-    from .configs import Bundle
+    from tested.configs import Bundle
 
 _logger = logging.getLogger(__name__)
 
@@ -82,9 +81,7 @@ def is_supported(bundle: "Bundle") -> bool:
     """
     from .languages.config import TypeSupport
 
-    new_stage("analyse.features", sub_stage=True)
     required = bundle.suite.get_used_features()
-    end_stage("analyse.features", sub_stage=True)
 
     # Check constructs
     available_constructs = bundle.lang_config.supported_constructs()

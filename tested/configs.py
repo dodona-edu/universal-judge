@@ -6,13 +6,13 @@ import json
 import logging
 from dataclasses import field
 from pathlib import Path
-from typing import Optional, Dict, IO, TYPE_CHECKING, Any
+from typing import IO, TYPE_CHECKING, Any, Dict, Optional
 
 from pydantic import BaseModel, root_validator
 from pydantic.dataclasses import dataclass
 
-from .testsuite import Suite, ExecutionMode
-from .utils import smart_close, consume_shebang, get_identifier
+from tested.testsuite import ExecutionMode, Suite
+from tested.utils import consume_shebang, get_identifier, smart_close
 
 # Prevent circular imports
 if TYPE_CHECKING:

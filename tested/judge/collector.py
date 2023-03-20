@@ -7,28 +7,28 @@ import dataclasses
 import logging
 from collections import defaultdict
 from math import floor
-from typing import List, Union, Optional, Generator
+from typing import Generator, List, Optional, Union
 
 from tested.configs import Bundle
 from tested.dodona import (
-    Update,
-    Status,
-    report_update,
-    StatusMessage,
-    CloseTab,
-    CloseContext,
-    CloseTestcase,
-    StartJudgment,
-    CloseJudgment,
-    StartTab,
-    StartContext,
-    StartTestcase,
-    close_for,
-    ExtendedMessage,
-    EscalateStatus,
-    update_size,
-    limit_size,
     AnnotateCode,
+    CloseContext,
+    CloseJudgment,
+    CloseTab,
+    CloseTestcase,
+    EscalateStatus,
+    ExtendedMessage,
+    StartContext,
+    StartJudgment,
+    StartTab,
+    StartTestcase,
+    Status,
+    StatusMessage,
+    Update,
+    close_for,
+    limit_size,
+    report_update,
+    update_size,
 )
 
 _logger = logging.getLogger(__name__)

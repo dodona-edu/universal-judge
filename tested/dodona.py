@@ -12,7 +12,7 @@ the authoritative json-schema, provided by Dodona.
 import dataclasses
 import json
 from enum import Enum
-from typing import Optional, Union, Literal, IO, Type
+from typing import IO, Literal, Optional, Type, Union
 
 from pydantic import BaseModel
 from pydantic.dataclasses import dataclass

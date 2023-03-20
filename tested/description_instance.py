@@ -2,7 +2,6 @@ import html
 import os
 import re
 import sys
-
 from argparse import ArgumentParser, FileType
 from functools import partial
 from typing import List
@@ -10,10 +9,10 @@ from typing import List
 from mako.template import Template
 
 from tested.configs import Bundle, DodonaConfig
+from tested.languages import get_language, language_exists
 from tested.languages.description_generator import TYPE_ARG, TYPE_CONFIG_NAME
 from tested.testsuite import Suite
 from tested.utils import smart_close
-from tested.languages import get_language, language_exists
 
 open_brackets = ("(", "[", "{")
 close_brackets = {")": "(", "]": "[", "}": "{"}
