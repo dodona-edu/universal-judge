@@ -355,7 +355,7 @@ ${expression('[10, 5, 2, 8, 7, 1, 3, 4, 9, 6]')}"""
         ("c", ">", 'long long x = data(1, 2, "alpha");'),
         ("kotlin", ">", 'var x = data(1, 2, "alpha")'),
         ("javascript", ">", 'let x = data(1, 2, "alpha")'),
-        ("haskell", ">", 'let x = data (1 :: Int) (2 :: Int) ("alpha")'),
+        ("haskell", ">", 'let x = data 1 :: Int 2 :: Int "alpha"'),
     ],
 )
 def test_template_multi_line_code_block_markdown(lang: str, prompt: str, expected: str):
