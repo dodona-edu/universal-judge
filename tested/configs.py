@@ -58,6 +58,15 @@ class Options:
     """
     If the custom Python evaluator should be optimized or not.
     """
+    compiler_optimizations: bool = False
+    """
+    If compiler optimizations should be enabled for languages that support them,
+    for example, C or Haskell.
+    This is disabled by default, as the additional time required in the compilation
+    step is often much larger than the gains in execution time for short exercises.
+    Longer exercises, or exercises where the solution might depend on optimization
+    may need this option.
+    """
 
 
 class DodonaConfig(BaseModel):

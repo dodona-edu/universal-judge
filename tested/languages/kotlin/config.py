@@ -34,6 +34,7 @@ class Kotlin(Language):
             get_executable("kotlinc"),
             f"-J-Xmx192M",
             "-nowarn",
+            "-opt" if bundle.config.options.compiler_optimizations else "",
             "-jvm-target",
             "11",
             "-cp",
