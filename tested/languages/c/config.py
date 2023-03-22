@@ -67,6 +67,7 @@ class C(Language):
                 "gcc",
                 "-std=c11",
                 "-Wall",
+                "-O3" if bundle.config.options.compiler_optimizations else "-O0",
                 "evaluation_result.c",
                 "values.c",
                 main_file,

@@ -17,7 +17,6 @@ from tested.languages.utils import (
 )
 
 
-# TODO: advanced type don't work very good at the moment.
 class Haskell(Language):
     def compilation(self, bundle: Bundle, files: List[str]) -> CallbackResult:
         main_ = files[-1]
@@ -26,7 +25,7 @@ class Haskell(Language):
             "ghc",
             "-fno-cse",
             "-fno-full-laziness",
-            "-O0",
+            "-O3" if bundle.config.options.compiler_optimizations else "-O0",
             main_,
             "-main-is",
             exec_,
