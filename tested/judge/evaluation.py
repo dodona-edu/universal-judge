@@ -1,6 +1,6 @@
 import html
 import logging
-from enum import Enum, StrEnum, unique
+from enum import StrEnum, unique
 from pathlib import Path
 from typing import Iterable, List, Optional, Set, Tuple
 
