@@ -11,7 +11,8 @@ jobs:
         with:
           python-version: 3.10.10
           cache: 'pip'
-      - run: pip install -r requirements.txt -r requirements-test.txt -r tested/languages/python/requirements.txt
+      - run: pip install pipenv
+      - run: pipenv install --dev
       - uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
