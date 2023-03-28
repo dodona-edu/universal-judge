@@ -27,7 +27,7 @@ import re
 import sys
 from collections import defaultdict
 from dataclasses import dataclass
-from enum import Enum, auto
+from enum import Enum, StrEnum, auto, unique
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Mapping, Optional, Set, Tuple, Union
 
@@ -233,13 +233,14 @@ class TypeSupport(Enum):
     """
 
 
-class TemplateType(str, Enum):
-    EXECUTION = "execution"
-    RUN = "run"
-    STATEMENT = "statement"
-    CONTEXT = "context"
-    SELECTOR = "selector"
-    EVALUATOR_EXECUTOR = "evaluator_executor"
+@unique
+class TemplateType(StrEnum):
+    EXECUTION = auto()
+    RUN = auto()
+    STATEMENT = auto()
+    CONTEXT = auto()
+    SELECTOR = auto()
+    EVALUATOR_EXECUTOR = auto()
 
 
 class Language:

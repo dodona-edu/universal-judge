@@ -7,7 +7,7 @@ of assistance when checking existing test suites.
 """
 from collections import defaultdict
 from dataclasses import field
-from enum import Enum
+from enum import StrEnum, auto, unique
 from os import path
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Literal, NamedTuple, Optional, Set, Union
@@ -36,23 +36,26 @@ from tested.serialisation import (
 from tested.utils import flatten, get_args
 
 
-class TextBuiltin(str, Enum):
+@unique
+class TextBuiltin(StrEnum):
     """Textual built in evaluators."""
 
-    TEXT = "text"
-    FILE = "file"
+    TEXT = auto()
+    FILE = auto()
 
 
-class ValueBuiltin(str, Enum):
+@unique
+class ValueBuiltin(StrEnum):
     """Built in evaluators for values."""
 
-    VALUE = "value"
+    VALUE = auto()
 
 
-class ExceptionBuiltin(str, Enum):
+@unique
+class ExceptionBuiltin(StrEnum):
     """Built in evaluators for exceptions."""
 
-    EXCEPTION = "exception"
+    EXCEPTION = auto()
 
 
 @dataclass
@@ -148,7 +151,8 @@ class SpecificEvaluator:
         return v
 
 
-class TextChannelType(str, Enum):
+@unique
+class TextChannelType(StrEnum):
     TEXT = "text"  # Literal values
     FILE = "file"  # Path to a file
 
@@ -277,19 +281,20 @@ class ExitCodeOutputChannel(WithFeatures):
         return NOTHING
 
 
-class EmptyChannel(WithFeatures, str, Enum):
+@unique
+class EmptyChannel(WithFeatures, StrEnum):
     """There is nothing on this output channel."""
 
-    NONE = "none"
+    NONE = auto()
 
     def get_used_features(self) -> FeatureSet:
         return NOTHING
 
 
-class IgnoredChannel(WithFeatures, str, Enum):
+class IgnoredChannel(WithFeatures, StrEnum):
     """A file channel is ignored by default."""
 
-    IGNORED = "ignored"
+    IGNORED = auto()
 
     def get_used_features(self) -> FeatureSet:
         return NOTHING
@@ -586,7 +591,8 @@ class Tab(WithFeatures, WithFunctions):
         return contexts
 
 
-class ExecutionMode(str, Enum):
+@unique
+class ExecutionMode(StrEnum):
     PRECOMPILATION = "batch"
     INDIVIDUAL = "context"
 

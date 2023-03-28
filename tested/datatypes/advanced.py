@@ -4,7 +4,7 @@ Advanced data types.
 Note that these are often complementary types: the default type suffice in many
 cases.
 """
-from enum import Enum
+from enum import StrEnum
 from typing import Union
 
 from tested.datatypes.basic import (
@@ -16,23 +16,16 @@ from tested.datatypes.basic import (
 )
 
 
-class _AdvancedDataType(str, Enum):
+class _AdvancedDataType(StrEnum):
     """Represents the advanced data types."""
 
-    def __new__(cls, *args, **kwargs):
-        value = args[0]
-        # noinspection PyArgumentList
-        obj = str.__new__(cls, value)
-        obj._value_ = args[0]
-        return obj
+    base_type: BasicTypes
 
-    def __init__(self, _: str, base_type: BasicTypes):
-        super().__init__()
-        self._base_type_ = base_type
-
-    @property
-    def base_type(self) -> BasicTypes:
-        return self._base_type_
+    def __new__(cls, value: str, base_type: BasicTypes):
+        member = str.__new__(cls, value)
+        member._value_ = value
+        member.base_type = base_type
+        return member
 
 
 class AdvancedNumericTypes(_AdvancedDataType):

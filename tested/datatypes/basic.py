@@ -1,35 +1,41 @@
 """
 Basic data types.
 """
-from enum import Enum
+from enum import StrEnum, auto, unique
 from typing import Union
 
 
-class BasicNumericTypes(str, Enum):
-    INTEGER = "integer"
-    REAL = "real"
+@unique
+class BasicNumericTypes(StrEnum):
+    INTEGER = auto()
+    REAL = auto()
 
 
-class BasicStringTypes(str, Enum):
-    TEXT = "text"
-    ANY = "any"  # Cannot be used in a test suite.
+@unique
+class BasicStringTypes(StrEnum):
+    TEXT = auto()
+    ANY = auto()  # Cannot be used in a test suite.
 
 
-class BasicBooleanTypes(str, Enum):
-    BOOLEAN = "boolean"
+@unique
+class BasicBooleanTypes(StrEnum):
+    BOOLEAN = auto()
 
 
-class BasicSequenceTypes(str, Enum):
-    SEQUENCE = "sequence"
-    SET = "set"
+@unique
+class BasicSequenceTypes(StrEnum):
+    SEQUENCE = auto()
+    SET = auto()
 
 
-class BasicObjectTypes(str, Enum):
-    MAP = "map"
+@unique
+class BasicObjectTypes(StrEnum):
+    MAP = auto()
 
 
-class BasicNothingTypes(str, Enum):
-    NOTHING = "nothing"
+@unique
+class BasicNothingTypes(StrEnum):
+    NOTHING = auto()
 
 
 BasicTypes = Union[

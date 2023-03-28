@@ -3,7 +3,7 @@ Module containing the definitions of the features we can support.
 """
 import logging
 import operator
-from enum import Enum
+from enum import StrEnum, unique
 from functools import reduce
 from typing import TYPE_CHECKING, Iterable, NamedTuple, Set
 
@@ -15,7 +15,8 @@ if TYPE_CHECKING:
 _logger = logging.getLogger(__name__)
 
 
-class Construct(str, Enum):
+@unique
+class Construct(StrEnum):
     # Object oriented stuff, classes, ...
     OBJECTS = "objects"
     EXCEPTIONS = "exceptions"
