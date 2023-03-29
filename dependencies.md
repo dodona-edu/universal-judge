@@ -16,13 +16,13 @@ For example, the versions in the table below are the ones we currently use to ru
 
 | Language            | Version |
 |---------------------|---------|
-| Python              | 3.10    |
+| Python              | 3.11    |
 | Bash                | 5.1     |
 | gcc (C)             | 10      |
 | ghc (Haskell)       | 8 or 9  |
 | Java                | 17      |
-| NodeJS (Javascript) | 16      |
-| Kotlin              | 1.6     |
+| NodeJS (Javascript) | 18      |
+| Kotlin              | 1.8     |
 | C# (.NET 6)         | 10.0    |
 
 ## Core
@@ -40,10 +40,15 @@ $ pip install -r requirements-tests.txt
 
 ## Python
 
-The dependencies needed to evaluate Python submissions are listed in `tested/languages/python/requirements.txt`.
 
-```shell
-$ pip install -r tested/languages/python/requirements.txt
+| Name     | Versions | Installation |
+|----------|----------|--------------|
+| `pylint` | 2.17     | Pip package  |
+
+Install the package as follows:
+
+```bash
+$ pip install pylint
 ```
 
 ## Bash
@@ -75,26 +80,26 @@ $ cabal v1-install aeson
 
 | Name         | Versions | Installation |
 |--------------|----------|--------------|
-| `checkstyle` | 8 or  9  | OS package   |
+| `checkstyle` | >= 8     | OS package   |
 
 ## Javascript
 
 | Name                    | Versions | Installation |
 |-------------------------|----------|--------------|
-| `eslint`                | 8.7      | npm package  |
+| `eslint`                | 8.36     | npm package  |
 | `abstract-syntax-tree`  | 2.16     | npm package  |
 
 Install npm packages as follows:
 
 ```shell
-$ npm install eslint@8.7 abstract-syntax-tree@2.16
+$ npm install eslint@8.36 abstract-syntax-tree@2.16
 ```
 
 ## Kotlin
 
 | Name                   | Versions | Installation |
 |------------------------|----------|--------------|
-| `klint`                | 0.43     | OS package   |
+| `klint`                | 0.48     | OS package   |
 
 
 ## C#
