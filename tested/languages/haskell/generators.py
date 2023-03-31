@@ -257,7 +257,7 @@ handleException (Right _) = Nothing
                     )
                     result += (
                         indent * 2
-                        + f"(\e -> let ee = (Just (e :: SomeException)) in {convert_statement(tc.exception_statement('ee'))})\n"
+                        + f"(\\e -> let ee = (Just (e :: SomeException)) in {convert_statement(tc.exception_statement('ee'))})\n"
                     )
         result += indent + ctx.after + "\n"
         result += indent + 'putStr ""\n'
