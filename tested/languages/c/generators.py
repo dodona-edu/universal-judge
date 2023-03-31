@@ -1,15 +1,15 @@
 import json
 from typing import List, Union
 
-from datatypes import AdvancedStringTypes, resolve_to_basic
-
 from tested.datatypes import (
     AdvancedNumericTypes,
+    AdvancedStringTypes,
     AllTypes,
     BasicBooleanTypes,
     BasicNothingTypes,
     BasicNumericTypes,
     BasicStringTypes,
+    resolve_to_basic,
 )
 from tested.languages.generator import (
     PreparedContext,

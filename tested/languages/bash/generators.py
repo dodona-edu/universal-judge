@@ -1,9 +1,7 @@
 import shlex
 from typing import List
 
-from datatypes import AdvancedStringTypes
-
-from tested.datatypes import BasicStringTypes
+from tested.datatypes import AdvancedStringTypes, BasicStringTypes
 from tested.languages.generator import (
     PreparedContext,
     PreparedExecutionUnit,

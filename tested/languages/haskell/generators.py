@@ -1,18 +1,17 @@
 import json
 from typing import List, Union
 
-from datatypes import AdvancedStringTypes, resolve_to_basic
-from utils import get_args
-
 from tested.datatypes import (
     AdvancedNumericTypes,
     AdvancedSequenceTypes,
+    AdvancedStringTypes,
     AllTypes,
     BasicBooleanTypes,
     BasicNothingTypes,
     BasicNumericTypes,
     BasicSequenceTypes,
     BasicStringTypes,
+    resolve_to_basic,
 )
 from tested.languages.generator import (
     PreparedContext,
@@ -30,6 +29,7 @@ from tested.serialisation import (
     VariableType,
     as_basic_type,
 )
+from tested.utils import get_args
 
 
 def convert_arguments(arguments: List[Expression]) -> str:

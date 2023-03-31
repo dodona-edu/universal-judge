@@ -1,8 +1,6 @@
 import json
 from typing import List, Literal, Optional, Union
 
-from datatypes import AdvancedStringTypes, resolve_to_basic
-
 from tested.datatypes import (
     AdvancedNumericTypes,
     AdvancedSequenceTypes,
@@ -13,6 +11,7 @@ from tested.datatypes import (
     BasicObjectTypes,
     BasicSequenceTypes,
     BasicStringTypes,
+    resolve_to_basic,
 )
 from tested.languages.generator import (
     PreparedContext,
