@@ -25,11 +25,14 @@ import math
 import os
 import re
 import sys
+import typing
 from collections import defaultdict
 from dataclasses import dataclass
 from enum import Enum, StrEnum, auto, unique
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Mapping, Optional, Set, Tuple, Union
+
+from mako import exceptions
 
 from tested.configs import Bundle
 from tested.datatypes import AdvancedTypes, AllTypes, ExpressionTypes, string_to_type
@@ -37,7 +40,13 @@ from tested.dodona import AnnotateCode, ExtendedMessage, Message, Permission, St
 from tested.features import Construct
 from tested.internationalization import get_i18n_string
 from tested.languages.description_generator import DescriptionGenerator
-from tested.serialisation import ExceptionValue
+from tested.serialisation import (
+    ExceptionValue,
+    Expression,
+    FunctionCall,
+    Statement,
+    Value,
+)
 from tested.testsuite import Suite
 from tested.utils import (
     camel_snake_case,
@@ -55,6 +64,9 @@ from tested.utils import (
     train_case,
     upper_flat_case,
 )
+
+if typing.TYPE_CHECKING:
+    from tested.languages.generator import PreparedExecutionUnit
 
 Command = List[str]
 FileFilter = Callable[[Path], bool]
@@ -75,6 +87,8 @@ _case_mapping = {
     "train_case": train_case,
     "upper_flat_case": upper_flat_case,
 }
+
+_logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -777,3 +791,51 @@ class Language:
         if self._description_generator is None:
             self._description_generator = DescriptionGenerator(self, self.config_dir)
         return self._description_generator
+
+    def generate_statement(self, statement: Statement) -> str:
+        """
+        Generate code for a (prepared) statement.
+
+        :param statement: The prepared statement.
+        :return: A string representing the statement.
+        """
+        raise NotImplementedError
+
+    def generate_execution_unit(self, execution_unit: "PreparedExecutionUnit") -> str:
+        """
+        Generate code for a prepared execution unit.
+
+        :param execution_unit: The prepared execution unit.
+        :return: A string representing the execution unit.
+        """
+        raise NotImplementedError
+
+    def generate_selector(self, contexts: List[str]) -> str:
+        """
+        Generate code for a selector for the given list of contexts.
+
+        :param contexts: The contexts the selector must support.
+        :return: A string representing the selector.
+        """
+        raise NotImplementedError
+
+    def generate_check_function(self, name: str, function: FunctionCall) -> str:
+        """
+        Generate code that calls the given function as a custom check function.
+
+        :param name: The name of the custom check function.
+        :param function: The function to call.
+        :return: A string representing the custom check function.
+        """
+        raise NotImplementedError
+
+    def generate_encoder(self, values: List[Value]) -> str:
+        """
+        Generate code for a main function that will encode the given values.
+
+        Note that this is only used in the tests, not in production.
+
+        :param values: The values to encode.
+        :return: A string representing an encoder.
+        """
+        raise NotImplementedError

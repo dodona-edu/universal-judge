@@ -12,7 +12,6 @@ and Python doesn't have explicit support for e.g. int32, int64.
 """
 import itertools
 import sys
-from dataclasses import dataclass
 from decimal import Decimal
 from pathlib import Path
 from typing import List
@@ -39,7 +38,7 @@ from tested.judge.compilation import run_compilation
 from tested.judge.execution import execute_file, filter_files
 from tested.judge.utils import BaseExecutionResult, copy_from_paths_to_path
 from tested.languages.config import TypeSupport
-from tested.languages.templates import find_and_write_template, path_to_templates
+from tested.languages.templates import path_to_dependencies
 from tested.serialisation import (
     BooleanType,
     NothingType,
@@ -67,11 +66,6 @@ LANGUAGES = [
     "bash",
     "csharp",
 ]
-
-
-@dataclass
-class _Statements:
-    statements: List[Value]
 
 
 # A list of example values for basic types.
@@ -175,21 +169,20 @@ ADVANCED_VALUES = [
 
 def run_encoder(bundle: Bundle, values: List[Value]) -> List[str]:
     # Copy dependencies.
-    dependency_paths = path_to_templates(bundle)
+    dependency_paths = path_to_dependencies(bundle)
     dependencies = bundle.lang_config.initial_dependencies()
     dest = bundle.config.workdir
     copy_from_paths_to_path(dependency_paths, dependencies, dest)
 
     name = bundle.lang_config.conventionalize_namespace("encode")
-    template = bundle.lang_config.template_name(name)
     encoder_name = bundle.lang_config.with_extension(name)
     encoder_destination = dest / encoder_name
-    encoder = find_and_write_template(
-        bundle, _Statements(values), encoder_destination, template
-    )
+    encode_code = bundle.lang_config.generate_encoder(values)
+    with open(encoder_destination, "w") as encoder_file:
+        encoder_file.write(encode_code)
 
     # Compile if necessary.
-    e, files = run_compilation(bundle, dest, [*dependencies, encoder], 10000)
+    e, files = run_compilation(bundle, dest, [*dependencies, encoder_name], 10000)
     if isinstance(e, BaseExecutionResult):
         print(e.stdout)
         print(e.stderr)

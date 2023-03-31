@@ -1,5 +1,6 @@
 import logging
 import re
+import typing
 from pathlib import Path
 from typing import List, Optional, Tuple
 
@@ -7,8 +8,12 @@ from tested.configs import Bundle
 from tested.dodona import AnnotateCode, Message, Status
 from tested.internationalization import get_i18n_string
 from tested.languages.config import CallbackResult, Command, Config, Language
+from tested.serialisation import FunctionCall, Statement, Value
 
 logger = logging.getLogger(__name__)
+
+if typing.TYPE_CHECKING:
+    from tested.languages.generator import PreparedExecutionUnit
 
 # Where the results of the compilation are stored.
 OUTPUT_DIRECTORY = "all-outputs"
@@ -112,3 +117,28 @@ class {class_name}
             )
 
         return [], annotations, stdout, stderr
+
+    def generate_statement(self, statement: Statement) -> str:
+        from tested.languages.csharp import generators
+
+        return generators.convert_statement(statement, full=True)
+
+    def generate_execution_unit(self, execution_unit: "PreparedExecutionUnit") -> str:
+        from tested.languages.csharp import generators
+
+        return generators.convert_execution_unit(execution_unit)
+
+    def generate_selector(self, contexts: List[str]) -> str:
+        from tested.languages.csharp import generators
+
+        return generators.convert_selector(contexts)
+
+    def generate_check_function(self, name: str, function: FunctionCall) -> str:
+        from tested.languages.csharp import generators
+
+        return generators.convert_check_function(function)
+
+    def generate_encoder(self, values: List[Value]) -> str:
+        from tested.languages.csharp import generators
+
+        return generators.convert_encoder(values)

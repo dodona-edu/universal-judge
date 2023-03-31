@@ -109,8 +109,13 @@ def haskell_solution(lang_config: Language, solution: Path, bundle: Bundle):
             contents = file.read()
         # noinspection PyTypeChecker
         with open(solution, "w") as file:
-            result = f"module {name} where\n" + contents
-            file.write(result)
+            original_lines = contents.split("\n")
+            i = next(
+                i for i, line in enumerate(original_lines) if not line.startswith("{-#")
+            )
+            result = f"module {name} where\n"
+            resulting_lines = original_lines[:i] + [result] + original_lines[i:]
+            file.write("\n".join(resulting_lines))
 
 
 def haskell_cleanup_stacktrace(traceback: str, submission_file: str, reduce_all=False):

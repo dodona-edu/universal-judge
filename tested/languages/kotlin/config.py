@@ -1,11 +1,12 @@
 import logging
 import os
 import re
+import typing
 from pathlib import Path
 from typing import List, Optional, Tuple
 
 from tested.configs import Bundle
-from tested.dodona import AnnotateCode, ExtendedMessage, Message, Permission, Status
+from tested.dodona import AnnotateCode, Message, Status
 from tested.languages.config import (
     CallbackResult,
     Command,
@@ -14,6 +15,10 @@ from tested.languages.config import (
     limit_output,
 )
 from tested.languages.utils import jvm_cleanup_stacktrace, jvm_memory_limit, jvm_stderr
+from tested.serialisation import FunctionCall, Statement, Value
+
+if typing.TYPE_CHECKING:
+    from tested.languages.generator import PreparedExecutionUnit
 
 logger = logging.getLogger(__name__)
 
@@ -134,3 +139,28 @@ class Kotlin(Language):
         self, bundle: Bundle, stderr: str
     ) -> Tuple[List[Message], List[AnnotateCode], str]:
         return jvm_stderr(self, bundle, stderr)
+
+    def generate_statement(self, statement: Statement) -> str:
+        from tested.languages.kotlin import generators
+
+        return generators.convert_statement(statement, full=True)
+
+    def generate_execution_unit(self, execution_unit: "PreparedExecutionUnit") -> str:
+        from tested.languages.kotlin import generators
+
+        return generators.convert_execution_unit(execution_unit)
+
+    def generate_selector(self, contexts: List[str]) -> str:
+        from tested.languages.kotlin import generators
+
+        return generators.convert_selector(contexts)
+
+    def generate_check_function(self, name: str, function: FunctionCall) -> str:
+        from tested.languages.kotlin import generators
+
+        return generators.convert_check_function(function)
+
+    def generate_encoder(self, values: List[Value]) -> str:
+        from tested.languages.kotlin import generators
+
+        return generators.convert_encoder(values)

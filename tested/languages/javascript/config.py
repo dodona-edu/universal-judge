@@ -1,5 +1,6 @@
 import logging
 import re
+import typing
 from pathlib import Path
 from typing import List, Tuple
 
@@ -13,6 +14,10 @@ from tested.languages.config import (
     limit_output,
 )
 from tested.languages.utils import cleanup_description
+from tested.serialisation import FunctionCall, Statement, Value
+
+if typing.TYPE_CHECKING:
+    from tested.languages.generator import PreparedExecutionUnit
 
 logger = logging.getLogger(__name__)
 
@@ -178,3 +183,23 @@ class JavaScript(Language):
             cleaned_contexts.append(identifier.join(cleaned_cases))
 
         return [], [], context_identifier.join(cleaned_contexts)
+
+    def generate_statement(self, statement: Statement) -> str:
+        from tested.languages.javascript import generators
+
+        return generators.convert_statement(statement, full=True)
+
+    def generate_execution_unit(self, execution_unit: "PreparedExecutionUnit") -> str:
+        from tested.languages.javascript import generators
+
+        return generators.convert_execution_unit(execution_unit)
+
+    def generate_check_function(self, name: str, function: FunctionCall) -> str:
+        from tested.languages.javascript import generators
+
+        return generators.convert_check_function(name, function)
+
+    def generate_encoder(self, values: List[Value]) -> str:
+        from tested.languages.javascript import generators
+
+        return generators.convert_encoder(values)

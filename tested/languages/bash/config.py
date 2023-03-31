@@ -1,4 +1,5 @@
 import re
+import typing
 from pathlib import Path
 from typing import List, Tuple
 
@@ -11,6 +12,10 @@ from tested.languages.config import (
     Language,
     limit_output,
 )
+from tested.serialisation import Statement, Value
+
+if typing.TYPE_CHECKING:
+    from tested.languages.generator import PreparedExecutionUnit
 
 
 class Bash(Language):
@@ -64,3 +69,18 @@ class Bash(Language):
         from tested.languages.bash import linter
 
         return linter.run_shellcheck(bundle, submission, remaining)
+
+    def generate_statement(self, statement: Statement) -> str:
+        from tested.languages.bash import generators
+
+        return generators.convert_statement(statement)
+
+    def generate_execution_unit(self, execution_unit: "PreparedExecutionUnit") -> str:
+        from tested.languages.bash import generators
+
+        return generators.convert_execution_unit(execution_unit)
+
+    def generate_encoder(self, values: List[Value]) -> str:
+        from tested.languages.bash import generators
+
+        return generators.convert_encoder(values)

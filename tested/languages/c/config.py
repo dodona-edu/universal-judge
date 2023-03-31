@@ -1,5 +1,6 @@
 import logging
 import re
+import typing
 from pathlib import Path
 from typing import List, Tuple
 
@@ -13,8 +14,13 @@ from tested.languages.config import (
     executable_name,
     limit_output,
 )
+from tested.serialisation import Statement, Value
 
 logger = logging.getLogger(__name__)
+
+
+if typing.TYPE_CHECKING:
+    from tested.languages.generator import PreparedExecutionUnit
 
 
 def cleanup_compilation_stderr(traceback: str, submission_file: str) -> str:
@@ -121,3 +127,23 @@ class C(Language):
 
     def is_source_file(self, file: Path) -> bool:
         return file.suffix in (".c", ".h")
+
+    def generate_statement(self, statement: Statement) -> str:
+        from tested.languages.c import generators
+
+        return generators.convert_statement(statement, full=True)
+
+    def generate_execution_unit(self, execution_unit: "PreparedExecutionUnit") -> str:
+        from tested.languages.c import generators
+
+        return generators.convert_execution_unit(execution_unit)
+
+    def generate_selector(self, contexts: List[str]) -> str:
+        from tested.languages.c import generators
+
+        return generators.convert_selector(contexts)
+
+    def generate_encoder(self, values: List[Value]) -> str:
+        from tested.languages.c import generators
+
+        return generators.convert_encoder(values)
