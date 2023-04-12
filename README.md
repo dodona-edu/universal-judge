@@ -7,17 +7,18 @@ TESTed is a software test framework to evaluate submissions for programming exer
 TESTed is implemented in Python, but has various dependencies for its language-specific modules.
 We only use the Python language module in this README, but see [dependencies.md](./dependencies.md) for an overview of dependencies for each of the supported programming languages.
 
-Install [Python 3.9](https://www.python.org/downloads/) or later (including pip).
+Install [Python 3.11](https://www.python.org/downloads/) or later (including pip).
 Next, [clone](https://github.com/git-guides/git-clone) the TESTed repository and open a command prompt in the cloned repository.
-Now you can run the following commands to install the necessary Python dependencies:
+TESTed uses [pipenv](https://pipenv.pypa.io/en/latest/installation/) to manage its Python dependencies.
+Now you can run the following commands to install them:
 
 ```bash
-# Core dependencies
-$ pip install -r requirements.txt
-# Only needed if you want to run tests
-$ pip install -r requirements-tests.txt
-# Needed to evaluate submissions in Python
-$ pip install -r tested/languages/python/requirements.txt
+# Pipenv install
+$ pip install pipenv --user
+# Install dependencies (include --dev for tests/development)
+$ pipenv sync --dev
+# Activate the virtualenv
+$ pipenv shell
 ```
 
 ## Running TESTed

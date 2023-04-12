@@ -32,21 +32,13 @@ from enum import Enum, StrEnum, auto, unique
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Mapping, Optional, Set, Tuple, Union
 
-from mako import exceptions
-
 from tested.configs import Bundle
 from tested.datatypes import AdvancedTypes, AllTypes, ExpressionTypes, string_to_type
 from tested.dodona import AnnotateCode, ExtendedMessage, Message, Permission, Status
 from tested.features import Construct
 from tested.internationalization import get_i18n_string
 from tested.languages.description_generator import DescriptionGenerator
-from tested.serialisation import (
-    ExceptionValue,
-    Expression,
-    FunctionCall,
-    Statement,
-    Value,
-)
+from tested.serialisation import ExceptionValue, FunctionCall, Statement, Value
 from tested.testsuite import Suite
 from tested.utils import (
     camel_snake_case,
@@ -245,16 +237,6 @@ class TypeSupport(Enum):
     case, exercises using this type are still solvable in the programming language.
     TESTed will use the basic type in those languages.
     """
-
-
-@unique
-class TemplateType(StrEnum):
-    EXECUTION = auto()
-    RUN = auto()
-    STATEMENT = auto()
-    CONTEXT = auto()
-    SELECTOR = auto()
-    EVALUATOR_EXECUTOR = auto()
 
 
 class Language:
@@ -507,16 +489,6 @@ class Language:
         """Utility function to append the file extension to a file name."""
         return f"{file_name}.{self.extension_file()}"
 
-    def extension_templates(self) -> List[str]:
-        """
-        A list of extensions for the template files. By default, this uses the
-        ``extension_file`` and ``mako``.
-
-        :return: The templates.
-        """
-        default = [self.extension_file(), "mako"]
-        return self.options.get("extensions").get("templates", default)
-
     def initial_dependencies(self) -> List[str]:
         """
         Return the additional dependencies that tested will include in compilation.
@@ -705,16 +677,6 @@ class Language:
         :return: A list of messages and annotations.
         """
         return [], []
-
-    def template_name(self, template_type: Union[TemplateType, str]) -> str:
-        """
-        Get the name for built-in templates. This can be specified in the
-        config.json file, but needing to override this is generally not necessary.
-
-        :param template_type: The built-in type.
-        :return: The name of the template (without extension).
-        """
-        return self.options.get("templates", {}).get(template_type, template_type)
 
     def inherits_from(self) -> Optional[str]:
         """

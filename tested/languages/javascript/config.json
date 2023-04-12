@@ -6,8 +6,7 @@
     "selector": false
   },
   "extensions": {
-    "file": "js",
-    "templates": ["js", "mako"]
+    "file": "js"
   },
   "naming_conventions": {
     "namespace": "camel_case",
