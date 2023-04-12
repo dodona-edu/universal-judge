@@ -16,6 +16,7 @@ A json-schema can be generated from this format by executing the module on the
 command line. The schema will be printed to stdout. This can be used to generate
 classes for implementations in other configs.
 """
+import copy
 import json
 import logging
 import math
@@ -495,8 +496,9 @@ ObjectKeyValuePair.__pydantic_model__.update_forward_refs()
 def as_basic_type(value: Value) -> Value:
     """Convert a value's type to a basic type."""
     new_type = resolve_to_basic(value.type)
-    # noinspection PyDataclass
-    return replace(value, type=new_type)
+    cp = copy.copy(value)
+    cp.type = new_type
+    return cp
 
 
 class _SerialisationSchema(BaseModel):

@@ -1,3 +1,4 @@
+import typing
 from pathlib import Path
 from typing import List, Tuple
 
@@ -9,6 +10,10 @@ from tested.languages.utils import (
     haskell_cleanup_stacktrace,
     haskell_solution,
 )
+from tested.serialisation import FunctionCall, Statement, Value
+
+if typing.TYPE_CHECKING:
+    from tested.languages.generator import PreparedExecutionUnit
 
 
 class RunHaskell(Language):
@@ -62,3 +67,28 @@ class RunHaskell(Language):
         self, traceback: str, submission_file: str, reduce_all=False
     ) -> str:
         return haskell_cleanup_stacktrace(traceback, submission_file, reduce_all)
+
+    def generate_statement(self, statement: Statement) -> str:
+        from tested.languages.haskell import generators
+
+        return generators.convert_statement(statement)
+
+    def generate_execution_unit(self, execution_unit: "PreparedExecutionUnit") -> str:
+        from tested.languages.haskell import generators
+
+        return generators.convert_execution_unit(execution_unit)
+
+    def generate_selector(self, contexts: List[str]) -> str:
+        from tested.languages.haskell import generators
+
+        return generators.convert_selector(contexts)
+
+    def generate_check_function(self, name: str, function: FunctionCall) -> str:
+        from tested.languages.haskell import generators
+
+        return generators.convert_check_function(name, function)
+
+    def generate_encoder(self, values: List[Value]) -> str:
+        from tested.languages.haskell import generators
+
+        return generators.convert_encoder(values)

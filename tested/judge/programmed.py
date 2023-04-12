@@ -23,7 +23,7 @@ from tested.languages.generator import (
     custom_evaluator_arguments,
     generate_custom_evaluator,
 )
-from tested.languages.templates import path_to_templates
+from tested.languages.templates import path_to_dependencies
 from tested.serialisation import EvalResult, Value
 from tested.testsuite import ProgrammedEvaluator
 from tested.utils import get_identifier
@@ -104,7 +104,7 @@ def _evaluate_others(
 
     # Copy the dependencies to the folder.
     dependencies = eval_bundle.lang_config.initial_dependencies()
-    origin = path_to_templates(eval_bundle)
+    origin = path_to_dependencies(eval_bundle)
     copy_from_paths_to_path(origin, dependencies, custom_path)
     # Include the actual evaluator in the dependencies.
     dependencies.append(evaluator.function.file.name)

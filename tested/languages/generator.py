@@ -21,7 +21,6 @@ from typing import (
     Union,
 )
 
-from mako import exceptions
 from pygments.formatters.html import HtmlFormatter
 
 # Prevent cyclic imports for types...
@@ -32,9 +31,7 @@ from tested.configs import Bundle
 from tested.datatypes import BasicSequenceTypes
 from tested.dodona import ExtendedMessage
 from tested.internationalization import get_i18n_string
-from tested.languages.config import TemplateType
 from tested.languages.description_generator import highlight_console
-from tested.languages.templates import find_and_write_template, find_template
 from tested.serialisation import (
     Assignment,
     Expression,
@@ -56,6 +53,7 @@ from tested.testsuite import (
     ExceptionOutput,
     FileUrl,
     IgnoredChannel,
+    MainInput,
     ProgrammedEvaluator,
     SpecificEvaluator,
     Testcase,
@@ -73,60 +71,53 @@ SEND_EXCEPTION = "send_exception"
 SEND_SPECIFIC_VALUE = "send_specific_value"
 SEND_SPECIFIC_EXCEPTION = "send_specific_exception"
 
-# Name of the function to call in evaluators
-PROGRAMMED_EVALUATE = "evaluate"
-
-EVALUATION_ARGS = "value"
-
-# Names of predefined templates.
-STATEMENT = "statement"
-
 
 @dataclass
-class MainCallArguments:
-    """Arguments for the main call."""
+class PreparedTestcaseStatement:
+    """
+    A testcase that has been prepared for code generation.
 
-    arguments: List[str]
 
+    """
 
-@dataclass
-class NormalArguments:
-    """Arguments for normal testcases."""
-
-    command: Statement
-
-    _value_function: Optional[Callable[[Expression], Statement]]
+    statement: Statement
+    "The original statement."
+    value_function: Optional[Callable[[Expression], Statement]]
+    "The function to handle the return value of the statement, if any."
 
     def input_statement(self, override: Optional[str] = None) -> Statement:
         """
         Get the input statement for the testcase.
 
         This will return, depending on the command, either an expression which will
-        pass the value to the correct handling function or a statement.
+        pass the value to the correct handling function or the statement itself.
 
         :param override: Optionally override the value argument.
         :return: The input statement.
         """
-        if self._value_function:
-            assert isinstance(self.command, get_args(Expression))
-            # Replace the arguments
+        if self.value_function:
+            assert isinstance(self.statement, get_args(Expression))
             if override:
-                return self._value_function(Identifier(override))
+                return self.value_function(Identifier(override))
             else:
                 # noinspection PyTypeChecker
-                return self._value_function(self.command)
+                return self.value_function(self.statement)
         else:
-            return self.command
+            return self.statement
 
 
 @dataclass
-class _TestcaseArguments:
-    """Arguments for a testcase template."""
+class PreparedTestcase:
+    """
+    A testcase that has been prepared for code generation.
+    """
 
-    # The arguments
-    input: Union[MainCallArguments, NormalArguments]
     testcase: Testcase
-    _exception_function: Callable[[Expression], Statement]
+    "The original testcase."
+    input: Union[MainInput, PreparedTestcaseStatement]
+    "The prepared input from the testcase."
+    exception_function: Callable[[Expression], Statement]
+    "Function to handle exceptions."
 
     def exception_statement(self, name: Optional[str] = None) -> Statement:
         """
@@ -136,61 +127,67 @@ class _TestcaseArguments:
         :return: The exception statement.
         """
         if name:
-            return self._exception_function(Identifier(name))
+            return self.exception_function(Identifier(name))
         else:
-            return self._exception_function(NothingType())
+            return self.exception_function(NothingType())
 
 
 @dataclass
-class _ContextArguments:
-    """Arguments for a context template."""
+class PreparedContext:
+    """
+    A context that has been prepared for code generation.
+    """
 
-    # The "before" code.
-    before: str
-    # The after code.
-    after: str
-    # A list of the other testcases.
-    testcases: List[_TestcaseArguments]
-    # Access to the underlying context.
     context: Context
+    "The original context."
+    testcases: List[PreparedTestcase]
+    "A list of prepared testcases."
+    before: str
+    "The code to execute before the context."
+    after: str
+    "The code to execute after the context."
 
 
 @dataclass
-class _ExecutionUnitArguments:
-    """Arguments for an execution unit template."""
+class PreparedExecutionUnit:
+    """
+    An execution unit that has been prepared for code generation.
+    """
 
-    # The name of the execution.
-    execution_name: str
-    # The name of the file for the return channel.
-    value_file: str
-    # The name of the file for the exception channel.
-    exception_file: str
-    # The name of the submission file.
-    submission_name: str
-    # The secret ID.
-    secret_id: str
-    # The secret context ID.
-    context_secret_id: str
-    # The contexts
-    contexts: List[_ContextArguments]
-    # The names of the language-specific evaluators we will need.
-    evaluator_names: Set[str]
     execution_unit: "ExecutionUnit"
+    "The original execution unit."
+    contexts: List[PreparedContext]
+    "The prepared contexts."
+    execution_name: str
+    "The name of the execution."
+    value_file: str
+    "The name of the file for the return channel."
+    exception_file: str
+    "The name of the file for the exception channel."
+    submission_name: str
+    "The name of the submission file."
+    context_separator_secret: str
+    "Secret for use in the context separator."
+    testcase_separator_secret: str
+    "Secret for use in the testcase separator."
+    evaluator_names: Set[str]
+    "The names of the language-specific evaluators we will need."
+
+
+def generate_execution_unit(
+    bundle: Bundle, prepared_execution: PreparedExecutionUnit
+) -> str:
+    """
+    Generate the code for one execution unit.
+    :param prepared_execution:
+    :param bundle:
+    :return:
+    """
+    return bundle.lang_config.generate_execution_unit(prepared_execution)
 
 
 @dataclass
-class _CustomEvaluatorArguments:
-    evaluator: str
-    function: FunctionCall
-
-
-@dataclass
-class _SelectorArguments:
-    contexts: List[str]
-
-
-@dataclass
-class InternalFunctionCall(FunctionCall):
+class PreparedFunctionCall(FunctionCall):
     has_root_namespace: bool = True
     # TODO: find out why this variable can't be initialized by the constructor
 
@@ -226,7 +223,7 @@ def _prepare_expression(bundle: Bundle, expression: Expression) -> Expression:
         expression = Identifier(
             bundle.lang_config.conventionalize_identifier(expression)
         )
-    elif isinstance(expression, InternalFunctionCall):
+    elif isinstance(expression, PreparedFunctionCall):
         expression.arguments = [
             _prepare_argument(bundle, arg) for arg in expression.arguments
         ]
@@ -249,7 +246,7 @@ def _prepare_expression(bundle: Bundle, expression: Expression) -> Expression:
         else:
             namespace = _prepare_expression(bundle, expression.namespace)
 
-        internal = InternalFunctionCall(
+        internal = PreparedFunctionCall(
             type=expression.type,
             arguments=[_prepare_argument(bundle, arg) for arg in expression.arguments],
             name=name,
@@ -313,7 +310,7 @@ def _create_handling_function(
             output.evaluator, SpecificEvaluator
         ):
             arguments = [
-                InternalFunctionCall(
+                PreparedFunctionCall(
                     type=FunctionType.FUNCTION,
                     name=lang_config.conventionalize_function(evaluator.name),
                     namespace=Identifier(evaluator_name),
@@ -326,7 +323,7 @@ def _create_handling_function(
             arguments = [expression]
             function_name = send_value
 
-        internal = InternalFunctionCall(
+        internal = PreparedFunctionCall(
             type=FunctionType.FUNCTION,
             name=lang_config.conventionalize_function(function_name),
             arguments=[_prepare_argument(bundle, arg) for arg in arguments],
@@ -360,7 +357,7 @@ def _create_exception_function(
 
 def _prepare_testcase(
     bundle: Bundle, testcase: Testcase
-) -> Tuple[_TestcaseArguments, List[str]]:
+) -> Tuple[PreparedTestcase, List[str]]:
     """
     Prepare a testcase.
 
@@ -376,7 +373,7 @@ def _prepare_testcase(
     names = []
 
     if testcase.is_main_testcase():
-        input_arguments = MainCallArguments(arguments=testcase.input.arguments)
+        prepared_input = testcase.input
     else:
         if isinstance(testcase.input, get_args(Expression)):
             # noinspection PyTypeChecker
@@ -400,8 +397,8 @@ def _prepare_testcase(
         if not has_return:
             value_function_call = None
             assert evaluator_name is None
-        input_arguments = NormalArguments(
-            command=command, _value_function=value_function_call
+        prepared_input = PreparedTestcaseStatement(
+            statement=command, value_function=value_function_call
         )
 
     (exception_function_call, exception_evaluator_name) = _create_exception_function(
@@ -412,10 +409,10 @@ def _prepare_testcase(
         names.append(exception_evaluator_name)
 
     return (
-        _TestcaseArguments(
+        PreparedTestcase(
             testcase=testcase,
-            input=input_arguments,
-            _exception_function=exception_function_call,
+            input=prepared_input,
+            exception_function=exception_function_call,
         ),
         names,
     )
@@ -423,7 +420,7 @@ def _prepare_testcase(
 
 def _prepare_testcases(
     bundle: Bundle, context: Context
-) -> Tuple[List[_TestcaseArguments], Set[str]]:
+) -> Tuple[List[PreparedTestcase], Set[str]]:
     """
     Prepare all testcases in a context.
 
@@ -606,29 +603,18 @@ def convert_statement(bundle: Bundle, statement: Statement) -> str:
 
     :return: The code the statement.
     """
-    template = bundle.lang_config.template_name(TemplateType.STATEMENT)
     if isinstance(statement, get_args(Expression)):
         statement = _prepare_expression(bundle, statement)
-        template = find_template(bundle, template)
-        try:
-            return template.render(statement=statement)
-        except Exception as e:
-            _logger.error(exceptions.text_error_template().render())
-            raise e
+    else:
+        assert isinstance(statement, get_args(Assignment))
+        statement = _prepare_assignment(bundle, statement)
 
-    assert isinstance(statement, get_args(Assignment))
-    statement = _prepare_assignment(bundle, statement)
-    template = find_template(bundle, template)
-    try:
-        return template.render(statement=statement, full=True)
-    except Exception as e:
-        _logger.error(exceptions.text_error_template().render())
-        raise e
+    return bundle.lang_config.generate_statement(statement)
 
 
-def _generate_context(
+def _prepare_context(
     bundle: Bundle, context: Context
-) -> Tuple[_ContextArguments, Set[str]]:
+) -> Tuple[PreparedContext, Set[str]]:
     """
     Prepare one context for the execution
 
@@ -648,10 +634,72 @@ def _generate_context(
     )
     testcases, evaluator_names = _prepare_testcases(bundle, context)
     return (
-        _ContextArguments(
+        PreparedContext(
             before=before_code, after=after_code, testcases=testcases, context=context
         ),
         evaluator_names,
+    )
+
+
+# execution_args = prepare_execution_unit(
+#     bundle, destination, execution_name, execution_unit
+# )
+#
+# evaluator_files = [f"{x}.{bundle.lang_config.extension_file()}" for x in
+#                    execution_args.evaluator_names]
+#
+# execution_destination = destination / bundle.lang_config.with_extension(
+#     execution_name)
+# template = bundle.lang_config.template_name(TemplateType.RUN)
+#
+# return (
+#     find_and_write_template(
+#         bundle, execution_args, execution_destination, template
+#     ),
+#     evaluator_files,
+# )
+
+
+def prepare_execution_unit(
+    bundle: Bundle,
+    destination: Path,
+    execution_name: str,
+    execution_unit: "ExecutionUnit",
+) -> PreparedExecutionUnit:
+    """
+    Prepare an execution unit for code generation.
+
+    :param bundle: The configuration bundle.
+    :param destination: Where the generated files should go.
+    :param execution_unit: The execution for which generation is happening.
+    :param execution_name: The name of the execution module.
+
+    :return: The name of the generated file in the given destination and a set
+             of evaluator names that will also be needed.
+    """
+    evaluator_names = set()
+    contexts = []
+    for context in execution_unit.contexts:
+        context_args, context_evaluator_names = _prepare_context(bundle, context)
+        contexts.append(context_args)
+        evaluator_names.update(context_evaluator_names)
+
+    value_file_name = value_file(bundle, destination).name
+    exception_file_name = exception_file(bundle, destination).name
+    submission_name = bundle.lang_config.submission_name(bundle.suite)
+
+    # Extract the main testcase and exit testcase.
+
+    return PreparedExecutionUnit(
+        execution_name=execution_name,
+        value_file=value_file_name,
+        exception_file=exception_file_name,
+        submission_name=submission_name,
+        testcase_separator_secret=bundle.secret,
+        context_separator_secret=bundle.context_separator_secret,
+        contexts=contexts,
+        execution_unit=execution_unit,
+        evaluator_names=evaluator_names,
     )
 
 
@@ -672,44 +720,24 @@ def generate_execution(
     :return: The name of the generated file in the given destination and a set
              of evaluator names that will also be needed.
     """
-    lang_config = bundle.lang_config
-    evaluator_names = set()
-    contexts = []
-
-    for context in execution_unit.contexts:
-        context_args, context_evaluator_names = _generate_context(bundle, context)
-        contexts.append(context_args)
-        evaluator_names.update(context_evaluator_names)
-
-    value_file_name = value_file(bundle, destination).name
-    exception_file_name = exception_file(bundle, destination).name
-    submission_name = lang_config.submission_name(bundle.suite)
-
-    # Extract the main testcase and exit testcase.
-
-    execution_args = _ExecutionUnitArguments(
-        execution_name=execution_name,
-        value_file=value_file_name,
-        exception_file=exception_file_name,
-        submission_name=submission_name,
-        secret_id=bundle.secret,
-        context_secret_id=bundle.context_separator_secret,
-        contexts=contexts,
-        execution_unit=execution_unit,
-        evaluator_names=evaluator_names,
+    prepared_execution = prepare_execution_unit(
+        bundle, destination, execution_name, execution_unit
     )
 
-    evaluator_files = [f"{x}.{lang_config.extension_file()}" for x in evaluator_names]
+    execution_code = generate_execution_unit(bundle, prepared_execution)
 
-    execution_destination = destination / lang_config.with_extension(execution_name)
-    template = lang_config.template_name(TemplateType.RUN)
+    evaluator_files = [
+        f"{x}.{bundle.lang_config.extension_file()}"
+        for x in prepared_execution.evaluator_names
+    ]
 
-    return (
-        find_and_write_template(
-            bundle, execution_args, execution_destination, template
-        ),
-        evaluator_files,
-    )
+    execution_name = bundle.lang_config.with_extension(execution_name)
+    execution_destination = destination / execution_name
+
+    with open(execution_destination, "w") as execution_file:
+        execution_file.write(execution_code)
+
+    return execution_name, evaluator_files
 
 
 def generate_selector(
@@ -726,14 +754,12 @@ def generate_selector(
     """
     assert bundle.lang_config.needs_selector()
     selector_name = bundle.lang_config.selector_name()
-    destination /= bundle.lang_config.with_extension(selector_name)
-    selector = bundle.lang_config.template_name(TemplateType.SELECTOR)
-    return find_and_write_template(
-        bundle=bundle,
-        template_args=_SelectorArguments(contexts=context_names),
-        destination=destination,
-        template_name=selector,
-    )
+    selector_filename = bundle.lang_config.with_extension(selector_name)
+    selector_destination = destination / selector_filename
+    selector_code = bundle.lang_config.generate_selector(context_names)
+    with open(selector_destination, "w") as execution_file:
+        execution_file.write(selector_code)
+    return selector_filename
 
 
 def custom_evaluator_arguments(evaluator: ProgrammedEvaluator) -> Value:
@@ -763,7 +789,7 @@ def generate_custom_evaluator(
     )
     arguments = custom_evaluator_arguments(evaluator)
 
-    function = InternalFunctionCall(
+    function = PreparedFunctionCall(
         type=FunctionType.FUNCTION,
         namespace=Identifier(evaluator_name),
         name=evaluator.function.name,
@@ -771,10 +797,16 @@ def generate_custom_evaluator(
     )
     function.has_root_namespace = False
 
-    args = _CustomEvaluatorArguments(evaluator=evaluator_name, function=function)
+    code = bundle.lang_config.generate_check_function(evaluator_name, function)
 
-    template = bundle.lang_config.template_name(TemplateType.EVALUATOR_EXECUTOR)
-    return find_and_write_template(bundle, args, destination, template)
+    if destination.is_dir():
+        destination /= bundle.lang_config.with_extension("EvaluatorExecutor")
+
+    # noinspection PyTypeChecker
+    with open(destination, "w") as check_function_file:
+        check_function_file.write(code)
+
+    return destination.name
 
 
 def value_file(bundle: Bundle, directory: Path):

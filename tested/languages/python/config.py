@@ -1,6 +1,7 @@
 import logging
 import os
 import re
+import typing
 from pathlib import Path
 from typing import List, Optional, Tuple
 
@@ -13,6 +14,10 @@ from tested.languages.config import (
     Language,
     trace_to_html,
 )
+from tested.serialisation import FunctionCall, Statement, Value
+
+if typing.TYPE_CHECKING:
+    from tested.languages.generator import PreparedExecutionUnit
 
 logger = logging.getLogger(__name__)
 
@@ -188,3 +193,23 @@ class Python(Language):
             return trace
         else:
             return None
+
+    def generate_statement(self, statement: Statement) -> str:
+        from tested.languages.python import generators
+
+        return generators.convert_statement(statement)
+
+    def generate_execution_unit(self, execution_unit: "PreparedExecutionUnit") -> str:
+        from tested.languages.python import generators
+
+        return generators.convert_execution_unit(execution_unit)
+
+    def generate_check_function(self, name: str, function: FunctionCall) -> str:
+        from tested.languages.python import generators
+
+        return generators.convert_check_function(name, function)
+
+    def generate_encoder(self, values: List[Value]) -> str:
+        from tested.languages.python import generators
+
+        return generators.convert_encoder(values)

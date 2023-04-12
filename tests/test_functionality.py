@@ -38,7 +38,7 @@ quotes = {
     "haskell": '"',
     "javascript": '"',
     "runhaskell": '"',
-    "bash": '"',
+    "bash": "'",
     "csharp": '"',
 }
 
