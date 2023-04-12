@@ -5,7 +5,6 @@ name = "pypi"
 
 [packages]
 psutil = "==5.9.4"
-mako = "==1.1.6"
 pydantic = "==1.9.2"
 jsonschema = "==4.17.3"
 typing-inspect = "==0.8.0"
@@ -19,7 +18,10 @@ pylint = "==2.17.1"
 pytest = ""
 pytest-mock = ""
 pytest-cov = ""
+# Still needed for instantiating exercise descriptions.
+# TODO: should we get rid of this?
+mako = "==1.1.6"
 
 [requires]
-python_version = "3.9"
+python_version = "3.11"
 python_full_version = "3.11.2"
