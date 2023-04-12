@@ -20,7 +20,7 @@ pytest-mock = ""
 pytest-cov = ""
 # Still needed for instantiating exercise descriptions.
 # TODO: should we get rid of this?
-mako = "==1.1.6"
+mako = "==1.2.2"
 
 [requires]
 python_version = "3.11"
