@@ -22,7 +22,7 @@ import math
 import operator
 from dataclasses import field, replace
 from decimal import Decimal
-from enum import Enum
+from enum import StrEnum, auto, unique
 from functools import reduce
 from typing import Any, Dict, Iterable, List, Literal, Optional, Tuple, Union
 
@@ -145,7 +145,8 @@ class WithFunctions:
         raise NotImplementedError
 
 
-class SpecialNumbers(str, Enum):
+@unique
+class SpecialNumbers(StrEnum):
     NOT_A_NUMBER = "nan"
     POS_INFINITY = "inf"
     NEG_INFINITY = "-inf"
@@ -344,20 +345,21 @@ class Identifier(str, WithFeatures, WithFunctions):
         return Identifier(v)
 
 
-class FunctionType(str, Enum):
-    FUNCTION = "function"
+@unique
+class FunctionType(StrEnum):
+    FUNCTION = auto()
     """
     A function expression. A function can be in a namespace if it is provided.
     The namespace can be an instance, in which case it is a method (e.g. Java or
     Python), but it can also be a function inside a module (e.g. Haskell).
-    E.g. with Java: a function without a given namespace will have the namespace of
-    it's implementing class
+    For example, in Java, a function without a given namespace will have the
+    namespace of its implementing class
     """
-    CONSTRUCTOR = "constructor"
+    CONSTRUCTOR = auto()
     """
     A constructor.
     """
-    PROPERTY = "property"
+    PROPERTY = auto()
     """
     Access a property on an object.
     """
@@ -509,7 +511,7 @@ def generate_schema():
     """
     sc = _SerialisationSchema.schema()
     sc["$id"] = "tested/serialisation"
-    sc["$schema"] = "http://json-schema.org/schema#"
+    sc["$schema"] = "https://json-schema.org/schema#"
     print(json.dumps(sc, indent=2))
 
 
@@ -517,7 +519,7 @@ def parse_value(value: str) -> Value:
     """
     Parse the json of a value into the relevant data structures.
 
-    If ``value`` is not valid json, a :class:`SerialisationError` will be thrown.
+    If ``value`` is not valid json, a `SerialisationError` will be thrown.
 
     :param value: The json to be parsed.
     :return: The parsed data.

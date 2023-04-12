@@ -276,8 +276,8 @@ def test_template_code_block_markdown(lang: str, prompt: str):
         (
             "c",
             ">",
-            '<span class="n">random</span><span class="p">()</span><span class="w"></span>',
-            '<span class="mi">5</span><span class="w"></span>',
+            '<span class="n">random</span><span class="p">()</span>',
+            '<span class="mi">5</span>',
         ),
         (
             "kotlin",
@@ -294,8 +294,8 @@ def test_template_code_block_markdown(lang: str, prompt: str):
         (
             "haskell",
             ">",
-            '<span class="nf">random</span><span class="w"></span>',
-            '<span class="mi">5</span><span class="w"> </span><span class="ow">::</span><span class="w"> </span><span class="kt">Int</span><span class="w"></span>',
+            '<span class="nf">random</span>',
+            '<span class="mi">5</span><span class="w"> </span><span class="ow">::</span><span class="w"> </span><span class="kt">Int</span>',
         ),
     ],
 )

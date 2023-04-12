@@ -1,10 +1,11 @@
-from enum import Enum
+from enum import StrEnum, auto, unique
 
 
-class ComplexExpressionTypes(str, Enum):
+@unique
+class ComplexExpressionTypes(StrEnum):
     """
     These datatypes are only used in the language configs, not in the test suite
     """
 
-    FUNCTION_CALLS = "function_calls"
-    IDENTIFIERS = "identifiers"
+    FUNCTION_CALLS = auto()
+    IDENTIFIERS = auto()

@@ -9,9 +9,10 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
         with:
-          python-version: 3.10.10
-          cache: 'pip'
-      - run: pip install -r requirements.txt -r requirements-test.txt -r tested/languages/python/requirements.txt
+          python-version: 3.11.2
+          cache: 'pipenv'
+      - run: pip install pipenv
+      - run: pipenv install --dev
       - uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
@@ -35,11 +36,11 @@ jobs:
         with:
           node-version: 16
       - run: npm install abstract-syntax-tree@2.20
-      - run: npm install -g eslint@8.7
+      - run: npm install -g eslint@8.36
       - run: sudo apt -y install hlint cppcheck shellcheck checkstyle
-      - run: curl -sSLO https://github.com/pinterest/ktlint/releases/download/0.43.2/ktlint && chmod a+x ktlint
+      - run: curl -sSLO https://github.com/pinterest/ktlint/releases/download/0.48.2/ktlint && chmod a+x ktlint
       - run: echo "${GITHUB_WORKSPACE}" >> $GITHUB_PATH
-      - run: python -m pytest --cov=tested tests/
+      - run: pipenv run pytest --cov=tested tests/
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
   lint:

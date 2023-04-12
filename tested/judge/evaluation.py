@@ -1,6 +1,6 @@
 import html
 import logging
-from enum import Enum
+from enum import StrEnum, unique
 from pathlib import Path
 from typing import Iterable, List, Optional, Set, Tuple
 
@@ -54,7 +54,8 @@ from tested.utils import get_args, safe_del, safe_get
 _logger = logging.getLogger(__name__)
 
 
-class Channel(str, Enum):
+@unique
+class Channel(StrEnum):
     """
     The different output channels.
     """

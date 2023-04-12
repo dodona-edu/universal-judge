@@ -11,19 +11,20 @@ the authoritative json-schema, provided by Dodona.
 """
 import dataclasses
 import json
-from enum import Enum
+from enum import StrEnum, auto, unique
 from typing import IO, Literal, Optional, Type, Union
 
 from pydantic import BaseModel
 from pydantic.dataclasses import dataclass
 
 
-class Permission(str, Enum):
+@unique
+class Permission(StrEnum):
     """To which level of user this message is visible."""
 
-    STAFF = "staff"
-    STUDENT = "student"
-    ZEUS = "zeus"
+    STAFF = auto()
+    STUDENT = auto()
+    ZEUS = auto()
 
 
 @dataclass
@@ -40,13 +41,14 @@ BadgeCount = int
 Index = int
 
 
-class Severity(str, Enum):
-    ERROR = "error"
-    INFO = "info"
-    WARNING = "warning"
+@unique
+class Severity(StrEnum):
+    ERROR = auto()
+    INFO = auto()
+    WARNING = auto()
 
 
-class Status(str, Enum):
+class Status(StrEnum):
     COMPILATION_ERROR = "compilation error"
     CORRECT = "correct"
     MEMORY_LIMIT_EXCEEDED = "memory limit exceeded"
