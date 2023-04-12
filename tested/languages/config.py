@@ -32,8 +32,6 @@ from enum import Enum, StrEnum, auto, unique
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Mapping, Optional, Set, Tuple, Union
 
-from mako import exceptions
-
 from tested.configs import Bundle
 from tested.datatypes import AdvancedTypes, AllTypes, ExpressionTypes, string_to_type
 from tested.dodona import AnnotateCode, ExtendedMessage, Message, Permission, Status
@@ -42,7 +40,6 @@ from tested.internationalization import get_i18n_string
 from tested.languages.description_generator import DescriptionGenerator
 from tested.serialisation import (
     ExceptionValue,
-    Expression,
     FunctionCall,
     Statement,
     Value,
