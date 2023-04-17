@@ -1,11 +1,13 @@
 [tool.isort]
 profile = "black"
+skip_glob = ["tests/exercises/*"]
 
 [tool.pylint.format]
 max-line-length = "88"
 
 [tool.black]
 line-length = 88
+extend-exclude="tests/exercises/*"
 
 [tool.pytest.ini_options]
 markers = [
