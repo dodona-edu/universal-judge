@@ -1,1 +1,0 @@
-Gedeeld door nul is flauwekul.
