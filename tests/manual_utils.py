@@ -59,7 +59,7 @@ def configuration(
     ext = get_language(language).extension_file()
     if options is None:
         options = {}
-    exercise_dir = Path(config.rootdir) / "exercise"
+    exercise_dir = Path(config.rootdir) / "tests" / "exercises"
     ep = f"{exercise_dir}/{exercise}"
     # noinspection PyArgumentList
     option_dict = recursive_dict_merge(
