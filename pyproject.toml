@@ -6,3 +6,10 @@ max-line-length = "88"
 
 [tool.black]
 line-length = 88
+
+[tool.pytest.ini_options]
+markers = [
+    "haskell", # Run the haskell tests
+    "linter", # Run linter tests
+    "slow", # Slow tests
+]
