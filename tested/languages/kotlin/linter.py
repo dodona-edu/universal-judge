@@ -90,7 +90,7 @@ def run_ktlint(
 
             annotations.append(
                 AnnotateCode(
-                    row=error.get("line", 1) - 1,
+                    row=error.get("line", 1) - 1 + bundle.config.source_offset,
                     text=message,
                     externalUrl="https://ktlint.github.io/#rules",
                     column=error.get("column", 1) - 1,
