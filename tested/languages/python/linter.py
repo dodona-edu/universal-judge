@@ -85,11 +85,11 @@ def run_pylint(
             )
 
         start_row = message.get("line", 1)
-        end_row = message.get("endLine") + 1
-        rows = end_row - start_row if end_row else None
+        end_row = message.get("endLine")
+        rows = end_row + 1 - start_row if end_row else None
         start_col = message.get("column", 1)
-        end_col = message.get("endColumn") + 1
-        cols = end_col - start_col if end_col else None
+        end_col = message.get("endColumn")
+        cols = end_col + 1 - start_col if end_col else None
 
         annotations.append(
             AnnotateCode(
