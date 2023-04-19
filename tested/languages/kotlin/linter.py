@@ -90,10 +90,10 @@ def run_ktlint(
 
             annotations.append(
                 AnnotateCode(
-                    row=max(int(error.get("line", "-1")) - 1, 0),
+                    row=error.get("line", 1) - 1,
                     text=message,
                     externalUrl="https://ktlint.github.io/#rules",
-                    column=max(int(error.get("column", "-1")) - 1, 0),
+                    column=error.get("column", 1) - 1,
                     type=Severity.INFO,
                 )
             )
