@@ -84,18 +84,18 @@ def run_pylint(
                 f"https://pylint.pycqa.org/en/latest/messages/{raw_type}/{symbol}.html"
             )
 
-        start_row = message.get("line", 1)
+        start_row = message.get("line", 0)
         end_row = message.get("endLine")
         rows = end_row + 1 - start_row if end_row else None
-        start_col = message.get("column", 1)
+        start_col = message.get("column", 0)
         end_col = message.get("endColumn")
-        cols = end_col + 1 - start_col if end_col else None
+        cols = end_col - start_col if end_col else None
 
         annotations.append(
             AnnotateCode(
                 row=start_row - 1 + bundle.config.source_offset,
                 rows=rows,
-                column=start_col - 1,
+                column=start_col,
                 columns=cols,
                 text=text,
                 externalUrl=external,
