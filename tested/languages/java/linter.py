@@ -76,10 +76,12 @@ def run_checkstyle(
                 external = f'https://checkstyle.sourceforge.io/apidocs/index.html?{source.replace(".", "/")}.html'
             annotations.append(
                 AnnotateCode(
-                    row=max(int(error_element.attrib.get("line", "-1")) - 1, 0),
+                    row=int(error_element.attrib.get("line", "1"))
+                    - 1
+                    + bundle.config.source_offset,
                     text=message,
                     externalUrl=external,
-                    column=max(int(error_element.attrib.get("column", "-1")) - 1, 0),
+                    column=int(error_element.attrib.get("column", "1")) - 1,
                     type=message_categories.get(
                         error_element.attrib.get("severity", "warning"),
                         Severity.WARNING,
