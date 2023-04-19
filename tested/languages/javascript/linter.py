@@ -75,12 +75,21 @@ def run_eslint(
             external = None
             if rule_id:
                 external = f"https://eslint.org/docs/rules/{rule_id}"
+
+            start_row = message.get("line", 1)
+            end_row = message.get("endLine") + 1
+            rows = end_row - start_row if end_row else None
+            start_col = message.get("column", 1)
+            end_col = message.get("endColumn") + 1
+            cols = end_col - start_col if end_col else None
             annotations.append(
                 AnnotateCode(
-                    row=max(int(message.get("line", "-1")) - 1, 0),
+                    row=start_row - 1 + bundle.config.source_offset,
+                    rows=rows,
                     text=text,
                     externalUrl=external,
-                    column=max(int(message.get("column", "-1")) - 1, 0),
+                    column=start_col - 1,
+                    columns=cols,
                     type=severity[int(message.get("severity", 1))],
                 )
             )
