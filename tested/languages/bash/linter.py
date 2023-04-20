@@ -70,12 +70,20 @@ def run_shellcheck(
         external = None
         if code:
             external = f"https://github.com/koalaman/shellcheck/wiki/SC{code}"
+        start_row = shellcheck_object.get("line", 1)
+        end_row = shellcheck_object.get("endLine")
+        rows = end_row - start_row if end_row else None
+        start_col = shellcheck_object.get("column", 1)
+        end_col = shellcheck_object.get("endColumn")
+        cols = end_col - start_col if end_col else None
         annotations.append(
             AnnotateCode(
-                row=max(int(shellcheck_object.get("line", "-1")) - 1, 0),
+                row=start_row - 1 + bundle.config.source_offset,
+                rows=rows,
                 text=text,
                 externalUrl=external,
-                column=max(int(shellcheck_object.get("column", "-1")) - 1, 0),
+                column=start_col - 1,
+                columns=cols,
                 type=message_categories.get(
                     shellcheck_object.get("level", "warning"), Severity.WARNING
                 ),

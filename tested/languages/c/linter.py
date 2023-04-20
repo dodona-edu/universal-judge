@@ -72,20 +72,19 @@ def run_cppcheck(
             if not message:
                 continue
             severity = error.attrib.get("severity", "warning")
-            position = None
+            row = None
+            col = None
             for el in error:
                 if el.tag != "location":
                     continue
-                position = (
-                    max(int(el.attrib.get("line", "-1")) - 1, 0),
-                    max(int(el.attrib.get("column", "-1")) - 1, 0),
-                )
+                row = int(el.attrib.get("line", "1")) - 1 + bundle.config.source_offset
+                col = int(el.attrib.get("column", "1")) - 1
                 break
             annotations.append(
                 AnnotateCode(
-                    row=position[0],
+                    row=row,
                     text=message,
-                    column=position[1],
+                    column=col,
                     type=message_categories.get(severity, Severity.WARNING),
                 )
             )

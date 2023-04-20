@@ -6,7 +6,7 @@ import json
 import logging
 from dataclasses import field
 from pathlib import Path
-from typing import IO, TYPE_CHECKING, Any, Dict, Optional
+from typing import IO, TYPE_CHECKING, Any, Dict, Optional, Tuple
 
 from pydantic import BaseModel, root_validator
 from pydantic.dataclasses import dataclass
@@ -86,6 +86,9 @@ class DodonaConfig(BaseModel):
     output_limit: int = 10240 * 1024  # Default value for backward compatibility.
     timing_statistics: bool = False
 
+    # Sometimes, we need to offset the source code.
+    source_offset: int = 0
+
     def config_for(self) -> Dict[str, Any]:
         return self.options.language.get(self.programming_language, dict())
 
@@ -135,7 +138,7 @@ class Bundle:
     suite: Suite
 
 
-def _get_language(config: DodonaConfig) -> str:
+def _get_language(config: DodonaConfig) -> Tuple[str, int]:
     import tested.languages as langs
 
     bang = consume_shebang(config.source)
@@ -144,13 +147,13 @@ def _get_language(config: DodonaConfig) -> str:
             f"Found shebang language and it exists, using {bang} instead "
             f"of config language {config.programming_language}."
         )
-        return bang
+        return bang, 1
     else:
         _logger.debug(
             f"No shebang found or it doesn't exist: {bang}. Using "
             f"configuration language {config.programming_language}."
         )
-        return config.programming_language
+        return config.programming_language, 0
 
 
 def create_bundle(
@@ -173,7 +176,8 @@ def create_bundle(
     import tested.languages as langs
 
     if language is None:
-        language = _get_language(config)
+        language, offset = _get_language(config)
+        config.source_offset = offset
     # noinspection PyDataclass
     adjusted_config = config.copy(update={"programming_language": language})
     lang_config = langs.get_language(language)

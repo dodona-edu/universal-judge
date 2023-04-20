@@ -76,12 +76,21 @@ def run_hlint(
         if notes:
             hint = f"{hint}\n{notes}"
 
+        start_row = hlint_message.get("startLine", 1)
+        end_row = hlint_message.get("endLine")
+        rows = end_row - start_row if end_row else None
+        start_col = hlint_message.get("startColumn", 1)
+        end_col = hlint_message.get("endColumn")
+        cols = end_col - start_col if end_col else None
+
         annotations.append(
             AnnotateCode(
-                row=max(int(hlint_message.get("startLine", "-1")) - 1, 0),
+                row=start_row - 1 + bundle.config.source_offset,
+                rows=rows,
                 text=hint,
                 externalUrl="https://github.com/ndmitchell/hlint/blob/master/hints.md",
-                column=max(int(hlint_message.get("startColumn", "-1")) - 1, 0),
+                column=start_col - 1,
+                columns=cols,
                 type=message_categories.get(
                     hlint_message.get("severity", "warning"), Severity.WARNING
                 ),
