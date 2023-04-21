@@ -11,6 +11,7 @@ from pathlib import Path
 
 import pytest
 
+from tested.judge.execution import ExecutionResult
 from tested.languages import LANGUAGES
 from tests.manual_utils import assert_valid_output, configuration, execute_config
 
@@ -735,3 +736,27 @@ def test_javascript_exception_missing_message(tmp_path: Path, pytestconfig):
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["wrong"]
     assert len(updates.find_all("append-message")) == 1
+
+
+def test_timeouts_propagate_to_contexts():
+    execution_result = ExecutionResult(
+        stdout="--PaqJwrEn0-- SEP--pBoq4YdEP-- SEP",
+        stderr="--PaqJwrEn0-- SEP--pBoq4YdEP-- SEP",
+        exit=0,
+        timeout=True,
+        memory=False,
+        context_separator="--PaqJwrEn0-- SEP",
+        testcase_separator="--pBoq4YdEP-- SEP",
+        results="--PaqJwrEn0-- SEP--pBoq4YdEP-- SEP",
+        exceptions="--PaqJwrEn0-- SEP--pBoq4YdEP-- SEP",
+    )
+    context_results = execution_result.to_context_results()
+    assert len(context_results) == 1
+    context_result = context_results[0]
+    assert context_result.timeout
+    assert not context_result.memory
+    assert context_result.exit == 0
+    assert context_result.stdout == execution_result.testcase_separator
+    assert context_result.stderr == execution_result.testcase_separator
+    assert context_result.results == execution_result.testcase_separator
+    assert context_result.exceptions == execution_result.testcase_separator
