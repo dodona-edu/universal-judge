@@ -56,7 +56,6 @@ class ExecutionResult(BaseExecutionResult):
         exceptions = self.exceptions.split(self.context_separator)
         stderr = self.stderr.split(self.context_separator)
         stdout = self.stdout.split(self.context_separator)
-        size = max(len(results), len(exceptions), len(stderr), len(stdout))
 
         # Since the context separator is first, we should have one that is empty.
         # We only remove it if it is in fact empty, otherwise ignore it.
@@ -64,6 +63,8 @@ class ExecutionResult(BaseExecutionResult):
         safe_del(stderr, 0, lambda e: e == "")
         safe_del(exceptions, 0, lambda e: e == "")
         safe_del(results, 0, lambda e: e == "")
+
+        size = max(len(results), len(exceptions), len(stderr), len(stdout))
 
         if size == 0:
             return [
@@ -91,8 +92,8 @@ class ExecutionResult(BaseExecutionResult):
                     exceptions=e or "",
                     stdout=out or "",
                     stderr=err or "",
-                    timeout=self.timeout and size == index,
-                    memory=self.memory and size == index,
+                    timeout=self.timeout and index == size - 1,
+                    memory=self.memory and index == size - 1,
                 )
             )
 
