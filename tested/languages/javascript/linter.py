@@ -78,10 +78,10 @@ def run_eslint(
 
             start_row = message.get("line", 1)
             end_row = message.get("endLine")
-            rows = end_row + 1 - start_row if end_row else None
+            rows = end_row - start_row if end_row and end_row > start_row else None
             start_col = message.get("column", 1)
             end_col = message.get("endColumn")
-            cols = end_col + 1 - start_col if end_col else None
+            cols = end_col - start_col if end_col and end_col > start_col else None
             annotations.append(
                 AnnotateCode(
                     row=start_row - 1 + bundle.config.source_offset,
