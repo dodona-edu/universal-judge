@@ -9,6 +9,6 @@ rules:
     # TODO: Add module.export before linting, to allow detecting unused vars in classes and functions
     no-unused-vars: ["off", { "vars": "local", "args": "after-used", "ignoreRestSiblings": false }]
 parserOptions:
-    ecmaVersion: 11
+    ecmaVersion: "latest"
     sourceType: "script"
     ecmaFeatures: {}
