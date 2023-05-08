@@ -34,10 +34,10 @@ from tested.datatypes import (
     resolve_to_basic,
 )
 from tested.evaluators.value import check_data_type
+from tested.features import TypeSupport
 from tested.judge.compilation import run_compilation
 from tested.judge.execution import execute_file, filter_files
 from tested.judge.utils import BaseExecutionResult, copy_from_paths_to_path
-from tested.languages.config import TypeSupport
 from tested.languages.conventionalize import conventionalize_namespace
 from tested.languages.templates import path_to_dependencies
 from tested.serialisation import (

@@ -142,7 +142,7 @@ def _filter_valid_languages(languages: List[str], test_suite: Suite) -> List[str
         # TODO: get rid of the None
         language: Language = get_language(None, language)
 
-        from .languages.config import TypeSupport
+        from tested.features import TypeSupport
 
         required = test_suite.get_used_features()
 

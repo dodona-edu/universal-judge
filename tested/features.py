@@ -3,7 +3,7 @@ Module containing the definitions of the features we can support.
 """
 import logging
 import operator
-from enum import StrEnum, unique
+from enum import Enum, StrEnum, auto, unique
 from functools import reduce
 from typing import TYPE_CHECKING, Iterable, NamedTuple, Set
 
@@ -80,7 +80,6 @@ def is_supported(bundle: "Bundle") -> bool:
 
     :return: True or False
     """
-    from .languages.config import TypeSupport
 
     required = bundle.suite.get_used_features()
 
@@ -128,3 +127,28 @@ def is_supported(bundle: "Bundle") -> bool:
             return False
 
     return True
+
+
+class TypeSupport(Enum):
+    SUPPORTED = auto()
+    """
+    The type is fully supported.
+    
+    For advanced types, this requires the language to have a suitable, distinct
+    type. It is not enough that another type can support it. For example, Python
+    does not have support for int16, even though all int16 values can easily fit
+    into the Python integer type.
+    """
+    UNSUPPORTED = auto()
+    """
+    There is no support. This is the default value to allow for expansion of the
+    types. Exercises which use these types will not be solvable in a language
+    for which the type is unsupported.
+    """
+    REDUCED = auto()
+    """
+    Used for advanced types only. This means the language has no support for the
+    type with a distinct type, but there is support using other types. In this
+    case, exercises using this type are still solvable in the programming language.
+    TESTed will use the basic type in those languages.
+    """

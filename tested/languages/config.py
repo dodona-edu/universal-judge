@@ -23,13 +23,12 @@ import logging
 import sys
 import typing
 from collections import defaultdict
-from enum import Enum, auto
 from pathlib import Path
 from typing import Callable, Dict, List, Mapping, Optional, Set, Tuple, Union
 
 from tested.datatypes import AdvancedTypes, AllTypes, ExpressionTypes, string_to_type
 from tested.dodona import AnnotateCode, Message, Status
-from tested.features import Construct
+from tested.features import Construct, TypeSupport
 from tested.internationalization import get_i18n_string
 from tested.languages.conventionalize import (
     EXECUTION_PREFIX,
@@ -52,31 +51,6 @@ FileFilter = Callable[[Path], bool]
 CallbackResult = Tuple[Command, Union[List[str], FileFilter]]
 
 _logger = logging.getLogger(__name__)
-
-
-class TypeSupport(Enum):
-    SUPPORTED = auto()
-    """
-    The type is fully supported.
-    
-    For advanced types, this requires the language to have a suitable, distinct
-    type. It is not enough that another type can support it. For example, Python
-    does not have support for int16, even though all int16 values can easily fit
-    into the Python integer type.
-    """
-    UNSUPPORTED = auto()
-    """
-    There is no support. This is the default value to allow for expansion of the
-    types. Exercises which use these types will not be solvable in a language
-    for which the type is unsupported.
-    """
-    REDUCED = auto()
-    """
-    Used for advanced types only. This means the language has no support for the
-    type with a distinct type, but there is support using other types. In this
-    case, exercises using this type are still solvable in the programming language.
-    TESTed will use the basic type in those languages.
-    """
 
 
 class Language:
