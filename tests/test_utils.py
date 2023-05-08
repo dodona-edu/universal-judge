@@ -51,6 +51,15 @@ def test_run_doctests_tested_utils():
     assert f == 0
 
 
+def test_run_doctests_tested_conventionalize():
+    import doctest
+
+    import tested.languages.conventionalize
+
+    f, _ = doctest.testmod(tested.languages.conventionalize)
+    assert f == 0
+
+
 def test_limit_output_no_limit():
     text = "aaaaa\nbbbbb\nccccc".strip()
     limited = limit_output(output=text, max_lines=3, limit_characters=17)
