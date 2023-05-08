@@ -553,17 +553,6 @@ class Language:
         """
         return [], []
 
-    def inherits_from(self) -> Optional[str]:
-        """
-        Indicates that this language inherits from another language. This means
-        that the other language will be used as a fallback if something is not
-        implemented in the other language (templates only, if you need to inherit
-        this class, just extend the config class the language).
-
-        :return: An optional language.
-        """
-        return self.options["general"].get("inherits")
-
     def filter_dependencies(
         self, bundle: Bundle, files: List[Path], context_name: str
     ) -> List[Path]:
