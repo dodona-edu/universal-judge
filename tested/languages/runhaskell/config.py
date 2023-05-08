@@ -1,35 +1,15 @@
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Tuple
+from typing import List, Tuple
 
 from tested.configs import Bundle
 from tested.dodona import AnnotateCode, Message
-from tested.languages.config import CallbackResult, Command, Config, Language
-from tested.languages.conventionalize import (
-    Conventionable,
-    NamingConventions,
-    conventionalize_namespace,
-    submission_file,
-)
-from tested.languages.utils import (
-    cleanup_description,
-    haskell_cleanup_stacktrace,
-    haskell_solution,
-)
-from tested.serialisation import FunctionCall, Statement, Value
-
-if TYPE_CHECKING:
-    from tested.languages.generation import PreparedExecutionUnit
+from tested.languages.config import CallbackResult, Command, Config
+from tested.languages.conventionalize import conventionalize_namespace, submission_file
+from tested.languages.haskell.config import Haskell
+from tested.languages.utils import haskell_cleanup_stacktrace
 
 
-class RunHaskell(Language):
-    def naming_conventions(self) -> Dict[Conventionable, NamingConventions]:
-        return {
-            "namespace": "pascal_case",
-            "identifier": "camel_case",
-            "global_identifier": "camel_case",
-            "function": "camel_case",
-        }
-
+class RunHaskell(Haskell):
     def compilation(self, files: List[str]) -> CallbackResult:
         submission = submission_file(self, self.config.suite)
         main_file = list(filter(lambda x: x == submission, files))
@@ -55,51 +35,7 @@ class RunHaskell(Language):
     ) -> Command:
         return ["runhaskell", file, *arguments]
 
-    def solution(self, solution: Path, bundle: Bundle):
-        haskell_solution(self, solution, bundle)
-
-    def linter(
-        self, bundle: Bundle, submission: Path, remaining: float
-    ) -> Tuple[List[Message], List[AnnotateCode]]:
-        # Import locally to prevent errors.
-        from tested.languages.haskell import linter
-
-        return linter.run_hlint(bundle, submission, remaining)
-
     def filter_dependencies(
         self, bundle: Bundle, files: List[str], context_name: str
     ) -> List[str]:
         return files
-
-    def cleanup_description(self, namespace: str, description: str) -> str:
-        return cleanup_description(self, namespace, description)
-
-    def cleanup_stacktrace(
-        self, traceback: str, submission_file: str, reduce_all=False
-    ) -> str:
-        return haskell_cleanup_stacktrace(traceback, submission_file, reduce_all)
-
-    def generate_statement(self, statement: Statement) -> str:
-        from tested.languages.haskell import generators
-
-        return generators.convert_statement(statement)
-
-    def generate_execution_unit(self, execution_unit: "PreparedExecutionUnit") -> str:
-        from tested.languages.haskell import generators
-
-        return generators.convert_execution_unit(execution_unit)
-
-    def generate_selector(self, contexts: List[str]) -> str:
-        from tested.languages.haskell import generators
-
-        return generators.convert_selector(contexts)
-
-    def generate_check_function(self, name: str, function: FunctionCall) -> str:
-        from tested.languages.haskell import generators
-
-        return generators.convert_check_function(name, function)
-
-    def generate_encoder(self, values: List[Value]) -> str:
-        from tested.languages.haskell import generators
-
-        return generators.convert_encoder(values)
