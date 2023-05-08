@@ -4,13 +4,7 @@ from typing import TYPE_CHECKING, Dict, List, Tuple
 
 from tested.configs import Bundle
 from tested.dodona import AnnotateCode, Message
-from tested.languages.config import (
-    CallbackResult,
-    Command,
-    Config,
-    Language,
-    limit_output,
-)
+from tested.languages.config import CallbackResult, Command, Language, limit_output
 from tested.languages.conventionalize import (
     Conventionable,
     NamingConventions,
@@ -44,10 +38,8 @@ class Java(Language):
         others = [x for x in files if not x.endswith(".jar")]
         return ["javac", "-cp", ".", *others], file_filter
 
-    def execution(
-        self, config: Config, cwd: Path, file: str, arguments: List[str]
-    ) -> Command:
-        limit = jvm_memory_limit(config)
+    def execution(self, cwd: Path, file: str, arguments: List[str]) -> Command:
+        limit = jvm_memory_limit(self.config)
         return ["java", f"-Xmx{limit}", "-cp", ".", Path(file).stem, *arguments]
 
     def linter(

@@ -322,9 +322,7 @@ class Language:
         """
         return [], files
 
-    def execution(
-        self, config: Config, cwd: Path, file: str, arguments: List[str]
-    ) -> Command:
+    def execution(self, cwd: Path, file: str, arguments: List[str]) -> Command:
         """
         Callback for generating the execution command.
 
@@ -336,7 +334,6 @@ class Language:
         on the PATH, you should use an absolute path to those instead of a relative
         one.
 
-        :param config: Various configuration options.
         :param cwd: The directory in which the ``file`` is.
         :param file: The file to execute.
         :param arguments: Arguments that must be passed to the execution.

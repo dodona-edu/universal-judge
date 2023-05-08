@@ -4,13 +4,7 @@ from typing import TYPE_CHECKING, Dict, List, Tuple
 
 from tested.configs import Bundle
 from tested.dodona import AnnotateCode, Message
-from tested.languages.config import (
-    CallbackResult,
-    Command,
-    Config,
-    Language,
-    limit_output,
-)
+from tested.languages.config import CallbackResult, Command, Language, limit_output
 from tested.languages.conventionalize import (
     Conventionable,
     NamingConventions,
@@ -44,9 +38,7 @@ class Bash(Language):
         )
         return [], [], limit_output(stdout), regex.sub("<code>:\\2:", stderr)
 
-    def execution(
-        self, config: Config, cwd: Path, file: str, arguments: List[str]
-    ) -> Command:
+    def execution(self, cwd: Path, file: str, arguments: List[str]) -> Command:
         return ["bash", file, *arguments]
 
     def stderr(

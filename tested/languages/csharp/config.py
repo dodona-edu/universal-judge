@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 from tested.configs import Bundle
 from tested.dodona import AnnotateCode, Message, Status
 from tested.internationalization import get_i18n_string
-from tested.languages.config import CallbackResult, Command, Config, Language
+from tested.languages.config import CallbackResult, Command, Language
 from tested.languages.conventionalize import (
     Conventionable,
     NamingConventions,
@@ -58,9 +58,7 @@ class CSharp(Language):
 
         return args, file_filter
 
-    def execution(
-        self, config: Config, cwd: Path, file: str, arguments: List[str]
-    ) -> Command:
+    def execution(self, cwd: Path, file: str, arguments: List[str]) -> Command:
         file = OUTPUT_DIRECTORY + "/" + file
         return ["dotnet", file, *arguments]
 

@@ -3,9 +3,9 @@ import re
 from pathlib import Path
 from typing import List, Tuple
 
-from tested.configs import Bundle
+from tested.configs import Bundle, GlobalConfig
 from tested.dodona import AnnotateCode, Message
-from tested.languages.config import Config, Language
+from tested.languages.config import Language
 from tested.languages.conventionalize import conventionalize_namespace, submission_name
 
 logger = logging.getLogger(__name__)
@@ -17,13 +17,13 @@ def cleanup_description(lang_config: Language, namespace: str, description: str)
     )
 
 
-def jvm_memory_limit(config: Config) -> int:
+def jvm_memory_limit(config: GlobalConfig) -> int:
     """
     Get the memory limit in bytes. Java Virtual Machine (JVM) requires this to be a
     multiple of 1024.
     See https://docs.oracle.com/en/java/javase/14/docs/specs/man/java.html
     """
-    limit = int(config.memory_limit)
+    limit = int(config.dodona.memory_limit)
     limit = (limit // 1024) * 1024
     return limit
 

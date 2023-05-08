@@ -6,13 +6,7 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
 from tested.configs import Bundle
 from tested.dodona import AnnotateCode, Message, Status
-from tested.languages.config import (
-    CallbackResult,
-    Command,
-    Config,
-    Language,
-    limit_output,
-)
+from tested.languages.config import CallbackResult, Command, Language, limit_output
 from tested.languages.conventionalize import (
     Conventionable,
     NamingConventions,
@@ -60,10 +54,8 @@ class Kotlin(Language):
             *others,
         ], file_filter
 
-    def execution(
-        self, config: Config, cwd: Path, file: str, arguments: List[str]
-    ) -> Command:
-        limit = jvm_memory_limit(config)
+    def execution(self, cwd: Path, file: str, arguments: List[str]) -> Command:
+        limit = jvm_memory_limit(self.config)
         return [
             get_executable("kotlin"),
             f"-J-Xmx{limit}",

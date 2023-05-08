@@ -3,7 +3,7 @@ from typing import List, Tuple
 
 from tested.configs import Bundle
 from tested.dodona import AnnotateCode, Message
-from tested.languages.config import CallbackResult, Command, Config
+from tested.languages.config import CallbackResult, Command
 from tested.languages.conventionalize import conventionalize_namespace, submission_file
 from tested.languages.haskell.config import Haskell
 from tested.languages.utils import haskell_cleanup_stacktrace
@@ -30,9 +30,7 @@ class RunHaskell(Haskell):
             ),
         )
 
-    def execution(
-        self, config: Config, cwd: Path, file: str, arguments: List[str]
-    ) -> Command:
+    def execution(self, cwd: Path, file: str, arguments: List[str]) -> Command:
         return ["runhaskell", file, *arguments]
 
     def filter_dependencies(

@@ -8,7 +8,6 @@ from tested.dodona import AnnotateCode, Message
 from tested.languages.config import (
     CallbackResult,
     Command,
-    Config,
     Language,
     executable_name,
     limit_output,
@@ -90,9 +89,7 @@ class C(Language):
             [result],
         )
 
-    def execution(
-        self, config: Config, cwd: Path, file: str, arguments: List[str]
-    ) -> Command:
+    def execution(self, cwd: Path, file: str, arguments: List[str]) -> Command:
         local_file = cwd / executable_name(Path(file).stem)
         return [str(local_file.absolute()), *arguments]
 

@@ -3,13 +3,7 @@ from typing import TYPE_CHECKING, Dict, List, Tuple
 
 from tested.configs import Bundle
 from tested.dodona import AnnotateCode, Message
-from tested.languages.config import (
-    CallbackResult,
-    Command,
-    Config,
-    Language,
-    executable_name,
-)
+from tested.languages.config import CallbackResult, Command, Language, executable_name
 from tested.languages.conventionalize import (
     Conventionable,
     NamingConventions,
@@ -48,9 +42,7 @@ class Haskell(Language):
             exec_,
         ], [executable_name(exec_)]
 
-    def execution(
-        self, config: Config, cwd: Path, file: str, arguments: List[str]
-    ) -> Command:
+    def execution(self, cwd: Path, file: str, arguments: List[str]) -> Command:
         local_file = cwd / file
         return [str(local_file.absolute()), *arguments]
 

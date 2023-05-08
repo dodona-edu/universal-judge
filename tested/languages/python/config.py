@@ -6,13 +6,7 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
 from tested.configs import Bundle
 from tested.dodona import AnnotateCode, Message, Severity
-from tested.languages.config import (
-    CallbackResult,
-    Command,
-    Config,
-    Language,
-    trace_to_html,
-)
+from tested.languages.config import CallbackResult, Command, Language, trace_to_html
 from tested.languages.conventionalize import Conventionable, NamingConventions
 from tested.serialisation import FunctionCall, Statement, Value
 
@@ -49,9 +43,7 @@ class Python(Language):
             ".",
         ], result
 
-    def execution(
-        self, config: Config, cwd: Path, file: str, arguments: List[str]
-    ) -> Command:
+    def execution(self, cwd: Path, file: str, arguments: List[str]) -> Command:
         return [_executable(), "-u", file, *arguments]
 
     def compiler_output(

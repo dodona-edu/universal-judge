@@ -11,7 +11,7 @@ from tested.dodona import Message, Status
 from tested.judge.collector import OutputManager
 from tested.judge.compilation import process_compile_results, run_compilation
 from tested.judge.utils import BaseExecutionResult, run_command
-from tested.languages.config import Config, FileFilter
+from tested.languages.config import FileFilter
 from tested.languages.conventionalize import selector_name
 from tested.languages.preparation import exception_file, value_file
 from tested.testsuite import Context, EmptyChannel, ExecutionMode
@@ -172,7 +172,6 @@ def execute_file(
     _logger.info("Starting execution on file %s", executable_name)
 
     command = bundle.lang_config.execution(
-        config=Config.from_bundle(bundle),
         cwd=working_directory,
         file=executable_name,
         arguments=[argument] if argument else [],
