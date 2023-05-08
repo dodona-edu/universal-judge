@@ -41,6 +41,7 @@ from tested.languages.conventionalize import (
     Conventionable,
     NamingConventions,
     conventionalize_namespace,
+    submission_name,
 )
 from tested.languages.description_generator import DescriptionGenerator
 from tested.serialisation import ExceptionValue, FunctionCall, Statement, Value
@@ -504,22 +505,19 @@ class Language:
         """
         return [], [], limit_output(stdout), limit_output(stderr)
 
-    def exception_output(
-        self, bundle: Bundle, exception: ExceptionValue
-    ) -> ExceptionValue:
+    def exception_output(self, exception: ExceptionValue) -> ExceptionValue:
         """
         Callback that allows modifying the exception value, for example the
         stacktrace.
 
-        :param bundle: Evaluation bundle
         :param exception: The exception.
         :return: The modified exception.
         """
-        namespace = conventionalize_namespace(self, bundle.suite.namespace)
+        submission = submission_name(self, self.config.suite)
         exception.stacktrace = self.cleanup_stacktrace(
-            exception.stacktrace, self.with_extension(namespace)
+            exception.stacktrace, self.with_extension(submission)
         )
-        exception.message = self.clean_exception_message(exception.message, namespace)
+        exception.message = self.clean_exception_message(exception.message, submission)
         return exception
 
     def stdout(

@@ -23,7 +23,7 @@ class _ExceptionValue(BaseModel):
 def try_as_exception(config: EvaluatorConfig, value: str) -> Either[ExceptionValue]:
     try:
         actual = _ExceptionValue.parse_raw(value).__root__
-        actual = config.bundle.lang_config.exception_output(config.bundle, actual)
+        actual = config.bundle.lang_config.exception_output(actual)
         return Either(actual)
     except (TypeError, ValueError) as e:
         return Either(e)
@@ -34,7 +34,7 @@ def try_as_readable_exception(
 ) -> Tuple[Optional[str], Optional[ExtendedMessage]]:
     try:
         actual = _ExceptionValue.parse_raw(value).__root__
-        actual = config.bundle.lang_config.exception_output(config.bundle, actual)
+        actual = config.bundle.lang_config.exception_output(actual)
     except (TypeError, ValueError):
         return None, None
     else:
