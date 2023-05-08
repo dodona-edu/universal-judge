@@ -32,7 +32,7 @@ class JavaScript(Language):
         }
 
     def compilation(self, files: List[str]) -> CallbackResult:
-        submission = submission_file(self, self.config.suite)
+        submission = submission_file(self)
         main_file = list(filter(lambda x: x == submission, files))
         if main_file:
             return ["node", "--check", main_file[0]], files
@@ -46,7 +46,7 @@ class JavaScript(Language):
             [],
             [],
             limit_output(stdout),
-            self.cleanup_stacktrace(stderr, submission_file(self, self.config.suite)),
+            self.cleanup_stacktrace(stderr, submission_file(self)),
         )
 
     def execution(self, cwd: Path, file: str, arguments: List[str]) -> Command:
@@ -153,7 +153,7 @@ class JavaScript(Language):
         # Identifier to separate testcase output
         identifier = f"--{self.config.testcase_separator_secret}-- SEP"
         context_identifier = f"--{self.config.context_separator_secret}-- SEP"
-        submission = submission_file(self, self.config.suite)
+        submission = submission_file(self)
         # Assume stacktrace when line is equal the submission_file path with
         # line number
         line_start_with_submission_file = re.compile(

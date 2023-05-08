@@ -126,7 +126,7 @@ class C(Language):
         self, stdout: str, stderr: str
     ) -> Tuple[List[Message], List[AnnotateCode], str, str]:
         clean_stacktrace = cleanup_compilation_stderr(
-            stderr, self.with_extension(submission_name(self, self.config.suite))
+            stderr, self.with_extension(submission_name(self))
         )
         return [], [], limit_output(stdout), clean_stacktrace
 

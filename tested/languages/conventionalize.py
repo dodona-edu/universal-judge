@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING, Callable, Dict, Literal
 
 if TYPE_CHECKING:
     from tested.languages import Language
-    from tested.testsuite import Suite
 
 _logger = logging.getLogger(__name__)
 
@@ -413,18 +412,18 @@ def conventionalize_property(language: "Language", property_name: str) -> str:
     return _conventionalize(language, "property", property_name)
 
 
-def submission_name(language: "Language", suite: "Suite") -> str:
+def submission_name(language: "Language") -> str:
     """
     TODO: docs
     """
-    return conventionalize_namespace(language, suite.namespace)
+    return conventionalize_namespace(language, language.config.suite.namespace)
 
 
-def submission_file(language: "Language", suite: "Suite") -> str:
+def submission_file(language: "Language") -> str:
     """
     TODO: docs
     """
-    return language.with_extension(submission_name(language, suite))
+    return language.with_extension(submission_name(language))
 
 
 def selector_name(language: "Language") -> str:

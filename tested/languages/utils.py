@@ -88,7 +88,7 @@ def jvm_stderr(
     # Identifier to separate testcase output
     identifier = f"--{self.config.testcase_separator_secret}-- SEP"
     context_identifier = f"--{self.config.context_separator_secret}-- SEP"
-    submission = submission_file(self, self.config.suite)
+    submission = submission_file(self)
 
     return (
         [],
@@ -106,7 +106,7 @@ def jvm_stderr(
 def haskell_solution(lang_config: Language, solution: Path):
     """Support implicit modules if needed."""
     if lang_config.config.dodona.config_for().get("implicitModule", True):
-        name = submission_name(lang_config, lang_config.config.suite)
+        name = submission_name(lang_config)
         # noinspection PyTypeChecker
         with open(solution, "r") as file:
             contents = file.read()

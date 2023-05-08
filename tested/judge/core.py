@@ -307,7 +307,7 @@ def _generate_files(
     copy_from_paths_to_path(dependency_paths, dependencies, common_dir)
 
     # Copy the submission file.
-    submission = submission_file(bundle.lang_config, bundle.suite)
+    submission = submission_file(bundle.lang_config)
     solution_path = common_dir / submission
     # noinspection PyTypeChecker
     shutil.copy2(bundle.config.source, solution_path)

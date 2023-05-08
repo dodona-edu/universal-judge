@@ -53,9 +53,7 @@ class Python(Language):
     def compiler_output(
         self, stdout: str, stderr: str
     ) -> Tuple[List[Message], List[AnnotateCode], str, str]:
-        stdout = self.cleanup_stacktrace(
-            stdout, submission_file(self, self.config.suite)
-        )
+        stdout = self.cleanup_stacktrace(stdout, submission_file(self))
         if match := re.search(r".*: (.+Error): (.+) \(<code>, line (\d+)\)", stdout):
             error = match.group(1)
             message = match.group(2)

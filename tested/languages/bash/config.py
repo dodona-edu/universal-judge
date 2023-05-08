@@ -21,7 +21,7 @@ class Bash(Language):
         return {"global_identifier": "macro_case"}
 
     def compilation(self, files: List[str]) -> CallbackResult:
-        submission = submission_file(self, self.config.suite)
+        submission = submission_file(self)
         main_file = list(filter(lambda x: x == submission, files))
         if main_file:
             return ["bash", "-n", main_file[0]], files
@@ -31,9 +31,7 @@ class Bash(Language):
     def compiler_output(
         self, stdout: str, stderr: str
     ) -> Tuple[List[Message], List[AnnotateCode], str, str]:
-        regex = re.compile(
-            f"{submission_file(self, self.config.suite)}: " f"(regel|rule) ([0-9]+):"
-        )
+        regex = re.compile(f"{submission_file(self)}: " f"(regel|rule) ([0-9]+):")
         return [], [], limit_output(stdout), regex.sub("<code>:\\2:", stderr)
 
     def execution(self, cwd: Path, file: str, arguments: List[str]) -> Command:
@@ -44,7 +42,7 @@ class Bash(Language):
             f"{self.execution_prefix()}_[0-9]+_[0-9]+\\."
             f"{self.extension_file()}: [a-zA-Z_]+ [0-9]+:"
         )
-        script = f"./{submission_file(self, self.config.suite)}"
+        script = f"./{submission_file(self)}"
         stderr = regex.sub("<testcode>:", stderr).replace(script, "<code>")
         regex = re.compile(
             f"{self.execution_prefix()}_[0-9]+_[0-9]+\\." f"{self.extension_file()}"

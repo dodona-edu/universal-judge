@@ -197,7 +197,7 @@ def prepare_expression(bundle: Bundle, expression: Expression) -> Expression:
             prepare_argument(bundle, arg) for arg in expression.arguments
         ]
     elif isinstance(expression, FunctionCall):
-        submission = submission_name(bundle.lang_config, bundle.suite)
+        submission = submission_name(bundle.lang_config)
         if expression.type == FunctionType.CONSTRUCTOR:
             name = conventionalize_class(bundle.lang_config, expression.name)
         elif expression.type == FunctionType.PROPERTY:
@@ -486,7 +486,7 @@ def prepare_execution_unit(
 
     value_file_name = value_file(bundle, destination).name
     exception_file_name = exception_file(bundle, destination).name
-    submission = submission_name(bundle.lang_config, bundle.suite)
+    submission = submission_name(bundle.lang_config)
 
     return PreparedExecutionUnit(
         execution_name=execution_name,

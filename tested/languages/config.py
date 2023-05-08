@@ -513,7 +513,7 @@ class Language:
         :param exception: The exception.
         :return: The modified exception.
         """
-        submission = submission_name(self, self.config.suite)
+        submission = submission_name(self)
         exception.stacktrace = self.cleanup_stacktrace(
             exception.stacktrace, self.with_extension(submission)
         )

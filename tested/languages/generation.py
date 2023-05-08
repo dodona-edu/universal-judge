@@ -104,7 +104,7 @@ def get_readable_input(
         # See https://rouge-ruby.github.io/docs/Rouge/Lexers/ConsoleLexer.html
         format_ = "console"
         arguments = " ".join(_escape_shell(x) for x in case.input.arguments)
-        submission = submission_name(bundle.lang_config, bundle.suite)
+        submission = submission_name(bundle.lang_config)
         args = f"$ {submission} {arguments}"
         if isinstance(case.input.stdin, TextData):
             stdin = case.input.stdin.get_data_as_string(bundle.config.resources)

@@ -72,9 +72,7 @@ class Haskell(Language):
             [],
             [],
             "",
-            haskell_cleanup_stacktrace(
-                stderr, submission_file(self, self.config.suite)
-            ),
+            haskell_cleanup_stacktrace(stderr, submission_file(self)),
         )
 
     def generate_statement(self, statement: Statement) -> str:

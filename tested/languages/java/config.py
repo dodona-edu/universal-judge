@@ -62,7 +62,7 @@ class Java(Language):
             [],
             [],
             limit_output(stdout),
-            jvm_cleanup_stacktrace(stderr, submission_file(self, self.config.suite)),
+            jvm_cleanup_stacktrace(stderr, submission_file(self)),
         )
 
     def stderr(self, stderr: str) -> Tuple[List[Message], List[AnnotateCode], str]:

@@ -137,7 +137,7 @@ class Kotlin(Language):
             [],
             [],
             limit_output(stdout),
-            jvm_cleanup_stacktrace(stderr, submission_name(self, self.config.suite)),
+            jvm_cleanup_stacktrace(stderr, submission_name(self)),
         )
 
     def stderr(self, stderr: str) -> Tuple[List[Message], List[AnnotateCode], str]:

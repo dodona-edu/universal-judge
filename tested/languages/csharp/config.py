@@ -85,7 +85,7 @@ class CSharp(Language):
         if "class" in contents:
             return  # No top-level statements; we are happy...
 
-        class_name = submission_name(self, self.config.suite)
+        class_name = submission_name(self)
         result = f"""\
 using System;
 using System.IO;
@@ -111,7 +111,7 @@ class {class_name}
     def compiler_output(
         self, stdout: str, stderr: str
     ) -> Tuple[List[Message], List[AnnotateCode], str, str]:
-        submission = submission_name(self, self.config.suite)
+        submission = submission_name(self)
         message_regex = (
             rf"{submission}\((\d+),(\d+)\): (error|warning) ([A-Z0-9]+): (.*) \["
         )
