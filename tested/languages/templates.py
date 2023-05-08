@@ -16,6 +16,7 @@ def path_to_dependencies(bundle: Bundle) -> List[Path]:
 
     :return: A list of template folders.
     """
+    # TODO: fix Runhaskell
     judge_root = bundle.config.judge
     result = [
         judge_root
