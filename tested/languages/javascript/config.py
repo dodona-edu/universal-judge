@@ -140,8 +140,8 @@ class JavaScript(Language):
         await_regex = re.compile(r"await\s+")
         return await_regex.sub("", description)
 
-    def clean_exception_message(self, message: str, namespace: str) -> str:
-        return message.replace(f"{namespace}.", "", 1)
+    def clean_exception_message(self, message: str) -> str:
+        return message.replace(f"{self.config.suite.namespace}.", "", 1)
 
     def stderr(self, stderr: str) -> Tuple[List[Message], List[AnnotateCode], str]:
         # Identifier to separate testcase output

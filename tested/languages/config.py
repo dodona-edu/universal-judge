@@ -512,7 +512,7 @@ class Language:
         """
         submission = submission_name(self)
         exception.stacktrace = self.cleanup_stacktrace(exception.stacktrace)
-        exception.message = self.clean_exception_message(exception.message, submission)
+        exception.message = self.clean_exception_message(exception.message)
         return exception
 
     def stdout(self, stdout: str) -> Tuple[List[Message], List[AnnotateCode], str]:
@@ -604,13 +604,14 @@ class Language:
         else:
             return None
 
-    def clean_exception_message(self, message: str, namespace: str) -> str:
+    def clean_exception_message(self, message: str) -> str:
         """
-        Cleanup exception message
+        Clean the exception message.
 
-        :param message: Exception message
-        :param namespace: Namespace name
-        :return: Processed message
+        By default, nothing is done to the message.
+
+        :param message: The message from the exception.
+        :return: The new message.
         """
         return message
 
