@@ -28,7 +28,7 @@ import sys
 import typing
 from collections import defaultdict
 from dataclasses import dataclass
-from enum import Enum, StrEnum, auto, unique
+from enum import Enum, auto
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Mapping, Optional, Set, Tuple, Union
 
@@ -37,6 +37,7 @@ from tested.datatypes import AdvancedTypes, AllTypes, ExpressionTypes, string_to
 from tested.dodona import AnnotateCode, ExtendedMessage, Message, Permission, Status
 from tested.features import Construct
 from tested.internationalization import get_i18n_string
+from tested.languages.conventionalize import Conventionable, NamingConventions
 from tested.languages.description_generator import DescriptionGenerator
 from tested.serialisation import ExceptionValue, FunctionCall, Statement, Value
 from tested.testsuite import Suite
@@ -265,6 +266,18 @@ class Language:
         path_to_config = self.config_dir / config_file
         with open(path_to_config, "r") as f:
             self.options = json.load(f)
+
+    def naming_conventions(self) -> Dict[Conventionable, NamingConventions]:
+        """
+        Return naming conventions for this language.
+
+        This should return a dictionary containing a mapping of "conventionable"
+        items mapped on their naming convention.
+
+        The default for missing conventionable items is snake case.
+        :return: A mapping for the naming conventions.
+        """
+        raise NotImplementedError
 
     def get_string_quote(self):
         return '"'
