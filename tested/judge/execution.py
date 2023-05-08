@@ -344,7 +344,7 @@ def execute_execution(
         args.collector.add(annotation)
     messages.extend(msgs)
 
-    testcase_identifier = f"--{bundle.secret}-- SEP"
+    testcase_identifier = f"--{bundle.testcase_separator_secret}-- SEP"
     context_identifier = f"--{bundle.context_separator_secret}-- SEP"
 
     value_file_path = value_file(bundle, execution_dir)

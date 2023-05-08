@@ -151,7 +151,7 @@ class JavaScript(Language):
         self, bundle: Bundle, stderr: str
     ) -> Tuple[List[Message], List[AnnotateCode], str]:
         # Identifier to separate testcase output
-        identifier = f"--{bundle.secret}-- SEP"
+        identifier = f"--{bundle.testcase_separator_secret}-- SEP"
         context_identifier = f"--{bundle.context_separator_secret}-- SEP"
         submission_file = self.with_extension(
             self.conventionalize_namespace(bundle.suite.namespace)

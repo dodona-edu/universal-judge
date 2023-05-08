@@ -695,7 +695,7 @@ def prepare_execution_unit(
         value_file=value_file_name,
         exception_file=exception_file_name,
         submission_name=submission_name,
-        testcase_separator_secret=bundle.secret,
+        testcase_separator_secret=bundle.testcase_separator_secret,
         context_separator_secret=bundle.context_separator_secret,
         contexts=contexts,
         execution_unit=execution_unit,
@@ -819,7 +819,7 @@ def value_file(bundle: Bundle, directory: Path):
 
     :return: The path to the file, depending on the working directory.
     """
-    return directory / f"{bundle.secret}_values.txt"
+    return directory / f"{bundle.testcase_separator_secret}_values.txt"
 
 
 def exception_file(bundle: Bundle, directory: Path):
@@ -832,4 +832,4 @@ def exception_file(bundle: Bundle, directory: Path):
 
     :return: The path to the file, depending on the working directory.
     """
-    return directory / f"{bundle.secret}_exceptions.txt"
+    return directory / f"{bundle.testcase_separator_secret}_exceptions.txt"

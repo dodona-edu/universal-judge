@@ -126,16 +126,37 @@ def read_config(config_in: IO) -> DodonaConfig:
     return parsed
 
 
-@dataclasses.dataclass(frozen=True)
+@dataclasses.dataclass
+class GlobalConfig:
+    dodona: DodonaConfig
+    testcase_separator_secret: str
+    context_separator_secret: str
+    suite: "Suite"
+
+
+@dataclasses.dataclass
 class Bundle:
     """A bundle of arguments and configs for running everything."""
 
-    config: DodonaConfig
-    out: IO
     lang_config: "Language"
-    secret: str
-    context_separator_secret: str
-    suite: Suite
+    global_config: GlobalConfig
+    out: IO
+
+    @property
+    def config(self) -> DodonaConfig:
+        return self.global_config.dodona
+
+    @property
+    def suite(self) -> "Suite":
+        return self.global_config.suite
+
+    @property
+    def testcase_separator_secret(self) -> str:
+        return self.global_config.testcase_separator_secret
+
+    @property
+    def context_separator_secret(self) -> str:
+        return self.global_config.context_separator_secret
 
 
 def _get_language(config: DodonaConfig) -> Tuple[str, int]:
@@ -181,11 +202,10 @@ def create_bundle(
     # noinspection PyDataclass
     adjusted_config = config.copy(update={"programming_language": language})
     lang_config = langs.get_language(language)
-    return Bundle(
-        config=adjusted_config,
-        out=output,
-        lang_config=lang_config,
-        secret=get_identifier(),
+    global_config = GlobalConfig(
+        dodona=adjusted_config,
+        testcase_separator_secret=get_identifier(),
         context_separator_secret=get_identifier(),
         suite=suite,
     )
+    return Bundle(lang_config=lang_config, global_config=global_config, out=output)

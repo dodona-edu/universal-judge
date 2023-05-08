@@ -8,7 +8,7 @@ from typing import List
 
 from mako.template import Template
 
-from tested.configs import Bundle, DodonaConfig
+from tested.configs import Bundle, DodonaConfig, GlobalConfig
 from tested.languages import get_language, language_exists
 from tested.languages.description_generator import TYPE_ARG, TYPE_CONFIG_NAME
 from tested.testsuite import Suite
@@ -139,8 +139,8 @@ def create_description_instance_from_template(
     judge_directory = Path(__file__).parent.parent
     language = get_language(programming_language)
 
-    bundle = Bundle(
-        config=DodonaConfig(
+    global_config = GlobalConfig(
+        dodona=DodonaConfig(
             resources="",
             source="",
             time_limit=0,
@@ -151,11 +151,15 @@ def create_description_instance_from_template(
             judge=str(judge_directory),
             test_suite="suite.yaml",
         ),
-        out=open(os.devnull, "w"),
-        lang_config=language,
         context_separator_secret="",
-        secret="",
+        testcase_separator_secret="",
         suite=Suite(namespace=namespace),
+    )
+
+    bundle = Bundle(
+        global_config=global_config,
+        lang_config=language,
+        out=open(os.devnull, "w"),
     )
 
     description_generator = language.get_description_generator()
