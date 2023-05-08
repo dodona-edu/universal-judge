@@ -13,7 +13,7 @@ from tested.judge.compilation import process_compile_results, run_compilation
 from tested.judge.utils import BaseExecutionResult, run_command
 from tested.languages.config import FileFilter
 from tested.languages.conventionalize import selector_name
-from tested.languages.preparation import exception_file, value_file
+from tested.languages.preparation import EXECUTION_PREFIX, exception_file, value_file
 from tested.testsuite import Context, EmptyChannel, ExecutionMode
 from tested.utils import safe_del
 
@@ -185,13 +185,16 @@ def execute_file(
 
 
 def copy_workdir_files(bundle: Bundle, context_dir: Path):
-    prefix = bundle.lang_config.execution_prefix()
     for origin in bundle.config.workdir.iterdir():
         file = origin.name.lower()
         if origin.is_file():
             _logger.debug("Copying %s to %s", origin, context_dir)
             shutil.copy2(origin, context_dir)
-        elif origin.is_dir() and not file.startswith(prefix) and file != "common":
+        elif (
+            origin.is_dir()
+            and not file.startswith(EXECUTION_PREFIX)
+            and file != "common"
+        ):
             _logger.debug("Copying %s to %s", origin, context_dir)
             shutil.copytree(origin, context_dir / file)
 
@@ -214,7 +217,7 @@ def execute_execution(
     # Filter dependencies of the global compilation results.
     dependencies = filter_files(args.files, args.common_directory)
     dependencies = bundle.lang_config.filter_dependencies(
-        bundle, dependencies, args.execution_name
+        dependencies, args.execution_name
     )
     _logger.debug("Dependencies are %s", dependencies)
     copy_workdir_files(bundle, execution_dir)

@@ -1,12 +1,9 @@
 from pathlib import Path
-from typing import List, Tuple
+from typing import List
 
-from tested.configs import Bundle
-from tested.dodona import AnnotateCode, Message
 from tested.languages.config import CallbackResult, Command
-from tested.languages.conventionalize import conventionalize_namespace, submission_file
+from tested.languages.conventionalize import submission_file
 from tested.languages.haskell.config import Haskell
-from tested.languages.utils import haskell_cleanup_stacktrace
 
 
 class RunHaskell(Haskell):
@@ -21,7 +18,5 @@ class RunHaskell(Haskell):
     def execution(self, cwd: Path, file: str, arguments: List[str]) -> Command:
         return ["runhaskell", file, *arguments]
 
-    def filter_dependencies(
-        self, bundle: Bundle, files: List[str], context_name: str
-    ) -> List[str]:
+    def filter_dependencies(self, files: List[str], context_name: str) -> List[str]:
         return files

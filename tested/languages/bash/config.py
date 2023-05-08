@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Dict, List, Tuple
 from tested.dodona import AnnotateCode, Message
 from tested.languages.config import CallbackResult, Command, Language, limit_output
 from tested.languages.conventionalize import (
+    EXECUTION_PREFIX,
     Conventionable,
     NamingConventions,
     submission_file,
@@ -38,13 +39,13 @@ class Bash(Language):
 
     def stderr(self, stderr: str) -> Tuple[List[Message], List[AnnotateCode], str]:
         regex = re.compile(
-            f"{self.execution_prefix()}_[0-9]+_[0-9]+\\."
+            f"{EXECUTION_PREFIX}_[0-9]+_[0-9]+\\."
             f"{self.extension_file()}: [a-zA-Z_]+ [0-9]+:"
         )
         script = f"./{submission_file(self)}"
         stderr = regex.sub("<testcode>:", stderr).replace(script, "<code>")
         regex = re.compile(
-            f"{self.execution_prefix()}_[0-9]+_[0-9]+\\." f"{self.extension_file()}"
+            f"{EXECUTION_PREFIX}_[0-9]+_[0-9]+\\." f"{self.extension_file()}"
         )
         return [], [], regex.sub("<testcode>", stderr)
 

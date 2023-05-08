@@ -8,6 +8,7 @@ from tested.configs import Bundle
 from tested.dodona import AnnotateCode, Message, Status
 from tested.languages.config import CallbackResult, Command, Language, limit_output
 from tested.languages.conventionalize import (
+    EXECUTION_PREFIX,
     Conventionable,
     NamingConventions,
     conventionalize_namespace,
@@ -106,14 +107,10 @@ class Kotlin(Language):
         else:
             return Language.find_main_file(self, files, name, precompilation_messages)
 
-    def filter_dependencies(
-        self, bundle: Bundle, files: List[Path], context_name: str
-    ) -> List[str]:
+    def filter_dependencies(self, files: List[Path], context_name: str) -> List[str]:
         def filter_function(file: Path) -> bool:
             # We don't want files for contexts that are not the one we use.
-            prefix = conventionalize_namespace(
-                bundle.lang_config, bundle.lang_config.execution_prefix()
-            )
+            prefix = conventionalize_namespace(self, EXECUTION_PREFIX)
             file = str(file)
             is_context = file.startswith(prefix)
             is_our_context = file.startswith(context_name + ".") or file.startswith(

@@ -38,6 +38,7 @@ from tested.dodona import AnnotateCode, ExtendedMessage, Message, Permission, St
 from tested.features import Construct
 from tested.internationalization import get_i18n_string
 from tested.languages.conventionalize import (
+    EXECUTION_PREFIX,
     Conventionable,
     NamingConventions,
     conventionalize_namespace,
@@ -343,10 +344,6 @@ class Language:
         """
         raise NotImplementedError
 
-    def execution_prefix(self) -> str:
-        """The "name" or prefix for the context names. Not conventionalized."""
-        return "execution"
-
     def execution_name(self, tab_number: int, execution_number: int) -> str:
         """
         Get the name of an execution. The name should be unique for the tab and
@@ -357,7 +354,7 @@ class Language:
         :return: The name of the context, conventionalized.
         """
         return conventionalize_namespace(
-            self, f"{self.execution_prefix()}_{tab_number}_{execution_number}"
+            self, f"{EXECUTION_PREFIX}_{tab_number}_{execution_number}"
         )
 
     def extension_file(self) -> str:
@@ -553,14 +550,24 @@ class Language:
         """
         return [], []
 
-    def filter_dependencies(
-        self, bundle: Bundle, files: List[Path], context_name: str
-    ) -> List[Path]:
+    def filter_dependencies(self, files: List[Path], context_name: str) -> List[Path]:
+        """
+        Callback to filter dependencies for one context.
+
+        These dependencies are the result of the compilation step. Only the files
+        accepted by this filter are available in the execution step.
+
+        By default, all non-context files are accepted, in addition to the files for
+        the current context.
+
+        :param files: The files resulting from the compilation step(s).
+        :param context_name: The name of the current context.
+        :return: A list of filtered files.
+        """
+
         def filter_function(file: Path) -> bool:
             # We don't want files for contexts that are not the one we use.
-            prefix = conventionalize_namespace(
-                bundle.lang_config, bundle.lang_config.execution_prefix()
-            )
+            prefix = conventionalize_namespace(self, EXECUTION_PREFIX)
             is_context = file.name.startswith(prefix)
             is_our_context = file.name.startswith(context_name + ".")
             return not is_context or is_our_context

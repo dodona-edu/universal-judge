@@ -190,7 +190,7 @@ def run_encoder(bundle: Bundle, values: List[Value]) -> List[str]:
         assert e.exit == 0
 
     files = filter_files(files, dest)
-    files = bundle.lang_config.filter_dependencies(bundle, files, name)
+    files = bundle.lang_config.filter_dependencies(files, name)
     executable = bundle.lang_config.find_main_file(files, name, [])[0]
 
     # Run the code.

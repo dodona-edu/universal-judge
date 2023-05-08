@@ -132,9 +132,7 @@ def _evaluate_others(
     # Execute the custom evaluator.
     evaluator_name = Path(evaluator_name).stem
 
-    files = eval_bundle.lang_config.filter_dependencies(
-        eval_bundle, files, evaluator_name
-    )
+    files = eval_bundle.lang_config.filter_dependencies(files, evaluator_name)
     for file in files:
         origin = custom_path / file
         try:

@@ -33,7 +33,7 @@ from tested.judge.execution import (
 )
 from tested.judge.linter import run_linter
 from tested.judge.utils import copy_from_paths_to_path
-from tested.languages.conventionalize import submission_file
+from tested.languages.conventionalize import EXECUTION_PREFIX, submission_file
 from tested.languages.generation import generate_execution, generate_selector
 from tested.languages.templates import path_to_dependencies
 from tested.testsuite import ExecutionMode
@@ -394,7 +394,6 @@ def _copy_workdir_source_files(bundle: Bundle, common_dir: Path) -> List[str]:
     :param bundle: Bundle information of the test suite
     :param common_dir: The directory of the other files
     """
-    prefix = bundle.lang_config.execution_prefix()
     source_files = []
 
     def recursive_copy(src: Path, dst: Path):
@@ -404,7 +403,11 @@ def _copy_workdir_source_files(bundle: Bundle, common_dir: Path) -> List[str]:
                 source_files.append(str(dst / origin.name))
                 _logger.debug("Copying %s to %s", origin, dst)
                 shutil.copy2(origin, dst)
-            elif origin.is_dir() and not file.startswith(prefix) and file != "common":
+            elif (
+                origin.is_dir()
+                and not file.startswith(EXECUTION_PREFIX)
+                and file != "common"
+            ):
                 _logger.debug("Iterate subdir %s", dst / file)
                 shutil.copytree(origin, dst / file)
 
