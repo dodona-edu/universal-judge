@@ -52,7 +52,7 @@ class Python(Language):
     def compiler_output(
         self, stdout: str, stderr: str
     ) -> Tuple[List[Message], List[AnnotateCode], str, str]:
-        stdout = self.cleanup_stacktrace(stdout, submission_file(self))
+        stdout = self.cleanup_stacktrace(stdout)
         if match := re.search(r".*: (.+Error): (.+) \(<code>, line (\d+)\)", stdout):
             error = match.group(1)
             message = match.group(2)
@@ -111,11 +111,9 @@ class Python(Language):
         return linter.run_pylint(self.config.dodona, remaining)
 
     # Idea and original code: dodona/judge-pythia
-    def cleanup_stacktrace(
-        self, traceback: str, submission_file: str, reduce_all=False
-    ) -> str:
+    def cleanup_stacktrace(self, traceback: str) -> str:
         context_file_regex = re.compile(r"context_[0-9]+_[0-9]+\.py")
-        file_line_regex = re.compile(rf"\({submission_file}, line (\d+)\)")
+        file_line_regex = re.compile(rf"\({submission_file(self)}, line (\d+)\)")
 
         if isinstance(traceback, str):
             traceback = traceback.splitlines(True)
@@ -144,10 +142,12 @@ class Python(Language):
                 continue
 
             # replace references to local names
-            if f'File "./{submission_file}"' in line:
-                line = line.replace(f'File "./{submission_file}"', 'File "<code>"')
+            if f'File "./{submission_file(self)}"' in line:
+                line = line.replace(
+                    f'File "./{submission_file(self)}"', 'File "<code>"'
+                )
             elif line.startswith("*** Error compiling"):
-                line = line.replace(f"./{submission_file}", "<code>")
+                line = line.replace(f"./{submission_file(self)}", "<code>")
             elif file_line_regex.search(line):
                 line = file_line_regex.sub(r"(<code>, line \1)", line)
             elif 'File "<string>"' in line:
@@ -163,8 +163,7 @@ class Python(Language):
             if ", in <module>" in line:
                 line = line.replace(", in <module>", "")
 
-            if not (reduce_all and line.startswith(" ")):
-                lines.append(line + "\n")
+            lines.append(line + "\n")
 
         if len(lines) > 20:
             lines = lines[:19] + ["...\n"] + [lines[-1]]

@@ -6,19 +6,13 @@ from typing import List, Tuple
 from tested.configs import GlobalConfig
 from tested.dodona import AnnotateCode, Message
 from tested.languages.config import Language
-from tested.languages.conventionalize import (
-    conventionalize_namespace,
-    submission_file,
-    submission_name,
-)
+from tested.languages.conventionalize import submission_file, submission_name
 
 logger = logging.getLogger(__name__)
 
 
-def cleanup_description(lang_config: Language, namespace: str, description: str) -> str:
-    return description.replace(
-        rf"{conventionalize_namespace(lang_config, namespace)}.", r"", 1
-    )
+def cleanup_description(lang_config: Language, description: str) -> str:
+    return description.replace(rf"{submission_name(lang_config)}.", r"", 1)
 
 
 def jvm_memory_limit(config: GlobalConfig) -> int:
@@ -33,9 +27,7 @@ def jvm_memory_limit(config: GlobalConfig) -> int:
 
 
 # Idea and original code: dodona/judge-pythia
-def jvm_cleanup_stacktrace(
-    traceback: str, submission_file: str, reduce_all=False
-) -> str:
+def jvm_cleanup_stacktrace(traceback: str, submission_filename: str) -> str:
     context_file_regex = re.compile(r"(Context[0-9]+|Selector)")
     unresolved_main_regex = r"error: unresolved reference: solutionMain"
     unresolved_reference_regex = re.compile(
@@ -66,16 +58,14 @@ def jvm_cleanup_stacktrace(
             continue
 
         # replace references to local names
-        if submission_file in line:
-            line = line.replace(submission_file, "<code>")
+        if submission_filename in line:
+            line = line.replace(submission_filename, "<code>")
             line = line.replace("Kt.solutionMain", "Kt.main")
         elif "at " in line:
             skip_line = True
             continue
         skip_line = False
-
-        if not (reduce_all and line.startswith(" ")):
-            lines.append(line + "\n")
+        lines.append(line + "\n")
 
     if len(lines) > 20:
         lines = lines[:19] + ["...\n"] + [lines[-1]]
@@ -95,7 +85,7 @@ def jvm_stderr(
         [],
         context_identifier.join(
             identifier.join(
-                self.cleanup_stacktrace(testcase, submission)
+                self.cleanup_stacktrace(testcase)
                 for testcase in context.split(identifier)
             )
             for context in stderr.split(context_identifier)
@@ -121,7 +111,7 @@ def haskell_solution(lang_config: Language, solution: Path):
             file.write("\n".join(resulting_lines))
 
 
-def haskell_cleanup_stacktrace(traceback: str, submission_file: str, reduce_all=False):
+def haskell_cleanup_stacktrace(traceback: str, submission_filename: str):
     context_file_regex = re.compile(r"(Context[0-9]+|Selector)")
     called_at_regex = re.compile(r"^(.*called at )./(<code>:)([0-9]+)(:[0-9]+) .*$")
     compile_line_regex = re.compile(r"^([0-9]+)(\s*\|.*)$")
@@ -158,8 +148,8 @@ def haskell_cleanup_stacktrace(traceback: str, submission_file: str, reduce_all=
             continue
 
         # replace references to local names
-        if submission_file in line:
-            line = line.replace(submission_file, "<code>")
+        if submission_filename in line:
+            line = line.replace(submission_filename, "<code>")
             match = called_at_regex.match(line)
             if match:
                 line = (
@@ -184,8 +174,7 @@ def haskell_cleanup_stacktrace(traceback: str, submission_file: str, reduce_all=
             if match:
                 line = f"{int(match.group(1)) - 1}{match.group(2)}"
 
-        if not (reduce_all and line.startswith(" ")):
-            lines.append(line + "\n")
+        lines.append(line + "\n")
 
     if len(lines) > 20:
         lines = lines[:19] + ["...\n"] + [lines[-1]]

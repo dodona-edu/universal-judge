@@ -123,7 +123,7 @@ def get_readable_input(
         format_ = bundle.config.programming_language
         # noinspection PyTypeChecker
         text = generate_statement(bundle, case.input)
-        text = bundle.lang_config.cleanup_description(bundle.suite.namespace, text)
+        text = bundle.lang_config.cleanup_description(text)
         analyse_files = True
 
     quote = bundle.lang_config.get_string_quote()

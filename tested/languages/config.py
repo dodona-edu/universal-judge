@@ -511,9 +511,7 @@ class Language:
         :return: The modified exception.
         """
         submission = submission_name(self)
-        exception.stacktrace = self.cleanup_stacktrace(
-            exception.stacktrace, self.with_extension(submission)
-        )
+        exception.stacktrace = self.cleanup_stacktrace(exception.stacktrace)
         exception.message = self.clean_exception_message(exception.message, submission)
         return exception
 
@@ -587,21 +585,17 @@ class Language:
             messages.append(get_i18n_string("languages.config.unknown.compilation"))
             return None, messages, Status.COMPILATION_ERROR, []
 
-    def cleanup_stacktrace(
-        self, traceback: str, submission_file: str, reduce_all=False
-    ) -> str:
+    def cleanup_stacktrace(self, traceback: str) -> str:
         """
         Takes a traceback as a string or as a list of strings and returns a reduced
         version of the traceback as a list of strings.
 
         :param traceback: Stack trace to cleanup
-        :param submission_file: Name of the submission file
-        :param reduce_all: Option for aggressive cleanup
         :return A clean stack trace
         """
         return traceback
 
-    def cleanup_description(self, namespace: str, description: str) -> str:
+    def cleanup_description(self, description: str) -> str:
         return description
 
     def clean_stacktrace_to_message(self, stacktrace: str) -> Optional[Message]:

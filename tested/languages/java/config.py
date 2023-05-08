@@ -47,10 +47,8 @@ class Java(Language):
 
         return linter.run_checkstyle(self.config.dodona, remaining)
 
-    def cleanup_stacktrace(
-        self, traceback: str, submission_file: str, reduce_all=False
-    ) -> str:
-        return jvm_cleanup_stacktrace(traceback, submission_file, reduce_all)
+    def cleanup_stacktrace(self, traceback: str) -> str:
+        return jvm_cleanup_stacktrace(traceback, submission_file(self))
 
     def compiler_output(
         self, stdout: str, stderr: str

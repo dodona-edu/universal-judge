@@ -45,7 +45,7 @@ class JavaScript(Language):
             [],
             [],
             limit_output(stdout),
-            self.cleanup_stacktrace(stderr, submission_file(self)),
+            self.cleanup_stacktrace(stderr),
         )
 
     def execution(self, cwd: Path, file: str, arguments: List[str]) -> Command:
@@ -75,12 +75,11 @@ class JavaScript(Language):
 
         return linter.run_eslint(self.config.dodona, remaining)
 
-    def cleanup_stacktrace(
-        self, traceback: str, submission_file: str, reduce_all=False
-    ) -> str:
-        namespace = submission_file[: submission_file.rfind(".")]
+    def cleanup_stacktrace(self, traceback: str) -> str:
+        submission_filename = submission_file(self)
+        namespace = submission_filename[: submission_filename.rfind(".")]
         line_start_with_submission_file = re.compile(
-            rf"^(\\?([^\\/]*[\\/])*)({submission_file}:)(?P<loc>[0-9]+)"
+            rf"^(\\?([^\\/]*[\\/])*)({submission_filename}:)(?P<loc>[0-9]+)"
         )
         ref_not_found_regex = re.compile(
             rf"TypeError: {namespace}.([a-zA-Z0-9_]*) "
@@ -89,7 +88,7 @@ class JavaScript(Language):
         ref_not_found_replace = r"ReferenceError: \1 is not defined"
 
         context_file_regex = re.compile(r"context[0-9]+\.js")
-        submission_file_regex = re.compile(rf"\(.*{submission_file}(.*)\)")
+        submission_file_regex = re.compile(rf"\(.*{submission_filename}(.*)\)")
         submission_file_replace = r"(<code>\1)"
         at_code_regex = re.compile(r"at .* \((<code>:[0-9]+:[0-9]+)\)")
         at_code_replace = r"at \1"
@@ -116,7 +115,7 @@ class JavaScript(Language):
                 line = ref_not_found_regex.sub(ref_not_found_replace, line)
 
             # replace references to local names
-            if submission_file in line:
+            if submission_filename in line:
                 line = submission_file_regex.sub(submission_file_replace, line)
             elif "at " in line:
                 skip_line = True
@@ -130,16 +129,14 @@ class JavaScript(Language):
 
             # Remove textual location information
             line = at_code_regex.sub(at_code_replace, line)
-
-            if not (reduce_all and line.startswith(" ")):
-                lines.append(line + "\n")
+            lines.append(line + "\n")
 
         if len(lines) > 20:
             lines = lines[:19] + ["...\n"] + [lines[-1]]
         return "".join(lines)
 
-    def cleanup_description(self, namespace: str, description: str) -> str:
-        description = cleanup_description(self, namespace, description)
+    def cleanup_description(self, description: str) -> str:
+        description = cleanup_description(self, description)
         await_regex = re.compile(r"await\s+")
         return await_regex.sub("", description)
 
@@ -151,7 +148,7 @@ class JavaScript(Language):
         identifier = f"--{self.config.testcase_separator_secret}-- SEP"
         context_identifier = f"--{self.config.context_separator_secret}-- SEP"
         submission = submission_file(self)
-        # Assume stacktrace when line is equal the submission_file path with
+        # Assume stacktrace when line is equal the submission_filename path with
         # line number
         line_start_with_submission_file = re.compile(
             rf"^(\\?([^\\/]*[\\/])*)({submission}):[0-9]+"
@@ -173,7 +170,7 @@ class JavaScript(Language):
                         break
                 keep_lines = "".join(case[:keep_until])
                 stacktrace = "".join(case[keep_until:])
-                stacktrace = self.cleanup_stacktrace(stacktrace, submission)
+                stacktrace = self.cleanup_stacktrace(stacktrace)
                 cleaned_cases.append(f"{keep_lines}{stacktrace}")
             cleaned_contexts.append(identifier.join(cleaned_cases))
 

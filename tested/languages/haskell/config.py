@@ -54,13 +54,11 @@ class Haskell(Language):
 
         return linter.run_hlint(self.config.dodona, remaining)
 
-    def cleanup_description(self, namespace: str, description: str) -> str:
-        return cleanup_description(self, namespace, description)
+    def cleanup_description(self, description: str) -> str:
+        return cleanup_description(self, description)
 
-    def cleanup_stacktrace(
-        self, traceback: str, submission_file: str, reduce_all=False
-    ) -> str:
-        return haskell_cleanup_stacktrace(traceback, submission_file, reduce_all)
+    def cleanup_stacktrace(self, traceback: str) -> str:
+        return haskell_cleanup_stacktrace(traceback, submission_file(self))
 
     def compiler_output(
         self, stdout: str, stderr: str

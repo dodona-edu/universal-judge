@@ -12,6 +12,7 @@ from tested.languages.conventionalize import (
     Conventionable,
     NamingConventions,
     conventionalize_namespace,
+    submission_file,
     submission_name,
 )
 from tested.languages.utils import jvm_cleanup_stacktrace, jvm_memory_limit, jvm_stderr
@@ -120,10 +121,8 @@ class Kotlin(Language):
 
         return list(x for x in files if filter_function(x))
 
-    def cleanup_stacktrace(
-        self, traceback: str, submission_file: str, reduce_all=False
-    ) -> str:
-        return jvm_cleanup_stacktrace(traceback, submission_file, reduce_all)
+    def cleanup_stacktrace(self, traceback: str) -> str:
+        return jvm_cleanup_stacktrace(traceback, submission_file(self))
 
     def compiler_output(
         self, stdout: str, stderr: str
