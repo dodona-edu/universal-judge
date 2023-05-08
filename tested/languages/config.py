@@ -37,7 +37,11 @@ from tested.datatypes import AdvancedTypes, AllTypes, ExpressionTypes, string_to
 from tested.dodona import AnnotateCode, ExtendedMessage, Message, Permission, Status
 from tested.features import Construct
 from tested.internationalization import get_i18n_string
-from tested.languages.conventionalize import Conventionable, NamingConventions
+from tested.languages.conventionalize import (
+    Conventionable,
+    NamingConventions,
+    conventionalize_namespace,
+)
 from tested.languages.description_generator import DescriptionGenerator
 from tested.serialisation import ExceptionValue, FunctionCall, Statement, Value
 from tested.testsuite import Suite
@@ -376,95 +380,6 @@ class Language:
         """
         raise NotImplementedError
 
-    def conventionalize_class(self, class_identifier: str) -> str:
-        """
-        Conventionalize the name of a class. This function uses the format
-        specified in the config.json file. If no format is specified, the class
-        name is unchanged, which is the same as snake_case, since the test suite uses
-        snake case.
-
-        :param class_identifier: The name of the class to conventionalize.
-        :return: The conventionalized class name.
-        """
-        return _conventionalize(self.options, "class", class_identifier)
-
-    def conventionalize_function(self, function: str) -> str:
-        """
-        Conventionalize the name of a function. This function uses the format
-        specified in the config.json file. If no format is specified, the function
-        name is unchanged, which is the same as snake_case, since the test suite uses
-        snake case.
-
-        :param function: The name of the function to conventionalize.
-        :return: The conventionalized function.
-        """
-        return _conventionalize(self.options, "function", function)
-
-    def conventionalize_identifier(self, identifier: str) -> str:
-        """
-        Conventionalize the name of an identifier. This function uses the format
-        specified in the config.json file. If no format is specified, the identifier
-        name is unchanged, which is the same as snake_case, since the test_suite uses
-        snake case.
-
-        :param identifier: The name of the identifier to conventionalize.
-        :return: The conventionalized identifier.
-        """
-        return _conventionalize(self.options, "identifier", identifier)
-
-    def conventionalize_global_identifier(self, identifier: str) -> str:
-        """
-        Conventionalize the name of an global variable. This function uses the
-        format specified in the config.json file. If no format is specified, the
-        global identifier name is unchanged, which is the same as snake_case, since
-        the test_suite uses snake case.
-
-        :param identifier: The name of the global variable to conventionalize.
-        :return: The conventionalized identifier.
-        """
-        return _conventionalize(self.options, "global_identifier", identifier)
-
-    def conventionalize_namespace(self, namespace: str) -> str:
-        """
-        Conventionalize the name of a namespace (class/module). This function uses
-        the format specified in the config.json file. If no format is specified, the
-        function name is unchanged, which is the same as snake_case, since the
-        test_suite uses snake case.
-
-        :param namespace: The name of the namespace to conventionalize.
-        :return: The conventionalized namespace.
-        """
-        return _conventionalize(self.options, "namespace", namespace)
-
-    def conventionalize_property(self, property_name: str) -> str:
-        """
-        Conventionalize the name of a property. This function uses the format
-        specified in the config.json file. If no format is specified, the property
-        name is unchanged, which is the same as snake_case, since the test_suite uses
-        snake case.
-
-        :param property_name: The name of the property to conventionalize.
-        :return: The conventionalized property.
-        """
-        return _conventionalize(self.options, "property", property_name)
-
-    def submission_name(self, suite: Suite) -> str:
-        """
-        Get the namespace (module/class) for the submission. This will use the
-        namespace specified in the test suite. The name is conventionalized for the
-        programming language.
-
-        :param suite: The test suite we are executing.
-        :return: The name for the submission, conventionalized.
-        """
-        return self.conventionalize_namespace(suite.namespace)
-
-    def selector_name(self) -> str:
-        """
-        :return: The name for the selector, conventionalized.
-        """
-        return self.conventionalize_namespace("selector")
-
     def execution_prefix(self) -> str:
         """The "name" or prefix for the context names. Not conventionalized."""
         return "execution"
@@ -478,8 +393,8 @@ class Language:
         :param execution_number: The number of the execution.
         :return: The name of the context, conventionalized.
         """
-        return self.conventionalize_namespace(
-            f"{self.execution_prefix()}_{tab_number}_{execution_number}"
+        return conventionalize_namespace(
+            self, f"{self.execution_prefix()}_{tab_number}_{execution_number}"
         )
 
     def extension_file(self) -> str:
@@ -641,7 +556,7 @@ class Language:
         :param exception: The exception.
         :return: The modified exception.
         """
-        namespace = self.conventionalize_namespace(bundle.suite.namespace)
+        namespace = conventionalize_namespace(self, bundle.suite.namespace)
         exception.stacktrace = self.cleanup_stacktrace(
             exception.stacktrace, self.with_extension(namespace)
         )
@@ -707,8 +622,8 @@ class Language:
     ) -> List[Path]:
         def filter_function(file: Path) -> bool:
             # We don't want files for contexts that are not the one we use.
-            prefix = bundle.lang_config.conventionalize_namespace(
-                bundle.lang_config.execution_prefix()
+            prefix = conventionalize_namespace(
+                bundle.lang_config, bundle.lang_config.execution_prefix()
             )
             is_context = file.name.startswith(prefix)
             is_our_context = file.name.startswith(context_name + ".")

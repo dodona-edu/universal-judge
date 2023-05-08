@@ -23,6 +23,17 @@ from typing import (
 
 from pygments.formatters.html import HtmlFormatter
 
+from tested.languages.conventionalize import (
+    conventionalize_class,
+    conventionalize_function,
+    conventionalize_global_identifier,
+    conventionalize_identifier,
+    conventionalize_namespace,
+    conventionalize_property,
+    selector_file,
+    submission_name,
+)
+
 # Prevent cyclic imports for types...
 if TYPE_CHECKING:
     from tested.judge.execution import ExecutionUnit
@@ -204,11 +215,11 @@ def _prepare_argument(
 
 def _prepare_assignment(bundle: Bundle, assignment: Assignment) -> Assignment:
     if isinstance(assignment.type, VariableType):
-        class_type = bundle.lang_config.conventionalize_class(assignment.type.data)
+        class_type = conventionalize_class(bundle.lang_config, assignment.type.data)
         assignment = assignment.replace_type(VariableType(data=class_type))
 
     assignment = assignment.replace_variable(
-        bundle.lang_config.conventionalize_identifier(assignment.variable)
+        conventionalize_identifier(bundle.lang_config, assignment.variable)
     )
     prepared = _prepare_expression(bundle, assignment.expression)
     return assignment.replace_expression(prepared)
@@ -221,28 +232,28 @@ def _prepare_expression(bundle: Bundle, expression: Expression) -> Expression:
 
     if isinstance(expression, Identifier):
         expression = Identifier(
-            bundle.lang_config.conventionalize_identifier(expression)
+            conventionalize_identifier(bundle.lang_config, expression)
         )
     elif isinstance(expression, PreparedFunctionCall):
         expression.arguments = [
             _prepare_argument(bundle, arg) for arg in expression.arguments
         ]
     elif isinstance(expression, FunctionCall):
-        submission_name = bundle.lang_config.submission_name(bundle.suite)
+        submission = submission_name(bundle.lang_config, bundle.suite)
         if expression.type == FunctionType.CONSTRUCTOR:
-            name = bundle.lang_config.conventionalize_class(expression.name)
+            name = conventionalize_class(bundle.lang_config, expression.name)
         elif expression.type == FunctionType.PROPERTY:
             if expression.namespace is None:
-                name = bundle.lang_config.conventionalize_global_identifier(
-                    expression.name
+                name = conventionalize_global_identifier(
+                    bundle.lang_config, expression.name
                 )
             else:
-                name = bundle.lang_config.conventionalize_property(expression.name)
+                name = conventionalize_property(bundle.lang_config, expression.name)
         else:
-            name = bundle.lang_config.conventionalize_function(expression.name)
+            name = conventionalize_function(bundle.lang_config, expression.name)
 
         if expression.namespace is None:
-            namespace = Identifier(submission_name)
+            namespace = Identifier(submission)
         else:
             namespace = _prepare_expression(bundle, expression.namespace)
 
@@ -301,7 +312,7 @@ def _create_handling_function(
     if hasattr(output, "evaluator") and isinstance(output.evaluator, SpecificEvaluator):
         # noinspection PyUnresolvedReferences
         evaluator = output.evaluator.for_language(bundle.config.programming_language)
-        evaluator_name = lang_config.conventionalize_namespace(evaluator.file.stem)
+        evaluator_name = conventionalize_namespace(lang_config, evaluator.file.stem)
     else:
         evaluator_name = None
 
@@ -312,7 +323,7 @@ def _create_handling_function(
             arguments = [
                 PreparedFunctionCall(
                     type=FunctionType.FUNCTION,
-                    name=lang_config.conventionalize_function(evaluator.name),
+                    name=conventionalize_function(lang_config, evaluator.name),
                     namespace=Identifier(evaluator_name),
                     arguments=[_prepare_expression(bundle, expression)],
                 )
@@ -325,7 +336,7 @@ def _create_handling_function(
 
         internal = PreparedFunctionCall(
             type=FunctionType.FUNCTION,
-            name=lang_config.conventionalize_function(function_name),
+            name=conventionalize_function(lang_config, function_name),
             arguments=[_prepare_argument(bundle, arg) for arg in arguments],
         )
         internal.has_root_namespace = False
@@ -481,8 +492,8 @@ def get_readable_input(
         # See https://rouge-ruby.github.io/docs/Rouge/Lexers/ConsoleLexer.html
         format_ = "console"
         arguments = " ".join(_escape_shell(x) for x in case.input.arguments)
-        submission_name = bundle.lang_config.submission_name(bundle.suite)
-        args = f"$ {submission_name} {arguments}"
+        submission = submission_name(bundle.lang_config, bundle.suite)
+        args = f"$ {submission} {arguments}"
         if isinstance(case.input.stdin, TextData):
             stdin = case.input.stdin.get_data_as_string(bundle.config.resources)
         else:
@@ -686,7 +697,7 @@ def prepare_execution_unit(
 
     value_file_name = value_file(bundle, destination).name
     exception_file_name = exception_file(bundle, destination).name
-    submission_name = bundle.lang_config.submission_name(bundle.suite)
+    submission = submission_name(bundle.lang_config, bundle.suite)
 
     # Extract the main testcase and exit testcase.
 
@@ -694,7 +705,7 @@ def prepare_execution_unit(
         execution_name=execution_name,
         value_file=value_file_name,
         exception_file=exception_file_name,
-        submission_name=submission_name,
+        submission_name=submission,
         testcase_separator_secret=bundle.testcase_separator_secret,
         context_separator_secret=bundle.context_separator_secret,
         contexts=contexts,
@@ -753,8 +764,7 @@ def generate_selector(
     :return: The name of the generated file in the given destination.
     """
     assert bundle.lang_config.needs_selector()
-    selector_name = bundle.lang_config.selector_name()
-    selector_filename = bundle.lang_config.with_extension(selector_name)
+    selector_filename = selector_file(bundle.lang_config)
     selector_destination = destination / selector_filename
     selector_code = bundle.lang_config.generate_selector(context_names)
     with open(selector_destination, "w") as execution_file:
@@ -784,8 +794,8 @@ def generate_custom_evaluator(
 
     :return: The name of the generated file.
     """
-    evaluator_name = bundle.lang_config.conventionalize_namespace(
-        evaluator.function.file.stem
+    evaluator_name = conventionalize_namespace(
+        bundle.lang_config, evaluator.function.file.stem
     )
     arguments = custom_evaluator_arguments(evaluator)
 

@@ -12,6 +12,7 @@ from tested.judge.collector import OutputManager
 from tested.judge.compilation import process_compile_results, run_compilation
 from tested.judge.utils import BaseExecutionResult, run_command
 from tested.languages.config import Config, FileFilter
+from tested.languages.conventionalize import selector_name
 from tested.languages.generator import exception_file, value_file
 from tested.testsuite import Context, EmptyChannel, ExecutionMode
 from tested.utils import safe_del
@@ -283,10 +284,10 @@ def execute_execution(
         if lang_config.needs_selector():
             _logger.debug("Selector is needed, using it.")
 
-            selector_name = lang_config.selector_name()
+            selector = selector_name(lang_config)
 
             executable, messages, status, annotations = lang_config.find_main_file(
-                files, selector_name, messages
+                files, selector, messages
             )
 
             _logger.debug(f"Found main file: {executable}")

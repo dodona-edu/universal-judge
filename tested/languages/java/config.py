@@ -11,7 +11,11 @@ from tested.languages.config import (
     Language,
     limit_output,
 )
-from tested.languages.conventionalize import Conventionable, NamingConventions
+from tested.languages.conventionalize import (
+    Conventionable,
+    NamingConventions,
+    conventionalize_namespace,
+)
 from tested.languages.utils import jvm_cleanup_stacktrace, jvm_memory_limit, jvm_stderr
 from tested.serialisation import FunctionCall, Statement, Value
 
@@ -67,7 +71,7 @@ class Java(Language):
             [],
             limit_output(stdout),
             jvm_cleanup_stacktrace(
-                stderr, self.with_extension(self.conventionalize_namespace(namespace))
+                stderr, self.with_extension(conventionalize_namespace(self, namespace))
             ),
         )
 

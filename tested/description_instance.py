@@ -10,6 +10,7 @@ from mako.template import Template
 
 from tested.configs import Bundle, DodonaConfig, GlobalConfig
 from tested.languages import get_language, language_exists
+from tested.languages.conventionalize import conventionalize_namespace
 from tested.languages.description_generator import TYPE_ARG, TYPE_CONFIG_NAME
 from tested.testsuite import Suite
 from tested.utils import smart_close
@@ -181,7 +182,7 @@ def create_description_instance_from_template(
             return description_generator.get_global_variable_name(var_name, is_html)
         return description_generator.get_variable_name(var_name, is_html)
 
-    namespace = language.conventionalize_namespace(namespace)
+    namespace = conventionalize_namespace(language, namespace)
     if is_html:
         namespace = html.escape(namespace)
 
@@ -208,7 +209,7 @@ def create_description_instance_from_template(
         programming_language_raw=description_generator.get_prompt_language(
             is_html=False
         ),
-        namespace=language.conventionalize_namespace(namespace),
+        namespace=conventionalize_namespace(language, namespace),
         natural_language=natural_languages.get(natural_language, natural_language),
         natural_language_iso639=natural_language,
     )

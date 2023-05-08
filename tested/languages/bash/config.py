@@ -11,7 +11,12 @@ from tested.languages.config import (
     Language,
     limit_output,
 )
-from tested.languages.conventionalize import Conventionable, NamingConventions
+from tested.languages.conventionalize import (
+    Conventionable,
+    NamingConventions,
+    conventionalize_namespace,
+    submission_file,
+)
 from tested.serialisation import Statement, Value
 
 if TYPE_CHECKING:
@@ -23,10 +28,8 @@ class Bash(Language):
         return {"global_identifier": "macro_case"}
 
     def compilation(self, bundle: Bundle, files: List[str]) -> CallbackResult:
-        submission_file = self.with_extension(
-            self.conventionalize_namespace(self.submission_name(bundle.suite))
-        )
-        main_file = list(filter(lambda x: x == submission_file, files))
+        submission = submission_file(self, bundle.suite)
+        main_file = list(filter(lambda x: x == submission, files))
         if main_file:
             return ["bash", "-n", main_file[0]], files
         else:
@@ -36,7 +39,7 @@ class Bash(Language):
         self, namespace: str, stdout: str, stderr: str
     ) -> Tuple[List[Message], List[AnnotateCode], str, str]:
         regex = re.compile(
-            f"{self.with_extension(self.conventionalize_namespace(namespace))}: "
+            f"{self.with_extension(conventionalize_namespace(self, namespace))}: "
             f"(regel|rule) ([0-9]+):"
         )
         return [], [], limit_output(stdout), regex.sub("<code>:\\2:", stderr)
@@ -53,7 +56,7 @@ class Bash(Language):
             f"{self.execution_prefix()}_[0-9]+_[0-9]+\\."
             f"{self.extension_file()}: [a-zA-Z_]+ [0-9]+:"
         )
-        script = f"./{self.with_extension(self.submission_name(bundle.suite))}"
+        script = f"./{submission_file(self, bundle.suite)}"
         stderr = regex.sub("<testcode>:", stderr).replace(script, "<code>")
         regex = re.compile(
             f"{self.execution_prefix()}_[0-9]+_[0-9]+\\." f"{self.extension_file()}"

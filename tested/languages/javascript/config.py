@@ -12,7 +12,12 @@ from tested.languages.config import (
     Language,
     limit_output,
 )
-from tested.languages.conventionalize import Conventionable, NamingConventions
+from tested.languages.conventionalize import (
+    Conventionable,
+    NamingConventions,
+    conventionalize_namespace,
+    submission_file,
+)
 from tested.languages.utils import cleanup_description
 from tested.serialisation import FunctionCall, Statement, Value
 
@@ -34,10 +39,8 @@ class JavaScript(Language):
         }
 
     def compilation(self, bundle: Bundle, files: List[str]) -> CallbackResult:
-        submission_file = self.with_extension(
-            self.conventionalize_namespace(self.submission_name(bundle.suite))
-        )
-        main_file = list(filter(lambda x: x == submission_file, files))
+        submission = submission_file(self, bundle.suite)
+        main_file = list(filter(lambda x: x == submission, files))
         if main_file:
             return ["node", "--check", main_file[0]], files
         else:
@@ -51,7 +54,7 @@ class JavaScript(Language):
             [],
             limit_output(stdout),
             self.cleanup_stacktrace(
-                stderr, self.with_extension(self.conventionalize_namespace(namespace))
+                stderr, self.with_extension(conventionalize_namespace(self, namespace))
             ),
         )
 
@@ -164,7 +167,7 @@ class JavaScript(Language):
         identifier = f"--{bundle.testcase_separator_secret}-- SEP"
         context_identifier = f"--{bundle.context_separator_secret}-- SEP"
         submission_file = self.with_extension(
-            self.conventionalize_namespace(bundle.suite.namespace)
+            conventionalize_namespace(self, bundle.suite.namespace)
         )
         # Assume stacktrace when line is equal the submission_file path with
         # line number

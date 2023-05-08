@@ -10,7 +10,11 @@ from tested.languages.config import (
     Language,
     executable_name,
 )
-from tested.languages.conventionalize import Conventionable, NamingConventions
+from tested.languages.conventionalize import (
+    Conventionable,
+    NamingConventions,
+    conventionalize_namespace,
+)
 from tested.languages.utils import (
     cleanup_description,
     haskell_cleanup_stacktrace,
@@ -77,7 +81,7 @@ class Haskell(Language):
             [],
             "",
             haskell_cleanup_stacktrace(
-                stderr, self.with_extension(self.conventionalize_namespace(namespace))
+                stderr, self.with_extension(conventionalize_namespace(self, namespace))
             ),
         )
 

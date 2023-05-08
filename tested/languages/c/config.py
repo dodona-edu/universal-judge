@@ -13,7 +13,11 @@ from tested.languages.config import (
     executable_name,
     limit_output,
 )
-from tested.languages.conventionalize import Conventionable, NamingConventions
+from tested.languages.conventionalize import (
+    Conventionable,
+    NamingConventions,
+    conventionalize_namespace,
+)
 from tested.serialisation import Statement, Value
 
 logger = logging.getLogger(__name__)
@@ -124,7 +128,7 @@ class C(Language):
         self, namespace: str, stdout: str, stderr: str
     ) -> Tuple[List[Message], List[AnnotateCode], str, str]:
         clean_stacktrace = cleanup_compilation_stderr(
-            stderr, self.with_extension(self.conventionalize_namespace(namespace))
+            stderr, self.with_extension(conventionalize_namespace(self, namespace))
         )
         return [], [], limit_output(stdout), clean_stacktrace
 

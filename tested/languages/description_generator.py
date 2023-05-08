@@ -13,6 +13,13 @@ from pygments.lexers import get_lexer_by_name
 
 from tested.configs import Bundle
 from tested.dsl import parse_string
+from tested.languages.conventionalize import (
+    conventionalize_class,
+    conventionalize_function,
+    conventionalize_global_identifier,
+    conventionalize_identifier,
+    conventionalize_property,
+)
 
 if TYPE_CHECKING:
     from .config import Language
@@ -82,7 +89,7 @@ class DescriptionGenerator:
             try:
                 return _get_type(arg)
             except KeyError:
-                return self.language.conventionalize_class(arg)
+                return conventionalize_class(self.language, arg)
 
         def _get_type_name(arg: str) -> Union[str, bool]:
             if not is_inner:
@@ -147,25 +154,25 @@ class DescriptionGenerator:
         return type_name
 
     def get_function_name(self, name: str, is_html: bool = True) -> str:
-        function_name = self.language.conventionalize_function(name)
+        function_name = conventionalize_function(self.language, name)
         if is_html:
             return html.escape(function_name)
         return function_name
 
     def get_property_name(self, name: str, is_html: bool = True) -> str:
-        name = self.language.conventionalize_property(name)
+        name = conventionalize_property(self.language, name)
         if is_html:
             return html.escape(name)
         return name
 
     def get_variable_name(self, name: str, is_html: bool = True) -> str:
-        name = self.language.conventionalize_identifier(name)
+        name = conventionalize_identifier(self.language, name)
         if is_html:
             return html.escape(name)
         return name
 
     def get_global_variable_name(self, name: str, is_html: bool = True) -> str:
-        name = self.language.conventionalize_global_identifier(name)
+        name = conventionalize_global_identifier(self.language, name)
         if is_html:
             return html.escape(name)
         return name

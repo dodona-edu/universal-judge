@@ -38,6 +38,7 @@ from tested.judge.compilation import run_compilation
 from tested.judge.execution import execute_file, filter_files
 from tested.judge.utils import BaseExecutionResult, copy_from_paths_to_path
 from tested.languages.config import TypeSupport
+from tested.languages.conventionalize import conventionalize_namespace
 from tested.languages.templates import path_to_dependencies
 from tested.serialisation import (
     BooleanType,
@@ -174,7 +175,7 @@ def run_encoder(bundle: Bundle, values: List[Value]) -> List[str]:
     dest = bundle.config.workdir
     copy_from_paths_to_path(dependency_paths, dependencies, dest)
 
-    name = bundle.lang_config.conventionalize_namespace("encode")
+    name = conventionalize_namespace(bundle.lang_config, "encode")
     encoder_name = bundle.lang_config.with_extension(name)
     encoder_destination = dest / encoder_name
     encode_code = bundle.lang_config.generate_encoder(values)

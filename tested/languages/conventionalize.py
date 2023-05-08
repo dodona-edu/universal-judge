@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Callable, Dict, Literal
 
 if TYPE_CHECKING:
     from tested.languages import Language
+    from tested.testsuite import Suite
 
 _logger = logging.getLogger(__name__)
 
@@ -412,22 +413,32 @@ def conventionalize_property(language: "Language", property_name: str) -> str:
     return _conventionalize(language, "property", property_name)
 
 
-def conventionalize_submission(language: "Language", raw_name: str) -> str:
+def submission_name(language: "Language", suite: "Suite") -> str:
     """
-    Get the conventionalized submission name.
-
-    Get the namespace (module/class) for the submission. This will use the
-    namespace specified in the test suite. The name is conventionalized for the
-    programming language.
+    TODO: docs
     """
-    return conventionalize_namespace(language, raw_name)
+    return conventionalize_namespace(language, suite.namespace)
 
 
-def conventionalize_selector(language: "Language") -> str:
+def submission_file(language: "Language", suite: "Suite") -> str:
+    """
+    TODO: docs
+    """
+    return language.with_extension(submission_name(language, suite))
+
+
+def selector_name(language: "Language") -> str:
     """
     :return: The name for the selector, conventionalized.
     """
     return conventionalize_namespace(language, "selector")
+
+
+def selector_file(language: "Language") -> str:
+    """
+    :return: The name for the selector, conventionalized.
+    """
+    return language.with_extension(selector_name(language))
 
 
 def conventionalize_execution(

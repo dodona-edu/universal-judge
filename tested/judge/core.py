@@ -33,6 +33,7 @@ from tested.judge.execution import (
 )
 from tested.judge.linter import run_linter
 from tested.judge.utils import copy_from_paths_to_path
+from tested.languages.conventionalize import submission_file
 from tested.languages.generator import generate_execution, generate_selector
 from tested.languages.templates import path_to_dependencies
 from tested.testsuite import ExecutionMode
@@ -305,14 +306,12 @@ def _generate_files(
     dependency_paths = path_to_dependencies(bundle)
     copy_from_paths_to_path(dependency_paths, dependencies, common_dir)
 
-    submission_name = bundle.lang_config.submission_name(bundle.suite)
-
     # Copy the submission file.
-    submission_file = f"{submission_name}" f".{bundle.lang_config.extension_file()}"
-    solution_path = common_dir / submission_file
+    submission = submission_file(bundle.lang_config, bundle.suite)
+    solution_path = common_dir / submission
     # noinspection PyTypeChecker
     shutil.copy2(bundle.config.source, solution_path)
-    dependencies.append(submission_file)
+    dependencies.append(submission)
 
     # Allow modifications of the submission file.
     bundle.lang_config.solution(solution_path, bundle)

@@ -4,7 +4,12 @@ from typing import TYPE_CHECKING, Dict, List, Tuple
 from tested.configs import Bundle
 from tested.dodona import AnnotateCode, Message
 from tested.languages.config import CallbackResult, Command, Config, Language
-from tested.languages.conventionalize import Conventionable, NamingConventions
+from tested.languages.conventionalize import (
+    Conventionable,
+    NamingConventions,
+    conventionalize_namespace,
+    submission_file,
+)
 from tested.languages.utils import (
     cleanup_description,
     haskell_cleanup_stacktrace,
@@ -26,10 +31,8 @@ class RunHaskell(Language):
         }
 
     def compilation(self, bundle: Bundle, files: List[str]) -> CallbackResult:
-        submission_file = self.with_extension(
-            self.conventionalize_namespace(self.submission_name(bundle.suite))
-        )
-        main_file = list(filter(lambda x: x == submission_file, files))
+        submission = submission_file(self, bundle.suite)
+        main_file = list(filter(lambda x: x == submission, files))
         if main_file:
             return ["ghc", "-fno-code", main_file[0]], files
         else:
@@ -43,7 +46,7 @@ class RunHaskell(Language):
             [],
             "",
             haskell_cleanup_stacktrace(
-                stderr, self.with_extension(self.conventionalize_namespace(namespace))
+                stderr, self.with_extension(conventionalize_namespace(self, namespace))
             ),
         )
 

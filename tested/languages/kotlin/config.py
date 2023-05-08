@@ -13,7 +13,11 @@ from tested.languages.config import (
     Language,
     limit_output,
 )
-from tested.languages.conventionalize import Conventionable, NamingConventions
+from tested.languages.conventionalize import (
+    Conventionable,
+    NamingConventions,
+    conventionalize_namespace,
+)
 from tested.languages.utils import jvm_cleanup_stacktrace, jvm_memory_limit, jvm_stderr
 from tested.serialisation import FunctionCall, Statement, Value
 
@@ -116,8 +120,8 @@ class Kotlin(Language):
     ) -> List[str]:
         def filter_function(file: Path) -> bool:
             # We don't want files for contexts that are not the one we use.
-            prefix = bundle.lang_config.conventionalize_namespace(
-                bundle.lang_config.execution_prefix()
+            prefix = conventionalize_namespace(
+                bundle.lang_config, bundle.lang_config.execution_prefix()
             )
             file = str(file)
             is_context = file.startswith(prefix)
@@ -141,7 +145,7 @@ class Kotlin(Language):
             [],
             limit_output(stdout),
             jvm_cleanup_stacktrace(
-                stderr, self.with_extension(self.conventionalize_namespace(namespace))
+                stderr, self.with_extension(conventionalize_namespace(self, namespace))
             ),
         )
 

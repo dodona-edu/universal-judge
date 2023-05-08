@@ -7,7 +7,12 @@ from tested.configs import Bundle
 from tested.dodona import AnnotateCode, Message, Status
 from tested.internationalization import get_i18n_string
 from tested.languages.config import CallbackResult, Command, Config, Language
-from tested.languages.conventionalize import Conventionable, NamingConventions
+from tested.languages.conventionalize import (
+    Conventionable,
+    NamingConventions,
+    conventionalize_namespace,
+    submission_name,
+)
 from tested.serialisation import FunctionCall, Statement, Value
 
 logger = logging.getLogger(__name__)
@@ -84,7 +89,7 @@ class CSharp(Language):
         if "class" in contents:
             return  # No top-level statements; we are happy...
 
-        class_name = bundle.lang_config.submission_name(bundle.suite)
+        class_name = submission_name(bundle.lang_config, bundle.suite)
         result = f"""\
 using System;
 using System.IO;
@@ -109,7 +114,9 @@ class {class_name}
     def compiler_output(
         self, namespace: str, stdout: str, stderr: str
     ) -> Tuple[List[Message], List[AnnotateCode], str, str]:
-        submission_name = self.with_extension(self.conventionalize_namespace(namespace))
+        submission_name = self.with_extension(
+            conventionalize_namespace(self, namespace)
+        )
         message_regex = (
             rf"{submission_name}\((\d+),(\d+)\): (error|warning) ([A-Z0-9]+): (.*) \["
         )

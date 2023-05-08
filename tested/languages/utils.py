@@ -6,13 +6,14 @@ from typing import List, Tuple
 from tested.configs import Bundle
 from tested.dodona import AnnotateCode, Message
 from tested.languages.config import Config, Language
+from tested.languages.conventionalize import conventionalize_namespace, submission_name
 
 logger = logging.getLogger(__name__)
 
 
 def cleanup_description(lang_config: Language, namespace: str, description: str) -> str:
     return description.replace(
-        rf"{lang_config.conventionalize_namespace(namespace)}.", r"", 1
+        rf"{conventionalize_namespace(lang_config, namespace)}.", r"", 1
     )
 
 
@@ -84,7 +85,7 @@ def jvm_stderr(
     identifier = f"--{bundle.testcase_separator_secret}-- SEP"
     context_identifier = f"--{bundle.context_separator_secret}-- SEP"
     submission_file = self.with_extension(
-        self.conventionalize_namespace(bundle.suite.namespace)
+        conventionalize_namespace(self, bundle.suite.namespace)
     )
 
     return (
@@ -103,7 +104,7 @@ def jvm_stderr(
 def haskell_solution(lang_config: Language, solution: Path, bundle: Bundle):
     """Support implicit modules if needed."""
     if bundle.config.config_for().get("implicitModule", True):
-        name = lang_config.submission_name(bundle.suite)
+        name = submission_name(lang_config, bundle.suite)
         # noinspection PyTypeChecker
         with open(solution, "r") as file:
             contents = file.read()
