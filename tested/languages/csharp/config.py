@@ -35,7 +35,7 @@ class CSharp(Language):
             "global_identifier": "macro_case",
         }
 
-    def compilation(self, bundle: Bundle, files: List[str]) -> CallbackResult:
+    def compilation(self, files: List[str]) -> CallbackResult:
         # In C#, all output files are located in a subdirectory, so we just
         # want to copy over the subdirectory.
         def file_filter(file: Path) -> bool:

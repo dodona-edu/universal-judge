@@ -122,7 +122,7 @@ def _evaluate_others(
     _logger.debug("Generated evaluator executor %s", evaluator_name)
 
     # Do compilation for those configs that require it.
-    command, files = eval_bundle.lang_config.compilation(bundle, dependencies)
+    command, files = eval_bundle.lang_config.compilation(dependencies)
     _logger.debug("Compiling custom evaluator with command %s", command)
     result = run_command(custom_path, None, command)
     if result and result.stderr:

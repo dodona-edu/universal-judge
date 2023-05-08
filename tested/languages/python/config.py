@@ -36,7 +36,7 @@ class Python(Language):
     def get_string_quote(self):
         return "'"
 
-    def compilation(self, bundle: Bundle, files: List[str]) -> CallbackResult:
+    def compilation(self, files: List[str]) -> CallbackResult:
         result = [x.replace(".py", ".pyc") for x in files]
         return [
             _executable(),

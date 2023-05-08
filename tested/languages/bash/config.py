@@ -27,8 +27,8 @@ class Bash(Language):
     def naming_conventions(self) -> Dict[Conventionable, NamingConventions]:
         return {"global_identifier": "macro_case"}
 
-    def compilation(self, bundle: Bundle, files: List[str]) -> CallbackResult:
-        submission = submission_file(self, bundle.suite)
+    def compilation(self, files: List[str]) -> CallbackResult:
+        submission = submission_file(self, self.config.suite)
         main_file = list(filter(lambda x: x == submission, files))
         if main_file:
             return ["bash", "-n", main_file[0]], files

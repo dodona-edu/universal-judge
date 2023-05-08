@@ -44,7 +44,7 @@ class Kotlin(Language):
             "class": "pascal_case",
         }
 
-    def compilation(self, bundle: Bundle, files: List[str]) -> CallbackResult:
+    def compilation(self, files: List[str]) -> CallbackResult:
         def file_filter(file: Path) -> bool:
             return file.suffix == ".class"
 

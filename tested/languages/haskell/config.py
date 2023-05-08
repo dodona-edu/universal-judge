@@ -35,14 +35,14 @@ class Haskell(Language):
             "function": "camel_case",
         }
 
-    def compilation(self, bundle: Bundle, files: List[str]) -> CallbackResult:
+    def compilation(self, files: List[str]) -> CallbackResult:
         main_ = files[-1]
         exec_ = main_.rstrip(".hs")
         return [
             "ghc",
             "-fno-cse",
             "-fno-full-laziness",
-            "-O3" if bundle.config.options.compiler_optimizations else "-O0",
+            "-O3" if self.config.options.compiler_optimizations else "-O0",
             main_,
             "-main-is",
             exec_,

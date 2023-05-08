@@ -71,7 +71,7 @@ class C(Language):
     def naming_conventions(self) -> Dict[Conventionable, NamingConventions]:
         return {"global_identifier": "macro_case"}
 
-    def compilation(self, bundle: Bundle, files: List[str]) -> CallbackResult:
+    def compilation(self, files: List[str]) -> CallbackResult:
         main_file = files[-1]
         exec_file = Path(main_file).stem
         result = executable_name(exec_file)
@@ -80,7 +80,7 @@ class C(Language):
                 "gcc",
                 "-std=c11",
                 "-Wall",
-                "-O3" if bundle.config.options.compiler_optimizations else "-O0",
+                "-O3" if self.config.options.compiler_optimizations else "-O0",
                 "evaluation_result.c",
                 "values.c",
                 main_file,

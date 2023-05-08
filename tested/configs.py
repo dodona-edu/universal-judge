@@ -133,6 +133,10 @@ class GlobalConfig:
     context_separator_secret: str
     suite: "Suite"
 
+    @property
+    def options(self) -> Options:
+        return self.dodona.options
+
 
 @dataclasses.dataclass
 class Bundle:
@@ -157,10 +161,6 @@ class Bundle:
     @property
     def context_separator_secret(self) -> str:
         return self.global_config.context_separator_secret
-
-    @property
-    def options(self) -> Options:
-        return self.global_config.dodona.options
 
 
 def _get_language(config: DodonaConfig) -> Tuple[str, int]:

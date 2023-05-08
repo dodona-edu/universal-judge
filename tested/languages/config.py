@@ -252,7 +252,7 @@ class Language:
     def get_string_quote(self):
         return '"'
 
-    def compilation(self, bundle: Bundle, files: List[str]) -> CallbackResult:
+    def compilation(self, files: List[str]) -> CallbackResult:
         """
         Callback for generating the compilation command.
 
@@ -313,7 +313,6 @@ class Language:
         Parameters
         ----------
 
-        :param bundle: The bundle configuration options.
         :param files: A suggestion containing the dependencies TESTed thinks might
                       be useful to compile. By convention, the last file in the list
                       is the file containing the "main" function.
