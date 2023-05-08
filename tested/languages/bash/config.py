@@ -39,24 +39,20 @@ class Bash(Language):
     def execution(self, cwd: Path, file: str, arguments: List[str]) -> Command:
         return ["bash", file, *arguments]
 
-    def stderr(
-        self, bundle: Bundle, stderr: str
-    ) -> Tuple[List[Message], List[AnnotateCode], str]:
+    def stderr(self, stderr: str) -> Tuple[List[Message], List[AnnotateCode], str]:
         regex = re.compile(
             f"{self.execution_prefix()}_[0-9]+_[0-9]+\\."
             f"{self.extension_file()}: [a-zA-Z_]+ [0-9]+:"
         )
-        script = f"./{submission_file(self, bundle.suite)}"
+        script = f"./{submission_file(self, self.config.suite)}"
         stderr = regex.sub("<testcode>:", stderr).replace(script, "<code>")
         regex = re.compile(
             f"{self.execution_prefix()}_[0-9]+_[0-9]+\\." f"{self.extension_file()}"
         )
         return [], [], regex.sub("<testcode>", stderr)
 
-    def stdout(
-        self, bundle: Bundle, stdout: str
-    ) -> Tuple[List[Message], List[AnnotateCode], str]:
-        return self.stderr(bundle, stdout)
+    def stdout(self, stdout: str) -> Tuple[List[Message], List[AnnotateCode], str]:
+        return self.stderr(stdout)
 
     def linter(
         self, bundle: Bundle, submission: Path, remaining: float

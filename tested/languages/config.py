@@ -520,25 +520,19 @@ class Language:
         exception.message = self.clean_exception_message(exception.message, submission)
         return exception
 
-    def stdout(
-        self, _bundle: Bundle, stdout: str
-    ) -> Tuple[List[Message], List[AnnotateCode], str]:
+    def stdout(self, stdout: str) -> Tuple[List[Message], List[AnnotateCode], str]:
         """
         Callback that allows modifying the stdout.
 
-        :param _bundle: Gives context to the execution stdout
         :param stdout: The original stdout.
         :return: A tuple containing messages, annotations and the new stdout.
         """
         return [], [], stdout
 
-    def stderr(
-        self, bundle: Bundle, stderr: str
-    ) -> Tuple[List[Message], List[AnnotateCode], str]:
+    def stderr(self, stderr: str) -> Tuple[List[Message], List[AnnotateCode], str]:
         """
         Callback that allows modifying the stderr.
 
-        :param bundle: Gives context to the execution stderr
         :param stderr: The original stderr.
         :return: A tuple containing messages, annotations and the new stderr.
         """

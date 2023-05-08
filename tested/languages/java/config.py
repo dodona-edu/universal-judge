@@ -65,10 +65,8 @@ class Java(Language):
             jvm_cleanup_stacktrace(stderr, submission_file(self, self.config.suite)),
         )
 
-    def stderr(
-        self, bundle: Bundle, stderr: str
-    ) -> Tuple[List[Message], List[AnnotateCode], str]:
-        return jvm_stderr(self, bundle, stderr)
+    def stderr(self, stderr: str) -> Tuple[List[Message], List[AnnotateCode], str]:
+        return jvm_stderr(self, stderr)
 
     def generate_statement(self, statement: Statement) -> str:
         from tested.languages.java import generators

@@ -3,10 +3,14 @@ import re
 from pathlib import Path
 from typing import List, Tuple
 
-from tested.configs import Bundle, GlobalConfig
+from tested.configs import GlobalConfig
 from tested.dodona import AnnotateCode, Message
 from tested.languages.config import Language
-from tested.languages.conventionalize import conventionalize_namespace, submission_name
+from tested.languages.conventionalize import (
+    conventionalize_namespace,
+    submission_file,
+    submission_name,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -79,21 +83,19 @@ def jvm_cleanup_stacktrace(
 
 
 def jvm_stderr(
-    self: Language, bundle: Bundle, stderr: str
+    self: Language, stderr: str
 ) -> Tuple[List[Message], List[AnnotateCode], str]:
     # Identifier to separate testcase output
-    identifier = f"--{bundle.testcase_separator_secret}-- SEP"
-    context_identifier = f"--{bundle.context_separator_secret}-- SEP"
-    submission_file = self.with_extension(
-        conventionalize_namespace(self, bundle.suite.namespace)
-    )
+    identifier = f"--{self.config.testcase_separator_secret}-- SEP"
+    context_identifier = f"--{self.config.context_separator_secret}-- SEP"
+    submission = submission_file(self, self.config.suite)
 
     return (
         [],
         [],
         context_identifier.join(
             identifier.join(
-                self.cleanup_stacktrace(testcase, submission_file)
+                self.cleanup_stacktrace(testcase, submission)
                 for testcase in context.split(identifier)
             )
             for context in stderr.split(context_identifier)

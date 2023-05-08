@@ -9,7 +9,6 @@ from tested.languages.config import CallbackResult, Command, Language, limit_out
 from tested.languages.conventionalize import (
     Conventionable,
     NamingConventions,
-    conventionalize_namespace,
     submission_file,
 )
 from tested.languages.utils import cleanup_description
@@ -150,19 +149,15 @@ class JavaScript(Language):
     def clean_exception_message(self, message: str, namespace: str) -> str:
         return message.replace(f"{namespace}.", "", 1)
 
-    def stderr(
-        self, bundle: Bundle, stderr: str
-    ) -> Tuple[List[Message], List[AnnotateCode], str]:
+    def stderr(self, stderr: str) -> Tuple[List[Message], List[AnnotateCode], str]:
         # Identifier to separate testcase output
-        identifier = f"--{bundle.testcase_separator_secret}-- SEP"
-        context_identifier = f"--{bundle.context_separator_secret}-- SEP"
-        submission_file = self.with_extension(
-            conventionalize_namespace(self, bundle.suite.namespace)
-        )
+        identifier = f"--{self.config.testcase_separator_secret}-- SEP"
+        context_identifier = f"--{self.config.context_separator_secret}-- SEP"
+        submission = submission_file(self, self.config.suite)
         # Assume stacktrace when line is equal the submission_file path with
         # line number
         line_start_with_submission_file = re.compile(
-            rf"^(\\?([^\\/]*[\\/])*)({submission_file}):[0-9]+"
+            rf"^(\\?([^\\/]*[\\/])*)({submission}):[0-9]+"
         )
         contexts = stderr.split(context_identifier)
         cleaned_contexts = []
@@ -181,7 +176,7 @@ class JavaScript(Language):
                         break
                 keep_lines = "".join(case[:keep_until])
                 stacktrace = "".join(case[keep_until:])
-                stacktrace = self.cleanup_stacktrace(stacktrace, submission_file)
+                stacktrace = self.cleanup_stacktrace(stacktrace, submission)
                 cleaned_cases.append(f"{keep_lines}{stacktrace}")
             cleaned_contexts.append(identifier.join(cleaned_cases))
 

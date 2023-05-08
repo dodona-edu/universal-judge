@@ -328,16 +328,12 @@ def execute_execution(
     )
 
     # Cleanup stderr
-    msgs, annotations, base_result.stderr = lang_config.stderr(
-        bundle, base_result.stderr
-    )
+    msgs, annotations, base_result.stderr = lang_config.stderr(base_result.stderr)
     for annotation in annotations:
         args.collector.add(annotation)
     messages.extend(msgs)
     # Cleanup stdout
-    msgs, annotation, base_result.stdout = lang_config.stdout(
-        bundle, base_result.stdout
-    )
+    msgs, annotation, base_result.stdout = lang_config.stdout(base_result.stdout)
     for annotation in annotations:
         args.collector.add(annotation)
     messages.extend(msgs)
