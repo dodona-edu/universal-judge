@@ -27,12 +27,10 @@ import re
 import sys
 import typing
 from collections import defaultdict
-from dataclasses import dataclass
 from enum import Enum, auto
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Mapping, Optional, Set, Tuple, Union
+from typing import Callable, Dict, List, Mapping, Optional, Set, Tuple, Union
 
-from tested.configs import Bundle
 from tested.datatypes import AdvancedTypes, AllTypes, ExpressionTypes, string_to_type
 from tested.dodona import AnnotateCode, ExtendedMessage, Message, Permission, Status
 from tested.features import Construct
@@ -58,33 +56,6 @@ CallbackResult = Tuple[Command, Union[List[str], FileFilter]]
 logger = logging.getLogger(__name__)
 
 _logger = logging.getLogger(__name__)
-
-
-@dataclass
-class Config:
-    # noinspection PyUnresolvedReferences
-    """
-    Global options for the language configuration.
-
-    Available fields:
-    :param time_limit: The time limit as given by Dodona. In most cases, you do not
-                       need this; TESTed tracks the execution time.
-    :param memory_limit: The memory limit as given by Dodona.
-    :param options: Language specific options. Using this field you could for
-                    example allow for additional parameters when compiling or
-                    executing.
-    """
-    time_limit: int  # Time limit from Dodona.
-    memory_limit: int  # Memory limit from Dodona.
-    options: Dict[str, Any]  # Language-specific options.
-
-    @classmethod
-    def from_bundle(cls, bundle: Bundle):
-        return Config(
-            time_limit=bundle.config.time_limit,
-            memory_limit=bundle.config.memory_limit,
-            options=bundle.config.config_for(),
-        )
 
 
 def executable_name(basename: str) -> str:
