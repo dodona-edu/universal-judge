@@ -1,10 +1,10 @@
-import typing
 from pathlib import Path
-from typing import List, Tuple
+from typing import TYPE_CHECKING, Dict, List, Tuple
 
 from tested.configs import Bundle
 from tested.dodona import AnnotateCode, Message
 from tested.languages.config import CallbackResult, Command, Config, Language
+from tested.languages.conventionalize import Conventionable, NamingConventions
 from tested.languages.utils import (
     cleanup_description,
     haskell_cleanup_stacktrace,
@@ -12,11 +12,19 @@ from tested.languages.utils import (
 )
 from tested.serialisation import FunctionCall, Statement, Value
 
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
     from tested.languages.generator import PreparedExecutionUnit
 
 
 class RunHaskell(Language):
+    def naming_conventions(self) -> Dict[Conventionable, NamingConventions]:
+        return {
+            "namespace": "pascal_case",
+            "identifier": "camel_case",
+            "global_identifier": "camel_case",
+            "function": "camel_case",
+        }
+
     def compilation(self, bundle: Bundle, files: List[str]) -> CallbackResult:
         submission_file = self.with_extension(
             self.conventionalize_namespace(self.submission_name(bundle.suite))

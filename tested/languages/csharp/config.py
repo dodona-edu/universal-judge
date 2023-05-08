@@ -1,18 +1,18 @@
 import logging
 import re
-import typing
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
 from tested.configs import Bundle
 from tested.dodona import AnnotateCode, Message, Status
 from tested.internationalization import get_i18n_string
 from tested.languages.config import CallbackResult, Command, Config, Language
+from tested.languages.conventionalize import Conventionable, NamingConventions
 from tested.serialisation import FunctionCall, Statement, Value
 
 logger = logging.getLogger(__name__)
 
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
     from tested.languages.generator import PreparedExecutionUnit
 
 # Where the results of the compilation are stored.
@@ -20,6 +20,16 @@ OUTPUT_DIRECTORY = "all-outputs"
 
 
 class CSharp(Language):
+    def naming_conventions(self) -> Dict[Conventionable, NamingConventions]:
+        return {
+            "namespace": "pascal_case",
+            "function": "pascal_case",
+            "identifier": "pascal_case",
+            "property": "pascal_case",
+            "class": "pascal_case",
+            "global_identifier": "macro_case",
+        }
+
     def compilation(self, bundle: Bundle, files: List[str]) -> CallbackResult:
         # In C#, all output files are located in a subdirectory, so we just
         # want to copy over the subdirectory.

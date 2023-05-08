@@ -1,9 +1,8 @@
 import logging
 import os
 import re
-import typing
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
 from tested.configs import Bundle
 from tested.dodona import AnnotateCode, Message, Severity
@@ -14,9 +13,10 @@ from tested.languages.config import (
     Language,
     trace_to_html,
 )
+from tested.languages.conventionalize import Conventionable, NamingConventions
 from tested.serialisation import FunctionCall, Statement, Value
 
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
     from tested.languages.generator import PreparedExecutionUnit
 
 logger = logging.getLogger(__name__)
@@ -30,6 +30,9 @@ def _executable():
 
 
 class Python(Language):
+    def naming_conventions(self) -> Dict[Conventionable, NamingConventions]:
+        return {"class": "pascal_case", "global_identifier": "macro_case"}
+
     def get_string_quote(self):
         return "'"
 

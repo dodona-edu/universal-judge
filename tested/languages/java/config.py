@@ -1,7 +1,6 @@
 import logging
-import typing
 from pathlib import Path
-from typing import List, Tuple
+from typing import TYPE_CHECKING, Dict, List, Tuple
 
 from tested.configs import Bundle
 from tested.dodona import AnnotateCode, Message
@@ -12,10 +11,11 @@ from tested.languages.config import (
     Language,
     limit_output,
 )
+from tested.languages.conventionalize import Conventionable, NamingConventions
 from tested.languages.utils import jvm_cleanup_stacktrace, jvm_memory_limit, jvm_stderr
 from tested.serialisation import FunctionCall, Statement, Value
 
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
     from tested.languages.generator import PreparedExecutionUnit
 
 
@@ -23,6 +23,16 @@ logger = logging.getLogger(__name__)
 
 
 class Java(Language):
+    def naming_conventions(self) -> Dict[Conventionable, NamingConventions]:
+        return {
+            "namespace": "pascal_case",
+            "function": "camel_case",
+            "identifier": "camel_case",
+            "global_identifier": "macro_case",
+            "property": "camel_case",
+            "class": "pascal_case",
+        }
+
     def compilation(self, bundle: Bundle, files: List[str]) -> CallbackResult:
         def file_filter(file: Path) -> bool:
             return file.suffix == ".class"
