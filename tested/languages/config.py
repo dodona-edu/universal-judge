@@ -53,7 +53,6 @@ if typing.TYPE_CHECKING:
 Command = List[str]
 FileFilter = Callable[[Path], bool]
 CallbackResult = Tuple[Command, Union[List[str], FileFilter]]
-logger = logging.getLogger(__name__)
 
 _logger = logging.getLogger(__name__)
 
@@ -146,7 +145,7 @@ def trace_to_html(
     link_regex = re.compile(link_regex)
     # Add links to
     traceback = link_regex.sub(link_subs, traceback)
-    logger.debug(f"<pre><code>{traceback}</code></pre>")
+    _logger.debug(f"<pre><code>{traceback}</code></pre>")
     return ExtendedMessage(
         description=f"<pre><code>{traceback}</code></pre>",
         format="html",
@@ -546,7 +545,7 @@ class Language:
     def find_main_file(
         self, files: List[Path], name: str, precompilation_messages: List[str]
     ) -> Tuple[Optional[Path], List[Message], Status, List[AnnotateCode]]:
-        logger.debug("Finding %s in %s", name, files)
+        _logger.debug("Finding %s in %s", name, files)
         messages = []
         possible_main_files = [x for x in files if x.name.startswith(name)]
         if possible_main_files:
