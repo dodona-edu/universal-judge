@@ -101,7 +101,7 @@ def judge(bundle: Bundle):
         )
 
         messages, status, annotations = process_compile_results(
-            bundle.suite.namespace, bundle.lang_config, result
+            bundle.lang_config, result
         )
 
         # If there is no result, there was no compilation.

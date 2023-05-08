@@ -240,9 +240,7 @@ def execute_execution(
         files = filter_files(files, execution_dir)
 
         # Process compilation results.
-        messages, status, annotations = process_compile_results(
-            bundle.suite.namespace, lang_config, result
-        )
+        messages, status, annotations = process_compile_results(lang_config, result)
 
         for annotation in annotations:
             args.collector.add(annotation)

@@ -62,7 +62,7 @@ def run_compilation(
 
 
 def process_compile_results(
-    namespace: str, language_config: Language, results: Optional[BaseExecutionResult]
+    language_config: Language, results: Optional[BaseExecutionResult]
 ) -> Tuple[List[Message], Status, List[AnnotateCode]]:
     """
     Process the output of a compilation step. It will convert the result of the
