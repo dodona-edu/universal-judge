@@ -258,6 +258,30 @@ class Language:
                 result.add(Construct[construct.upper()])
         return result
 
+    def map_type_restrictions(self) -> Optional[Set[ExpressionTypes]]:
+        """
+        Get type restrictions that apply to map types in this language.
+
+        If you return None, all data types are assumed to be usable as the key in
+        a map data type, such as a dictionary or hashmap. Otherwise, you must return
+        a whitelist of the allowed types.
+
+        :return: The whitelist of allowed types, or everything is allowed.
+        """
+        return None
+
+    def set_type_restrictions(self) -> Optional[Set[ExpressionTypes]]:
+        """
+        Get type restrictions that apply to the set types in this languageg.
+
+        If you return None, all data types are assumed to be usable as the key in
+        a set data type, such as a HashSet. Otherwise, you must return a whitelist
+        of the allowed types.
+
+        :return: The whitelist of allowed types, or everything is allowed.
+        """
+        return None
+
     def type_support_map(self) -> Mapping[AllTypes, TypeSupport]:
         """
         Return a map containing the support for all types.
