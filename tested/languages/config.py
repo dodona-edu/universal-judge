@@ -44,23 +44,7 @@ from tested.languages.conventionalize import (
 )
 from tested.languages.description_generator import DescriptionGenerator
 from tested.serialisation import ExceptionValue, FunctionCall, Statement, Value
-from tested.testsuite import Suite
-from tested.utils import (
-    camel_snake_case,
-    camelize,
-    cobol_case,
-    dash_case,
-    doner_case,
-    fallback,
-    flat_case,
-    get_args,
-    macro_case,
-    pascal_snake_case,
-    pascalize,
-    snake_case,
-    train_case,
-    upper_flat_case,
-)
+from tested.utils import fallback, get_args
 
 if typing.TYPE_CHECKING:
     from tested.languages.generation import PreparedExecutionUnit
@@ -69,21 +53,6 @@ Command = List[str]
 FileFilter = Callable[[Path], bool]
 CallbackResult = Tuple[Command, Union[List[str], FileFilter]]
 logger = logging.getLogger(__name__)
-
-_case_mapping = {
-    "camel_case": camelize,
-    "camel_snake_case": camel_snake_case,
-    "cobol_case": cobol_case,
-    "dash_case": dash_case,
-    "donor_case": doner_case,
-    "flat_case": flat_case,
-    "macro_case": macro_case,
-    "pascal_case": pascalize,
-    "pascal_snake_case": pascal_snake_case,
-    "snake_case": snake_case,
-    "train_case": train_case,
-    "upper_flat_case": upper_flat_case,
-}
 
 _logger = logging.getLogger(__name__)
 
@@ -113,14 +82,6 @@ class Config:
             memory_limit=bundle.config.memory_limit,
             options=bundle.config.config_for(),
         )
-
-
-def _conventionalize(options: dict, what: str, name: str):
-    """Conventionalize based on the options."""
-    function = _case_mapping[
-        options.get("naming_conventions", {}).get(what, "snake_case")
-    ]
-    return function(name)
 
 
 def executable_name(basename: str) -> str:
