@@ -1,9 +1,11 @@
 import logging
 import re
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Dict, List, Mapping, Optional, Set, Tuple
 
+from tested.datatypes import AllTypes
 from tested.dodona import AnnotateCode, Message, Status
+from tested.features import Construct, TypeSupport
 from tested.internationalization import get_i18n_string
 from tested.languages.config import CallbackResult, Command, Language
 from tested.languages.conventionalize import (
@@ -23,6 +25,15 @@ OUTPUT_DIRECTORY = "all-outputs"
 
 
 class CSharp(Language):
+    def initial_dependencies(self) -> List[str]:
+        return ["dotnet.csproj", "Values.cs", "EvaluationResult.cs"]
+
+    def needs_selector(self):
+        return True
+
+    def file_extension(self) -> str:
+        return "cs"
+
     def naming_conventions(self) -> Dict[Conventionable, NamingConventions]:
         return {
             "namespace": "pascal_case",
@@ -31,6 +42,47 @@ class CSharp(Language):
             "property": "pascal_case",
             "class": "pascal_case",
             "global_identifier": "macro_case",
+        }
+
+    def supported_constructs(self) -> Set[Construct]:
+        return {
+            Construct.OBJECTS,
+            Construct.EXCEPTIONS,
+            Construct.FUNCTION_CALLS,
+            Construct.ASSIGNMENTS,
+            Construct.HETEROGENEOUS_COLLECTIONS,
+            Construct.HETEROGENEOUS_ARGUMENTS,
+            Construct.EVALUATION,
+            Construct.NAMED_ARGUMENTS,
+            Construct.DEFAULT_PARAMETERS,
+            Construct.GLOBAL_VARIABLES,
+        }
+
+    def datatype_support(self) -> Mapping[AllTypes, TypeSupport]:
+        return {
+            "integer": "supported",
+            "real": "supported",
+            "char": "reduced",
+            "text": "supported",
+            "boolean": "supported",
+            "sequence": "supported",
+            "set": "supported",
+            "map": "supported",
+            "nothing": "supported",
+            "int8": "supported",
+            "uint8": "supported",
+            "int16": "supported",
+            "uint16": "supported",
+            "int32": "supported",
+            "uint32": "supported",
+            "int64": "supported",
+            "uint64": "supported",
+            "bigint": "supported",
+            "single_precision": "supported",
+            "double_precision": "supported",
+            "array": "supported",
+            "list": "supported",
+            "tuple": "supported",
         }
 
     def compilation(self, files: List[str]) -> CallbackResult:

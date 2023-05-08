@@ -2,9 +2,11 @@ import logging
 import os
 import re
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Dict, List, Mapping, Optional, Set, Tuple
 
+from tested.datatypes import AllTypes, ExpressionTypes
 from tested.dodona import AnnotateCode, Message, Severity
+from tested.features import Construct, TypeSupport
 from tested.languages.config import CallbackResult, Command, Language
 from tested.languages.conventionalize import (
     Conventionable,
@@ -28,11 +30,80 @@ def _executable():
 
 
 class Python(Language):
-    def naming_conventions(self) -> Dict[Conventionable, NamingConventions]:
-        return {"class": "pascal_case", "global_identifier": "macro_case"}
+    def initial_dependencies(self) -> List[str]:
+        return ["values.py", "evaluation_utils.py"]
+
+    def needs_selector(self):
+        return False
+
+    def file_extension(self) -> str:
+        return "py"
 
     def get_string_quote(self):
         return "'"
+
+    def naming_conventions(self) -> Dict[Conventionable, NamingConventions]:
+        return {"class": "pascal_case", "global_identifier": "macro_case"}
+
+    def supported_constructs(self) -> Set[Construct]:
+        return {
+            Construct.OBJECTS,
+            Construct.EXCEPTIONS,
+            Construct.FUNCTION_CALLS,
+            Construct.ASSIGNMENTS,
+            Construct.HETEROGENEOUS_COLLECTIONS,
+            Construct.HETEROGENEOUS_ARGUMENTS,
+            Construct.NAMED_ARGUMENTS,
+            Construct.EVALUATION,
+            Construct.DEFAULT_PARAMETERS,
+            Construct.GLOBAL_VARIABLES,
+        }
+
+    def datatype_support(self) -> Mapping[AllTypes, TypeSupport]:
+        return {
+            "integer": "supported",
+            "real": "supported",
+            "char": "reduced",
+            "text": "supported",
+            "boolean": "supported",
+            "sequence": "supported",
+            "set": "supported",
+            "map": "supported",
+            "nothing": "supported",
+            "undefined": "reduced",
+            "int8": "reduced",
+            "uint8": "reduced",
+            "int16": "reduced",
+            "uint16": "reduced",
+            "int32": "reduced",
+            "uint32": "reduced",
+            "int64": "reduced",
+            "uint64": "reduced",
+            "bigint": "supported",
+            "single_precision": "reduced",
+            "double_precision": "reduced",
+            "double_extended": "reduced",
+            "fixed_precision": "supported",
+            "array": "reduced",
+            "list": "supported",
+            "tuple": "supported",
+        }
+
+    def map_type_restrictions(self) -> Optional[Set[ExpressionTypes]]:
+        return {
+            "integer",
+            "real",
+            "text",
+            "boolean",
+            "tuple",
+            "bigint",
+            "fixed_precision",
+            "function_calls",
+            "identifiers",
+        }
+
+    def set_type_restrictions(self) -> Optional[Set[ExpressionTypes]]:
+        return self.map_type_restrictions()
 
     def compilation(self, files: List[str]) -> CallbackResult:
         result = [x.replace(".py", ".pyc") for x in files]

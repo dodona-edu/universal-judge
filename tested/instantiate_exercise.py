@@ -17,6 +17,7 @@ from tested.description_instance import (
     prepare_template,
 )
 from tested.dsl import parse_dsl
+from tested.features import fallback_type_support_map
 from tested.languages import LANGUAGES, Language, get_language, language_exists
 from tested.testsuite import Suite, parse_test_suite
 
@@ -151,7 +152,7 @@ def _filter_valid_languages(languages: List[str], test_suite: Suite) -> List[str
         if not (required.constructs <= available_constructs):
             return False
 
-        mapping = language.type_support_map()
+        mapping = fallback_type_support_map(language)
         for t in required.types:
             if mapping[t] == TypeSupport.UNSUPPORTED:
                 return False
@@ -171,7 +172,10 @@ def _filter_valid_languages(languages: List[str], test_suite: Suite) -> List[str
             lambda x: x[0] in (BasicSequenceTypes.SET, BasicObjectTypes.MAP),
             required.nested_types,
         )
-        restricted = language.restriction_map()
+        restricted = {
+            BasicSequenceTypes.SET: language.set_type_restrictions(),
+            BasicObjectTypes.MAP: language.map_type_restrictions(),
+        }
         for key, value_types in nested_types:
             if not (value_types <= restricted[key]):
                 return False

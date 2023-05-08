@@ -1,8 +1,10 @@
 import re
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Tuple
+from typing import TYPE_CHECKING, Dict, List, Mapping, Set, Tuple
 
+from tested.datatypes import AdvancedStringTypes, AllTypes, BasicStringTypes
 from tested.dodona import AnnotateCode, Message
+from tested.features import Construct, TypeSupport
 from tested.languages.config import CallbackResult, Command, Language
 from tested.languages.conventionalize import (
     EXECUTION_PREFIX,
@@ -20,6 +22,29 @@ if TYPE_CHECKING:
 class Bash(Language):
     def naming_conventions(self) -> Dict[Conventionable, NamingConventions]:
         return {"global_identifier": "macro_case"}
+
+    def datatype_support(self) -> Mapping[AllTypes, TypeSupport]:
+        return {
+            AdvancedStringTypes.CHAR: TypeSupport.REDUCED,
+            BasicStringTypes.TEXT: TypeSupport.SUPPORTED,
+        }
+
+    def file_extension(self) -> str:
+        return "sh"
+
+    def initial_dependencies(self) -> List[str]:
+        return []
+
+    def needs_selector(self):
+        return False
+
+    def supported_constructs(self) -> Set[Construct]:
+        return {
+            Construct.FUNCTION_CALLS,
+            Construct.ASSIGNMENTS,
+            Construct.DEFAULT_PARAMETERS,
+            Construct.GLOBAL_VARIABLES,
+        }
 
     def compilation(self, files: List[str]) -> CallbackResult:
         submission = submission_file(self)

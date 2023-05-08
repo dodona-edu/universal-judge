@@ -52,7 +52,7 @@ def judge(bundle: Bundle):
     # Begin by checking if the given test suite is executable in this language.
     _logger.info("Checking supported features...")
     set_locale(bundle.config.natural_language)
-    if not is_supported(bundle):
+    if not is_supported(bundle.lang_config):
         report_update(bundle.out, StartJudgment())
         report_update(
             bundle.out,

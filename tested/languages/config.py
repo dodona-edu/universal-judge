@@ -1,32 +1,17 @@
 """
-The configuration class for a programming language in TESTed. Note that this is one
-of the three things you must implement:
+The configuration class for a programming language.
 
-- This class
-- A config.json file
-- The templates which are used to create the code.
-
-Implementing a new programming language
----------------------------------------
-
-The first thing you should do is implement this class and the accompanying toml
-file. While the toml file is not strictly required, it makes implementing the
-configuration class a lot less work. You can still override all functions and do
-something special instead of reading it from the toml file.
-
-There are a few callbacks that must be implemented. These raise a
-`NotImplementedError`, so proper editors will warn you (or TESTed will crash when
-using your language).
+This class is the API between the core of TESTed and the language-specific details.
+Everything that depends on the programming language passes through this class.
 """
-import json
 import logging
 import sys
 import typing
-from collections import defaultdict
+from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Callable, Dict, List, Mapping, Optional, Set, Tuple, Union
 
-from tested.datatypes import AdvancedTypes, AllTypes, ExpressionTypes, string_to_type
+from tested.datatypes import AllTypes, ExpressionTypes
 from tested.dodona import AnnotateCode, Message, Status
 from tested.features import Construct, TypeSupport
 from tested.internationalization import get_i18n_string
@@ -35,12 +20,10 @@ from tested.languages.conventionalize import (
     Conventionable,
     NamingConventions,
     conventionalize_namespace,
-    submission_name,
 )
 from tested.languages.description_generator import DescriptionGenerator
 from tested.languages.utils import limit_output, trace_to_html
 from tested.serialisation import ExceptionValue, FunctionCall, Statement, Value
-from tested.utils import fallback, get_args
 
 if typing.TYPE_CHECKING:
     from tested.configs import GlobalConfig
@@ -53,55 +36,28 @@ CallbackResult = Tuple[Command, Union[List[str], FileFilter]]
 _logger = logging.getLogger(__name__)
 
 
-class Language:
+class Language(ABC):
     """
-    Base configuration class for a programming language.
+    Abstract base class for a programming language.
 
-    When you need to override a function, check the docs or the implementation to
-    see if the function reads configuration data from the config.json file. If this
-    is the case, it is recommended to modify the value in the config.json file
-    instead of overriding the function in a subclass.
+    You should implement all abstract methods in a subclass to properly implement
+    support for a programming language. Some methods have a default value, meaning
+    you can optionally override them, but it is not required.
+
+    When overriding methods, it is always a good idea to consult the docs in the
+    base class for information.
+
+    Note that an instance of this class is linked to a specific test suite: if you
+    want to run for another test suite, you must create a new instance.
     """
 
-    __slots__ = ["options", "config_dir", "_description_generator", "config"]
+    config: "GlobalConfig"
+    _description_generator: Optional[DescriptionGenerator]
 
     # TODO: get rid of the optional here...
-    def __init__(
-        self, config: Optional["GlobalConfig"], config_file: str = "config.json"
-    ):
-        """
-        Initialise a language configuration. Subclasses can modify the name of the
-        toml configuration file. By default, a "config.json" file is expected in the
-        same directory as the configuration class.
-
-        :param config_file: The name of the configuration file. Relative to the
-                            directory in which the configuration class is.
-        """
+    def __init__(self, config: Optional["GlobalConfig"]):
         self.config = config
         self._description_generator = None
-        self.config_dir = Path(sys.modules[self.__module__].__file__).parent
-        path_to_config = self.config_dir / config_file
-        with open(path_to_config, "r") as f:
-            self.options = json.load(f)
-
-    def get_string_quote(self):
-        """
-        Get the symbol used to quote strings.
-        A double quote is used by default.
-        """
-        return '"'
-
-    def naming_conventions(self) -> Dict[Conventionable, NamingConventions]:
-        """
-        Return naming conventions for this language.
-
-        This should return a dictionary containing a mapping of "conventionable"
-        items mapped on their naming convention.
-
-        The default for missing conventionable items is snake case.
-        :return: A mapping for the naming conventions.
-        """
-        raise NotImplementedError
 
     def compilation(self, files: List[str]) -> CallbackResult:
         """
@@ -173,6 +129,7 @@ class Language:
         """
         return [], files
 
+    @abstractmethod
     def execution(self, cwd: Path, file: str, arguments: List[str]) -> Command:
         """
         Callback for generating the execution command.
@@ -193,6 +150,26 @@ class Language:
         """
         raise NotImplementedError
 
+    def get_string_quote(self):
+        """
+        Get the symbol used to quote strings.
+        A double quote is used by default.
+        """
+        return '"'
+
+    @abstractmethod
+    def naming_conventions(self) -> Dict[Conventionable, NamingConventions]:
+        """
+        Return naming conventions for this language.
+
+        This should return a dictionary containing a mapping of "conventionable"
+        items mapped on their naming convention.
+
+        The default for missing conventionable items is snake case.
+        :return: A mapping for the naming conventions.
+        """
+        raise NotImplementedError
+
     def execution_name(self, tab_number: int, execution_number: int) -> str:
         """
         Get the name of an execution. The name should be unique for the tab and
@@ -206,12 +183,13 @@ class Language:
             self, f"{EXECUTION_PREFIX}_{tab_number}_{execution_number}"
         )
 
+    @abstractmethod
     def file_extension(self) -> str:
         """
         The main file extension for this language, sans the dot. This is read from
         the config.json file.
         """
-        return self.options["extensions"]["file"]
+        raise NotImplementedError
 
     def is_source_file(self, file: Path) -> bool:
         """
@@ -226,6 +204,7 @@ class Language:
         """Utility function to append the file extension to a file name."""
         return f"{file_name}.{self.file_extension()}"
 
+    @abstractmethod
     def initial_dependencies(self) -> List[str]:
         """
         Return the additional dependencies that tested will include in compilation.
@@ -233,16 +212,17 @@ class Language:
 
         :return: A list of dependencies, relative to the "templates" folder.
         """
-        return self.options["general"]["dependencies"]
+        raise NotImplementedError
 
-    def needs_selector(self):
+    @abstractmethod
+    def needs_selector(self) -> bool:
         """
         Return if the language needs a selector for batch compilation or not. This
         is a mandatory option in the config.json file.
 
         :return: True if a selector is needed, false otherwise.
         """
-        return self.options["general"]["selector"]
+        raise NotImplementedError
 
     def supported_constructs(self) -> Set[Construct]:
         """
@@ -251,12 +231,7 @@ class Language:
 
         :return: The features supported by this language.
         """
-        config: Dict[str, bool] = self.options.get("constructs", {})
-        result = set()
-        for construct, supported in config.items():
-            if supported:
-                result.add(Construct[construct.upper()])
-        return result
+        return {}
 
     def map_type_restrictions(self) -> Optional[Set[ExpressionTypes]]:
         """
@@ -282,55 +257,16 @@ class Language:
         """
         return None
 
-    def type_support_map(self) -> Mapping[AllTypes, TypeSupport]:
+    def datatype_support(self) -> Mapping[AllTypes, TypeSupport]:
         """
-        Return a map containing the support for all types.
+        Override support for datatypes.
 
-        See the documentation on the TypeSupport enum for information on how
-        to interpret the results.
+        By default, all types are unsupported. By overriding this, you can indicate
+        support for more types.
 
-        Note that it is considered a programming error if a basic type is not
-        supported, but the advanced type is supported. This requirement is
-        checked by TESTed when using the language.
-
-        :return: The typing support dict.
+        :return: A dictionary of types mapped to their support level.
         """
-        raw_config: Dict[str, str] = self.options.get("datatypes", {})
-        config = {x: TypeSupport[y.upper()] for x, y in raw_config.items()}
-        return fallback(defaultdict(lambda: TypeSupport.UNSUPPORTED), config)
-
-    def restriction_map(self) -> Mapping[AllTypes, Set[ExpressionTypes]]:
-        """
-        Return a map containing the restrictions for the set type and the map keys
-        :return: The restriction dict
-        """
-
-        def get_expression_type(type_str: str) -> ExpressionTypes:
-            enums = get_args(ExpressionTypes)
-            for enum in enums:
-                for m in enum.__members__:
-                    if type_str == enum[m].value:
-                        return enum[m]
-            raise ValueError(f"Unknown type string {type_str}")
-
-        raw_config: Dict[str, List[str]] = self.options.get("restrictions", {})
-        config = {
-            string_to_type("MAP" if x == "map_key" else x.upper()): set(
-                (get_expression_type(t) for t in y)
-            )
-            for x, y in raw_config.items()
-        }
-        mappings = self.type_support_map()
-        for data_type, type_support in mappings.items():
-            data_type = get_expression_type(data_type)
-            if type_support is TypeSupport.REDUCED and isinstance(
-                data_type, get_args(AdvancedTypes)
-            ):
-                basic_type = data_type.base_type
-                for _, restricted in config.items():
-                    if basic_type in restricted:
-                        restricted.add(data_type)
-        return fallback(defaultdict(set), config)
+        return dict()
 
     def modify_solution(self, solution: Path):
         """
@@ -383,7 +319,6 @@ class Language:
         :param exception: The exception.
         :return: The modified exception.
         """
-        submission = submission_name(self)
         exception.stacktrace = self.cleanup_stacktrace(exception.stacktrace)
         exception.message = self.clean_exception_message(exception.message)
         return exception
@@ -448,6 +383,18 @@ class Language:
     def find_main_file(
         self, files: List[Path], name: str, precompilation_messages: List[str]
     ) -> Tuple[Optional[Path], List[Message], Status, List[AnnotateCode]]:
+        """
+        Find the "main" file in a list of files.
+
+        This method is invoked to find the "main" file, i.e. the file with the main
+        method (or at least the file that should be executed).
+
+        :param files: A list of files.
+        :param name: The name of the main file.
+        :param precompilation_messages: A list of precompilation messages.
+        :return: The main file or a list of messages.
+        """
+        # TODO: check why the messages are needed here...
         _logger.debug("Finding %s in %s", name, files)
         messages = []
         possible_main_files = [x for x in files if x.name.startswith(name)]
@@ -490,9 +437,11 @@ class Language:
 
     def get_description_generator(self) -> DescriptionGenerator:
         if self._description_generator is None:
-            self._description_generator = DescriptionGenerator(self, self.config_dir)
+            config_dir = Path(sys.modules[self.__module__].__file__).parent
+            self._description_generator = DescriptionGenerator(self, config_dir)
         return self._description_generator
 
+    @abstractmethod
     def generate_statement(self, statement: Statement) -> str:
         """
         Generate code for a (prepared) statement.
@@ -502,6 +451,7 @@ class Language:
         """
         raise NotImplementedError
 
+    @abstractmethod
     def generate_execution_unit(self, execution_unit: "PreparedExecutionUnit") -> str:
         """
         Generate code for a prepared execution unit.
@@ -530,6 +480,7 @@ class Language:
         """
         raise NotImplementedError
 
+    @abstractmethod
     def generate_encoder(self, values: List[Value]) -> str:
         """
         Generate code for a main function that will encode the given values.

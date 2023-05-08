@@ -1,9 +1,11 @@
 import logging
 import re
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Tuple
+from typing import TYPE_CHECKING, Dict, List, Mapping, Set, Tuple
 
+from tested.datatypes import AllTypes
 from tested.dodona import AnnotateCode, Message
+from tested.features import Construct, TypeSupport
 from tested.languages.config import CallbackResult, Command, Language
 from tested.languages.conventionalize import (
     Conventionable,
@@ -61,8 +63,46 @@ def cleanup_compilation_stderr(traceback: str, submission_file: str) -> str:
 
 
 class C(Language):
+    def initial_dependencies(self) -> List[str]:
+        return ["values.h", "values.c", "evaluation_result.h", "evaluation_result.c"]
+
+    def needs_selector(self):
+        return True
+
+    def file_extension(self) -> str:
+        return "c"
+
     def naming_conventions(self) -> Dict[Conventionable, NamingConventions]:
         return {"global_identifier": "macro_case"}
+
+    def supported_constructs(self) -> Set[Construct]:
+        return {
+            Construct.FUNCTION_CALLS,
+            Construct.ASSIGNMENTS,
+            Construct.GLOBAL_VARIABLES,
+        }
+
+    def datatype_support(self) -> Mapping[AllTypes, TypeSupport]:
+        return {
+            "integer": "supported",
+            "real": "supported",
+            "char": "supported",
+            "text": "supported",
+            "boolean": "supported",
+            "nothing": "supported",
+            "undefined": "reduced",
+            "int8": "reduced",
+            "uint8": "reduced",
+            "int16": "supported",
+            "uint16": "supported",
+            "int32": "supported",
+            "uint32": "supported",
+            "int64": "supported",
+            "uint64": "supported",
+            "single_precision": "supported",
+            "double_precision": "supported",
+            "double_extended": "supported",
+        }
 
     def compilation(self, files: List[str]) -> CallbackResult:
         main_file = files[-1]

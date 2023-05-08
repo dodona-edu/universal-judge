@@ -14,7 +14,7 @@ from tested.datatypes import (
 )
 from tested.dodona import ExtendedMessage, Permission, Status, StatusMessage
 from tested.evaluators.common import EvaluationResult, EvaluatorConfig
-from tested.features import TypeSupport
+from tested.features import TypeSupport, fallback_type_support_map
 from tested.internationalization import get_i18n_string
 from tested.languages.generation import generate_statement
 from tested.serialisation import (
@@ -165,7 +165,7 @@ def check_data_type(
     :return: A tuple with the result and expected value, the type that was used to
              do the check.
     """
-    supported_types = bundle.lang_config.type_support_map()
+    supported_types = fallback_type_support_map(bundle.lang_config)
 
     # Case 3.
     if supported_types[expected.type] == TypeSupport.UNSUPPORTED:

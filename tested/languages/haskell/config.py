@@ -1,7 +1,9 @@
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Tuple
+from typing import TYPE_CHECKING, Dict, List, Mapping, Set, Tuple
 
+from tested.datatypes import AllTypes
 from tested.dodona import AnnotateCode, Message
+from tested.features import Construct, TypeSupport
 from tested.languages.config import CallbackResult, Command, Language
 from tested.languages.conventionalize import (
     Conventionable,
@@ -21,12 +23,55 @@ if TYPE_CHECKING:
 
 
 class Haskell(Language):
+    def initial_dependencies(self) -> List[str]:
+        return ["Values.hs", "EvaluationUtils.hs"]
+
+    def needs_selector(self):
+        return True
+
+    def file_extension(self) -> str:
+        return "hs"
+
     def naming_conventions(self) -> Dict[Conventionable, NamingConventions]:
         return {
             "namespace": "pascal_case",
             "identifier": "camel_case",
             "global_identifier": "camel_case",
             "function": "camel_case",
+        }
+
+    def datatype_support(self) -> Mapping[AllTypes, TypeSupport]:
+        return {
+            "integer": "supported",
+            "real": "supported",
+            "char": "supported",
+            "text": "supported",
+            "boolean": "supported",
+            "sequence": "supported",
+            "nothing": "supported",
+            "undefined": "reduced",
+            "int8": "supported",
+            "uint8": "supported",
+            "int16": "supported",
+            "uint16": "supported",
+            "int32": "supported",
+            "uint32": "supported",
+            "int64": "supported",
+            "uint64": "supported",
+            "bigint": "supported",
+            "single_precision": "supported",
+            "double_precision": "supported",
+            "list": "supported",
+            "tuple": "supported",
+        }
+
+    def supported_constructs(self) -> Set[Construct]:
+        return {
+            Construct.EXCEPTIONS,
+            Construct.FUNCTION_CALLS,
+            Construct.ASSIGNMENTS,
+            Construct.EVALUATION,
+            Construct.GLOBAL_VARIABLES,
         }
 
     def compilation(self, files: List[str]) -> CallbackResult:

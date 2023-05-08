@@ -2,10 +2,11 @@ import logging
 import os
 import re
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Dict, List, Mapping, Optional, Set, Tuple
 
-from tested.configs import Bundle
+from tested.datatypes import AllTypes, ExpressionTypes
 from tested.dodona import AnnotateCode, Message, Status
+from tested.features import Construct, TypeSupport
 from tested.languages.config import CallbackResult, Command, Language
 from tested.languages.conventionalize import (
     EXECUTION_PREFIX,
@@ -36,6 +37,15 @@ def get_executable(name):
 
 
 class Kotlin(Language):
+    def initial_dependencies(self) -> List[str]:
+        return ["Values.kt", "EvaluationResult.kt"]
+
+    def needs_selector(self):
+        return True
+
+    def file_extension(self) -> str:
+        return "kt"
+
     def naming_conventions(self) -> Dict[Conventionable, NamingConventions]:
         return {
             "namespace": "pascal_case",
@@ -45,6 +55,76 @@ class Kotlin(Language):
             "property": "camel_case",
             "class": "pascal_case",
         }
+
+    def supported_constructs(self) -> Set[Construct]:
+        return {
+            Construct.OBJECTS,
+            Construct.EXCEPTIONS,
+            Construct.FUNCTION_CALLS,
+            Construct.ASSIGNMENTS,
+            Construct.HETEROGENEOUS_COLLECTIONS,
+            Construct.HETEROGENEOUS_ARGUMENTS,
+            Construct.EVALUATION,
+            Construct.NAMED_ARGUMENTS,
+            Construct.DEFAULT_PARAMETERS,
+            Construct.GLOBAL_VARIABLES,
+        }
+
+    def datatype_support(self) -> Mapping[AllTypes, TypeSupport]:
+        return {
+            "integer": "supported",
+            "real": "supported",
+            "char": "supported",
+            "text": "supported",
+            "boolean": "supported",
+            "sequence": "supported",
+            "set": "supported",
+            "map": "supported",
+            "nothing": "supported",
+            "int8": "supported",
+            "uint8": "supported",
+            "int16": "supported",
+            "uint16": "supported",
+            "int32": "supported",
+            "uint32": "supported",
+            "int64": "supported",
+            "uint64": "supported",
+            "bigint": "supported",
+            "single_precision": "supported",
+            "double_precision": "supported",
+            "double_extended": "reduced",
+            "fixed_precision": "supported",
+            "array": "supported",
+            "list": "supported",
+            "tuple": "reduced",
+            "undefined": "reduced",
+        }
+
+    def map_type_restrictions(self) -> Optional[Set[ExpressionTypes]]:
+        return {
+            "integer",
+            "real",
+            "char",
+            "text",
+            "boolean",
+            "sequence",
+            "set",
+            "map",
+            "int8",
+            "int16",
+            "int32",
+            "int64",
+            "single_precision",
+            "double_precision",
+            "fixed_precision",
+            "array",
+            "list",
+            "function_calls",
+            "identifiers",
+        }
+
+    def set_type_restrictions(self) -> Optional[Set[ExpressionTypes]]:
+        return self.map_type_restrictions()
 
     def compilation(self, files: List[str]) -> CallbackResult:
         def file_filter(file: Path) -> bool:

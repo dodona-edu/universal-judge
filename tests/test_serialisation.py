@@ -34,7 +34,7 @@ from tested.datatypes import (
     resolve_to_basic,
 )
 from tested.evaluators.value import check_data_type
-from tested.features import TypeSupport
+from tested.features import TypeSupport, fallback_type_support_map
 from tested.judge.compilation import run_compilation
 from tested.judge.execution import execute_file, filter_files
 from tested.judge.utils import BaseExecutionResult, copy_from_paths_to_path
@@ -212,7 +212,7 @@ def test_basic_types(language, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "", language, tmp_path)
     plan = Suite()
     bundle = create_bundle(conf, sys.stdout, plan)
-    type_map = bundle.lang_config.type_support_map()
+    type_map = fallback_type_support_map(bundle.lang_config)
 
     # Create a list of basic types we want to test.
     types = [v for v in BASIC_VALUES if type_map[v.type] != TypeSupport.UNSUPPORTED]
@@ -237,7 +237,7 @@ def test_advanced_types(language, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "", language, tmp_path)
     plan = Suite()
     bundle = create_bundle(conf, sys.stdout, plan)
-    type_map = bundle.lang_config.type_support_map()
+    type_map = fallback_type_support_map(bundle.lang_config)
 
     # Create a list of basic types we want to test.
     # We want to test all supported or reduced types.
@@ -279,7 +279,7 @@ def test_special_numbers(language, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "", language, tmp_path)
     plan = Suite()
     bundle = create_bundle(conf, sys.stdout, plan)
-    type_map = bundle.lang_config.type_support_map()
+    type_map = fallback_type_support_map(bundle.lang_config)
 
     # Create a list of basic types we want to test.
     types = []
@@ -320,7 +320,7 @@ def test_valid_type_map(language: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "", language, tmp_path)
     plan = Suite()
     bundle = create_bundle(conf, sys.stdout, plan)
-    type_map = bundle.lang_config.type_support_map()
+    type_map = fallback_type_support_map(bundle.lang_config)
 
     # Validate basic types.
     for basic_type in get_args(BasicTypes):

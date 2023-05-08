@@ -1,9 +1,11 @@
 import logging
 import re
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Tuple
+from typing import TYPE_CHECKING, Dict, List, Mapping, Optional, Set, Tuple
 
+from tested.datatypes import AllTypes, BasicStringTypes, ExpressionTypes
 from tested.dodona import AnnotateCode, Message
+from tested.features import Construct, TypeSupport
 from tested.languages.config import CallbackResult, Command, Language
 from tested.languages.conventionalize import (
     Conventionable,
@@ -20,6 +22,15 @@ logger = logging.getLogger(__name__)
 
 
 class JavaScript(Language):
+    def initial_dependencies(self) -> List[str]:
+        return ["values.js"]
+
+    def needs_selector(self):
+        return False
+
+    def file_extension(self) -> str:
+        return "js"
+
     def naming_conventions(self) -> Dict[Conventionable, NamingConventions]:
         return {
             "namespace": "camel_case",
@@ -28,6 +39,64 @@ class JavaScript(Language):
             "global_identifier": "macro_case",
             "property": "camel_case",
             "class": "pascal_case",
+        }
+
+    def supported_constructs(self) -> Set[Construct]:
+        return {
+            Construct.OBJECTS,
+            Construct.EXCEPTIONS,
+            Construct.FUNCTION_CALLS,
+            Construct.ASSIGNMENTS,
+            Construct.HETEROGENEOUS_COLLECTIONS,
+            Construct.HETEROGENEOUS_ARGUMENTS,
+            Construct.EVALUATION,
+            Construct.DEFAULT_PARAMETERS,
+            Construct.GLOBAL_VARIABLES,
+        }
+
+    def datatype_support(self) -> Mapping[AllTypes, TypeSupport]:
+        return {
+            "integer": "supported",
+            "real": "supported",
+            "char": "reduced",
+            "text": "supported",
+            "boolean": "supported",
+            "sequence": "supported",
+            "set": "supported",
+            "map": "supported",
+            "nothing": "supported",
+            "undefined": "supported",
+            "int8": "reduced",
+            "uint8": "reduced",
+            "int16": "reduced",
+            "uint16": "reduced",
+            "int32": "reduced",
+            "uint32": "reduced",
+            "int64": "reduced",
+            "uint64": "reduced",
+            "bigint": "supported",
+            "single_precision": "reduced",
+            "double_precision": "reduced",
+            "double_extended": "reduced",
+            "array": "reduced",
+            "list": "reduced",
+            "tuple": "reduced",
+        }
+
+    def map_type_restrictions(self) -> Optional[Set[ExpressionTypes]]:
+        return {BasicStringTypes.TEXT}
+
+    def set_type_restrictions(self) -> Optional[Set[ExpressionTypes]]:
+        return {
+            "integer",
+            "real",
+            "text",
+            "boolean",
+            "sequence",
+            "set",
+            "map",
+            "function_calls",
+            "identifiers",
         }
 
     def compilation(self, files: List[str]) -> CallbackResult:
