@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 
 if TYPE_CHECKING:
-    from tested.languages.generator import PreparedExecutionUnit
+    from tested.languages.generation import PreparedExecutionUnit
 
 
 def cleanup_compilation_stderr(traceback: str, submission_file: str) -> str:

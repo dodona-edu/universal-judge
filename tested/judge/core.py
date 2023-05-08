@@ -34,7 +34,7 @@ from tested.judge.execution import (
 from tested.judge.linter import run_linter
 from tested.judge.utils import copy_from_paths_to_path
 from tested.languages.conventionalize import submission_file
-from tested.languages.generator import generate_execution, generate_selector
+from tested.languages.generation import generate_execution, generate_selector
 from tested.languages.templates import path_to_dependencies
 from tested.testsuite import ExecutionMode
 

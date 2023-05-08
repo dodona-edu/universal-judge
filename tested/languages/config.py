@@ -63,7 +63,7 @@ from tested.utils import (
 )
 
 if typing.TYPE_CHECKING:
-    from tested.languages.generator import PreparedExecutionUnit
+    from tested.languages.generation import PreparedExecutionUnit
 
 Command = List[str]
 FileFilter = Callable[[Path], bool]

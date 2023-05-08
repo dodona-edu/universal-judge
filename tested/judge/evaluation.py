@@ -28,7 +28,7 @@ from tested.evaluators import get_evaluator
 from tested.internationalization import get_i18n_string
 from tested.judge.collector import OutputManager, TestcaseCollector
 from tested.judge.execution import ContextResult
-from tested.languages.generator import (
+from tested.languages.generation import (
     attempt_readable_input,
     generate_statement,
     get_readable_input,

@@ -180,7 +180,7 @@ class DescriptionGenerator:
     def get_code(
         self, stmt: str, bundle: Bundle, statement: bool = False, is_html: bool = True
     ) -> str:
-        from .generator import generate_statement
+        from .generation import generate_statement
 
         if statement:
             stmt = parse_string(stmt)

@@ -23,7 +23,7 @@ from tested.languages.utils import (
 from tested.serialisation import FunctionCall, Statement, Value
 
 if TYPE_CHECKING:
-    from tested.languages.generator import PreparedExecutionUnit
+    from tested.languages.generation import PreparedExecutionUnit
 
 
 class Haskell(Language):

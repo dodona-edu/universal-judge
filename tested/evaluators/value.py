@@ -16,7 +16,7 @@ from tested.dodona import ExtendedMessage, Permission, Status, StatusMessage
 from tested.evaluators.common import EvaluationResult, EvaluatorConfig
 from tested.internationalization import get_i18n_string
 from tested.languages.config import TypeSupport
-from tested.languages.generator import generate_statement
+from tested.languages.generation import generate_statement
 from tested.serialisation import (
     ObjectKeyValuePair,
     ObjectType,

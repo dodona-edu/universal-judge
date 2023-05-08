@@ -22,7 +22,7 @@ from tested.languages.utils import cleanup_description
 from tested.serialisation import FunctionCall, Statement, Value
 
 if TYPE_CHECKING:
-    from tested.languages.generator import PreparedExecutionUnit
+    from tested.languages.generation import PreparedExecutionUnit
 
 logger = logging.getLogger(__name__)
 

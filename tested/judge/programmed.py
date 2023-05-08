@@ -18,7 +18,7 @@ from tested.features import Construct
 from tested.internationalization import get_i18n_string
 from tested.judge.execution import execute_file, filter_files
 from tested.judge.utils import BaseExecutionResult, copy_from_paths_to_path, run_command
-from tested.languages.generator import (
+from tested.languages.generation import (
     custom_evaluator_arguments,
     generate_custom_evaluator,
     generate_statement,

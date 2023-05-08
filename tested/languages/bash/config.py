@@ -20,7 +20,7 @@ from tested.languages.conventionalize import (
 from tested.serialisation import Statement, Value
 
 if TYPE_CHECKING:
-    from tested.languages.generator import PreparedExecutionUnit
+    from tested.languages.generation import PreparedExecutionUnit
 
 
 class Bash(Language):

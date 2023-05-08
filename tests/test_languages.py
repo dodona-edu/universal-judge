@@ -5,7 +5,7 @@ from pathlib import Path
 from tested.configs import create_bundle
 from tested.datatypes import BasicBooleanTypes, BasicNumericTypes, BasicStringTypes
 from tested.languages.conventionalize import submission_name
-from tested.languages.generator import generate_statement
+from tested.languages.generation import generate_statement
 from tested.serialisation import (
     BooleanType,
     FunctionCall,

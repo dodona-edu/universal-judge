@@ -18,7 +18,7 @@ from tested.serialisation import FunctionCall, Statement, Value
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from tested.languages.generator import PreparedExecutionUnit
+    from tested.languages.generation import PreparedExecutionUnit
 
 # Where the results of the compilation are stored.
 OUTPUT_DIRECTORY = "all-outputs"
