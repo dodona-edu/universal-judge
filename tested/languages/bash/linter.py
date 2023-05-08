@@ -4,7 +4,7 @@ import shutil
 from pathlib import Path
 from typing import List, Tuple
 
-from tested.configs import Bundle
+from tested.configs import DodonaConfig
 from tested.dodona import AnnotateCode, ExtendedMessage, Message, Permission, Severity
 from tested.internationalization import get_i18n_string
 from tested.judge.utils import run_command
@@ -19,14 +19,14 @@ message_categories = {
 
 
 def run_shellcheck(
-    bundle: Bundle, submission: Path, remaining: float, language: str = "bash"
+    config: DodonaConfig, remaining: float, language: str = "bash"
 ) -> Tuple[List[Message], List[AnnotateCode]]:
     """
     Calls shellcheck to annotate submitted source code and adds resulting score and
     annotations to tab.
     """
-    config = bundle.config
-    language_options = bundle.config.config_for()
+    submission = config.source
+    language_options = config.config_for()
     if language_options.get("shellcheck_config", None):
         config_path = config.resources / language_options.get("shellcheck_config")
         # Add shellcheck file in home folder
@@ -78,7 +78,7 @@ def run_shellcheck(
         cols = end_col - start_col if end_col else None
         annotations.append(
             AnnotateCode(
-                row=start_row - 1 + bundle.config.source_offset,
+                row=start_row - 1 + config.source_offset,
                 rows=rows,
                 text=text,
                 externalUrl=external,

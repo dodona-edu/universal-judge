@@ -1,9 +1,8 @@
 import logging
-from pathlib import Path
 from typing import List, Tuple
 from xml.etree import ElementTree
 
-from tested.configs import Bundle
+from tested.configs import DodonaConfig
 from tested.dodona import AnnotateCode, ExtendedMessage, Message, Permission, Severity
 from tested.internationalization import get_i18n_string
 from tested.judge.utils import run_command
@@ -21,15 +20,13 @@ message_categories = {
 
 
 def run_cppcheck(
-    bundle: Bundle, submission: Path, remaining: float, language: str = "c"
+    config: DodonaConfig, remaining: float, language: str = "c"
 ) -> Tuple[List[Message], List[AnnotateCode]]:
     """
     Calls cppcheck to annotate submitted source code and adds resulting score and
     annotations to tab.
     """
-    config = bundle.config
-    language_options = bundle.config.config_for()
-
+    submission = config.source
     execution_results = run_command(
         directory=submission.parent,
         timeout=remaining,
@@ -77,7 +74,7 @@ def run_cppcheck(
             for el in error:
                 if el.tag != "location":
                     continue
-                row = int(el.attrib.get("line", "1")) - 1 + bundle.config.source_offset
+                row = int(el.attrib.get("line", "1")) - 1 + config.source_offset
                 col = int(el.attrib.get("column", "1")) - 1
                 break
             annotations.append(

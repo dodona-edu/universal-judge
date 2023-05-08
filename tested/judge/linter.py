@@ -7,10 +7,6 @@ from tested.judge.collector import OutputManager
 _logger = logging.getLogger(__name__)
 
 
-def runs_linter(bundle: Bundle) -> bool:
-    return bundle.config.linter()
-
-
 def run_linter(bundle: Bundle, collector: OutputManager, remaining: float):
     """
     Run the linter on the submission. For the linter to run, two preconditions
@@ -24,15 +20,13 @@ def run_linter(bundle: Bundle, collector: OutputManager, remaining: float):
     :param remaining: The remaining time for the execution.
     """
 
-    if not runs_linter(bundle):
+    if not bundle.config.linter():
         _logger.debug("Linter is disabled.")
         return
 
     _logger.debug("Running linter...")
 
-    messages, annotations = bundle.lang_config.linter(
-        bundle, bundle.config.source, remaining
-    )
+    messages, annotations = bundle.lang_config.linter(remaining)
 
     for message in messages:
         collector.add(AppendMessage(message=message))

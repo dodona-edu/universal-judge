@@ -1,7 +1,6 @@
 from pathlib import Path
 from typing import TYPE_CHECKING, Dict, List, Tuple
 
-from tested.configs import Bundle
 from tested.dodona import AnnotateCode, Message
 from tested.languages.config import CallbackResult, Command, Language, executable_name
 from tested.languages.conventionalize import (
@@ -49,13 +48,11 @@ class Haskell(Language):
     def modify_solution(self, solution: Path):
         haskell_solution(self, solution)
 
-    def linter(
-        self, bundle: Bundle, submission: Path, remaining: float
-    ) -> Tuple[List[Message], List[AnnotateCode]]:
+    def linter(self, remaining: float) -> Tuple[List[Message], List[AnnotateCode]]:
         # Import locally to prevent errors.
         from tested.languages.haskell import linter
 
-        return linter.run_hlint(bundle, submission, remaining)
+        return linter.run_hlint(self.config.dodona, remaining)
 
     def cleanup_description(self, namespace: str, description: str) -> str:
         return cleanup_description(self, namespace, description)

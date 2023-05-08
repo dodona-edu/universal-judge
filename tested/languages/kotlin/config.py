@@ -88,13 +88,11 @@ class Kotlin(Language):
         with open(solution, "w") as file:
             file.write(contents)
 
-    def linter(
-        self, bundle: Bundle, submission: Path, remaining: float
-    ) -> Tuple[List[Message], List[AnnotateCode]]:
+    def linter(self, remaining: float) -> Tuple[List[Message], List[AnnotateCode]]:
         # Import locally to prevent errors.
         from tested.languages.kotlin import linter
 
-        return linter.run_ktlint(bundle, submission, remaining)
+        return linter.run_ktlint(self.config.dodona, remaining)
 
     def find_main_file(
         self, files: List[str], name: str, precompilation_messages: List[str]

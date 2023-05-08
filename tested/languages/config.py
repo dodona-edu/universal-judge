@@ -538,9 +538,7 @@ class Language:
         """
         return [], [], stderr
 
-    def linter(
-        self, bundle: Bundle, submission: Path, remaining: float
-    ) -> Tuple[List[Message], List[AnnotateCode]]:
+    def linter(self, remaining: float) -> Tuple[List[Message], List[AnnotateCode]]:
         """
         Run a linter or other code analysis tools on the submission.
         The messages that are output will be passed to Dodona.
@@ -549,8 +547,6 @@ class Language:
         Note that you should not modify the solution file. There is no guarantee
         that this solution is the one that will be evaluated.
 
-        :param bundle: The configuration bundle.
-        :param submission: The path to the submission.
         :param remaining: The time the judge can use.
 
         :return: A list of messages and annotations.

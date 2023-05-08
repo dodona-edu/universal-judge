@@ -3,7 +3,6 @@ import re
 from pathlib import Path
 from typing import TYPE_CHECKING, Dict, List, Tuple
 
-from tested.configs import Bundle
 from tested.dodona import AnnotateCode, Message
 from tested.languages.config import (
     CallbackResult,
@@ -114,13 +113,11 @@ class C(Language):
             header = "#pragma once\n\n"
             file.write(header + contents)
 
-    def linter(
-        self, bundle: Bundle, submission: Path, remaining: float
-    ) -> Tuple[List[Message], List[AnnotateCode]]:
+    def linter(self, remaining: float) -> Tuple[List[Message], List[AnnotateCode]]:
         # Import locally to prevent errors.
         from tested.languages.c import linter
 
-        return linter.run_cppcheck(bundle, submission, remaining)
+        return linter.run_cppcheck(self.config.dodona, remaining)
 
     def compiler_output(
         self, stdout: str, stderr: str

@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import List, Tuple
 from xml.etree import ElementTree
 
-from tested.configs import Bundle
+from tested.configs import DodonaConfig
 from tested.dodona import AnnotateCode, ExtendedMessage, Message, Permission, Severity
 from tested.internationalization import get_i18n_string
 from tested.judge.utils import run_command
@@ -19,14 +19,14 @@ message_categories = {
 
 
 def run_checkstyle(
-    bundle: Bundle, submission: Path, remaining: float
+    config: DodonaConfig, remaining: float
 ) -> Tuple[List[Message], List[AnnotateCode]]:
     """
     Calls checkstyle to annotate submitted source code and adds resulting score and
     annotations to tab.
     """
-    config = bundle.config
-    language_options = bundle.config.config_for()
+    submission = config.source
+    language_options = config.config_for()
 
     if language_options.get("checkstyle_config", None):
         config_path = config.resources / language_options.get("checkstyle_config")
@@ -78,7 +78,7 @@ def run_checkstyle(
                 AnnotateCode(
                     row=int(error_element.attrib.get("line", "1"))
                     - 1
-                    + bundle.config.source_offset,
+                    + config.source_offset,
                     text=message,
                     externalUrl=external,
                     column=int(error_element.attrib.get("column", "1")) - 1,

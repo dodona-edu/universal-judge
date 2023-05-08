@@ -4,7 +4,6 @@ import re
 from pathlib import Path
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
-from tested.configs import Bundle
 from tested.dodona import AnnotateCode, Message, Severity
 from tested.languages.config import CallbackResult, Command, Language, trace_to_html
 from tested.languages.conventionalize import (
@@ -105,13 +104,11 @@ class Python(Language):
 
         return line, column, message
 
-    def linter(
-        self, bundle: Bundle, submission: Path, remaining: float
-    ) -> Tuple[List[Message], List[AnnotateCode]]:
+    def linter(self, remaining: float) -> Tuple[List[Message], List[AnnotateCode]]:
         # Import locally to prevent errors.
         from tested.languages.python import linter
 
-        return linter.run_pylint(bundle, submission, remaining)
+        return linter.run_pylint(self.config.dodona, remaining)
 
     # Idea and original code: dodona/judge-pythia
     def cleanup_stacktrace(

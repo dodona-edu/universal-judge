@@ -2,7 +2,6 @@ import re
 from pathlib import Path
 from typing import TYPE_CHECKING, Dict, List, Tuple
 
-from tested.configs import Bundle
 from tested.dodona import AnnotateCode, Message
 from tested.languages.config import CallbackResult, Command, Language, limit_output
 from tested.languages.conventionalize import (
@@ -52,13 +51,11 @@ class Bash(Language):
     def stdout(self, stdout: str) -> Tuple[List[Message], List[AnnotateCode], str]:
         return self.stderr(stdout)
 
-    def linter(
-        self, bundle: Bundle, submission: Path, remaining: float
-    ) -> Tuple[List[Message], List[AnnotateCode]]:
+    def linter(self, remaining: float) -> Tuple[List[Message], List[AnnotateCode]]:
         # Import locally to prevent errors.
         from tested.languages.bash import linter
 
-        return linter.run_shellcheck(bundle, submission, remaining)
+        return linter.run_shellcheck(self.config.dodona, remaining)
 
     def generate_statement(self, statement: Statement) -> str:
         from tested.languages.bash import generators
