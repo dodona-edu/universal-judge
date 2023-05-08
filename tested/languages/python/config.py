@@ -7,7 +7,11 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 from tested.configs import Bundle
 from tested.dodona import AnnotateCode, Message, Severity
 from tested.languages.config import CallbackResult, Command, Language, trace_to_html
-from tested.languages.conventionalize import Conventionable, NamingConventions
+from tested.languages.conventionalize import (
+    Conventionable,
+    NamingConventions,
+    submission_file,
+)
 from tested.serialisation import FunctionCall, Statement, Value
 
 if TYPE_CHECKING:
@@ -47,9 +51,11 @@ class Python(Language):
         return [_executable(), "-u", file, *arguments]
 
     def compiler_output(
-        self, namespace: str, stdout: str, stderr: str
+        self, stdout: str, stderr: str
     ) -> Tuple[List[Message], List[AnnotateCode], str, str]:
-        stdout = self.cleanup_stacktrace(stdout, self.with_extension(namespace))
+        stdout = self.cleanup_stacktrace(
+            stdout, submission_file(self, self.config.suite)
+        )
         if match := re.search(r".*: (.+Error): (.+) \(<code>, line (\d+)\)", stdout):
             error = match.group(1)
             message = match.group(2)

@@ -8,7 +8,6 @@ from tested.languages.config import CallbackResult, Command, Language, limit_out
 from tested.languages.conventionalize import (
     Conventionable,
     NamingConventions,
-    conventionalize_namespace,
     submission_file,
 )
 from tested.serialisation import Statement, Value
@@ -30,11 +29,10 @@ class Bash(Language):
             return [], files
 
     def compiler_output(
-        self, namespace: str, stdout: str, stderr: str
+        self, stdout: str, stderr: str
     ) -> Tuple[List[Message], List[AnnotateCode], str, str]:
         regex = re.compile(
-            f"{self.with_extension(conventionalize_namespace(self, namespace))}: "
-            f"(regel|rule) ([0-9]+):"
+            f"{submission_file(self, self.config.suite)}: " f"(regel|rule) ([0-9]+):"
         )
         return [], [], limit_output(stdout), regex.sub("<code>:\\2:", stderr)
 

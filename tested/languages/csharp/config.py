@@ -9,7 +9,6 @@ from tested.languages.config import CallbackResult, Command, Language
 from tested.languages.conventionalize import (
     Conventionable,
     NamingConventions,
-    conventionalize_namespace,
     submission_name,
 )
 from tested.serialisation import FunctionCall, Statement, Value
@@ -110,9 +109,9 @@ class {class_name}
             file.write(result)
 
     def compiler_output(
-        self, namespace: str, stdout: str, stderr: str
+        self, stdout: str, stderr: str
     ) -> Tuple[List[Message], List[AnnotateCode], str, str]:
-        submission = self.with_extension(conventionalize_namespace(self, namespace))
+        submission = submission_name(self, self.config.suite)
         message_regex = (
             rf"{submission}\((\d+),(\d+)\): (error|warning) ([A-Z0-9]+): (.*) \["
         )

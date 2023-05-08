@@ -79,7 +79,7 @@ def process_compile_results(
     show_stdout = False
     _logger.debug("Received stderr from compiler: " + results.stderr)
     compiler_messages, annotations, stdout, stderr = language_config.compiler_output(
-        namespace, results.stdout, results.stderr
+        results.stdout, results.stderr
     )
     messages.extend(compiler_messages)
     shown_messages = annotations or compiler_messages

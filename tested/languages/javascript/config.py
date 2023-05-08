@@ -41,15 +41,13 @@ class JavaScript(Language):
             return [], files
 
     def compiler_output(
-        self, namespace: str, stdout: str, stderr: str
+        self, stdout: str, stderr: str
     ) -> Tuple[List[Message], List[AnnotateCode], str, str]:
         return (
             [],
             [],
             limit_output(stdout),
-            self.cleanup_stacktrace(
-                stderr, self.with_extension(conventionalize_namespace(self, namespace))
-            ),
+            self.cleanup_stacktrace(stderr, submission_file(self, self.config.suite)),
         )
 
     def execution(self, cwd: Path, file: str, arguments: List[str]) -> Command:

@@ -15,7 +15,7 @@ from tested.languages.config import (
 from tested.languages.conventionalize import (
     Conventionable,
     NamingConventions,
-    conventionalize_namespace,
+    submission_name,
 )
 from tested.serialisation import Statement, Value
 
@@ -123,10 +123,10 @@ class C(Language):
         return linter.run_cppcheck(bundle, submission, remaining)
 
     def compiler_output(
-        self, namespace: str, stdout: str, stderr: str
+        self, stdout: str, stderr: str
     ) -> Tuple[List[Message], List[AnnotateCode], str, str]:
         clean_stacktrace = cleanup_compilation_stderr(
-            stderr, self.with_extension(conventionalize_namespace(self, namespace))
+            stderr, self.with_extension(submission_name(self, self.config.suite))
         )
         return [], [], limit_output(stdout), clean_stacktrace
 

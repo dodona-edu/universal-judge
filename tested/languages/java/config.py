@@ -8,7 +8,7 @@ from tested.languages.config import CallbackResult, Command, Language, limit_out
 from tested.languages.conventionalize import (
     Conventionable,
     NamingConventions,
-    conventionalize_namespace,
+    submission_file,
 )
 from tested.languages.utils import jvm_cleanup_stacktrace, jvm_memory_limit, jvm_stderr
 from tested.serialisation import FunctionCall, Statement, Value
@@ -56,15 +56,13 @@ class Java(Language):
         return jvm_cleanup_stacktrace(traceback, submission_file, reduce_all)
 
     def compiler_output(
-        self, namespace: str, stdout: str, stderr: str
+        self, stdout: str, stderr: str
     ) -> Tuple[List[Message], List[AnnotateCode], str, str]:
         return (
             [],
             [],
             limit_output(stdout),
-            jvm_cleanup_stacktrace(
-                stderr, self.with_extension(conventionalize_namespace(self, namespace))
-            ),
+            jvm_cleanup_stacktrace(stderr, submission_file(self, self.config.suite)),
         )
 
     def stderr(
