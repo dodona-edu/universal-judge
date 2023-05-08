@@ -93,8 +93,8 @@ class C(Language):
         local_file = cwd / executable_name(Path(file).stem)
         return [str(local_file.absolute()), *arguments]
 
-    # noinspection PyTypeChecker
-    def solution(self, solution: Path, bundle: Bundle):
+    def modify_solution(self, solution: Path):
+        # noinspection PyTypeChecker
         with open(solution, "r") as file:
             contents = file.read()
         # We use regex to find the main function.
@@ -109,6 +109,7 @@ class C(Language):
             with_args = re.compile(r"(int|void)(\s+)main(\s*)\((\s*)int")
             replacement = r"int\2solution_main\3(\4int"
             contents = re.sub(with_args, replacement, contents, count=1)
+        # noinspection PyTypeChecker
         with open(solution, "w") as file:
             header = "#pragma once\n\n"
             file.write(header + contents)

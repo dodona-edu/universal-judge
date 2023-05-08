@@ -314,7 +314,7 @@ def _generate_files(
     dependencies.append(submission)
 
     # Allow modifications of the submission file.
-    bundle.lang_config.solution(solution_path, bundle)
+    bundle.lang_config.modify_solution(solution_path)
 
     # The names of the executions for the test suite.
     execution_names = []

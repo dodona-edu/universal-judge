@@ -101,10 +101,10 @@ def jvm_stderr(
     )
 
 
-def haskell_solution(lang_config: Language, solution: Path, bundle: Bundle):
+def haskell_solution(lang_config: Language, solution: Path):
     """Support implicit modules if needed."""
-    if bundle.config.config_for().get("implicitModule", True):
-        name = submission_name(lang_config, bundle.suite)
+    if lang_config.config.dodona.config_for().get("implicitModule", True):
+        name = submission_name(lang_config, lang_config.config.suite)
         # noinspection PyTypeChecker
         with open(solution, "r") as file:
             contents = file.read()

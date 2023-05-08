@@ -66,7 +66,7 @@ class Kotlin(Language):
         ]
 
     # noinspection PyTypeChecker
-    def solution(self, solution: Path, bundle: Bundle):
+    def modify_solution(self, solution: Path):
         with open(solution, "r") as file:
             contents = file.read()
         # We use regex to find the main function.

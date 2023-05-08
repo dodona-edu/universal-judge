@@ -3,7 +3,6 @@ import re
 from pathlib import Path
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
-from tested.configs import Bundle
 from tested.dodona import AnnotateCode, Message, Status
 from tested.internationalization import get_i18n_string
 from tested.languages.config import CallbackResult, Command, Language
@@ -79,15 +78,15 @@ class CSharp(Language):
             messages.append(get_i18n_string("languages.config.unknown.compilation"))
             return None, messages, Status.COMPILATION_ERROR, []
 
-    # noinspection PyTypeChecker
-    def solution(self, solution: Path, bundle: Bundle):
+    def modify_solution(self, solution: Path):
+        # noinspection PyTypeChecker
         with open(solution, "r") as file:
             contents = file.read()
 
         if "class" in contents:
             return  # No top-level statements; we are happy...
 
-        class_name = submission_name(bundle.lang_config, bundle.suite)
+        class_name = submission_name(self, self.config.suite)
         result = f"""\
 using System;
 using System.IO;
@@ -106,17 +105,16 @@ class {class_name}
 }}
         """
 
+        # noinspection PyTypeChecker
         with open(solution, "w") as file:
             file.write(result)
 
     def compiler_output(
         self, namespace: str, stdout: str, stderr: str
     ) -> Tuple[List[Message], List[AnnotateCode], str, str]:
-        submission_name = self.with_extension(
-            conventionalize_namespace(self, namespace)
-        )
+        submission = self.with_extension(conventionalize_namespace(self, namespace))
         message_regex = (
-            rf"{submission_name}\((\d+),(\d+)\): (error|warning) ([A-Z0-9]+): (.*) \["
+            rf"{submission}\((\d+),(\d+)\): (error|warning) ([A-Z0-9]+): (.*) \["
         )
         messages = re.findall(message_regex, stdout)
         annotations = []

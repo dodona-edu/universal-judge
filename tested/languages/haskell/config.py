@@ -46,8 +46,8 @@ class Haskell(Language):
         local_file = cwd / file
         return [str(local_file.absolute()), *arguments]
 
-    def solution(self, solution: Path, bundle: Bundle):
-        haskell_solution(self, solution, bundle)
+    def modify_solution(self, solution: Path):
+        haskell_solution(self, solution)
 
     def linter(
         self, bundle: Bundle, submission: Path, remaining: float

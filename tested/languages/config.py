@@ -461,7 +461,7 @@ class Language:
                         restricted.add(data_type)
         return fallback(defaultdict(set), config)
 
-    def solution(self, solution: Path, bundle: Bundle):
+    def modify_solution(self, solution: Path):
         """
         An opportunity to modify the solution. By default, this does nothing.
         If you modify the solution, you must overwrite the contents of the solution
@@ -470,11 +470,10 @@ class Language:
         This callback is called after linting, but before any compilation.
 
         :param solution: Path to the solution and path for the modified solution.
-        :param bundle: The configuration bundle.
         """
         pass
 
-    def specific_evaluator(self, evaluator: Path, bundle: Bundle):
+    def modify_specific_evaluator(self, evaluator: Path):
         """
         An opportunity to modify the language specific evaluator. By default,
         this does nothing. If you modify the evaluator, you must overwrite the
@@ -483,7 +482,6 @@ class Language:
         This callback is called before any compilation.
 
         :param evaluator: Path to the evaluator and path for the modified evaluator.
-        :param bundle: The configuration bundle.
         """
         pass
 

@@ -55,8 +55,7 @@ class JavaScript(Language):
     def execution(self, cwd: Path, file: str, arguments: List[str]) -> Command:
         return ["node", file, *arguments]
 
-    # noinspection PyTypeChecker
-    def solution(self, solution: Path, bundle: Bundle):
+    def modify_solution(self, solution: Path):
         # import local to prevent errors
         from tested.judge.utils import run_command
 
@@ -68,6 +67,7 @@ class JavaScript(Language):
                 command=["node", parse_file, solution.absolute()],
             )
             namings = output.stdout.strip()
+            # noinspection PyTypeChecker
             with open(solution, "a") as file:
                 print(f"\nmodule.exports = {{{namings}}};", file=file)
         except TimeoutError:
