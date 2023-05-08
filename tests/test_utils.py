@@ -7,7 +7,7 @@ import pytest
 import yaml
 
 from tested.description_instance import create_description_instance
-from tested.languages.config import limit_output
+from tested.languages.utils import limit_output
 from tested.utils import sorted_no_duplicates
 from tests.manual_utils import assert_valid_output, configuration, execute_config
 

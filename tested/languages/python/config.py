@@ -5,12 +5,13 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
 from tested.dodona import AnnotateCode, Message, Severity
-from tested.languages.config import CallbackResult, Command, Language, trace_to_html
+from tested.languages.config import CallbackResult, Command, Language
 from tested.languages.conventionalize import (
     Conventionable,
     NamingConventions,
     submission_file,
 )
+from tested.languages.utils import trace_to_html
 from tested.serialisation import FunctionCall, Statement, Value
 
 if TYPE_CHECKING:

@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
 from tested.configs import Bundle
 from tested.dodona import AnnotateCode, Message, Status
-from tested.languages.config import CallbackResult, Command, Language, limit_output
+from tested.languages.config import CallbackResult, Command, Language
 from tested.languages.conventionalize import (
     EXECUTION_PREFIX,
     Conventionable,
@@ -15,7 +15,12 @@ from tested.languages.conventionalize import (
     submission_file,
     submission_name,
 )
-from tested.languages.utils import jvm_cleanup_stacktrace, jvm_memory_limit, jvm_stderr
+from tested.languages.utils import (
+    jvm_cleanup_stacktrace,
+    jvm_memory_limit,
+    jvm_stderr,
+    limit_output,
+)
 from tested.serialisation import FunctionCall, Statement, Value
 
 if TYPE_CHECKING:

@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Dict, List, Tuple
 
 from tested.dodona import AnnotateCode, Message
-from tested.languages.config import CallbackResult, Command, Language, executable_name
+from tested.languages.config import CallbackResult, Command, Language
 from tested.languages.conventionalize import (
     Conventionable,
     NamingConventions,
@@ -10,6 +10,7 @@ from tested.languages.conventionalize import (
 )
 from tested.languages.utils import (
     cleanup_description,
+    executable_name,
     haskell_cleanup_stacktrace,
     haskell_solution,
 )

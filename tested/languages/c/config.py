@@ -4,18 +4,13 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Dict, List, Tuple
 
 from tested.dodona import AnnotateCode, Message
-from tested.languages.config import (
-    CallbackResult,
-    Command,
-    Language,
-    executable_name,
-    limit_output,
-)
+from tested.languages.config import CallbackResult, Command, Language
 from tested.languages.conventionalize import (
     Conventionable,
     NamingConventions,
     submission_name,
 )
+from tested.languages.utils import executable_name, limit_output
 from tested.serialisation import Statement, Value
 
 logger = logging.getLogger(__name__)

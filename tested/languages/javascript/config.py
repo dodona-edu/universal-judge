@@ -4,13 +4,13 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Dict, List, Tuple
 
 from tested.dodona import AnnotateCode, Message
-from tested.languages.config import CallbackResult, Command, Language, limit_output
+from tested.languages.config import CallbackResult, Command, Language
 from tested.languages.conventionalize import (
     Conventionable,
     NamingConventions,
     submission_file,
 )
-from tested.languages.utils import cleanup_description
+from tested.languages.utils import cleanup_description, limit_output
 from tested.serialisation import FunctionCall, Statement, Value
 
 if TYPE_CHECKING:
