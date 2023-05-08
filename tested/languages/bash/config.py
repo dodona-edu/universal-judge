@@ -41,12 +41,12 @@ class Bash(Language):
     def stderr(self, stderr: str) -> Tuple[List[Message], List[AnnotateCode], str]:
         regex = re.compile(
             f"{EXECUTION_PREFIX}_[0-9]+_[0-9]+\\."
-            f"{self.extension_file()}: [a-zA-Z_]+ [0-9]+:"
+            f"{self.file_extension()}: [a-zA-Z_]+ [0-9]+:"
         )
         script = f"./{submission_file(self)}"
         stderr = regex.sub("<testcode>:", stderr).replace(script, "<code>")
         regex = re.compile(
-            f"{EXECUTION_PREFIX}_[0-9]+_[0-9]+\\." f"{self.extension_file()}"
+            f"{EXECUTION_PREFIX}_[0-9]+_[0-9]+\\." f"{self.file_extension()}"
         )
         return [], [], regex.sub("<testcode>", stderr)
 

@@ -259,7 +259,7 @@ def generate_execution(
     execution_code = generate_execution_unit(bundle, prepared_execution)
 
     evaluator_files = [
-        f"{x}.{bundle.lang_config.extension_file()}"
+        f"{x}.{bundle.lang_config.file_extension()}"
         for x in prepared_execution.evaluator_names
     ]
 

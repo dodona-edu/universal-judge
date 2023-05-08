@@ -56,7 +56,7 @@ def configuration(
     options=None,
 ) -> DodonaConfig:
     # Get the file extension for this language.
-    ext = get_language(None, language).extension_file()
+    ext = get_language(None, language).file_extension()
     if options is None:
         options = {}
     exercise_dir = Path(config.rootdir) / "tests" / "exercises"

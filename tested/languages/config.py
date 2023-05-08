@@ -84,6 +84,13 @@ class Language:
         with open(path_to_config, "r") as f:
             self.options = json.load(f)
 
+    def get_string_quote(self):
+        """
+        Get the symbol used to quote strings.
+        A double quote is used by default.
+        """
+        return '"'
+
     def naming_conventions(self) -> Dict[Conventionable, NamingConventions]:
         """
         Return naming conventions for this language.
@@ -95,9 +102,6 @@ class Language:
         :return: A mapping for the naming conventions.
         """
         raise NotImplementedError
-
-    def get_string_quote(self):
-        return '"'
 
     def compilation(self, files: List[str]) -> CallbackResult:
         """
@@ -202,7 +206,7 @@ class Language:
             self, f"{EXECUTION_PREFIX}_{tab_number}_{execution_number}"
         )
 
-    def extension_file(self) -> str:
+    def file_extension(self) -> str:
         """
         The main file extension for this language, sans the dot. This is read from
         the config.json file.
@@ -216,11 +220,11 @@ class Language:
         :param file: File to check if it's a valid source
         :return: If the file is valid source
         """
-        return file.suffix == f".{self.extension_file()}"
+        return file.suffix == f".{self.file_extension()}"
 
     def with_extension(self, file_name: str) -> str:
         """Utility function to append the file extension to a file name."""
-        return f"{file_name}.{self.extension_file()}"
+        return f"{file_name}.{self.file_extension()}"
 
     def initial_dependencies(self) -> List[str]:
         """
