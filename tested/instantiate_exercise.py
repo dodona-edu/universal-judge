@@ -223,7 +223,6 @@ def _instantiate(
     :return:
     """
     config_dict = deepcopy(config_json_dict)
-    config_json_file = instance_dir / "config.json"
     existing: bool
     if instance_dir.exists():
         if not instance_dir.is_dir():
@@ -232,13 +231,6 @@ def _instantiate(
                 f"failed!",
                 file=sys.stderr,
             )
-        if config_json_file.exists() and config_json_file.is_file():
-            config = _get_config(config_json_file)
-            try:
-                dodona_internals = "internals"
-                config_dict[dodona_internals] = config[dodona_internals]
-            except KeyError:
-                pass
         _remove_existing(instance_dir, backup_descriptions)
     else:
         instance_dir.mkdir(parents=True)
@@ -269,8 +261,6 @@ def _instantiate(
             config_dict["description"]["names"][i18n] = f"{name} ({language})"
     except KeyError:
         pass
-    with open(config_json_file, "w") as fd:
-        json.dump(config_dict, fd, indent=2)
 
 
 def _instantiate_descriptions(

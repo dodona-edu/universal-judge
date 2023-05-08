@@ -35,7 +35,6 @@ from tested.judge.linter import run_linter
 from tested.judge.utils import copy_from_paths_to_path
 from tested.languages.conventionalize import EXECUTION_PREFIX, submission_file
 from tested.languages.generation import generate_execution, generate_selector
-from tested.languages.templates import path_to_dependencies
 from tested.testsuite import ExecutionMode
 
 _logger = logging.getLogger(__name__)
@@ -303,7 +302,7 @@ def _generate_files(
     _logger.debug(f"Generating files in common directory %s", common_dir)
 
     # Copy dependencies
-    dependency_paths = path_to_dependencies(bundle)
+    dependency_paths = bundle.lang_config.path_to_dependencies()
     copy_from_paths_to_path(dependency_paths, dependencies, common_dir)
 
     # Copy the submission file.

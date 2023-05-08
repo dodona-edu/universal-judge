@@ -3,7 +3,6 @@ from __future__ import annotations
 import html
 import json
 import logging
-import os
 from pathlib import Path
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
 
@@ -50,8 +49,6 @@ class DescriptionGenerator:
     ):
         self.language = language
         path_to_types = config_dir / types_file
-        if not os.path.exists(path_to_types):
-            path_to_types = config_dir.parent / language.inherits_from() / types_file
 
         with open(path_to_types, "r") as f:
             self.types = json.load(f)

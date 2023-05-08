@@ -5,7 +5,6 @@ This class is the API between the core of TESTed and the language-specific detai
 Everything that depends on the programming language passes through this class.
 """
 import logging
-import sys
 import typing
 from abc import ABC, abstractmethod
 from pathlib import Path
@@ -437,7 +436,8 @@ class Language(ABC):
 
     def get_description_generator(self) -> DescriptionGenerator:
         if self._description_generator is None:
-            config_dir = Path(sys.modules[self.__module__].__file__).parent
+            lang = self.config.dodona.programming_language
+            config_dir = self.config.dodona.judge / "tested" / "languages" / lang
             self._description_generator = DescriptionGenerator(self, config_dir)
         return self._description_generator
 
@@ -491,3 +491,13 @@ class Language(ABC):
         :return: A string representing an encoder.
         """
         raise NotImplementedError
+
+    def path_to_dependencies(self) -> List[Path]:
+        """
+        Construct the paths to the folder containing the additional dependencies
+        needed for a programming language.
+
+        :return: A list of template folders.
+        """
+        lang = self.config.dodona.programming_language
+        return [self.config.dodona.judge / "tested" / "languages" / lang / "templates"]
