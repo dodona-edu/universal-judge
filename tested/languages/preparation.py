@@ -161,7 +161,7 @@ class PreparedExecutionUnit:
     "The names of the language-specific evaluators we will need."
 
 
-def _prepare_argument(
+def prepare_argument(
     bundle: Bundle, argument: Union[Expression, NamedArgument]
 ) -> Union[Expression, NamedArgument]:
     if isinstance(argument, NamedArgument):
@@ -173,15 +173,11 @@ def _prepare_argument(
 
 def prepare_assignment(bundle: Bundle, assignment: Assignment) -> Assignment:
     if isinstance(assignment.type, VariableType):
-        class_type = conventionalize_class(
-            bundle.lang_config.naming_conventions(), assignment.type.data
-        )
+        class_type = conventionalize_class(bundle.lang_config, assignment.type.data)
         assignment = assignment.replace_type(VariableType(data=class_type))
 
     assignment = assignment.replace_variable(
-        conventionalize_identifier(
-            bundle.lang_config.naming_conventions(), assignment.variable
-        )
+        conventionalize_identifier(bundle.lang_config, assignment.variable)
     )
     prepared = prepare_expression(bundle, assignment.expression)
     return assignment.replace_expression(prepared)
@@ -191,32 +187,37 @@ def prepare_expression(bundle: Bundle, expression: Expression) -> Expression:
     """
     Prepare an expression for use in a template.
     """
-    lang = bundle.lang_config
+
     if isinstance(expression, Identifier):
-        expression = Identifier(conventionalize_identifier(lang, expression))
+        expression = Identifier(
+            conventionalize_identifier(bundle.lang_config, expression)
+        )
     elif isinstance(expression, PreparedFunctionCall):
         expression.arguments = [
-            _prepare_argument(bundle, arg) for arg in expression.arguments
+            prepare_argument(bundle, arg) for arg in expression.arguments
         ]
     elif isinstance(expression, FunctionCall):
+        submission = submission_name(bundle.lang_config, bundle.suite)
         if expression.type == FunctionType.CONSTRUCTOR:
-            name = conventionalize_class(lang, expression.name)
+            name = conventionalize_class(bundle.lang_config, expression.name)
         elif expression.type == FunctionType.PROPERTY:
             if expression.namespace is None:
-                name = conventionalize_global_identifier(lang, expression.name)
+                name = conventionalize_global_identifier(
+                    bundle.lang_config, expression.name
+                )
             else:
-                name = conventionalize_property(lang, expression.name)
+                name = conventionalize_property(bundle.lang_config, expression.name)
         else:
-            name = conventionalize_function(lang, expression.name)
+            name = conventionalize_function(bundle.lang_config, expression.name)
 
         if expression.namespace is None:
-            namespace = Identifier(submission_name(lang, bundle.suite))
+            namespace = Identifier(submission)
         else:
             namespace = prepare_expression(bundle, expression.namespace)
 
         internal = PreparedFunctionCall(
             type=expression.type,
-            arguments=[_prepare_argument(bundle, arg) for arg in expression.arguments],
+            arguments=[prepare_argument(bundle, arg) for arg in expression.arguments],
             name=name,
             namespace=namespace,
         )
@@ -263,10 +264,11 @@ def _create_handling_function(
     :param output: The evaluator.
     :return: A tuple containing the call and the name of the evaluator if present.
     """
-    lang = bundle.lang_config
+    lang_config = bundle.lang_config
     if hasattr(output, "evaluator") and isinstance(output.evaluator, SpecificEvaluator):
+        # noinspection PyUnresolvedReferences
         evaluator = output.evaluator.for_language(bundle.config.programming_language)
-        evaluator_name = conventionalize_namespace(lang, evaluator.file.stem)
+        evaluator_name = conventionalize_namespace(lang_config, evaluator.file.stem)
     else:
         evaluator_name = None
 
@@ -277,7 +279,7 @@ def _create_handling_function(
             arguments = [
                 PreparedFunctionCall(
                     type=FunctionType.FUNCTION,
-                    name=conventionalize_function(lang, evaluator.name),
+                    name=conventionalize_function(lang_config, evaluator.name),
                     namespace=Identifier(evaluator_name),
                     arguments=[prepare_expression(bundle, expression)],
                 )
@@ -290,8 +292,8 @@ def _create_handling_function(
 
         internal = PreparedFunctionCall(
             type=FunctionType.FUNCTION,
-            name=conventionalize_function(lang, function_name),
-            arguments=[_prepare_argument(bundle, arg) for arg in arguments],
+            name=conventionalize_function(lang_config, function_name),
+            arguments=[prepare_argument(bundle, arg) for arg in arguments],
         )
         internal.has_root_namespace = False
         return internal
@@ -320,7 +322,7 @@ def _create_exception_function(
     )
 
 
-def _prepare_testcase(
+def prepare_testcase(
     bundle: Bundle, testcase: Testcase
 ) -> Tuple[PreparedTestcase, List[str]]:
     """
@@ -383,7 +385,7 @@ def _prepare_testcase(
     )
 
 
-def _prepare_testcases(
+def prepare_testcases(
     bundle: Bundle, context: Context
 ) -> Tuple[List[PreparedTestcase], Set[str]]:
     """
@@ -397,13 +399,13 @@ def _prepare_testcases(
     result = []
     files = set()
     for i, testcase in enumerate(context.testcases):
-        args, new_names = _prepare_testcase(bundle, testcase)
+        args, new_names = prepare_testcase(bundle, testcase)
         result.append(args)
         files.update(new_names)
     return result, files
 
 
-def _prepare_context(
+def prepare_context(
     bundle: Bundle, context: Context
 ) -> Tuple[PreparedContext, Set[str]]:
     """
@@ -423,7 +425,7 @@ def _prepare_context(
     after_code = context.after.get(language, TextData(data="")).get_data_as_string(
         resources
     )
-    testcases, evaluator_names = _prepare_testcases(bundle, context)
+    testcases, evaluator_names = prepare_testcases(bundle, context)
     return (
         PreparedContext(
             before=before_code, after=after_code, testcases=testcases, context=context
@@ -478,15 +480,13 @@ def prepare_execution_unit(
     evaluator_names = set()
     contexts = []
     for context in execution_unit.contexts:
-        context_args, context_evaluator_names = _prepare_context(bundle, context)
+        context_args, context_evaluator_names = prepare_context(bundle, context)
         contexts.append(context_args)
         evaluator_names.update(context_evaluator_names)
 
     value_file_name = value_file(bundle, destination).name
     exception_file_name = exception_file(bundle, destination).name
-    submission = (submission_name(bundle.lang_config, bundle.suite),)
-
-    # Extract the main testcase and exit testcase.
+    submission = submission_name(bundle.lang_config, bundle.suite)
 
     return PreparedExecutionUnit(
         execution_name=execution_name,

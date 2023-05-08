@@ -19,9 +19,9 @@ from tested.internationalization import get_i18n_string
 from tested.judge.execution import execute_file, filter_files
 from tested.judge.utils import BaseExecutionResult, copy_from_paths_to_path, run_command
 from tested.languages.generator import (
-    convert_statement,
     custom_evaluator_arguments,
     generate_custom_evaluator,
+    generate_statement,
 )
 from tested.languages.templates import path_to_dependencies
 from tested.serialisation import EvalResult, Value
@@ -227,10 +227,10 @@ def _evaluate_python(
     exec(evaluator_code, global_env)
 
     # Call the evaluator.
-    literal_expected = convert_statement(eval_bundle, expected)
-    literal_actual = convert_statement(eval_bundle, actual)
+    literal_expected = generate_statement(eval_bundle, expected)
+    literal_actual = generate_statement(eval_bundle, actual)
     arguments = custom_evaluator_arguments(evaluator)
-    literal_arguments = convert_statement(eval_bundle, arguments)
+    literal_arguments = generate_statement(eval_bundle, arguments)
 
     with _catch_output() as (stdout_, stderr_):
         exec(

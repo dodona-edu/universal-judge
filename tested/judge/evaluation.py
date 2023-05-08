@@ -30,7 +30,7 @@ from tested.judge.collector import OutputManager, TestcaseCollector
 from tested.judge.execution import ContextResult
 from tested.languages.generator import (
     attempt_readable_input,
-    convert_statement,
+    generate_statement,
     get_readable_input,
 )
 from tested.testsuite import (
@@ -447,7 +447,7 @@ def guess_expected_value(bundle: Bundle, test: OutputChannel) -> str:
         )
     elif isinstance(test, ValueOutputChannel):
         return (
-            convert_statement(bundle, test.value)
+            generate_statement(bundle, test.value)
             if test.value
             else get_i18n_string("judge.evaluation.dynamic")
         )

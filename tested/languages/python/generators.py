@@ -11,7 +11,7 @@ from tested.datatypes import (
     BasicSequenceTypes,
     BasicStringTypes,
 )
-from tested.languages.generator import (
+from tested.languages.preparation import (
     PreparedContext,
     PreparedExecutionUnit,
     PreparedFunctionCall,
