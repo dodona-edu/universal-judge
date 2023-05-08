@@ -47,6 +47,7 @@ from tested.serialisation import ExceptionValue, FunctionCall, Statement, Value
 from tested.utils import fallback, get_args
 
 if typing.TYPE_CHECKING:
+    from tested.configs import GlobalConfig
     from tested.languages.generation import PreparedExecutionUnit
 
 Command = List[str]
@@ -215,9 +216,12 @@ class Language:
     instead of overriding the function in a subclass.
     """
 
-    __slots__ = ["options", "config_dir", "_description_generator"]
+    __slots__ = ["options", "config_dir", "_description_generator", "config"]
 
-    def __init__(self, config_file: str = "config.json"):
+    # TODO: get rid of the optional here...
+    def __init__(
+        self, config: Optional["GlobalConfig"], config_file: str = "config.json"
+    ):
         """
         Initialise a language configuration. Subclasses can modify the name of the
         toml configuration file. By default, a "config.json" file is expected in the
@@ -226,6 +230,7 @@ class Language:
         :param config_file: The name of the configuration file. Relative to the
                             directory in which the configuration class is.
         """
+        self.config = config
         self._description_generator = None
         self.config_dir = Path(sys.modules[self.__module__].__file__).parent
         path_to_config = self.config_dir / config_file

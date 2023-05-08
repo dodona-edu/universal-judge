@@ -158,6 +158,10 @@ class Bundle:
     def context_separator_secret(self) -> str:
         return self.global_config.context_separator_secret
 
+    @property
+    def options(self) -> Options:
+        return self.global_config.dodona.options
+
 
 def _get_language(config: DodonaConfig) -> Tuple[str, int]:
     import tested.languages as langs
@@ -201,11 +205,11 @@ def create_bundle(
         config.source_offset = offset
     # noinspection PyDataclass
     adjusted_config = config.copy(update={"programming_language": language})
-    lang_config = langs.get_language(language)
     global_config = GlobalConfig(
         dodona=adjusted_config,
         testcase_separator_secret=get_identifier(),
         context_separator_secret=get_identifier(),
         suite=suite,
     )
+    lang_config = langs.get_language(global_config, language)
     return Bundle(lang_config=lang_config, global_config=global_config, out=output)

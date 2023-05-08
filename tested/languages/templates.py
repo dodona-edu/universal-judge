@@ -13,7 +13,7 @@ def _language_inheritance_tree(bundle: Bundle) -> List[str]:
     result = [bundle.config.programming_language]
     while lang := current.inherits_from():
         result.append(lang)
-        current = get_language(lang)
+        current = get_language(bundle.global_config, lang)
     return result
 
 

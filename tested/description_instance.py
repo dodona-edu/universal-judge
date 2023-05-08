@@ -138,8 +138,6 @@ def create_description_instance_from_template(
     from pathlib import Path
 
     judge_directory = Path(__file__).parent.parent
-    language = get_language(programming_language)
-
     global_config = GlobalConfig(
         dodona=DodonaConfig(
             resources="",
@@ -156,6 +154,7 @@ def create_description_instance_from_template(
         testcase_separator_secret="",
         suite=Suite(namespace=namespace),
     )
+    language = get_language(global_config, programming_language)
 
     bundle = Bundle(
         global_config=global_config,

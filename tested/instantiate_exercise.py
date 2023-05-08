@@ -139,7 +139,8 @@ def _filter_valid_languages(languages: List[str], test_suite: Suite) -> List[str
     """
 
     def is_supported(language: str) -> bool:
-        language: Language = get_language(language)
+        # TODO: get rid of the None
+        language: Language = get_language(None, language)
 
         from .languages.config import TypeSupport
 
