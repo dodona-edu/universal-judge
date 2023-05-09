@@ -153,8 +153,7 @@ class Language(ABC):
 
     def get_string_quote(self):
         """
-        Get the symbol used to quote strings.
-        A double quote is used by default.
+        :return: The symbol used to quote strings.
         """
         return '"'
 
@@ -174,22 +173,26 @@ class Language(ABC):
     @abstractmethod
     def file_extension(self) -> str:
         """
-        The main file extension for this language, sans the dot. This is read from
-        the config.json file.
+        :return: The main file extension for this language, sans the dot.
         """
         raise NotImplementedError
 
     def is_source_file(self, file: Path) -> bool:
         """
-        Check if the given file is a valid source file
+        Check if the given file could be a source file for this programming language.
 
-        :param file: File to check if it's a valid source
-        :return: If the file is valid source
+        Note that this check can be pretty basic: checking the file's extension should
+        be enough.
+
+        :param file: Path to the file to check.
+        :return: True if the file is a valid source file.
         """
         return file.suffix == f".{self.file_extension()}"
 
     def with_extension(self, file_name: str) -> str:
-        """Utility function to append the file extension to a file name."""
+        """
+        :return: The file name with the language's extension appended to it.
+        """
         return f"{file_name}.{self.file_extension()}"
 
     @abstractmethod
@@ -235,7 +238,7 @@ class Language(ABC):
 
     def set_type_restrictions(self) -> Optional[Set[ExpressionTypes]]:
         """
-        Get type restrictions that apply to the set types in this languageg.
+        Get type restrictions that apply to the set types in this language.
 
         If you return None, all data types are assumed to be usable as the key in
         a set data type, such as a HashSet. Otherwise, you must return a whitelist
