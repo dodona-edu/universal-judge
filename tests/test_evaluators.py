@@ -1,20 +1,33 @@
+import json
 import sys
 from pathlib import Path
 from unittest.mock import ANY
+
+from pydantic.json import pydantic_encoder
 
 import tested
 from tested.configs import create_bundle
 from tested.dodona import Status
 from tested.evaluators.common import EvaluatorConfig
+from tested.evaluators.exception import evaluate as evaluate_exception
 from tested.evaluators.text import evaluate_file, evaluate_text
-from tested.testsuite import FileOutputChannel, Suite, TextOutputChannel
+from tested.serialisation import ExceptionValue
+from tested.testsuite import (
+    ExceptionOutputChannel,
+    ExpectedException,
+    FileOutputChannel,
+    Suite,
+    TextOutputChannel,
+)
 from tests.manual_utils import configuration
 
 
-def evaluator_config(tmp_path: Path, pytestconfig, options=None) -> EvaluatorConfig:
+def evaluator_config(
+    tmp_path: Path, pytestconfig, options=None, language="python"
+) -> EvaluatorConfig:
     if options is None:
         options = dict()
-    conf = configuration(pytestconfig, "", "python", tmp_path)
+    conf = configuration(pytestconfig, "", language, tmp_path)
     plan = Suite()
     bundle = create_bundle(conf, sys.stdout, plan)
     return EvaluatorConfig(bundle=bundle, options=options, context_dir=tmp_path)
@@ -246,3 +259,115 @@ def test_file_evaluator_dont_strip_lines_correct(tmp_path: Path, pytestconfig, m
     assert result.result.enum == Status.CORRECT
     assert result.readable_expected == "expected\nexpected2\n"
     assert result.readable_actual == "expected\nexpected2"
+
+
+def test_exception_evaluator_only_messages_correct(tmp_path: Path, pytestconfig):
+    config = evaluator_config(tmp_path, pytestconfig)
+    channel = ExceptionOutputChannel(exception=ExpectedException(message="Test error"))
+    actual_value = json.dumps(
+        ExceptionValue(message="Test error", type="ZeroDivisionError"),
+        default=pydantic_encoder,
+    )
+    result = evaluate_exception(config, channel, actual_value)
+    assert result.result.enum == Status.CORRECT
+    assert result.readable_expected == "ZeroDivisionError: Test error"
+    assert result.readable_actual == "ZeroDivisionError: Test error"
+
+
+def test_exception_evaluator_only_messages_wrong(tmp_path: Path, pytestconfig):
+    config = evaluator_config(tmp_path, pytestconfig)
+    channel = ExceptionOutputChannel(exception=ExpectedException(message="Test error"))
+    actual_value = json.dumps(
+        ExceptionValue(message="Pief poef", type="ZeroDivisionError"),
+        default=pydantic_encoder,
+    )
+    result = evaluate_exception(config, channel, actual_value)
+    assert result.result.enum == Status.WRONG
+    assert result.readable_expected == "Test error"
+    assert result.readable_actual == "ZeroDivisionError: Pief poef"
+
+
+def test_exception_evaluator_correct_message_wrong_type(tmp_path: Path, pytestconfig):
+    channel = ExceptionOutputChannel(
+        exception=ExpectedException(
+            message="Test error",
+            types={"python": "PiefError", "javascript": "PafError"},
+        )
+    )
+    actual_value = json.dumps(
+        ExceptionValue(message="Test error", type="ZeroDivisionError"),
+        default=pydantic_encoder,
+    )
+
+    # Test for Python
+    config = evaluator_config(tmp_path, pytestconfig, language="python")
+    result = evaluate_exception(config, channel, actual_value)
+    assert result.result.enum == Status.WRONG
+    assert result.readable_expected == "PiefError: Test error"
+    assert result.readable_actual == "ZeroDivisionError: Test error"
+
+    # Test for JavaScript
+    config = evaluator_config(tmp_path, pytestconfig, language="javascript")
+    result = evaluate_exception(config, channel, actual_value)
+    assert result.result.enum == Status.WRONG
+    assert result.readable_expected == "PafError: Test error"
+    assert result.readable_actual == "ZeroDivisionError: Test error"
+
+
+def test_exception_evaluator_wrong_message_correct_type(tmp_path: Path, pytestconfig):
+    channel = ExceptionOutputChannel(
+        exception=ExpectedException(
+            message="Test error",
+            types={"python": "PiefError", "javascript": "PafError"},
+        )
+    )
+
+    # Test for Python
+    config = evaluator_config(tmp_path, pytestconfig, language="python")
+    actual_value = json.dumps(
+        ExceptionValue(message="Test errors", type="PiefError"),
+        default=pydantic_encoder,
+    )
+    result = evaluate_exception(config, channel, actual_value)
+    assert result.result.enum == Status.WRONG
+    assert result.readable_expected == "PiefError: Test error"
+    assert result.readable_actual == "PiefError: Test errors"
+
+    # Test for JavaScript
+    config = evaluator_config(tmp_path, pytestconfig, language="javascript")
+    actual_value = json.dumps(
+        ExceptionValue(message="Test errors", type="PafError"), default=pydantic_encoder
+    )
+    result = evaluate_exception(config, channel, actual_value)
+    assert result.result.enum == Status.WRONG
+    assert result.readable_expected == "PafError: Test error"
+    assert result.readable_actual == "PafError: Test errors"
+
+
+def test_exception_evaluator_correct_type_and_message(tmp_path: Path, pytestconfig):
+    channel = ExceptionOutputChannel(
+        exception=ExpectedException(
+            message="Test error",
+            types={"python": "PiefError", "javascript": "PafError"},
+        )
+    )
+
+    # Test for Python
+    config = evaluator_config(tmp_path, pytestconfig, language="python")
+    actual_value = json.dumps(
+        ExceptionValue(message="Test error", type="PiefError"), default=pydantic_encoder
+    )
+    result = evaluate_exception(config, channel, actual_value)
+    assert result.result.enum == Status.CORRECT
+    assert result.readable_expected == "PiefError: Test error"
+    assert result.readable_actual == "PiefError: Test error"
+
+    # Test for JavaScript
+    config = evaluator_config(tmp_path, pytestconfig, language="javascript")
+    actual_value = json.dumps(
+        ExceptionValue(message="Test error", type="PafError"), default=pydantic_encoder
+    )
+    result = evaluate_exception(config, channel, actual_value)
+    assert result.result.enum == Status.CORRECT
+    assert result.readable_expected == "PafError: Test error"
+    assert result.readable_actual == "PafError: Test error"

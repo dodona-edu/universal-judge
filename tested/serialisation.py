@@ -21,11 +21,11 @@ import json
 import logging
 import math
 import operator
-from dataclasses import field, replace
+from dataclasses import field
 from decimal import Decimal
 from enum import StrEnum, auto, unique
 from functools import reduce
-from typing import Any, Dict, Iterable, List, Literal, Optional, Tuple, Union
+from typing import Any, Iterable, List, Literal, Optional, Tuple, Union
 
 from pydantic import BaseModel, Field, root_validator
 from pydantic.dataclasses import dataclass
@@ -700,24 +700,18 @@ class EvalResult(BaseModel):
 
 
 @dataclass
-class InternalExceptionMessage:
-    i18n_key: str
-    variables: Dict[str, Any] = field(default_factory=list)
-
-
-@dataclass
-class ExceptionValue(WithFeatures):
+class ExceptionValue:
     """An exception that was thrown while executing the user context."""
 
     message: str
+    type: str = ""
     stacktrace: str = ""
-    tested: Optional[InternalExceptionMessage] = None
-
-    def get_used_features(self) -> FeatureSet:
-        return FeatureSet({Construct.EXCEPTIONS}, types=set(), nested_types=set())
 
     def readable(self) -> str:
-        return f"{self.message}".strip()
+        if self.type:
+            return f"{self.type}: {self.message}"
+        else:
+            return self.message
 
 
 if __name__ == "__main__":

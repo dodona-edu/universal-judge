@@ -24,7 +24,6 @@ from tested.features import (
     combine_features,
 )
 from tested.serialisation import (
-    ExceptionValue,
     Expression,
     FunctionCall,
     FunctionType,
@@ -246,10 +245,54 @@ class ValueOutputChannel(WithFeatures):
 
 
 @dataclass
+class ExpectedException(WithFeatures):
+    """
+    Denotes the expected exception value.
+
+    This is the test suite companion to the ExceptionValue from the serialization.
+    """
+
+    # If the message is none, the message will not be checked.
+    message: Optional[str]
+    # Dictionary of exceptions types for supported languages.
+    # You can either:
+    # - Specify nothing, in which case the type is not checked.
+    # - Specify a dictionary mapping programming names to exception names.
+    #   These exception names should already be in the right convention.
+    types: Optional[Dict[str, str]] = None
+
+    @root_validator
+    def needs_either_message_or_types(cls, values):
+        message = values.get("message")
+        types = values.get("types")
+        if message is None and types is None:
+            raise ValueError("You must specify either an exception message or type.")
+        return values
+
+    def get_used_features(self) -> FeatureSet:
+        return FeatureSet({Construct.EXCEPTIONS}, types=set(), nested_types=set())
+
+    def get_type(self, language: str) -> Optional[str]:
+        if not self.types:
+            return None
+        return self.types.get(language)
+
+    def readable(self, language: str) -> str:
+        type_ = self.get_type(language)
+        if self.message and type_:
+            return f"{type_}: {self.message}"
+        elif self.message:
+            return self.message
+        else:
+            assert type_, "Cannot have neither message nor type."
+            return type_
+
+
+@dataclass
 class ExceptionOutputChannel(WithFeatures):
     """Handles exceptions caused by the submission."""
 
-    exception: Optional[ExceptionValue] = None
+    exception: Optional[ExpectedException] = None
     evaluator: Union[GenericExceptionEvaluator, SpecificEvaluator] = field(
         default_factory=GenericExceptionEvaluator
     )
@@ -350,6 +393,8 @@ class Output(WithFeatures):
         if isinstance(self.exception, ExceptionOutputChannel):
             if isinstance(self.exception.evaluator, SpecificEvaluator):
                 languages = set(self.exception.evaluator.evaluators.keys())
+            elif self.exception.exception.types:
+                languages = set(self.exception.exception.types.keys())
         if isinstance(self.result, ValueOutputChannel):
             if isinstance(self.result.evaluator, SpecificEvaluator):
                 langs = set(self.result.evaluator.evaluators.keys())
@@ -430,6 +475,8 @@ class Testcase(WithFeatures, WithFunctions):
 
     @root_validator
     def no_return_with_assignment(cls, values):
+        if "output" not in values:
+            return values
         # If the value test is not "None", but the input is not an expression,
         # this is an error: a statement is not an expression.
         output = values["output"]

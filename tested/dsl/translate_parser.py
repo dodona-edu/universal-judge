@@ -17,7 +17,6 @@ from tested.datatypes import (
 from tested.dsl.ast_translator import parse_string
 from tested.serialisation import (
     BooleanType,
-    ExceptionValue,
     NothingType,
     NumberType,
     ObjectKeyValuePair,
@@ -31,6 +30,7 @@ from tested.testsuite import (
     EmptyChannel,
     ExceptionOutputChannel,
     ExitCodeOutputChannel,
+    ExpectedException,
     FileUrl,
     GenericTextEvaluator,
     MainInput,
@@ -179,8 +179,14 @@ def _convert_testcase(testcase: YamlDict, previous_config: dict) -> Testcase:
     if (stderr := testcase.get("stderr")) is not None:
         output.stderr = _convert_text_output_channel(stderr, config, "stderr")
     if (exception := testcase.get("exception")) is not None:
+        if isinstance(exception, str):
+            message = exception
+            types = None
+        else:
+            message = exception.get("message")
+            types = exception["types"]
         output.exception = ExceptionOutputChannel(
-            exception=ExceptionValue(message=exception)
+            exception=ExpectedException(message=message, types=types)
         )
     if (exit_code := testcase.get("exit_code")) is not None:
         output.exit_code = ExitCodeOutputChannel(exit_code)

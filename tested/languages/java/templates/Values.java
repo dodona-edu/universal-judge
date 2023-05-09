@@ -30,7 +30,7 @@ public class Values {
         }
         return list;
     }
-        
+
     private static String escape(String string) {
         return string.replace("\\", "\\\\")
                         .replace("\"", "\\\"")
@@ -142,7 +142,8 @@ public class Values {
         var trace = sw.toString();
         var msg = exception.getMessage();
         var result = "{ \"message\": \"" + escape(msg == null ? "" : msg) +
-                     "\", \"stacktrace\": \"" + escape(trace) + "\"}";
+                     "\", \"stacktrace\": \"" + escape(trace) +
+                     "\", \"type\": \"" + exception.getClass().getSimpleName() + "\"}";
         writer.write(result);
     }
 

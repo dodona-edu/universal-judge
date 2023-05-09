@@ -80,6 +80,63 @@ def test_parse_ctx_exception():
     assert tc.output.exception.exception.message == "Error"
 
 
+def test_parse_ctx_exception_types():
+    yaml_str = """
+- tab: "Ctx Exception"
+  hidden: false
+  testcases:
+  - arguments: [ "--arg", "fail" ]
+    exception:
+      message: "Exception message"
+      types:
+        javascript: "AssertionError"
+        java: "IllegalArgumentException"
+  - arguments: [ "--arg", "fail2" ]
+    exit_code: 10
+- tab: "Ctx Error"
+  testcases:
+  - arguments: [ "--arg", "error" ]
+    exception:
+      message: "Error"
+      types:
+        csharp: "System.DivideByZeroException"
+        python: "ZeroDivisionError"
+    """
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    assert len(suite.tabs) == 2
+    tab = suite.tabs[0]
+    assert not tab.hidden
+    assert tab.name == "Ctx Exception"
+    assert len(tab.contexts) == 2
+    context = tab.contexts[0]
+    assert len(context.testcases) == 1
+    tc = context.testcases[0]
+    assert tc.input.arguments == ["--arg", "fail"]
+    assert tc.output.exception.exception.message == "Exception message"
+    assert tc.output.exception.exception.types == {
+        "javascript": "AssertionError",
+        "java": "IllegalArgumentException",
+    }
+    context = tab.contexts[1]
+    assert len(context.testcases) == 1
+    tc = context.testcases[0]
+    assert tc.input.arguments == ["--arg", "fail2"]
+    assert tc.output.exit_code.value == 10
+    tab = suite.tabs[1]
+    assert tab.name == "Ctx Error"
+    assert len(tab.contexts) == 1
+    context = tab.contexts[0]
+    assert len(context.testcases) == 1
+    tc = context.testcases[0]
+    assert tc.input.arguments == ["--arg", "error"]
+    assert tc.output.exception.exception.message == "Error"
+    assert tc.output.exception.exception.types == {
+        "csharp": "System.DivideByZeroException",
+        "python": "ZeroDivisionError",
+    }
+
+
 def test_parse_ctx_with_config():
     yaml_str = """
 - tab: "Config ctx"

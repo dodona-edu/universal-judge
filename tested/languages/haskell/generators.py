@@ -197,10 +197,10 @@ writeContextSeparator = do
     hFlush stdout
     hFlush stderr
 
-sendValue :: Values.Typeable a => a -> IO ()
+sendValue :: Values.JsonTypeable a => a -> IO ()
 sendValue = Values.sendValue value_file
 
-sendException :: Exception e => Maybe e -> IO ()
+sendException :: Maybe SomeException -> IO ()
 sendException = Values.sendException exception_file
 
 sendSpecificValue :: EvaluationResult -> IO ()

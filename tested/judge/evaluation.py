@@ -441,7 +441,7 @@ def guess_expected_value(bundle: Bundle, test: OutputChannel) -> str:
         return test.get_data_as_string(bundle.config.resources)
     elif isinstance(test, ExceptionOutputChannel):
         return (
-            test.exception.message
+            test.exception.readable(bundle.config.programming_language)
             if test.exception
             else get_i18n_string("judge.evaluation.dynamic")
         )

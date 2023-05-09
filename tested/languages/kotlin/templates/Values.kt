@@ -158,6 +158,9 @@ fun valuesSendException(writer: PrintWriter, throwable: Throwable?) {
     }
     val strStackTraceWriter = StringWriter()
     throwable.printStackTrace(PrintWriter(strStackTraceWriter))
-    writer.printf("{ \"message\": \"%s\", \"stacktrace\": \"%s\"}",
-            escape(throwable.message ?: ""), escape(strStackTraceWriter.toString()))
+    writer.printf("{ \"message\": \"%s\", \"stacktrace\": \"%s\", \"type\": \"%s\"}",
+            escape(throwable.message ?: ""),
+            escape(strStackTraceWriter.toString()),
+            throwable::class.simpleName
+        )
 }
