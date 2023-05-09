@@ -275,7 +275,7 @@ def trace_to_html(
     # Add links to
     traceback = link_regex.sub(link_subs, traceback)
     # We cannot generate a "pre" element, since that is ugly.
-    generated = f"<div class='code'>Traceback:{traceback}</div>"
+    generated = f"<div class='code'>Traceback:{traceback.strip()}</div>"
     generated = generated.replace("\n", "<br>")
     _logger.debug(generated)
     return ExtendedMessage(
