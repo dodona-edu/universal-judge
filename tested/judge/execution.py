@@ -12,8 +12,8 @@ from tested.judge.collector import OutputManager
 from tested.judge.compilation import process_compile_results, run_compilation
 from tested.judge.utils import BaseExecutionResult, run_command
 from tested.languages.config import FileFilter
-from tested.languages.conventionalize import selector_name
-from tested.languages.preparation import EXECUTION_PREFIX, exception_file, value_file
+from tested.languages.conventionalize import EXECUTION_PREFIX, selector_name
+from tested.languages.preparation import exception_file, value_file
 from tested.testsuite import Context, EmptyChannel, ExecutionMode
 from tested.utils import safe_del
 
