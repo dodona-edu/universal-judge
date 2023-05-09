@@ -171,19 +171,6 @@ class Language(ABC):
         """
         raise NotImplementedError
 
-    def execution_name(self, tab_number: int, execution_number: int) -> str:
-        """
-        Get the name of an execution. The name should be unique for the tab and
-        execution number combination.
-
-        :param tab_number: The number of the tab.
-        :param execution_number: The number of the execution.
-        :return: The name of the context, conventionalized.
-        """
-        return conventionalize_namespace(
-            self, f"{EXECUTION_PREFIX}_{tab_number}_{execution_number}"
-        )
-
     @abstractmethod
     def file_extension(self) -> str:
         """

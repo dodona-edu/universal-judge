@@ -414,14 +414,14 @@ def conventionalize_property(language: "Language", property_name: str) -> str:
 
 def submission_name(language: "Language") -> str:
     """
-    TODO: docs
+    :return: The name of a submission.
     """
     return conventionalize_namespace(language, language.config.suite.namespace)
 
 
 def submission_file(language: "Language") -> str:
     """
-    TODO: docs
+    :return: The file name of a submission.
     """
     return language.with_extension(submission_name(language))
 
@@ -440,17 +440,15 @@ def selector_file(language: "Language") -> str:
     return language.with_extension(selector_name(language))
 
 
-def conventionalize_execution(
-    language: "Language", tab_number: int, execution_number: int
-) -> str:
+def execution_name(language: "Language", tab_number: int, execution_number: int) -> str:
     """
     Get the name of an execution. The name should be unique for the tab and
     execution number combination.
 
-    :param language:
+    :param language: The language module.
     :param tab_number: The number of the tab.
     :param execution_number: The number of the execution.
-    :return: The name of the context, conventionalized.
+    :return: The name of the execution.
     """
     name = f"{EXECUTION_PREFIX}_{tab_number}_{execution_number}"
     return conventionalize_namespace(language, name)

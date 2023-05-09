@@ -33,7 +33,11 @@ from tested.judge.execution import (
 )
 from tested.judge.linter import run_linter
 from tested.judge.utils import copy_from_paths_to_path
-from tested.languages.conventionalize import EXECUTION_PREFIX, submission_file
+from tested.languages.conventionalize import (
+    EXECUTION_PREFIX,
+    execution_name,
+    submission_file,
+)
 from tested.languages.generation import generate_execution, generate_selector
 from tested.testsuite import ExecutionMode
 
@@ -185,8 +189,8 @@ def judge(bundle: Bundle):
                 Execution(
                     unit=unit,
                     context_offset=offset,
-                    execution_name=bundle.lang_config.execution_name(
-                        tab_number=tab_index, execution_number=execution_index
+                    execution_name=execution_name(
+                        bundle.lang_config, tab_index, execution_index
                     ),
                     execution_index=execution_index,
                     mode=mode,
@@ -321,13 +325,13 @@ def _generate_files(
     for tab_i, tab in enumerate(bundle.suite.tabs):
         execution_units = merge_contexts_into_units(tab.contexts)
         for unit_i, unit in enumerate(execution_units):
-            execution_name = bundle.lang_config.execution_name(tab_i, unit_i)
-            _logger.debug(f"Generating file for execution {execution_name}")
+            exec_name = execution_name(bundle.lang_config, tab_i, unit_i)
+            _logger.debug(f"Generating file for execution {exec_name}")
             generated, evaluators = generate_execution(
                 bundle=bundle,
                 destination=common_dir,
                 execution_unit=unit,
-                execution_name=execution_name,
+                execution_name=exec_name,
             )
             # Copy evaluators to the directory.
             for evaluator in evaluators:
@@ -336,7 +340,7 @@ def _generate_files(
                 shutil.copy2(source, common_dir)
             dependencies.extend(evaluators)
             dependencies.append(generated)
-            execution_names.append(execution_name)
+            execution_names.append(exec_name)
 
     if mode == ExecutionMode.PRECOMPILATION and bundle.lang_config.needs_selector():
         _logger.debug("Generating selector for PRECOMPILATION mode.")
