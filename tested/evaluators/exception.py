@@ -93,15 +93,6 @@ def evaluate(
             messages=[staff_message, student_message],
         )
 
-    messages = []
-    # Append the stacktrace as an HTML message if possible.
-    # We do this even if it is correct.
-    cleaned_stacktrace = config.bundle.lang_config.clean_stacktrace_to_message(
-        actual.stacktrace
-    )
-    if cleaned_stacktrace:
-        messages.append(cleaned_stacktrace)
-
     # If there is type information, check it.
     if expected_type := expected.get_type(language):
         type_is_ok = expected_type == actual.type
@@ -110,6 +101,15 @@ def evaluate(
     message_is_ok = expected.message == actual.message or expected.message is None
 
     status = Status.CORRECT if (type_is_ok and message_is_ok) else Status.WRONG
+
+    messages = []
+    # Append the stacktrace as an HTML message if possible.
+    # To keep things clean, we only do this if the test is incorrect.
+    cleaned_stacktrace = config.bundle.lang_config.clean_stacktrace_to_message(
+        actual.stacktrace
+    )
+    if cleaned_stacktrace and status != Status.CORRECT:
+        messages.append(cleaned_stacktrace)
 
     # If the result is correct, substitute the expected value with the correct type.
     if status == Status.CORRECT:
