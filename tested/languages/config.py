@@ -50,11 +50,13 @@ class Language(ABC):
     want to run for another test suite, you must create a new instance.
     """
 
-    config: "GlobalConfig"
+    config: Optional["GlobalConfig"]
     _description_generator: Optional[DescriptionGenerator]
 
-    # TODO: get rid of the optional here...
     def __init__(self, config: Optional["GlobalConfig"]):
+        """
+        :param config: If the config is None, only "config" methods will work.
+        """
         self.config = config
         self._description_generator = None
 
