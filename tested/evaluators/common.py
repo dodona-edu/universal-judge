@@ -31,7 +31,6 @@ from pydantic.dataclasses import dataclass
 
 from tested.configs import Bundle
 from tested.dodona import Message, Status, StatusMessage
-from tested.languages.conventionalize import conventionalize_namespace
 from tested.serialisation import EvalResult
 from tested.testsuite import ExceptionOutputChannel, NormalOutputChannel, OutputChannel
 
@@ -107,9 +106,6 @@ def cleanup_specific_programmed(
     actual.result = get_status(actual.result)
     if isinstance(channel, ExceptionOutputChannel):
         lang_config = config.bundle.lang_config
-        namespace = conventionalize_namespace(
-            lang_config, config.bundle.suite.namespace
-        )
         actual.readable_expected = lang_config.cleanup_stacktrace(
             actual.readable_expected
         )
