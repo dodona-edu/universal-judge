@@ -61,11 +61,13 @@ def evaluate(
     assert channel.exception is not None
 
     expected = channel.exception
+    language = config.bundle.global_config.dodona.programming_language
+    readable_expected = expected.readable(language)
 
     if not actual:
         return EvaluationResult(
             result=StatusMessage(enum=Status.WRONG),
-            readable_expected=expected.readable(),
+            readable_expected=readable_expected,
             readable_actual="",
             messages=[],
         )
@@ -86,29 +88,36 @@ def evaluate(
                 enum=Status.INTERNAL_ERROR,
                 human=get_i18n_string("evaluators.exception.status"),
             ),
-            readable_expected=expected.readable(),
+            readable_expected=readable_expected,
             readable_actual="",
             messages=[staff_message, student_message],
         )
 
-    message = config.bundle.lang_config.clean_stacktrace_to_message(actual.stacktrace)
-    if message:
-        messages = [message]
+    # If there is type information, check it.
+    if expected_type := expected.get_type(language):
+        type_is_ok = expected_type == actual.type
     else:
-        messages = []
+        type_is_ok = True
+    message_is_ok = expected.message == actual.message or expected.message is None
 
-    if actual.tested is not None:
-        # noinspection PyArgumentList
-        messages.append(
-            get_i18n_string(actual.tested.i18n_key, **actual.tested.variables)
-        )
-        status = Status.WRONG
-    else:
-        status = Status.CORRECT if expected.message == actual.message else Status.WRONG
+    status = Status.CORRECT if (type_is_ok and message_is_ok) else Status.WRONG
+
+    messages = []
+    # Append the stacktrace as an HTML message if possible.
+    # To keep things clean, we only do this if the test is incorrect.
+    cleaned_stacktrace = config.bundle.lang_config.clean_stacktrace_to_message(
+        actual.stacktrace
+    )
+    if cleaned_stacktrace and status != Status.CORRECT:
+        messages.append(cleaned_stacktrace)
+
+    # If the result is correct, substitute the expected value with the correct type.
+    if status == Status.CORRECT:
+        readable_expected = actual.readable()
 
     return EvaluationResult(
         result=StatusMessage(enum=status),
-        readable_expected=expected.readable(),
+        readable_expected=readable_expected,
         readable_actual=actual.readable(),
         messages=messages,
     )

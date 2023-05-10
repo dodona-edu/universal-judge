@@ -1,0 +1,34 @@
+{
+  "tabs": [
+    {
+      "name": "Feedback",
+      "contexts": [
+        {
+          "testcases": [
+            {
+              "description": "Uitvoeren code",
+              "input": {
+                "main_call": true
+              },
+              "output": {
+                "exception": {
+                  "exception": {
+                    "message": null,
+                    "types": {
+                      "haskell": "ArithException",
+                      "runhaskell": "ArithException",
+                      "java": "ArithmeticException",
+                      "kotlin": "ArithmeticException",
+                      "csharp": "DivideByZeroException",
+                      "python": "ZeroDivisionError"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

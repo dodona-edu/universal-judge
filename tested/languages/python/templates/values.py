@@ -73,6 +73,7 @@ def send_exception(stream, exception):
         "message": str(exception),
         "stacktrace": f"{exception.__class__.__name__}: {exception}\n"
         f"{tracer.getvalue()}",
+        "type": exception.__class__.__name__,
     }
     json.dump(data, stream)
 

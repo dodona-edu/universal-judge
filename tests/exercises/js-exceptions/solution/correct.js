@@ -1,4 +1,5 @@
-throw {
-    "name": "AssertionError",
-    "message": "Valid exceptions"
-};
+const {AssertionError} = require('node:assert');
+
+throw new AssertionError({
+    message: "Valid exceptions"
+});

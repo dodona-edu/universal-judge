@@ -123,6 +123,7 @@ namespace Tested
           Dictionary<string, string> data = new Dictionary<string, string>();
           data.Add("message", e.Message ?? "");
           data.Add("stacktrace", e.StackTrace ?? "");
+          data.Add("type", e.GetType().Name);
 
           string stringResult = JsonSerializer.Serialize(data);
           writer.Write(stringResult);
@@ -144,7 +145,7 @@ namespace Tested
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
           };
           var data = new Dictionary<string, string>();
-         
+
           string stringResult = JsonSerializer.Serialize(result, serializeOptions);
           writer.Write(stringResult);
         }

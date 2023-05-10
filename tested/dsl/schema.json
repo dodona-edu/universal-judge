@@ -117,7 +117,26 @@
       "properties": {
         "exception": {
           "description": "Expected exception message",
-          "$ref": "#/definitions/generalOutput"
+          "oneOf" : [
+            {
+              "$ref": "#/definitions/generalOutput"
+            },
+            {
+              "type" : "object",
+              "required" : ["types"],
+              "properties" : {
+                "message": {
+                  "$ref": "#/definitions/generalOutput"
+                },
+                "types": {
+                  "type" : "object",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          ]
         },
         "files": {
           "type": "array",
