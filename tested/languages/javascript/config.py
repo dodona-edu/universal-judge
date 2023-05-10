@@ -8,9 +8,11 @@ from tested.dodona import AnnotateCode, Message
 from tested.features import Construct, TypeSupport
 from tested.languages.config import CallbackResult, Command, Language
 from tested.languages.conventionalize import (
+    EXECUTION_PREFIX,
     Conventionable,
     NamingConventions,
     submission_file,
+    submission_name,
 )
 from tested.languages.utils import cleanup_description, limit_output
 from tested.serialisation import FunctionCall, Statement, Value
@@ -145,64 +147,27 @@ class JavaScript(Language):
         return linter.run_eslint(self.config.dodona, remaining)
 
     def cleanup_stacktrace(self, traceback: str) -> str:
-        submission_filename = submission_file(self)
-        namespace = submission_filename[: submission_filename.rfind(".")]
-        line_start_with_submission_file = re.compile(
-            rf"^(\\?([^\\/]*[\\/])*)({submission_filename}:)(?P<loc>[0-9]+)"
-        )
-        ref_not_found_regex = re.compile(
-            rf"TypeError: {namespace}.([a-zA-Z0-9_]*) "
-            r"is not a (function|constructor)"
-        )
-        ref_not_found_replace = r"ReferenceError: \1 is not defined"
+        # What this does:
+        # 1a. While inside the submission code, replace all references to the location with <code>
+        # 1b. Remove any "submission.SOMETHING" -> "SOMETHING"
+        # 2. Once we encounter a line with the execution location, skip all lines.
+        submission_location_regex = f"{self.config.dodona.workdir}/{EXECUTION_PREFIX}[_0-9]+/{submission_file(self)}"
+        execution_location_regex = f"{self.config.dodona.workdir}/{EXECUTION_PREFIX}[_0-9]+/{EXECUTION_PREFIX}[_0-9]+.js"
+        submission_namespace = f"{submission_name(self)}."
 
-        context_file_regex = re.compile(r"context[0-9]+\.js")
-        submission_file_regex = re.compile(rf"\(.*{submission_filename}(.*)\)")
-        submission_file_replace = r"(<code>\1)"
-        at_code_regex = re.compile(r"at .* \((<code>:[0-9]+:[0-9]+)\)")
-        at_code_replace = r"at \1"
+        resulting_lines = ""
+        for line in traceback.splitlines(keepends=True):
+            # If we encounter an execution location, we are done.
+            if re.search(execution_location_regex, line):
+                break
 
-        if isinstance(traceback, str):
-            traceback = traceback.splitlines(True)
+            # Replace any reference to the submission.
+            line = re.sub(submission_location_regex, "<code>", line)
+            # Remove any references of the form "submission.SOMETHING"
+            line = line.replace(submission_namespace, "")
+            resulting_lines += line
 
-        skip_line, lines = False, []
-        for line in traceback:
-            line = line.strip("\n")
-
-            if not line:
-                continue
-
-            # skip line if not a new File line is started
-            if context_file_regex.search(line):
-                skip_line = True
-                continue
-            elif skip_line and (line.startswith(" ") and "at" not in line):
-                continue
-
-            # replace type error not found to reference error
-            if ref_not_found_regex.search(line):
-                line = ref_not_found_regex.sub(ref_not_found_replace, line)
-
-            # replace references to local names
-            if submission_filename in line:
-                line = submission_file_regex.sub(submission_file_replace, line)
-            elif "at " in line:
-                skip_line = True
-                continue
-            skip_line = False
-
-            # Replace submission file line
-            match = line_start_with_submission_file.match(line)
-            if match:
-                line = f"<code>:{match.group('loc')}"
-
-            # Remove textual location information
-            line = at_code_regex.sub(at_code_replace, line)
-            lines.append(line + "\n")
-
-        if len(lines) > 20:
-            lines = lines[:19] + ["...\n"] + [lines[-1]]
-        return "".join(lines)
+        return resulting_lines
 
     def cleanup_description(self, description: str) -> str:
         description = cleanup_description(self, description)
