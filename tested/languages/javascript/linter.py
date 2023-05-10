@@ -3,7 +3,7 @@ import logging
 from pathlib import Path
 from typing import List, Tuple
 
-from tested.configs import Bundle
+from tested.configs import DodonaConfig
 from tested.dodona import AnnotateCode, ExtendedMessage, Message, Permission, Severity
 from tested.internationalization import get_i18n_string
 from tested.judge.utils import run_command
@@ -13,14 +13,14 @@ severity = [Severity.INFO, Severity.WARNING, Severity.ERROR]
 
 
 def run_eslint(
-    bundle: Bundle, submission: Path, remaining: float
+    config: DodonaConfig, remaining: float
 ) -> Tuple[List[Message], List[AnnotateCode]]:
     """
     Calls eslint to annotate submitted source code and adds resulting score and
     annotations to tab.
     """
-    config = bundle.config
-    language_options = bundle.config.config_for()
+    submission = config.source
+    language_options = config.config_for()
     if language_options.get("eslint_config", None):
         config_path = config.resources / language_options.get("eslint_config")
     else:
@@ -84,7 +84,7 @@ def run_eslint(
             cols = end_col - start_col if end_col and end_col > start_col else None
             annotations.append(
                 AnnotateCode(
-                    row=start_row - 1 + bundle.config.source_offset,
+                    row=start_row - 1 + config.source_offset,
                     rows=rows,
                     text=text,
                     externalUrl=external,

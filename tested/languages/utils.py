@@ -1,36 +1,38 @@
+import html
 import logging
+import math
+import os
 import re
 from pathlib import Path
-from typing import List, Tuple
+from typing import TYPE_CHECKING, List, Tuple
 
-from tested.configs import Bundle
-from tested.dodona import AnnotateCode, Message
-from tested.languages.config import Config, Language
+from tested.configs import GlobalConfig
+from tested.dodona import AnnotateCode, ExtendedMessage, Message, Permission
+from tested.languages.conventionalize import submission_file, submission_name
 
-logger = logging.getLogger(__name__)
+if TYPE_CHECKING:
+    from tested.languages.config import Language
 
-
-def cleanup_description(lang_config: Language, namespace: str, description: str) -> str:
-    return description.replace(
-        rf"{lang_config.conventionalize_namespace(namespace)}.", r"", 1
-    )
+_logger = logging.getLogger(__name__)
 
 
-def jvm_memory_limit(config: Config) -> int:
+def cleanup_description(lang_config: "Language", description: str) -> str:
+    return description.replace(rf"{submission_name(lang_config)}.", r"", 1)
+
+
+def jvm_memory_limit(config: GlobalConfig) -> int:
     """
     Get the memory limit in bytes. Java Virtual Machine (JVM) requires this to be a
     multiple of 1024.
     See https://docs.oracle.com/en/java/javase/14/docs/specs/man/java.html
     """
-    limit = int(config.memory_limit)
+    limit = int(config.dodona.memory_limit)
     limit = (limit // 1024) * 1024
     return limit
 
 
 # Idea and original code: dodona/judge-pythia
-def jvm_cleanup_stacktrace(
-    traceback: str, submission_file: str, reduce_all=False
-) -> str:
+def jvm_cleanup_stacktrace(traceback: str, submission_filename: str) -> str:
     context_file_regex = re.compile(r"(Context[0-9]+|Selector)")
     unresolved_main_regex = r"error: unresolved reference: solutionMain"
     unresolved_reference_regex = re.compile(
@@ -61,16 +63,14 @@ def jvm_cleanup_stacktrace(
             continue
 
         # replace references to local names
-        if submission_file in line:
-            line = line.replace(submission_file, "<code>")
+        if submission_filename in line:
+            line = line.replace(submission_filename, "<code>")
             line = line.replace("Kt.solutionMain", "Kt.main")
         elif "at " in line:
             skip_line = True
             continue
         skip_line = False
-
-        if not (reduce_all and line.startswith(" ")):
-            lines.append(line + "\n")
+        lines.append(line + "\n")
 
     if len(lines) > 20:
         lines = lines[:19] + ["...\n"] + [lines[-1]]
@@ -78,21 +78,19 @@ def jvm_cleanup_stacktrace(
 
 
 def jvm_stderr(
-    self: Language, bundle: Bundle, stderr: str
+    self: "Language", stderr: str
 ) -> Tuple[List[Message], List[AnnotateCode], str]:
     # Identifier to separate testcase output
-    identifier = f"--{bundle.secret}-- SEP"
-    context_identifier = f"--{bundle.context_separator_secret}-- SEP"
-    submission_file = self.with_extension(
-        self.conventionalize_namespace(bundle.suite.namespace)
-    )
+    identifier = f"--{self.config.testcase_separator_secret}-- SEP"
+    context_identifier = f"--{self.config.context_separator_secret}-- SEP"
+    submission = submission_file(self)
 
     return (
         [],
         [],
         context_identifier.join(
             identifier.join(
-                self.cleanup_stacktrace(testcase, submission_file)
+                self.cleanup_stacktrace(testcase)
                 for testcase in context.split(identifier)
             )
             for context in stderr.split(context_identifier)
@@ -100,10 +98,10 @@ def jvm_stderr(
     )
 
 
-def haskell_solution(lang_config: Language, solution: Path, bundle: Bundle):
+def haskell_solution(lang_config: "Language", solution: Path):
     """Support implicit modules if needed."""
-    if bundle.config.config_for().get("implicitModule", True):
-        name = lang_config.submission_name(bundle.suite)
+    if lang_config.config.dodona.config_for().get("implicitModule", True):
+        name = submission_name(lang_config)
         # noinspection PyTypeChecker
         with open(solution, "r") as file:
             contents = file.read()
@@ -118,7 +116,7 @@ def haskell_solution(lang_config: Language, solution: Path, bundle: Bundle):
             file.write("\n".join(resulting_lines))
 
 
-def haskell_cleanup_stacktrace(traceback: str, submission_file: str, reduce_all=False):
+def haskell_cleanup_stacktrace(traceback: str, submission_filename: str):
     context_file_regex = re.compile(r"(Context[0-9]+|Selector)")
     called_at_regex = re.compile(r"^(.*called at )./(<code>:)([0-9]+)(:[0-9]+) .*$")
     compile_line_regex = re.compile(r"^([0-9]+)(\s*\|.*)$")
@@ -155,8 +153,8 @@ def haskell_cleanup_stacktrace(traceback: str, submission_file: str, reduce_all=
             continue
 
         # replace references to local names
-        if submission_file in line:
-            line = line.replace(submission_file, "<code>")
+        if submission_filename in line:
+            line = line.replace(submission_filename, "<code>")
             match = called_at_regex.match(line)
             if match:
                 line = (
@@ -181,9 +179,104 @@ def haskell_cleanup_stacktrace(traceback: str, submission_file: str, reduce_all=
             if match:
                 line = f"{int(match.group(1)) - 1}{match.group(2)}"
 
-        if not (reduce_all and line.startswith(" ")):
-            lines.append(line + "\n")
+        lines.append(line + "\n")
 
     if len(lines) > 20:
         lines = lines[:19] + ["...\n"] + [lines[-1]]
     return "".join(lines)
+
+
+def executable_name(basename: str) -> str:
+    """
+    Utility function that will
+
+    :param basename: The name of the executable without extension.
+
+    :return: The executable with extension corresponding to the platform.
+    """
+    if os.name == "nt":
+        return f"{basename}.exe"
+    else:
+        return basename
+
+
+def limit_output(
+    output: str,
+    limit_characters: int = 512,
+    max_lines: int = 20,
+    ellipsis_str: str = "...",
+) -> str:
+    """
+    Utility function for limiting a string output
+
+    :param output: String that possible needs to be abbreviated
+    :param limit_characters: Maximum characters used in the output
+    :param max_lines: Maximum lines in the output
+    :param ellipsis_str: ellipsis used when abbreviated is needed
+
+    :return: The abbreviated 'output' if needed otherwise the 'output' itself
+    """
+    lines = output.splitlines()
+    # Case character limit not exceeded and line limit not exceeded
+    if len(output) <= limit_characters and len(lines) <= max_lines:
+        return output
+    # Case character limit exceeded
+    max_chars = limit_characters - len(ellipsis_str)
+    forward_buffer = []
+    backward_buffer = []
+    len_lines = len(lines)
+    for f in range(math.ceil(min(max_lines - 1, len_lines) / 2)):
+        r = len_lines - f - 1
+        # Case last lines to consider are the same
+        if f == r:
+            forward_buffer.append(lines[f][: (max_chars - 1)])
+        # Otherwise
+        else:
+            next_line, prev_line = lines[f], lines[r]
+            current_length = len(next_line) + len(prev_line) + 2
+            # Both lines can be add in full
+            if current_length < max_chars:
+                forward_buffer.append(next_line)
+                backward_buffer.append(prev_line)
+                max_chars -= current_length
+            # Lines must be limited
+            else:
+                half = max_chars / 2
+                # Next line can be add in full
+                if len(next_line) + 2 < max_chars:
+                    forward_buffer.append(next_line)
+                    max_chars -= len(next_line) + 2
+                    backward_buffer.append(prev_line[-max_chars:])
+                # Prev line can be add in full
+                elif len(prev_line) + 2 < max_chars:
+                    backward_buffer.append(prev_line)
+                    max_chars -= len(prev_line) + 2
+                    forward_buffer.append(next_line[:max_chars])
+                # Both lines needed abbreviation
+                else:
+                    forward_buffer.append(next_line[: math.ceil(half - 1)])
+                    backward_buffer.append(prev_line[-math.floor(half - 1) :])
+                # Terminate loop because character limit reached
+                break
+    # Concat buffer
+    return "\n".join(forward_buffer + [ellipsis_str] + backward_buffer[::-1])
+
+
+def trace_to_html(
+    traceback: str,
+    link_regex: str = r"&lt;code&gt;:([0-9]+)",
+    link_subs: str = r'<a href="#" class="tab-link" data-tab="code" '
+    r'data-line="\1">&lt;code&gt;:\1</a>',
+) -> ExtendedMessage:
+    # Escape special characters
+    traceback = html.escape(traceback)
+    # Compile regex
+    link_regex = re.compile(link_regex)
+    # Add links to
+    traceback = link_regex.sub(link_subs, traceback)
+    _logger.debug(f"<pre><code>{traceback}</code></pre>")
+    return ExtendedMessage(
+        description=f"<pre><code>{traceback}</code></pre>",
+        format="html",
+        permission=Permission.STUDENT,
+    )

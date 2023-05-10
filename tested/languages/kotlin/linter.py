@@ -3,7 +3,7 @@ import logging
 from pathlib import Path
 from typing import List, Tuple
 
-from tested.configs import Bundle
+from tested.configs import DodonaConfig
 from tested.dodona import AnnotateCode, ExtendedMessage, Message, Permission, Severity
 from tested.internationalization import get_i18n_string
 from tested.judge.utils import run_command
@@ -12,14 +12,14 @@ logger = logging.getLogger(__name__)
 
 
 def run_ktlint(
-    bundle: Bundle, submission: Path, remaining: float
+    config: DodonaConfig, remaining: float
 ) -> Tuple[List[Message], List[AnnotateCode]]:
     """
     Calls ktlint to annotate submitted source code and adds resulting score and
     annotations to tab.
     """
-    config = bundle.config
-    language_options = bundle.config.config_for()
+    submission = config.source
+    language_options = config.config_for()
 
     command = ["ktlint", "--reporter=json"]
 
@@ -90,7 +90,7 @@ def run_ktlint(
 
             annotations.append(
                 AnnotateCode(
-                    row=error.get("line", 1) - 1 + bundle.config.source_offset,
+                    row=error.get("line", 1) - 1 + config.source_offset,
                     text=message,
                     externalUrl="https://ktlint.github.io/#rules",
                     column=error.get("column", 1) - 1,

@@ -1,26 +1,91 @@
 import logging
 import re
-import typing
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import TYPE_CHECKING, Dict, List, Mapping, Optional, Set, Tuple
 
-from tested.configs import Bundle
+from tested.datatypes import AllTypes
 from tested.dodona import AnnotateCode, Message, Status
+from tested.features import Construct, TypeSupport
 from tested.internationalization import get_i18n_string
-from tested.languages.config import CallbackResult, Command, Config, Language
+from tested.languages.config import CallbackResult, Command, Language
+from tested.languages.conventionalize import (
+    Conventionable,
+    NamingConventions,
+    submission_name,
+)
 from tested.serialisation import FunctionCall, Statement, Value
 
 logger = logging.getLogger(__name__)
 
-if typing.TYPE_CHECKING:
-    from tested.languages.generator import PreparedExecutionUnit
+if TYPE_CHECKING:
+    from tested.languages.generation import PreparedExecutionUnit
 
 # Where the results of the compilation are stored.
 OUTPUT_DIRECTORY = "all-outputs"
 
 
 class CSharp(Language):
-    def compilation(self, bundle: Bundle, files: List[str]) -> CallbackResult:
+    def initial_dependencies(self) -> List[str]:
+        return ["dotnet.csproj", "Values.cs", "EvaluationResult.cs"]
+
+    def needs_selector(self):
+        return True
+
+    def file_extension(self) -> str:
+        return "cs"
+
+    def naming_conventions(self) -> Dict[Conventionable, NamingConventions]:
+        return {
+            "namespace": "pascal_case",
+            "function": "pascal_case",
+            "identifier": "pascal_case",
+            "property": "pascal_case",
+            "class": "pascal_case",
+            "global_identifier": "macro_case",
+        }
+
+    def supported_constructs(self) -> Set[Construct]:
+        return {
+            Construct.OBJECTS,
+            Construct.EXCEPTIONS,
+            Construct.FUNCTION_CALLS,
+            Construct.ASSIGNMENTS,
+            Construct.HETEROGENEOUS_COLLECTIONS,
+            Construct.HETEROGENEOUS_ARGUMENTS,
+            Construct.EVALUATION,
+            Construct.NAMED_ARGUMENTS,
+            Construct.DEFAULT_PARAMETERS,
+            Construct.GLOBAL_VARIABLES,
+        }
+
+    def datatype_support(self) -> Mapping[AllTypes, TypeSupport]:
+        return {
+            "integer": "supported",
+            "real": "supported",
+            "char": "reduced",
+            "text": "supported",
+            "boolean": "supported",
+            "sequence": "supported",
+            "set": "supported",
+            "map": "supported",
+            "nothing": "supported",
+            "int8": "supported",
+            "uint8": "supported",
+            "int16": "supported",
+            "uint16": "supported",
+            "int32": "supported",
+            "uint32": "supported",
+            "int64": "supported",
+            "uint64": "supported",
+            "bigint": "supported",
+            "single_precision": "supported",
+            "double_precision": "supported",
+            "array": "supported",
+            "list": "supported",
+            "tuple": "supported",
+        }
+
+    def compilation(self, files: List[str]) -> CallbackResult:
         # In C#, all output files are located in a subdirectory, so we just
         # want to copy over the subdirectory.
         def file_filter(file: Path) -> bool:
@@ -43,9 +108,7 @@ class CSharp(Language):
 
         return args, file_filter
 
-    def execution(
-        self, config: Config, cwd: Path, file: str, arguments: List[str]
-    ) -> Command:
+    def execution(self, cwd: Path, file: str, arguments: List[str]) -> Command:
         file = OUTPUT_DIRECTORY + "/" + file
         return ["dotnet", file, *arguments]
 
@@ -66,15 +129,15 @@ class CSharp(Language):
             messages.append(get_i18n_string("languages.config.unknown.compilation"))
             return None, messages, Status.COMPILATION_ERROR, []
 
-    # noinspection PyTypeChecker
-    def solution(self, solution: Path, bundle: Bundle):
+    def modify_solution(self, solution: Path):
+        # noinspection PyTypeChecker
         with open(solution, "r") as file:
             contents = file.read()
 
         if "class" in contents:
             return  # No top-level statements; we are happy...
 
-        class_name = bundle.lang_config.submission_name(bundle.suite)
+        class_name = submission_name(self)
         result = f"""\
 using System;
 using System.IO;
@@ -93,15 +156,16 @@ class {class_name}
 }}
         """
 
+        # noinspection PyTypeChecker
         with open(solution, "w") as file:
             file.write(result)
 
     def compiler_output(
-        self, namespace: str, stdout: str, stderr: str
+        self, stdout: str, stderr: str
     ) -> Tuple[List[Message], List[AnnotateCode], str, str]:
-        submission_name = self.with_extension(self.conventionalize_namespace(namespace))
+        submission = submission_name(self)
         message_regex = (
-            rf"{submission_name}\((\d+),(\d+)\): (error|warning) ([A-Z0-9]+): (.*) \["
+            rf"{submission}\((\d+),(\d+)\): (error|warning) ([A-Z0-9]+): (.*) \["
         )
         messages = re.findall(message_regex, stdout)
         annotations = []

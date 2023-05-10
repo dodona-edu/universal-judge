@@ -4,7 +4,8 @@ from pathlib import Path
 
 from tested.configs import create_bundle
 from tested.datatypes import BasicBooleanTypes, BasicNumericTypes, BasicStringTypes
-from tested.languages.generator import convert_statement
+from tested.languages.conventionalize import submission_name
+from tested.languages.generation import generate_statement
 from tested.serialisation import (
     BooleanType,
     FunctionCall,
@@ -32,8 +33,8 @@ def test_function_arguments_without_brackets(tmp_path: Path, pytestconfig):
         ],
     )
 
-    result = convert_statement(bundle, statement)
+    result = generate_statement(bundle, statement)
     assert (
         result
-        == f'{bundle.lang_config.submission_name(plan)}.test 5.5 :: Double "hallo" True'
+        == f'{submission_name(bundle.lang_config)}.test 5.5 :: Double "hallo" True'
     )

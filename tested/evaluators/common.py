@@ -106,13 +106,10 @@ def cleanup_specific_programmed(
     actual.result = get_status(actual.result)
     if isinstance(channel, ExceptionOutputChannel):
         lang_config = config.bundle.lang_config
-        namespace = lang_config.conventionalize_namespace(config.bundle.suite.namespace)
         actual.readable_expected = lang_config.cleanup_stacktrace(
-            actual.readable_expected, lang_config.with_extension(namespace)
+            actual.readable_expected
         )
-        cleaned_actual = lang_config.cleanup_stacktrace(
-            actual.readable_actual, lang_config.with_extension(namespace)
-        )
+        cleaned_actual = lang_config.cleanup_stacktrace(actual.readable_actual)
         message = lang_config.clean_stacktrace_to_message(cleaned_actual)
 
         if message:

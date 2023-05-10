@@ -1,94 +1,40 @@
-import typing
 from pathlib import Path
-from typing import List, Tuple
+from typing import List
 
-from tested.configs import Bundle
-from tested.dodona import AnnotateCode, Message
-from tested.languages.config import CallbackResult, Command, Config, Language
-from tested.languages.utils import (
-    cleanup_description,
-    haskell_cleanup_stacktrace,
-    haskell_solution,
-)
-from tested.serialisation import FunctionCall, Statement, Value
-
-if typing.TYPE_CHECKING:
-    from tested.languages.generator import PreparedExecutionUnit
+from tested.languages.config import CallbackResult, Command
+from tested.languages.conventionalize import submission_file
+from tested.languages.description_generator import DescriptionGenerator
+from tested.languages.haskell.config import Haskell
 
 
-class RunHaskell(Language):
-    def compilation(self, bundle: Bundle, files: List[str]) -> CallbackResult:
-        submission_file = self.with_extension(
-            self.conventionalize_namespace(self.submission_name(bundle.suite))
-        )
-        main_file = list(filter(lambda x: x == submission_file, files))
+class RunHaskell(Haskell):
+    def compilation(self, files: List[str]) -> CallbackResult:
+        submission = submission_file(self)
+        main_file = list(filter(lambda x: x == submission, files))
         if main_file:
             return ["ghc", "-fno-code", main_file[0]], files
         else:
             return [], files
 
-    def compiler_output(
-        self, namespace: str, stdout: str, stderr: str
-    ) -> Tuple[List[Message], List[AnnotateCode], str, str]:
-        return (
-            [],
-            [],
-            "",
-            haskell_cleanup_stacktrace(
-                stderr, self.with_extension(self.conventionalize_namespace(namespace))
-            ),
-        )
-
-    def execution(
-        self, config: Config, cwd: Path, file: str, arguments: List[str]
-    ) -> Command:
+    def execution(self, cwd: Path, file: str, arguments: List[str]) -> Command:
         return ["runhaskell", file, *arguments]
 
-    def solution(self, solution: Path, bundle: Bundle):
-        haskell_solution(self, solution, bundle)
-
-    def linter(
-        self, bundle: Bundle, submission: Path, remaining: float
-    ) -> Tuple[List[Message], List[AnnotateCode]]:
-        # Import locally to prevent errors.
-        from tested.languages.haskell import linter
-
-        return linter.run_hlint(bundle, submission, remaining)
-
-    def filter_dependencies(
-        self, bundle: Bundle, files: List[str], context_name: str
-    ) -> List[str]:
+    def filter_dependencies(self, files: List[str], context_name: str) -> List[str]:
         return files
 
-    def cleanup_description(self, namespace: str, description: str) -> str:
-        return cleanup_description(self, namespace, description)
+    def path_to_dependencies(self) -> List[Path]:
+        """
+        Construct the paths to the folder containing the additional dependencies
+        needed for a programming language.
 
-    def cleanup_stacktrace(
-        self, traceback: str, submission_file: str, reduce_all=False
-    ) -> str:
-        return haskell_cleanup_stacktrace(traceback, submission_file, reduce_all)
+        :return: A list of template folders.
+        """
+        return [
+            self.config.dodona.judge / "tested" / "languages" / "haskell" / "templates"
+        ]
 
-    def generate_statement(self, statement: Statement) -> str:
-        from tested.languages.haskell import generators
-
-        return generators.convert_statement(statement)
-
-    def generate_execution_unit(self, execution_unit: "PreparedExecutionUnit") -> str:
-        from tested.languages.haskell import generators
-
-        return generators.convert_execution_unit(execution_unit)
-
-    def generate_selector(self, contexts: List[str]) -> str:
-        from tested.languages.haskell import generators
-
-        return generators.convert_selector(contexts)
-
-    def generate_check_function(self, name: str, function: FunctionCall) -> str:
-        from tested.languages.haskell import generators
-
-        return generators.convert_check_function(name, function)
-
-    def generate_encoder(self, values: List[Value]) -> str:
-        from tested.languages.haskell import generators
-
-        return generators.convert_encoder(values)
+    def get_description_generator(self) -> DescriptionGenerator:
+        if self._description_generator is None:
+            config_dir = self.config.dodona.judge / "tested" / "languages" / "haskell"
+            self._description_generator = DescriptionGenerator(self, config_dir)
+        return self._description_generator

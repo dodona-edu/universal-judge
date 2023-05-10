@@ -2,14 +2,13 @@ import shlex
 from typing import List
 
 from tested.datatypes import AdvancedStringTypes, BasicStringTypes
-from tested.languages.generator import (
+from tested.languages.preparation import (
     PreparedContext,
     PreparedExecutionUnit,
     PreparedTestcase,
 )
 from tested.serialisation import (
     Assignment,
-    Expression,
     FunctionCall,
     FunctionType,
     Identifier,

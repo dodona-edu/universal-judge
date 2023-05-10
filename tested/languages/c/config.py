@@ -1,26 +1,25 @@
 import logging
 import re
-import typing
 from pathlib import Path
-from typing import List, Tuple
+from typing import TYPE_CHECKING, Dict, List, Mapping, Set, Tuple
 
-from tested.configs import Bundle
+from tested.datatypes import AllTypes
 from tested.dodona import AnnotateCode, Message
-from tested.languages.config import (
-    CallbackResult,
-    Command,
-    Config,
-    Language,
-    executable_name,
-    limit_output,
+from tested.features import Construct, TypeSupport
+from tested.languages.config import CallbackResult, Command, Language
+from tested.languages.conventionalize import (
+    Conventionable,
+    NamingConventions,
+    submission_name,
 )
+from tested.languages.utils import executable_name, limit_output
 from tested.serialisation import Statement, Value
 
 logger = logging.getLogger(__name__)
 
 
-if typing.TYPE_CHECKING:
-    from tested.languages.generator import PreparedExecutionUnit
+if TYPE_CHECKING:
+    from tested.languages.generation import PreparedExecutionUnit
 
 
 def cleanup_compilation_stderr(traceback: str, submission_file: str) -> str:
@@ -64,7 +63,48 @@ def cleanup_compilation_stderr(traceback: str, submission_file: str) -> str:
 
 
 class C(Language):
-    def compilation(self, bundle: Bundle, files: List[str]) -> CallbackResult:
+    def initial_dependencies(self) -> List[str]:
+        return ["values.h", "values.c", "evaluation_result.h", "evaluation_result.c"]
+
+    def needs_selector(self):
+        return True
+
+    def file_extension(self) -> str:
+        return "c"
+
+    def naming_conventions(self) -> Dict[Conventionable, NamingConventions]:
+        return {"global_identifier": "macro_case"}
+
+    def supported_constructs(self) -> Set[Construct]:
+        return {
+            Construct.FUNCTION_CALLS,
+            Construct.ASSIGNMENTS,
+            Construct.GLOBAL_VARIABLES,
+        }
+
+    def datatype_support(self) -> Mapping[AllTypes, TypeSupport]:
+        return {
+            "integer": "supported",
+            "real": "supported",
+            "char": "supported",
+            "text": "supported",
+            "boolean": "supported",
+            "nothing": "supported",
+            "undefined": "reduced",
+            "int8": "reduced",
+            "uint8": "reduced",
+            "int16": "supported",
+            "uint16": "supported",
+            "int32": "supported",
+            "uint32": "supported",
+            "int64": "supported",
+            "uint64": "supported",
+            "single_precision": "supported",
+            "double_precision": "supported",
+            "double_extended": "supported",
+        }
+
+    def compilation(self, files: List[str]) -> CallbackResult:
         main_file = files[-1]
         exec_file = Path(main_file).stem
         result = executable_name(exec_file)
@@ -73,7 +113,7 @@ class C(Language):
                 "gcc",
                 "-std=c11",
                 "-Wall",
-                "-O3" if bundle.config.options.compiler_optimizations else "-O0",
+                "-O3" if self.config.options.compiler_optimizations else "-O0",
                 "evaluation_result.c",
                 "values.c",
                 main_file,
@@ -83,14 +123,12 @@ class C(Language):
             [result],
         )
 
-    def execution(
-        self, config: Config, cwd: Path, file: str, arguments: List[str]
-    ) -> Command:
+    def execution(self, cwd: Path, file: str, arguments: List[str]) -> Command:
         local_file = cwd / executable_name(Path(file).stem)
         return [str(local_file.absolute()), *arguments]
 
-    # noinspection PyTypeChecker
-    def solution(self, solution: Path, bundle: Bundle):
+    def modify_solution(self, solution: Path):
+        # noinspection PyTypeChecker
         with open(solution, "r") as file:
             contents = file.read()
         # We use regex to find the main function.
@@ -105,23 +143,22 @@ class C(Language):
             with_args = re.compile(r"(int|void)(\s+)main(\s*)\((\s*)int")
             replacement = r"int\2solution_main\3(\4int"
             contents = re.sub(with_args, replacement, contents, count=1)
+        # noinspection PyTypeChecker
         with open(solution, "w") as file:
             header = "#pragma once\n\n"
             file.write(header + contents)
 
-    def linter(
-        self, bundle: Bundle, submission: Path, remaining: float
-    ) -> Tuple[List[Message], List[AnnotateCode]]:
+    def linter(self, remaining: float) -> Tuple[List[Message], List[AnnotateCode]]:
         # Import locally to prevent errors.
         from tested.languages.c import linter
 
-        return linter.run_cppcheck(bundle, submission, remaining)
+        return linter.run_cppcheck(self.config.dodona, remaining)
 
     def compiler_output(
-        self, namespace: str, stdout: str, stderr: str
+        self, stdout: str, stderr: str
     ) -> Tuple[List[Message], List[AnnotateCode], str, str]:
         clean_stacktrace = cleanup_compilation_stderr(
-            stderr, self.with_extension(self.conventionalize_namespace(namespace))
+            stderr, self.with_extension(submission_name(self))
         )
         return [], [], limit_output(stdout), clean_stacktrace
 

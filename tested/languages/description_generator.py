@@ -3,7 +3,6 @@ from __future__ import annotations
 import html
 import json
 import logging
-import os
 from pathlib import Path
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
 
@@ -13,6 +12,13 @@ from pygments.lexers import get_lexer_by_name
 
 from tested.configs import Bundle
 from tested.dsl import parse_string
+from tested.languages.conventionalize import (
+    conventionalize_class,
+    conventionalize_function,
+    conventionalize_global_identifier,
+    conventionalize_identifier,
+    conventionalize_property,
+)
 
 if TYPE_CHECKING:
     from .config import Language
@@ -43,8 +49,6 @@ class DescriptionGenerator:
     ):
         self.language = language
         path_to_types = config_dir / types_file
-        if not os.path.exists(path_to_types):
-            path_to_types = config_dir.parent / language.inherits_from() / types_file
 
         with open(path_to_types, "r") as f:
             self.types = json.load(f)
@@ -82,7 +86,7 @@ class DescriptionGenerator:
             try:
                 return _get_type(arg)
             except KeyError:
-                return self.language.conventionalize_class(arg)
+                return conventionalize_class(self.language, arg)
 
         def _get_type_name(arg: str) -> Union[str, bool]:
             if not is_inner:
@@ -147,25 +151,25 @@ class DescriptionGenerator:
         return type_name
 
     def get_function_name(self, name: str, is_html: bool = True) -> str:
-        function_name = self.language.conventionalize_function(name)
+        function_name = conventionalize_function(self.language, name)
         if is_html:
             return html.escape(function_name)
         return function_name
 
     def get_property_name(self, name: str, is_html: bool = True) -> str:
-        name = self.language.conventionalize_property(name)
+        name = conventionalize_property(self.language, name)
         if is_html:
             return html.escape(name)
         return name
 
     def get_variable_name(self, name: str, is_html: bool = True) -> str:
-        name = self.language.conventionalize_identifier(name)
+        name = conventionalize_identifier(self.language, name)
         if is_html:
             return html.escape(name)
         return name
 
     def get_global_variable_name(self, name: str, is_html: bool = True) -> str:
-        name = self.language.conventionalize_global_identifier(name)
+        name = conventionalize_global_identifier(self.language, name)
         if is_html:
             return html.escape(name)
         return name
@@ -173,7 +177,7 @@ class DescriptionGenerator:
     def get_code(
         self, stmt: str, bundle: Bundle, statement: bool = False, is_html: bool = True
     ) -> str:
-        from .generator import convert_statement
+        from .generation import generate_statement
 
         if statement:
             stmt = parse_string(stmt)
@@ -191,8 +195,8 @@ class DescriptionGenerator:
             logger.warning(f"Missing features are: {missing}.")
             raise Exception("Missing features")
 
-        stmt = convert_statement(bundle, stmt)
-        stmt = self.language.cleanup_description(bundle.suite.namespace, stmt)
+        stmt = generate_statement(bundle, stmt)
+        stmt = self.language.cleanup_description(stmt)
         if is_html:
             prompt = html.escape(self.types["console"]["prompt"]).strip()
             stmt = self.generate_html_code(stmt).strip()

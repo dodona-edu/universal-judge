@@ -14,7 +14,7 @@ from tested.datatypes import (
     BasicStringTypes,
     resolve_to_basic,
 )
-from tested.languages.generator import (
+from tested.languages.preparation import (
     PreparedContext,
     PreparedExecutionUnit,
     PreparedFunctionCall,

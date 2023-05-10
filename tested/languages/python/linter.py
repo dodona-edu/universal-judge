@@ -4,13 +4,12 @@ Most of this code is taken from the code from Pythia.
 """
 import logging
 from io import StringIO
-from pathlib import Path
 from typing import List, Tuple
 
 from pylint import lint
 from pylint.reporters import JSONReporter
 
-from tested.configs import Bundle
+from tested.configs import DodonaConfig
 from tested.dodona import *
 from tested.internationalization import get_i18n_string
 
@@ -26,14 +25,14 @@ message_categories = {
 
 
 def run_pylint(
-    bundle: Bundle, submission: Path, remaining: float
+    config: DodonaConfig, remaining: float
 ) -> Tuple[List[Message], List[AnnotateCode]]:
     """
     Calls pylint to annotate submitted source code and adds resulting score and
     annotations to tab.
     """
-    config = bundle.config
-    language_options = bundle.config.config_for()
+    submission = config.source
+    language_options = config.config_for()
     if language_options.get("pylint_config", None):
         config_path = config.resources / language_options.get("pylint_config")
     else:
@@ -93,7 +92,7 @@ def run_pylint(
 
         annotations.append(
             AnnotateCode(
-                row=start_row - 1 + bundle.config.source_offset,
+                row=start_row - 1 + config.source_offset,
                 rows=rows,
                 column=start_col,
                 columns=cols,

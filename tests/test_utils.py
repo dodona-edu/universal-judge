@@ -7,7 +7,7 @@ import pytest
 import yaml
 
 from tested.description_instance import create_description_instance
-from tested.languages.config import limit_output
+from tested.languages.utils import limit_output
 from tested.utils import sorted_no_duplicates
 from tests.manual_utils import assert_valid_output, configuration, execute_config
 
@@ -48,6 +48,15 @@ def test_run_doctests_tested_utils():
     import tested.utils
 
     f, _ = doctest.testmod(tested.utils)
+    assert f == 0
+
+
+def test_run_doctests_tested_conventionalize():
+    import doctest
+
+    import tested.languages.conventionalize
+
+    f, _ = doctest.testmod(tested.languages.conventionalize)
     assert f == 0
 
 

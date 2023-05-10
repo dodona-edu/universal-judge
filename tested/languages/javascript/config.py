@@ -1,57 +1,126 @@
 import logging
 import re
-import typing
 from pathlib import Path
-from typing import List, Tuple
+from typing import TYPE_CHECKING, Dict, List, Mapping, Optional, Set, Tuple
 
-from tested.configs import Bundle
+from tested.datatypes import AllTypes, BasicStringTypes, ExpressionTypes
 from tested.dodona import AnnotateCode, Message
-from tested.languages.config import (
-    CallbackResult,
-    Command,
-    Config,
-    Language,
-    limit_output,
+from tested.features import Construct, TypeSupport
+from tested.languages.config import CallbackResult, Command, Language
+from tested.languages.conventionalize import (
+    Conventionable,
+    NamingConventions,
+    submission_file,
 )
-from tested.languages.utils import cleanup_description
+from tested.languages.utils import cleanup_description, limit_output
 from tested.serialisation import FunctionCall, Statement, Value
 
-if typing.TYPE_CHECKING:
-    from tested.languages.generator import PreparedExecutionUnit
+if TYPE_CHECKING:
+    from tested.languages.generation import PreparedExecutionUnit
 
 logger = logging.getLogger(__name__)
 
 
 class JavaScript(Language):
-    def compilation(self, bundle: Bundle, files: List[str]) -> CallbackResult:
-        submission_file = self.with_extension(
-            self.conventionalize_namespace(self.submission_name(bundle.suite))
-        )
-        main_file = list(filter(lambda x: x == submission_file, files))
+    def initial_dependencies(self) -> List[str]:
+        return ["values.js"]
+
+    def needs_selector(self):
+        return False
+
+    def file_extension(self) -> str:
+        return "js"
+
+    def naming_conventions(self) -> Dict[Conventionable, NamingConventions]:
+        return {
+            "namespace": "camel_case",
+            "function": "camel_case",
+            "identifier": "camel_case",
+            "global_identifier": "macro_case",
+            "property": "camel_case",
+            "class": "pascal_case",
+        }
+
+    def supported_constructs(self) -> Set[Construct]:
+        return {
+            Construct.OBJECTS,
+            Construct.EXCEPTIONS,
+            Construct.FUNCTION_CALLS,
+            Construct.ASSIGNMENTS,
+            Construct.HETEROGENEOUS_COLLECTIONS,
+            Construct.HETEROGENEOUS_ARGUMENTS,
+            Construct.EVALUATION,
+            Construct.DEFAULT_PARAMETERS,
+            Construct.GLOBAL_VARIABLES,
+        }
+
+    def datatype_support(self) -> Mapping[AllTypes, TypeSupport]:
+        return {
+            "integer": "supported",
+            "real": "supported",
+            "char": "reduced",
+            "text": "supported",
+            "boolean": "supported",
+            "sequence": "supported",
+            "set": "supported",
+            "map": "supported",
+            "nothing": "supported",
+            "undefined": "supported",
+            "int8": "reduced",
+            "uint8": "reduced",
+            "int16": "reduced",
+            "uint16": "reduced",
+            "int32": "reduced",
+            "uint32": "reduced",
+            "int64": "reduced",
+            "uint64": "reduced",
+            "bigint": "supported",
+            "single_precision": "reduced",
+            "double_precision": "reduced",
+            "double_extended": "reduced",
+            "array": "reduced",
+            "list": "reduced",
+            "tuple": "reduced",
+        }
+
+    def map_type_restrictions(self) -> Optional[Set[ExpressionTypes]]:
+        return {BasicStringTypes.TEXT}
+
+    def set_type_restrictions(self) -> Optional[Set[ExpressionTypes]]:
+        return {
+            "integer",
+            "real",
+            "text",
+            "boolean",
+            "sequence",
+            "set",
+            "map",
+            "function_calls",
+            "identifiers",
+        }
+
+    def compilation(self, files: List[str]) -> CallbackResult:
+        submission = submission_file(self)
+        main_file = list(filter(lambda x: x == submission, files))
         if main_file:
             return ["node", "--check", main_file[0]], files
         else:
             return [], files
 
     def compiler_output(
-        self, namespace: str, stdout: str, stderr: str
+        self, stdout: str, stderr: str
     ) -> Tuple[List[Message], List[AnnotateCode], str, str]:
         return (
             [],
             [],
             limit_output(stdout),
-            self.cleanup_stacktrace(
-                stderr, self.with_extension(self.conventionalize_namespace(namespace))
-            ),
+            self.cleanup_stacktrace(stderr),
         )
 
-    def execution(
-        self, config: Config, cwd: Path, file: str, arguments: List[str]
-    ) -> Command:
+    def execution(self, cwd: Path, file: str, arguments: List[str]) -> Command:
         return ["node", file, *arguments]
 
-    # noinspection PyTypeChecker
-    def solution(self, solution: Path, bundle: Bundle):
+    def modify_solution(self, solution: Path):
         # import local to prevent errors
         from tested.judge.utils import run_command
 
@@ -63,25 +132,23 @@ class JavaScript(Language):
                 command=["node", parse_file, solution.absolute()],
             )
             namings = output.stdout.strip()
+            # noinspection PyTypeChecker
             with open(solution, "a") as file:
                 print(f"\nmodule.exports = {{{namings}}};", file=file)
         except TimeoutError:
             pass
 
-    def linter(
-        self, bundle: Bundle, submission: Path, remaining: float
-    ) -> Tuple[List[Message], List[AnnotateCode]]:
+    def linter(self, remaining: float) -> Tuple[List[Message], List[AnnotateCode]]:
         # Import locally to prevent errors.
         from tested.languages.javascript import linter
 
-        return linter.run_eslint(bundle, submission, remaining)
+        return linter.run_eslint(self.config.dodona, remaining)
 
-    def cleanup_stacktrace(
-        self, traceback: str, submission_file: str, reduce_all=False
-    ) -> str:
-        namespace = submission_file[: submission_file.rfind(".")]
+    def cleanup_stacktrace(self, traceback: str) -> str:
+        submission_filename = submission_file(self)
+        namespace = submission_filename[: submission_filename.rfind(".")]
         line_start_with_submission_file = re.compile(
-            rf"^(\\?([^\\/]*[\\/])*)({submission_file}:)(?P<loc>[0-9]+)"
+            rf"^(\\?([^\\/]*[\\/])*)({submission_filename}:)(?P<loc>[0-9]+)"
         )
         ref_not_found_regex = re.compile(
             rf"TypeError: {namespace}.([a-zA-Z0-9_]*) "
@@ -90,7 +157,7 @@ class JavaScript(Language):
         ref_not_found_replace = r"ReferenceError: \1 is not defined"
 
         context_file_regex = re.compile(r"context[0-9]+\.js")
-        submission_file_regex = re.compile(rf"\(.*{submission_file}(.*)\)")
+        submission_file_regex = re.compile(rf"\(.*{submission_filename}(.*)\)")
         submission_file_replace = r"(<code>\1)"
         at_code_regex = re.compile(r"at .* \((<code>:[0-9]+:[0-9]+)\)")
         at_code_replace = r"at \1"
@@ -117,7 +184,7 @@ class JavaScript(Language):
                 line = ref_not_found_regex.sub(ref_not_found_replace, line)
 
             # replace references to local names
-            if submission_file in line:
+            if submission_filename in line:
                 line = submission_file_regex.sub(submission_file_replace, line)
             elif "at " in line:
                 skip_line = True
@@ -131,35 +198,29 @@ class JavaScript(Language):
 
             # Remove textual location information
             line = at_code_regex.sub(at_code_replace, line)
-
-            if not (reduce_all and line.startswith(" ")):
-                lines.append(line + "\n")
+            lines.append(line + "\n")
 
         if len(lines) > 20:
             lines = lines[:19] + ["...\n"] + [lines[-1]]
         return "".join(lines)
 
-    def cleanup_description(self, namespace: str, description: str) -> str:
-        description = cleanup_description(self, namespace, description)
+    def cleanup_description(self, description: str) -> str:
+        description = cleanup_description(self, description)
         await_regex = re.compile(r"await\s+")
         return await_regex.sub("", description)
 
-    def clean_exception_message(self, message: str, namespace: str) -> str:
-        return message.replace(f"{namespace}.", "", 1)
+    def clean_exception_message(self, message: str) -> str:
+        return message.replace(f"{self.config.suite.namespace}.", "", 1)
 
-    def stderr(
-        self, bundle: Bundle, stderr: str
-    ) -> Tuple[List[Message], List[AnnotateCode], str]:
+    def stderr(self, stderr: str) -> Tuple[List[Message], List[AnnotateCode], str]:
         # Identifier to separate testcase output
-        identifier = f"--{bundle.secret}-- SEP"
-        context_identifier = f"--{bundle.context_separator_secret}-- SEP"
-        submission_file = self.with_extension(
-            self.conventionalize_namespace(bundle.suite.namespace)
-        )
-        # Assume stacktrace when line is equal the submission_file path with
+        identifier = f"--{self.config.testcase_separator_secret}-- SEP"
+        context_identifier = f"--{self.config.context_separator_secret}-- SEP"
+        submission = submission_file(self)
+        # Assume stacktrace when line is equal the submission_filename path with
         # line number
         line_start_with_submission_file = re.compile(
-            rf"^(\\?([^\\/]*[\\/])*)({submission_file}):[0-9]+"
+            rf"^(\\?([^\\/]*[\\/])*)({submission}):[0-9]+"
         )
         contexts = stderr.split(context_identifier)
         cleaned_contexts = []
@@ -178,7 +239,7 @@ class JavaScript(Language):
                         break
                 keep_lines = "".join(case[:keep_until])
                 stacktrace = "".join(case[keep_until:])
-                stacktrace = self.cleanup_stacktrace(stacktrace, submission_file)
+                stacktrace = self.cleanup_stacktrace(stacktrace)
                 cleaned_cases.append(f"{keep_lines}{stacktrace}")
             cleaned_contexts.append(identifier.join(cleaned_cases))
 

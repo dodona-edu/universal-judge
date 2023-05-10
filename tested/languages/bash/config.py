@@ -1,74 +1,88 @@
 import re
-import typing
 from pathlib import Path
-from typing import List, Tuple
+from typing import TYPE_CHECKING, Dict, List, Mapping, Set, Tuple
 
-from tested.configs import Bundle
+from tested.datatypes import AdvancedStringTypes, AllTypes, BasicStringTypes
 from tested.dodona import AnnotateCode, Message
-from tested.languages.config import (
-    CallbackResult,
-    Command,
-    Config,
-    Language,
-    limit_output,
+from tested.features import Construct, TypeSupport
+from tested.languages.config import CallbackResult, Command, Language
+from tested.languages.conventionalize import (
+    EXECUTION_PREFIX,
+    Conventionable,
+    NamingConventions,
+    submission_file,
 )
+from tested.languages.utils import limit_output
 from tested.serialisation import Statement, Value
 
-if typing.TYPE_CHECKING:
-    from tested.languages.generator import PreparedExecutionUnit
+if TYPE_CHECKING:
+    from tested.languages.generation import PreparedExecutionUnit
 
 
 class Bash(Language):
-    def compilation(self, bundle: Bundle, files: List[str]) -> CallbackResult:
-        submission_file = self.with_extension(
-            self.conventionalize_namespace(self.submission_name(bundle.suite))
-        )
-        main_file = list(filter(lambda x: x == submission_file, files))
+    def naming_conventions(self) -> Dict[Conventionable, NamingConventions]:
+        return {"global_identifier": "macro_case"}
+
+    def datatype_support(self) -> Mapping[AllTypes, TypeSupport]:
+        return {
+            AdvancedStringTypes.CHAR: TypeSupport.REDUCED,
+            BasicStringTypes.TEXT: TypeSupport.SUPPORTED,
+        }
+
+    def file_extension(self) -> str:
+        return "sh"
+
+    def initial_dependencies(self) -> List[str]:
+        return []
+
+    def needs_selector(self):
+        return False
+
+    def supported_constructs(self) -> Set[Construct]:
+        return {
+            Construct.FUNCTION_CALLS,
+            Construct.ASSIGNMENTS,
+            Construct.DEFAULT_PARAMETERS,
+            Construct.GLOBAL_VARIABLES,
+        }
+
+    def compilation(self, files: List[str]) -> CallbackResult:
+        submission = submission_file(self)
+        main_file = list(filter(lambda x: x == submission, files))
         if main_file:
             return ["bash", "-n", main_file[0]], files
         else:
             return [], files
 
     def compiler_output(
-        self, namespace: str, stdout: str, stderr: str
+        self, stdout: str, stderr: str
     ) -> Tuple[List[Message], List[AnnotateCode], str, str]:
-        regex = re.compile(
-            f"{self.with_extension(self.conventionalize_namespace(namespace))}: "
-            f"(regel|rule) ([0-9]+):"
-        )
+        regex = re.compile(f"{submission_file(self)}: " f"(regel|rule) ([0-9]+):")
         return [], [], limit_output(stdout), regex.sub("<code>:\\2:", stderr)
 
-    def execution(
-        self, config: Config, cwd: Path, file: str, arguments: List[str]
-    ) -> Command:
+    def execution(self, cwd: Path, file: str, arguments: List[str]) -> Command:
         return ["bash", file, *arguments]
 
-    def stderr(
-        self, bundle: Bundle, stderr: str
-    ) -> Tuple[List[Message], List[AnnotateCode], str]:
+    def stderr(self, stderr: str) -> Tuple[List[Message], List[AnnotateCode], str]:
         regex = re.compile(
-            f"{self.execution_prefix()}_[0-9]+_[0-9]+\\."
-            f"{self.extension_file()}: [a-zA-Z_]+ [0-9]+:"
+            f"{EXECUTION_PREFIX}_[0-9]+_[0-9]+\\."
+            f"{self.file_extension()}: [a-zA-Z_]+ [0-9]+:"
         )
-        script = f"./{self.with_extension(self.submission_name(bundle.suite))}"
+        script = f"./{submission_file(self)}"
         stderr = regex.sub("<testcode>:", stderr).replace(script, "<code>")
         regex = re.compile(
-            f"{self.execution_prefix()}_[0-9]+_[0-9]+\\." f"{self.extension_file()}"
+            f"{EXECUTION_PREFIX}_[0-9]+_[0-9]+\\." f"{self.file_extension()}"
         )
         return [], [], regex.sub("<testcode>", stderr)
 
-    def stdout(
-        self, bundle: Bundle, stdout: str
-    ) -> Tuple[List[Message], List[AnnotateCode], str]:
-        return self.stderr(bundle, stdout)
+    def stdout(self, stdout: str) -> Tuple[List[Message], List[AnnotateCode], str]:
+        return self.stderr(stdout)
 
-    def linter(
-        self, bundle: Bundle, submission: Path, remaining: float
-    ) -> Tuple[List[Message], List[AnnotateCode]]:
+    def linter(self, remaining: float) -> Tuple[List[Message], List[AnnotateCode]]:
         # Import locally to prevent errors.
         from tested.languages.bash import linter
 
-        return linter.run_shellcheck(bundle, submission, remaining)
+        return linter.run_shellcheck(self.config.dodona, remaining)
 
     def generate_statement(self, statement: Statement) -> str:
         from tested.languages.bash import generators

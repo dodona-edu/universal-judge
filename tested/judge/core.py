@@ -33,8 +33,12 @@ from tested.judge.execution import (
 )
 from tested.judge.linter import run_linter
 from tested.judge.utils import copy_from_paths_to_path
-from tested.languages.generator import generate_execution, generate_selector
-from tested.languages.templates import path_to_dependencies
+from tested.languages.conventionalize import (
+    EXECUTION_PREFIX,
+    execution_name,
+    submission_file,
+)
+from tested.languages.generation import generate_execution, generate_selector
 from tested.testsuite import ExecutionMode
 
 _logger = logging.getLogger(__name__)
@@ -51,7 +55,7 @@ def judge(bundle: Bundle):
     # Begin by checking if the given test suite is executable in this language.
     _logger.info("Checking supported features...")
     set_locale(bundle.config.natural_language)
-    if not is_supported(bundle):
+    if not is_supported(bundle.lang_config):
         report_update(bundle.out, StartJudgment())
         report_update(
             bundle.out,
@@ -100,7 +104,7 @@ def judge(bundle: Bundle):
         )
 
         messages, status, annotations = process_compile_results(
-            bundle.suite.namespace, bundle.lang_config, result
+            bundle.lang_config, result
         )
 
         # If there is no result, there was no compilation.
@@ -185,8 +189,8 @@ def judge(bundle: Bundle):
                 Execution(
                     unit=unit,
                     context_offset=offset,
-                    execution_name=bundle.lang_config.execution_name(
-                        tab_number=tab_index, execution_number=execution_index
+                    execution_name=execution_name(
+                        bundle.lang_config, tab_index, execution_index
                     ),
                     execution_index=execution_index,
                     mode=mode,
@@ -302,20 +306,18 @@ def _generate_files(
     _logger.debug(f"Generating files in common directory %s", common_dir)
 
     # Copy dependencies
-    dependency_paths = path_to_dependencies(bundle)
+    dependency_paths = bundle.lang_config.path_to_dependencies()
     copy_from_paths_to_path(dependency_paths, dependencies, common_dir)
 
-    submission_name = bundle.lang_config.submission_name(bundle.suite)
-
     # Copy the submission file.
-    submission_file = f"{submission_name}" f".{bundle.lang_config.extension_file()}"
-    solution_path = common_dir / submission_file
+    submission = submission_file(bundle.lang_config)
+    solution_path = common_dir / submission
     # noinspection PyTypeChecker
     shutil.copy2(bundle.config.source, solution_path)
-    dependencies.append(submission_file)
+    dependencies.append(submission)
 
     # Allow modifications of the submission file.
-    bundle.lang_config.solution(solution_path, bundle)
+    bundle.lang_config.modify_solution(solution_path)
 
     # The names of the executions for the test suite.
     execution_names = []
@@ -323,13 +325,13 @@ def _generate_files(
     for tab_i, tab in enumerate(bundle.suite.tabs):
         execution_units = merge_contexts_into_units(tab.contexts)
         for unit_i, unit in enumerate(execution_units):
-            execution_name = bundle.lang_config.execution_name(tab_i, unit_i)
-            _logger.debug(f"Generating file for execution {execution_name}")
+            exec_name = execution_name(bundle.lang_config, tab_i, unit_i)
+            _logger.debug(f"Generating file for execution {exec_name}")
             generated, evaluators = generate_execution(
                 bundle=bundle,
                 destination=common_dir,
                 execution_unit=unit,
-                execution_name=execution_name,
+                execution_name=exec_name,
             )
             # Copy evaluators to the directory.
             for evaluator in evaluators:
@@ -338,7 +340,7 @@ def _generate_files(
                 shutil.copy2(source, common_dir)
             dependencies.extend(evaluators)
             dependencies.append(generated)
-            execution_names.append(execution_name)
+            execution_names.append(exec_name)
 
     if mode == ExecutionMode.PRECOMPILATION and bundle.lang_config.needs_selector():
         _logger.debug("Generating selector for PRECOMPILATION mode.")
@@ -395,7 +397,6 @@ def _copy_workdir_source_files(bundle: Bundle, common_dir: Path) -> List[str]:
     :param bundle: Bundle information of the test suite
     :param common_dir: The directory of the other files
     """
-    prefix = bundle.lang_config.execution_prefix()
     source_files = []
 
     def recursive_copy(src: Path, dst: Path):
@@ -405,7 +406,11 @@ def _copy_workdir_source_files(bundle: Bundle, common_dir: Path) -> List[str]:
                 source_files.append(str(dst / origin.name))
                 _logger.debug("Copying %s to %s", origin, dst)
                 shutil.copy2(origin, dst)
-            elif origin.is_dir() and not file.startswith(prefix) and file != "common":
+            elif (
+                origin.is_dir()
+                and not file.startswith(EXECUTION_PREFIX)
+                and file != "common"
+            ):
                 _logger.debug("Iterate subdir %s", dst / file)
                 shutil.copytree(origin, dst / file)
 

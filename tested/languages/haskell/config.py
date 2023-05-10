@@ -1,76 +1,119 @@
-import typing
 from pathlib import Path
-from typing import List, Tuple
+from typing import TYPE_CHECKING, Dict, List, Mapping, Set, Tuple
 
-from tested.configs import Bundle
+from tested.datatypes import AllTypes
 from tested.dodona import AnnotateCode, Message
-from tested.languages.config import (
-    CallbackResult,
-    Command,
-    Config,
-    Language,
-    executable_name,
+from tested.features import Construct, TypeSupport
+from tested.languages.config import CallbackResult, Command, Language
+from tested.languages.conventionalize import (
+    Conventionable,
+    NamingConventions,
+    submission_file,
 )
 from tested.languages.utils import (
     cleanup_description,
+    executable_name,
     haskell_cleanup_stacktrace,
     haskell_solution,
 )
 from tested.serialisation import FunctionCall, Statement, Value
 
-if typing.TYPE_CHECKING:
-    from tested.languages.generator import PreparedExecutionUnit
+if TYPE_CHECKING:
+    from tested.languages.generation import PreparedExecutionUnit
 
 
 class Haskell(Language):
-    def compilation(self, bundle: Bundle, files: List[str]) -> CallbackResult:
+    def initial_dependencies(self) -> List[str]:
+        return ["Values.hs", "EvaluationUtils.hs"]
+
+    def needs_selector(self):
+        return True
+
+    def file_extension(self) -> str:
+        return "hs"
+
+    def naming_conventions(self) -> Dict[Conventionable, NamingConventions]:
+        return {
+            "namespace": "pascal_case",
+            "identifier": "camel_case",
+            "global_identifier": "camel_case",
+            "function": "camel_case",
+        }
+
+    def datatype_support(self) -> Mapping[AllTypes, TypeSupport]:
+        return {
+            "integer": "supported",
+            "real": "supported",
+            "char": "supported",
+            "text": "supported",
+            "boolean": "supported",
+            "sequence": "supported",
+            "nothing": "supported",
+            "undefined": "reduced",
+            "int8": "supported",
+            "uint8": "supported",
+            "int16": "supported",
+            "uint16": "supported",
+            "int32": "supported",
+            "uint32": "supported",
+            "int64": "supported",
+            "uint64": "supported",
+            "bigint": "supported",
+            "single_precision": "supported",
+            "double_precision": "supported",
+            "list": "supported",
+            "tuple": "supported",
+        }
+
+    def supported_constructs(self) -> Set[Construct]:
+        return {
+            Construct.EXCEPTIONS,
+            Construct.FUNCTION_CALLS,
+            Construct.ASSIGNMENTS,
+            Construct.EVALUATION,
+            Construct.GLOBAL_VARIABLES,
+        }
+
+    def compilation(self, files: List[str]) -> CallbackResult:
         main_ = files[-1]
         exec_ = main_.rstrip(".hs")
         return [
             "ghc",
             "-fno-cse",
             "-fno-full-laziness",
-            "-O3" if bundle.config.options.compiler_optimizations else "-O0",
+            "-O3" if self.config.options.compiler_optimizations else "-O0",
             main_,
             "-main-is",
             exec_,
         ], [executable_name(exec_)]
 
-    def execution(
-        self, config: Config, cwd: Path, file: str, arguments: List[str]
-    ) -> Command:
+    def execution(self, cwd: Path, file: str, arguments: List[str]) -> Command:
         local_file = cwd / file
         return [str(local_file.absolute()), *arguments]
 
-    def solution(self, solution: Path, bundle: Bundle):
-        haskell_solution(self, solution, bundle)
+    def modify_solution(self, solution: Path):
+        haskell_solution(self, solution)
 
-    def linter(
-        self, bundle: Bundle, submission: Path, remaining: float
-    ) -> Tuple[List[Message], List[AnnotateCode]]:
+    def linter(self, remaining: float) -> Tuple[List[Message], List[AnnotateCode]]:
         # Import locally to prevent errors.
         from tested.languages.haskell import linter
 
-        return linter.run_hlint(bundle, submission, remaining)
+        return linter.run_hlint(self.config.dodona, remaining)
 
-    def cleanup_description(self, namespace: str, description: str) -> str:
-        return cleanup_description(self, namespace, description)
+    def cleanup_description(self, description: str) -> str:
+        return cleanup_description(self, description)
 
-    def cleanup_stacktrace(
-        self, traceback: str, submission_file: str, reduce_all=False
-    ) -> str:
-        return haskell_cleanup_stacktrace(traceback, submission_file, reduce_all)
+    def cleanup_stacktrace(self, traceback: str) -> str:
+        return haskell_cleanup_stacktrace(traceback, submission_file(self))
 
     def compiler_output(
-        self, namespace: str, stdout: str, stderr: str
+        self, stdout: str, stderr: str
     ) -> Tuple[List[Message], List[AnnotateCode], str, str]:
         return (
             [],
             [],
             "",
-            haskell_cleanup_stacktrace(
-                stderr, self.with_extension(self.conventionalize_namespace(namespace))
-            ),
+            haskell_cleanup_stacktrace(stderr, submission_file(self)),
         )
 
     def generate_statement(self, statement: Statement) -> str:

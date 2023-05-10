@@ -18,12 +18,11 @@ from tested.features import Construct
 from tested.internationalization import get_i18n_string
 from tested.judge.execution import execute_file, filter_files
 from tested.judge.utils import BaseExecutionResult, copy_from_paths_to_path, run_command
-from tested.languages.generator import (
-    convert_statement,
+from tested.languages.generation import (
     custom_evaluator_arguments,
     generate_custom_evaluator,
+    generate_statement,
 )
-from tested.languages.templates import path_to_dependencies
 from tested.serialisation import EvalResult, Value
 from tested.testsuite import ProgrammedEvaluator
 from tested.utils import get_identifier
@@ -104,7 +103,7 @@ def _evaluate_others(
 
     # Copy the dependencies to the folder.
     dependencies = eval_bundle.lang_config.initial_dependencies()
-    origin = path_to_dependencies(eval_bundle)
+    origin = eval_bundle.lang_config.path_to_dependencies()
     copy_from_paths_to_path(origin, dependencies, custom_path)
     # Include the actual evaluator in the dependencies.
     dependencies.append(evaluator.function.file.name)
@@ -122,7 +121,7 @@ def _evaluate_others(
     _logger.debug("Generated evaluator executor %s", evaluator_name)
 
     # Do compilation for those configs that require it.
-    command, files = eval_bundle.lang_config.compilation(bundle, dependencies)
+    command, files = eval_bundle.lang_config.compilation(dependencies)
     _logger.debug("Compiling custom evaluator with command %s", command)
     result = run_command(custom_path, None, command)
     if result and result.stderr:
@@ -132,9 +131,7 @@ def _evaluate_others(
     # Execute the custom evaluator.
     evaluator_name = Path(evaluator_name).stem
 
-    files = eval_bundle.lang_config.filter_dependencies(
-        eval_bundle, files, evaluator_name
-    )
+    files = eval_bundle.lang_config.filter_dependencies(files, evaluator_name)
     for file in files:
         origin = custom_path / file
         try:
@@ -227,10 +224,10 @@ def _evaluate_python(
     exec(evaluator_code, global_env)
 
     # Call the evaluator.
-    literal_expected = convert_statement(eval_bundle, expected)
-    literal_actual = convert_statement(eval_bundle, actual)
+    literal_expected = generate_statement(eval_bundle, expected)
+    literal_actual = generate_statement(eval_bundle, actual)
     arguments = custom_evaluator_arguments(evaluator)
-    literal_arguments = convert_statement(eval_bundle, arguments)
+    literal_arguments = generate_statement(eval_bundle, arguments)
 
     with _catch_output() as (stdout_, stderr_):
         exec(

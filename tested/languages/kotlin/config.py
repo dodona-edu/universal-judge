@@ -1,24 +1,31 @@
 import logging
 import os
 import re
-import typing
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import TYPE_CHECKING, Dict, List, Mapping, Optional, Set, Tuple
 
-from tested.configs import Bundle
+from tested.datatypes import AllTypes, ExpressionTypes
 from tested.dodona import AnnotateCode, Message, Status
-from tested.languages.config import (
-    CallbackResult,
-    Command,
-    Config,
-    Language,
+from tested.features import Construct, TypeSupport
+from tested.languages.config import CallbackResult, Command, Language
+from tested.languages.conventionalize import (
+    EXECUTION_PREFIX,
+    Conventionable,
+    NamingConventions,
+    conventionalize_namespace,
+    submission_file,
+    submission_name,
+)
+from tested.languages.utils import (
+    jvm_cleanup_stacktrace,
+    jvm_memory_limit,
+    jvm_stderr,
     limit_output,
 )
-from tested.languages.utils import jvm_cleanup_stacktrace, jvm_memory_limit, jvm_stderr
 from tested.serialisation import FunctionCall, Statement, Value
 
-if typing.TYPE_CHECKING:
-    from tested.languages.generator import PreparedExecutionUnit
+if TYPE_CHECKING:
+    from tested.languages.generation import PreparedExecutionUnit
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +37,96 @@ def get_executable(name):
 
 
 class Kotlin(Language):
-    def compilation(self, bundle: Bundle, files: List[str]) -> CallbackResult:
+    def initial_dependencies(self) -> List[str]:
+        return ["Values.kt", "EvaluationResult.kt"]
+
+    def needs_selector(self):
+        return True
+
+    def file_extension(self) -> str:
+        return "kt"
+
+    def naming_conventions(self) -> Dict[Conventionable, NamingConventions]:
+        return {
+            "namespace": "pascal_case",
+            "function": "camel_case",
+            "identifier": "camel_case",
+            "global_identifier": "macro_case",
+            "property": "camel_case",
+            "class": "pascal_case",
+        }
+
+    def supported_constructs(self) -> Set[Construct]:
+        return {
+            Construct.OBJECTS,
+            Construct.EXCEPTIONS,
+            Construct.FUNCTION_CALLS,
+            Construct.ASSIGNMENTS,
+            Construct.HETEROGENEOUS_COLLECTIONS,
+            Construct.HETEROGENEOUS_ARGUMENTS,
+            Construct.EVALUATION,
+            Construct.NAMED_ARGUMENTS,
+            Construct.DEFAULT_PARAMETERS,
+            Construct.GLOBAL_VARIABLES,
+        }
+
+    def datatype_support(self) -> Mapping[AllTypes, TypeSupport]:
+        return {
+            "integer": "supported",
+            "real": "supported",
+            "char": "supported",
+            "text": "supported",
+            "boolean": "supported",
+            "sequence": "supported",
+            "set": "supported",
+            "map": "supported",
+            "nothing": "supported",
+            "int8": "supported",
+            "uint8": "supported",
+            "int16": "supported",
+            "uint16": "supported",
+            "int32": "supported",
+            "uint32": "supported",
+            "int64": "supported",
+            "uint64": "supported",
+            "bigint": "supported",
+            "single_precision": "supported",
+            "double_precision": "supported",
+            "double_extended": "reduced",
+            "fixed_precision": "supported",
+            "array": "supported",
+            "list": "supported",
+            "tuple": "reduced",
+            "undefined": "reduced",
+        }
+
+    def map_type_restrictions(self) -> Optional[Set[ExpressionTypes]]:
+        return {
+            "integer",
+            "real",
+            "char",
+            "text",
+            "boolean",
+            "sequence",
+            "set",
+            "map",
+            "int8",
+            "int16",
+            "int32",
+            "int64",
+            "single_precision",
+            "double_precision",
+            "fixed_precision",
+            "array",
+            "list",
+            "function_calls",
+            "identifiers",
+        }
+
+    def set_type_restrictions(self) -> Optional[Set[ExpressionTypes]]:
+        return self.map_type_restrictions()
+
+    def compilation(self, files: List[str]) -> CallbackResult:
         def file_filter(file: Path) -> bool:
             return file.suffix == ".class"
 
@@ -46,10 +142,8 @@ class Kotlin(Language):
             *others,
         ], file_filter
 
-    def execution(
-        self, config: Config, cwd: Path, file: str, arguments: List[str]
-    ) -> Command:
-        limit = jvm_memory_limit(config)
+    def execution(self, cwd: Path, file: str, arguments: List[str]) -> Command:
+        limit = jvm_memory_limit(self.config)
         return [
             get_executable("kotlin"),
             f"-J-Xmx{limit}",
@@ -60,7 +154,7 @@ class Kotlin(Language):
         ]
 
     # noinspection PyTypeChecker
-    def solution(self, solution: Path, bundle: Bundle):
+    def modify_solution(self, solution: Path):
         with open(solution, "r") as file:
             contents = file.read()
         # We use regex to find the main function.
@@ -81,13 +175,11 @@ class Kotlin(Language):
         with open(solution, "w") as file:
             file.write(contents)
 
-    def linter(
-        self, bundle: Bundle, submission: Path, remaining: float
-    ) -> Tuple[List[Message], List[AnnotateCode]]:
+    def linter(self, remaining: float) -> Tuple[List[Message], List[AnnotateCode]]:
         # Import locally to prevent errors.
         from tested.languages.kotlin import linter
 
-        return linter.run_ktlint(bundle, submission, remaining)
+        return linter.run_ktlint(self.config.dodona, remaining)
 
     def find_main_file(
         self, files: List[str], name: str, precompilation_messages: List[str]
@@ -101,14 +193,10 @@ class Kotlin(Language):
         else:
             return Language.find_main_file(self, files, name, precompilation_messages)
 
-    def filter_dependencies(
-        self, bundle: Bundle, files: List[Path], context_name: str
-    ) -> List[str]:
+    def filter_dependencies(self, files: List[Path], context_name: str) -> List[str]:
         def filter_function(file: Path) -> bool:
             # We don't want files for contexts that are not the one we use.
-            prefix = bundle.lang_config.conventionalize_namespace(
-                bundle.lang_config.execution_prefix()
-            )
+            prefix = conventionalize_namespace(self, EXECUTION_PREFIX)
             file = str(file)
             is_context = file.startswith(prefix)
             is_our_context = file.startswith(context_name + ".") or file.startswith(
@@ -118,27 +206,21 @@ class Kotlin(Language):
 
         return list(x for x in files if filter_function(x))
 
-    def cleanup_stacktrace(
-        self, traceback: str, submission_file: str, reduce_all=False
-    ) -> str:
-        return jvm_cleanup_stacktrace(traceback, submission_file, reduce_all)
+    def cleanup_stacktrace(self, traceback: str) -> str:
+        return jvm_cleanup_stacktrace(traceback, submission_file(self))
 
     def compiler_output(
-        self, namespace: str, stdout: str, stderr: str
+        self, stdout: str, stderr: str
     ) -> Tuple[List[Message], List[AnnotateCode], str, str]:
         return (
             [],
             [],
             limit_output(stdout),
-            jvm_cleanup_stacktrace(
-                stderr, self.with_extension(self.conventionalize_namespace(namespace))
-            ),
+            jvm_cleanup_stacktrace(stderr, submission_name(self)),
         )
 
-    def stderr(
-        self, bundle: Bundle, stderr: str
-    ) -> Tuple[List[Message], List[AnnotateCode], str]:
-        return jvm_stderr(self, bundle, stderr)
+    def stderr(self, stderr: str) -> Tuple[List[Message], List[AnnotateCode], str]:
+        return jvm_stderr(self, stderr)
 
     def generate_statement(self, statement: Statement) -> str:
         from tested.languages.kotlin import generators

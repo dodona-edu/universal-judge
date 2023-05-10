@@ -52,9 +52,7 @@ def run_compilation(
              decide to fallback to individual mode if the compilation result is
              not positive.
     """
-    command, files = bundle.lang_config.compilation(
-        bundle, [str(x) for x in dependencies]
-    )
+    command, files = bundle.lang_config.compilation([str(x) for x in dependencies])
     _logger.debug(
         "Generating files with command %s in directory %s", command, directory
     )
@@ -64,7 +62,7 @@ def run_compilation(
 
 
 def process_compile_results(
-    namespace: str, language_config: Language, results: Optional[BaseExecutionResult]
+    language_config: Language, results: Optional[BaseExecutionResult]
 ) -> Tuple[List[Message], Status, List[AnnotateCode]]:
     """
     Process the output of a compilation step. It will convert the result of the
@@ -81,7 +79,7 @@ def process_compile_results(
     show_stdout = False
     _logger.debug("Received stderr from compiler: " + results.stderr)
     compiler_messages, annotations, stdout, stderr = language_config.compiler_output(
-        namespace, results.stdout, results.stderr
+        results.stdout, results.stderr
     )
     messages.extend(compiler_messages)
     shown_messages = annotations or compiler_messages

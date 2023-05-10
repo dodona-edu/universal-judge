@@ -3,14 +3,16 @@ Module containing the definitions of the features we can support.
 """
 import logging
 import operator
-from enum import StrEnum, unique
+from collections import defaultdict
+from enum import Enum, StrEnum, auto, unique
 from functools import reduce
-from typing import TYPE_CHECKING, Iterable, NamedTuple, Set
+from typing import TYPE_CHECKING, Dict, Iterable, NamedTuple, Set
 
 from tested.datatypes import AllTypes, BasicObjectTypes, BasicSequenceTypes, NestedTypes
+from tested.utils import fallback
 
 if TYPE_CHECKING:
-    from tested.configs import Bundle
+    from tested.languages.config import Language
 
 _logger = logging.getLogger(__name__)
 
@@ -57,6 +59,53 @@ class WithFeatures:
 NOTHING = FeatureSet(constructs=set(), types=set(), nested_types=set())
 
 
+class TypeSupport(Enum):
+    SUPPORTED = auto()
+    """
+    The type is fully supported.
+    
+    For advanced types, this requires the language to have a suitable, distinct
+    type. It is not enough that another type can support it. For example, Python
+    does not have support for int16, even though all int16 values can easily fit
+    into the Python integer type.
+    """
+    UNSUPPORTED = auto()
+    """
+    There is no support. This is the default value to allow for expansion of the
+    types. Exercises which use these types will not be solvable in a language
+    for which the type is unsupported.
+    """
+    REDUCED = auto()
+    """
+    Used for advanced types only. This means the language has no support for the
+    type with a distinct type, but there is support using other types. In this
+    case, exercises using this type are still solvable in the programming language.
+    TESTed will use the basic type in those languages.
+    """
+
+
+def fallback_type_support_map(language: "Language") -> Dict[AllTypes, TypeSupport]:
+    """
+    Return a map containing the support for all types.
+
+    See the documentation on the TypeSupport enum for information on how
+    to interpret the results.
+
+    Note that it is considered a programming error if a basic type is not
+    supported, but the advanced type is supported. This requirement is
+    checked by TESTed when using the language.
+
+    :return: The typing support dict.
+    """
+    config = dict()
+    for x, y in language.datatype_support().items():
+        if isinstance(y, str):
+            config[x] = TypeSupport[y.upper()]
+        else:
+            config[x] = y
+    return fallback(defaultdict(lambda: TypeSupport.UNSUPPORTED), config)
+
+
 def combine_features(iterable: Iterable[FeatureSet]) -> FeatureSet:
     """
     Combine multiple features into one features.
@@ -70,22 +119,21 @@ def combine_features(iterable: Iterable[FeatureSet]) -> FeatureSet:
     return FeatureSet(constructs=constructs, types=types, nested_types=nexted_types)
 
 
-def is_supported(bundle: "Bundle") -> bool:
+def is_supported(language: "Language") -> bool:
     """
     Check if the given configuration bundle is supported. This will check if the
     test suite inside the bundle can be executed by the programming language in the
     bundle.
 
-    :param bundle: The configuration bundle.
+    :param language: The configuration bundle.
 
     :return: True or False
     """
-    from .languages.config import TypeSupport
 
-    required = bundle.suite.get_used_features()
+    required = language.config.suite.get_used_features()
 
     # Check constructs
-    available_constructs = bundle.lang_config.supported_constructs()
+    available_constructs = language.supported_constructs()
     if not (required.constructs <= available_constructs):
         _logger.warning("This test suite is not compatible!")
         _logger.warning(f"Required constructs are {required.constructs}.")
@@ -94,19 +142,19 @@ def is_supported(bundle: "Bundle") -> bool:
         _logger.warning(f"Missing features are: {missing}.")
         return False
 
-    mapping = bundle.lang_config.type_support_map()
+    mapping = fallback_type_support_map(language)
     for t in required.types:
         if mapping[t] == TypeSupport.UNSUPPORTED:
             _logger.warning(f"Test suite requires unsupported type {t}")
             return False
 
     # Check language-specific evaluators
-    for tab in bundle.suite.tabs:
+    for tab in language.config.suite.tabs:
         for context in tab.contexts:
             for testcase in context.testcases:
                 languages = testcase.output.get_specific_eval_languages()
                 if languages is not None:
-                    if bundle.config.programming_language not in languages:
+                    if language.config.dodona.programming_language not in languages:
                         _logger.warning(
                             f"Specific evaluators are available only in "
                             f"{languages}!"
@@ -117,7 +165,10 @@ def is_supported(bundle: "Bundle") -> bool:
         lambda x: x[0] in (BasicSequenceTypes.SET, BasicObjectTypes.MAP),
         required.nested_types,
     )
-    restricted = bundle.lang_config.restriction_map()
+    restricted = {
+        BasicSequenceTypes.SET: language.set_type_restrictions(),
+        BasicObjectTypes.MAP: language.map_type_restrictions(),
+    }
     for key, value_types in nested_types:
         if not (value_types <= restricted[key]):
             _logger.warning("This test suite is not compatible!")

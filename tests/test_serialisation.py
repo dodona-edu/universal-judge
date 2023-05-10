@@ -34,11 +34,11 @@ from tested.datatypes import (
     resolve_to_basic,
 )
 from tested.evaluators.value import check_data_type
+from tested.features import TypeSupport, fallback_type_support_map
 from tested.judge.compilation import run_compilation
 from tested.judge.execution import execute_file, filter_files
 from tested.judge.utils import BaseExecutionResult, copy_from_paths_to_path
-from tested.languages.config import TypeSupport
-from tested.languages.templates import path_to_dependencies
+from tested.languages.conventionalize import conventionalize_namespace
 from tested.serialisation import (
     BooleanType,
     NothingType,
@@ -169,12 +169,12 @@ ADVANCED_VALUES = [
 
 def run_encoder(bundle: Bundle, values: List[Value]) -> List[str]:
     # Copy dependencies.
-    dependency_paths = path_to_dependencies(bundle)
+    dependency_paths = bundle.lang_config.path_to_dependencies()
     dependencies = bundle.lang_config.initial_dependencies()
     dest = bundle.config.workdir
     copy_from_paths_to_path(dependency_paths, dependencies, dest)
 
-    name = bundle.lang_config.conventionalize_namespace("encode")
+    name = conventionalize_namespace(bundle.lang_config, "encode")
     encoder_name = bundle.lang_config.with_extension(name)
     encoder_destination = dest / encoder_name
     encode_code = bundle.lang_config.generate_encoder(values)
@@ -189,7 +189,7 @@ def run_encoder(bundle: Bundle, values: List[Value]) -> List[str]:
         assert e.exit == 0
 
     files = filter_files(files, dest)
-    files = bundle.lang_config.filter_dependencies(bundle, files, name)
+    files = bundle.lang_config.filter_dependencies(files, name)
     executable = bundle.lang_config.find_main_file(files, name, [])[0]
 
     # Run the code.
@@ -211,7 +211,7 @@ def test_basic_types(language, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "", language, tmp_path)
     plan = Suite()
     bundle = create_bundle(conf, sys.stdout, plan)
-    type_map = bundle.lang_config.type_support_map()
+    type_map = fallback_type_support_map(bundle.lang_config)
 
     # Create a list of basic types we want to test.
     types = [v for v in BASIC_VALUES if type_map[v.type] != TypeSupport.UNSUPPORTED]
@@ -236,7 +236,7 @@ def test_advanced_types(language, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "", language, tmp_path)
     plan = Suite()
     bundle = create_bundle(conf, sys.stdout, plan)
-    type_map = bundle.lang_config.type_support_map()
+    type_map = fallback_type_support_map(bundle.lang_config)
 
     # Create a list of basic types we want to test.
     # We want to test all supported or reduced types.
@@ -278,7 +278,7 @@ def test_special_numbers(language, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "", language, tmp_path)
     plan = Suite()
     bundle = create_bundle(conf, sys.stdout, plan)
-    type_map = bundle.lang_config.type_support_map()
+    type_map = fallback_type_support_map(bundle.lang_config)
 
     # Create a list of basic types we want to test.
     types = []
@@ -319,7 +319,7 @@ def test_valid_type_map(language: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "", language, tmp_path)
     plan = Suite()
     bundle = create_bundle(conf, sys.stdout, plan)
-    type_map = bundle.lang_config.type_support_map()
+    type_map = fallback_type_support_map(bundle.lang_config)
 
     # Validate basic types.
     for basic_type in get_args(BasicTypes):

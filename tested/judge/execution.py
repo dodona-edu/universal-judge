@@ -11,8 +11,9 @@ from tested.dodona import Message, Status
 from tested.judge.collector import OutputManager
 from tested.judge.compilation import process_compile_results, run_compilation
 from tested.judge.utils import BaseExecutionResult, run_command
-from tested.languages.config import Config, FileFilter
-from tested.languages.generator import exception_file, value_file
+from tested.languages.config import FileFilter
+from tested.languages.conventionalize import EXECUTION_PREFIX, selector_name
+from tested.languages.preparation import exception_file, value_file
 from tested.testsuite import Context, EmptyChannel, ExecutionMode
 from tested.utils import safe_del
 
@@ -171,7 +172,6 @@ def execute_file(
     _logger.info("Starting execution on file %s", executable_name)
 
     command = bundle.lang_config.execution(
-        config=Config.from_bundle(bundle),
         cwd=working_directory,
         file=executable_name,
         arguments=[argument] if argument else [],
@@ -185,13 +185,16 @@ def execute_file(
 
 
 def copy_workdir_files(bundle: Bundle, context_dir: Path):
-    prefix = bundle.lang_config.execution_prefix()
     for origin in bundle.config.workdir.iterdir():
         file = origin.name.lower()
         if origin.is_file():
             _logger.debug("Copying %s to %s", origin, context_dir)
             shutil.copy2(origin, context_dir)
-        elif origin.is_dir() and not file.startswith(prefix) and file != "common":
+        elif (
+            origin.is_dir()
+            and not file.startswith(EXECUTION_PREFIX)
+            and file != "common"
+        ):
             _logger.debug("Copying %s to %s", origin, context_dir)
             shutil.copytree(origin, context_dir / file)
 
@@ -214,7 +217,7 @@ def execute_execution(
     # Filter dependencies of the global compilation results.
     dependencies = filter_files(args.files, args.common_directory)
     dependencies = bundle.lang_config.filter_dependencies(
-        bundle, dependencies, args.execution_name
+        dependencies, args.execution_name
     )
     _logger.debug("Dependencies are %s", dependencies)
     copy_workdir_files(bundle, execution_dir)
@@ -240,9 +243,7 @@ def execute_execution(
         files = filter_files(files, execution_dir)
 
         # Process compilation results.
-        messages, status, annotations = process_compile_results(
-            bundle.suite.namespace, lang_config, result
-        )
+        messages, status, annotations = process_compile_results(lang_config, result)
 
         for annotation in annotations:
             args.collector.add(annotation)
@@ -283,10 +284,10 @@ def execute_execution(
         if lang_config.needs_selector():
             _logger.debug("Selector is needed, using it.")
 
-            selector_name = lang_config.selector_name()
+            selector = selector_name(lang_config)
 
             executable, messages, status, annotations = lang_config.find_main_file(
-                files, selector_name, messages
+                files, selector, messages
             )
 
             _logger.debug(f"Found main file: {executable}")
@@ -330,21 +331,17 @@ def execute_execution(
     )
 
     # Cleanup stderr
-    msgs, annotations, base_result.stderr = lang_config.stderr(
-        bundle, base_result.stderr
-    )
+    msgs, annotations, base_result.stderr = lang_config.stderr(base_result.stderr)
     for annotation in annotations:
         args.collector.add(annotation)
     messages.extend(msgs)
     # Cleanup stdout
-    msgs, annotation, base_result.stdout = lang_config.stdout(
-        bundle, base_result.stdout
-    )
+    msgs, annotation, base_result.stdout = lang_config.stdout(base_result.stdout)
     for annotation in annotations:
         args.collector.add(annotation)
     messages.extend(msgs)
 
-    testcase_identifier = f"--{bundle.secret}-- SEP"
+    testcase_identifier = f"--{bundle.testcase_separator_secret}-- SEP"
     context_identifier = f"--{bundle.context_separator_secret}-- SEP"
 
     value_file_path = value_file(bundle, execution_dir)

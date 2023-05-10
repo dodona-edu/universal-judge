@@ -6,6 +6,8 @@ needed to execute the templates.
 In short, if it has to do with the templates or is programming language specific,
 you will probably find it in this package.
 """
+from typing import TYPE_CHECKING, Optional
+
 from tested.languages.bash.config import Bash
 from tested.languages.c.config import C
 from tested.languages.config import Language
@@ -16,6 +18,9 @@ from tested.languages.javascript.config import JavaScript
 from tested.languages.kotlin.config import Kotlin
 from tested.languages.python.config import Python
 from tested.languages.runhaskell.config import RunHaskell
+
+if TYPE_CHECKING:
+    from tested.configs import GlobalConfig
 
 LANGUAGES = {
     "bash": Bash,
@@ -30,11 +35,11 @@ LANGUAGES = {
 }
 
 
-def get_language(language: str) -> Language:
+def get_language(global_config: Optional["GlobalConfig"], language: str) -> Language:
     """
     Get the configuration for a programming language.
     """
-    return LANGUAGES[language]()
+    return LANGUAGES[language](global_config)
 
 
 def language_exists(language: str) -> bool:

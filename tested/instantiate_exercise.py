@@ -17,6 +17,7 @@ from tested.description_instance import (
     prepare_template,
 )
 from tested.dsl import parse_dsl
+from tested.features import fallback_type_support_map
 from tested.languages import LANGUAGES, Language, get_language, language_exists
 from tested.testsuite import Suite, parse_test_suite
 
@@ -139,9 +140,9 @@ def _filter_valid_languages(languages: List[str], test_suite: Suite) -> List[str
     """
 
     def is_supported(language: str) -> bool:
-        language: Language = get_language(language)
+        language: Language = get_language(None, language)
 
-        from .languages.config import TypeSupport
+        from tested.features import TypeSupport
 
         required = test_suite.get_used_features()
 
@@ -150,7 +151,7 @@ def _filter_valid_languages(languages: List[str], test_suite: Suite) -> List[str
         if not (required.constructs <= available_constructs):
             return False
 
-        mapping = language.type_support_map()
+        mapping = fallback_type_support_map(language)
         for t in required.types:
             if mapping[t] == TypeSupport.UNSUPPORTED:
                 return False
@@ -170,7 +171,10 @@ def _filter_valid_languages(languages: List[str], test_suite: Suite) -> List[str
             lambda x: x[0] in (BasicSequenceTypes.SET, BasicObjectTypes.MAP),
             required.nested_types,
         )
-        restricted = language.restriction_map()
+        restricted = {
+            BasicSequenceTypes.SET: language.set_type_restrictions(),
+            BasicObjectTypes.MAP: language.map_type_restrictions(),
+        }
         for key, value_types in nested_types:
             if not (value_types <= restricted[key]):
                 return False
@@ -218,7 +222,6 @@ def _instantiate(
     :return:
     """
     config_dict = deepcopy(config_json_dict)
-    config_json_file = instance_dir / "config.json"
     existing: bool
     if instance_dir.exists():
         if not instance_dir.is_dir():
@@ -227,13 +230,6 @@ def _instantiate(
                 f"failed!",
                 file=sys.stderr,
             )
-        if config_json_file.exists() and config_json_file.is_file():
-            config = _get_config(config_json_file)
-            try:
-                dodona_internals = "internals"
-                config_dict[dodona_internals] = config[dodona_internals]
-            except KeyError:
-                pass
         _remove_existing(instance_dir, backup_descriptions)
     else:
         instance_dir.mkdir(parents=True)
@@ -264,8 +260,6 @@ def _instantiate(
             config_dict["description"]["names"][i18n] = f"{name} ({language})"
     except KeyError:
         pass
-    with open(config_json_file, "w") as fd:
-        json.dump(config_dict, fd, indent=2)
 
 
 def _instantiate_descriptions(

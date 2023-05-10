@@ -1,70 +1,151 @@
 import logging
-import typing
 from pathlib import Path
-from typing import List, Tuple
+from typing import TYPE_CHECKING, Dict, List, Mapping, Optional, Set, Tuple
 
-from tested.configs import Bundle
+from tested.datatypes import AllTypes, ExpressionTypes
 from tested.dodona import AnnotateCode, Message
-from tested.languages.config import (
-    CallbackResult,
-    Command,
-    Config,
-    Language,
+from tested.features import Construct, TypeSupport
+from tested.languages.config import CallbackResult, Command, Language
+from tested.languages.conventionalize import (
+    Conventionable,
+    NamingConventions,
+    submission_file,
+)
+from tested.languages.utils import (
+    jvm_cleanup_stacktrace,
+    jvm_memory_limit,
+    jvm_stderr,
     limit_output,
 )
-from tested.languages.utils import jvm_cleanup_stacktrace, jvm_memory_limit, jvm_stderr
 from tested.serialisation import FunctionCall, Statement, Value
 
-if typing.TYPE_CHECKING:
-    from tested.languages.generator import PreparedExecutionUnit
+if TYPE_CHECKING:
+    from tested.languages.generation import PreparedExecutionUnit
 
 
 logger = logging.getLogger(__name__)
 
 
 class Java(Language):
-    def compilation(self, bundle: Bundle, files: List[str]) -> CallbackResult:
+    def initial_dependencies(self) -> List[str]:
+        return ["Values.java", "EvaluationResult.java"]
+
+    def needs_selector(self):
+        return True
+
+    def file_extension(self) -> str:
+        return "java"
+
+    def naming_conventions(self) -> Dict[Conventionable, NamingConventions]:
+        return {
+            "namespace": "pascal_case",
+            "function": "camel_case",
+            "identifier": "camel_case",
+            "global_identifier": "macro_case",
+            "property": "camel_case",
+            "class": "pascal_case",
+        }
+
+    def supported_constructs(self) -> Set[Construct]:
+        return {
+            Construct.OBJECTS,
+            Construct.EXCEPTIONS,
+            Construct.FUNCTION_CALLS,
+            Construct.ASSIGNMENTS,
+            Construct.HETEROGENEOUS_COLLECTIONS,
+            Construct.HETEROGENEOUS_ARGUMENTS,
+            Construct.EVALUATION,
+            Construct.DEFAULT_PARAMETERS,
+            Construct.GLOBAL_VARIABLES,
+        }
+
+    def datatype_support(self) -> Mapping[AllTypes, TypeSupport]:
+        return {
+            "integer": "supported",
+            "real": "supported",
+            "char": "supported",
+            "text": "supported",
+            "boolean": "supported",
+            "sequence": "supported",
+            "set": "supported",
+            "map": "supported",
+            "nothing": "supported",
+            "undefined": "reduced",
+            "int8": "supported",
+            "uint8": "reduced",
+            "int16": "supported",
+            "uint16": "reduced",
+            "int32": "supported",
+            "uint32": "reduced",
+            "int64": "supported",
+            "uint64": "reduced",
+            "bigint": "supported",
+            "single_precision": "supported",
+            "double_precision": "supported",
+            "double_extended": "reduced",
+            "fixed_precision": "supported",
+            "array": "supported",
+            "list": "supported",
+        }
+
+    def map_type_restrictions(self) -> Optional[Set[ExpressionTypes]]:
+        return {
+            "integer",
+            "real",
+            "char",
+            "text",
+            "boolean",
+            "sequence",
+            "set",
+            "map",
+            "int8",
+            "int16",
+            "int32",
+            "int64",
+            "single_precision",
+            "double_precision",
+            "fixed_precision",
+            "array",
+            "list",
+            "function_calls",
+            "identifiers",
+        }
+
+    def set_type_restrictions(self) -> Optional[Set[ExpressionTypes]]:
+        return self.map_type_restrictions()
+
+    def compilation(self, files: List[str]) -> CallbackResult:
         def file_filter(file: Path) -> bool:
             return file.suffix == ".class"
 
         others = [x for x in files if not x.endswith(".jar")]
         return ["javac", "-cp", ".", *others], file_filter
 
-    def execution(
-        self, config: Config, cwd: Path, file: str, arguments: List[str]
-    ) -> Command:
-        limit = jvm_memory_limit(config)
+    def execution(self, cwd: Path, file: str, arguments: List[str]) -> Command:
+        limit = jvm_memory_limit(self.config)
         return ["java", f"-Xmx{limit}", "-cp", ".", Path(file).stem, *arguments]
 
-    def linter(
-        self, bundle: Bundle, submission: Path, remaining: float
-    ) -> Tuple[List[Message], List[AnnotateCode]]:
+    def linter(self, remaining: float) -> Tuple[List[Message], List[AnnotateCode]]:
         # Import locally to prevent errors.
         from tested.languages.java import linter
 
-        return linter.run_checkstyle(bundle, submission, remaining)
+        return linter.run_checkstyle(self.config.dodona, remaining)
 
-    def cleanup_stacktrace(
-        self, traceback: str, submission_file: str, reduce_all=False
-    ) -> str:
-        return jvm_cleanup_stacktrace(traceback, submission_file, reduce_all)
+    def cleanup_stacktrace(self, traceback: str) -> str:
+        return jvm_cleanup_stacktrace(traceback, submission_file(self))
 
     def compiler_output(
-        self, namespace: str, stdout: str, stderr: str
+        self, stdout: str, stderr: str
     ) -> Tuple[List[Message], List[AnnotateCode], str, str]:
         return (
             [],
             [],
             limit_output(stdout),
-            jvm_cleanup_stacktrace(
-                stderr, self.with_extension(self.conventionalize_namespace(namespace))
-            ),
+            jvm_cleanup_stacktrace(stderr, submission_file(self)),
         )
 
-    def stderr(
-        self, bundle: Bundle, stderr: str
-    ) -> Tuple[List[Message], List[AnnotateCode], str]:
-        return jvm_stderr(self, bundle, stderr)
+    def stderr(self, stderr: str) -> Tuple[List[Message], List[AnnotateCode], str]:
+        return jvm_stderr(self, stderr)
 
     def generate_statement(self, statement: Statement) -> str:
         from tested.languages.java import generators
