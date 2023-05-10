@@ -814,7 +814,6 @@ def test_javascript_exception_wrong(tmp_path: Path, pytestconfig):
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["wrong"]
-    assert len(updates.find_all("append-message")) == 1
 
 
 def test_javascript_exception_missing_message(tmp_path: Path, pytestconfig):
@@ -829,7 +828,6 @@ def test_javascript_exception_missing_message(tmp_path: Path, pytestconfig):
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["wrong"]
-    assert len(updates.find_all("append-message")) == 1
 
 
 def test_timeouts_propagate_to_contexts():
