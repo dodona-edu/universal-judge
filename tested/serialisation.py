@@ -706,9 +706,10 @@ class ExceptionValue:
     message: str
     type: str = ""
     stacktrace: str = ""
+    additional_message_keys: List[str] = field(default_factory=list)
 
-    def readable(self) -> str:
-        if self.type:
+    def readable(self, omit_type) -> str:
+        if self.type and not omit_type:
             return f"{self.type}: {self.message}"
         else:
             return self.message

@@ -91,11 +91,13 @@ function sendException(stream, exception) {
             "type": exception.constructor.name
         }));
     } else {
+        additional_error =
         // We have something else, so we cannot rely on stuff being present.
         fs.writeSync(stream, JSON.stringify({
             "message": JSON.stringify(exception),
             "stacktrace": "",
-            "type": exception.constructor.name
+            "type": exception.constructor.name,
+            "additional_message_keys": ["languages.javascript.runtime.invalid.exception"]
         }));
     }
 }

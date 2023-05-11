@@ -38,7 +38,7 @@ def try_as_readable_exception(
     except (TypeError, ValueError):
         return None, None
     else:
-        readable = actual.readable()
+        readable = actual.readable(omit_type=False)
         message = config.bundle.lang_config.clean_stacktrace_to_message(
             actual.stacktrace
         )
@@ -93,8 +93,10 @@ def evaluate(
             messages=[staff_message, student_message],
         )
 
+    expected_type = expected.get_type(language)
+
     # If there is type information, check it.
-    if expected_type := expected.get_type(language):
+    if expected_type:
         type_is_ok = expected_type == actual.type
     else:
         type_is_ok = True
@@ -113,11 +115,20 @@ def evaluate(
 
     # If the result is correct, substitute the expected value with the correct type.
     if status == Status.CORRECT:
-        readable_expected = actual.readable()
+        readable_expected = actual.readable(omit_type=False)
+
+    if status != Status.CORRECT:
+        # Add additional messages if present.
+        for message in actual.additional_message_keys:
+            messages.append(
+                get_i18n_string(message, actual_type=(actual.type or actual.message))
+            )
 
     return EvaluationResult(
         result=StatusMessage(enum=status),
         readable_expected=readable_expected,
-        readable_actual=actual.readable(),
+        readable_actual=actual.readable(
+            omit_type=expected_type is None and status != Status.CORRECT
+        ),
         messages=messages,
     )

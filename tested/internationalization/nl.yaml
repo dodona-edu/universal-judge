@@ -103,6 +103,9 @@ nl:
         crashed: "Pylint gecrasht"
         output: "Pylint produceerde slechte uitvoer."
     javascript:
+      runtime:
+        invalid:
+          exception: "%{actual_type} is geen instantie van Error (of een subklasse)."
       linter:
         timeout: "ESLint overschreed tijdslimiet."
         memory: "ESLint overschreed geheugenlimiet."
