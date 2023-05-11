@@ -173,7 +173,6 @@ def check_data_type(
 
     # Case 1.
     if isinstance(expected.type, get_args(BasicTypes)):
-        logger.debug(f"The expected type {expected.type} is advanced.")
         basic_actual = as_basic_type(actual)
         return expected.type == basic_actual.type, expected
 
