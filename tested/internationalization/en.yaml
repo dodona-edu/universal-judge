@@ -103,6 +103,9 @@ en:
         crashed: "Pylint crashed"
         output: "Pylint produced bad output."
     javascript:
+      runtime:
+        invalid:
+          exception: "%{actual_type} is not an instance of Error (or a subclass)."
       linter:
         timeout: "ESLint exceeded time limit"
         memory: "ESLint exceeded memory limit"

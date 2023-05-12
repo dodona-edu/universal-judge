@@ -284,7 +284,7 @@ def test_exception_evaluator_only_messages_wrong(tmp_path: Path, pytestconfig):
     result = evaluate_exception(config, channel, actual_value)
     assert result.result.enum == Status.WRONG
     assert result.readable_expected == "Test error"
-    assert result.readable_actual == "ZeroDivisionError: Pief poef"
+    assert result.readable_actual == "Pief poef"
 
 
 def test_exception_evaluator_correct_message_wrong_type(tmp_path: Path, pytestconfig):
