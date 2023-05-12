@@ -802,6 +802,21 @@ def test_javascript_exception_correct(tmp_path: Path, pytestconfig):
     assert len(updates.find_all("append-message")) == 0
 
 
+def test_javascript_exception_correct_temp(tmp_path: Path, pytestconfig):
+    conf = configuration(
+        pytestconfig,
+        "js-exceptions",
+        "javascript",
+        tmp_path,
+        "plan.yaml",
+        "correct-temp",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]
+    assert len(updates.find_all("append-message")) == 0
+
+
 def test_javascript_exception_wrong(tmp_path: Path, pytestconfig):
     conf = configuration(
         pytestconfig,
@@ -815,6 +830,21 @@ def test_javascript_exception_wrong(tmp_path: Path, pytestconfig):
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["wrong"]
     assert len(updates.find_all("append-message")) == 1
+
+
+def test_javascript_exception_wrong_null(tmp_path: Path, pytestconfig):
+    conf = configuration(
+        pytestconfig,
+        "js-exceptions",
+        "javascript",
+        tmp_path,
+        "plan.yaml",
+        "wrong-null",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["wrong"]
+    assert len(updates.find_all("append-message")) == 0
 
 
 def test_javascript_exception_missing_message(tmp_path: Path, pytestconfig):
