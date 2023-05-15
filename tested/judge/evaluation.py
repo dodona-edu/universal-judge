@@ -130,13 +130,7 @@ def _evaluate_channel(
     else:
         expected = evaluation_result.readable_expected
 
-    channel_test = (
-        "return (String)"
-        if (channel is Channel.RETURN and evaluation_result.is_multiline_string)
-        else channel
-    )
-
-    out.add(StartTest(expected=expected, channel=channel_test))
+    out.add(StartTest(expected=expected, channel=channel))
 
     # Report any messages we received.
     for message in evaluation_result.messages:

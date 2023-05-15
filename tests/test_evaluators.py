@@ -7,17 +7,20 @@ from pydantic.json import pydantic_encoder
 
 import tested
 from tested.configs import create_bundle
+from tested.datatypes import BasicStringTypes
 from tested.dodona import Status
-from tested.evaluators.common import EvaluatorConfig
+from tested.evaluators.common import EvaluationResult, EvaluatorConfig
 from tested.evaluators.exception import evaluate as evaluate_exception
 from tested.evaluators.text import evaluate_file, evaluate_text
-from tested.serialisation import ExceptionValue
+from tested.evaluators.value import evaluate as evaluate_value
+from tested.serialisation import ExceptionValue, StringType
 from tested.testsuite import (
     ExceptionOutputChannel,
     ExpectedException,
     FileOutputChannel,
     Suite,
     TextOutputChannel,
+    ValueOutputChannel,
 )
 from tests.manual_utils import configuration
 
@@ -371,3 +374,54 @@ def test_exception_evaluator_correct_type_and_message(tmp_path: Path, pytestconf
     assert result.result.enum == Status.CORRECT
     assert result.readable_expected == "PafError: Test error"
     assert result.readable_actual == "PafError: Test error"
+
+
+def test_value_string_as_text_is_detected(tmp_path: Path, pytestconfig):
+    channel = ValueOutputChannel(
+        value=StringType(type=BasicStringTypes.TEXT, data="multi\nline\nstring")
+    )
+    actual_value = json.dumps(
+        StringType(type=BasicStringTypes.TEXT, data="multi\nline\nstring"),
+        default=pydantic_encoder,
+    )
+    config = evaluator_config(tmp_path, pytestconfig, language="python")
+    result = evaluate_value(config, channel, actual_value)
+    assert result.result.enum == Status.CORRECT
+    assert result.readable_expected == "multi\nline\nstring"
+    assert result.readable_actual == "multi\nline\nstring"
+
+
+def test_value_string_as_text_is_not_detected_if_disabled(tmp_path: Path, pytestconfig):
+    channel = ValueOutputChannel(
+        value=StringType(type=BasicStringTypes.TEXT, data="multi\nline\nstring")
+    )
+    actual_value = json.dumps(
+        StringType(type=BasicStringTypes.TEXT, data="multi\nline\nstring"),
+        default=pydantic_encoder,
+    )
+    config = evaluator_config(
+        tmp_path, pytestconfig, language="python", options={"stringsAsText": False}
+    )
+    result = evaluate_value(config, channel, actual_value)
+    assert result.result.enum == Status.CORRECT
+    assert result.readable_expected == "'multi\\nline\\nstring'"
+    assert result.readable_actual == "'multi\\nline\\nstring'"
+
+
+def test_value_string_as_text_is_not_detected_if_not_multiline(
+    tmp_path: Path, pytestconfig
+):
+    channel = ValueOutputChannel(
+        value=StringType(type=BasicStringTypes.TEXT, data="multi")
+    )
+    actual_value = json.dumps(
+        StringType(type=BasicStringTypes.TEXT, data="multi\nline\nstring"),
+        default=pydantic_encoder,
+    )
+    config = evaluator_config(
+        tmp_path, pytestconfig, language="python", options={"stringsAsText": False}
+    )
+    result = evaluate_value(config, channel, actual_value)
+    assert result.result.enum == Status.WRONG
+    assert result.readable_expected == "'multi'"
+    assert result.readable_actual == "'multi\\nline\\nstring'"
