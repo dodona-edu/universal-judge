@@ -251,6 +251,7 @@ def evaluate(
     is_multiline_string = (
         config.options.get("stringsAsText", True)
         and expected.type == BasicStringTypes.TEXT
+        and "\n" in expected.data
     )
 
     return EvaluationResult(

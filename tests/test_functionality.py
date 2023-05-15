@@ -190,7 +190,7 @@ def test_io_function_display_multiline_exercise(
     close_test = updates.find_all("close-test")
     assert 1 == len(start_test)
     assert 1 == len(close_test)
-    assert "return (String)" == start_test[0].get("channel", "")
+    assert "return" == start_test[0].get("channel", "")
     expected, actual = start_test[0].get("expected", ""), close_test[0].get(
         "generated", ""
     )
