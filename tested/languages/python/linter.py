@@ -88,7 +88,11 @@ def run_pylint(
         rows = end_row + 1 - start_row if end_row else None
         start_col = message.get("column", 0)
         end_col = message.get("endColumn")
-        cols = end_col - start_col if end_col else None
+        # Prevent negative columns
+        if rows == 1:
+            cols = end_col - start_col if end_col else None
+        else:
+            cols = end_col
 
         annotations.append(
             AnnotateCode(
