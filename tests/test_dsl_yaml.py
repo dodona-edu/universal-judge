@@ -1,8 +1,12 @@
 import pytest
 
-from tested.datatypes import AdvancedNumericTypes, BasicNumericTypes
+from tested.datatypes import (
+    AdvancedNumericTypes,
+    AdvancedSequenceTypes,
+    BasicNumericTypes,
+)
 from tested.dsl import translate_to_test_suite
-from tested.serialisation import Assignment, FunctionCall, ObjectType
+from tested.serialisation import Assignment, FunctionCall, ObjectType, SequenceType
 from tested.testsuite import GenericTextEvaluator, parse_test_suite
 
 
@@ -404,3 +408,25 @@ tabs:
     assert config["roundTo"] == 63
     assert config["tryFloatingPoint"]
     assert config["caseInsensitive"]
+
+
+def test_statement_raw_return():
+    yaml_str = """
+- tab: 'Test'
+  contexts:
+    - testcases:
+        - statement: 'test()'
+          return_raw: '[(4, 4), (4, 3), (4, 2), (4, 1), (4, 0), (3, 0), (3, 1), (4, 1)]'
+"""
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    assert len(suite.tabs) == 1
+    tab = suite.tabs[0]
+    assert len(tab.contexts) == 1
+    testcases = tab.contexts[0].testcases
+    assert len(testcases) == 1
+    test = testcases[0]
+    assert isinstance(test.input, FunctionCall)
+    assert isinstance(test.output.result.value, SequenceType)
+    for element in test.output.result.value.data:
+        assert element.type == AdvancedSequenceTypes.TUPLE
