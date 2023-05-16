@@ -57,8 +57,10 @@ SEND_SPECIFIC_EXCEPTION = "send_specific_exception"
 
 @dataclass
 class PreparedFunctionCall(FunctionCall):
-    has_root_namespace: bool = True
-    # TODO: find out why this variable can't be initialized by the constructor
+    # If this is set, the function is called on the submission namespace.
+    # This is the case for all functions, except method calls (as the variables
+    # on which they are called are not in the submission namespace).
+    submission_namespace: Optional[str] = None
 
 
 @dataclass
@@ -197,32 +199,51 @@ def prepare_expression(bundle: Bundle, expression: Expression) -> Expression:
             prepare_argument(bundle, arg) for arg in expression.arguments
         ]
     elif isinstance(expression, FunctionCall):
-        submission = submission_name(bundle.lang_config)
         if expression.type == FunctionType.CONSTRUCTOR:
+            assert (
+                expression.namespace is None
+            ), "Namespaces are not supported for constructors."
             name = conventionalize_class(bundle.lang_config, expression.name)
+            namespace = None
+            needs_submission_namespace = True
         elif expression.type == FunctionType.PROPERTY:
             if expression.namespace is None:
                 name = conventionalize_global_identifier(
                     bundle.lang_config, expression.name
                 )
+                namespace = None
+                needs_submission_namespace = True
             else:
                 name = conventionalize_property(bundle.lang_config, expression.name)
-        else:
+                namespace = prepare_expression(bundle, expression.namespace)
+                needs_submission_namespace = False
+        elif expression.type == FunctionType.STATIC:
+            assert expression.namespace, "Namespaces are required for static calls."
+            assert isinstance(
+                expression.namespace, Identifier
+            ), "Namespaces for static calls can only be simple identifiers."
             name = conventionalize_function(bundle.lang_config, expression.name)
-
-        if expression.namespace is None:
-            namespace = Identifier(submission)
+            needs_submission_namespace = True
+            namespace = conventionalize_class(bundle.lang_config, expression.namespace)
         else:
-            namespace = prepare_expression(bundle, expression.namespace)
+            assert expression.type == FunctionType.FUNCTION
+            name = conventionalize_function(bundle.lang_config, expression.name)
+            if expression.namespace is None:
+                namespace = None
+                needs_submission_namespace = True
+            else:
+                namespace = prepare_expression(bundle, expression.namespace)
+                needs_submission_namespace = False
 
-        internal = PreparedFunctionCall(
+        return PreparedFunctionCall(
             type=expression.type,
             arguments=[prepare_argument(bundle, arg) for arg in expression.arguments],
             name=name,
             namespace=namespace,
+            submission_namespace=submission_name(bundle.lang_config)
+            if needs_submission_namespace
+            else None,
         )
-        internal.has_root_namespace = not bool(expression.namespace)
-        return internal
     elif isinstance(expression, SequenceType):
         expression.data = [prepare_expression(bundle, expr) for expr in expression.data]
     elif isinstance(expression, ObjectType):
@@ -282,9 +303,9 @@ def _create_handling_function(
                     name=conventionalize_function(lang_config, evaluator.name),
                     namespace=Identifier(evaluator_name),
                     arguments=[prepare_expression(bundle, expression)],
+                    submission_namespace=None,
                 )
             ]
-            arguments[0].has_root_namespace = False
             function_name = send_evaluated
         else:
             arguments = [expression]

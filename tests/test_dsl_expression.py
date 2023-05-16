@@ -461,3 +461,17 @@ def test_parse_chained_property():
     assert namespace.namespace is None
     assert namespace.type == FunctionType.FUNCTION
     assert namespace.name == "get_container"
+
+
+def test_parse_method():
+    parsed = parse_string("test.the_method()")
+    assert parsed.type == FunctionType.FUNCTION
+    assert parsed.name == "the_method"
+    assert parsed.namespace == "test"
+
+
+def test_parse_static_method():
+    parsed = parse_string("Test.the_method()")
+    assert parsed.type == FunctionType.STATIC
+    assert parsed.name == "the_method"
+    assert parsed.namespace == "Test"

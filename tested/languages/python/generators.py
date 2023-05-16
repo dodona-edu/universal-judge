@@ -32,15 +32,13 @@ from tested.serialisation import (
 from tested.utils import get_args
 
 
-def convert_arguments(
-    arguments: List[Expression | NamedArgument], with_namespace=False
-) -> str:
+def convert_arguments(arguments: List[Expression | NamedArgument]) -> str:
     results = []
     for arg in arguments:
         if isinstance(arg, NamedArgument):
-            results.append(f"{arg.name}={convert_statement(arg.value, with_namespace)}")
+            results.append(f"{arg.name}={convert_statement(arg.value)}")
         else:
-            results.append(convert_statement(arg, with_namespace))
+            results.append(convert_statement(arg))
     return ", ".join(results)
 
 
@@ -86,9 +84,9 @@ def convert_value(value: Value) -> str:
     elif value.type == BasicObjectTypes.MAP:
         result = "{"
         for i, pair in enumerate(value.data):
-            result += convert_statement(pair.key, True)
+            result += convert_statement(pair.key)
             result += ": "
-            result += convert_statement(pair.value, True)
+            result += convert_statement(pair.value)
             if i != len(value.data) - 1:
                 result += ", "
         result += "}"
@@ -96,28 +94,27 @@ def convert_value(value: Value) -> str:
     raise AssertionError(f"Invalid literal: {value!r}")
 
 
-def convert_function_call(function: FunctionCall, with_namespace=False) -> str:
+def convert_function_call(function: FunctionCall) -> str:
     result = ""
-    if function.namespace and (not function.has_root_namespace or with_namespace):
-        result += convert_statement(function.namespace, with_namespace) + "."
+    if isinstance(function, PreparedFunctionCall) and function.submission_namespace:
+        result += function.submission_namespace + "."
+    if function.namespace:
+        result += convert_statement(function.namespace) + "."
     result += function.name
     if function.type != FunctionType.PROPERTY:
-        result += f"({convert_arguments(function.arguments, with_namespace)})"
+        result += f"({convert_arguments(function.arguments)})"
     return result
 
 
-def convert_statement(statement: Statement, with_namespace=False) -> str:
+def convert_statement(statement: Statement) -> str:
     if isinstance(statement, Identifier):
         return statement
     elif isinstance(statement, FunctionCall):
-        return convert_function_call(statement, with_namespace)
+        return convert_function_call(statement)
     elif isinstance(statement, get_args(Value)):
         return convert_value(statement)
     elif isinstance(statement, get_args(Assignment)):
-        return (
-            f"{statement.variable} = "
-            f"{convert_statement(statement.expression, with_namespace)}"
-        )
+        return f"{statement.variable} = " f"{convert_statement(statement.expression)}"
     raise AssertionError(f"Unknown statement: {statement!r}")
 
 
@@ -203,9 +200,7 @@ def send_specific_exception(exception):
                     result += f'{indent*2}importlib.reload(sys.modules["{pu.submission_name}"])\n'
             else:
                 result += (
-                    indent * 2
-                    + convert_statement(tc.input.input_statement(), True)
-                    + "\n"
+                    indent * 2 + convert_statement(tc.input.input_statement()) + "\n"
                 )
 
             result += indent + "except Exception as e:\n"

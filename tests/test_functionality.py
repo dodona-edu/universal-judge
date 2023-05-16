@@ -883,3 +883,15 @@ def test_timeouts_propagate_to_contexts():
     assert context_result.stderr == execution_result.testcase_separator
     assert context_result.results == execution_result.testcase_separator
     assert context_result.exceptions == execution_result.testcase_separator
+
+
+@pytest.mark.parametrize(
+    "language", ["csharp", "java", "javascript", "kotlin", "python"]
+)
+def test_static_functions(language: str, tmp_path: Path, pytestconfig):
+    conf = configuration(
+        pytestconfig, "echo-function", language, tmp_path, "one-static.yaml", "correct"
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]

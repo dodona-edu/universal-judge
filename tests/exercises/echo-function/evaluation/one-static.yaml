@@ -1,0 +1,4 @@
+- tab: "My tab"
+  testcases:
+    - expression: 'Submission.echo("input")'
+      return: "input"

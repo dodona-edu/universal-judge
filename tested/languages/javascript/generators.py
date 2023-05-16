@@ -14,6 +14,7 @@ from tested.datatypes import (
 from tested.languages.preparation import (
     PreparedContext,
     PreparedExecutionUnit,
+    PreparedFunctionCall,
     PreparedTestcase,
 )
 from tested.serialisation import (
@@ -88,6 +89,8 @@ def convert_function_call(call: FunctionCall, internal=False) -> str:
         result += "await "
     if call.type == FunctionType.CONSTRUCTOR:
         result += "new "
+    if isinstance(call, PreparedFunctionCall) and call.submission_namespace:
+        result += call.submission_namespace + "."
     if call.namespace:
         result += convert_statement(call.namespace, True) + "."
     result += call.name

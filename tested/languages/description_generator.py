@@ -174,11 +174,7 @@ class DescriptionGenerator:
             return html.escape(name)
         return name
 
-    def get_code(
-        self, stmt: str, bundle: Bundle, statement: bool = False, is_html: bool = True
-    ) -> str:
-        from .generation import generate_statement
-
+    def get_code(self, stmt: str, statement: bool = False, is_html: bool = True) -> str:
         if statement:
             stmt = parse_string(stmt)
         else:
@@ -195,7 +191,7 @@ class DescriptionGenerator:
             logger.warning(f"Missing features are: {missing}.")
             raise Exception("Missing features")
 
-        stmt = generate_statement(bundle, stmt)
+        stmt = self.language.generate_statement(stmt)
         stmt = self.language.cleanup_description(stmt)
         if is_html:
             prompt = html.escape(self.types["console"]["prompt"]).strip()

@@ -193,13 +193,11 @@ def create_description_instance_from_template(
         datatype=get_type_name,
         statement=partial(
             description_generator.get_code,
-            bundle=bundle,
             is_html=is_html,
             statement=True,
         ),
         expression=partial(
             description_generator.get_code,
-            bundle=bundle,
             is_html=is_html,
             statement=False,
         ),

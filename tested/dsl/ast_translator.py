@@ -129,9 +129,12 @@ def _convert_call(node: ast.Call) -> FunctionCall:
         name = node.func.id
         namespace = None
     elif isinstance(node.func, ast.Attribute):
-        our_type = FunctionType.FUNCTION
-        name = node.func.attr
         namespace = _convert_expression(node.func.value, False)
+        if isinstance(namespace, Identifier) and namespace[0].isupper():
+            our_type = FunctionType.STATIC
+        else:
+            our_type = FunctionType.FUNCTION
+        name = node.func.attr
     else:
         raise InvalidDslError(f"Unknown function type: {type(node.func)}")
 

@@ -17,7 +17,6 @@ from tested.datatypes import (
 from tested.languages.preparation import (
     PreparedContext,
     PreparedExecutionUnit,
-    PreparedFunctionCall,
     PreparedTestcase,
 )
 from tested.serialisation import (
@@ -127,9 +126,7 @@ def convert_value(value: Value) -> str:
 
 def convert_function_call(function: FunctionCall) -> str:
     result = ""
-    if function.namespace and not (
-        isinstance(function, PreparedFunctionCall) and function.has_root_namespace
-    ):
+    if function.namespace:
         result += f"{convert_statement(function.namespace)}!!."
     result += function.name
     if function.type != FunctionType.PROPERTY:

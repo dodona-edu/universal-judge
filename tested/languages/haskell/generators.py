@@ -16,6 +16,7 @@ from tested.datatypes import (
 from tested.languages.preparation import (
     PreparedContext,
     PreparedExecutionUnit,
+    PreparedFunctionCall,
     PreparedTestcase,
 )
 from tested.serialisation import (
@@ -79,6 +80,8 @@ def convert_value(value: Value) -> str:
 
 def convert_function_call(function: FunctionCall) -> str:
     result = ""
+    if isinstance(function, PreparedFunctionCall) and function.submission_namespace:
+        result += function.submission_namespace + "."
     if function.namespace:
         result += convert_statement(function.namespace) + "."
     result += function.name + " "

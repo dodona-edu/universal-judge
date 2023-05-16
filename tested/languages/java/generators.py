@@ -120,10 +120,13 @@ def convert_function_call(function: FunctionCall) -> str:
     result = ""
     if function.type == FunctionType.CONSTRUCTOR:
         result += "new "
-    if function.namespace and not (
-        (isinstance(function, PreparedFunctionCall) and function.has_root_namespace)
-        and function.type == FunctionType.CONSTRUCTOR
+    if (
+        isinstance(function, PreparedFunctionCall)
+        and function.submission_namespace
+        and function.type not in (FunctionType.CONSTRUCTOR, FunctionType.STATIC)
     ):
+        result += function.submission_namespace + "."
+    if function.namespace:
         result += convert_statement(function.namespace) + "."
     result += function.name
     if function.type != FunctionType.PROPERTY:

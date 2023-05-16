@@ -354,7 +354,17 @@ class FunctionType(StrEnum):
     The namespace can be an instance, in which case it is a method (e.g. Java or
     Python), but it can also be a function inside a module (e.g. Haskell).
     For example, in Java, a function without a given namespace will have the
-    namespace of its implementing class
+    namespace of its implementing class.
+    """
+    STATIC = auto()
+    """
+    A static function on a class. This is OOP-specific: it requires support for
+    OOP in the language, so e.g. Haskell is not supported when using this.
+    A more generic way it so use a top-level function, which will be converted to
+    static functions in the languages that require it.
+    
+    Implementation note: this will never be present during code generation, where
+    the function will be replaced by a property and normal function call.
     """
     CONSTRUCTOR = auto()
     """
@@ -414,6 +424,7 @@ class FunctionCall(WithFeatures, WithFunctions):
         if self.type in (
             FunctionType.PROPERTY,
             FunctionType.CONSTRUCTOR,
+            FunctionType.STATIC,
         ) or not isinstance(self.namespace, (Identifier, NoneType)):
             constructs.add(Construct.OBJECTS)
 
