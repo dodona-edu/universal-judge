@@ -1,0 +1,66 @@
+cff-version: 1.2.0
+title: >-
+  TESTed—An educational testing framework with
+  language-agnostic test suites for programming exercises
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Niko
+    family-names: Strijbol
+    email: niko.strijbol@ugent.be
+    affiliation: >-
+      Department of Applied Mathematics, Computer Science
+      and Statistics, Ghent University
+    orcid: 'https://orcid.org/0000-0002-3161-174X'
+  - given-names: Charlotte
+    family-names: Van Petegem
+    email: charlotte.vanpetegem@ugent.be
+    affiliation: >-
+      Department of Applied Mathematics, Computer Science
+      and Statistics, Ghent University
+    orcid: 'https://orcid.org/0000-0003-0779-4897'
+  - given-names: Rien
+    family-names: Maertens
+    email: rien.maertens@ugent.be
+    affiliation: >-
+      Department of Applied Mathematics, Computer Science
+      and Statistics, Ghent University
+    orcid: 'https://orcid.org/0000-0002-2927-3032'
+  - given-names: Boris
+    family-names: Sels
+    email: boris.sels@gmail.com
+    affiliation: >-
+      Department of Applied Mathematics, Computer Science
+      and Statistics, Ghent University
+    orcid: 'https://orcid.org/0000-0002-0870-9554'
+  - given-names: Christophe
+    family-names: Scholliers
+    email: christophe.scholliers@ugent.be
+    affiliation: >-
+      Department of Applied Mathematics, Computer Science
+      and Statistics, Ghent University
+    orcid: 'https://orcid.org/0000-0002-2837-4763'
+  - given-names: Peter
+    family-names: Dawyndt
+    orcid: 'https://orcid.org/0000-0002-1623-9070'
+    email: peter.dawyndt@ugent.be
+    affiliation: >-
+      Department of Applied Mathematics, Computer Science
+      and Statistics, Ghent University
+  - given-names: Bart
+    family-names: Mesuere
+    email: bart.mesuere@ugent.be
+    orcid: 'https://orcid.org/0000-0003-0610-3441'
+    affiliation: >-
+      Department of Applied Mathematics, Computer Science
+      and Statistics, Ghent University
+identifiers:
+  - type: doi
+    value: 10.1016/j.softx.2023.101404
+  - type: url
+    value: https://www.sciencedirect.com/science/article/pii/S2352711023001000
+repository-code: 'https://github.com/dodona-edu/universal-judge'
+url: 'https://docs.dodona.be/en/tested'
+license: MIT
