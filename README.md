@@ -2,6 +2,11 @@
 
 TESTed is a software test framework to evaluate submissions for programming exercises across multiple programming languages, using a single test suite per exercise.
 
+TESTed is developed by [Team Dodona](https://dodona.ugent.be/en/about/) at Ghent University.
+If you use this software in research, please cite:
+
+- Strijbol, N., Van Petegem, C., Maertens, R., Sels, B., Scholliers, C., Dawyndt, P., & Mesuere, B. (2023). TESTed—An educational testing framework with language-agnostic test suites for programming exercises. SoftwareX, 22, 101404. [doi:10.1016/j.softx.2023.101404](https://doi.org/10.1016/j.softx.2023.101404)
+
 ## Installing TESTed
 
 TESTed is implemented in Python, but has various dependencies for its language-specific modules.
