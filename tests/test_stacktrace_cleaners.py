@@ -72,3 +72,34 @@ def test_javascript_empty():
     expected_cleaned = ""
     actual_cleaned = language_config.cleanup_stacktrace(original)
     assert actual_cleaned == expected_cleaned
+
+
+def test_javascript_compilation_error():
+    workdir = "/home/bliep/bloep/universal-judge/workdir"
+    language_config = get_language(workdir, "javascript")
+    original = f"""
+    {workdir}/common/submission.js:4
+    const deepcopy = cellen => cellen.map(([x, y]) => [x, y]));
+                                                             ^
+    
+    SyntaxError: Unexpected token ')'
+        at internalCompileFunction (node:internal/vm:73:18)
+        at wrapSafe (node:internal/modules/cjs/loader:1176:20)
+        at checkSyntax (node:internal/main/check_syntax:67:3)
+    
+    Node.js v18.15.0
+    """
+    expected_cleaned = """
+    <code>:4
+    const deepcopy = cellen => cellen.map(([x, y]) => [x, y]));
+                                                             ^
+    
+    SyntaxError: Unexpected token ')'
+        at internalCompileFunction (node:internal/vm:73:18)
+        at wrapSafe (node:internal/modules/cjs/loader:1176:20)
+        at checkSyntax (node:internal/main/check_syntax:67:3)
+    
+    Node.js v18.15.0
+    """
+    actual_cleaned = language_config.cleanup_stacktrace(original)
+    assert actual_cleaned == expected_cleaned

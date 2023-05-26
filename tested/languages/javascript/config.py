@@ -151,7 +151,11 @@ class JavaScript(Language):
         # 1a. While inside the submission code, replace all references to the location with <code>
         # 1b. Remove any "submission.SOMETHING" -> "SOMETHING"
         # 2. Once we encounter a line with the execution location, skip all lines.
-        submission_location_regex = f"{self.config.dodona.workdir}/{EXECUTION_PREFIX}[_0-9]+/{submission_file(self)}"
+        execution_submission_location_regex = f"{self.config.dodona.workdir}/{EXECUTION_PREFIX}[_0-9]+/{submission_file(self)}"
+        submission_location = (
+            self.config.dodona.workdir / "common" / submission_file(self)
+        )
+        compilation_submission_location = str(submission_location.resolve())
         execution_location_regex = f"{self.config.dodona.workdir}/{EXECUTION_PREFIX}[_0-9]+/{EXECUTION_PREFIX}[_0-9]+.js"
         submission_namespace = f"{submission_name(self)}."
 
@@ -162,7 +166,8 @@ class JavaScript(Language):
                 break
 
             # Replace any reference to the submission.
-            line = re.sub(submission_location_regex, "<code>", line)
+            line = re.sub(execution_submission_location_regex, "<code>", line)
+            line = line.replace(compilation_submission_location, "<code>")
             # Remove any references of the form "submission.SOMETHING"
             line = line.replace(submission_namespace, "")
             resulting_lines += line
