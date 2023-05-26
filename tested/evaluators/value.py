@@ -216,6 +216,15 @@ def evaluate(
     else:
         expected, readable_expected, actual, readable_actual = result
 
+    # Special pretty printing for multiline strings.
+    is_multiline_string = (
+        config.options.get("stringsAsText", True)
+        and expected.type == BasicStringTypes.TEXT
+        and "\n" in expected.data
+    )
+    if is_multiline_string:
+        readable_expected = get_as_string(expected, readable_expected)
+
     # If the channel value is not None, but actual is, error.
     if actual is None:
         return EvaluationResult(
@@ -248,22 +257,15 @@ def evaluate(
 
     correct = type_check and content_check
 
-    is_multiline_string = (
-        config.options.get("stringsAsText", True)
-        and expected.type == BasicStringTypes.TEXT
-        and "\n" in expected.data
-    )
+    if is_multiline_string:
+        readable_actual = get_as_string(actual, readable_actual)
 
     return EvaluationResult(
         result=StatusMessage(
             human=type_status, enum=Status.CORRECT if correct else Status.WRONG
         ),
-        readable_expected=get_as_string(expected, readable_expected)
-        if is_multiline_string
-        else readable_expected,
-        readable_actual=get_as_string(actual, readable_actual)
-        if is_multiline_string
-        else readable_actual,
+        readable_expected=readable_expected,
+        readable_actual=readable_actual,
         messages=messages,
         is_multiline_string=is_multiline_string,
     )

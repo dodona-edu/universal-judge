@@ -425,3 +425,18 @@ def test_value_string_as_text_is_not_detected_if_not_multiline(
     assert result.result.enum == Status.WRONG
     assert result.readable_expected == "'multi'"
     assert result.readable_actual == "'multi\\nline\\nstring'"
+
+
+def test_value_string_as_text_is_detected_when_no_actual(tmp_path: Path, pytestconfig):
+    channel = ValueOutputChannel(
+        value=StringType(type=BasicStringTypes.TEXT, data="multi\nline\nstring")
+    )
+    actual_value = json.dumps(
+        StringType(type=BasicStringTypes.TEXT, data="multi\nline\nstring"),
+        default=pydantic_encoder,
+    )
+    config = evaluator_config(tmp_path, pytestconfig, language="python")
+    result = evaluate_value(config, channel, "")
+    assert result.result.enum == Status.WRONG
+    assert result.readable_expected == "multi\nline\nstring"
+    assert result.readable_actual == ""
