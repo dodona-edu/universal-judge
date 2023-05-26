@@ -49,9 +49,6 @@ en:
         message: "Expected value of type %{expected}, but was type %{actual}."
   judge:
     compilation:
-      received:
-        stderr: "Received stderr from compiler:"
-        stdout: "Received stdout from compiler:"
       exitcode: "Exitcode %{exitcode}."
     core:
       unsupported:

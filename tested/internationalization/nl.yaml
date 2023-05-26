@@ -49,9 +49,6 @@ nl:
         message: "Verwachtte waarde van type %{expected}, maar was type %{actual}."
   judge:
     compilation:
-      received:
-        stderr: "De compiler produceerde volgende uitvoer op stderr:"
-        stdout: "De compiler produceerde volgende uitvoer op stdout:"
       exitcode: "Exitcode %{exitcode}."
     core:
       unsupported:
