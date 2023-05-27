@@ -13,7 +13,6 @@ from tested.languages.conventionalize import (
     NamingConventions,
     submission_file,
 )
-from tested.languages.utils import trace_to_html
 from tested.serialisation import FunctionCall, Statement, Value
 
 if TYPE_CHECKING:
@@ -240,26 +239,6 @@ class Python(Language):
         if len(lines) > 20:
             lines = lines[:19] + ["...\n"] + [lines[-1]]
         return "".join(lines)
-
-    def clean_stacktrace_to_message(self, stacktrace: str) -> Optional[Message]:
-        if stacktrace:
-            trace = trace_to_html(
-                stacktrace,
-                r"File &quot;&lt;code&gt;&quot;, line ([0-9]+)",
-                r'File <a href="#" class="tab-link" '
-                r'data-tab="code" data-line="\1">'
-                r"&quot;&lt;code&gt;&quot;, line \1</a>",
-            )
-            additional_regex = re.compile(r"\(&lt;code&gt;, line (\d+)\)")
-            additional_sub = (
-                r'(<a href="#" class="tab-link" data-tab="code" '
-                r'data-line="\1">&lt;code&gt;, line \1</a>)'
-            )
-            trace.description = additional_regex.sub(additional_sub, trace.description)
-            logger.debug(trace.description)
-            return trace
-        else:
-            return None
 
     def generate_statement(self, statement: Statement) -> str:
         from tested.languages.python import generators

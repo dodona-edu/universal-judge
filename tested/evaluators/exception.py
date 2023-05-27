@@ -9,6 +9,7 @@ from pydantic import BaseModel
 from tested.dodona import ExtendedMessage, Permission, Status, StatusMessage
 from tested.evaluators.common import EvaluationResult, EvaluatorConfig
 from tested.internationalization import get_i18n_string
+from tested.languages.utils import convert_stacktrace_to_clickable_feedback
 from tested.serialisation import ExceptionValue
 from tested.testsuite import ExceptionOutputChannel
 from tested.utils import Either
@@ -23,7 +24,9 @@ class _ExceptionValue(BaseModel):
 def try_as_exception(config: EvaluatorConfig, value: str) -> Either[ExceptionValue]:
     try:
         actual = _ExceptionValue.parse_raw(value).__root__
-        actual = config.bundle.lang_config.exception_output(actual)
+        actual.stacktrace = config.bundle.lang_config.cleanup_stacktrace(
+            actual.stacktrace
+        )
         return Either(actual)
     except (TypeError, ValueError) as e:
         return Either(e)
@@ -34,13 +37,15 @@ def try_as_readable_exception(
 ) -> Tuple[Optional[str], Optional[ExtendedMessage]]:
     try:
         actual = _ExceptionValue.parse_raw(value).__root__
-        actual = config.bundle.lang_config.exception_output(actual)
+        actual.stacktrace = config.bundle.lang_config.cleanup_stacktrace(
+            actual.stacktrace
+        )
     except (TypeError, ValueError):
         return None, None
     else:
         readable = actual.readable(omit_type=False)
-        message = config.bundle.lang_config.clean_stacktrace_to_message(
-            actual.stacktrace
+        message = convert_stacktrace_to_clickable_feedback(
+            config.bundle.lang_config, actual.stacktrace
         )
         return readable, message
 
@@ -107,8 +112,9 @@ def evaluate(
     messages = []
     # Append the stacktrace as an HTML message if possible.
     # To keep things clean, we only do this if the test is incorrect.
-    cleaned_stacktrace = config.bundle.lang_config.clean_stacktrace_to_message(
-        actual.stacktrace
+
+    cleaned_stacktrace = convert_stacktrace_to_clickable_feedback(
+        language, actual.stacktrace
     )
     if cleaned_stacktrace and status != Status.CORRECT:
         messages.append(cleaned_stacktrace)

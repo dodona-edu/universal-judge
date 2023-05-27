@@ -1,7 +1,12 @@
 from pathlib import Path
 
+import pytest
+
 from tested.configs import DodonaConfig, GlobalConfig
 from tested.languages import LANGUAGES, Language
+
+# noinspection PyProtectedMember
+from tested.languages.utils import _replace_code_line_number
 from tested.testsuite import Suite
 
 
@@ -65,9 +70,10 @@ def test_javascript_type_error():
     assert actual_cleaned == expected_cleaned
 
 
-def test_javascript_empty():
+@pytest.mark.parametrize("language", LANGUAGES.keys())
+def test_empty_stacktrace(language):
     workdir = "/home/bliep/bloep/universal-judge/workdir"
-    language_config = get_language(workdir, "javascript")
+    language_config = get_language(workdir, language)
     original = ""
     expected_cleaned = ""
     actual_cleaned = language_config.cleanup_stacktrace(original)
@@ -103,3 +109,20 @@ def test_javascript_compilation_error():
     """
     actual_cleaned = language_config.cleanup_stacktrace(original)
     assert actual_cleaned == expected_cleaned
+
+
+def test_code_link_line_number_replacement_works(tmp_path: Path, pytestconfig):
+    stacktrace = f"""AssertionError [ERR_ASSERTION]: ongeldig bericht
+    at bigram2letter (<code>:86:13)
+    at <code>:98:32
+    at Array.map (<anonymous>)
+    at Codeersleutel.decodeer (<code>:98:18)
+    """
+    expected = f"""AssertionError [ERR_ASSERTION]: ongeldig bericht
+    at bigram2letter (<code>:91:13)
+    at <code>:103:32
+    at Array.map (<anonymous>)
+    at Codeersleutel.decodeer (<code>:103:18)
+    """
+    actual = _replace_code_line_number(5, stacktrace)
+    assert actual == expected

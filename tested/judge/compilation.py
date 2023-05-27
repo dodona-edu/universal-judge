@@ -10,6 +10,7 @@ from tested.dodona import AnnotateCode, Message, Status
 from tested.internationalization import get_i18n_string
 from tested.judge.utils import BaseExecutionResult, run_command
 from tested.languages.config import FileFilter, Language
+from tested.languages.utils import convert_stacktrace_to_clickable_feedback
 
 _logger = logging.getLogger(__name__)
 
@@ -87,7 +88,9 @@ def process_compile_results(
     # Report stderr.
     if stderr:
         # Append compiler messages to the output.
-        messages.append(language_config.clean_stacktrace_to_message(stderr))
+        messages.append(
+            convert_stacktrace_to_clickable_feedback(language_config, stderr)
+        )
         _logger.debug("Received stderr from compiler: " + stderr)
         show_stdout = True
         shown_messages = True
@@ -95,7 +98,9 @@ def process_compile_results(
     # Report stdout.
     if stdout and (show_stdout or results.exit != 0):
         # Append compiler messages to the output.
-        messages.append(language_config.clean_stacktrace_to_message(stdout))
+        messages.append(
+            convert_stacktrace_to_clickable_feedback(language_config, stdout)
+        )
         _logger.debug("Received stdout from compiler: " + stdout)
         shown_messages = True
 

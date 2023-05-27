@@ -1,5 +1,6 @@
 import logging
 import re
+import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING, Dict, List, Mapping, Optional, Set, Tuple
 
@@ -178,9 +179,6 @@ class JavaScript(Language):
         description = cleanup_description(self, description)
         await_regex = re.compile(r"await\s+")
         return await_regex.sub("", description)
-
-    def clean_exception_message(self, message: str) -> str:
-        return message.replace(f"{self.config.suite.namespace}.", "", 1)
 
     def stderr(self, stderr: str) -> Tuple[List[Message], List[AnnotateCode], str]:
         # Identifier to separate testcase output

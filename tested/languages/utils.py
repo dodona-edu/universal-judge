@@ -4,7 +4,7 @@ import math
 import os
 import re
 from pathlib import Path
-from typing import TYPE_CHECKING, List, Tuple
+from typing import TYPE_CHECKING, List, Optional, Tuple
 
 from tested.configs import GlobalConfig
 from tested.dodona import AnnotateCode, ExtendedMessage, Message, Permission
@@ -14,6 +14,7 @@ if TYPE_CHECKING:
     from tested.languages.config import Language
 
 _logger = logging.getLogger(__name__)
+code_regex = re.compile(r"<code>:(\d+)")
 
 
 def cleanup_description(lang_config: "Language", description: str) -> str:
@@ -262,24 +263,50 @@ def limit_output(
     return "\n".join(forward_buffer + [ellipsis_str] + backward_buffer[::-1])
 
 
-def trace_to_html(
-    traceback: str,
-    link_regex: str = r"&lt;code&gt;:([0-9]+)",
-    link_subs: str = r'<a href="#" class="tab-link" data-tab="code" '
-    r'data-line="\1">&lt;code&gt;:\1</a>',
-) -> ExtendedMessage:
-    # Escape special characters
-    traceback = html.escape(traceback)
-    # Compile regex
-    link_regex = re.compile(link_regex)
-    # Add links to
-    traceback = link_regex.sub(link_subs, traceback)
+def _convert_stacktrace_to_html(stacktrace: str) -> ExtendedMessage:
+    link_replacement = r'<a href="#" class="tab-link" data-tab="code" data-line="\1">&lt;code&gt;:\1</a>'
+    # Escape special characters.
+    stacktrace = html.escape(stacktrace)
+    # Add links to code.
+    stacktrace = re.sub(code_regex, link_replacement, stacktrace)
     # We cannot generate a "pre" element, since that is ugly.
-    generated = f"<div class='code'>Traceback:{traceback.strip()}</div>"
+    generated = f"<div class='code'>Traceback:{stacktrace.strip()}</div>"
+    # Ensure newlines.
     generated = generated.replace("\n", "<br>")
-    _logger.debug(generated)
     return ExtendedMessage(
         description=generated,
         format="html",
         permission=Permission.STUDENT,
     )
+
+
+def _replace_code_line_number(offset: int, stacktrace: str) -> str:
+    def modify_line_number(match: re.Match) -> str:
+        current_number = int(match.group(1))
+        return "<code>:" + str(current_number + offset)
+
+    return re.sub(code_regex, modify_line_number, stacktrace)
+
+
+def convert_stacktrace_to_clickable_feedback(
+    lang: "Language", stacktrace: Optional[str]
+) -> Optional[ExtendedMessage]:
+    """
+    Convert a stacktrace to an HTML message with clickable links to the submission.
+
+    In this process, the stacktrace is first passed to the language config to clean
+    up the stacktrace. Then the code links are updated for shifted line numbers, and
+    finally, the code links are converted to actual links.
+
+    :param lang: The language config.
+    :param stacktrace: The stacktrace to clean up.
+    :return: A clickable feedback message.
+    """
+    if not stacktrace:
+        return None
+    cleaned_stacktrace = lang.cleanup_stacktrace(stacktrace)
+    updated_stacktrace = _replace_code_line_number(
+        lang.config.dodona.source_offset, cleaned_stacktrace
+    )
+    html_stacktrace = _convert_stacktrace_to_html(updated_stacktrace)
+    return html_stacktrace
