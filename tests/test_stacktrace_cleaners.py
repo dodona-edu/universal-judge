@@ -111,6 +111,31 @@ def test_javascript_compilation_error():
     assert actual_cleaned == expected_cleaned
 
 
+def test_python_compilation_error():
+    language_config = get_language("/temp", "python")
+    original = """*** Error compiling './submission.py'...
+    Sorry: IndentationError: unexpected indent (submission.py, line 9)
+"""
+    expected = """*** Error compiling '<code>'...
+    Sorry: IndentationError: unexpected indent (<code>:9)
+"""
+    actual = language_config.cleanup_stacktrace(original)
+    assert actual == expected
+
+
+def test_python_exception():
+    language_config = get_language("/temp", "python")
+    original = """NameError: name 'does_not_exist' is not defined
+      File "./execution_0_0.py", line 48, in execution_0_0_context_0
+      File "./submission.py", line 1, in <module>
+"""
+    expected = """NameError: name 'does_not_exist' is not defined
+      File "<code>:1"
+"""
+    actual = language_config.cleanup_stacktrace(original)
+    assert actual == expected
+
+
 def test_code_link_line_number_replacement_works(tmp_path: Path, pytestconfig):
     stacktrace = f"""AssertionError [ERR_ASSERTION]: ongeldig bericht
     at bigram2letter (<code>:86:13)
