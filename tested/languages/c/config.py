@@ -8,11 +8,12 @@ from tested.dodona import AnnotateCode, Message
 from tested.features import Construct, TypeSupport
 from tested.languages.config import CallbackResult, Command, Language
 from tested.languages.conventionalize import (
+    EXECUTION_PREFIX,
     Conventionable,
     NamingConventions,
-    submission_name,
+    submission_file,
 )
-from tested.languages.utils import executable_name, limit_output
+from tested.languages.utils import executable_name
 from tested.serialisation import Statement, Value
 
 logger = logging.getLogger(__name__)
@@ -20,46 +21,6 @@ logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from tested.languages.generation import PreparedExecutionUnit
-
-
-def cleanup_compilation_stderr(traceback: str, submission_file: str) -> str:
-    context_file_regex = re.compile(r"(context_[0-9]+_[0-9]+|selector)")
-    code_line_regex = re.compile(r"(<code>:|\s+)([0-9]+)(:|\s+\|)")
-
-    if isinstance(traceback, str):
-        traceback = traceback.splitlines(True)
-
-    skip_line, lines = False, []
-    for line in traceback:
-        line = line.strip("\n")
-
-        if not line:
-            continue
-
-        # skip line if not a new File line is started
-        if context_file_regex.search(line):
-            skip_line = True
-            continue
-        elif skip_line and not line.startswith(" "):
-            skip_line = False
-            pass
-        elif skip_line:
-            continue
-
-        line = line.replace(submission_file, "<code>")
-        line = line.replace("solution_main", "main")
-
-        match = code_line_regex.search(line)
-        if match:
-            # update line number to compensate for #pragma once
-            replace = rf"{match.group(1)}{int(match.group(2)) - 2}{match.group(3)}"
-            line = code_line_regex.sub(replace, line, 1)
-
-        lines.append(line + "\n")
-
-    if len(lines) > 20:
-        lines = lines[:19] + ["...\n"] + [lines[-1]]
-    return "".join(lines)
 
 
 class C(Language):
@@ -154,13 +115,20 @@ class C(Language):
 
         return linter.run_cppcheck(self.config.dodona, remaining)
 
-    def compiler_output(
-        self, stdout: str, stderr: str
-    ) -> Tuple[List[Message], List[AnnotateCode], str, str]:
-        clean_stacktrace = cleanup_compilation_stderr(
-            stderr, self.with_extension(submission_name(self))
-        )
-        return [], [], limit_output(stdout), clean_stacktrace
+    def cleanup_stacktrace(self, stacktrace: str) -> str:
+        included_regex = rf"from ({EXECUTION_PREFIX}|selector)"
+        result = ""
+        for line in stacktrace.splitlines(keepends=True):
+            if re.search(included_regex, line):
+                continue
+
+            # Once we hit the three dots, skip.
+            if "..." in line:
+                break
+
+            line = line.replace(submission_file(self), "<code>")
+            result += line
+        return result
 
     def is_source_file(self, file: Path) -> bool:
         return file.suffix in (".c", ".h")

@@ -221,6 +221,31 @@ def test_bash_compilation_error():
     assert actual == expected
 
 
+def test_c_compilation_error():
+    original = """In file included from execution_0_0.c:6,
+                     from selector.c:6:
+    submission.c:3:1: fout: unknown type name ‘mfzej’
+        3 | mfzej àryhg çyh aiogharuio ghqgh
+          | ^~~~~
+    submission.c:3:1
+    ...
+    _main(1, args);
+          |             ^~~~~~~~~~~~~
+    execution_0_0.c: In functie ‘execution_0_0’:
+    execution_0_0.c:45:9: fout: ‘execution_0_0_value_file’ undeclared (first use in this function)
+       45 |         execution_0_0_value_file = fopen("N62PYrpfo_values.txt", "w");
+          |         ^~~~~~~~~~~~~~~~~~~~~~~~
+"""
+    language_config = get_language("test", "c")
+    expected = """    <code>:3:1: fout: unknown type name ‘mfzej’
+        3 | mfzej àryhg çyh aiogharuio ghqgh
+          | ^~~~~
+    <code>:3:1
+"""
+    actual = language_config.cleanup_stacktrace(original)
+    assert actual == expected
+
+
 def test_code_link_line_number_replacement_works(tmp_path: Path, pytestconfig):
     stacktrace = f"""AssertionError [ERR_ASSERTION]: ongeldig bericht
     at bigram2letter (<code>:86:13)
