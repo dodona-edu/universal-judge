@@ -7,7 +7,6 @@ import pytest
 import yaml
 
 from tested.description_instance import create_description_instance
-from tested.languages.utils import limit_output
 from tested.utils import sorted_no_duplicates
 from tests.manual_utils import assert_valid_output, configuration, execute_config
 
@@ -58,38 +57,6 @@ def test_run_doctests_tested_conventionalize():
 
     f, _ = doctest.testmod(tested.languages.conventionalize)
     assert f == 0
-
-
-def test_limit_output_no_limit():
-    text = "aaaaa\nbbbbb\nccccc".strip()
-    limited = limit_output(output=text, max_lines=3, limit_characters=17)
-    assert text == limited
-    assert len(limited) <= 17
-    assert len(limited.splitlines()) <= 3
-    limited = limit_output(output=text, max_lines=3, limit_characters=20)
-    assert text == limited
-    assert len(limited) <= 20
-    assert len(limited.splitlines()) <= 3
-    limited = limit_output(output=text, max_lines=4, limit_characters=17)
-    assert text == limited
-    assert len(limited) <= 17
-    assert len(limited.splitlines()) <= 4
-    limited = limit_output(output=text, max_lines=2, limit_characters=17)
-    assert "aaaaa\n...\nccccc" == limited
-    assert len(limited) <= 17
-    assert len(limited.splitlines()) <= 3
-    limited = limit_output(output=text, max_lines=3, limit_characters=15)
-    assert "aaaaa\n...\nccccc" == limited
-    assert len(limited) <= 15
-    assert len(limited.splitlines()) <= 3
-    limited = limit_output(output=text, max_lines=3, limit_characters=12)
-    assert "aaaaa\n...\ncc" == limited
-    assert len(limited) <= 12
-    assert len(limited.splitlines()) <= 3
-    limited = limit_output(output=text, max_lines=3, limit_characters=7)
-    assert "a\n...\nc" == limited
-    assert len(limited) <= 7
-    assert len(limited.splitlines()) <= 3
 
 
 @pytest.mark.parametrize(

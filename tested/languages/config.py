@@ -21,7 +21,6 @@ from tested.languages.conventionalize import (
     conventionalize_namespace,
 )
 from tested.languages.description_generator import DescriptionGenerator
-from tested.languages.utils import limit_output
 from tested.serialisation import FunctionCall, Statement, Value
 
 if typing.TYPE_CHECKING:
@@ -299,27 +298,7 @@ class Language(ABC):
                  - A list of annotations to add.
                  - The new stdout and stderr.
         """
-        return [], [], limit_output(stdout), limit_output(stderr)
-
-    def stdout(self, stdout: str) -> Tuple[List[Message], List[AnnotateCode], str]:
-        """
-        Callback that allows modifying the stdout.
-
-        :param stdout: The original stdout.
-        :return: A tuple containing messages, annotations and the new stdout.
-        """
-        # TODO: remove this callback
-        return [], [], stdout
-
-    def stderr(self, stderr: str) -> Tuple[List[Message], List[AnnotateCode], str]:
-        """
-        Callback that allows modifying the stderr.
-
-        :param stderr: The original stderr.
-        :return: A tuple containing messages, annotations and the new stderr.
-        """
-        # TODO: remove this callback
-        return [], [], stderr
+        return [], [], stdout, stderr
 
     def linter(self, remaining: float) -> Tuple[List[Message], List[AnnotateCode]]:
         """

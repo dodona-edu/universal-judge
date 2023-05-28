@@ -330,17 +330,6 @@ def execute_execution(
         remaining=remaining,
     )
 
-    # Cleanup stderr
-    msgs, annotations, base_result.stderr = lang_config.stderr(base_result.stderr)
-    for annotation in annotations:
-        args.collector.add(annotation)
-    messages.extend(msgs)
-    # Cleanup stdout
-    msgs, annotation, base_result.stdout = lang_config.stdout(base_result.stdout)
-    for annotation in annotations:
-        args.collector.add(annotation)
-    messages.extend(msgs)
-
     testcase_identifier = f"--{bundle.testcase_separator_secret}-- SEP"
     context_identifier = f"--{bundle.context_separator_secret}-- SEP"
 

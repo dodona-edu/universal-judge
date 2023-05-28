@@ -1,6 +1,5 @@
 import logging
 import re
-import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING, Dict, List, Mapping, Optional, Set, Tuple
 
@@ -15,7 +14,7 @@ from tested.languages.conventionalize import (
     submission_file,
     submission_name,
 )
-from tested.languages.utils import cleanup_description, limit_output
+from tested.languages.utils import cleanup_description
 from tested.serialisation import FunctionCall, Statement, Value
 
 if TYPE_CHECKING:
@@ -110,16 +109,6 @@ class JavaScript(Language):
         else:
             return [], files
 
-    def compiler_output(
-        self, stdout: str, stderr: str
-    ) -> Tuple[List[Message], List[AnnotateCode], str, str]:
-        return (
-            [],
-            [],
-            limit_output(stdout),
-            self.cleanup_stacktrace(stderr),
-        )
-
     def execution(self, cwd: Path, file: str, arguments: List[str]) -> Command:
         return ["node", file, *arguments]
 
@@ -179,39 +168,6 @@ class JavaScript(Language):
         description = cleanup_description(self, description)
         await_regex = re.compile(r"await\s+")
         return await_regex.sub("", description)
-
-    def stderr(self, stderr: str) -> Tuple[List[Message], List[AnnotateCode], str]:
-        # Identifier to separate testcase output
-        identifier = f"--{self.config.testcase_separator_secret}-- SEP"
-        context_identifier = f"--{self.config.context_separator_secret}-- SEP"
-        submission = submission_file(self)
-        # Assume stacktrace when line is equal the submission_filename path with
-        # line number
-        line_start_with_submission_file = re.compile(
-            rf"^(\\?([^\\/]*[\\/])*)({submission}):[0-9]+"
-        )
-        contexts = stderr.split(context_identifier)
-        cleaned_contexts = []
-        for context in contexts:
-            cases = context.split(identifier)
-            cleaned_cases = []
-            # Process each case
-            for case in cases:
-                keep_until = 0
-                case = case.splitlines(keepends=True)
-                for index, line in enumerate(case):
-                    line = line.rstrip("\n")
-                    if not line_start_with_submission_file.match(line):
-                        keep_until = index + 1
-                    else:
-                        break
-                keep_lines = "".join(case[:keep_until])
-                stacktrace = "".join(case[keep_until:])
-                stacktrace = self.cleanup_stacktrace(stacktrace)
-                cleaned_cases.append(f"{keep_lines}{stacktrace}")
-            cleaned_contexts.append(identifier.join(cleaned_cases))
-
-        return [], [], context_identifier.join(cleaned_contexts)
 
     def generate_statement(self, statement: Statement) -> str:
         from tested.languages.javascript import generators

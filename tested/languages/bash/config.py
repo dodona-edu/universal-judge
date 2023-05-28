@@ -12,7 +12,6 @@ from tested.languages.conventionalize import (
     NamingConventions,
     submission_file,
 )
-from tested.languages.utils import limit_output
 from tested.serialisation import Statement, Value
 
 if TYPE_CHECKING:
@@ -54,12 +53,6 @@ class Bash(Language):
         else:
             return [], files
 
-    def compiler_output(
-        self, stdout: str, stderr: str
-    ) -> Tuple[List[Message], List[AnnotateCode], str, str]:
-        regex = re.compile(f"{submission_file(self)}: " f"(regel|rule) ([0-9]+):")
-        return [], [], limit_output(stdout), regex.sub("<code>:\\2:", stderr)
-
     def execution(self, cwd: Path, file: str, arguments: List[str]) -> Command:
         return ["bash", file, *arguments]
 
@@ -68,7 +61,7 @@ class Bash(Language):
             f"{EXECUTION_PREFIX}_[0-9]+_[0-9]+\\."
             f"{self.file_extension()}: [a-zA-Z_]+ [0-9]+:"
         )
-        script = rf"{submission_file(self)}: line (\d+)"
+        script = rf"{submission_file(self)}: (regel|rule) (\d+)"
         stacktrace = re.sub(script, r"<code>:\1", stacktrace)
         stacktrace = regex.sub("<testcode>:", stacktrace).replace(
             submission_file(self), "<code>"
