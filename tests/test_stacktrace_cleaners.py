@@ -136,6 +136,38 @@ def test_python_exception():
     assert actual == expected
 
 
+def test_csharp_exception():
+    workdir = "/home/bliep/bloep/universal-judge/workdir"
+    language_config = get_language(workdir, "csharp")
+    original = f"""at Submission.Main(String[] args) in {workdir}/common/Submission.cs:line 7
+    at Tested.Execution00.Context0() in {workdir}/common/Execution00.cs:line 67'
+    """
+    expected = "at Submission.Main(String[] args) in <code>:7\n"
+    actual = language_config.cleanup_stacktrace(original)
+    assert actual == expected
+
+
+def test_csharp_compilation():
+    workdir = "/home/bliep/bloep/universal-judge/workdir"
+    language_config = get_language(workdir, "csharp")
+    original = f"""Determining projects to restore...
+    Restored {workdir}/common/dotnet.csproj (in 81 ms).
+    {workdir}/common/Submission.cs(13,20): error CS1002: ; expected [{workdir}/common/dotnet.csproj]
+    {workdir}/common/Submission.cs(13,26): error CS1002: ; expected [{workdir}/common/dotnet.csproj]
+    {workdir}/common/Submission.cs(13,30): error CS1001: Identifier expected [{workdir}/common/dotnet.csproj]
+    {workdir}/common/Submission.cs(13,30): error CS1002: ; expected [{workdir}/common/dotnet.csproj]
+    {workdir}/common/Submission.cs(13,34): error CS1002: ; expected [{workdir}/common/dotnet.csproj]
+    """
+    expected = f"""    <code>:13:20: error CS1002: ; expected
+    <code>:13:26: error CS1002: ; expected
+    <code>:13:30: error CS1001: Identifier expected
+    <code>:13:30: error CS1002: ; expected
+    <code>:13:34: error CS1002: ; expected
+    """
+    actual = language_config.cleanup_stacktrace(original)
+    assert actual == expected
+
+
 def test_code_link_line_number_replacement_works(tmp_path: Path, pytestconfig):
     stacktrace = f"""AssertionError [ERR_ASSERTION]: ongeldig bericht
     at bigram2letter (<code>:86:13)
