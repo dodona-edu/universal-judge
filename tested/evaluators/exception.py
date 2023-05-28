@@ -114,7 +114,7 @@ def evaluate(
     # To keep things clean, we only do this if the test is incorrect.
 
     cleaned_stacktrace = convert_stacktrace_to_clickable_feedback(
-        language, actual.stacktrace
+        config.bundle.lang_config, actual.stacktrace
     )
     if cleaned_stacktrace and status != Status.CORRECT:
         messages.append(cleaned_stacktrace)
