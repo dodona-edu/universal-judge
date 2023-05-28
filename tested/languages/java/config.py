@@ -11,7 +11,7 @@ from tested.languages.conventionalize import (
     NamingConventions,
     submission_file,
 )
-from tested.languages.utils import jvm_cleanup_stacktrace, jvm_memory_limit, jvm_stderr
+from tested.languages.utils import jvm_cleanup_stacktrace, jvm_memory_limit
 from tested.serialisation import FunctionCall, Statement, Value
 
 if TYPE_CHECKING:

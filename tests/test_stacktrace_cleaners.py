@@ -279,6 +279,64 @@ def test_haskell_runtime_error():
     assert actual == expected
 
 
+def test_kotlin_compilation_error():
+    original = """Execution00.kt:52:13: error: unresolved reference: solutionMain
+            solutionMain(arrayOf())
+            ^
+    Submission.kt:1:1: error: expecting a top level declaration
+    mfzej àryhg çyh aiogharuio ghqgh
+    ^
+    Submission.kt:1:7: error: expecting a top level declaration
+    ...
+       ^
+    Submission.kt:1:17: error: expecting a top level declaration
+    mfzej àryhg çyh aiogharuio ghqgh
+                    ^
+    Submission.kt:1:28: error: expecting a top level declaration
+    mfzej àryhg çyh aiogharuio ghqgh
+                               ^
+    """
+    language_config = get_language("test", "kotlin")
+    expected = """    <code>:1:1: error: expecting a top level declaration
+    mfzej àryhg çyh aiogharuio ghqgh
+    ^
+    <code>:1:7: error: expecting a top level declaration
+    ...
+       ^
+    <code>:1:17: error: expecting a top level declaration
+    mfzej àryhg çyh aiogharuio ghqgh
+                    ^
+    <code>:1:28: error: expecting a top level declaration
+    mfzej àryhg çyh aiogharuio ghqgh
+                               ^
+    
+"""
+    actual = language_config.cleanup_stacktrace(original)
+    assert actual == expected
+
+
+def test_kotlin_run_error():
+    original = """java.lang.ClassCastException: class java.lang.Integer cannot be cast to class java.lang.String (java.lang.Integer and java.lang.String are in module java.base of loader 'bootstrap')
+	at SubmissionKt.solutionMain(Submission.kt:4)
+	at Execution00.context0(Execution00.kt:52)
+	at Execution00.execute(Execution00.kt:63)
+	at SelectorKt.main(Selector.kt:8)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.jetbrains.kotlin.runner.AbstractRunner.run(runners.kt:70)
+	at org.jetbrains.kotlin.runner.Main.run(Main.kt:188)
+	at org.jetbrains.kotlin.runner.Main.main(Main.kt:198)
+    """
+    language_config = get_language("test", "kotlin")
+    expected = """java.lang.ClassCastException: class java.lang.Integer cannot be cast to class java.lang.String (java.lang.Integer and java.lang.String are in module java.base of loader 'bootstrap')
+	at SubmissionKt.main(<code>:4)
+"""
+    actual = language_config.cleanup_stacktrace(original)
+    assert actual == expected
+
+
 def test_code_link_line_number_replacement_works(tmp_path: Path, pytestconfig):
     stacktrace = f"""AssertionError [ERR_ASSERTION]: ongeldig bericht
     at bigram2letter (<code>:86:13)

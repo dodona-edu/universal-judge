@@ -3,12 +3,11 @@ import logging
 import math
 import os
 import re
-import warnings
 from pathlib import Path
-from typing import TYPE_CHECKING, List, Optional, Tuple
+from typing import TYPE_CHECKING, Optional
 
 from tested.configs import GlobalConfig
-from tested.dodona import AnnotateCode, ExtendedMessage, Message, Permission
+from tested.dodona import ExtendedMessage, Permission
 from tested.languages.conventionalize import submission_name
 
 if TYPE_CHECKING:
@@ -36,6 +35,7 @@ def jvm_memory_limit(config: GlobalConfig) -> int:
 # Idea and original code: dodona/judge-pythia
 def jvm_cleanup_stacktrace(stacktrace: str, submission_filename: str) -> str:
     context_file_regex = re.compile(r"(Context[0-9]+|Selector)")
+    execution_regex = re.compile(rf"Execution(\d+)\.kt")
     unresolved_main_regex = r"error: unresolved reference: solutionMain"
     unresolved_reference_regex = re.compile(
         r"(error: unresolved reference: [a-zA-Z$_0-9]+)"
@@ -66,34 +66,19 @@ def jvm_cleanup_stacktrace(stacktrace: str, submission_filename: str) -> str:
         if submission_filename in line:
             line = line.replace(submission_filename, "<code>")
             line = line.replace("Kt.solutionMain", "Kt.main")
+            line = line.replace("SubmissionKt.solutionMain", "SubmissionKt.main")
         elif "at " in line:
             skip_line = True
             continue
+
+        if execution_regex.search(line):
+            skip_line = True
+            continue
+
         skip_line = False
         lines.append(line + "\n")
 
     return "".join(lines)
-
-
-def jvm_stderr(
-    self: "Language", stderr: str
-) -> Tuple[List[Message], List[AnnotateCode], str]:
-    warnings.warn("Deprecated...", category=DeprecationWarning)
-    # Identifier to separate testcase output
-    identifier = f"--{self.config.testcase_separator_secret}-- SEP"
-    context_identifier = f"--{self.config.context_separator_secret}-- SEP"
-
-    return (
-        [],
-        [],
-        context_identifier.join(
-            identifier.join(
-                self.cleanup_stacktrace(testcase)
-                for testcase in context.split(identifier)
-            )
-            for context in stderr.split(context_identifier)
-        ),
-    )
 
 
 def haskell_solution(lang_config: "Language", solution: Path):
