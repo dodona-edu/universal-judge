@@ -308,6 +308,7 @@ class Language(ABC):
         :param stdout: The original stdout.
         :return: A tuple containing messages, annotations and the new stdout.
         """
+        # TODO: remove this callback
         return [], [], stdout
 
     def stderr(self, stderr: str) -> Tuple[List[Message], List[AnnotateCode], str]:
@@ -317,6 +318,7 @@ class Language(ABC):
         :param stderr: The original stderr.
         :return: A tuple containing messages, annotations and the new stderr.
         """
+        # TODO: remove this callback
         return [], [], stderr
 
     def linter(self, remaining: float) -> Tuple[List[Message], List[AnnotateCode]]:

@@ -3,12 +3,13 @@ import logging
 import math
 import os
 import re
+import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING, List, Optional, Tuple
 
 from tested.configs import GlobalConfig
 from tested.dodona import AnnotateCode, ExtendedMessage, Message, Permission
-from tested.languages.conventionalize import submission_file, submission_name
+from tested.languages.conventionalize import submission_name
 
 if TYPE_CHECKING:
     from tested.languages.config import Language
@@ -33,18 +34,16 @@ def jvm_memory_limit(config: GlobalConfig) -> int:
 
 
 # Idea and original code: dodona/judge-pythia
-def jvm_cleanup_stacktrace(traceback: str, submission_filename: str) -> str:
+def jvm_cleanup_stacktrace(stacktrace: str, submission_filename: str) -> str:
     context_file_regex = re.compile(r"(Context[0-9]+|Selector)")
     unresolved_main_regex = r"error: unresolved reference: solutionMain"
     unresolved_reference_regex = re.compile(
         r"(error: unresolved reference: [a-zA-Z$_0-9]+)"
     )
-
-    if isinstance(traceback, str):
-        traceback = traceback.splitlines(True)
+    stacktrace = stacktrace.splitlines(True)
 
     skip_line, lines = False, []
-    for line in traceback:
+    for line in stacktrace:
         line = line.strip("\n")
 
         if not line:
@@ -73,18 +72,16 @@ def jvm_cleanup_stacktrace(traceback: str, submission_filename: str) -> str:
         skip_line = False
         lines.append(line + "\n")
 
-    if len(lines) > 20:
-        lines = lines[:19] + ["...\n"] + [lines[-1]]
     return "".join(lines)
 
 
 def jvm_stderr(
     self: "Language", stderr: str
 ) -> Tuple[List[Message], List[AnnotateCode], str]:
+    warnings.warn("Deprecated...", category=DeprecationWarning)
     # Identifier to separate testcase output
     identifier = f"--{self.config.testcase_separator_secret}-- SEP"
     context_identifier = f"--{self.config.context_separator_secret}-- SEP"
-    submission = submission_file(self)
 
     return (
         [],

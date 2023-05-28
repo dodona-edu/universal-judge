@@ -168,6 +168,37 @@ def test_csharp_compilation():
     assert actual == expected
 
 
+def test_java_compilation_error():
+    original = """Submission.java:1: error: class, interface, enum, or record expected
+    mfzej àryhg çyh aiogharuio ghqgh
+    ^
+    1 error"""
+    language_config = get_language("test", "java")
+    expected = """<code>:1: error: class, interface, enum, or record expected
+    mfzej àryhg çyh aiogharuio ghqgh
+    ^
+    1 error
+"""
+    actual = language_config.cleanup_stacktrace(original)
+    assert actual == expected
+
+
+def test_java_runtime_error():
+    original = """java.lang.ClassCastException: class java.lang.Integer cannot be cast to class java.lang.String (java.lang.Integer and java.lang.String are in module java.base of loader 'bootstrap')
+	at Submission.main(Submission.java:7)
+	at Execution00.context0(Execution00.java:60)
+	at Execution00.execute(Execution00.java:70)
+	at Execution00.main(Execution00.java:81)
+	at Selector.main(Selector.java:7)
+    """
+    language_config = get_language("test", "java")
+    expected = """java.lang.ClassCastException: class java.lang.Integer cannot be cast to class java.lang.String (java.lang.Integer and java.lang.String are in module java.base of loader 'bootstrap')
+	at Submission.main(<code>:7)
+"""
+    actual = language_config.cleanup_stacktrace(original)
+    assert actual == expected
+
+
 def test_code_link_line_number_replacement_works(tmp_path: Path, pytestconfig):
     stacktrace = f"""AssertionError [ERR_ASSERTION]: ongeldig bericht
     at bigram2letter (<code>:86:13)
