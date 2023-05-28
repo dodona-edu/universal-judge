@@ -246,6 +246,39 @@ def test_c_compilation_error():
     assert actual == expected
 
 
+def test_haskell_compilation_error():
+    original = """Submission.hs:3:1: error:
+        Parse error: module header, import declaration
+        or top-level declaration expected.
+      |
+    3 | mfzej àryhg çyh aiogharuio ghqgh
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+"""
+    language_config = get_language("test", "haskell")
+    expected = """<code>:3:1: error:
+        Parse error: module header, import declaration
+        or top-level declaration expected.
+      |
+    3 | mfzej àryhg çyh aiogharuio ghqgh
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+"""
+    actual = language_config.cleanup_stacktrace(original)
+    assert actual == expected
+
+
+def test_haskell_runtime_error():
+    original = """undefined
+    CallStack (from HasCallStack):
+      error, called at ./Submission.hs:5:5 in main:Submission
+"""
+    language_config = get_language("test", "haskell")
+    expected = """    CallStack (from HasCallStack):
+      error, called at <code>:5:5 in main:Submission
+"""
+    actual = language_config.cleanup_stacktrace(original)
+    assert actual == expected
+
+
 def test_code_link_line_number_replacement_works(tmp_path: Path, pytestconfig):
     stacktrace = f"""AssertionError [ERR_ASSERTION]: ongeldig bericht
     at bigram2letter (<code>:86:13)
