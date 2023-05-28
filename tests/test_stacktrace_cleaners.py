@@ -199,6 +199,28 @@ def test_java_runtime_error():
     assert actual == expected
 
 
+def test_bash_runtime_error():
+    original = "submission.sh: line 1: d: opdracht niet gevonden\n"
+    language_config = get_language("test", "bash")
+    expected = "<code>:1: d: opdracht niet gevonden\n"
+    actual = language_config.cleanup_stacktrace(original)
+    assert actual == expected
+
+
+def test_bash_compilation_error():
+    original = """
+    submission.sh: line 1: syntaxfout nabij onverwacht symbool '('
+    submission.sh: line 1: `def isISBN10(code):'
+    """
+    language_config = get_language("test", "bash")
+    expected = """
+    <code>:1: syntaxfout nabij onverwacht symbool '('
+    <code>:1: `def isISBN10(code):'
+    """
+    actual = language_config.cleanup_stacktrace(original)
+    assert actual == expected
+
+
 def test_code_link_line_number_replacement_works(tmp_path: Path, pytestconfig):
     stacktrace = f"""AssertionError [ERR_ASSERTION]: ongeldig bericht
     at bigram2letter (<code>:86:13)
