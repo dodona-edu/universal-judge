@@ -62,7 +62,7 @@ class Bash(Language):
             f"{self.file_extension()}: [a-zA-Z_]+ [0-9]+:"
         )
         script = rf"{submission_file(self)}: (regel|rule) (\d+)"
-        stacktrace = re.sub(script, r"<code>:\1", stacktrace)
+        stacktrace = re.sub(script, r"<code>:\2", stacktrace)
         stacktrace = regex.sub("<testcode>:", stacktrace).replace(
             submission_file(self), "<code>"
         )

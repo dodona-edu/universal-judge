@@ -7,12 +7,25 @@ Running the tests should happen in with the root directory (the one with src/ an
 tests/) as the working directory.
 """
 import shutil
+import sys
 from pathlib import Path
 
 import pytest
 
+from tested.configs import create_bundle
+from tested.datatypes import BasicBooleanTypes, BasicNumericTypes, BasicStringTypes
 from tested.judge.execution import ExecutionResult
 from tested.languages import LANGUAGES
+from tested.languages.conventionalize import submission_name
+from tested.languages.generation import generate_statement
+from tested.serialisation import (
+    BooleanType,
+    FunctionCall,
+    FunctionType,
+    NumberType,
+    StringType,
+)
+from tested.testsuite import Suite
 from tests.manual_utils import assert_valid_output, configuration, execute_config
 
 COMPILE_LANGUAGES = [
@@ -883,3 +896,26 @@ def test_timeouts_propagate_to_contexts():
     assert context_result.stderr == execution_result.testcase_separator
     assert context_result.results == execution_result.testcase_separator
     assert context_result.exceptions == execution_result.testcase_separator
+
+
+def test_function_arguments_without_brackets(tmp_path: Path, pytestconfig):
+    conf = configuration(pytestconfig, "", "haskell", tmp_path)
+    plan = Suite()
+    bundle = create_bundle(conf, sys.stdout, plan)
+
+    statement = FunctionCall(
+        type=FunctionType.FUNCTION,
+        name="test",
+        namespace=None,
+        arguments=[
+            NumberType(type=BasicNumericTypes.REAL, data=5.5),
+            StringType(type=BasicStringTypes.TEXT, data="hallo"),
+            BooleanType(type=BasicBooleanTypes.BOOLEAN, data=True),
+        ],
+    )
+
+    result = generate_statement(bundle, statement)
+    assert (
+        result
+        == f'{submission_name(bundle.lang_config)}.test 5.5 :: Double "hallo" True'
+    )
