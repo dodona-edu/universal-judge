@@ -33,6 +33,7 @@ from tested.testsuite import (
     ExpectedException,
     FileUrl,
     GenericTextEvaluator,
+    IgnoredChannel,
     MainInput,
     Output,
     Suite,
@@ -163,6 +164,7 @@ def _convert_testcase(testcase: YamlDict, previous_config: dict) -> Testcase:
 
     if (expr_stmt := testcase.get("statement", testcase.get("expression"))) is not None:
         the_input = parse_string(expr_stmt)
+        is_statement = testcase.get("statement") is not None
     else:
         stdin = (
             TextData(data=testcase["stdin"])
@@ -171,6 +173,7 @@ def _convert_testcase(testcase: YamlDict, previous_config: dict) -> Testcase:
         )
         arguments = testcase.get("arguments", [])
         the_input = MainInput(stdin=stdin, arguments=arguments)
+        is_statement = False
 
     output = Output()
 
@@ -198,6 +201,9 @@ def _convert_testcase(testcase: YamlDict, previous_config: dict) -> Testcase:
         if "return" in testcase:
             raise ValueError("Both a return and return_raw value is not allowed.")
         output.result = ValueOutputChannel(value=parse_string(result, True))
+
+    if is_statement:
+        output.result = IgnoredChannel.IGNORED
 
     # TODO: allow propagation of files...
     files = []
