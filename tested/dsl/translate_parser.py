@@ -202,7 +202,8 @@ def _convert_testcase(testcase: YamlDict, previous_config: dict) -> Testcase:
             raise ValueError("Both a return and return_raw value is not allowed.")
         output.result = ValueOutputChannel(value=parse_string(result, True))
 
-    if is_statement:
+    # If there is a return value, allow it.
+    if is_statement and not ("return" in testcase or "return_raw" in testcase):
         output.result = IgnoredChannel.IGNORED
 
     # TODO: allow propagation of files...
