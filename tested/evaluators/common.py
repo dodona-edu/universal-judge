@@ -31,6 +31,7 @@ from pydantic.dataclasses import dataclass
 
 from tested.configs import Bundle
 from tested.dodona import Message, Status, StatusMessage
+from tested.languages.utils import convert_stacktrace_to_clickable_feedback
 from tested.serialisation import EvalResult
 from tested.testsuite import ExceptionOutputChannel, NormalOutputChannel, OutputChannel
 
@@ -109,8 +110,9 @@ def cleanup_specific_programmed(
         actual.readable_expected = lang_config.cleanup_stacktrace(
             actual.readable_expected
         )
-        cleaned_actual = lang_config.cleanup_stacktrace(actual.readable_actual)
-        message = lang_config.clean_stacktrace_to_message(cleaned_actual)
+        message = convert_stacktrace_to_clickable_feedback(
+            lang_config, actual.readable_actual
+        )
 
         if message:
             actual.messages.append(message)

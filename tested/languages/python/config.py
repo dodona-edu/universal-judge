@@ -13,7 +13,6 @@ from tested.languages.conventionalize import (
     NamingConventions,
     submission_file,
 )
-from tested.languages.utils import trace_to_html
 from tested.serialisation import FunctionCall, Statement, Value
 
 if TYPE_CHECKING:
@@ -124,7 +123,6 @@ class Python(Language):
     def compiler_output(
         self, stdout: str, stderr: str
     ) -> Tuple[List[Message], List[AnnotateCode], str, str]:
-        stdout = self.cleanup_stacktrace(stdout)
         if match := re.search(r".*: (.+Error): (.+) \(<code>, line (\d+)\)", stdout):
             error = match.group(1)
             message = match.group(2)
@@ -139,42 +137,8 @@ class Python(Language):
                 stdout,
                 stderr,
             )
-        elif stuff := self._attempt_stacktrace(stdout):
-            line, column, message = stuff
-            return (
-                [],
-                [
-                    AnnotateCode(
-                        row=line, column=column, text=message, type=Severity.ERROR
-                    )
-                ],
-                stdout,
-                stderr,
-            )
         else:
             return [], [], stdout, stderr
-
-    def _attempt_stacktrace(self, trace: str):
-        # TODO: this only works with compiler traces.
-        # Find message
-        line_regex = rf'File "<code>", line (?P<line>\d+)'
-        if match := re.search(line_regex, trace):
-            line = int(match.group("line")) - 1
-        else:
-            return None
-        error_regex = r"(?P<error>.+Error): (?P<message>.+)"
-        if match := re.search(error_regex, trace):
-            message = match.group("error") + ": " + match.group("message")
-        else:
-            return None
-        column_regex = r"^\s*\^\s*$"
-        if match := re.search(column_regex, trace, re.MULTILINE):
-            column_line = match.group(0)
-            column = len(column_line) - len(column_line.lstrip())
-        else:
-            return None
-
-        return line, column, message
 
     def linter(self, remaining: float) -> Tuple[List[Message], List[AnnotateCode]]:
         # Import locally to prevent errors.
@@ -183,15 +147,14 @@ class Python(Language):
         return linter.run_pylint(self.config.dodona, remaining)
 
     # Idea and original code: dodona/judge-pythia
-    def cleanup_stacktrace(self, traceback: str) -> str:
+    def cleanup_stacktrace(self, stacktrace: str) -> str:
         context_file_regex = re.compile(r"context_[0-9]+_[0-9]+\.py")
         file_line_regex = re.compile(rf"\({submission_file(self)}, line (\d+)\)")
-
-        if isinstance(traceback, str):
-            traceback = traceback.splitlines(True)
+        file_full_regex = re.compile(rf'File "./{submission_file(self)}", line (\d+)')
+        stacktrace = stacktrace.splitlines(True)
 
         skip_line, lines = False, []
-        for line in traceback:
+        for line in stacktrace:
             line = line.strip("\n")
             logger.debug(line)
 
@@ -199,7 +162,7 @@ class Python(Language):
                 continue
 
             if line.startswith(
-                "During handling of the above exception, another " "exception occurred:"
+                "During handling of the above exception, another exception occurred:"
             ):
                 lines = []
                 continue
@@ -214,14 +177,16 @@ class Python(Language):
                 continue
 
             # replace references to local names
-            if f'File "./{submission_file(self)}"' in line:
+            if file_full_regex.search(line):
+                line = file_full_regex.sub(r'File "<code>:\1"', line)
+            elif f'File "./{submission_file(self)}"' in line:
                 line = line.replace(
                     f'File "./{submission_file(self)}"', 'File "<code>"'
                 )
             elif line.startswith("*** Error compiling"):
                 line = line.replace(f"./{submission_file(self)}", "<code>")
             elif file_line_regex.search(line):
-                line = file_line_regex.sub(r"(<code>, line \1)", line)
+                line = file_line_regex.sub(r"(<code>:\1)", line)
             elif 'File "<string>"' in line:
                 line = line.replace('File "<string>"', 'File "<code>"')
             elif 'File "<doctest>"' in line:
@@ -236,30 +201,7 @@ class Python(Language):
                 line = line.replace(", in <module>", "")
 
             lines.append(line + "\n")
-
-        if len(lines) > 20:
-            lines = lines[:19] + ["...\n"] + [lines[-1]]
         return "".join(lines)
-
-    def clean_stacktrace_to_message(self, stacktrace: str) -> Optional[Message]:
-        if stacktrace:
-            trace = trace_to_html(
-                stacktrace,
-                r"File &quot;&lt;code&gt;&quot;, line ([0-9]+)",
-                r'File <a href="#" class="tab-link" '
-                r'data-tab="code" data-line="\1">'
-                r"&quot;&lt;code&gt;&quot;, line \1</a>",
-            )
-            additional_regex = re.compile(r"\(&lt;code&gt;, line (\d+)\)")
-            additional_sub = (
-                r'(<a href="#" class="tab-link" data-tab="code" '
-                r'data-line="\1">&lt;code&gt;, line \1</a>)'
-            )
-            trace.description = additional_regex.sub(additional_sub, trace.description)
-            logger.debug(trace.description)
-            return trace
-        else:
-            return None
 
     def generate_statement(self, statement: Statement) -> str:
         from tested.languages.python import generators

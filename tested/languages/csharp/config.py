@@ -9,8 +9,11 @@ from tested.features import Construct, TypeSupport
 from tested.internationalization import get_i18n_string
 from tested.languages.config import CallbackResult, Command, Language
 from tested.languages.conventionalize import (
+    EXECUTION_PREFIX,
     Conventionable,
     NamingConventions,
+    conventionalize_namespace,
+    submission_file,
     submission_name,
 )
 from tested.serialisation import FunctionCall, Statement, Value
@@ -159,6 +162,36 @@ class {class_name}
         # noinspection PyTypeChecker
         with open(solution, "w") as file:
             file.write(result)
+
+    def cleanup_stacktrace(self, stacktrace: str) -> str:
+        execution = conventionalize_namespace(self, EXECUTION_PREFIX)
+        execution_submission_location_regex = (
+            rf"{self.config.dodona.workdir}/common/{execution}[0-9]+.cs"
+        )
+        submission_location = (
+            self.config.dodona.workdir / "common" / submission_file(self)
+        )
+        submission_location_regex = rf"{submission_location.resolve()}:line ([0-9]+)"
+        compilation_location_regex = rf"{submission_location.resolve()}\((\d+),(\d+)\)"
+        compilation_suffix = f" [{self.config.dodona.workdir}/common/dotnet.csproj]"
+
+        resulting_lines = ""
+        for line in stacktrace.splitlines(keepends=True):
+            # If we encounter an execution location, we are done.
+            if re.search(execution_submission_location_regex, line):
+                break
+
+            if "Determining projects to restore..." in line:
+                continue
+            if f"Restored {self.config.dodona.workdir}" in line:
+                continue
+
+            line = re.sub(submission_location_regex, r"<code>:\1", line)
+            line = re.sub(compilation_location_regex, r"<code>:\1:\2", line)
+            line = line.replace(compilation_suffix, "")
+            resulting_lines += line
+
+        return resulting_lines
 
     def compiler_output(
         self, stdout: str, stderr: str

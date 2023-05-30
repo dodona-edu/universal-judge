@@ -1,19 +1,19 @@
 import html
 import logging
-import math
 import os
 import re
 from pathlib import Path
-from typing import TYPE_CHECKING, List, Tuple
+from typing import TYPE_CHECKING, Optional
 
 from tested.configs import GlobalConfig
-from tested.dodona import AnnotateCode, ExtendedMessage, Message, Permission
-from tested.languages.conventionalize import submission_file, submission_name
+from tested.dodona import ExtendedMessage, Permission
+from tested.languages.conventionalize import submission_name
 
 if TYPE_CHECKING:
     from tested.languages.config import Language
 
 _logger = logging.getLogger(__name__)
+code_regex = re.compile(r"<code>:(\d+)")
 
 
 def cleanup_description(lang_config: "Language", description: str) -> str:
@@ -32,18 +32,17 @@ def jvm_memory_limit(config: GlobalConfig) -> int:
 
 
 # Idea and original code: dodona/judge-pythia
-def jvm_cleanup_stacktrace(traceback: str, submission_filename: str) -> str:
+def jvm_cleanup_stacktrace(stacktrace: str, submission_filename: str) -> str:
     context_file_regex = re.compile(r"(Context[0-9]+|Selector)")
+    execution_regex = re.compile(rf"Execution(\d+)\.kt")
     unresolved_main_regex = r"error: unresolved reference: solutionMain"
     unresolved_reference_regex = re.compile(
         r"(error: unresolved reference: [a-zA-Z$_0-9]+)"
     )
-
-    if isinstance(traceback, str):
-        traceback = traceback.splitlines(True)
+    stacktrace = stacktrace.splitlines(True)
 
     skip_line, lines = False, []
-    for line in traceback:
+    for line in stacktrace:
         line = line.strip("\n")
 
         if not line:
@@ -66,36 +65,19 @@ def jvm_cleanup_stacktrace(traceback: str, submission_filename: str) -> str:
         if submission_filename in line:
             line = line.replace(submission_filename, "<code>")
             line = line.replace("Kt.solutionMain", "Kt.main")
+            line = line.replace("SubmissionKt.solutionMain", "SubmissionKt.main")
         elif "at " in line:
             skip_line = True
             continue
+
+        if execution_regex.search(line):
+            skip_line = True
+            continue
+
         skip_line = False
         lines.append(line + "\n")
 
-    if len(lines) > 20:
-        lines = lines[:19] + ["...\n"] + [lines[-1]]
     return "".join(lines)
-
-
-def jvm_stderr(
-    self: "Language", stderr: str
-) -> Tuple[List[Message], List[AnnotateCode], str]:
-    # Identifier to separate testcase output
-    identifier = f"--{self.config.testcase_separator_secret}-- SEP"
-    context_identifier = f"--{self.config.context_separator_secret}-- SEP"
-    submission = submission_file(self)
-
-    return (
-        [],
-        [],
-        context_identifier.join(
-            identifier.join(
-                self.cleanup_stacktrace(testcase)
-                for testcase in context.split(identifier)
-            )
-            for context in stderr.split(context_identifier)
-        ),
-    )
 
 
 def haskell_solution(lang_config: "Language", solution: Path):
@@ -116,76 +98,6 @@ def haskell_solution(lang_config: "Language", solution: Path):
             file.write("\n".join(resulting_lines))
 
 
-def haskell_cleanup_stacktrace(traceback: str, submission_filename: str):
-    context_file_regex = re.compile(r"(Context[0-9]+|Selector)")
-    called_at_regex = re.compile(r"^(.*called at )./(<code>:)([0-9]+)(:[0-9]+) .*$")
-    compile_line_regex = re.compile(r"^([0-9]+)(\s*\|.*)$")
-    type_conflict_regex = re.compile(
-        r"Couldn.t match expected type (.*) with actual type (.*)"
-    )
-    code_line_regex = re.compile(r"^(.*<code>:)([0-9]+)(:[0-9]+.*)$")
-
-    parse_module = r"error: parse error on input ‘module’"
-    replace_module = r"error: unexpected ‘module’"
-
-    if isinstance(traceback, str):
-        traceback = traceback.splitlines(True)
-
-    skip_line, lines = False, []
-    for line in traceback:
-        line = line.strip("\n")
-
-        if not line or line == "undefined":
-            continue
-
-        # skip line if not a new File line is started
-        if context_file_regex.search(line):
-            skip_line = True
-            continue
-        elif skip_line and (line.startswith(" ") or line[0].isdigit()):
-            match = type_conflict_regex.search(line)
-            if match:
-                lines.append(
-                    "Argument type conflict: Couldn't match expected type "
-                    f"{match.group(2)} with actual type "
-                    f"{match.group(1)}\n"
-                )
-            continue
-
-        # replace references to local names
-        if submission_filename in line:
-            line = line.replace(submission_filename, "<code>")
-            match = called_at_regex.match(line)
-            if match:
-                line = (
-                    f"{match.group(1)}{match.group(2)}"
-                    f"{int(match.group(3)) - 1}{match.group(4)}"
-                )
-            else:
-                match = code_line_regex.match(line)
-                if match:
-                    line = (
-                        f"{match.group(1)}{int(match.group(2)) - 1}" f"{match.group(3)}"
-                    )
-        elif "at " in line:
-            skip_line = True
-            continue
-        skip_line = False
-
-        if parse_module in line:
-            line = line.replace(parse_module, replace_module)
-        else:
-            match = compile_line_regex.match(line)
-            if match:
-                line = f"{int(match.group(1)) - 1}{match.group(2)}"
-
-        lines.append(line + "\n")
-
-    if len(lines) > 20:
-        lines = lines[:19] + ["...\n"] + [lines[-1]]
-    return "".join(lines)
-
-
 def executable_name(basename: str) -> str:
     """
     Utility function that will
@@ -200,86 +112,50 @@ def executable_name(basename: str) -> str:
         return basename
 
 
-def limit_output(
-    output: str,
-    limit_characters: int = 512,
-    max_lines: int = 20,
-    ellipsis_str: str = "...",
-) -> str:
-    """
-    Utility function for limiting a string output
-
-    :param output: String that possible needs to be abbreviated
-    :param limit_characters: Maximum characters used in the output
-    :param max_lines: Maximum lines in the output
-    :param ellipsis_str: ellipsis used when abbreviated is needed
-
-    :return: The abbreviated 'output' if needed otherwise the 'output' itself
-    """
-    lines = output.splitlines()
-    # Case character limit not exceeded and line limit not exceeded
-    if len(output) <= limit_characters and len(lines) <= max_lines:
-        return output
-    # Case character limit exceeded
-    max_chars = limit_characters - len(ellipsis_str)
-    forward_buffer = []
-    backward_buffer = []
-    len_lines = len(lines)
-    for f in range(math.ceil(min(max_lines - 1, len_lines) / 2)):
-        r = len_lines - f - 1
-        # Case last lines to consider are the same
-        if f == r:
-            forward_buffer.append(lines[f][: (max_chars - 1)])
-        # Otherwise
-        else:
-            next_line, prev_line = lines[f], lines[r]
-            current_length = len(next_line) + len(prev_line) + 2
-            # Both lines can be add in full
-            if current_length < max_chars:
-                forward_buffer.append(next_line)
-                backward_buffer.append(prev_line)
-                max_chars -= current_length
-            # Lines must be limited
-            else:
-                half = max_chars / 2
-                # Next line can be add in full
-                if len(next_line) + 2 < max_chars:
-                    forward_buffer.append(next_line)
-                    max_chars -= len(next_line) + 2
-                    backward_buffer.append(prev_line[-max_chars:])
-                # Prev line can be add in full
-                elif len(prev_line) + 2 < max_chars:
-                    backward_buffer.append(prev_line)
-                    max_chars -= len(prev_line) + 2
-                    forward_buffer.append(next_line[:max_chars])
-                # Both lines needed abbreviation
-                else:
-                    forward_buffer.append(next_line[: math.ceil(half - 1)])
-                    backward_buffer.append(prev_line[-math.floor(half - 1) :])
-                # Terminate loop because character limit reached
-                break
-    # Concat buffer
-    return "\n".join(forward_buffer + [ellipsis_str] + backward_buffer[::-1])
-
-
-def trace_to_html(
-    traceback: str,
-    link_regex: str = r"&lt;code&gt;:([0-9]+)",
-    link_subs: str = r'<a href="#" class="tab-link" data-tab="code" '
-    r'data-line="\1">&lt;code&gt;:\1</a>',
-) -> ExtendedMessage:
-    # Escape special characters
-    traceback = html.escape(traceback)
-    # Compile regex
-    link_regex = re.compile(link_regex)
-    # Add links to
-    traceback = link_regex.sub(link_subs, traceback)
+def _convert_stacktrace_to_html(stacktrace: str) -> ExtendedMessage:
+    link_replacement = r'<a href="#" class="tab-link" data-tab="code" data-line="\1">&lt;code&gt;:\1</a>'
+    # Escape special characters.
+    stacktrace = html.escape(stacktrace)
+    # Add links to code.
+    stacktrace = re.sub(code_regex, link_replacement, stacktrace)
     # We cannot generate a "pre" element, since that is ugly.
-    generated = f"<div class='code'>Traceback:{traceback.strip()}</div>"
+    generated = f"<div class='code'>Traceback:{stacktrace.strip()}</div>"
+    # Ensure newlines.
     generated = generated.replace("\n", "<br>")
-    _logger.debug(generated)
     return ExtendedMessage(
         description=generated,
         format="html",
         permission=Permission.STUDENT,
     )
+
+
+def _replace_code_line_number(offset: int, stacktrace: str) -> str:
+    def modify_line_number(match: re.Match) -> str:
+        current_number = int(match.group(1))
+        return "<code>:" + str(current_number + offset)
+
+    return re.sub(code_regex, modify_line_number, stacktrace)
+
+
+def convert_stacktrace_to_clickable_feedback(
+    lang: "Language", stacktrace: Optional[str]
+) -> Optional[ExtendedMessage]:
+    """
+    Convert a stacktrace to an HTML message with clickable links to the submission.
+
+    In this process, the stacktrace is first passed to the language config to clean
+    up the stacktrace. Then the code links are updated for shifted line numbers, and
+    finally, the code links are converted to actual links.
+
+    :param lang: The language config.
+    :param stacktrace: The stacktrace to clean up.
+    :return: A clickable feedback message.
+    """
+    if not stacktrace:
+        return None
+    cleaned_stacktrace = lang.cleanup_stacktrace(stacktrace)
+    updated_stacktrace = _replace_code_line_number(
+        lang.config.dodona.source_offset, cleaned_stacktrace
+    )
+    html_stacktrace = _convert_stacktrace_to_html(updated_stacktrace)
+    return html_stacktrace

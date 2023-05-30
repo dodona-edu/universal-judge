@@ -14,14 +14,8 @@ from tested.languages.conventionalize import (
     NamingConventions,
     conventionalize_namespace,
     submission_file,
-    submission_name,
 )
-from tested.languages.utils import (
-    jvm_cleanup_stacktrace,
-    jvm_memory_limit,
-    jvm_stderr,
-    limit_output,
-)
+from tested.languages.utils import jvm_cleanup_stacktrace, jvm_memory_limit
 from tested.serialisation import FunctionCall, Statement, Value
 
 if TYPE_CHECKING:
@@ -208,19 +202,6 @@ class Kotlin(Language):
 
     def cleanup_stacktrace(self, traceback: str) -> str:
         return jvm_cleanup_stacktrace(traceback, submission_file(self))
-
-    def compiler_output(
-        self, stdout: str, stderr: str
-    ) -> Tuple[List[Message], List[AnnotateCode], str, str]:
-        return (
-            [],
-            [],
-            limit_output(stdout),
-            jvm_cleanup_stacktrace(stderr, submission_name(self)),
-        )
-
-    def stderr(self, stderr: str) -> Tuple[List[Message], List[AnnotateCode], str]:
-        return jvm_stderr(self, stderr)
 
     def generate_statement(self, statement: Statement) -> str:
         from tested.languages.kotlin import generators

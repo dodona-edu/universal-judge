@@ -12,9 +12,7 @@ from pathlib import Path
 from tested.configs import DodonaConfig
 from tested.main import run
 
-exercise_dir = (
-    "/home/niko/Ontwikkeling/javascript-oefeningen/reeksen/09 OOP/star battle"
-)
+exercise_dir = "/home/niko/Ontwikkeling/universal-judge/tests/exercises/echo"
 
 
 def read_config() -> DodonaConfig:
@@ -24,13 +22,13 @@ def read_config() -> DodonaConfig:
         **{
             "memory_limit": 536870912,
             "time_limit": 60,
-            "programming_language": "javascript",
+            "programming_language": "python",
             "natural_language": "nl",
             "resources": Path(exercise_dir, "evaluation"),
-            "source": Path(exercise_dir, "solution/solution.nl.js"),
+            "source": Path(exercise_dir, "solution/run-error.py"),
             "judge": Path("."),
             "workdir": Path("workdir"),
-            "test_suite": "suite.yaml",
+            "test_suite": "one.tson",
             "options": {
                 "allow_fallback": False,
                 "mode": "batch",

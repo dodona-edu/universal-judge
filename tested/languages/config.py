@@ -21,8 +21,7 @@ from tested.languages.conventionalize import (
     conventionalize_namespace,
 )
 from tested.languages.description_generator import DescriptionGenerator
-from tested.languages.utils import limit_output, trace_to_html
-from tested.serialisation import ExceptionValue, FunctionCall, Statement, Value
+from tested.serialisation import FunctionCall, Statement, Value
 
 if typing.TYPE_CHECKING:
     from tested.configs import GlobalConfig
@@ -287,11 +286,10 @@ class Language(ABC):
         self, stdout: str, stderr: str
     ) -> Tuple[List[Message], List[AnnotateCode], str, str]:
         """
-        Callback that allows processing the output of the compiler. This might be
-        useful to filter TESTed code or add links to the code tab on Dodona.
+        Convert the stdout and stderr from a compiler to more structured data.
 
-        TODO: in context compilation mode, this is called for each compilation,
-          which can result in the same annotation 50x times.
+        Note that you should not clean stacktraces; this is done automatically
+        for the returned stdout and stderr.
 
         :param stdout: The standard output from the compiler.
         :param stderr: The standard error from the compiler.
@@ -300,37 +298,7 @@ class Language(ABC):
                  - A list of annotations to add.
                  - The new stdout and stderr.
         """
-        return [], [], limit_output(stdout), limit_output(stderr)
-
-    def exception_output(self, exception: ExceptionValue) -> ExceptionValue:
-        """
-        Callback that allows modifying the exception value, for example the
-        stacktrace.
-
-        :param exception: The exception.
-        :return: The modified exception.
-        """
-        exception.stacktrace = self.cleanup_stacktrace(exception.stacktrace)
-        exception.message = self.clean_exception_message(exception.message)
-        return exception
-
-    def stdout(self, stdout: str) -> Tuple[List[Message], List[AnnotateCode], str]:
-        """
-        Callback that allows modifying the stdout.
-
-        :param stdout: The original stdout.
-        :return: A tuple containing messages, annotations and the new stdout.
-        """
-        return [], [], stdout
-
-    def stderr(self, stderr: str) -> Tuple[List[Message], List[AnnotateCode], str]:
-        """
-        Callback that allows modifying the stderr.
-
-        :param stderr: The original stderr.
-        :return: A tuple containing messages, annotations and the new stderr.
-        """
-        return [], [], stderr
+        return [], [], stdout, stderr
 
     def linter(self, remaining: float) -> Tuple[List[Message], List[AnnotateCode]]:
         """
@@ -396,35 +364,21 @@ class Language(ABC):
             messages.append(get_i18n_string("languages.config.unknown.compilation"))
             return None, messages, Status.COMPILATION_ERROR, []
 
-    def cleanup_stacktrace(self, traceback: str) -> str:
+    def cleanup_stacktrace(self, stacktrace: str) -> str:
         """
-        Takes a traceback as a string or as a list of strings and returns a reduced
-        version of the traceback as a list of strings.
+        Clean up a stacktrace.
 
-        :param traceback: Stack trace to cleanup
+        The language implementation should, if possible, remove all references to
+        "internal" TESTed code, and also replace all paths to the submission with
+        the placeholder "<code>".
+
+        :param stacktrace: Stack trace to clean up.
         :return A clean stack trace
         """
-        return traceback
+        return stacktrace
 
     def cleanup_description(self, description: str) -> str:
         return description
-
-    def clean_stacktrace_to_message(self, stacktrace: str) -> Optional[Message]:
-        if stacktrace:
-            return trace_to_html(stacktrace)
-        else:
-            return None
-
-    def clean_exception_message(self, message: str) -> str:
-        """
-        Clean the exception message.
-
-        By default, nothing is done to the message.
-
-        :param message: The message from the exception.
-        :return: The new message.
-        """
-        return message
 
     def get_description_generator(self) -> DescriptionGenerator:
         if self._description_generator is None:

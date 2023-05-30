@@ -12,7 +12,6 @@ from tested.languages.conventionalize import (
     NamingConventions,
     submission_file,
 )
-from tested.languages.utils import limit_output
 from tested.serialisation import Statement, Value
 
 if TYPE_CHECKING:
@@ -54,29 +53,23 @@ class Bash(Language):
         else:
             return [], files
 
-    def compiler_output(
-        self, stdout: str, stderr: str
-    ) -> Tuple[List[Message], List[AnnotateCode], str, str]:
-        regex = re.compile(f"{submission_file(self)}: " f"(regel|rule) ([0-9]+):")
-        return [], [], limit_output(stdout), regex.sub("<code>:\\2:", stderr)
-
     def execution(self, cwd: Path, file: str, arguments: List[str]) -> Command:
         return ["bash", file, *arguments]
 
-    def stderr(self, stderr: str) -> Tuple[List[Message], List[AnnotateCode], str]:
+    def cleanup_stacktrace(self, stacktrace: str) -> str:
         regex = re.compile(
             f"{EXECUTION_PREFIX}_[0-9]+_[0-9]+\\."
             f"{self.file_extension()}: [a-zA-Z_]+ [0-9]+:"
         )
-        script = f"./{submission_file(self)}"
-        stderr = regex.sub("<testcode>:", stderr).replace(script, "<code>")
+        script = rf"{submission_file(self)}: (regel|rule) (\d+)"
+        stacktrace = re.sub(script, r"<code>:\2", stacktrace)
+        stacktrace = regex.sub("<testcode>:", stacktrace).replace(
+            submission_file(self), "<code>"
+        )
         regex = re.compile(
             f"{EXECUTION_PREFIX}_[0-9]+_[0-9]+\\." f"{self.file_extension()}"
         )
-        return [], [], regex.sub("<testcode>", stderr)
-
-    def stdout(self, stdout: str) -> Tuple[List[Message], List[AnnotateCode], str]:
-        return self.stderr(stdout)
+        return regex.sub("<testcode>", stacktrace)
 
     def linter(self, remaining: float) -> Tuple[List[Message], List[AnnotateCode]]:
         # Import locally to prevent errors.

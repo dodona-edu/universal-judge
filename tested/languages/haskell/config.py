@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 from typing import TYPE_CHECKING, Dict, List, Mapping, Set, Tuple
 
@@ -13,7 +14,6 @@ from tested.languages.conventionalize import (
 from tested.languages.utils import (
     cleanup_description,
     executable_name,
-    haskell_cleanup_stacktrace,
     haskell_solution,
 )
 from tested.serialisation import FunctionCall, Statement, Value
@@ -104,17 +104,53 @@ class Haskell(Language):
         return cleanup_description(self, description)
 
     def cleanup_stacktrace(self, traceback: str) -> str:
-        return haskell_cleanup_stacktrace(traceback, submission_file(self))
-
-    def compiler_output(
-        self, stdout: str, stderr: str
-    ) -> Tuple[List[Message], List[AnnotateCode], str, str]:
-        return (
-            [],
-            [],
-            "",
-            haskell_cleanup_stacktrace(stderr, submission_file(self)),
+        filename = submission_file(self)
+        context_file_regex = re.compile(r"(Context[0-9]+|Selector)")
+        compile_line_regex = re.compile(r"^([0-9]+)(\s*\|.*)$")
+        type_conflict_regex = re.compile(
+            r"Couldn't match expected type (.*) with actual type (.*)"
         )
+        parse_module = r"error: parse error on input ‘module’"
+        replace_module = r"error: unexpected ‘module’"
+        traceback = traceback.splitlines()
+        skip_line, lines = False, []
+        for line in traceback:
+            if not line or line == "undefined":
+                continue
+
+            # skip line if not a new File line is started
+            if context_file_regex.search(line):
+                skip_line = True
+                continue
+            elif skip_line and (line.startswith(" ") or line[0].isdigit()):
+                match = type_conflict_regex.search(line)
+                if match:
+                    lines.append(
+                        "Argument type conflict: Couldn't match expected type "
+                        f"{match.group(2)} with actual type "
+                        f"{match.group(1)}\n"
+                    )
+                continue
+
+            # replace references to local names
+            if filename in line:
+                line = line.replace(f"./{filename}", "<code>").replace(
+                    filename, "<code>"
+                )
+            elif "at " in line:
+                skip_line = True
+                continue
+            skip_line = False
+
+            if parse_module in line:
+                line = line.replace(parse_module, replace_module)
+            else:
+                match = compile_line_regex.match(line)
+                if match:
+                    line = f"{int(match.group(1)) - 1}{match.group(2)}"
+
+            lines.append(line + "\n")
+        return "".join(lines)
 
     def generate_statement(self, statement: Statement) -> str:
         from tested.languages.haskell import generators
