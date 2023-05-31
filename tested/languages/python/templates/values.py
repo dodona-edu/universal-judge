@@ -8,6 +8,7 @@ import traceback
 
 
 def encode(value):
+    diagnostic = None
     if value is None:
         type_ = "nothing"
         data_ = value
@@ -55,8 +56,9 @@ def encode(value):
     else:
         type_ = "unknown"
         data_ = str(value)
+        diagnostic = str(type(value))
 
-    return {"data": data_, "type": type_}
+    return {"data": data_, "type": type_, "diagnostic": diagnostic}
 
 
 def send_value(stream, value):

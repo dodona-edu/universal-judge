@@ -37,13 +37,17 @@ private fun encodeSequence(objects: Iterable<Any?>): String {
 
 private fun encode(value: Any?): String {
     val typeAndData = internalEncode(value)
-    return String.format("{ \"data\": %s, \"type\": \"%s\"}",
-            typeAndData[1], typeAndData[0])
+    if (typeAndData[2] != null) {
+        return String.format("{ \"data\": %s, \"type\": \"%s\", \"diagnostic\": \"%s\"}", typeAndData[1], typeAndData[0], typeAndData[2])
+    } else {
+        return String.format("{ \"data\": %s, \"type\": \"%s\"}", typeAndData[1], typeAndData[0])
+    }
 }
 
-private fun internalEncode(value: Any?): Array<String> {
+private fun internalEncode(value: Any?): Array<String?> {
     val type: String
     val data: String
+    var diagnostic: String? = null
 
     if (value == null) {
         type = "nothing"
@@ -127,11 +131,12 @@ private fun internalEncode(value: Any?): Array<String> {
                 }
                 .joinToString(separator = ", ", prefix = "[", postfix = "]")
     } else {
-        type = value::class.simpleName.toString()
-        data = String.format("\"%s\"", escape(value.toString()));
+        type = "unknown"
+        data = String.format("\"%s\"", escape(value.toString()))
+        diagnostic = value::class.simpleName
     }
 
-    return arrayOf(type, data)
+    return arrayOf(type, data, diagnostic)
 }
 
 fun evaluated(writer: PrintWriter, result: Boolean, expected: String?,

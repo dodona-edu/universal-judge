@@ -28,17 +28,9 @@ from tested.serialisation import (
     to_python_comparable,
 )
 from tested.testsuite import OutputChannel, TextOutputChannel, ValueOutputChannel
-from tested.utils import Either, get_args, sorted_no_duplicates
+from tested.utils import get_args, sorted_no_duplicates
 
 logger = logging.getLogger(__name__)
-
-
-def try_as_value(value: str) -> Either[Value]:
-    try:
-        actual = parse_value(value)
-        return Either(actual)
-    except (ValueError, TypeError) as e:
-        return Either(e)
 
 
 def try_as_readable_value(
@@ -53,7 +45,7 @@ def try_as_readable_value(
 
 
 def get_values(
-    bundle: Bundle, output_channel: ValueOutputChannel, actual
+    bundle: Bundle, output_channel: ValueOutputChannel, actual: str
 ) -> Union[EvaluationResult, Tuple[Value, str, Optional[Value], str]]:
     if isinstance(output_channel, TextOutputChannel):
         expected = output_channel.get_data_as_string(bundle.config.resources)
@@ -73,21 +65,31 @@ def get_values(
     # A crash here indicates a problem with one of the language implementations,
     # or a student is trying to cheat.
     try:
-        actual = try_as_value(actual).get()
+        actual = parse_value(actual)
     except (TypeError, ValueError) as e:
         raw_message = f"Received {actual}, which caused {e} for get_values."
         message = ExtendedMessage(
             description=raw_message, format="text", permission=Permission.STAFF
         )
-        student = (
-            "Your return value was wrong; additionally Dodona didn't "
-            "recognize it. Contact staff for more information."
-        )
+        student = "An error occurred while collecting the return value. Contact staff for more information."
         return EvaluationResult(
-            result=StatusMessage(enum=Status.WRONG, human=student),
+            result=StatusMessage(enum=Status.INTERNAL_ERROR, human=student),
             readable_expected=readable_expected,
             readable_actual=str(actual),
             messages=[message],
+        )
+
+    # If the type is "unknown", we handle it here, instead of sending it through
+    # the language configs.
+    if actual.type == BasicStringTypes.UNKNOWN:
+        if actual.diagnostic and actual.diagnostic not in actual.data:
+            readable_actual = f"({actual.diagnostic}) {actual.data}"
+        else:
+            readable_actual = actual.data
+        return EvaluationResult(
+            result=StatusMessage(enum=Status.WRONG),
+            readable_expected=readable_expected,
+            readable_actual=readable_actual,
         )
 
     readable_actual = generate_statement(bundle, actual)

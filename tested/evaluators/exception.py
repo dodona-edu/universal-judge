@@ -12,7 +12,6 @@ from tested.internationalization import get_i18n_string
 from tested.languages.utils import convert_stacktrace_to_clickable_feedback
 from tested.serialisation import ExceptionValue
 from tested.testsuite import ExceptionOutputChannel
-from tested.utils import Either
 
 logger = logging.getLogger(__name__)
 
@@ -21,15 +20,10 @@ class _ExceptionValue(BaseModel):
     __root__: ExceptionValue
 
 
-def try_as_exception(config: EvaluatorConfig, value: str) -> Either[ExceptionValue]:
-    try:
-        actual = _ExceptionValue.parse_raw(value).__root__
-        actual.stacktrace = config.bundle.lang_config.cleanup_stacktrace(
-            actual.stacktrace
-        )
-        return Either(actual)
-    except (TypeError, ValueError) as e:
-        return Either(e)
+def try_as_exception(config: EvaluatorConfig, value: str) -> ExceptionValue:
+    actual = _ExceptionValue.parse_raw(value).__root__
+    actual.stacktrace = config.bundle.lang_config.cleanup_stacktrace(actual.stacktrace)
+    return actual
 
 
 def try_as_readable_exception(
@@ -78,7 +72,7 @@ def evaluate(
         )
 
     try:
-        actual = try_as_exception(config, actual).get()
+        actual = try_as_exception(config, actual)
     except (TypeError, ValueError) as e:
         staff_message = ExtendedMessage(
             description=get_i18n_string(

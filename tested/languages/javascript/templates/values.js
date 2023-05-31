@@ -4,9 +4,11 @@ const fs = require("fs");
 function encode(value) {
 
     let type;
+    let diagnostic = null;
 
     if (typeof value === "undefined") {
         type = "undefined";
+        data = null;
     } else if (typeof value === "boolean") {
         type = "boolean";
     } else if (typeof value === "number") {
@@ -52,7 +54,8 @@ function encode(value) {
                                 };
                             }
                     );
-        } else {
+        } else if (value?.constructor === Object) {
+            // Plain objects
             type = "map";
             // Process the elements of the object.
             value = Object.entries(value).map(([key, value]) => {
@@ -61,14 +64,21 @@ function encode(value) {
                     value: encode(value)
                 };
             });
+        } else {
+            type = "unknown";
+            diagnostic = value?.constructor?.name;
+            value = JSON.stringify(value);
         }
     } else {
         type = "unknown";
+        diagnostic = value?.constructor?.name;
+        value = Object.prototype.toString.call(value);
     }
 
     return {
         type: type,
-        data: value
+        data: value,
+        diagnostic: diagnostic
     };
 
 }

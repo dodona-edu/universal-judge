@@ -23,6 +23,7 @@ namespace Tested
         private static Dictionary<string, object?> internalEncode(Object? value) {
             string type;
             object? data = value;
+            string? diagnostic = null;
 
             if (value == null) {
                 type = "nothing";
@@ -96,10 +97,13 @@ namespace Tested
                 data = entries;
             } else {
                 type = "unknown";
+                diagnostic = data.GetType().ToString();
+                data = JsonSerializer.Serialize(data);
             }
             var result = new Dictionary<string, object?>();
             result.Add("type", type);
             result.Add("data", data);
+            result.Add("diagnostic", diagnostic);
             return result;
         }
 
