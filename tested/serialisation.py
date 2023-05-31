@@ -157,6 +157,7 @@ class SpecialNumbers(StrEnum):
 class NumberType(WithFeatures, WithFunctions):
     type: NumericTypes
     data: Union[SpecialNumbers, Decimal, int, float]
+    diagnostic: Literal[None] = None  # Unused in this type.
 
     def get_used_features(self) -> FeatureSet:
         return FeatureSet(set(), {self.type}, _get_self_nested_type(self.type))
@@ -187,6 +188,12 @@ class StringType(WithFeatures, WithFunctions):
     type: StringTypes
     data: str
 
+    # Optional string representation of the type of the value, if the type is
+    # "unknown". TESTed will not do anything with this, as the actual type is
+    # unknown, but it will be shown to the user to aid them in debugging their
+    # error.
+    diagnostic: Optional[str] = None
+
     def get_used_features(self) -> FeatureSet:
         return FeatureSet(set(), {self.type}, _get_self_nested_type(self.type))
 
@@ -198,6 +205,7 @@ class StringType(WithFeatures, WithFunctions):
 class BooleanType(WithFeatures, WithFunctions):
     type: BooleanTypes
     data: bool
+    diagnostic: Literal[None] = None  # Unused in this type.
 
     def get_used_features(self) -> FeatureSet:
         return FeatureSet(set(), {self.type}, _get_self_nested_type(self.type))
@@ -210,6 +218,7 @@ class BooleanType(WithFeatures, WithFunctions):
 class SequenceType(WithFeatures, WithFunctions):
     type: SequenceTypes
     data: List["Expression"]
+    diagnostic: Literal[None] = None  # Unused in this type.
 
     def get_used_features(self) -> FeatureSet:
         nested_features = [x.get_used_features() for x in self.data]
@@ -272,6 +281,7 @@ class ObjectKeyValuePair(WithFeatures, WithFunctions):
 class ObjectType(WithFeatures, WithFunctions):
     type: ObjectTypes
     data: List[ObjectKeyValuePair]
+    diagnostic: Literal[None] = None  # Unused in this type.
 
     def get_key_type(self) -> WrappedAllTypes:
         """
@@ -307,6 +317,7 @@ class ObjectType(WithFeatures, WithFunctions):
 class NothingType(WithFeatures, WithFunctions):
     type: NothingTypes = BasicNothingTypes.NOTHING
     data: Literal[None] = None
+    diagnostic: Literal[None] = None  # Unused in this type.
 
     def get_used_features(self) -> FeatureSet:
         return FeatureSet(set(), {self.type}, _get_self_nested_type(self.type))
@@ -555,7 +566,7 @@ class PrintingDecimal:
 def _convert_to_python(value: Optional[Value], for_printing=False) -> Any:
     """
     Convert the parsed values into the proper Python type. This is basically
-    the same as de-serialising a value, but this function is currently not re-used
+    the same as deserialising a value, but this function is currently not re-used
     in the Python implementation, since run-time de-serialisation is not supported.
     :param value: The parsed value.
     :param for_printing: If the result will be used for printing or not.

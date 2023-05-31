@@ -3,7 +3,7 @@ Programmed evaluator.
 """
 import logging
 import traceback
-from typing import Optional, Tuple
+from typing import Optional
 
 from tested.datatypes import StringTypes
 from tested.dodona import ExtendedMessage, Permission, Status, StatusMessage
@@ -12,20 +12,13 @@ from tested.evaluators.common import (
     EvaluatorConfig,
     cleanup_specific_programmed,
 )
-from tested.evaluators.value import get_values, try_as_value
+from tested.evaluators.value import get_values
 from tested.internationalization import get_i18n_string
 from tested.judge.programmed import evaluate_programmed
 from tested.judge.utils import BaseExecutionResult
 from tested.serialisation import EvalResult, StringType, Value
-from tested.testsuite import (
-    ExceptionOutputChannel,
-    FileOutputChannel,
-    NormalOutputChannel,
-    ProgrammedEvaluator,
-    TextOutputChannel,
-    ValueOutputChannel,
-)
-from tested.utils import Either, get_args
+from tested.testsuite import NormalOutputChannel, ProgrammedEvaluator
+from tested.utils import get_args
 
 _logger = logging.getLogger(__name__)
 
@@ -41,34 +34,6 @@ def _maybe_string(value_: str) -> Optional[Value]:
 
 def _try_specific(value_: str) -> EvalResult:
     return EvalResult.parse_raw(value_)
-
-
-def expected_as_value(
-    config: EvaluatorConfig, channel: NormalOutputChannel, actual: str
-) -> Tuple[Optional[Value], Either[Value]]:
-    if isinstance(channel, TextOutputChannel):
-        expected = channel.get_data_as_string(config.bundle.config.resources)
-        expected_value = _maybe_string(expected)
-        actual_value = StringType(StringTypes.TEXT, expected)
-        return expected_value, Either(actual_value)
-
-    if isinstance(channel, FileOutputChannel):
-        expected = _maybe_string(channel.expected_path)
-        actual = StringType(type=StringTypes.TEXT, data=channel.actual_path)
-        return expected, Either(actual)
-
-    if isinstance(channel, ValueOutputChannel):
-        expected = channel.value
-        try:
-            actual = try_as_value(actual).get()
-        except (ValueError, TypeError) as e:
-            return expected, Either(e)
-        return expected, Either(actual)
-
-    if isinstance(channel, ExceptionOutputChannel):
-        raise AssertionError("Programmed evaluation is not support for exceptions.")
-
-    raise AssertionError(f"Unknown channel type for {channel}.")
 
 
 def evaluate(

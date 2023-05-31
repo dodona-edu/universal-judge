@@ -919,3 +919,30 @@ def test_function_arguments_without_brackets(tmp_path: Path, pytestconfig):
         result
         == f'{submission_name(bundle.lang_config)}.test 5.5 :: Double "hallo" True'
     )
+
+
+@pytest.mark.parametrize(
+    "language_and_expected",
+    [
+        ("csharp", '(Coords) {"X":5.5,"Y":7.5}'),
+        ("java", "Coord[x=5, y=7]"),
+        ("javascript", '(Coord) {"x":5,"y":7}'),
+        ("kotlin", "Coord(x=5, y=6)"),
+        ("python", "(<class 'submission.Coord'>) Coord(x=5, y=6)"),
+    ],
+)
+def test_unknown_return_type(tmp_path: Path, pytestconfig, language_and_expected):
+    language, expected = language_and_expected
+    conf = configuration(
+        pytestconfig,
+        "echo-function",
+        language,
+        tmp_path,
+        "one.tson",
+        "unknown-return-type",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["wrong"]
+    received_data = updates.find_next("close-test")["generated"]
+    assert received_data == expected

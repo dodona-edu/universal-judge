@@ -15,6 +15,7 @@ class BasicNumericTypes(StrEnum):
 class BasicStringTypes(StrEnum):
     TEXT = auto()
     ANY = auto()  # Cannot be used in a test suite.
+    UNKNOWN = auto()  # Cannot be used in a test suite.
 
 
 @unique

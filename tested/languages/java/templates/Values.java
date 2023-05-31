@@ -45,6 +45,7 @@ public class Values {
     private static List<String> internalEncode(Object value) {
         String type;
         String data;
+        String diagnostic = null;
 
         if (value == null) {
             type = "nothing";
@@ -120,13 +121,16 @@ public class Values {
         } else {
             type = "unknown";
             data = "\"" + escape(value.toString()) + "\"";
+            diagnostic = "\"" + escape(((Object) value).getClass().getName()) + "\"";
         }
-        return List.of(type, data);
+        return Arrays.asList(type, data, diagnostic);
     }
 
     private static String encode(Object value) {
         var typeAndData = internalEncode(value);
-        return "{ \"data\": " + typeAndData.get(1) + ", \"type\": \"" + typeAndData.get(0) + "\"}";
+        return "{ \"data\": " + typeAndData.get(1) + "," +
+                " \"type\": \"" + typeAndData.get(0) + "\", " +
+                " \"diagnostic\": " + typeAndData.get(2) + "}";
     }
 
     public static void send(PrintWriter writer, Object value) {

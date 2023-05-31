@@ -69,24 +69,6 @@ def basename(file: Union[str, Path]) -> str:
     return file.stem
 
 
-T = TypeVar("T")
-
-
-class Either(Generic[T]):
-    def __init__(self, value: Union[T, Exception]):
-        self.value = value
-
-    def get(self) -> T:
-        if isinstance(self.value, Exception):
-            raise self.value
-        return self.value
-
-    def maybe(self) -> Optional[T]:
-        if isinstance(self.value, Exception):
-            return None
-        return self.value
-
-
 def get_identifier() -> str:
     """Generate a random secret valid in most configs."""
     letter = random.choice(string.ascii_letters)
@@ -132,6 +114,7 @@ def consume_shebang(submission: Path) -> Optional[str]:
 
 K = TypeVar("K")
 V = TypeVar("V")
+T = TypeVar("T")
 
 
 class _FallbackDict(dict, Generic[K, V]):
