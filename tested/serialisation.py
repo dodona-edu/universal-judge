@@ -17,7 +17,6 @@ command line. The schema will be printed to stdout. This can be used to generate
 classes for implementations in other configs.
 """
 import copy
-import inspect
 import json
 import logging
 import math
