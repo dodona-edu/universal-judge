@@ -18,6 +18,7 @@ from tested.languages.preparation import (
     PreparedExecutionUnit,
     PreparedTestcase,
 )
+from tested.languages.utils import convert_unknown_type
 from tested.serialisation import (
     Assignment,
     Expression,
@@ -74,6 +75,8 @@ def convert_value(value: Value) -> str:
         return "Nothing :: Maybe Integer"
     elif value.type == BasicSequenceTypes.SEQUENCE:
         return f"[{convert_arguments(value.data)}]"
+    elif value.type == BasicStringTypes.UNKNOWN:
+        return convert_unknown_type(value)
     raise AssertionError(f"Invalid literal: {value!r}")
 
 

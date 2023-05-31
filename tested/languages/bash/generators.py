@@ -7,6 +7,7 @@ from tested.languages.preparation import (
     PreparedExecutionUnit,
     PreparedTestcase,
 )
+from tested.languages.utils import convert_unknown_type
 from tested.serialisation import (
     Assignment,
     FunctionCall,
@@ -21,6 +22,8 @@ from tested.utils import get_args
 def convert_value(value: Value) -> str:
     if value.type in (AdvancedStringTypes.CHAR, BasicStringTypes.TEXT):
         return shlex.quote(value.data)
+    elif value.type == BasicStringTypes.UNKNOWN:
+        return convert_unknown_type(value)
     raise AssertionError(f"Invalid literal: {value!r}")
 
 

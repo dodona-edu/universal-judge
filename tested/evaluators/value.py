@@ -79,19 +79,6 @@ def get_values(
             messages=[message],
         )
 
-    # If the type is "unknown", we handle it here, instead of sending it through
-    # the language configs.
-    if actual.type == BasicStringTypes.UNKNOWN:
-        if actual.diagnostic and actual.diagnostic not in actual.data:
-            readable_actual = f"({actual.diagnostic}) {actual.data}"
-        else:
-            readable_actual = actual.data
-        return EvaluationResult(
-            result=StatusMessage(enum=Status.WRONG),
-            readable_expected=readable_expected,
-            readable_actual=readable_actual,
-        )
-
     readable_actual = generate_statement(bundle, actual)
     return expected, readable_expected, actual, readable_actual
 

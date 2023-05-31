@@ -20,6 +20,7 @@ from tested.languages.preparation import (
     PreparedFunctionCall,
     PreparedTestcase,
 )
+from tested.languages.utils import convert_unknown_type
 from tested.serialisation import (
     Assignment,
     Expression,
@@ -122,6 +123,8 @@ def convert_value(value: Value) -> str:
                 result += ", "
         result += ")"
         return result
+    elif value.type == BasicStringTypes.UNKNOWN:
+        return convert_unknown_type(value)
     raise AssertionError(f"Invalid literal: {value!r}")
 
 
