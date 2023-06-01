@@ -6,8 +6,10 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Optional
 
 from tested.configs import GlobalConfig
+from tested.datatypes import BasicStringTypes
 from tested.dodona import ExtendedMessage, Permission
 from tested.languages.conventionalize import submission_name
+from tested.serialisation import StringType
 
 if TYPE_CHECKING:
     from tested.languages.config import Language
@@ -159,3 +161,13 @@ def convert_stacktrace_to_clickable_feedback(
     )
     html_stacktrace = _convert_stacktrace_to_html(updated_stacktrace)
     return html_stacktrace
+
+
+def convert_unknown_type(value: StringType) -> str:
+    assert value.type == BasicStringTypes.UNKNOWN
+    # This is only used to generate values for displaying, so it does not have
+    # to be valid code.
+    result = value.data
+    if value.diagnostic and value.diagnostic not in result:
+        result = f"({value.diagnostic}) {result}"
+    return result

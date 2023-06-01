@@ -693,6 +693,7 @@ def to_python_comparable(value: Optional[Value]):
         BasicStringTypes.TEXT,
         BasicNothingTypes.NOTHING,
         BasicStringTypes.ANY,
+        BasicStringTypes.UNKNOWN,
     ):
         return value.data
 

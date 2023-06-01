@@ -16,6 +16,7 @@ from tested.languages.preparation import (
     PreparedExecutionUnit,
     PreparedTestcase,
 )
+from tested.languages.utils import convert_unknown_type
 from tested.serialisation import (
     Assignment,
     Expression,
@@ -82,6 +83,8 @@ def convert_value(value: Value) -> str:
         return f"(bool) " + str(value.data).lower()
     elif value.type == BasicNothingTypes.NOTHING:
         return "NULL"
+    elif value.type == BasicStringTypes.UNKNOWN:
+        return convert_unknown_type(value)
     raise AssertionError(f"Invalid literal: {value!r}")
 
 
