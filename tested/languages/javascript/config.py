@@ -90,6 +90,7 @@ class JavaScript(Language):
         return {BasicStringTypes.TEXT}
 
     def set_type_restrictions(self) -> Optional[Set[ExpressionTypes]]:
+        # noinspection PyTypeChecker
         return {
             "integer",
             "real",
