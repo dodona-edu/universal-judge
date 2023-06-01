@@ -36,7 +36,7 @@ function encode(value) {
         value = value.toString();
     } else if (typeof value === "object") {
         if (value === null) {
-            type = "nothing";
+            type = "null";
         } else if (Array.isArray(value)) {
             type = "list";
             value = value.map(encode);
