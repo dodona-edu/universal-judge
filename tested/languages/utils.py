@@ -121,7 +121,7 @@ def _convert_stacktrace_to_html(stacktrace: str) -> ExtendedMessage:
     # Add links to code.
     stacktrace = re.sub(code_regex, link_replacement, stacktrace)
     # We cannot generate a "pre" element, since that is ugly.
-    generated = f"<div class='code'>Traceback:{stacktrace.strip()}</div>"
+    generated = f"<div class='code'>{stacktrace.strip()}</div>"
     # Ensure newlines.
     generated = generated.replace("\n", "<br>")
     return ExtendedMessage(
