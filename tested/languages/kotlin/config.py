@@ -75,6 +75,8 @@ class Kotlin(Language):
             "set": "supported",
             "map": "supported",
             "nothing": "supported",
+            "undefined": "reduced",
+            "null": "reduced",
             "int8": "supported",
             "uint8": "supported",
             "int16": "supported",
@@ -91,7 +93,6 @@ class Kotlin(Language):
             "array": "supported",
             "list": "supported",
             "tuple": "reduced",
-            "undefined": "reduced",
         }
 
     def map_type_restrictions(self) -> Optional[Set[ExpressionTypes]]:

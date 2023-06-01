@@ -232,9 +232,13 @@ def evaluate(
     py_actual = to_python_comparable(actual)
 
     content_check = py_expected == py_actual
+    correct = type_check and content_check
 
-    # Only add the message about the type if the content is the same.
-    if content_check and not type_check:
+    if is_multiline_string:
+        readable_actual = get_as_string(actual, readable_actual)
+
+    # If the displayed values are the same, add a message about the type.
+    if not type_check and readable_expected == readable_actual:
         type_status = get_i18n_string("evaluators.value.datatype.wrong")
         messages.append(
             get_i18n_string(
@@ -243,11 +247,6 @@ def evaluate(
                 actual=actual.type,
             )
         )
-
-    correct = type_check and content_check
-
-    if is_multiline_string:
-        readable_actual = get_as_string(actual, readable_actual)
 
     return EvaluationResult(
         result=StatusMessage(

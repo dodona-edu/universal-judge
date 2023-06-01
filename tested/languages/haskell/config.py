@@ -50,6 +50,7 @@ class Haskell(Language):
             "sequence": "supported",
             "nothing": "supported",
             "undefined": "reduced",
+            "null": "reduced",
             "int8": "supported",
             "uint8": "supported",
             "int16": "supported",

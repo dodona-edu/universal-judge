@@ -68,6 +68,7 @@ class JavaScript(Language):
             "map": "supported",
             "nothing": "supported",
             "undefined": "supported",
+            "null": "supported",
             "int8": "reduced",
             "uint8": "reduced",
             "int16": "reduced",

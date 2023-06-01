@@ -72,6 +72,8 @@ class CSharp(Language):
             "set": "supported",
             "map": "supported",
             "nothing": "supported",
+            "undefined": "reduced",
+            "null": "reduced",
             "int8": "supported",
             "uint8": "supported",
             "int16": "supported",
