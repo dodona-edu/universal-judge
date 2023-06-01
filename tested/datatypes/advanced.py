@@ -99,6 +99,11 @@ class AdvancedNothingTypes(_AdvancedDataType):
     Distinguish between undefined values and null values.
     Like in JavaScript.
     """
+    NULL = "null", BasicNothingTypes.NOTHING
+    """
+    Type to explicitly and exclusively denote the "null" type, but
+    not the "undefined" type, as the basic "nothing" type does.
+    """
 
 
 AdvancedTypes = Union[

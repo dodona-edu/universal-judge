@@ -70,6 +70,7 @@ class Python(Language):
             "map": "supported",
             "nothing": "supported",
             "undefined": "reduced",
+            "null": "reduced",
             "int8": "reduced",
             "uint8": "reduced",
             "int16": "reduced",

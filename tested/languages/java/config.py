@@ -66,6 +66,7 @@ class Java(Language):
             "map": "supported",
             "nothing": "supported",
             "undefined": "reduced",
+            "null": "reduced",
             "int8": "supported",
             "uint8": "reduced",
             "int16": "supported",

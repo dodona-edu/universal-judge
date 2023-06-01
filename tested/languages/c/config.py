@@ -52,6 +52,7 @@ class C(Language):
             "boolean": "supported",
             "nothing": "supported",
             "undefined": "reduced",
+            "null": "reduced",
             "int8": "reduced",
             "uint8": "reduced",
             "int16": "supported",

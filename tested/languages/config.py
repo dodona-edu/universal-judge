@@ -221,7 +221,7 @@ class Language(ABC):
 
         :return: The features supported by this language.
         """
-        return {}
+        return set()
 
     def map_type_restrictions(self) -> Optional[Set[ExpressionTypes]]:
         """
