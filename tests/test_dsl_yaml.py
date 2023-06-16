@@ -4,6 +4,8 @@ from tested.datatypes import (
     AdvancedNumericTypes,
     AdvancedSequenceTypes,
     BasicNumericTypes,
+    BasicObjectTypes,
+    BasicSequenceTypes,
 )
 from tested.dsl import translate_to_test_suite
 from tested.serialisation import Assignment, FunctionCall, ObjectType, SequenceType
@@ -430,3 +432,64 @@ def test_statement_raw_return():
     assert isinstance(test.output.result.value, SequenceType)
     for element in test.output.result.value.data:
         assert element.type == AdvancedSequenceTypes.TUPLE
+
+
+@pytest.mark.parametrize(
+    "function_name,result",
+    [
+        ("set", BasicSequenceTypes.SET),
+        ("sequence", BasicSequenceTypes.SEQUENCE),
+        ("array", AdvancedSequenceTypes.ARRAY),
+        ("tuple", AdvancedSequenceTypes.TUPLE),
+        ("map", BasicObjectTypes.MAP),
+    ],
+)
+def test_empty_constructor(function_name, result):
+    yaml_str = f"""
+- tab: 'Test'
+  contexts:
+    - testcases:
+        - statement: 'test()'
+          return_raw: '{function_name}()'
+"""
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    assert len(suite.tabs) == 1
+    tab = suite.tabs[0]
+    assert len(tab.contexts) == 1
+    testcases = tab.contexts[0].testcases
+    assert len(testcases) == 1
+    test = testcases[0]
+    assert isinstance(test.input, FunctionCall)
+    assert test.output.result.value.type == result
+    assert len(test.output.result.value.data) == 0
+
+
+@pytest.mark.parametrize(
+    "function_name,result",
+    [
+        ("set", BasicSequenceTypes.SET),
+        ("sequence", BasicSequenceTypes.SEQUENCE),
+        ("array", AdvancedSequenceTypes.ARRAY),
+        ("tuple", AdvancedSequenceTypes.TUPLE),
+    ],
+)
+def test_empty_constructor_with_param(function_name, result):
+    yaml_str = f"""
+- tab: 'Test'
+  contexts:
+    - testcases:
+        - statement: 'test()'
+          return_raw: '{function_name}([])'
+"""
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    assert len(suite.tabs) == 1
+    tab = suite.tabs[0]
+    assert len(tab.contexts) == 1
+    testcases = tab.contexts[0].testcases
+    assert len(testcases) == 1
+    test = testcases[0]
+    assert isinstance(test.input, FunctionCall)
+    assert test.output.result.value.type == result
+    assert len(test.output.result.value.data) == 0

@@ -28,6 +28,7 @@ the following is supported:
 
 import ast
 import dataclasses
+from typing import Optional
 
 from pydantic import ValidationError
 
@@ -60,6 +61,24 @@ from tested.utils import get_args
 
 class InvalidDslError(Exception):
     pass
+
+
+def _is_and_get_allowed_empty(node: ast.Call) -> Optional[Value]:
+    """
+    Check if we allow this cast without params to represent an "empty" value.
+    Returns the empty value if allowed, otherwise None.
+    """
+    assert isinstance(node.func, ast.Name)
+    if node.func.id in AdvancedSequenceTypes.__members__.values():
+        # noinspection PyTypeChecker
+        return SequenceType(type=node.func.id, data=[])
+    elif node.func.id in BasicSequenceTypes.__members__.values():
+        # noinspection PyTypeChecker
+        return SequenceType(type=node.func.id, data=[])
+    elif node.func.id in BasicObjectTypes.__members__.values():
+        return ObjectType(type=BasicObjectTypes.MAP, data=[])
+    else:
+        return None
 
 
 def _is_type_cast(node: ast.expr) -> bool:
@@ -165,20 +184,36 @@ def _convert_constant(node: ast.Constant) -> Value:
 def _convert_expression(node: ast.expr, is_return: bool) -> Expression:
     if _is_type_cast(node):
         assert isinstance(node, ast.Call)
-        if n := len(node.args) != 1:
-            raise InvalidDslError(
-                f"A cast function must have exactly one argument, found {n}"
-            )
-        # We have a cast, so extract the value, but modify the type later on.
-        subexpression = node.args[0]
-        value = _convert_expression(subexpression, is_return)
 
-        if not isinstance(value, get_args(Value)):
-            raise InvalidDslError(
-                "The argument of a cast function must resolve to a value."
-            )
+        # "Casts" of sequence types can also be used a constructor for an empty sequence.
+        # For example, "set()", "map()", ...
+        nr_of_args = len(node.args)
+        if (empty_value := _is_and_get_allowed_empty(node)) and nr_of_args == 0:
+            value = empty_value
+        else:
+            assert isinstance(node.func, ast.Name)
+            if nr_of_args != 1:
+                if _is_and_get_allowed_empty(node) is not None:
+                    error = f"""
+                    The cast function '{node.func.id}' must have either zero or one arguments:
+                    - Zero if you want to use it to represent an empty value, e.g. '{node.func.id}()'
+                    - One if you want to cast another value to the type '{node.func.id}'.
+                    """
+                    raise InvalidDslError(error)
+                else:
+                    error = f"""
+                    The cast function '{node.func.id}' must have exact one argument, but found {nr_of_args}.
+                    For example, '{node.func.id}(...)', where '...' is the value.
+                    """
+                    raise InvalidDslError(error)
+            # We have a cast, so extract the value, but modify the type later on.
+            subexpression = node.args[0]
+            value = _convert_expression(subexpression, is_return)
 
-        assert isinstance(node.func, ast.Name)
+            if not isinstance(value, get_args(Value)):
+                raise InvalidDslError(
+                    "The argument of a cast function must resolve to a value."
+                )
         return dataclasses.replace(value, type=node.func.id)
     elif isinstance(node, ast.Call):
         if is_return:
