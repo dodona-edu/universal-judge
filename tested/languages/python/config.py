@@ -90,6 +90,7 @@ class Python(Language):
         }
 
     def map_type_restrictions(self) -> Optional[Set[ExpressionTypes]]:
+        # noinspection PyTypeChecker
         return {
             "integer",
             "real",

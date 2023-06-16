@@ -90,6 +90,7 @@ class JavaScript(Language):
         return {BasicStringTypes.TEXT}
 
     def set_type_restrictions(self) -> Optional[Set[ExpressionTypes]]:
+        # noinspection PyTypeChecker
         return {
             "integer",
             "real",
@@ -130,6 +131,13 @@ class JavaScript(Language):
                 print(f"\nmodule.exports = {{{namings}}};", file=file)
         except TimeoutError:
             pass
+
+        # Add strict mode to the script.
+        with open(solution, "r") as file:
+            non_strict = file.read()
+        with open(solution, "w") as file:
+            file.write('"use strict";\n\n' + non_strict)
+        self.config.dodona.source_offset += 2
 
     def linter(self, remaining: float) -> Tuple[List[Message], List[AnnotateCode]]:
         # Import locally to prevent errors.

@@ -177,7 +177,7 @@ class Kotlin(Language):
         return linter.run_ktlint(self.config.dodona, remaining)
 
     def find_main_file(
-        self, files: List[str], name: str, precompilation_messages: List[str]
+        self, files: List[Path], name: str, precompilation_messages: List[str]
     ) -> Tuple[Optional[str], List[Message], Status, List[AnnotateCode]]:
         logger.debug("Finding %s in %s", name, files)
         main, msgs, status, ants = Language.find_main_file(
@@ -188,7 +188,7 @@ class Kotlin(Language):
         else:
             return Language.find_main_file(self, files, name, precompilation_messages)
 
-    def filter_dependencies(self, files: List[Path], context_name: str) -> List[str]:
+    def filter_dependencies(self, files: List[Path], context_name: str) -> List[Path]:
         def filter_function(file: Path) -> bool:
             # We don't want files for contexts that are not the one we use.
             prefix = conventionalize_namespace(self, EXECUTION_PREFIX)
