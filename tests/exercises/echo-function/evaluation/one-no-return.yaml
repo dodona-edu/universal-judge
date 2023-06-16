@@ -1,3 +1,0 @@
-- tab: "My tab"
-  testcases:
-    - expression: 'echo(echo("input"))'

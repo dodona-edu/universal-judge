@@ -57,7 +57,6 @@
     },
     "tab": {
       "type": "object",
-      "additionalProperties" : false,
       "properties": {
         "config": {
           "$ref": "#/definitions/globalConfig",
@@ -95,7 +94,6 @@
     },
     "context": {
       "type": "object",
-      "additionalProperties" : false,
       "properties": {
         "config": {
           "$ref": "#/definitions/globalConfig",
@@ -116,7 +114,6 @@
     "testcase": {
       "type": "object",
       "description": "An individual test for a statement or expression",
-      "additionalProperties" : false,
       "properties": {
         "exception": {
           "description": "Expected exception message",
@@ -187,7 +184,7 @@
           "description": "Stdin for this context",
           "$ref": "#/definitions/textualTypes"
         },
-        "exit_code": {
+        "exitCode": {
           "type": "integer",
           "description": "Expected exit code for the run"
         },

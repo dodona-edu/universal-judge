@@ -480,10 +480,9 @@ class Testcase(WithFeatures, WithFunctions):
         # If the value test is not "None", but the input is not an expression,
         # this is an error: a statement is not an expression.
         output = values["output"]
-        if output.result not in (
-            EmptyChannel.NONE,
-            IgnoredChannel.IGNORED,
-        ) and not isinstance(values["input"], get_args(Expression)):
+        if output.result != EmptyChannel.NONE and not isinstance(
+            values["input"], get_args(Expression)
+        ):
             raise ValueError("You cannot expect a value from a statement.")
         return values
 
