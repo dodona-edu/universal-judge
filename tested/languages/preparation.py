@@ -34,9 +34,7 @@ from tested.serialisation import (
 )
 from tested.testsuite import (
     Context,
-    EmptyChannel,
     ExceptionOutput,
-    IgnoredChannel,
     MainInput,
     SpecificEvaluator,
     Testcase,
@@ -342,28 +340,25 @@ def prepare_testcase(
     if testcase.is_main_testcase():
         prepared_input = testcase.input
     else:
+        result_channel = testcase.output.result
+
         if isinstance(testcase.input, get_args(Expression)):
             # noinspection PyTypeChecker
             command = prepare_expression(bundle, testcase.input)
+            # Create the function to handle the values.
+            value_function_call, evaluator_name = _create_handling_function(
+                bundle, SEND_VALUE, SEND_SPECIFIC_VALUE, result_channel
+            )
         else:
             assert isinstance(testcase.input, get_args(Assignment))
             # noinspection PyTypeChecker
             command = prepare_assignment(bundle, testcase.input)
+            value_function_call = None
+            evaluator_name = None
 
-        result_channel = testcase.output.result
-
-        # Create the function to handle the values.
-        value_function_call, evaluator_name = _create_handling_function(
-            bundle, SEND_VALUE, SEND_SPECIFIC_VALUE, result_channel
-        )
         if evaluator_name:
             names.append(evaluator_name)
 
-        has_return = result_channel not in (EmptyChannel.NONE, IgnoredChannel.IGNORED)
-        # A special case: if there isn't an actual value, don't call the function.
-        if not has_return:
-            value_function_call = None
-            assert evaluator_name is None
         prepared_input = PreparedTestcaseStatement(
             statement=command, value_function=value_function_call
         )

@@ -946,3 +946,19 @@ def test_unknown_return_type(tmp_path: Path, pytestconfig, language_and_expected
     assert updates.find_status_enum() == ["wrong"]
     received_data = updates.find_next("close-test")["generated"]
     assert received_data == expected
+
+
+@pytest.mark.parametrize("language", ALL_SPECIFIC_LANGUAGES)
+def test_not_allowed_return_value_is_wrong(language: str, tmp_path: Path, pytestconfig):
+    conf = configuration(
+        pytestconfig,
+        "echo-function",
+        language,
+        tmp_path,
+        "one-no-return.yaml",
+        "correct",
+    )
+
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["wrong"]

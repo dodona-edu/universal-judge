@@ -273,7 +273,7 @@ def test_statement_and_main():
           data: 12
           config:
             tryFloatingPoint: true
-      - statement: 'add(5, 7)'
+      - expression: 'add(5, 7)'
         return: 12
     """
     json_str = translate_to_test_suite(yaml_str)
@@ -294,13 +294,13 @@ def test_statement_and_main():
     assert test.output.result.value.type == BasicNumericTypes.INTEGER
 
 
-def test_statement():
+def test_expression():
     yaml_str = """
 - tab: "Feedback"
   testcases:
   - expression: "heir(8, 10)"
     return: [ 10, 4, 15, 11, 7, 5, 3, 2, 16, 12, 1, 6, 13, 9, 14, 8 ]
-  - statement: "heir(8, 3)"
+  - expression: "heir(8, 3)"
     return: [ 3, 6, 9, 12, 15, 2, 7, 1, 13, 8, 16, 10, 14, 4, 11, 5 ]
 """
     json_str = translate_to_test_suite(yaml_str)
@@ -415,7 +415,7 @@ def test_statement_raw_return():
 - tab: 'Test'
   contexts:
     - testcases:
-        - statement: 'test()'
+        - expression: 'test()'
           return_raw: '[(4, 4), (4, 3), (4, 2), (4, 1), (4, 0), (3, 0), (3, 1), (4, 1)]'
 """
     json_str = translate_to_test_suite(yaml_str)
