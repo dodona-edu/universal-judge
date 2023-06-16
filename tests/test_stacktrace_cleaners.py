@@ -6,20 +6,23 @@ from tested.configs import DodonaConfig, GlobalConfig
 from tested.languages import LANGUAGES, Language
 
 # noinspection PyProtectedMember
-from tested.languages.utils import _replace_code_line_number
+from tested.languages.utils import (
+    _convert_stacktrace_to_html,
+    _replace_code_line_number,
+)
 from tested.testsuite import Suite
 
 
-def get_language(workdir: Path, language: str) -> Language:
+def get_language(workdir: str, language: str) -> Language:
     dodona_config = DodonaConfig(
-        resources="",
-        source="",
+        resources=Path(),
+        source=Path(),
         time_limit=0,
         memory_limit=0,
         natural_language="nl",
         programming_language=language,
-        workdir=workdir,
-        judge="",
+        workdir=Path(workdir),
+        judge=Path(),
     )
     global_config = GlobalConfig(
         dodona=dodona_config,
@@ -351,4 +354,22 @@ def test_code_link_line_number_replacement_works(tmp_path: Path, pytestconfig):
     at Codeersleutel.decodeer (<code>:103:18)
     """
     actual = _replace_code_line_number(5, stacktrace)
+    assert actual == expected
+
+
+def test_code_is_linked():
+    stacktrace = """AssertionError [ERR_ASSERTION]: ongeldig bericht
+    at bigram2letter (<code>:86:13)
+    at <code>:98:32
+    at Array.map (<anonymous>)
+    at Codeersleutel.decodeer (<code>:98:18)
+    """
+    expected = (
+        "<div class='code'>AssertionError [ERR_ASSERTION]: ongeldig bericht<br>"
+        '    at bigram2letter (<a href="#" class="tab-link" data-tab="code" data-line="86">&lt;code&gt;:86</a>:13)<br>'
+        '    at <a href="#" class="tab-link" data-tab="code" data-line="98">&lt;code&gt;:98</a>:32<br>'
+        "    at Array.map (&lt;anonymous&gt;)<br>"
+        '    at Codeersleutel.decodeer (<a href="#" class="tab-link" data-tab="code" data-line="98">&lt;code&gt;:98</a>:18)</div>'
+    )
+    actual = _convert_stacktrace_to_html(stacktrace).description
     assert actual == expected

@@ -115,11 +115,12 @@ def executable_name(basename: str) -> str:
 
 
 def _convert_stacktrace_to_html(stacktrace: str) -> ExtendedMessage:
+    code_regex_escaped = r"&lt;code&gt;:(\d+)"
     link_replacement = r'<a href="#" class="tab-link" data-tab="code" data-line="\1">&lt;code&gt;:\1</a>'
     # Escape special characters.
     stacktrace = html.escape(stacktrace)
     # Add links to code.
-    stacktrace = re.sub(code_regex, link_replacement, stacktrace)
+    stacktrace = re.sub(code_regex_escaped, link_replacement, stacktrace)
     # We cannot generate a "pre" element, since that is ugly.
     generated = f"<div class='code'>{stacktrace.strip()}</div>"
     # Ensure newlines.
