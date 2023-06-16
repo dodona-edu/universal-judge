@@ -186,6 +186,7 @@ def _convert_testcase(testcase: YamlDict, previous_config: dict) -> Testcase:
             message = exception
             types = None
         else:
+            exception: dict
             message = exception.get("message")
             types = exception["types"]
         output.exception = ExceptionOutputChannel(
@@ -203,7 +204,9 @@ def _convert_testcase(testcase: YamlDict, previous_config: dict) -> Testcase:
         output.result = ValueOutputChannel(value=parse_string(result, True))
 
     # If there is a return value, allow it.
-    if is_statement and not ("return" in testcase or "return_raw" in testcase):
+    # With statements, the default is "ignore".
+    # With expressions, the default is "none".
+    if is_statement and output.result == EmptyChannel.NONE:
         output.result = IgnoredChannel.IGNORED
 
     # TODO: allow propagation of files...
