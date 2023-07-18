@@ -156,6 +156,17 @@ class TextChannelType(StrEnum):
     FILE = "file"  # Path to a file
 
 
+def _resolve_path(working_directory, file_path):
+    """
+    Resolve a path to an absolute path. Relative paths will be resolved against
+    the given ``directory``, not the actual working directory.
+    """
+    if path.isabs(file_path):
+        return path.abspath(file_path)
+    else:
+        return path.abspath(path.join(working_directory, file_path))
+
+
 @dataclass
 class TextData(WithFeatures):
     """Describes textual data: either directly or in a file."""
@@ -163,23 +174,12 @@ class TextData(WithFeatures):
     data: str
     type: TextChannelType = TextChannelType.TEXT
 
-    @staticmethod
-    def _resolve_path(working_directory, file_path):
-        """
-        Resolve a path to an absolute path. Relative paths will be resolved against
-        the given ``directory``, not the actual working directory.
-        """
-        if path.isabs(file_path):
-            return path.abspath(file_path)
-        else:
-            return path.abspath(path.join(working_directory, file_path))
-
     def get_data_as_string(self, working_directory: Path) -> str:
         """Get the data as a string, reading the file if necessary."""
         if self.type == TextChannelType.TEXT:
             return self.data
         elif self.type == TextChannelType.FILE:
-            file_path = self._resolve_path(working_directory, self.data)
+            file_path = _resolve_path(working_directory, self.data)
             with open(file_path, "r") as file:
                 return file.read()
         else:
@@ -214,7 +214,7 @@ class FileOutputChannel(WithFeatures):
         return NOTHING
 
     def get_data_as_string(self, resources: Path) -> str:
-        file_path = self._resolve_path(resources, self.expected_path)
+        file_path = _resolve_path(resources, self.expected_path)
         with open(file_path, "r") as file:
             return file.read()
 
