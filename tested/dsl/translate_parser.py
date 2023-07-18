@@ -28,6 +28,7 @@ from tested.serialisation import (
 from tested.testsuite import (
     Context,
     EmptyChannel,
+    EvaluationFunction,
     ExceptionOutputChannel,
     ExitCodeOutputChannel,
     ExpectedException,
@@ -35,6 +36,7 @@ from tested.testsuite import (
     GenericTextEvaluator,
     MainInput,
     Output,
+    ProgrammedEvaluator,
     Suite,
     Tab,
     Testcase,
@@ -143,19 +145,58 @@ def _convert_file(link_file: YamlDict) -> FileUrl:
     return FileUrl(name=link_file["name"], url=link_file["url"])
 
 
+def _convert_programmed_evaluator(stream: dict) -> ProgrammedEvaluator:
+    return ProgrammedEvaluator(
+        language=stream["language"],
+        function=EvaluationFunction(
+            file=stream["file"], name=stream.get("name", "evaluate")
+        ),
+        arguments=[
+            parse_string(v, is_return=True) for v in stream.get("arguments", [])
+        ],
+    )
+
+
 def _convert_text_output_channel(
     stream: YamlObject, config: dict, config_name: str
 ) -> TextOutputChannel:
     if isinstance(stream, str):
         data = stream
         config = config.get(config_name, {})
+        return TextOutputChannel(
+            data=data, evaluator=GenericTextEvaluator(options=config)
+        )
     else:
         assert isinstance(stream, dict)
-        data = stream["data"]
-        existing_config = config.get(config_name, {})
-        config = _deepen_config_level(stream, existing_config)
+        if "evaluator" not in stream or stream["evaluator"] == "builtin":
+            data = stream["data"]
+            existing_config = config.get(config_name, {})
+            config = _deepen_config_level(stream, existing_config)
+            return TextOutputChannel(
+                data=data, evaluator=GenericTextEvaluator(options=config)
+            )
+        elif stream["evaluator"] == "custom":
+            return TextOutputChannel(
+                data=stream["data"], evaluator=_convert_programmed_evaluator(stream)
+            )
+        raise TypeError(f"Unknown text evaluator type: {stream['evaluator']}")
 
-    return TextOutputChannel(data=data, evaluator=GenericTextEvaluator(options=config))
+
+def _convert_advanced_value_output_channel(stream: YamlObject) -> ValueOutputChannel:
+    if isinstance(stream, str):
+        value = parse_string(stream, is_return=True)
+        return ValueOutputChannel(value=value)
+    else:
+        assert isinstance(stream, dict)
+        if "evaluator" not in stream or stream["evaluator"] == "builtin":
+            value = parse_string(stream["value"], is_return=True)
+            return ValueOutputChannel(value=value)
+        elif stream["evaluator"] == "custom":
+            return ValueOutputChannel(
+                value=parse_string(stream["value"], is_return=True),
+                evaluator=_convert_programmed_evaluator(stream),
+            )
+        raise TypeError(f"Unknown value evaluator type: {stream['evaluator']}")
 
 
 def _convert_testcase(testcase: YamlDict, previous_config: dict) -> Testcase:
@@ -183,6 +224,7 @@ def _convert_testcase(testcase: YamlDict, previous_config: dict) -> Testcase:
             message = exception
             types = None
         else:
+            assert isinstance(exception, dict)
             message = exception.get("message")
             types = exception["types"]
         output.exception = ExceptionOutputChannel(
@@ -197,7 +239,7 @@ def _convert_testcase(testcase: YamlDict, previous_config: dict) -> Testcase:
     if (result := testcase.get("return_raw")) is not None:
         if "return" in testcase:
             raise ValueError("Both a return and return_raw value is not allowed.")
-        output.result = ValueOutputChannel(value=parse_string(result, True))
+        output.result = _convert_advanced_value_output_channel(result)
 
     # TODO: allow propagation of files...
     files = []
