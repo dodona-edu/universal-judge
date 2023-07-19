@@ -1,152 +1,154 @@
 {
-  "$id": "https://github.com/dodona-edu/universal-judge/blob/master/tested/dsl/schema.yaml",
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "DSL Schema",
-  "description": "DSL test suite for TESTed",
-  "oneOf": [
+  "$id" : "https://github.com/dodona-edu/universal-judge/blob/master/tested/dsl/schema.yaml",
+  "$schema" : "http://json-schema.org/draft-07/schema#",
+  "title" : "DSL Schema",
+  "description" : "DSL test suite for TESTed",
+  "oneOf" : [
     {
-      "$ref": "#/definitions/_rootObject"
+      "$ref" : "#/definitions/_rootObject"
     },
     {
-      "$ref": "#/definitions/tab"
+      "$ref" : "#/definitions/tab"
     },
     {
-      "$ref": "#/definitions/_tabList"
+      "$ref" : "#/definitions/_tabList"
     }
   ],
-  "definitions": {
-    "_tabList": {
-      "type": "array",
-      "minItems": 1,
-      "items": {
-        "$ref": "#/definitions/tab"
+  "definitions" : {
+    "_tabList" : {
+      "type" : "array",
+      "minItems" : 1,
+      "items" : {
+        "$ref" : "#/definitions/tab"
       }
     },
-    "_contextList": {
-      "type": "array",
-      "minItems": 1,
-      "items": {
-        "$ref": "#/definitions/context"
+    "_contextList" : {
+      "type" : "array",
+      "minItems" : 1,
+      "items" : {
+        "$ref" : "#/definitions/context"
       }
     },
-    "_testcaseList": {
-      "type": "array",
-      "minItems": 1,
-      "items": {
-        "$ref": "#/definitions/testcase"
+    "_testcaseList" : {
+      "type" : "array",
+      "minItems" : 1,
+      "items" : {
+        "$ref" : "#/definitions/testcase"
       }
     },
-    "_rootObject": {
-      "type": "object",
-      "properties": {
-        "config": {
-          "$ref": "#/definitions/globalConfig",
-          "description": "Configuration applicable to the whole test suite."
+    "_rootObject" : {
+      "type" : "object",
+      "properties" : {
+        "config" : {
+          "$ref" : "#/definitions/globalConfig",
+          "description" : "Configuration applicable to the whole test suite."
         },
-        "namespace": {
-          "type": "string",
-          "description": "Namespace of the submitted solution, in `snake_case`"
+        "namespace" : {
+          "type" : "string",
+          "description" : "Namespace of the submitted solution, in `snake_case`"
         },
-        "tabs": {
-          "$ref": "#/definitions/_tabList"
+        "tabs" : {
+          "$ref" : "#/definitions/_tabList"
         }
       },
-      "required": [
+      "required" : [
         "tabs"
       ]
     },
-    "tab": {
-      "type": "object",
-      "properties": {
-        "config": {
-          "$ref": "#/definitions/globalConfig",
-          "description": "Configuration applicable to this tab"
+    "tab" : {
+      "type" : "object",
+      "properties" : {
+        "config" : {
+          "$ref" : "#/definitions/globalConfig",
+          "description" : "Configuration applicable to this tab"
         },
-        "hidden": {
-          "type": "boolean",
-          "description": "Defines if the tab is hidden for the student or not"
+        "hidden" : {
+          "type" : "boolean",
+          "description" : "Defines if the tab is hidden for the student or not"
         },
-        "tab": {
-          "type": "string",
-          "description": "The name of this tab."
+        "tab" : {
+          "type" : "string",
+          "description" : "The name of this tab."
         },
-        "contexts": {
-          "$ref": "#/definitions/_contextList"
+        "contexts" : {
+          "$ref" : "#/definitions/_contextList"
         },
-        "testcases": {
-          "$ref": "#/definitions/_testcaseList"
+        "testcases" : {
+          "$ref" : "#/definitions/_testcaseList"
         }
       },
-      "oneOf": [
+      "oneOf" : [
         {
-          "required": [
+          "required" : [
             "contexts",
             "tab"
           ]
         },
         {
-          "required": [
+          "required" : [
             "testcases",
             "tab"
           ]
         }
       ]
     },
-    "context": {
-      "type": "object",
-      "properties": {
-        "config": {
-          "$ref": "#/definitions/globalConfig",
-          "description": "Configuration settings at context level"
+    "context" : {
+      "type" : "object",
+      "properties" : {
+        "config" : {
+          "$ref" : "#/definitions/globalConfig",
+          "description" : "Configuration settings at context level"
         },
-        "context": {
-          "type": "string",
-          "description": "Description of this context."
+        "context" : {
+          "type" : "string",
+          "description" : "Description of this context."
         },
-        "testcases": {
-          "$ref": "#/definitions/_testcaseList"
+        "testcases" : {
+          "$ref" : "#/definitions/_testcaseList"
         }
       },
-      "required": [
+      "required" : [
         "testcases"
       ]
     },
-    "testcase": {
-      "type": "object",
-      "description": "An individual test for a statement or expression",
-      "properties": {
-        "exception": {
-          "description": "Expected exception message",
+    "testcase" : {
+      "type" : "object",
+      "description" : "An individual test for a statement or expression",
+      "properties" : {
+        "exception" : {
+          "description" : "Expected exception message",
           "oneOf" : [
             {
-              "$ref": "#/definitions/generalOutput"
+              "type" : "string"
             },
             {
               "type" : "object",
-              "required" : ["types"],
+              "required" : [
+                "types"
+              ],
               "properties" : {
-                "message": {
-                  "$ref": "#/definitions/generalOutput"
+                "message" : {
+                  "type" : "string"
                 },
-                "types": {
+                "types" : {
                   "type" : "object",
-                  "items": {
-                    "type": "string"
+                  "items" : {
+                    "type" : "string"
                   }
                 }
               }
             }
           ]
         },
-        "files": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/file"
+        "files" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/file"
           }
         },
-        "return": {
-          "description": "Expected return value",
-          "type": [
+        "return" : {
+          "description" : "Expected return value",
+          "type" : [
             "array",
             "boolean",
             "integer",
@@ -156,166 +158,271 @@
             "string"
           ]
         },
-        "return_raw": {
-          "description": "Value string to parse to the expected return value",
-          "$ref": "#/definitions/generalOutput"
+        "return_raw" : {
+          "description" : "Value string to parse to the expected return value",
+          "$ref" : "#/definitions/advancedValueOutputChannel"
         },
-        "statement": {
-          "description": "Statement or expression to evaluate",
-          "$ref": "#/definitions/textualTypes"
+        "statement" : {
+          "description" : "Statement or expression to evaluate",
+          "type" : "string"
         },
-        "expression": {
-          "description": "Statement or expression to evaluate",
-          "$ref": "#/definitions/textualTypes"
+        "expression" : {
+          "description" : "Statement or expression to evaluate",
+          "type" : "string"
         },
-        "stderr": {
-          "description": "Expected output at stderr",
-          "$ref": "#/definitions/streamOutput"
+        "stderr" : {
+          "description" : "Expected output at stderr",
+          "$ref" : "#/definitions/textOutputChannel"
         },
-        "stdout": {
-          "description": "Expected output at stdout",
-          "$ref": "#/definitions/streamOutput"
+        "stdout" : {
+          "description" : "Expected output at stdout",
+          "$ref" : "#/definitions/textOutputChannel"
         },
-        "config": {
-          "$ref": "#/definitions/globalConfig",
-          "description": "Configuration settings at testcase level"
+        "config" : {
+          "$ref" : "#/definitions/globalConfig",
+          "description" : "Configuration settings at testcase level"
         },
-        "stdin": {
-          "description": "Stdin for this context",
-          "$ref": "#/definitions/textualTypes"
+        "stdin" : {
+          "description" : "Stdin for this context",
+          "type" : [
+            "string",
+            "number",
+            "integer",
+            "boolean"
+          ]
         },
-        "exitCode": {
-          "type": "integer",
-          "description": "Expected exit code for the run"
+        "exitCode" : {
+          "type" : "integer",
+          "description" : "Expected exit code for the run"
         },
-        "arguments": {
-          "type": "array",
-          "description": "Array of program call arguments",
-          "items": {
-            "$ref": "#/definitions/textualTypes"
+        "arguments" : {
+          "type" : "array",
+          "description" : "Array of program call arguments",
+          "items" : {
+            "type" : [
+              "string",
+              "number",
+              "integer",
+              "boolean"
+            ]
           }
         }
       }
     },
-    "configText": {
-      "type": "object",
-      "description": "Configuration properties for textual comparison and to configure if the expected value should be hidden or not",
-      "minProperties": 1,
-      "properties": {
-        "applyRounding": {
-          "description": "Apply rounding when comparing as float",
-          "type": "boolean"
-        },
-        "caseInsensitive": {
-          "description": "Ignore case when comparing strings",
-          "type": "boolean"
-        },
-        "ignoreWhitespace": {
-          "description": "Ignore leading and trailing whitespace",
-          "type": "boolean"
-        },
-        "roundTo": {
-          "description": "The number of decimals to round at, when applying the rounding on floats",
-          "type": "integer"
-        },
-        "tryFloatingPoint": {
-          "description": "Try comparing text as floating point numbers",
-          "type": "boolean"
-        },
-        "hideExpected": {
-          "description": "Hide the expected value in feedback (default: false), not recommended to use!",
-          "type": "boolean"
-        }
-      }
-    },
-    "localConfigGeneral": {
-      "type": "object",
-      "description": "General configuration properties for one test",
-      "required": [
-        "data"
-      ],
-      "properties": {
-        "data": {
-          "$ref": "#/definitions/textualTypes"
-        }
-      }
-    },
-    "localConfigText": {
-      "type": "object",
-      "description": "Textual configuration properties of one test",
-      "required": [
-        "data",
-        "config"
-      ],
-      "properties": {
-        "data": {
-          "$ref": "#/definitions/textualTypes"
-        },
-        "config": {
-          "$ref": "#/definitions/configText"
-        }
-      }
-    },
-    "globalConfig": {
-      "type": "object",
-      "description": "Global configuration properties",
-      "minProperties": 1,
-      "properties": {
-        "stdout": {
-          "$ref": "#/definitions/configText"
-        },
-        "stderr": {
-          "$ref": "#/definitions/configText"
-        }
-      }
-    },
-    "streamOutput": {
-      "anyOf": [
+    "textOutputChannel" : {
+      "anyOf" : [
         {
-          "$ref": "#/definitions/textualTypes"
+          "description" : "A simple value which is converted into a string.",
+          "type" : [
+            "string",
+            "number",
+            "integer",
+            "boolean"
+          ]
         },
         {
-          "$ref": "#/definitions/localConfigText"
+          "$ref" : "#/definitions/advancedTextOutputChannel"
         }
       ]
     },
-    "generalOutput": {
-      "$ref": "#/definitions/textualTypes"
+    "advancedTextOutputChannel" : {
+      "type" : "object",
+      "description" : "Advanced output for a text output channel, such as stdout or stderr.",
+      "required" : [
+        "data"
+      ],
+      "properties" : {
+        "data" : {
+          "description" : "The expected data types.",
+          "type" : [
+            "string",
+            "number",
+            "integer",
+            "boolean"
+          ]
+        },
+        "config" : {
+          "$ref" : "#/definitions/textConfigurationOptions"
+        }
+      },
+      "oneOf" : [
+        {
+          "properties" : {
+            "evaluator" : {
+              "type" : "string",
+              "enum" : [
+                "builtin"
+              ]
+            }
+          }
+        },
+        {
+          "required" : [
+            "evaluator",
+            "language",
+            "file"
+          ],
+          "properties" : {
+            "evaluator" : {
+              "type" : "string",
+              "enum" : [
+                "custom"
+              ]
+            },
+            "language" : {
+              "type" : "string",
+              "description" : "The programming language of the custom check function."
+            },
+            "file" : {
+              "type" : "string",
+              "description" : "The path to the file containing the custom check function."
+            },
+            "name" : {
+              "type" : "string",
+              "description" : "The name of the custom check function.",
+              "default" : "evaluate"
+            },
+            "arguments" : {
+              "type" : "array",
+              "description" : "List of 'Python' values to use as arguments to the function.",
+              "items" : {
+                "type" : "string"
+              }
+            }
+          }
+        }
+      ]
     },
-    "file": {
-      "type": "object",
-      "description": "Tab definition with testcases",
-      "required": [
+    "advancedValueOutputChannel" : {
+      "oneOf" : [
+        {
+          "type" : "string",
+          "description" : "A 'Python' value to parse and use as the expected type."
+        },
+        {
+          "type" : "object",
+          "description" : "A custom check function.",
+          "required" : [
+            "value"
+          ],
+          "properties" : {
+            "value" : {
+              "type" : "string",
+              "description" : "The expected value."
+            }
+          },
+          "oneOf" : [
+            {
+              "properties" : {
+                "evaluator" : {
+                  "type" : "string",
+                  "enum" : [
+                    "builtin"
+                  ]
+                }
+              }
+            },
+            {
+              "required" : [
+                "evaluator",
+                "language",
+                "file"
+              ],
+              "properties" : {
+                "evaluator" : {
+                  "type" : "string",
+                  "enum" : [
+                    "custom"
+                  ]
+                },
+                "language" : {
+                  "type" : "string",
+                  "description" : "The programming language of the custom check function."
+                },
+                "file" : {
+                  "type" : "string",
+                  "description" : "The path to the file containing the custom check function."
+                },
+                "name" : {
+                  "type" : "string",
+                  "description" : "The name of the custom check function.",
+                  "default" : "evaluate"
+                },
+                "arguments" : {
+                  "type" : "array",
+                  "description" : "List of 'Python' values to use as arguments to the function.",
+                  "items" : {
+                    "type" : "string"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "textConfigurationOptions" : {
+      "type" : "object",
+      "description" : "Configuration properties for textual comparison and to configure if the expected value should be hidden or not",
+      "minProperties" : 1,
+      "properties" : {
+        "applyRounding" : {
+          "description" : "Apply rounding when comparing as float",
+          "type" : "boolean"
+        },
+        "caseInsensitive" : {
+          "description" : "Ignore case when comparing strings",
+          "type" : "boolean"
+        },
+        "ignoreWhitespace" : {
+          "description" : "Ignore leading and trailing whitespace",
+          "type" : "boolean"
+        },
+        "roundTo" : {
+          "description" : "The number of decimals to round at, when applying the rounding on floats",
+          "type" : "integer"
+        },
+        "tryFloatingPoint" : {
+          "description" : "Try comparing text as floating point numbers",
+          "type" : "boolean"
+        },
+        "hideExpected" : {
+          "description" : "Hide the expected value in feedback (default: false), not recommended to use!",
+          "type" : "boolean"
+        }
+      }
+    },
+    "globalConfig" : {
+      "type" : "object",
+      "description" : "Global configuration properties",
+      "minProperties" : 1,
+      "properties" : {
+        "stdout" : {
+          "$ref" : "#/definitions/textConfigurationOptions"
+        },
+        "stderr" : {
+          "$ref" : "#/definitions/textConfigurationOptions"
+        }
+      }
+    },
+    "file" : {
+      "type" : "object",
+      "description" : "Path to a file for input.",
+      "required" : [
         "name",
         "url"
       ],
-      "properties": {
-        "name": {
-          "type": "string",
-          "description": "File name"
+      "properties" : {
+        "name" : {
+          "type" : "string",
+          "description" : "File name"
         },
-        "url": {
-          "type": "string",
-          "format": "uri",
-          "description": "Relative path to the file in the `description` folder of a Dodona exercise"
+        "url" : {
+          "type" : "string",
+          "format" : "uri",
+          "description" : "Relative path to the file in the `description` folder of a Dodona exercise"
         }
       }
-    },
-    "textualTypes": {
-      "anyOf": [
-        {
-          "type": "boolean"
-        },
-        {
-          "type": "integer"
-        },
-        {
-          "type": "number"
-        },
-        {
-          "type": "string"
-        }
-      ]
     }
   }
 }

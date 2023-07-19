@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 
 from tested.datatypes import (
@@ -6,10 +8,25 @@ from tested.datatypes import (
     BasicNumericTypes,
     BasicObjectTypes,
     BasicSequenceTypes,
+    BasicStringTypes,
 )
 from tested.dsl import translate_to_test_suite
-from tested.serialisation import Assignment, FunctionCall, ObjectType, SequenceType
-from tested.testsuite import GenericTextEvaluator, parse_test_suite
+from tested.serialisation import (
+    Assignment,
+    FunctionCall,
+    NumberType,
+    ObjectType,
+    SequenceType,
+    StringType,
+)
+from tested.testsuite import (
+    GenericTextEvaluator,
+    GenericValueEvaluator,
+    ProgrammedEvaluator,
+    TextOutputChannel,
+    ValueOutputChannel,
+    parse_test_suite,
+)
 
 
 def test_parse_one_tab_ctx():
@@ -493,3 +510,189 @@ def test_empty_constructor_with_param(function_name, result):
     assert isinstance(test.input, FunctionCall)
     assert test.output.result.value.type == result
     assert len(test.output.result.value.data) == 0
+
+
+def test_text_built_in_checks_implied():
+    yaml_str = f"""
+    - tab: 'Test'
+      contexts:
+        - testcases:
+            - statement: 'test()'
+              stdout:
+                data: "hallo"
+    """
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    assert len(suite.tabs) == 1
+    tab = suite.tabs[0]
+    assert len(tab.contexts) == 1
+    testcases = tab.contexts[0].testcases
+    assert len(testcases) == 1
+    test = testcases[0]
+    assert isinstance(test.input, FunctionCall)
+    assert isinstance(test.output.stdout, TextOutputChannel)
+    assert isinstance(test.output.stdout.evaluator, GenericTextEvaluator)
+    assert test.output.stdout.data == "hallo"
+
+
+def test_text_built_in_checks_explicit():
+    yaml_str = f"""
+    - tab: 'Test'
+      contexts:
+        - testcases:
+            - statement: 'test()'
+              stdout:
+                data: "hallo"
+                evaluator: "builtin"
+    """
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    assert len(suite.tabs) == 1
+    tab = suite.tabs[0]
+    assert len(tab.contexts) == 1
+    testcases = tab.contexts[0].testcases
+    assert len(testcases) == 1
+    test = testcases[0]
+    assert isinstance(test.input, FunctionCall)
+    assert isinstance(test.output.stdout, TextOutputChannel)
+    assert isinstance(test.output.stdout.evaluator, GenericTextEvaluator)
+    assert test.output.stdout.data == "hallo"
+
+
+def test_text_custom_checks_correct():
+    yaml_str = f"""
+    - tab: 'Test'
+      contexts:
+        - testcases:
+            - statement: 'test()'
+              stdout:
+                data: "hallo"
+                evaluator: "custom"
+                language: "python"
+                file: "test.py"
+                name: "evaluate_test"
+                arguments: ["'yes'", "5", "set([5, 5])"]
+    """
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    assert len(suite.tabs) == 1
+    tab = suite.tabs[0]
+    assert len(tab.contexts) == 1
+    testcases = tab.contexts[0].testcases
+    assert len(testcases) == 1
+    test = testcases[0]
+    assert isinstance(test.input, FunctionCall)
+    assert isinstance(test.output.stdout, TextOutputChannel)
+    assert isinstance(test.output.stdout.evaluator, ProgrammedEvaluator)
+    assert test.output.stdout.data == "hallo"
+    evaluator = test.output.stdout.evaluator
+    assert evaluator.language == "python"
+    assert evaluator.function.name == "evaluate_test"
+    assert evaluator.function.file == Path("test.py")
+    assert evaluator.arguments == [
+        StringType(type=BasicStringTypes.TEXT, data="yes"),
+        NumberType(type=BasicNumericTypes.INTEGER, data=5),
+        SequenceType(
+            type=BasicSequenceTypes.SET,
+            data=[
+                NumberType(type=BasicNumericTypes.INTEGER, data=5),
+                NumberType(type=BasicNumericTypes.INTEGER, data=5),
+            ],
+        ),
+    ]
+
+
+def test_value_built_in_checks_implied():
+    yaml_str = f"""
+    - tab: 'Test'
+      contexts:
+        - testcases:
+            - statement: 'test()'
+              return_raw:
+                value: "'hallo'"
+    """
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    assert len(suite.tabs) == 1
+    tab = suite.tabs[0]
+    assert len(tab.contexts) == 1
+    testcases = tab.contexts[0].testcases
+    assert len(testcases) == 1
+    test = testcases[0]
+    assert isinstance(test.input, FunctionCall)
+    assert isinstance(test.output.result, ValueOutputChannel)
+    assert isinstance(test.output.result.evaluator, GenericValueEvaluator)
+    assert test.output.result.value == StringType(
+        type=BasicStringTypes.TEXT, data="hallo"
+    )
+
+
+def test_value_built_in_checks_explicit():
+    yaml_str = f"""
+    - tab: 'Test'
+      contexts:
+        - testcases:
+            - statement: 'test()'
+              return_raw:
+                value: "'hallo'"
+                evaluator: "builtin"
+    """
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    assert len(suite.tabs) == 1
+    tab = suite.tabs[0]
+    assert len(tab.contexts) == 1
+    testcases = tab.contexts[0].testcases
+    assert len(testcases) == 1
+    test = testcases[0]
+    assert isinstance(test.input, FunctionCall)
+    assert isinstance(test.output.result, ValueOutputChannel)
+    assert isinstance(test.output.result.evaluator, GenericValueEvaluator)
+    assert test.output.result.value == StringType(
+        type=BasicStringTypes.TEXT, data="hallo"
+    )
+
+
+def test_value_custom_checks_correct():
+    yaml_str = f"""
+    - tab: 'Test'
+      contexts:
+        - testcases:
+            - statement: 'test()'
+              return_raw:
+                value: "'hallo'"
+                evaluator: "custom"
+                language: "python"
+                file: "test.py"
+                name: "evaluate_test"
+                arguments: ["'yes'", "5", "set([5, 5])"]
+    """
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    assert len(suite.tabs) == 1
+    tab = suite.tabs[0]
+    assert len(tab.contexts) == 1
+    testcases = tab.contexts[0].testcases
+    assert len(testcases) == 1
+    test = testcases[0]
+    assert isinstance(test.input, FunctionCall)
+    assert isinstance(test.output.result, ValueOutputChannel)
+    assert isinstance(test.output.result.evaluator, ProgrammedEvaluator)
+    assert test.output.result.value == StringType(
+        type=BasicStringTypes.TEXT, data="hallo"
+    )
+    evaluator = test.output.result.evaluator
+    assert evaluator.language == "python"
+    assert evaluator.function.name == "evaluate_test"
+    assert evaluator.function.file == Path("test.py")
+    assert evaluator.arguments == [
+        StringType(type=BasicStringTypes.TEXT, data="yes"),
+        NumberType(type=BasicNumericTypes.INTEGER, data=5),
+        SequenceType(
+            type=BasicSequenceTypes.SET,
+            data=[
+                NumberType(type=BasicNumericTypes.INTEGER, data=5),
+                NumberType(type=BasicNumericTypes.INTEGER, data=5),
+            ],
+        ),
+    ]
