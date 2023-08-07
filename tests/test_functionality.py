@@ -605,7 +605,7 @@ def test_batch_compilation_no_fallback(
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert len(updates.find_all("start-tab")) == 1
-    assert updates.find_status_enum() == ["compilation error"] * 2
+    assert updates.find_status_enum() == ["compilation error"]
     assert spy.call_count == 1
 
 

@@ -339,8 +339,20 @@ class Language(ABC):
 
         return list(x for x in files if filter_function(x))
 
+    @typing.overload
     def find_main_file(
-        self, files: List[Path], name: str, precompilation_messages: List[str]
+        self, files: List[Path], name: str, precompilation_messages: List[Message]
+    ) -> Tuple[Path, List[Message], typing.Literal[Status.CORRECT], List[AnnotateCode]]:
+        ...
+
+    @typing.overload
+    def find_main_file(
+        self, files: List[Path], name: str, precompilation_messages: List[Message]
+    ) -> Tuple[None, List[Message], Status, List[AnnotateCode]]:
+        ...
+
+    def find_main_file(
+        self, files: List[Path], name: str, precompilation_messages: List[Message]
     ) -> Tuple[Optional[Path], List[Message], Status, List[AnnotateCode]]:
         """
         Find the "main" file in a list of files.
@@ -382,6 +394,7 @@ class Language(ABC):
 
     def get_description_generator(self) -> DescriptionGenerator:
         if self._description_generator is None:
+            assert self.config
             lang = self.config.dodona.programming_language
             config_dir = self.config.dodona.judge / "tested" / "languages" / lang
             self._description_generator = DescriptionGenerator(self, config_dir)
@@ -445,5 +458,6 @@ class Language(ABC):
 
         :return: A list of template folders.
         """
+        assert self.config
         lang = self.config.dodona.programming_language
         return [self.config.dodona.judge / "tested" / "languages" / lang / "templates"]

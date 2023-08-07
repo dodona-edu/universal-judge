@@ -140,14 +140,14 @@ def create_description_instance_from_template(
     judge_directory = Path(__file__).parent.parent
     global_config = GlobalConfig(
         dodona=DodonaConfig(
-            resources="",
-            source="",
+            resources="",  # type: ignore
+            source="",  # type: ignore
             time_limit=0,
             memory_limit=0,
             natural_language=natural_language,
             programming_language=programming_language,
-            workdir="",
-            judge=str(judge_directory),
+            workdir="",  # type: ignore
+            judge=judge_directory,
             test_suite="suite.yaml",
         ),
         context_separator_secret="",
@@ -185,7 +185,7 @@ def create_description_instance_from_template(
     if is_html:
         namespace = html.escape(namespace)
 
-    return template.render(
+    return template.render(  # type: ignore
         function=partial(description_generator.get_function_name, is_html=is_html),
         property=partial(description_generator.get_property_name, is_html=is_html),
         variable=get_variable,
@@ -224,9 +224,9 @@ def create_description_instance(
     if not language_exists(programming_language):
         raise ValueError(f"Language {programming_language} doesn't exists")
 
-    template = prepare_template(template, is_html)
+    template = prepare_template(template, is_html)  # type: ignore
     return create_description_instance_from_template(
-        template, programming_language, natural_language, namespace, is_html
+        template, programming_language, natural_language, namespace, is_html  # type: ignore
     )
 
 

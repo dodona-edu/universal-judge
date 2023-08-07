@@ -35,10 +35,10 @@ from tested.utils import get_args
 
 NumericTypes = Union[BasicNumericTypes, AdvancedNumericTypes]
 StringTypes = Union[BasicStringTypes, AdvancedStringTypes]
-BooleanTypes = Union[BasicBooleanTypes]
+BooleanTypes = BasicBooleanTypes
 NothingTypes = Union[BasicNothingTypes, AdvancedNothingTypes]
 SequenceTypes = Union[BasicSequenceTypes, AdvancedSequenceTypes]
-ObjectTypes = Union[BasicObjectTypes]
+ObjectTypes = BasicObjectTypes
 
 SimpleTypes = Union[NumericTypes, StringTypes, BooleanTypes, NothingTypes]
 ComplexTypes = Union[SequenceTypes, ObjectTypes]
@@ -56,10 +56,10 @@ def resolve_to_basic(type_: AllTypes) -> BasicTypes:
     """
     Resolve a type to its basic type. Basic types are returned unchanged.
     """
-    if isinstance(type_, get_args(BasicTypes)):
+    if isinstance(type_, BasicTypes):
         return type_
 
-    assert isinstance(type_, get_args(AdvancedTypes))
+    assert isinstance(type_, AdvancedTypes)
     return type_.base_type
 
 

@@ -416,6 +416,7 @@ def submission_name(language: "Language") -> str:
     """
     :return: The name of a submission.
     """
+    assert language.config
     return conventionalize_namespace(language, language.config.suite.namespace)
 
 

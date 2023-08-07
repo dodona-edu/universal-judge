@@ -1,5 +1,5 @@
 import json
-from typing import List
+from typing import List, cast
 
 from tested.datatypes import (
     AdvancedNothingTypes,
@@ -15,6 +15,7 @@ from tested.languages.preparation import (
     PreparedContext,
     PreparedExecutionUnit,
     PreparedTestcase,
+    PreparedTestcaseStatement,
 )
 from tested.languages.utils import convert_unknown_type
 from tested.serialisation import (
@@ -23,12 +24,15 @@ from tested.serialisation import (
     FunctionCall,
     FunctionType,
     Identifier,
+    ObjectType,
+    SequenceType,
     SpecialNumbers,
     Statement,
+    StringType,
     Value,
     as_basic_type,
 )
-from tested.utils import get_args
+from tested.testsuite import MainInput
 
 
 def convert_arguments(arguments: List[Expression]) -> str:
@@ -67,10 +71,13 @@ def convert_value(value: Value) -> str:
     elif value.type == BasicNothingTypes.NOTHING:
         return "null"
     elif value.type == BasicSequenceTypes.SEQUENCE:
+        assert isinstance(value, SequenceType)
         return f"[{convert_arguments(value.data)}]"
     elif value.type == BasicSequenceTypes.SET:
+        assert isinstance(value, SequenceType)
         return f"new Set([{convert_arguments(value.data)}])"
     elif value.type == BasicObjectTypes.MAP:
+        assert isinstance(value, ObjectType)
         result = "{"
         for i, pair in enumerate(value.data):
             result += convert_statement(pair.key, True)
@@ -81,6 +88,7 @@ def convert_value(value: Value) -> str:
         result += "}"
         return result
     elif value.type == BasicStringTypes.UNKNOWN:
+        assert isinstance(value, StringType)
         return convert_unknown_type(value)
     raise AssertionError(f"Invalid literal: {value!r}")
 
@@ -95,7 +103,7 @@ def convert_function_call(call: FunctionCall, internal=False) -> str:
         result += convert_statement(call.namespace, True) + "."
     result += call.name
     if call.type != FunctionType.PROPERTY:
-        result += f"({convert_arguments(call.arguments)})"
+        result += f"({convert_arguments(cast(List[Expression], call.arguments))})"
     return result
 
 
@@ -104,9 +112,9 @@ def convert_statement(statement: Statement, internal=False, full=False) -> str:
         return statement
     elif isinstance(statement, FunctionCall):
         return convert_function_call(statement, internal)
-    elif isinstance(statement, get_args(Value)):
+    elif isinstance(statement, Value):
         return convert_value(statement)
-    elif isinstance(statement, get_args(Assignment)):
+    elif isinstance(statement, Assignment):
         if full:
             prefix = "let "
         else:
@@ -135,6 +143,7 @@ def _generate_internal_context(ctx: PreparedContext, pu: PreparedExecutionUnit) 
 
         # Prepare command arguments if needed.
         if tc.testcase.is_main_testcase():
+            assert isinstance(tc.input, MainInput)
             wrapped = [json.dumps(a) for a in tc.input.arguments]
             result += f"""
             let new_args = [process.argv[0]];
@@ -143,18 +152,22 @@ def _generate_internal_context(ctx: PreparedContext, pu: PreparedExecutionUnit) 
             """
 
         # We need special code to make variables available outside of the try-catch block.
-        if not tc.testcase.is_main_testcase() and isinstance(
-            tc.input.statement, get_args(Assignment)
+        if (
+            not tc.testcase.is_main_testcase()
+            and isinstance(tc.input, PreparedTestcaseStatement)
+            and isinstance(tc.input.statement, Assignment)
         ):
             result += f"let {tc.input.statement.variable}\n"
 
         result += "try {\n"
         if tc.testcase.is_main_testcase():
+            assert isinstance(tc.input, MainInput)
             result += f"""
                 delete require.cache[require.resolve("./{pu.submission_name}.js")];
                 const {pu.submission_name} = require("./{pu.submission_name}.js");
             """
         else:
+            assert isinstance(tc.input, PreparedTestcaseStatement)
             result += " " * 4 + convert_statement(tc.input.input_statement()) + ";\n"
 
         result += f"""

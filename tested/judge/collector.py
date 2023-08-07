@@ -15,6 +15,7 @@ from tested.dodona import (
     CloseContext,
     CloseJudgment,
     CloseTab,
+    CloseTest,
     CloseTestcase,
     EscalateStatus,
     ExtendedMessage,
@@ -257,11 +258,11 @@ class OutputManager:
 
         # Add stack.
         for to_close in reversed(self.tree_stack):
-            try:
-                # noinspection PyArgumentList
-                command = close_for(to_close)(status=status)
-            except TypeError:
-                command = close_for(to_close)()
+            closer = close_for(to_close)
+            if closer == CloseTest:
+                command = CloseTest(generated="", status=status)
+            else:
+                command = closer()  # type: ignore
             self._add(command)
         self.collected = True
 

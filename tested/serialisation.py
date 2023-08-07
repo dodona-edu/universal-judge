@@ -25,7 +25,7 @@ from dataclasses import field
 from decimal import Decimal
 from enum import StrEnum, auto, unique
 from functools import reduce
-from typing import Any, Iterable, List, Literal, Optional, Tuple, Union
+from typing import Any, Iterable, List, Literal, Optional, Tuple, Union, cast
 
 from pydantic import BaseModel, Field, root_validator
 from pydantic.dataclasses import dataclass
@@ -52,7 +52,7 @@ from tested.datatypes import (
     StringTypes,
     resolve_to_basic,
 )
-from tested.dodona import ExtendedMessage, Status
+from tested.dodona import Message, Status
 from tested.features import Construct, FeatureSet, WithFeatures, combine_features
 from tested.utils import flatten, get_args, sorted_no_duplicates
 
@@ -70,7 +70,7 @@ def _get_type_for(expression: "Expression") -> WrappedAllTypes:
         return expression.type, expression.get_content_type()
     elif isinstance(expression, ObjectType):
         return expression.type, (expression.get_key_type(), expression.get_value_type())
-    elif isinstance(expression, get_args(Value)):
+    elif isinstance(expression, Value):
         return expression.type
     else:
         return BasicStringTypes.ANY
@@ -497,18 +497,18 @@ class Assignment(WithFeatures, WithFunctions):
 Statement = Union[Assignment, Expression]
 
 # Update the forward references, which fixes the schema generation.
-ObjectType.__pydantic_model__.update_forward_refs()
-SequenceType.__pydantic_model__.update_forward_refs()
-NamedArgument.__pydantic_model__.update_forward_refs()
-FunctionCall.__pydantic_model__.update_forward_refs()
-ObjectKeyValuePair.__pydantic_model__.update_forward_refs()
+ObjectType.__pydantic_model__.update_forward_refs()  # type: ignore
+SequenceType.__pydantic_model__.update_forward_refs()  # type: ignore
+NamedArgument.__pydantic_model__.update_forward_refs()  # type: ignore
+FunctionCall.__pydantic_model__.update_forward_refs()  # type: ignore
+ObjectKeyValuePair.__pydantic_model__.update_forward_refs()  # type: ignore
 
 
 def as_basic_type(value: Value) -> Value:
     """Convert a value's type to a basic type."""
     new_type = resolve_to_basic(value.type)
     cp = copy.copy(value)
-    cp.type = new_type
+    cp.type = new_type  # type: ignore
     return cp
 
 
@@ -576,30 +576,41 @@ def _convert_to_python(value: Optional[Value], for_printing=False) -> Any:
         return None
 
     # If we have a type for which the data is usable in Python, use it.
-    if isinstance(value.type, get_args(SimpleTypes)):
+    if isinstance(value.type, SimpleTypes):
         # If we have floats or ints, convert them to Python.
-        if value.type in (NumericTypes.SINGLE_PRECISION, NumericTypes.DOUBLE_PRECISION):
+        if value.type in (
+            AdvancedNumericTypes.SINGLE_PRECISION,
+            AdvancedNumericTypes.DOUBLE_PRECISION,
+        ):
             return float(str(value.data))
-        if value.type != NumericTypes.FIXED_PRECISION:
+        if value.type != AdvancedNumericTypes.FIXED_PRECISION:
             return int(str(value.data))
         if for_printing:
+            assert isinstance(value.data, Decimal)
             return PrintingDecimal(value.data)
 
         return value.data
 
-    if isinstance(value.type, get_args(SequenceTypes)):
-        values = [_convert_to_python(x) for x in value.data]
+    if isinstance(value.type, SequenceTypes):
+        assert isinstance(value, SequenceType)
+        values = [_convert_to_python(cast(Value, x)) for x in value.data]
         basic_type = resolve_to_basic(value.type)
-        if basic_type == SequenceTypes.SEQUENCE:
+        if basic_type == BasicSequenceTypes.SEQUENCE:
             return values
-        if basic_type == SequenceTypes.SET:
-            return sorted_no_duplicates(_convert_to_python(x) for x in value.data)
+        if basic_type == BasicSequenceTypes.SET:
+            return sorted_no_duplicates(
+                _convert_to_python(cast(Value, x)) for x in value.data
+            )
         raise AssertionError(f"Unknown basic sequence type {basic_type}.")
 
-    if isinstance(value.type, get_args(ObjectTypes)):
+    if isinstance(value.type, ObjectTypes):
+        assert isinstance(value, ObjectType)
         return sorted_no_duplicates(
             (
-                (_convert_to_python(pair.key), _convert_to_python(pair.value))
+                (
+                    _convert_to_python(cast(Value, pair.key)),
+                    _convert_to_python(cast(Value, pair.value)),
+                )
                 for pair in value.data
             ),
             key=lambda x: x[0],
@@ -613,7 +624,7 @@ def _convert_to_python(value: Optional[Value], for_printing=False) -> Any:
     return str(value.data)
 
 
-def serialize_from_python(value: Any, type_: str = None) -> Value:
+def serialize_from_python(value: Any, type_: Optional[AllTypes] = None) -> Value:
     """
     Convert a (simple) Python value into a TESTed value.
 
@@ -621,14 +632,19 @@ def serialize_from_python(value: Any, type_: str = None) -> Value:
     JSON encoder for values of the language module for Python.
     """
     if value is None:
+        assert isinstance(type_, NothingTypes | None)
         return NothingType(type=type_ or BasicNothingTypes.NOTHING)
     elif isinstance(value, str):
+        assert isinstance(type_, StringTypes | None)
         return StringType(type=type_ or BasicStringTypes.TEXT, data=value)
     elif isinstance(value, bool):
+        assert isinstance(type_, BooleanTypes | None)
         return BooleanType(type=type_ or BasicBooleanTypes.BOOLEAN, data=value)
     elif isinstance(value, int):
+        assert isinstance(type_, NumericTypes | None)
         return NumberType(type=type_ or BasicNumericTypes.INTEGER, data=value)
     elif isinstance(value, float):
+        assert isinstance(type_, NumericTypes | None)
         return NumberType(type=type_ or BasicNumericTypes.REAL, data=value)
     else:
         raise TypeError(f"No clue how to convert {value} into TESTed value.")
@@ -657,7 +673,7 @@ class ComparableFloat:
         return bool(self.value)
 
 
-def to_python_comparable(value: Optional[Value]):
+def to_python_comparable(value: Optional[Value]) -> Any:
     """
     Convert the value into a comparable Python value. Most values are just converted
     to their built-in Python variant. Some, however, are not. For example, floats
@@ -667,26 +683,37 @@ def to_python_comparable(value: Optional[Value]):
     the return channel (in the test suite). The returned value is only guaranteed
     to support the following operations: eq, str, repr and bool.
     """
-    if value.type == AdvancedNumericTypes.FIXED_PRECISION:
-        return Decimal(value.data)
-    basic_type = resolve_to_basic(value.type)
     if value is None:
         return None
+    basic_type = resolve_to_basic(value.type)
+    if value.type == AdvancedNumericTypes.FIXED_PRECISION:
+        assert isinstance(value.data, Decimal)
+        return Decimal(value.data)
     if basic_type == BasicSequenceTypes.SEQUENCE:
-        return [to_python_comparable(x) for x in value.data]
+        assert isinstance(value, SequenceType)
+        return [to_python_comparable(cast(Value, x)) for x in value.data]
     if basic_type == BasicSequenceTypes.SET:
-        return sorted_no_duplicates(to_python_comparable(x) for x in value.data)
+        assert isinstance(value, SequenceType)
+        return sorted_no_duplicates(
+            to_python_comparable(cast(Value, x)) for x in value.data
+        )
     if basic_type == BasicObjectTypes.MAP:
+        assert isinstance(value, ObjectType)
         return sorted_no_duplicates(
             (
-                (to_python_comparable(pair.key), to_python_comparable(pair.value))
+                (
+                    to_python_comparable(cast(Value, pair.key)),
+                    to_python_comparable(cast(Value, pair.value)),
+                )
                 for pair in value.data
             ),
             key=lambda x: x[0],
         )
     if basic_type == BasicNumericTypes.REAL:
+        assert isinstance(value, NumberType)
         return ComparableFloat(float(value.data))
     if basic_type == BasicNumericTypes.INTEGER:
+        assert isinstance(value, NumberType)
         return value.data
     if basic_type in (
         BasicBooleanTypes.BOOLEAN,
@@ -701,14 +728,41 @@ def to_python_comparable(value: Optional[Value]):
 
 
 class EvalResult(BaseModel):
-    result: Union[bool, Status]
+    result: Status
     readable_expected: Optional[str] = Field(None, alias="readableExpected")
     readable_actual: Optional[str] = Field(None, alias="readableActual")
-    messages: List[ExtendedMessage] = Field(default_factory=list)
+    messages: List[Message] = Field(default_factory=list)
 
     class Config:
         # Allow both camel case and snake case fields
         allow_population_by_field_name = True
+
+
+class BooleanEvalResult(BaseModel):
+    """
+    Allows a boolean result.
+    """
+
+    result: Status | bool
+    readable_expected: Optional[str] = Field(None, alias="readableExpected")
+    readable_actual: Optional[str] = Field(None, alias="readableActual")
+    messages: List[Message] = Field(default_factory=list)
+
+    class Config:
+        # Allow both camel case and snake case fields
+        allow_population_by_field_name = True
+
+    def as_eval_result(self) -> EvalResult:
+        if isinstance(self.result, Status):
+            status = self.result
+        else:
+            status = Status.CORRECT if self.result else Status.WRONG
+        return EvalResult(
+            result=status,
+            readable_expected=self.readable_expected,  # type: ignore
+            readable_actual=self.readable_actual,  # type: ignore
+            messages=self.messages,
+        )
 
 
 @dataclass

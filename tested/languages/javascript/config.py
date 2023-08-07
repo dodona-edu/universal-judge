@@ -57,7 +57,7 @@ class JavaScript(Language):
         }
 
     def datatype_support(self) -> Mapping[AllTypes, TypeSupport]:
-        return {
+        return {  # type: ignore
             "integer": "supported",
             "real": "supported",
             "char": "reduced",
@@ -90,8 +90,7 @@ class JavaScript(Language):
         return {BasicStringTypes.TEXT}
 
     def set_type_restrictions(self) -> Optional[Set[ExpressionTypes]]:
-        # noinspection PyTypeChecker
-        return {
+        return {  # type: ignore
             "integer",
             "real",
             "text",
@@ -118,17 +117,19 @@ class JavaScript(Language):
         # import local to prevent errors
         from tested.judge.utils import run_command
 
-        parse_file = Path(__file__).parent / "parseAst.js"
+        assert self.config
+
+        parse_file = str(Path(__file__).parent / "parseAst.js")
         try:
             output = run_command(
                 solution.parent,
                 timeout=None,
-                command=["node", parse_file, solution.absolute()],
+                command=["node", parse_file, str(solution.absolute())],
             )
-            namings = output.stdout.strip()
-            # noinspection PyTypeChecker
-            with open(solution, "a") as file:
-                print(f"\nmodule.exports = {{{namings}}};", file=file)
+            if output:
+                namings = output.stdout.strip()
+                with open(solution, "a") as file:
+                    print(f"\nmodule.exports = {{{namings}}};", file=file)
         except TimeoutError:
             pass
 
@@ -143,9 +144,11 @@ class JavaScript(Language):
         # Import locally to prevent errors.
         from tested.languages.javascript import linter
 
+        assert self.config
         return linter.run_eslint(self.config.dodona, remaining)
 
     def cleanup_stacktrace(self, traceback: str) -> str:
+        assert self.config
         # What this does:
         # 1a. While inside the submission code, replace all references to the location with <code>
         # 1b. Remove any "submission.SOMETHING" -> "SOMETHING"

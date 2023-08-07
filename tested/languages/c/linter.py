@@ -79,7 +79,7 @@ def run_cppcheck(
                 break
             annotations.append(
                 AnnotateCode(
-                    row=row,
+                    row=row or 0,
                     text=message,
                     column=col,
                     type=message_categories.get(severity, Severity.WARNING),

@@ -59,7 +59,7 @@ class Python(Language):
         }
 
     def datatype_support(self) -> Mapping[AllTypes, TypeSupport]:
-        return {
+        return {  # type: ignore
             "integer": "supported",
             "real": "supported",
             "char": "reduced",
@@ -90,8 +90,7 @@ class Python(Language):
         }
 
     def map_type_restrictions(self) -> Optional[Set[ExpressionTypes]]:
-        # noinspection PyTypeChecker
-        return {
+        return {  # type: ignore
             "integer",
             "real",
             "text",
@@ -146,14 +145,15 @@ class Python(Language):
         # Import locally to prevent errors.
         from tested.languages.python import linter
 
+        assert self.config
         return linter.run_pylint(self.config.dodona, remaining)
 
     # Idea and original code: dodona/judge-pythia
-    def cleanup_stacktrace(self, stacktrace: str) -> str:
+    def cleanup_stacktrace(self, stacktrace_str: str) -> str:
         context_file_regex = re.compile(r"context_[0-9]+_[0-9]+\.py")
         file_line_regex = re.compile(rf"\({submission_file(self)}, line (\d+)\)")
         file_full_regex = re.compile(rf'File "./{submission_file(self)}", line (\d+)')
-        stacktrace = stacktrace.splitlines(True)
+        stacktrace = stacktrace_str.splitlines(True)
 
         skip_line, lines = False, []
         for line in stacktrace:

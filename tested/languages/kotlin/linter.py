@@ -21,13 +21,11 @@ def run_ktlint(
     submission = config.source
     language_options = config.config_for()
 
-    command = ["ktlint", "--reporter=json"]
+    command = ["ktlint", "--reporter=json", "--log-level=error"]
 
-    if language_options.get("editorconfig", None):
-        command.append(
-            "--editorconfig="
-            f"{config.resources / language_options.get('editorconfig')}"
-        )
+    if path := language_options.get("editorconfig", None):
+        assert isinstance(path, str)
+        command.append(f"--editorconfig={config.resources / path}")
 
     if language_options.get("disabled_rules_ktlint", None):
         rules = language_options["disabled_rules_ktlint"]
@@ -39,17 +37,16 @@ def run_ktlint(
     else:
         command.append("--disabled_rules=filename")
 
-    if language_options.get("ktlint_ruleset", None):
-        command.append(
-            f"--ruleset={config.resources / language_options.get('ktlint_ruleset')}"
-        )
+    if path := language_options.get("ktlint_ruleset", None):
+        assert isinstance(path, str)
+        command.append(f"--ruleset={config.resources / path}")
 
     if language_options.get("ktlint_experimental", True):
         command.append("--experimental")
 
     submission = submission.absolute()
 
-    command.append(submission.relative_to(submission.parent))
+    command.append(str(submission.relative_to(submission.parent)))
 
     execution_results = run_command(
         directory=submission.parent, timeout=remaining, command=command
@@ -73,6 +70,11 @@ def run_ktlint(
             get_i18n_string("languages.kotlin.linter.output"),
             ExtendedMessage(
                 description=str(e), format="code", permission=Permission.STAFF
+            ),
+            ExtendedMessage(
+                description=execution_results.stdout,
+                format="code",
+                permission=Permission.STAFF,
             ),
         ], []
     annotations = []

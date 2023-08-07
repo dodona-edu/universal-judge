@@ -1,8 +1,9 @@
 """
 Value evaluator.
 """
+import itertools
 import logging
-from typing import Optional, Tuple, Union
+from typing import Optional, Tuple, Union, cast
 
 from tested.configs import Bundle
 from tested.datatypes import (
@@ -27,8 +28,13 @@ from tested.serialisation import (
     parse_value,
     to_python_comparable,
 )
-from tested.testsuite import OutputChannel, TextOutputChannel, ValueOutputChannel
-from tested.utils import get_args, sorted_no_duplicates
+from tested.testsuite import (
+    EvaluatorOutputChannel,
+    OutputChannel,
+    TextOutputChannel,
+    ValueOutputChannel,
+)
+from tested.utils import sorted_no_duplicates
 
 logger = logging.getLogger(__name__)
 
@@ -45,29 +51,30 @@ def try_as_readable_value(
 
 
 def get_values(
-    bundle: Bundle, output_channel: ValueOutputChannel, actual: str
+    bundle: Bundle, output_channel: EvaluatorOutputChannel, actual_str: str
 ) -> Union[EvaluationResult, Tuple[Value, str, Optional[Value], str]]:
     if isinstance(output_channel, TextOutputChannel):
         expected = output_channel.get_data_as_string(bundle.config.resources)
         expected_value = StringType(type=BasicStringTypes.TEXT, data=expected)
-        actual_value = StringType(type=BasicStringTypes.TEXT, data=actual)
-        return expected_value, expected, actual_value, actual
+        actual_value = StringType(type=BasicStringTypes.TEXT, data=actual_str)
+        return expected_value, expected, actual_value, actual_str
 
     assert isinstance(output_channel, ValueOutputChannel)
 
     expected = output_channel.value
+    assert isinstance(expected, Value)
     readable_expected = generate_statement(bundle, expected)
 
     # Special support for empty strings.
-    if not actual.strip():
+    if not actual_str.strip():
         return expected, readable_expected, None, ""
 
     # A crash here indicates a problem with one of the language implementations,
     # or a student is trying to cheat.
     try:
-        actual = parse_value(actual)
+        actual = parse_value(actual_str)
     except (TypeError, ValueError) as e:
-        raw_message = f"Received {actual}, which caused {e} for get_values."
+        raw_message = f"Received {actual_str}, which caused {e} for get_values."
         message = ExtendedMessage(
             description=raw_message, format="text", permission=Permission.STAFF
         )
@@ -75,7 +82,7 @@ def get_values(
         return EvaluationResult(
             result=StatusMessage(enum=Status.INTERNAL_ERROR, human=student),
             readable_expected=readable_expected,
-            readable_actual=str(actual),
+            readable_actual=actual_str,
             messages=[message],
         )
 
@@ -83,57 +90,37 @@ def get_values(
     return expected, readable_expected, actual, readable_actual
 
 
-def _check_type(bundle: Bundle, expected: Value, actual: Value) -> Tuple[bool, Value]:
-    valid, value = check_data_type(bundle, expected, actual)
-    if not valid:
-        return False, value
-    elif isinstance(value.type, get_args(SimpleTypes)):
-        return True, value
-    elif isinstance(value, SequenceType):
-        if as_basic_type(value).type == BasicSequenceTypes.SET:
-            actual_object = sorted_no_duplicates(
-                value.data, recursive_key=lambda x: x.data
+def _prepare_value_for_type_check(value: Value) -> Value:
+    """
+    Prepare a value for type checking.
+
+    This is mainly sorting the values if the value is a container. Note that we don't
+    actually do type checking here.
+
+    :param value: The value to prepare.
+    :return: The prepared value.
+    """
+    if isinstance(value, SequenceType):
+        basic_type = as_basic_type(value)
+        if basic_type.type == BasicSequenceTypes.SET:
+            value.data = sorted_no_duplicates(
+                value.data, recursive_key=lambda x: x.data  # type: ignore
             )
-            expected_object = sorted_no_duplicates(
-                expected.data, recursive_key=lambda x: x.data
-            )
-        else:
-            actual_object, expected_object = value.data, expected.data
-        data = []
-        for actual_element, expected_element in zip(actual_object, expected_object):
-            element_valid, element_value = _check_type(
-                bundle, expected_element, actual_element
-            )
-            valid = valid and element_valid
-            data.append(element_value)
-        value.data = data
-        return valid, value
-    else:
+    elif isinstance(value, ObjectType):
         assert isinstance(value, ObjectType)
-        data = []
-        actual_object = sorted_no_duplicates(
-            value.data, key=lambda x: x.key, recursive_key=lambda x: x.data
+        value.data = sorted_no_duplicates(
+            value.data, key=lambda x: x.key, recursive_key=lambda x: x.data  # type: ignore
         )
-        expected_object = sorted_no_duplicates(
-            expected.data, key=lambda x: x.key, recursive_key=lambda x: x.data
-        )
-
-        for actual_element, expected_element in zip(actual_object, expected_object):
-            actual_key, actual_value = actual_element.key, actual_element.value
-            expected_key, expected_value = actual_element.key, actual_element.value
-            key_valid, key_value = _check_type(bundle, expected_key, actual_key)
-            value_valid, value_value = _check_type(bundle, expected_value, actual_value)
-            valid = valid and key_valid and value_valid
-            data.append(ObjectKeyValuePair(key=key_value, value=value_value))
-        value.data = data
-        return valid, value
+    else:
+        assert isinstance(value.type, SimpleTypes)
+    return value
 
 
-def check_data_type(
+def _check_simple_type(
     bundle: Bundle, expected: Value, actual: Value
 ) -> Tuple[bool, Value]:
     """
-    Check if the type of the two values match. The following procedure is used:
+    Check if the data type of two simple values match. The following procedure is used:
 
     1. If the expected value's type is a basic type, the actual value is reduced to
        it's basic type, after which both types are checked for equality.
@@ -148,11 +135,10 @@ def check_data_type(
        type.
 
     :param bundle: The configuration bundle.
-    :param expected: The expected type from the test suite.
-    :param actual: The actual type produced by the suite.
+    :param expected: The expected value from the test suite.
+    :param actual: The actual value produced by the suite.
 
-    :return: A tuple with the result and expected value, the type that was used to
-             do the check.
+    :return: A tuple with the result and expected value, which can have a modified type.
     """
     supported_types = fallback_type_support_map(bundle.lang_config)
 
@@ -161,11 +147,11 @@ def check_data_type(
         raise ValueError(f"The language does not support {expected.type}")
 
     # Case 1.
-    if isinstance(expected.type, get_args(BasicTypes)):
+    if isinstance(expected.type, BasicTypes):
         basic_actual = as_basic_type(actual)
         return expected.type == basic_actual.type, expected
 
-    assert isinstance(expected.type, get_args(AdvancedTypes))
+    assert isinstance(expected.type, AdvancedTypes)
 
     # Case 2.b.
     if supported_types[expected.type] == TypeSupport.REDUCED:
@@ -179,8 +165,80 @@ def check_data_type(
     return expected.type == actual.type, expected
 
 
+def _check_data_type(
+    bundle: Bundle, expected: Value, actual: Optional[Value]
+) -> Tuple[bool, Value]:
+    """
+    Check if two values have the same (recursive) type.
+
+    Recursive in this context means that all container types need to have elements
+    with matching types as well. For example, a list of integers will only match
+    another list of integers.
+
+    :param bundle: The configuration bundle.
+    :param expected: The expected value from the test suite.
+    :param actual: The actual value produced by the suite.
+
+    :return: A tuple with the result and expected value, which can have a modified type.
+    """
+    prepared_expected = _prepare_value_for_type_check(expected)
+
+    if actual is None:
+        return False, prepared_expected
+
+    prepared_actual = _prepare_value_for_type_check(actual)
+
+    valid, prepared_expected = _check_simple_type(
+        bundle, prepared_expected, prepared_actual
+    )
+
+    if isinstance(prepared_expected, SequenceType):
+        expected_elements = prepared_expected.data
+        actual_elements = (
+            prepared_actual.data if isinstance(prepared_actual.data, list) else []
+        )
+        prepared_elements = []
+        for expected_element, actual_element in itertools.zip_longest(
+            expected_elements, actual_elements
+        ):
+            assert expected_element is None or isinstance(expected_element, Value)
+            assert actual_element is None or isinstance(actual_element, Value)
+            element_valid, prepared_element = _check_data_type(
+                bundle, expected_element, actual_element
+            )
+            prepared_elements.append(prepared_element)
+            valid = valid and element_valid
+        prepared_expected.data = prepared_elements
+    elif isinstance(prepared_expected, ObjectType):
+        expected_elements = prepared_expected.data
+        actual_elements = (
+            prepared_actual.data if isinstance(prepared_actual.data, list) else []
+        )
+        prepared_elements = []
+        for expected_element, actual_element in itertools.zip_longest(
+            expected_elements, actual_elements
+        ):
+            assert isinstance(actual_element, ObjectKeyValuePair)
+            actual_key, actual_value = actual_element.key, actual_element.value
+            assert isinstance(actual_key, Value) and isinstance(actual_value, Value)
+            expected_key, expected_value = actual_element.key, actual_element.value
+            assert isinstance(expected_key, Value) and isinstance(expected_value, Value)
+            key_valid, prepared_key = _check_data_type(bundle, expected_key, actual_key)
+            value_valid, prepared_value = _check_data_type(
+                bundle, expected_value, actual_value
+            )
+            valid = valid and key_valid and value_valid
+            prepared_elements.append(
+                ObjectKeyValuePair(key=prepared_key, value=prepared_value)
+            )
+        prepared_expected.data = prepared_elements
+    else:
+        assert isinstance(prepared_expected.type, SimpleTypes)
+    return valid, prepared_expected
+
+
 def evaluate(
-    config: EvaluatorConfig, channel: OutputChannel, actual: str
+    config: EvaluatorConfig, channel: OutputChannel, actual_str: str
 ) -> EvaluationResult:
     """
     Evaluate two values. The values must match exact. Currently, this evaluator
@@ -192,14 +250,14 @@ def evaluate(
     # Try parsing the value as an EvaluationResult.
     # This is the result of a custom evaluator.
     try:
-        evaluation_result = EvaluationResult.__pydantic_model__.parse_raw(actual)
+        evaluation_result = EvaluationResult.__pydantic_model__.parse_raw(actual_str)  # type: ignore
     except (TypeError, ValueError):
         pass
     else:
         return evaluation_result
 
     # Try parsing the value as an actual Value.
-    result = get_values(config.bundle, channel, actual)
+    result = get_values(config.bundle, channel, actual_str)
     if isinstance(result, EvaluationResult):
         return result
     else:
@@ -209,7 +267,7 @@ def evaluate(
     is_multiline_string = (
         config.options.get("stringsAsText", True)
         and expected.type == BasicStringTypes.TEXT
-        and "\n" in expected.data
+        and "\n" in cast(str, expected.data)
     )
     if is_multiline_string:
         readable_expected = get_as_string(expected, readable_expected)
@@ -224,7 +282,7 @@ def evaluate(
             readable_actual=readable_actual,
         )
 
-    type_check, expected = _check_type(config.bundle, expected, actual)
+    type_check, expected = _check_data_type(config.bundle, expected, actual)
     messages = []
     type_status = None
 
@@ -259,13 +317,13 @@ def evaluate(
     )
 
 
-def get_as_string(value: Optional[Value], readable: str):
+def get_as_string(value: Optional[Value], readable: str) -> str:
     # Return readable if value is none
     if value is None:
         return readable
-    # Replace tab by 4 spaces
-    return (
-        value.data.replace("\t", "    ")
-        if value.type == BasicStringTypes.TEXT
-        else readable
-    )
+    if value.type == BasicStringTypes.TEXT:
+        assert isinstance(value, StringType)
+        # Replace tab by 4 spaces
+        return value.data.replace("\t", "    ")
+    else:
+        return readable

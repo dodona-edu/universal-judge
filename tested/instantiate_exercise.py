@@ -18,7 +18,7 @@ from tested.description_instance import (
 )
 from tested.dsl import parse_dsl
 from tested.features import fallback_type_support_map
-from tested.languages import LANGUAGES, Language, get_language, language_exists
+from tested.languages import LANGUAGES, get_language, language_exists
 from tested.testsuite import Suite, parse_test_suite
 
 
@@ -139,8 +139,8 @@ def _filter_valid_languages(languages: List[str], test_suite: Suite) -> List[str
     :return: all given languages which support the test suite
     """
 
-    def is_supported(language: str) -> bool:
-        language: Language = get_language(None, language)
+    def is_supported(language_str: str) -> bool:
+        language = get_language(None, language_str)
 
         from tested.features import TypeSupport
 
@@ -159,9 +159,9 @@ def _filter_valid_languages(languages: List[str], test_suite: Suite) -> List[str
         # Check language-specific evaluators
         for testcase in (
             testcase
-            for tab in test_suite.tabs
-            for context in tab.contexts
-            for testcase in context.all_testcases()
+            for tab in test_suite.tabs  # type: ignore
+            for context in tab.contexts  # type: ignore
+            for testcase in context.testcases
         ):
             eval_langs = testcase.output.get_specific_eval_languages()
             if eval_langs is not None and language not in eval_langs:
@@ -176,7 +176,7 @@ def _filter_valid_languages(languages: List[str], test_suite: Suite) -> List[str
             BasicObjectTypes.MAP: language.map_type_restrictions(),
         }
         for key, value_types in nested_types:
-            if not (value_types <= restricted[key]):
+            if not (value_types <= restricted[key]):  # type: ignore
                 return False
 
         return True
@@ -301,7 +301,7 @@ def _instantiate_descriptions(
         if description.is_template:
             # Generate
             instance = create_description_instance_from_template(
-                description.template,
+                description.template,  # type: ignore
                 language,
                 description.natural_language,
                 test_suite.namespace,

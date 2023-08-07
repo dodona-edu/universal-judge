@@ -11,7 +11,7 @@ from tested.evaluators.common import EvaluationResult, EvaluatorConfig
 from tested.internationalization import get_i18n_string
 from tested.languages.utils import convert_stacktrace_to_clickable_feedback
 from tested.serialisation import ExceptionValue
-from tested.testsuite import ExceptionOutputChannel
+from tested.testsuite import ExceptionOutputChannel, OutputChannel
 
 logger = logging.getLogger(__name__)
 
@@ -45,14 +45,14 @@ def try_as_readable_exception(
 
 
 def evaluate(
-    config: EvaluatorConfig, channel: ExceptionOutputChannel, actual: str
+    config: EvaluatorConfig, channel: OutputChannel, actual_str: str
 ) -> EvaluationResult:
     """
     Evaluate an exception.
 
     :param config: Not used.
     :param channel: The channel from the test suite.
-    :param actual: The raw actual value of the execution.
+    :param actual_str: The raw actual value of the execution.
 
     :return: An evaluation result.
     """
@@ -63,7 +63,7 @@ def evaluate(
     language = config.bundle.global_config.dodona.programming_language
     readable_expected = expected.readable(language)
 
-    if not actual:
+    if not actual_str:
         return EvaluationResult(
             result=StatusMessage(enum=Status.WRONG),
             readable_expected=readable_expected,
@@ -72,11 +72,11 @@ def evaluate(
         )
 
     try:
-        actual = try_as_exception(config, actual)
+        actual = try_as_exception(config, actual_str)
     except (TypeError, ValueError) as e:
         staff_message = ExtendedMessage(
             description=get_i18n_string(
-                "evaluators.exception.staff", actual=actual, exception=e
+                "evaluators.exception.staff", actual=actual_str, exception=e
             ),
             format="text",
             permission=Permission.STAFF,

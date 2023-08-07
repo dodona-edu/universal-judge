@@ -7,10 +7,11 @@ import shutil
 import sys
 import traceback
 import types
+from collections.abc import Generator
 from dataclasses import dataclass, field
 from io import StringIO
 from pathlib import Path
-from typing import ContextManager, List, Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union, cast
 
 from tested.configs import Bundle, create_bundle
 from tested.dodona import ExtendedMessage, Permission, Status
@@ -23,7 +24,7 @@ from tested.languages.generation import (
     generate_custom_evaluator,
     generate_statement,
 )
-from tested.serialisation import EvalResult, Value
+from tested.serialisation import BooleanEvalResult, EvalResult, Value
 from tested.testsuite import ProgrammedEvaluator
 from tested.utils import get_identifier
 
@@ -33,7 +34,7 @@ _logger = logging.getLogger(__name__)
 def evaluate_programmed(
     bundle: Bundle,
     evaluator: ProgrammedEvaluator,
-    expected: Optional[Value],
+    expected: Value,
     actual: Value,
 ) -> Union[BaseExecutionResult, EvalResult]:
     """
@@ -54,7 +55,7 @@ def evaluate_programmed(
 def _evaluate_others(
     bundle: Bundle,
     evaluator: ProgrammedEvaluator,
-    expected: Optional[Value],
+    expected: Value,
     actual: Value,
 ) -> BaseExecutionResult:
     """
@@ -165,7 +166,7 @@ def _evaluate_others(
 
 
 @contextlib.contextmanager
-def _catch_output() -> ContextManager[Tuple[StringIO, StringIO]]:
+def _catch_output() -> Generator[Tuple[StringIO, StringIO], None, None]:
     old_stdout = sys.stdout
     old_stderr = sys.stderr
     stdout = StringIO()
@@ -190,7 +191,7 @@ class _EvaluationResult:
 def _evaluate_python(
     bundle: Bundle,
     evaluator: ProgrammedEvaluator,
-    expected: Optional[Value],
+    expected: Value,
     actual: Value,
 ) -> EvalResult:
     """
@@ -239,9 +240,6 @@ def _evaluate_python(
     stdout_ = stdout_.getvalue()
     stderr_ = stderr_.getvalue()
 
-    print(stdout_)
-    print(stderr_)
-
     messages = []
     if stdout_:
         messages.append(
@@ -265,8 +263,7 @@ def _evaluate_python(
             )
         )
 
-    # noinspection PyTypeChecker
-    result_: Optional[_EvaluationResult] = global_env["__tested_test__result"]
+    result_ = cast(_EvaluationResult | None, global_env["__tested_test__result"])
 
     # If the result is None, the evaluator is broken.
     if result_ is None:
@@ -284,20 +281,20 @@ def _evaluate_python(
         )
         return EvalResult(
             result=Status.INTERNAL_ERROR,
-            readable_expected=None,
-            readable_actual=None,
+            readable_expected=None,  # type: ignore
+            readable_actual=None,  # type: ignore
             messages=messages,
         )
 
     assert isinstance(result_, _EvaluationResult)
 
     try:
-        return EvalResult(
+        return BooleanEvalResult(
             result=result_.result,
-            readable_expected=result_.readable_expected,
-            readable_actual=result_.readable_actual,
+            readable_expected=result_.readable_expected,  # type: ignore
+            readable_actual=result_.readable_actual,  # type: ignore
             messages=messages + result_.messages,
-        )
+        ).as_eval_result()
     except (TypeError, ValueError):
         # This happens when the messages are not in the correct format. In normal
         # execution, this is caught when parsing the resulting json, but this does
@@ -323,7 +320,7 @@ def _evaluate_python(
         )
         return EvalResult(
             result=Status.INTERNAL_ERROR,
-            readable_expected=None,
-            readable_actual=None,
+            readable_expected=None,  # type: ignore
+            readable_actual=None,  # type: ignore
             messages=messages,
         )

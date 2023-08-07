@@ -75,16 +75,18 @@ class DescriptionGenerator:
         recursive_call: bool = False,
     ) -> str:
         programming_language = bundle.config.programming_language
+        if custom_type_map is None:
+            custom_type_map = dict()
 
         def _get_type(arg: str) -> Union[str, bool]:
             try:
-                return custom_type_map[programming_language][args]
+                return custom_type_map[programming_language][args]  # type: ignore
             except KeyError:
                 return self.types[arg]
 
         def _get_type_or_conventionalize(arg: str) -> str:
             try:
-                return _get_type(arg)
+                return _get_type(arg)  # type: ignore
             except KeyError:
                 return conventionalize_class(self.language, arg)
 
@@ -93,15 +95,12 @@ class DescriptionGenerator:
                 return _get_type_or_conventionalize(arg)
             else:
                 try:
-                    return custom_type_map[programming_language]["inner"][arg]
+                    return custom_type_map[programming_language]["inner"][arg]  # type: ignore
                 except KeyError:
                     try:
                         return self.types["inner"][arg]
                     except KeyError:
                         return _get_type_or_conventionalize(arg)
-
-        if custom_type_map is None:
-            custom_type_map = dict()
 
         if isinstance(args, str):
             name = _get_type_name(args)
@@ -175,14 +174,18 @@ class DescriptionGenerator:
         return name
 
     def get_code(
-        self, stmt: str, bundle: Bundle, statement: bool = False, is_html: bool = True
+        self,
+        stmt_str: str,
+        bundle: Bundle,
+        statement: bool = False,
+        is_html: bool = True,
     ) -> str:
         from .generation import generate_statement
 
         if statement:
-            stmt = parse_string(stmt)
+            stmt = parse_string(stmt_str)
         else:
-            stmt = parse_string(stmt, is_return=True)
+            stmt = parse_string(stmt_str, is_return=True)
 
         required = stmt.get_used_features()
         available = self.language.supported_constructs()

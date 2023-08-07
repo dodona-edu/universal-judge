@@ -1,5 +1,5 @@
 import json
-from typing import List, Union
+from typing import List, Union, cast
 
 from tested.datatypes import (
     AdvancedNumericTypes,
@@ -15,6 +15,7 @@ from tested.languages.preparation import (
     PreparedContext,
     PreparedExecutionUnit,
     PreparedTestcase,
+    PreparedTestcaseStatement,
 )
 from tested.languages.utils import convert_unknown_type
 from tested.serialisation import (
@@ -26,20 +27,22 @@ from tested.serialisation import (
     NamedArgument,
     SpecialNumbers,
     Statement,
+    StringType,
     Value,
     VariableType,
     as_basic_type,
 )
-from tested.utils import get_args
+from tested.testsuite import MainInput
 
 
 def convert_arguments(arguments: List[Expression | NamedArgument]) -> str:
-    return ", ".join(convert_statement(arg) for arg in arguments)
+    return ", ".join(convert_statement(cast(Expression, arg)) for arg in arguments)
 
 
 def convert_value(value: Value) -> str:
     # Handle some advanced types.
     if value.type == AdvancedStringTypes.CHAR:
+        assert isinstance(value, StringType)
         return f"(char) '" + value.data.replace("'", "\\'") + "'"
     elif value.type == AdvancedNumericTypes.INT_16:
         return f"((short) {value.data})"
@@ -84,6 +87,7 @@ def convert_value(value: Value) -> str:
     elif value.type == BasicNothingTypes.NOTHING:
         return "NULL"
     elif value.type == BasicStringTypes.UNKNOWN:
+        assert isinstance(value, StringType)
         return convert_unknown_type(value)
     raise AssertionError(f"Invalid literal: {value!r}")
 
@@ -143,9 +147,9 @@ def convert_statement(statement: Statement, full=False) -> str:
         return statement
     elif isinstance(statement, FunctionCall):
         return convert_function_call(statement)
-    elif isinstance(statement, get_args(Value)):
+    elif isinstance(statement, Value):
         return convert_value(statement)
-    elif isinstance(statement, get_args(Assignment)):
+    elif isinstance(statement, Assignment):
         if full:
             prefix = convert_declaration(statement.type) + " "
         else:
@@ -170,6 +174,7 @@ def _generate_internal_context(ctx: PreparedContext, pu: PreparedExecutionUnit) 
         result += f"{pu.execution_name}_write_separator();\n"
 
         if tc.testcase.is_main_testcase():
+            assert isinstance(tc.input, MainInput)
             wrapped = [json.dumps(a) for a in tc.input.arguments]
             result += f'char* args[] = {{"{pu.submission_name}", '
             result += ", ".join(wrapped)
@@ -178,6 +183,7 @@ def _generate_internal_context(ctx: PreparedContext, pu: PreparedExecutionUnit) 
                 f"exit_code = solution_main({len(tc.input.arguments) + 1}, args);\n"
             )
         else:
+            assert isinstance(tc.input, PreparedTestcaseStatement)
             result += "exit_code = 0;\n"
             result += convert_statement(tc.input.input_statement()) + ";\n"
 

@@ -29,12 +29,14 @@ class RunHaskell(Haskell):
 
         :return: A list of template folders.
         """
+        assert self.config
         return [
             self.config.dodona.judge / "tested" / "languages" / "haskell" / "templates"
         ]
 
     def get_description_generator(self) -> DescriptionGenerator:
         if self._description_generator is None:
+            assert self.config
             config_dir = self.config.dodona.judge / "tested" / "languages" / "haskell"
             self._description_generator = DescriptionGenerator(self, config_dir)
         return self._description_generator

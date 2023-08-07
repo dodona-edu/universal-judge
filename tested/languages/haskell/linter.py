@@ -26,17 +26,25 @@ def run_hlint(
     """
     submission = config.source
     language_options = config.config_for()
-    if language_options.get("hlint_config", None):
-        config_path = config.resources / language_options.get("hlint_config")
+    if path := language_options.get("hlint_config", None):
+        assert isinstance(path, str)
+        config_path = config.resources / path
     else:
         # Use the default file.
         config_path = config.judge / "tested/languages/haskell/hlint.yml"
-    config_path = config_path.absolute()
+    config_path = str(config_path.absolute())
 
     execution_results = run_command(
         directory=submission.parent,
         timeout=remaining,
-        command=["hlint", "-j", "--json", "-h", config_path, submission.absolute()],
+        command=[
+            "hlint",
+            "-j",
+            "--json",
+            "-h",
+            config_path,
+            str(submission.absolute()),
+        ],
     )
 
     if execution_results is None:

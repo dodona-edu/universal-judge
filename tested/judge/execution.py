@@ -4,7 +4,7 @@ import shutil
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable, List, Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union, cast
 
 from tested.configs import Bundle
 from tested.dodona import Message, Status
@@ -14,7 +14,7 @@ from tested.judge.utils import BaseExecutionResult, run_command
 from tested.languages.config import FileFilter
 from tested.languages.conventionalize import EXECUTION_PREFIX, selector_name
 from tested.languages.preparation import exception_file, value_file
-from tested.testsuite import Context, EmptyChannel, ExecutionMode
+from tested.testsuite import Context, EmptyChannel, ExecutionMode, MainInput
 from tested.utils import safe_del
 
 _logger = logging.getLogger(__name__)
@@ -131,7 +131,7 @@ class Execution:
     execution_index: int
     mode: ExecutionMode
     common_directory: Path
-    files: Union[List[str], Callable[[Path, str], bool]]
+    files: Union[List[str], FileFilter]
     precompilation_result: Optional[Tuple[List[Message], Status]]
     collector: OutputManager
 
@@ -237,7 +237,8 @@ def execute_execution(
     if args.mode == ExecutionMode.INDIVIDUAL:
         _logger.info("Compiling context %s in INDIVIDUAL mode...", args.execution_name)
         remaining = max_time - (time.perf_counter() - start)
-        result, files = run_compilation(bundle, execution_dir, dependencies, remaining)
+        deps = [str(x) for x in dependencies]
+        result, files = run_compilation(bundle, execution_dir, deps, remaining)
 
         # A new compilation means a new file filtering
         files = filter_files(files, execution_dir)
@@ -380,7 +381,7 @@ def merge_contexts_into_units(contexts: List[Context]) -> List[ExecutionUnit]:
         # If we get stdin, start a new execution unit.
         if (
             context.has_main_testcase()
-            and context.testcases[0].input.stdin != EmptyChannel.NONE
+            and cast(MainInput, context.testcases[0].input).stdin != EmptyChannel.NONE
         ):
             if current_unit:
                 units.append(ExecutionUnit(contexts=current_unit))

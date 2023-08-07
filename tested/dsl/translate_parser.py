@@ -1,7 +1,7 @@
 import json
 from logging import getLogger
 from pathlib import Path
-from typing import Callable, Dict, List, Optional, TextIO, TypeVar, Union
+from typing import Callable, Dict, List, Optional, TextIO, TypeVar, Union, cast
 
 import yaml
 from jsonschema import Draft7Validator
@@ -109,6 +109,7 @@ def _deepen_config_level(
     if new_level_object is None or "config" not in new_level_object:
         return current_level
 
+    assert isinstance(new_level_object["config"], dict)
     return recursive_dict_merge(current_level, new_level_object["config"])
 
 
@@ -142,6 +143,8 @@ def _convert_value(value: YamlObject) -> Value:
 
 
 def _convert_file(link_file: YamlDict) -> FileUrl:
+    assert isinstance(link_file["name"], str)
+    assert isinstance(link_file["url"], str)
     return FileUrl(name=link_file["name"], url=link_file["url"])
 
 
@@ -168,8 +171,8 @@ def _convert_text_output_channel(
         )
     else:
         assert isinstance(stream, dict)
+        data = str(stream["data"])
         if "evaluator" not in stream or stream["evaluator"] == "builtin":
-            data = stream["data"]
             existing_config = config.get(config_name, {})
             config = _deepen_config_level(stream, existing_config)
             return TextOutputChannel(
@@ -177,7 +180,7 @@ def _convert_text_output_channel(
             )
         elif stream["evaluator"] == "custom":
             return TextOutputChannel(
-                data=stream["data"], evaluator=_convert_programmed_evaluator(stream)
+                data=data, evaluator=_convert_programmed_evaluator(stream)
             )
         raise TypeError(f"Unknown text evaluator type: {stream['evaluator']}")
 
@@ -185,15 +188,18 @@ def _convert_text_output_channel(
 def _convert_advanced_value_output_channel(stream: YamlObject) -> ValueOutputChannel:
     if isinstance(stream, str):
         value = parse_string(stream, is_return=True)
+        assert isinstance(value, Value)
         return ValueOutputChannel(value=value)
     else:
         assert isinstance(stream, dict)
+        assert isinstance(stream["value"], str)
+        value = parse_string(stream["value"], is_return=True)
+        assert isinstance(value, Value)
         if "evaluator" not in stream or stream["evaluator"] == "builtin":
-            value = parse_string(stream["value"], is_return=True)
             return ValueOutputChannel(value=value)
         elif stream["evaluator"] == "custom":
             return ValueOutputChannel(
-                value=parse_string(stream["value"], is_return=True),
+                value=value,
                 evaluator=_convert_programmed_evaluator(stream),
             )
         raise TypeError(f"Unknown value evaluator type: {stream['evaluator']}")
@@ -203,14 +209,16 @@ def _convert_testcase(testcase: YamlDict, previous_config: dict) -> Testcase:
     config = _deepen_config_level(testcase, previous_config)
 
     if (expr_stmt := testcase.get("statement", testcase.get("expression"))) is not None:
+        assert isinstance(expr_stmt, str)
         the_input = parse_string(expr_stmt)
     else:
-        stdin = (
-            TextData(data=testcase["stdin"])
-            if "stdin" in testcase
-            else EmptyChannel.NONE
-        )
+        if "stdin" in testcase:
+            assert isinstance(testcase["stdin"], str)
+            stdin = TextData(data=testcase["stdin"])
+        else:
+            stdin = EmptyChannel.NONE
         arguments = testcase.get("arguments", [])
+        assert isinstance(arguments, list)
         the_input = MainInput(stdin=stdin, arguments=arguments)
 
     output = Output()
@@ -226,12 +234,14 @@ def _convert_testcase(testcase: YamlDict, previous_config: dict) -> Testcase:
         else:
             assert isinstance(exception, dict)
             message = exception.get("message")
-            types = exception["types"]
+            assert isinstance(message, str)
+            assert isinstance(exception["types"], dict)
+            types = cast(Dict[str, str], exception["types"])
         output.exception = ExceptionOutputChannel(
             exception=ExpectedException(message=message, types=types)
         )
     if (exit_code := testcase.get("exit_code")) is not None:
-        output.exit_code = ExitCodeOutputChannel(exit_code)
+        output.exit_code = ExitCodeOutputChannel(value=cast(int, exit_code))
     if (result := testcase.get("return")) is not None:
         if "return_raw" in testcase:
             raise ValueError("Both a return and return_raw value is not allowed.")
@@ -244,6 +254,7 @@ def _convert_testcase(testcase: YamlDict, previous_config: dict) -> Testcase:
     # TODO: allow propagation of files...
     files = []
     if "files" in testcase:
+        assert isinstance(testcase["files"], list)
         for yaml_file in testcase["files"]:
             files.append(_convert_file(yaml_file))
 
@@ -252,6 +263,7 @@ def _convert_testcase(testcase: YamlDict, previous_config: dict) -> Testcase:
 
 def _convert_context(context: YamlDict, previous_config: dict) -> Context:
     config = _deepen_config_level(context, previous_config)
+    assert isinstance(context["testcases"], list)
     testcases = _convert_dsl_list(context["testcases"], config, _convert_testcase)
     return Context(testcases=testcases)
 
@@ -265,25 +277,26 @@ def _convert_tab(tab: YamlDict, previous_config: dict) -> Tab:
     :return: A full tab.
     """
     config = _deepen_config_level(tab, previous_config)
-    hidden = tab.get("hidden", None)
     name = tab["tab"]
+    assert isinstance(name, str)
 
     # The tab can have testcases or contexts.
     if "contexts" in tab:
+        assert isinstance(tab["contexts"], list)
         contexts = _convert_dsl_list(tab["contexts"], config, _convert_context)
     else:
-        assert "testcases" in tab
+        assert isinstance(tab["testcases"], list)
         testcases = _convert_dsl_list(tab["testcases"], config, _convert_testcase)
         contexts = [Context(testcases=[t]) for t in testcases]
 
-    return Tab(name=name, hidden=hidden, contexts=contexts)
+    return Tab(name=name, contexts=contexts)
 
 
 T = TypeVar("T")
 
 
 def _convert_dsl_list(
-    dsl_list: list, config: dict, converter: Callable[[YamlObject, dict], T]
+    dsl_list: list, config: dict, converter: Callable[[YamlDict, dict], T]
 ) -> List[T]:
     """
     Convert a list of YAML objects into a test suite object.
@@ -319,9 +332,11 @@ def _convert_dsl(dsl_object: YamlObject) -> Suite:
         namespace = dsl_object.get("namespace")
         config = _deepen_config_level(dsl_object, {})
         tab_list = dsl_object["tabs"]
+        assert isinstance(tab_list, list)
     tabs = _convert_dsl_list(tab_list, config, _convert_tab)
 
     if namespace:
+        assert isinstance(namespace, str)
         return Suite(tabs=tabs, namespace=namespace)
     else:
         return Suite(tabs=tabs)

@@ -69,15 +69,17 @@
             typing-inspect
             pyyaml
             pygments
-            python-i18n
-            # For Pycharm
-            setuptools
+            python-i18n 
         ];
         python-env = python.withPackages(ps: (core-packages ps) ++ [
             ps.pylint
             ps.pytest
             ps.pytest-mock
             ps.pytest-cov
+            # For Pycharm
+            ps.setuptools
+            ps.isort
+            ps.black
         ]);
         core-deps = [
             (python.withPackages(ps: (core-packages ps) ++ [ps.pylint]))
@@ -115,7 +117,7 @@
           default = tested;
           tested = pkgs.devshell.mkShell {
             name = "TESTed";
-            packages = [python-env] ++ haskell-deps ++ node-deps ++ bash-deps ++ c-deps ++ java-deps ++ kotlin-deps ++ csharp-deps;
+            packages = [python-env pkgs.nodePackages.pyright] ++ haskell-deps ++ node-deps ++ bash-deps ++ c-deps ++ java-deps ++ kotlin-deps ++ csharp-deps;
             devshell.startup.link.text = ''
               mkdir -p "$PRJ_DATA_DIR/current"
               ln -sfn "${python-env}/${python-env.sitePackages}" "$PRJ_DATA_DIR/current/python-packages"

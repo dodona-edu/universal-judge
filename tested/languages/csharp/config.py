@@ -62,7 +62,7 @@ class CSharp(Language):
         }
 
     def datatype_support(self) -> Mapping[AllTypes, TypeSupport]:
-        return {
+        return {  # type: ignore
             "integer": "supported",
             "real": "supported",
             "char": "reduced",
@@ -166,6 +166,7 @@ class {class_name}
             file.write(result)
 
     def cleanup_stacktrace(self, stacktrace: str) -> str:
+        assert self.config
         execution = conventionalize_namespace(self, EXECUTION_PREFIX)
         execution_submission_location_regex = (
             rf"{self.config.dodona.workdir}/common/{execution}[0-9]+.cs"

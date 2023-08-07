@@ -58,8 +58,8 @@ def run_command(
         )
     except subprocess.TimeoutExpired as e:
         return BaseExecutionResult(
-            stdout=e.stdout or "",
-            stderr=e.stderr or "",
+            stdout=str(e.stdout or ""),
+            stderr=str(e.stderr or ""),
             exit=0,
             timeout=True,
             memory=False,

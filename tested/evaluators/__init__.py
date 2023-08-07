@@ -24,11 +24,11 @@ For example, such a function looks like this:
 """
 import functools
 from pathlib import Path
-from typing import Union
+from typing import Callable, Optional, Union
 
 from tested.configs import Bundle
 from tested.dodona import Status
-from tested.evaluators.common import Evaluator, _curry_evaluator
+from tested.evaluators.common import Evaluator, RawEvaluator, _curry_evaluator
 from tested.testsuite import (
     EmptyChannel,
     ExceptionBuiltin,
@@ -66,13 +66,16 @@ def get_evaluator(
         value,
     )
 
-    currier = functools.partial(_curry_evaluator, bundle, context_dir)
+    currier: Callable[[RawEvaluator, Optional[dict]], Evaluator] = functools.partial(
+        _curry_evaluator, bundle, context_dir
+    )
 
     # Handle channel states.
     if output == EmptyChannel.NONE:
-        return currier(
-            functools.partial(nothing.evaluate, unexpected_status=unexpected_status)
+        evaluator = functools.partial(
+            nothing.evaluate, unexpected_status=unexpected_status
         )
+        return currier(evaluator)
     if output == IgnoredChannel.IGNORED:
         return currier(ignored.evaluate)
     if isinstance(output, ExitCodeOutputChannel):

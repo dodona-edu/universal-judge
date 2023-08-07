@@ -3,10 +3,10 @@ Programmed evaluator.
 """
 import logging
 import traceback
-from typing import Optional
+from typing import List, Optional
 
-from tested.datatypes import StringTypes
-from tested.dodona import ExtendedMessage, Permission, Status, StatusMessage
+from tested.datatypes import BasicStringTypes
+from tested.dodona import ExtendedMessage, Message, Permission, Status, StatusMessage
 from tested.evaluators.common import (
     EvaluationResult,
     EvaluatorConfig,
@@ -16,9 +16,8 @@ from tested.evaluators.value import get_values
 from tested.internationalization import get_i18n_string
 from tested.judge.programmed import evaluate_programmed
 from tested.judge.utils import BaseExecutionResult
-from tested.serialisation import EvalResult, StringType, Value
-from tested.testsuite import NormalOutputChannel, ProgrammedEvaluator
-from tested.utils import get_args
+from tested.serialisation import BooleanEvalResult, EvalResult, StringType, Value
+from tested.testsuite import EvaluatorOutputChannel, OutputChannel, ProgrammedEvaluator
 
 _logger = logging.getLogger(__name__)
 
@@ -27,7 +26,7 @@ DEFAULT_STUDENT = get_i18n_string("evaluators.programmed.student.default")
 
 def _maybe_string(value_: str) -> Optional[Value]:
     if value_:
-        return StringType(StringTypes.TEXT, value_)
+        return StringType(type=BasicStringTypes.TEXT, data=value_)
     else:
         return None
 
@@ -37,23 +36,22 @@ def _try_specific(value_: str) -> EvalResult:
 
 
 def evaluate(
-    config: EvaluatorConfig, channel: NormalOutputChannel, actual: str
+    config: EvaluatorConfig, channel: OutputChannel, actual_str: str
 ) -> EvaluationResult:
     """
     Evaluate using a programmed evaluator. This evaluator is unique, in that it is
     also responsible for running the evaluator (all other evaluators don't do that).
     """
-    assert isinstance(channel, get_args(NormalOutputChannel))
-    assert hasattr(channel, "evaluator")
+    assert isinstance(channel, EvaluatorOutputChannel)
     assert isinstance(channel.evaluator, ProgrammedEvaluator)
 
-    _logger.debug(f"Programmed evaluator for output {actual}")
+    _logger.debug(f"Programmed evaluator for output {actual_str}")
 
     # Convert the expected item to a Value, which is then passed to the
     # evaluator for evaluation.
     # This is slightly tricky, since the actual value must also be converted
     # to a value, and we are not yet sure what the actual value is exactly
-    result = get_values(config.bundle, channel, actual or "")
+    result = get_values(config.bundle, channel, actual_str or "")
     # TODO: why is this?
     if isinstance(result, EvaluationResult):
         return result
@@ -103,9 +101,11 @@ def evaluate(
                 messages=[stdout, stderr, DEFAULT_STUDENT],
             )
         try:
-            evaluation_result = _try_specific(result.stdout)
+            evaluation_result = BooleanEvalResult.parse_raw(
+                result.stdout
+            ).as_eval_result()
         except (TypeError, ValueError):
-            messages = [
+            messages: List[Message] = [
                 ExtendedMessage(description=DEFAULT_STUDENT, format="text"),
                 ExtendedMessage(
                     description=get_i18n_string("evaluators.programmed.result"),
@@ -158,20 +158,20 @@ def evaluate(
         result_status = StatusMessage(
             enum=Status.CORRECT if evaluation_result.result else Status.WRONG
         )
-    actual = cleanup_specific_programmed(
+    cleaned = cleanup_specific_programmed(
         config,
         channel,
         EvalResult(
             result=result_status.enum,
-            readable_expected=readable_expected,
-            readable_actual=readable_actual,
+            readable_expected=readable_expected,  # type: ignore
+            readable_actual=readable_actual,  # type: ignore
             messages=evaluation_result.messages,
         ),
     )
 
     return EvaluationResult(
         result=result_status,
-        readable_expected=actual.readable_expected,
-        readable_actual=actual.readable_actual,
-        messages=actual.messages,
+        readable_expected=cleaned.readable_expected or "",
+        readable_actual=cleaned.readable_actual or "",
+        messages=cleaned.messages,
     )

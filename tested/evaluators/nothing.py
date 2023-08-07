@@ -8,12 +8,12 @@ from tested.evaluators.common import EvaluationResult, EvaluatorConfig, try_outp
 from tested.evaluators.exception import try_as_readable_exception
 from tested.evaluators.value import try_as_readable_value
 from tested.internationalization import get_i18n_string
-from tested.testsuite import EmptyChannel
+from tested.testsuite import EmptyChannel, OutputChannel
 
 
 def evaluate(
     config: EvaluatorConfig,
-    channel: EmptyChannel,
+    channel: OutputChannel,
     actual: str,
     unexpected_status: Status = Status.WRONG,
 ) -> EvaluationResult:
