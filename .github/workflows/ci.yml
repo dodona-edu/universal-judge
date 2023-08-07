@@ -54,3 +54,19 @@ jobs:
         with:
           version: "~= 23.0"
           src: "./tested ./tests"
+  types:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.11.2
+          cache: 'pipenv'
+      - run: pip install pipenv
+      - run: pipenv install --dev
+      - run: echo "$(pipenv --venv)/bin" >> $GITHUB_PATH
+      - uses: jakebailey/pyright-action@v1
+        with:
+          version: '1.1.316'
+          warnings: true
+          working-directory: tested/
