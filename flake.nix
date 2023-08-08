@@ -61,15 +61,39 @@
                maintainers = [ ];
              };
            };
+        marko = python.pkgs.buildPythonPackage rec {
+            pname = "marko";
+            version = "2.0.0";
+            format = "pyproject";
+            
+            src = pkgs.fetchPypi {
+                inherit pname version;
+                hash = "sha256-78JkYIkyUME3UQJa6SAuuxOJiHA2/A35AJxquHVGcDA=";
+            };
+            
+            nativeBuildInputs = [
+                python.pkgs.pdm-pep517 python.pkgs.pdm-backend
+            ];
+           
+            doCheck = false;
+           
+            meta = with pkgs.lib; {
+                homepage = "https://github.com/frostming/marko";
+                license = licenses.mit;
+                maintainers = [ ];
+            };
+        };
         core-packages = ps: with ps; [
             psutil
-            mako
             my-pydantic
             jsonschema
             typing-inspect
             pyyaml
             pygments
-            python-i18n 
+            python-i18n
+            # For scripts, not judge itself.
+            mako
+            marko
         ];
         python-env = python.withPackages(ps: (core-packages ps) ++ [
             ps.pylint

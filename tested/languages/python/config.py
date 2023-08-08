@@ -7,7 +7,12 @@ from typing import TYPE_CHECKING, Dict, List, Mapping, Optional, Set, Tuple
 from tested.datatypes import AllTypes, ExpressionTypes
 from tested.dodona import AnnotateCode, Message, Severity
 from tested.features import Construct, TypeSupport
-from tested.languages.config import CallbackResult, Command, Language
+from tested.languages.config import (
+    CallbackResult,
+    Command,
+    Language,
+    TypeDeclarationMetadata,
+)
 from tested.languages.conventionalize import (
     Conventionable,
     NamingConventions,
@@ -224,3 +229,37 @@ class Python(Language):
         from tested.languages.python import generators
 
         return generators.convert_encoder(values)
+
+    def get_declaration_metadata(self) -> TypeDeclarationMetadata:
+        return {
+            "names": {  # type: ignore
+                "integer": "int",
+                "real": "float",
+                "char": "str",
+                "text": "str",
+                "boolean": "bool",
+                "sequence": "List",
+                "set": "Set",
+                "map": "Dict",
+                "nothing": "None",
+                "undefined": "None",
+                "int8": "int",
+                "uint8": "int",
+                "int16": "int",
+                "uint16": "int",
+                "int32": "int",
+                "uint32": "int",
+                "int64": "int",
+                "uint64": "int",
+                "bigint": "int",
+                "single_precision": "float",
+                "double_precision": "float",
+                "double_extended": "Decimal",
+                "fixed_precision": "Decimal",
+                "array": "List",
+                "list": "List",
+                "tuple": "Tuple",
+                "any": "Any",
+            },
+            "prompt": ">>>",
+        }

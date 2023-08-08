@@ -5,7 +5,12 @@ from typing import TYPE_CHECKING, Dict, List, Mapping, Set, Tuple
 from tested.datatypes import AllTypes
 from tested.dodona import AnnotateCode, Message
 from tested.features import Construct, TypeSupport
-from tested.languages.config import CallbackResult, Command, Language
+from tested.languages.config import (
+    CallbackResult,
+    Command,
+    Language,
+    TypeDeclarationMetadata,
+)
 from tested.languages.conventionalize import (
     Conventionable,
     NamingConventions,
@@ -179,3 +184,32 @@ class Haskell(Language):
         from tested.languages.haskell import generators
 
         return generators.convert_encoder(values)
+
+    def get_declaration_metadata(self) -> TypeDeclarationMetadata:
+        return {
+            "names": {  # type: ignore
+                "integer": "Int",
+                "real": "Double",
+                "char": "Char",
+                "text": "String",
+                "boolean": "Bool",
+                "nothing": "Nothing",
+                "undefined": "Nothing",
+                "int8": "Data.Int.Int8",
+                "uint8": "Data.Word.Word8",
+                "int16": "Data.Int.Int16",
+                "uint16": "Data.Word.Word16",
+                "int32": "Data.Int.Int32",
+                "uint32": "Data.Word.Word32",
+                "int64": "Data.Int.Int64",
+                "uint64": "Data.Word.Word64",
+                "bigint": "Integer",
+                "single_precision": "Float",
+                "double_precision": "Double",
+                "any": "Object",
+                "list": True,
+                "tuple": True,
+                "sequence": True,
+            },
+            "nested_overrides": {"tuple": ("(", ")")},  # type: ignore
+        }

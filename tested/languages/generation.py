@@ -8,20 +8,22 @@ import logging
 import re
 import shlex
 from pathlib import Path
-from typing import TYPE_CHECKING, Iterable, List, Match, Set, Tuple
+from typing import TYPE_CHECKING, Iterable, List, Match, Set, Tuple, TypeAlias
 
+from pygments import highlight
 from pygments.formatters.html import HtmlFormatter
+from pygments.lexers import get_lexer_by_name
 
 from tested.configs import Bundle
-from tested.datatypes import BasicSequenceTypes
+from tested.datatypes import AllTypes, BasicObjectTypes, BasicSequenceTypes
 from tested.dodona import ExtendedMessage
 from tested.internationalization import get_i18n_string
+from tested.languages import Language
 from tested.languages.conventionalize import (
     conventionalize_namespace,
     selector_file,
     submission_name,
 )
-from tested.languages.description_generator import highlight_console
 from tested.languages.preparation import (
     PreparedExecutionUnit,
     PreparedFunctionCall,
@@ -37,6 +39,7 @@ from tested.serialisation import (
     SequenceType,
     Statement,
     Value,
+    VariableType,
 )
 from tested.testsuite import (
     Context,
@@ -52,7 +55,24 @@ if TYPE_CHECKING:
     from tested.judge.execution import ExecutionUnit
 
 _logger = logging.getLogger(__name__)
-_html_formatter = HtmlFormatter()
+_html_formatter = HtmlFormatter(nowrap=True)
+
+
+# Alias for type declarations
+NestedTypeDeclaration: TypeAlias = (
+    AllTypes | Tuple[AllTypes, Tuple["NestedTypeDeclaration", ...]]
+)
+
+
+def highlight_code(stmt: str, language: str = "console") -> str:
+    """
+    Highlight code for some programming language.
+
+    :param stmt: The code to highlight.
+    :param language: The language of the code.
+    """
+    lexer = get_lexer_by_name(language, stripall=True)
+    return highlight(stmt, lexer, _html_formatter)
 
 
 def generate_execution_unit(
@@ -148,10 +168,9 @@ def get_readable_input(
     if format_ == "text":
         generated_html = html.escape(text)
     elif format_ == "console":
-        generated_html = highlight_console(text)
+        generated_html = highlight_code(text)
     else:
-        generator = bundle.lang_config.get_description_generator()
-        generated_html = generator.generate_html_code(text)
+        generated_html = highlight_code(text, bundle.config.programming_language)
 
     if case.is_main_testcase():
         regex = re.compile(
@@ -340,8 +359,55 @@ def generate_custom_evaluator(
     if destination.is_dir():
         destination /= bundle.lang_config.with_extension("EvaluatorExecutor")
 
-    # noinspection PyTypeChecker
     with open(destination, "w") as check_function_file:
         check_function_file.write(code)
 
     return destination.name
+
+
+def _convert_single_type(
+    language: Language, type_: AllTypes | VariableType, inner: bool
+) -> str | bool:
+    if isinstance(type_, VariableType):
+        return type_.data
+    meta = language.get_declaration_metadata()
+    if inner and type_ in meta.get("inner_names", {}):
+        return meta["inner_names"][type_]  # type: ignore
+    else:
+        return meta["names"].get(type_, type_)
+
+
+def generate_type_declaration(
+    language: Language, declaration: NestedTypeDeclaration, inner: bool = False
+) -> str | bool:
+    if not isinstance(declaration, tuple):
+        return _convert_single_type(language, declaration, inner)
+
+    meta = language.get_declaration_metadata()
+    base_type, nested = declaration
+    base = _convert_single_type(language, base_type, inner)
+
+    start, finish = meta.get("nested", ("[", "]"))
+
+    if base_type in meta.get("nested_overrides", {}):
+        start, finish = meta["nested_overrides"][base_type]  # type: ignore
+
+    if isinstance(base_type, BasicObjectTypes):
+        assert (
+            len(nested) == 2
+        ), "Object types require exactly two nested types if present."
+
+    converted_nested = []
+    for x in nested:
+        converted_x = generate_type_declaration(language, x, True)
+        assert isinstance(converted_x, str)
+        converted_nested.append(converted_x)
+
+    if base is True:
+        # This is a type with "inner" types, i.e. no name, such as Tuple[bool]
+        return f"{start}{', '.join(converted_nested)}{finish}"
+    elif base is False:
+        # This is a type with "rigt" types, i.e. no name, such as bool[]
+        return f"{', '.join(converted_nested)}{start}{finish}"
+    else:
+        return f"{base}{start}{', '.join(converted_nested)}{finish}"

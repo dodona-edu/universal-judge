@@ -7,7 +7,12 @@ from tested.datatypes import AllTypes
 from tested.dodona import AnnotateCode, Message, Status
 from tested.features import Construct, TypeSupport
 from tested.internationalization import get_i18n_string
-from tested.languages.config import CallbackResult, Command, Language
+from tested.languages.config import (
+    CallbackResult,
+    Command,
+    Language,
+    TypeDeclarationMetadata,
+)
 from tested.languages.conventionalize import (
     EXECUTION_PREFIX,
     Conventionable,
@@ -242,3 +247,32 @@ class {class_name}
         from tested.languages.csharp import generators
 
         return generators.convert_encoder(values)
+
+    def get_declaration_metadata(self) -> TypeDeclarationMetadata:
+        return {
+            "names": {  # type: ignore
+                "integer": "Int32",
+                "real": "Double",
+                "char": "char",
+                "text": "string",
+                "boolean": "Boolean",
+                "sequence": "List",
+                "set": "Set",
+                "map": "Dictionary",
+                "int8": "Byte",
+                "uint8": "SByte",
+                "int16": "Int16",
+                "uint16": "UInt16",
+                "int32": "Int32",
+                "uint32": "UInt32",
+                "int64": "Int64",
+                "uint64": "UInt64",
+                "bigint": "BigInteger",
+                "single_precision": "Single",
+                "double_precision": "Double",
+                "double_extended": "BigInteger",
+                "list": "List",
+                "tuple": "Tuple",
+                "any": "Object",
+            }
+        }

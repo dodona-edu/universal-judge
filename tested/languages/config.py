@@ -8,7 +8,18 @@ import logging
 import typing
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Callable, Dict, List, Mapping, Optional, Set, Tuple, Union
+from typing import (
+    Callable,
+    Dict,
+    List,
+    Mapping,
+    NotRequired,
+    Optional,
+    Set,
+    Tuple,
+    TypedDict,
+    Union,
+)
 
 from tested.datatypes import AllTypes, ExpressionTypes
 from tested.dodona import AnnotateCode, Message, Status
@@ -20,7 +31,6 @@ from tested.languages.conventionalize import (
     NamingConventions,
     conventionalize_namespace,
 )
-from tested.languages.description_generator import DescriptionGenerator
 from tested.serialisation import FunctionCall, Statement, Value
 
 if typing.TYPE_CHECKING:
@@ -32,6 +42,15 @@ FileFilter = Callable[[Path], bool]
 CallbackResult = Tuple[Command, Union[List[str], FileFilter]]
 
 _logger = logging.getLogger(__name__)
+
+
+class TypeDeclarationMetadata(TypedDict):
+    names: Mapping[AllTypes, str | bool]
+    inner_names: NotRequired[Mapping[AllTypes, str]]
+    nested: NotRequired[Tuple[str, str]]
+    nested_overrides: NotRequired[Mapping[AllTypes, Tuple[str, str]]]
+    prompt: NotRequired[str]
+    natural_overrides: NotRequired[Mapping[str, Mapping[AllTypes, Tuple[str, str]]]]
 
 
 class Language(ABC):
@@ -50,14 +69,12 @@ class Language(ABC):
     """
 
     config: Optional["GlobalConfig"]
-    _description_generator: Optional[DescriptionGenerator]
 
     def __init__(self, config: Optional["GlobalConfig"]):
         """
         :param config: If the config is None, only "config" methods will work.
         """
         self.config = config
-        self._description_generator = None
 
     def compilation(self, files: List[str]) -> CallbackResult:
         """
@@ -389,16 +406,14 @@ class Language(ABC):
         """
         return stacktrace
 
-    def cleanup_description(self, description: str) -> str:
-        return description
+    def cleanup_description(self, statement: str) -> str:
+        """
+        Allow the language implementation to modify a generated statement for use
+        in problem statements.
 
-    def get_description_generator(self) -> DescriptionGenerator:
-        if self._description_generator is None:
-            assert self.config
-            lang = self.config.dodona.programming_language
-            config_dir = self.config.dodona.judge / "tested" / "languages" / lang
-            self._description_generator = DescriptionGenerator(self, config_dir)
-        return self._description_generator
+        :param statement: The generated statement.
+        """
+        return statement
 
     @abstractmethod
     def generate_statement(self, statement: Statement) -> str:
@@ -448,6 +463,16 @@ class Language(ABC):
 
         :param values: The values to encode.
         :return: A string representing an encoder.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_declaration_metadata(self) -> TypeDeclarationMetadata:
+        """
+        Return metadata that can be used to construct type declarations.
+
+        In languages that support it, this declaration should be valid to use on a
+        variable, for example. In other languages, an approximation can be used.
         """
         raise NotImplementedError
 

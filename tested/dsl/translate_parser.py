@@ -131,7 +131,6 @@ def _convert_value(value: YamlObject) -> Value:
         )
     else:
         data = []
-        # noinspection PyTypeChecker
         for key, val in value.items():
             data.append(
                 ObjectKeyValuePair(

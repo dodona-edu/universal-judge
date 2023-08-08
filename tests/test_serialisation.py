@@ -40,6 +40,7 @@ from tested.judge.execution import execute_file, filter_files
 from tested.judge.utils import BaseExecutionResult, copy_from_paths_to_path
 from tested.languages.conventionalize import conventionalize_namespace
 from tested.serialisation import (
+    Assignment,
     BooleanType,
     NothingType,
     NumberType,
@@ -333,3 +334,11 @@ def test_valid_type_map(language: str, tmp_path: Path, pytestconfig):
             basic_type = resolve_to_basic(advanced_type)
             basic_value = type_map[basic_type]
             assert basic_value == TypeSupport.SUPPORTED
+
+
+def test_nested_type_declaration(tmp_path: Path, pytestconfig):
+    # Get a type map.
+    conf = configuration(pytestconfig, "", "java", tmp_path)
+    plan = Suite()
+    bundle = create_bundle(conf, sys.stdout, plan)
+    statement = Assignment()

@@ -5,7 +5,12 @@ from typing import TYPE_CHECKING, Dict, List, Mapping, Optional, Set, Tuple
 from tested.datatypes import AllTypes, ExpressionTypes
 from tested.dodona import AnnotateCode, Message
 from tested.features import Construct, TypeSupport
-from tested.languages.config import CallbackResult, Command, Language
+from tested.languages.config import (
+    CallbackResult,
+    Command,
+    Language,
+    TypeDeclarationMetadata,
+)
 from tested.languages.conventionalize import (
     Conventionable,
     NamingConventions,
@@ -156,3 +161,52 @@ class Java(Language):
         from tested.languages.java import generators
 
         return generators.convert_encoder(values)
+
+    def get_declaration_metadata(self) -> TypeDeclarationMetadata:
+        return {
+            "names": {
+                "integer": "int",
+                "real": "double",
+                "char": "char",
+                "text": "String",
+                "boolean": "boolean",
+                "sequence": "List",
+                "set": "Set",
+                "map": "Map",
+                "nothing": "Void",
+                "undefined": "Void",
+                "int8": "byte",
+                "uint8": "short",
+                "int16": "short",
+                "uint16": "int",
+                "int32": "int",
+                "uint32": "long",
+                "int64": "long",
+                "uint64": "BigInteger",
+                "bigint": "BigInteger",
+                "single_precision": "float",
+                "double_precision": "double",
+                "double_extended": "BigDecimal",
+                "fixed_precision": "BigDecimal",
+                "list": "List",
+                "any": "Object",
+                "array": False,
+            },
+            "inner_names": {
+                "boolean": "Boolean",
+                "char": "Character",
+                "integer": "Integer",
+                "real": "Double",
+                "single_precision": "Float",
+                "double_precision": "Double",
+                "int8": "Byte",
+                "uint8": "Short",
+                "int16": "Short",
+                "uint16": "Integer",
+                "int32": "Integer",
+                "uint32": "Long",
+                "int64": "Long",
+            },
+            "nested": ("<", ">"),
+            "nested_overrides": {"array": ("[", "]")},  # type: ignore
+        }
