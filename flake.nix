@@ -6,10 +6,7 @@
     flake-utils.url = "github:numtide/flake-utils";
     devshell = {
       url = "github:numtide/devshell";
-      inputs = {
-        flake-utils.follows = "flake-utils";
-        nixpkgs.follows = "nixpkgs";
-      };
+      inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
@@ -91,9 +88,6 @@
             pyyaml
             pygments
             python-i18n
-            # For scripts, not judge itself.
-            mako
-            marko
         ];
         python-env = python.withPackages(ps: (core-packages ps) ++ [
             ps.pylint
@@ -104,6 +98,8 @@
             ps.setuptools
             ps.isort
             ps.black
+            ps.jinja2
+            marko
         ]);
         core-deps = [
             (python.withPackages(ps: (core-packages ps) ++ [ps.pylint]))
@@ -141,7 +137,7 @@
           default = tested;
           tested = pkgs.devshell.mkShell {
             name = "TESTed";
-            packages = [python-env pkgs.nodePackages.pyright] ++ haskell-deps ++ node-deps ++ bash-deps ++ c-deps ++ java-deps ++ kotlin-deps ++ csharp-deps;
+            packages = [python-env pkgs.nodePackages.pyright pkgs.pipenv] ++ haskell-deps ++ node-deps ++ bash-deps ++ c-deps ++ java-deps ++ kotlin-deps ++ csharp-deps;
             devshell.startup.link.text = ''
               mkdir -p "$PRJ_DATA_DIR/current"
               ln -sfn "${python-env}/${python-env.sitePackages}" "$PRJ_DATA_DIR/current/python-packages"

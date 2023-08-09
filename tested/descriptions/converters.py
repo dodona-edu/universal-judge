@@ -1,7 +1,7 @@
 from functools import partial
 from typing import cast
 
-from mako.template import Template
+from jinja2 import Template
 from marko import Markdown
 
 from tested.configs import Bundle
@@ -36,7 +36,7 @@ def common_type_name(type_: AllTypes, plural: bool = False):
     return get_i18n_string(f"types.{key}.{type_}")
 
 
-def convert_mako_problem(bundle: Bundle, raw_description: str) -> str:
+def convert_templated_problem(bundle: Bundle, raw_description: str) -> str:
     """
     Render a Mako problem into a normal problem.
 
@@ -44,26 +44,26 @@ def convert_mako_problem(bundle: Bundle, raw_description: str) -> str:
     :param raw_description: The raw, Mako description.
     :return: The processed (Markdown) description.
     """
-    description_template = Template(raw_description, output_encoding="utf8")
+
+    description_template = Template(
+        source=raw_description, autoescape=False, keep_trailing_newline=True
+    )
     language = bundle.lang_config
     set_locale(bundle.config.natural_language)
-    return cast(
-        str,
-        description_template.render(
-            # Conventionalize functions
-            namespace=partial(conventionalize_namespace, language),
-            function=partial(conventionalize_function, language),
-            identifier=partial(conventionalize_identifier, language),
-            property=partial(conventionalize_property, language),
-            clazz=partial(conventionalize_class, language),
-            global_identifier=partial(conventionalize_global_identifier, language),
-            # Access to the current programming language
-            programming_language=bundle.config.programming_language,
-            # Data type conversion
-            datatype=partial(type_declaration, language),
-            datatype_common=common_type_name,
-            t=partial(render_one_statement, bundle),
-        ),
+    return description_template.render(
+        # Conventionalize functions
+        namespace=partial(conventionalize_namespace, language),
+        function=partial(conventionalize_function, language),
+        identifier=partial(conventionalize_identifier, language),
+        property=partial(conventionalize_property, language),
+        clazz=partial(conventionalize_class, language),
+        global_identifier=partial(conventionalize_global_identifier, language),
+        # Access to the current programming language
+        programming_language=bundle.config.programming_language,
+        # Data type conversion
+        datatype=partial(type_declaration, language),
+        datatype_common=common_type_name,
+        t=partial(render_one_statement, bundle),
     )
 
 

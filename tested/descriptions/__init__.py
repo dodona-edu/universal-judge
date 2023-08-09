@@ -2,7 +2,10 @@ import os
 from pathlib import Path
 
 from tested.configs import Bundle, DodonaConfig, GlobalConfig
-from tested.descriptions.converters import convert_mako_problem, convert_tested_markdown
+from tested.descriptions.converters import (
+    convert_templated_problem,
+    convert_tested_markdown,
+)
 from tested.languages import get_language
 from tested.testsuite import Suite
 
@@ -35,7 +38,7 @@ def process_problem_statement(
         out=open(os.devnull, "w"),
     )
 
-    tested_markdown = convert_mako_problem(bundle, problem_statement)
+    tested_markdown = convert_templated_problem(bundle, problem_statement)
     normal_markdown = convert_tested_markdown(bundle, tested_markdown)
 
     if not tested_markdown.endswith("\n"):

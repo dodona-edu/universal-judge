@@ -10,7 +10,7 @@ from tested.dsl.ast_translator import InvalidDslError
 @pytest.mark.parametrize("language", ["python", "kotlin", "java", "haskell"])
 def test_python_description(language: str):
     test_dir = Path(__file__).parent
-    description_template = test_dir / "descriptions" / "example.md.mako"
+    description_template = test_dir / "descriptions" / "example.md.jinja2"
     description_python = test_dir / "descriptions" / f"example.{language}.md"
     with open(description_template, "r") as dp:
         template = dp.read()
@@ -35,7 +35,7 @@ def test_python_description(language: str):
     ],
 )
 def test_template_function_name(lang: str, expected: str):
-    template = '${function("this_is_a_function_name")}'
+    template = '{{ function("this_is_a_function_name") }}'
     instance = process_problem_statement(template, lang)
     assert instance == f"{expected}"
 
@@ -89,7 +89,7 @@ def test_template_function_name(lang: str, expected: str):
     ],
 )
 def test_template_type_name(lang: str, tested_type: Any, expected: str):
-    template = f"""${'{'}datatype({tested_type}){'}'}"""
+    template = f"""{{{{ datatype({tested_type}) }}}}"""
     instance = process_problem_statement(template, lang)
     assert instance == f"{expected}"
 
@@ -115,7 +115,7 @@ def test_template_type_name(lang: str, tested_type: Any, expected: str):
     ],
 )
 def test_template_natural_type_name(lang: str, tested_type: Any, expected: str):
-    template = f"""${{datatype_common({tested_type})}}"""
+    template = f"""{{{{ datatype_common({tested_type}) }}}}"""
     instance = process_problem_statement(template, lang)
     assert instance == f"{expected}"
 
@@ -141,7 +141,7 @@ def test_template_natural_type_name(lang: str, tested_type: Any, expected: str):
     ],
 )
 def test_template_natural_type_name_nl(lang: str, tested_type: Any, expected: str):
-    template = f"""${{datatype_common({tested_type})}}"""
+    template = f"""{{{{ datatype_common({tested_type}) }}}}"""
     instance = process_problem_statement(template, lang, "nl")
     assert instance == f"{expected}"
 
@@ -169,7 +169,7 @@ def test_template_code_block_markdown(lang: str, prompt: str):
         if lang == "java"
         else "random()"
     )
-    expected_expr = "5 :: Int" if lang == "haskell" else "5"
+    expected_expr = "5"
     instance = process_problem_statement(template, lang)
     expected = f"""```console?lang={lang}&prompt={prompt}
 {prompt} {expected_stmt}
@@ -200,9 +200,9 @@ def test_template_code_block_markdown(lang: str, prompt: str):
     ],
 )
 def test_template_statement_expression(lang: str, expected: str):
-    template = """${t('random = Random()')}
-${t('random.new_sequence(10, 10)')}
-${t('[10, 5, 2, 8, 7, 1, 3, 4, 9, 6]')}"""
+    template = """{{ t('random = Random()') }}
+{{ t('random.new_sequence(10, 10)') }}
+{{ t('[10, 5, 2, 8, 7, 1, 3, 4, 9, 6]') }}"""
     instance = process_problem_statement(template, lang)
     assert instance == f"{expected}"
 
@@ -241,3 +241,59 @@ beta")
 ```"""
     with pytest.raises(InvalidDslError):
         process_problem_statement(template, "java")
+
+
+def test_multiline_results():
+    template = """
+```console?lang=tested
+>>> dots("paper.txt")
+###..###...##..#..#.####.###..#....###.
+#..#.#..#.#..#.#.#..#....#..#.#....#..#
+#..#.#..#.#....##...###..###..#....#..#
+###..###..#....#.#..#....#..#.#....###.
+#.#..#....#..#.#.#..#....#..#.#....#.#.
+#..#.#.....##..#..#.#....###..####.#..#
+```
+"""
+    actual = process_problem_statement(template, "javascript")
+    expected = """
+```console?lang=javascript&prompt=>
+> dots("paper.txt")
+###..###...##..#..#.####.###..#....###.
+#..#.#..#.#..#.#.#..#....#..#.#....#..#
+#..#.#..#.#....##...###..###..#....#..#
+###..###..#....#.#..#....#..#.#....###.
+#.#..#....#..#.#.#..#....#..#.#....#.#.
+#..#.#.....##..#..#.#....###..####.#..#
+```
+"""
+    assert actual == expected
+
+
+def test_multiline_statement():
+    template = """
+```console?lang=tested
+>>> dots(
+...  "paper.txt"
+...  )
+###..###...##..#..#.####.###..#....###.
+#..#.#..#.#..#.#.#..#....#..#.#....#..#
+#..#.#..#.#....##...###..###..#....#..#
+###..###..#....#.#..#....#..#.#....###.
+#.#..#....#..#.#.#..#....#..#.#....#.#.
+#..#.#.....##..#..#.#....###..####.#..#
+```
+"""
+    actual = process_problem_statement(template, "javascript")
+    expected = """
+```console?lang=javascript&prompt=>
+> dots("paper.txt")
+###..###...##..#..#.####.###..#....###.
+#..#.#..#.#..#.#.#..#....#..#.#....#..#
+#..#.#..#.#....##...###..###..#....#..#
+###..###..#....#.#..#....#..#.#....###.
+#.#..#....#..#.#.#..#....#..#.#....#.#.
+#..#.#.....##..#..#.#....###..####.#..#
+```
+"""
+    assert actual == expected

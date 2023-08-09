@@ -4,13 +4,15 @@ problem statement.
 
 A generic problem statement has two special aspects:
 
-1. The problem statement is a Mako template, so conditionals are possible.
+1. The problem statement is a Jinja2 template, so conditionals are possible.
    See the section below for information on some available variables.
 2. Code blocks in Markdown that are annotated with the language `tested` will
    be converted into the programming language.
 
 
-== Mako templates ==
+== Jinja2 templates ==
+
+See https://jinja.palletsprojects.com/en/3.1.x/templates/
 
 The following variables are available:
 
@@ -22,7 +24,11 @@ programming language, the following functions are available: `namespace`, `funct
 
 Finally, there are two functions that convert "TESTed" data types to either the type
 in the programming language (e.g. "sequence" becomes "list" in Python"). You can use
-the function `datatype` for this.
+the function `datatype` for this. There is also a `datatype_common` which gives a
+translated, natural language name for the type.
+
+Finally, a function `t` is available to which you can pass a string containing a
+DSL expression or statement. It will be converted to the destination language.
 
 == Code blocks ==
 
