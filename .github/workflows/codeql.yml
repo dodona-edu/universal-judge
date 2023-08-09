@@ -30,6 +30,7 @@ jobs:
           languages: python
           config-file: ./.github/codeql.yml
           queries: +security-and-quality
+          setup-python-dependencies: false
 
       - name: Autobuild
         uses: github/codeql-action/autobuild@v2
