@@ -38,8 +38,14 @@ from tested.serialisation import (
     Statement,
     Value,
 )
-from tested.testsuite import Context, FileUrl, ProgrammedEvaluator, Testcase, TextData
-from tested.utils import get_args
+from tested.testsuite import (
+    Context,
+    FileUrl,
+    MainInput,
+    ProgrammedEvaluator,
+    Testcase,
+    TextData,
+)
 
 # Prevent cyclic imports for types...
 if TYPE_CHECKING:
@@ -101,6 +107,7 @@ def get_readable_input(
     if case.description:
         text = case.description
     elif case.is_main_testcase():
+        assert isinstance(case.input, MainInput)
         # See https://rouge-ruby.github.io/docs/Rouge/Lexers/ConsoleLexer.html
         format_ = "console"
         arguments = " ".join(_escape_shell(x) for x in case.input.arguments)
@@ -120,8 +127,8 @@ def get_readable_input(
             else:
                 text = stdin
     else:
+        assert isinstance(case.input, Statement)
         format_ = bundle.config.programming_language
-        # noinspection PyTypeChecker
         text = generate_statement(bundle, case.input)
         text = bundle.lang_config.cleanup_description(text)
         analyse_files = True
@@ -226,10 +233,10 @@ def generate_statement(bundle: Bundle, statement: Statement) -> str:
 
     :return: The code the statement.
     """
-    if isinstance(statement, get_args(Expression)):
+    if isinstance(statement, Expression):
         statement = prepare_expression(bundle, statement)
     else:
-        assert isinstance(statement, get_args(Assignment))
+        assert isinstance(statement, Assignment)
         statement = prepare_assignment(bundle, statement)
 
     return bundle.lang_config.generate_statement(statement)

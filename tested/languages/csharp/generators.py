@@ -18,6 +18,7 @@ from tested.languages.preparation import (
     PreparedExecutionUnit,
     PreparedFunctionCall,
     PreparedTestcase,
+    PreparedTestcaseStatement,
 )
 from tested.languages.utils import convert_unknown_type
 from tested.serialisation import (
@@ -27,13 +28,16 @@ from tested.serialisation import (
     FunctionType,
     Identifier,
     NamedArgument,
+    ObjectType,
+    SequenceType,
     SpecialNumbers,
     Statement,
+    StringType,
     Value,
     VariableType,
     as_basic_type,
 )
-from tested.utils import get_args
+from tested.testsuite import MainInput
 
 
 def convert_arguments(arguments: List[Expression | NamedArgument]) -> str:
@@ -49,8 +53,10 @@ def convert_arguments(arguments: List[Expression | NamedArgument]) -> str:
 def convert_value(value: Value) -> str:
     # Handle some advanced types.
     if value.type == AdvancedSequenceTypes.ARRAY:
+        assert isinstance(value, SequenceType)
         return f"new {convert_declaration(value.type, value)}{{{convert_arguments(value.data)}}}"
     elif value.type == AdvancedSequenceTypes.TUPLE:
+        assert isinstance(value, SequenceType)
         return f"({convert_arguments(value.data)})"
     elif value.type == AdvancedNumericTypes.SINGLE_PRECISION:
         if not isinstance(value.data, SpecialNumbers):
@@ -101,8 +107,10 @@ def convert_value(value: Value) -> str:
     elif value.type == BasicNothingTypes.NOTHING:
         return "null"
     elif value.type in (BasicSequenceTypes.SEQUENCE, BasicSequenceTypes.SET):
+        assert isinstance(value, SequenceType)
         return f"new {convert_declaration(value.type, value)}() {{{convert_arguments(value.data)}}}"
     elif value.type == BasicObjectTypes.MAP:
+        assert isinstance(value, ObjectType)
         result = f"new {convert_declaration(value.type, value)}() {{"
         for i, pair in enumerate(value.data):
             result += (
@@ -113,6 +121,7 @@ def convert_value(value: Value) -> str:
         result += "}"
         return result
     elif value.type == BasicStringTypes.UNKNOWN:
+        assert isinstance(value, StringType)
         return convert_unknown_type(value)
     raise AssertionError(f"Invalid literal: {value!r}")
 
@@ -152,7 +161,7 @@ def convert_declaration(
         # TODO: this is very complex, and why?
         type_ = (
             (value.get_content_type() or "Object")
-            if isinstance(value, get_args(Value))
+            if isinstance(value, SequenceType)
             else nt
             if nt
             else "Object"
@@ -160,13 +169,15 @@ def convert_declaration(
         base_type, sub_type = extract_type_tuple(type_, False)
         return convert_declaration(base_type, None, sub_type) + "[]"
     elif tp == AdvancedSequenceTypes.TUPLE:
+        # TODO: rework this
         type_ = (
             (value.get_content_type() or "Object")
-            if isinstance(value, get_args(Value))
+            if isinstance(value, SequenceType)
             else nt
             if nt
             else "Object"
         )
+        assert isinstance(value, SequenceType)
         base_type, sub_type = extract_type_tuple(type_, False)
         converted_type = convert_declaration(base_type, None, sub_type)
         return "(" + ", ".join(converted_type for _ in range(len(value.data)))
@@ -194,7 +205,7 @@ def convert_declaration(
     if basic == BasicSequenceTypes.SEQUENCE:
         type_ = (
             (value.get_content_type() or "Object")
-            if isinstance(value, get_args(Value))
+            if isinstance(value, SequenceType)
             else nt
             if nt
             else "Object"
@@ -204,7 +215,7 @@ def convert_declaration(
     elif basic == BasicSequenceTypes.SET:
         type_ = (
             (value.get_content_type() or "Object")
-            if isinstance(value, get_args(Value))
+            if isinstance(value, SequenceType)
             else nt
             if nt
             else "Object"
@@ -220,7 +231,7 @@ def convert_declaration(
     elif basic == BasicNumericTypes.REAL:
         return "Double"
     elif basic == BasicObjectTypes.MAP:
-        if isinstance(value, get_args(Value)):
+        if isinstance(value, ObjectType):
             key_type_ = value.get_key_type() or "Object"
             value_type_ = value.get_value_type() or "Object"
         elif nt:
@@ -240,9 +251,9 @@ def convert_statement(statement: Statement, full=False) -> str:
         return statement
     elif isinstance(statement, FunctionCall):
         return convert_function_call(statement)
-    elif isinstance(statement, get_args(Value)):
+    elif isinstance(statement, Value):
         return convert_value(statement)
-    elif isinstance(statement, get_args(Assignment)):
+    elif isinstance(statement, Assignment):
         if full:
             prefix = convert_declaration(statement.type, statement.expression)
         else:
@@ -263,8 +274,10 @@ def _generate_internal_context(ctx: PreparedContext, pu: PreparedExecutionUnit) 
         result += "WriteSeparator();\n"
 
         # Make a variable available outside of the try-catch block.
-        if not tc.testcase.is_main_testcase() and isinstance(
-            tc.input.statement, get_args(Assignment)
+        if (
+            not tc.testcase.is_main_testcase()
+            and isinstance(tc.input, PreparedTestcaseStatement)
+            and isinstance(tc.input.statement, Assignment)
         ):
             result += (
                 convert_declaration(
@@ -276,11 +289,13 @@ def _generate_internal_context(ctx: PreparedContext, pu: PreparedExecutionUnit) 
 
         result += "try {"
         if tc.testcase.is_main_testcase():
+            assert isinstance(tc.input, MainInput)
             result += " " * 4 + f"{pu.submission_name}.Main(new string[]{{"
             wrapped = [json.dumps(a) for a in tc.input.arguments]
             result += ", ".join(wrapped)
             result += "});\n"
         else:
+            assert isinstance(tc.input, PreparedTestcaseStatement)
             result += " " * 4 + convert_statement(tc.input.input_statement()) + ";\n"
         result += " " * 4 + convert_statement(tc.exception_statement()) + ";\n"
         result += "} catch (System.Exception E) {\n"

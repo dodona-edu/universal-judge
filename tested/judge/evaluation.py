@@ -1,8 +1,9 @@
 import html
 import logging
+from collections.abc import Collection
 from enum import StrEnum, unique
 from pathlib import Path
-from typing import Iterable, List, Optional, Set, Tuple
+from typing import List, Optional, Set, Tuple
 
 from tested.configs import Bundle
 from tested.dodona import (
@@ -49,7 +50,7 @@ from tested.testsuite import (
     ValueOutput,
     ValueOutputChannel,
 )
-from tested.utils import get_args, safe_del, safe_get
+from tested.utils import safe_del, safe_get
 
 _logger = logging.getLogger(__name__)
 
@@ -117,7 +118,7 @@ def _evaluate_channel(
 
     expected: str
     if (
-        not isinstance(output, get_args(SpecialOutputChannel))
+        not isinstance(output, SpecialOutputChannel)
         and not output.show_expected
         and not is_correct
     ):
@@ -220,7 +221,7 @@ def evaluate_context_results(
     if not could_delete:
         _logger.warning("Missing output in context testcase.")
         missing_values.append(
-            AppendMessage(get_i18n_string("judge.evaluation.early-exit"))
+            AppendMessage(message=get_i18n_string("judge.evaluation.early-exit"))
         )
         missing_values.append(
             EscalateStatus(
@@ -234,7 +235,7 @@ def evaluate_context_results(
         if recovered := "\n".join(stdout_):
             missing_values.append(
                 AppendMessage(
-                    ExtendedMessage(
+                    message=ExtendedMessage(
                         description="Standaarduitvoer was:\n" + recovered, format="code"
                     )
                 )
@@ -242,7 +243,7 @@ def evaluate_context_results(
         if recovered := "\n".join(stderr_):
             missing_values.append(
                 AppendMessage(
-                    ExtendedMessage(
+                    message=ExtendedMessage(
                         description="Standaardfout was:\n" + recovered, format="code"
                     )
                 )
@@ -362,7 +363,7 @@ def evaluate_context_results(
 
 
 def _link_files_message(
-    link_files: Iterable[FileUrl], collector: Optional[OutputManager] = None
+    link_files: Collection[FileUrl], collector: Optional[OutputManager] = None
 ) -> Optional[AppendMessage]:
     link_list = ", ".join(
         f'<a href="{link_file.url}" class="file-link" target="_blank">'
@@ -395,23 +396,23 @@ def should_show(test: OutputChannel, channel: Channel) -> bool:
     if channel == Channel.EXIT:
         if test == IgnoredChannel.IGNORED:
             return False
-        assert isinstance(test, get_args(ExitCodeOutputChannel))
+        assert isinstance(test, ExitCodeOutputChannel)
         return test.value != 0
     elif channel in (Channel.STDOUT, Channel.STDERR):
-        assert isinstance(test, get_args(TextOutput))
+        assert isinstance(test, TextOutput)
         # We don't show the channel if the output is nothing or ignored.
-        return not isinstance(test, get_args(SpecialOutputChannel))
+        return not isinstance(test, SpecialOutputChannel)
     elif channel == Channel.FILE:
-        assert isinstance(test, get_args(FileOutput))
+        assert isinstance(test, FileOutput)
         # We don't show the channel if we ignore the channel.
         return not isinstance(test, IgnoredChannel)
     elif channel == Channel.RETURN:
-        assert isinstance(test, get_args(ValueOutput))
+        assert isinstance(test, ValueOutput)
         # We don't show the channel if we ignore it or expect no result.
-        return not isinstance(test, get_args(SpecialOutputChannel))
+        return not isinstance(test, SpecialOutputChannel)
     elif channel == Channel.EXCEPTION:
-        assert isinstance(test, get_args(ExceptionOutput))
-        return not isinstance(test, get_args(SpecialOutputChannel))
+        assert isinstance(test, ExceptionOutput)
+        return not isinstance(test, SpecialOutputChannel)
     else:
         raise AssertionError(f"Unknown channel {channel}")
 
@@ -427,7 +428,7 @@ def guess_expected_value(bundle: Bundle, test: OutputChannel) -> str:
 
     :return: A best effort attempt of the expected value.
     """
-    if isinstance(test, get_args(SpecialOutputChannel)):
+    if isinstance(test, SpecialOutputChannel):
         return ""
     elif isinstance(test, TextOutputChannel):
         return test.get_data_as_string(bundle.config.resources)
@@ -447,7 +448,7 @@ def guess_expected_value(bundle: Bundle, test: OutputChannel) -> str:
         )
     elif isinstance(test, ExitCodeOutputChannel):
         return str(test.value)
-    _logger.warn(f"Unknown output type {test}")
+    _logger.warning(f"Unknown output type {test}")
     return ""
 
 
@@ -484,6 +485,7 @@ def prepare_evaluation(bundle: Bundle, collector: OutputManager):
     for i, tab in enumerate(bundle.suite.tabs):
         collector.prepare_tab(StartTab(title=tab.name, hidden=tab.hidden), i)
 
+        assert tab.contexts
         for j, context in enumerate(tab.contexts):
             updates = []
 

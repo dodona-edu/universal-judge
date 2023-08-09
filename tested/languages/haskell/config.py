@@ -41,7 +41,7 @@ class Haskell(Language):
         }
 
     def datatype_support(self) -> Mapping[AllTypes, TypeSupport]:
-        return {
+        return {  # type: ignore
             "integer": "supported",
             "real": "supported",
             "char": "supported",
@@ -78,6 +78,7 @@ class Haskell(Language):
     def compilation(self, files: List[str]) -> CallbackResult:
         main_ = files[-1]
         exec_ = main_.rstrip(".hs")
+        assert self.config
         return [
             "ghc",
             "-fno-cse",
@@ -99,12 +100,13 @@ class Haskell(Language):
         # Import locally to prevent errors.
         from tested.languages.haskell import linter
 
+        assert self.config
         return linter.run_hlint(self.config.dodona, remaining)
 
     def cleanup_description(self, description: str) -> str:
         return cleanup_description(self, description)
 
-    def cleanup_stacktrace(self, traceback: str) -> str:
+    def cleanup_stacktrace(self, traceback_str: str) -> str:
         filename = submission_file(self)
         context_file_regex = re.compile(r"(Context[0-9]+|Selector)")
         compile_line_regex = re.compile(r"^([0-9]+)(\s*\|.*)$")
@@ -113,7 +115,7 @@ class Haskell(Language):
         )
         parse_module = r"error: parse error on input ‘module’"
         replace_module = r"error: unexpected ‘module’"
-        traceback = traceback.splitlines()
+        traceback = traceback_str.splitlines()
         skip_line, lines = False, []
         for line in traceback:
             if not line or line == "undefined":

@@ -101,7 +101,7 @@ def evaluate_text(
 
 
 def evaluate_file(
-    config: EvaluatorConfig, channel: FileOutputChannel, actual: str
+    config: EvaluatorConfig, channel: OutputChannel, actual: str
 ) -> EvaluationResult:
     """
     Evaluate the contents of two files. The file evaluator supports one option,

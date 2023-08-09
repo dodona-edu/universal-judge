@@ -27,12 +27,13 @@ from tested.serialisation import (
     Expression,
     FunctionCall,
     FunctionType,
+    NamedArgument,
     SequenceType,
     Statement,
     Value,
     WithFunctions,
 )
-from tested.utils import flatten, get_args
+from tested.utils import flatten
 
 
 @unique
@@ -343,23 +344,21 @@ class IgnoredChannel(WithFeatures, StrEnum):
         return NOTHING
 
 
-SpecialOutputChannel = Union[EmptyChannel, IgnoredChannel]
+SpecialOutputChannel = EmptyChannel | IgnoredChannel
 
-NormalOutputChannel = Union[
-    TextOutputChannel,
-    FileOutputChannel,
-    ValueOutputChannel,
-    ExceptionOutputChannel,
-    ExitCodeOutputChannel,
+EvaluatorOutputChannel = Union[
+    TextOutputChannel, FileOutputChannel, ValueOutputChannel, ExceptionOutputChannel
 ]
 
-OutputChannel = Union[NormalOutputChannel, SpecialOutputChannel]
+NormalOutputChannel = EvaluatorOutputChannel | ExitCodeOutputChannel
 
-TextOutput = Union[TextOutputChannel, SpecialOutputChannel]
-FileOutput = Union[FileOutputChannel, IgnoredChannel]
-ExceptionOutput = Union[ExceptionOutputChannel, SpecialOutputChannel]
-ValueOutput = Union[ValueOutputChannel, SpecialOutputChannel]
-ExitOutput = Union[ExitCodeOutputChannel, IgnoredChannel]
+OutputChannel = NormalOutputChannel | SpecialOutputChannel
+
+TextOutput = TextOutputChannel | SpecialOutputChannel
+FileOutput = FileOutputChannel | IgnoredChannel
+ExceptionOutput = ExceptionOutputChannel | SpecialOutputChannel
+ValueOutput = ValueOutputChannel | SpecialOutputChannel
+ExitOutput = ExitCodeOutputChannel | IgnoredChannel
 
 
 @dataclass
@@ -393,7 +392,9 @@ class Output(WithFeatures):
         if isinstance(self.exception, ExceptionOutputChannel):
             if isinstance(self.exception.evaluator, SpecificEvaluator):
                 languages = set(self.exception.evaluator.evaluators.keys())
-            elif self.exception.exception.types:
+            elif (
+                self.exception.exception is not None and self.exception.exception.types
+            ):
                 languages = set(self.exception.exception.types.keys())
         if isinstance(self.result, ValueOutputChannel):
             if isinstance(self.result.evaluator, SpecificEvaluator):
@@ -416,9 +417,9 @@ class MainInput(WithFeatures, WithFunctions):
     arguments: List[str] = field(default_factory=list)
     main_call: bool = True  # Deprecated, to remove...
 
-    def get_as_string(self, working_directory):
+    def get_as_string(self, working_directory: Path) -> str:
         if self.stdin == EmptyChannel.NONE:
-            return None
+            return ""
         else:
             return self.stdin.get_data_as_string(working_directory)
 
@@ -481,7 +482,7 @@ class Testcase(WithFeatures, WithFunctions):
         # this is an error: a statement is not an expression.
         output = values["output"]
         if output.result != EmptyChannel.NONE and not isinstance(
-            values["input"], get_args(Expression)
+            values["input"], Expression
         ):
             raise ValueError("You cannot expect a value from a statement.")
         return values
@@ -524,7 +525,8 @@ class Context(WithFeatures, WithFunctions):
 
     def get_stdin(self, resources: Path) -> str:
         first_testcase = self.testcases[0]
-        if isinstance(first_testcase.input, MainInput):
+        if self.has_main_testcase():
+            assert isinstance(first_testcase.input, MainInput)
             return first_testcase.input.get_as_string(resources)
         else:
             return ""
@@ -553,12 +555,15 @@ class Tab(WithFeatures, WithFunctions):
     runs: Optional[list] = None
 
     def get_used_features(self) -> FeatureSet:
+        assert self.contexts is not None
         return combine_features(x.get_used_features() for x in self.contexts)
 
     def get_functions(self) -> Iterable[FunctionCall]:
+        assert self.contexts is not None
         return flatten(x.get_functions() for x in self.contexts)
 
     def count_contexts(self):
+        assert self.contexts is not None
         return len(self.contexts)
 
     @root_validator(pre=True)
@@ -594,8 +599,8 @@ class Tab(WithFeatures, WithFunctions):
     def unique_evaluation_functions(cls, contexts: List[Context]) -> List[Context]:
         eval_functions: Dict[str, List[EvaluationFunction]] = defaultdict(list)
 
-        for context in contexts:  # type: Context
-            for testcase in context.testcases:  # type: Testcase
+        for context in contexts:
+            for testcase in context.testcases:
                 output = testcase.output
                 if isinstance(output.result, ValueOutputChannel) and isinstance(
                     output.result.evaluator, SpecificEvaluator
@@ -724,19 +729,20 @@ def _resolve_function_calls(function_calls: Iterable[FunctionCall]):
         argument_map: Dict[Any, List[Expression]] = defaultdict(list)
         for call in calls:
             for i, arg in enumerate(call.arguments):
+                if isinstance(arg, NamedArgument):
+                    arg = arg.value
                 argument_map[i].append(arg)
 
         # All types inside the every list should be the same.
         # TODO: this has some limitations, more specifically, function calls and
         #  identifiers are not checked, as it is not known which types they are.
         type_use = []
-        # noinspection PyTypeChecker
         for arguments in argument_map.values():
             types = set()
             for argument in arguments:
                 if isinstance(argument, SequenceType):
                     types.add((argument.type, argument.get_content_type()))
-                elif isinstance(argument, get_args(Value)):
+                elif isinstance(argument, Value):
                     types.add(argument.type)
             type_use.append(types)
         if not all(len(x) <= 1 for x in type_use):
@@ -763,7 +769,7 @@ def generate_schema():
     """
     import json
 
-    sc = Suite.__pydantic_model__.schema()
+    sc = _SuiteModel.schema()
     sc["$schema"] = "http://json-schema.org/draft-07/schema#"
     print(json.dumps(sc, indent=2))
 

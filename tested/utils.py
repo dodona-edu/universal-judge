@@ -1,28 +1,13 @@
 import contextlib
 import itertools
 import logging
-import os
 import random
-import stat
 import string
 import sys
 import typing
 from itertools import zip_longest
-from os import PathLike
 from pathlib import Path
-from typing import (
-    IO,
-    Any,
-    Callable,
-    Generator,
-    Generic,
-    Iterable,
-    List,
-    Mapping,
-    Optional,
-    TypeVar,
-    Union,
-)
+from typing import IO, Any, Callable, Iterable, List, Optional, TypeVar, Union
 
 _logger = logging.getLogger(__name__)
 
@@ -37,19 +22,6 @@ def smart_close(file: IO):
         return file
 
     return contextlib.nullcontext(file)
-
-
-@contextlib.contextmanager
-def protected_directory(
-    directory: Union[PathLike, Path]
-) -> Generator[Path, None, None]:
-    try:
-        _logger.info("Making %s read-only", directory)
-        os.chmod(directory, stat.S_IREAD)  # Disable write access
-        yield directory
-    finally:
-        _logger.info("Giving write-access to %s", directory)
-        os.chmod(directory, stat.S_IREAD | stat.S_IWRITE)
 
 
 def basename(file: Union[str, Path]) -> str:
@@ -86,7 +58,6 @@ def consume_shebang(submission: Path) -> Optional[str]:
     """
     language = None
     try:
-        # noinspection PyTypeChecker
         with open(submission, "r+") as file:
             lines = file.readlines()
             file.seek(0)
@@ -113,24 +84,10 @@ def consume_shebang(submission: Path) -> Optional[str]:
 
 
 K = TypeVar("K")
-V = TypeVar("V")
 T = TypeVar("T")
 
 
-class _FallbackDict(dict, Generic[K, V]):
-    def __init__(self, existing: Mapping[K, V], fallback_: Mapping[K, V]):
-        super().__init__(existing)
-        self.fallback = fallback_
-
-    def __missing__(self, key: K) -> Optional[V]:
-        return self.fallback[key]
-
-
-def fallback(source: Mapping[K, V], additions: Mapping[K, V]) -> Mapping[K, V]:
-    return _FallbackDict(additions, source)
-
-
-def get_args(type_):
+def get_args(type_: Any) -> tuple[Any, ...]:
     """
     Get the args of a type or the type itself.
 
@@ -238,13 +195,9 @@ def recursive_dict_merge(one: dict, two: dict) -> dict:
 
 def sorted_no_duplicates(
     iterable: Iterable[T],
-    key: Optional[Callable[[T], K]] = None,
+    key: Callable[[T], K] = lambda x: x,
     recursive_key: Optional[Callable[[K], K]] = None,
 ) -> List[T]:
-    # Identity key function
-    def identity(x: T) -> T:
-        return x
-
     # Order functions
     def type_order(x: Any, y: Any) -> int:
         """
@@ -355,10 +308,6 @@ def sorted_no_duplicates(
             list_t, copy = copy, list_t
             timgroup *= 2
         return copy
-
-    # Check if key function is not none
-    if key is None:
-        key = identity
 
     # Sort and filterout duplicates
     first, last_key, no_dup, list_iter = True, None, [], list(iterable)

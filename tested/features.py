@@ -4,12 +4,11 @@ Module containing the definitions of the features we can support.
 import logging
 import operator
 from collections import defaultdict
-from enum import Enum, StrEnum, auto, unique
+from enum import StrEnum, auto, unique
 from functools import reduce
 from typing import TYPE_CHECKING, Dict, Iterable, NamedTuple, Set
 
 from tested.datatypes import AllTypes, BasicObjectTypes, BasicSequenceTypes, NestedTypes
-from tested.utils import fallback
 
 if TYPE_CHECKING:
     from tested.languages.config import Language
@@ -59,7 +58,7 @@ class WithFeatures:
 NOTHING = FeatureSet(constructs=set(), types=set(), nested_types=set())
 
 
-class TypeSupport(Enum):
+class TypeSupport(StrEnum):
     SUPPORTED = auto()
     """
     The type is fully supported.
@@ -97,13 +96,13 @@ def fallback_type_support_map(language: "Language") -> Dict[AllTypes, TypeSuppor
 
     :return: The typing support dict.
     """
-    config = dict()
+    config = defaultdict(lambda: TypeSupport.UNSUPPORTED)
     for x, y in language.datatype_support().items():
         if isinstance(y, str):
             config[x] = TypeSupport[y.upper()]
         else:
             config[x] = y
-    return fallback(defaultdict(lambda: TypeSupport.UNSUPPORTED), config)
+    return config
 
 
 def combine_features(iterable: Iterable[FeatureSet]) -> FeatureSet:
@@ -130,6 +129,7 @@ def is_supported(language: "Language") -> bool:
     :return: True or False
     """
 
+    assert language.config is not None
     required = language.config.suite.get_used_features()
 
     # Check constructs
@@ -150,6 +150,7 @@ def is_supported(language: "Language") -> bool:
 
     # Check language-specific evaluators
     for tab in language.config.suite.tabs:
+        assert tab.contexts is not None
         for context in tab.contexts:
             for testcase in context.testcases:
                 languages = testcase.output.get_specific_eval_languages()
@@ -160,15 +161,16 @@ def is_supported(language: "Language") -> bool:
                             f"{languages}!"
                         )
                         return False
+    nested_types = []
+    for key, value_types in required.nested_types:
+        if key in (BasicSequenceTypes.SET, BasicObjectTypes.MAP):
+            nested_types.append((key, value_types))
 
-    nested_types = filter(
-        lambda x: x[0] in (BasicSequenceTypes.SET, BasicObjectTypes.MAP),
-        required.nested_types,
-    )
     restricted = {
         BasicSequenceTypes.SET: language.set_type_restrictions(),
         BasicObjectTypes.MAP: language.map_type_restrictions(),
     }
+
     for key, value_types in nested_types:
         if not (value_types <= restricted[key]):
             _logger.warning("This test suite is not compatible!")

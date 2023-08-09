@@ -34,14 +34,14 @@ def jvm_memory_limit(config: GlobalConfig) -> int:
 
 
 # Idea and original code: dodona/judge-pythia
-def jvm_cleanup_stacktrace(stacktrace: str, submission_filename: str) -> str:
+def jvm_cleanup_stacktrace(stacktrace_str: str, submission_filename: str) -> str:
     context_file_regex = re.compile(r"(Context[0-9]+|Selector)")
     execution_regex = re.compile(rf"Execution(\d+)\.kt")
     unresolved_main_regex = r"error: unresolved reference: solutionMain"
     unresolved_reference_regex = re.compile(
         r"(error: unresolved reference: [a-zA-Z$_0-9]+)"
     )
-    stacktrace = stacktrace.splitlines(True)
+    stacktrace = stacktrace_str.splitlines(True)
 
     skip_line, lines = False, []
     for line in stacktrace:
@@ -84,6 +84,7 @@ def jvm_cleanup_stacktrace(stacktrace: str, submission_filename: str) -> str:
 
 def haskell_solution(lang_config: "Language", solution: Path):
     """Support implicit modules if needed."""
+    assert lang_config.config
     if lang_config.config.dodona.config_for().get("implicitModule", True):
         name = submission_name(lang_config)
         # noinspection PyTypeChecker
@@ -157,6 +158,7 @@ def convert_stacktrace_to_clickable_feedback(
     if not stacktrace:
         return None
     cleaned_stacktrace = lang.cleanup_stacktrace(stacktrace)
+    assert lang.config
     updated_stacktrace = _replace_code_line_number(
         lang.config.dodona.source_offset, cleaned_stacktrace
     )

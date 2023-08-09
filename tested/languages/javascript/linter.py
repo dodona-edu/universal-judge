@@ -21,12 +21,13 @@ def run_eslint(
     """
     submission = config.source
     language_options = config.config_for()
-    if language_options.get("eslint_config", None):
-        config_path = config.resources / language_options.get("eslint_config")
+    if path := language_options.get("eslint_config", None):
+        assert isinstance(path, str)
+        config_path = config.resources / path
     else:
         # Use the default file.
         config_path = config.judge / "tested/languages/javascript/eslintrc.yml"
-    config_path = config_path.absolute()
+    config_path = str(config_path.absolute())
 
     execution_results = run_command(
         directory=submission.parent,
@@ -38,7 +39,7 @@ def run_eslint(
             "--no-inline-config",
             "-c",
             config_path,
-            submission.absolute(),
+            str(submission.absolute()),
         ],
     )
 

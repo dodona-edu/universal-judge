@@ -25,7 +25,7 @@ For example, such a function looks like this:
 import functools
 from dataclasses import field
 from pathlib import Path
-from typing import Any, Callable, Dict, List, NamedTuple, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, NamedTuple, Optional, Tuple
 
 from pydantic.dataclasses import dataclass
 
@@ -92,23 +92,13 @@ def try_outputs(
     return actual, None
 
 
-def get_status(status: Optional[Union[bool, Status]]) -> Status:
-    if status is None:
-        return Status.WRONG
-    elif isinstance(status, bool):
-        return Status.CORRECT if status else Status.WRONG
-    else:
-        return status
-
-
 def cleanup_specific_programmed(
     config: EvaluatorConfig, channel: NormalOutputChannel, actual: EvalResult
 ) -> EvalResult:
-    actual.result = get_status(actual.result)
     if isinstance(channel, ExceptionOutputChannel):
         lang_config = config.bundle.lang_config
         actual.readable_expected = lang_config.cleanup_stacktrace(
-            actual.readable_expected
+            actual.readable_expected or ""
         )
         message = convert_stacktrace_to_clickable_feedback(
             lang_config, actual.readable_actual

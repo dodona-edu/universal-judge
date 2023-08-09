@@ -33,7 +33,7 @@ from tested.datatypes import (
     BasicTypes,
     resolve_to_basic,
 )
-from tested.evaluators.value import check_data_type
+from tested.evaluators.value import _check_simple_type
 from tested.features import TypeSupport, fallback_type_support_map
 from tested.judge.compilation import run_compilation
 from tested.judge.execution import execute_file, filter_files
@@ -224,7 +224,7 @@ def test_basic_types(language, tmp_path: Path, pytestconfig):
 
     for result, expected in zip(results, types):
         actual = parse_value(result)
-        type_check, _ = check_data_type(bundle, expected, actual)
+        type_check, _ = _check_simple_type(bundle, expected, actual)
         assert type_check, f"type check failure {expected} != {actual}"
         py_expected = to_python_comparable(expected)
         py_actual = to_python_comparable(actual)
@@ -250,7 +250,7 @@ def test_advanced_types(language, tmp_path: Path, pytestconfig):
 
     for result, expected in zip(results, types):
         actual = parse_value(result)
-        type_check, _ = check_data_type(bundle, expected, actual)
+        type_check, _ = _check_simple_type(bundle, expected, actual)
         assert type_check, f"type check failure {expected} != {actual}"
         py_expected = to_python_comparable(expected)
         py_actual = to_python_comparable(actual)
@@ -305,7 +305,7 @@ def test_special_numbers(language, tmp_path: Path, pytestconfig):
 
     for result, expected in zip(results, types):
         actual = parse_value(result)
-        type_check, _ = check_data_type(bundle, expected, actual)
+        type_check, _ = _check_simple_type(bundle, expected, actual)
         assert type_check, f"type check failure {expected} != {actual}"
         py_expected = to_python_comparable(expected)
         py_actual = to_python_comparable(actual)

@@ -75,6 +75,7 @@ class Bash(Language):
         # Import locally to prevent errors.
         from tested.languages.bash import linter
 
+        assert self.config
         return linter.run_shellcheck(self.config.dodona, remaining)
 
     def generate_statement(self, statement: Statement) -> str:

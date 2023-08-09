@@ -16,6 +16,7 @@ from tested.languages.preparation import (
     PreparedExecutionUnit,
     PreparedFunctionCall,
     PreparedTestcase,
+    PreparedTestcaseStatement,
 )
 from tested.languages.utils import convert_unknown_type
 from tested.serialisation import (
@@ -25,12 +26,15 @@ from tested.serialisation import (
     FunctionType,
     Identifier,
     NamedArgument,
+    ObjectType,
+    SequenceType,
     SpecialNumbers,
     Statement,
+    StringType,
     Value,
     as_basic_type,
 )
-from tested.utils import get_args
+from tested.testsuite import MainInput
 
 
 def convert_arguments(
@@ -48,6 +52,7 @@ def convert_arguments(
 def convert_value(value: Value) -> str:
     # Handle some advanced types.
     if value.type == AdvancedSequenceTypes.TUPLE:
+        assert isinstance(value, SequenceType)
         return f"({convert_arguments(value.data)})"
     elif value.type in (
         AdvancedNumericTypes.DOUBLE_EXTENDED,
@@ -81,10 +86,13 @@ def convert_value(value: Value) -> str:
     elif value.type == BasicNothingTypes.NOTHING:
         return "None"
     elif value.type == BasicSequenceTypes.SEQUENCE:
+        assert isinstance(value, SequenceType)
         return f"[{convert_arguments(value.data)}]"
     elif value.type == BasicSequenceTypes.SET:
+        assert isinstance(value, SequenceType)
         return f"{{{convert_arguments(value.data)}}}"
     elif value.type == BasicObjectTypes.MAP:
+        assert isinstance(value, ObjectType)
         result = "{"
         for i, pair in enumerate(value.data):
             result += convert_statement(pair.key, True)
@@ -95,13 +103,17 @@ def convert_value(value: Value) -> str:
         result += "}"
         return result
     elif value.type == BasicStringTypes.UNKNOWN:
+        assert isinstance(value, StringType)
         return convert_unknown_type(value)
     raise AssertionError(f"Invalid literal: {value!r}")
 
 
 def convert_function_call(function: FunctionCall, with_namespace=False) -> str:
     result = ""
-    if function.namespace and (not function.has_root_namespace or with_namespace):
+    if function.namespace and (
+        not (isinstance(function, PreparedFunctionCall) and function.has_root_namespace)
+        or with_namespace
+    ):
         result += convert_statement(function.namespace, with_namespace) + "."
     result += function.name
     if function.type != FunctionType.PROPERTY:
@@ -114,9 +126,9 @@ def convert_statement(statement: Statement, with_namespace=False) -> str:
         return statement
     elif isinstance(statement, FunctionCall):
         return convert_function_call(statement, with_namespace)
-    elif isinstance(statement, get_args(Value)):
+    elif isinstance(statement, Value):
         return convert_value(statement)
-    elif isinstance(statement, get_args(Assignment)):
+    elif isinstance(statement, Assignment):
         return (
             f"{statement.variable} = "
             f"{convert_statement(statement.expression, with_namespace)}"
@@ -194,6 +206,7 @@ def send_specific_exception(exception):
 
             # Prepare command arguments if needed.
             if tc.testcase.is_main_testcase():
+                assert isinstance(tc.input, MainInput)
                 result += indent + "new_args = [sys.argv[0]]\n"
                 wrapped = [json.dumps(a) for a in tc.input.arguments]
                 result += f"{indent}new_args.extend([{', '.join(wrapped)}])\n"
@@ -201,10 +214,12 @@ def send_specific_exception(exception):
 
             result += indent + "try:\n"
             if tc.testcase.is_main_testcase():
+                assert isinstance(tc.input, MainInput)
                 result += f"{indent*2}import {pu.submission_name}\n"
                 if i != 0:
                     result += f'{indent*2}importlib.reload(sys.modules["{pu.submission_name}"])\n'
             else:
+                assert isinstance(tc.input, PreparedTestcaseStatement)
                 result += (
                     indent * 2
                     + convert_statement(tc.input.input_statement(), True)

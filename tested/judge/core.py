@@ -1,4 +1,3 @@
-import concurrent
 import logging
 import shutil
 import time
@@ -117,7 +116,7 @@ def judge(bundle: Bundle):
                 index = len(bundle.suite.tabs) + 1
                 if messages:
                     collector.prepare_tab(
-                        StartTab(get_i18n_string("judge.core.compilation")), index
+                        StartTab(title=get_i18n_string("judge.core.compilation")), index
                     )
                 for message in messages:
                     collector.add(AppendMessage(message=message))
@@ -143,7 +142,7 @@ def judge(bundle: Bundle):
                 _logger.info("Compilation error, falling back to individual mode")
                 # Remove the selector file from the dependencies.
                 # Otherwise, it will keep being compiled, which we want to avoid.
-                if bundle.lang_config.needs_selector():
+                if selector and bundle.lang_config.needs_selector():
                     files.remove(selector)
             # When compilation succeeded, only add annotations
             elif status == Status.CORRECT:
@@ -155,7 +154,7 @@ def judge(bundle: Bundle):
                 # Report messages.
                 if messages:
                     collector.add_tab(
-                        StartTab(get_i18n_string("judge.core.compilation")), -1
+                        StartTab(title=get_i18n_string("judge.core.compilation")), -1
                     )
                 for message in messages:
                     collector.add(AppendMessage(message=message))
@@ -181,6 +180,7 @@ def judge(bundle: Bundle):
     # Create a list of runs we want to execute.
     for tab_index, tab in enumerate(bundle.suite.tabs):
         collector.add_tab(StartTab(title=tab.name, hidden=tab.hidden), tab_index)
+        assert tab.contexts
         execution_units = merge_contexts_into_units(tab.contexts)
         executions = []
         offset = 0
@@ -287,7 +287,7 @@ def _parallel_execution(
                     # Ensure finally is called NOW and cancels remaining tasks.
                     del results
                     return status
-        except concurrent.futures.TimeoutError:
+        except TimeoutError:
             _logger.warning("Futures did not end soon enough.", exc_info=True)
             return Status.TIME_LIMIT_EXCEEDED
 
@@ -323,6 +323,7 @@ def _generate_files(
     execution_names = []
     # Generate the files for each execution.
     for tab_i, tab in enumerate(bundle.suite.tabs):
+        assert tab.contexts
         execution_units = merge_contexts_into_units(tab.contexts)
         for unit_i, unit in enumerate(execution_units):
             exec_name = execution_name(bundle.lang_config, tab_i, unit_i)

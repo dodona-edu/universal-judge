@@ -35,7 +35,6 @@ disableOptimizations: true
 namespace: "solution"
 tabs:
 - tab: "Ctx"
-  hidden: true
   testcases:
   - arguments: [ "--arg", "argument" ]
     stdin: "Input string"
@@ -48,7 +47,6 @@ tabs:
     assert suite.namespace == "solution"
     assert len(suite.tabs) == 1
     tab = suite.tabs[0]
-    assert tab.hidden
     assert tab.name == "Ctx"
     assert len(tab.contexts) == 1
     context = tab.contexts[0]

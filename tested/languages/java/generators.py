@@ -1,5 +1,5 @@
 import json
-from typing import List, Literal, Optional, Union
+from typing import List, Literal, Optional, Union, cast
 
 from tested.datatypes import (
     AdvancedNumericTypes,
@@ -19,6 +19,7 @@ from tested.languages.preparation import (
     PreparedExecutionUnit,
     PreparedFunctionCall,
     PreparedTestcase,
+    PreparedTestcaseStatement,
 )
 from tested.languages.utils import convert_unknown_type
 from tested.serialisation import (
@@ -27,13 +28,16 @@ from tested.serialisation import (
     FunctionCall,
     FunctionType,
     Identifier,
+    ObjectType,
+    SequenceType,
     SpecialNumbers,
     Statement,
+    StringType,
     Value,
     VariableType,
     as_basic_type,
 )
-from tested.utils import get_args
+from tested.testsuite import MainInput
 
 
 def convert_arguments(arguments: List[Expression]) -> str:
@@ -43,6 +47,7 @@ def convert_arguments(arguments: List[Expression]) -> str:
 def convert_value(value: Value) -> str:
     # Handle some advanced types.
     if value.type == AdvancedSequenceTypes.ARRAY:
+        assert isinstance(value, SequenceType)
         return f"new {convert_declaration(value.type, value)}{{{convert_arguments(value.data)}}}"
     elif value.type == AdvancedNumericTypes.SINGLE_PRECISION:
         if not isinstance(value.data, SpecialNumbers):
@@ -73,6 +78,7 @@ def convert_value(value: Value) -> str:
         else:
             raise AssertionError("Special numbers not supported for BigDecimal")
     elif value.type == AdvancedStringTypes.CHAR:
+        assert isinstance(value, StringType)
         return "'" + value.data.replace("'", "\\'") + "'"
     # Handle basic types
     value = as_basic_type(value)
@@ -99,10 +105,13 @@ def convert_value(value: Value) -> str:
     elif value.type == BasicNothingTypes.NOTHING:
         return "null"
     elif value.type == BasicSequenceTypes.SEQUENCE:
+        assert isinstance(value, SequenceType)
         return f"List.of({convert_arguments(value.data)})"
     elif value.type == BasicSequenceTypes.SET:
+        assert isinstance(value, SequenceType)
         return f"Set.of({convert_arguments(value.data)})"
     elif value.type == BasicObjectTypes.MAP:
+        assert isinstance(value, ObjectType)
         result = "Map.ofEntries("
         for i, pair in enumerate(value.data):
             result += "Map.entry("
@@ -115,6 +124,7 @@ def convert_value(value: Value) -> str:
         result += ")"
         return result
     elif value.type == BasicStringTypes.UNKNOWN:
+        assert isinstance(value, StringType)
         return convert_unknown_type(value)
     raise AssertionError(f"Invalid literal: {value!r}")
 
@@ -130,7 +140,7 @@ def convert_function_call(function: FunctionCall) -> str:
         result += convert_statement(function.namespace) + "."
     result += function.name
     if function.type != FunctionType.PROPERTY:
-        result += f"({convert_arguments(function.arguments)})"
+        result += f"({convert_arguments(cast(List[Expression], function.arguments))})"
     return result
 
 
@@ -155,7 +165,7 @@ def convert_declaration(
         # TODO: this is very complex, and why?
         type_ = (
             (value.get_content_type() or "Object")
-            if isinstance(value, get_args(Value))
+            if isinstance(value, SequenceType)
             else nt
             if nt
             else "Object"
@@ -187,7 +197,7 @@ def convert_declaration(
     if basic == BasicSequenceTypes.SEQUENCE:
         type_ = (
             (value.get_content_type() or "Object")
-            if isinstance(value, get_args(Value))
+            if isinstance(value, SequenceType)
             else nt
             if nt
             else "Object"
@@ -197,7 +207,7 @@ def convert_declaration(
     elif basic == BasicSequenceTypes.SET:
         type_ = (
             (value.get_content_type() or "Object")
-            if isinstance(value, get_args(Value))
+            if isinstance(value, SequenceType)
             else nt
             if nt
             else "Object"
@@ -213,7 +223,7 @@ def convert_declaration(
     elif basic == BasicNumericTypes.REAL:
         return "Double" if inner else "double"
     elif basic == BasicObjectTypes.MAP:
-        if isinstance(value, get_args(Value)):
+        if isinstance(value, ObjectType):
             key_type_ = value.get_key_type() or "Object"
             value_type_ = value.get_value_type() or "Object"
         elif nt:
@@ -233,9 +243,9 @@ def convert_statement(statement: Statement, full=False) -> str:
         return statement
     elif isinstance(statement, FunctionCall):
         return convert_function_call(statement)
-    elif isinstance(statement, get_args(Value)):
+    elif isinstance(statement, Value):
         return convert_value(statement)
-    elif isinstance(statement, get_args(Assignment)):
+    elif isinstance(statement, Assignment):
         if full:
             prefix = convert_declaration(statement.type, statement.expression) + " "
         else:
@@ -257,8 +267,10 @@ def _generate_internal_context(ctx: PreparedContext, pu: PreparedExecutionUnit) 
 
         # In Java, we need special code to make variables available outside of
         # the try-catch block.
-        if not tc.testcase.is_main_testcase() and isinstance(
-            tc.input.statement, get_args(Assignment)
+        if (
+            not tc.testcase.is_main_testcase()
+            and isinstance(tc.input, PreparedTestcaseStatement)
+            and isinstance(tc.input.statement, Assignment)
         ):
             result += (
                 convert_declaration(
@@ -270,11 +282,13 @@ def _generate_internal_context(ctx: PreparedContext, pu: PreparedExecutionUnit) 
 
         result += "try {\n"
         if tc.testcase.is_main_testcase():
+            assert isinstance(tc.input, MainInput)
             result += " " * 4 + f"{pu.submission_name}.main(new String[]{{"
             wrapped = [json.dumps(a) for a in tc.input.arguments]
             result += ", ".join(wrapped)
             result += "});\n"
         else:
+            assert isinstance(tc.input, PreparedTestcaseStatement)
             result += " " * 4 + convert_statement(tc.input.input_statement()) + ";\n"
         result += " " * 4 + convert_statement(tc.exception_statement()) + ";\n"
         result += "} catch (Exception | AssertionError e) {\n"

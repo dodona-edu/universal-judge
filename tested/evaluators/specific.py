@@ -1,5 +1,5 @@
 """
-Specific evaluator
+Evaluate the result of a language-specific oracle.
 """
 
 from tested.dodona import ExtendedMessage, Permission, Status, StatusMessage
@@ -9,20 +9,21 @@ from tested.evaluators.common import (
     cleanup_specific_programmed,
 )
 from tested.internationalization import get_i18n_string
-from tested.serialisation import EvalResult
-from tested.testsuite import OutputChannel, SpecificEvaluator
+from tested.serialisation import BooleanEvalResult
+from tested.testsuite import EvaluatorOutputChannel, OutputChannel, SpecificEvaluator
 
 
 def evaluate(
-    config: EvaluatorConfig, channel: OutputChannel, actual: str
+    config: EvaluatorConfig, channel: OutputChannel, actual_str: str
 ) -> EvaluationResult:
     """
     Compare the result of a specific evaluator. This evaluator has no options.
     """
+    assert isinstance(channel, EvaluatorOutputChannel)
     assert isinstance(channel.evaluator, SpecificEvaluator)
 
     # Special support for no values to have a better error message.
-    if actual == "":
+    if actual_str == "":
         return EvaluationResult(
             result=StatusMessage(
                 enum=Status.WRONG,
@@ -33,13 +34,12 @@ def evaluate(
             messages=[get_i18n_string("evaluators.specific.missing.message")],
         )
 
-    # Try parsing as the result.
     try:
-        actual: EvalResult = EvalResult.parse_raw(actual)
+        actual = BooleanEvalResult.parse_raw(actual_str).as_eval_result()
     except (TypeError, ValueError) as e:
         staff_message = ExtendedMessage(
             description=get_i18n_string(
-                "evaluators.specific.staff", actual=actual, e=e
+                "evaluators.specific.staff", actual=actual_str, e=e
             ),
             format="text",
             permission=Permission.STAFF,
@@ -59,7 +59,7 @@ def evaluate(
 
     return EvaluationResult(
         result=StatusMessage(enum=actual.result),
-        readable_expected=actual.readable_expected,
-        readable_actual=actual.readable_actual,
+        readable_expected=actual.readable_expected or "",
+        readable_actual=actual.readable_actual or "",
         messages=actual.messages,
     )

@@ -33,8 +33,9 @@ def run_pylint(
     """
     submission = config.source
     language_options = config.config_for()
-    if language_options.get("pylint_config", None):
-        config_path = config.resources / language_options.get("pylint_config")
+    if path := language_options.get("pylint_config", None):
+        assert isinstance(path, str)
+        config_path = config.resources / path
     else:
         # Use the default file.
         config_path = config.judge / "tested/languages/python/pylint_config.rc"

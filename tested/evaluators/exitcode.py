@@ -4,7 +4,7 @@ from typing import Optional
 from tested.dodona import Status, StatusMessage
 from tested.evaluators.common import EvaluationResult, EvaluatorConfig
 from tested.internationalization import get_i18n_string
-from tested.testsuite import ExitCodeOutputChannel
+from tested.testsuite import ExitCodeOutputChannel, OutputChannel
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +17,7 @@ def _as_int(value: str) -> Optional[int]:
 
 
 def evaluate(
-    _config: EvaluatorConfig, channel: ExitCodeOutputChannel, value: str
+    _config: EvaluatorConfig, channel: OutputChannel, value: str
 ) -> EvaluationResult:
     assert isinstance(channel, ExitCodeOutputChannel)
     exit_code = _as_int(value)

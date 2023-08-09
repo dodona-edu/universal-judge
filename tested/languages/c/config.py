@@ -44,7 +44,7 @@ class C(Language):
         }
 
     def datatype_support(self) -> Mapping[AllTypes, TypeSupport]:
-        return {
+        return {  # type: ignore
             "integer": "supported",
             "real": "supported",
             "char": "supported",
@@ -70,6 +70,7 @@ class C(Language):
         main_file = files[-1]
         exec_file = Path(main_file).stem
         result = executable_name(exec_file)
+        assert self.config
         return (
             [
                 "gcc",
@@ -90,7 +91,6 @@ class C(Language):
         return [str(local_file.absolute()), *arguments]
 
     def modify_solution(self, solution: Path):
-        # noinspection PyTypeChecker
         with open(solution, "r") as file:
             contents = file.read()
         # We use regex to find the main function.
@@ -105,7 +105,6 @@ class C(Language):
             with_args = re.compile(r"(int|void)(\s+)main(\s*)\((\s*)int")
             replacement = r"int\2solution_main\3(\4int"
             contents = re.sub(with_args, replacement, contents, count=1)
-        # noinspection PyTypeChecker
         with open(solution, "w") as file:
             header = "#pragma once\n\n"
             file.write(header + contents)
@@ -114,6 +113,7 @@ class C(Language):
         # Import locally to prevent errors.
         from tested.languages.c import linter
 
+        assert self.config
         return linter.run_cppcheck(self.config.dodona, remaining)
 
     def cleanup_stacktrace(self, stacktrace: str) -> str:

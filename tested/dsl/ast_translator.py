@@ -22,14 +22,15 @@ the following is supported:
 - Collection and datastructure literals
 - Negation operator
 - Function calls
-- Keyword arguments (ie. named arguments)
-- Properties (ie. attributes)
+- Keyword arguments (i.e. named arguments)
+- Properties (i.e. attributes)
 """
 
 import ast
 import dataclasses
-from typing import Optional
+from typing import Literal, Optional, cast, overload
 
+from _decimal import Decimal
 from pydantic import ValidationError
 
 from tested.datatypes import (
@@ -51,6 +52,7 @@ from tested.serialisation import (
     ObjectKeyValuePair,
     ObjectType,
     SequenceType,
+    SpecialNumbers,
     Statement,
     Value,
     VariableType,
@@ -70,11 +72,9 @@ def _is_and_get_allowed_empty(node: ast.Call) -> Optional[Value]:
     """
     assert isinstance(node.func, ast.Name)
     if node.func.id in AdvancedSequenceTypes.__members__.values():
-        # noinspection PyTypeChecker
-        return SequenceType(type=node.func.id, data=[])
+        return SequenceType(type=cast(AdvancedSequenceTypes, node.func.id), data=[])
     elif node.func.id in BasicSequenceTypes.__members__.values():
-        # noinspection PyTypeChecker
-        return SequenceType(type=node.func.id, data=[])
+        return SequenceType(type=cast(BasicSequenceTypes, node.func.id), data=[])
     elif node.func.id in BasicObjectTypes.__members__.values():
         return ObjectType(type=BasicObjectTypes.MAP, data=[])
     else:
@@ -96,6 +96,7 @@ def _is_type_cast(node: ast.expr) -> bool:
 def _convert_ann_assignment(node: ast.AnnAssign) -> Assignment:
     if not isinstance(node.target, ast.Name):
         raise InvalidDslError("You can only assign to simple variables")
+    assert node.value
     value = _convert_expression(node.value, False)
     if isinstance(node.annotation, ast.Name):
         type_ = node.annotation.id
@@ -109,7 +110,11 @@ def _convert_ann_assignment(node: ast.AnnAssign) -> Assignment:
     if not is_our_type:
         type_ = VariableType(data=type_)
 
-    return Assignment(variable=node.target.id, expression=value, type=type_)
+    return Assignment(
+        variable=node.target.id,
+        expression=value,
+        type=cast(VariableType | AllTypes, type_),
+    )
 
 
 def _convert_assignment(node: ast.Assign) -> Assignment:
@@ -125,7 +130,7 @@ def _convert_assignment(node: ast.Assign) -> Assignment:
 
     # Support a few obvious ones, such as constructor calls or literal values.
     type_ = None
-    if isinstance(value, get_args(Value)):
+    if isinstance(value, Value):
         type_ = value.type
     elif isinstance(value, FunctionCall) and value.type == FunctionType.CONSTRUCTOR:
         type_ = VariableType(data=value.name)
@@ -135,6 +140,7 @@ def _convert_assignment(node: ast.Assign) -> Assignment:
             f"Could not deduce the type of variable {variable.id}: add a type annotation."
         )
 
+    assert isinstance(type_, AllTypes | VariableType)
     return Assignment(variable=variable.id, expression=value, type=type_)
 
 
@@ -162,7 +168,8 @@ def _convert_call(node: ast.Call) -> FunctionCall:
     for keyword in node.keywords:
         arguments.append(
             NamedArgument(
-                name=keyword.arg, value=_convert_expression(keyword.value, False)
+                name=cast(str, keyword.arg),
+                value=_convert_expression(keyword.value, False),
             )
         )
 
@@ -184,6 +191,7 @@ def _convert_constant(node: ast.Constant) -> Value:
 def _convert_expression(node: ast.expr, is_return: bool) -> Expression:
     if _is_type_cast(node):
         assert isinstance(node, ast.Call)
+        assert isinstance(node.func, ast.Name)
 
         # "Casts" of sequence types can also be used a constructor for an empty sequence.
         # For example, "set()", "map()", ...
@@ -210,7 +218,7 @@ def _convert_expression(node: ast.expr, is_return: bool) -> Expression:
             subexpression = node.args[0]
             value = _convert_expression(subexpression, is_return)
 
-            if not isinstance(value, get_args(Value)):
+            if not isinstance(value, Value):
                 raise InvalidDslError(
                     "The argument of a cast function must resolve to a value."
                 )
@@ -254,7 +262,8 @@ def _convert_expression(node: ast.expr, is_return: bool) -> Expression:
     elif isinstance(node, ast.Dict):
         elements = [
             ObjectKeyValuePair(
-                _convert_expression(k, is_return), _convert_expression(v, is_return)
+                key=_convert_expression(cast(ast.expr, k), is_return),
+                value=_convert_expression(v, is_return),
             )
             for k, v in zip(node.keys, node.values)
         ]
@@ -269,6 +278,7 @@ def _convert_expression(node: ast.expr, is_return: bool) -> Expression:
         value = _convert_constant(node.operand)
         if not isinstance(value, NumberType):
             raise InvalidDslError("'-' is only supported on literal numbers")
+        assert isinstance(value.data, Decimal | int | float)
         return NumberType(type=value.type, data=-value.data)
     else:
         raise InvalidDslError(f"Unsupported expression type: {type(node)}")
@@ -301,6 +311,16 @@ def _translate_to_ast(node: ast.Interactive, is_return: bool) -> Statement:
         return _convert_expression(statement_or_expression.value, is_return)
     else:
         return _convert_statement(statement_or_expression)
+
+
+@overload
+def parse_string(code: str, is_return: Literal[True]) -> Value:
+    ...
+
+
+@overload
+def parse_string(code: str, is_return: Literal[False] = False) -> Statement:
+    ...
 
 
 def parse_string(code: str, is_return=False) -> Statement:

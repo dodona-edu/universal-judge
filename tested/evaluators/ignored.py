@@ -7,11 +7,11 @@ from tested.dodona import Status, StatusMessage
 from tested.evaluators.common import EvaluationResult, EvaluatorConfig, try_outputs
 from tested.evaluators.exception import try_as_readable_exception
 from tested.evaluators.value import try_as_readable_value
-from tested.testsuite import IgnoredChannel
+from tested.testsuite import IgnoredChannel, OutputChannel
 
 
 def evaluate(
-    config: EvaluatorConfig, channel: IgnoredChannel, actual: str
+    config: EvaluatorConfig, channel: OutputChannel, actual: str
 ) -> EvaluationResult:
     assert isinstance(channel, IgnoredChannel)
 

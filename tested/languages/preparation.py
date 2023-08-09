@@ -6,7 +6,7 @@ module handles that.
 """
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, Callable, List, Optional, Set, Tuple, Union
+from typing import TYPE_CHECKING, Callable, List, Optional, Set, Tuple, Union, cast
 
 from tested.configs import Bundle
 from tested.languages.conventionalize import (
@@ -35,6 +35,7 @@ from tested.serialisation import (
 from tested.testsuite import (
     Context,
     EmptyChannel,
+    EvaluatorOutputChannel,
     ExceptionOutput,
     IgnoredChannel,
     MainInput,
@@ -43,7 +44,6 @@ from tested.testsuite import (
     TextData,
     ValueOutput,
 )
-from tested.utils import get_args
 
 if TYPE_CHECKING:
     from tested.judge.execution import ExecutionUnit
@@ -83,11 +83,10 @@ class PreparedTestcaseStatement:
         :return: The input statement.
         """
         if self.value_function:
-            assert isinstance(self.statement, get_args(Expression))
+            assert isinstance(self.statement, Expression)
             if override:
                 return self.value_function(Identifier(override))
             else:
-                # noinspection PyTypeChecker
                 return self.value_function(self.statement)
         else:
             return self.statement
@@ -265,15 +264,16 @@ def _create_handling_function(
     :return: A tuple containing the call and the name of the evaluator if present.
     """
     lang_config = bundle.lang_config
-    if hasattr(output, "evaluator") and isinstance(output.evaluator, SpecificEvaluator):
-        # noinspection PyUnresolvedReferences
+    if isinstance(output, EvaluatorOutputChannel) and isinstance(
+        output.evaluator, SpecificEvaluator
+    ):
         evaluator = output.evaluator.for_language(bundle.config.programming_language)
         evaluator_name = conventionalize_namespace(lang_config, evaluator.file.stem)
     else:
         evaluator_name = None
 
     def generator(expression: Expression) -> Statement:
-        if hasattr(output, "evaluator") and isinstance(
+        if isinstance(output, EvaluatorOutputChannel) and isinstance(
             output.evaluator, SpecificEvaluator
         ):
             arguments = [
@@ -340,14 +340,12 @@ def prepare_testcase(
     names = []
 
     if testcase.is_main_testcase():
-        prepared_input = testcase.input
+        prepared_input = cast(MainInput, testcase.input)
     else:
-        if isinstance(testcase.input, get_args(Expression)):
-            # noinspection PyTypeChecker
+        if isinstance(testcase.input, Expression):
             command = prepare_expression(bundle, testcase.input)
         else:
-            assert isinstance(testcase.input, get_args(Assignment))
-            # noinspection PyTypeChecker
+            assert isinstance(testcase.input, Assignment)
             command = prepare_assignment(bundle, testcase.input)
 
         result_channel = testcase.output.result

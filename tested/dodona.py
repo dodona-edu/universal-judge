@@ -12,7 +12,7 @@ the authoritative json-schema, provided by Dodona.
 import dataclasses
 import json
 from enum import StrEnum, auto, unique
-from typing import IO, Literal, Optional, Type, Union
+from typing import IO, Literal, Optional, Union
 
 from pydantic import BaseModel
 from pydantic.dataclasses import dataclass
@@ -138,7 +138,7 @@ class AnnotateCode:
 
     row: Index
     text: str
-    externalUrl: str = None
+    externalUrl: Optional[str] = None
     column: Optional[Index] = None
     type: Optional[Severity] = None
     rows: Optional[Index] = None
@@ -227,7 +227,9 @@ _mapping = {
 }
 
 
-def close_for(type_: str) -> Type[Update]:
+def close_for(
+    type_: str,
+) -> type[CloseJudgment | CloseTab | CloseContext | CloseTestcase | CloseTest]:
     return _mapping[type_]
 
 

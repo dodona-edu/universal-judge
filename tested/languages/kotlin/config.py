@@ -65,7 +65,7 @@ class Kotlin(Language):
         }
 
     def datatype_support(self) -> Mapping[AllTypes, TypeSupport]:
-        return {
+        return {  # type: ignore
             "integer": "supported",
             "real": "supported",
             "char": "supported",
@@ -96,7 +96,7 @@ class Kotlin(Language):
         }
 
     def map_type_restrictions(self) -> Optional[Set[ExpressionTypes]]:
-        return {
+        return {  # type: ignore
             "integer",
             "real",
             "char",
@@ -138,6 +138,7 @@ class Kotlin(Language):
         ], file_filter
 
     def execution(self, cwd: Path, file: str, arguments: List[str]) -> Command:
+        assert self.config
         limit = jvm_memory_limit(self.config)
         return [
             get_executable("kotlin"),
@@ -148,7 +149,6 @@ class Kotlin(Language):
             *arguments,
         ]
 
-    # noinspection PyTypeChecker
     def modify_solution(self, solution: Path):
         with open(solution, "r") as file:
             contents = file.read()
@@ -174,11 +174,12 @@ class Kotlin(Language):
         # Import locally to prevent errors.
         from tested.languages.kotlin import linter
 
+        assert self.config
         return linter.run_ktlint(self.config.dodona, remaining)
 
     def find_main_file(
-        self, files: List[Path], name: str, precompilation_messages: List[str]
-    ) -> Tuple[Optional[str], List[Message], Status, List[AnnotateCode]]:
+        self, files: List[Path], name: str, precompilation_messages: List[Message]
+    ) -> Tuple[Optional[Path], List[Message], Status, List[AnnotateCode]]:
         logger.debug("Finding %s in %s", name, files)
         main, msgs, status, ants = Language.find_main_file(
             self, files, name + "Kt", precompilation_messages
@@ -189,10 +190,10 @@ class Kotlin(Language):
             return Language.find_main_file(self, files, name, precompilation_messages)
 
     def filter_dependencies(self, files: List[Path], context_name: str) -> List[Path]:
-        def filter_function(file: Path) -> bool:
+        def filter_function(file_path: Path) -> bool:
             # We don't want files for contexts that are not the one we use.
             prefix = conventionalize_namespace(self, EXECUTION_PREFIX)
-            file = str(file)
+            file = str(file_path)
             is_context = file.startswith(prefix)
             is_our_context = file.startswith(context_name + ".") or file.startswith(
                 context_name + "$"

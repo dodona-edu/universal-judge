@@ -1,11 +1,12 @@
 import shlex
-from typing import List
+from typing import Callable, List
 
 from tested.datatypes import AdvancedStringTypes, BasicStringTypes
 from tested.languages.preparation import (
     PreparedContext,
     PreparedExecutionUnit,
     PreparedTestcase,
+    PreparedTestcaseStatement,
 )
 from tested.languages.utils import convert_unknown_type
 from tested.serialisation import (
@@ -14,12 +15,14 @@ from tested.serialisation import (
     FunctionType,
     Identifier,
     Statement,
+    StringType,
     Value,
 )
-from tested.utils import get_args
+from tested.testsuite import MainInput
 
 
 def convert_value(value: Value) -> str:
+    assert isinstance(value, StringType), f"Invalid literal: {value!r}"
     if value.type in (AdvancedStringTypes.CHAR, BasicStringTypes.TEXT):
         return shlex.quote(value.data)
     elif value.type == BasicStringTypes.UNKNOWN:
@@ -31,9 +34,11 @@ def has_nested_function_call(fun: FunctionCall) -> bool:
     return len(list(filter(lambda a: isinstance(a, FunctionCall), fun.arguments))) > 0
 
 
-# TODO: can we merge these two functions?
 def convert_function_call_nested(
-    function: FunctionCall, index: int, index_fun: callable, index_map: list
+    function: FunctionCall,
+    index_fun: Callable[[], int],
+    index_map: list,
+    index=int,
 ) -> str:
     index_map.append({})
     result = ""
@@ -47,7 +52,7 @@ def convert_function_call_nested(
             if has_nested_function_call(argument):
                 result += (
                     convert_function_call_nested(
-                        argument, index_map[-1][i], index_fun, index_map
+                        argument, index_fun, index_map, index_map[-1][i]
                     )
                     + "\n"
                 )
@@ -69,7 +74,7 @@ def convert_function_call_nested(
                     )
                 else:
                     result += f'"$ARG{index_map[-1][i]}" '
-            elif isinstance(argument, get_args(Value)):
+            elif isinstance(argument, Value):
                 # We have a value, delegate to the value template.
                 result += convert_value(argument) + " "
     result += ")"
@@ -78,7 +83,9 @@ def convert_function_call_nested(
 
 
 def convert_function_call(
-    function: FunctionCall, index_fun: callable, index_map: list
+    function: FunctionCall,
+    index_fun: Callable[[], int],
+    index_map: list,
 ) -> str:
     index_map.append({})
     result = ""
@@ -92,7 +99,7 @@ def convert_function_call(
             if has_nested_function_call(argument):
                 result += (
                     convert_function_call_nested(
-                        argument, index_map[-1][i], index_fun, index_map
+                        argument, index_fun, index_map, index_map[-1][i]
                     )
                     + "\n"
                 )
@@ -118,7 +125,7 @@ def convert_function_call(
                     )
                 else:
                     result += f'"$ARG{index_map[-1][i]}" '
-            elif isinstance(argument, get_args(Value)):
+            elif isinstance(argument, Value):
                 # We have a value, delegate to the value template.
                 result += convert_value(argument) + " "
     else:
@@ -143,9 +150,9 @@ def convert_statement(statement: Statement) -> str:
     elif isinstance(statement, FunctionCall):
         index_fun = unique_index_function()
         return convert_function_call(statement, index_fun, [])
-    elif isinstance(statement, get_args(Value)):
+    elif isinstance(statement, Value):
         return convert_value(statement)
-    elif isinstance(statement, get_args(Assignment)):
+    elif isinstance(statement, Assignment):
         result = f"local {statement.variable}="
         if isinstance(statement.expression, FunctionCall):
             result += f"$({convert_statement(statement.expression)})"
@@ -202,9 +209,11 @@ touch {pu.value_file} {pu.exception_file}
 
             # Prepare command arguments if needed.
             if tc.testcase.is_main_testcase():
+                assert isinstance(tc.input, MainInput)
                 result += f"{indent}source {pu.submission_name}.sh "
                 result += " ".join(shlex.quote(s) for s in tc.input.arguments) + "\n"
             else:
+                assert isinstance(tc.input, PreparedTestcaseStatement)
                 result += indent + convert_statement(tc.input.input_statement()) + "\n"
             result += "\n"
 

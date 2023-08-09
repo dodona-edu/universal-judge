@@ -7,13 +7,13 @@ from pydantic.json import pydantic_encoder
 
 import tested
 from tested.configs import create_bundle
-from tested.datatypes import BasicStringTypes
+from tested.datatypes import BasicSequenceTypes, BasicStringTypes
 from tested.dodona import Status
 from tested.evaluators.common import EvaluationResult, EvaluatorConfig
 from tested.evaluators.exception import evaluate as evaluate_exception
 from tested.evaluators.text import evaluate_file, evaluate_text
 from tested.evaluators.value import evaluate as evaluate_value
-from tested.serialisation import ExceptionValue, StringType
+from tested.serialisation import ExceptionValue, SequenceType, StringType
 from tested.testsuite import (
     ExceptionOutputChannel,
     ExpectedException,
@@ -431,12 +431,62 @@ def test_value_string_as_text_is_detected_when_no_actual(tmp_path: Path, pytestc
     channel = ValueOutputChannel(
         value=StringType(type=BasicStringTypes.TEXT, data="multi\nline\nstring")
     )
-    actual_value = json.dumps(
-        StringType(type=BasicStringTypes.TEXT, data="multi\nline\nstring"),
-        default=pydantic_encoder,
-    )
     config = evaluator_config(tmp_path, pytestconfig, language="python")
     result = evaluate_value(config, channel, "")
     assert result.result.enum == Status.WRONG
     assert result.readable_expected == "multi\nline\nstring"
     assert result.readable_actual == ""
+
+
+def test_nested_sets_type_check_works_if_correct(tmp_path: Path, pytestconfig):
+    expected_value = SequenceType(
+        type=BasicSequenceTypes.SET,
+        data=[
+            SequenceType(
+                type=BasicSequenceTypes.SET,
+                data=[
+                    StringType(type=BasicStringTypes.TEXT, data="a"),
+                    StringType(type=BasicStringTypes.TEXT, data="b"),
+                ],
+            ),
+            SequenceType(
+                type=BasicSequenceTypes.SET,
+                data=[
+                    StringType(type=BasicStringTypes.TEXT, data="a"),
+                    StringType(type=BasicStringTypes.TEXT, data="a"),
+                ],
+            ),
+            StringType(type=BasicStringTypes.TEXT, data="c"),
+        ],
+    )
+    actual_value = SequenceType(
+        type=BasicSequenceTypes.SET,
+        data=[
+            SequenceType(
+                type=BasicSequenceTypes.SET,
+                data=[
+                    StringType(type=BasicStringTypes.TEXT, data="a"),
+                    StringType(type=BasicStringTypes.TEXT, data="a"),
+                ],
+            ),
+            StringType(type=BasicStringTypes.TEXT, data="c"),
+            SequenceType(
+                type=BasicSequenceTypes.SET,
+                data=[
+                    StringType(type=BasicStringTypes.TEXT, data="b"),
+                    StringType(type=BasicStringTypes.TEXT, data="a"),
+                ],
+            ),
+        ],
+    )
+    channel = ValueOutputChannel(value=expected_value)
+    config = evaluator_config(tmp_path, pytestconfig, language="python")
+    result = evaluate_value(
+        config,
+        channel,
+        json.dumps(
+            actual_value,
+            default=pydantic_encoder,
+        ),
+    )
+    assert result.result.enum == Status.CORRECT

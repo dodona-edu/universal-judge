@@ -55,7 +55,7 @@ class Java(Language):
         }
 
     def datatype_support(self) -> Mapping[AllTypes, TypeSupport]:
-        return {
+        return {  # type: ignore
             "integer": "supported",
             "real": "supported",
             "char": "supported",
@@ -85,7 +85,7 @@ class Java(Language):
         }
 
     def map_type_restrictions(self) -> Optional[Set[ExpressionTypes]]:
-        return {
+        return {  # type: ignore
             "integer",
             "real",
             "char",
@@ -118,6 +118,7 @@ class Java(Language):
         return ["javac", "-cp", ".", *others], file_filter
 
     def execution(self, cwd: Path, file: str, arguments: List[str]) -> Command:
+        assert self.config
         limit = jvm_memory_limit(self.config)
         return ["java", f"-Xmx{limit}", "-cp", ".", Path(file).stem, *arguments]
 
@@ -125,6 +126,7 @@ class Java(Language):
         # Import locally to prevent errors.
         from tested.languages.java import linter
 
+        assert self.config
         return linter.run_checkstyle(self.config.dodona, remaining)
 
     def cleanup_stacktrace(self, traceback: str) -> str:

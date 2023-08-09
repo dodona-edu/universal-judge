@@ -27,15 +27,23 @@ def run_shellcheck(
     """
     submission = config.source
     language_options = config.config_for()
-    if language_options.get("shellcheck_config", None):
-        config_path = config.resources / language_options.get("shellcheck_config")
+    if path := language_options.get("shellcheck_config", None):
+        assert isinstance(path, str)
+        config_path = config.resources / path
         # Add shellcheck file in home folder
-        shutil.copy2(Path(config_path), Path(Path.home(), ".shellcheckrc"))
+        shutil.copy2(config_path, Path.home() / ".shellcheckrc")
 
     execution_results = run_command(
         directory=submission.parent,
         timeout=remaining,
-        command=["shellcheck", "-f", "json", "-s", language, submission.absolute()],
+        command=[
+            "shellcheck",
+            "-f",
+            "json",
+            "-s",
+            language,
+            str(submission.absolute()),
+        ],
     )
 
     if execution_results is None:

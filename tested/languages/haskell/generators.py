@@ -17,6 +17,7 @@ from tested.languages.preparation import (
     PreparedContext,
     PreparedExecutionUnit,
     PreparedTestcase,
+    PreparedTestcaseStatement,
 )
 from tested.languages.utils import convert_unknown_type
 from tested.serialisation import (
@@ -24,13 +25,16 @@ from tested.serialisation import (
     Expression,
     FunctionCall,
     Identifier,
+    NamedArgument,
+    SequenceType,
     SpecialNumbers,
     Statement,
+    StringType,
     Value,
     VariableType,
     as_basic_type,
 )
-from tested.utils import get_args
+from tested.testsuite import MainInput
 
 
 def convert_arguments(arguments: List[Expression]) -> str:
@@ -40,8 +44,9 @@ def convert_arguments(arguments: List[Expression]) -> str:
 def convert_value(value: Value) -> str:
     # Handle some advanced types.
     if value.type == AdvancedSequenceTypes.TUPLE:
+        assert isinstance(value, SequenceType)
         return f"({convert_arguments(value.data)})"
-    elif isinstance(value.type, get_args(AdvancedNumericTypes)):
+    elif isinstance(value.type, AdvancedNumericTypes):
         if not isinstance(value.data, SpecialNumbers):
             return f"{value.data} :: {convert_declaration(value.type)}"
         elif value.data == SpecialNumbers.NOT_A_NUMBER:
@@ -52,6 +57,7 @@ def convert_value(value: Value) -> str:
             assert value.data == SpecialNumbers.NEG_INFINITY
             return f"(-1/0) :: {convert_declaration(value.type)}"
     elif value.type == AdvancedStringTypes.CHAR:
+        assert isinstance(value, StringType)
         return "'" + value.data.replace("'", "\\'") + "'"
     # Handle basic types
     value = as_basic_type(value)
@@ -74,8 +80,10 @@ def convert_value(value: Value) -> str:
     elif value.type == BasicNothingTypes.NOTHING:
         return "Nothing :: Maybe Integer"
     elif value.type == BasicSequenceTypes.SEQUENCE:
+        assert isinstance(value, SequenceType)
         return f"[{convert_arguments(value.data)}]"
     elif value.type == BasicStringTypes.UNKNOWN:
+        assert isinstance(value, StringType)
         return convert_unknown_type(value)
     raise AssertionError(f"Invalid literal: {value!r}")
 
@@ -86,9 +94,10 @@ def convert_function_call(function: FunctionCall) -> str:
         result += convert_statement(function.namespace) + "."
     result += function.name + " "
     for i, argument in enumerate(function.arguments):
-        if isinstance(argument, get_args(Value)):
+        if isinstance(argument, Value):
             result += convert_statement(argument)
         else:
+            assert not isinstance(argument, NamedArgument)
             result += "(" + convert_statement(argument) + ")"
         if i != len(function.arguments) - 1:
             result += " "
@@ -137,7 +146,7 @@ def convert_declaration(tp: Union[AllTypes, VariableType]) -> str:
 
 
 def convert_statement(statement: Statement, lifting=False) -> str:
-    if isinstance(statement, get_args(Expression)):
+    if isinstance(statement, Expression):
         result = ""
         if lifting:
             result += "return ("
@@ -146,7 +155,7 @@ def convert_statement(statement: Statement, lifting=False) -> str:
         elif isinstance(statement, FunctionCall):
             result += convert_function_call(statement)
         else:
-            assert isinstance(statement, get_args(Value))
+            assert isinstance(statement, Value)
             result += convert_value(statement)
         if lifting:
             result += ")"
@@ -230,6 +239,7 @@ handleException (Right _) = Nothing
             result += indent + "writeSeparator\n"
 
             if tc.testcase.is_main_testcase():
+                assert isinstance(tc.input, MainInput)
                 wrapped = [json.dumps(a) for a in tc.input.arguments]
                 result += indent + f"let mainArgs = [{' '.join(wrapped)}]\n"
                 result += (
@@ -241,9 +251,10 @@ handleException (Right _) = Nothing
                     + f"let ee = handleException result in {convert_statement(tc.exception_statement('ee'))}\n"
                 )
             else:
+                assert isinstance(tc.input, PreparedTestcaseStatement)
                 # In Haskell we do not actually have statements, so we need to keep them separate.
                 # Additionally, exceptions with "statements" are not supported at this time.
-                if isinstance(tc.input.statement, get_args(Assignment)):
+                if isinstance(tc.input.statement, Assignment):
                     result += indent + convert_statement(tc.input.statement) + "\n"
                 else:
                     result += indent + f"result{i1} <- catch\n"
