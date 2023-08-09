@@ -177,7 +177,8 @@ class NumberType(WithFeatures, WithFunctions):
                 f"real numbers."
             )
 
-        if resolve_to_basic(values.get("type")) == BasicNumericTypes.INTEGER:
+        type_ = values.get("type")
+        if type_ and resolve_to_basic(type_) == BasicNumericTypes.INTEGER:
             values["data"] = values["data"].to_integral_value()
 
         return values
