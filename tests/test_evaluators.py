@@ -7,13 +7,19 @@ from pydantic.json import pydantic_encoder
 
 import tested
 from tested.configs import create_bundle
-from tested.datatypes import BasicSequenceTypes, BasicStringTypes
+from tested.datatypes import BasicObjectTypes, BasicSequenceTypes, BasicStringTypes
 from tested.dodona import Status
 from tested.evaluators.common import EvaluationResult, EvaluatorConfig
 from tested.evaluators.exception import evaluate as evaluate_exception
 from tested.evaluators.text import evaluate_file, evaluate_text
 from tested.evaluators.value import evaluate as evaluate_value
-from tested.serialisation import ExceptionValue, SequenceType, StringType
+from tested.serialisation import (
+    ExceptionValue,
+    ObjectKeyValuePair,
+    ObjectType,
+    SequenceType,
+    StringType,
+)
 from tested.testsuite import (
     ExceptionOutputChannel,
     ExpectedException,
@@ -490,3 +496,85 @@ def test_nested_sets_type_check_works_if_correct(tmp_path: Path, pytestconfig):
         ),
     )
     assert result.result.enum == Status.CORRECT
+
+
+def test_too_many_sequence_values_dont_crash(tmp_path: Path, pytestconfig):
+    expected_value = SequenceType(
+        type=BasicSequenceTypes.SEQUENCE,
+        data=[
+            SequenceType(
+                type=BasicSequenceTypes.SET,
+                data=[
+                    StringType(type=BasicStringTypes.TEXT, data="a"),
+                    StringType(type=BasicStringTypes.TEXT, data="b"),
+                ],
+            ),
+        ],
+    )
+    actual_value = SequenceType(
+        type=BasicSequenceTypes.SEQUENCE,
+        data=[
+            SequenceType(
+                type=BasicSequenceTypes.SET,
+                data=[
+                    StringType(type=BasicStringTypes.TEXT, data="a"),
+                    StringType(type=BasicStringTypes.TEXT, data="a"),
+                ],
+            ),
+            StringType(type=BasicStringTypes.TEXT, data="c"),
+            SequenceType(
+                type=BasicSequenceTypes.SET,
+                data=[
+                    StringType(type=BasicStringTypes.TEXT, data="b"),
+                    StringType(type=BasicStringTypes.TEXT, data="a"),
+                ],
+            ),
+        ],
+    )
+    channel = ValueOutputChannel(value=expected_value)
+    config = evaluator_config(tmp_path, pytestconfig, language="python")
+    result = evaluate_value(
+        config,
+        channel,
+        json.dumps(
+            actual_value,
+            default=pydantic_encoder,
+        ),
+    )
+    assert result.result.enum == Status.WRONG
+
+
+def test_too_many_object_values_dont_crash(tmp_path: Path, pytestconfig):
+    expected_value = ObjectType(
+        type=BasicObjectTypes.MAP,
+        data=[
+            ObjectKeyValuePair(
+                key=StringType(type=BasicStringTypes.TEXT, data="a"),
+                value=StringType(type=BasicStringTypes.TEXT, data="b"),
+            )
+        ],
+    )
+    actual_value = ObjectType(
+        type=BasicObjectTypes.MAP,
+        data=[
+            ObjectKeyValuePair(
+                key=StringType(type=BasicStringTypes.TEXT, data="a"),
+                value=StringType(type=BasicStringTypes.TEXT, data="b"),
+            ),
+            ObjectKeyValuePair(
+                key=StringType(type=BasicStringTypes.TEXT, data="c"),
+                value=StringType(type=BasicStringTypes.TEXT, data="d"),
+            ),
+        ],
+    )
+    channel = ValueOutputChannel(value=expected_value)
+    config = evaluator_config(tmp_path, pytestconfig, language="python")
+    result = evaluate_value(
+        config,
+        channel,
+        json.dumps(
+            actual_value,
+            default=pydantic_encoder,
+        ),
+    )
+    assert result.result.enum == Status.WRONG
