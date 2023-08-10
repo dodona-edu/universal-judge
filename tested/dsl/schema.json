@@ -248,7 +248,7 @@
       "oneOf" : [
         {
           "properties" : {
-            "evaluator" : {
+            "oracle" : {
               "type" : "string",
               "enum" : [
                 "builtin"
@@ -258,15 +258,15 @@
         },
         {
           "required" : [
-            "evaluator",
+            "oracle",
             "language",
             "file"
           ],
           "properties" : {
-            "evaluator" : {
+            "oracle" : {
               "type" : "string",
               "enum" : [
-                "custom"
+                "custom_check"
               ]
             },
             "language" : {
@@ -314,7 +314,7 @@
           "oneOf" : [
             {
               "properties" : {
-                "evaluator" : {
+                "oracle" : {
                   "type" : "string",
                   "enum" : [
                     "builtin"
@@ -324,15 +324,15 @@
             },
             {
               "required" : [
-                "evaluator",
+                "oracle",
                 "language",
                 "file"
               ],
               "properties" : {
-                "evaluator" : {
+                "oracle" : {
                   "type" : "string",
                   "enum" : [
-                    "custom"
+                    "custom_check"
                   ]
                 },
                 "language" : {

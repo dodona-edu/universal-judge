@@ -36,11 +36,11 @@ from tested.serialisation import (
 from tested.testsuite import (
     Context,
     EmptyChannel,
-    EvaluatorOutputChannel,
     ExceptionOutput,
     IgnoredChannel,
+    LanguageSpecificOracle,
     MainInput,
-    SpecificEvaluator,
+    OracleOutputChannel,
     Testcase,
     TextData,
     ValueOutput,
@@ -158,7 +158,7 @@ class PreparedExecutionUnit:
     testcase_separator_secret: str
     "Secret for use in the testcase separator."
     evaluator_names: Set[str]
-    "The names of the language-specific evaluators we will need."
+    "The names of the language-specific functions we will need."
 
 
 def prepare_argument(
@@ -246,13 +246,13 @@ def _create_handling_function(
     Create a function to handle the result of a return value or an exception.
 
     There are two possibilities:
-    - There is a language-specific evaluator. In that case, we wrap the value in
-      a function call to the evaluator, and then send off the result. An example of
+    - There is a language-specific oracle. In that case, we wrap the value in
+      a function call to the oracle, and then send off the result. An example of
       the result:
 
         send_evaluated(evaluate(value))
 
-    - There is no language-specific evaluator. In that case, we just send off the
+    - There is no language-specific oracle. In that case, we just send off the
       value directly. An example of the result:
 
         send_value(value)
@@ -261,21 +261,21 @@ def _create_handling_function(
     :param send_evaluated: The name of the function that will handle sending the
                            result of an evaluation.
     :param send_value: The name of the function that will handle sending the value.
-    :param output: The evaluator.
-    :return: A tuple containing the call and the name of the evaluator if present.
+    :param output: The oracle.
+    :return: A tuple containing the call and the name of the oracle if present.
     """
     lang_config = bundle.lang_config
-    if isinstance(output, EvaluatorOutputChannel) and isinstance(
-        output.evaluator, SpecificEvaluator
+    if isinstance(output, OracleOutputChannel) and isinstance(
+        output.oracle, LanguageSpecificOracle
     ):
-        evaluator = output.evaluator.for_language(bundle.config.programming_language)
+        evaluator = output.oracle.for_language(bundle.config.programming_language)
         evaluator_name = conventionalize_namespace(lang_config, evaluator.file.stem)
     else:
         evaluator_name = None
 
     def generator(expression: Expression) -> Statement:
-        if isinstance(output, EvaluatorOutputChannel) and isinstance(
-            output.evaluator, SpecificEvaluator
+        if isinstance(output, OracleOutputChannel) and isinstance(
+            output.oracle, LanguageSpecificOracle
         ):
             assert evaluator
             arguments = [
@@ -314,9 +314,9 @@ def _create_exception_function(
     :param bundle: The configuration bundle.
     :param testcase: The testcase to create the function for.
 
-    :return: The function and optionally the name of the evaluator file.
+    :return: The function and optionally the name of the oracle file.
     """
-    # If we have a regular testcase, handle special evaluators.
+    # If we have a regular testcase, handle special functions.
 
     exception_channel = testcase.output.exception
     return _create_handling_function(
@@ -336,8 +336,8 @@ def prepare_testcase(
     :param bundle: The configuration bundle.
     :param testcase: The testcase to prepare.
 
-    :return: Arguments containing the preparation results and the evaluator name or
-             None if no language-specific evaluator is needed.
+    :return: Arguments containing the preparation results and the oracle name or
+             None if no language-specific oracle is needed.
     """
     names = []
 
@@ -415,7 +415,7 @@ def prepare_context(
     :param context: The context to prepare
 
     :return: The prepared context arguments and a set
-             of evaluator names.
+             of oracle names.
     """
     language = bundle.config.programming_language
     resources = bundle.config.resources
@@ -475,7 +475,7 @@ def prepare_execution_unit(
     :param execution_name: The name of the execution module.
 
     :return: The name of the generated file in the given destination and a set
-             of evaluator names that will also be needed.
+             of oracle names that will also be needed.
     """
     evaluator_names = set()
     contexts = []

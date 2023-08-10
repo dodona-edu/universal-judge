@@ -21,7 +21,12 @@ from tested.features import (
     WithFeatures,
     combine_features,
 )
-from tested.parsing import custom_fallback_field, get_converter, ignore_field
+from tested.parsing import (
+    custom_fallback_field,
+    fallback_field,
+    get_converter,
+    ignore_field,
+)
 from tested.serialisation import (
     Expression,
     FunctionCall,
@@ -37,7 +42,7 @@ from tested.utils import flatten
 
 @unique
 class TextBuiltin(StrEnum):
-    """Textual built in evaluators."""
+    """Textual built-in functions."""
 
     TEXT = auto()
     FILE = auto()
@@ -45,26 +50,26 @@ class TextBuiltin(StrEnum):
 
 @unique
 class ValueBuiltin(StrEnum):
-    """Built in evaluators for values."""
+    """Built-in functions for values."""
 
     VALUE = auto()
 
 
 @unique
 class ExceptionBuiltin(StrEnum):
-    """Built in evaluators for exceptions."""
+    """Built-in functions for exceptions."""
 
     EXCEPTION = auto()
 
 
 @define
-class BaseBuiltinEvaluator:
+class BaseBuiltinOracle:
     """
-    A built-in evaluator in TESTed. Some basic evaluators are available, as
+    A built-in oracle in TESTed. Some basic functions are available, as
     enumerated by :class:`Builtin`. These are useful for things like comparing text,
     files or values.
 
-    This is the recommended and default evaluator, since it is the least amount
+    This is the recommended and default oracle, since it is the least amount
     of work and the most language independent.
     """
 
@@ -73,17 +78,17 @@ class BaseBuiltinEvaluator:
 
 
 @define
-class GenericTextEvaluator(BaseBuiltinEvaluator):
+class GenericTextOracle(BaseBuiltinOracle):
     name: TextBuiltin = TextBuiltin.TEXT
 
 
 @define
-class GenericValueEvaluator(BaseBuiltinEvaluator):
+class GenericValueOracle(BaseBuiltinOracle):
     name: ValueBuiltin = ValueBuiltin.VALUE
 
 
 @define
-class GenericExceptionEvaluator(BaseBuiltinEvaluator):
+class GenericExceptionOracle(BaseBuiltinOracle):
     name: ExceptionBuiltin = ExceptionBuiltin.EXCEPTION
 
 
@@ -99,51 +104,62 @@ class EvaluationFunction:
 
 
 @define
-class ProgrammedEvaluator:
+class CustomCheckOracle:
     """
-    Evaluate the responses with custom code. This is still a language-independent
-    method; the evaluator is run as part of the judge and receives its values from
-    that judge. This type is useful, for example, when doing exercises on sequence
-    alignments.
+    Evaluate the result with a custom check function.
+
+    This oracle enables doing custom checks while still being programming-language
+    independent. The oracle is run through the judge infrastructure to translate
+    values between different programming languages.
+
+    Although most programming languages are supported, we recommend using Python,
+    as TESTed can then apply specific optimisations, meaning it will be faster than
+    other languages.
+
+    Some examples of intended use of this oracle are sequence alignment checking,
+    or evaluating non-deterministic return values.
     """
 
     language: str
     function: EvaluationFunction
     arguments: List[Value] = field(factory=list)
-    type: Literal["programmed"] = "programmed"
+    type: Literal["programmed", "custom_check"] = "custom_check"
 
 
+@fallback_field(get_converter(), {"evaluators": "functions"})
 @define
-class SpecificEvaluator:
+class LanguageSpecificOracle:
     """
-    Provide language-specific code that will be run in the same environment as the
-    user's code. While this is very powerful and allows you to test language-specific
-    constructs, there are a few caveats:
+    Evaluate the result with a custom check function written in a specific programming
+    language. Every programming language needs its own check function.
+
+    While this is very powerful and allows you to test language-specific constructs,
+    there are a few caveats:
 
     1. The code is run alongside the user code. This means the user can potentially
        take control of the code.
-    2. This will limit the context_number of language an exercise is available in,
-       since you need to provide tests for all configs you want to support.
+    2. This will limit the number of programming languages an exercise is available
+       in, since you need to provide tests for all configs you want to support.
     3. It is a lot of work. You need to return the correct values, since the judge
        needs to understand what the result was.
 
     The code you must write should be a function that accepts the result of a user
-    expression. Note: this type of evaluator is only supported when using function
-    calls. If you want to evaluate_text stdout, you should use the custom evaluator
+    expression. Note: this type of oracle is only supported when using function
+    calls. If you want to evaluate stdout, you should use the custom check oracle
     instead.
     """
 
-    evaluators: Dict[str, EvaluationFunction] = field()
+    functions: Dict[str, EvaluationFunction] = field()
     type: Literal["specific"] = "specific"
 
     def for_language(self, language: str) -> EvaluationFunction:
-        return self.evaluators[language]
+        return self.functions[language]
 
-    @evaluators.validator  # type: ignore
-    def validate_evaluator(self, attribute, value):
+    @functions.validator  # type: ignore
+    def validate_evaluator(self, _, value):
         """There should be at least one evaluator."""
         if len(value.keys()) == 0:
-            raise ValueError("At least one specific evaluator is required.")
+            raise ValueError("At least one language-specific oracle is required.")
 
 
 @unique
@@ -185,16 +201,16 @@ class TextData(WithFeatures):
         return NOTHING
 
 
+@fallback_field(get_converter(), {"evaluator": "oracle"})
 @ignore_field(get_converter(), "show_expected")
 @define
 class TextOutputChannel(TextData):
     """Describes the output for textual channels."""
 
-    evaluator: Union[GenericTextEvaluator, ProgrammedEvaluator] = field(
-        factory=GenericTextEvaluator
-    )
+    oracle: GenericTextOracle | CustomCheckOracle = field(factory=GenericTextOracle)
 
 
+@fallback_field(get_converter(), {"evaluator": "oracle"})
 @ignore_field(get_converter(), "show_expected")
 @define
 class FileOutputChannel(WithFeatures):
@@ -202,8 +218,8 @@ class FileOutputChannel(WithFeatures):
 
     expected_path: str  # Path to the file to compare to.
     actual_path: str  # Path to the generated file (by the user code)
-    evaluator: Union[GenericTextEvaluator, ProgrammedEvaluator] = field(
-        factory=lambda: GenericTextEvaluator(name=TextBuiltin.FILE)
+    oracle: GenericTextOracle | CustomCheckOracle = field(
+        factory=lambda: GenericTextOracle(name=TextBuiltin.FILE)
     )
 
     def get_used_features(self) -> FeatureSet:
@@ -215,24 +231,26 @@ class FileOutputChannel(WithFeatures):
             return file.read()
 
 
+@fallback_field(get_converter(), {"evaluator": "oracle"})
 @ignore_field(get_converter(), "show_expected")
 @define
 class ValueOutputChannel(WithFeatures):
     """Handles return values of function calls."""
 
     value: Optional[Value] = None
-    evaluator: Union[
-        GenericValueEvaluator, ProgrammedEvaluator, SpecificEvaluator
-    ] = field(factory=GenericValueEvaluator)
-
-    def __attrs_post_init__(self):
-        if isinstance(self.evaluator, GenericValueEvaluator) and not self.value:
-            raise ValueError("The generic evaluator needs an channel value.")
+    oracle: GenericValueOracle | CustomCheckOracle | LanguageSpecificOracle = field(
+        factory=GenericValueOracle
+    )
 
     def get_used_features(self) -> FeatureSet:
         if self.value:
             return self.value.get_used_features()
         return NOTHING
+
+    @oracle.validator  # type: ignore
+    def value_requirements(self, _, oracle):
+        if isinstance(oracle, GenericValueOracle) and not self.value:
+            raise ValueError("When using the built-in oracle, a value is required.")
 
 
 @define
@@ -275,14 +293,15 @@ class ExpectedException(WithFeatures):
             return type_
 
 
+@fallback_field(get_converter(), {"evaluator": "oracle"})
 @ignore_field(get_converter(), "show_expected")
 @define
 class ExceptionOutputChannel(WithFeatures):
     """Handles exceptions caused by the submission."""
 
     exception: Optional[ExpectedException] = None
-    evaluator: Union[GenericExceptionEvaluator, SpecificEvaluator] = field(
-        factory=GenericExceptionEvaluator
+    oracle: GenericExceptionOracle | LanguageSpecificOracle = field(
+        factory=GenericExceptionOracle
     )
 
     def get_used_features(self) -> FeatureSet:
@@ -291,8 +310,8 @@ class ExceptionOutputChannel(WithFeatures):
         return NOTHING
 
     def __attrs_post_init__(self):
-        if isinstance(self.evaluator, GenericExceptionEvaluator) and not self.exception:
-            raise ValueError("The generic evaluator needs a channel exception.")
+        if isinstance(self.oracle, GenericExceptionOracle) and not self.exception:
+            raise ValueError("The generic oracle needs a channel exception.")
 
 
 @ignore_field(get_converter(), "show_expected")
@@ -328,11 +347,11 @@ class IgnoredChannel(WithFeatures, StrEnum):
 
 SpecialOutputChannel = EmptyChannel | IgnoredChannel
 
-EvaluatorOutputChannel = Union[
+OracleOutputChannel = Union[
     TextOutputChannel, FileOutputChannel, ValueOutputChannel, ExceptionOutputChannel
 ]
 
-NormalOutputChannel = EvaluatorOutputChannel | ExitCodeOutputChannel
+NormalOutputChannel = OracleOutputChannel | ExitCodeOutputChannel
 
 OutputChannel = NormalOutputChannel | SpecialOutputChannel
 
@@ -365,22 +384,22 @@ class Output(WithFeatures):
             ]
         )
 
-    def get_specific_eval_languages(self) -> Optional[Set[str]]:
+    def get_specific_oracle_languages(self) -> Optional[Set[str]]:
         """
-        Get the languages supported by this output if language-specific evaluators
+        Get the languages supported by this output if language-specific oracles
         are used. If none are used, None is returned, otherwise a set of languages.
         """
         languages = None
         if isinstance(self.exception, ExceptionOutputChannel):
-            if isinstance(self.exception.evaluator, SpecificEvaluator):
-                languages = set(self.exception.evaluator.evaluators.keys())
+            if isinstance(self.exception.oracle, LanguageSpecificOracle):
+                languages = set(self.exception.oracle.functions.keys())
             elif (
                 self.exception.exception is not None and self.exception.exception.types
             ):
                 languages = set(self.exception.exception.types.keys())
         if isinstance(self.result, ValueOutputChannel):
-            if isinstance(self.result.evaluator, SpecificEvaluator):
-                langs = set(self.result.evaluator.evaluators.keys())
+            if isinstance(self.result.oracle, LanguageSpecificOracle):
+                langs = set(self.result.oracle.functions.keys())
                 if languages is not None:
                     languages &= langs
                 else:
@@ -560,20 +579,20 @@ class Tab(WithFeatures, WithFunctions):
             for testcase in context.testcases:
                 output = testcase.output
                 if isinstance(output.result, ValueOutputChannel) and isinstance(
-                    output.result.evaluator, SpecificEvaluator
+                    output.result.oracle, LanguageSpecificOracle
                 ):
                     for (
                         language,
                         function,
-                    ) in output.result.evaluator.evaluators.items():
+                    ) in output.result.oracle.functions.items():
                         eval_functions[language].append(function)
                 if isinstance(output.exception, ExceptionOutputChannel) and isinstance(
-                    output.exception.evaluator, SpecificEvaluator
+                    output.exception.oracle, LanguageSpecificOracle
                 ):
                     for (
                         language,
                         function,
-                    ) in output.exception.evaluator.evaluators.items():
+                    ) in output.exception.oracle.functions.items():
                         eval_functions[language].append(function)
 
         # Check within each language that the functions are unique over the
@@ -589,7 +608,7 @@ class Tab(WithFeatures, WithFunctions):
             for function, file in function_file.items():
                 if len(file) > 1:
                     raise ValueError(
-                        f"Evaluator function names must be unique within the same "
+                        f"Oracle function names must be unique within the same "
                         f"run. {function} was used in multiple files: {file}"
                     )
 

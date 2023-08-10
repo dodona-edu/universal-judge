@@ -188,7 +188,7 @@ def convert_execution_unit(pu: PreparedExecutionUnit) -> str:
     const values = require("./values.js");
     """
 
-    # Import the language specific evaluators we will need.
+    # Import the language specific functions we will need.
     for name in pu.evaluator_names:
         result += f'const {name} = require("./{name}.js");\n'
 

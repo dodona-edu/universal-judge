@@ -20,9 +20,9 @@ from tested.serialisation import (
     StringType,
 )
 from tested.testsuite import (
-    GenericTextEvaluator,
-    GenericValueEvaluator,
-    ProgrammedEvaluator,
+    CustomCheckOracle,
+    GenericTextOracle,
+    GenericValueOracle,
     TextOutputChannel,
     ValueOutputChannel,
     parse_test_suite,
@@ -205,7 +205,7 @@ def test_parse_ctx_with_config():
 
     stdout = tc0.output.stdout
     assert stdout.data == "3.34"
-    options = stdout.evaluator.options
+    options = stdout.oracle.options
     assert len(options) == 3
     assert options["tryFloatingPoint"]
     assert options["applyRounding"]
@@ -213,7 +213,7 @@ def test_parse_ctx_with_config():
 
     stdout = tc1.output.stdout
     assert stdout.data == "3.337"
-    options = stdout.evaluator.options
+    options = stdout.oracle.options
     assert len(options) == 3
     assert options["tryFloatingPoint"]
     assert options["applyRounding"]
@@ -221,7 +221,7 @@ def test_parse_ctx_with_config():
 
     stdout = tc2.output.stdout
     assert stdout.data == "3.3"
-    options = stdout.evaluator.options
+    options = stdout.oracle.options
     assert len(options) == 3
     assert options["tryFloatingPoint"]
     assert options["applyRounding"]
@@ -229,7 +229,7 @@ def test_parse_ctx_with_config():
 
     stderr = tc3.output.stderr
     assert stderr.data == " Fail "
-    options = stderr.evaluator.options
+    options = stderr.oracle.options
     assert len(options) == 2
     assert not options["caseInsensitive"]
     assert options["ignoreWhitespace"]
@@ -267,14 +267,14 @@ def test_statements():
     assert len(tests0) == 2
     assert isinstance(tests0[0].input, Assignment)
     assert tests0[0].output.stdout.data == "New safe"
-    assert tests0[0].output.stdout.evaluator.options["ignoreWhitespace"]
+    assert tests0[0].output.stdout.oracle.options["ignoreWhitespace"]
     assert isinstance(tests0[1].input, FunctionCall)
     assert tests0[1].output.result.value.data == "Ignore whitespace"
 
     assert len(tests1) == 2
     assert isinstance(tests1[0].input, Assignment)
     assert tests1[0].output.stdout.data == "New safe"
-    assert not tests1[0].output.stdout.evaluator.options["ignoreWhitespace"]
+    assert not tests1[0].output.stdout.oracle.options["ignoreWhitespace"]
     assert isinstance(tests1[1].input, FunctionCall)
     assert tests1[1].output.result.value.data == 5
     assert tests1[1].output.result.value.type == AdvancedNumericTypes.U_INT_8
@@ -303,7 +303,7 @@ def test_statement_and_main():
     tc = ctx.testcases[0]
     assert tc.input.arguments == ["-a", "5", "7"]
     assert tc.output.stdout.data == "12"
-    assert tc.output.stdout.evaluator.options["tryFloatingPoint"]
+    assert tc.output.stdout.oracle.options["tryFloatingPoint"]
     test = ctx.testcases[1]
     assert isinstance(test.input, FunctionCall)
     assert test.output.result.value.data == 12
@@ -418,8 +418,8 @@ tabs:
     json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
     stdout = suite.tabs[0].contexts[0].testcases[0].output.stdout
-    assert isinstance(stdout.evaluator, GenericTextEvaluator)
-    config = stdout.evaluator.options
+    assert isinstance(stdout.oracle, GenericTextOracle)
+    config = stdout.oracle.options
     assert config["applyRounding"]
     assert config["roundTo"] == 63
     assert config["tryFloatingPoint"]
@@ -528,7 +528,7 @@ def test_text_built_in_checks_implied():
     test = testcases[0]
     assert isinstance(test.input, FunctionCall)
     assert isinstance(test.output.stdout, TextOutputChannel)
-    assert isinstance(test.output.stdout.evaluator, GenericTextEvaluator)
+    assert isinstance(test.output.stdout.oracle, GenericTextOracle)
     assert test.output.stdout.data == "hallo"
 
 
@@ -540,7 +540,7 @@ def test_text_built_in_checks_explicit():
             - statement: 'test()'
               stdout:
                 data: "hallo"
-                evaluator: "builtin"
+                oracle: "builtin"
     """
     json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
@@ -552,7 +552,7 @@ def test_text_built_in_checks_explicit():
     test = testcases[0]
     assert isinstance(test.input, FunctionCall)
     assert isinstance(test.output.stdout, TextOutputChannel)
-    assert isinstance(test.output.stdout.evaluator, GenericTextEvaluator)
+    assert isinstance(test.output.stdout.oracle, GenericTextOracle)
     assert test.output.stdout.data == "hallo"
 
 
@@ -564,7 +564,7 @@ def test_text_custom_checks_correct():
             - statement: 'test()'
               stdout:
                 data: "hallo"
-                evaluator: "custom"
+                oracle: "custom_check"
                 language: "python"
                 file: "test.py"
                 name: "evaluate_test"
@@ -580,13 +580,13 @@ def test_text_custom_checks_correct():
     test = testcases[0]
     assert isinstance(test.input, FunctionCall)
     assert isinstance(test.output.stdout, TextOutputChannel)
-    assert isinstance(test.output.stdout.evaluator, ProgrammedEvaluator)
+    assert isinstance(test.output.stdout.oracle, CustomCheckOracle)
     assert test.output.stdout.data == "hallo"
-    evaluator = test.output.stdout.evaluator
-    assert evaluator.language == "python"
-    assert evaluator.function.name == "evaluate_test"
-    assert evaluator.function.file == Path("test.py")
-    assert evaluator.arguments == [
+    oracle = test.output.stdout.oracle
+    assert oracle.language == "python"
+    assert oracle.function.name == "evaluate_test"
+    assert oracle.function.file == Path("test.py")
+    assert oracle.arguments == [
         StringType(type=BasicStringTypes.TEXT, data="yes"),
         NumberType(type=BasicNumericTypes.INTEGER, data=5),
         SequenceType(
@@ -618,7 +618,7 @@ def test_value_built_in_checks_implied():
     test = testcases[0]
     assert isinstance(test.input, FunctionCall)
     assert isinstance(test.output.result, ValueOutputChannel)
-    assert isinstance(test.output.result.evaluator, GenericValueEvaluator)
+    assert isinstance(test.output.result.oracle, GenericValueOracle)
     assert test.output.result.value == StringType(
         type=BasicStringTypes.TEXT, data="hallo"
     )
@@ -632,7 +632,7 @@ def test_value_built_in_checks_explicit():
             - statement: 'test()'
               return_raw:
                 value: "'hallo'"
-                evaluator: "builtin"
+                oracle: "builtin"
     """
     json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
@@ -644,7 +644,7 @@ def test_value_built_in_checks_explicit():
     test = testcases[0]
     assert isinstance(test.input, FunctionCall)
     assert isinstance(test.output.result, ValueOutputChannel)
-    assert isinstance(test.output.result.evaluator, GenericValueEvaluator)
+    assert isinstance(test.output.result.oracle, GenericValueOracle)
     assert test.output.result.value == StringType(
         type=BasicStringTypes.TEXT, data="hallo"
     )
@@ -658,7 +658,7 @@ def test_value_custom_checks_correct():
             - statement: 'test()'
               return_raw:
                 value: "'hallo'"
-                evaluator: "custom"
+                oracle: "custom_check"
                 language: "python"
                 file: "test.py"
                 name: "evaluate_test"
@@ -674,15 +674,15 @@ def test_value_custom_checks_correct():
     test = testcases[0]
     assert isinstance(test.input, FunctionCall)
     assert isinstance(test.output.result, ValueOutputChannel)
-    assert isinstance(test.output.result.evaluator, ProgrammedEvaluator)
+    assert isinstance(test.output.result.oracle, CustomCheckOracle)
     assert test.output.result.value == StringType(
         type=BasicStringTypes.TEXT, data="hallo"
     )
-    evaluator = test.output.result.evaluator
-    assert evaluator.language == "python"
-    assert evaluator.function.name == "evaluate_test"
-    assert evaluator.function.file == Path("test.py")
-    assert evaluator.arguments == [
+    oracle = test.output.result.oracle
+    assert oracle.language == "python"
+    assert oracle.function.name == "evaluate_test"
+    assert oracle.function.file == Path("test.py")
+    assert oracle.arguments == [
         StringType(type=BasicStringTypes.TEXT, data="yes"),
         NumberType(type=BasicNumericTypes.INTEGER, data=5),
         SequenceType(

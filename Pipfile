@@ -23,6 +23,7 @@ marko = "==2.0.0"
 pytest = ""
 pytest-mock = ""
 pytest-cov = ""
+pytest-xdist = ""
 
 [requires]
 python_version = "3.11"

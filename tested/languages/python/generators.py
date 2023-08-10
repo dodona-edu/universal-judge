@@ -144,7 +144,7 @@ import importlib
 from decimal import Decimal
 """
 
-    # Import the language specific evaluators we will need.
+    # Import the language specific functions we will need.
     for name in pu.evaluator_names:
         result += f"import {name}\n"
 

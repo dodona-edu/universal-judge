@@ -148,16 +148,16 @@ def is_supported(language: "Language") -> bool:
             _logger.warning(f"Test suite requires unsupported type {t}")
             return False
 
-    # Check language-specific evaluators
+    # Check language-specific oracles
     for tab in language.config.suite.tabs:
         assert tab.contexts is not None
         for context in tab.contexts:
             for testcase in context.testcases:
-                languages = testcase.output.get_specific_eval_languages()
+                languages = testcase.output.get_specific_oracle_languages()
                 if languages is not None:
                     if language.config.dodona.programming_language not in languages:
                         _logger.warning(
-                            f"Specific evaluators are available only in "
+                            f"Language-specific oracles are available only in "
                             f"{languages}!"
                         )
                         return False

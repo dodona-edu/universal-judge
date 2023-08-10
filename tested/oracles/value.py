@@ -1,5 +1,5 @@
 """
-Value evaluator.
+Value oracle.
 """
 import logging
 from typing import Optional, Tuple, Union, cast
@@ -13,10 +13,10 @@ from tested.datatypes import (
     SimpleTypes,
 )
 from tested.dodona import ExtendedMessage, Message, Permission, Status, StatusMessage
-from tested.evaluators.common import EvaluationResult, EvaluatorConfig
 from tested.features import TypeSupport, fallback_type_support_map
 from tested.internationalization import get_i18n_string
 from tested.languages.generation import generate_statement
+from tested.oracles.common import OracleConfig, OracleResult
 from tested.parsing import get_converter
 from tested.serialisation import (
     ObjectKeyValuePair,
@@ -29,7 +29,7 @@ from tested.serialisation import (
     to_python_comparable,
 )
 from tested.testsuite import (
-    EvaluatorOutputChannel,
+    OracleOutputChannel,
     OutputChannel,
     TextOutputChannel,
     ValueOutputChannel,
@@ -51,8 +51,8 @@ def try_as_readable_value(
 
 
 def get_values(
-    bundle: Bundle, output_channel: EvaluatorOutputChannel, actual_str: str
-) -> Union[EvaluationResult, Tuple[Value, str, Optional[Value], str]]:
+    bundle: Bundle, output_channel: OracleOutputChannel, actual_str: str
+) -> Union[OracleResult, Tuple[Value, str, Optional[Value], str]]:
     if isinstance(output_channel, TextOutputChannel):
         expected = output_channel.get_data_as_string(bundle.config.resources)
         expected_value = StringType(type=BasicStringTypes.TEXT, data=expected)
@@ -79,7 +79,7 @@ def get_values(
             description=raw_message, format="text", permission=Permission.STAFF
         )
         student = "An error occurred while collecting the return value. Contact staff for more information."
-        return EvaluationResult(
+        return OracleResult(
             result=StatusMessage(enum=Status.INTERNAL_ERROR, human=student),
             readable_expected=readable_expected,
             readable_actual=actual_str,
@@ -234,20 +234,20 @@ def _check_data_type(
 
 
 def evaluate(
-    config: EvaluatorConfig, channel: OutputChannel, actual_str: str
-) -> EvaluationResult:
+    config: OracleConfig, channel: OutputChannel, actual_str: str
+) -> OracleResult:
     """
-    Evaluate two values. The values must match exact. Currently, this evaluator
+    Evaluate two values. The values must match exact. Currently, this oracle
     has no options, but it might receive them in the future (e.g. options on how
     to deal with strings or floats).
     """
     assert isinstance(channel, ValueOutputChannel)
 
-    # Try parsing the value as an EvaluationResult.
-    # This is the result of a custom evaluator.
+    # Try parsing the value as an OracleResult.
+    # This is the result of a custom oracle.
     # noinspection PyBroadException
     try:
-        evaluation_result = get_converter().loads(actual_str, EvaluationResult)
+        evaluation_result = get_converter().loads(actual_str, OracleResult)
     except Exception:
         pass
     else:
@@ -255,7 +255,7 @@ def evaluate(
 
     # Try parsing the value as an actual Value.
     result = get_values(config.bundle, channel, actual_str)
-    if isinstance(result, EvaluationResult):
+    if isinstance(result, OracleResult):
         return result
     else:
         expected, readable_expected, actual, readable_actual = result
@@ -271,9 +271,9 @@ def evaluate(
 
     # If the channel value is not None, but actual is, error.
     if actual is None:
-        return EvaluationResult(
+        return OracleResult(
             result=StatusMessage(
-                enum=Status.WRONG, human=get_i18n_string("evaluators.value.missing")
+                enum=Status.WRONG, human=get_i18n_string("functions.value.missing")
             ),
             readable_expected=readable_expected,
             readable_actual=readable_actual,
@@ -303,7 +303,7 @@ def evaluate(
             )
         )
 
-    return EvaluationResult(
+    return OracleResult(
         result=StatusMessage(
             human=type_status, enum=Status.CORRECT if correct else Status.WRONG
         ),

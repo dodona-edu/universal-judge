@@ -33,15 +33,13 @@ from tested.datatypes import (
     BasicTypes,
     resolve_to_basic,
 )
-from tested.evaluators.value import _check_simple_type
 from tested.features import TypeSupport, fallback_type_support_map
 from tested.judge.compilation import run_compilation
 from tested.judge.execution import execute_file, filter_files
 from tested.judge.utils import BaseExecutionResult, copy_from_paths_to_path
 from tested.languages.conventionalize import conventionalize_namespace
-from tested.parsing import get_converter
+from tested.oracles.value import _check_simple_type
 from tested.serialisation import (
-    Assignment,
     BooleanType,
     NothingType,
     NumberType,
@@ -55,13 +53,7 @@ from tested.serialisation import (
     to_python_comparable,
 )
 from tested.testsuite import (
-    ExceptionOutputChannel,
-    ExitCodeOutputChannel,
-    FileOutputChannel,
-    MainInput,
     Suite,
-    TextOutputChannel,
-    ValueOutputChannel,
 )
 from tested.utils import get_args
 from tests.manual_utils import configuration
@@ -343,80 +335,3 @@ def test_valid_type_map(language: str, tmp_path: Path, pytestconfig):
             basic_type = resolve_to_basic(advanced_type)
             basic_value = type_map[basic_type]
             assert basic_value == TypeSupport.SUPPORTED
-
-
-def test_input_deprecated_attribute_is_accepted():
-    scheme = """
-    {
-        "main_call": true,
-        "stdin": {
-            "type": "text",
-            "data": "input-1"
-        }
-    }
-    """
-    result = get_converter().loads(scheme, MainInput)
-    assert result.stdin.data == "input-1"
-
-
-def test_text_show_expected_is_accepted():
-    scheme = """
-    {
-        "show_expected": true,
-        "data": "hallo",
-        "type": "text"
-    }
-    """
-    result = get_converter().loads(scheme, TextOutputChannel)
-    assert result.data == "hallo"
-
-
-def test_file_show_expected_is_accepted():
-    scheme = """
-    {
-        "show_expected": true,
-        "expected_path": "hallo",
-        "actual_path": "hallo"
-    }
-    """
-    result = get_converter().loads(scheme, FileOutputChannel)
-    assert result.expected_path == "hallo"
-    assert result.actual_path == "hallo"
-
-
-def test_value_show_expected_is_accepted():
-    scheme = """
-    {
-        "show_expected": true,
-        "value": {
-            "type": "text",
-            "data": "yes"
-        }
-    }
-    """
-    result = get_converter().loads(scheme, ValueOutputChannel)
-    assert result.value.data == "yes"
-
-
-def test_exception_show_expected_is_accepted():
-    scheme = """
-    {
-        "show_expected": true,
-        "exception": {
-            "message": "text"
-        }
-    }
-    """
-    result = get_converter().loads(scheme, ExceptionOutputChannel)
-    assert result.exception.message == "text"
-
-
-def test_exit_show_expected_is_accepted():
-    scheme = """
-    {
-        "show_expected": true,
-        "value": 0
-    }
-    """
-    result = get_converter().loads(scheme, ExitCodeOutputChannel)
-    assert result.value == 0

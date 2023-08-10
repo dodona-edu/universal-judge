@@ -74,6 +74,7 @@
             ps.pytest
             ps.pytest-mock
             ps.pytest-cov
+            ps.pytest-xdist
             # For Pycharm
             ps.setuptools
             ps.isort

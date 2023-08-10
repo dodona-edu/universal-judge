@@ -201,7 +201,7 @@ def convert_execution_unit(pu: PreparedExecutionUnit) -> str:
     #include "{pu.submission_name}.c"
     """
 
-    # Import evaluators
+    # Import functions
     for name in pu.evaluator_names:
         result += f'#include "{name}.c"\n'
 

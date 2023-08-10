@@ -5,12 +5,11 @@ import contextlib
 import logging
 import shutil
 import sys
-import traceback
 import types
 from collections.abc import Generator
 from io import StringIO
 from pathlib import Path
-from typing import List, Optional, Tuple, Union, cast
+from typing import Tuple, Union, cast
 
 from attrs import define, field
 
@@ -21,12 +20,12 @@ from tested.internationalization import get_i18n_string
 from tested.judge.execution import execute_file, filter_files
 from tested.judge.utils import BaseExecutionResult, copy_from_paths_to_path, run_command
 from tested.languages.generation import (
-    custom_evaluator_arguments,
+    custom_oracle_arguments,
     generate_custom_evaluator,
     generate_statement,
 )
 from tested.serialisation import BooleanEvalResult, EvalResult, Value
-from tested.testsuite import ProgrammedEvaluator
+from tested.testsuite import CustomCheckOracle
 from tested.utils import get_identifier
 
 _logger = logging.getLogger(__name__)
@@ -34,13 +33,13 @@ _logger = logging.getLogger(__name__)
 
 def evaluate_programmed(
     bundle: Bundle,
-    evaluator: ProgrammedEvaluator,
+    evaluator: CustomCheckOracle,
     expected: Value,
     actual: Value,
 ) -> Union[BaseExecutionResult, EvalResult]:
     """
     Run the custom evaluation. Concerning structure and execution, the custom
-    evaluator is very similar to the execution of the whole evaluation. It a
+    oracle is very similar to the execution of the whole evaluation. It a
     mini-evaluation if you will.
     """
 
@@ -55,7 +54,7 @@ def evaluate_programmed(
 
 def _evaluate_others(
     bundle: Bundle,
-    evaluator: ProgrammedEvaluator,
+    evaluator: CustomCheckOracle,
     expected: Value,
     actual: Value,
 ) -> BaseExecutionResult:
@@ -65,18 +64,18 @@ def _evaluate_others(
     """
     _logger.debug("Doing evaluation in non-Python mode.")
 
-    # Create a directory for this evaluator. If one exists, delete it first.
+    # Create a directory for this oracle. If one exists, delete it first.
     evaluator_dir_name = evaluator.function.file.stem
     custom_directory_name = f"{get_identifier()}_{evaluator_dir_name}"
-    custom_path = Path(bundle.config.workdir, "evaluators", custom_directory_name)
+    custom_path = Path(bundle.config.workdir, "functions", custom_directory_name)
     if custom_path.exists():
-        _logger.debug("Removing existing directory for custom evaluator.")
+        _logger.debug("Removing existing directory for custom oracle.")
         shutil.rmtree(custom_path, ignore_errors=True)
     custom_path.mkdir(parents=True)
 
     _logger.info("Will do custom evaluation in %s", custom_path)
 
-    # Create a configs bundle for the language of the evaluator.
+    # Create a configs bundle for the language of the oracle.
     eval_bundle = create_bundle(
         bundle.config, bundle.out, bundle.suite, evaluator.language
     )
@@ -98,7 +97,7 @@ def _evaluate_others(
             memory=False,
         )
 
-    # Copy the evaluator
+    # Copy the oracle
     origin_path = Path(bundle.config.resources, evaluator.function.file)
     _logger.debug("Copying %s to %s", origin_path, custom_path)
     shutil.copy2(origin_path, custom_path)
@@ -107,11 +106,11 @@ def _evaluate_others(
     dependencies = eval_bundle.lang_config.initial_dependencies()
     origin = eval_bundle.lang_config.path_to_dependencies()
     copy_from_paths_to_path(origin, dependencies, custom_path)
-    # Include the actual evaluator in the dependencies.
+    # Include the actual oracle in the dependencies.
     dependencies.append(evaluator.function.file.name)
 
-    # Generate the evaluator.
-    _logger.debug("Generating custom evaluator.")
+    # Generate the oracle.
+    _logger.debug("Generating custom oracle.")
     evaluator_name = generate_custom_evaluator(
         eval_bundle,
         destination=custom_path,
@@ -120,17 +119,17 @@ def _evaluate_others(
         actual_value=actual,
     )
     dependencies.append(evaluator_name)
-    _logger.debug("Generated evaluator executor %s", evaluator_name)
+    _logger.debug("Generated oracle executor %s", evaluator_name)
 
     # Do compilation for those configs that require it.
     command, files = eval_bundle.lang_config.compilation(dependencies)
-    _logger.debug("Compiling custom evaluator with command %s", command)
+    _logger.debug("Compiling custom oracle with command %s", command)
     result = run_command(custom_path, None, command)
     if result and result.stderr:
         raise ValueError("Error while compiling specific test case:" + result.stderr)
 
     files = filter_files(files, custom_path)
-    # Execute the custom evaluator.
+    # Execute the custom oracle.
     evaluator_name = Path(evaluator_name).stem
 
     files = eval_bundle.lang_config.filter_dependencies(files, evaluator_name)
@@ -181,17 +180,9 @@ def _catch_output() -> Generator[Tuple[StringIO, StringIO], None, None]:
         sys.stderr = old_stderr
 
 
-@define
-class _EvaluationResult:
-    result: bool
-    readable_expected: Optional[str] = None
-    readable_actual: Optional[str] = None
-    messages: List[ExtendedMessage] = field(factory=list)
-
-
 def _evaluate_python(
     bundle: Bundle,
-    evaluator: ProgrammedEvaluator,
+    oracle: CustomCheckOracle,
     expected: Value,
     actual: Value,
 ) -> EvalResult:
@@ -199,41 +190,41 @@ def _evaluate_python(
     Run an evaluation in Python. While the templates are still used to generate
     code, they are not executed in a separate process, but inside python itself.
     """
-    assert evaluator.language == "python"
+    assert oracle.language == "python"
     _logger.debug("Doing evaluation in Python mode.")
 
-    # Create a configs bundle for the language of the evaluator.
+    # Create a configs bundle for the language of the oracle.
     eval_bundle = create_bundle(
-        bundle.config, bundle.out, bundle.suite, evaluator.language
+        bundle.config, bundle.out, bundle.suite, oracle.language
     )
 
-    # Path to the evaluator.
-    origin_path = Path(bundle.config.resources, evaluator.function.file)
-    # Read evaluator to file.
+    # Path to the oracle.
+    origin_path = Path(bundle.config.resources, oracle.function.file)
+    # Read oracle to file.
     with open(origin_path, "r") as file:
         evaluator_code = file.read()
 
     # We must provide the globals from the "evaluation_utils" to the code.
     # Begin by defining the module.
     utils = types.ModuleType("evaluation_utils")
-    utils.__dict__["EvaluationResult"] = _EvaluationResult
+    utils.__dict__["EvaluationResult"] = BooleanEvalResult
     utils.__dict__["Message"] = ExtendedMessage
 
     # The context in which to execute.
     global_env = {"__tested_test__": utils}
     exec("import sys\n" "sys.modules['evaluation_utils'] = __tested_test__", global_env)
-    # Make the evaluator available.
+    # Make the oracle available.
     exec(evaluator_code, global_env)
 
-    # Call the evaluator.
+    # Call the oracle.
     literal_expected = generate_statement(eval_bundle, expected)
     literal_actual = generate_statement(eval_bundle, actual)
-    arguments = custom_evaluator_arguments(evaluator)
+    arguments = custom_oracle_arguments(oracle)
     literal_arguments = generate_statement(eval_bundle, arguments)
 
     with _catch_output() as (stdout_, stderr_):
         exec(
-            f"__tested_test__result = {evaluator.function.name}("
+            f"__tested_test__result = {oracle.function.name}("
             f"{literal_expected}, {literal_actual}, {literal_arguments})",
             global_env,
         )
@@ -264,9 +255,9 @@ def _evaluate_python(
             )
         )
 
-    result_ = cast(_EvaluationResult | None, global_env["__tested_test__result"])
+    result_ = cast(BooleanEvalResult | None, global_env["__tested_test__result"])
 
-    # If the result is None, the evaluator is broken.
+    # If the result is None, the oracle is broken.
     if result_ is None:
         messages.append(
             ExtendedMessage(
@@ -282,46 +273,11 @@ def _evaluate_python(
         )
         return EvalResult(
             result=Status.INTERNAL_ERROR,
-            readable_expected=None,  # type: ignore
-            readable_actual=None,  # type: ignore
+            readable_expected=None,
+            readable_actual=None,
             messages=messages,
         )
 
-    assert isinstance(result_, _EvaluationResult)
-
-    try:
-        return BooleanEvalResult(
-            result=result_.result,
-            readable_expected=result_.readable_expected,  # type: ignore
-            readable_actual=result_.readable_actual,  # type: ignore
-            messages=messages + result_.messages,
-        ).as_eval_result()
-    except (TypeError, ValueError):
-        # This happens when the messages are not in the correct format. In normal
-        # execution, this is caught when parsing the resulting json, but this does
-        # not happen when using Python, so we do it here.
-        messages.append(
-            ExtendedMessage(
-                description=get_i18n_string("judge.programmed.student"), format="text"
-            )
-        )
-        messages.append(
-            ExtendedMessage(
-                description=get_i18n_string("judge.programmed.invalid"),
-                format="text",
-                permission=Permission.STAFF,
-            )
-        )
-        messages.append(
-            ExtendedMessage(
-                description=traceback.format_exc(),
-                format="code",
-                permission=Permission.STAFF,
-            )
-        )
-        return EvalResult(
-            result=Status.INTERNAL_ERROR,
-            readable_expected=None,  # type: ignore
-            readable_actual=None,  # type: ignore
-            messages=messages,
-        )
+    assert isinstance(result_, BooleanEvalResult)
+    result_.messages.extend(messages)
+    return result_.as_eval_result()

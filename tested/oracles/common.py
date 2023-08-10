@@ -1,20 +1,20 @@
 """
-Evaluators actually compare values to determine the result of a test.
+Oracles compare values to determine the result of a test.
 
-## Implementing an evaluator
+## Implementing oracles
 
-An evaluator is just a function that receives some configuration parameters and
+An oracle is just a function that receives some configuration parameters and
 returns a result.
 
 The following parameters are passed to the function:
 
-- RawEvaluator configs, consisting of:
+- RawOracle configs, consisting of:
   - The global configuration for the run of TESTed
-  - The configuration for the evaluator instance
+  - The configuration for the oracle instance
   - The judge instance
 - The output channel from the test suite.
 - The raw actual output.
-- The maximum time for the evaluation. Simple evaluators can ignore this, but more
+- The maximum time for the oracle. Simple oracles can ignore this, but more
   advanced ones need more time.
 
 For example, such a function looks like this:
@@ -36,45 +36,40 @@ from tested.testsuite import ExceptionOutputChannel, NormalOutputChannel, Output
 
 
 @define
-class EvaluationResult:
-    """Provides the result of an evaluation for a specific output channel."""
+class OracleResult:
+    """
+    Represents the result of applying an oracle to evaluate some result.
+    """
 
     result: StatusMessage  # The result of the evaluation.
-    readable_expected: str
-    """
-    A human-friendly version of what the channel should have been.
-    """
-    readable_actual: str
-    """
-    A human-friendly version (on a best-efforts basis) of what the channel is.
-    """
+    readable_expected: str  # A human-friendly version of what the channel should have been.
+    readable_actual: str  # A human-friendly version (on a best-efforts basis) of what the channel is.
     messages: List[Message] = field(factory=list)
-    is_multiline_string: bool = False
-    """
-    Indicates if the evaluation result is a multiline string
-    """
+    is_multiline_string: bool = (
+        False  # Indicates if the evaluation result is a multiline string.
+    )
 
 
-class EvaluatorConfig(NamedTuple):
+class OracleConfig(NamedTuple):
     bundle: Bundle
     options: Dict[str, Any]
     context_dir: Path
 
 
-RawEvaluator = Callable[[EvaluatorConfig, OutputChannel, str], EvaluationResult]
+RawOracle = Callable[[OracleConfig, OutputChannel, str], OracleResult]
 
-Evaluator = Callable[[OutputChannel, str], EvaluationResult]
+Oracle = Callable[[OutputChannel, str], OracleResult]
 
 
-def _curry_evaluator(
+def _curry_oracle(
     bundle: Bundle,
     context_dir: Path,
-    function: RawEvaluator,
+    function: RawOracle,
     options: Optional[dict] = None,
-) -> Evaluator:
+) -> Oracle:
     if options is None:
         options = dict()
-    config = EvaluatorConfig(bundle, options, context_dir)
+    config = OracleConfig(bundle, options, context_dir)
     # noinspection PyTypeChecker
     return functools.partial(function, config)
 
@@ -92,7 +87,7 @@ def try_outputs(
 
 
 def cleanup_specific_programmed(
-    config: EvaluatorConfig, channel: NormalOutputChannel, actual: EvalResult
+    config: OracleConfig, channel: NormalOutputChannel, actual: EvalResult
 ) -> EvalResult:
     if isinstance(channel, ExceptionOutputChannel):
         lang_config = config.bundle.lang_config

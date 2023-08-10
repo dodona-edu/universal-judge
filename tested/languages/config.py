@@ -289,13 +289,13 @@ class Language(ABC):
 
     def modify_specific_evaluator(self, evaluator: Path):
         """
-        An opportunity to modify the language specific evaluator. By default,
-        this does nothing. If you modify the evaluator, you must overwrite the
-        contents of the evaluator in-place.
+        An opportunity to modify the language specific oracle. By default,
+        this does nothing. If you modify the oracle, you must overwrite the
+        contents of the oracle in-place.
 
         This callback is called before any compilation.
 
-        :param evaluator: Path to the evaluator and path for the modified evaluator.
+        :param evaluator: Path to the oracle and path for the modified oracle.
         """
         pass
 

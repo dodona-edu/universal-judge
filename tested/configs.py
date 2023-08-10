@@ -53,7 +53,7 @@ class Options:
     """
     optimized: bool = True
     """
-    If the custom Python evaluator should be optimized or not.
+    If the Python oracles should be optimized or not.
     """
     compiler_optimizations: bool = False
     """

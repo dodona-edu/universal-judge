@@ -25,7 +25,6 @@ from tested.dodona import (
     StatusMessage,
     Update,
 )
-from tested.evaluators import get_evaluator
 from tested.internationalization import get_i18n_string
 from tested.judge.collector import OutputManager, TestcaseCollector
 from tested.judge.execution import ContextResult
@@ -34,6 +33,7 @@ from tested.languages.generation import (
     generate_statement,
     get_readable_input,
 )
+from tested.oracles import get_oracle
 from tested.testsuite import (
     Context,
     ExceptionOutput,
@@ -103,10 +103,10 @@ def _evaluate_channel(
 
     :return: True if successful, otherwise False.
     """
-    evaluator = get_evaluator(
+    evaluator = get_oracle(
         bundle, context_directory, output, unexpected_status=unexpected_status
     )
-    # Run the evaluator.
+    # Run the oracle.
     evaluation_result = evaluator(output, actual if actual else "")
     status = evaluation_result.result
 
@@ -246,7 +246,7 @@ def evaluate_context_results(
         inlined_files = inlined_files.union(seen)
         t_col = TestcaseCollector(StartTestcase(description=readable_input))
 
-        # Get the evaluators
+        # Get the functions
         output = testcase.output
 
         # Get the values produced by the execution. If there are no values,
@@ -406,7 +406,7 @@ def should_show(test: OutputChannel, channel: Channel) -> bool:
 def guess_expected_value(bundle: Bundle, test: OutputChannel) -> str:
     """
     Try and get the expected value for an output channel. In some cases, such as
-    a programmed or language specific evaluator, there will be no expected value
+    a programmed or language specific oracle, there will be no expected value
     available in the test suite. In that case, we use an empty string.
 
     :param bundle: Configuration bundle.

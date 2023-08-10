@@ -1,18 +1,13 @@
-"""
-RawEvaluator for ignored channels.
-"""
 import functools
 
 from tested.dodona import Status, StatusMessage
-from tested.evaluators.common import EvaluationResult, EvaluatorConfig, try_outputs
-from tested.evaluators.exception import try_as_readable_exception
-from tested.evaluators.value import try_as_readable_value
+from tested.oracles.common import OracleConfig, OracleResult, try_outputs
+from tested.oracles.exception import try_as_readable_exception
+from tested.oracles.value import try_as_readable_value
 from tested.testsuite import IgnoredChannel, OutputChannel
 
 
-def evaluate(
-    config: EvaluatorConfig, channel: OutputChannel, actual: str
-) -> EvaluationResult:
+def evaluate(config: OracleConfig, channel: OutputChannel, actual: str) -> OracleResult:
     assert isinstance(channel, IgnoredChannel)
 
     # If there is something in the channel, try parsing it as
@@ -24,7 +19,7 @@ def evaluate(
     actual, msg = try_outputs(actual, parsers)
     messages = [msg] if msg else []
 
-    return EvaluationResult(
+    return OracleResult(
         result=StatusMessage(enum=Status.CORRECT),
         readable_expected="",
         readable_actual=actual,

@@ -43,9 +43,9 @@ from tested.serialisation import (
 )
 from tested.testsuite import (
     Context,
+    CustomCheckOracle,
     FileUrl,
     MainInput,
-    ProgrammedEvaluator,
     Testcase,
     TextData,
 )
@@ -277,7 +277,7 @@ def generate_execution(
     :param execution_name: The name of the execution module.
 
     :return: The name of the generated file in the given destination and a set
-             of evaluator names that will also be needed.
+             of oracle names that will also be needed.
     """
     prepared_execution = prepare_execution_unit(
         bundle, destination, execution_name, execution_unit
@@ -320,25 +320,25 @@ def generate_selector(
     return selector_filename
 
 
-def custom_evaluator_arguments(evaluator: ProgrammedEvaluator) -> Value:
+def custom_oracle_arguments(oracle: CustomCheckOracle) -> Value:
     return SequenceType(
-        type=BasicSequenceTypes.SEQUENCE, data=evaluator.arguments  # pyright: ignore
+        type=BasicSequenceTypes.SEQUENCE, data=oracle.arguments  # pyright: ignore
     )
 
 
 def generate_custom_evaluator(
     bundle: Bundle,
     destination: Path,
-    evaluator: ProgrammedEvaluator,
+    evaluator: CustomCheckOracle,
     expected_value: Value,
     actual_value: Value,
 ) -> str:
     """
-    Generate the code for running a programmed evaluator.
+    Generate the code for running a programmed oracle.
 
     :param bundle: The configuration bundle.
     :param destination: The folder where the code should be generated.
-    :param evaluator: The evaluator data from the test suite.
+    :param evaluator: The oracle data from the test suite.
     :param expected_value: The preprocessed expected value.
     :param actual_value: The preprocessed actual value.
 
@@ -347,7 +347,7 @@ def generate_custom_evaluator(
     evaluator_name = conventionalize_namespace(
         bundle.lang_config, evaluator.function.file.stem
     )
-    arguments = custom_evaluator_arguments(evaluator)
+    arguments = custom_oracle_arguments(evaluator)
 
     function = PreparedFunctionCall(
         type=FunctionType.FUNCTION,

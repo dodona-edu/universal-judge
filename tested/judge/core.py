@@ -334,10 +334,10 @@ def _generate_files(
                 execution_unit=unit,
                 execution_name=exec_name,
             )
-            # Copy evaluators to the directory.
+            # Copy functions to the directory.
             for evaluator in evaluators:
                 source = Path(bundle.config.resources) / evaluator
-                _logger.debug("Copying evaluator from %s to %s", source, common_dir)
+                _logger.debug("Copying oracle from %s to %s", source, common_dir)
                 shutil.copy2(source, common_dir)
             dependencies.extend(evaluators)
             dependencies.append(generated)
