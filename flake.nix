@@ -6,10 +6,7 @@
     flake-utils.url = "github:numtide/flake-utils";
     devshell = {
       url = "github:numtide/devshell";
-      inputs = {
-        flake-utils.follows = "flake-utils";
-        nixpkgs.follows = "nixpkgs";
-      };
+      inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
@@ -61,15 +58,36 @@
                maintainers = [ ];
              };
            };
+        marko = python.pkgs.buildPythonPackage rec {
+            pname = "marko";
+            version = "2.0.0";
+            format = "pyproject";
+            
+            src = pkgs.fetchPypi {
+                inherit pname version;
+                hash = "sha256-78JkYIkyUME3UQJa6SAuuxOJiHA2/A35AJxquHVGcDA=";
+            };
+            
+            nativeBuildInputs = [
+                python.pkgs.pdm-pep517 python.pkgs.pdm-backend
+            ];
+           
+            doCheck = false;
+           
+            meta = with pkgs.lib; {
+                homepage = "https://github.com/frostming/marko";
+                license = licenses.mit;
+                maintainers = [ ];
+            };
+        };
         core-packages = ps: with ps; [
             psutil
-            mako
             my-pydantic
             jsonschema
             typing-inspect
             pyyaml
             pygments
-            python-i18n 
+            python-i18n
         ];
         python-env = python.withPackages(ps: (core-packages ps) ++ [
             ps.pylint
@@ -80,6 +98,8 @@
             ps.setuptools
             ps.isort
             ps.black
+            ps.jinja2
+            marko
         ]);
         core-deps = [
             (python.withPackages(ps: (core-packages ps) ++ [ps.pylint]))
@@ -117,7 +137,7 @@
           default = tested;
           tested = pkgs.devshell.mkShell {
             name = "TESTed";
-            packages = [python-env pkgs.nodePackages.pyright] ++ haskell-deps ++ node-deps ++ bash-deps ++ c-deps ++ java-deps ++ kotlin-deps ++ csharp-deps;
+            packages = [python-env pkgs.nodePackages.pyright pkgs.pipenv] ++ haskell-deps ++ node-deps ++ bash-deps ++ c-deps ++ java-deps ++ kotlin-deps ++ csharp-deps;
             devshell.startup.link.text = ''
               mkdir -p "$PRJ_DATA_DIR/current"
               ln -sfn "${python-env}/${python-env.sitePackages}" "$PRJ_DATA_DIR/current/python-packages"

@@ -52,7 +52,6 @@ from tested.serialisation import (
     ObjectKeyValuePair,
     ObjectType,
     SequenceType,
-    SpecialNumbers,
     Statement,
     Value,
     VariableType,

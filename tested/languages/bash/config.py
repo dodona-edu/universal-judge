@@ -5,7 +5,12 @@ from typing import TYPE_CHECKING, Dict, List, Mapping, Set, Tuple
 from tested.datatypes import AdvancedStringTypes, AllTypes, BasicStringTypes
 from tested.dodona import AnnotateCode, Message
 from tested.features import Construct, TypeSupport
-from tested.languages.config import CallbackResult, Command, Language
+from tested.languages.config import (
+    CallbackResult,
+    Command,
+    Language,
+    TypeDeclarationMetadata,
+)
 from tested.languages.conventionalize import (
     EXECUTION_PREFIX,
     Conventionable,
@@ -92,3 +97,12 @@ class Bash(Language):
         from tested.languages.bash import generators
 
         return generators.convert_encoder(values)
+
+    def get_declaration_metadata(self) -> TypeDeclarationMetadata:
+        return {
+            "names": {  # type: ignore
+                "text": "str",
+                "char": "str",
+            },
+            "prompt": "$",
+        }

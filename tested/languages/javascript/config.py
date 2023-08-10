@@ -6,7 +6,12 @@ from typing import TYPE_CHECKING, Dict, List, Mapping, Optional, Set, Tuple
 from tested.datatypes import AllTypes, BasicStringTypes, ExpressionTypes
 from tested.dodona import AnnotateCode, Message
 from tested.features import Construct, TypeSupport
-from tested.languages.config import CallbackResult, Command, Language
+from tested.languages.config import (
+    CallbackResult,
+    Command,
+    Language,
+    TypeDeclarationMetadata,
+)
 from tested.languages.conventionalize import (
     EXECUTION_PREFIX,
     Conventionable,
@@ -200,3 +205,36 @@ class JavaScript(Language):
         from tested.languages.javascript import generators
 
         return generators.convert_encoder(values)
+
+    def get_declaration_metadata(self) -> TypeDeclarationMetadata:
+        return {
+            "names": {  # type: ignore
+                "integer": "number",
+                "real": "number",
+                "char": "string",
+                "text": "string",
+                "boolean": "boolean",
+                "sequence": "array",
+                "set": "set",
+                "map": "object",
+                "nothing": "null",
+                "undefined": "undefined",
+                "int8": "number",
+                "uint8": "number",
+                "int16": "number",
+                "uint16": "number",
+                "int32": "number",
+                "uint32": "number",
+                "int64": "number",
+                "uint64": "number",
+                "bigint": "number",
+                "single_precision": "number",
+                "double_precision": "number",
+                "double_extended": "number",
+                "fixed_precision": "number",
+                "array": "array",
+                "list": "array",
+                "any": "object",
+            },
+            "nested": ("<", ">"),
+        }

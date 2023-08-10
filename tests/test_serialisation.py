@@ -40,6 +40,7 @@ from tested.judge.execution import execute_file, filter_files
 from tested.judge.utils import BaseExecutionResult, copy_from_paths_to_path
 from tested.languages.conventionalize import conventionalize_namespace
 from tested.serialisation import (
+    Assignment,
     BooleanType,
     NothingType,
     NumberType,

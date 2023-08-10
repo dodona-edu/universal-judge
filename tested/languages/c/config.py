@@ -6,7 +6,12 @@ from typing import TYPE_CHECKING, Dict, List, Mapping, Set, Tuple
 from tested.datatypes import AllTypes
 from tested.dodona import AnnotateCode, Message
 from tested.features import Construct, TypeSupport
-from tested.languages.config import CallbackResult, Command, Language
+from tested.languages.config import (
+    CallbackResult,
+    Command,
+    Language,
+    TypeDeclarationMetadata,
+)
 from tested.languages.conventionalize import (
     EXECUTION_PREFIX,
     Conventionable,
@@ -153,3 +158,28 @@ class C(Language):
         from tested.languages.c import generators
 
         return generators.convert_encoder(values)
+
+    def get_declaration_metadata(self) -> TypeDeclarationMetadata:
+        return {
+            "names": {  # type: ignore
+                "integer": "int",
+                "real": "double",
+                "char": "char",
+                "text": "char*",
+                "boolean": "bool",
+                "nothing": "void",
+                "undefined": "void",
+                "int8": "signed char",
+                "uint8": "unsigned char",
+                "int16": "short",
+                "uint16": "unsigned short",
+                "int32": "int",
+                "uint32": "unsigned int",
+                "int64": "long",
+                "uint64": "unsigned long",
+                "bigint": "long long",
+                "single_precision": "float",
+                "double_precision": "double",
+                "any": "void*",
+            }
+        }
