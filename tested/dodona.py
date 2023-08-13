@@ -9,13 +9,12 @@ When running the module from the command line, a json-schema of the structure wi
 be printed to stdout. This might be useful to test this implementation against
 the authoritative json-schema, provided by Dodona.
 """
-import dataclasses
 import json
 from enum import StrEnum, auto, unique
 from typing import IO, Literal, Optional, Union
 
-from pydantic import BaseModel
-from pydantic.dataclasses import dataclass
+from attrs import define, evolve
+from cattrs.preconf.json import make_converter
 
 
 @unique
@@ -27,7 +26,7 @@ class Permission(StrEnum):
     ZEUS = auto()
 
 
-@dataclass
+@define
 class ExtendedMessage:
     description: str
     format: str = "text"
@@ -62,7 +61,7 @@ class Status(StrEnum):
     NOT_EXECUTED = "wrong"
 
 
-@dataclass
+@define
 class StatusMessage:
     """Describes the outcome of the judgement."""
 
@@ -70,14 +69,14 @@ class StatusMessage:
     human: Optional[str] = None
 
 
-@dataclass
+@define
 class StartJudgment:
     """Start on a new judgement."""
 
     command: Literal["start-judgement"] = "start-judgement"
 
 
-@dataclass
+@define
 class StartTab:
     """
     Start on a new tab with a given title. Hidden if all contexts are accepted
@@ -90,7 +89,7 @@ class StartTab:
     permission: Optional[Permission] = None
 
 
-@dataclass
+@define
 class StartContext:
     """Start on a new context."""
 
@@ -98,7 +97,7 @@ class StartContext:
     command: Literal["start-context"] = "start-context"
 
 
-@dataclass
+@define
 class StartTestcase:
     """Start on a new testcase with a given description"""
 
@@ -106,7 +105,7 @@ class StartTestcase:
     command: Literal["start-testcase"] = "start-testcase"
 
 
-@dataclass
+@define
 class StartTest:
     """Start on a new test with a given channel answer."""
 
@@ -116,7 +115,7 @@ class StartTest:
     command: Literal["start-test"] = "start-test"
 
 
-@dataclass
+@define
 class EscalateStatus:
     """Escalate a status for the worse."""
 
@@ -124,7 +123,7 @@ class EscalateStatus:
     command: Literal["escalate-status"] = "escalate-status"
 
 
-@dataclass
+@define
 class AppendMessage:
     """Append a message to the open object."""
 
@@ -132,7 +131,7 @@ class AppendMessage:
     command: Literal["append-message"] = "append-message"
 
 
-@dataclass
+@define
 class AnnotateCode:
     """Annotate a piece of user_code."""
 
@@ -146,7 +145,7 @@ class AnnotateCode:
     command: Literal["annotate-code"] = "annotate-code"
 
 
-@dataclass
+@define
 class CloseTest:
     """
     Close the current test. Accepted iff status is correct, but you can overwrite
@@ -159,7 +158,7 @@ class CloseTest:
     command: Literal["close-test"] = "close-test"
 
 
-@dataclass
+@define
 class CloseTestcase:
     """
     Close the current testcase. Accepted if all tests are accepted, but you can
@@ -170,7 +169,7 @@ class CloseTestcase:
     command: Literal["close-testcase"] = "close-testcase"
 
 
-@dataclass
+@define
 class CloseContext:
     """
     Close the current context. Accepted if all testcases are accepted, but you can
@@ -181,7 +180,7 @@ class CloseContext:
     command: Literal["close-context"] = "close-context"
 
 
-@dataclass
+@define
 class CloseTab:
     """Close the current tab."""
 
@@ -189,7 +188,7 @@ class CloseTab:
     command: Literal["close-tab"] = "close-tab"
 
 
-@dataclass
+@define
 class CloseJudgment:
     """
     Close the current judgement. Accepted iff all contexts are accepted, status is
@@ -233,21 +232,10 @@ def close_for(
     return _mapping[type_]
 
 
-class _DodonaUpdate(BaseModel):
-    __root__: Update
-
-
 def _clean_dictionary(d):
     if not isinstance(d, dict):
         return d
     return {k: _clean_dictionary(v) for k, v in d.items() if v is not None}
-
-
-class _EnhancedJSONEncoder(json.JSONEncoder):
-    def default(self, o):
-        if dataclasses.is_dataclass(o):
-            return _clean_dictionary(dataclasses.asdict(o))
-        return super().default(o)
 
 
 def _maybe_shorten(text: str, max_chars: int) -> str:
@@ -275,20 +263,23 @@ def limit_size(update: Update, size: int) -> Update:
     if isinstance(update, AppendMessage):
         if isinstance(update.message, ExtendedMessage):
             shorter = _maybe_shorten(update.message.description, size)
-            new_message = dataclasses.replace(update.message, description=shorter)
+            new_message = evolve(update.message, description=shorter)
         else:
             assert isinstance(update.message, str)
             new_message = _maybe_shorten(update.message, size)
-        update = dataclasses.replace(update, message=new_message)
+        update = evolve(update, message=new_message)
     if isinstance(update, CloseTest):
         new_message = _maybe_shorten(update.generated, size)
-        status = dataclasses.replace(update.status, enum=Status.OUTPUT_LIMIT_EXCEEDED)
-        update = dataclasses.replace(update, generated=new_message, status=status)
+        status = evolve(update.status, enum=Status.OUTPUT_LIMIT_EXCEEDED)
+        update = evolve(update, generated=new_message, status=status)
     if isinstance(update, AnnotateCode):
         new_text = _maybe_shorten(update.text, size)
-        update = dataclasses.replace(update, text=new_text)
+        update = evolve(update, text=new_text)
 
     return update
+
+
+dodona_converter = make_converter()
 
 
 def report_update(to: IO, update: Update):
@@ -298,12 +289,8 @@ def report_update(to: IO, update: Update):
     :param to: Where to write to. It will not be closed.
     :param update: The update to write.
     """
-    json.dump(update, to, cls=_EnhancedJSONEncoder)
-    # noinspection PyUnreachableCode
+    as_dict = dodona_converter.unstructure(update)
+    cleaned = _clean_dictionary(as_dict)
+    json.dump(cleaned, to)
     if __debug__:
         print("", file=to)
-
-
-if __name__ == "__main__":
-    sc = _DodonaUpdate.schema()
-    print(sc)

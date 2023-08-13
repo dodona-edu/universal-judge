@@ -17,19 +17,16 @@ command line. The schema will be printed to stdout. This can be used to generate
 classes for implementations in other configs.
 """
 import copy
-import json
 import logging
 import math
 import operator
-from dataclasses import field
 from decimal import Decimal
 from enum import StrEnum, auto, unique
 from functools import reduce
+from types import NoneType
 from typing import Any, Iterable, List, Literal, Optional, Tuple, Union, cast
 
-from pydantic import BaseModel, Field, root_validator
-from pydantic.dataclasses import dataclass
-from pydantic.typing import NoneType
+from attrs import define, field, resolve_types, validators
 
 from tested.datatypes import (
     AdvancedNumericTypes,
@@ -54,7 +51,8 @@ from tested.datatypes import (
 )
 from tested.dodona import Message, Status
 from tested.features import Construct, FeatureSet, WithFeatures, combine_features
-from tested.utils import flatten, get_args, sorted_no_duplicates
+from tested.parsing import fallback_field, get_converter, parse_json_value
+from tested.utils import flatten, sorted_no_duplicates
 
 logger = logging.getLogger(__name__)
 
@@ -102,7 +100,6 @@ def _get_combined_types(types: Iterable[WrappedAllTypes]) -> WrappedAllTypes:
         else:
             type_dict[data_type] = None
     if len(type_dict) == 1:
-        # noinspection PyTypeChecker
         key_type, sub_type = next(iter(type_dict.items()))
         if sub_type is None:
             return key_type
@@ -153,11 +150,27 @@ class SpecialNumbers(StrEnum):
     NEG_INFINITY = "-inf"
 
 
-@dataclass
+@define
 class NumberType(WithFeatures, WithFunctions):
-    type: NumericTypes
-    data: Union[SpecialNumbers, Decimal, int, float]
+    type: NumericTypes = field(validator=validators.instance_of(NumericTypes))
+    data: Union[SpecialNumbers, int, float, Decimal] = field(
+        validator=validators.instance_of(Union[SpecialNumbers, int, float, Decimal])
+    )
     diagnostic: Literal[None] = None  # Unused in this type.
+
+    def __attrs_post_init__(self):
+        if (
+            isinstance(self.data, SpecialNumbers)
+            and resolve_to_basic(self.type) == BasicNumericTypes.INTEGER
+        ):
+            raise ValueError(
+                f"SpecialNumber '{self.data}' is only supported for " f"real numbers."
+            )
+
+        if resolve_to_basic(self.type) == BasicNumericTypes.INTEGER and isinstance(
+            self.data, Decimal
+        ):
+            self.data = self.data.to_integral_value()
 
     def get_used_features(self) -> FeatureSet:
         return FeatureSet(set(), {self.type}, _get_self_nested_type(self.type))
@@ -165,29 +178,11 @@ class NumberType(WithFeatures, WithFunctions):
     def get_functions(self) -> Iterable["FunctionCall"]:
         return []
 
-    # noinspection PyMethodParameters
-    @root_validator
-    def check_number_types(cls, values):
-        if (
-            isinstance(values.get("data"), SpecialNumbers)
-            and resolve_to_basic(values.get("type")) == BasicNumericTypes.INTEGER
-        ):
-            raise ValueError(
-                f"SpecialNumber '{values.get('data')}' is only supported for "
-                f"real numbers."
-            )
 
-        type_ = values.get("type")
-        if type_ and resolve_to_basic(type_) == BasicNumericTypes.INTEGER:
-            values["data"] = values["data"].to_integral_value()
-
-        return values
-
-
-@dataclass
+@define
 class StringType(WithFeatures, WithFunctions):
-    type: StringTypes
-    data: str
+    type: StringTypes = field(validator=validators.instance_of(StringTypes))
+    data: str = field(validator=validators.instance_of(str))
 
     # Optional string representation of the type of the value, if the type is
     # "unknown". TESTed will not do anything with this, as the actual type is
@@ -202,10 +197,10 @@ class StringType(WithFeatures, WithFunctions):
         return []
 
 
-@dataclass
+@define
 class BooleanType(WithFeatures, WithFunctions):
-    type: BooleanTypes
-    data: bool
+    type: BooleanTypes = field(validator=validators.instance_of(BooleanTypes))
+    data: bool = field(validator=validators.instance_of(bool))
     diagnostic: Literal[None] = None  # Unused in this type.
 
     def get_used_features(self) -> FeatureSet:
@@ -215,9 +210,9 @@ class BooleanType(WithFeatures, WithFunctions):
         return []
 
 
-@dataclass
+@define
 class SequenceType(WithFeatures, WithFunctions):
-    type: SequenceTypes
+    type: SequenceTypes = field(validator=validators.instance_of(SequenceTypes))
     data: List["Expression"]
     diagnostic: Literal[None] = None  # Unused in this type.
 
@@ -251,7 +246,7 @@ class SequenceType(WithFeatures, WithFunctions):
         return flatten(x.get_functions() for x in self.data)
 
 
-@dataclass
+@define
 class ObjectKeyValuePair(WithFeatures, WithFunctions):
     key: "Expression"
     value: "Expression"
@@ -278,9 +273,9 @@ class ObjectKeyValuePair(WithFeatures, WithFunctions):
         return self.value.get_functions()
 
 
-@dataclass
+@define
 class ObjectType(WithFeatures, WithFunctions):
-    type: ObjectTypes
+    type: ObjectTypes = field(validator=validators.instance_of(ObjectTypes))
     data: List[ObjectKeyValuePair]
     diagnostic: Literal[None] = None  # Unused in this type.
 
@@ -314,9 +309,12 @@ class ObjectType(WithFeatures, WithFunctions):
         )
 
 
-@dataclass
+@define
 class NothingType(WithFeatures, WithFunctions):
-    type: NothingTypes = BasicNothingTypes.NOTHING
+    type: NothingTypes = field(
+        default=BasicNothingTypes.NOTHING,
+        validator=validators.instance_of(NothingTypes),  # type: ignore
+    )
     data: Literal[None] = None
     diagnostic: Literal[None] = None  # Unused in this type.
 
@@ -344,19 +342,6 @@ class Identifier(str, WithFeatures, WithFunctions):
     def get_functions(self) -> Iterable["FunctionCall"]:
         return []
 
-    @classmethod
-    def __get_validators__(cls):
-        # one or more validators may be yielded which will be called in the
-        # order to validate the input, each validator will receive as an input
-        # the value returned from the previous validator
-        yield cls.validate
-
-    @classmethod
-    def validate(cls, v):
-        if not isinstance(v, str):
-            raise TypeError("string required")
-        return Identifier(v)
-
 
 @unique
 class FunctionType(StrEnum):
@@ -378,7 +363,7 @@ class FunctionType(StrEnum):
     """
 
 
-@dataclass
+@define
 class NamedArgument(WithFeatures, WithFunctions):
     """Represents a named argument for a function."""
 
@@ -396,7 +381,7 @@ class NamedArgument(WithFeatures, WithFunctions):
         return self.value.get_functions()
 
 
-@dataclass
+@define
 class FunctionCall(WithFeatures, WithFunctions):
     """
     Represents a function expression.
@@ -405,16 +390,11 @@ class FunctionCall(WithFeatures, WithFunctions):
     type: FunctionType
     name: str
     namespace: Optional["Expression"] = None
-    arguments: List[Union["Expression", NamedArgument]] = field(default_factory=list)
+    arguments: List[Union[NamedArgument, "Expression"]] = field(factory=list)
 
-    # noinspection PyMethodParameters
-    @root_validator
-    def properties_have_no_args(cls, values):
-        type_ = values.get("type")
-        args = values.get("args")
-        if type_ == FunctionType.PROPERTY and args:
+    def __attrs_post_init__(self):
+        if self.type == FunctionType.PROPERTY and self.arguments:
             raise ValueError("You cannot have arguments for a property!")
-        return values
 
     def get_used_features(self) -> FeatureSet:
         if self.type == FunctionType.PROPERTY and self.namespace is None:
@@ -452,16 +432,16 @@ class FunctionCall(WithFeatures, WithFunctions):
         )
 
 
-@dataclass
+@define
 class VariableType:
     data: str
     type: Literal["custom"] = "custom"
 
 
-Expression = Union[Identifier, FunctionCall, Value]
+Expression = Union[Identifier, Value, FunctionCall]
 
 
-@dataclass
+@define
 class Assignment(WithFeatures, WithFunctions):
     """
     Assigns the return value of a function to a variable. Because the expression
@@ -498,11 +478,11 @@ class Assignment(WithFeatures, WithFunctions):
 Statement = Union[Assignment, Expression]
 
 # Update the forward references, which fixes the schema generation.
-ObjectType.__pydantic_model__.update_forward_refs()  # type: ignore
-SequenceType.__pydantic_model__.update_forward_refs()  # type: ignore
-NamedArgument.__pydantic_model__.update_forward_refs()  # type: ignore
-FunctionCall.__pydantic_model__.update_forward_refs()  # type: ignore
-ObjectKeyValuePair.__pydantic_model__.update_forward_refs()  # type: ignore
+resolve_types(ObjectType)
+resolve_types(SequenceType)
+resolve_types(NamedArgument)
+resolve_types(FunctionCall)
+resolve_types(ObjectKeyValuePair)
 
 
 def as_basic_type(value: Value) -> Value:
@@ -513,20 +493,17 @@ def as_basic_type(value: Value) -> Value:
     return cp
 
 
-class _SerialisationSchema(BaseModel):
-    """The schema for serialising data."""
-
-    __root__: Value
-
-
 def generate_schema():
     """
     Generate a json schema for the serialisation type. It will be printed on stdout.
     """
-    sc = _SerialisationSchema.schema()
-    sc["$id"] = "tested/serialisation"
-    sc["$schema"] = "https://json-schema.org/schema#"
-    print(json.dumps(sc, indent=2))
+    # converter = make_converter()
+    #
+    # sc = _SerialisationSchema.model_json_schema()
+    # sc["$id"] = "tested/serialisation"
+    # sc["$schema"] = "https://json-schema.org/schema#"
+    # print(json.dumps(sc, indent=2))
+    pass
 
 
 def parse_value(value: str) -> Value:
@@ -538,22 +515,8 @@ def parse_value(value: str) -> Value:
     :param value: The json to be parsed.
     :return: The parsed data.
     """
-    try:
-        parsed_json = json.loads(value)
-    except Exception as e:
-        raise ValueError(f"Could not parse {value} as valid json.", e)
 
-    # We try each value until we find one that works, or we throw an error.
-    errors = []
-    for clazz in get_args(Value):
-        try:
-            return clazz(**parsed_json)
-        except (TypeError, ValueError) as e:
-            errors.append(e)
-
-    logger.debug(f"Could not parse value, errors are {errors}. Could be normal!")
-
-    raise TypeError(f"Could not find valid type for {value}.")
+    return parse_json_value(value)
 
 
 class PrintingDecimal:
@@ -728,30 +691,32 @@ def to_python_comparable(value: Optional[Value]) -> Any:
     raise AssertionError(f"Unknown value type: {value}")
 
 
-class EvalResult(BaseModel):
+@fallback_field(
+    get_converter(),
+    {"readableExpected": "readable_expected", "readableActual": "readable_actual"},
+)
+@define
+class EvalResult:
     result: Status
-    readable_expected: Optional[str] = Field(None, alias="readableExpected")
-    readable_actual: Optional[str] = Field(None, alias="readableActual")
-    messages: List[Message] = Field(default_factory=list)
-
-    class Config:
-        # Allow both camel case and snake case fields
-        allow_population_by_field_name = True
+    readable_expected: Optional[str] = None
+    readable_actual: Optional[str] = None
+    messages: List[Message] = field(factory=list)
 
 
-class BooleanEvalResult(BaseModel):
+@fallback_field(
+    get_converter(),
+    {"readableExpected": "readable_expected", "readableActual": "readable_actual"},
+)
+@define
+class BooleanEvalResult:
     """
     Allows a boolean result.
     """
 
-    result: Status | bool
-    readable_expected: Optional[str] = Field(None, alias="readableExpected")
-    readable_actual: Optional[str] = Field(None, alias="readableActual")
-    messages: List[Message] = Field(default_factory=list)
-
-    class Config:
-        # Allow both camel case and snake case fields
-        allow_population_by_field_name = True
+    result: Union[bool, Status]
+    readable_expected: Optional[str] = None
+    readable_actual: Optional[str] = None
+    messages: List[Message] = field(factory=list)
 
     def as_eval_result(self) -> EvalResult:
         if isinstance(self.result, Status):
@@ -760,20 +725,20 @@ class BooleanEvalResult(BaseModel):
             status = Status.CORRECT if self.result else Status.WRONG
         return EvalResult(
             result=status,
-            readable_expected=self.readable_expected,  # type: ignore
-            readable_actual=self.readable_actual,  # type: ignore
+            readable_expected=self.readable_expected,
+            readable_actual=self.readable_actual,
             messages=self.messages,
         )
 
 
-@dataclass
+@define
 class ExceptionValue:
     """An exception that was thrown while executing the user context."""
 
     message: str
     type: str = ""
     stacktrace: str = ""
-    additional_message_keys: List[str] = field(default_factory=list)
+    additional_message_keys: List[str] = field(factory=list)
 
     def readable(self, omit_type) -> str:
         if self.type and not omit_type:

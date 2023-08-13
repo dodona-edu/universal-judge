@@ -23,11 +23,10 @@ For example, such a function looks like this:
         pass
 """
 import functools
-from dataclasses import field
 from pathlib import Path
 from typing import Any, Callable, Dict, List, NamedTuple, Optional, Tuple
 
-from pydantic.dataclasses import dataclass
+from attrs import define, field
 
 from tested.configs import Bundle
 from tested.dodona import Message, Status, StatusMessage
@@ -36,7 +35,7 @@ from tested.serialisation import EvalResult
 from tested.testsuite import ExceptionOutputChannel, NormalOutputChannel, OutputChannel
 
 
-@dataclass
+@define
 class EvaluationResult:
     """Provides the result of an evaluation for a specific output channel."""
 
@@ -49,7 +48,7 @@ class EvaluationResult:
     """
     A human-friendly version (on a best-efforts basis) of what the channel is.
     """
-    messages: List[Message] = field(default_factory=list)
+    messages: List[Message] = field(factory=list)
     is_multiline_string: bool = False
     """
     Indicates if the evaluation result is a multiline string

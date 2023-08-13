@@ -36,53 +36,33 @@
             maintainers = [];
           };
         };
-        my-pydantic = python.pkgs.buildPythonPackage rec {
-             pname = "pydantic";
-             version = "1.9.2";
-             format = "setuptools";
-
-             src = pkgs.fetchPypi {
-               inherit pname version;
-               hash = "sha256-jLC8UJv7cTBdelnQAWPV+fxFMPCIHqMsdP9PdMhfPT0=";
-             };
-
-             propagatedBuildInputs = [
-                python.pkgs.typing-extensions
-             ];
-
-             doCheck = false;
-
-             meta = with pkgs.lib; {
-               homepage = "https://github.com/pydantic/pydantic/";
-               license = licenses.mit;
-               maintainers = [ ];
-             };
-           };
         marko = python.pkgs.buildPythonPackage rec {
-            pname = "marko";
-            version = "2.0.0";
-            format = "pyproject";
-            
-            src = pkgs.fetchPypi {
-                inherit pname version;
-                hash = "sha256-78JkYIkyUME3UQJa6SAuuxOJiHA2/A35AJxquHVGcDA=";
-            };
-            
-            nativeBuildInputs = [
-                python.pkgs.pdm-pep517 python.pkgs.pdm-backend
-            ];
+          pname = "marko";
+          version = "2.0.0";
+          format = "pyproject";
            
-            doCheck = false;
+          src = pkgs.fetchPypi {
+            inherit pname version;
+            hash = "sha256-78JkYIkyUME3UQJa6SAuuxOJiHA2/A35AJxquHVGcDA=";
+          };
+            
+          nativeBuildInputs = [
+            python.pkgs.pdm-pep517 python.pkgs.pdm-backend
+          ];
            
-            meta = with pkgs.lib; {
-                homepage = "https://github.com/frostming/marko";
-                license = licenses.mit;
-                maintainers = [ ];
-            };
+          doCheck = false;
+           
+          meta = with pkgs.lib; {
+            homepage = "https://github.com/frostming/marko";
+            license = licenses.mit;
+            maintainers = [ ];
+          };
         };
         core-packages = ps: with ps; [
             psutil
-            my-pydantic
+            pydantic
+            attrs
+            cattrs
             jsonschema
             typing-inspect
             pyyaml

@@ -13,6 +13,9 @@ ij_smart_tabs = false
 ij_visual_guides = 84
 ij_wrap_on_typing = false
 
+[*.nix]
+indent_size = 2
+
 [{*.json,*.yaml,*.yml}]
 indent_size = 2
 ij_json_keep_blank_lines_in_code = 0

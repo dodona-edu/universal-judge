@@ -12,11 +12,12 @@ from tested.datatypes import (
     BasicTypes,
     SimpleTypes,
 )
-from tested.dodona import ExtendedMessage, Permission, Status, StatusMessage
+from tested.dodona import ExtendedMessage, Message, Permission, Status, StatusMessage
 from tested.evaluators.common import EvaluationResult, EvaluatorConfig
 from tested.features import TypeSupport, fallback_type_support_map
 from tested.internationalization import get_i18n_string
 from tested.languages.generation import generate_statement
+from tested.parsing import get_converter
 from tested.serialisation import (
     ObjectKeyValuePair,
     ObjectType,
@@ -40,7 +41,7 @@ logger = logging.getLogger(__name__)
 
 def try_as_readable_value(
     bundle: Bundle, value: str
-) -> Tuple[Optional[str], Optional[ExtendedMessage]]:
+) -> Tuple[Optional[str], Optional[Message]]:
     try:
         actual = parse_value(value)
     except (ValueError, TypeError):
@@ -244,9 +245,10 @@ def evaluate(
 
     # Try parsing the value as an EvaluationResult.
     # This is the result of a custom evaluator.
+    # noinspection PyBroadException
     try:
-        evaluation_result = EvaluationResult.__pydantic_model__.parse_raw(actual_str)  # type: ignore
-    except (TypeError, ValueError):
+        evaluation_result = get_converter().loads(actual_str, EvaluationResult)
+    except Exception:
         pass
     else:
         return evaluation_result

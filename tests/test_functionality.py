@@ -766,40 +766,6 @@ def test_named_parameters_not_supported(language, tmp_path: Path, pytestconfig):
     assert updates.find_status_enum() == ["internal error"]
 
 
-@pytest.mark.parametrize("language", ALL_LANGUAGES)
-def test_hide_expected_correct(language: str, tmp_path: Path, pytestconfig):
-    conf = configuration(
-        pytestconfig, "echo", language, tmp_path, "one-hide-expected.tson", "correct"
-    )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["correct"]
-    assert (
-        len(list(filter(lambda x: bool(x["expected"]), updates.find_all("start-test"))))
-        == 1
-    )
-
-
-@pytest.mark.parametrize("language", ALL_LANGUAGES)
-def test_hide_expected_wrong(language: str, tmp_path: Path, pytestconfig):
-    conf = configuration(
-        pytestconfig, "echo", language, tmp_path, "one-hide-expected.tson", "wrong"
-    )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["wrong"]
-    assert (
-        len(
-            list(
-                filter(
-                    lambda x: not bool(x["expected"]), updates.find_all("start-test")
-                )
-            )
-        )
-        == 1
-    )
-
-
 def test_javascript_exception_correct(tmp_path: Path, pytestconfig):
     conf = configuration(
         pytestconfig,

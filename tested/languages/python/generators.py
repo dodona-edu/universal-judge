@@ -1,5 +1,5 @@
 import json
-from typing import List
+from typing import List, Union
 
 from tested.datatypes import (
     AdvancedNumericTypes,
@@ -38,7 +38,7 @@ from tested.testsuite import MainInput
 
 
 def convert_arguments(
-    arguments: List[Expression | NamedArgument], with_namespace=False
+    arguments: List[NamedArgument | Expression], with_namespace=False
 ) -> str:
     results = []
     for arg in arguments:
@@ -53,7 +53,7 @@ def convert_value(value: Value) -> str:
     # Handle some advanced types.
     if value.type == AdvancedSequenceTypes.TUPLE:
         assert isinstance(value, SequenceType)
-        return f"({convert_arguments(value.data)})"
+        return f"({convert_arguments(value.data)})"  # pyright: ignore
     elif value.type in (
         AdvancedNumericTypes.DOUBLE_EXTENDED,
         AdvancedNumericTypes.FIXED_PRECISION,
@@ -87,10 +87,10 @@ def convert_value(value: Value) -> str:
         return "None"
     elif value.type == BasicSequenceTypes.SEQUENCE:
         assert isinstance(value, SequenceType)
-        return f"[{convert_arguments(value.data)}]"
+        return f"[{convert_arguments(value.data)}]"  # pyright: ignore
     elif value.type == BasicSequenceTypes.SET:
         assert isinstance(value, SequenceType)
-        return f"{{{convert_arguments(value.data)}}}"
+        return f"{{{convert_arguments(value.data)}}}"  # pyright: ignore
     elif value.type == BasicObjectTypes.MAP:
         assert isinstance(value, ObjectType)
         result = "{"
@@ -117,7 +117,7 @@ def convert_function_call(function: FunctionCall, with_namespace=False) -> str:
         result += convert_statement(function.namespace, with_namespace) + "."
     result += function.name
     if function.type != FunctionType.PROPERTY:
-        result += f"({convert_arguments(function.arguments, with_namespace)})"
+        result += f"({convert_arguments(function.arguments, with_namespace)})"  # pyright: ignore
     return result
 
 

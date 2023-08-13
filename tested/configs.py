@@ -1,16 +1,13 @@
 """
 Module for handling and bundling various configuration options for TESTed.
 """
-import dataclasses
-import json
 import logging
-from dataclasses import field
 from pathlib import Path
 from typing import IO, TYPE_CHECKING, Any, Dict, Optional, Tuple
 
-from pydantic import BaseModel, root_validator
-from pydantic.dataclasses import dataclass
+from attrs import define, evolve, field
 
+from tested.parsing import fallback_field, get_converter
 from tested.testsuite import ExecutionMode, Suite
 from tested.utils import consume_shebang, get_identifier, smart_close
 
@@ -21,7 +18,7 @@ if TYPE_CHECKING:
 _logger = logging.getLogger(__name__)
 
 
-@dataclass(frozen=True)
+@define(frozen=True)
 class Options:
     """
     TESTed-specific options. Putting these options in the exercise config allows
@@ -44,7 +41,7 @@ class Options:
     fails. If nothing is given, the language-dependent default is used. If a boolean
     is given, this value is used, regardless of the language default.
     """
-    language: Dict[str, Dict[str, Any]] = field(default_factory=dict)
+    language: Dict[str, Dict[str, Any]] = field(factory=dict)
     """
     Language-specific options for the judge. These depend on the language
     implementation; the judge itself does nothing with it.
@@ -69,7 +66,9 @@ class Options:
     """
 
 
-class DodonaConfig(BaseModel):
+@fallback_field(get_converter(), {"testplan": "test_suite", "plan_name": "test_suite"})
+@define
+class DodonaConfig:
     resources: Path
     source: Path
     time_limit: int
@@ -98,16 +97,6 @@ class DodonaConfig(BaseModel):
             return self.options.linter
         return local_config
 
-    # noinspection PyMethodParameters
-    @root_validator(pre=True)
-    def backward_compatibility_for_test_suite(cls, values):
-        compatible_names = ["testplan", "plan_name"]
-        for old_name in compatible_names:
-            if old_name in values:
-                values["test_suite"] = values[old_name]
-                del values[old_name]
-        return values
-
 
 def read_config(config_in: IO) -> DodonaConfig:
     """
@@ -116,17 +105,12 @@ def read_config(config_in: IO) -> DodonaConfig:
     """
     with smart_close(config_in) as input_:
         config_json = input_.read()
-    config_ = json.loads(config_json)
 
-    # Replace the judge directory.
-    parsed: DodonaConfig = DodonaConfig.parse_obj(config_)
-    # noinspection PyDataclass
-    parsed = parsed.copy(update={"judge": parsed.judge})
-
+    parsed = get_converter().loads(config_json, DodonaConfig)
     return parsed
 
 
-@dataclasses.dataclass
+@define
 class GlobalConfig:
     dodona: DodonaConfig
     testcase_separator_secret: str
@@ -138,7 +122,7 @@ class GlobalConfig:
         return self.dodona.options
 
 
-@dataclasses.dataclass
+@define
 class Bundle:
     """A bundle of arguments and configs for running everything."""
 
@@ -203,8 +187,7 @@ def create_bundle(
     if language is None:
         language, offset = _get_language(config)
         config.source_offset = offset
-    # noinspection PyDataclass
-    adjusted_config = config.copy(update={"programming_language": language})
+    adjusted_config = evolve(config, programming_language=language)
     global_config = GlobalConfig(
         dodona=adjusted_config,
         testcase_separator_secret=get_identifier(),

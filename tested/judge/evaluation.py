@@ -116,21 +116,7 @@ def _evaluate_channel(
     if not should_show(output, channel) and is_correct:
         return True
 
-    expected: str
-    if (
-        not isinstance(output, SpecialOutputChannel)
-        and not output.show_expected
-        and not is_correct
-    ):
-        expected = ""
-        evaluation_result.messages.append(
-            ExtendedMessage(
-                description=get_i18n_string("judge.evaluation.hidden_expected")
-            )
-        )
-    else:
-        expected = evaluation_result.readable_expected
-
+    expected = evaluation_result.readable_expected
     out.add(StartTest(expected=expected, channel=channel))
 
     # Report any messages we received.

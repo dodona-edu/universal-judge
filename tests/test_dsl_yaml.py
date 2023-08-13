@@ -170,9 +170,9 @@ def test_parse_ctx_with_config():
       ignoreWhitespace: true
       caseInsensitive: false
   testcases:
-  - arguments: [ '-a', 2.125, 1.212 ]
+  - arguments: [ '-a', '2.125', '1.212' ]
     stdout: "3.34"
-  - arguments: [ '-a', 2.125, 1.212 ]
+  - arguments: [ '-a', '2.125', '1.212' ]
     stdout:
       data: "3.337"
       config:
@@ -180,7 +180,7 @@ def test_parse_ctx_with_config():
   - config:
       stdout:
         roundTo: 1
-    arguments: [ '-a', 2.125, 1.212 ]
+    arguments: [ '-a', '2.125', '1.212' ]
     stdout: "3.3"
   - arguments: [ '-e' ]
     stderr: " Fail "
@@ -285,7 +285,7 @@ def test_statement_and_main():
 - tab: "Statement and main"
   contexts:
   - testcases:
-      - arguments: [ '-a', 5, 7 ]
+      - arguments: [ '-a', '5', '7' ]
         stdout:
           data: 12
           config:
@@ -301,7 +301,6 @@ def test_statement_and_main():
     ctx = tab.contexts[0]
     assert len(ctx.testcases) == 2
     tc = ctx.testcases[0]
-    assert tc.input.main_call
     assert tc.input.arguments == ["-a", "5", "7"]
     assert tc.output.stdout.data == "12"
     assert tc.output.stdout.evaluator.options["tryFloatingPoint"]

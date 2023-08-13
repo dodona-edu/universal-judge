@@ -8,10 +8,11 @@ import sys
 import traceback
 import types
 from collections.abc import Generator
-from dataclasses import dataclass, field
 from io import StringIO
 from pathlib import Path
 from typing import List, Optional, Tuple, Union, cast
+
+from attrs import define, field
 
 from tested.configs import Bundle, create_bundle
 from tested.dodona import ExtendedMessage, Permission, Status
@@ -180,12 +181,12 @@ def _catch_output() -> Generator[Tuple[StringIO, StringIO], None, None]:
         sys.stderr = old_stderr
 
 
-@dataclass
+@define
 class _EvaluationResult:
     result: bool
     readable_expected: Optional[str] = None
     readable_actual: Optional[str] = None
-    messages: List[ExtendedMessage] = field(default_factory=list)
+    messages: List[ExtendedMessage] = field(factory=list)
 
 
 def _evaluate_python(

@@ -4,9 +4,10 @@ Prepare test suite input for code generation.
 Most input from a test suite needs to be prepared to easily generated code. This
 module handles that.
 """
-from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Callable, List, Optional, Set, Tuple, Union, cast
+
+from attrs import define
 
 from tested.configs import Bundle
 from tested.languages.conventionalize import (
@@ -55,13 +56,13 @@ SEND_SPECIFIC_VALUE = "send_specific_value"
 SEND_SPECIFIC_EXCEPTION = "send_specific_exception"
 
 
-@dataclass
+@define
 class PreparedFunctionCall(FunctionCall):
     has_root_namespace: bool = True
     # TODO: find out why this variable can't be initialized by the constructor
 
 
-@dataclass
+@define
 class PreparedTestcaseStatement:
     """
     A testcase that has been prepared for code generation.
@@ -92,7 +93,7 @@ class PreparedTestcaseStatement:
             return self.statement
 
 
-@dataclass
+@define
 class PreparedTestcase:
     """
     A testcase that has been prepared for code generation.
@@ -118,7 +119,7 @@ class PreparedTestcase:
             return self.exception_function(NothingType())
 
 
-@dataclass
+@define
 class PreparedContext:
     """
     A context that has been prepared for code generation.
@@ -134,7 +135,7 @@ class PreparedContext:
     "The code to execute after the context."
 
 
-@dataclass
+@define
 class PreparedExecutionUnit:
     """
     An execution unit that has been prepared for code generation.
@@ -276,6 +277,7 @@ def _create_handling_function(
         if isinstance(output, EvaluatorOutputChannel) and isinstance(
             output.evaluator, SpecificEvaluator
         ):
+            assert evaluator
             arguments = [
                 PreparedFunctionCall(
                     type=FunctionType.FUNCTION,

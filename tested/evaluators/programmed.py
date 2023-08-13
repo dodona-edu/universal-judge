@@ -3,9 +3,8 @@ Programmed evaluator.
 """
 import logging
 import traceback
-from typing import List, Optional
+from typing import List
 
-from tested.datatypes import BasicStringTypes
 from tested.dodona import ExtendedMessage, Message, Permission, Status, StatusMessage
 from tested.evaluators.common import (
     EvaluationResult,
@@ -16,23 +15,13 @@ from tested.evaluators.value import get_values
 from tested.internationalization import get_i18n_string
 from tested.judge.programmed import evaluate_programmed
 from tested.judge.utils import BaseExecutionResult
-from tested.serialisation import BooleanEvalResult, EvalResult, StringType, Value
+from tested.parsing import get_converter
+from tested.serialisation import BooleanEvalResult, EvalResult
 from tested.testsuite import EvaluatorOutputChannel, OutputChannel, ProgrammedEvaluator
 
 _logger = logging.getLogger(__name__)
 
 DEFAULT_STUDENT = get_i18n_string("evaluators.programmed.student.default")
-
-
-def _maybe_string(value_: str) -> Optional[Value]:
-    if value_:
-        return StringType(type=BasicStringTypes.TEXT, data=value_)
-    else:
-        return None
-
-
-def _try_specific(value_: str) -> EvalResult:
-    return EvalResult.parse_raw(value_)
 
 
 def evaluate(
@@ -101,10 +90,11 @@ def evaluate(
                 messages=[stdout, stderr, DEFAULT_STUDENT],
             )
         try:
-            evaluation_result = BooleanEvalResult.parse_raw(
-                result.stdout
-            ).as_eval_result()
-        except (TypeError, ValueError):
+            evaluation_result = (
+                get_converter().loads(result.stdout, BooleanEvalResult).as_eval_result()
+            )
+        except Exception as e:
+            _logger.exception(e)
             messages: List[Message] = [
                 ExtendedMessage(description=DEFAULT_STUDENT, format="text"),
                 ExtendedMessage(

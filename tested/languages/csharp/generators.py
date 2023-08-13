@@ -54,10 +54,10 @@ def convert_value(value: Value) -> str:
     # Handle some advanced types.
     if value.type == AdvancedSequenceTypes.ARRAY:
         assert isinstance(value, SequenceType)
-        return f"new {convert_declaration(value.type, value)}{{{convert_arguments(value.data)}}}"
+        return f"new {convert_declaration(value.type, value)}{{{convert_arguments(value.data)}}}"  # pyright: ignore
     elif value.type == AdvancedSequenceTypes.TUPLE:
         assert isinstance(value, SequenceType)
-        return f"({convert_arguments(value.data)})"
+        return f"({convert_arguments(value.data)})"  # pyright: ignore
     elif value.type == AdvancedNumericTypes.SINGLE_PRECISION:
         if not isinstance(value.data, SpecialNumbers):
             return f"{value.data}f"
@@ -108,7 +108,7 @@ def convert_value(value: Value) -> str:
         return "null"
     elif value.type in (BasicSequenceTypes.SEQUENCE, BasicSequenceTypes.SET):
         assert isinstance(value, SequenceType)
-        return f"new {convert_declaration(value.type, value)}() {{{convert_arguments(value.data)}}}"
+        return f"new {convert_declaration(value.type, value)}() {{{convert_arguments(value.data)}}}"  # pyright: ignore
     elif value.type == BasicObjectTypes.MAP:
         assert isinstance(value, ObjectType)
         result = f"new {convert_declaration(value.type, value)}() {{"
@@ -137,7 +137,7 @@ def convert_function_call(function: FunctionCall) -> str:
         result += convert_statement(function.namespace) + "."
     result += function.name
     if function.type != FunctionType.PROPERTY:
-        result += f"({convert_arguments(function.arguments)})"
+        result += f"({convert_arguments(function.arguments)})"  # pyright: ignore
     return result
 
 

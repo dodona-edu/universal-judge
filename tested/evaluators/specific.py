@@ -1,6 +1,8 @@
 """
 Evaluate the result of a language-specific oracle.
 """
+import logging
+import traceback
 
 from tested.dodona import ExtendedMessage, Permission, Status, StatusMessage
 from tested.evaluators.common import (
@@ -9,8 +11,11 @@ from tested.evaluators.common import (
     cleanup_specific_programmed,
 )
 from tested.internationalization import get_i18n_string
+from tested.parsing import get_converter
 from tested.serialisation import BooleanEvalResult
 from tested.testsuite import EvaluatorOutputChannel, OutputChannel, SpecificEvaluator
+
+_logger = logging.getLogger(__name__)
 
 
 def evaluate(
@@ -35,11 +40,12 @@ def evaluate(
         )
 
     try:
-        actual = BooleanEvalResult.parse_raw(actual_str).as_eval_result()
-    except (TypeError, ValueError) as e:
+        actual = get_converter().loads(actual_str, BooleanEvalResult).as_eval_result()
+    except Exception as e:
+        _logger.exception(e)
         staff_message = ExtendedMessage(
             description=get_i18n_string(
-                "evaluators.specific.staff", actual=actual_str, e=e
+                "evaluators.specific.staff", actual=actual_str, e=traceback.format_exc()
             ),
             format="text",
             permission=Permission.STAFF,

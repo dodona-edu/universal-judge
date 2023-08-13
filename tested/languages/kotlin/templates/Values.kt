@@ -63,7 +63,7 @@ private fun internalEncode(value: Any?): Array<String?> {
         data = value.toString()
     } else if (value is BigDecimal) {
         type = "fixed_precision"
-        data = value.toString()
+        data = String.format("\"%s\"", escape(value.toString()))
     } else if (value is UByte) {
         type = "uint8"
         data = value.toString()
@@ -142,7 +142,7 @@ private fun internalEncode(value: Any?): Array<String?> {
 fun evaluated(writer: PrintWriter, result: Boolean, expected: String?,
               actual: String?, messages: Iterable<EvaluationResult.Message>) {
     val builder = StringBuilder(64).append('{')
-            .append("\"result\": \"").append(result).append("\", ")
+            .append("\"result\": ").append(result).append(", ")
             .append("\"readable_expected\": \"").append(expected).append("\", ")
             .append("\"readable_actual\": \"").append(actual).append("\", ")
             .append("\"messages\": [").append(messages.joinToString(separator = ", ",

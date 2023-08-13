@@ -62,7 +62,7 @@ public class Values {
             data = value.toString();
         } else if (value instanceof BigDecimal) {
             type = "fixed_precision";
-            data = value.toString();
+            data = "\"" + escape(value.toString()) + "\"";
         } else if (value instanceof Byte) {
             type = "int8";
             data = value.toString();

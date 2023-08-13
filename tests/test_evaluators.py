@@ -1,9 +1,6 @@
-import json
 import sys
 from pathlib import Path
 from unittest.mock import ANY
-
-from pydantic.json import pydantic_encoder
 
 import tested
 from tested.configs import create_bundle
@@ -13,6 +10,7 @@ from tested.evaluators.common import EvaluationResult, EvaluatorConfig
 from tested.evaluators.exception import evaluate as evaluate_exception
 from tested.evaluators.text import evaluate_file, evaluate_text
 from tested.evaluators.value import evaluate as evaluate_value
+from tested.parsing import get_converter
 from tested.serialisation import (
     ExceptionValue,
     ObjectKeyValuePair,
@@ -273,9 +271,8 @@ def test_file_evaluator_dont_strip_lines_correct(tmp_path: Path, pytestconfig, m
 def test_exception_evaluator_only_messages_correct(tmp_path: Path, pytestconfig):
     config = evaluator_config(tmp_path, pytestconfig)
     channel = ExceptionOutputChannel(exception=ExpectedException(message="Test error"))
-    actual_value = json.dumps(
+    actual_value = get_converter().dumps(
         ExceptionValue(message="Test error", type="ZeroDivisionError"),
-        default=pydantic_encoder,
     )
     result = evaluate_exception(config, channel, actual_value)
     assert result.result.enum == Status.CORRECT
@@ -286,9 +283,8 @@ def test_exception_evaluator_only_messages_correct(tmp_path: Path, pytestconfig)
 def test_exception_evaluator_only_messages_wrong(tmp_path: Path, pytestconfig):
     config = evaluator_config(tmp_path, pytestconfig)
     channel = ExceptionOutputChannel(exception=ExpectedException(message="Test error"))
-    actual_value = json.dumps(
+    actual_value = get_converter().dumps(
         ExceptionValue(message="Pief poef", type="ZeroDivisionError"),
-        default=pydantic_encoder,
     )
     result = evaluate_exception(config, channel, actual_value)
     assert result.result.enum == Status.WRONG
@@ -303,9 +299,8 @@ def test_exception_evaluator_correct_message_wrong_type(tmp_path: Path, pytestco
             types={"python": "PiefError", "javascript": "PafError"},
         )
     )
-    actual_value = json.dumps(
+    actual_value = get_converter().dumps(
         ExceptionValue(message="Test error", type="ZeroDivisionError"),
-        default=pydantic_encoder,
     )
 
     # Test for Python
@@ -333,9 +328,8 @@ def test_exception_evaluator_wrong_message_correct_type(tmp_path: Path, pytestco
 
     # Test for Python
     config = evaluator_config(tmp_path, pytestconfig, language="python")
-    actual_value = json.dumps(
+    actual_value = get_converter().dumps(
         ExceptionValue(message="Test errors", type="PiefError"),
-        default=pydantic_encoder,
     )
     result = evaluate_exception(config, channel, actual_value)
     assert result.result.enum == Status.WRONG
@@ -344,8 +338,8 @@ def test_exception_evaluator_wrong_message_correct_type(tmp_path: Path, pytestco
 
     # Test for JavaScript
     config = evaluator_config(tmp_path, pytestconfig, language="javascript")
-    actual_value = json.dumps(
-        ExceptionValue(message="Test errors", type="PafError"), default=pydantic_encoder
+    actual_value = get_converter().dumps(
+        ExceptionValue(message="Test errors", type="PafError")
     )
     result = evaluate_exception(config, channel, actual_value)
     assert result.result.enum == Status.WRONG
@@ -363,8 +357,8 @@ def test_exception_evaluator_correct_type_and_message(tmp_path: Path, pytestconf
 
     # Test for Python
     config = evaluator_config(tmp_path, pytestconfig, language="python")
-    actual_value = json.dumps(
-        ExceptionValue(message="Test error", type="PiefError"), default=pydantic_encoder
+    actual_value = get_converter().dumps(
+        ExceptionValue(message="Test error", type="PiefError")
     )
     result = evaluate_exception(config, channel, actual_value)
     assert result.result.enum == Status.CORRECT
@@ -373,8 +367,8 @@ def test_exception_evaluator_correct_type_and_message(tmp_path: Path, pytestconf
 
     # Test for JavaScript
     config = evaluator_config(tmp_path, pytestconfig, language="javascript")
-    actual_value = json.dumps(
-        ExceptionValue(message="Test error", type="PafError"), default=pydantic_encoder
+    actual_value = get_converter().dumps(
+        ExceptionValue(message="Test error", type="PafError")
     )
     result = evaluate_exception(config, channel, actual_value)
     assert result.result.enum == Status.CORRECT
@@ -386,9 +380,8 @@ def test_value_string_as_text_is_detected(tmp_path: Path, pytestconfig):
     channel = ValueOutputChannel(
         value=StringType(type=BasicStringTypes.TEXT, data="multi\nline\nstring")
     )
-    actual_value = json.dumps(
-        StringType(type=BasicStringTypes.TEXT, data="multi\nline\nstring"),
-        default=pydantic_encoder,
+    actual_value = get_converter().dumps(
+        StringType(type=BasicStringTypes.TEXT, data="multi\nline\nstring")
     )
     config = evaluator_config(tmp_path, pytestconfig, language="python")
     result = evaluate_value(config, channel, actual_value)
@@ -401,9 +394,8 @@ def test_value_string_as_text_is_not_detected_if_disabled(tmp_path: Path, pytest
     channel = ValueOutputChannel(
         value=StringType(type=BasicStringTypes.TEXT, data="multi\nline\nstring")
     )
-    actual_value = json.dumps(
-        StringType(type=BasicStringTypes.TEXT, data="multi\nline\nstring"),
-        default=pydantic_encoder,
+    actual_value = get_converter().dumps(
+        StringType(type=BasicStringTypes.TEXT, data="multi\nline\nstring")
     )
     config = evaluator_config(
         tmp_path, pytestconfig, language="python", options={"stringsAsText": False}
@@ -420,9 +412,8 @@ def test_value_string_as_text_is_not_detected_if_not_multiline(
     channel = ValueOutputChannel(
         value=StringType(type=BasicStringTypes.TEXT, data="multi")
     )
-    actual_value = json.dumps(
+    actual_value = get_converter().dumps(
         StringType(type=BasicStringTypes.TEXT, data="multi\nline\nstring"),
-        default=pydantic_encoder,
     )
     config = evaluator_config(
         tmp_path, pytestconfig, language="python", options={"stringsAsText": False}
@@ -487,14 +478,7 @@ def test_nested_sets_type_check_works_if_correct(tmp_path: Path, pytestconfig):
     )
     channel = ValueOutputChannel(value=expected_value)
     config = evaluator_config(tmp_path, pytestconfig, language="python")
-    result = evaluate_value(
-        config,
-        channel,
-        json.dumps(
-            actual_value,
-            default=pydantic_encoder,
-        ),
-    )
+    result = evaluate_value(config, channel, get_converter().dumps(actual_value))
     assert result.result.enum == Status.CORRECT
 
 
@@ -533,14 +517,7 @@ def test_too_many_sequence_values_dont_crash(tmp_path: Path, pytestconfig):
     )
     channel = ValueOutputChannel(value=expected_value)
     config = evaluator_config(tmp_path, pytestconfig, language="python")
-    result = evaluate_value(
-        config,
-        channel,
-        json.dumps(
-            actual_value,
-            default=pydantic_encoder,
-        ),
-    )
+    result = evaluate_value(config, channel, get_converter().dumps(actual_value))
     assert result.result.enum == Status.WRONG
 
 
@@ -572,9 +549,6 @@ def test_too_many_object_values_dont_crash(tmp_path: Path, pytestconfig):
     result = evaluate_value(
         config,
         channel,
-        json.dumps(
-            actual_value,
-            default=pydantic_encoder,
-        ),
+        get_converter().dumps(actual_value),
     )
     assert result.result.enum == Status.WRONG

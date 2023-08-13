@@ -5,7 +5,6 @@ from typing import Callable, Dict, List, Optional, TextIO, TypeVar, Union, cast
 
 import yaml
 from jsonschema import Draft7Validator
-from pydantic.json import pydantic_encoder
 
 from tested.datatypes import (
     BasicBooleanTypes,
@@ -15,6 +14,7 @@ from tested.datatypes import (
     BasicStringTypes,
 )
 from tested.dsl.ast_translator import parse_string
+from tested.parsing import suite_to_json
 from tested.serialisation import (
     BooleanType,
     NothingType,
@@ -365,4 +365,4 @@ def translate_to_test_suite(dsl_string: str, validate: bool = True) -> str:
     :return: The test suite.
     """
     suite = parse_dsl(dsl_string, validate)
-    return json.dumps(suite, default=pydantic_encoder, indent=2)
+    return suite_to_json(suite)

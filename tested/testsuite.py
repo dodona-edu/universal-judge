@@ -6,14 +6,12 @@ When executing this module, a json-schema is generated for the format, which can
 of assistance when checking existing test suites.
 """
 from collections import defaultdict
-from dataclasses import field
 from enum import StrEnum, auto, unique
 from os import path
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Literal, NamedTuple, Optional, Set, Union
 
-from pydantic import BaseModel, root_validator, validator
-from pydantic.dataclasses import dataclass
+from attrs import define, field
 
 from tested.datatypes import BasicStringTypes
 from tested.features import (
@@ -23,6 +21,7 @@ from tested.features import (
     WithFeatures,
     combine_features,
 )
+from tested.parsing import custom_fallback_field, get_converter, ignore_field
 from tested.serialisation import (
     Expression,
     FunctionCall,
@@ -58,7 +57,7 @@ class ExceptionBuiltin(StrEnum):
     EXCEPTION = auto()
 
 
-@dataclass
+@define
 class BaseBuiltinEvaluator:
     """
     A built-in evaluator in TESTed. Some basic evaluators are available, as
@@ -70,25 +69,25 @@ class BaseBuiltinEvaluator:
     """
 
     type: Literal["builtin"] = "builtin"
-    options: Dict[str, Any] = field(default_factory=dict)
+    options: Dict[str, Any] = field(factory=dict)
 
 
-@dataclass
+@define
 class GenericTextEvaluator(BaseBuiltinEvaluator):
     name: TextBuiltin = TextBuiltin.TEXT
 
 
-@dataclass
+@define
 class GenericValueEvaluator(BaseBuiltinEvaluator):
     name: ValueBuiltin = ValueBuiltin.VALUE
 
 
-@dataclass
+@define
 class GenericExceptionEvaluator(BaseBuiltinEvaluator):
     name: ExceptionBuiltin = ExceptionBuiltin.EXCEPTION
 
 
-@dataclass
+@define
 class EvaluationFunction:
     """
     An evaluation function. This not a normal function call; only the name may be
@@ -99,7 +98,7 @@ class EvaluationFunction:
     name: str = "evaluate"
 
 
-@dataclass
+@define
 class ProgrammedEvaluator:
     """
     Evaluate the responses with custom code. This is still a language-independent
@@ -110,11 +109,11 @@ class ProgrammedEvaluator:
 
     language: str
     function: EvaluationFunction
-    arguments: List[Value] = field(default_factory=list)
+    arguments: List[Value] = field(factory=list)
     type: Literal["programmed"] = "programmed"
 
 
-@dataclass
+@define
 class SpecificEvaluator:
     """
     Provide language-specific code that will be run in the same environment as the
@@ -134,21 +133,17 @@ class SpecificEvaluator:
     instead.
     """
 
-    evaluators: Dict[str, EvaluationFunction]
+    evaluators: Dict[str, EvaluationFunction] = field()
     type: Literal["specific"] = "specific"
 
     def for_language(self, language: str) -> EvaluationFunction:
         return self.evaluators[language]
 
-    # noinspection PyMethodParameters
-    @validator("evaluators")
-    def validate_evaluator(cls, v):
+    @evaluators.validator  # type: ignore
+    def validate_evaluator(self, attribute, value):
         """There should be at least one evaluator."""
-
-        if len(v.keys()) == 0:
+        if len(value.keys()) == 0:
             raise ValueError("At least one specific evaluator is required.")
-
-        return v
 
 
 @unique
@@ -168,7 +163,7 @@ def _resolve_path(working_directory, file_path):
         return path.abspath(path.join(working_directory, file_path))
 
 
-@dataclass
+@define
 class TextData(WithFeatures):
     """Describes textual data: either directly or in a file."""
 
@@ -190,26 +185,26 @@ class TextData(WithFeatures):
         return NOTHING
 
 
-@dataclass
+@ignore_field(get_converter(), "show_expected")
+@define
 class TextOutputChannel(TextData):
     """Describes the output for textual channels."""
 
     evaluator: Union[GenericTextEvaluator, ProgrammedEvaluator] = field(
-        default_factory=GenericTextEvaluator
+        factory=GenericTextEvaluator
     )
-    show_expected: bool = True
 
 
-@dataclass
+@ignore_field(get_converter(), "show_expected")
+@define
 class FileOutputChannel(WithFeatures):
     """Describes the output for files."""
 
     expected_path: str  # Path to the file to compare to.
     actual_path: str  # Path to the generated file (by the user code)
     evaluator: Union[GenericTextEvaluator, ProgrammedEvaluator] = field(
-        default_factory=lambda: GenericTextEvaluator(name=TextBuiltin.FILE)
+        factory=lambda: GenericTextEvaluator(name=TextBuiltin.FILE)
     )
-    show_expected: bool = True
 
     def get_used_features(self) -> FeatureSet:
         return NOTHING
@@ -220,32 +215,27 @@ class FileOutputChannel(WithFeatures):
             return file.read()
 
 
-@dataclass
+@ignore_field(get_converter(), "show_expected")
+@define
 class ValueOutputChannel(WithFeatures):
     """Handles return values of function calls."""
 
     value: Optional[Value] = None
     evaluator: Union[
         GenericValueEvaluator, ProgrammedEvaluator, SpecificEvaluator
-    ] = field(default_factory=GenericValueEvaluator)
-    show_expected: bool = True
+    ] = field(factory=GenericValueEvaluator)
+
+    def __attrs_post_init__(self):
+        if isinstance(self.evaluator, GenericValueEvaluator) and not self.value:
+            raise ValueError("The generic evaluator needs an channel value.")
 
     def get_used_features(self) -> FeatureSet:
         if self.value:
             return self.value.get_used_features()
         return NOTHING
 
-    # noinspection PyMethodParameters
-    @root_validator
-    def value_requirements(cls, values):
-        value = values.get("value")
-        evaluator = values.get("evaluator")
-        if isinstance(evaluator, GenericValueEvaluator) and not value:
-            raise ValueError("The generic evaluator needs an channel value.")
-        return values
 
-
-@dataclass
+@define
 class ExpectedException(WithFeatures):
     """
     Denotes the expected exception value.
@@ -262,13 +252,9 @@ class ExpectedException(WithFeatures):
     #   These exception names should already be in the right convention.
     types: Optional[Dict[str, str]] = None
 
-    @root_validator
-    def needs_either_message_or_types(cls, values):
-        message = values.get("message")
-        types = values.get("types")
-        if message is None and types is None:
+    def __attrs_post_init__(self):
+        if self.message is None and self.types is None:
             raise ValueError("You must specify either an exception message or type.")
-        return values
 
     def get_used_features(self) -> FeatureSet:
         return FeatureSet({Construct.EXCEPTIONS}, types=set(), nested_types=set())
@@ -289,37 +275,32 @@ class ExpectedException(WithFeatures):
             return type_
 
 
-@dataclass
+@ignore_field(get_converter(), "show_expected")
+@define
 class ExceptionOutputChannel(WithFeatures):
     """Handles exceptions caused by the submission."""
 
     exception: Optional[ExpectedException] = None
     evaluator: Union[GenericExceptionEvaluator, SpecificEvaluator] = field(
-        default_factory=GenericExceptionEvaluator
+        factory=GenericExceptionEvaluator
     )
-    show_expected: bool = True
 
     def get_used_features(self) -> FeatureSet:
         if self.exception:
             return self.exception.get_used_features()
         return NOTHING
 
-    # noinspection PyMethodParameters
-    @root_validator
-    def value_requirements(cls, values):
-        exception = values.get("exception")
-        evaluator = values.get("evaluator")
-        if isinstance(evaluator, GenericExceptionEvaluator) and not exception:
+    def __attrs_post_init__(self):
+        if isinstance(self.evaluator, GenericExceptionEvaluator) and not self.exception:
             raise ValueError("The generic evaluator needs a channel exception.")
-        return values
 
 
-@dataclass
+@ignore_field(get_converter(), "show_expected")
+@define
 class ExitCodeOutputChannel(WithFeatures):
     """Handles exit codes."""
 
     value: int = 0
-    show_expected: bool = True
 
     def get_used_features(self) -> FeatureSet:
         return NOTHING
@@ -335,6 +316,7 @@ class EmptyChannel(WithFeatures, StrEnum):
         return NOTHING
 
 
+@unique
 class IgnoredChannel(WithFeatures, StrEnum):
     """A file channel is ignored by default."""
 
@@ -361,7 +343,7 @@ ValueOutput = ValueOutputChannel | SpecialOutputChannel
 ExitOutput = ExitCodeOutputChannel | IgnoredChannel
 
 
-@dataclass
+@define
 class Output(WithFeatures):
     """The output channels for a testcase."""
 
@@ -407,15 +389,15 @@ class Output(WithFeatures):
         return languages
 
 
-@dataclass
+@define
 class MainInput(WithFeatures, WithFunctions):
     """
     Input for the "main" testcase.
     """
 
-    stdin: Union[TextData, EmptyChannel] = EmptyChannel.NONE
-    arguments: List[str] = field(default_factory=list)
-    main_call: bool = True  # Deprecated, to remove...
+    stdin: TextData | EmptyChannel = EmptyChannel.NONE
+    arguments: List[str] = field(factory=list)
+    main_call: Literal[True] = True
 
     def get_as_string(self, working_directory: Path) -> str:
         if self.stdin == EmptyChannel.NONE:
@@ -433,13 +415,14 @@ class MainInput(WithFeatures, WithFunctions):
         return []
 
 
-@dataclass(frozen=True)
+@define(frozen=True)
 class FileUrl:
     url: str
     name: str
 
 
-@dataclass
+@ignore_field(get_converter(), "essential")
+@define
 class Testcase(WithFeatures, WithFunctions):
     """
     A testcase is some input statement and a set of tests on the effects of that
@@ -459,12 +442,10 @@ class Testcase(WithFeatures, WithFunctions):
     one testcase present.
     """
 
-    input: Union[MainInput, Statement]
+    input: Statement | MainInput
     description: Optional[str] = None
-    output: Output = field(default_factory=Output)
-    link_files: List[FileUrl] = field(default_factory=list)
-
-    essential: bool = False  # Deprecated, only for backwards compatability (for now)
+    output: Output = field(factory=Output)
+    link_files: List[FileUrl] = field(factory=list)
 
     def get_used_features(self) -> FeatureSet:
         return combine_features(
@@ -474,18 +455,13 @@ class Testcase(WithFeatures, WithFunctions):
     def get_functions(self) -> Iterable[FunctionCall]:
         return self.input.get_functions()
 
-    @root_validator
-    def no_return_with_assignment(cls, values):
-        if "output" not in values:
-            return values
+    def __attrs_post_init__(self):
         # If the value test is not "None", but the input is not an expression,
         # this is an error: a statement is not an expression.
-        output = values["output"]
-        if output.result != EmptyChannel.NONE and not isinstance(
-            values["input"], Expression
+        if self.output.result != EmptyChannel.NONE and not isinstance(
+            self.input, Expression
         ):
             raise ValueError("You cannot expect a value from a statement.")
-        return values
 
     def is_main_testcase(self):
         return isinstance(self.input, MainInput)
@@ -494,31 +470,29 @@ class Testcase(WithFeatures, WithFunctions):
 Code = Dict[str, TextData]
 
 
-@dataclass
+@define
 class Context(WithFeatures, WithFunctions):
     """
     A context is a set of dependant test cases.
     """
 
-    testcases: List[Testcase] = field(default_factory=list)
-    before: Code = field(default_factory=dict)
-    after: Code = field(default_factory=dict)
+    testcases: List[Testcase] = field(factory=list)
+    before: Code = field(factory=dict)
+    after: Code = field(factory=dict)
     description: Optional[str] = None
-    link_files: List[FileUrl] = field(default_factory=list)
+    link_files: List[FileUrl] = field(factory=list)
 
-    @validator("testcases")
-    def check_testcases(cls, all_testcases: List[Testcase]) -> List[Testcase]:
+    @testcases.validator  # type: ignore
+    def check_testcases(self, _, value: List[Testcase]):
         # Check that only the first testcase has a main call.
-        for non_first_testcase in all_testcases[1:]:
+        for non_first_testcase in value[1:]:
             if isinstance(non_first_testcase.input, MainInput):
                 raise ValueError("Only the first testcase may have a main call.")
 
         # Check that only the last testcase has an exit code check.
-        for non_last_testcase in all_testcases[1:-1]:
+        for non_last_testcase in value[1:-1]:
             if non_last_testcase.output.exit_code != IgnoredChannel.IGNORED:
                 raise ValueError("Only the last testcase may have an exit code check.")
-
-        return all_testcases
 
     def get_functions(self) -> Iterable[FunctionCall]:
         return flatten(x.get_functions() for x in self.testcases)
@@ -541,18 +515,26 @@ class Context(WithFeatures, WithFunctions):
         return not self.testcases[-1].output.exit_code == IgnoredChannel.IGNORED
 
 
-@dataclass
+def _runs_to_tab_converter(runs: Optional[list]):
+    assert isinstance(runs, list), "The field 'runs' must be a list."
+    contexts = []
+    for run in runs:
+        if "run" in run and run["run"]["input"]["main_call"]:
+            contexts.append({"testcases": [run["run"]]})
+        if "contexts" in run:
+            for context in run["contexts"]:
+                contexts.append(context)
+    return contexts
+
+
+@custom_fallback_field(get_converter(), {"runs": ("contexts", _runs_to_tab_converter)})
+@define
 class Tab(WithFeatures, WithFunctions):
     """Represents a tab on Dodona."""
 
     name: str
-    # Only optional for backwards compatability.
-    contexts: Optional[List[Context]] = None
+    contexts: List[Context] = field()
     hidden: Optional[bool] = None
-
-    # Deprecated, only for backward compatability.
-    # TODO: convert this to contexts automatically.
-    runs: Optional[list] = None
 
     def get_used_features(self) -> FeatureSet:
         assert self.contexts is not None
@@ -566,46 +548,20 @@ class Tab(WithFeatures, WithFunctions):
         assert self.contexts is not None
         return len(self.contexts)
 
-    @root_validator(pre=True)
-    def migrate_runs_to_contexts(cls, values):
-        runs = values.get("runs")
-        if not runs:
-            return values
-
-        if "contexts" in values and values["contexts"]:
-            raise ValueError(
-                "You cannot mix contexts and runs in the same tab; migrate to contexts instead."
-            )
-
-        contexts = []
-        for run in runs:
-            if "run" in run and run["run"]["input"]["main_call"]:
-                contexts.append({"testcases": [run["run"]]})
-            if "contexts" in run:
-                for context in run["contexts"]:
-                    contexts.append(context)
-
-        del values["runs"]
-        values["contexts"] = contexts
-        return values
-
-    @root_validator
-    def must_have_contexts(cls, values):
-        if "contexts" not in values or not values["contexts"]:
+    def __attrs_post_init__(self):
+        if not self.contexts:
             raise ValueError("At least one context is required.")
-        return values
 
-    @validator("contexts")
-    def unique_evaluation_functions(cls, contexts: List[Context]) -> List[Context]:
+    @contexts.validator  # type: ignore
+    def unique_evaluation_functions(self, _, value: List[Context]):
         eval_functions: Dict[str, List[EvaluationFunction]] = defaultdict(list)
 
-        for context in contexts:
+        for context in value:
             for testcase in context.testcases:
                 output = testcase.output
                 if isinstance(output.result, ValueOutputChannel) and isinstance(
                     output.result.evaluator, SpecificEvaluator
                 ):
-                    # noinspection PyTypeChecker
                     for (
                         language,
                         function,
@@ -614,7 +570,6 @@ class Tab(WithFeatures, WithFunctions):
                 if isinstance(output.exception, ExceptionOutputChannel) and isinstance(
                     output.exception.evaluator, SpecificEvaluator
                 ):
-                    # noinspection PyTypeChecker
                     for (
                         language,
                         function,
@@ -625,22 +580,18 @@ class Tab(WithFeatures, WithFunctions):
         # files. Two calls to a function with the same name in the same file is
         # obviously allowed, as they refer to the same function.
 
-        # noinspection PyTypeChecker
         for language, functions in eval_functions.items():
             # Map every function name to the files it is present in.
             function_file: Dict[str, Set[Path]] = defaultdict(set)
             for function in functions:
                 function_file[function.name].add(function.file)
 
-            # noinspection PyTypeChecker
             for function, file in function_file.items():
                 if len(file) > 1:
                     raise ValueError(
                         f"Evaluator function names must be unique within the same "
                         f"run. {function} was used in multiple files: {file}"
                     )
-
-        return contexts
 
 
 @unique
@@ -649,11 +600,11 @@ class ExecutionMode(StrEnum):
     INDIVIDUAL = "context"
 
 
-@dataclass
+@define
 class Suite(WithFeatures, WithFunctions):
     """General test suite, which is used to run tests of some code."""
 
-    tabs: List[Tab] = field(default_factory=list)
+    tabs: List[Tab] = field(factory=list)
     namespace: str = "submission"
 
     def get_used_features(self) -> FeatureSet:
@@ -754,24 +705,22 @@ def _resolve_function_calls(function_calls: Iterable[FunctionCall]):
     return combine_features(used_features)
 
 
-class _SuiteModel(BaseModel):
-    __root__: Suite
-
-
 def parse_test_suite(json_string) -> Suite:
     """Parse a test suite into the structures."""
-    return _SuiteModel.parse_raw(json_string).__root__
+    from tested.parsing import parse_json_suite
+
+    return parse_json_suite(json_string)
 
 
 def generate_schema():
     """
     Generate a json schema for the serialization type. It will be printed on stdout.
     """
-    import json
-
-    sc = _SuiteModel.schema()
-    sc["$schema"] = "http://json-schema.org/draft-07/schema#"
-    print(json.dumps(sc, indent=2))
+    # import json
+    #
+    # sc = Suite.model_json_schema()
+    # sc["$schema"] = "http://json-schema.org/draft-07/schema#"
+    # print(json.dumps(sc, indent=2))
 
 
 if __name__ == "__main__":

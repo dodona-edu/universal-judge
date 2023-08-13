@@ -1,7 +1,6 @@
 """
 Translates items from the test suite into the actual programming language.
 """
-import dataclasses
 import html
 import json
 import logging
@@ -31,6 +30,7 @@ from tested.languages.preparation import (
     prepare_execution_unit,
     prepare_expression,
 )
+from tested.parsing import get_converter
 from tested.serialisation import (
     Assignment,
     Expression,
@@ -89,7 +89,8 @@ def generate_execution_unit(
 
 def _handle_link_files(link_files: Iterable[FileUrl], language: str) -> Tuple[str, str]:
     dict_links = dict(
-        (link_file.name, dataclasses.asdict(link_file)) for link_file in link_files
+        (link_file.name, get_converter().unstructure(link_file))
+        for link_file in link_files
     )
     files = json.dumps(dict_links)
     return (
@@ -320,7 +321,9 @@ def generate_selector(
 
 
 def custom_evaluator_arguments(evaluator: ProgrammedEvaluator) -> Value:
-    return SequenceType(type=BasicSequenceTypes.SEQUENCE, data=evaluator.arguments)
+    return SequenceType(
+        type=BasicSequenceTypes.SEQUENCE, data=evaluator.arguments  # pyright: ignore
+    )
 
 
 def generate_custom_evaluator(
