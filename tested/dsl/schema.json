@@ -147,16 +147,7 @@
           }
         },
         "return" : {
-          "description" : "Expected return value",
-          "type" : [
-            "array",
-            "boolean",
-            "integer",
-            "null",
-            "number",
-            "object",
-            "string"
-          ]
+          "description" : "Expected return value"
         },
         "return_raw" : {
           "description" : "Value string to parse to the expected return value",

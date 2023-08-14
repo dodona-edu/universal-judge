@@ -129,6 +129,11 @@ def _convert_value(value: YamlObject) -> Value:
             type=BasicSequenceTypes.SEQUENCE,
             data=[_convert_value(part_value) for part_value in value],
         )
+    elif isinstance(value, set):
+        return SequenceType(
+            type=BasicSequenceTypes.SET,
+            data=[_convert_value(part_value) for part_value in value],
+        )
     else:
         data = []
         for key, val in value.items():
@@ -350,7 +355,7 @@ def parse_dsl(dsl_string: str, validate: bool = True) -> Suite:
     """
     dsl_object = _parse_yaml(dsl_string)
     if validate and not _validate_dsl(dsl_object):
-        raise ValueError("Cannot parse invalid DSL.")
+        raise ValueError("DSL does not adhere to the JSON schema")
     return _convert_dsl(dsl_object)
 
 

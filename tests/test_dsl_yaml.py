@@ -693,3 +693,32 @@ def test_value_custom_checks_correct():
             ],
         ),
     ]
+
+
+def test_yaml_set_tag_is_supported():
+    yaml_str = """
+- tab: 'Test'
+  contexts:
+    - testcases:
+        - statement: 'test()'
+          return: !!set {5, 6}
+    """
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    assert len(suite.tabs) == 1
+    tab = suite.tabs[0]
+    assert len(tab.contexts) == 1
+    testcases = tab.contexts[0].testcases
+    assert len(testcases) == 1
+    test = testcases[0]
+    assert isinstance(test.input, FunctionCall)
+    assert isinstance(test.output.result, ValueOutputChannel)
+    value = test.output.result.value
+    assert isinstance(value, SequenceType)
+    assert value == SequenceType(
+        type=BasicSequenceTypes.SET,
+        data=[
+            NumberType(type=BasicNumericTypes.INTEGER, data=5),
+            NumberType(type=BasicNumericTypes.INTEGER, data=6),
+        ],
+    )
