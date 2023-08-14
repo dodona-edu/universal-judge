@@ -52,9 +52,7 @@ from tested.serialisation import (
     parse_value,
     to_python_comparable,
 )
-from tested.testsuite import (
-    Suite,
-)
+from tested.testsuite import Suite
 from tested.utils import get_args
 from tests.manual_utils import configuration
 
