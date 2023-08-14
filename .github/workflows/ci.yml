@@ -40,7 +40,7 @@ jobs:
       - run: sudo apt -y install hlint cppcheck shellcheck checkstyle
       - run: curl -sSLO https://github.com/pinterest/ktlint/releases/download/0.48.2/ktlint && chmod a+x ktlint
       - run: echo "${GITHUB_WORKSPACE}" >> $GITHUB_PATH
-      - run: pipenv run pytest --cov=tested tests/
+      - run: pipenv run pytest -n auto --cov=tested tests/
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
   lint:
