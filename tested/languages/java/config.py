@@ -1,4 +1,5 @@
 import logging
+import re
 from pathlib import Path
 from typing import TYPE_CHECKING, Dict, List, Mapping, Optional, Set, Tuple
 
@@ -210,3 +211,9 @@ class Java(Language):
             "nested": ("<", ">"),
             "nested_overrides": {"array": ("[", "]")},  # type: ignore
         }
+
+    def is_void_method(self, name: str) -> bool:
+        regex = rf"void\s+{name}"
+        assert self.config
+        the_source = self.config.dodona.source.read_text()
+        return re.search(regex, the_source) is not None

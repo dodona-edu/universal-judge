@@ -45,6 +45,7 @@ from tested.testsuite import (
     IgnoredChannel,
     OutputChannel,
     SpecialOutputChannel,
+    Testcase,
     TextOutput,
     TextOutputChannel,
     ValueOutput,
@@ -76,6 +77,7 @@ def _evaluate_channel(
     channel: Channel,
     output: OutputChannel,
     actual: Optional[str],
+    testcase: Optional[Testcase] = None,
     unexpected_status: Status = Status.WRONG,
     timeout: bool = False,
     memory: bool = False,
@@ -104,7 +106,7 @@ def _evaluate_channel(
     :return: True if successful, otherwise False.
     """
     evaluator = get_oracle(
-        bundle, context_directory, output, unexpected_status=unexpected_status
+        bundle, context_directory, output, testcase, unexpected_status=unexpected_status
     )
     # Run the oracle.
     evaluation_result = evaluator(output, actual if actual else "")
@@ -112,8 +114,10 @@ def _evaluate_channel(
 
     # Decide if we should show this channel or not.
     is_correct = status.enum == Status.CORRECT
+    should_report_case = should_show(output, channel)
 
-    if not should_show(output, channel) and is_correct:
+    if not should_report_case and is_correct:
+        # We do report that a test is correct, to set the status.
         return True
 
     expected = evaluation_result.readable_expected
@@ -126,11 +130,11 @@ def _evaluate_channel(
     # Report missing output
     if actual is None:
         out.add(AppendMessage(message=get_i18n_string("judge.evaluation.early-exit")))
-    elif should_show(output, channel) and timeout and not is_correct:
+    elif should_report_case and timeout and not is_correct:
         status.human = get_i18n_string("judge.evaluation.time-limit")
         status.enum = Status.TIME_LIMIT_EXCEEDED
         out.add(AppendMessage(message=status.human))
-    elif should_show(output, channel) and memory and not is_correct:
+    elif should_report_case and memory and not is_correct:
         status.human = get_i18n_string("judge.evaluation.memory-limit")
         status.enum = Status.TIME_LIMIT_EXCEEDED
         out.add(AppendMessage(message=status.human))
@@ -304,6 +308,7 @@ def evaluate_context_results(
             Channel.RETURN,
             output.result,
             actual_value,
+            testcase=testcase,
             timeout=exec_results.timeout and len(values) == i + 1,
             memory=exec_results.memory and len(values) == i + 1,
         )
@@ -395,7 +400,7 @@ def should_show(test: OutputChannel, channel: Channel) -> bool:
     elif channel == Channel.RETURN:
         assert isinstance(test, ValueOutput)
         # We don't show the channel if we ignore it or expect no result.
-        return not isinstance(test, SpecialOutputChannel)
+        return not isinstance(test, IgnoredChannel)
     elif channel == Channel.EXCEPTION:
         assert isinstance(test, ExceptionOutput)
         return not isinstance(test, SpecialOutputChannel)

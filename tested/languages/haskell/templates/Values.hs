@@ -85,10 +85,11 @@ instance {-# OVERLAPPABLE #-} JsonTypeable a => JsonTypeable [a] where
     toType m = "list"
     toJson l = toJSON (map toObject l)
 
--- Tuples, up to 62 items, as in GHC
 instance () => JsonTypeable () where
-    toType m = "tuple"
-    toJson () = toJSON ()
+    toType _ = "undefined"
+    toJson () = Null
+
+-- Tuples, up to 62 items, as in GHC    
 instance (JsonTypeable a, JsonTypeable b) => JsonTypeable (a, b) where
     toType m = "tuple"
     toJson (a, b) = toJSON [toObject a, toObject b]

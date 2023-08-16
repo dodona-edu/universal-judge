@@ -354,8 +354,8 @@ def generate_custom_evaluator(
         namespace=Identifier(evaluator_name),
         name=evaluator.function.name,
         arguments=[expected_value, actual_value, arguments],
+        has_root_namespace=False,
     )
-    function.has_root_namespace = False
 
     code = bundle.lang_config.generate_check_function(evaluator_name, function)
 

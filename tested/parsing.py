@@ -6,7 +6,6 @@ a single converter for all, both the serialization and suite.
 """
 import logging
 from decimal import Decimal
-from types import NoneType
 from typing import TYPE_CHECKING, Any, Callable, Tuple
 
 from cattrs import Converter

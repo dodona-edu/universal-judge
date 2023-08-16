@@ -11,8 +11,6 @@ from io import StringIO
 from pathlib import Path
 from typing import Tuple, Union, cast
 
-from attrs import define, field
-
 from tested.configs import Bundle, create_bundle
 from tested.dodona import ExtendedMessage, Permission, Status
 from tested.features import Construct

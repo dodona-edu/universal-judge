@@ -13,9 +13,7 @@ from tested.configs import DodonaConfig, Options
 from tested.main import run
 from tested.testsuite import ExecutionMode
 
-exercise_dir = (
-    "/home/niko/Ontwikkeling/javascript-oefeningen/reeksen/07 objecten/akkoorden"
-)
+exercise_dir = "/home/niko/Ontwikkeling/universal-judge/tests/exercises/counter"
 
 
 def read_config() -> DodonaConfig:
@@ -23,13 +21,13 @@ def read_config() -> DodonaConfig:
     return DodonaConfig(
         memory_limit=536870912,
         time_limit=60,
-        programming_language="javascript",
+        programming_language="python",
         natural_language="nl",
         resources=Path(exercise_dir, "evaluation"),
-        source=Path(exercise_dir, "solution/solution.nl.js"),
+        source=Path(exercise_dir, "solution/solution.py"),
         judge=Path("."),
         workdir=Path("workdir"),
-        test_suite="suite.yaml",
+        test_suite="plan.yaml",
         options=Options(
             allow_fallback=False,
             mode=ExecutionMode.PRECOMPILATION,

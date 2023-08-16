@@ -185,7 +185,14 @@ def _generate_internal_context(ctx: PreparedContext, pu: PreparedExecutionUnit) 
         else:
             assert isinstance(tc.input, PreparedTestcaseStatement)
             result += "exit_code = 0;\n"
-            result += convert_statement(tc.input.input_statement()) + ";\n"
+            if isinstance(
+                tc.input.statement, FunctionCall
+            ) and pu.language.is_void_method(tc.input.statement.name):
+                # The method has a "void" return type, so don't wrap it.
+                result += " " * 4 + convert_statement(tc.input.statement) + ";\n"
+                result += " " * 4 + convert_statement(tc.input.no_value_call()) + ";\n"
+            else:
+                result += convert_statement(tc.input.input_statement()) + ";\n"
 
     result += ctx.after + "\n"
     result += "return exit_code;\n"

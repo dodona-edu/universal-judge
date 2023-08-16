@@ -254,17 +254,25 @@ handleException (Right _) = Nothing
                 assert isinstance(tc.input, PreparedTestcaseStatement)
                 # In Haskell we do not actually have statements, so we need to keep them separate.
                 # Additionally, exceptions with "statements" are not supported at this time.
-                if isinstance(tc.input.statement, Assignment):
+                if not isinstance(tc.input.statement, Expression):
                     result += indent + convert_statement(tc.input.statement) + "\n"
                 else:
                     result += indent + f"result{i1} <- catch\n"
                     result += (
                         indent * 2 + f"({convert_statement(tc.input.statement, True)}\n"
                     )
-                    result += (
-                        indent * 3
-                        + f">>= \\r -> {convert_statement(tc.input.input_statement('r'))}\n"
-                    )
+                    id_result = tc.input.input_statement("r")
+                    if isinstance(id_result, Identifier):
+                        # In this case, we don't catch the value in the sendValues function.
+                        # This results in pure value instead of an IO monad, so lift the value into the monad.
+                        result += (
+                            indent * 3
+                            + f">>= \\r -> return {convert_statement(id_result)}\n"
+                        )
+                    else:
+                        result += (
+                            indent * 3 + f">>= \\r -> {convert_statement(id_result)}\n"
+                        )
                     result += (
                         indent * 3
                         + f">> let ee = (Nothing :: Maybe SomeException) in {convert_statement(tc.exception_statement('ee'))})\n"

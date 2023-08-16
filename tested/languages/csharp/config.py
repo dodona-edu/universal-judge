@@ -276,3 +276,9 @@ class {class_name}
                 "any": "Object",
             }
         }
+
+    def is_void_method(self, name: str) -> bool:
+        assert self.config
+        regex = rf"void\s+{name}"
+        the_source = self.config.dodona.source.read_text()
+        return re.search(regex, the_source) is not None

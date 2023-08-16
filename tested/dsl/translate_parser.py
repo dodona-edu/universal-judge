@@ -47,6 +47,7 @@ from tested.testsuite import (
     ExpectedException,
     FileUrl,
     GenericTextOracle,
+    IgnoredChannel,
     MainInput,
     Output,
     Suite,
@@ -274,12 +275,32 @@ def _convert_advanced_value_output_channel(stream: YamlObject) -> ValueOutputCha
         raise TypeError(f"Unknown value oracle type: {stream['oracle']}")
 
 
+def _validate_testcase_combinations(testcase: YamlDict):
+    if ("stdin" in testcase or "arguments" in testcase) and (
+        "statement" in testcase or "expression" in testcase
+    ):
+        raise ValueError("A main call cannot contain an expression or a statement.")
+    if "statement" in testcase and "expression" in testcase:
+        raise ValueError("A statement and expression as input are mutually exclusive.")
+    if "statement" in testcase and ("return" in testcase or "return_raw" in testcase):
+        raise ValueError("A statement cannot have an expected return value.")
+    if "return" in testcase and "return_raw" in testcase:
+        raise ValueError("The outputs return and return_raw are mutually exclusive.")
+
+
 def _convert_testcase(testcase: YamlDict, previous_config: dict) -> Testcase:
     config = _deepen_config_level(testcase, previous_config)
 
+    # This is backwards compatability to some extend.
+    # TODO: remove this at some point.
+    if "statement" in testcase and ("return" in testcase or "return_raw" in testcase):
+        testcase["expression"] = testcase.pop("statement")
+
+    _validate_testcase_combinations(testcase)
     if (expr_stmt := testcase.get("statement", testcase.get("expression"))) is not None:
         assert isinstance(expr_stmt, str)
         the_input = parse_string(expr_stmt)
+        return_channel = IgnoredChannel.IGNORED if "statement" in testcase else None
     else:
         if "stdin" in testcase:
             assert isinstance(testcase["stdin"], str)
@@ -289,8 +310,12 @@ def _convert_testcase(testcase: YamlDict, previous_config: dict) -> Testcase:
         arguments = testcase.get("arguments", [])
         assert isinstance(arguments, list)
         the_input = MainInput(stdin=stdin, arguments=arguments)
+        return_channel = None
 
     output = Output()
+
+    if return_channel:
+        output.result = return_channel
 
     if (stdout := testcase.get("stdout")) is not None:
         output.stdout = _convert_text_output_channel(stdout, config, "stdout")
@@ -312,12 +337,10 @@ def _convert_testcase(testcase: YamlDict, previous_config: dict) -> Testcase:
     if (exit_code := testcase.get("exit_code")) is not None:
         output.exit_code = ExitCodeOutputChannel(value=cast(int, exit_code))
     if (result := testcase.get("return")) is not None:
-        if "return_raw" in testcase:
-            raise ValueError("Both a return and return_raw value is not allowed.")
+        assert not return_channel
         output.result = ValueOutputChannel(value=_convert_value(result))
     if (result := testcase.get("return_raw")) is not None:
-        if "return" in testcase:
-            raise ValueError("Both a return and return_raw value is not allowed.")
+        assert not return_channel
         output.result = _convert_advanced_value_output_channel(result)
 
     # TODO: allow propagation of files...

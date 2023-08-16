@@ -35,7 +35,6 @@ from tested.serialisation import (
 )
 from tested.testsuite import (
     Context,
-    EmptyChannel,
     ExceptionOutput,
     IgnoredChannel,
     LanguageSpecificOracle,
@@ -48,6 +47,7 @@ from tested.testsuite import (
 
 if TYPE_CHECKING:
     from tested.judge.execution import ExecutionUnit
+    from tested.languages import Language
 
 # Names of the predefined functions that must be available.
 SEND_VALUE = "send_value"
@@ -59,7 +59,6 @@ SEND_SPECIFIC_EXCEPTION = "send_specific_exception"
 @define
 class PreparedFunctionCall(FunctionCall):
     has_root_namespace: bool = True
-    # TODO: find out why this variable can't be initialized by the constructor
 
 
 @define
@@ -68,10 +67,10 @@ class PreparedTestcaseStatement:
     A testcase that has been prepared for code generation.
     """
 
-    statement: Statement
-    "The original statement."
-    value_function: Optional[Callable[[Expression], Statement]]
-    "The function to handle the return value of the statement, if any."
+    statement: Statement  # The original statement.
+    value_function: Optional[
+        Callable[[Expression], Statement]
+    ]  # The function to handle the return value of the statement, if any.
 
     def input_statement(self, override: Optional[str] = None) -> Statement:
         """
@@ -90,7 +89,14 @@ class PreparedTestcaseStatement:
             else:
                 return self.value_function(self.statement)
         else:
-            return self.statement
+            if override:
+                return Identifier(override)
+            else:
+                return self.statement
+
+    def no_value_call(self) -> Statement:
+        assert self.value_function
+        return self.value_function(NothingType())
 
 
 @define
@@ -159,6 +165,7 @@ class PreparedExecutionUnit:
     "Secret for use in the testcase separator."
     evaluator_names: Set[str]
     "The names of the language-specific functions we will need."
+    language: "Language"
 
 
 def prepare_argument(
@@ -220,8 +227,8 @@ def prepare_expression(bundle: Bundle, expression: Expression) -> Expression:
             arguments=[prepare_argument(bundle, arg) for arg in expression.arguments],
             name=name,
             namespace=namespace,
+            has_root_namespace=not bool(expression.namespace),
         )
-        internal.has_root_namespace = not bool(expression.namespace)
         return internal
     elif isinstance(expression, SequenceType):
         expression.data = [prepare_expression(bundle, expr) for expr in expression.data]
@@ -284,9 +291,9 @@ def _create_handling_function(
                     name=conventionalize_function(lang_config, evaluator.name),
                     namespace=Identifier(evaluator_name),
                     arguments=[prepare_expression(bundle, expression)],
+                    has_root_namespace=False,
                 )
             ]
-            arguments[0].has_root_namespace = False
             function_name = send_evaluated
         else:
             arguments = [expression]
@@ -296,8 +303,8 @@ def _create_handling_function(
             type=FunctionType.FUNCTION,
             name=conventionalize_function(lang_config, function_name),
             arguments=[prepare_argument(bundle, arg) for arg in arguments],
+            has_root_namespace=False,
         )
-        internal.has_root_namespace = False
         return internal
 
     return generator, evaluator_name
@@ -344,26 +351,25 @@ def prepare_testcase(
     if testcase.is_main_testcase():
         prepared_input = cast(MainInput, testcase.input)
     else:
+        result_channel = testcase.output.result
         if isinstance(testcase.input, Expression):
             command = prepare_expression(bundle, testcase.input)
+            # Create the function to handle the values.
+            value_function_call, evaluator_name = _create_handling_function(
+                bundle, SEND_VALUE, SEND_SPECIFIC_VALUE, result_channel
+            )
+            if evaluator_name:
+                names.append(evaluator_name)
+            if result_channel == IgnoredChannel.IGNORED:
+                value_function_call = None
         else:
             assert isinstance(testcase.input, Assignment)
             command = prepare_assignment(bundle, testcase.input)
-
-        result_channel = testcase.output.result
-
-        # Create the function to handle the values.
-        value_function_call, evaluator_name = _create_handling_function(
-            bundle, SEND_VALUE, SEND_SPECIFIC_VALUE, result_channel
-        )
-        if evaluator_name:
-            names.append(evaluator_name)
-
-        has_return = result_channel not in (EmptyChannel.NONE, IgnoredChannel.IGNORED)
-        # A special case: if there isn't an actual value, don't call the function.
-        if not has_return:
+            assert (
+                result_channel == IgnoredChannel.IGNORED
+            ), "Return values of statements must be ignored."
             value_function_call = None
-            assert evaluator_name is None
+
         prepared_input = PreparedTestcaseStatement(
             statement=command, value_function=value_function_call
         )
@@ -498,4 +504,5 @@ def prepare_execution_unit(
         contexts=contexts,
         execution_unit=execution_unit,
         evaluator_names=evaluator_names,
+        language=bundle.lang_config,
     )
