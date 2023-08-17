@@ -42,9 +42,10 @@ logger = logging.getLogger(__name__)
 def try_as_readable_value(
     bundle: Bundle, value: str
 ) -> Tuple[Optional[str], Optional[Message]]:
+    # noinspection PyBroadException
     try:
         actual = parse_value(value)
-    except (ValueError, TypeError):
+    except Exception:
         return None, None
     else:
         return generate_statement(bundle, actual), None
@@ -73,7 +74,7 @@ def get_values(
     # or a student is trying to cheat.
     try:
         actual = parse_value(actual_str)
-    except (TypeError, ValueError) as e:
+    except Exception as e:
         raw_message = f"Received {actual_str}, which caused {e} for get_values."
         message = ExtendedMessage(
             description=raw_message, format="text", permission=Permission.STAFF
@@ -233,6 +234,18 @@ def _check_data_type(
     return valid, prepared_expected
 
 
+def compare_values(
+    config: OracleConfig, actual: Optional[Value], expected: Value
+) -> Tuple[bool, Value, bool]:
+    type_check, expected = _check_data_type(config.bundle, expected, actual)
+    py_expected = to_python_comparable(expected)
+    py_actual = to_python_comparable(actual)
+
+    content_check = py_expected == py_actual
+
+    return type_check, expected, content_check
+
+
 def evaluate(
     config: OracleConfig, channel: OutputChannel, actual_str: str
 ) -> OracleResult:
@@ -279,14 +292,10 @@ def evaluate(
             readable_actual=readable_actual,
         )
 
-    type_check, expected = _check_data_type(config.bundle, expected, actual)
+    type_check, expected, content_check = compare_values(config, actual, expected)
     messages = []
     type_status = None
 
-    py_expected = to_python_comparable(expected)
-    py_actual = to_python_comparable(actual)
-
-    content_check = py_expected == py_actual
     correct = type_check and content_check
 
     if is_multiline_string:

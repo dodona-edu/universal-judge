@@ -52,6 +52,9 @@ private fun internalEncode(value: Any?): Array<String?> {
     if (value == null) {
         type = "nothing"
         data = "null"
+    } else if (value is Unit) {
+        type = "undefined"
+        data = "null"
     } else if (value is Boolean) {
         type = "boolean"
         data = value.toString()

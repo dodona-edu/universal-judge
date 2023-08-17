@@ -1,0 +1,4 @@
+- tab: "My tab"
+  testcases:
+    - expression: 'no_echo("input")'
+      return: "input"

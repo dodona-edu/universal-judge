@@ -486,3 +486,9 @@ class Language(ABC):
         assert self.config
         lang = self.config.dodona.programming_language
         return [self.config.dodona.judge / "tested" / "languages" / lang / "templates"]
+
+    def is_void_method(self, name: str) -> bool:
+        """
+        Check if a function with a name returns nothing.
+        """
+        return False

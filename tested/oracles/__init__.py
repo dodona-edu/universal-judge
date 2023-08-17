@@ -17,6 +17,7 @@ from tested.testsuite import (
     LanguageSpecificOracle,
     NormalOutputChannel,
     SpecialOutputChannel,
+    Testcase,
     TextBuiltin,
     ValueBuiltin,
 )
@@ -26,6 +27,7 @@ def get_oracle(
     bundle: Bundle,
     context_dir: Path,
     output: Union[NormalOutputChannel, SpecialOutputChannel],
+    testcase: Optional[Testcase] = None,
     unexpected_status: Status = Status.WRONG,
 ) -> Oracle:
     """
@@ -49,7 +51,7 @@ def get_oracle(
     # Handle channel states.
     if output == EmptyChannel.NONE:
         oracle = functools.partial(
-            nothing.evaluate, unexpected_status=unexpected_status
+            nothing.evaluate, unexpected_status=unexpected_status, testcase=testcase
         )
         return currier(oracle)
     if output == IgnoredChannel.IGNORED:

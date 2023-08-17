@@ -6,4 +6,9 @@ class Submission
     {
         return content;
     }
+    
+    public static void NoEcho(string content)
+    {
+        // Do nothing.
+    }
 }

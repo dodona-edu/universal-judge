@@ -9,7 +9,8 @@ from tested.configs import GlobalConfig
 from tested.datatypes import BasicStringTypes
 from tested.dodona import ExtendedMessage, Permission
 from tested.languages.conventionalize import submission_name
-from tested.serialisation import StringType
+from tested.languages.preparation import PreparedTestcaseStatement
+from tested.serialisation import FunctionCall, StringType
 
 if TYPE_CHECKING:
     from tested.languages.config import Language
@@ -174,3 +175,15 @@ def convert_unknown_type(value: StringType) -> str:
     if value.diagnostic and value.diagnostic not in result:
         result = f"({value.diagnostic}) {result}"
     return result
+
+
+def is_special_void_call(input_: PreparedTestcaseStatement, lang: "Language") -> bool:
+    """
+    Check if the given testcase is a call to a special function with a "void" return
+    value.
+    """
+    return (
+        isinstance(input_.statement, FunctionCall)
+        and input_.value_function is not None
+        and lang.is_void_method(input_.statement.name)
+    )

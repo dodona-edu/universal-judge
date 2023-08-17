@@ -475,12 +475,20 @@ class Testcase(WithFeatures, WithFunctions):
         return self.input.get_functions()
 
     def __attrs_post_init__(self):
-        # If the value test is not "None", but the input is not an expression,
-        # this is an error: a statement is not an expression.
-        if self.output.result != EmptyChannel.NONE and not isinstance(
-            self.input, Expression
+        # If the expected return value is None and we have a statement, change it
+        # to ignore, as they mean the same thing.
+        if (
+            not isinstance(self.input, Expression)
+            and self.output.result == EmptyChannel.NONE
         ):
-            raise ValueError("You cannot expect a value from a statement.")
+            self.output.result = IgnoredChannel.IGNORED
+
+        # If we have a statement but the output is not None or Ignored, we error.
+        if not isinstance(self.input, Expression) and self.output.result not in (
+            EmptyChannel.NONE,
+            IgnoredChannel.IGNORED,
+        ):
+            raise ValueError("You cannot expected a return value from a statement.")
 
     def is_main_testcase(self):
         return isinstance(self.input, MainInput)

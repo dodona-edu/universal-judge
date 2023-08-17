@@ -904,3 +904,83 @@ def test_unknown_return_type(tmp_path: Path, pytestconfig, language_and_expected
     assert updates.find_status_enum() == ["wrong"]
     received_data = updates.find_next("close-test")["generated"]
     assert received_data == expected
+
+
+@pytest.mark.parametrize("language", ALL_SPECIFIC_LANGUAGES)
+def test_expected_no_return_but_got_some(language: str, tmp_path: Path, pytestconfig):
+    conf = configuration(
+        pytestconfig,
+        "echo-function",
+        language,
+        tmp_path,
+        "expected_no_return_but_got_some.yaml",
+        "correct",
+    )
+
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["wrong"]
+
+
+@pytest.mark.parametrize("language", ALL_SPECIFIC_LANGUAGES)
+def test_expected_no_return_and_got_none(language: str, tmp_path: Path, pytestconfig):
+    conf = configuration(
+        pytestconfig,
+        "echo-function",
+        language,
+        tmp_path,
+        "expected_no_return_and_got_none.yaml",
+        "correct",
+    )
+
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]
+
+
+@pytest.mark.parametrize("language", ALL_SPECIFIC_LANGUAGES)
+def test_expected_return_but_got_none(language: str, tmp_path: Path, pytestconfig):
+    conf = configuration(
+        pytestconfig,
+        "echo-function",
+        language,
+        tmp_path,
+        "expected_return_but_got_none.yaml",
+        "correct",
+    )
+
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["wrong"]
+
+
+@pytest.mark.parametrize("language", ALL_SPECIFIC_LANGUAGES)
+def test_expected_return_and_got_some(language: str, tmp_path: Path, pytestconfig):
+    conf = configuration(
+        pytestconfig,
+        "echo-function",
+        language,
+        tmp_path,
+        "expected_return_and_got_some.yaml",
+        "correct",
+    )
+
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]
+
+
+@pytest.mark.parametrize("language", ALL_SPECIFIC_LANGUAGES)
+def test_ignored_return_and_got_some(language: str, tmp_path: Path, pytestconfig):
+    conf = configuration(
+        pytestconfig,
+        "echo-function",
+        language,
+        tmp_path,
+        "ignored_return_but_got_some.json",
+        "correct",
+    )
+
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == []  # Empty means correct

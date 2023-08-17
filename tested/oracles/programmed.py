@@ -13,7 +13,7 @@ from tested.oracles.common import (
 )
 from tested.oracles.value import get_values
 from tested.parsing import get_converter
-from tested.serialisation import BooleanEvalResult, EvalResult, StringType, Value
+from tested.serialisation import BooleanEvalResult, EvalResult
 from tested.testsuite import CustomCheckOracle, OracleOutputChannel, OutputChannel
 
 _logger = logging.getLogger(__name__)
