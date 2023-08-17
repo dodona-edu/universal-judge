@@ -5,8 +5,8 @@ import math
 from typing import Any, Dict, Optional
 
 from tested.dodona import Status, StatusMessage
-from tested.evaluators.common import EvaluationResult, EvaluatorConfig
 from tested.internationalization import get_i18n_string
+from tested.oracles.common import OracleConfig, OracleResult
 from tested.testsuite import FileOutputChannel, OutputChannel, TextOutputChannel
 
 
@@ -17,7 +17,7 @@ def _is_number(string: str) -> Optional[float]:
         return None
 
 
-def _text_options(config: EvaluatorConfig) -> dict:
+def _text_options(config: OracleConfig) -> dict:
     defaults = {
         # Options for textual comparison
         "ignoreWhitespace": True,
@@ -31,17 +31,15 @@ def _text_options(config: EvaluatorConfig) -> dict:
     return defaults
 
 
-def _file_defaults(config: EvaluatorConfig) -> dict:
+def _file_defaults(config: OracleConfig) -> dict:
     defaults = {"mode": "exact"}
     defaults.update(config.options)
-    if defaults["mode"] not in {"exact", "lines", "values"}:
-        raise ValueError(f"Unknown mode for file evaluator: {defaults['mode']}")
+    if defaults["mode"] not in ("exact", "lines", "values"):
+        raise ValueError(f"Unknown mode for file oracle: {defaults['mode']}")
     return defaults
 
 
-def compare_text(
-    options: Dict[str, Any], expected: str, actual: str
-) -> EvaluationResult:
+def compare_text(options: Dict[str, Any], expected: str, actual: str) -> OracleResult:
     # Temporary variables that may modified by the evaluation options,
     # Don't modify the actual values, otherwise there maybe confusion with the
     # solution submitted by the student
@@ -69,7 +67,7 @@ def compare_text(
     else:
         result = actual_eval == expected_eval
 
-    return EvaluationResult(
+    return OracleResult(
         result=StatusMessage(enum=Status.CORRECT if result else Status.WRONG),
         readable_expected=str(expected),
         readable_actual=str(actual),
@@ -77,10 +75,10 @@ def compare_text(
 
 
 def evaluate_text(
-    config: EvaluatorConfig, channel: OutputChannel, actual: str
-) -> EvaluationResult:
+    config: OracleConfig, channel: OutputChannel, actual: str
+) -> OracleResult:
     """
-    The base evaluator, used to compare two strings. As this evaluator is
+    The base oracle, used to compare two strings. As this oracle is
     intended for evaluating stdout, it supports various options to make life
     easier:
 
@@ -101,21 +99,21 @@ def evaluate_text(
 
 
 def evaluate_file(
-    config: EvaluatorConfig, channel: OutputChannel, actual: str
-) -> EvaluationResult:
+    config: OracleConfig, channel: OutputChannel, actual: str
+) -> OracleResult:
     """
-    Evaluate the contents of two files. The file evaluator supports one option,
-    ``mode``, used to define in which mode the evaluator should operate:
+    Evaluate the contents of two files. The file oracle supports one option,
+    ``mode``, used to define in which mode the oracle should operate:
 
     1. ``full``: The complete contents are passed to the :class:`TextEvaluator`.
     2. ``line``: The file is split by lines and each line is compared to the
        corresponding line with the :class:`TextEvaluator`. The lines are compared
        without newlines.
 
-    Since the text evaluator is used behind the scenes, this evaluator also supports
-    all parameters of that evaluator.
+    Since the text oracle is used behind the scenes, this oracle also supports
+    all parameters of that oracle.
 
-    When no mode is passed, the evaluator will default to ``full``.
+    When no mode is passed, the oracle will default to ``full``.
     """
     assert isinstance(channel, FileOutputChannel)
     options = _text_options(config)
@@ -125,7 +123,7 @@ def evaluate_file(
         message = get_i18n_string(
             "evaluators.text.file.unexpected.message", actual=actual
         )
-        return EvaluationResult(
+        return OracleResult(
             result=StatusMessage(
                 enum=Status.WRONG,
                 human=get_i18n_string("evaluators.text.file.unexpected.status"),
@@ -149,7 +147,7 @@ def evaluate_file(
         with open(str(actual_path), "r") as file:
             actual = file.read()
     except FileNotFoundError:
-        return EvaluationResult(
+        return OracleResult(
             result=StatusMessage(
                 enum=Status.RUNTIME_ERROR,
                 human=get_i18n_string("evaluators.text.file.not-found"),
@@ -169,7 +167,7 @@ def evaluate_file(
         for expected_line, actual_line in zip(expected_lines, actual_lines):
             r = compare_text(options, expected_line, actual_line)
             correct = correct and r.result.enum == Status.CORRECT
-        return EvaluationResult(
+        return OracleResult(
             result=StatusMessage(enum=Status.CORRECT if correct else Status.WRONG),
             readable_expected=expected,
             readable_actual=actual,

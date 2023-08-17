@@ -55,7 +55,7 @@ def convert_value(value: Value) -> str:
     # Handle some advanced types.
     if value.type == AdvancedSequenceTypes.ARRAY:
         assert isinstance(value, SequenceType)
-        return f"arrayOf({convert_arguments(value.data)})"
+        return f"arrayOf({convert_arguments(value.data)})"  # pyright: ignore
     elif value.type == AdvancedNumericTypes.SINGLE_PRECISION:
         if not isinstance(value.data, SpecialNumbers):
             return f"{value.data}f"
@@ -115,10 +115,10 @@ def convert_value(value: Value) -> str:
         return "null"
     elif value.type == BasicSequenceTypes.SEQUENCE:
         assert isinstance(value, SequenceType)
-        return f"listOf({convert_arguments(value.data)})"
+        return f"listOf({convert_arguments(value.data)})"  # pyright: ignore
     elif value.type == BasicSequenceTypes.SET:
         assert isinstance(value, SequenceType)
-        return f"setOf({convert_arguments(value.data)})"
+        return f"setOf({convert_arguments(value.data)})"  # pyright: ignore
     elif value.type == BasicObjectTypes.MAP:
         assert isinstance(value, ObjectType)
         result = "mapOf("
@@ -146,7 +146,7 @@ def convert_function_call(function: FunctionCall) -> str:
         result += f"{convert_statement(function.namespace)}!!."
     result += function.name
     if function.type != FunctionType.PROPERTY:
-        result += f"({convert_arguments(function.arguments)})"
+        result += f"({convert_arguments(function.arguments)})"  # pyright: ignore
     return result
 
 

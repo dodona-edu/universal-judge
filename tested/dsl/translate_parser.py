@@ -5,7 +5,6 @@ from typing import Callable, Dict, List, Optional, TextIO, TypeVar, Union, cast
 
 import yaml
 from jsonschema import Draft7Validator
-from pydantic.json import pydantic_encoder
 
 from tested.datatypes import (
     BasicBooleanTypes,
@@ -15,6 +14,7 @@ from tested.datatypes import (
     BasicStringTypes,
 )
 from tested.dsl.ast_translator import parse_string
+from tested.parsing import suite_to_json
 from tested.serialisation import (
     BooleanType,
     NothingType,
@@ -27,16 +27,16 @@ from tested.serialisation import (
 )
 from tested.testsuite import (
     Context,
+    CustomCheckOracle,
     EmptyChannel,
     EvaluationFunction,
     ExceptionOutputChannel,
     ExitCodeOutputChannel,
     ExpectedException,
     FileUrl,
-    GenericTextEvaluator,
+    GenericTextOracle,
     MainInput,
     Output,
-    ProgrammedEvaluator,
     Suite,
     Tab,
     Testcase,
@@ -147,8 +147,8 @@ def _convert_file(link_file: YamlDict) -> FileUrl:
     return FileUrl(name=link_file["name"], url=link_file["url"])
 
 
-def _convert_programmed_evaluator(stream: dict) -> ProgrammedEvaluator:
-    return ProgrammedEvaluator(
+def _convert_custom_check_oracle(stream: dict) -> CustomCheckOracle:
+    return CustomCheckOracle(
         language=stream["language"],
         function=EvaluationFunction(
             file=stream["file"], name=stream.get("name", "evaluate")
@@ -165,23 +165,21 @@ def _convert_text_output_channel(
     if isinstance(stream, str):
         data = stream
         config = config.get(config_name, {})
-        return TextOutputChannel(
-            data=data, evaluator=GenericTextEvaluator(options=config)
-        )
+        return TextOutputChannel(data=data, oracle=GenericTextOracle(options=config))
     else:
         assert isinstance(stream, dict)
         data = str(stream["data"])
-        if "evaluator" not in stream or stream["evaluator"] == "builtin":
+        if "oracle" not in stream or stream["oracle"] == "builtin":
             existing_config = config.get(config_name, {})
             config = _deepen_config_level(stream, existing_config)
             return TextOutputChannel(
-                data=data, evaluator=GenericTextEvaluator(options=config)
+                data=data, oracle=GenericTextOracle(options=config)
             )
-        elif stream["evaluator"] == "custom":
+        elif stream["oracle"] == "custom_check":
             return TextOutputChannel(
-                data=data, evaluator=_convert_programmed_evaluator(stream)
+                data=data, oracle=_convert_custom_check_oracle(stream)
             )
-        raise TypeError(f"Unknown text evaluator type: {stream['evaluator']}")
+        raise TypeError(f"Unknown text oracle type: {stream['oracle']}")
 
 
 def _convert_advanced_value_output_channel(stream: YamlObject) -> ValueOutputChannel:
@@ -194,14 +192,14 @@ def _convert_advanced_value_output_channel(stream: YamlObject) -> ValueOutputCha
         assert isinstance(stream["value"], str)
         value = parse_string(stream["value"], is_return=True)
         assert isinstance(value, Value)
-        if "evaluator" not in stream or stream["evaluator"] == "builtin":
+        if "oracle" not in stream or stream["oracle"] == "builtin":
             return ValueOutputChannel(value=value)
-        elif stream["evaluator"] == "custom":
+        elif stream["oracle"] == "custom_check":
             return ValueOutputChannel(
                 value=value,
-                evaluator=_convert_programmed_evaluator(stream),
+                oracle=_convert_custom_check_oracle(stream),
             )
-        raise TypeError(f"Unknown value evaluator type: {stream['evaluator']}")
+        raise TypeError(f"Unknown value oracle type: {stream['oracle']}")
 
 
 def _convert_testcase(testcase: YamlDict, previous_config: dict) -> Testcase:
@@ -365,4 +363,4 @@ def translate_to_test_suite(dsl_string: str, validate: bool = True) -> str:
     :return: The test suite.
     """
     suite = parse_dsl(dsl_string, validate)
-    return json.dumps(suite, default=pydantic_encoder, indent=2)
+    return suite_to_json(suite)

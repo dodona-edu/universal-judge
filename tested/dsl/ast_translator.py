@@ -27,11 +27,11 @@ the following is supported:
 """
 
 import ast
-import dataclasses
+from decimal import Decimal
 from typing import Literal, Optional, cast, overload
 
-from _decimal import Decimal
-from pydantic import ValidationError
+import attrs
+from attrs import evolve
 
 from tested.datatypes import (
     AdvancedNothingTypes,
@@ -41,6 +41,7 @@ from tested.datatypes import (
     BasicObjectTypes,
     BasicSequenceTypes,
 )
+from tested.parsing import get_converter
 from tested.serialisation import (
     Assignment,
     Expression,
@@ -70,12 +71,13 @@ def _is_and_get_allowed_empty(node: ast.Call) -> Optional[Value]:
     Returns the empty value if allowed, otherwise None.
     """
     assert isinstance(node.func, ast.Name)
-    if node.func.id in AdvancedSequenceTypes.__members__.values():
-        return SequenceType(type=cast(AdvancedSequenceTypes, node.func.id), data=[])
-    elif node.func.id in BasicSequenceTypes.__members__.values():
-        return SequenceType(type=cast(BasicSequenceTypes, node.func.id), data=[])
-    elif node.func.id in BasicObjectTypes.__members__.values():
-        return ObjectType(type=BasicObjectTypes.MAP, data=[])
+    type_ = get_converter().structure(node.func.id, AllTypes)
+    if isinstance(type_, AdvancedSequenceTypes):
+        return SequenceType(type=cast(AdvancedSequenceTypes, type_), data=[])
+    elif isinstance(type_, BasicSequenceTypes):
+        return SequenceType(type=cast(BasicSequenceTypes, type_), data=[])
+    elif isinstance(type_, BasicObjectTypes):
+        return ObjectType(type=type_, data=[])
     else:
         return None
 
@@ -221,7 +223,7 @@ def _convert_expression(node: ast.expr, is_return: bool) -> Expression:
                 raise InvalidDslError(
                     "The argument of a cast function must resolve to a value."
                 )
-        return dataclasses.replace(value, type=node.func.id)
+        return evolve(value, type=get_converter().structure(node.func.id, AllTypes))
     elif isinstance(node, ast.Call):
         if is_return:
             raise InvalidDslError(
@@ -333,7 +335,5 @@ def parse_string(code: str, is_return=False) -> Statement:
     try:
         tree = ast.parse(code, mode="single")
         return _translate_to_ast(tree, is_return)
-    except ValidationError as e:
-        raise InvalidDslError("Probably type error in DSL") from e
-    except SyntaxError as e:
-        raise InvalidDslError("Invalid syntax in DSL") from e
+    except Exception as e:
+        raise InvalidDslError("Invalid DSL") from e

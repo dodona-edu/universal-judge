@@ -9,6 +9,9 @@ from itertools import zip_longest
 from pathlib import Path
 from typing import IO, Any, Callable, Iterable, List, Optional, TypeVar, Union
 
+from cattrs import Converter
+from cattrs.gen import make_dict_structure_fn
+
 _logger = logging.getLogger(__name__)
 
 

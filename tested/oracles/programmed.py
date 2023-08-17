@@ -1,66 +1,52 @@
-"""
-Programmed evaluator.
-"""
 import logging
 import traceback
-from typing import List, Optional
+from typing import List
 
-from tested.datatypes import BasicStringTypes
 from tested.dodona import ExtendedMessage, Message, Permission, Status, StatusMessage
-from tested.evaluators.common import (
-    EvaluationResult,
-    EvaluatorConfig,
-    cleanup_specific_programmed,
-)
-from tested.evaluators.value import get_values
 from tested.internationalization import get_i18n_string
 from tested.judge.programmed import evaluate_programmed
 from tested.judge.utils import BaseExecutionResult
+from tested.oracles.common import (
+    OracleConfig,
+    OracleResult,
+    cleanup_specific_programmed,
+)
+from tested.oracles.value import get_values
+from tested.parsing import get_converter
 from tested.serialisation import BooleanEvalResult, EvalResult, StringType, Value
-from tested.testsuite import EvaluatorOutputChannel, OutputChannel, ProgrammedEvaluator
+from tested.testsuite import CustomCheckOracle, OracleOutputChannel, OutputChannel
 
 _logger = logging.getLogger(__name__)
 
 DEFAULT_STUDENT = get_i18n_string("evaluators.programmed.student.default")
 
 
-def _maybe_string(value_: str) -> Optional[Value]:
-    if value_:
-        return StringType(type=BasicStringTypes.TEXT, data=value_)
-    else:
-        return None
-
-
-def _try_specific(value_: str) -> EvalResult:
-    return EvalResult.parse_raw(value_)
-
-
 def evaluate(
-    config: EvaluatorConfig, channel: OutputChannel, actual_str: str
-) -> EvaluationResult:
+    config: OracleConfig, channel: OutputChannel, actual_str: str
+) -> OracleResult:
     """
-    Evaluate using a programmed evaluator. This evaluator is unique, in that it is
-    also responsible for running the evaluator (all other evaluators don't do that).
+    Evaluate using a programmed oracle. This oracle is unique, in that it is
+    also responsible for running the oracle (all other functions don't do that).
     """
-    assert isinstance(channel, EvaluatorOutputChannel)
-    assert isinstance(channel.evaluator, ProgrammedEvaluator)
+    assert isinstance(channel, OracleOutputChannel)
+    assert isinstance(channel.oracle, CustomCheckOracle)
 
-    _logger.debug(f"Programmed evaluator for output {actual_str}")
+    _logger.debug(f"Programmed oracle for output {actual_str}")
 
     # Convert the expected item to a Value, which is then passed to the
-    # evaluator for evaluation.
+    # oracle for evaluation.
     # This is slightly tricky, since the actual value must also be converted
     # to a value, and we are not yet sure what the actual value is exactly
     result = get_values(config.bundle, channel, actual_str or "")
     # TODO: why is this?
-    if isinstance(result, EvaluationResult):
+    if isinstance(result, OracleResult):
         return result
     else:
         expected, readable_expected, actual, readable_actual = result
 
     # If there is no actual result, stop early.
     if actual is None:
-        return EvaluationResult(
+        return OracleResult(
             result=StatusMessage(enum=Status.WRONG),
             readable_expected=readable_expected,
             readable_actual=readable_actual,
@@ -72,19 +58,19 @@ def evaluate(
         f"actual: {actual}"
     )
     result = evaluate_programmed(
-        config.bundle, evaluator=channel.evaluator, expected=expected, actual=actual
+        config.bundle, evaluator=channel.oracle, expected=expected, actual=actual
     )
 
     if isinstance(result, BaseExecutionResult):
         if result.timeout:
-            return EvaluationResult(
+            return OracleResult(
                 result=StatusMessage(enum=Status.TIME_LIMIT_EXCEEDED),
                 readable_expected=readable_expected,
                 readable_actual=readable_actual,
                 messages=[result.stdout, result.stderr],
             )
         if result.memory:
-            return EvaluationResult(
+            return OracleResult(
                 result=StatusMessage(enum=Status.MEMORY_LIMIT_EXCEEDED),
                 readable_expected=readable_expected,
                 readable_actual=readable_actual,
@@ -94,17 +80,18 @@ def evaluate(
         if not result.stdout:
             stdout = ExtendedMessage(description=result.stdout, format="text")
             stderr = ExtendedMessage(description=result.stderr, format="text")
-            return EvaluationResult(
+            return OracleResult(
                 result=StatusMessage(enum=Status.INTERNAL_ERROR),
                 readable_expected=readable_expected,
                 readable_actual=readable_actual,
                 messages=[stdout, stderr, DEFAULT_STUDENT],
             )
         try:
-            evaluation_result = BooleanEvalResult.parse_raw(
-                result.stdout
-            ).as_eval_result()
-        except (TypeError, ValueError):
+            evaluation_result = (
+                get_converter().loads(result.stdout, BooleanEvalResult).as_eval_result()
+            )
+        except Exception as e:
+            _logger.exception(e)
             messages: List[Message] = [
                 ExtendedMessage(description=DEFAULT_STUDENT, format="text"),
                 ExtendedMessage(
@@ -136,7 +123,7 @@ def evaluate(
                     permission=Permission.STAFF,
                 ),
             ]
-            return EvaluationResult(
+            return OracleResult(
                 result=StatusMessage(enum=Status.INTERNAL_ERROR),
                 readable_expected=readable_expected,
                 readable_actual=readable_actual,
@@ -169,7 +156,7 @@ def evaluate(
         ),
     )
 
-    return EvaluationResult(
+    return OracleResult(
         result=result_status,
         readable_expected=cleaned.readable_expected or "",
         readable_actual=cleaned.readable_actual or "",

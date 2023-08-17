@@ -3,11 +3,12 @@ The partial format should automatically close output, but doesn't for some reaso
 This module contains a class that will collect the output, and override it on on
 testcase level if needed.
 """
-import dataclasses
 import logging
 from collections import defaultdict
 from math import floor
 from typing import Generator, List, Optional, Union
+
+from attrs import evolve
 
 from tested.configs import Bundle
 from tested.dodona import (
@@ -326,8 +327,7 @@ class OutputManager:
 
 def _replace_status(t: Update, status: StatusMessage) -> Update:
     try:
-        # noinspection PyDataclass
-        return dataclasses.replace(t, status=status)
+        return evolve(t, status=status)
     except TypeError:
         return t
 

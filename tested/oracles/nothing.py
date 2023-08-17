@@ -1,22 +1,19 @@
-"""
-RawEvaluator for channels without output.
-"""
 import functools
 
 from tested.dodona import Status, StatusMessage
-from tested.evaluators.common import EvaluationResult, EvaluatorConfig, try_outputs
-from tested.evaluators.exception import try_as_readable_exception
-from tested.evaluators.value import try_as_readable_value
 from tested.internationalization import get_i18n_string
+from tested.oracles.common import OracleConfig, OracleResult, try_outputs
+from tested.oracles.exception import try_as_readable_exception
+from tested.oracles.value import try_as_readable_value
 from tested.testsuite import EmptyChannel, OutputChannel
 
 
 def evaluate(
-    config: EvaluatorConfig,
+    config: OracleConfig,
     channel: OutputChannel,
     actual: str,
     unexpected_status: Status = Status.WRONG,
-) -> EvaluationResult:
+) -> OracleResult:
     assert isinstance(channel, EmptyChannel)
     messages = []
 
@@ -28,20 +25,14 @@ def evaluate(
         actual, msg = try_outputs(actual, parsers)
         if msg:
             messages.append(msg)
+        error = "runtime" if unexpected_status == Status.RUNTIME_ERROR else "unexpected"
         result = StatusMessage(
             enum=unexpected_status,
-            human=get_i18n_string(
-                "evaluators.nothing."
-                + (
-                    "runtime"
-                    if unexpected_status == Status.RUNTIME_ERROR
-                    else "unexpected"
-                )
-            ),
+            human=get_i18n_string(f"evaluators.nothing.{error}"),
         )
     else:
         result = StatusMessage(enum=Status.CORRECT)
 
-    return EvaluationResult(
+    return OracleResult(
         result=result, readable_expected="", readable_actual=actual, messages=messages
     )

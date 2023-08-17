@@ -7,12 +7,12 @@ import subprocess
 from pathlib import Path
 from typing import List, Optional
 
-from pydantic.dataclasses import dataclass
+from attrs import define
 
 _logger = logging.getLogger(__name__)
 
 
-@dataclass
+@define
 class BaseExecutionResult:
     """
     Base result of executing a command.

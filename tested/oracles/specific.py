@@ -1,30 +1,35 @@
 """
 Evaluate the result of a language-specific oracle.
 """
+import logging
+import traceback
 
 from tested.dodona import ExtendedMessage, Permission, Status, StatusMessage
-from tested.evaluators.common import (
-    EvaluationResult,
-    EvaluatorConfig,
+from tested.internationalization import get_i18n_string
+from tested.oracles.common import (
+    OracleConfig,
+    OracleResult,
     cleanup_specific_programmed,
 )
-from tested.internationalization import get_i18n_string
+from tested.parsing import get_converter
 from tested.serialisation import BooleanEvalResult
-from tested.testsuite import EvaluatorOutputChannel, OutputChannel, SpecificEvaluator
+from tested.testsuite import LanguageSpecificOracle, OracleOutputChannel, OutputChannel
+
+_logger = logging.getLogger(__name__)
 
 
 def evaluate(
-    config: EvaluatorConfig, channel: OutputChannel, actual_str: str
-) -> EvaluationResult:
+    config: OracleConfig, channel: OutputChannel, actual_str: str
+) -> OracleResult:
     """
-    Compare the result of a specific evaluator. This evaluator has no options.
+    Compare the result of a specific oracle. This oracle has no options.
     """
-    assert isinstance(channel, EvaluatorOutputChannel)
-    assert isinstance(channel.evaluator, SpecificEvaluator)
+    assert isinstance(channel, OracleOutputChannel)
+    assert isinstance(channel.oracle, LanguageSpecificOracle)
 
     # Special support for no values to have a better error message.
     if actual_str == "":
-        return EvaluationResult(
+        return OracleResult(
             result=StatusMessage(
                 enum=Status.WRONG,
                 human=get_i18n_string("evaluators.specific.missing.status"),
@@ -35,17 +40,18 @@ def evaluate(
         )
 
     try:
-        actual = BooleanEvalResult.parse_raw(actual_str).as_eval_result()
-    except (TypeError, ValueError) as e:
+        actual = get_converter().loads(actual_str, BooleanEvalResult).as_eval_result()
+    except Exception as e:
+        _logger.exception(e)
         staff_message = ExtendedMessage(
             description=get_i18n_string(
-                "evaluators.specific.staff", actual=actual_str, e=e
+                "evaluators.specific.staff", actual=actual_str, e=traceback.format_exc()
             ),
             format="text",
             permission=Permission.STAFF,
         )
         student_message = get_i18n_string("evaluators.specific.student.default")
-        return EvaluationResult(
+        return OracleResult(
             result=StatusMessage(
                 enum=Status.INTERNAL_ERROR,
                 human=get_i18n_string("evaluators.specific.status"),
@@ -57,7 +63,7 @@ def evaluate(
 
     actual = cleanup_specific_programmed(config, channel, actual)
 
-    return EvaluationResult(
+    return OracleResult(
         result=StatusMessage(enum=actual.result),
         readable_expected=actual.readable_expected or "",
         readable_actual=actual.readable_actual or "",

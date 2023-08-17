@@ -1,40 +1,34 @@
-"""
-Exception evaluator.
-"""
 import logging
+import traceback
 from typing import Optional, Tuple
 
-from pydantic import BaseModel
-
-from tested.dodona import ExtendedMessage, Permission, Status, StatusMessage
-from tested.evaluators.common import EvaluationResult, EvaluatorConfig
+from tested.dodona import ExtendedMessage, Message, Permission, Status, StatusMessage
 from tested.internationalization import get_i18n_string
 from tested.languages.utils import convert_stacktrace_to_clickable_feedback
+from tested.oracles.common import OracleConfig, OracleResult
+from tested.parsing import get_converter
 from tested.serialisation import ExceptionValue
 from tested.testsuite import ExceptionOutputChannel, OutputChannel
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 
-class _ExceptionValue(BaseModel):
-    __root__: ExceptionValue
-
-
-def try_as_exception(config: EvaluatorConfig, value: str) -> ExceptionValue:
-    actual = _ExceptionValue.parse_raw(value).__root__
+def try_as_exception(config: OracleConfig, value: str) -> ExceptionValue:
+    actual = get_converter().loads(value, ExceptionValue)
     actual.stacktrace = config.bundle.lang_config.cleanup_stacktrace(actual.stacktrace)
     return actual
 
 
 def try_as_readable_exception(
-    config: EvaluatorConfig, value: str
-) -> Tuple[Optional[str], Optional[ExtendedMessage]]:
+    config: OracleConfig, value: str
+) -> Tuple[Optional[str], Optional[Message]]:
+    # noinspection PyBroadException
     try:
-        actual = _ExceptionValue.parse_raw(value).__root__
+        actual = get_converter().loads(value, ExceptionValue)
         actual.stacktrace = config.bundle.lang_config.cleanup_stacktrace(
             actual.stacktrace
         )
-    except (TypeError, ValueError):
+    except Exception:
         return None, None
     else:
         readable = actual.readable(omit_type=False)
@@ -45,8 +39,8 @@ def try_as_readable_exception(
 
 
 def evaluate(
-    config: EvaluatorConfig, channel: OutputChannel, actual_str: str
-) -> EvaluationResult:
+    config: OracleConfig, channel: OutputChannel, actual_str: str
+) -> OracleResult:
     """
     Evaluate an exception.
 
@@ -64,7 +58,7 @@ def evaluate(
     readable_expected = expected.readable(language)
 
     if not actual_str:
-        return EvaluationResult(
+        return OracleResult(
             result=StatusMessage(enum=Status.WRONG),
             readable_expected=readable_expected,
             readable_actual="",
@@ -73,16 +67,19 @@ def evaluate(
 
     try:
         actual = try_as_exception(config, actual_str)
-    except (TypeError, ValueError) as e:
+    except Exception as e:
+        _logger.exception(e)
         staff_message = ExtendedMessage(
             description=get_i18n_string(
-                "evaluators.exception.staff", actual=actual_str, exception=e
+                "evaluators.exception.staff",
+                actual=actual_str,
+                exception=traceback.format_exc(),
             ),
             format="text",
             permission=Permission.STAFF,
         )
         student_message = get_i18n_string("evaluators.exception.student")
-        return EvaluationResult(
+        return OracleResult(
             result=StatusMessage(
                 enum=Status.INTERNAL_ERROR,
                 human=get_i18n_string("evaluators.exception.status"),
@@ -124,7 +121,7 @@ def evaluate(
                 get_i18n_string(message, actual_type=(actual.type or actual.message))
             )
 
-    return EvaluationResult(
+    return OracleResult(
         result=StatusMessage(enum=status),
         readable_expected=readable_expected,
         readable_actual=actual.readable(

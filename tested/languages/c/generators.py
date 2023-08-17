@@ -95,7 +95,7 @@ def convert_value(value: Value) -> str:
 def convert_function_call(function: FunctionCall) -> str:
     result = function.name
     if function.type != FunctionType.PROPERTY:
-        result += f"({convert_arguments(function.arguments)})"
+        result += f"({convert_arguments(function.arguments)})"  # pyright: ignore
     return result
 
 
@@ -201,7 +201,7 @@ def convert_execution_unit(pu: PreparedExecutionUnit) -> str:
     #include "{pu.submission_name}.c"
     """
 
-    # Import evaluators
+    # Import functions
     for name in pu.evaluator_names:
         result += f'#include "{name}.c"\n'
 

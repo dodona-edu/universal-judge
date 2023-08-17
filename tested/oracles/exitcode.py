@@ -2,8 +2,8 @@ import logging
 from typing import Optional
 
 from tested.dodona import Status, StatusMessage
-from tested.evaluators.common import EvaluationResult, EvaluatorConfig
 from tested.internationalization import get_i18n_string
+from tested.oracles.common import OracleConfig, OracleResult
 from tested.testsuite import ExitCodeOutputChannel, OutputChannel
 
 logger = logging.getLogger(__name__)
@@ -16,14 +16,12 @@ def _as_int(value: str) -> Optional[int]:
         return None
 
 
-def evaluate(
-    _config: EvaluatorConfig, channel: OutputChannel, value: str
-) -> EvaluationResult:
+def evaluate(_config: OracleConfig, channel: OutputChannel, value: str) -> OracleResult:
     assert isinstance(channel, ExitCodeOutputChannel)
     exit_code = _as_int(value)
 
     if exit_code is None:
-        return EvaluationResult(
+        return OracleResult(
             result=StatusMessage(
                 enum=Status.WRONG,
                 human=get_i18n_string(
@@ -46,7 +44,7 @@ def evaluate(
     else:
         status = StatusMessage(enum=Status.CORRECT)
 
-    return EvaluationResult(
+    return OracleResult(
         result=status,
         readable_expected=str(expected_exit_code),
         readable_actual=str(exit_code),

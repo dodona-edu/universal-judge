@@ -9,6 +9,7 @@ from jsonschema import validate
 from tested.configs import DodonaConfig
 from tested.languages import get_language
 from tested.main import run
+from tested.parsing import get_converter
 from tested.utils import recursive_dict_merge
 
 
@@ -61,7 +62,6 @@ def configuration(
         options = {}
     exercise_dir = Path(config.rootdir) / "tests" / "exercises"
     ep = f"{exercise_dir}/{exercise}"
-    # noinspection PyArgumentList
     option_dict = recursive_dict_merge(
         {
             "memory_limit": 536870912,
@@ -77,13 +77,11 @@ def configuration(
         },
         options,
     )
-    # noinspection PyArgumentList
-    return DodonaConfig(**option_dict)
+    return get_converter().structure(option_dict, DodonaConfig)
 
 
 def execute_config(config: DodonaConfig) -> str:
     actual = StringIO()
-    # noinspection PyTypeChecker
     run(config, actual)
     result = actual.getvalue()
     print(result)

@@ -33,14 +33,13 @@ from tested.datatypes import (
     BasicTypes,
     resolve_to_basic,
 )
-from tested.evaluators.value import _check_simple_type
 from tested.features import TypeSupport, fallback_type_support_map
 from tested.judge.compilation import run_compilation
 from tested.judge.execution import execute_file, filter_files
 from tested.judge.utils import BaseExecutionResult, copy_from_paths_to_path
 from tested.languages.conventionalize import conventionalize_namespace
+from tested.oracles.value import _check_simple_type
 from tested.serialisation import (
-    Assignment,
     BooleanType,
     NothingType,
     NumberType,

@@ -1,18 +1,16 @@
-import json
 import sys
 from pathlib import Path
 from unittest.mock import ANY
-
-from pydantic.json import pydantic_encoder
 
 import tested
 from tested.configs import create_bundle
 from tested.datatypes import BasicObjectTypes, BasicSequenceTypes, BasicStringTypes
 from tested.dodona import Status
-from tested.evaluators.common import EvaluationResult, EvaluatorConfig
-from tested.evaluators.exception import evaluate as evaluate_exception
-from tested.evaluators.text import evaluate_file, evaluate_text
-from tested.evaluators.value import evaluate as evaluate_value
+from tested.oracles.common import OracleConfig, OracleResult
+from tested.oracles.exception import evaluate as evaluate_exception
+from tested.oracles.text import evaluate_file, evaluate_text
+from tested.oracles.value import evaluate as evaluate_value
+from tested.parsing import get_converter
 from tested.serialisation import (
     ExceptionValue,
     ObjectKeyValuePair,
@@ -31,19 +29,19 @@ from tested.testsuite import (
 from tests.manual_utils import configuration
 
 
-def evaluator_config(
+def oracle_config(
     tmp_path: Path, pytestconfig, options=None, language="python"
-) -> EvaluatorConfig:
+) -> OracleConfig:
     if options is None:
         options = dict()
     conf = configuration(pytestconfig, "", language, tmp_path)
     plan = Suite()
     bundle = create_bundle(conf, sys.stdout, plan)
-    return EvaluatorConfig(bundle=bundle, options=options, context_dir=tmp_path)
+    return OracleConfig(bundle=bundle, options=options, context_dir=tmp_path)
 
 
-def test_text_evaluator(tmp_path: Path, pytestconfig):
-    config = evaluator_config(tmp_path, pytestconfig, {"ignoreWhitespace": False})
+def test_text_oracle(tmp_path: Path, pytestconfig):
+    config = oracle_config(tmp_path, pytestconfig, {"ignoreWhitespace": False})
     channel = TextOutputChannel(data="expected")
     result = evaluate_text(config, channel, "expected")
     assert result.result.enum == Status.CORRECT
@@ -56,8 +54,8 @@ def test_text_evaluator(tmp_path: Path, pytestconfig):
     assert result.readable_actual == "nothing"
 
 
-def test_text_evaluator_whitespace(tmp_path: Path, pytestconfig):
-    config = evaluator_config(tmp_path, pytestconfig, {"ignoreWhitespace": True})
+def test_text_oracle_whitespace(tmp_path: Path, pytestconfig):
+    config = oracle_config(tmp_path, pytestconfig, {"ignoreWhitespace": True})
     channel = TextOutputChannel(data="expected")
     result = evaluate_text(config, channel, "expected      ")
     assert result.result.enum == Status.CORRECT
@@ -70,8 +68,8 @@ def test_text_evaluator_whitespace(tmp_path: Path, pytestconfig):
     assert result.readable_actual == "nothing"
 
 
-def test_text_evaluator_case_sensitive(tmp_path: Path, pytestconfig):
-    config = evaluator_config(tmp_path, pytestconfig, {"caseInsensitive": True})
+def test_text_oracle_case_sensitive(tmp_path: Path, pytestconfig):
+    config = oracle_config(tmp_path, pytestconfig, {"caseInsensitive": True})
     channel = TextOutputChannel(data="expected")
     result = evaluate_text(config, channel, "Expected")
     assert result.result.enum == Status.CORRECT
@@ -84,8 +82,8 @@ def test_text_evaluator_case_sensitive(tmp_path: Path, pytestconfig):
     assert result.readable_actual == "nothing"
 
 
-def test_text_evaluator_combination(tmp_path: Path, pytestconfig):
-    config = evaluator_config(
+def test_text_oracle_combination(tmp_path: Path, pytestconfig):
+    config = oracle_config(
         tmp_path, pytestconfig, {"caseInsensitive": True, "ignoreWhitespace": True}
     )
     channel = TextOutputChannel(data="expected")
@@ -100,8 +98,8 @@ def test_text_evaluator_combination(tmp_path: Path, pytestconfig):
     assert result.readable_actual == "nothing"
 
 
-def test_text_evaluator_rounding(tmp_path: Path, pytestconfig):
-    config = evaluator_config(
+def test_text_oracle_rounding(tmp_path: Path, pytestconfig):
+    config = oracle_config(
         tmp_path, pytestconfig, {"tryFloatingPoint": True, "applyRounding": True}
     )
     channel = TextOutputChannel(data="1.333")
@@ -116,8 +114,8 @@ def test_text_evaluator_rounding(tmp_path: Path, pytestconfig):
     assert result.readable_actual == "1.5"
 
 
-def test_text_evaluator_round_to(tmp_path: Path, pytestconfig):
-    config = evaluator_config(
+def test_text_oracle_round_to(tmp_path: Path, pytestconfig):
+    config = oracle_config(
         tmp_path,
         pytestconfig,
         {"tryFloatingPoint": True, "applyRounding": True, "roundTo": 1},
@@ -134,9 +132,9 @@ def test_text_evaluator_round_to(tmp_path: Path, pytestconfig):
     assert result.readable_actual == "1.5"
 
 
-def test_file_evaluator_full_wrong(tmp_path: Path, pytestconfig, mocker):
-    config = evaluator_config(tmp_path, pytestconfig, {"mode": "full"})
-    s = mocker.spy(tested.evaluators.text, name="compare_text")
+def test_file_oracle_full_wrong(tmp_path: Path, pytestconfig, mocker):
+    config = oracle_config(tmp_path, pytestconfig, {"mode": "full"})
+    s = mocker.spy(tested.oracles.text, name="compare_text")
     mock_files = [
         mocker.mock_open(read_data=content).return_value
         for content in ["expected\nexpected", "actual\nactual"]
@@ -154,9 +152,9 @@ def test_file_evaluator_full_wrong(tmp_path: Path, pytestconfig, mocker):
     assert result.readable_actual == "actual\nactual"
 
 
-def test_file_evaluator_full_correct(tmp_path: Path, pytestconfig, mocker):
-    config = evaluator_config(tmp_path, pytestconfig, {"mode": "full"})
-    s = mocker.spy(tested.evaluators.text, name="compare_text")
+def test_file_oracle_full_correct(tmp_path: Path, pytestconfig, mocker):
+    config = oracle_config(tmp_path, pytestconfig, {"mode": "full"})
+    s = mocker.spy(tested.oracles.text, name="compare_text")
     mock_files = [
         mocker.mock_open(read_data=content).return_value
         for content in ["expected\nexpected", "expected\nexpected"]
@@ -174,11 +172,11 @@ def test_file_evaluator_full_correct(tmp_path: Path, pytestconfig, mocker):
     assert result.readable_actual == "expected\nexpected"
 
 
-def test_file_evaluator_line_wrong(tmp_path: Path, pytestconfig, mocker):
-    config = evaluator_config(
+def test_file_oracle_line_wrong(tmp_path: Path, pytestconfig, mocker):
+    config = oracle_config(
         tmp_path, pytestconfig, {"mode": "line", "stripNewlines": True}
     )
-    s = mocker.spy(tested.evaluators.text, name="compare_text")
+    s = mocker.spy(tested.oracles.text, name="compare_text")
     mock_files = [
         mocker.mock_open(read_data=content).return_value
         for content in ["expected\nexpected2", "actual\nactual2"]
@@ -198,11 +196,11 @@ def test_file_evaluator_line_wrong(tmp_path: Path, pytestconfig, mocker):
     assert result.readable_actual == "actual\nactual2"
 
 
-def test_file_evaluator_line_correct(tmp_path: Path, pytestconfig, mocker):
-    config = evaluator_config(
+def test_file_oracle_line_correct(tmp_path: Path, pytestconfig, mocker):
+    config = oracle_config(
         tmp_path, pytestconfig, {"mode": "line", "stripNewlines": True}
     )
-    s = mocker.spy(tested.evaluators.text, name="compare_text")
+    s = mocker.spy(tested.oracles.text, name="compare_text")
     mock_files = [
         mocker.mock_open(read_data=content).return_value
         for content in ["expected\nexpected2", "expected\nexpected2"]
@@ -222,11 +220,11 @@ def test_file_evaluator_line_correct(tmp_path: Path, pytestconfig, mocker):
     assert result.readable_actual == "expected\nexpected2"
 
 
-def test_file_evaluator_strip_lines_correct(tmp_path: Path, pytestconfig, mocker):
-    config = evaluator_config(
+def test_file_oracle_strip_lines_correct(tmp_path: Path, pytestconfig, mocker):
+    config = oracle_config(
         tmp_path, pytestconfig, {"mode": "line", "stripNewlines": True}
     )
-    s = mocker.spy(tested.evaluators.text, name="compare_text")
+    s = mocker.spy(tested.oracles.text, name="compare_text")
     mock_files = [
         mocker.mock_open(read_data=content).return_value
         for content in ["expected\nexpected2\n", "expected\nexpected2"]
@@ -246,11 +244,11 @@ def test_file_evaluator_strip_lines_correct(tmp_path: Path, pytestconfig, mocker
     assert result.readable_actual == "expected\nexpected2"
 
 
-def test_file_evaluator_dont_strip_lines_correct(tmp_path: Path, pytestconfig, mocker):
-    config = evaluator_config(
+def test_file_oracle_dont_strip_lines_correct(tmp_path: Path, pytestconfig, mocker):
+    config = oracle_config(
         tmp_path, pytestconfig, {"mode": "line", "stripNewlines": False}
     )
-    s = mocker.spy(tested.evaluators.text, name="compare_text")
+    s = mocker.spy(tested.oracles.text, name="compare_text")
     mock_files = [
         mocker.mock_open(read_data=content).return_value
         for content in ["expected\nexpected2\n", "expected\nexpected2"]
@@ -270,12 +268,11 @@ def test_file_evaluator_dont_strip_lines_correct(tmp_path: Path, pytestconfig, m
     assert result.readable_actual == "expected\nexpected2"
 
 
-def test_exception_evaluator_only_messages_correct(tmp_path: Path, pytestconfig):
-    config = evaluator_config(tmp_path, pytestconfig)
+def test_exception_oracle_only_messages_correct(tmp_path: Path, pytestconfig):
+    config = oracle_config(tmp_path, pytestconfig)
     channel = ExceptionOutputChannel(exception=ExpectedException(message="Test error"))
-    actual_value = json.dumps(
+    actual_value = get_converter().dumps(
         ExceptionValue(message="Test error", type="ZeroDivisionError"),
-        default=pydantic_encoder,
     )
     result = evaluate_exception(config, channel, actual_value)
     assert result.result.enum == Status.CORRECT
@@ -283,12 +280,11 @@ def test_exception_evaluator_only_messages_correct(tmp_path: Path, pytestconfig)
     assert result.readable_actual == "ZeroDivisionError: Test error"
 
 
-def test_exception_evaluator_only_messages_wrong(tmp_path: Path, pytestconfig):
-    config = evaluator_config(tmp_path, pytestconfig)
+def test_exception_oracle_only_messages_wrong(tmp_path: Path, pytestconfig):
+    config = oracle_config(tmp_path, pytestconfig)
     channel = ExceptionOutputChannel(exception=ExpectedException(message="Test error"))
-    actual_value = json.dumps(
+    actual_value = get_converter().dumps(
         ExceptionValue(message="Pief poef", type="ZeroDivisionError"),
-        default=pydantic_encoder,
     )
     result = evaluate_exception(config, channel, actual_value)
     assert result.result.enum == Status.WRONG
@@ -296,34 +292,33 @@ def test_exception_evaluator_only_messages_wrong(tmp_path: Path, pytestconfig):
     assert result.readable_actual == "Pief poef"
 
 
-def test_exception_evaluator_correct_message_wrong_type(tmp_path: Path, pytestconfig):
+def test_exception_oracle_correct_message_wrong_type(tmp_path: Path, pytestconfig):
     channel = ExceptionOutputChannel(
         exception=ExpectedException(
             message="Test error",
             types={"python": "PiefError", "javascript": "PafError"},
         )
     )
-    actual_value = json.dumps(
+    actual_value = get_converter().dumps(
         ExceptionValue(message="Test error", type="ZeroDivisionError"),
-        default=pydantic_encoder,
     )
 
     # Test for Python
-    config = evaluator_config(tmp_path, pytestconfig, language="python")
+    config = oracle_config(tmp_path, pytestconfig, language="python")
     result = evaluate_exception(config, channel, actual_value)
     assert result.result.enum == Status.WRONG
     assert result.readable_expected == "PiefError: Test error"
     assert result.readable_actual == "ZeroDivisionError: Test error"
 
     # Test for JavaScript
-    config = evaluator_config(tmp_path, pytestconfig, language="javascript")
+    config = oracle_config(tmp_path, pytestconfig, language="javascript")
     result = evaluate_exception(config, channel, actual_value)
     assert result.result.enum == Status.WRONG
     assert result.readable_expected == "PafError: Test error"
     assert result.readable_actual == "ZeroDivisionError: Test error"
 
 
-def test_exception_evaluator_wrong_message_correct_type(tmp_path: Path, pytestconfig):
+def test_exception_oracle_wrong_message_correct_type(tmp_path: Path, pytestconfig):
     channel = ExceptionOutputChannel(
         exception=ExpectedException(
             message="Test error",
@@ -332,10 +327,9 @@ def test_exception_evaluator_wrong_message_correct_type(tmp_path: Path, pytestco
     )
 
     # Test for Python
-    config = evaluator_config(tmp_path, pytestconfig, language="python")
-    actual_value = json.dumps(
+    config = oracle_config(tmp_path, pytestconfig, language="python")
+    actual_value = get_converter().dumps(
         ExceptionValue(message="Test errors", type="PiefError"),
-        default=pydantic_encoder,
     )
     result = evaluate_exception(config, channel, actual_value)
     assert result.result.enum == Status.WRONG
@@ -343,9 +337,9 @@ def test_exception_evaluator_wrong_message_correct_type(tmp_path: Path, pytestco
     assert result.readable_actual == "PiefError: Test errors"
 
     # Test for JavaScript
-    config = evaluator_config(tmp_path, pytestconfig, language="javascript")
-    actual_value = json.dumps(
-        ExceptionValue(message="Test errors", type="PafError"), default=pydantic_encoder
+    config = oracle_config(tmp_path, pytestconfig, language="javascript")
+    actual_value = get_converter().dumps(
+        ExceptionValue(message="Test errors", type="PafError")
     )
     result = evaluate_exception(config, channel, actual_value)
     assert result.result.enum == Status.WRONG
@@ -353,7 +347,7 @@ def test_exception_evaluator_wrong_message_correct_type(tmp_path: Path, pytestco
     assert result.readable_actual == "PafError: Test errors"
 
 
-def test_exception_evaluator_correct_type_and_message(tmp_path: Path, pytestconfig):
+def test_exception_oracle_correct_type_and_message(tmp_path: Path, pytestconfig):
     channel = ExceptionOutputChannel(
         exception=ExpectedException(
             message="Test error",
@@ -362,9 +356,9 @@ def test_exception_evaluator_correct_type_and_message(tmp_path: Path, pytestconf
     )
 
     # Test for Python
-    config = evaluator_config(tmp_path, pytestconfig, language="python")
-    actual_value = json.dumps(
-        ExceptionValue(message="Test error", type="PiefError"), default=pydantic_encoder
+    config = oracle_config(tmp_path, pytestconfig, language="python")
+    actual_value = get_converter().dumps(
+        ExceptionValue(message="Test error", type="PiefError")
     )
     result = evaluate_exception(config, channel, actual_value)
     assert result.result.enum == Status.CORRECT
@@ -372,9 +366,9 @@ def test_exception_evaluator_correct_type_and_message(tmp_path: Path, pytestconf
     assert result.readable_actual == "PiefError: Test error"
 
     # Test for JavaScript
-    config = evaluator_config(tmp_path, pytestconfig, language="javascript")
-    actual_value = json.dumps(
-        ExceptionValue(message="Test error", type="PafError"), default=pydantic_encoder
+    config = oracle_config(tmp_path, pytestconfig, language="javascript")
+    actual_value = get_converter().dumps(
+        ExceptionValue(message="Test error", type="PafError")
     )
     result = evaluate_exception(config, channel, actual_value)
     assert result.result.enum == Status.CORRECT
@@ -386,11 +380,10 @@ def test_value_string_as_text_is_detected(tmp_path: Path, pytestconfig):
     channel = ValueOutputChannel(
         value=StringType(type=BasicStringTypes.TEXT, data="multi\nline\nstring")
     )
-    actual_value = json.dumps(
-        StringType(type=BasicStringTypes.TEXT, data="multi\nline\nstring"),
-        default=pydantic_encoder,
+    actual_value = get_converter().dumps(
+        StringType(type=BasicStringTypes.TEXT, data="multi\nline\nstring")
     )
-    config = evaluator_config(tmp_path, pytestconfig, language="python")
+    config = oracle_config(tmp_path, pytestconfig, language="python")
     result = evaluate_value(config, channel, actual_value)
     assert result.result.enum == Status.CORRECT
     assert result.readable_expected == "multi\nline\nstring"
@@ -401,11 +394,10 @@ def test_value_string_as_text_is_not_detected_if_disabled(tmp_path: Path, pytest
     channel = ValueOutputChannel(
         value=StringType(type=BasicStringTypes.TEXT, data="multi\nline\nstring")
     )
-    actual_value = json.dumps(
-        StringType(type=BasicStringTypes.TEXT, data="multi\nline\nstring"),
-        default=pydantic_encoder,
+    actual_value = get_converter().dumps(
+        StringType(type=BasicStringTypes.TEXT, data="multi\nline\nstring")
     )
-    config = evaluator_config(
+    config = oracle_config(
         tmp_path, pytestconfig, language="python", options={"stringsAsText": False}
     )
     result = evaluate_value(config, channel, actual_value)
@@ -420,11 +412,10 @@ def test_value_string_as_text_is_not_detected_if_not_multiline(
     channel = ValueOutputChannel(
         value=StringType(type=BasicStringTypes.TEXT, data="multi")
     )
-    actual_value = json.dumps(
+    actual_value = get_converter().dumps(
         StringType(type=BasicStringTypes.TEXT, data="multi\nline\nstring"),
-        default=pydantic_encoder,
     )
-    config = evaluator_config(
+    config = oracle_config(
         tmp_path, pytestconfig, language="python", options={"stringsAsText": False}
     )
     result = evaluate_value(config, channel, actual_value)
@@ -437,7 +428,7 @@ def test_value_string_as_text_is_detected_when_no_actual(tmp_path: Path, pytestc
     channel = ValueOutputChannel(
         value=StringType(type=BasicStringTypes.TEXT, data="multi\nline\nstring")
     )
-    config = evaluator_config(tmp_path, pytestconfig, language="python")
+    config = oracle_config(tmp_path, pytestconfig, language="python")
     result = evaluate_value(config, channel, "")
     assert result.result.enum == Status.WRONG
     assert result.readable_expected == "multi\nline\nstring"
@@ -486,15 +477,8 @@ def test_nested_sets_type_check_works_if_correct(tmp_path: Path, pytestconfig):
         ],
     )
     channel = ValueOutputChannel(value=expected_value)
-    config = evaluator_config(tmp_path, pytestconfig, language="python")
-    result = evaluate_value(
-        config,
-        channel,
-        json.dumps(
-            actual_value,
-            default=pydantic_encoder,
-        ),
-    )
+    config = oracle_config(tmp_path, pytestconfig, language="python")
+    result = evaluate_value(config, channel, get_converter().dumps(actual_value))
     assert result.result.enum == Status.CORRECT
 
 
@@ -532,15 +516,8 @@ def test_too_many_sequence_values_dont_crash(tmp_path: Path, pytestconfig):
         ],
     )
     channel = ValueOutputChannel(value=expected_value)
-    config = evaluator_config(tmp_path, pytestconfig, language="python")
-    result = evaluate_value(
-        config,
-        channel,
-        json.dumps(
-            actual_value,
-            default=pydantic_encoder,
-        ),
-    )
+    config = oracle_config(tmp_path, pytestconfig, language="python")
+    result = evaluate_value(config, channel, get_converter().dumps(actual_value))
     assert result.result.enum == Status.WRONG
 
 
@@ -568,13 +545,10 @@ def test_too_many_object_values_dont_crash(tmp_path: Path, pytestconfig):
         ],
     )
     channel = ValueOutputChannel(value=expected_value)
-    config = evaluator_config(tmp_path, pytestconfig, language="python")
+    config = oracle_config(tmp_path, pytestconfig, language="python")
     result = evaluate_value(
         config,
         channel,
-        json.dumps(
-            actual_value,
-            default=pydantic_encoder,
-        ),
+        get_converter().dumps(actual_value),
     )
     assert result.result.enum == Status.WRONG

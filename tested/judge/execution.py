@@ -2,9 +2,10 @@ import itertools
 import logging
 import shutil
 import time
-from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Optional, Tuple, Union, cast
+
+from attrs import define
 
 from tested.configs import Bundle
 from tested.dodona import Message, Status
@@ -20,7 +21,7 @@ from tested.utils import safe_del
 _logger = logging.getLogger(__name__)
 
 
-@dataclass
+@define
 class ContextResult(BaseExecutionResult):
     """
     The results of executing a context.
@@ -35,7 +36,7 @@ class ContextResult(BaseExecutionResult):
     exceptions: str
 
 
-@dataclass
+@define
 class ExecutionResult(BaseExecutionResult):
     """
     The results of executing an execution unit.
@@ -101,7 +102,7 @@ class ExecutionResult(BaseExecutionResult):
         return context_execution_results
 
 
-@dataclass
+@define
 class ExecutionUnit:
     """
     Combines a set of contexts that will be executed together.
@@ -119,7 +120,7 @@ class ExecutionUnit:
         return self.contexts[-1].has_exit_testcase()
 
 
-@dataclass
+@define
 class Execution:
     """
     Contains an execution unit and various metadata.
