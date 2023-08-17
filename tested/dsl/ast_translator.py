@@ -30,7 +30,6 @@ import ast
 from decimal import Decimal
 from typing import Literal, Optional, cast, overload
 
-import attrs
 from attrs import evolve
 
 from tested.datatypes import (
