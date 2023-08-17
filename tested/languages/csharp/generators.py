@@ -20,7 +20,7 @@ from tested.languages.preparation import (
     PreparedTestcase,
     PreparedTestcaseStatement,
 )
-from tested.languages.utils import convert_unknown_type
+from tested.languages.utils import convert_unknown_type, is_special_void_call
 from tested.serialisation import (
     Assignment,
     Expression,
@@ -296,9 +296,7 @@ def _generate_internal_context(ctx: PreparedContext, pu: PreparedExecutionUnit) 
             result += "});\n"
         else:
             assert isinstance(tc.input, PreparedTestcaseStatement)
-            if isinstance(
-                tc.input.statement, FunctionCall
-            ) and pu.language.is_void_method(tc.input.statement.name):
+            if is_special_void_call(tc.input, pu.language):
                 # The method has a "void" return type, so don't wrap it.
                 result += " " * 4 + convert_statement(tc.input.statement) + ";\n"
                 result += " " * 4 + convert_statement(tc.input.no_value_call()) + ";\n"
