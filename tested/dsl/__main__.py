@@ -24,7 +24,7 @@ parser = parser.parse_args()
 with smart_close(parser.input) as input_file:
     dsl = input_file.read()
 
-suite = translate_to_test_suite(dsl, validate=True)
+suite = translate_to_test_suite(dsl)
 
 with smart_close(parser.output) as output_file:
     output_file.write(suite)
