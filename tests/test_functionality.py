@@ -737,33 +737,25 @@ def test_too_much_output(tmp_path: Path, pytestconfig):
     assert len(updates.find_all("close-test")) == 2
 
 
-@pytest.mark.parametrize("language", ["python", "csharp"])
-def test_named_parameters_supported(language: str, tmp_path: Path, pytestconfig):
-    conf = configuration(
-        pytestconfig, "echo-function", language, tmp_path, "one-named.tson", "correct"
-    )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["correct"]
-
-
 @pytest.mark.parametrize(
-    "language",
+    "language,result",
     [
-        "java",
-        "c",
-        "javascript",
-        pytest.param("haskell", marks=pytest.mark.haskell),
-        pytest.param("runhaskell", marks=pytest.mark.haskell),
+        ("python", ["correct"]),
+        ("csharp", ["correct"]),
+        ("java", ["internal error"]),
+        ("c", ["internal error"]),
+        ("javascript", ["internal error"]),
+        ("haskell", ["internal error"]),
+        ("runhaskell", ["internal error"]),
     ],
 )
-def test_named_parameters_not_supported(language, tmp_path: Path, pytestconfig):
+def test_named_parameters(language: str, result: list, tmp_path: Path, pytestconfig):
     conf = configuration(
         pytestconfig, "echo-function", language, tmp_path, "one-named.tson", "correct"
     )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["internal error"]
+    all_results = execute_config(conf)
+    updates = assert_valid_output(all_results, pytestconfig)
+    assert updates.find_status_enum() == result
 
 
 def test_javascript_exception_correct(tmp_path: Path, pytestconfig):
