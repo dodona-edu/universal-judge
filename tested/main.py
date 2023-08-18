@@ -21,7 +21,9 @@ def run(config: DodonaConfig, judge_output: IO):
             textual_suite = t.read()
     except FileNotFoundError as e:
         print("The test suite was not found. Check your exercise's config.json file.")
-        print("Remember that the test suite is a path relative to the 'evaluation' folder of your exercise.")
+        print(
+            "Remember that the test suite is a path relative to the 'evaluation' folder of your exercise."
+        )
         raise e
 
     _, ext = os.path.splitext(config.test_suite)
