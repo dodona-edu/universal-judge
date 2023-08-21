@@ -39,7 +39,16 @@ function encode(value) {
             type = "null";
         } else if (Array.isArray(value)) {
             type = "list";
-            value = value.map(encode);
+            // Handle holes in arrays...
+            const unholed = [];
+            for (let i = 0; i < value.length; i++) {
+                if (!value.hasOwnProperty(i)) {
+                    unholed.push(`<empty at index ${i}>`)
+                } else {
+                    unholed.push(value[i]);
+                }
+            }
+            value = unholed.map(encode);
         } else if (value instanceof Set) {
             type = "set";
             value = Array.from(value).map(encode);

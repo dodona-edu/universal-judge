@@ -286,7 +286,7 @@ def evaluate(
     if actual is None:
         return OracleResult(
             result=StatusMessage(
-                enum=Status.WRONG, human=get_i18n_string("functions.value.missing")
+                enum=Status.WRONG, human=get_i18n_string("evaluators.value.missing")
             ),
             readable_expected=readable_expected,
             readable_actual=readable_actual,
