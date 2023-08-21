@@ -1,11 +1,11 @@
 en:
-  evaluators:
+  oracles:
     exception:
       staff: >-
         Expected value exception, but received %{actual}, which caused an exception
         while parsing: %{exception}
       student: >-
-        Dodona don't understood this exception. Report this error to the teacher.
+        Dodona does not understand this exception. Report this error to the teacher.
       status: "Invalid exception"
     exitcode:
       status:

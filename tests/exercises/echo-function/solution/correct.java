@@ -7,4 +7,8 @@ class Submission {
     public static void noEcho(String value) {
         // Do nothing.
     }
+    
+    public static String toString(int number) {
+        return Integer.toString(number);
+    }
 }

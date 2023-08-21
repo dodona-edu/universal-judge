@@ -35,6 +35,7 @@ from tested.serialisation import (
     as_basic_type,
 )
 from tested.testsuite import MainInput
+from tested.utils import is_statement_strict
 
 
 def convert_arguments(arguments: List[Expression]) -> str:
@@ -254,12 +255,17 @@ handleException (Right _) = Nothing
                 assert isinstance(tc.input, PreparedTestcaseStatement)
                 # In Haskell we do not actually have statements, so we need to keep them separate.
                 # Additionally, exceptions with "statements" are not supported at this time.
-                if not isinstance(tc.input.statement, Expression):
-                    result += indent + convert_statement(tc.input.statement) + "\n"
+                if is_statement_strict(tc.input.statement):
+                    result += (
+                        indent
+                        + convert_statement(tc.input.unwrapped_input_statement())
+                        + "\n"
+                    )
                 else:
                     result += indent + f"result{i1} <- catch\n"
                     result += (
-                        indent * 2 + f"({convert_statement(tc.input.statement, True)}\n"
+                        indent * 2
+                        + f"({convert_statement(tc.input.unwrapped_input_statement(), True)}\n"
                     )
                     id_result = tc.input.input_statement("r")
                     if isinstance(id_result, Identifier):

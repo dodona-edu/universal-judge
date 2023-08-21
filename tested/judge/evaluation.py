@@ -399,7 +399,7 @@ def should_show(test: OutputChannel, channel: Channel) -> bool:
         return not isinstance(test, IgnoredChannel)
     elif channel == Channel.RETURN:
         assert isinstance(test, ValueOutput)
-        # We don't show the channel if we ignore it or expect no result.
+        # We don't show the channel if we ignore it.
         return not isinstance(test, IgnoredChannel)
     elif channel == Channel.EXCEPTION:
         assert isinstance(test, ExceptionOutput)

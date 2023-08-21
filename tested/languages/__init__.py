@@ -22,6 +22,7 @@ from tested.languages.runhaskell.config import RunHaskell
 if TYPE_CHECKING:
     from tested.configs import GlobalConfig
 
+
 LANGUAGES = {
     "bash": Bash,
     "c": C,

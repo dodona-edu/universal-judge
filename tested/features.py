@@ -153,7 +153,7 @@ def is_supported(language: "Language") -> bool:
         assert tab.contexts is not None
         for context in tab.contexts:
             for testcase in context.testcases:
-                languages = testcase.output.get_specific_oracle_languages()
+                languages = testcase.output.get_specific_languages()
                 if languages is not None:
                     if language.config.dodona.programming_language not in languages:
                         _logger.warning(

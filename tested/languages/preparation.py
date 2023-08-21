@@ -5,7 +5,17 @@ Most input from a test suite needs to be prepared to easily generated code. This
 module handles that.
 """
 from pathlib import Path
-from typing import TYPE_CHECKING, Callable, List, Optional, Set, Tuple, Union, cast
+from typing import (
+    TYPE_CHECKING,
+    Callable,
+    List,
+    Literal,
+    Optional,
+    Set,
+    Tuple,
+    Union,
+    cast,
+)
 
 from attrs import define
 
@@ -37,6 +47,7 @@ from tested.testsuite import (
     Context,
     ExceptionOutput,
     IgnoredChannel,
+    LanguageLiterals,
     LanguageSpecificOracle,
     MainInput,
     OracleOutputChannel,
@@ -62,12 +73,21 @@ class PreparedFunctionCall(FunctionCall):
 
 
 @define
+class PreparedLanguageLiteral:
+    literal: str
+    type: Literal["expression", "statement"]
+
+    def is_statement(self) -> bool:
+        return self.type == "statement"
+
+
+@define
 class PreparedTestcaseStatement:
     """
     A testcase that has been prepared for code generation.
     """
 
-    statement: Statement  # The original statement.
+    statement: Statement | PreparedLanguageLiteral  # The original statement.
     value_function: Optional[
         Callable[[Expression], Statement]
     ]  # The function to handle the return value of the statement, if any.
@@ -82,17 +102,27 @@ class PreparedTestcaseStatement:
         :param override: Optionally override the value argument.
         :return: The input statement.
         """
+        input_statement = (
+            Identifier(override) if override else self.unwrapped_input_statement()
+        )
+
         if self.value_function:
-            assert isinstance(self.statement, Expression)
-            if override:
-                return self.value_function(Identifier(override))
-            else:
-                return self.value_function(self.statement)
+            assert isinstance(input_statement, Expression)
+            return self.value_function(input_statement)
         else:
-            if override:
-                return Identifier(override)
-            else:
-                return self.statement
+            return input_statement
+
+    def unwrapped_input_statement(self):
+        """
+        Get the input statement for the testcase, but don't wrap it with the value
+        collection function.
+        """
+        if isinstance(self.statement, PreparedLanguageLiteral):
+            result = Identifier(self.statement.literal)
+            result.is_raw = True
+            return result
+        else:
+            return self.statement
 
     def no_value_call(self) -> Statement:
         assert self.value_function
@@ -196,9 +226,10 @@ def prepare_expression(bundle: Bundle, expression: Expression) -> Expression:
     """
 
     if isinstance(expression, Identifier):
-        expression = Identifier(
-            conventionalize_identifier(bundle.lang_config, expression)
-        )
+        if not expression.is_raw:
+            expression = Identifier(
+                conventionalize_identifier(bundle.lang_config, expression)
+            )
     elif isinstance(expression, PreparedFunctionCall):
         expression.arguments = [
             prepare_argument(bundle, arg) for arg in expression.arguments
@@ -362,13 +393,28 @@ def prepare_testcase(
                 names.append(evaluator_name)
             if result_channel == IgnoredChannel.IGNORED:
                 value_function_call = None
-        else:
-            assert isinstance(testcase.input, Assignment)
+        elif isinstance(testcase.input, Assignment):
             command = prepare_assignment(bundle, testcase.input)
             assert (
                 result_channel == IgnoredChannel.IGNORED
             ), "Return values of statements must be ignored."
             value_function_call = None
+        else:
+            assert isinstance(testcase.input, LanguageLiterals)
+            command = PreparedLanguageLiteral(
+                testcase.input.get_for(bundle.config.programming_language),
+                testcase.input.type,
+            )
+            if testcase.input.type == "expression":
+                value_function_call, evaluator_name = _create_handling_function(
+                    bundle, SEND_VALUE, SEND_SPECIFIC_VALUE, result_channel
+                )
+                if evaluator_name:
+                    names.append(evaluator_name)
+                if result_channel == IgnoredChannel.IGNORED:
+                    value_function_call = None
+            else:
+                value_function_call = None
 
         prepared_input = PreparedTestcaseStatement(
             statement=command, value_function=value_function_call

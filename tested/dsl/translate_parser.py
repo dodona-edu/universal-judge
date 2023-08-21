@@ -2,10 +2,21 @@ import json
 from decimal import Decimal
 from logging import getLogger
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, TextIO, TypeVar, Union, cast
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    Literal,
+    Optional,
+    TextIO,
+    TypeVar,
+    Union,
+    cast,
+)
 
 import yaml
-from attrs import define
+from attrs import define, evolve
 from jsonschema import Draft7Validator
 from jsonschema.exceptions import ValidationError
 
@@ -49,9 +60,11 @@ from tested.testsuite import (
     FileUrl,
     GenericTextOracle,
     IgnoredChannel,
+    LanguageLiterals,
     MainInput,
     Output,
     Suite,
+    SupportedLanguage,
     Tab,
     Testcase,
     TextData,
@@ -114,6 +127,42 @@ class DslValidationError(ValueError):
     pass
 
 
+@define
+class DslContext:
+    """
+    Carries context in each level.
+    """
+
+    config: dict
+    language: Union[SupportedLanguage, Literal["tested"]] = "tested"
+
+    def deepen_config(
+        self, new_level_object: Optional[YamlDict], merge_with: Optional[str] = None
+    ) -> "DslContext":
+        """
+        Return a context with config for the new level object.
+
+        This is achieved by taking a copy of the options in the existing level,
+        and overriding all options that are present on the new level.
+
+        :param new_level_object: The object from the test suite that may have options.
+        :param merge_with: Optional key denoting the subsection of the config to update.
+
+        :return: A dictionary for the next level.
+        """
+        if new_level_object is None or "config" not in new_level_object:
+            return self
+
+        assert isinstance(new_level_object["config"], dict)
+        if merge_with:
+            original_config = self.config.get(merge_with, {})
+        else:
+            original_config = self.config
+
+        new_config = recursive_dict_merge(original_config, new_level_object["config"])
+        return evolve(self, config=new_config)
+
+
 def convert_validation_error_to_group(
     error: ValidationError,
 ) -> ExceptionGroup | Exception:
@@ -162,27 +211,6 @@ def _validate_dsl(dsl_object: YamlObject):
         the_errors = [convert_validation_error_to_group(e) for e in errors]
         message = "Validating the DSL resulted in some errors."
         raise ExceptionGroup(message, the_errors)
-
-
-def _deepen_config_level(
-    new_level_object: Optional[YamlDict], current_level: dict
-) -> dict:
-    """
-    Return a dict of options for the new level object.
-
-    This is achieved by taking a copy of the options in the existing level,
-    and overriding all options that are present on the new level.
-
-    :param new_level_object: The object from the test suite that may have options.
-    :param current_level: The options created for the previous level.
-
-    :return: A dictionary for the next level.
-    """
-    if new_level_object is None or "config" not in new_level_object:
-        return current_level
-
-    assert isinstance(new_level_object["config"], dict)
-    return recursive_dict_merge(current_level, new_level_object["config"])
 
 
 def _tested_type_to_value(tested_type: TestedType) -> Value:
@@ -270,18 +298,17 @@ def _convert_custom_check_oracle(stream: dict) -> CustomCheckOracle:
 
 
 def _convert_text_output_channel(
-    stream: YamlObject, config: dict, config_name: str
+    stream: YamlObject, context: DslContext, config_name: str
 ) -> TextOutputChannel:
     if isinstance(stream, str):
         data = stream
-        config = config.get(config_name, {})
+        config = context.config.get(config_name, {})
         return TextOutputChannel(data=data, oracle=GenericTextOracle(options=config))
     else:
         assert isinstance(stream, dict)
         data = str(stream["data"])
         if "oracle" not in stream or stream["oracle"] == "builtin":
-            existing_config = config.get(config_name, {})
-            config = _deepen_config_level(stream, existing_config)
+            config = context.deepen_config(stream, merge_with=config_name).config
             return TextOutputChannel(
                 data=data, oracle=GenericTextOracle(options=config)
             )
@@ -325,8 +352,8 @@ def _validate_testcase_combinations(testcase: YamlDict):
         raise ValueError("The outputs return and return_raw are mutually exclusive.")
 
 
-def _convert_testcase(testcase: YamlDict, previous_config: dict) -> Testcase:
-    config = _deepen_config_level(testcase, previous_config)
+def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
+    context = context.deepen_config(testcase)
 
     # This is backwards compatability to some extend.
     # TODO: remove this at some point.
@@ -335,8 +362,21 @@ def _convert_testcase(testcase: YamlDict, previous_config: dict) -> Testcase:
 
     _validate_testcase_combinations(testcase)
     if (expr_stmt := testcase.get("statement", testcase.get("expression"))) is not None:
-        assert isinstance(expr_stmt, str)
-        the_input = parse_string(expr_stmt)
+        if isinstance(expr_stmt, dict) or context.language != "tested":
+            if isinstance(expr_stmt, str):
+                the_dict = {context.language: expr_stmt}
+            else:
+                assert isinstance(expr_stmt, dict)
+                the_dict = expr_stmt
+            the_dict = {SupportedLanguage(l): cast(str, v) for l, v in the_dict.items()}
+            if "statement" in testcase:
+                the_type: Literal["statement", "expression"] = "statement"
+            else:
+                the_type: Literal["statement", "expression"] = "expression"
+            the_input = LanguageLiterals(literals=the_dict, type=the_type)
+        else:
+            assert isinstance(expr_stmt, str)
+            the_input = parse_string(expr_stmt)
         return_channel = IgnoredChannel.IGNORED if "statement" in testcase else None
     else:
         if "stdin" in testcase:
@@ -355,9 +395,9 @@ def _convert_testcase(testcase: YamlDict, previous_config: dict) -> Testcase:
         output.result = return_channel
 
     if (stdout := testcase.get("stdout")) is not None:
-        output.stdout = _convert_text_output_channel(stdout, config, "stdout")
+        output.stdout = _convert_text_output_channel(stdout, context, "stdout")
     if (stderr := testcase.get("stderr")) is not None:
-        output.stderr = _convert_text_output_channel(stderr, config, "stderr")
+        output.stderr = _convert_text_output_channel(stderr, context, "stderr")
     if (exception := testcase.get("exception")) is not None:
         if isinstance(exception, str):
             message = exception
@@ -390,32 +430,32 @@ def _convert_testcase(testcase: YamlDict, previous_config: dict) -> Testcase:
     return Testcase(input=the_input, output=output, link_files=files)
 
 
-def _convert_context(context: YamlDict, previous_config: dict) -> Context:
-    config = _deepen_config_level(context, previous_config)
+def _convert_context(context: YamlDict, dsl_context: DslContext) -> Context:
+    dsl_context = dsl_context.deepen_config(context)
     assert isinstance(context["testcases"], list)
-    testcases = _convert_dsl_list(context["testcases"], config, _convert_testcase)
+    testcases = _convert_dsl_list(context["testcases"], dsl_context, _convert_testcase)
     return Context(testcases=testcases)
 
 
-def _convert_tab(tab: YamlDict, previous_config: dict) -> Tab:
+def _convert_tab(tab: YamlDict, context: DslContext) -> Tab:
     """
     Translate a DSL tab to a full test suite tab.
 
     :param tab: The tab to translate.
-    :param previous_config: The config for the parent level.
+    :param context: The context with config for the parent level.
     :return: A full tab.
     """
-    config = _deepen_config_level(tab, previous_config)
+    context = context.deepen_config(tab)
     name = tab["tab"]
     assert isinstance(name, str)
 
     # The tab can have testcases or contexts.
     if "contexts" in tab:
         assert isinstance(tab["contexts"], list)
-        contexts = _convert_dsl_list(tab["contexts"], config, _convert_context)
+        contexts = _convert_dsl_list(tab["contexts"], context, _convert_context)
     else:
         assert isinstance(tab["testcases"], list)
-        testcases = _convert_dsl_list(tab["testcases"], config, _convert_testcase)
+        testcases = _convert_dsl_list(tab["testcases"], context, _convert_testcase)
         contexts = [Context(testcases=[t]) for t in testcases]
 
     return Tab(name=name, contexts=contexts)
@@ -425,20 +465,15 @@ T = TypeVar("T")
 
 
 def _convert_dsl_list(
-    dsl_list: list, config: dict, converter: Callable[[YamlDict, dict], T]
+    dsl_list: list, context: DslContext, converter: Callable[[YamlDict, DslContext], T]
 ) -> List[T]:
     """
     Convert a list of YAML objects into a test suite object.
-
-    :param dsl_list: The YAML list.
-    :param config: The config
-    :param converter:
-    :return:
     """
     objects = []
     for dsl_object in dsl_list:
         assert isinstance(dsl_object, dict)
-        objects.append(converter(dsl_object, config))
+        objects.append(converter(dsl_object, context))
     return objects
 
 
@@ -452,17 +487,20 @@ def _convert_dsl(dsl_object: YamlObject) -> Suite:
     :param dsl_object: A validated DSL test suite object.
     :return: A full test suite.
     """
+    context = DslContext(config={})
     if isinstance(dsl_object, list):
         namespace = None
         tab_list = dsl_object
-        config = {}
     else:
         assert isinstance(dsl_object, dict)
         namespace = dsl_object.get("namespace")
-        config = _deepen_config_level(dsl_object, {})
+        context = context.deepen_config(dsl_object)
         tab_list = dsl_object["tabs"]
         assert isinstance(tab_list, list)
-    tabs = _convert_dsl_list(tab_list, config, _convert_tab)
+        if (language := dsl_object.get("language", "tested")) != "tested":
+            language = SupportedLanguage(language)
+        context.language = language  # type: ignore
+    tabs = _convert_dsl_list(tab_list, context, _convert_tab)
 
     if namespace:
         assert isinstance(namespace, str)

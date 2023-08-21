@@ -49,6 +49,18 @@
         },
         "tabs" : {
           "$ref" : "#/definitions/_tabList"
+        },
+        "language" : {
+          "description" : "Indicate that all code is in a specific language.",
+          "oneOf" : [
+            {
+              "$ref" : "#/definitions/supportedLanguage"
+            },
+            {
+              "const" : "tested"
+            }
+          ],
+          "default" : "tested"
         }
       },
       "required" : [
@@ -115,6 +127,35 @@
       "type" : "object",
       "description" : "An individual test for a statement or expression",
       "properties" : {
+        "stdin" : {
+          "description" : "Stdin for this context",
+          "type" : [
+            "string",
+            "number",
+            "integer",
+            "boolean"
+          ]
+        },
+        "arguments" : {
+          "type" : "array",
+          "description" : "Array of program call arguments",
+          "items" : {
+            "type" : [
+              "string",
+              "number",
+              "integer",
+              "boolean"
+            ]
+          }
+        },
+        "statement" : {
+          "description" : "The statement to evaluate.",
+          "$ref" : "#/definitions/expressionOrStatement"
+        },
+        "expression" : {
+          "description" : "The expression to evaluate.",
+          "$ref" : "#/definitions/expressionOrStatement"
+        },
         "exception" : {
           "description" : "Expected exception message",
           "oneOf" : [
@@ -132,6 +173,9 @@
                 },
                 "types" : {
                   "type" : "object",
+                  "propertyNames" : {
+                    "$ref" : "#/definitions/supportedLanguage"
+                  },
                   "items" : {
                     "type" : "string"
                   }
@@ -153,14 +197,6 @@
           "description" : "Value string to parse to the expected return value",
           "$ref" : "#/definitions/advancedValueOutputChannel"
         },
-        "statement" : {
-          "description" : "Statement or expression to evaluate",
-          "type" : "string"
-        },
-        "expression" : {
-          "description" : "Statement or expression to evaluate",
-          "type" : "string"
-        },
         "stderr" : {
           "description" : "Expected output at stderr",
           "$ref" : "#/definitions/textOutputChannel"
@@ -173,30 +209,9 @@
           "$ref" : "#/definitions/globalConfig",
           "description" : "Configuration settings at testcase level"
         },
-        "stdin" : {
-          "description" : "Stdin for this context",
-          "type" : [
-            "string",
-            "number",
-            "integer",
-            "boolean"
-          ]
-        },
         "exitCode" : {
           "type" : "integer",
           "description" : "Expected exit code for the run"
-        },
-        "arguments" : {
-          "type" : "array",
-          "description" : "Array of program call arguments",
-          "items" : {
-            "type" : [
-              "string",
-              "number",
-              "integer",
-              "boolean"
-            ]
-          }
         }
       }
     },
@@ -213,6 +228,23 @@
         },
         {
           "$ref" : "#/definitions/advancedTextOutputChannel"
+        }
+      ]
+    },
+    "expressionOrStatement" : {
+      "oneOf" : [
+        {
+          "type" : "string"
+        },
+        {
+          "type" : "object",
+          "propertyNames" : {
+            "$ref" : "#/definitions/supportedLanguage"
+          },
+          "items" : {
+            "type" : "string",
+            "description" : "A language-specific literal which will be used verbatim."
+          }
         }
       ]
     },
@@ -414,6 +446,20 @@
           "description" : "Relative path to the file in the `description` folder of a Dodona exercise"
         }
       }
+    },
+    "supportedLanguage" : {
+      "type" : "string",
+      "enum" : [
+        "bash",
+        "c",
+        "haskell",
+        "java",
+        "javascript",
+        "kotlin",
+        "python",
+        "runhaskell",
+        "csharp"
+      ]
     }
   }
 }
