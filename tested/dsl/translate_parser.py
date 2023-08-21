@@ -7,6 +7,7 @@ from typing import Any, Callable, Dict, List, Optional, TextIO, TypeVar, Union, 
 import yaml
 from attrs import define
 from jsonschema import Draft7Validator
+from jsonschema.exceptions import ValidationError
 
 from tested.datatypes import (
     AdvancedNumericTypes,
@@ -109,22 +110,58 @@ def _load_schema_validator():
 _SCHEMA_VALIDATOR = _load_schema_validator()
 
 
-def _validate_dsl(dsl_object: YamlObject, report=True) -> bool:
+class DslValidationError(ValueError):
+    pass
+
+
+def convert_validation_error_to_group(
+    error: ValidationError,
+) -> ExceptionGroup | Exception:
+    if not error.context and not error.cause:
+        if len(error.message) > 150:
+            message = error.message.replace(str(error.instance), "<DSL>")
+            note = "With <DSL> being: " + str(error.instance)
+        else:
+            message = error.message
+            note = None
+        converted = DslValidationError(
+            f"Validation error at {error.json_path}: " + message
+        )
+        if note:
+            converted.add_note(note)
+        return converted
+    elif error.cause:
+        return error.cause
+    elif error.context:
+        causes = [convert_validation_error_to_group(x) for x in error.context]
+        message = f"Validation error at {error.json_path}, caused by a sub-exception."
+        return ExceptionGroup(message, causes)
+    else:
+        return error
+
+
+def _validate_dsl(dsl_object: YamlObject):
     """
     Validate a DSl object.
 
     :param dsl_object: The object to validate.
-    :param report: If errors should be printed or not.
     :return: True if valid, False otherwise.
     """
     errors = list(_SCHEMA_VALIDATOR.iter_errors(dsl_object))
-    if not errors:
-        return True
-    if report:
-        for error in errors:
-            logger.error(error)
-
-    return False
+    if len(errors) == 1:
+        message = (
+            "Validating the DSL resulted in an error. "
+            "The most specific sub-exception is often the culprit. "
+        )
+        error = convert_validation_error_to_group(errors[0])
+        if isinstance(error, ExceptionGroup):
+            raise ExceptionGroup(message, error.exceptions)
+        else:
+            raise DslValidationError(message + str(error)) from error
+    elif len(errors) > 1:
+        the_errors = [convert_validation_error_to_group(e) for e in errors]
+        message = "Validating the DSL resulted in some errors."
+        raise ExceptionGroup(message, the_errors)
 
 
 def _deepen_config_level(
@@ -434,28 +471,25 @@ def _convert_dsl(dsl_object: YamlObject) -> Suite:
         return Suite(tabs=tabs)
 
 
-def parse_dsl(dsl_string: str, validate: bool = True) -> Suite:
+def parse_dsl(dsl_string: str) -> Suite:
     """
     Parse a string containing a DSL test suite into our representation,
     a test suite.
 
     :param dsl_string: The string containing a DSL.
-    :param validate: If the test suite should be validated or not.
     :return: The parsed and converted test suite.
     """
     dsl_object = _parse_yaml(dsl_string)
-    if validate and not _validate_dsl(dsl_object):
-        raise ValueError("DSL does not adhere to the JSON schema")
+    _validate_dsl(dsl_object)
     return _convert_dsl(dsl_object)
 
 
-def translate_to_test_suite(dsl_string: str, validate: bool = True) -> str:
+def translate_to_test_suite(dsl_string: str) -> str:
     """
     Convert a DSL to a test suite.
 
     :param dsl_string: The DSL.
-    :param validate: Validate the DSL or not.
     :return: The test suite.
     """
-    suite = parse_dsl(dsl_string, validate)
+    suite = parse_dsl(dsl_string)
     return suite_to_json(suite)

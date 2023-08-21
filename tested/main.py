@@ -16,8 +16,15 @@ def run(config: DodonaConfig, judge_output: IO):
     :param config: The configuration, as received from Dodona.
     :param judge_output: Where the judge output will be written to.
     """
-    with open(f"{config.resources}/{config.test_suite}", "r") as t:
-        textual_suite = t.read()
+    try:
+        with open(f"{config.resources}/{config.test_suite}", "r") as t:
+            textual_suite = t.read()
+    except FileNotFoundError as e:
+        print("The test suite was not found. Check your exercise's config.json file.")
+        print(
+            "Remember that the test suite is a path relative to the 'evaluation' folder of your exercise."
+        )
+        raise e
 
     _, ext = os.path.splitext(config.test_suite)
     is_yaml = ext.lower() in (".yaml", ".yml")

@@ -354,7 +354,7 @@ def test_invalid_yaml():
     - statement: 'data = () ()'
       return_raw: '() {}'
     """
-    with pytest.raises(ValueError):
+    with pytest.raises(Exception):
         translate_to_test_suite(yaml_str)
 
 
@@ -379,7 +379,7 @@ def test_invalid_context_as_testcase():
     statement: "5"
     return: 5
     """
-    with pytest.raises(ValueError):
+    with pytest.raises(Exception):
         translate_to_test_suite(yaml_str)
 
 
