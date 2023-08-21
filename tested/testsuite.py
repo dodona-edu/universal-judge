@@ -545,6 +545,28 @@ class Testcase(WithFeatures, WithFunctions):
     def is_main_testcase(self):
         return isinstance(self.input, MainInput)
 
+    def get_specific_languages(self) -> Optional[Set[SupportedLanguage]]:
+        """
+        Get the languages supported by this output if this output uses any language-specific constructs.
+
+        :return: None if no language-specific stuff is used, a set of supported languages otherwise.
+        """
+        output_languages = self.output.get_specific_languages()
+        input_languages = None
+        if isinstance(self.input, LanguageLiterals):
+            input_languages = {SupportedLanguage(x) for x in self.input.literals.keys()}
+
+        if output_languages is None and input_languages is None:
+            return None
+        if output_languages is None:
+            assert input_languages is not None
+            return input_languages
+        if input_languages is None:
+            assert output_languages is not None
+            return output_languages
+
+        return output_languages & input_languages
+
 
 Code = Dict[str, TextData]
 
@@ -747,7 +769,6 @@ def _resolve_function_calls(function_calls: Iterable[FunctionCall]):
         registry[signature].append(function_call)
 
     used_features = []
-    # noinspection PyTypeChecker
     for signature, calls in registry.items():
         # If there are default arguments, some function calls will not have the
         # same number of arguments.

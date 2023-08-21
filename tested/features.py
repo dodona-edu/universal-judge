@@ -40,13 +40,9 @@ class Construct(StrEnum):
     GLOBAL_VARIABLES = "global_variables"
 
 
-Types = Set[AllTypes]
-Constructs = Set[Construct]
-
-
 class FeatureSet(NamedTuple):
-    constructs: Constructs
-    types: Types
+    constructs: Set[Construct]
+    types: Set[AllTypes]
     nested_types: NestedTypes
 
 
@@ -153,11 +149,11 @@ def is_supported(language: "Language") -> bool:
         assert tab.contexts is not None
         for context in tab.contexts:
             for testcase in context.testcases:
-                languages = testcase.output.get_specific_languages()
+                languages = testcase.get_specific_languages()
                 if languages is not None:
                     if language.config.dodona.programming_language not in languages:
                         _logger.warning(
-                            f"Language-specific oracles are available only in "
+                            f"Language-specific constructs are available only in "
                             f"{languages}!"
                         )
                         return False
