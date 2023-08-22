@@ -26,7 +26,7 @@
       "type" : "array",
       "minItems" : 1,
       "items" : {
-        "$ref" : "#/definitions/context"
+        "$ref" : "#/definitions/testcase"
       }
     },
     "_scriptList" : {
@@ -89,22 +89,30 @@
         "hidden" : {
           "type" : "boolean",
           "description" : "Defines if the unit/tab is hidden for the student or not"
+        },
+        "unit" : {
+          "type" : "string",
+          "description" : "The name of this unit."
+        },
+        "tab" : {
+          "type" : "string",
+          "description" : "The name of this tab."
+        },
+        "cases" : {
+          "$ref" : "#/definitions/_testcaseList"
+        },
+        "contexts" : {
+          "$ref" : "#/definitions/_testcaseList"
+        },
+        "scripts" : {
+          "$ref" : "#/definitions/_scriptList"
+        },
+        "testcases" : {
+          "$ref" : "#/definitions/_scriptList"
         }
       },
       "oneOf" : [
         {
-          "properties" : {
-            "tab" : {
-              "type" : "string",
-              "description" : "The name of this tab."
-            },
-            "contexts" : {
-              "$ref" : "#/definitions/_testcaseList"
-            },
-            "testcases" : {
-              "$ref" : "#/definitions/_scriptList"
-            }
-          },
           "required" : [
             "tab"
           ],
@@ -122,25 +130,13 @@
           ]
         },
         {
-          "properties" : {
-            "unit" : {
-              "type" : "string",
-              "description" : "The name of this unit."
-            },
-            "testcases" : {
-              "$ref" : "#/definitions/_testcaseList"
-            },
-            "scripts" : {
-              "$ref" : "#/definitions/_scriptList"
-            }
-          },
           "required" : [
             "unit"
           ],
           "oneOf" : [
             {
               "required" : [
-                "testcases"
+                "cases"
               ]
             },
             {
@@ -152,7 +148,7 @@
         }
       ]
     },
-    "context" : {
+    "testcase" : {
       "type" : "object",
       "properties" : {
         "config" : {

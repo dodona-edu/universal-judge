@@ -454,10 +454,11 @@ def _convert_tab(tab: YamlDict, context: DslContext) -> Tab:
     if "contexts" in tab:
         assert isinstance(tab["contexts"], list)
         contexts = _convert_dsl_list(tab["contexts"], context, _convert_context)
-    elif "testcases" in tab and "unit" in tab:
+    elif "cases" in tab:
+        assert "unit" in tab
         # We have testcases N.S. / contexts O.S.
-        assert isinstance(tab["testcases"], list)
-        contexts = _convert_dsl_list(tab["testcases"], context, _convert_context)
+        assert isinstance(tab["cases"], list)
+        contexts = _convert_dsl_list(tab["cases"], context, _convert_context)
     elif "testcases" in tab:
         # We have scripts N.S. / testcases O.S.
         assert "tab" in tab

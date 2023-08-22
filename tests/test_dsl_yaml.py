@@ -890,8 +890,8 @@ def test_one_language_literal():
         java: "IllegalArgumentException"
   - arguments: [ "--arg", "fail2" ]
     exit_code: 10
-- tab: "Ctx Error"
-  testcases:
+- unit: "Ctx Error"
+  scripts:
   - arguments: [ "--arg", "error" ]
     exception:
       message: "Error"
@@ -939,7 +939,7 @@ def test_one_language_literal():
         """,
             """
     - unit: "Statement and main"
-      testcases:
+      cases:
       - script:
           - arguments: [ '-a', '5', '7' ]
             stdout:
