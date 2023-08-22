@@ -432,8 +432,9 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
 
 def _convert_context(context: YamlDict, dsl_context: DslContext) -> Context:
     dsl_context = dsl_context.deepen_config(context)
-    assert isinstance(context["testcases"], list)
-    testcases = _convert_dsl_list(context["testcases"], dsl_context, _convert_testcase)
+    raw_testcases = context.get("script", context.get("testcases"))
+    assert isinstance(raw_testcases, list)
+    testcases = _convert_dsl_list(raw_testcases, dsl_context, _convert_testcase)
     return Context(testcases=testcases)
 
 
@@ -446,16 +447,28 @@ def _convert_tab(tab: YamlDict, context: DslContext) -> Tab:
     :return: A full tab.
     """
     context = context.deepen_config(tab)
-    name = tab["tab"]
+    name = tab.get("unit", tab.get("tab"))
     assert isinstance(name, str)
 
     # The tab can have testcases or contexts.
     if "contexts" in tab:
         assert isinstance(tab["contexts"], list)
         contexts = _convert_dsl_list(tab["contexts"], context, _convert_context)
-    else:
+    elif "cases" in tab:
+        assert "unit" in tab
+        # We have testcases N.S. / contexts O.S.
+        assert isinstance(tab["cases"], list)
+        contexts = _convert_dsl_list(tab["cases"], context, _convert_context)
+    elif "testcases" in tab:
+        # We have scripts N.S. / testcases O.S.
+        assert "tab" in tab
         assert isinstance(tab["testcases"], list)
         testcases = _convert_dsl_list(tab["testcases"], context, _convert_testcase)
+        contexts = [Context(testcases=[t]) for t in testcases]
+    else:
+        assert "scripts" in tab
+        assert isinstance(tab["scripts"], list)
+        testcases = _convert_dsl_list(tab["scripts"], context, _convert_testcase)
         contexts = [Context(testcases=[t]) for t in testcases]
 
     return Tab(name=name, contexts=contexts)
@@ -495,7 +508,7 @@ def _convert_dsl(dsl_object: YamlObject) -> Suite:
         assert isinstance(dsl_object, dict)
         namespace = dsl_object.get("namespace")
         context = context.deepen_config(dsl_object)
-        tab_list = dsl_object["tabs"]
+        tab_list = dsl_object.get("units", dsl_object.get("tabs"))
         assert isinstance(tab_list, list)
         if (language := dsl_object.get("language", "tested")) != "tested":
             language = SupportedLanguage(language)
