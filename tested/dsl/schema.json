@@ -1,46 +1,47 @@
 {
   "$id" : "https://github.com/dodona-edu/universal-judge/blob/master/tested/dsl/schema.yaml",
-  "$schema" : "http://json-schema.org/draft-07/schema#",
+  "$schema" : "https://json-schema.org/draft/2019-09/schema",
   "title" : "DSL Schema",
   "description" : "DSL test suite for TESTed",
   "oneOf" : [
     {
-      "$ref" : "#/definitions/_rootObject"
+      "$ref" : "#/$defs/_rootObject"
     },
     {
-      "$ref" : "#/definitions/unit"
+      "$ref" : "#/$defs/unit"
     },
     {
-      "$ref" : "#/definitions/_unitList"
+      "$ref" : "#/$defs/_unitList"
     }
   ],
-  "definitions" : {
+  "$defs" : {
     "_unitList" : {
       "type" : "array",
       "minItems" : 1,
       "items" : {
-        "$ref" : "#/definitions/unit"
+        "$ref" : "#/$defs/unit"
       }
     },
     "_testcaseList" : {
       "type" : "array",
       "minItems" : 1,
       "items" : {
-        "$ref" : "#/definitions/testcase"
+        "$ref" : "#/$defs/testcase"
       }
     },
     "_scriptList" : {
       "type" : "array",
       "minItems" : 1,
       "items" : {
-        "$ref" : "#/definitions/script"
+        "$ref" : "#/$defs/script"
       }
     },
     "_rootObject" : {
       "type" : "object",
+      "unevaluatedProperties" : false,
       "properties" : {
         "config" : {
-          "$ref" : "#/definitions/globalConfig",
+          "$ref" : "#/$defs/globalConfig",
           "description" : "Configuration applicable to the whole test suite."
         },
         "namespace" : {
@@ -48,16 +49,16 @@
           "description" : "Namespace of the submitted solution, in `snake_case`"
         },
         "tabs" : {
-          "$ref" : "#/definitions/_unitList"
+          "$ref" : "#/$defs/_unitList"
         },
         "units" : {
-          "$ref" : "#/definitions/_unitList"
+          "$ref" : "#/$defs/_unitList"
         },
         "language" : {
           "description" : "Indicate that all code is in a specific language.",
           "oneOf" : [
             {
-              "$ref" : "#/definitions/supportedLanguage"
+              "$ref" : "#/$defs/supportedLanguage"
             },
             {
               "const" : "tested"
@@ -81,9 +82,10 @@
     },
     "unit" : {
       "type" : "object",
+      "unevaluatedProperties" : false,
       "properties" : {
         "config" : {
-          "$ref" : "#/definitions/globalConfig",
+          "$ref" : "#/$defs/globalConfig",
           "description" : "Configuration applicable to this unit/tab"
         },
         "hidden" : {
@@ -99,16 +101,16 @@
           "description" : "The name of this tab."
         },
         "cases" : {
-          "$ref" : "#/definitions/_testcaseList"
+          "$ref" : "#/$defs/_testcaseList"
         },
         "contexts" : {
-          "$ref" : "#/definitions/_testcaseList"
+          "$ref" : "#/$defs/_testcaseList"
         },
         "scripts" : {
-          "$ref" : "#/definitions/_scriptList"
+          "$ref" : "#/$defs/_scriptList"
         },
         "testcases" : {
-          "$ref" : "#/definitions/_scriptList"
+          "$ref" : "#/$defs/_scriptList"
         }
       },
       "oneOf" : [
@@ -150,9 +152,10 @@
     },
     "testcase" : {
       "type" : "object",
+      "unevaluatedProperties" : false,
       "properties" : {
         "config" : {
-          "$ref" : "#/definitions/globalConfig",
+          "$ref" : "#/$defs/globalConfig",
           "description" : "Configuration settings at context level"
         },
         "context" : {
@@ -160,10 +163,10 @@
           "description" : "Description of this context."
         },
         "testcases" : {
-          "$ref" : "#/definitions/_scriptList"
+          "$ref" : "#/$defs/_scriptList"
         },
         "script" : {
-          "$ref" : "#/definitions/_scriptList"
+          "$ref" : "#/$defs/_scriptList"
         }
       },
       "oneOf" : [
@@ -181,6 +184,7 @@
     },
     "script" : {
       "type" : "object",
+      "unevaluatedProperties" : false,
       "description" : "An individual test for a statement or expression",
       "properties" : {
         "stdin" : {
@@ -206,11 +210,11 @@
         },
         "statement" : {
           "description" : "The statement to evaluate.",
-          "$ref" : "#/definitions/expressionOrStatement"
+          "$ref" : "#/$defs/expressionOrStatement"
         },
         "expression" : {
           "description" : "The expression to evaluate.",
-          "$ref" : "#/definitions/expressionOrStatement"
+          "$ref" : "#/$defs/expressionOrStatement"
         },
         "exception" : {
           "description" : "Expected exception message",
@@ -230,7 +234,7 @@
                 "types" : {
                   "type" : "object",
                   "propertyNames" : {
-                    "$ref" : "#/definitions/supportedLanguage"
+                    "$ref" : "#/$defs/supportedLanguage"
                   },
                   "items" : {
                     "type" : "string"
@@ -243,7 +247,7 @@
         "files" : {
           "type" : "array",
           "items" : {
-            "$ref" : "#/definitions/file"
+            "$ref" : "#/$defs/file"
           }
         },
         "return" : {
@@ -251,21 +255,21 @@
         },
         "return_raw" : {
           "description" : "Value string to parse to the expected return value",
-          "$ref" : "#/definitions/advancedValueOutputChannel"
+          "$ref" : "#/$defs/advancedValueOutputChannel"
         },
         "stderr" : {
           "description" : "Expected output at stderr",
-          "$ref" : "#/definitions/textOutputChannel"
+          "$ref" : "#/$defs/textOutputChannel"
         },
         "stdout" : {
           "description" : "Expected output at stdout",
-          "$ref" : "#/definitions/textOutputChannel"
+          "$ref" : "#/$defs/textOutputChannel"
         },
         "config" : {
-          "$ref" : "#/definitions/globalConfig",
+          "$ref" : "#/$defs/globalConfig",
           "description" : "Configuration settings at testcase level"
         },
-        "exitCode" : {
+        "exit_code" : {
           "type" : "integer",
           "description" : "Expected exit code for the run"
         }
@@ -283,7 +287,7 @@
           ]
         },
         {
-          "$ref" : "#/definitions/advancedTextOutputChannel"
+          "$ref" : "#/$defs/advancedTextOutputChannel"
         }
       ]
     },
@@ -295,7 +299,7 @@
         {
           "type" : "object",
           "propertyNames" : {
-            "$ref" : "#/definitions/supportedLanguage"
+            "$ref" : "#/$defs/supportedLanguage"
           },
           "items" : {
             "type" : "string",
@@ -306,6 +310,7 @@
     },
     "advancedTextOutputChannel" : {
       "type" : "object",
+      "unevaluatedProperties" : false,
       "description" : "Advanced output for a text output channel, such as stdout or stderr.",
       "required" : [
         "data"
@@ -321,7 +326,7 @@
           ]
         },
         "config" : {
-          "$ref" : "#/definitions/textConfigurationOptions"
+          "$ref" : "#/$defs/textConfigurationOptions"
         }
       },
       "oneOf" : [
@@ -380,6 +385,7 @@
         },
         {
           "type" : "object",
+          "unevaluatedProperties" : false,
           "description" : "A custom check function.",
           "required" : [
             "value"
@@ -444,6 +450,7 @@
       "type" : "object",
       "description" : "Configuration properties for textual comparison and to configure if the expected value should be hidden or not",
       "minProperties" : 1,
+      "unevaluatedProperties" : false,
       "properties" : {
         "applyRounding" : {
           "description" : "Apply rounding when comparing as float",
@@ -475,18 +482,20 @@
       "type" : "object",
       "description" : "Global configuration properties",
       "minProperties" : 1,
+      "unevaluatedProperties" : false,
       "properties" : {
         "stdout" : {
-          "$ref" : "#/definitions/textConfigurationOptions"
+          "$ref" : "#/$defs/textConfigurationOptions"
         },
         "stderr" : {
-          "$ref" : "#/definitions/textConfigurationOptions"
+          "$ref" : "#/$defs/textConfigurationOptions"
         }
       }
     },
     "file" : {
       "type" : "object",
       "description" : "Path to a file for input.",
+      "unevaluatedProperties" : false,
       "required" : [
         "name",
         "url"

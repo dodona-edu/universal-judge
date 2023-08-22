@@ -17,7 +17,7 @@ from tested.datatypes import (
     SequenceTypes,
     StringTypes,
 )
-from tested.dsl import translate_to_test_suite
+from tested.dsl import parse_dsl, translate_to_test_suite
 from tested.serialisation import (
     Assignment,
     FunctionCall,
@@ -40,7 +40,6 @@ from tested.utils import get_args
 
 def test_parse_one_tab_ctx():
     yaml_str = """
-disableOptimizations: true
 namespace: "solution"
 tabs:
 - tab: "Ctx"
@@ -959,3 +958,17 @@ def test_old_and_new_names_work(old, new):
     new_suite = parse_test_suite(new_json)
 
     assert old_suite == new_suite
+
+
+def test_additional_properties_are_not_allowed():
+    yaml_str = """
+    - tab: "Feedback"
+      testcases:
+      - expression: "heir(8, 10)"
+        not_return: [ 10, 4, 15, 11, 7, 5, 3, 2, 16, 12, 1, 6, 13, 9, 14, 8 ]
+      - statement:
+            javascript: "hello()"
+            python: "hello_2()"
+"""
+    with pytest.raises(Exception):
+        parse_dsl(yaml_str)

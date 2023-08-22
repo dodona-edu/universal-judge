@@ -17,8 +17,8 @@ from typing import (
 
 import yaml
 from attrs import define, evolve
-from jsonschema import Draft7Validator
 from jsonschema.exceptions import ValidationError
+from jsonschema.validators import Draft201909Validator
 
 from tested.datatypes import (
     AdvancedNumericTypes,
@@ -116,8 +116,8 @@ def _load_schema_validator():
     path_to_schema = Path(__file__).parent / "schema.json"
     with open(path_to_schema, "r") as schema_file:
         schema_object = json.load(schema_file)
-    Draft7Validator.check_schema(schema_object)
-    return Draft7Validator(schema_object)
+    Draft201909Validator.check_schema(schema_object)
+    return Draft201909Validator(schema_object)
 
 
 _SCHEMA_VALIDATOR = _load_schema_validator()
