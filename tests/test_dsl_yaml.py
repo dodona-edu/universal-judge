@@ -851,3 +851,111 @@ def test_one_language_literal():
     i2 = test1.input
     assert i2.type == "statement"
     assert i2.literals.keys() == {"javascript", "python"}
+
+
+@pytest.mark.parametrize(
+    "old,new",
+    [
+        (
+            """
+- tab: "Ctx Exception"
+  hidden: false
+  testcases:
+  - arguments: [ "--arg", "fail" ]
+    exception:
+      message: "Exception message"
+      types:
+        javascript: "AssertionError"
+        java: "IllegalArgumentException"
+  - arguments: [ "--arg", "fail2" ]
+    exit_code: 10
+- tab: "Ctx Error"
+  testcases:
+  - arguments: [ "--arg", "error" ]
+    exception:
+      message: "Error"
+      types:
+        csharp: "System.DivideByZeroException"
+        python: "ZeroDivisionError"
+    """,
+            """
+- unit: "Ctx Exception"
+  hidden: false
+  scripts:
+  - arguments: [ "--arg", "fail" ]
+    exception:
+      message: "Exception message"
+      types:
+        javascript: "AssertionError"
+        java: "IllegalArgumentException"
+  - arguments: [ "--arg", "fail2" ]
+    exit_code: 10
+- tab: "Ctx Error"
+  testcases:
+  - arguments: [ "--arg", "error" ]
+    exception:
+      message: "Error"
+      types:
+        csharp: "System.DivideByZeroException"
+        python: "ZeroDivisionError"
+    """,
+        ),
+        (
+            """
+        language: "javascript"
+        tabs:
+        - tab: "Feedback"
+          testcases:
+          - expression: "heir(8, 10)"
+            return: [ 10, 4, 15, 11, 7, 5, 3, 2, 16, 12, 1, 6, 13, 9, 14, 8 ]
+          - statement:
+                javascript: "hello()"
+                python: "hello_2()"
+    """,
+            """
+        language: "javascript"
+        units:
+        - unit: "Feedback"
+          scripts:
+          - expression: "heir(8, 10)"
+            return: [ 10, 4, 15, 11, 7, 5, 3, 2, 16, 12, 1, 6, 13, 9, 14, 8 ]
+          - statement:
+                javascript: "hello()"
+                python: "hello_2()"
+    """,
+        ),
+        (
+            """
+    - tab: "Statement and main"
+      contexts:
+      - testcases:
+          - arguments: [ '-a', '5', '7' ]
+            stdout:
+              data: 12
+              config:
+                tryFloatingPoint: true
+          - expression: 'add(5, 7)'
+            return: 12
+        """,
+            """
+    - unit: "Statement and main"
+      testcases:
+      - script:
+          - arguments: [ '-a', '5', '7' ]
+            stdout:
+              data: 12
+              config:
+                tryFloatingPoint: true
+          - expression: 'add(5, 7)'
+            return: 12
+        """,
+        ),
+    ],
+)
+def test_old_and_new_names_work(old, new):
+    old_json = translate_to_test_suite(old)
+    old_suite = parse_test_suite(old_json)
+    new_json = translate_to_test_suite(new)
+    new_suite = parse_test_suite(new_json)
+
+    assert old_suite == new_suite

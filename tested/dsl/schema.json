@@ -8,32 +8,32 @@
       "$ref" : "#/definitions/_rootObject"
     },
     {
-      "$ref" : "#/definitions/tab"
+      "$ref" : "#/definitions/unit"
     },
     {
-      "$ref" : "#/definitions/_tabList"
+      "$ref" : "#/definitions/_unitList"
     }
   ],
   "definitions" : {
-    "_tabList" : {
+    "_unitList" : {
       "type" : "array",
       "minItems" : 1,
       "items" : {
-        "$ref" : "#/definitions/tab"
-      }
-    },
-    "_contextList" : {
-      "type" : "array",
-      "minItems" : 1,
-      "items" : {
-        "$ref" : "#/definitions/context"
+        "$ref" : "#/definitions/unit"
       }
     },
     "_testcaseList" : {
       "type" : "array",
       "minItems" : 1,
       "items" : {
-        "$ref" : "#/definitions/testcase"
+        "$ref" : "#/definitions/context"
+      }
+    },
+    "_scriptList" : {
+      "type" : "array",
+      "minItems" : 1,
+      "items" : {
+        "$ref" : "#/definitions/script"
       }
     },
     "_rootObject" : {
@@ -48,7 +48,10 @@
           "description" : "Namespace of the submitted solution, in `snake_case`"
         },
         "tabs" : {
-          "$ref" : "#/definitions/_tabList"
+          "$ref" : "#/definitions/_unitList"
+        },
+        "units" : {
+          "$ref" : "#/definitions/_unitList"
         },
         "language" : {
           "description" : "Indicate that all code is in a specific language.",
@@ -63,43 +66,88 @@
           "default" : "tested"
         }
       },
-      "required" : [
-        "tabs"
-      ]
-    },
-    "tab" : {
-      "type" : "object",
-      "properties" : {
-        "config" : {
-          "$ref" : "#/definitions/globalConfig",
-          "description" : "Configuration applicable to this tab"
-        },
-        "hidden" : {
-          "type" : "boolean",
-          "description" : "Defines if the tab is hidden for the student or not"
-        },
-        "tab" : {
-          "type" : "string",
-          "description" : "The name of this tab."
-        },
-        "contexts" : {
-          "$ref" : "#/definitions/_contextList"
-        },
-        "testcases" : {
-          "$ref" : "#/definitions/_testcaseList"
-        }
-      },
       "oneOf" : [
         {
           "required" : [
-            "contexts",
-            "tab"
+            "tabs"
           ]
         },
         {
           "required" : [
-            "testcases",
+            "units"
+          ]
+        }
+      ]
+    },
+    "unit" : {
+      "type" : "object",
+      "properties" : {
+        "config" : {
+          "$ref" : "#/definitions/globalConfig",
+          "description" : "Configuration applicable to this unit/tab"
+        },
+        "hidden" : {
+          "type" : "boolean",
+          "description" : "Defines if the unit/tab is hidden for the student or not"
+        }
+      },
+      "oneOf" : [
+        {
+          "properties" : {
+            "tab" : {
+              "type" : "string",
+              "description" : "The name of this tab."
+            },
+            "contexts" : {
+              "$ref" : "#/definitions/_testcaseList"
+            },
+            "testcases" : {
+              "$ref" : "#/definitions/_scriptList"
+            }
+          },
+          "required" : [
             "tab"
+          ],
+          "oneOf" : [
+            {
+              "required" : [
+                "contexts"
+              ]
+            },
+            {
+              "required" : [
+                "testcases"
+              ]
+            }
+          ]
+        },
+        {
+          "properties" : {
+            "unit" : {
+              "type" : "string",
+              "description" : "The name of this unit."
+            },
+            "testcases" : {
+              "$ref" : "#/definitions/_testcaseList"
+            },
+            "scripts" : {
+              "$ref" : "#/definitions/_scriptList"
+            }
+          },
+          "required" : [
+            "unit"
+          ],
+          "oneOf" : [
+            {
+              "required" : [
+                "testcases"
+              ]
+            },
+            {
+              "required" : [
+                "scripts"
+              ]
+            }
           ]
         }
       ]
@@ -116,14 +164,26 @@
           "description" : "Description of this context."
         },
         "testcases" : {
-          "$ref" : "#/definitions/_testcaseList"
+          "$ref" : "#/definitions/_scriptList"
+        },
+        "script" : {
+          "$ref" : "#/definitions/_scriptList"
         }
       },
-      "required" : [
-        "testcases"
+      "oneOf" : [
+        {
+          "required" : [
+            "testcases"
+          ]
+        },
+        {
+          "required" : [
+            "script"
+          ]
+        }
       ]
     },
-    "testcase" : {
+    "script" : {
       "type" : "object",
       "description" : "An individual test for a statement or expression",
       "properties" : {
