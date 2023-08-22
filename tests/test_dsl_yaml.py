@@ -30,6 +30,7 @@ from tested.testsuite import (
     CustomCheckOracle,
     GenericTextOracle,
     GenericValueOracle,
+    LanguageLiterals,
     TextOutputChannel,
     ValueOutputChannel,
     parse_test_suite,
@@ -327,6 +328,31 @@ def test_expression():
   - expression: "heir(8, 3)"
     return: [ 3, 6, 9, 12, 15, 2, 7, 1, 13, 8, 16, 10, 14, 4, 11, 5 ]
 """
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    assert len(suite.tabs) == 1
+    tab = suite.tabs[0]
+    assert len(tab.contexts) == 2
+    ctx0, ctx1 = tab.contexts
+    testcases0, testcases1 = ctx0.testcases, ctx1.testcases
+    assert len(testcases0) == 1
+    assert len(testcases1) == 1
+    test0, test1 = testcases0[0], testcases1[0]
+    assert isinstance(test0.input, FunctionCall)
+    assert isinstance(test1.input, FunctionCall)
+
+
+def test_expression_with_explicit_language():
+    yaml_str = """
+    language: "tested"
+    tabs:
+    - tab: "Feedback"
+      testcases:
+      - expression: "heir(8, 10)"
+        return: [ 10, 4, 15, 11, 7, 5, 3, 2, 16, 12, 1, 6, 13, 9, 14, 8 ]
+      - expression: "heir(8, 3)"
+        return: [ 3, 6, 9, 12, 15, 2, 7, 1, 13, 8, 16, 10, 14, 4, 11, 5 ]
+    """
     json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
     assert len(suite.tabs) == 1
@@ -766,3 +792,62 @@ def test_yaml_custom_tags_are_supported(all_types, value):
             assert isinstance(test.output.result, ValueOutputChannel)
             value = test.output.result.value
             assert value.type == the_type
+
+
+def test_global_language_literals():
+    yaml_str = """
+    language: "javascript"
+    tabs:
+    - tab: "Feedback"
+      testcases:
+      - expression: "heir(8, 10)"
+        return: [ 10, 4, 15, 11, 7, 5, 3, 2, 16, 12, 1, 6, 13, 9, 14, 8 ]
+      - statement:
+            javascript: "hello()"
+            python: "hello_2()"
+"""
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    assert len(suite.tabs) == 1
+    tab = suite.tabs[0]
+    assert len(tab.contexts) == 2
+    ctx0, ctx1 = tab.contexts
+    testcases0, testcases1 = ctx0.testcases, ctx1.testcases
+    assert len(testcases0) == 1
+    assert len(testcases1) == 1
+    test0, test1 = testcases0[0], testcases1[0]
+    assert isinstance(test0.input, LanguageLiterals)
+    i1 = test0.input
+    assert i1.type == "expression"
+    assert i1.literals.keys() == {"javascript"}
+    assert isinstance(test1.input, LanguageLiterals)
+    i2 = test1.input
+    assert i2.type == "statement"
+    assert i2.literals.keys() == {"javascript", "python"}
+
+
+def test_one_language_literal():
+    yaml_str = """
+    - tab: "Feedback"
+      testcases:
+      - expression: "heir(8, 10)"
+        return: [ 10, 4, 15, 11, 7, 5, 3, 2, 16, 12, 1, 6, 13, 9, 14, 8 ]
+      - statement:
+            javascript: "hello()"
+            python: "hello_2()"
+"""
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    assert len(suite.tabs) == 1
+    tab = suite.tabs[0]
+    assert len(tab.contexts) == 2
+    ctx0, ctx1 = tab.contexts
+    testcases0, testcases1 = ctx0.testcases, ctx1.testcases
+    assert len(testcases0) == 1
+    assert len(testcases1) == 1
+    test0, test1 = testcases0[0], testcases1[0]
+    assert isinstance(test0.input, FunctionCall)
+    assert isinstance(test1.input, LanguageLiterals)
+    i2 = test1.input
+    assert i2.type == "statement"
+    assert i2.literals.keys() == {"javascript", "python"}

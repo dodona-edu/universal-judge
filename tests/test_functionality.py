@@ -984,3 +984,19 @@ def test_ignored_return_and_got_some(language: str, tmp_path: Path, pytestconfig
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == []  # Empty means correct
+
+
+@pytest.mark.parametrize("language", ALL_SPECIFIC_LANGUAGES)
+def test_language_literals_work(language: str, tmp_path: Path, pytestconfig):
+    conf = configuration(
+        pytestconfig,
+        "echo-function",
+        language,
+        tmp_path,
+        "one-language-literals.yaml",
+        "correct",
+    )
+
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]

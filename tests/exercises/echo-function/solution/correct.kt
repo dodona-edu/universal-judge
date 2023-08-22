@@ -5,3 +5,7 @@ fun echo(content : Any?) : Any? {
 fun noEcho(content : Any?) {
     // Do nothing
 }
+
+fun toString(content: Int): String {
+    return content.toString()
+}

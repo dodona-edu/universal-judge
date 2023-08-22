@@ -11,4 +11,9 @@ class Submission
     {
         // Do nothing.
     }
+    
+    public static string toString(int number)
+    {
+        return number.ToString();
+    }
 }

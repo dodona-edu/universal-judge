@@ -187,7 +187,11 @@ def _generate_internal_context(ctx: PreparedContext, pu: PreparedExecutionUnit) 
             result += "exit_code = 0;\n"
             if is_special_void_call(tc.input, pu.language):
                 # The method has a "void" return type, so don't wrap it.
-                result += " " * 4 + convert_statement(tc.input.statement) + ";\n"
+                result += (
+                    " " * 4
+                    + convert_statement(tc.input.unwrapped_input_statement())
+                    + ";\n"
+                )
                 result += " " * 4 + convert_statement(tc.input.no_value_call()) + ";\n"
             else:
                 result += convert_statement(tc.input.input_statement()) + ";\n"

@@ -37,7 +37,7 @@ from tested.serialisation import (
     Value,
     WithFunctions,
 )
-from tested.utils import flatten
+from tested.utils import flatten, is_statement_strict
 
 
 @unique
@@ -60,6 +60,46 @@ class ExceptionBuiltin(StrEnum):
     """Built-in functions for exceptions."""
 
     EXCEPTION = auto()
+
+
+@unique
+class SupportedLanguage(StrEnum):
+    BASH = auto()
+    C = auto()
+    HASKELL = auto()
+    JAVA = auto()
+    JAVASCRIPT = auto()
+    KOTLIN = auto()
+    PYTHON = auto()
+    RUNHASKELL = auto()
+    CSHARP = auto()
+
+
+LanguageMapping = Dict[SupportedLanguage, str]
+
+
+@define
+class LanguageLiterals(WithFunctions, WithFeatures):
+    literals: LanguageMapping = field()
+    type: Literal["expression", "statement"] = "expression"
+
+    def get_for(self, language: SupportedLanguage):
+        return self.literals[language]
+
+    def is_statement(self) -> bool:
+        return self.type == "statement"
+
+    def get_functions(self) -> Iterable["FunctionCall"]:
+        return []
+
+    def get_used_features(self) -> FeatureSet:
+        return NOTHING
+
+    @literals.validator  # type: ignore
+    def validate_literals(self, _, value):
+        """There should be at least one evaluator."""
+        if len(value.keys()) == 0:
+            raise ValueError("At least one language-specific literal is required.")
 
 
 @define
@@ -149,10 +189,10 @@ class LanguageSpecificOracle:
     instead.
     """
 
-    functions: Dict[str, EvaluationFunction] = field()
+    functions: Dict[SupportedLanguage, EvaluationFunction] = field()
     type: Literal["specific"] = "specific"
 
-    def for_language(self, language: str) -> EvaluationFunction:
+    def for_language(self, language: SupportedLanguage) -> EvaluationFunction:
         return self.functions[language]
 
     @functions.validator  # type: ignore
@@ -384,22 +424,29 @@ class Output(WithFeatures):
             ]
         )
 
-    def get_specific_oracle_languages(self) -> Optional[Set[str]]:
+    def get_specific_languages(self) -> Optional[Set[SupportedLanguage]]:
         """
-        Get the languages supported by this output if language-specific oracles
-        are used. If none are used, None is returned, otherwise a set of languages.
+        Get the languages supported by this output if this output uses any language-specific constructs.
+
+        :return: None if no language-specific stuff is used, a set of supported languages otherwise.
         """
         languages = None
         if isinstance(self.exception, ExceptionOutputChannel):
             if isinstance(self.exception.oracle, LanguageSpecificOracle):
-                languages = set(self.exception.oracle.functions.keys())
+                languages = {
+                    SupportedLanguage(x) for x in self.exception.oracle.functions.keys()
+                }
             elif (
                 self.exception.exception is not None and self.exception.exception.types
             ):
-                languages = set(self.exception.exception.types.keys())
+                languages = {
+                    SupportedLanguage(x) for x in self.exception.exception.types.keys()
+                }
         if isinstance(self.result, ValueOutputChannel):
             if isinstance(self.result.oracle, LanguageSpecificOracle):
-                langs = set(self.result.oracle.functions.keys())
+                langs = {
+                    SupportedLanguage(x) for x in self.result.oracle.functions.keys()
+                }
                 if languages is not None:
                     languages &= langs
                 else:
@@ -461,7 +508,7 @@ class Testcase(WithFeatures, WithFunctions):
     one testcase present.
     """
 
-    input: Statement | MainInput
+    input: Statement | MainInput | LanguageLiterals
     description: Optional[str] = None
     output: Output = field(factory=Output)
     link_files: List[FileUrl] = field(factory=list)
@@ -477,14 +524,19 @@ class Testcase(WithFeatures, WithFunctions):
     def __attrs_post_init__(self):
         # If the expected return value is None and we have a statement, change it
         # to ignore, as they mean the same thing.
-        if (
-            not isinstance(self.input, Expression)
-            and self.output.result == EmptyChannel.NONE
-        ):
+        if is_statement_strict(self.input) and self.output.result == EmptyChannel.NONE:
+            self.output.result = IgnoredChannel.IGNORED
+
+        # We also ignore if it is the main input.
+        if self.is_main_testcase():
+            self.output.result = IgnoredChannel.IGNORED
+
+        # If the language literal is a statement, we also ignore.
+        if isinstance(self.input, LanguageLiterals) and self.input.is_statement():
             self.output.result = IgnoredChannel.IGNORED
 
         # If we have a statement but the output is not None or Ignored, we error.
-        if not isinstance(self.input, Expression) and self.output.result not in (
+        if is_statement_strict(self.input) and self.output.result not in (
             EmptyChannel.NONE,
             IgnoredChannel.IGNORED,
         ):
@@ -492,6 +544,28 @@ class Testcase(WithFeatures, WithFunctions):
 
     def is_main_testcase(self):
         return isinstance(self.input, MainInput)
+
+    def get_specific_languages(self) -> Optional[Set[SupportedLanguage]]:
+        """
+        Get the languages supported by this output if this output uses any language-specific constructs.
+
+        :return: None if no language-specific stuff is used, a set of supported languages otherwise.
+        """
+        output_languages = self.output.get_specific_languages()
+        input_languages = None
+        if isinstance(self.input, LanguageLiterals):
+            input_languages = {SupportedLanguage(x) for x in self.input.literals.keys()}
+
+        if output_languages is None and input_languages is None:
+            return None
+        if output_languages is None:
+            assert input_languages is not None
+            return input_languages
+        if input_languages is None:
+            assert output_languages is not None
+            return output_languages
+
+        return output_languages & input_languages
 
 
 Code = Dict[str, TextData]
@@ -695,7 +769,6 @@ def _resolve_function_calls(function_calls: Iterable[FunctionCall]):
         registry[signature].append(function_call)
 
     used_features = []
-    # noinspection PyTypeChecker
     for signature, calls in registry.items():
         # If there are default arguments, some function calls will not have the
         # same number of arguments.

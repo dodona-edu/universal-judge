@@ -334,6 +334,13 @@ Value = Union[
 class Identifier(str, WithFeatures, WithFunctions):
     """Represents an variable name."""
 
+    is_raw: bool
+
+    def __new__(cls, *args, **kwargs):
+        the_class = str.__new__(cls, *args, **kwargs)
+        the_class.is_raw = False
+        return the_class
+
     def get_used_features(self) -> FeatureSet:
         return FeatureSet(
             set(), set(), {(ComplexExpressionTypes.IDENTIFIERS, frozenset())}
@@ -475,6 +482,7 @@ class Assignment(WithFeatures, WithFunctions):
         return self.expression.get_functions()
 
 
+# If changing this, also update is_statement_strict in the utils.
 Statement = Union[Assignment, Expression]
 
 # Update the forward references, which fixes the schema generation.

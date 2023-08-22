@@ -8,7 +8,7 @@ from typing import IO, TYPE_CHECKING, Any, Dict, Optional, Tuple
 from attrs import define, evolve, field
 
 from tested.parsing import fallback_field, get_converter
-from tested.testsuite import ExecutionMode, Suite
+from tested.testsuite import ExecutionMode, Suite, SupportedLanguage
 from tested.utils import consume_shebang, get_identifier, smart_close
 
 # Prevent circular imports
@@ -74,8 +74,7 @@ class DodonaConfig:
     time_limit: int
     memory_limit: int
     natural_language: str
-    programming_language: str
-    # noinspection SpellCheckingInspection
+    programming_language: SupportedLanguage
     workdir: Path
     judge: Path
     test_suite: str = (
@@ -147,7 +146,7 @@ class Bundle:
         return self.global_config.context_separator_secret
 
 
-def _get_language(config: DodonaConfig) -> Tuple[str, int]:
+def _get_language(config: DodonaConfig) -> Tuple[SupportedLanguage, int]:
     import tested.languages as langs
 
     bang = consume_shebang(config.source)

@@ -4,10 +4,25 @@ import logging
 import random
 import string
 import sys
-import typing
 from itertools import zip_longest
 from pathlib import Path
-from typing import IO, Any, Callable, Iterable, List, Optional, TypeVar, Union
+from typing import (
+    IO,
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Iterable,
+    List,
+    Optional,
+    TypeGuard,
+    TypeVar,
+    Union,
+)
+from typing import get_args as typing_get_args
+
+if TYPE_CHECKING:
+    from tested.serialisation import Assignment
+    from tested.testsuite import SupportedLanguage
 
 _logger = logging.getLogger(__name__)
 
@@ -48,7 +63,7 @@ def get_identifier() -> str:
     return letter + "".join(rest)
 
 
-def consume_shebang(submission: Path) -> Optional[str]:
+def consume_shebang(submission: Path) -> Optional["SupportedLanguage"]:
     """
     Find the shebang in the submission, and if it is present, consume it.
 
@@ -56,6 +71,8 @@ def consume_shebang(submission: Path) -> Optional[str]:
 
     :return: The programming language if found.
     """
+    from tested.testsuite import SupportedLanguage
+
     language = None
     try:
         with open(submission, "r+") as file:
@@ -80,7 +97,7 @@ def consume_shebang(submission: Path) -> Optional[str]:
         # Nothing we can do if there is no submission.
         pass
 
-    return language
+    return SupportedLanguage(language) if language else None
 
 
 K = TypeVar("K")
@@ -119,7 +136,7 @@ def get_args(type_: Any) -> tuple[Any, ...]:
     :param type_: The type to resolve.
     :return: The resolved generics or the type itself.
     """
-    if a := typing.get_args(type_):
+    if a := typing_get_args(type_):
         return a
     else:
         return (type_,)
@@ -323,3 +340,16 @@ def sorted_no_duplicates(
             first, last_key = False, key(v)
             no_dup.append(v)
     return no_dup
+
+
+def is_statement_strict(statement: Any) -> TypeGuard["Assignment"]:
+    """
+    Check that the given value is a strict statement: it must be a statement but
+    not an expression.
+
+    :param statement: The potential statement to check.
+    :return: True if it is, False otherwise.
+    """
+    from tested.serialisation import Assignment
+
+    return isinstance(statement, Assignment)

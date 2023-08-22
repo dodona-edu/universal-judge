@@ -7,7 +7,7 @@ from tested.descriptions.converters import (
     convert_tested_markdown,
 )
 from tested.languages import get_language
-from tested.testsuite import Suite
+from tested.testsuite import Suite, SupportedLanguage
 
 
 def process_problem_statement(
@@ -21,7 +21,7 @@ def process_problem_statement(
             time_limit=0,
             memory_limit=0,
             natural_language=natural_language,
-            programming_language=programming_language,
+            programming_language=SupportedLanguage(programming_language),
             workdir=Path(),
             judge=judge_directory,
         ),

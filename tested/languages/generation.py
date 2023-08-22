@@ -45,6 +45,7 @@ from tested.testsuite import (
     Context,
     CustomCheckOracle,
     FileUrl,
+    LanguageLiterals,
     MainInput,
     Testcase,
     TextData,
@@ -147,12 +148,14 @@ def get_readable_input(
                 analyse_files = True
             else:
                 text = stdin
-    else:
-        assert isinstance(case.input, Statement)
+    elif isinstance(case.input, Statement):
         format_ = bundle.config.programming_language
         text = generate_statement(bundle, case.input)
         text = bundle.lang_config.cleanup_description(text)
         analyse_files = True
+    else:
+        assert isinstance(case.input, LanguageLiterals)
+        text = case.input.get_for(bundle.config.programming_language)
 
     quote = bundle.lang_config.get_string_quote()
     if not analyse_files or not files:

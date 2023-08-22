@@ -1,5 +1,5 @@
 nl:
-  evaluators:
+  oracles:
     exception:
       staff: >-
         Verwachte een foutwaarde, maar %{actual} gekregen, welke een fout

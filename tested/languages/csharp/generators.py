@@ -298,7 +298,11 @@ def _generate_internal_context(ctx: PreparedContext, pu: PreparedExecutionUnit) 
             assert isinstance(tc.input, PreparedTestcaseStatement)
             if is_special_void_call(tc.input, pu.language):
                 # The method has a "void" return type, so don't wrap it.
-                result += " " * 4 + convert_statement(tc.input.statement) + ";\n"
+                result += (
+                    " " * 4
+                    + convert_statement(tc.input.unwrapped_input_statement())
+                    + ";\n"
+                )
                 result += " " * 4 + convert_statement(tc.input.no_value_call()) + ";\n"
             else:
                 result += (
