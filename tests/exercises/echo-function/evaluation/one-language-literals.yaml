@@ -9,4 +9,4 @@
         kotlin: "toString(1+1)"
         python: "submission.to_string(1+1)"
         csharp: "Submission.toString(1+1)"
-      return: "2"
+      return: !v "2"
