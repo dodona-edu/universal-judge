@@ -120,13 +120,11 @@ def evaluate_file(
 
     # There must be nothing as output.
     if actual:
-        message = get_i18n_string(
-            "evaluators.text.file.unexpected.message", actual=actual
-        )
+        message = get_i18n_string("oracles.text.file.unexpected.message", actual=actual)
         return OracleResult(
             result=StatusMessage(
                 enum=Status.WRONG,
-                human=get_i18n_string("evaluators.text.file.unexpected.status"),
+                human=get_i18n_string("oracles.text.file.unexpected.status"),
             ),
             readable_expected="",
             readable_actual=actual,
@@ -150,7 +148,7 @@ def evaluate_file(
         return OracleResult(
             result=StatusMessage(
                 enum=Status.RUNTIME_ERROR,
-                human=get_i18n_string("evaluators.text.file.not-found"),
+                human=get_i18n_string("oracles.text.file.not-found"),
             ),
             readable_expected=expected,
             readable_actual="",

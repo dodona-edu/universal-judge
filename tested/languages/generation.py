@@ -6,6 +6,7 @@ import json
 import logging
 import re
 import shlex
+import urllib.parse
 from pathlib import Path
 from typing import TYPE_CHECKING, Iterable, List, Match, Set, Tuple, TypeAlias
 
@@ -112,7 +113,7 @@ def _escape_shell(arg: str) -> str:
 
 
 def get_readable_input(
-    bundle: Bundle, files: List[FileUrl], case: Testcase
+    bundle: Bundle, case: Testcase
 ) -> Tuple[ExtendedMessage, Set[FileUrl]]:
     """
     Get human-readable input for a testcase. This function will use, in
@@ -125,7 +126,6 @@ def get_readable_input(
         a. The stdin and the arguments.
     """
     format_ = "text"  # By default, we use text as input.
-    analyse_files = False
     if case.description:
         text = case.description
     elif case.is_main_testcase():
@@ -141,34 +141,37 @@ def get_readable_input(
             stdin = ""
         if not stdin:
             text = args
-            analyse_files = bool(arguments)
         else:
             if case.input.arguments:
                 text = f"{args}\n{stdin}"
-                analyse_files = True
             else:
                 text = stdin
     elif isinstance(case.input, Statement):
         format_ = bundle.config.programming_language
         text = generate_statement(bundle, case.input)
         text = bundle.lang_config.cleanup_description(text)
-        analyse_files = True
     else:
         assert isinstance(case.input, LanguageLiterals)
         text = case.input.get_for(bundle.config.programming_language)
 
-    quote = bundle.lang_config.get_string_quote()
-    if not analyse_files or not files:
-        return ExtendedMessage(description=text, format=format_), set()
-    if case.is_main_testcase():
-        regex = re.compile("|".join(map(lambda x: re.escape(x.name), files)))
-    else:
-        regex = re.compile(
-            f'{quote}{"|".join(map(lambda x: re.escape(x.name), files))}{quote}'
-        )
-    if not regex.search(text):
+    # If there are no files, return now. This means we don't need to do ugly stuff.
+    if not case.link_files:
         return ExtendedMessage(description=text, format=format_), set()
 
+    # We have potential files.
+    # Check if the file names are present in the string.
+    # If not, we can also stop before doing ugly things.
+    # We construct a regex, since that can be faster than checking everything.
+    simple_regex = re.compile(
+        "|".join(map(lambda x: re.escape(x.name), case.link_files))
+    )
+
+    if not simple_regex.search(text):
+        # There is no match, so bail now.
+        return ExtendedMessage(description=text, format=format_), set()
+
+    # Now we need to do ugly stuff.
+    # Begin by compiling the HTML that will be displayed.
     if format_ == "text":
         generated_html = html.escape(text)
     elif format_ == "console":
@@ -176,60 +179,34 @@ def get_readable_input(
     else:
         generated_html = highlight_code(text, bundle.config.programming_language)
 
-    if case.is_main_testcase():
-        regex = re.compile(
-            f'({"|".join(map(lambda x: re.escape(html.escape(x.name)), files))})'
-        )
-        is_args = True
-    else:
-        quote = "&#39;" if quote == "'" else html.escape(quote)
-        regex = re.compile(
-            f"({quote})"
-            f'({"|".join(map(lambda x: re.escape(html.escape(x.name)), files))})'
-            f"({quote})"
-        )
-        is_args = False
-    url_map = dict(map(lambda x: (html.escape(x.name), x), files))
+    # Map of file URLs.
+    url_map = {html.escape(x.name): x for x in case.link_files}
 
-    seen: Set[FileUrl] = set()
+    seen = set()
+    escaped_regex = re.compile("|".join(url_map.keys()))
 
+    # Replaces the match with the corresponding link.
     def replace_link(match: Match) -> str:
-        groups = match.groups()
-        if is_args:
-            file = url_map[groups[0]]
-            seen.add(file)
-            return (
-                f'<a href={repr(file.url)} class="file-link" '
-                f'target="_blank">{groups[0]}</a>'
-            )
-        file = url_map[groups[1]]
-        seen.add(file)
-        return (
-            f'{groups[0]}<a href={repr(file.url)} class="file-link" '
-            f'target="_blank">{groups[1]}</a>{groups[2]}'
+        filename = match.group()
+        the_file = url_map[filename]
+        the_url = urllib.parse.quote("media/" + the_file.url)
+        the_replacement = (
+            f'<a href="{the_url}" class="file-link" target="_blank">{filename}</a>'
         )
+        seen.add(the_file)
+        return the_replacement
 
-    generated_html = regex.sub(replace_link, generated_html)
+    generated_html = escaped_regex.sub(replace_link, generated_html)
     prefix, suffix = _handle_link_files(seen, format_)
     generated_html = f"{prefix}{generated_html}{suffix}"
     return ExtendedMessage(description=generated_html, format="html"), seen
-
-
-def attempt_run_readable_input(bundle: Bundle, run: Testcase) -> ExtendedMessage:
-    result, _ = get_readable_input(bundle, run.link_files, run)
-    if result.description:
-        return result
-
-    return ExtendedMessage(
-        description=get_i18n_string("languages.generator.missing.input"), format="text"
-    )
 
 
 def attempt_readable_input(bundle: Bundle, context: Context) -> ExtendedMessage:
     # Try until we find a testcase with input.
     testcases = context.testcases
     for testcase in testcases:
-        result, _ = get_readable_input(bundle, context.link_files, testcase)
+        result, _ = get_readable_input(bundle, testcase)
         if result.description:
             return result
 

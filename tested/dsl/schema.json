@@ -44,6 +44,12 @@
           "$ref" : "#/$defs/globalConfig",
           "description" : "Configuration applicable to the whole test suite."
         },
+        "files" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/$defs/file"
+          }
+        },
         "namespace" : {
           "type" : "string",
           "description" : "Namespace of the submitted solution, in `snake_case`"
@@ -87,6 +93,12 @@
         "config" : {
           "$ref" : "#/$defs/globalConfig",
           "description" : "Configuration applicable to this unit/tab"
+        },
+        "files" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/$defs/file"
+          }
         },
         "hidden" : {
           "type" : "boolean",
@@ -157,6 +169,12 @@
         "config" : {
           "$ref" : "#/$defs/globalConfig",
           "description" : "Configuration settings at context level"
+        },
+        "files" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/$defs/file"
+          }
         },
         "context" : {
           "type" : "string",

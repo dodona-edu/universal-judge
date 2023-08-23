@@ -127,40 +127,54 @@ class DslValidationError(ValueError):
     pass
 
 
-@define
+@define(frozen=True)
 class DslContext:
     """
     Carries context in each level.
     """
 
     config: dict
+    files: List[FileUrl]
     language: Union[SupportedLanguage, Literal["tested"]] = "tested"
 
-    def deepen_config(
-        self, new_level_object: Optional[YamlDict], merge_with: Optional[str] = None
+    def deepen_context(
+        self,
+        new_level: Optional[YamlDict],
+        include_config=True,
+        include_files=True,
+        merge_with: Optional[str] = None,
     ) -> "DslContext":
         """
-        Return a context with config for the new level object.
+        Merge certain fields of the new object with the current context, resulting
+        in a new context for the new level.
 
-        This is achieved by taking a copy of the options in the existing level,
-        and overriding all options that are present on the new level.
+        :param new_level: The new object from the DSL to get information from.
+        :param include_config: If config should be considered.
+        :param include_files: If files should be considered.
+        :param merge_with: If merging configs, the key of the subsection to update.
 
-        :param new_level_object: The object from the test suite that may have options.
-        :param merge_with: Optional key denoting the subsection of the config to update.
-
-        :return: A dictionary for the next level.
+        :return: A new context.
         """
-        if new_level_object is None or "config" not in new_level_object:
+        if new_level is None:
             return self
 
-        assert isinstance(new_level_object["config"], dict)
-        if merge_with:
-            original_config = self.config.get(merge_with, {})
-        else:
-            original_config = self.config
+        new_config = self.config
+        if include_config and "config" in new_level:
+            assert isinstance(new_level["config"], dict)
+            if merge_with:
+                original_config = self.config.get(merge_with, {})
+            else:
+                original_config = self.config
 
-        new_config = recursive_dict_merge(original_config, new_level_object["config"])
-        return evolve(self, config=new_config)
+            new_config = recursive_dict_merge(original_config, new_level["config"])
+
+        new_files = self.files
+        if include_files and "files" in new_level:
+            assert isinstance(new_level["files"], list)
+            additional_files = {_convert_file(f) for f in new_level["files"]}
+            new_files = list(set(self.files) | additional_files)
+
+        return evolve(self, config=new_config, files=new_files)
 
 
 def convert_validation_error_to_group(
@@ -308,7 +322,9 @@ def _convert_text_output_channel(
         assert isinstance(stream, dict)
         data = str(stream["data"])
         if "oracle" not in stream or stream["oracle"] == "builtin":
-            config = context.deepen_config(stream, merge_with=config_name).config
+            config = context.deepen_context(
+                stream, include_files=False, merge_with=config_name
+            ).config
             return TextOutputChannel(
                 data=data, oracle=GenericTextOracle(options=config)
             )
@@ -353,7 +369,7 @@ def _validate_testcase_combinations(testcase: YamlDict):
 
 
 def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
-    context = context.deepen_config(testcase)
+    context = context.deepen_context(testcase)
 
     # This is backwards compatability to some extend.
     # TODO: remove this at some point.
@@ -420,18 +436,11 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
         assert not return_channel
         output.result = _convert_advanced_value_output_channel(result)
 
-    # TODO: allow propagation of files...
-    files = []
-    if "files" in testcase:
-        assert isinstance(testcase["files"], list)
-        for yaml_file in testcase["files"]:
-            files.append(_convert_file(yaml_file))
-
-    return Testcase(input=the_input, output=output, link_files=files)
+    return Testcase(input=the_input, output=output, link_files=context.files)
 
 
 def _convert_context(context: YamlDict, dsl_context: DslContext) -> Context:
-    dsl_context = dsl_context.deepen_config(context)
+    dsl_context = dsl_context.deepen_context(context)
     raw_testcases = context.get("script", context.get("testcases"))
     assert isinstance(raw_testcases, list)
     testcases = _convert_dsl_list(raw_testcases, dsl_context, _convert_testcase)
@@ -446,7 +455,7 @@ def _convert_tab(tab: YamlDict, context: DslContext) -> Tab:
     :param context: The context with config for the parent level.
     :return: A full tab.
     """
-    context = context.deepen_config(tab)
+    context = context.deepen_context(tab)
     name = tab.get("unit", tab.get("tab"))
     assert isinstance(name, str)
 
@@ -500,19 +509,19 @@ def _convert_dsl(dsl_object: YamlObject) -> Suite:
     :param dsl_object: A validated DSL test suite object.
     :return: A full test suite.
     """
-    context = DslContext(config={})
+    context = DslContext(config={}, files=[])
     if isinstance(dsl_object, list):
         namespace = None
         tab_list = dsl_object
     else:
         assert isinstance(dsl_object, dict)
         namespace = dsl_object.get("namespace")
-        context = context.deepen_config(dsl_object)
+        context = context.deepen_context(dsl_object)
         tab_list = dsl_object.get("units", dsl_object.get("tabs"))
         assert isinstance(tab_list, list)
         if (language := dsl_object.get("language", "tested")) != "tested":
             language = SupportedLanguage(language)
-        context.language = language  # type: ignore
+        context = evolve(context, language=language)
     tabs = _convert_dsl_list(tab_list, context, _convert_tab)
 
     if namespace:

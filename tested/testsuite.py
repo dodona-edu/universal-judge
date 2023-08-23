@@ -571,6 +571,7 @@ class Testcase(WithFeatures, WithFunctions):
 Code = Dict[str, TextData]
 
 
+@ignore_field(get_converter(), "link_files")
 @define
 class Context(WithFeatures, WithFunctions):
     """
@@ -581,7 +582,6 @@ class Context(WithFeatures, WithFunctions):
     before: Code = field(factory=dict)
     after: Code = field(factory=dict)
     description: Optional[str] = None
-    link_files: List[FileUrl] = field(factory=list)
 
     @testcases.validator  # type: ignore
     def check_testcases(self, _, value: List[Testcase]):
@@ -614,6 +614,12 @@ class Context(WithFeatures, WithFunctions):
 
     def has_exit_testcase(self):
         return not self.testcases[-1].output.exit_code == IgnoredChannel.IGNORED
+
+    def get_files(self) -> Set[FileUrl]:
+        all_files = set()
+        for t in self.testcases:
+            all_files = all_files.union(t.link_files)
+        return all_files
 
 
 def _runs_to_tab_converter(runs: Optional[list]):

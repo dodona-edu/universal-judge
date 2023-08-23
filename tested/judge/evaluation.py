@@ -3,7 +3,7 @@ import logging
 from collections.abc import Collection
 from enum import StrEnum, unique
 from pathlib import Path
-from typing import List, Optional, Set, Tuple
+from typing import List, Optional, Tuple
 
 from tested.configs import Bundle
 from tested.dodona import (
@@ -240,14 +240,16 @@ def evaluate_context_results(
             )
 
     collectors = []
-    inlined_files: Set[FileUrl] = set()
+
+    # All files that will be used in this context.
+    all_files = context.get_files()
 
     # Begin processing the normal testcases.
     for i, testcase in enumerate(context.testcases):
         _logger.debug(f"Evaluating testcase {i}")
 
-        readable_input, seen = get_readable_input(bundle, context.link_files, testcase)
-        inlined_files = inlined_files.union(seen)
+        readable_input, seen = get_readable_input(bundle, testcase)
+        all_files = all_files - seen
         t_col = TestcaseCollector(StartTestcase(description=readable_input))
 
         # Get the functions
@@ -338,9 +340,8 @@ def evaluate_context_results(
         collectors.append(t_col)
 
     # Add file links
-    non_inlined = set(context.link_files).difference(inlined_files)
-    if non_inlined:
-        _link_files_message(non_inlined, collector)
+    if all_files:
+        _link_files_message(all_files, collector)
 
     # Add all testcases to collector
     for t_col in collectors:
@@ -489,13 +490,13 @@ def prepare_evaluation(bundle: Bundle, collector: OutputManager):
                 )
             )
 
-            inlined_files: Set[FileUrl] = set()
+            # All files that will be used in this context.
+            all_files = context.get_files()
+
             # Begin normal testcases.
             for t, testcase in enumerate(context.testcases):
-                readable_input, seen = get_readable_input(
-                    bundle, context.link_files, testcase
-                )
-                inlined_files = inlined_files.union(seen)
+                readable_input, seen = get_readable_input(bundle, testcase)
+                all_files = all_files - seen
                 updates.append(StartTestcase(description=readable_input))
 
                 # Do the normal output channels.
@@ -512,10 +513,9 @@ def prepare_evaluation(bundle: Bundle, collector: OutputManager):
 
                 updates.append(CloseTestcase(accepted=False))
 
-            # Add file links
-            non_inlined = set(context.link_files).difference(inlined_files)
-            if non_inlined:
-                updates.insert(0, _link_files_message(non_inlined))
+            # Add links to files we haven't seen yet.
+            if all_files:
+                updates.insert(0, _link_files_message(all_files))
 
             collector.prepare_context(updates, i, j)
             collector.prepare_context(CloseContext(accepted=False), i, j)

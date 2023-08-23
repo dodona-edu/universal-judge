@@ -32,11 +32,11 @@ def evaluate(
         return OracleResult(
             result=StatusMessage(
                 enum=Status.WRONG,
-                human=get_i18n_string("evaluators.specific.missing.status"),
+                human=get_i18n_string("oracles.specific.missing.status"),
             ),
             readable_actual="",
             readable_expected="",
-            messages=[get_i18n_string("evaluators.specific.missing.message")],
+            messages=[get_i18n_string("oracles.specific.missing.message")],
         )
 
     try:
@@ -45,16 +45,16 @@ def evaluate(
         _logger.exception(e)
         staff_message = ExtendedMessage(
             description=get_i18n_string(
-                "evaluators.specific.staff", actual=actual_str, e=traceback.format_exc()
+                "oracles.specific.staff", actual=actual_str, e=traceback.format_exc()
             ),
             format="text",
             permission=Permission.STAFF,
         )
-        student_message = get_i18n_string("evaluators.specific.student.default")
+        student_message = get_i18n_string("oracles.specific.student.default")
         return OracleResult(
             result=StatusMessage(
                 enum=Status.INTERNAL_ERROR,
-                human=get_i18n_string("evaluators.specific.status"),
+                human=get_i18n_string("oracles.specific.status"),
             ),
             readable_expected="",
             readable_actual="",

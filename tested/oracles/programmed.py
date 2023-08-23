@@ -18,7 +18,7 @@ from tested.testsuite import CustomCheckOracle, OracleOutputChannel, OutputChann
 
 _logger = logging.getLogger(__name__)
 
-DEFAULT_STUDENT = get_i18n_string("evaluators.programmed.student.default")
+DEFAULT_STUDENT = get_i18n_string("oracles.programmed.student.default")
 
 
 def evaluate(
@@ -95,7 +95,7 @@ def evaluate(
             messages: List[Message] = [
                 ExtendedMessage(description=DEFAULT_STUDENT, format="text"),
                 ExtendedMessage(
-                    description=get_i18n_string("evaluators.programmed.result"),
+                    description=get_i18n_string("oracles.programmed.result"),
                     format="text",
                     permission=Permission.STAFF,
                 ),
@@ -105,7 +105,7 @@ def evaluate(
                     permission=Permission.STAFF,
                 ),
                 ExtendedMessage(
-                    description=get_i18n_string("evaluators.programmed.stdout"),
+                    description=get_i18n_string("oracles.programmed.stdout"),
                     permission=Permission.STAFF,
                 ),
                 ExtendedMessage(
@@ -114,7 +114,7 @@ def evaluate(
                     permission=Permission.STAFF,
                 ),
                 ExtendedMessage(
-                    description=get_i18n_string("evaluators.programmed.stderr"),
+                    description=get_i18n_string("oracles.programmed.stderr"),
                     permission=Permission.STAFF,
                 ),
                 ExtendedMessage(

@@ -25,13 +25,13 @@ def evaluate(_config: OracleConfig, channel: OutputChannel, value: str) -> Oracl
             result=StatusMessage(
                 enum=Status.WRONG,
                 human=get_i18n_string(
-                    "evaluators.exitcode.status.invalid", exit_code=value
+                    "oracles.exitcode.status.invalid", exit_code=value
                 ),
             ),
             readable_expected=str(channel.value),
             readable_actual=str(value),
             messages=[
-                get_i18n_string("evaluators.exitcode.status.message", exit_code=value)
+                get_i18n_string("oracles.exitcode.status.message", exit_code=value)
             ],
         )
 
@@ -39,7 +39,7 @@ def evaluate(_config: OracleConfig, channel: OutputChannel, value: str) -> Oracl
 
     if expected_exit_code != exit_code:
         status = StatusMessage(
-            enum=Status.WRONG, human=get_i18n_string("evaluators.exitcode.status.wrong")
+            enum=Status.WRONG, human=get_i18n_string("oracles.exitcode.status.wrong")
         )
     else:
         status = StatusMessage(enum=Status.CORRECT)
