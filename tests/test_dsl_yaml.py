@@ -28,6 +28,7 @@ from tested.serialisation import (
 )
 from tested.testsuite import (
     CustomCheckOracle,
+    FileUrl,
     GenericTextOracle,
     GenericValueOracle,
     LanguageLiterals,
@@ -972,3 +973,32 @@ def test_additional_properties_are_not_allowed():
 """
     with pytest.raises(Exception):
         parse_dsl(yaml_str)
+
+
+def test_files_are_propagated():
+    yaml_str = """
+- tab: "Config ctx"
+  files:
+    - name: "test"
+      url: "test.md"
+    - name: "two"
+      url: "two.md"
+  testcases:
+  - arguments: [ '-a', '2.125', '1.212' ]
+    stdout: "3.34"
+  - arguments: [ '-a', '2.125', '1.212' ]
+    stdout: "3.337"
+    files:
+        - name: "test"
+          url: "twooo.md"
+    """
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    tab = suite.tabs[0]
+    ctx0, ctx1 = tab.contexts
+    testcases0, testcases1 = ctx0.testcases, ctx1.testcases
+    test0, test1 = testcases0[0], testcases1[0]
+    assert set(test0.link_files) == {
+        FileUrl(name="test", url="test.md"),
+        FileUrl(name="two", url="two.md"),
+    }

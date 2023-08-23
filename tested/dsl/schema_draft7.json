@@ -33,7 +33,7 @@
       "type" : "array",
       "minItems" : 1,
       "items" : {
-        "$ref" : "#/definitions/script"
+        "$ref" : "#/definitions/test"
       }
     },
     "_rootObject" : {
@@ -42,6 +42,12 @@
         "config" : {
           "$ref" : "#/definitions/globalConfig",
           "description" : "Configuration applicable to the whole test suite."
+        },
+        "files" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/file"
+          }
         },
         "namespace" : {
           "type" : "string",
@@ -85,6 +91,12 @@
         "config" : {
           "$ref" : "#/definitions/globalConfig",
           "description" : "Configuration applicable to this unit/tab"
+        },
+        "files" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/file"
+          }
         },
         "hidden" : {
           "type" : "boolean",
@@ -155,6 +167,12 @@
           "$ref" : "#/definitions/globalConfig",
           "description" : "Configuration settings at context level"
         },
+        "files" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/file"
+          }
+        },
         "context" : {
           "type" : "string",
           "description" : "Description of this context."
@@ -179,7 +197,7 @@
         }
       ]
     },
-    "script" : {
+    "test" : {
       "type" : "object",
       "description" : "An individual test for a statement or expression",
       "properties" : {
