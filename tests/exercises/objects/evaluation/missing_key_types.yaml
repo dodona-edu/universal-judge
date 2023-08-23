@@ -1,4 +1,4 @@
 - tab: "Feedback"
   testcases:
     - expression: '{{"a"}: [int32(1)], {"b"}: "a.txt"}'
-      return-raw: '{{"a"}: [int32(1)], {"b"}: "a.txt"}'
+      return_raw: '{{"a"}: [int32(1)], {"b"}: "a.txt"}'
