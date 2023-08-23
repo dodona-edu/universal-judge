@@ -71,18 +71,18 @@ def evaluate(
         _logger.exception(e)
         staff_message = ExtendedMessage(
             description=get_i18n_string(
-                "evaluators.exception.staff",
+                "oracles.exception.staff",
                 actual=actual_str,
                 exception=traceback.format_exc(),
             ),
             format="text",
             permission=Permission.STAFF,
         )
-        student_message = get_i18n_string("evaluators.exception.student")
+        student_message = get_i18n_string("oracles.exception.student")
         return OracleResult(
             result=StatusMessage(
                 enum=Status.INTERNAL_ERROR,
-                human=get_i18n_string("evaluators.exception.status"),
+                human=get_i18n_string("oracles.exception.status"),
             ),
             readable_expected=readable_expected,
             readable_actual="",

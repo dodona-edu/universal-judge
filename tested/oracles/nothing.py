@@ -25,7 +25,7 @@ def evaluate_nothing_others(
         error = "runtime" if unexpected_status == Status.RUNTIME_ERROR else "unexpected"
         result = StatusMessage(
             enum=unexpected_status,
-            human=get_i18n_string(f"evaluators.nothing.{error}"),
+            human=get_i18n_string(f"oracles.nothing.{error}"),
         )
     else:
         result = StatusMessage(enum=Status.CORRECT)
@@ -66,7 +66,7 @@ def evaluate_no_return(
         error = "runtime" if unexpected_status == Status.RUNTIME_ERROR else "unexpected"
         result = StatusMessage(
             enum=unexpected_status,
-            human=get_i18n_string(f"evaluators.nothing.{error}"),
+            human=get_i18n_string(f"oracles.nothing.{error}"),
         )
         return OracleResult(
             result=result, readable_expected="", readable_actual=actual, messages=[]

@@ -286,7 +286,7 @@ def evaluate(
     if actual is None:
         return OracleResult(
             result=StatusMessage(
-                enum=Status.WRONG, human=get_i18n_string("evaluators.value.missing")
+                enum=Status.WRONG, human=get_i18n_string("oracles.value.missing")
             ),
             readable_expected=readable_expected,
             readable_actual=readable_actual,
@@ -303,10 +303,10 @@ def evaluate(
 
     # If the displayed values are the same, add a message about the type.
     if not type_check and readable_expected == readable_actual:
-        type_status = get_i18n_string("evaluators.value.datatype.wrong")
+        type_status = get_i18n_string("oracles.value.datatype.wrong")
         messages.append(
             get_i18n_string(
-                "evaluators.value.datatype.message",
+                "oracles.value.datatype.message",
                 expected=expected.type,
                 actual=actual.type,
             )
