@@ -121,6 +121,7 @@ def _parse_yaml(yaml_stream: Union[str, TextIO]) -> YamlObject:
         for actual_type in types:
             yaml.add_constructor("!" + actual_type, _custom_type_constructors, loader)
     yaml.add_constructor("!v", _yaml_value_constructor, loader)
+    yaml.add_constructor("!value", _yaml_value_constructor, loader)
     return yaml.load(yaml_stream, loader)
 
 
