@@ -86,16 +86,30 @@ class TestedType:
     type: str | AllTypes
 
 
-def custom_type_constructors(loader: yaml.Loader, node: yaml.Node):
-    tested_tag = node.tag[1:]
+@define
+class YamlValue:
+    value: Any
+
+
+def _parse_yaml_value(loader: yaml.Loader, node: yaml.Node) -> Any:
     if isinstance(node, yaml.MappingNode):
-        base_result = loader.construct_mapping(node)
+        result = loader.construct_mapping(node)
     elif isinstance(node, yaml.SequenceNode):
-        base_result = loader.construct_sequence(node)
+        result = loader.construct_sequence(node)
     else:
         assert isinstance(node, yaml.ScalarNode)
-        base_result = loader.construct_scalar(node)
+        result = loader.construct_scalar(node)
+    return result
+
+
+def _custom_type_constructors(loader: yaml.Loader, node: yaml.Node) -> TestedType:
+    tested_tag = node.tag[1:]
+    base_result = _parse_yaml_value(loader, node)
     return TestedType(type=tested_tag, value=base_result)
+
+
+def _yaml_value_constructor(loader: yaml.Loader, node: yaml.Node) -> YamlValue:
+    return YamlValue(value=_parse_yaml_value(loader, node))
 
 
 def _parse_yaml(yaml_stream: Union[str, TextIO]) -> YamlObject:
@@ -105,7 +119,9 @@ def _parse_yaml(yaml_stream: Union[str, TextIO]) -> YamlObject:
     loader: type[yaml.Loader] = cast(type[yaml.Loader], yaml.CSafeLoader)
     for types in get_args(AllTypes):
         for actual_type in types:
-            yaml.add_constructor("!" + actual_type, custom_type_constructors, loader)
+            yaml.add_constructor("!" + actual_type, _custom_type_constructors, loader)
+    yaml.add_constructor("!v", _yaml_value_constructor, loader)
+    yaml.add_constructor("!value", _yaml_value_constructor, loader)
     return yaml.load(yaml_stream, loader)
 
 
@@ -336,11 +352,23 @@ def _convert_text_output_channel(
 
 
 def _convert_advanced_value_output_channel(stream: YamlObject) -> ValueOutputChannel:
-    if isinstance(stream, str):
+    if isinstance(stream, YamlValue):
+        # A normal yaml type tagged explicitly.
+        value = _convert_value(stream.value)
+        assert isinstance(value, Value)
+        return ValueOutputChannel(value=value)
+    if isinstance(stream, (int, float, bool, TestedType, list, set)):
+        # Simple values where no confusion is possible.
+        value = _convert_value(stream)
+        assert isinstance(value, Value)
+        return ValueOutputChannel(value=value)
+    elif isinstance(stream, str):
+        # A normal YAML string is considered a "Python" string.
         value = parse_string(stream, is_return=True)
         assert isinstance(value, Value)
         return ValueOutputChannel(value=value)
     else:
+        # We have an object, which means we have an output channel.
         assert isinstance(stream, dict)
         assert isinstance(stream["value"], str)
         value = parse_string(stream["value"], is_return=True)
@@ -362,10 +390,8 @@ def _validate_testcase_combinations(testcase: YamlDict):
         raise ValueError("A main call cannot contain an expression or a statement.")
     if "statement" in testcase and "expression" in testcase:
         raise ValueError("A statement and expression as input are mutually exclusive.")
-    if "statement" in testcase and ("return" in testcase or "return_raw" in testcase):
+    if "statement" in testcase and "return" in testcase:
         raise ValueError("A statement cannot have an expected return value.")
-    if "return" in testcase and "return_raw" in testcase:
-        raise ValueError("The outputs return and return_raw are mutually exclusive.")
 
 
 def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
@@ -373,7 +399,7 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
 
     # This is backwards compatability to some extend.
     # TODO: remove this at some point.
-    if "statement" in testcase and ("return" in testcase or "return_raw" in testcase):
+    if "statement" in testcase and "return" in testcase:
         testcase["expression"] = testcase.pop("statement")
 
     _validate_testcase_combinations(testcase)
@@ -430,9 +456,6 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
     if (exit_code := testcase.get("exit_code")) is not None:
         output.exit_code = ExitCodeOutputChannel(value=cast(int, exit_code))
     if (result := testcase.get("return")) is not None:
-        assert not return_channel
-        output.result = ValueOutputChannel(value=_convert_value(result))
-    if (result := testcase.get("return_raw")) is not None:
         assert not return_channel
         output.result = _convert_advanced_value_output_channel(result)
 

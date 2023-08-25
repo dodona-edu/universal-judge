@@ -269,10 +269,7 @@
           }
         },
         "return" : {
-          "description" : "Expected return value"
-        },
-        "return_raw" : {
-          "description" : "Value string to parse to the expected return value",
+          "description" : "Expected return value.",
           "$ref" : "#/$defs/advancedValueOutputChannel"
         },
         "stderr" : {
@@ -396,7 +393,8 @@
       ]
     },
     "advancedValueOutputChannel" : {
-      "oneOf" : [
+      "anyOf" : [
+        {},
         {
           "type" : "string",
           "description" : "A 'Python' value to parse and use as the expected type."
