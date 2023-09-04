@@ -13,7 +13,7 @@ from tested.configs import DodonaConfig, Options
 from tested.main import run
 from tested.testsuite import ExecutionMode, SupportedLanguage
 
-exercise_dir = "/home/niko/Ontwikkeling/universal-judge/tests/exercises/echo-function"
+exercise_dir = "/home/niko/Ontwikkeling/CG-Dodona/reeks09/rebussen oplossen/"
 
 
 def read_config() -> DodonaConfig:
@@ -21,16 +21,14 @@ def read_config() -> DodonaConfig:
     return DodonaConfig(
         memory_limit=536870912,
         time_limit=60,
-        programming_language=SupportedLanguage("haskell"),
+        programming_language=SupportedLanguage("bash"),
         natural_language="nl",
         resources=Path(exercise_dir, "evaluation"),
-        source=Path(exercise_dir, "solution/correct.hs"),
+        source=Path("test.sh"),
         judge=Path("."),
         workdir=Path("workdir"),
-        test_suite="one-language-literals.yaml",
+        test_suite="tests.yaml",
         options=Options(
-            allow_fallback=False,
-            mode=ExecutionMode.PRECOMPILATION,
             linter=False,
         ),
     )
@@ -57,12 +55,17 @@ if __name__ == "__main__":
     config.workdir.mkdir(exist_ok=True)
 
     # Delete content in work dir
-    # noinspection PyTypeChecker
     for root, dirs, files in os.walk(config.workdir):
         for f in files:
             os.unlink(os.path.join(root, f))
         for d in dirs:
             shutil.rmtree(os.path.join(root, d), ignore_errors=True)
+
+        # Copy existing files to workdir if needed.
+    if Path(exercise_dir, "workdir").is_dir():
+        shutil.copytree(
+            Path(exercise_dir, "workdir"), config.workdir, dirs_exist_ok=True
+        )
 
     start = time.time()
     run(config, sys.stdout)

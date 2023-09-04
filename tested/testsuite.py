@@ -399,7 +399,7 @@ TextOutput = TextOutputChannel | SpecialOutputChannel
 FileOutput = FileOutputChannel | IgnoredChannel
 ExceptionOutput = ExceptionOutputChannel | SpecialOutputChannel
 ValueOutput = ValueOutputChannel | SpecialOutputChannel
-ExitOutput = ExitCodeOutputChannel | IgnoredChannel
+ExitOutput = ExitCodeOutputChannel | IgnoredChannel | EmptyChannel
 
 
 @define
@@ -411,7 +411,8 @@ class Output(WithFeatures):
     file: FileOutput = IgnoredChannel.IGNORED
     exception: ExceptionOutput = EmptyChannel.NONE
     result: ValueOutput = EmptyChannel.NONE
-    exit_code: ExitOutput = IgnoredChannel.IGNORED
+    # This default value is adjusted later, based on the position of the output.
+    exit_code: ExitOutput = EmptyChannel.NONE
 
     def get_used_features(self) -> FeatureSet:
         return combine_features(
@@ -583,6 +584,14 @@ class Context(WithFeatures, WithFunctions):
     after: Code = field(factory=dict)
     description: Optional[str] = None
 
+    def __attrs_post_init__(self):
+        # Fix the default value of the exit code outputs.
+        for non_last_testcase in self.testcases[:-1]:
+            if non_last_testcase.output.exit_code == EmptyChannel.NONE:
+                non_last_testcase.output.exit_code = IgnoredChannel.IGNORED
+        if (last_testcase := self.testcases[-1]).output.exit_code == EmptyChannel.NONE:
+            last_testcase.output.exit_code = ExitCodeOutputChannel()
+
     @testcases.validator  # type: ignore
     def check_testcases(self, _, value: List[Testcase]):
         # Check that only the first testcase has a main call.
@@ -592,7 +601,10 @@ class Context(WithFeatures, WithFunctions):
 
         # Check that only the last testcase has an exit code check.
         for non_last_testcase in value[1:-1]:
-            if non_last_testcase.output.exit_code != IgnoredChannel.IGNORED:
+            if non_last_testcase.output.exit_code not in (
+                IgnoredChannel.IGNORED,
+                EmptyChannel.NONE,
+            ):
                 raise ValueError("Only the last testcase may have an exit code check.")
 
     def get_functions(self) -> Iterable[FunctionCall]:
