@@ -24,7 +24,7 @@ def read_config() -> DodonaConfig:
         programming_language=SupportedLanguage("bash"),
         natural_language="nl",
         resources=Path(exercise_dir, "evaluation"),
-        source=Path("test.sh"),
+        source=Path(exercise_dir, "solution/solution.sh"),
         judge=Path("."),
         workdir=Path("workdir"),
         test_suite="tests.yaml",

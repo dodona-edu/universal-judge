@@ -3,13 +3,13 @@ import logging
 from collections.abc import Collection
 from enum import StrEnum, unique
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List, Literal, Optional, Tuple, Union
 
 from tested.configs import Bundle
 from tested.dodona import (
     AppendMessage,
     CloseContext,
-    CloseJudgment,
+    CloseJudgement,
     CloseTab,
     CloseTest,
     CloseTestcase,
@@ -17,7 +17,6 @@ from tested.dodona import (
     ExtendedMessage,
     Message,
     StartContext,
-    StartJudgment,
     StartTab,
     StartTest,
     StartTestcase,
@@ -180,7 +179,7 @@ def evaluate_context_results(
         collector.add(EscalateStatus(status=StatusMessage(enum=compiler_results[1])))
 
         # Finish evaluation, since there is nothing we can do.
-        collector.add(CloseTestcase(accepted=False))
+        collector.add(CloseTestcase(accepted=False), 0)
         return compiler_results[1]
 
     # There must be execution if compilation succeeded.
@@ -238,8 +237,6 @@ def evaluate_context_results(
                     )
                 )
             )
-
-    collectors = []
 
     # All files that will be used in this context.
     all_files = context.get_files()
@@ -337,15 +334,11 @@ def evaluate_context_results(
             for u in missing_values:
                 t_col.add(u)
 
-        collectors.append(t_col)
+        t_col.to_manager(collector, CloseTestcase(), i)
 
     # Add file links
     if all_files:
-        _link_files_message(all_files, collector)
-
-    # Add all testcases to collector
-    for t_col in collectors:
-        t_col.to_manager(collector, CloseTestcase())
+        collector.add(_link_files_message(all_files))
 
     if exec_results.timeout:
         return Status.TIME_LIMIT_EXCEEDED
@@ -354,9 +347,7 @@ def evaluate_context_results(
     return None
 
 
-def _link_files_message(
-    link_files: Collection[FileUrl], collector: Optional[OutputManager] = None
-) -> Optional[AppendMessage]:
+def _link_files_message(link_files: Collection[FileUrl]) -> AppendMessage:
     link_list = ", ".join(
         f'<a href="{link_file.url}" class="file-link" target="_blank">'
         f'<span class="code">{html.escape(link_file.name)}</span></a>'
@@ -367,11 +358,7 @@ def _link_files_message(
     )
     description = f"<div class='contains-file''><p>{file_list_str}</p></div>"
     message = ExtendedMessage(description=description, format="html")
-    if collector is not None:
-        collector.add(AppendMessage(message=message))
-        return None
-    else:
-        return AppendMessage(message=message)
+    return AppendMessage(message=message)
 
 
 def should_show(test: OutputChannel, channel: Channel) -> bool:
@@ -464,37 +451,36 @@ def _add_channel(
         )
 
 
-def prepare_evaluation(bundle: Bundle, collector: OutputManager):
-    """
-    Generate output depicting the expected test suite. This output will be shown if
-    the normal execution terminates early for some reason. This function assumes
-    the output is OK, but does not accept anything.
+def complete_evaluation(bundle: Bundle, collector: OutputManager):
+    # We assume we have at least an open judgement.
+    if collector.finalized:
+        return
 
-    :param bundle: The configuration bundle.
-    :param collector: The output collector.
-    """
-    collector.prepare_judgment(StartJudgment())
-    for i, tab in enumerate(bundle.suite.tabs):
-        collector.prepare_tab(StartTab(title=tab.name, hidden=tab.hidden), i)
+    assert (
+        "judgement" in collector.open_stack
+    ), "A non-finalized output manager without open judgement is not possible."
 
+    tab_start, context_start, testcase_start = collector.closed
+
+    for tab in bundle.suite.tabs[tab_start:]:
+        if context_start == 0 and testcase_start == 0:
+            collector.add(StartTab(title=tab.name, hidden=tab.hidden))
         assert tab.contexts
-        for j, context in enumerate(tab.contexts):
-            updates = []
-
-            collector.prepare_context(
-                StartContext(description=context.description), i, j
-            )
-            updates.append(
+        for context in tab.contexts[context_start:]:
+            updates: list[Update] = [
                 AppendMessage(
                     message=get_i18n_string("judge.evaluation.missing.context")
                 )
-            )
-
+            ]
+            if testcase_start == 0:
+                collector.add(StartContext(description=context.description))
             # All files that will be used in this context.
             all_files = context.get_files()
 
             # Begin normal testcases.
-            for t, testcase in enumerate(context.testcases):
+            for j, testcase in enumerate(
+                context.testcases[testcase_start:], start=testcase_start
+            ):
                 readable_input, seen = get_readable_input(bundle, testcase)
                 all_files = all_files - seen
                 updates.append(StartTestcase(description=readable_input))
@@ -512,12 +498,40 @@ def prepare_evaluation(bundle: Bundle, collector: OutputManager):
                     _add_channel(bundle, output.exit_code, Channel.EXIT, updates)
 
                 updates.append(CloseTestcase(accepted=False))
+            testcase_start = 0  # For the next context, start at the beginning
 
             # Add links to files we haven't seen yet.
             if all_files:
                 updates.insert(0, _link_files_message(all_files))
 
-            collector.prepare_context(updates, i, j)
-            collector.prepare_context(CloseContext(accepted=False), i, j)
-        collector.prepare_tab(CloseTab(), i)
-    collector.prepare_judgment(CloseJudgment(accepted=False))
+            collector.add_all(updates)
+            collector.add(CloseContext(accepted=False))
+        collector.add(CloseTab())
+        context_start = 0  # For the next tab, start from the beginning.
+    collector.add(CloseJudgement(accepted=False))
+
+
+def terminate(
+    bundle: Bundle,
+    collector: OutputManager,
+    status_if_unclosed: Union[Status, StatusMessage],
+):
+    # Determine the level we need to close.
+    tab, context, testcase = collector.closed
+    max_tab = len(bundle.suite.tabs)
+
+    until: Literal["testcase", "context", "tab", "judgement"]
+    if tab == max_tab:
+        # We are basically done.
+        until = "judgement"
+    elif context == len(bundle.suite.tabs[tab].contexts):
+        # We have done all contexts here, so close the current tab.
+        until = "tab"
+    elif testcase == len(bundle.suite.tabs[tab].contexts[context].testcases):
+        # We have done all testcases, so close the current context.
+        until = "context"
+    else:
+        until = "testcase"
+
+    collector.terminate(status_if_unclosed=status_if_unclosed, until=until)
+    complete_evaluation(bundle, collector)

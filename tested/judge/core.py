@@ -1,19 +1,17 @@
 import logging
 import shutil
 import time
-from concurrent.futures.thread import ThreadPoolExecutor
 from pathlib import Path
 from typing import List, Optional, Tuple
 
 from tested.configs import Bundle
 from tested.dodona import (
-    AppendMessage,
     CloseContext,
-    CloseJudgment,
+    CloseJudgement,
     CloseTab,
     Message,
     StartContext,
-    StartJudgment,
+    StartJudgement,
     StartTab,
     Status,
     StatusMessage,
@@ -23,7 +21,7 @@ from tested.features import is_supported
 from tested.internationalization import get_i18n_string, set_locale
 from tested.judge.collector import OutputManager
 from tested.judge.compilation import process_compile_results, run_compilation
-from tested.judge.evaluation import evaluate_context_results
+from tested.judge.evaluation import evaluate_context_results, terminate
 from tested.judge.execution import (
     Execution,
     ExecutionResult,
@@ -55,10 +53,10 @@ def judge(bundle: Bundle):
     _logger.info("Checking supported features...")
     set_locale(bundle.config.natural_language)
     if not is_supported(bundle.lang_config):
-        report_update(bundle.out, StartJudgment())
+        report_update(bundle.out, StartJudgement())
         report_update(
             bundle.out,
-            CloseJudgment(
+            CloseJudgement(
                 accepted=False,
                 status=StatusMessage(
                     enum=Status.INTERNAL_ERROR,
@@ -73,8 +71,8 @@ def judge(bundle: Bundle):
         return  # Not all required features are supported.
 
     mode = bundle.config.options.mode
-    collector = OutputManager(bundle)
-    collector.add(StartJudgment())
+    collector = OutputManager(bundle.out)
+    collector.add(StartJudgement())
 
     max_time = float(bundle.config.time_limit) * 0.9
     start = time.perf_counter()
@@ -82,7 +80,7 @@ def judge(bundle: Bundle):
     # Run the linter.
     run_linter(bundle, collector, max_time)
     if time.perf_counter() - start > max_time:
-        collector.terminate(Status.TIME_LIMIT_EXCEEDED)
+        terminate(bundle, collector, Status.TIME_LIMIT_EXCEEDED)
         return
 
     _logger.info("Start generating code...")
@@ -112,23 +110,14 @@ def judge(bundle: Bundle):
         else:
             # Handle timout if necessary.
             if result.timeout or result.memory:
-                # Show in separate tab.
-                index = len(bundle.suite.tabs) + 1
-                if messages:
-                    collector.prepare_tab(
-                        StartTab(title=get_i18n_string("judge.core.compilation")), index
-                    )
-                for message in messages:
-                    collector.add(AppendMessage(message=message))
-                for annotation in annotations:
-                    collector.add(annotation)
-                if messages:
-                    collector.prepare_tab(CloseTab(), index)
-                collector.terminate(
+                collector.add_messages(messages)
+                collector.add_all(annotations)
+                status = (
                     Status.TIME_LIMIT_EXCEEDED
                     if result.timeout
                     else Status.MEMORY_LIMIT_EXCEEDED
                 )
+                terminate(bundle, collector, status)
                 return
 
             assert not result.timeout
@@ -147,27 +136,18 @@ def judge(bundle: Bundle):
             # When compilation succeeded, only add annotations
             elif status == Status.CORRECT:
                 files = compilation_files
-                for annotation in annotations:
-                    collector.add(annotation)
-            # Add compilation tab when compilation failed
+                collector.add_all(annotations)
             else:
-                # Report messages.
-                if messages:
-                    collector.add_tab(
-                        StartTab(title=get_i18n_string("judge.core.compilation")), -1
-                    )
-                for message in messages:
-                    collector.add(AppendMessage(message=message))
-                for annotation in annotations:
-                    collector.add(annotation)
-                if messages:
-                    collector.add_tab(CloseTab(), -1)
+                collector.add_messages(messages)
+                collector.add_all(annotations)
 
-                collector.terminate(
+                terminate(
+                    bundle,
+                    collector,
                     StatusMessage(
                         enum=status,
                         human=get_i18n_string("judge.core.invalid.source-code"),
-                    )
+                    ),
                 )
                 _logger.info("Compilation error without fallback")
                 return  # Compilation error occurred, useless to continue.
@@ -175,11 +155,9 @@ def judge(bundle: Bundle):
         precompilation_result = None
 
     _logger.info("Starting judgement...")
-    parallel = bundle.config.options.parallel
-
     # Create a list of runs we want to execute.
     for tab_index, tab in enumerate(bundle.suite.tabs):
-        collector.add_tab(StartTab(title=tab.name, hidden=tab.hidden), tab_index)
+        collector.add(StartTab(title=tab.name, hidden=tab.hidden))
         assert tab.contexts
         execution_units = merge_contexts_into_units(tab.contexts)
         executions = []
@@ -203,23 +181,18 @@ def judge(bundle: Bundle):
             offset += len(unit.contexts)
 
         remaining = max_time - (time.perf_counter() - start)
-        if parallel:
-            result = _parallel_execution(bundle, executions, remaining)
-        else:
-            result = _single_execution(bundle, executions, remaining)
+        result = _single_execution(bundle, executions, remaining)
 
         if result in (
             Status.TIME_LIMIT_EXCEEDED,
             Status.MEMORY_LIMIT_EXCEEDED,
             Status.OUTPUT_LIMIT_EXCEEDED,
         ):
-            assert not collector.collected
-            collector.terminate(result)
+            terminate(bundle, collector, result)
             return
-        collector.add_tab(CloseTab(), tab_index)
+        collector.add(CloseTab(), tab_index)
 
-    collector.add(CloseJudgment())
-    collector.clean_finish()
+    collector.add(CloseJudgement())
 
 
 def _single_execution(
@@ -242,54 +215,6 @@ def _single_execution(
         if status:
             return status
     return None
-
-
-def _parallel_execution(
-    bundle: Bundle, items: List[Execution], max_time: float
-) -> Optional[Status]:
-    """
-    Execute a list of contexts in parallel.
-
-    :param bundle: The configuration bundle.
-    :param items: The contexts to execute.
-    :param max_time: The max amount of time.
-    """
-    start = time.perf_counter()  # Accessed from threads.
-
-    def threaded_execution(execution: Execution):
-        """The function executed in parallel."""
-        remainder = max_time - (time.perf_counter() - start)
-        execution_result, m, s, p = execute_execution(bundle, execution, remainder)
-
-        def evaluation_function(_eval_remainder):
-            _status = _process_results(bundle, execution, execution_result, m, s, p)
-
-            if _status and _status not in (
-                Status.TIME_LIMIT_EXCEEDED,
-                Status.MEMORY_LIMIT_EXCEEDED,
-            ):
-                return _status
-            return None
-
-        return evaluation_function
-
-    with ThreadPoolExecutor(max_workers=4) as executor:
-        remaining = max_time - (time.perf_counter() - start)
-        results = executor.map(threaded_execution, items, timeout=remaining)
-        try:
-            for eval_function in list(results):
-                remaining = max_time - (time.perf_counter() - start)
-                if (status := eval_function(remaining)) in (
-                    Status.TIME_LIMIT_EXCEEDED,
-                    Status.MEMORY_LIMIT_EXCEEDED,
-                    Status.OUTPUT_LIMIT_EXCEEDED,
-                ):
-                    # Ensure finally is called NOW and cancels remaining tasks.
-                    del results
-                    return status
-        except TimeoutError:
-            _logger.warning("Futures did not end soon enough.", exc_info=True)
-            return Status.TIME_LIMIT_EXCEEDED
 
 
 def _generate_files(
@@ -367,9 +292,7 @@ def _process_results(
     for index, (context, context_result) in enumerate(
         zip(execution.unit.contexts, context_results), execution.context_offset
     ):
-        execution.collector.add_context(
-            StartContext(description=context.description), index
-        )
+        execution.collector.add(StartContext(description=context.description))
 
         continue_ = evaluate_context_results(
             bundle,
@@ -383,9 +306,7 @@ def _process_results(
         # We handled the compiler messages above, so remove them.
         compiler_messages = []
 
-        execution.collector.add_context(CloseContext(), index)
-        if execution.collector.is_full():
-            return Status.OUTPUT_LIMIT_EXCEEDED
+        execution.collector.add(CloseContext(), index)
         if continue_ in (Status.TIME_LIMIT_EXCEEDED, Status.MEMORY_LIMIT_EXCEEDED):
             return continue_
     return None

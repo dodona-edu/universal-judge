@@ -13,7 +13,7 @@ import json
 from enum import StrEnum, auto, unique
 from typing import IO, Literal, Optional, Union
 
-from attrs import define, evolve
+from attrs import define
 from cattrs.preconf.json import make_converter
 
 
@@ -70,7 +70,7 @@ class StatusMessage:
 
 
 @define
-class StartJudgment:
+class StartJudgement:
     """Start on a new judgement."""
 
     command: Literal["start-judgement"] = "start-judgement"
@@ -189,7 +189,7 @@ class CloseTab:
 
 
 @define
-class CloseJudgment:
+class CloseJudgement:
     """
     Close the current judgement. Accepted iff all contexts are accepted, status is
     the worst (highest in description) of all tests, summary is the last of all
@@ -202,7 +202,7 @@ class CloseJudgment:
 
 
 Update = Union[
-    StartJudgment,
+    StartJudgement,
     StartTab,
     StartContext,
     StartTestcase,
@@ -213,70 +213,15 @@ Update = Union[
     CloseTestcase,
     CloseContext,
     CloseTab,
-    CloseJudgment,
+    CloseJudgement,
     EscalateStatus,
 ]
-
-_mapping = {
-    "judgement": CloseJudgment,
-    "tab": CloseTab,
-    "context": CloseContext,
-    "testcase": CloseTestcase,
-    "test": CloseTest,
-}
-
-
-def close_for(
-    type_: str,
-) -> type[CloseJudgment | CloseTab | CloseContext | CloseTestcase | CloseTest]:
-    return _mapping[type_]
 
 
 def _clean_dictionary(d):
     if not isinstance(d, dict):
         return d
     return {k: _clean_dictionary(v) for k, v in d.items() if v is not None}
-
-
-def _maybe_shorten(text: str, max_chars: int) -> str:
-    if len(text) > max_chars - 3:
-        text = text[: max_chars - 3] + "..."
-    return text
-
-
-def update_size(update: Update) -> int:
-    if isinstance(update, AppendMessage):
-        if isinstance(update.message, ExtendedMessage):
-            return len(update.message.description.encode("utf-8"))
-        else:
-            assert isinstance(update.message, str)
-            return len(update.message.encode("utf-8"))
-    if isinstance(update, CloseTest):
-        return len(update.generated.encode("utf-8"))
-    if isinstance(update, AnnotateCode):
-        return len(update.text.encode("utf-8"))
-    return 0
-
-
-def limit_size(update: Update, size: int) -> Update:
-    # Handle shortening messages and other output here.
-    if isinstance(update, AppendMessage):
-        if isinstance(update.message, ExtendedMessage):
-            shorter = _maybe_shorten(update.message.description, size)
-            new_message = evolve(update.message, description=shorter)
-        else:
-            assert isinstance(update.message, str)
-            new_message = _maybe_shorten(update.message, size)
-        update = evolve(update, message=new_message)
-    if isinstance(update, CloseTest):
-        new_message = _maybe_shorten(update.generated, size)
-        status = evolve(update.status, enum=Status.OUTPUT_LIMIT_EXCEEDED)
-        update = evolve(update, generated=new_message, status=status)
-    if isinstance(update, AnnotateCode):
-        new_text = _maybe_shorten(update.text, size)
-        update = evolve(update, text=new_text)
-
-    return update
 
 
 dodona_converter = make_converter()

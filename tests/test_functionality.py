@@ -605,7 +605,7 @@ def test_batch_compilation_no_fallback(
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert len(updates.find_all("start-tab")) == 1
-    assert updates.find_status_enum() == ["compilation error"]
+    assert updates.find_status_enum() == ["compilation error", "wrong", "wrong"]
     assert spy.call_count == 1
 
 
@@ -718,23 +718,6 @@ def test_objects_error(language: str, tmp_path: Path, pytestconfig):
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["internal error"]
-
-
-def test_too_much_output(tmp_path: Path, pytestconfig):
-    conf = configuration(
-        pytestconfig,
-        "echo",
-        "python",
-        tmp_path,
-        "two.tson",
-        "output_limit",
-        {"output_limit": 1000},
-    )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    # 4 times: two times for the tests, one escalate and one judgement.
-    assert updates.find_status_enum() == ["output limit exceeded"] * 4
-    assert len(updates.find_all("close-test")) == 2
 
 
 @pytest.mark.parametrize(
