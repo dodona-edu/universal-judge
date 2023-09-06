@@ -141,7 +141,7 @@ def _check_simple_type(
 
     :return: A tuple with the result and expected value, which can have a modified type.
     """
-    supported_types = fallback_type_support_map(bundle.lang_config)
+    supported_types = fallback_type_support_map(bundle.language)
 
     # Case 3.
     if supported_types[expected.type] == TypeSupport.UNSUPPORTED:

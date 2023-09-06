@@ -319,12 +319,12 @@ def convert_execution_unit(pu: PreparedExecutionUnit) -> str:
     import java.math.BigInteger;
     import java.math.BigDecimal;
     
-    public class {pu.execution_name} implements Closeable {{
+    public class {pu.unit.name} implements Closeable {{
     
         private final PrintWriter valueWriter;
         private final PrintWriter exceptionWriter;
     
-        public {pu.execution_name}() throws Exception {{
+        public {pu.unit.name}() throws Exception {{
             this.valueWriter = new PrintWriter("{pu.value_file}");
             this.exceptionWriter = new PrintWriter("{pu.exception_file}");
         }}
@@ -393,7 +393,7 @@ def convert_execution_unit(pu: PreparedExecutionUnit) -> str:
         }}
         
         public static void main(String[] a) throws Exception {{
-            try({pu.execution_name} execution = new {pu.execution_name}()) {{
+            try({pu.unit.name} execution = new {pu.unit.name}()) {{
                 execution.execute();
             }}
         }}

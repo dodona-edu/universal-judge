@@ -6,8 +6,9 @@ from pathlib import Path
 from typing import List, Optional, Tuple, Union
 
 from tested.configs import Bundle
-from tested.dodona import AnnotateCode, Message, Status
+from tested.dodona import Status
 from tested.internationalization import get_i18n_string
+from tested.judge.planning import CompilationResult
 from tested.judge.utils import BaseExecutionResult, run_command
 from tested.languages.config import FileFilter, Language
 from tested.languages.utils import convert_stacktrace_to_clickable_feedback
@@ -53,7 +54,7 @@ def run_compilation(
              decide to fallback to individual mode if the compilation result is
              not positive.
     """
-    command, files = bundle.lang_config.compilation(dependencies)
+    command, files = bundle.language.compilation(dependencies)
     _logger.debug(
         "Generating files with command %s in directory %s", command, directory
     )
@@ -64,25 +65,24 @@ def run_compilation(
 
 def process_compile_results(
     language_config: Language, results: Optional[BaseExecutionResult]
-) -> Tuple[List[Message], Status, List[AnnotateCode]]:
+) -> CompilationResult:
     """
     Process the output of a compilation step. It will convert the result of the
     command into a list of messages and a status. If the status is not correct,
     the messages and status may be passed to Dodona unchanged. Alternatively, they
     can be kept to show them with the first context.
     """
-    messages = []
 
     # There was no compilation
     if results is None:
-        return messages, Status.CORRECT, []
+        return [], Status.CORRECT, []
 
     show_stdout = False
     _logger.debug("Received stderr from compiler: " + results.stderr)
     compiler_messages, annotations, stdout, stderr = language_config.compiler_output(
         results.stdout, results.stderr
     )
-    messages.extend(compiler_messages)
+    messages = compiler_messages
     shown_messages = annotations or compiler_messages
 
     # Report stderr.

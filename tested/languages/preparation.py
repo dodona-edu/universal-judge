@@ -57,8 +57,8 @@ from tested.testsuite import (
 )
 
 if TYPE_CHECKING:
-    from tested.judge.execution import ExecutionUnit
-    from tested.languages import Language
+    from tested.judge.planning import PlannedExecutionUnit
+    from tested.languages.config import Language
 
 # Names of the predefined functions that must be available.
 SEND_VALUE = "send_value"
@@ -177,24 +177,24 @@ class PreparedExecutionUnit:
     An execution unit that has been prepared for code generation.
     """
 
-    execution_unit: "ExecutionUnit"
-    "The original execution unit."
+    # The planned, original execution unit.
+    unit: "PlannedExecutionUnit"
+    # A list of prepared contexts.
     contexts: List[PreparedContext]
-    "The prepared contexts."
-    execution_name: str
-    "The name of the execution."
+    # The name of the file for the return channel.
     value_file: str
-    "The name of the file for the return channel."
+    # The name of the file for the exception channel.
     exception_file: str
-    "The name of the file for the exception channel."
+    # The name of the submission file.
     submission_name: str
-    "The name of the submission file."
+    # The secret context separator.
     context_separator_secret: str
-    "Secret for use in the context separator."
+    # The secret testcase separator.
     testcase_separator_secret: str
-    "Secret for use in the testcase separator."
+    # The names of the language-specific functions we will need.
     evaluator_names: Set[str]
-    "The names of the language-specific functions we will need."
+    # The language module.
+    # TODO: this should not go here, but it does.
     language: "Language"
 
 
@@ -210,11 +210,11 @@ def prepare_argument(
 
 def prepare_assignment(bundle: Bundle, assignment: Assignment) -> Assignment:
     if isinstance(assignment.type, VariableType):
-        class_type = conventionalize_class(bundle.lang_config, assignment.type.data)
+        class_type = conventionalize_class(bundle.language, assignment.type.data)
         assignment = assignment.replace_type(VariableType(data=class_type))
 
     assignment = assignment.replace_variable(
-        conventionalize_identifier(bundle.lang_config, assignment.variable)
+        conventionalize_identifier(bundle.language, assignment.variable)
     )
     prepared = prepare_expression(bundle, assignment.expression)
     return assignment.replace_expression(prepared)
@@ -228,25 +228,25 @@ def prepare_expression(bundle: Bundle, expression: Expression) -> Expression:
     if isinstance(expression, Identifier):
         if not expression.is_raw:
             expression = Identifier(
-                conventionalize_identifier(bundle.lang_config, expression)
+                conventionalize_identifier(bundle.language, expression)
             )
     elif isinstance(expression, PreparedFunctionCall):
         expression.arguments = [
             prepare_argument(bundle, arg) for arg in expression.arguments
         ]
     elif isinstance(expression, FunctionCall):
-        submission = submission_name(bundle.lang_config)
+        submission = submission_name(bundle.language)
         if expression.type == FunctionType.CONSTRUCTOR:
-            name = conventionalize_class(bundle.lang_config, expression.name)
+            name = conventionalize_class(bundle.language, expression.name)
         elif expression.type == FunctionType.PROPERTY:
             if expression.namespace is None:
                 name = conventionalize_global_identifier(
-                    bundle.lang_config, expression.name
+                    bundle.language, expression.name
                 )
             else:
-                name = conventionalize_property(bundle.lang_config, expression.name)
+                name = conventionalize_property(bundle.language, expression.name)
         else:
-            name = conventionalize_function(bundle.lang_config, expression.name)
+            name = conventionalize_function(bundle.language, expression.name)
 
         if expression.namespace is None:
             namespace = Identifier(submission)
@@ -302,7 +302,7 @@ def _create_handling_function(
     :param output: The oracle.
     :return: A tuple containing the call and the name of the oracle if present.
     """
-    lang_config = bundle.lang_config
+    lang_config = bundle.language
     if isinstance(output, OracleOutputChannel) and isinstance(
         output.oracle, LanguageSpecificOracle
     ):
@@ -515,8 +515,7 @@ def exception_file(bundle: Bundle, directory: Path):
 def prepare_execution_unit(
     bundle: Bundle,
     destination: Path,
-    execution_name: str,
-    execution_unit: "ExecutionUnit",
+    execution_unit: "PlannedExecutionUnit",
 ) -> PreparedExecutionUnit:
     """
     Prepare an execution unit for code generation.
@@ -524,7 +523,6 @@ def prepare_execution_unit(
     :param bundle: The configuration bundle.
     :param destination: Where the generated files should go.
     :param execution_unit: The execution for which generation is happening.
-    :param execution_name: The name of the execution module.
 
     :return: The name of the generated file in the given destination and a set
              of oracle names that will also be needed.
@@ -532,23 +530,22 @@ def prepare_execution_unit(
     evaluator_names = set()
     contexts = []
     for context in execution_unit.contexts:
-        context_args, context_evaluator_names = prepare_context(bundle, context)
+        context_args, context_evaluator_names = prepare_context(bundle, context.context)
         contexts.append(context_args)
         evaluator_names.update(context_evaluator_names)
 
     value_file_name = value_file(bundle, destination).name
     exception_file_name = exception_file(bundle, destination).name
-    submission = submission_name(bundle.lang_config)
+    submission = submission_name(bundle.language)
 
     return PreparedExecutionUnit(
-        execution_name=execution_name,
         value_file=value_file_name,
         exception_file=exception_file_name,
         submission_name=submission,
         testcase_separator_secret=bundle.testcase_separator_secret,
         context_separator_secret=bundle.context_separator_secret,
         contexts=contexts,
-        execution_unit=execution_unit,
+        unit=execution_unit,
         evaluator_names=evaluator_names,
-        language=bundle.lang_config,
+        language=bundle.language,
     )

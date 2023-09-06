@@ -171,7 +171,7 @@ def _generate_internal_context(ctx: PreparedContext, pu: PreparedExecutionUnit) 
     # Generate code for each testcase
     tc: PreparedTestcase
     for tc in ctx.testcases:
-        result += f"{pu.execution_name}_write_separator();\n"
+        result += f"{pu.unit.name}_write_separator();\n"
 
         if tc.testcase.is_main_testcase():
             assert isinstance(tc.input, MainInput)
@@ -215,59 +215,59 @@ def convert_execution_unit(pu: PreparedExecutionUnit) -> str:
         result += f'#include "{name}.c"\n'
 
     result += f"""
-    static FILE* {pu.execution_name}_value_file = NULL;
-    static FILE* {pu.execution_name}_exception_file = NULL;
+    static FILE* {pu.unit.name}_value_file = NULL;
+    static FILE* {pu.unit.name}_exception_file = NULL;
     
-    static void {pu.execution_name}_write_separator() {{
-        fprintf({pu.execution_name}_value_file, "--{pu.testcase_separator_secret}-- SEP");
-        fprintf({pu.execution_name}_exception_file, "--{pu.testcase_separator_secret}-- SEP");
+    static void {pu.unit.name}_write_separator() {{
+        fprintf({pu.unit.name}_value_file, "--{pu.testcase_separator_secret}-- SEP");
+        fprintf({pu.unit.name}_exception_file, "--{pu.testcase_separator_secret}-- SEP");
         fprintf(stdout, "--{pu.testcase_separator_secret}-- SEP");
         fprintf(stderr, "--{pu.testcase_separator_secret}-- SEP");
     }}
     
-    static void {pu.execution_name}_write_context_separator() {{
-        fprintf({pu.execution_name}_value_file, "--{pu.context_separator_secret}-- SEP");
-        fprintf({pu.execution_name}_exception_file, "--{pu.context_separator_secret}-- SEP");
+    static void {pu.unit.name}_write_context_separator() {{
+        fprintf({pu.unit.name}_value_file, "--{pu.context_separator_secret}-- SEP");
+        fprintf({pu.unit.name}_exception_file, "--{pu.context_separator_secret}-- SEP");
         fprintf(stdout, "--{pu.context_separator_secret}-- SEP");
         fprintf(stderr, "--{pu.context_separator_secret}-- SEP");
     }}
     
     #undef send_value
-    #define send_value(value) write_value({pu.execution_name}_value_file, value)
+    #define send_value(value) write_value({pu.unit.name}_value_file, value)
     
     #undef send_specific_value
-    #define send_specific_value(value) write_evaluated({pu.execution_name}_value_file, value)
+    #define send_specific_value(value) write_evaluated({pu.unit.name}_value_file, value)
     """
 
     # Generate code for each context.
     ctx: PreparedContext
     for i, ctx in enumerate(pu.contexts):
         result += f"""
-        int {pu.execution_name}_context_{i}(void) {{
+        int {pu.unit.name}_context_{i}(void) {{
             {_generate_internal_context(ctx, pu)}
         }}
         """
 
     result += f"""
-    int {pu.execution_name}() {{
-        {pu.execution_name}_value_file = fopen("{pu.value_file}", "w");
-        {pu.execution_name}_exception_file = fopen("{pu.exception_file}", "w");
+    int {pu.unit.name}() {{
+        {pu.unit.name}_value_file = fopen("{pu.value_file}", "w");
+        {pu.unit.name}_exception_file = fopen("{pu.exception_file}", "w");
         int exit_code;
     """
 
     for i, ctx in enumerate(pu.contexts):
-        result += " " * 4 + f"{pu.execution_name}_write_context_separator();\n"
-        result += " " * 4 + f"exit_code = {pu.execution_name}_context_{i}();\n"
+        result += " " * 4 + f"{pu.unit.name}_write_context_separator();\n"
+        result += " " * 4 + f"exit_code = {pu.unit.name}_context_{i}();\n"
 
     result += f"""
-        fclose({pu.execution_name}_value_file);
-        fclose({pu.execution_name}_exception_file);
+        fclose({pu.unit.name}_value_file);
+        fclose({pu.unit.name}_exception_file);
         return exit_code;
     }}
     
     #ifndef INCLUDED
     int main() {{
-        return {pu.execution_name}();
+        return {pu.unit.name}();
     }}
     #endif
     """

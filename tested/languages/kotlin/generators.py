@@ -268,7 +268,7 @@ import java.io.PrintWriter
 import java.math.BigInteger
 import java.math.BigDecimal
 
-class {pu.execution_name}: AutoCloseable {{
+class {pu.unit.name}: AutoCloseable {{
 
     private val valueWriter = PrintWriter("{pu.value_file}")
     private val exceptionWriter = PrintWriter("{pu.exception_file}")
@@ -369,7 +369,7 @@ class {pu.execution_name}: AutoCloseable {{
 }}
 
 fun main(args: Array<String> = emptyArray()) {{
-    val execution = {pu.execution_name}()
+    val execution = {pu.unit.name}()
     execution.use {{
         it.execute()
     }}

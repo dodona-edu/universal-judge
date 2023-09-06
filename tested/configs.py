@@ -125,7 +125,7 @@ class GlobalConfig:
 class Bundle:
     """A bundle of arguments and configs for running everything."""
 
-    lang_config: "Language"
+    language: "Language"
     global_config: GlobalConfig
     out: IO
 
@@ -194,4 +194,4 @@ def create_bundle(
         suite=suite,
     )
     lang_config = langs.get_language(global_config, language)
-    return Bundle(lang_config=lang_config, global_config=global_config, out=output)
+    return Bundle(language=lang_config, global_config=global_config, out=output)

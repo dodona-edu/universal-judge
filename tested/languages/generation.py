@@ -7,8 +7,9 @@ import logging
 import re
 import shlex
 import urllib.parse
+from collections.abc import Iterable
 from pathlib import Path
-from typing import TYPE_CHECKING, Iterable, List, Match, Set, Tuple, TypeAlias
+from typing import Match, TypeAlias
 
 from pygments import highlight
 from pygments.formatters.html import HtmlFormatter
@@ -18,6 +19,7 @@ from tested.configs import Bundle
 from tested.datatypes import AllTypes, BasicObjectTypes, BasicSequenceTypes
 from tested.dodona import ExtendedMessage
 from tested.internationalization import get_i18n_string
+from tested.judge.planning import PlannedExecutionUnit
 from tested.languages import Language
 from tested.languages.conventionalize import (
     conventionalize_namespace,
@@ -52,17 +54,13 @@ from tested.testsuite import (
     TextData,
 )
 
-# Prevent cyclic imports for types...
-if TYPE_CHECKING:
-    from tested.judge.execution import ExecutionUnit
-
 _logger = logging.getLogger(__name__)
 _html_formatter = HtmlFormatter(nowrap=True)
 
 
 # Alias for type declarations
 NestedTypeDeclaration: TypeAlias = (
-    AllTypes | Tuple[AllTypes, Tuple["NestedTypeDeclaration", ...]]
+    AllTypes | tuple[AllTypes, tuple["NestedTypeDeclaration", ...]]
 )
 
 
@@ -86,10 +84,10 @@ def generate_execution_unit(
     :param bundle:
     :return:
     """
-    return bundle.lang_config.generate_execution_unit(prepared_execution)
+    return bundle.language.generate_execution_unit(prepared_execution)
 
 
-def _handle_link_files(link_files: Iterable[FileUrl], language: str) -> Tuple[str, str]:
+def _handle_link_files(link_files: Iterable[FileUrl], language: str) -> tuple[str, str]:
     dict_links = dict(
         (link_file.name, get_converter().unstructure(link_file))
         for link_file in link_files
@@ -114,7 +112,7 @@ def _escape_shell(arg: str) -> str:
 
 def get_readable_input(
     bundle: Bundle, case: Testcase
-) -> Tuple[ExtendedMessage, Set[FileUrl]]:
+) -> tuple[ExtendedMessage, set[FileUrl]]:
     """
     Get human-readable input for a testcase. This function will use, in
     order of availability:
@@ -133,7 +131,7 @@ def get_readable_input(
         # See https://rouge-ruby.github.io/docs/Rouge/Lexers/ConsoleLexer.html
         format_ = "console"
         arguments = " ".join(_escape_shell(x) for x in case.input.arguments)
-        submission = submission_name(bundle.lang_config)
+        submission = submission_name(bundle.language)
         args = f"$ {submission} {arguments}"
         if isinstance(case.input.stdin, TextData):
             stdin = case.input.stdin.get_data_as_string(bundle.config.resources)
@@ -149,7 +147,7 @@ def get_readable_input(
     elif isinstance(case.input, Statement):
         format_ = bundle.config.programming_language
         text = generate_statement(bundle, case.input)
-        text = bundle.lang_config.cleanup_description(text)
+        text = bundle.language.cleanup_description(text)
     else:
         assert isinstance(case.input, LanguageLiterals)
         text = case.input.get_for(bundle.config.programming_language)
@@ -239,38 +237,33 @@ def generate_statement(bundle: Bundle, statement: Statement) -> str:
         assert isinstance(statement, Assignment)
         statement = prepare_assignment(bundle, statement)
 
-    return bundle.lang_config.generate_statement(statement)
+    return bundle.language.generate_statement(statement)
 
 
 def generate_execution(
     bundle: Bundle,
     destination: Path,
-    execution_unit: "ExecutionUnit",
-    execution_name: str,
-) -> Tuple[str, List[str]]:
+    execution_unit: PlannedExecutionUnit,
+) -> tuple[str, list[str]]:
     """
     Generate the files related to the execution.
 
     :param bundle: The configuration bundle.
     :param destination: Where the generated files should go.
     :param execution_unit: The execution for which generation is happening.
-    :param execution_name: The name of the execution module.
 
     :return: The name of the generated file in the given destination and a set
              of oracle names that will also be needed.
     """
-    prepared_execution = prepare_execution_unit(
-        bundle, destination, execution_name, execution_unit
-    )
-
+    prepared_execution = prepare_execution_unit(bundle, destination, execution_unit)
     execution_code = generate_execution_unit(bundle, prepared_execution)
 
     evaluator_files = [
-        f"{x}.{bundle.lang_config.file_extension()}"
+        f"{x}.{bundle.language.file_extension()}"
         for x in prepared_execution.evaluator_names
     ]
 
-    execution_name = bundle.lang_config.with_extension(execution_name)
+    execution_name = bundle.language.with_extension(execution_unit.name)
     execution_destination = destination / execution_name
 
     with open(execution_destination, "w") as execution_file:
@@ -280,7 +273,7 @@ def generate_execution(
 
 
 def generate_selector(
-    bundle: Bundle, destination: Path, context_names: List[str]
+    bundle: Bundle, destination: Path, context_names: list[str]
 ) -> str:
     """
     Generate the file to execute_module a single context.
@@ -291,10 +284,10 @@ def generate_selector(
 
     :return: The name of the generated file in the given destination.
     """
-    assert bundle.lang_config.needs_selector()
-    selector_filename = selector_file(bundle.lang_config)
+    assert bundle.language.needs_selector()
+    selector_filename = selector_file(bundle.language)
     selector_destination = destination / selector_filename
-    selector_code = bundle.lang_config.generate_selector(context_names)
+    selector_code = bundle.language.generate_selector(context_names)
     with open(selector_destination, "w") as execution_file:
         execution_file.write(selector_code)
     return selector_filename
@@ -325,7 +318,7 @@ def generate_custom_evaluator(
     :return: The name of the generated file.
     """
     evaluator_name = conventionalize_namespace(
-        bundle.lang_config, evaluator.function.file.stem
+        bundle.language, evaluator.function.file.stem
     )
     arguments = custom_oracle_arguments(evaluator)
 
@@ -337,10 +330,10 @@ def generate_custom_evaluator(
         has_root_namespace=False,
     )
 
-    code = bundle.lang_config.generate_check_function(evaluator_name, function)
+    code = bundle.language.generate_check_function(evaluator_name, function)
 
     if destination.is_dir():
-        destination /= bundle.lang_config.with_extension("EvaluatorExecutor")
+        destination /= bundle.language.with_extension("EvaluatorExecutor")
 
     with open(destination, "w") as check_function_file:
         check_function_file.write(code)

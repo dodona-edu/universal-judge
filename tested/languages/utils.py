@@ -3,7 +3,7 @@ import logging
 import os
 import re
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, overload
 
 from tested.configs import GlobalConfig
 from tested.datatypes import BasicStringTypes
@@ -140,6 +140,20 @@ def _replace_code_line_number(offset: int, stacktrace: str) -> str:
         return "<code>:" + str(current_number + offset)
 
     return re.sub(code_regex, modify_line_number, stacktrace)
+
+
+@overload
+def convert_stacktrace_to_clickable_feedback(
+    lang: "Language", stacktrace: str
+) -> ExtendedMessage:
+    ...
+
+
+@overload
+def convert_stacktrace_to_clickable_feedback(
+    lang: "Language", stacktrace: None
+) -> None:
+    ...
 
 
 def convert_stacktrace_to_clickable_feedback(

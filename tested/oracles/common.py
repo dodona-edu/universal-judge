@@ -90,7 +90,7 @@ def cleanup_specific_programmed(
     config: OracleConfig, channel: NormalOutputChannel, actual: EvalResult
 ) -> EvalResult:
     if isinstance(channel, ExceptionOutputChannel):
-        lang_config = config.bundle.lang_config
+        lang_config = config.bundle.language
         actual.readable_expected = lang_config.cleanup_stacktrace(
             actual.readable_expected or ""
         )

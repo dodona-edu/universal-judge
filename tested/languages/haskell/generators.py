@@ -171,7 +171,7 @@ indent = " " * 4
 
 def convert_execution_unit(pu: PreparedExecutionUnit) -> str:
     result = f"""{{-# LANGUAGE NamedFieldPuns #-}}
-module {pu.execution_name} where
+module {pu.unit.name} where
 
 import System.IO (hPutStr, stderr, stdout, hFlush)
 import System.Environment
@@ -230,8 +230,8 @@ handleException (Right _) = Nothing
     # Generate code for each context.
     ctx: PreparedContext
     for i, ctx in enumerate(pu.contexts):
-        result += f"{pu.execution_name.lower()}Context{i} :: IO ()\n"
-        result += f"{pu.execution_name.lower()}Context{i} = do\n"
+        result += f"{pu.unit.name.lower()}Context{i} :: IO ()\n"
+        result += f"{pu.unit.name.lower()}Context{i} = do\n"
         result += indent + ctx.before + "\n"
 
         # Generate code for each testcase
@@ -296,7 +296,7 @@ main = do
 """
     for i, ctx in enumerate(pu.contexts):
         result += indent + "writeContextSeparator\n"
-        result += indent + f"{pu.execution_name.lower()}Context{i}\n"
+        result += indent + f"{pu.unit.name.lower()}Context{i}\n"
 
     result += indent + 'putStr ""\n'
     return result

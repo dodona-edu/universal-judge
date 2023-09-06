@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING, Dict, List, Mapping, Optional, Set, Tuple
 from tested.datatypes import AllTypes
 from tested.dodona import AnnotateCode, Message, Status
 from tested.features import Construct, TypeSupport
-from tested.internationalization import get_i18n_string
 from tested.languages.config import (
     CallbackResult,
     Command,
@@ -123,24 +122,20 @@ class CSharp(Language):
         return ["dotnet", file, *arguments]
 
     def find_main_file(
-        self, files: List[Path], name: str, precompilation_messages: List[str]
-    ) -> Tuple[Optional[Path], List[Message], Status, List[AnnotateCode]]:
+        self, files: List[Path], name: str
+    ) -> Tuple[Optional[Path], Status]:
         # TODO: specify the extension (if any) of the output files, so we don't need to
         # override this.
         logger.debug("Finding %s in %s", name, files)
-        messages = []
         possible_main_files = [
             x for x in files if x.name.startswith(name) and x.suffix == ".dll"
         ]
         if possible_main_files:
-            return possible_main_files[0], messages, Status.CORRECT, []
+            return possible_main_files[0], Status.CORRECT
         else:
-            messages.extend(precompilation_messages)
-            messages.append(get_i18n_string("languages.config.unknown.compilation"))
-            return None, messages, Status.COMPILATION_ERROR, []
+            return None, Status.COMPILATION_ERROR
 
     def modify_solution(self, solution: Path):
-        # noinspection PyTypeChecker
         with open(solution, "r") as file:
             contents = file.read()
 

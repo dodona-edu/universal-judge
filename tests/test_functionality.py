@@ -857,8 +857,7 @@ def test_function_arguments_without_brackets(tmp_path: Path, pytestconfig):
 
     result = generate_statement(bundle, statement)
     assert (
-        result
-        == f'{submission_name(bundle.lang_config)}.test 5.5 :: Double "hallo" True'
+        result == f'{submission_name(bundle.language)}.test 5.5 :: Double "hallo" True'
     )
 
 

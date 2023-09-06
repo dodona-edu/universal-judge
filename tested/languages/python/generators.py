@@ -190,7 +190,7 @@ def send_specific_exception(exception):
     ctx: PreparedContext
     for i, ctx in enumerate(pu.contexts):
         indent = " " * 4
-        result += f"def {pu.execution_name}_context_{i}():\n"
+        result += f"def {pu.unit.name}_context_{i}():\n"
         result += indent + ctx.before + "\n"
 
         if not ctx.context.has_main_testcase():
@@ -235,7 +235,7 @@ def send_specific_exception(exception):
 
     for i, ctx in enumerate(pu.contexts):
         result += "write_context_separator()\n"
-        result += f"{pu.execution_name}_context_{i}()\n"
+        result += f"{pu.unit.name}_context_{i}()\n"
 
     result += """
 value_file.close()

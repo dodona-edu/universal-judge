@@ -79,7 +79,7 @@ def _evaluate_others(
     )
 
     # Check if the language supports this.
-    if Construct.EVALUATION not in eval_bundle.lang_config.supported_constructs():
+    if Construct.EVALUATION not in eval_bundle.language.supported_constructs():
         _logger.error(
             f"{eval_bundle.config.programming_language} does not support"
             f" evaluations."
@@ -101,8 +101,8 @@ def _evaluate_others(
     shutil.copy2(origin_path, custom_path)
 
     # Copy the dependencies to the folder.
-    dependencies = eval_bundle.lang_config.initial_dependencies()
-    origin = eval_bundle.lang_config.path_to_dependencies()
+    dependencies = eval_bundle.language.initial_dependencies()
+    origin = eval_bundle.language.path_to_dependencies()
     copy_from_paths_to_path(origin, dependencies, custom_path)
     # Include the actual oracle in the dependencies.
     dependencies.append(evaluator.function.file.name)
@@ -120,7 +120,7 @@ def _evaluate_others(
     _logger.debug("Generated oracle executor %s", evaluator_name)
 
     # Do compilation for those configs that require it.
-    command, files = eval_bundle.lang_config.compilation(dependencies)
+    command, files = eval_bundle.language.compilation(dependencies)
     _logger.debug("Compiling custom oracle with command %s", command)
     result = run_command(custom_path, None, command)
     if result and result.stderr:
@@ -130,7 +130,7 @@ def _evaluate_others(
     # Execute the custom oracle.
     evaluator_name = Path(evaluator_name).stem
 
-    files = eval_bundle.lang_config.filter_dependencies(files, evaluator_name)
+    files = eval_bundle.language.filter_dependencies(files, evaluator_name)
     for file in files:
         origin = custom_path / file
         try:
@@ -139,9 +139,7 @@ def _evaluate_others(
             # If the file already exists, skip it.
             pass
 
-    executable, _, status, _ = eval_bundle.lang_config.find_main_file(
-        files, evaluator_name, []
-    )
+    executable, status = eval_bundle.language.find_main_file(files, evaluator_name)
 
     if status != Status.CORRECT:
         return BaseExecutionResult(

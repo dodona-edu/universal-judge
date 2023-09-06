@@ -326,14 +326,14 @@ using System.IO;
 namespace Tested
 {{
 
-class {pu.execution_name}
+class {pu.unit.name}
 {{
     private readonly StreamWriter valueFile;
     private readonly StreamWriter exceptionFile;
     private readonly StreamWriter stdout;
     private readonly StreamWriter stderr;
 
-    public {pu.execution_name}()
+    public {pu.unit.name}()
     {{
         valueFile = new StreamWriter(File.OpenWrite("{pu.value_file}"));
         exceptionFile = new StreamWriter(File.OpenWrite("{pu.exception_file}"));
@@ -406,7 +406,7 @@ class {pu.execution_name}
 
     result += f"""        
     public static void Main(string[] a) {{
-        {pu.execution_name} execution = new {pu.execution_name}();
+        {pu.unit.name} execution = new {pu.unit.name}();
         execution.Execute();
     }}
 }}

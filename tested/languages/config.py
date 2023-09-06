@@ -24,7 +24,6 @@ from typing import (
 from tested.datatypes import AllTypes, ExpressionTypes
 from tested.dodona import AnnotateCode, Message, Status
 from tested.features import Construct, TypeSupport
-from tested.internationalization import get_i18n_string
 from tested.languages.conventionalize import (
     EXECUTION_PREFIX,
     Conventionable,
@@ -358,19 +357,21 @@ class Language(ABC):
 
     @typing.overload
     def find_main_file(
-        self, files: List[Path], name: str, precompilation_messages: List[Message]
-    ) -> Tuple[Path, List[Message], typing.Literal[Status.CORRECT], List[AnnotateCode]]:
+        self,
+        files: List[Path],
+        name: str,
+    ) -> tuple[Path, typing.Literal[Status.CORRECT]]:
         ...
 
     @typing.overload
-    def find_main_file(
-        self, files: List[Path], name: str, precompilation_messages: List[Message]
-    ) -> Tuple[None, List[Message], Status, List[AnnotateCode]]:
+    def find_main_file(self, files: List[Path], name: str) -> tuple[None, Status]:
         ...
 
     def find_main_file(
-        self, files: List[Path], name: str, precompilation_messages: List[Message]
-    ) -> Tuple[Optional[Path], List[Message], Status, List[AnnotateCode]]:
+        self,
+        files: List[Path],
+        name: str,
+    ) -> Tuple[Optional[Path], Status]:
         """
         Find the "main" file in a list of files.
 
@@ -379,19 +380,14 @@ class Language(ABC):
 
         :param files: A list of files.
         :param name: The name of the main file.
-        :param precompilation_messages: A list of precompilation messages.
         :return: The main file or a list of messages.
         """
-        # TODO: check why the messages are needed here...
         _logger.debug("Finding %s in %s", name, files)
-        messages = []
         possible_main_files = [x for x in files if x.name.startswith(name)]
         if possible_main_files:
-            return possible_main_files[0], messages, Status.CORRECT, []
+            return possible_main_files[0], Status.CORRECT
         else:
-            messages.extend(precompilation_messages)
-            messages.append(get_i18n_string("languages.config.unknown.compilation"))
-            return None, messages, Status.COMPILATION_ERROR, []
+            return None, Status.COMPILATION_ERROR
 
     def cleanup_stacktrace(self, stacktrace: str) -> str:
         """
