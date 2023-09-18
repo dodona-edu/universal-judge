@@ -3,7 +3,7 @@ import logging
 from collections.abc import Collection
 from enum import StrEnum, unique
 from pathlib import Path
-from typing import List, Literal, Optional, Tuple, Union
+from typing import List, Literal, Optional, Union
 
 from tested.configs import Bundle
 from tested.dodona import (
@@ -15,7 +15,6 @@ from tested.dodona import (
     CloseTestcase,
     EscalateStatus,
     ExtendedMessage,
-    Message,
     StartContext,
     StartTab,
     StartTest,
@@ -27,6 +26,7 @@ from tested.dodona import (
 from tested.internationalization import get_i18n_string
 from tested.judge.collector import OutputManager, TestcaseCollector
 from tested.judge.execution import ContextResult
+from tested.judge.planning import CompilationResult
 from tested.languages.generation import (
     attempt_readable_input,
     generate_statement,
@@ -147,11 +147,11 @@ def _evaluate_channel(
 def evaluate_context_results(
     bundle: Bundle,
     context: Context,
-    exec_results: Optional[ContextResult],
-    compiler_results: Tuple[List[Message], Status],
+    exec_results: ContextResult | None,
+    compilation_results: CompilationResult,
     context_dir: Path,
     collector: OutputManager,
-) -> Optional[Status]:
+) -> Status | None:
     """
     Evaluate the results for a single context.
 
@@ -161,7 +161,7 @@ def evaluate_context_results(
     :param bundle: The configuration bundle.
     :param context: The context to evaluate.
     :param exec_results: The results of evaluating the context.
-    :param compiler_results: The compiler results.
+    :param compilation_results: The compiler results.
     :param context_dir: The directory where the execution happened.
     :param collector: Where to put the output
     :return: A status if of interest to the caller.
@@ -169,18 +169,20 @@ def evaluate_context_results(
 
     # If the compiler results are not successful, there is no point in doing more,
     # so stop early.
-    if compiler_results[1] != Status.CORRECT:
+    if compilation_results.status != Status.CORRECT:
         readable_input = attempt_readable_input(bundle, context)
         collector.add(StartTestcase(description=readable_input))
         # Report all compiler messages.
-        for message in compiler_results[0]:
-            collector.add(AppendMessage(message=message))
-        # Escalate the compiler status to every testcase.
-        collector.add(EscalateStatus(status=StatusMessage(enum=compiler_results[1])))
+        if not compilation_results.reported:
+            collector.add_messages(compilation_results.messages)
+            collector.add_all(compilation_results.annotations)
+            collector.add(
+                EscalateStatus(status=StatusMessage(enum=compilation_results.status))
+            )
 
-        # Finish evaluation, since there is nothing we can do.
+        # Finish the evaluation, since there is nothing we can do.
         collector.add(CloseTestcase(accepted=False), 0)
-        return compiler_results[1]
+        return compilation_results.status
 
     # There must be execution if compilation succeeded.
     assert exec_results is not None
@@ -460,7 +462,7 @@ def complete_evaluation(bundle: Bundle, collector: OutputManager):
         "judgement" in collector.open_stack
     ), "A non-finalized output manager without open judgement is not possible."
 
-    tab_start, context_start, testcase_start = collector.closed
+    tab_start, context_start, testcase_start = collector.currently_open
 
     for tab in bundle.suite.tabs[tab_start:]:
         if context_start == 0 and testcase_start == 0:
@@ -517,7 +519,7 @@ def terminate(
     status_if_unclosed: Union[Status, StatusMessage],
 ):
     # Determine the level we need to close.
-    tab, context, testcase = collector.closed
+    tab, context, testcase = collector.currently_open
     max_tab = len(bundle.suite.tabs)
 
     until: Literal["testcase", "context", "tab", "judgement"]

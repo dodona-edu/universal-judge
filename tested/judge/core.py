@@ -8,7 +8,6 @@ from tested.dodona import (
     CloseContext,
     CloseJudgement,
     CloseTab,
-    Message,
     StartContext,
     StartJudgement,
     StartTab,
@@ -23,6 +22,7 @@ from tested.judge.compilation import process_compile_results, run_compilation
 from tested.judge.evaluation import evaluate_context_results, terminate
 from tested.judge.execution import (
     ExecutionResult,
+    PlanStrategy,
     compile_unit,
     execute_unit,
     filter_files,
@@ -41,6 +41,29 @@ from tested.languages.conventionalize import EXECUTION_PREFIX, submission_file
 from tested.languages.generation import generate_execution, generate_selector
 
 _logger = logging.getLogger(__name__)
+
+
+def _is_fatal_compilation_error(compilation_results: CompilationResult) -> bool:
+    return compilation_results.status in (
+        Status.TIME_LIMIT_EXCEEDED,
+        Status.MEMORY_LIMIT_EXCEEDED,
+    )
+
+
+def _handle_time_or_memory_compilation(
+    bundle: Bundle, collector: OutputManager, results: CompilationResult
+):
+    assert _is_fatal_compilation_error(results)
+    collector.add_messages(results.messages)
+    collector.add_all(results.annotations)
+    terminate(
+        bundle,
+        collector,
+        StatusMessage(
+            enum=results.status,
+            human=get_i18n_string("judge.core.invalid.source-code"),
+        ),
+    )
 
 
 def judge(bundle: Bundle):
@@ -81,19 +104,9 @@ def judge(bundle: Bundle):
         terminate(bundle, collector, Status.TIME_LIMIT_EXCEEDED)
         return
 
-    _logger.debug("Planning execution")
-    planned_units = plan_test_suite(bundle)
-    _judge_planned_units(bundle, collector, planned_units, start, max_time)
+    planned_units = plan_test_suite(bundle, strategy=PlanStrategy.OPTIMAL)
 
-
-def _judge_planned_units(
-    bundle: Bundle,
-    collector: OutputManager,
-    planned_units: list[PlannedExecutionUnit],
-    start: float,
-    max_time: float,
-):
-    _logger.debug("Generating files")
+    # Attempt to precompile everything.
     common_dir, dependencies, selector = _generate_files(bundle, planned_units)
 
     # Create an execution plan.
@@ -106,82 +119,55 @@ def _judge_planned_units(
         start_time=start,
     )
 
-    messages, status, annotations = precompile(bundle, plan)
+    _logger.debug("Attempting precompilation")
+    compilation_results = precompile(bundle, plan)
 
     # If something went horribly wrong, and the compilation itself caused a timeout or memory issue, bail now.
-    if status in (Status.TIME_LIMIT_EXCEEDED, Status.MEMORY_LIMIT_EXCEEDED):
-        _logger.info(f"Compilation resulted in {status}. Bailing now.")
-        collector.add_messages(messages)
-        collector.add_all(annotations)
-        terminate(bundle, collector, status)
+    if _is_fatal_compilation_error(compilation_results):
+        _handle_time_or_memory_compilation(bundle, collector, compilation_results)
         return
 
-    # If an individual execution unit should be compiled or not.
-    should_unit_compile = False
+    # If the compilation failed, but we can fall back, do that.
+    if (
+        compilation_results.status != Status.CORRECT
+        and bundle.config.options.allow_fallback
+    ):
+        _logger.warning("Precompilation failed. Falling back to unit compilation.")
+        planned_units = plan_test_suite(bundle, strategy=PlanStrategy.TAB)
+        plan.units = planned_units
+        compilation_results = None
 
-    # If the compilation failed, but we are allowed to use a fallback, do that.
-    if status != Status.CORRECT and bundle.config.options.allow_fallback:
-        _logger.info(
-            "Compilation error, falling back to compiling each unit individually."
-        )
-        should_unit_compile = True
-        # Remove the selector file from the dependencies.
-        # Otherwise, it will keep being compiled, which we want to avoid.
-        if bundle.language.needs_selector():
-            # The last element in the list is the "selector".
-            plan.files.pop()
-    # When compilation succeeded, only add annotations
-    elif status == Status.CORRECT:
-        collector.add_messages(messages)
-        collector.add_all(annotations)
-    else:
-        collector.add_messages(messages)
-        collector.add_all(annotations)
-        terminate(
-            bundle,
-            collector,
-            StatusMessage(
-                enum=status,
-                human=get_i18n_string("judge.core.invalid.source-code"),
-            ),
-        )
-        _logger.info("Compilation error without fallback")
-        return  # Compilation error occurred, useless to continue.
+    _judge_planned_units(bundle, collector, plan, compilation_results)
 
+
+def _judge_planned_units(
+    bundle: Bundle,
+    collector: OutputManager,
+    plan: ExecutionPlan,
+    compilation_results: CompilationResult | None,
+):
     _logger.info("Starting execution.")
+    currently_open_tab = -1
     # Create a list of runs we want to execute.
     for i, planned_unit in enumerate(plan.units):
         # Prepare the unit.
         execution_dir, dependencies = set_up_unit(bundle, plan, i)
 
-        should_attempt_execution = True
         # If compilation is necessary, do it.
-        if should_unit_compile:
-            (messages, status, annotations), dependencies = compile_unit(
+        if compilation_results is None:
+            local_compilation_results, dependencies = compile_unit(
                 bundle, plan, i, execution_dir, dependencies
             )
-            if status == Status.TIME_LIMIT_EXCEEDED:
-                # There is no more, so stop now.
-                collector.add_messages(messages)
-                collector.add_all(annotations)
-                terminate(
-                    bundle,
-                    collector,
-                    StatusMessage(
-                        enum=status,
-                        human=get_i18n_string("judge.core.invalid.source-code"),
-                    ),
+            if _is_fatal_compilation_error(local_compilation_results):
+                _handle_time_or_memory_compilation(
+                    bundle, collector, local_compilation_results
                 )
                 return
-            elif status != Status.CORRECT:
-                # TODO: go back and start again with tabs?
-                should_attempt_execution = False
-            else:
-                collector.add_messages(messages)
-                collector.add_all(annotations)
+        else:
+            local_compilation_results = compilation_results
 
         # Execute the unit.
-        if should_attempt_execution:
+        if local_compilation_results.status == Status.CORRECT:
             remaining_time = plan.remaining_time()
             execution_result, status = execute_unit(
                 bundle, planned_unit, execution_dir, dependencies, remaining_time
@@ -189,14 +175,14 @@ def _judge_planned_units(
         else:
             execution_result = None
 
-        result_status = _process_results(
+        result_status, currently_open_tab = _process_results(
             bundle=bundle,
             unit=planned_unit,
             execution_result=execution_result,
-            compiler_messages=messages,
-            status=status,
             execution_dir=execution_dir,
+            compilation_results=local_compilation_results,
             collector=collector,
+            currently_open_tab=currently_open_tab,
         )
 
         if result_status in (
@@ -207,8 +193,8 @@ def _judge_planned_units(
             terminate(bundle, collector, result_status)
             return
 
-        # Depending on the result, we might want to do the next execution anyway.
-
+    # Close the last tab.
+    collector.add(CloseTab(), currently_open_tab)
     collector.add(CloseJudgement())
 
 
@@ -235,7 +221,7 @@ def precompile(bundle: Bundle, plan: ExecutionPlan) -> CompilationResult:
 
     # Update the files if the compilation succeeded.
     processed_results = process_compile_results(bundle.language, result)
-    if processed_results[1] == Status.CORRECT:
+    if processed_results.status == Status.CORRECT:
         plan.files = compilation_files
 
     return processed_results
@@ -300,26 +286,24 @@ def _process_results(
     bundle: Bundle,
     collector: OutputManager,
     unit: PlannedExecutionUnit,
+    compilation_results: CompilationResult,
     execution_result: ExecutionResult | None,
-    compiler_messages: list[Message],
-    status: Status,
     execution_dir: Path,
-) -> Status | None:
+    currently_open_tab: int,
+) -> tuple[Status | None, int]:
     if execution_result:
         context_results = execution_result.to_context_results()
     else:
         context_results = [None] * len(unit.contexts)
 
-    current_tab_index = -1
-
     for planned, context_result in zip(unit.contexts, context_results):
         planned: PlannedContext
-        if current_tab_index < planned.tab_index:
+        if currently_open_tab < planned.tab_index:
             # Close the previous tab if necessary.
-            if current_tab_index >= 0:
-                collector.add(CloseTab(), current_tab_index)
-            current_tab_index = current_tab_index + 1
-            tab = bundle.suite.tabs[current_tab_index]
+            if collector.open_stack[-1] == "tab":
+                collector.add(CloseTab(), currently_open_tab)
+            currently_open_tab = currently_open_tab + 1
+            tab = bundle.suite.tabs[currently_open_tab]
             collector.add(StartTab(title=tab.name, hidden=tab.hidden))
 
         # Handle the contexts.
@@ -329,21 +313,16 @@ def _process_results(
             bundle,
             context=planned.context,
             exec_results=context_result,
-            compiler_results=(compiler_messages, status),
             context_dir=execution_dir,
             collector=collector,
+            compilation_results=compilation_results,
         )
-
-        # We handled the compiler messages above, so remove them.
-        compiler_messages = []
 
         collector.add(CloseContext(), planned.context_index)
         if continue_ in (Status.TIME_LIMIT_EXCEEDED, Status.MEMORY_LIMIT_EXCEEDED):
-            return continue_
+            return continue_, currently_open_tab
 
-    # Finish the final tab.
-    collector.add(CloseTab(), current_tab_index)
-    return None
+    return None, currently_open_tab
 
 
 def _copy_workdir_source_files(bundle: Bundle, common_dir: Path) -> list[str]:

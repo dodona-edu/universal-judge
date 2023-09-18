@@ -5,13 +5,19 @@ import time
 from pathlib import Path
 from typing import Optional
 
-from attrs import define
+from attrs import define, field
 
 from tested.dodona import AnnotateCode, Message, Status
 from tested.languages.config import FileFilter
 from tested.testsuite import Context
 
-CompilationResult = tuple[list[Message], Status, list[AnnotateCode]]
+
+@define
+class CompilationResult:
+    status: Status
+    messages: list[Message] = field(factory=list)
+    annotations: list[AnnotateCode] = field(factory=list)
+    reported: bool = False
 
 
 @define

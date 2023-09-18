@@ -1,6 +1,8 @@
+import enum
 import itertools
 import logging
 import shutil
+from enum import Enum
 from pathlib import Path
 from typing import List, Optional, Tuple, Union, cast
 
@@ -314,22 +316,15 @@ def execute_unit(
     return result, status
 
 
-def plan_test_suite(bundle: Bundle) -> list[PlannedExecutionUnit]:
-    """
-    Transform a test suite into a list of execution units.
+class PlanStrategy(Enum):
+    OPTIMAL = enum.auto()
+    TAB = enum.auto()
+    CONTEXT = enum.auto()
 
-    :param bundle: The configuration
-    :return: A list of planned execution units.
-    """
 
-    # First, flatten all contexts into a single list.
-    flattened_contexts = []
-    for t, tab in enumerate(bundle.suite.tabs):
-        for c, context in enumerate(tab.contexts):
-            flattened_contexts.append(
-                PlannedContext(context=context, tab_index=t, context_index=c)
-            )
-
+def _flattened_contexts_to_units(
+    bundle: Bundle, flattened_contexts: list[PlannedContext]
+) -> list[PlannedExecutionUnit]:
     units = []
     current_unit = []
 
@@ -372,3 +367,49 @@ def plan_test_suite(bundle: Bundle) -> list[PlannedExecutionUnit]:
         )
 
     return units
+
+
+def plan_test_suite(
+    bundle: Bundle, strategy: PlanStrategy
+) -> list[PlannedExecutionUnit]:
+    """
+    Transform a test suite into a list of execution units.
+
+    :param strategy: Which strategy to follow when planning the units.
+    :param bundle: The configuration
+    :return: A list of planned execution units.
+    """
+
+    # First, flatten all contexts into a single list.
+    if strategy == PlanStrategy.OPTIMAL:
+        flattened_contexts = []
+        for t, tab in enumerate(bundle.suite.tabs):
+            for c, context in enumerate(tab.contexts):
+                flattened_contexts.append(
+                    PlannedContext(context=context, tab_index=t, context_index=c)
+                )
+        flattened_contexts_list = [flattened_contexts]
+    elif strategy == PlanStrategy.TAB:
+        flattened_contexts_list = []
+        for t, tab in enumerate(bundle.suite.tabs):
+            flattened_contexts = []
+            for c, context in enumerate(tab.contexts):
+                flattened_contexts.append(
+                    PlannedContext(context=context, tab_index=t, context_index=c)
+                )
+            flattened_contexts_list.append(flattened_contexts)
+    else:
+        assert strategy == PlanStrategy.CONTEXT
+        flattened_contexts_list = []
+        for t, tab in enumerate(bundle.suite.tabs):
+            for c, context in enumerate(tab.contexts):
+                flattened_contexts = [
+                    PlannedContext(context=context, tab_index=t, context_index=c)
+                ]
+                flattened_contexts_list.append(flattened_contexts)
+
+    nested_units = []
+    for flattened_contexts in flattened_contexts_list:
+        nested_units.extend(_flattened_contexts_to_units(bundle, flattened_contexts))
+
+    return nested_units

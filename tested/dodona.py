@@ -11,7 +11,7 @@ the authoritative json-schema, provided by Dodona.
 """
 import json
 from enum import StrEnum, auto, unique
-from typing import IO, Literal, Optional, Union
+from typing import IO, Literal, Union
 
 from attrs import define
 from cattrs.preconf.json import make_converter
@@ -30,10 +30,10 @@ class Permission(StrEnum):
 class ExtendedMessage:
     description: str
     format: str = "text"
-    permission: Optional[Permission] = None
+    permission: Permission | None = None
 
 
-Message = Union[ExtendedMessage, str]
+Message = ExtendedMessage | str
 
 BadgeCount = int
 
@@ -66,7 +66,7 @@ class StatusMessage:
     """Describes the outcome of the judgement."""
 
     enum: Status
-    human: Optional[str] = None
+    human: str | None = None
 
 
 @define
@@ -84,16 +84,16 @@ class StartTab:
     """
 
     title: str
-    hidden: Optional[bool] = None
+    hidden: bool | None = None
     command: Literal["start-tab"] = "start-tab"
-    permission: Optional[Permission] = None
+    permission: Permission | None = None
 
 
 @define
 class StartContext:
     """Start on a new context."""
 
-    description: Optional[Message] = None
+    description: Message | None = None
     command: Literal["start-context"] = "start-context"
 
 
@@ -110,8 +110,8 @@ class StartTest:
     """Start on a new test with a given channel answer."""
 
     expected: str
-    channel: Optional[str] = None
-    description: Optional[Message] = None
+    channel: str | None = None
+    description: Message | None = None
     command: Literal["start-test"] = "start-test"
 
 
@@ -137,11 +137,11 @@ class AnnotateCode:
 
     row: Index
     text: str
-    externalUrl: Optional[str] = None
-    column: Optional[Index] = None
-    type: Optional[Severity] = None
-    rows: Optional[Index] = None
-    columns: Optional[Index] = None
+    externalUrl: str | None = None
+    column: Index | None = None
+    type: Severity | None = None
+    rows: Index | None = None
+    columns: Index | None = None
     command: Literal["annotate-code"] = "annotate-code"
 
 
@@ -154,7 +154,7 @@ class CloseTest:
 
     generated: str
     status: StatusMessage
-    accepted: Optional[bool] = None
+    accepted: bool | None = None
     command: Literal["close-test"] = "close-test"
 
 
@@ -165,7 +165,7 @@ class CloseTestcase:
     overwrite this.
     """
 
-    accepted: Optional[bool] = None
+    accepted: bool | None = None
     command: Literal["close-testcase"] = "close-testcase"
 
 
@@ -176,7 +176,7 @@ class CloseContext:
     overwrite this.
     """
 
-    accepted: Optional[bool] = None
+    accepted: bool | None = None
     command: Literal["close-context"] = "close-context"
 
 
@@ -184,7 +184,7 @@ class CloseContext:
 class CloseTab:
     """Close the current tab."""
 
-    badge_count: Optional[BadgeCount] = None
+    badge_count: BadgeCount | None = None
     command: Literal["close-tab"] = "close-tab"
 
 
@@ -196,8 +196,8 @@ class CloseJudgement:
     tests, but you can overwrite this.
     """
 
-    accepted: Optional[bool] = None
-    status: Optional[StatusMessage] = None
+    accepted: bool | None = None
+    status: StatusMessage | None = None
     command: Literal["close-judgement"] = "close-judgement"
 
 

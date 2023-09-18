@@ -75,7 +75,7 @@ def process_compile_results(
 
     # There was no compilation
     if results is None:
-        return [], Status.CORRECT, []
+        return CompilationResult(status=Status.CORRECT)
 
     show_stdout = False
     _logger.debug("Received stderr from compiler: " + results.stderr)
@@ -106,14 +106,16 @@ def process_compile_results(
 
     # Report errors if needed.
     if results.timeout:
-        return messages, Status.TIME_LIMIT_EXCEEDED, annotations
+        status = Status.TIME_LIMIT_EXCEEDED
     if results.memory:
-        return messages, Status.MEMORY_LIMIT_EXCEEDED, annotations
+        status = Status.MEMORY_LIMIT_EXCEEDED
     if results.exit != 0:
         if not shown_messages:
             messages.append(
                 get_i18n_string("judge.compilation.exitcode", exitcode=results.exit)
             )
-        return messages, Status.COMPILATION_ERROR, annotations
+        status = Status.COMPILATION_ERROR
     else:
-        return messages, Status.CORRECT, annotations
+        status = Status.CORRECT
+
+    return CompilationResult(messages=messages, status=status, annotations=annotations)

@@ -564,10 +564,11 @@ def test_batch_compilation(language: str, tmp_path: Path, pytestconfig, mocker):
 def test_batch_compilation_fallback(
     language: str, tmp_path: Path, pytestconfig, mocker
 ):
+    config_ = {"options": {"allow_fallback": True}}
     lang_class = LANGUAGES[language]
     spy = mocker.spy(lang_class, "compilation")
     conf = configuration(
-        pytestconfig, "echo", language, tmp_path, "two.tson", "comp-error"
+        pytestconfig, "echo", language, tmp_path, "two.tson", "comp-error", config_
     )
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
@@ -589,7 +590,7 @@ def test_batch_compilation_no_fallback(
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert len(updates.find_all("start-tab")) == 1
-    assert updates.find_status_enum() == ["compilation error", "wrong", "wrong"]
+    assert updates.find_status_enum() == ["compilation error"] * 2
     assert spy.call_count == 1
 
 

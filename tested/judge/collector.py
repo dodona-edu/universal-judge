@@ -36,19 +36,19 @@ class OutputManager:
     __slots__ = [
         "finalized",
         "open_stack",
-        "closed",
+        "currently_open",
         "out",
     ]
 
     finalized: bool
     open_stack: list[str]
-    closed: Tuple[int, int, int]
+    currently_open: Tuple[int, int, int]
     out: IO
 
     def __init__(self, out: IO):
         self.finalized = False
         self.open_stack = []
-        self.closed = (0, 0, 0)
+        self.currently_open = (0, 0, 0)
         self.out = out
 
     def add_all(self, commands: Iterable[Update]):
@@ -73,18 +73,18 @@ class OutputManager:
             self.open_stack.append(type_)
         elif action == "close":
             previous = self.open_stack.pop()
-            assert previous == type_, "Closing a different update type"
+            assert previous == type_, f"Closing {type_}, but expected {previous}"
 
         # If the output should be counted or not.
         if index is not None:
             if isinstance(command, CloseTab):
-                self.closed = (index + 1, 0, 0)
+                self.currently_open = (index + 1, 0, 0)
             elif isinstance(command, CloseContext):
-                tabs, _, _ = self.closed
-                self.closed = (tabs, index + 1, 0)
+                tabs, _, _ = self.currently_open
+                self.currently_open = (tabs, index + 1, 0)
             elif isinstance(command, CloseTestcase):
-                tabs, contexts, _ = self.closed
-                self.closed = (tabs, contexts, index + 1)
+                tabs, contexts, _ = self.currently_open
+                self.currently_open = (tabs, contexts, index + 1)
 
         _logger.debug(f"After adding, stack is {self.open_stack}")
         report_update(self.out, command)
