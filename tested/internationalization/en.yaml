@@ -52,9 +52,7 @@ en:
       exitcode: "Exitcode %{exitcode}."
     core:
       unsupported:
-        language: >-
-          This exercise can't be solved in this programming language:
-          %{language}
+        language: "Unsupported programming language"
       compilation: "Compilation"
       invalid:
         source-code: "Invalid source code"

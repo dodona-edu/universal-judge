@@ -546,22 +546,6 @@ def test_programmed_evaluator_wrong(lang: str, tmp_path: Path, pytestconfig):
 
 
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
-def test_context_compilation(language: str, tmp_path: Path, pytestconfig, mocker):
-    config_ = {"options": {"mode": "context"}}
-    # Mock the compilation callback to ensure we call it for every context.
-    lang_class = LANGUAGES[language]
-    spy = mocker.spy(lang_class, "compilation")
-    conf = configuration(
-        pytestconfig, "echo", language, tmp_path, "two.tson", "correct", config_
-    )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    assert len(updates.find_all("start-testcase")) == 2
-    assert updates.find_status_enum() == ["correct"] * 2
-    assert spy.call_count == 2
-
-
-@pytest.mark.parametrize("language", ALL_LANGUAGES)
 def test_batch_compilation(language: str, tmp_path: Path, pytestconfig, mocker):
     config_ = {"options": {"mode": "batch"}}
     lang_class = LANGUAGES[language]

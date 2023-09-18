@@ -59,27 +59,23 @@ def judge(bundle: Bundle):
         report_update(
             bundle.out,
             CloseJudgement(
-                accepted=False,
                 status=StatusMessage(
                     enum=Status.INTERNAL_ERROR,
-                    human=get_i18n_string(
-                        "judge.core.unsupported.language",
-                        language=bundle.config.programming_language,
-                    ),
+                    human=get_i18n_string("judge.core.unsupported.language"),
                 ),
             ),
         )
         _logger.info("Required features not supported.")
         return  # Not all required features are supported.
 
+    # Do the set-up for the judgement.
     collector = OutputManager(bundle.out)
     collector.add(StartJudgement())
-
     max_time = float(bundle.config.time_limit) * 0.9
     start = time.perf_counter()
 
     # Run the linter.
-    # TODO: move to the back? Or at least limit the time.
+    # TODO: do this in parallel
     run_linter(bundle, collector, max_time)
     if time.perf_counter() - start > max_time:
         terminate(bundle, collector, Status.TIME_LIMIT_EXCEEDED)
@@ -87,7 +83,16 @@ def judge(bundle: Bundle):
 
     _logger.debug("Planning execution")
     planned_units = plan_test_suite(bundle)
+    _judge_planned_units(bundle, collector, planned_units, start, max_time)
 
+
+def _judge_planned_units(
+    bundle: Bundle,
+    collector: OutputManager,
+    planned_units: list[PlannedExecutionUnit],
+    start: float,
+    max_time: float,
+):
     _logger.debug("Generating files")
     common_dir, dependencies, selector = _generate_files(bundle, planned_units)
 
@@ -201,6 +206,8 @@ def judge(bundle: Bundle):
         ):
             terminate(bundle, collector, result_status)
             return
+
+        # Depending on the result, we might want to do the next execution anyway.
 
     collector.add(CloseJudgement())
 
