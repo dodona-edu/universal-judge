@@ -3,7 +3,7 @@ import logging
 import os
 import re
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional, overload
+from typing import TYPE_CHECKING, overload
 
 from tested.configs import GlobalConfig
 from tested.datatypes import BasicStringTypes
@@ -157,8 +157,8 @@ def convert_stacktrace_to_clickable_feedback(
 
 
 def convert_stacktrace_to_clickable_feedback(
-    lang: "Language", stacktrace: Optional[str]
-) -> Optional[ExtendedMessage]:
+    lang: "Language", stacktrace: str | None
+) -> ExtendedMessage | None:
     """
     Convert a stacktrace to an HTML message with clickable links to the submission.
 

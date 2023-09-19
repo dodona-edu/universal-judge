@@ -6,10 +6,11 @@ When executing this module, a json-schema is generated for the format, which can
 of assistance when checking existing test suites.
 """
 from collections import defaultdict
+from collections.abc import Iterable
 from enum import StrEnum, auto, unique
 from os import path
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Literal, NamedTuple, Optional, Set, Union
+from typing import Any, Literal, Union
 
 from attrs import define, field
 
@@ -75,7 +76,7 @@ class SupportedLanguage(StrEnum):
     CSHARP = auto()
 
 
-LanguageMapping = Dict[SupportedLanguage, str]
+LanguageMapping = dict[SupportedLanguage, str]
 
 
 @define
@@ -114,7 +115,7 @@ class BaseBuiltinOracle:
     """
 
     type: Literal["builtin"] = "builtin"
-    options: Dict[str, Any] = field(factory=dict)
+    options: dict[str, Any] = field(factory=dict)
 
 
 @define
@@ -162,7 +163,7 @@ class CustomCheckOracle:
 
     language: str
     function: EvaluationFunction
-    arguments: List[Value] = field(factory=list)
+    arguments: list[Value] = field(factory=list)
     type: Literal["programmed", "custom_check"] = "custom_check"
 
 
@@ -189,7 +190,7 @@ class LanguageSpecificOracle:
     instead.
     """
 
-    functions: Dict[SupportedLanguage, EvaluationFunction] = field()
+    functions: dict[SupportedLanguage, EvaluationFunction] = field()
     type: Literal["specific"] = "specific"
 
     def for_language(self, language: SupportedLanguage) -> EvaluationFunction:
@@ -277,7 +278,7 @@ class FileOutputChannel(WithFeatures):
 class ValueOutputChannel(WithFeatures):
     """Handles return values of function calls."""
 
-    value: Optional[Value] = None
+    value: Value | None = None
     oracle: GenericValueOracle | CustomCheckOracle | LanguageSpecificOracle = field(
         factory=GenericValueOracle
     )
@@ -302,13 +303,13 @@ class ExpectedException(WithFeatures):
     """
 
     # If the message is none, the message will not be checked.
-    message: Optional[str]
+    message: str | None
     # Dictionary of exceptions types for supported languages.
     # You can either:
     # - Specify nothing, in which case the type is not checked.
     # - Specify a dictionary mapping programming names to exception names.
     #   These exception names should already be in the right convention.
-    types: Optional[Dict[str, str]] = None
+    types: dict[str, str] | None = None
 
     def __attrs_post_init__(self):
         if self.message is None and self.types is None:
@@ -317,7 +318,7 @@ class ExpectedException(WithFeatures):
     def get_used_features(self) -> FeatureSet:
         return FeatureSet({Construct.EXCEPTIONS}, types=set(), nested_types=set())
 
-    def get_type(self, language: str) -> Optional[str]:
+    def get_type(self, language: str) -> str | None:
         if not self.types:
             return None
         return self.types.get(language)
@@ -339,7 +340,7 @@ class ExpectedException(WithFeatures):
 class ExceptionOutputChannel(WithFeatures):
     """Handles exceptions caused by the submission."""
 
-    exception: Optional[ExpectedException] = None
+    exception: ExpectedException | None = None
     oracle: GenericExceptionOracle | LanguageSpecificOracle = field(
         factory=GenericExceptionOracle
     )
@@ -425,7 +426,7 @@ class Output(WithFeatures):
             ]
         )
 
-    def get_specific_languages(self) -> Optional[Set[SupportedLanguage]]:
+    def get_specific_languages(self) -> set[SupportedLanguage] | None:
         """
         Get the languages supported by this output if this output uses any language-specific constructs.
 
@@ -463,7 +464,7 @@ class MainInput(WithFeatures, WithFunctions):
     """
 
     stdin: TextData | EmptyChannel = EmptyChannel.NONE
-    arguments: List[str] = field(factory=list)
+    arguments: list[str] = field(factory=list)
     main_call: Literal[True] = True
 
     def get_as_string(self, working_directory: Path) -> str:
@@ -510,9 +511,9 @@ class Testcase(WithFeatures, WithFunctions):
     """
 
     input: Statement | MainInput | LanguageLiterals
-    description: Optional[str] = None
+    description: str | None = None
     output: Output = field(factory=Output)
-    link_files: List[FileUrl] = field(factory=list)
+    link_files: list[FileUrl] = field(factory=list)
 
     def get_used_features(self) -> FeatureSet:
         return combine_features(
@@ -546,7 +547,7 @@ class Testcase(WithFeatures, WithFunctions):
     def is_main_testcase(self):
         return isinstance(self.input, MainInput)
 
-    def get_specific_languages(self) -> Optional[Set[SupportedLanguage]]:
+    def get_specific_languages(self) -> set[SupportedLanguage] | None:
         """
         Get the languages supported by this output if this output uses any language-specific constructs.
 
@@ -569,7 +570,7 @@ class Testcase(WithFeatures, WithFunctions):
         return output_languages & input_languages
 
 
-Code = Dict[str, TextData]
+Code = dict[str, TextData]
 
 
 @ignore_field(get_converter(), "link_files")
@@ -579,10 +580,10 @@ class Context(WithFeatures, WithFunctions):
     A context is a set of dependant test cases.
     """
 
-    testcases: List[Testcase] = field(factory=list)
+    testcases: list[Testcase] = field(factory=list)
     before: Code = field(factory=dict)
     after: Code = field(factory=dict)
-    description: Optional[str] = None
+    description: str | None = None
 
     def __attrs_post_init__(self):
         # Fix the default value of the exit code outputs.
@@ -593,7 +594,7 @@ class Context(WithFeatures, WithFunctions):
             last_testcase.output.exit_code = ExitCodeOutputChannel()
 
     @testcases.validator  # type: ignore
-    def check_testcases(self, _, value: List[Testcase]):
+    def check_testcases(self, _, value: list[Testcase]):
         # Check that only the first testcase has a main call.
         for non_first_testcase in value[1:]:
             if isinstance(non_first_testcase.input, MainInput):
@@ -627,14 +628,14 @@ class Context(WithFeatures, WithFunctions):
     def has_exit_testcase(self):
         return not self.testcases[-1].output.exit_code == IgnoredChannel.IGNORED
 
-    def get_files(self) -> Set[FileUrl]:
+    def get_files(self) -> set[FileUrl]:
         all_files = set()
         for t in self.testcases:
             all_files = all_files.union(t.link_files)
         return all_files
 
 
-def _runs_to_tab_converter(runs: Optional[list]):
+def _runs_to_tab_converter(runs: list | None):
     assert isinstance(runs, list), "The field 'runs' must be a list."
     contexts = []
     for run in runs:
@@ -652,8 +653,8 @@ class Tab(WithFeatures, WithFunctions):
     """Represents a tab on Dodona."""
 
     name: str
-    contexts: List[Context] = field()
-    hidden: Optional[bool] = None
+    contexts: list[Context] = field()
+    hidden: bool | None = None
 
     def get_used_features(self) -> FeatureSet:
         assert self.contexts is not None
@@ -672,8 +673,8 @@ class Tab(WithFeatures, WithFunctions):
             raise ValueError("At least one context is required.")
 
     @contexts.validator  # type: ignore
-    def unique_evaluation_functions(self, _, value: List[Context]):
-        eval_functions: Dict[str, List[EvaluationFunction]] = defaultdict(list)
+    def unique_evaluation_functions(self, _, value: list[Context]):
+        eval_functions: dict[str, list[EvaluationFunction]] = defaultdict(list)
 
         for context in value:
             for testcase in context.testcases:
@@ -701,7 +702,7 @@ class Tab(WithFeatures, WithFunctions):
 
         for language, functions in eval_functions.items():
             # Map every function name to the files it is present in.
-            function_file: Dict[str, Set[Path]] = defaultdict(set)
+            function_file: dict[str, set[Path]] = defaultdict(set)
             for function in functions:
                 function_file[function.name].add(function.file)
 
@@ -723,7 +724,7 @@ class ExecutionMode(StrEnum):
 class Suite(WithFeatures, WithFunctions):
     """General test suite, which is used to run tests of some code."""
 
-    tabs: List[Tab] = field(factory=list)
+    tabs: list[Tab] = field(factory=list)
     namespace: str = "submission"
 
     def get_used_features(self) -> FeatureSet:
@@ -745,7 +746,8 @@ class Suite(WithFeatures, WithFunctions):
         return flatten(x.get_functions() for x in self.tabs)
 
 
-class _FunctionSignature(NamedTuple):
+@define(frozen=True)
+class _FunctionSignature:
     name: str
     namespace: str
     type: FunctionType
@@ -777,7 +779,7 @@ def _resolve_function_calls(function_calls: Iterable[FunctionCall]):
     :param function_calls:
     :return:
     """
-    registry: Dict[_FunctionSignature, List[FunctionCall]] = defaultdict(list)
+    registry: dict[_FunctionSignature, list[FunctionCall]] = defaultdict(list)
 
     fs = list(function_calls)
     assert all(x for x in fs)
@@ -795,7 +797,7 @@ def _resolve_function_calls(function_calls: Iterable[FunctionCall]):
                 FeatureSet({Construct.DEFAULT_PARAMETERS}, set(), set())
             )
         # Create mapping [arg position] -> arguments for each call
-        argument_map: Dict[Any, List[Expression]] = defaultdict(list)
+        argument_map: dict[Any, list[Expression]] = defaultdict(list)
         for call in calls:
             for i, arg in enumerate(call.arguments):
                 if isinstance(arg, NamedArgument):

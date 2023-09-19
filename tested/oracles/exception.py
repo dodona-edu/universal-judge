@@ -1,6 +1,5 @@
 import logging
 import traceback
-from typing import Optional, Tuple
 
 from tested.dodona import ExtendedMessage, Message, Permission, Status, StatusMessage
 from tested.internationalization import get_i18n_string
@@ -21,7 +20,7 @@ def try_as_exception(config: OracleConfig, value: str) -> ExceptionValue:
 
 def try_as_readable_exception(
     config: OracleConfig, value: str
-) -> Tuple[Optional[str], Optional[Message]]:
+) -> tuple[str | None, Message | None]:
     # noinspection PyBroadException
     try:
         actual = get_converter().loads(value, ExceptionValue)

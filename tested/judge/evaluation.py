@@ -3,7 +3,7 @@ import logging
 from collections.abc import Collection
 from enum import StrEnum, unique
 from pathlib import Path
-from typing import List, Literal, Optional, Union
+from typing import Literal
 
 from tested.configs import Bundle
 from tested.dodona import (
@@ -75,12 +75,12 @@ def _evaluate_channel(
     out: TestcaseCollector,
     channel: Channel,
     output: OutputChannel,
-    actual: Optional[str],
-    testcase: Optional[Testcase] = None,
+    actual: str | None,
+    testcase: Testcase | None = None,
     unexpected_status: Status = Status.WRONG,
     timeout: bool = False,
     memory: bool = False,
-) -> Optional[bool]:
+) -> bool | None:
     """
     Evaluate the output on a given channel. This function will output the
     appropriate messages to start and end a new test in Dodona.
@@ -434,7 +434,7 @@ def guess_expected_value(bundle: Bundle, test: OutputChannel) -> str:
 
 
 def _add_channel(
-    bundle: Bundle, output: OutputChannel, channel: Channel, updates: List[Update]
+    bundle: Bundle, output: OutputChannel, channel: Channel, updates: list[Update]
 ):
     """Add a channel to the output if it should be shown."""
     if should_show(output, channel):
@@ -516,7 +516,7 @@ def complete_evaluation(bundle: Bundle, collector: OutputManager):
 def terminate(
     bundle: Bundle,
     collector: OutputManager,
-    status_if_unclosed: Union[Status, StatusMessage],
+    status_if_unclosed: Status | StatusMessage,
 ):
     # Determine the level we need to close.
     tab, context, testcase = collector.currently_open

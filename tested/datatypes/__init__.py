@@ -12,8 +12,6 @@ As mentioned in the manuscript, the context_testcase use is scenario 1.
 Additionally, the types in this file are organized by their JSON encoding type.
 They are also split in "basic types" and "advanced types".
 """
-from typing import FrozenSet, Set, Tuple, Union
-
 from tested.datatypes.advanced import (
     AdvancedNothingTypes,
     AdvancedNumericTypes,
@@ -33,23 +31,23 @@ from tested.datatypes.basic import (
 from tested.datatypes.complex import ComplexExpressionTypes
 from tested.utils import get_args
 
-NumericTypes = Union[BasicNumericTypes, AdvancedNumericTypes]
-StringTypes = Union[BasicStringTypes, AdvancedStringTypes]
+NumericTypes = BasicNumericTypes | AdvancedNumericTypes
+StringTypes = BasicStringTypes | AdvancedStringTypes
 BooleanTypes = BasicBooleanTypes
-NothingTypes = Union[BasicNothingTypes, AdvancedNothingTypes]
-SequenceTypes = Union[BasicSequenceTypes, AdvancedSequenceTypes]
+NothingTypes = BasicNothingTypes | AdvancedNothingTypes
+SequenceTypes = BasicSequenceTypes | AdvancedSequenceTypes
 ObjectTypes = BasicObjectTypes
 
-SimpleTypes = Union[NumericTypes, StringTypes, BooleanTypes, NothingTypes]
-ComplexTypes = Union[SequenceTypes, ObjectTypes]
+SimpleTypes = NumericTypes | StringTypes | BooleanTypes | NothingTypes
+ComplexTypes = SequenceTypes | ObjectTypes
 
-AllTypes = Union[BasicTypes, AdvancedTypes]
+AllTypes = BasicTypes | AdvancedTypes
 
-ExpressionTypes = Union[AllTypes, ComplexExpressionTypes]
-NestedTypes = Set[Tuple[ExpressionTypes, FrozenSet[ExpressionTypes]]]
+ExpressionTypes = AllTypes | ComplexExpressionTypes
+NestedTypes = set[tuple[ExpressionTypes, frozenset[ExpressionTypes]]]
 
 # Test that our aliases are correct.
-assert set(get_args(AllTypes)) == set(get_args(Union[SimpleTypes, ComplexTypes]))
+assert set(get_args(AllTypes)) == set(get_args(SimpleTypes | ComplexTypes))
 
 
 def resolve_to_basic(type_: AllTypes) -> BasicTypes:

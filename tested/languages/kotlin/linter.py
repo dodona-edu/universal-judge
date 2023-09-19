@@ -1,7 +1,6 @@
 import json
 import logging
 from pathlib import Path
-from typing import List, Tuple
 
 from tested.configs import DodonaConfig
 from tested.dodona import AnnotateCode, ExtendedMessage, Message, Permission, Severity
@@ -13,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 def run_ktlint(
     config: DodonaConfig, remaining: float
-) -> Tuple[List[Message], List[AnnotateCode]]:
+) -> tuple[list[Message], list[AnnotateCode]]:
     """
     Calls ktlint to annotate submitted source code and adds resulting score and
     annotations to tab.

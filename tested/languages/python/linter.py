@@ -4,7 +4,6 @@ Most of this code is taken from the code from Pythia.
 """
 import logging
 from io import StringIO
-from typing import List, Tuple
 
 from pylint import lint
 from pylint.reporters import JSONReporter
@@ -26,7 +25,7 @@ message_categories = {
 
 def run_pylint(
     config: DodonaConfig, remaining: float
-) -> Tuple[List[Message], List[AnnotateCode]]:
+) -> tuple[list[Message], list[AnnotateCode]]:
     """
     Calls pylint to annotate submitted source code and adds resulting score and
     annotations to tab.

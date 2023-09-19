@@ -11,7 +11,7 @@ from pathlib import Path
 
 from tested.configs import DodonaConfig, Options
 from tested.main import run
-from tested.testsuite import ExecutionMode, SupportedLanguage
+from tested.testsuite import SupportedLanguage
 
 exercise_dir = "/home/niko/Ontwikkeling/universal-judge/tests/exercises/global"
 

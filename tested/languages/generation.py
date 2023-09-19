@@ -9,7 +9,8 @@ import shlex
 import urllib.parse
 from collections.abc import Iterable
 from pathlib import Path
-from typing import Match, TypeAlias
+from re import Match
+from typing import TypeAlias
 
 from pygments import highlight
 from pygments.formatters.html import HtmlFormatter

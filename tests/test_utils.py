@@ -1,6 +1,5 @@
 import json
 from pathlib import Path
-from typing import List
 
 import yaml
 
@@ -216,7 +215,7 @@ def test_valid_yaml_and_json():
     Test to validate if all YAML and JSON can be parsed correctly.
     """
 
-    def recursive_iter_dir(directory: Path) -> List[Path]:
+    def recursive_iter_dir(directory: Path) -> list[Path]:
         yaml_and_json_files = []
         for file in directory.iterdir():
             if file.is_file() and (

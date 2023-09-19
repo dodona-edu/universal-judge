@@ -1,6 +1,6 @@
 import logging
 from collections.abc import Iterable
-from typing import IO, Literal, Optional, Tuple, Union
+from typing import IO, Literal
 
 from tested.dodona import (
     AppendMessage,
@@ -42,7 +42,7 @@ class OutputManager:
 
     finalized: bool
     open_stack: list[str]
-    currently_open: Tuple[int, int, int]
+    currently_open: tuple[int, int, int]
     out: IO
 
     def __init__(self, out: IO):
@@ -58,7 +58,7 @@ class OutputManager:
     def add_messages(self, messages: Iterable[Message]):
         self.add_all(AppendMessage(message=m) for m in messages)
 
-    def add(self, command: Update, index: Optional[int] = None):
+    def add(self, command: Update, index: int | None = None):
         """
         Add and report a command.
 
@@ -91,7 +91,7 @@ class OutputManager:
 
     def terminate(
         self,
-        status_if_unclosed: Union[Status, StatusMessage],
+        status_if_unclosed: Status | StatusMessage,
         until: Literal["testcase", "context", "tab", "judgement"] = "judgement",
     ):
         """
@@ -145,7 +145,7 @@ class TestcaseCollector:
     """
     Collects updates for a testcase, but only outputs them if the testcase has
     content (children). This is intended to be used to evaluate testcases: they can
-    be started without problem, but if nothing is written during evaluation, they
+    be started without a problem, but if nothing is written during evaluation, they
     will not be shown in Dodona.
     """
 

@@ -1,5 +1,5 @@
 import json
-from typing import List, cast
+from typing import cast
 
 from tested.datatypes import (
     AdvancedNothingTypes,
@@ -35,7 +35,7 @@ from tested.serialisation import (
 from tested.testsuite import MainInput
 
 
-def convert_arguments(arguments: List[Expression]) -> str:
+def convert_arguments(arguments: list[Expression]) -> str:
     return ", ".join(convert_statement(arg, True) for arg in arguments)
 
 
@@ -103,7 +103,7 @@ def convert_function_call(call: FunctionCall, internal=False) -> str:
         result += convert_statement(call.namespace, True) + "."
     result += call.name
     if call.type != FunctionType.PROPERTY:
-        result += f"({convert_arguments(cast(List[Expression], call.arguments))})"
+        result += f"({convert_arguments(cast(list[Expression], call.arguments))})"
     return result
 
 
@@ -267,7 +267,7 @@ def convert_check_function(evaluator: str, function: FunctionCall) -> str:
     """
 
 
-def convert_encoder(values: List[Value]) -> str:
+def convert_encoder(values: list[Value]) -> str:
     result = """
     const values = require('./values.js');
     const fs = require("fs");

@@ -2,7 +2,8 @@
 Functions to conventionalize various aspects of a programming langauge.
 """
 import logging
-from typing import TYPE_CHECKING, Callable, Dict, Literal
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
     from tested.languages import Language
@@ -316,7 +317,7 @@ NamingConventions = Literal[
 ]
 
 
-_case_mapping: Dict[NamingConventions, Callable[[str], str]] = {
+_case_mapping: dict[NamingConventions, Callable[[str], str]] = {
     "camel_case": camelize,
     "camel_snake_case": camel_snake_case,
     "cobol_case": cobol_case,

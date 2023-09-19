@@ -2,7 +2,7 @@ import logging
 import os
 import re
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Mapping, Optional, Set, Tuple
+from typing import TYPE_CHECKING
 
 from tested.datatypes import AllTypes, ExpressionTypes
 from tested.dodona import AnnotateCode, Message, Status
@@ -36,7 +36,7 @@ def get_executable(name):
 
 
 class Kotlin(Language):
-    def initial_dependencies(self) -> List[str]:
+    def initial_dependencies(self) -> list[str]:
         return ["Values.kt", "EvaluationResult.kt"]
 
     def needs_selector(self):
@@ -45,7 +45,7 @@ class Kotlin(Language):
     def file_extension(self) -> str:
         return "kt"
 
-    def naming_conventions(self) -> Dict[Conventionable, NamingConventions]:
+    def naming_conventions(self) -> dict[Conventionable, NamingConventions]:
         return {
             "namespace": "pascal_case",
             "function": "camel_case",
@@ -55,7 +55,7 @@ class Kotlin(Language):
             "class": "pascal_case",
         }
 
-    def supported_constructs(self) -> Set[Construct]:
+    def supported_constructs(self) -> set[Construct]:
         return {
             Construct.OBJECTS,
             Construct.EXCEPTIONS,
@@ -69,7 +69,7 @@ class Kotlin(Language):
             Construct.GLOBAL_VARIABLES,
         }
 
-    def datatype_support(self) -> Mapping[AllTypes, TypeSupport]:
+    def datatype_support(self) -> dict[AllTypes, TypeSupport]:
         return {  # type: ignore
             "integer": "supported",
             "real": "supported",
@@ -100,7 +100,7 @@ class Kotlin(Language):
             "tuple": "reduced",
         }
 
-    def map_type_restrictions(self) -> Optional[Set[ExpressionTypes]]:
+    def map_type_restrictions(self) -> set[ExpressionTypes] | None:
         return {  # type: ignore
             "integer",
             "real",
@@ -123,10 +123,10 @@ class Kotlin(Language):
             "identifiers",
         }
 
-    def set_type_restrictions(self) -> Optional[Set[ExpressionTypes]]:
+    def set_type_restrictions(self) -> set[ExpressionTypes] | None:
         return self.map_type_restrictions()
 
-    def compilation(self, files: List[str]) -> CallbackResult:
+    def compilation(self, files: list[str]) -> CallbackResult:
         def file_filter(file: Path) -> bool:
             return file.suffix == ".class"
 
@@ -142,7 +142,7 @@ class Kotlin(Language):
             *others,
         ], file_filter
 
-    def execution(self, cwd: Path, file: str, arguments: List[str]) -> Command:
+    def execution(self, cwd: Path, file: str, arguments: list[str]) -> Command:
         assert self.config
         limit = jvm_memory_limit(self.config)
         return [
@@ -175,7 +175,7 @@ class Kotlin(Language):
         with open(solution, "w") as file:
             file.write(contents)
 
-    def linter(self, remaining: float) -> Tuple[List[Message], List[AnnotateCode]]:
+    def linter(self, remaining: float) -> tuple[list[Message], list[AnnotateCode]]:
         # Import locally to prevent errors.
         from tested.languages.kotlin import linter
 
@@ -183,8 +183,8 @@ class Kotlin(Language):
         return linter.run_ktlint(self.config.dodona, remaining)
 
     def find_main_file(
-        self, files: List[Path], name: str
-    ) -> Tuple[Optional[Path], Status]:
+        self, files: list[Path], name: str
+    ) -> tuple[Path | None, Status]:
         logger.debug("Finding %s in %s", name, files)
         main, status = Language.find_main_file(self, files, name + "Kt")
         if status == Status.CORRECT:
@@ -192,7 +192,7 @@ class Kotlin(Language):
         else:
             return Language.find_main_file(self, files, name)
 
-    def filter_dependencies(self, files: List[Path], context_name: str) -> List[Path]:
+    def filter_dependencies(self, files: list[Path], context_name: str) -> list[Path]:
         def filter_function(file_path: Path) -> bool:
             # We don't want files for contexts that are not the one we use.
             prefix = conventionalize_namespace(self, EXECUTION_PREFIX)
@@ -218,7 +218,7 @@ class Kotlin(Language):
 
         return generators.convert_execution_unit(execution_unit)
 
-    def generate_selector(self, contexts: List[str]) -> str:
+    def generate_selector(self, contexts: list[str]) -> str:
         from tested.languages.kotlin import generators
 
         return generators.convert_selector(contexts)
@@ -228,7 +228,7 @@ class Kotlin(Language):
 
         return generators.convert_check_function(function)
 
-    def generate_encoder(self, values: List[Value]) -> str:
+    def generate_encoder(self, values: list[Value]) -> str:
         from tested.languages.kotlin import generators
 
         return generators.convert_encoder(values)

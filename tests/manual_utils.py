@@ -2,7 +2,6 @@ import json
 import re
 from io import StringIO
 from pathlib import Path
-from typing import List
 
 from jsonschema import validate
 
@@ -13,18 +12,18 @@ from tested.parsing import get_converter
 from tested.utils import recursive_dict_merge
 
 
-def split_output(output: str) -> List[str]:
+def split_output(output: str) -> list[str]:
     return re.compile(r"(?<=})\s*(?={)").split(output)
 
 
 class CommandDict(list):
-    def find_all(self, command: str) -> List[dict]:
+    def find_all(self, command: str) -> list[dict]:
         return [x for x in self if x["command"] == command]
 
     def find_next(self, command: str) -> dict:
         return next(x for x in self if x["command"] == command)
 
-    def find_status_enum(self) -> List[str]:
+    def find_status_enum(self) -> list[str]:
         commands = [
             x
             for x in self

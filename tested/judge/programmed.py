@@ -9,7 +9,7 @@ import types
 from collections.abc import Generator
 from io import StringIO
 from pathlib import Path
-from typing import Tuple, Union, cast
+from typing import cast
 
 from tested.configs import Bundle, create_bundle
 from tested.dodona import ExtendedMessage, Permission, Status
@@ -34,7 +34,7 @@ def evaluate_programmed(
     evaluator: CustomCheckOracle,
     expected: Value,
     actual: Value,
-) -> Union[BaseExecutionResult, EvalResult]:
+) -> BaseExecutionResult | EvalResult:
     """
     Run the custom evaluation. Concerning structure and execution, the custom
     oracle is very similar to the execution of the whole evaluation. It a
@@ -162,7 +162,7 @@ def _evaluate_others(
 
 
 @contextlib.contextmanager
-def _catch_output() -> Generator[Tuple[StringIO, StringIO], None, None]:
+def _catch_output() -> Generator[tuple[StringIO, StringIO], None, None]:
     old_stdout = sys.stdout
     old_stderr = sys.stderr
     stdout = StringIO()

@@ -1,6 +1,5 @@
 import logging
 import traceback
-from typing import List
 
 from tested.dodona import ExtendedMessage, Message, Permission, Status, StatusMessage
 from tested.internationalization import get_i18n_string
@@ -92,7 +91,7 @@ def evaluate(
             )
         except Exception as e:
             _logger.exception(e)
-            messages: List[Message] = [
+            messages: list[Message] = [
                 ExtendedMessage(description=DEFAULT_STUDENT, format="text"),
                 ExtendedMessage(
                     description=get_i18n_string("oracles.programmed.result"),

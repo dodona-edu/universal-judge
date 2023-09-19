@@ -1,31 +1,22 @@
-import enum
 import itertools
 import logging
 import shutil
-from enum import Enum
 from pathlib import Path
-from typing import List, Optional, Tuple, Union, cast
 
 from attrs import define
 
 from tested.configs import Bundle
-from tested.dodona import Message, Status
+from tested.dodona import Status
 from tested.judge.compilation import process_compile_results, run_compilation
-from tested.judge.planning import (
-    CompilationResult,
-    ExecutionPlan,
-    PlannedContext,
-    PlannedExecutionUnit,
+from tested.judge.planning import CompilationResult, ExecutionPlan, PlannedExecutionUnit
+from tested.judge.utils import (
+    BaseExecutionResult,
+    copy_workdir_files,
+    filter_files,
+    run_command,
 )
-from tested.judge.utils import BaseExecutionResult, run_command
-from tested.languages.config import FileFilter
-from tested.languages.conventionalize import (
-    EXECUTION_PREFIX,
-    execution_name,
-    selector_name,
-)
+from tested.languages.conventionalize import selector_name
 from tested.languages.preparation import exception_file, value_file
-from tested.testsuite import EmptyChannel, MainInput
 from tested.utils import safe_del
 
 _logger = logging.getLogger(__name__)
@@ -63,7 +54,7 @@ class ExecutionResult(BaseExecutionResult):
 
     def to_context_results(
         self,
-    ) -> List[ContextResult]:
+    ) -> list[ContextResult]:
         results = self.results.split(self.context_separator)
         exceptions = self.exceptions.split(self.context_separator)
         stderr = self.stderr.split(self.context_separator)
@@ -112,33 +103,13 @@ class ExecutionResult(BaseExecutionResult):
         return context_execution_results
 
 
-@define
-class ExecutionUnit:
-    """
-    Contains an execution unit and various metadata.
-    """
-
-    planned: PlannedExecutionUnit
-    files: Union[List[str], FileFilter]
-    precompilation_result: Optional[Tuple[List[Message], Status]]
-
-
-def filter_files(files: Union[List[str], FileFilter], directory: Path) -> List[Path]:
-    if callable(files):
-        return list(
-            x.relative_to(directory) for x in filter(files, directory.rglob("*"))
-        )
-    else:
-        return [Path(file) for file in files]
-
-
 def execute_file(
     bundle: Bundle,
     executable_name: str,
     working_directory: Path,
-    remaining: Optional[float],
-    stdin: Optional[str] = None,
-    argument: Optional[str] = None,
+    remaining: float | None,
+    stdin: str | None = None,
+    argument: str | None = None,
 ) -> BaseExecutionResult:
     """
     Execute a file.
@@ -156,34 +127,19 @@ def execute_file(
 
     :return: The result of the execution.
     """
-    _logger.info("Starting execution on file %s", executable_name)
+    _logger.info(f"Starting execution on file {executable_name}")
 
     command = bundle.language.execution(
         cwd=working_directory,
         file=executable_name,
         arguments=[argument] if argument else [],
     )
-    _logger.debug("Executing %s in directory %s", command, working_directory)
+    _logger.debug(f"Executing {command} in directory {working_directory}")
 
     result = run_command(working_directory, remaining, command, stdin)
 
     assert result is not None
     return result
-
-
-def copy_workdir_files(bundle: Bundle, context_dir: Path):
-    for origin in bundle.config.workdir.iterdir():
-        file = origin.name.lower()
-        if origin.is_file():
-            _logger.debug("Copying %s to %s", origin, context_dir)
-            shutil.copy2(origin, context_dir)
-        elif (
-            origin.is_dir()
-            and not file.startswith(EXECUTION_PREFIX)
-            and file != "common"
-        ):
-            _logger.debug("Copying %s to %s", origin, context_dir)
-            shutil.copytree(origin, context_dir / file)
 
 
 def _get_contents_or_empty(file_path: Path) -> str:
@@ -209,7 +165,7 @@ def set_up_unit(
     dependencies = filter_files(plan.files, plan.common_directory)
     dependencies = bundle.language.filter_dependencies(dependencies, unit.name)
     _logger.debug(f"Dependencies are {dependencies}")
-    copy_workdir_files(bundle, execution_dir)
+    copy_workdir_files(bundle, execution_dir, True)
 
     # Copy files from the common directory to the context directory.
     for file in dependencies:
@@ -314,102 +270,3 @@ def execute_unit(
     )
 
     return result, status
-
-
-class PlanStrategy(Enum):
-    OPTIMAL = enum.auto()
-    TAB = enum.auto()
-    CONTEXT = enum.auto()
-
-
-def _flattened_contexts_to_units(
-    bundle: Bundle, flattened_contexts: list[PlannedContext]
-) -> list[PlannedExecutionUnit]:
-    units = []
-    current_unit = []
-
-    for planned in flattened_contexts:
-        # If we get stdin, start a new execution unit.
-        if (
-            planned.context.has_main_testcase()
-            and cast(MainInput, planned.context.testcases[0].input).stdin
-            != EmptyChannel.NONE
-        ):
-            if current_unit:
-                units.append(
-                    PlannedExecutionUnit(
-                        contexts=current_unit,
-                        name=execution_name(bundle.language, len(units)),
-                        index=len(units),
-                    )
-                )
-            current_unit = []
-
-        current_unit.append(planned)
-
-        if planned.context.has_exit_testcase():
-            units.append(
-                PlannedExecutionUnit(
-                    contexts=current_unit,
-                    name=execution_name(bundle.language, len(units)),
-                    index=len(units),
-                )
-            )
-            current_unit = []
-
-    if current_unit:
-        units.append(
-            PlannedExecutionUnit(
-                contexts=current_unit,
-                name=execution_name(bundle.language, len(units)),
-                index=len(units),
-            )
-        )
-
-    return units
-
-
-def plan_test_suite(
-    bundle: Bundle, strategy: PlanStrategy
-) -> list[PlannedExecutionUnit]:
-    """
-    Transform a test suite into a list of execution units.
-
-    :param strategy: Which strategy to follow when planning the units.
-    :param bundle: The configuration
-    :return: A list of planned execution units.
-    """
-
-    # First, flatten all contexts into a single list.
-    if strategy == PlanStrategy.OPTIMAL:
-        flattened_contexts = []
-        for t, tab in enumerate(bundle.suite.tabs):
-            for c, context in enumerate(tab.contexts):
-                flattened_contexts.append(
-                    PlannedContext(context=context, tab_index=t, context_index=c)
-                )
-        flattened_contexts_list = [flattened_contexts]
-    elif strategy == PlanStrategy.TAB:
-        flattened_contexts_list = []
-        for t, tab in enumerate(bundle.suite.tabs):
-            flattened_contexts = []
-            for c, context in enumerate(tab.contexts):
-                flattened_contexts.append(
-                    PlannedContext(context=context, tab_index=t, context_index=c)
-                )
-            flattened_contexts_list.append(flattened_contexts)
-    else:
-        assert strategy == PlanStrategy.CONTEXT
-        flattened_contexts_list = []
-        for t, tab in enumerate(bundle.suite.tabs):
-            for c, context in enumerate(tab.contexts):
-                flattened_contexts = [
-                    PlannedContext(context=context, tab_index=t, context_index=c)
-                ]
-                flattened_contexts_list.append(flattened_contexts)
-
-    nested_units = []
-    for flattened_contexts in flattened_contexts_list:
-        nested_units.extend(_flattened_contexts_to_units(bundle, flattened_contexts))
-
-    return nested_units

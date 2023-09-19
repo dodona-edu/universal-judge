@@ -1,19 +1,8 @@
 import json
+from collections.abc import Callable
 from decimal import Decimal
-from logging import getLogger
 from pathlib import Path
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    List,
-    Literal,
-    Optional,
-    TextIO,
-    TypeVar,
-    Union,
-    cast,
-)
+from typing import Any, Literal, TextIO, TypeVar, cast
 
 import yaml
 from attrs import define, evolve
@@ -73,11 +62,9 @@ from tested.testsuite import (
 )
 from tested.utils import get_args, recursive_dict_merge
 
-logger = getLogger(__name__)
-
-OptionDict = Dict[str, Union[int, bool]]
-YamlDict = Dict[str, "YamlObject"]
-YamlObject = Union[YamlDict, list, bool, float, int, str, None]
+OptionDict = dict[str, int | bool]
+YamlDict = dict[str, "YamlObject"]
+YamlObject = YamlDict | list | bool | float | int | str | None
 
 
 @define
@@ -112,7 +99,7 @@ def _yaml_value_constructor(loader: yaml.Loader, node: yaml.Node) -> YamlValue:
     return YamlValue(value=_parse_yaml_value(loader, node))
 
 
-def _parse_yaml(yaml_stream: Union[str, TextIO]) -> YamlObject:
+def _parse_yaml(yaml_stream: str | TextIO) -> YamlObject:
     """
     Parse a string or stream to YAML.
     """
@@ -150,15 +137,15 @@ class DslContext:
     """
 
     config: dict
-    files: List[FileUrl]
-    language: Union[SupportedLanguage, Literal["tested"]] = "tested"
+    files: list[FileUrl]
+    language: SupportedLanguage | Literal["tested"] = "tested"
 
     def deepen_context(
         self,
-        new_level: Optional[YamlDict],
+        new_level: YamlDict | None,
         include_config=True,
         include_files=True,
-        merge_with: Optional[str] = None,
+        merge_with: str | None = None,
     ) -> "DslContext":
         """
         Merge certain fields of the new object with the current context, resulting
@@ -449,7 +436,7 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
             message = exception.get("message")
             assert isinstance(message, str)
             assert isinstance(exception["types"], dict)
-            types = cast(Dict[str, str], exception["types"])
+            types = cast(dict[str, str], exception["types"])
         output.exception = ExceptionOutputChannel(
             exception=ExpectedException(message=message, types=types)
         )
@@ -511,7 +498,7 @@ T = TypeVar("T")
 
 def _convert_dsl_list(
     dsl_list: list, context: DslContext, converter: Callable[[YamlDict, DslContext], T]
-) -> List[T]:
+) -> list[T]:
     """
     Convert a list of YAML objects into a test suite object.
     """

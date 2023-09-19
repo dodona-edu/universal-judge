@@ -1,5 +1,4 @@
 import json
-from typing import List
 
 from tested.datatypes import (
     AdvancedNumericTypes,
@@ -38,7 +37,7 @@ from tested.testsuite import MainInput
 
 
 def convert_arguments(
-    arguments: List[NamedArgument | Expression], with_namespace=False
+    arguments: list[NamedArgument | Expression], with_namespace=False
 ) -> str:
     results = []
     for arg in arguments:
@@ -256,7 +255,7 @@ values.send_evaluated(sys.stdout, result)
 """
 
 
-def convert_encoder(values: List[Value]) -> str:
+def convert_encoder(values: list[Value]) -> str:
     result = """
 import sys
 import values

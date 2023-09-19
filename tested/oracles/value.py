@@ -2,7 +2,7 @@
 Value oracle.
 """
 import logging
-from typing import Optional, Tuple, Union, cast
+from typing import cast
 
 from tested.configs import Bundle
 from tested.datatypes import (
@@ -41,7 +41,7 @@ logger = logging.getLogger(__name__)
 
 def try_as_readable_value(
     bundle: Bundle, value: str
-) -> Tuple[Optional[str], Optional[Message]]:
+) -> tuple[str | None, Message | None]:
     # noinspection PyBroadException
     try:
         actual = parse_value(value)
@@ -53,7 +53,7 @@ def try_as_readable_value(
 
 def get_values(
     bundle: Bundle, output_channel: OracleOutputChannel, actual_str: str
-) -> Union[OracleResult, Tuple[Value, str, Optional[Value], str]]:
+) -> OracleResult | tuple[Value, str, Value | None, str]:
     if isinstance(output_channel, TextOutputChannel):
         expected = output_channel.get_data_as_string(bundle.config.resources)
         expected_value = StringType(type=BasicStringTypes.TEXT, data=expected)
@@ -119,7 +119,7 @@ def _prepare_value_for_type_check(value: Value) -> Value:
 
 def _check_simple_type(
     bundle: Bundle, expected: Value, actual: Value
-) -> Tuple[bool, Value]:
+) -> tuple[bool, Value]:
     """
     Check if the data type of two simple values match. The following procedure is used:
 
@@ -167,8 +167,8 @@ def _check_simple_type(
 
 
 def _check_data_type(
-    bundle: Bundle, expected: Value, actual: Optional[Value]
-) -> Tuple[bool, Value]:
+    bundle: Bundle, expected: Value, actual: Value | None
+) -> tuple[bool, Value]:
     """
     Check if two values have the same (recursive) type.
 
@@ -235,8 +235,8 @@ def _check_data_type(
 
 
 def compare_values(
-    config: OracleConfig, actual: Optional[Value], expected: Value
-) -> Tuple[bool, Value, bool]:
+    config: OracleConfig, actual: Value | None, expected: Value
+) -> tuple[bool, Value, bool]:
     type_check, expected = _check_data_type(config.bundle, expected, actual)
     py_expected = to_python_comparable(expected)
     py_actual = to_python_comparable(actual)
@@ -323,7 +323,7 @@ def evaluate(
     )
 
 
-def get_as_string(value: Optional[Value], readable: str) -> str:
+def get_as_string(value: Value | None, readable: str) -> str:
     # Return readable if value is none
     if value is None:
         return readable

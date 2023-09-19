@@ -1,6 +1,5 @@
 import logging
 from pathlib import Path
-from typing import List, Tuple
 from xml.etree import ElementTree
 
 from tested.configs import DodonaConfig
@@ -20,7 +19,7 @@ message_categories = {
 
 def run_checkstyle(
     config: DodonaConfig, remaining: float
-) -> Tuple[List[Message], List[AnnotateCode]]:
+) -> tuple[list[Message], list[AnnotateCode]]:
     """
     Calls checkstyle to annotate submitted source code and adds resulting score and
     annotations to tab.

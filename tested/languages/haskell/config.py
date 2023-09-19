@@ -1,6 +1,6 @@
 import re
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Mapping, Set, Tuple
+from typing import TYPE_CHECKING
 
 from tested.datatypes import AllTypes
 from tested.dodona import AnnotateCode, Message
@@ -28,7 +28,7 @@ if TYPE_CHECKING:
 
 
 class Haskell(Language):
-    def initial_dependencies(self) -> List[str]:
+    def initial_dependencies(self) -> list[str]:
         return ["Values.hs", "EvaluationUtils.hs"]
 
     def needs_selector(self):
@@ -37,7 +37,7 @@ class Haskell(Language):
     def file_extension(self) -> str:
         return "hs"
 
-    def naming_conventions(self) -> Dict[Conventionable, NamingConventions]:
+    def naming_conventions(self) -> dict[Conventionable, NamingConventions]:
         return {
             "namespace": "pascal_case",
             "identifier": "camel_case",
@@ -45,7 +45,7 @@ class Haskell(Language):
             "function": "camel_case",
         }
 
-    def datatype_support(self) -> Mapping[AllTypes, TypeSupport]:
+    def datatype_support(self) -> dict[AllTypes, TypeSupport]:
         return {  # type: ignore
             "integer": "supported",
             "real": "supported",
@@ -71,7 +71,7 @@ class Haskell(Language):
             "tuple": "supported",
         }
 
-    def supported_constructs(self) -> Set[Construct]:
+    def supported_constructs(self) -> set[Construct]:
         return {
             Construct.EXCEPTIONS,
             Construct.FUNCTION_CALLS,
@@ -80,7 +80,7 @@ class Haskell(Language):
             Construct.GLOBAL_VARIABLES,
         }
 
-    def compilation(self, files: List[str]) -> CallbackResult:
+    def compilation(self, files: list[str]) -> CallbackResult:
         main_ = files[-1]
         exec_ = main_.rstrip(".hs")
         assert self.config
@@ -94,14 +94,14 @@ class Haskell(Language):
             exec_,
         ], [executable_name(exec_)]
 
-    def execution(self, cwd: Path, file: str, arguments: List[str]) -> Command:
+    def execution(self, cwd: Path, file: str, arguments: list[str]) -> Command:
         local_file = cwd / file
         return [str(local_file.absolute()), *arguments]
 
     def modify_solution(self, solution: Path):
         haskell_solution(self, solution)
 
-    def linter(self, remaining: float) -> Tuple[List[Message], List[AnnotateCode]]:
+    def linter(self, remaining: float) -> tuple[list[Message], list[AnnotateCode]]:
         # Import locally to prevent errors.
         from tested.languages.haskell import linter
 
@@ -170,7 +170,7 @@ class Haskell(Language):
 
         return generators.convert_execution_unit(execution_unit)
 
-    def generate_selector(self, contexts: List[str]) -> str:
+    def generate_selector(self, contexts: list[str]) -> str:
         from tested.languages.haskell import generators
 
         return generators.convert_selector(contexts)
@@ -180,7 +180,7 @@ class Haskell(Language):
 
         return generators.convert_check_function(name, function)
 
-    def generate_encoder(self, values: List[Value]) -> str:
+    def generate_encoder(self, values: list[Value]) -> str:
         from tested.languages.haskell import generators
 
         return generators.convert_encoder(values)

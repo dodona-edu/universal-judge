@@ -14,7 +14,6 @@ import itertools
 import sys
 from decimal import Decimal
 from pathlib import Path
-from typing import List
 
 import pytest
 
@@ -167,7 +166,7 @@ ADVANCED_VALUES = [
 ]
 
 
-def run_encoder(bundle: Bundle, values: List[Value]) -> List[str]:
+def run_encoder(bundle: Bundle, values: list[Value]) -> list[str]:
     # Copy dependencies.
     dependency_paths = bundle.language.path_to_dependencies()
     dependencies = bundle.language.initial_dependencies()

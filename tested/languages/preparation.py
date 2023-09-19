@@ -5,17 +5,7 @@ Most input from a test suite needs to be prepared to easily generated code. This
 module handles that.
 """
 from pathlib import Path
-from typing import (
-    TYPE_CHECKING,
-    Callable,
-    List,
-    Literal,
-    Optional,
-    Set,
-    Tuple,
-    Union,
-    cast,
-)
+from typing import TYPE_CHECKING, Callable, Literal, cast
 
 from attrs import define
 
@@ -88,11 +78,11 @@ class PreparedTestcaseStatement:
     """
 
     statement: Statement | PreparedLanguageLiteral  # The original statement.
-    value_function: Optional[
-        Callable[[Expression], Statement]
-    ]  # The function to handle the return value of the statement, if any.
+    value_function: Callable[
+        [Expression], Statement
+    ] | None  # The function to handle the return value of the statement, if any.
 
-    def input_statement(self, override: Optional[str] = None) -> Statement:
+    def input_statement(self, override: str | None = None) -> Statement:
         """
         Get the input statement for the testcase.
 
@@ -137,12 +127,12 @@ class PreparedTestcase:
 
     testcase: Testcase
     "The original testcase."
-    input: Union[MainInput, PreparedTestcaseStatement]
+    input: MainInput | PreparedTestcaseStatement
     "The prepared input from the testcase."
     exception_function: Callable[[Expression], Statement]
     "Function to handle exceptions."
 
-    def exception_statement(self, name: Optional[str] = None) -> Statement:
+    def exception_statement(self, name: str | None = None) -> Statement:
         """
         Get the exception statement for the testcase.
 
@@ -163,7 +153,7 @@ class PreparedContext:
 
     context: Context
     "The original context."
-    testcases: List[PreparedTestcase]
+    testcases: list[PreparedTestcase]
     "A list of prepared testcases."
     before: str
     "The code to execute before the context."
@@ -180,7 +170,7 @@ class PreparedExecutionUnit:
     # The planned, original execution unit.
     unit: "PlannedExecutionUnit"
     # A list of prepared contexts.
-    contexts: List[PreparedContext]
+    contexts: list[PreparedContext]
     # The name of the file for the return channel.
     value_file: str
     # The name of the file for the exception channel.
@@ -192,15 +182,15 @@ class PreparedExecutionUnit:
     # The secret testcase separator.
     testcase_separator_secret: str
     # The names of the language-specific functions we will need.
-    evaluator_names: Set[str]
+    evaluator_names: set[str]
     # The language module.
     # TODO: this should not go here, but it does.
     language: "Language"
 
 
 def prepare_argument(
-    bundle: Bundle, argument: Union[Expression, NamedArgument]
-) -> Union[Expression, NamedArgument]:
+    bundle: Bundle, argument: Expression | NamedArgument
+) -> Expression | NamedArgument:
     if isinstance(argument, NamedArgument):
         return NamedArgument(
             name=argument.name, value=prepare_expression(bundle, argument.value)
@@ -278,8 +268,8 @@ def _create_handling_function(
     bundle: Bundle,
     send_value: str,
     send_evaluated: str,
-    output: Union[ExceptionOutput, ValueOutput],
-) -> Tuple[Callable[[Expression], Statement], Optional[str]]:
+    output: ExceptionOutput | ValueOutput,
+) -> tuple[Callable[[Expression], Statement], str | None]:
     """
     Create a function to handle the result of a return value or an exception.
 
@@ -343,7 +333,7 @@ def _create_handling_function(
 
 def _create_exception_function(
     bundle: Bundle, testcase: Testcase
-) -> Tuple[Callable[[Expression], Statement], Optional[str]]:
+) -> tuple[Callable[[Expression], Statement], str | None]:
     """
     Create a function call for handling exceptions. These functions assume there is
     a variable called "value", which must be reachable from where the function will
@@ -364,7 +354,7 @@ def _create_exception_function(
 
 def prepare_testcase(
     bundle: Bundle, testcase: Testcase
-) -> Tuple[PreparedTestcase, List[str]]:
+) -> tuple[PreparedTestcase, list[str]]:
     """
     Prepare a testcase.
 
@@ -439,7 +429,7 @@ def prepare_testcase(
 
 def prepare_testcases(
     bundle: Bundle, context: Context
-) -> Tuple[List[PreparedTestcase], Set[str]]:
+) -> tuple[list[PreparedTestcase], set[str]]:
     """
     Prepare all testcases in a context.
 
@@ -459,7 +449,7 @@ def prepare_testcases(
 
 def prepare_context(
     bundle: Bundle, context: Context
-) -> Tuple[PreparedContext, Set[str]]:
+) -> tuple[PreparedContext, set[str]]:
     """
     Prepare one context for the execution
 

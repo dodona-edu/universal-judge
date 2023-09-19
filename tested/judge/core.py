@@ -18,15 +18,12 @@ from tested.dodona import (
 from tested.features import is_supported
 from tested.internationalization import get_i18n_string, set_locale
 from tested.judge.collector import OutputManager
-from tested.judge.compilation import process_compile_results, run_compilation
+from tested.judge.compilation import precompile
 from tested.judge.evaluation import evaluate_context_results, terminate
 from tested.judge.execution import (
     ExecutionResult,
-    PlanStrategy,
     compile_unit,
     execute_unit,
-    filter_files,
-    plan_test_suite,
     set_up_unit,
 )
 from tested.judge.linter import run_linter
@@ -35,9 +32,11 @@ from tested.judge.planning import (
     ExecutionPlan,
     PlannedContext,
     PlannedExecutionUnit,
+    PlanStrategy,
+    plan_test_suite,
 )
 from tested.judge.utils import copy_from_paths_to_path
-from tested.languages.conventionalize import EXECUTION_PREFIX, submission_file
+from tested.languages.conventionalize import submission_file
 from tested.languages.generation import generate_execution, generate_selector
 
 _logger = logging.getLogger(__name__)
@@ -71,6 +70,18 @@ def judge(bundle: Bundle):
     Evaluate a solution for an exercise. Execute the tests present in the
     test suite. The result (the judgment) is sent to stdout, so Dodona can pick it
     up.
+
+    The current strategy for executing is as follows:
+
+    1. Convert all contexts into as little units as possible.
+    2. Attempt to precompile everything.
+       a. If this fails, go to 3.
+       b. If this succeeds, go to 4.
+    3. Convert contexts into "tab-level" units.
+    4. For each execution unit:
+       a. Compile if necessary (only if 2 failed)
+       b. Execute the unit.
+       c. Process the results.
 
     :param bundle: The configuration bundle.
     """
@@ -137,16 +148,8 @@ def judge(bundle: Bundle):
         plan.units = planned_units
         compilation_results = None
 
-    _judge_planned_units(bundle, collector, plan, compilation_results)
+    _logger.info("Starting execution")
 
-
-def _judge_planned_units(
-    bundle: Bundle,
-    collector: OutputManager,
-    plan: ExecutionPlan,
-    compilation_results: CompilationResult | None,
-):
-    _logger.info("Starting execution.")
     currently_open_tab = -1
     # Create a list of runs we want to execute.
     for i, planned_unit in enumerate(plan.units):
@@ -198,35 +201,6 @@ def _judge_planned_units(
     collector.add(CloseJudgement())
 
 
-def precompile(bundle: Bundle, plan: ExecutionPlan) -> CompilationResult:
-    """
-    Attempt to precompile the execution plan.
-
-    :param bundle: The options.
-    :param plan: The execution plan.
-    :return: The results of the precompilation step.
-    """
-    _logger.info("Starting precompilation phase")
-    assert not bundle.language.needs_selector() or plan.selector is not None
-    plan_files = filter_files(plan.files, plan.common_directory)
-    files = _copy_workdir_source_files(bundle, plan.common_directory) + [
-        str(x) for x in plan_files
-    ]
-    remaining_time = plan.remaining_time()
-
-    # Do the actual compiling.
-    result, compilation_files = run_compilation(
-        bundle, plan.common_directory, files, remaining_time
-    )
-
-    # Update the files if the compilation succeeded.
-    processed_results = process_compile_results(bundle.language, result)
-    if processed_results.status == Status.CORRECT:
-        plan.files = compilation_files
-
-    return processed_results
-
-
 def _generate_files(
     bundle: Bundle, execution_plan: list[PlannedExecutionUnit]
 ) -> tuple[Path, list[str], str | None]:
@@ -247,7 +221,6 @@ def _generate_files(
     # Copy the submission file.
     submission = submission_file(bundle.language)
     solution_path = common_dir / submission
-    # noinspection PyTypeChecker
     shutil.copy2(bundle.config.source, solution_path)
     dependencies.append(submission)
 
@@ -323,32 +296,3 @@ def _process_results(
             return continue_, currently_open_tab
 
     return None, currently_open_tab
-
-
-def _copy_workdir_source_files(bundle: Bundle, common_dir: Path) -> list[str]:
-    """
-    Copy additional source files from the workdir to the common dir
-
-    :param bundle: Bundle information of the test suite
-    :param common_dir: The directory of the other files
-    """
-    source_files = []
-
-    def recursive_copy(src: Path, dst: Path):
-        for origin in src.iterdir():
-            file = origin.name.lower()
-            if origin.is_file() and bundle.language.is_source_file(origin):
-                source_files.append(str(dst / origin.name))
-                _logger.debug(f"Copying {origin} to {dst}")
-                shutil.copy2(origin, dst)
-            elif (
-                origin.is_dir()
-                and not file.startswith(EXECUTION_PREFIX)
-                and file != "common"
-            ):
-                _logger.debug(f"Iterate subdir {dst / file}")
-                shutil.copytree(origin, dst / file)
-
-    recursive_copy(bundle.config.workdir, common_dir)
-
-    return source_files

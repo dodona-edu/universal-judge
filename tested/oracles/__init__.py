@@ -1,6 +1,6 @@
 import functools
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable, Optional, Union
 
 from tested.configs import Bundle
 from tested.dodona import Status
@@ -26,8 +26,8 @@ from tested.testsuite import (
 def get_oracle(
     bundle: Bundle,
     context_dir: Path,
-    output: Union[NormalOutputChannel, SpecialOutputChannel],
-    testcase: Optional[Testcase] = None,
+    output: NormalOutputChannel | SpecialOutputChannel,
+    testcase: Testcase | None = None,
     unexpected_status: Status = Status.WRONG,
 ) -> Oracle:
     """
@@ -44,7 +44,7 @@ def get_oracle(
         value,
     )
 
-    currier: Callable[[RawOracle, Optional[dict]], Oracle] = functools.partial(
+    currier: Callable[[RawOracle, dict | None], Oracle] = functools.partial(
         _curry_oracle, bundle, context_dir
     )
 

@@ -1,5 +1,4 @@
 import json
-from typing import List, Union
 
 from tested.datatypes import (
     AdvancedNumericTypes,
@@ -38,7 +37,7 @@ from tested.testsuite import MainInput
 from tested.utils import is_statement_strict
 
 
-def convert_arguments(arguments: List[Expression]) -> str:
+def convert_arguments(arguments: list[Expression]) -> str:
     return ", ".join(convert_statement(arg) for arg in arguments)
 
 
@@ -105,7 +104,7 @@ def convert_function_call(function: FunctionCall) -> str:
     return result
 
 
-def convert_declaration(tp: Union[AllTypes, VariableType]) -> str:
+def convert_declaration(tp: AllTypes | VariableType) -> str:
     if isinstance(tp, VariableType):
         return tp.data
     elif tp == AdvancedNumericTypes.U_INT_64:
@@ -302,7 +301,7 @@ main = do
     return result
 
 
-def convert_selector(contexts: List[str]) -> str:
+def convert_selector(contexts: list[str]) -> str:
     result = """
 module Selector where
 
@@ -337,7 +336,7 @@ main = do x <- return $ {convert_function_call(function)}
 """
 
 
-def convert_encoder(values: List[Value]) -> str:
+def convert_encoder(values: list[Value]) -> str:
     result = """
 module Encode where
 
