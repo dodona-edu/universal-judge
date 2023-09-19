@@ -1,8 +1,6 @@
 from io import StringIO
 from pathlib import Path
 
-from manual_utils import assert_valid_output, configuration
-
 from tested.configs import create_bundle
 from tested.dodona import (
     CloseContext,
@@ -29,6 +27,7 @@ from tested.testsuite import (
     Tab,
     Testcase,
 )
+from tests.manual_utils import assert_valid_output, configuration
 
 TEST_SUITE = Suite(
     tabs=[
