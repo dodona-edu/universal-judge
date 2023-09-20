@@ -303,14 +303,17 @@ def _convert_file(link_file: YamlDict) -> FileUrl:
 
 
 def _convert_custom_check_oracle(stream: dict) -> CustomCheckOracle:
+    converted_args = []
+    for v in stream.get("arguments", []):
+        cv = _convert_yaml_value(v)
+        assert isinstance(cv, Value)
+        converted_args.append(cv)
     return CustomCheckOracle(
         language=stream["language"],
         function=EvaluationFunction(
             file=stream["file"], name=stream.get("name", "evaluate")
         ),
-        arguments=[
-            parse_string(v, is_return=True) for v in stream.get("arguments", [])
-        ],
+        arguments=converted_args,
     )
 
 
@@ -338,27 +341,30 @@ def _convert_text_output_channel(
         raise TypeError(f"Unknown text oracle type: {stream['oracle']}")
 
 
-def _convert_advanced_value_output_channel(stream: YamlObject) -> ValueOutputChannel:
+def _convert_yaml_value(stream: YamlObject) -> Value | None:
     if isinstance(stream, YamlValue):
         # A normal yaml type tagged explicitly.
         value = _convert_value(stream.value)
-        assert isinstance(value, Value)
-        return ValueOutputChannel(value=value)
-    if isinstance(stream, (int, float, bool, TestedType, list, set)):
+    elif isinstance(stream, (int, float, bool, TestedType, list, set)):
         # Simple values where no confusion is possible.
         value = _convert_value(stream)
-        assert isinstance(value, Value)
-        return ValueOutputChannel(value=value)
     elif isinstance(stream, str):
         # A normal YAML string is considered a "Python" string.
         value = parse_string(stream, is_return=True)
-        assert isinstance(value, Value)
-        return ValueOutputChannel(value=value)
+    else:
+        return None
+    assert isinstance(value, Value)
+    return value
+
+
+def _convert_advanced_value_output_channel(stream: YamlObject) -> ValueOutputChannel:
+    yaml_value = _convert_yaml_value(stream)
+    if yaml_value:
+        return ValueOutputChannel(value=yaml_value)
     else:
         # We have an object, which means we have an output channel.
         assert isinstance(stream, dict)
-        assert isinstance(stream["value"], str)
-        value = parse_string(stream["value"], is_return=True)
+        value = _convert_yaml_value(stream["value"])
         assert isinstance(value, Value)
         if "oracle" not in stream or stream["oracle"] == "builtin":
             return ValueOutputChannel(value=value)
