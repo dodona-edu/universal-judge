@@ -40,7 +40,11 @@ def evaluate_no_return(
     expected = NothingType()
 
     try:
-        value = parse_value(actual)
+        if actual == "":
+            # If there was an exception, we still get the empty string.
+            value = NothingType()
+        else:
+            value = parse_value(actual)
     except Exception as e:
         raw_message = f"Could not parse {actual}, which caused {e} for get_values."
         message = ExtendedMessage(

@@ -24,7 +24,6 @@ def try_as_readable_exception(
     # noinspection PyBroadException
     try:
         actual = get_converter().loads(value, ExceptionValue)
-        actual.stacktrace = config.bundle.language.cleanup_stacktrace(actual.stacktrace)
     except Exception:
         return None, None
     else:
