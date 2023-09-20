@@ -143,7 +143,7 @@ class JavaScript(Language):
             non_strict = file.read()
         with open(solution, "w") as file:
             file.write('"use strict";\n\n' + non_strict)
-        self.config.dodona.source_offset += 2
+        self.config.dodona.source_offset -= 2
 
     def linter(self, remaining: float) -> tuple[list[Message], list[AnnotateCode]]:
         # Import locally to prevent errors.
@@ -165,6 +165,11 @@ class JavaScript(Language):
         compilation_submission_location = str(submission_location.resolve())
         execution_location_regex = f"{self.config.dodona.workdir}/{EXECUTION_PREFIX}[_0-9]+/{EXECUTION_PREFIX}[_0-9]+.js"
         submission_namespace = f"{submission_name(self)}."
+        location_pattern = r"(\d+):(\d+)"
+
+        def update_line_number(match: re.Match) -> str:
+            assert self.config
+            return f"{int(match.group(1)) + self.config.dodona.source_offset}:{match.group(2)}"
 
         resulting_lines = ""
         for line in traceback.splitlines(keepends=True):
@@ -177,6 +182,10 @@ class JavaScript(Language):
             line = line.replace(compilation_submission_location, "<code>")
             # Remove any references of the form "submission.SOMETHING"
             line = line.replace(submission_namespace, "")
+
+            # Adjust line numbers
+            line = re.sub(location_pattern, update_line_number, line)
+
             resulting_lines += line
 
         return resulting_lines
