@@ -1,21 +1,22 @@
 import itertools
 import logging
 import shutil
-import time
 from pathlib import Path
-from typing import List, Optional, Tuple, Union, cast
 
 from attrs import define
 
 from tested.configs import Bundle
-from tested.dodona import Message, Status
-from tested.judge.collector import OutputManager
+from tested.dodona import Status
 from tested.judge.compilation import process_compile_results, run_compilation
-from tested.judge.utils import BaseExecutionResult, run_command
-from tested.languages.config import FileFilter
-from tested.languages.conventionalize import EXECUTION_PREFIX, selector_name
+from tested.judge.planning import CompilationResult, ExecutionPlan, PlannedExecutionUnit
+from tested.judge.utils import (
+    BaseExecutionResult,
+    copy_workdir_files,
+    filter_files,
+    run_command,
+)
+from tested.languages.conventionalize import selector_name
 from tested.languages.preparation import exception_file, value_file
-from tested.testsuite import Context, EmptyChannel, ExecutionMode, MainInput
 from tested.utils import safe_del
 
 _logger = logging.getLogger(__name__)
@@ -53,7 +54,7 @@ class ExecutionResult(BaseExecutionResult):
 
     def to_context_results(
         self,
-    ) -> List[ContextResult]:
+    ) -> list[ContextResult]:
         results = self.results.split(self.context_separator)
         exceptions = self.exceptions.split(self.context_separator)
         stderr = self.stderr.split(self.context_separator)
@@ -102,57 +103,13 @@ class ExecutionResult(BaseExecutionResult):
         return context_execution_results
 
 
-@define
-class ExecutionUnit:
-    """
-    Combines a set of contexts that will be executed together.
-    """
-
-    contexts: List[Context]
-
-    def get_stdin(self, resources: Path) -> str:
-        return "\n".join(c.get_stdin(resources) or "" for c in self.contexts)
-
-    def has_main_testcase(self) -> bool:
-        return self.contexts[0].has_main_testcase()
-
-    def has_exit_testcase(self) -> bool:
-        return self.contexts[-1].has_exit_testcase()
-
-
-@define
-class Execution:
-    """
-    Contains an execution unit and various metadata.
-    """
-
-    unit: ExecutionUnit
-    context_offset: int
-    execution_name: str
-    execution_index: int
-    mode: ExecutionMode
-    common_directory: Path
-    files: Union[List[str], FileFilter]
-    precompilation_result: Optional[Tuple[List[Message], Status]]
-    collector: OutputManager
-
-
-def filter_files(files: Union[List[str], FileFilter], directory: Path) -> List[Path]:
-    if callable(files):
-        return list(
-            x.relative_to(directory) for x in filter(files, directory.rglob("*"))
-        )
-    else:
-        return [Path(file) for file in files]
-
-
 def execute_file(
     bundle: Bundle,
     executable_name: str,
     working_directory: Path,
-    remaining: Optional[float],
-    stdin: Optional[str] = None,
-    argument: Optional[str] = None,
+    remaining: float | None,
+    stdin: str | None = None,
+    argument: str | None = None,
 ) -> BaseExecutionResult:
     """
     Execute a file.
@@ -170,14 +127,14 @@ def execute_file(
 
     :return: The result of the execution.
     """
-    _logger.info("Starting execution on file %s", executable_name)
+    _logger.info(f"Starting execution on file {executable_name}")
 
-    command = bundle.lang_config.execution(
+    command = bundle.language.execution(
         cwd=working_directory,
         file=executable_name,
         arguments=[argument] if argument else [],
     )
-    _logger.debug("Executing %s in directory %s", command, working_directory)
+    _logger.debug(f"Executing {command} in directory {working_directory}")
 
     result = run_command(working_directory, remaining, command, stdin)
 
@@ -185,142 +142,104 @@ def execute_file(
     return result
 
 
-def copy_workdir_files(bundle: Bundle, context_dir: Path):
-    for origin in bundle.config.workdir.iterdir():
-        file = origin.name.lower()
-        if origin.is_file():
-            _logger.debug("Copying %s to %s", origin, context_dir)
-            shutil.copy2(origin, context_dir)
-        elif (
-            origin.is_dir()
-            and not file.startswith(EXECUTION_PREFIX)
-            and file != "common"
-        ):
-            _logger.debug("Copying %s to %s", origin, context_dir)
-            shutil.copytree(origin, context_dir / file)
+def _get_contents_or_empty(file_path: Path) -> str:
+    try:
+        with open(file_path, "r") as f:
+            return f.read()
+    except FileNotFoundError:
+        _logger.warning(f"File not found, looked in {file_path}")
+        return ""
 
 
-def execute_execution(
-    bundle: Bundle, args: Execution, max_time: float
-) -> Tuple[Optional[ExecutionResult], List[Message], Status, Path]:
-    """
-    Execute an execution.
-    """
-    lang_config = bundle.lang_config
-    start = time.perf_counter()
-
+def set_up_unit(
+    bundle: Bundle, plan: ExecutionPlan, which_unit: int
+) -> tuple[Path, list[Path]]:
+    unit = plan.units[which_unit]
     # Create a working directory for the execution.
-    execution_dir = Path(bundle.config.workdir, args.execution_name)
+    execution_dir = Path(bundle.config.workdir, unit.name)
     execution_dir.mkdir()
 
-    _logger.info("Executing %s in path %s", args.execution_name, execution_dir)
+    _logger.info(f"Preparing {unit.name} in {execution_dir}")
 
     # Filter dependencies of the global compilation results.
-    dependencies = filter_files(args.files, args.common_directory)
-    dependencies = bundle.lang_config.filter_dependencies(
-        dependencies, args.execution_name
-    )
-    _logger.debug("Dependencies are %s", dependencies)
-    copy_workdir_files(bundle, execution_dir)
+    dependencies = filter_files(plan.files, plan.common_directory)
+    dependencies = bundle.language.filter_dependencies(dependencies, unit.name)
+    _logger.debug(f"Dependencies are {dependencies}")
+    copy_workdir_files(bundle, execution_dir, True)
 
     # Copy files from the common directory to the context directory.
     for file in dependencies:
-        origin = args.common_directory / file
+        origin = plan.common_directory / file
         destination = execution_dir / file
         # Ensure we preserve subdirectories.
         destination.parent.mkdir(parents=True, exist_ok=True)
-        _logger.debug("Copying %s to %s", origin, destination)
+        _logger.debug(f"Copying {origin} to {destination}")
         if origin == destination:
             continue  # Don't copy the file to itself
         shutil.copy2(origin, destination)
 
-    # If needed, do a compilation.
-    if args.mode == ExecutionMode.INDIVIDUAL:
-        _logger.info("Compiling context %s in INDIVIDUAL mode...", args.execution_name)
-        remaining = max_time - (time.perf_counter() - start)
-        deps = [str(x) for x in dependencies]
-        result, files = run_compilation(bundle, execution_dir, deps, remaining)
+    return execution_dir, dependencies
 
-        # A new compilation means a new file filtering
-        files = filter_files(files, execution_dir)
 
-        # Process compilation results.
-        messages, status, annotations = process_compile_results(lang_config, result)
+def compile_unit(
+    bundle: Bundle,
+    plan: ExecutionPlan,
+    which_unit: int,
+    execution_dir: Path,
+    dependencies: list[Path],
+) -> tuple[CompilationResult, list[Path]]:
+    unit = plan.units[which_unit]
+    _logger.info(f"Compiling unit {unit.name}")
+    remaining = plan.remaining_time()
+    deps = [str(x) for x in dependencies]
+    result, files = run_compilation(bundle, execution_dir, deps, remaining)
 
-        for annotation in annotations:
-            args.collector.add(annotation)
+    # A new compilation means a new file filtering
+    files = filter_files(files, execution_dir)
 
-        if status != Status.CORRECT:
-            _logger.debug("Compilation of individual context failed.")
-            _logger.debug("Aborting executing of this context.")
-            return None, messages, status, execution_dir
+    # Process compilation results.
+    processed_results = process_compile_results(bundle.language, result)
+    return processed_results, files
 
-        _logger.debug("Executing context %s in INDIVIDUAL mode...", args.execution_name)
 
-        executable, messages, status, annotations = lang_config.find_main_file(
-            files, args.execution_name, messages
-        )
+def execute_unit(
+    bundle: Bundle,
+    unit: PlannedExecutionUnit,
+    execution_dir: Path,
+    dependencies: list[Path],
+    remaining_time: float,
+) -> tuple[ExecutionResult | None, Status]:
+    """
+    Execute a unit.
 
-        for annotation in annotations:
-            args.collector.add(annotation)
+    This function assumes the files have been prepared (set_up_unit) and
+    compilation has happened if needed.
 
-        if status != Status.CORRECT:
-            return None, messages, status, execution_dir
+    :param bundle: The bundle.
+    :param unit: The unit to execute.
+    :param execution_dir: The directory in which we execute.
+    :param dependencies: The dependencies.
+    :param remaining_time: The remaining time for this execution.
+    """
+    _logger.info(f"Executing unit {unit.name}")
 
-        files.remove(executable)
-        stdin = args.unit.get_stdin(bundle.config.resources)
-        argument = None
+    files = list(dependencies)  # A copy of the files.
+
+    if bundle.language.needs_selector():
+        main_file_name = selector_name(bundle.language)
+        argument = unit.name
     else:
-        result, files = None, list(dependencies)
-        if args.precompilation_result:
-            _logger.debug("Substituting precompilation results.")
-            messages, _ = args.precompilation_result
-        else:
-            _logger.debug("No precompilation results found, using default.")
-            messages, _ = [], Status.CORRECT
+        main_file_name = unit.name
+        argument = None
 
-        _logger.info(
-            "Executing context %s in PRECOMPILATION mode...", args.execution_name
-        )
+    executable, status = bundle.language.find_main_file(files, main_file_name)
+    _logger.debug(f"Found main file: {executable}")
 
-        if lang_config.needs_selector():
-            _logger.debug("Selector is needed, using it.")
+    if status != Status.CORRECT:
+        return None, status
 
-            selector = selector_name(lang_config)
-
-            executable, messages, status, annotations = lang_config.find_main_file(
-                files, selector, messages
-            )
-
-            _logger.debug(f"Found main file: {executable}")
-
-            for annotation in annotations:
-                args.collector.add(annotation)
-
-            if status != Status.CORRECT:
-                return None, messages, status, execution_dir
-
-            files.remove(executable)
-            stdin = args.unit.get_stdin(bundle.config.resources)
-            argument = args.execution_name
-        else:
-            _logger.debug("Selector is not needed, using individual execution.")
-
-            executable, messages, status, annotations = lang_config.find_main_file(
-                files, args.execution_name, messages
-            )
-
-            for annotation in annotations:
-                args.collector.add(annotation)
-
-            if status != Status.CORRECT:
-                return None, messages, status, execution_dir
-
-            files.remove(executable)
-            stdin = args.unit.get_stdin(bundle.config.resources)
-            argument = None
-
-    remaining = max_time - (time.perf_counter() - start)
+    files.remove(executable)
+    stdin = unit.get_stdin(bundle.config.resources)
 
     # Do the execution.
     base_result = execute_file(
@@ -329,27 +248,14 @@ def execute_execution(
         working_directory=execution_dir,
         stdin=stdin,
         argument=argument,
-        remaining=remaining,
+        remaining=remaining_time,
     )
 
     testcase_identifier = f"--{bundle.testcase_separator_secret}-- SEP"
     context_identifier = f"--{bundle.context_separator_secret}-- SEP"
 
-    value_file_path = value_file(bundle, execution_dir)
-    try:
-        with open(value_file_path, "r") as f:
-            values = f.read()
-    except FileNotFoundError:
-        _logger.warning("Value file not found, looked in %s", value_file_path)
-        values = ""
-
-    exception_file_path = exception_file(bundle, execution_dir)
-    try:
-        with open(exception_file_path, "r") as f:
-            exceptions = f.read()
-    except FileNotFoundError:
-        _logger.warning("Exception file not found, looked in %s", exception_file_path)
-        exceptions = ""
+    values = _get_contents_or_empty(value_file(bundle, execution_dir))
+    exceptions = _get_contents_or_empty(exception_file(bundle, execution_dir))
 
     result = ExecutionResult(
         stdout=base_result.stdout,
@@ -363,38 +269,4 @@ def execute_execution(
         memory=base_result.memory,
     )
 
-    return result, messages, status, execution_dir
-
-
-def merge_contexts_into_units(contexts: List[Context]) -> List[ExecutionUnit]:
-    """
-    Merge contexts into as little execution units as possible.
-
-    :param contexts:
-    :return:
-    """
-    # return [ExecutionUnit(contexts=[c]) for c in contexts]
-
-    units = []
-    current_unit = []
-
-    for context in contexts:
-        # If we get stdin, start a new execution unit.
-        if (
-            context.has_main_testcase()
-            and cast(MainInput, context.testcases[0].input).stdin != EmptyChannel.NONE
-        ):
-            if current_unit:
-                units.append(ExecutionUnit(contexts=current_unit))
-            current_unit = []
-
-        current_unit.append(context)
-
-        if context.has_exit_testcase():
-            units.append(ExecutionUnit(contexts=current_unit))
-            current_unit = []
-
-    if current_unit:
-        units.append(ExecutionUnit(contexts=current_unit))
-
-    return units
+    return result, status

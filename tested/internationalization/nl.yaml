@@ -52,9 +52,7 @@ nl:
       exitcode: "Exitcode %{exitcode}."
     core:
       unsupported:
-        language: >-
-          Deze oefening kan niet opgelost worden in deze programmeertaal:
-          %{language}
+        language: "Niet-ondersteunde programmeertaal"
       compilation: "Compilatie"
       invalid:
         source-code: "Ongeldige broncode"

@@ -34,7 +34,7 @@ def process_problem_statement(
 
     bundle = Bundle(
         global_config=global_config,
-        lang_config=language,
+        language=language,
         out=open(os.devnull, "w"),
     )
 

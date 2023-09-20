@@ -1,7 +1,7 @@
 import logging
 import re
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Mapping, Optional, Set, Tuple
+from typing import TYPE_CHECKING
 
 from tested.datatypes import AllTypes, ExpressionTypes
 from tested.dodona import AnnotateCode, Message
@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 
 
 class Java(Language):
-    def initial_dependencies(self) -> List[str]:
+    def initial_dependencies(self) -> list[str]:
         return ["Values.java", "EvaluationResult.java"]
 
     def needs_selector(self):
@@ -37,7 +37,7 @@ class Java(Language):
     def file_extension(self) -> str:
         return "java"
 
-    def naming_conventions(self) -> Dict[Conventionable, NamingConventions]:
+    def naming_conventions(self) -> dict[Conventionable, NamingConventions]:
         return {
             "namespace": "pascal_case",
             "function": "camel_case",
@@ -47,7 +47,7 @@ class Java(Language):
             "class": "pascal_case",
         }
 
-    def supported_constructs(self) -> Set[Construct]:
+    def supported_constructs(self) -> set[Construct]:
         return {
             Construct.OBJECTS,
             Construct.EXCEPTIONS,
@@ -60,7 +60,7 @@ class Java(Language):
             Construct.GLOBAL_VARIABLES,
         }
 
-    def datatype_support(self) -> Mapping[AllTypes, TypeSupport]:
+    def datatype_support(self) -> dict[AllTypes, TypeSupport]:
         return {  # type: ignore
             "integer": "supported",
             "real": "supported",
@@ -90,7 +90,7 @@ class Java(Language):
             "list": "supported",
         }
 
-    def map_type_restrictions(self) -> Optional[Set[ExpressionTypes]]:
+    def map_type_restrictions(self) -> set[ExpressionTypes] | None:
         return {  # type: ignore
             "integer",
             "real",
@@ -113,22 +113,22 @@ class Java(Language):
             "identifiers",
         }
 
-    def set_type_restrictions(self) -> Optional[Set[ExpressionTypes]]:
+    def set_type_restrictions(self) -> set[ExpressionTypes] | None:
         return self.map_type_restrictions()
 
-    def compilation(self, files: List[str]) -> CallbackResult:
+    def compilation(self, files: list[str]) -> CallbackResult:
         def file_filter(file: Path) -> bool:
             return file.suffix == ".class"
 
         others = [x for x in files if not x.endswith(".jar")]
         return ["javac", "-cp", ".", *others], file_filter
 
-    def execution(self, cwd: Path, file: str, arguments: List[str]) -> Command:
+    def execution(self, cwd: Path, file: str, arguments: list[str]) -> Command:
         assert self.config
         limit = jvm_memory_limit(self.config)
         return ["java", f"-Xmx{limit}", "-cp", ".", Path(file).stem, *arguments]
 
-    def linter(self, remaining: float) -> Tuple[List[Message], List[AnnotateCode]]:
+    def linter(self, remaining: float) -> tuple[list[Message], list[AnnotateCode]]:
         # Import locally to prevent errors.
         from tested.languages.java import linter
 
@@ -148,7 +148,7 @@ class Java(Language):
 
         return generators.convert_execution_unit(execution_unit)
 
-    def generate_selector(self, contexts: List[str]) -> str:
+    def generate_selector(self, contexts: list[str]) -> str:
         from tested.languages.java import generators
 
         return generators.convert_selector(contexts)
@@ -158,7 +158,7 @@ class Java(Language):
 
         return generators.convert_check_function(function)
 
-    def generate_encoder(self, values: List[Value]) -> str:
+    def generate_encoder(self, values: list[Value]) -> str:
         from tested.languages.java import generators
 
         return generators.convert_encoder(values)

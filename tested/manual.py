@@ -11,9 +11,9 @@ from pathlib import Path
 
 from tested.configs import DodonaConfig, Options
 from tested.main import run
-from tested.testsuite import ExecutionMode, SupportedLanguage
+from tested.testsuite import SupportedLanguage
 
-exercise_dir = "/home/niko/Ontwikkeling/CG-Dodona/reeks09/rebussen oplossen/"
+exercise_dir = "/home/niko/Ontwikkeling/universal-judge/tests/exercises/global"
 
 
 def read_config() -> DodonaConfig:
@@ -21,13 +21,13 @@ def read_config() -> DodonaConfig:
     return DodonaConfig(
         memory_limit=536870912,
         time_limit=60,
-        programming_language=SupportedLanguage("bash"),
+        programming_language=SupportedLanguage("python"),
         natural_language="nl",
         resources=Path(exercise_dir, "evaluation"),
-        source=Path("test.sh"),
+        source=Path(exercise_dir, "solution/correct.py"),
         judge=Path("."),
         workdir=Path("workdir"),
-        test_suite="tests.yaml",
+        test_suite="one.tson",
         options=Options(
             linter=False,
         ),

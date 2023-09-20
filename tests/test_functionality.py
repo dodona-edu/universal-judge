@@ -546,22 +546,6 @@ def test_programmed_evaluator_wrong(lang: str, tmp_path: Path, pytestconfig):
 
 
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
-def test_context_compilation(language: str, tmp_path: Path, pytestconfig, mocker):
-    config_ = {"options": {"mode": "context"}}
-    # Mock the compilation callback to ensure we call it for every context.
-    lang_class = LANGUAGES[language]
-    spy = mocker.spy(lang_class, "compilation")
-    conf = configuration(
-        pytestconfig, "echo", language, tmp_path, "two.tson", "correct", config_
-    )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    assert len(updates.find_all("start-testcase")) == 2
-    assert updates.find_status_enum() == ["correct"] * 2
-    assert spy.call_count == 2
-
-
-@pytest.mark.parametrize("language", ALL_LANGUAGES)
 def test_batch_compilation(language: str, tmp_path: Path, pytestconfig, mocker):
     config_ = {"options": {"mode": "batch"}}
     lang_class = LANGUAGES[language]
@@ -580,10 +564,11 @@ def test_batch_compilation(language: str, tmp_path: Path, pytestconfig, mocker):
 def test_batch_compilation_fallback(
     language: str, tmp_path: Path, pytestconfig, mocker
 ):
+    config_ = {"options": {"allow_fallback": True}}
     lang_class = LANGUAGES[language]
     spy = mocker.spy(lang_class, "compilation")
     conf = configuration(
-        pytestconfig, "echo", language, tmp_path, "two.tson", "comp-error"
+        pytestconfig, "echo", language, tmp_path, "two.tson", "comp-error", config_
     )
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
@@ -605,7 +590,7 @@ def test_batch_compilation_no_fallback(
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert len(updates.find_all("start-tab")) == 1
-    assert updates.find_status_enum() == ["compilation error"]
+    assert updates.find_status_enum() == ["compilation error"] * 2
     assert spy.call_count == 1
 
 
@@ -718,23 +703,6 @@ def test_objects_error(language: str, tmp_path: Path, pytestconfig):
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["internal error"]
-
-
-def test_too_much_output(tmp_path: Path, pytestconfig):
-    conf = configuration(
-        pytestconfig,
-        "echo",
-        "python",
-        tmp_path,
-        "two.tson",
-        "output_limit",
-        {"output_limit": 1000},
-    )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    # 4 times: two times for the tests, one escalate and one judgement.
-    assert updates.find_status_enum() == ["output limit exceeded"] * 4
-    assert len(updates.find_all("close-test")) == 2
 
 
 @pytest.mark.parametrize(
@@ -874,8 +842,7 @@ def test_function_arguments_without_brackets(tmp_path: Path, pytestconfig):
 
     result = generate_statement(bundle, statement)
     assert (
-        result
-        == f'{submission_name(bundle.lang_config)}.test 5.5 :: Double "hallo" True'
+        result == f'{submission_name(bundle.language)}.test 5.5 :: Double "hallo" True'
     )
 
 

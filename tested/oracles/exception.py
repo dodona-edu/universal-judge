@@ -1,6 +1,5 @@
 import logging
 import traceback
-from typing import Optional, Tuple
 
 from tested.dodona import ExtendedMessage, Message, Permission, Status, StatusMessage
 from tested.internationalization import get_i18n_string
@@ -15,25 +14,23 @@ _logger = logging.getLogger(__name__)
 
 def try_as_exception(config: OracleConfig, value: str) -> ExceptionValue:
     actual = get_converter().loads(value, ExceptionValue)
-    actual.stacktrace = config.bundle.lang_config.cleanup_stacktrace(actual.stacktrace)
+    actual.stacktrace = config.bundle.language.cleanup_stacktrace(actual.stacktrace)
     return actual
 
 
 def try_as_readable_exception(
     config: OracleConfig, value: str
-) -> Tuple[Optional[str], Optional[Message]]:
+) -> tuple[str | None, Message | None]:
     # noinspection PyBroadException
     try:
         actual = get_converter().loads(value, ExceptionValue)
-        actual.stacktrace = config.bundle.lang_config.cleanup_stacktrace(
-            actual.stacktrace
-        )
+        actual.stacktrace = config.bundle.language.cleanup_stacktrace(actual.stacktrace)
     except Exception:
         return None, None
     else:
         readable = actual.readable(omit_type=False)
         message = convert_stacktrace_to_clickable_feedback(
-            config.bundle.lang_config, actual.stacktrace
+            config.bundle.language, actual.stacktrace
         )
         return readable, message
 
@@ -105,7 +102,7 @@ def evaluate(
     # To keep things clean, we only do this if the test is incorrect.
 
     cleaned_stacktrace = convert_stacktrace_to_clickable_feedback(
-        config.bundle.lang_config, actual.stacktrace
+        config.bundle.language, actual.stacktrace
     )
     if cleaned_stacktrace and status != Status.CORRECT:
         messages.append(cleaned_stacktrace)

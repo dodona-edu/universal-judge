@@ -23,8 +23,9 @@ For example, such a function looks like this:
         pass
 """
 import functools
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable, Dict, List, NamedTuple, Optional, Tuple
+from typing import Any
 
 from attrs import define, field
 
@@ -44,15 +45,16 @@ class OracleResult:
     result: StatusMessage  # The result of the evaluation.
     readable_expected: str  # A human-friendly version of what the channel should have been.
     readable_actual: str  # A human-friendly version (on a best-efforts basis) of what the channel is.
-    messages: List[Message] = field(factory=list)
+    messages: list[Message] = field(factory=list)
     is_multiline_string: bool = (
         False  # Indicates if the evaluation result is a multiline string.
     )
 
 
-class OracleConfig(NamedTuple):
+@define
+class OracleConfig:
     bundle: Bundle
-    options: Dict[str, Any]
+    options: dict[str, Any]
     context_dir: Path
 
 
@@ -65,7 +67,7 @@ def _curry_oracle(
     bundle: Bundle,
     context_dir: Path,
     function: RawOracle,
-    options: Optional[dict] = None,
+    options: dict | None = None,
 ) -> Oracle:
     if options is None:
         options = dict()
@@ -75,8 +77,8 @@ def _curry_oracle(
 
 
 def try_outputs(
-    actual: str, parsers: List[Callable[[str], Tuple[Optional[str], Optional[Message]]]]
-) -> Tuple[str, Optional[Message]]:
+    actual: str, parsers: list[Callable[[str], tuple[str | None, Message | None]]]
+) -> tuple[str, Message | None]:
     if not actual:
         return actual, None
     for parser in parsers:
@@ -90,7 +92,7 @@ def cleanup_specific_programmed(
     config: OracleConfig, channel: NormalOutputChannel, actual: EvalResult
 ) -> EvalResult:
     if isinstance(channel, ExceptionOutputChannel):
-        lang_config = config.bundle.lang_config
+        lang_config = config.bundle.language
         actual.readable_expected = lang_config.cleanup_stacktrace(
             actual.readable_expected or ""
         )

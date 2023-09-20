@@ -1,5 +1,5 @@
 import shlex
-from typing import Callable, List
+from collections.abc import Callable
 
 from tested.datatypes import AdvancedStringTypes, BasicStringTypes
 from tested.languages.preparation import (
@@ -231,7 +231,7 @@ touch {pu.value_file} {pu.exception_file}
 
 # TODO: don't call Python to encode JSON in Bash.
 #   Use something like jq.
-def convert_encoder(values: List[Value]) -> str:
+def convert_encoder(values: list[Value]) -> str:
     result = f"""
 function json_escape {{
     printf '%s' "$1" | python -c 'import json,sys; print(json.dumps(sys.stdin.read()))'

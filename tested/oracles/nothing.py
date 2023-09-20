@@ -1,5 +1,4 @@
 import functools
-from typing import Optional
 
 from tested.dodona import ExtendedMessage, Permission, Status, StatusMessage
 from tested.internationalization import get_i18n_string
@@ -78,7 +77,7 @@ def evaluate(
     channel: OutputChannel,
     actual: str,
     unexpected_status: Status = Status.WRONG,
-    testcase: Optional[Testcase] = None,  # Only used if there is an expression.
+    testcase: Testcase | None = None,  # Only used if there is an expression.
 ) -> OracleResult:
     assert isinstance(channel, EmptyChannel)
     if testcase and isinstance(testcase.input, Expression):

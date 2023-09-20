@@ -2,7 +2,6 @@ import json
 import logging
 import shutil
 from pathlib import Path
-from typing import List, Tuple
 
 from tested.configs import DodonaConfig
 from tested.dodona import AnnotateCode, ExtendedMessage, Message, Permission, Severity
@@ -20,7 +19,7 @@ message_categories = {
 
 def run_shellcheck(
     config: DodonaConfig, remaining: float, language: str = "bash"
-) -> Tuple[List[Message], List[AnnotateCode]]:
+) -> tuple[list[Message], list[AnnotateCode]]:
     """
     Calls shellcheck to annotate submitted source code and adds resulting score and
     annotations to tab.

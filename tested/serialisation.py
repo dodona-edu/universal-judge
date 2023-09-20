@@ -20,11 +20,12 @@ import copy
 import logging
 import math
 import operator
+from collections.abc import Iterable
 from decimal import Decimal
 from enum import StrEnum, auto, unique
 from functools import reduce
 from types import NoneType
-from typing import Any, Iterable, List, Literal, Optional, Tuple, Union, cast
+from typing import Any, Literal, Optional, Union, cast
 
 from attrs import define, field, resolve_types, validators
 
@@ -58,8 +59,8 @@ logger = logging.getLogger(__name__)
 
 WrappedAllTypes = Union[
     AllTypes,
-    Tuple[SequenceTypes, "WrappedAllTypes"],
-    Tuple[ObjectTypes, Tuple["WrappedAllTypes", "WrappedAllTypes"]],
+    tuple[SequenceTypes, "WrappedAllTypes"],
+    tuple[ObjectTypes, tuple["WrappedAllTypes", "WrappedAllTypes"]],
 ]
 
 
@@ -120,6 +121,7 @@ def _combine_nested_types(
     nested_types: Iterable[ExpressionTypes] = {
         y[0] for f in features for y in f.nested_types
     }
+    # noinspection PyTypeChecker
     return {
         (
             data_type,
@@ -153,7 +155,7 @@ class SpecialNumbers(StrEnum):
 @define
 class NumberType(WithFeatures, WithFunctions):
     type: NumericTypes = field(validator=validators.instance_of(NumericTypes))
-    data: Union[SpecialNumbers, int, float, Decimal] = field(
+    data: SpecialNumbers | int | float | Decimal = field(
         validator=validators.instance_of(Union[SpecialNumbers, int, float, Decimal])
     )
     diagnostic: Literal[None] = None  # Unused in this type.
@@ -188,7 +190,7 @@ class StringType(WithFeatures, WithFunctions):
     # "unknown". TESTed will not do anything with this, as the actual type is
     # unknown, but it will be shown to the user to aid them in debugging their
     # error.
-    diagnostic: Optional[str] = None
+    diagnostic: str | None = None
 
     def get_used_features(self) -> FeatureSet:
         return FeatureSet(set(), {self.type}, _get_self_nested_type(self.type))
@@ -213,7 +215,7 @@ class BooleanType(WithFeatures, WithFunctions):
 @define
 class SequenceType(WithFeatures, WithFunctions):
     type: SequenceTypes = field(validator=validators.instance_of(SequenceTypes))
-    data: List["Expression"]
+    data: list["Expression"]
     diagnostic: Literal[None] = None  # Unused in this type.
 
     def get_used_features(self) -> FeatureSet:
@@ -276,7 +278,7 @@ class ObjectKeyValuePair(WithFeatures, WithFunctions):
 @define
 class ObjectType(WithFeatures, WithFunctions):
     type: ObjectTypes = field(validator=validators.instance_of(ObjectTypes))
-    data: List[ObjectKeyValuePair]
+    data: list[ObjectKeyValuePair]
     diagnostic: Literal[None] = None  # Unused in this type.
 
     def get_key_type(self) -> WrappedAllTypes:
@@ -397,7 +399,7 @@ class FunctionCall(WithFeatures, WithFunctions):
     type: FunctionType
     name: str
     namespace: Optional["Expression"] = None
-    arguments: List[Union[NamedArgument, "Expression"]] = field(factory=list)
+    arguments: list[Union[NamedArgument, "Expression"]] = field(factory=list)
 
     def __attrs_post_init__(self):
         if self.type == FunctionType.PROPERTY and self.arguments:
@@ -445,7 +447,7 @@ class VariableType:
     type: Literal["custom"] = "custom"
 
 
-Expression = Union[Identifier, Value, FunctionCall]
+Expression = Identifier | Value | FunctionCall
 
 
 @define
@@ -459,7 +461,7 @@ class Assignment(WithFeatures, WithFunctions):
 
     variable: str
     expression: Expression
-    type: Union[AllTypes, VariableType]
+    type: AllTypes | VariableType
 
     def replace_expression(self, expression: Expression) -> "Assignment":
         return Assignment(variable=self.variable, expression=expression, type=self.type)
@@ -467,7 +469,7 @@ class Assignment(WithFeatures, WithFunctions):
     def replace_variable(self, variable: str) -> "Assignment":
         return Assignment(variable=variable, expression=self.expression, type=self.type)
 
-    def replace_type(self, type_name: Union[AllTypes, VariableType]) -> "Assignment":
+    def replace_type(self, type_name: AllTypes | VariableType) -> "Assignment":
         return Assignment(
             variable=self.variable, expression=self.expression, type=type_name
         )
@@ -483,7 +485,7 @@ class Assignment(WithFeatures, WithFunctions):
 
 
 # If changing this, also update is_statement_strict in the utils.
-Statement = Union[Assignment, Expression]
+Statement = Assignment | Expression
 
 # Update the forward references, which fixes the schema generation.
 resolve_types(ObjectType)
@@ -499,19 +501,6 @@ def as_basic_type(value: Value) -> Value:
     cp = copy.copy(value)
     cp.type = new_type  # type: ignore
     return cp
-
-
-def generate_schema():
-    """
-    Generate a json schema for the serialisation type. It will be printed on stdout.
-    """
-    # converter = make_converter()
-    #
-    # sc = _SerialisationSchema.model_json_schema()
-    # sc["$id"] = "tested/serialisation"
-    # sc["$schema"] = "https://json-schema.org/schema#"
-    # print(json.dumps(sc, indent=2))
-    pass
 
 
 def parse_value(value: str) -> Value:
@@ -535,7 +524,7 @@ class PrintingDecimal:
         return str(self.decimal)
 
 
-def _convert_to_python(value: Optional[Value], for_printing=False) -> Any:
+def _convert_to_python(value: Value | None, for_printing=False) -> Any:
     """
     Convert the parsed values into the proper Python type. This is basically
     the same as deserialising a value, but this function is currently not re-used
@@ -596,7 +585,7 @@ def _convert_to_python(value: Optional[Value], for_printing=False) -> Any:
     return str(value.data)
 
 
-def serialize_from_python(value: Any, type_: Optional[AllTypes] = None) -> Value:
+def serialize_from_python(value: Any, type_: AllTypes | None = None) -> Value:
     """
     Convert a (simple) Python value into a TESTed value.
 
@@ -645,7 +634,7 @@ class ComparableFloat:
         return bool(self.value)
 
 
-def to_python_comparable(value: Optional[Value]) -> Any:
+def to_python_comparable(value: Value | None) -> Any:
     """
     Convert the value into a comparable Python value. Most values are just converted
     to their built-in Python variant. Some, however, are not. For example, floats
@@ -706,9 +695,9 @@ def to_python_comparable(value: Optional[Value]) -> Any:
 @define
 class EvalResult:
     result: Status
-    readable_expected: Optional[str] = None
-    readable_actual: Optional[str] = None
-    messages: List[Message] = field(factory=list)
+    readable_expected: str | None = None
+    readable_actual: str | None = None
+    messages: list[Message] = field(factory=list)
 
 
 @fallback_field(
@@ -721,10 +710,10 @@ class BooleanEvalResult:
     Allows a boolean result.
     """
 
-    result: Union[bool, Status]
-    readable_expected: Optional[str] = None
-    readable_actual: Optional[str] = None
-    messages: List[Message] = field(factory=list)
+    result: bool | Status
+    readable_expected: str | None = None
+    readable_actual: str | None = None
+    messages: list[Message] = field(factory=list)
 
     def as_eval_result(self) -> EvalResult:
         if isinstance(self.result, Status):
@@ -746,14 +735,10 @@ class ExceptionValue:
     message: str
     type: str = ""
     stacktrace: str = ""
-    additional_message_keys: List[str] = field(factory=list)
+    additional_message_keys: list[str] = field(factory=list)
 
     def readable(self, omit_type) -> str:
         if self.type and not omit_type:
             return f"{self.type}: {self.message}"
         else:
             return self.message
-
-
-if __name__ == "__main__":
-    generate_schema()

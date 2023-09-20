@@ -5,9 +5,12 @@ import logging
 import shutil
 import subprocess
 from pathlib import Path
-from typing import List, Optional
 
 from attrs import define
+
+from tested.configs import Bundle
+from tested.languages.config import FileFilter
+from tested.languages.conventionalize import EXECUTION_PREFIX
 
 _logger = logging.getLogger(__name__)
 
@@ -27,10 +30,10 @@ class BaseExecutionResult:
 
 def run_command(
     directory: Path,
-    timeout: Optional[float],
-    command: Optional[List[str]] = None,
-    stdin: Optional[str] = None,
-) -> Optional[BaseExecutionResult]:
+    timeout: float | None,
+    command: list[str] | None = None,
+    stdin: str | None = None,
+) -> BaseExecutionResult | None:
     """
     Run a command and get the result of said command.
 
@@ -46,7 +49,6 @@ def run_command(
 
     try:
         timeout = int(timeout) if timeout is not None else None
-        # noinspection PyTypeChecker
         process = subprocess.run(
             command,
             cwd=directory,
@@ -74,7 +76,7 @@ def run_command(
     )
 
 
-def copy_from_paths_to_path(origins: List[Path], files: List[str], destination: Path):
+def copy_from_paths_to_path(origins: list[Path], files: list[str], destination: Path):
     """
     Copy a list of files from a list of source folders to a destination folder. The
     source folders are searched in-order for the name of the file, which means that
@@ -97,5 +99,45 @@ def copy_from_paths_to_path(origins: List[Path], files: List[str], destination: 
                 f"Could not find dependency file {file}, " f"looked in {origins}"
             )
     for file in files_to_copy:
-        # noinspection PyTypeChecker
         shutil.copy2(file, destination)
+
+
+def copy_workdir_files(bundle: Bundle, destination: Path, all_files: bool) -> list[str]:
+    """
+    Copy files from the workdir to a destination.
+
+    :param bundle: Bundle information of the test suite
+    :param destination: Where to copy to.
+    :param all_files: If all files or only source files should be copied.
+    """
+    source_files = []
+
+    def recursive_copy(src: Path, dst: Path):
+        for origin in src.iterdir():
+            file = origin.name.lower()
+            if origin.is_file() and (
+                all_files or bundle.language.is_source_file(origin)
+            ):
+                source_files.append(str(dst / origin.name))
+                _logger.debug(f"Copying {origin} to {dst}")
+                shutil.copy2(origin, dst)
+            elif (
+                origin.is_dir()
+                and not file.startswith(EXECUTION_PREFIX)
+                and file != "common"
+            ):
+                _logger.debug(f"Iterate subdir {dst / file}")
+                shutil.copytree(origin, dst / file)
+
+    recursive_copy(bundle.config.workdir, destination)
+
+    return source_files
+
+
+def filter_files(files: list[str] | FileFilter, directory: Path) -> list[Path]:
+    if callable(files):
+        return list(
+            x.relative_to(directory) for x in filter(files, directory.rglob("*"))
+        )
+    else:
+        return [Path(file) for file in files]

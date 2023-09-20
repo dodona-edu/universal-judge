@@ -2,7 +2,7 @@
 Evaluators for text.
 """
 import math
-from typing import Any, Dict, Optional
+from typing import Any
 
 from tested.dodona import Status, StatusMessage
 from tested.internationalization import get_i18n_string
@@ -10,7 +10,7 @@ from tested.oracles.common import OracleConfig, OracleResult
 from tested.testsuite import FileOutputChannel, OutputChannel, TextOutputChannel
 
 
-def _is_number(string: str) -> Optional[float]:
+def _is_number(string: str) -> float | None:
     try:
         return float(string)
     except ValueError:
@@ -39,7 +39,7 @@ def _file_defaults(config: OracleConfig) -> dict:
     return defaults
 
 
-def compare_text(options: Dict[str, Any], expected: str, actual: str) -> OracleResult:
+def compare_text(options: dict[str, Any], expected: str, actual: str) -> OracleResult:
     # Temporary variables that may modified by the evaluation options,
     # Don't modify the actual values, otherwise there maybe confusion with the
     # solution submitted by the student

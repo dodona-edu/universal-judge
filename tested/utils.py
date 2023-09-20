@@ -4,25 +4,14 @@ import logging
 import random
 import string
 import sys
+from collections.abc import Callable, Iterable
 from itertools import zip_longest
 from pathlib import Path
-from typing import (
-    IO,
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Iterable,
-    List,
-    Optional,
-    TypeGuard,
-    TypeVar,
-    Union,
-)
+from typing import IO, TYPE_CHECKING, Any, TypeGuard, TypeVar
 from typing import get_args as typing_get_args
 
 if TYPE_CHECKING:
     from tested.serialisation import Assignment
-    from tested.testsuite import SupportedLanguage
 
 _logger = logging.getLogger(__name__)
 
@@ -39,7 +28,7 @@ def smart_close(file: IO):
     return contextlib.nullcontext(file)
 
 
-def basename(file: Union[str, Path]) -> str:
+def basename(file: str | Path) -> str:
     """
     Get the basename of a file.
 
@@ -61,43 +50,6 @@ def get_identifier() -> str:
     letter = random.choice(string.ascii_letters)
     rest = random.sample(string.ascii_letters + string.digits, 8)
     return letter + "".join(rest)
-
-
-def consume_shebang(submission: Path) -> Optional["SupportedLanguage"]:
-    """
-    Find the shebang in the submission, and if it is present, consume it.
-
-    :param submission: The path to the file containing the code.
-
-    :return: The programming language if found.
-    """
-    from tested.testsuite import SupportedLanguage
-
-    language = None
-    try:
-        with open(submission, "r+") as file:
-            lines = file.readlines()
-            file.seek(0)
-
-            # Steps to find
-            has_potential = True
-            for line in lines:
-                stripped = line.strip()
-                if has_potential and stripped.startswith("#!tested"):
-                    try:
-                        _, language = stripped.split(" ")
-                    except ValueError:
-                        _logger.error(f"Invalid shebang on line {stripped}")
-                else:
-                    file.write(line)
-                if has_potential and stripped:
-                    has_potential = False
-            file.truncate()
-    except FileNotFoundError:
-        # Nothing we can do if there is no submission.
-        pass
-
-    return SupportedLanguage(language) if language else None
 
 
 K = TypeVar("K")
@@ -152,7 +104,7 @@ def flatten(nested: Iterable[Iterable[T]]) -> Iterable[T]:
     return itertools.chain.from_iterable(nested)
 
 
-def safe_del(l: List[T], index: int, f: Callable[[T], bool]) -> bool:
+def safe_del(l: list[T], index: int, f: Callable[[T], bool]) -> bool:
     """
     Delete an item from a list at a position if the filter is True. If the index
     is out of range or the filter is False, the function will return False, else
@@ -175,7 +127,7 @@ def safe_del(l: List[T], index: int, f: Callable[[T], bool]) -> bool:
         return False
 
 
-def safe_get(l: List[T], index: int) -> Optional[T]:
+def safe_get(l: list[T], index: int) -> T | None:
     """
     Get the element at the given position or None if the index is out of bounds.
     """
@@ -213,8 +165,8 @@ def recursive_dict_merge(one: dict, two: dict) -> dict:
 def sorted_no_duplicates(
     iterable: Iterable[T],
     key: Callable[[T], K] = lambda x: x,
-    recursive_key: Optional[Callable[[K], K]] = None,
-) -> List[T]:
+    recursive_key: Callable[[K], K] | None = None,
+) -> list[T]:
     # Order functions
     def type_order(x: Any, y: Any) -> int:
         """
@@ -263,7 +215,7 @@ def sorted_no_duplicates(
 
     # Sort functions, custom implementation needed for efficient recursive ordering
     # of values that have different types
-    def insertion_sort(list_t: List[T], start: int, end: int) -> List[T]:
+    def insertion_sort(list_t: list[T], start: int, end: int) -> list[T]:
         """
         Insertion sort
         :param list_t: list to sort
@@ -281,7 +233,7 @@ def sorted_no_duplicates(
             list_t[j + 1] = item
         return list_t
 
-    def merge(to_list: List[T], from_list: List[T], start: int, middle: int, end: int):
+    def merge(to_list: list[T], from_list: list[T], start: int, middle: int, end: int):
         """
         Merge two sorted sublist to sorted list
 
@@ -306,7 +258,7 @@ def sorted_no_duplicates(
         else:
             to_list[k:end] = from_list[j:end]
 
-    def timsort(list_t: List[T], timgroup: int = 32) -> List[T]:
+    def timsort(list_t: list[T], timgroup: int = 32) -> list[T]:
         """
         Time sort algorithm
         :param list_t: the modifiable list to sort

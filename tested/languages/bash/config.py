@@ -1,6 +1,6 @@
 import re
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Mapping, Set, Tuple
+from typing import TYPE_CHECKING
 
 from tested.datatypes import AdvancedStringTypes, AllTypes, BasicStringTypes
 from tested.dodona import AnnotateCode, Message
@@ -24,10 +24,10 @@ if TYPE_CHECKING:
 
 
 class Bash(Language):
-    def naming_conventions(self) -> Dict[Conventionable, NamingConventions]:
+    def naming_conventions(self) -> dict[Conventionable, NamingConventions]:
         return {"global_identifier": "macro_case"}
 
-    def datatype_support(self) -> Mapping[AllTypes, TypeSupport]:
+    def datatype_support(self) -> dict[AllTypes, TypeSupport]:
         return {
             AdvancedStringTypes.CHAR: TypeSupport.REDUCED,
             BasicStringTypes.TEXT: TypeSupport.SUPPORTED,
@@ -36,13 +36,13 @@ class Bash(Language):
     def file_extension(self) -> str:
         return "sh"
 
-    def initial_dependencies(self) -> List[str]:
+    def initial_dependencies(self) -> list[str]:
         return []
 
     def needs_selector(self):
         return False
 
-    def supported_constructs(self) -> Set[Construct]:
+    def supported_constructs(self) -> set[Construct]:
         return {
             Construct.FUNCTION_CALLS,
             Construct.ASSIGNMENTS,
@@ -50,7 +50,7 @@ class Bash(Language):
             Construct.GLOBAL_VARIABLES,
         }
 
-    def compilation(self, files: List[str]) -> CallbackResult:
+    def compilation(self, files: list[str]) -> CallbackResult:
         submission = submission_file(self)
         main_file = list(filter(lambda x: x == submission, files))
         if main_file:
@@ -58,7 +58,7 @@ class Bash(Language):
         else:
             return [], files
 
-    def execution(self, cwd: Path, file: str, arguments: List[str]) -> Command:
+    def execution(self, cwd: Path, file: str, arguments: list[str]) -> Command:
         return ["bash", file, *arguments]
 
     def cleanup_stacktrace(self, stacktrace: str) -> str:
@@ -76,7 +76,7 @@ class Bash(Language):
         )
         return regex.sub("<testcode>", stacktrace)
 
-    def linter(self, remaining: float) -> Tuple[List[Message], List[AnnotateCode]]:
+    def linter(self, remaining: float) -> tuple[list[Message], list[AnnotateCode]]:
         # Import locally to prevent errors.
         from tested.languages.bash import linter
 
@@ -93,7 +93,7 @@ class Bash(Language):
 
         return generators.convert_execution_unit(execution_unit)
 
-    def generate_encoder(self, values: List[Value]) -> str:
+    def generate_encoder(self, values: list[Value]) -> str:
         from tested.languages.bash import generators
 
         return generators.convert_encoder(values)

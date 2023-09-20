@@ -2,7 +2,8 @@
 Functions to conventionalize various aspects of a programming langauge.
 """
 import logging
-from typing import TYPE_CHECKING, Callable, Dict, Literal
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
     from tested.languages import Language
@@ -316,7 +317,7 @@ NamingConventions = Literal[
 ]
 
 
-_case_mapping: Dict[NamingConventions, Callable[[str], str]] = {
+_case_mapping: dict[NamingConventions, Callable[[str], str]] = {
     "camel_case": camelize,
     "camel_snake_case": camel_snake_case,
     "cobol_case": cobol_case,
@@ -441,15 +442,14 @@ def selector_file(language: "Language") -> str:
     return language.with_extension(selector_name(language))
 
 
-def execution_name(language: "Language", tab_number: int, execution_number: int) -> str:
+def execution_name(language: "Language", execution_number: int) -> str:
     """
     Get the name of an execution. The name should be unique for the tab and
     execution number combination.
 
     :param language: The language module.
-    :param tab_number: The number of the tab.
     :param execution_number: The number of the execution.
     :return: The name of the execution.
     """
-    name = f"{EXECUTION_PREFIX}_{tab_number}_{execution_number}"
+    name = f"{EXECUTION_PREFIX}_{execution_number}"
     return conventionalize_namespace(language, name)

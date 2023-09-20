@@ -2,7 +2,7 @@ import logging
 import os
 import re
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Mapping, Optional, Set, Tuple
+from typing import TYPE_CHECKING
 
 from tested.datatypes import AllTypes, ExpressionTypes
 from tested.dodona import AnnotateCode, Message, Severity
@@ -34,7 +34,7 @@ def _executable():
 
 
 class Python(Language):
-    def initial_dependencies(self) -> List[str]:
+    def initial_dependencies(self) -> list[str]:
         return ["values.py", "evaluation_utils.py"]
 
     def needs_selector(self):
@@ -46,10 +46,10 @@ class Python(Language):
     def get_string_quote(self):
         return "'"
 
-    def naming_conventions(self) -> Dict[Conventionable, NamingConventions]:
+    def naming_conventions(self) -> dict[Conventionable, NamingConventions]:
         return {"class": "pascal_case", "global_identifier": "macro_case"}
 
-    def supported_constructs(self) -> Set[Construct]:
+    def supported_constructs(self) -> set[Construct]:
         return {
             Construct.OBJECTS,
             Construct.EXCEPTIONS,
@@ -63,7 +63,7 @@ class Python(Language):
             Construct.GLOBAL_VARIABLES,
         }
 
-    def datatype_support(self) -> Mapping[AllTypes, TypeSupport]:
+    def datatype_support(self) -> dict[AllTypes, TypeSupport]:
         return {  # type: ignore
             "integer": "supported",
             "real": "supported",
@@ -94,7 +94,7 @@ class Python(Language):
             "tuple": "supported",
         }
 
-    def map_type_restrictions(self) -> Optional[Set[ExpressionTypes]]:
+    def map_type_restrictions(self) -> set[ExpressionTypes] | None:
         return {  # type: ignore
             "integer",
             "real",
@@ -107,10 +107,10 @@ class Python(Language):
             "identifiers",
         }
 
-    def set_type_restrictions(self) -> Optional[Set[ExpressionTypes]]:
+    def set_type_restrictions(self) -> set[ExpressionTypes] | None:
         return self.map_type_restrictions()
 
-    def compilation(self, files: List[str]) -> CallbackResult:
+    def compilation(self, files: list[str]) -> CallbackResult:
         result = [x.replace(".py", ".pyc") for x in files]
         return [
             _executable(),
@@ -123,12 +123,12 @@ class Python(Language):
             ".",
         ], result
 
-    def execution(self, cwd: Path, file: str, arguments: List[str]) -> Command:
+    def execution(self, cwd: Path, file: str, arguments: list[str]) -> Command:
         return [_executable(), "-u", file, *arguments]
 
     def compiler_output(
         self, stdout: str, stderr: str
-    ) -> Tuple[List[Message], List[AnnotateCode], str, str]:
+    ) -> tuple[list[Message], list[AnnotateCode], str, str]:
         if match := re.search(r".*: (.+Error): (.+) \(<code>, line (\d+)\)", stdout):
             error = match.group(1)
             message = match.group(2)
@@ -146,7 +146,7 @@ class Python(Language):
         else:
             return [], [], stdout, stderr
 
-    def linter(self, remaining: float) -> Tuple[List[Message], List[AnnotateCode]]:
+    def linter(self, remaining: float) -> tuple[list[Message], list[AnnotateCode]]:
         # Import locally to prevent errors.
         from tested.languages.python import linter
 
@@ -225,7 +225,7 @@ class Python(Language):
 
         return generators.convert_check_function(name, function)
 
-    def generate_encoder(self, values: List[Value]) -> str:
+    def generate_encoder(self, values: list[Value]) -> str:
         from tested.languages.python import generators
 
         return generators.convert_encoder(values)

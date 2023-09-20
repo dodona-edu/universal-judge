@@ -1,5 +1,5 @@
 import json
-from typing import List, Literal, Optional, Union, cast
+from typing import Literal, cast
 
 from tested.datatypes import (
     AdvancedNumericTypes,
@@ -40,7 +40,7 @@ from tested.serialisation import (
 from tested.testsuite import MainInput
 
 
-def convert_arguments(arguments: List[Expression]) -> str:
+def convert_arguments(arguments: list[Expression]) -> str:
     return ", ".join(convert_statement(arg) for arg in arguments)
 
 
@@ -140,13 +140,13 @@ def convert_function_call(function: FunctionCall) -> str:
         result += convert_statement(function.namespace) + "."
     result += function.name
     if function.type != FunctionType.PROPERTY:
-        result += f"({convert_arguments(cast(List[Expression], function.arguments))})"
+        result += f"({convert_arguments(cast(list[Expression], function.arguments))})"
     return result
 
 
 def convert_declaration(
-    tp: Union[AllTypes, VariableType, Literal["Object"]],
-    value: Optional[Statement],
+    tp: AllTypes | VariableType | Literal["Object"],
+    value: Statement | None,
     nt=None,
     inner=False,
 ) -> str:
@@ -319,12 +319,12 @@ def convert_execution_unit(pu: PreparedExecutionUnit) -> str:
     import java.math.BigInteger;
     import java.math.BigDecimal;
     
-    public class {pu.execution_name} implements Closeable {{
+    public class {pu.unit.name} implements Closeable {{
     
         private final PrintWriter valueWriter;
         private final PrintWriter exceptionWriter;
     
-        public {pu.execution_name}() throws Exception {{
+        public {pu.unit.name}() throws Exception {{
             this.valueWriter = new PrintWriter("{pu.value_file}");
             this.exceptionWriter = new PrintWriter("{pu.exception_file}");
         }}
@@ -393,7 +393,7 @@ def convert_execution_unit(pu: PreparedExecutionUnit) -> str:
         }}
         
         public static void main(String[] a) throws Exception {{
-            try({pu.execution_name} execution = new {pu.execution_name}()) {{
+            try({pu.unit.name} execution = new {pu.unit.name}()) {{
                 execution.execute();
             }}
         }}
@@ -403,7 +403,7 @@ def convert_execution_unit(pu: PreparedExecutionUnit) -> str:
     return result
 
 
-def convert_selector(contexts: List[str]) -> str:
+def convert_selector(contexts: list[str]) -> str:
     result = """
     class Selector {
         public static void main(String[] a) throws Exception {
@@ -436,7 +436,7 @@ def convert_check_function(function: FunctionCall) -> str:
     """
 
 
-def convert_encoder(values: List[Value]) -> str:
+def convert_encoder(values: list[Value]) -> str:
     result = """
 import java.util.*;
 import java.io.*;

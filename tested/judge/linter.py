@@ -26,7 +26,7 @@ def run_linter(bundle: Bundle, collector: OutputManager, remaining: float):
 
     _logger.debug("Running linter...")
 
-    messages, annotations = bundle.lang_config.linter(remaining)
+    messages, annotations = bundle.language.linter(remaining)
 
     for message in messages:
         collector.add(AppendMessage(message=message))

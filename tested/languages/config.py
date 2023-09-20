@@ -7,24 +7,13 @@ Everything that depends on the programming language passes through this class.
 import logging
 import typing
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from pathlib import Path
-from typing import (
-    Callable,
-    Dict,
-    List,
-    Mapping,
-    NotRequired,
-    Optional,
-    Set,
-    Tuple,
-    TypedDict,
-    Union,
-)
+from typing import NotRequired, Optional, TypedDict
 
 from tested.datatypes import AllTypes, ExpressionTypes
 from tested.dodona import AnnotateCode, Message, Status
 from tested.features import Construct, TypeSupport
-from tested.internationalization import get_i18n_string
 from tested.languages.conventionalize import (
     EXECUTION_PREFIX,
     Conventionable,
@@ -37,20 +26,20 @@ if typing.TYPE_CHECKING:
     from tested.configs import GlobalConfig
     from tested.languages.generation import PreparedExecutionUnit
 
-Command = List[str]
+Command = list[str]
 FileFilter = Callable[[Path], bool]
-CallbackResult = Tuple[Command, Union[List[str], FileFilter]]
+CallbackResult = tuple[Command, list[str] | FileFilter]
 
 _logger = logging.getLogger(__name__)
 
 
 class TypeDeclarationMetadata(TypedDict):
-    names: Mapping[AllTypes, str | bool]
-    inner_names: NotRequired[Mapping[AllTypes, str]]
-    nested: NotRequired[Tuple[str, str]]
-    nested_overrides: NotRequired[Mapping[AllTypes, Tuple[str, str]]]
+    names: dict[AllTypes, str | bool]
+    inner_names: NotRequired[dict[AllTypes, str]]
+    nested: NotRequired[tuple[str, str]]
+    nested_overrides: NotRequired[dict[AllTypes, tuple[str, str]]]
     prompt: NotRequired[str]
-    natural_overrides: NotRequired[Mapping[str, Mapping[AllTypes, Tuple[str, str]]]]
+    natural_overrides: NotRequired[dict[str, dict[AllTypes, tuple[str, str]]]]
 
 
 class Language(ABC):
@@ -76,7 +65,7 @@ class Language(ABC):
         """
         self.config = config
 
-    def compilation(self, files: List[str]) -> CallbackResult:
+    def compilation(self, files: list[str]) -> CallbackResult:
         """
         Callback for generating the compilation command.
 
@@ -147,7 +136,7 @@ class Language(ABC):
         return [], files
 
     @abstractmethod
-    def execution(self, cwd: Path, file: str, arguments: List[str]) -> Command:
+    def execution(self, cwd: Path, file: str, arguments: list[str]) -> Command:
         """
         Callback for generating the execution command.
 
@@ -174,7 +163,7 @@ class Language(ABC):
         return '"'
 
     @abstractmethod
-    def naming_conventions(self) -> Dict[Conventionable, NamingConventions]:
+    def naming_conventions(self) -> dict[Conventionable, NamingConventions]:
         """
         Return naming conventions for this language.
 
@@ -212,7 +201,7 @@ class Language(ABC):
         return f"{file_name}.{self.file_extension()}"
 
     @abstractmethod
-    def initial_dependencies(self) -> List[str]:
+    def initial_dependencies(self) -> list[str]:
         """
         Return the additional dependencies that tested will include in compilation.
         The dependencies are read from the config.json file.
@@ -231,7 +220,7 @@ class Language(ABC):
         """
         raise NotImplementedError
 
-    def supported_constructs(self) -> Set[Construct]:
+    def supported_constructs(self) -> set[Construct]:
         """
         Callback to get the supported constructs for a language. By default, no
         features are returned, i.e. the default is false.
@@ -240,7 +229,7 @@ class Language(ABC):
         """
         return set()
 
-    def map_type_restrictions(self) -> Optional[Set[ExpressionTypes]]:
+    def map_type_restrictions(self) -> set[ExpressionTypes] | None:
         """
         Get type restrictions that apply to map types in this language.
 
@@ -252,7 +241,7 @@ class Language(ABC):
         """
         return None
 
-    def set_type_restrictions(self) -> Optional[Set[ExpressionTypes]]:
+    def set_type_restrictions(self) -> set[ExpressionTypes] | None:
         """
         Get type restrictions that apply to the set types in this language.
 
@@ -264,7 +253,7 @@ class Language(ABC):
         """
         return None
 
-    def datatype_support(self) -> Mapping[AllTypes, TypeSupport]:
+    def datatype_support(self) -> dict[AllTypes, TypeSupport]:
         """
         Override support for datatypes.
 
@@ -289,7 +278,7 @@ class Language(ABC):
 
     def modify_specific_evaluator(self, evaluator: Path):
         """
-        An opportunity to modify the language specific oracle. By default,
+        An opportunity to modify the language-specific oracle. By default,
         this does nothing. If you modify the oracle, you must overwrite the
         contents of the oracle in-place.
 
@@ -301,7 +290,7 @@ class Language(ABC):
 
     def compiler_output(
         self, stdout: str, stderr: str
-    ) -> Tuple[List[Message], List[AnnotateCode], str, str]:
+    ) -> tuple[list[Message], list[AnnotateCode], str, str]:
         """
         Convert the stdout and stderr from a compiler to more structured data.
 
@@ -317,7 +306,7 @@ class Language(ABC):
         """
         return [], [], stdout, stderr
 
-    def linter(self, remaining: float) -> Tuple[List[Message], List[AnnotateCode]]:
+    def linter(self, remaining: float) -> tuple[list[Message], list[AnnotateCode]]:
         """
         Run a linter or other code analysis tools on the submission.
         The messages that are output will be passed to Dodona.
@@ -332,7 +321,7 @@ class Language(ABC):
         """
         return [], []
 
-    def filter_dependencies(self, files: List[Path], context_name: str) -> List[Path]:
+    def filter_dependencies(self, files: list[Path], context_name: str) -> list[Path]:
         """
         Callback to filter dependencies for one context.
 
@@ -358,19 +347,21 @@ class Language(ABC):
 
     @typing.overload
     def find_main_file(
-        self, files: List[Path], name: str, precompilation_messages: List[Message]
-    ) -> Tuple[Path, List[Message], typing.Literal[Status.CORRECT], List[AnnotateCode]]:
+        self,
+        files: list[Path],
+        name: str,
+    ) -> tuple[Path, typing.Literal[Status.CORRECT]]:
         ...
 
     @typing.overload
-    def find_main_file(
-        self, files: List[Path], name: str, precompilation_messages: List[Message]
-    ) -> Tuple[None, List[Message], Status, List[AnnotateCode]]:
+    def find_main_file(self, files: list[Path], name: str) -> tuple[None, Status]:
         ...
 
     def find_main_file(
-        self, files: List[Path], name: str, precompilation_messages: List[Message]
-    ) -> Tuple[Optional[Path], List[Message], Status, List[AnnotateCode]]:
+        self,
+        files: list[Path],
+        name: str,
+    ) -> tuple[Path | None, Status]:
         """
         Find the "main" file in a list of files.
 
@@ -379,19 +370,14 @@ class Language(ABC):
 
         :param files: A list of files.
         :param name: The name of the main file.
-        :param precompilation_messages: A list of precompilation messages.
         :return: The main file or a list of messages.
         """
-        # TODO: check why the messages are needed here...
         _logger.debug("Finding %s in %s", name, files)
-        messages = []
         possible_main_files = [x for x in files if x.name.startswith(name)]
         if possible_main_files:
-            return possible_main_files[0], messages, Status.CORRECT, []
+            return possible_main_files[0], Status.CORRECT
         else:
-            messages.extend(precompilation_messages)
-            messages.append(get_i18n_string("languages.config.unknown.compilation"))
-            return None, messages, Status.COMPILATION_ERROR, []
+            return None, Status.COMPILATION_ERROR
 
     def cleanup_stacktrace(self, stacktrace: str) -> str:
         """
@@ -435,7 +421,7 @@ class Language(ABC):
         """
         raise NotImplementedError
 
-    def generate_selector(self, contexts: List[str]) -> str:
+    def generate_selector(self, contexts: list[str]) -> str:
         """
         Generate code for a selector for the given list of contexts.
 
@@ -455,7 +441,7 @@ class Language(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def generate_encoder(self, values: List[Value]) -> str:
+    def generate_encoder(self, values: list[Value]) -> str:
         """
         Generate code for a main function that will encode the given values.
 
@@ -476,7 +462,7 @@ class Language(ABC):
         """
         raise NotImplementedError
 
-    def path_to_dependencies(self) -> List[Path]:
+    def path_to_dependencies(self) -> list[Path]:
         """
         Construct the paths to the folder containing the additional dependencies
         needed for a programming language.

@@ -1,5 +1,4 @@
 import json
-from typing import List
 
 from tested.datatypes import (
     AdvancedNumericTypes,
@@ -38,7 +37,7 @@ from tested.testsuite import MainInput
 
 
 def convert_arguments(
-    arguments: List[NamedArgument | Expression], with_namespace=False
+    arguments: list[NamedArgument | Expression], with_namespace=False
 ) -> str:
     results = []
     for arg in arguments:
@@ -190,7 +189,7 @@ def send_specific_exception(exception):
     ctx: PreparedContext
     for i, ctx in enumerate(pu.contexts):
         indent = " " * 4
-        result += f"def {pu.execution_name}_context_{i}():\n"
+        result += f"def {pu.unit.name}_context_{i}():\n"
         result += indent + ctx.before + "\n"
 
         if not ctx.context.has_main_testcase():
@@ -235,7 +234,7 @@ def send_specific_exception(exception):
 
     for i, ctx in enumerate(pu.contexts):
         result += "write_context_separator()\n"
-        result += f"{pu.execution_name}_context_{i}()\n"
+        result += f"{pu.unit.name}_context_{i}()\n"
 
     result += """
 value_file.close()
@@ -256,7 +255,7 @@ values.send_evaluated(sys.stdout, result)
 """
 
 
-def convert_encoder(values: List[Value]) -> str:
+def convert_encoder(values: list[Value]) -> str:
     result = """
 import sys
 import values

@@ -4,9 +4,12 @@ Module containing the definitions of the features we can support.
 import logging
 import operator
 from collections import defaultdict
+from collections.abc import Iterable
 from enum import StrEnum, auto, unique
 from functools import reduce
-from typing import TYPE_CHECKING, Dict, Iterable, NamedTuple, Set
+from typing import TYPE_CHECKING
+
+from attrs import define
 
 from tested.datatypes import AllTypes, BasicObjectTypes, BasicSequenceTypes, NestedTypes
 
@@ -40,9 +43,10 @@ class Construct(StrEnum):
     GLOBAL_VARIABLES = "global_variables"
 
 
-class FeatureSet(NamedTuple):
-    constructs: Set[Construct]
-    types: Set[AllTypes]
+@define
+class FeatureSet:
+    constructs: set[Construct]
+    types: set[AllTypes]
     nested_types: NestedTypes
 
 
@@ -79,7 +83,7 @@ class TypeSupport(StrEnum):
     """
 
 
-def fallback_type_support_map(language: "Language") -> Dict[AllTypes, TypeSupport]:
+def fallback_type_support_map(language: "Language") -> dict[AllTypes, TypeSupport]:
     """
     Return a map containing the support for all types.
 
@@ -107,8 +111,11 @@ def combine_features(iterable: Iterable[FeatureSet]) -> FeatureSet:
     """
     features = list(iterable)
     assert all(isinstance(x, FeatureSet) for x in features)
+    # noinspection PyTypeChecker
     constructs = reduce(operator.or_, (x.constructs for x in features), set())
+    # noinspection PyTypeChecker
     types = reduce(operator.or_, (x.types for x in features), set())
+    # noinspection PyTypeChecker
     nexted_types = reduce(operator.or_, (x.nested_types for x in features), set())
 
     return FeatureSet(constructs=constructs, types=types, nested_types=nexted_types)

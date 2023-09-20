@@ -20,7 +20,7 @@ def render_one_statement(bundle: Bundle, statement: str) -> str:
     parsed_string = parse_string(statement)
     generated_statement = generate_statement(bundle, parsed_string)
     # Allow the language to modify the template a bit.
-    return bundle.lang_config.cleanup_description(generated_statement)
+    return bundle.language.cleanup_description(generated_statement)
 
 
 class TestedRenderer(MarkdownRenderer):
@@ -40,7 +40,7 @@ class TestedRenderer(MarkdownRenderer):
         doctests = self._doctest_parser.get_examples(raw_code)
 
         resulting_lines = []
-        prompt = self.bundle.lang_config.get_declaration_metadata().get("prompt", ">")
+        prompt = self.bundle.language.get_declaration_metadata().get("prompt", ">")
 
         # Both the doctests and the results are parsed as values in the DSL.
         for examples in doctests:

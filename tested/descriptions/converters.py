@@ -48,7 +48,7 @@ def convert_templated_problem(bundle: Bundle, raw_description: str) -> str:
     description_template = Template(
         source=raw_description, autoescape=False, keep_trailing_newline=True
     )
-    language = bundle.lang_config
+    language = bundle.language
     set_locale(bundle.config.natural_language)
     return description_template.render(
         # Conventionalize functions

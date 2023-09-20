@@ -3,12 +3,17 @@ Functions responsible for the compilation step.
 """
 import logging
 from pathlib import Path
-from typing import List, Optional, Tuple, Union
 
 from tested.configs import Bundle
-from tested.dodona import AnnotateCode, Message, Status
+from tested.dodona import Status
 from tested.internationalization import get_i18n_string
-from tested.judge.utils import BaseExecutionResult, run_command
+from tested.judge.planning import CompilationResult, ExecutionPlan
+from tested.judge.utils import (
+    BaseExecutionResult,
+    copy_workdir_files,
+    filter_files,
+    run_command,
+)
 from tested.languages.config import FileFilter, Language
 from tested.languages.utils import convert_stacktrace_to_clickable_feedback
 
@@ -16,8 +21,8 @@ _logger = logging.getLogger(__name__)
 
 
 def run_compilation(
-    bundle: Bundle, directory: Path, dependencies: List[str], remaining: float
-) -> Tuple[Optional[BaseExecutionResult], Union[List[str], FileFilter]]:
+    bundle: Bundle, directory: Path, dependencies: list[str], remaining: float
+) -> tuple[BaseExecutionResult | None, list[str] | FileFilter]:
     """
     The compilation step in the pipeline. This callback is used in both the
     precompilation and individual mode. The implementation may only depend on
@@ -53,7 +58,7 @@ def run_compilation(
              decide to fallback to individual mode if the compilation result is
              not positive.
     """
-    command, files = bundle.lang_config.compilation(dependencies)
+    command, files = bundle.language.compilation(dependencies)
     _logger.debug(
         "Generating files with command %s in directory %s", command, directory
     )
@@ -63,26 +68,25 @@ def run_compilation(
 
 
 def process_compile_results(
-    language_config: Language, results: Optional[BaseExecutionResult]
-) -> Tuple[List[Message], Status, List[AnnotateCode]]:
+    language_config: Language, results: BaseExecutionResult | None
+) -> CompilationResult:
     """
     Process the output of a compilation step. It will convert the result of the
     command into a list of messages and a status. If the status is not correct,
     the messages and status may be passed to Dodona unchanged. Alternatively, they
     can be kept to show them with the first context.
     """
-    messages = []
 
     # There was no compilation
     if results is None:
-        return messages, Status.CORRECT, []
+        return CompilationResult(status=Status.CORRECT)
 
     show_stdout = False
     _logger.debug("Received stderr from compiler: " + results.stderr)
     compiler_messages, annotations, stdout, stderr = language_config.compiler_output(
         results.stdout, results.stderr
     )
-    messages.extend(compiler_messages)
+    messages = compiler_messages
     shown_messages = annotations or compiler_messages
 
     # Report stderr.
@@ -106,14 +110,45 @@ def process_compile_results(
 
     # Report errors if needed.
     if results.timeout:
-        return messages, Status.TIME_LIMIT_EXCEEDED, annotations
+        status = Status.TIME_LIMIT_EXCEEDED
     if results.memory:
-        return messages, Status.MEMORY_LIMIT_EXCEEDED, annotations
+        status = Status.MEMORY_LIMIT_EXCEEDED
     if results.exit != 0:
         if not shown_messages:
             messages.append(
                 get_i18n_string("judge.compilation.exitcode", exitcode=results.exit)
             )
-        return messages, Status.COMPILATION_ERROR, annotations
+        status = Status.COMPILATION_ERROR
     else:
-        return messages, Status.CORRECT, annotations
+        status = Status.CORRECT
+
+    return CompilationResult(messages=messages, status=status, annotations=annotations)
+
+
+def precompile(bundle: Bundle, plan: ExecutionPlan) -> CompilationResult:
+    """
+    Attempt to precompile the execution plan.
+
+    :param bundle: The options.
+    :param plan: The execution plan.
+    :return: The results of the precompilation step.
+    """
+    _logger.info("Starting precompilation phase")
+    assert not bundle.language.needs_selector() or plan.selector is not None
+    plan_files = filter_files(plan.files, plan.common_directory)
+    files = copy_workdir_files(bundle, plan.common_directory, False) + [
+        str(x) for x in plan_files
+    ]
+    remaining_time = plan.remaining_time()
+
+    # Do the actual compiling.
+    result, compilation_files = run_compilation(
+        bundle, plan.common_directory, files, remaining_time
+    )
+
+    # Update the files if the compilation succeeded.
+    processed_results = process_compile_results(bundle.language, result)
+    if processed_results.status == Status.CORRECT:
+        plan.files = compilation_files
+
+    return processed_results

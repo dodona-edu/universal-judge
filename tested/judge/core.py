@@ -1,19 +1,16 @@
 import logging
 import shutil
 import time
-from concurrent.futures.thread import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-from typing import List, Optional, Tuple
 
 from tested.configs import Bundle
 from tested.dodona import (
-    AppendMessage,
     CloseContext,
-    CloseJudgment,
+    CloseJudgement,
     CloseTab,
-    Message,
     StartContext,
-    StartJudgment,
+    StartJudgement,
     StartTab,
     Status,
     StatusMessage,
@@ -22,25 +19,51 @@ from tested.dodona import (
 from tested.features import is_supported
 from tested.internationalization import get_i18n_string, set_locale
 from tested.judge.collector import OutputManager
-from tested.judge.compilation import process_compile_results, run_compilation
-from tested.judge.evaluation import evaluate_context_results
+from tested.judge.compilation import precompile
+from tested.judge.evaluation import evaluate_context_results, terminate
 from tested.judge.execution import (
-    Execution,
     ExecutionResult,
-    execute_execution,
-    merge_contexts_into_units,
+    compile_unit,
+    execute_unit,
+    set_up_unit,
 )
 from tested.judge.linter import run_linter
-from tested.judge.utils import copy_from_paths_to_path
-from tested.languages.conventionalize import (
-    EXECUTION_PREFIX,
-    execution_name,
-    submission_file,
+from tested.judge.planning import (
+    CompilationResult,
+    ExecutionPlan,
+    PlannedContext,
+    PlannedExecutionUnit,
+    PlanStrategy,
+    plan_test_suite,
 )
+from tested.judge.utils import copy_from_paths_to_path
+from tested.languages.conventionalize import submission_file
 from tested.languages.generation import generate_execution, generate_selector
-from tested.testsuite import ExecutionMode
 
 _logger = logging.getLogger(__name__)
+
+
+def _is_fatal_compilation_error(compilation_results: CompilationResult) -> bool:
+    return compilation_results.status in (
+        Status.TIME_LIMIT_EXCEEDED,
+        Status.MEMORY_LIMIT_EXCEEDED,
+    )
+
+
+def _handle_time_or_memory_compilation(
+    bundle: Bundle, collector: OutputManager, results: CompilationResult
+):
+    assert _is_fatal_compilation_error(results)
+    collector.add_messages(results.messages)
+    collector.add_all(results.annotations)
+    terminate(
+        bundle,
+        collector,
+        StatusMessage(
+            enum=results.status,
+            human=get_i18n_string("judge.core.invalid.source-code"),
+        ),
+    )
 
 
 def judge(bundle: Bundle):
@@ -49,303 +72,218 @@ def judge(bundle: Bundle):
     test suite. The result (the judgment) is sent to stdout, so Dodona can pick it
     up.
 
+    The current strategy for executing is as follows:
+
+    1. Convert all contexts into as little units as possible.
+    2. Attempt to precompile everything.
+       a. If this fails, go to 3.
+       b. If this succeeds, go to 4.
+    3. Convert contexts into "tab-level" units.
+    4. For each execution unit:
+       a. Compile if necessary (only if 2 failed)
+       b. Execute the unit.
+       c. Process the results.
+
     :param bundle: The configuration bundle.
     """
     # Begin by checking if the given test suite is executable in this language.
     _logger.info("Checking supported features...")
     set_locale(bundle.config.natural_language)
-    if not is_supported(bundle.lang_config):
-        report_update(bundle.out, StartJudgment())
+    if not is_supported(bundle.language):
+        report_update(bundle.out, StartJudgement())
         report_update(
             bundle.out,
-            CloseJudgment(
-                accepted=False,
+            CloseJudgement(
                 status=StatusMessage(
                     enum=Status.INTERNAL_ERROR,
-                    human=get_i18n_string(
-                        "judge.core.unsupported.language",
-                        language=bundle.config.programming_language,
-                    ),
+                    human=get_i18n_string("judge.core.unsupported.language"),
                 ),
             ),
         )
         _logger.info("Required features not supported.")
         return  # Not all required features are supported.
 
-    mode = bundle.config.options.mode
-    collector = OutputManager(bundle)
-    collector.add(StartJudgment())
-
+    # Do the set-up for the judgement.
+    collector = OutputManager(bundle.out)
+    collector.add(StartJudgement())
     max_time = float(bundle.config.time_limit) * 0.9
     start = time.perf_counter()
 
     # Run the linter.
+    # TODO: do this in parallel
     run_linter(bundle, collector, max_time)
     if time.perf_counter() - start > max_time:
-        collector.terminate(Status.TIME_LIMIT_EXCEEDED)
+        terminate(bundle, collector, Status.TIME_LIMIT_EXCEEDED)
         return
 
-    _logger.info("Start generating code...")
-    common_dir, files, selector = _generate_files(bundle, mode)
-    # Add the selector to the dependencies.
-    if selector:
-        files.append(selector)
+    planned_units = plan_test_suite(bundle, strategy=PlanStrategy.OPTIMAL)
 
-    if mode == ExecutionMode.PRECOMPILATION:
-        assert not bundle.lang_config.needs_selector() or selector is not None
-        files = _copy_workdir_source_files(bundle, common_dir) + files
+    # Attempt to precompile everything.
+    common_dir, dependencies, selector = _generate_files(bundle, planned_units)
 
-        # Compile all code in one go.
-        _logger.info("Running precompilation step...")
-        remaining = max_time - (time.perf_counter() - start)
-        result, compilation_files = run_compilation(
-            bundle, common_dir, files, remaining
-        )
+    # Create an execution plan.
+    plan = ExecutionPlan(
+        units=planned_units,
+        common_directory=common_dir,
+        files=dependencies,
+        selector=selector,
+        max_time=max_time,
+        start_time=start,
+    )
 
-        messages, status, annotations = process_compile_results(
-            bundle.lang_config, result
-        )
+    _logger.debug("Attempting precompilation")
+    compilation_results = precompile(bundle, plan)
 
-        # If there is no result, there was no compilation.
-        if not result:
-            precompilation_result = None
-        else:
-            # Handle timout if necessary.
-            if result.timeout or result.memory:
-                # Show in separate tab.
-                index = len(bundle.suite.tabs) + 1
-                if messages:
-                    collector.prepare_tab(
-                        StartTab(title=get_i18n_string("judge.core.compilation")), index
-                    )
-                for message in messages:
-                    collector.add(AppendMessage(message=message))
-                for annotation in annotations:
-                    collector.add(annotation)
-                if messages:
-                    collector.prepare_tab(CloseTab(), index)
-                collector.terminate(
-                    Status.TIME_LIMIT_EXCEEDED
-                    if result.timeout
-                    else Status.MEMORY_LIMIT_EXCEEDED
-                )
-                return
+    # If something went horribly wrong, and the compilation itself caused a timeout or memory issue, bail now.
+    if _is_fatal_compilation_error(compilation_results):
+        _handle_time_or_memory_compilation(bundle, collector, compilation_results)
+        return
 
-            assert not result.timeout
-            assert not result.memory
+    # If the compilation failed, but we can fall back, do that.
+    if (
+        compilation_results.status != Status.CORRECT
+        and bundle.config.options.allow_fallback
+    ):
+        _logger.warning("Precompilation failed. Falling back to unit compilation.")
+        planned_units = plan_test_suite(bundle, strategy=PlanStrategy.TAB)
+        plan.units = planned_units
+        compilation_results = None
 
-            precompilation_result = (messages, status)
+    _logger.info("Starting execution")
 
-            # If we have fallback, discard all results.
-            if status != Status.CORRECT and bundle.config.options.allow_fallback:
-                mode = ExecutionMode.INDIVIDUAL
-                _logger.info("Compilation error, falling back to individual mode")
-                # Remove the selector file from the dependencies.
-                # Otherwise, it will keep being compiled, which we want to avoid.
-                if selector and bundle.lang_config.needs_selector():
-                    files.remove(selector)
-            # When compilation succeeded, only add annotations
-            elif status == Status.CORRECT:
-                files = compilation_files
-                for annotation in annotations:
-                    collector.add(annotation)
-            # Add compilation tab when compilation failed
-            else:
-                # Report messages.
-                if messages:
-                    collector.add_tab(
-                        StartTab(title=get_i18n_string("judge.core.compilation")), -1
-                    )
-                for message in messages:
-                    collector.add(AppendMessage(message=message))
-                for annotation in annotations:
-                    collector.add(annotation)
-                if messages:
-                    collector.add_tab(CloseTab(), -1)
+    def _process_one_unit(
+        index: int,
+    ) -> tuple[CompilationResult, ExecutionResult | None, Path]:
+        return _execute_one_unit(bundle, plan, compilation_results, index)
 
-                collector.terminate(
-                    StatusMessage(
-                        enum=status,
-                        human=get_i18n_string("judge.core.invalid.source-code"),
-                    )
-                )
-                _logger.info("Compilation error without fallback")
-                return  # Compilation error occurred, useless to continue.
+    if bundle.config.options.parallel:
+        max_workers = None
     else:
-        precompilation_result = None
+        max_workers = 1
 
-    _logger.info("Starting judgement...")
-    parallel = bundle.config.options.parallel
+    _logger.debug(f"Executing with {max_workers} workers")
 
-    # Create a list of runs we want to execute.
-    for tab_index, tab in enumerate(bundle.suite.tabs):
-        collector.add_tab(StartTab(title=tab.name, hidden=tab.hidden), tab_index)
-        assert tab.contexts
-        execution_units = merge_contexts_into_units(tab.contexts)
-        executions = []
-        offset = 0
-        for execution_index, unit in enumerate(execution_units):
-            executions.append(
-                Execution(
-                    unit=unit,
-                    context_offset=offset,
-                    execution_name=execution_name(
-                        bundle.lang_config, tab_index, execution_index
-                    ),
-                    execution_index=execution_index,
-                    mode=mode,
-                    common_directory=common_dir,
-                    files=files,
-                    precompilation_result=precompilation_result,
-                    collector=collector,
-                )
-            )
-            offset += len(unit.contexts)
-
-        remaining = max_time - (time.perf_counter() - start)
-        if parallel:
-            result = _parallel_execution(bundle, executions, remaining)
-        else:
-            result = _single_execution(bundle, executions, remaining)
-
-        if result in (
-            Status.TIME_LIMIT_EXCEEDED,
-            Status.MEMORY_LIMIT_EXCEEDED,
-            Status.OUTPUT_LIMIT_EXCEEDED,
-        ):
-            assert not collector.collected
-            collector.terminate(result)
-            return
-        collector.add_tab(CloseTab(), tab_index)
-
-    collector.add(CloseJudgment())
-    collector.clean_finish()
-
-
-def _single_execution(
-    bundle: Bundle, items: List[Execution], max_time: float
-) -> Optional[Status]:
-    """
-    Process items in a non-threaded way.
-
-    :param bundle: The configuration bundle.
-    :param items: The contexts to execute.
-    :param max_time: The max amount of time.
-    """
-    start = time.perf_counter()
-    for execution in items:
-        remaining = max_time - (time.perf_counter() - start)
-        execution_result, m, s, p = execute_execution(bundle, execution, remaining)
-
-        status = _process_results(bundle, execution, execution_result, m, s, p)
-
-        if status:
-            return status
-    return None
-
-
-def _parallel_execution(
-    bundle: Bundle, items: List[Execution], max_time: float
-) -> Optional[Status]:
-    """
-    Execute a list of contexts in parallel.
-
-    :param bundle: The configuration bundle.
-    :param items: The contexts to execute.
-    :param max_time: The max amount of time.
-    """
-    start = time.perf_counter()  # Accessed from threads.
-
-    def threaded_execution(execution: Execution):
-        """The function executed in parallel."""
-        remainder = max_time - (time.perf_counter() - start)
-        execution_result, m, s, p = execute_execution(bundle, execution, remainder)
-
-        def evaluation_function(_eval_remainder):
-            _status = _process_results(bundle, execution, execution_result, m, s, p)
-
-            if _status and _status not in (
-                Status.TIME_LIMIT_EXCEEDED,
-                Status.MEMORY_LIMIT_EXCEEDED,
-            ):
-                return _status
-            return None
-
-        return evaluation_function
-
-    with ThreadPoolExecutor(max_workers=4) as executor:
-        remaining = max_time - (time.perf_counter() - start)
-        results = executor.map(threaded_execution, items, timeout=remaining)
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        remaining_time = plan.remaining_time()
+        results = executor.map(
+            _process_one_unit, range(len(plan.units)), timeout=remaining_time
+        )
         try:
-            for eval_function in list(results):
-                remaining = max_time - (time.perf_counter() - start)
-                if (status := eval_function(remaining)) in (
+            currently_open_tab = -1
+            for i, (
+                local_compilation_results,
+                execution_result,
+                execution_dir,
+            ) in enumerate(results):
+                planned_unit = plan.units[i]
+                _logger.debug(f"Processing results for execution unit {i}")
+                result_status, currently_open_tab = _process_results(
+                    bundle=bundle,
+                    unit=planned_unit,
+                    execution_result=execution_result,
+                    execution_dir=execution_dir,
+                    compilation_results=local_compilation_results,
+                    collector=collector,
+                    currently_open_tab=currently_open_tab,
+                )
+
+                if result_status in (
                     Status.TIME_LIMIT_EXCEEDED,
                     Status.MEMORY_LIMIT_EXCEEDED,
                     Status.OUTPUT_LIMIT_EXCEEDED,
                 ):
-                    # Ensure finally is called NOW and cancels remaining tasks.
                     del results
-                    return status
+                    terminate(bundle, collector, result_status)
+                    return
         except TimeoutError:
-            _logger.warning("Futures did not end soon enough.", exc_info=True)
-            return Status.TIME_LIMIT_EXCEEDED
+            terminate(bundle, collector, Status.TIME_LIMIT_EXCEEDED)
+            return
+
+    # Close the last tab.
+    collector.add(CloseTab(), currently_open_tab)
+    collector.add(CloseJudgement())
+
+
+def _execute_one_unit(
+    bundle: Bundle,
+    plan: ExecutionPlan,
+    compilation_results: CompilationResult | None,
+    index: int,
+) -> tuple[CompilationResult, ExecutionResult | None, Path]:
+    planned_unit = plan.units[index]
+    # Prepare the unit.
+    execution_dir, dependencies = set_up_unit(bundle, plan, index)
+
+    # If compilation is necessary, do it.
+    if compilation_results is None:
+        local_compilation_results, dependencies = compile_unit(
+            bundle, plan, index, execution_dir, dependencies
+        )
+    else:
+        local_compilation_results = compilation_results
+
+    # Execute the unit.
+    if local_compilation_results.status == Status.CORRECT:
+        remaining_time = plan.remaining_time()
+        execution_result, status = execute_unit(
+            bundle, planned_unit, execution_dir, dependencies, remaining_time
+        )
+        local_compilation_results.status = status
+    else:
+        execution_result = None
+
+    return local_compilation_results, execution_result, execution_dir
 
 
 def _generate_files(
-    bundle: Bundle, mode: ExecutionMode
-) -> Tuple[Path, List[str], Optional[str]]:
+    bundle: Bundle, execution_plan: list[PlannedExecutionUnit]
+) -> tuple[Path, list[str], str | None]:
     """
     Generate all necessary files, using the templates. This creates a common
     directory, copies all dependencies to that folder and runs the generation.
     """
-    dependencies = bundle.lang_config.initial_dependencies()
+    dependencies = bundle.language.initial_dependencies()
     common_dir = Path(bundle.config.workdir, f"common")
     common_dir.mkdir()
 
-    _logger.debug(f"Generating files in common directory %s", common_dir)
+    _logger.debug(f"Generating files in common directory {common_dir}")
 
     # Copy dependencies
-    dependency_paths = bundle.lang_config.path_to_dependencies()
+    dependency_paths = bundle.language.path_to_dependencies()
     copy_from_paths_to_path(dependency_paths, dependencies, common_dir)
 
     # Copy the submission file.
-    submission = submission_file(bundle.lang_config)
+    submission = submission_file(bundle.language)
     solution_path = common_dir / submission
-    # noinspection PyTypeChecker
     shutil.copy2(bundle.config.source, solution_path)
     dependencies.append(submission)
 
     # Allow modifications of the submission file.
-    bundle.lang_config.modify_solution(solution_path)
+    bundle.language.modify_solution(solution_path)
 
     # The names of the executions for the test suite.
     execution_names = []
     # Generate the files for each execution.
-    for tab_i, tab in enumerate(bundle.suite.tabs):
-        assert tab.contexts
-        execution_units = merge_contexts_into_units(tab.contexts)
-        for unit_i, unit in enumerate(execution_units):
-            exec_name = execution_name(bundle.lang_config, tab_i, unit_i)
-            _logger.debug(f"Generating file for execution {exec_name}")
-            generated, evaluators = generate_execution(
-                bundle=bundle,
-                destination=common_dir,
-                execution_unit=unit,
-                execution_name=exec_name,
-            )
-            # Copy functions to the directory.
-            for evaluator in evaluators:
-                source = Path(bundle.config.resources) / evaluator
-                _logger.debug("Copying oracle from %s to %s", source, common_dir)
-                shutil.copy2(source, common_dir)
-            dependencies.extend(evaluators)
-            dependencies.append(generated)
-            execution_names.append(exec_name)
+    for execution_unit in execution_plan:
+        _logger.debug(f"Generating file for execution {execution_unit.name}")
+        generated, evaluators = generate_execution(
+            bundle=bundle, destination=common_dir, execution_unit=execution_unit
+        )
 
-    if mode == ExecutionMode.PRECOMPILATION and bundle.lang_config.needs_selector():
-        _logger.debug("Generating selector for PRECOMPILATION mode.")
+        # Copy functions to the directory.
+        for evaluator in evaluators:
+            source = Path(bundle.config.resources) / evaluator
+            _logger.debug(f"Copying oracle from {source} to {common_dir}")
+            shutil.copy2(source, common_dir)
+
+        dependencies.extend(evaluators)
+        dependencies.append(generated)
+        execution_names.append(execution_unit.name)
+
+    if bundle.language.needs_selector():
+        _logger.debug("Generating selector.")
         generated = generate_selector(bundle, common_dir, execution_names)
+        dependencies.append(generated)
     else:
         generated = None
     return common_dir, dependencies, generated
@@ -353,68 +291,42 @@ def _generate_files(
 
 def _process_results(
     bundle: Bundle,
-    execution: Execution,
-    execution_result: Optional[ExecutionResult],
-    compiler_messages: List[Message],
-    s: Status,
-    p: Path,
-) -> Optional[Status]:
+    collector: OutputManager,
+    unit: PlannedExecutionUnit,
+    compilation_results: CompilationResult,
+    execution_result: ExecutionResult | None,
+    execution_dir: Path,
+    currently_open_tab: int,
+) -> tuple[Status | None, int]:
     if execution_result:
         context_results = execution_result.to_context_results()
     else:
-        context_results = [None] * len(execution.unit.contexts)
+        context_results = [None] * len(unit.contexts)
 
-    for index, (context, context_result) in enumerate(
-        zip(execution.unit.contexts, context_results), execution.context_offset
-    ):
-        execution.collector.add_context(
-            StartContext(description=context.description), index
-        )
+    for planned, context_result in zip(unit.contexts, context_results):
+        planned: PlannedContext
+        if currently_open_tab < planned.tab_index:
+            # Close the previous tab if necessary.
+            if collector.open_stack[-1] == "tab":
+                collector.add(CloseTab(), currently_open_tab)
+            currently_open_tab = currently_open_tab + 1
+            tab = bundle.suite.tabs[currently_open_tab]
+            collector.add(StartTab(title=tab.name, hidden=tab.hidden))
+
+        # Handle the contexts.
+        collector.add(StartContext(description=planned.context.description))
 
         continue_ = evaluate_context_results(
             bundle,
-            context=context,
+            context=planned.context,
             exec_results=context_result,
-            compiler_results=(compiler_messages, s),
-            context_dir=p,
-            collector=execution.collector,
+            context_dir=execution_dir,
+            collector=collector,
+            compilation_results=compilation_results,
         )
 
-        # We handled the compiler messages above, so remove them.
-        compiler_messages = []
-
-        execution.collector.add_context(CloseContext(), index)
-        if execution.collector.is_full():
-            return Status.OUTPUT_LIMIT_EXCEEDED
+        collector.add(CloseContext(), planned.context_index)
         if continue_ in (Status.TIME_LIMIT_EXCEEDED, Status.MEMORY_LIMIT_EXCEEDED):
-            return continue_
-    return None
+            return continue_, currently_open_tab
 
-
-def _copy_workdir_source_files(bundle: Bundle, common_dir: Path) -> List[str]:
-    """
-    Copy additional source files from the workdir to the common dir
-
-    :param bundle: Bundle information of the test suite
-    :param common_dir: The directory of the other files
-    """
-    source_files = []
-
-    def recursive_copy(src: Path, dst: Path):
-        for origin in src.iterdir():
-            file = origin.name.lower()
-            if origin.is_file() and bundle.lang_config.is_source_file(origin):
-                source_files.append(str(dst / origin.name))
-                _logger.debug("Copying %s to %s", origin, dst)
-                shutil.copy2(origin, dst)
-            elif (
-                origin.is_dir()
-                and not file.startswith(EXECUTION_PREFIX)
-                and file != "common"
-            ):
-                _logger.debug("Iterate subdir %s", dst / file)
-                shutil.copytree(origin, dst / file)
-
-    recursive_copy(bundle.config.workdir, common_dir)
-
-    return source_files
+    return None, currently_open_tab

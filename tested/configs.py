@@ -3,13 +3,13 @@ Module for handling and bundling various configuration options for TESTed.
 """
 import logging
 from pathlib import Path
-from typing import IO, TYPE_CHECKING, Any, Dict, Optional, Tuple
+from typing import IO, TYPE_CHECKING, Any, Optional
 
 from attrs import define, evolve, field
 
 from tested.parsing import fallback_field, get_converter
 from tested.testsuite import ExecutionMode, Suite, SupportedLanguage
-from tested.utils import consume_shebang, get_identifier, smart_close
+from tested.utils import get_identifier, smart_close
 
 # Prevent circular imports
 if TYPE_CHECKING:
@@ -41,7 +41,7 @@ class Options:
     fails. If nothing is given, the language-dependent default is used. If a boolean
     is given, this value is used, regardless of the language default.
     """
-    language: Dict[str, Dict[str, Any]] = field(factory=dict)
+    language: dict[str, dict[str, Any]] = field(factory=dict)
     """
     Language-specific options for the judge. These depend on the language
     implementation; the judge itself does nothing with it.
@@ -87,7 +87,7 @@ class DodonaConfig:
     # Sometimes, we need to offset the source code.
     source_offset: int = 0
 
-    def config_for(self) -> Dict[str, Any]:
+    def config_for(self) -> dict[str, Any]:
         return self.options.language.get(self.programming_language, dict())
 
     def linter(self) -> bool:
@@ -125,7 +125,7 @@ class GlobalConfig:
 class Bundle:
     """A bundle of arguments and configs for running everything."""
 
-    lang_config: "Language"
+    language: "Language"
     global_config: GlobalConfig
     out: IO
 
@@ -146,10 +146,47 @@ class Bundle:
         return self.global_config.context_separator_secret
 
 
-def _get_language(config: DodonaConfig) -> Tuple[SupportedLanguage, int]:
+def _consume_shebang(submission: Path) -> Optional["SupportedLanguage"]:
+    """
+    Find the shebang in the submission, and if it is present, consume it.
+
+    :param submission: The path to the file containing the code.
+
+    :return: The programming language if found.
+    """
+    from tested.testsuite import SupportedLanguage
+
+    language = None
+    try:
+        with open(submission, "r+") as file:
+            lines = file.readlines()
+            file.seek(0)
+
+            # Steps to find
+            has_potential = True
+            for line in lines:
+                stripped = line.strip()
+                if has_potential and stripped.startswith("#!tested"):
+                    try:
+                        _, language = stripped.split(" ")
+                    except ValueError:
+                        _logger.error(f"Invalid shebang on line {stripped}")
+                else:
+                    file.write(line)
+                if has_potential and stripped:
+                    has_potential = False
+            file.truncate()
+    except FileNotFoundError:
+        # Nothing we can do if there is no submission.
+        pass
+
+    return SupportedLanguage(language) if language else None
+
+
+def _get_language(config: DodonaConfig) -> tuple[SupportedLanguage, int]:
     import tested.languages as langs
 
-    bang = consume_shebang(config.source)
+    bang = _consume_shebang(config.source)
     if bang and langs.language_exists(bang):
         _logger.debug(
             f"Found shebang language and it exists, using {bang} instead "
@@ -168,7 +205,7 @@ def create_bundle(
     config: DodonaConfig,
     output: IO,
     suite: Suite,
-    language: Optional[str] = None,
+    language: str | None = None,
 ) -> Bundle:
     """
     Create a configuration bundle.
@@ -194,4 +231,4 @@ def create_bundle(
         suite=suite,
     )
     lang_config = langs.get_language(global_config, language)
-    return Bundle(lang_config=lang_config, global_config=global_config, out=output)
+    return Bundle(language=lang_config, global_config=global_config, out=output)

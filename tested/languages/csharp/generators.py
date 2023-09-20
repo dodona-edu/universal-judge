@@ -1,5 +1,5 @@
 import json
-from typing import List, Literal, Optional, Union
+from typing import Literal
 
 from tested.datatypes import (
     AdvancedNumericTypes,
@@ -40,7 +40,7 @@ from tested.serialisation import (
 from tested.testsuite import MainInput
 
 
-def convert_arguments(arguments: List[Expression | NamedArgument]) -> str:
+def convert_arguments(arguments: list[Expression | NamedArgument]) -> str:
     results = []
     for arg in arguments:
         if isinstance(arg, NamedArgument):
@@ -142,8 +142,8 @@ def convert_function_call(function: FunctionCall) -> str:
 
 
 def convert_declaration(
-    tp: Union[AllTypes, VariableType, Literal["Object"]],
-    value: Optional[Statement],
+    tp: AllTypes | VariableType | Literal["Object"],
+    value: Statement | None,
     nt=None,
 ) -> str:
     def extract_type_tuple(type_, generic=True):
@@ -326,14 +326,14 @@ using System.IO;
 namespace Tested
 {{
 
-class {pu.execution_name}
+class {pu.unit.name}
 {{
     private readonly StreamWriter valueFile;
     private readonly StreamWriter exceptionFile;
     private readonly StreamWriter stdout;
     private readonly StreamWriter stderr;
 
-    public {pu.execution_name}()
+    public {pu.unit.name}()
     {{
         valueFile = new StreamWriter(File.OpenWrite("{pu.value_file}"));
         exceptionFile = new StreamWriter(File.OpenWrite("{pu.exception_file}"));
@@ -406,7 +406,7 @@ class {pu.execution_name}
 
     result += f"""        
     public static void Main(string[] a) {{
-        {pu.execution_name} execution = new {pu.execution_name}();
+        {pu.unit.name} execution = new {pu.unit.name}();
         execution.Execute();
     }}
 }}
@@ -416,7 +416,7 @@ class {pu.execution_name}
     return result
 
 
-def convert_selector(contexts: List[str]) -> str:
+def convert_selector(contexts: list[str]) -> str:
     result = """
     using System;
     namespace Tested
@@ -460,7 +460,7 @@ def convert_check_function(function: FunctionCall) -> str:
     """
 
 
-def convert_encoder(values: List[Value]) -> str:
+def convert_encoder(values: list[Value]) -> str:
     result = """
     using Tested;
     using System.Numerics;

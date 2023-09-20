@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 
 from tested.dodona import Status, StatusMessage
 from tested.internationalization import get_i18n_string
@@ -9,7 +8,7 @@ from tested.testsuite import ExitCodeOutputChannel, OutputChannel
 logger = logging.getLogger(__name__)
 
 
-def _as_int(value: str) -> Optional[int]:
+def _as_int(value: str) -> int | None:
     try:
         return int(value)
     except (ValueError, TypeError):

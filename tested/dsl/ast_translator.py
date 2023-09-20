@@ -28,7 +28,7 @@ the following is supported:
 
 import ast
 from decimal import Decimal
-from typing import Literal, Optional, cast, overload
+from typing import Literal, cast, overload
 
 from attrs import evolve
 
@@ -64,7 +64,7 @@ class InvalidDslError(Exception):
     pass
 
 
-def _is_and_get_allowed_empty(node: ast.Call) -> Optional[Value]:
+def _is_and_get_allowed_empty(node: ast.Call) -> Value | None:
     """
     Check if we allow this cast without params to represent an "empty" value.
     Returns the empty value if allowed, otherwise None.

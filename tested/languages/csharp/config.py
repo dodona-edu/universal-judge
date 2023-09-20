@@ -1,12 +1,11 @@
 import logging
 import re
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Mapping, Optional, Set, Tuple
+from typing import TYPE_CHECKING
 
 from tested.datatypes import AllTypes
 from tested.dodona import AnnotateCode, Message, Status
 from tested.features import Construct, TypeSupport
-from tested.internationalization import get_i18n_string
 from tested.languages.config import (
     CallbackResult,
     Command,
@@ -33,7 +32,7 @@ OUTPUT_DIRECTORY = "all-outputs"
 
 
 class CSharp(Language):
-    def initial_dependencies(self) -> List[str]:
+    def initial_dependencies(self) -> list[str]:
         return ["dotnet.csproj", "Values.cs", "EvaluationResult.cs"]
 
     def needs_selector(self):
@@ -42,7 +41,7 @@ class CSharp(Language):
     def file_extension(self) -> str:
         return "cs"
 
-    def naming_conventions(self) -> Dict[Conventionable, NamingConventions]:
+    def naming_conventions(self) -> dict[Conventionable, NamingConventions]:
         return {
             "namespace": "pascal_case",
             "function": "pascal_case",
@@ -52,7 +51,7 @@ class CSharp(Language):
             "global_identifier": "macro_case",
         }
 
-    def supported_constructs(self) -> Set[Construct]:
+    def supported_constructs(self) -> set[Construct]:
         return {
             Construct.OBJECTS,
             Construct.EXCEPTIONS,
@@ -66,7 +65,7 @@ class CSharp(Language):
             Construct.GLOBAL_VARIABLES,
         }
 
-    def datatype_support(self) -> Mapping[AllTypes, TypeSupport]:
+    def datatype_support(self) -> dict[AllTypes, TypeSupport]:
         return {  # type: ignore
             "integer": "supported",
             "real": "supported",
@@ -95,7 +94,7 @@ class CSharp(Language):
             "tuple": "supported",
         }
 
-    def compilation(self, files: List[str]) -> CallbackResult:
+    def compilation(self, files: list[str]) -> CallbackResult:
         # In C#, all output files are located in a subdirectory, so we just
         # want to copy over the subdirectory.
         def file_filter(file: Path) -> bool:
@@ -118,29 +117,25 @@ class CSharp(Language):
 
         return args, file_filter
 
-    def execution(self, cwd: Path, file: str, arguments: List[str]) -> Command:
+    def execution(self, cwd: Path, file: str, arguments: list[str]) -> Command:
         file = OUTPUT_DIRECTORY + "/" + file
         return ["dotnet", file, *arguments]
 
     def find_main_file(
-        self, files: List[Path], name: str, precompilation_messages: List[str]
-    ) -> Tuple[Optional[Path], List[Message], Status, List[AnnotateCode]]:
+        self, files: list[Path], name: str
+    ) -> tuple[Path | None, Status]:
         # TODO: specify the extension (if any) of the output files, so we don't need to
         # override this.
         logger.debug("Finding %s in %s", name, files)
-        messages = []
         possible_main_files = [
             x for x in files if x.name.startswith(name) and x.suffix == ".dll"
         ]
         if possible_main_files:
-            return possible_main_files[0], messages, Status.CORRECT, []
+            return possible_main_files[0], Status.CORRECT
         else:
-            messages.extend(precompilation_messages)
-            messages.append(get_i18n_string("languages.config.unknown.compilation"))
-            return None, messages, Status.COMPILATION_ERROR, []
+            return None, Status.COMPILATION_ERROR
 
     def modify_solution(self, solution: Path):
-        # noinspection PyTypeChecker
         with open(solution, "r") as file:
             contents = file.read()
 
@@ -203,7 +198,7 @@ class {class_name}
 
     def compiler_output(
         self, stdout: str, stderr: str
-    ) -> Tuple[List[Message], List[AnnotateCode], str, str]:
+    ) -> tuple[list[Message], list[AnnotateCode], str, str]:
         submission = submission_name(self)
         message_regex = (
             rf"{submission}\((\d+),(\d+)\): (error|warning) ([A-Z0-9]+): (.*) \["
@@ -233,7 +228,7 @@ class {class_name}
 
         return generators.convert_execution_unit(execution_unit)
 
-    def generate_selector(self, contexts: List[str]) -> str:
+    def generate_selector(self, contexts: list[str]) -> str:
         from tested.languages.csharp import generators
 
         return generators.convert_selector(contexts)
@@ -243,7 +238,7 @@ class {class_name}
 
         return generators.convert_check_function(function)
 
-    def generate_encoder(self, values: List[Value]) -> str:
+    def generate_encoder(self, values: list[Value]) -> str:
         from tested.languages.csharp import generators
 
         return generators.convert_encoder(values)

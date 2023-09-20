@@ -5,8 +5,9 @@ Since we need to set up quite a few converters, we re-use
 a single converter for all, both the serialization and suite.
 """
 import logging
+from collections.abc import Callable
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any, Callable, Tuple
+from typing import TYPE_CHECKING, Any
 
 from cattrs import Converter
 from cattrs.gen import make_dict_structure_fn
@@ -129,7 +130,7 @@ def fallback_field(converter_arg: Converter, old_to_new_field: dict[str, str]):
 
 def custom_fallback_field(
     converter_arg: Converter,
-    old_to_new_field: dict[str, Tuple[str, Callable[[Any], Any]]],
+    old_to_new_field: dict[str, tuple[str, Callable[[Any], Any]]],
 ):
     def decorator(cls):
         struct = make_dict_structure_fn(cls, converter_arg)
