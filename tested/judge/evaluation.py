@@ -33,8 +33,10 @@ from tested.languages.generation import (
     get_readable_input,
 )
 from tested.oracles import get_oracle
+from tested.oracles.common import OracleResult
 from tested.testsuite import (
     Context,
+    EmptyChannel,
     ExceptionOutput,
     ExceptionOutputChannel,
     ExitCodeOutputChannel,
@@ -113,7 +115,7 @@ def _evaluate_channel(
 
     # Decide if we should show this channel or not.
     is_correct = status.enum == Status.CORRECT
-    should_report_case = should_show(output, channel)
+    should_report_case = should_show(output, channel, evaluation_result)
 
     if not should_report_case and is_correct:
         # We do report that a test is correct, to set the status.
@@ -363,7 +365,9 @@ def _link_files_message(link_files: Collection[FileUrl]) -> AppendMessage:
     return AppendMessage(message=message)
 
 
-def should_show(test: OutputChannel, channel: Channel) -> bool:
+def should_show(
+    test: OutputChannel, channel: Channel, result: OracleResult | None = None
+) -> bool:
     """
     Determine if the channel should be shown, without accounting for the actual
     value. This function answers the question: "Assuming the actual value is
@@ -371,6 +375,7 @@ def should_show(test: OutputChannel, channel: Channel) -> bool:
 
     :param test: The output for the channel from the test suite.
     :param channel: The channel.
+    :param result: The result of the evaluation.
 
     :return: True if the channel should be shown, false otherwise.
     """
@@ -390,7 +395,15 @@ def should_show(test: OutputChannel, channel: Channel) -> bool:
     elif channel == Channel.RETURN:
         assert isinstance(test, ValueOutput)
         # We don't show the channel if we ignore it.
-        return not isinstance(test, IgnoredChannel)
+        if isinstance(test, IgnoredChannel):
+            return False
+        if (
+            isinstance(test, EmptyChannel)
+            and result
+            and result.result.enum == Status.CORRECT
+        ):
+            return False
+        return True
     elif channel == Channel.EXCEPTION:
         assert isinstance(test, ExceptionOutput)
         return not isinstance(test, SpecialOutputChannel)
