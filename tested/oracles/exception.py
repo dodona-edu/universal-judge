@@ -12,9 +12,8 @@ from tested.testsuite import ExceptionOutputChannel, OutputChannel
 _logger = logging.getLogger(__name__)
 
 
-def try_as_exception(config: OracleConfig, value: str) -> ExceptionValue:
+def try_as_exception(value: str) -> ExceptionValue:
     actual = get_converter().loads(value, ExceptionValue)
-    actual.stacktrace = config.bundle.language.cleanup_stacktrace(actual.stacktrace)
     return actual
 
 
@@ -62,7 +61,7 @@ def evaluate(
         )
 
     try:
-        actual = try_as_exception(config, actual_str)
+        actual = try_as_exception(actual_str)
     except Exception as e:
         _logger.exception(e)
         staff_message = ExtendedMessage(
