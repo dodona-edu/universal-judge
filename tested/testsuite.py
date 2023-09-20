@@ -412,8 +412,7 @@ class Output(WithFeatures):
     file: FileOutput = IgnoredChannel.IGNORED
     exception: ExceptionOutput = EmptyChannel.NONE
     result: ValueOutput = EmptyChannel.NONE
-    # This default value is adjusted later, based on the position of the output.
-    exit_code: ExitOutput = EmptyChannel.NONE
+    exit_code: ExitOutput = IgnoredChannel.IGNORED
 
     def get_used_features(self) -> FeatureSet:
         return combine_features(
@@ -584,14 +583,6 @@ class Context(WithFeatures, WithFunctions):
     before: Code = field(factory=dict)
     after: Code = field(factory=dict)
     description: str | None = None
-
-    def __attrs_post_init__(self):
-        # Fix the default value of the exit code outputs.
-        for non_last_testcase in self.testcases[:-1]:
-            if non_last_testcase.output.exit_code == EmptyChannel.NONE:
-                non_last_testcase.output.exit_code = IgnoredChannel.IGNORED
-        if (last_testcase := self.testcases[-1]).output.exit_code == EmptyChannel.NONE:
-            last_testcase.output.exit_code = ExitCodeOutputChannel()
 
     @testcases.validator  # type: ignore
     def check_testcases(self, _, value: list[Testcase]):
