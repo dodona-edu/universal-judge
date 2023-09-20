@@ -56,4 +56,4 @@ def evaluate(
             messages=[staff_message, student_message],
         )
 
-    return actual.to_oracle_result(config.bundle, channel)
+    return actual.to_oracle_result(config.bundle, channel, "", "")

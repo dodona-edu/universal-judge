@@ -126,4 +126,6 @@ def evaluate(
         assert isinstance(result, BooleanEvalResult)
         evaluation_result = result
 
-    return evaluation_result.to_oracle_result(config.bundle, channel)
+    return evaluation_result.to_oracle_result(
+        config.bundle, channel, readable_actual, readable_expected
+    )

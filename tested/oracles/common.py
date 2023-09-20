@@ -79,7 +79,11 @@ class BooleanEvalResult:
     dsl_actual: str | None = None
 
     def to_oracle_result(
-        self, bundle: Bundle, channel: NormalOutputChannel
+        self,
+        bundle: Bundle,
+        channel: NormalOutputChannel,
+        fallback_actual: str,
+        fallback_expected: str,
     ) -> OracleResult:
         if isinstance(self.result, Status):
             status = self.result
@@ -92,14 +96,14 @@ class BooleanEvalResult:
             parsed_statement = parse_string(self.dsl_expected, True)
             readable_expected = generate_statement(bundle, parsed_statement)
         else:
-            readable_expected = ""
+            readable_expected = fallback_expected
         if self.readable_actual:
             readable_actual = self.readable_actual
         elif self.dsl_actual:
             parsed_statement = parse_string(self.dsl_actual, True)
             readable_actual = generate_statement(bundle, parsed_statement)
         else:
-            readable_actual = ""
+            readable_actual = fallback_actual
         messages = self.messages
 
         if isinstance(channel, ExceptionOutputChannel):
