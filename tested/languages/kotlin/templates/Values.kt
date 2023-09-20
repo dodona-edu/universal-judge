@@ -4,15 +4,13 @@ import java.math.BigDecimal
 import java.math.BigInteger
 
 private fun convertMessage(message: EvaluationResult.Message): String {
-    val builder = StringBuilder(64).append('{')
-            .append("\"description\": \"").append(message.description)
-            .append("\", ")
-            .append("\"format\": \"").append(message.format).append("\"")
-    if (message.permission != null) {
-        builder.append(", \"permission\": \"").append(message.permission)
-                .append('\"')
-    }
-    return builder.append('}').toString()
+    return """
+        {
+            "description": ${asJson(message.description)},
+            "format": ${asJson(message.format)},
+            "permission": ${asJson(message.permission)}
+        }
+    """.trimIndent()
 }
 
 private fun escape(str: String): String {
@@ -142,22 +140,29 @@ private fun internalEncode(value: Any?): Array<String?> {
     return arrayOf(type, data, diagnostic)
 }
 
-fun evaluated(writer: PrintWriter, result: Boolean, expected: String?,
-              actual: String?, messages: Iterable<EvaluationResult.Message>) {
-    val builder = StringBuilder(64).append('{')
-            .append("\"result\": ").append(result).append(", ")
-            .append("\"readable_expected\": \"").append(expected).append("\", ")
-            .append("\"readable_actual\": \"").append(actual).append("\", ")
-            .append("\"messages\": [").append(messages.joinToString(separator = ", ",
-                    transform = { m -> convertMessage(m) })).append("]}")
-    writer.print(builder.toString())
+fun asJson(value: String?): String {
+    if (value == null) {
+        return "null";
+    } else {
+        return "\"${escape(value)}\"";
+    }
 }
 
 fun valuesSend(writer: PrintWriter, value: Any?): Unit = writer.print(encode(value))
 
 fun valuesSendEvaluated(writer: PrintWriter, result: EvaluationResult) {
-    evaluated(writer, result.result, result.readableExpected, result.readableActual,
-            result.messages)
+    val messages = result.messages.joinToString(separator = ", ", transform = { m -> convertMessage(m) })
+    val result = """
+        {
+            "result": ${result.result},
+            "readable_expected": ${asJson(result.readableExpected)},
+            "readable_actual": ${asJson(result.readableActual)},
+            "dsl_expected": ${asJson(result.dslExpected)},
+            "dsl_actual": ${asJson(result.dslActual)},
+            "messages": [${messages}]
+        }
+    """.trimIndent()
+    writer.print(result)
 }
 
 fun valuesSendException(writer: PrintWriter, throwable: Throwable?) {
@@ -166,9 +171,11 @@ fun valuesSendException(writer: PrintWriter, throwable: Throwable?) {
     }
     val strStackTraceWriter = StringWriter()
     throwable.printStackTrace(PrintWriter(strStackTraceWriter))
-    writer.printf("{ \"message\": \"%s\", \"stacktrace\": \"%s\", \"type\": \"%s\"}",
-            escape(throwable.message ?: ""),
-            escape(strStackTraceWriter.toString()),
-            throwable::class.simpleName
-        )
+    writer.printf("""
+        {
+            "message": "${escape(throwable.message ?: "")}",
+            "stacktrace": "${escape(strStackTraceWriter.toString())}",
+            "type": "${throwable::class.simpleName}"
+        }
+    """.trimIndent())
 }

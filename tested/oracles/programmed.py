@@ -5,14 +5,9 @@ from tested.dodona import ExtendedMessage, Message, Permission, Status, StatusMe
 from tested.internationalization import get_i18n_string
 from tested.judge.programmed import evaluate_programmed
 from tested.judge.utils import BaseExecutionResult
-from tested.oracles.common import (
-    OracleConfig,
-    OracleResult,
-    cleanup_specific_programmed,
-)
+from tested.oracles.common import BooleanEvalResult, OracleConfig, OracleResult
 from tested.oracles.value import get_values
 from tested.parsing import get_converter
-from tested.serialisation import BooleanEvalResult, EvalResult
 from tested.testsuite import CustomCheckOracle, OracleOutputChannel, OutputChannel
 
 _logger = logging.getLogger(__name__)
@@ -37,7 +32,7 @@ def evaluate(
     # This is slightly tricky, since the actual value must also be converted
     # to a value, and we are not yet sure what the actual value is exactly
     result = get_values(config.bundle, channel, actual_str or "")
-    # TODO: why is this?
+    # If an error occurred, we get a result directly.
     if isinstance(result, OracleResult):
         return result
     else:
@@ -61,6 +56,7 @@ def evaluate(
     )
 
     if isinstance(result, BaseExecutionResult):
+        _logger.error(result.stderr)
         if result.timeout:
             return OracleResult(
                 result=StatusMessage(enum=Status.TIME_LIMIT_EXCEEDED),
@@ -86,9 +82,7 @@ def evaluate(
                 messages=[stdout, stderr, DEFAULT_STUDENT],
             )
         try:
-            evaluation_result = (
-                get_converter().loads(result.stdout, BooleanEvalResult).as_eval_result()
-            )
+            evaluation_result = get_converter().loads(result.stdout, BooleanEvalResult)
         except Exception as e:
             _logger.exception(e)
             messages: list[Message] = [
@@ -129,35 +123,7 @@ def evaluate(
                 messages=messages,
             )
     else:
-        assert isinstance(result, EvalResult)
+        assert isinstance(result, BooleanEvalResult)
         evaluation_result = result
 
-    if evaluation_result.readable_expected:
-        readable_expected = evaluation_result.readable_expected
-    if evaluation_result.readable_actual:
-        readable_actual = evaluation_result.readable_actual
-
-    if isinstance(evaluation_result.result, Status):
-        result_status = StatusMessage(enum=evaluation_result.result)
-    else:
-        assert isinstance(evaluation_result.result, bool)
-        result_status = StatusMessage(
-            enum=Status.CORRECT if evaluation_result.result else Status.WRONG
-        )
-    cleaned = cleanup_specific_programmed(
-        config,
-        channel,
-        EvalResult(
-            result=result_status.enum,
-            readable_expected=readable_expected,  # type: ignore
-            readable_actual=readable_actual,  # type: ignore
-            messages=evaluation_result.messages,
-        ),
-    )
-
-    return OracleResult(
-        result=result_status,
-        readable_expected=cleaned.readable_expected or "",
-        readable_actual=cleaned.readable_actual or "",
-        messages=cleaned.messages,
-    )
+    return evaluation_result.to_oracle_result(config.bundle, channel)

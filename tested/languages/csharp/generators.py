@@ -478,7 +478,7 @@ def convert_encoder(values: list[Value]) -> str:
 
     for value in values:
         result += " " * 6 + f"Values.WriteValue(stdout, {convert_value(value)});"
-        result += " " * 6 + 'stdout.Write("\\n");\n'
+        result += " " * 6 + 'stdout.Write("␞");\n'
 
     result += "}\n}\n}\n"
     return result

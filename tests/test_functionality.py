@@ -293,6 +293,25 @@ def test_programmed_evaluation(language: str, tmp_path: Path, pytestconfig):
     assert len(updates.find_all("append-message")) == 5
 
 
+def test_programmed_evaluation_with_dsl(tmp_path: Path, pytestconfig):
+    conf = configuration(
+        pytestconfig,
+        "echo-function",
+        "javascript",
+        tmp_path,
+        "programmed-dsl-no-haskell.tson",
+        "correct",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"] * 5
+    assert len(updates.find_all("append-message")) == 5
+    all_expected = [x["expected"] for x in updates.find_all("start-test")]
+    assert all_expected == ["new Set([5, 5])"] * 5
+    all_actual = [x["generated"] for x in updates.find_all("close-test")]
+    assert all_actual == ["new Set([4, 4])"] * 5
+
+
 @pytest.mark.parametrize(
     "lang",
     [

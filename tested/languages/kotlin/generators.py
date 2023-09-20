@@ -422,7 +422,7 @@ def convert_encoder(values: list[Value]) -> str:
 
     for value in values:
         result += " " * 4 + f"valuesSend(writer, {convert_value(value)})\n"
-        result += " " * 4 + 'writer.write("\\n")\n'
+        result += " " * 4 + 'writer.write("␞")\n'
 
     result += " " * 4 + "writer.close()\n"
     result += "}\n"

@@ -450,7 +450,7 @@ public class Encode {
 
     for value in values:
         result += " " * 8 + f"Values.send(writer, {convert_value(value)});\n"
-        result += " " * 8 + 'writer.write("\\n");\n'
+        result += " " * 8 + 'writer.write("␞");\n'
 
     result += " " * 8 + "writer.close();\n"
     result += " " * 4 + "}\n"

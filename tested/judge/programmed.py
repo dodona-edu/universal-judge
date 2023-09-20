@@ -22,7 +22,8 @@ from tested.languages.generation import (
     generate_custom_evaluator,
     generate_statement,
 )
-from tested.serialisation import BooleanEvalResult, EvalResult, Value
+from tested.oracles.common import BooleanEvalResult
+from tested.serialisation import Value
 from tested.testsuite import CustomCheckOracle
 from tested.utils import get_identifier
 
@@ -34,7 +35,7 @@ def evaluate_programmed(
     evaluator: CustomCheckOracle,
     expected: Value,
     actual: Value,
-) -> BaseExecutionResult | EvalResult:
+) -> BaseExecutionResult | BooleanEvalResult:
     """
     Run the custom evaluation. Concerning structure and execution, the custom
     oracle is very similar to the execution of the whole evaluation. It a
@@ -181,7 +182,7 @@ def _evaluate_python(
     oracle: CustomCheckOracle,
     expected: Value,
     actual: Value,
-) -> EvalResult:
+) -> BooleanEvalResult:
     """
     Run an evaluation in Python. While the templates are still used to generate
     code, they are not executed in a separate process, but inside python itself.
@@ -267,13 +268,12 @@ def _evaluate_python(
                 permission=Permission.STAFF,
             )
         )
-        return EvalResult(
+        return BooleanEvalResult(
             result=Status.INTERNAL_ERROR,
             readable_expected=None,
             readable_actual=None,
             messages=messages,
         )
 
-    assert isinstance(result_, BooleanEvalResult)
     result_.messages.extend(messages)
-    return result_.as_eval_result()
+    return result_

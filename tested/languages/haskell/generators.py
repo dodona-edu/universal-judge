@@ -350,5 +350,5 @@ main = do
 
     for value in values:
         result += indent + f"sendValueH stdout ({convert_value(value)})\n"
-        result += indent + 'putStr "\\n"\n'
+        result += indent + 'putStr "␞"\n'
     return result

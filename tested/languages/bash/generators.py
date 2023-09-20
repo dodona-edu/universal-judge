@@ -238,7 +238,7 @@ function json_escape {{
 }}
 
 function send_value {{
-    echo "{{\\"type\\": \\"text\\", \\"data\\": $(json_escape "$1")}}"
+    echo "{{\\"type\\": \\"text\\", \\"data\\": $(json_escape "$1")}}␞"
 }}
 """
     for value in values:

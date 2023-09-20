@@ -322,6 +322,6 @@ int main() {
 """
     for value in values:
         result += " " * 4 + f"write_value(stdout, {convert_value(value)});\n"
-        result += " " * 4 + 'printf("\\n");\n'
+        result += " " * 4 + 'printf("␞");\n'
     result += "}\n"
     return result

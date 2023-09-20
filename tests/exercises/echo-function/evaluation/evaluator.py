@@ -8,3 +8,12 @@ def evaluate(actual):
 
 def evaluate_value(expected, actual, args):
     return EvaluationResult(expected == actual, expected, actual, [Message("Hallo")])
+
+
+def evaluate_value_dsl(expected, actual, args):
+    return EvaluationResult(
+        result=expected == actual,
+        messages=[Message("Hallo")],
+        dsl_expected="{5, 5}",
+        dsl_actual="{4, 4}"
+    )

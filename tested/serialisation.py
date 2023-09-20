@@ -50,9 +50,8 @@ from tested.datatypes import (
     StringTypes,
     resolve_to_basic,
 )
-from tested.dodona import Message, Status
 from tested.features import Construct, FeatureSet, WithFeatures, combine_features
-from tested.parsing import fallback_field, get_converter, parse_json_value
+from tested.parsing import parse_json_value
 from tested.utils import flatten, sorted_no_duplicates
 
 logger = logging.getLogger(__name__)
@@ -686,46 +685,6 @@ def to_python_comparable(value: Value | None) -> Any:
         return value.data
 
     raise AssertionError(f"Unknown value type: {value}")
-
-
-@fallback_field(
-    get_converter(),
-    {"readableExpected": "readable_expected", "readableActual": "readable_actual"},
-)
-@define
-class EvalResult:
-    result: Status
-    readable_expected: str | None = None
-    readable_actual: str | None = None
-    messages: list[Message] = field(factory=list)
-
-
-@fallback_field(
-    get_converter(),
-    {"readableExpected": "readable_expected", "readableActual": "readable_actual"},
-)
-@define
-class BooleanEvalResult:
-    """
-    Allows a boolean result.
-    """
-
-    result: bool | Status
-    readable_expected: str | None = None
-    readable_actual: str | None = None
-    messages: list[Message] = field(factory=list)
-
-    def as_eval_result(self) -> EvalResult:
-        if isinstance(self.result, Status):
-            status = self.result
-        else:
-            status = Status.CORRECT if self.result else Status.WRONG
-        return EvalResult(
-            result=status,
-            readable_expected=self.readable_expected,
-            readable_actual=self.readable_actual,
-            messages=self.messages,
-        )
 
 
 @define

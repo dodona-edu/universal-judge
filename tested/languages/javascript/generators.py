@@ -275,6 +275,6 @@ def convert_encoder(values: list[Value]) -> str:
 
     for value in values:
         result += f"values.sendValue(process.stdout.fd, {convert_value(value)});\n"
-        result += 'fs.writeSync(process.stdout.fd, "\\n");\n'
+        result += 'fs.writeSync(process.stdout.fd, "␞");\n'
 
     return result

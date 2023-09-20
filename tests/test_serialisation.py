@@ -194,7 +194,7 @@ def run_encoder(bundle: Bundle, values: list[Value]) -> list[str]:
     # Run the code.
     r = execute_file(bundle, executable.name, dest, None)
     print(r.stderr)
-    return r.stdout.splitlines(keepends=False)
+    return r.stdout.split(sep="␞")[:-1]
 
 
 def assert_serialisation(bundle: Bundle, expected: Value):
