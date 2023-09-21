@@ -112,26 +112,29 @@ class OutputManager:
             assert isinstance(status_if_unclosed, StatusMessage)
             status = status_if_unclosed
 
-        self.add(EscalateStatus(status=status))
+        if status.enum != Status.CORRECT:
+            self.add(EscalateStatus(status=status))
+
+        open_tab, open_context, open_testcase = self.currently_open
 
         while self.open_stack:
             open_level = self.open_stack[-1]
             if open_level == "test":
                 self.add(CloseTest(generated="", status=status))
             elif open_level == "testcase":
-                self.add(CloseTestcase(accepted=False))
+                self.add(CloseTestcase(accepted=False), open_testcase)
                 if until == open_level:
                     return
             elif open_level == "context":
                 if until == "testcase":
                     return
-                self.add(CloseContext())
+                self.add(CloseContext(), open_context)
                 if until == open_level:
                     return
             elif open_level == "tab":
                 if until in ("context", "testcase"):
                     return
-                self.add(CloseTab())
+                self.add(CloseTab(), open_tab)
                 if until == open_level:
                     return
             elif open_level == "judgement":
