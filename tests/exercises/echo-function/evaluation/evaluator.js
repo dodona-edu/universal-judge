@@ -8,7 +8,7 @@ function evaluate(actual) {
     }
 }
 
-function evaluateValue(expected, actual, args) {
+function evaluateValue(expected, actual) {
     return {
         "result": expected === actual,
         "readable_expected": expected,
@@ -17,7 +17,7 @@ function evaluateValue(expected, actual, args) {
     }
 }
 
-function evaluateValueDsl(expected, actual, args) {
+function evaluateValueDsl(expected, actual) {
     return {
         "result": expected === actual,
         "dsl_expected": "{5, 5}",

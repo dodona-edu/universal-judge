@@ -921,7 +921,7 @@ def test_expected_no_return_and_got_none(language: str, tmp_path: Path, pytestco
 
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["correct"]
+    assert updates.find_status_enum() == []
 
 
 @pytest.mark.parametrize("language", ALL_SPECIFIC_LANGUAGES)

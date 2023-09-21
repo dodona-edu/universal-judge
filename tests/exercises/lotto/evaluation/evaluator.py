@@ -1,4 +1,5 @@
 import re
+# noinspection PyUnresolvedReferences
 from evaluation_utils import EvaluationResult, Message
 
 
@@ -39,8 +40,7 @@ def valid_lottery_numbers(number_str, count=6, maximum=42):
     return True, None
 
 
-def evaluate(expected, actual, arguments):
-    count, maximum = arguments
+def evaluate(expected, actual, count, maximum):
     valid, message = valid_lottery_numbers(actual, count, maximum)
     messages = [Message(message)] if message else []
     if valid:

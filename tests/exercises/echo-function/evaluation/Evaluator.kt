@@ -10,7 +10,7 @@ class Evaluator {
         }
 
         @JvmStatic
-        fun evaluateValue(expected: Any, actual: Any?, arguments: List<Any?>?): EvaluationResult {
+        fun evaluateValue(expected: Any, actual: Any?): EvaluationResult {
             return EvaluationResult.Builder(result = expected == actual,
                     readableExpected = expected.toString(),
                     readableActual = actual?.toString() ?: "")
@@ -19,7 +19,7 @@ class Evaluator {
         }
 
         @JvmStatic
-        fun evaluateValueDsl(expected: Any, actual: Any?, arguments: List<Any?>?): EvaluationResult {
+        fun evaluateValueDsl(expected: Any, actual: Any?): EvaluationResult {
             return EvaluationResult.Builder(result = expected == actual,
                     dslExpected = "{5, 5}",
                     dslActual = "{4, 4}")
