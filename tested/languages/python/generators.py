@@ -264,5 +264,5 @@ from decimal import Decimal
 
     for value in values:
         result += f"values.send_value(sys.stdout, {convert_value(value)})\n"
-        result += "print()\n"
+        result += "print('␞')\n"
     return result

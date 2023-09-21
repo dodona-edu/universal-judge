@@ -6,12 +6,16 @@ public class EvaluationResult {
     public final boolean result;
     public final String readableExpected;
     public final String readableActual;
+    public final String dslExpected;
+    public final String dslActual;
     public final List<Message> messages;
 
-    private EvaluationResult(boolean result, String readableExpected, String readableActual, List<Message> messages) {
+    private EvaluationResult(boolean result, String readableExpected, String readableActual, String dslExpected, String dslActual, List<Message> messages) {
         this.result = result;
         this.readableExpected = readableExpected;
         this.readableActual = readableActual;
+        this.dslExpected = dslExpected;
+        this.dslActual = dslActual;
         this.messages = messages;
     }
 
@@ -44,6 +48,8 @@ public class EvaluationResult {
         private final boolean result;
         private String readableExpected = null;
         private String readableActual = null;
+        private String dslExpected = null;
+        private String dslActual = null;
         private final List<Message> messages = new ArrayList<>();
 
         private Builder(boolean result) {
@@ -59,6 +65,16 @@ public class EvaluationResult {
             this.readableActual = readableActual;
             return this;
         }
+        
+        public Builder withDslExpected(String dslExpected) {
+            this.dslExpected = dslExpected;
+            return this;
+        }
+
+        public Builder withDslActual(String dslActual) {
+            this.dslActual = dslActual;
+            return this;
+        }
 
         public Builder withMessages(List<Message> messages) {
             this.messages.addAll(messages);
@@ -71,7 +87,7 @@ public class EvaluationResult {
         }
 
         public EvaluationResult build() {
-            return new EvaluationResult(result, readableExpected, readableActual, messages);
+            return new EvaluationResult(result, readableExpected, readableActual, dslExpected, dslActual, messages);
         }
     }
 }

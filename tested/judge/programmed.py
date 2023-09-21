@@ -17,12 +17,9 @@ from tested.features import Construct
 from tested.internationalization import get_i18n_string
 from tested.judge.execution import execute_file, filter_files
 from tested.judge.utils import BaseExecutionResult, copy_from_paths_to_path, run_command
-from tested.languages.generation import (
-    custom_oracle_arguments,
-    generate_custom_evaluator,
-    generate_statement,
-)
-from tested.serialisation import BooleanEvalResult, EvalResult, Value
+from tested.languages.generation import generate_custom_evaluator, generate_statement
+from tested.oracles.common import BooleanEvalResult
+from tested.serialisation import FunctionCall, FunctionType, Value
 from tested.testsuite import CustomCheckOracle
 from tested.utils import get_identifier
 
@@ -34,7 +31,7 @@ def evaluate_programmed(
     evaluator: CustomCheckOracle,
     expected: Value,
     actual: Value,
-) -> BaseExecutionResult | EvalResult:
+) -> BaseExecutionResult | BooleanEvalResult:
     """
     Run the custom evaluation. Concerning structure and execution, the custom
     oracle is very similar to the execution of the whole evaluation. It a
@@ -181,7 +178,7 @@ def _evaluate_python(
     oracle: CustomCheckOracle,
     expected: Value,
     actual: Value,
-) -> EvalResult:
+) -> BooleanEvalResult:
     """
     Run an evaluation in Python. While the templates are still used to generate
     code, they are not executed in a separate process, but inside python itself.
@@ -213,17 +210,15 @@ def _evaluate_python(
     exec(evaluator_code, global_env)
 
     # Call the oracle.
-    literal_expected = generate_statement(eval_bundle, expected)
-    literal_actual = generate_statement(eval_bundle, actual)
-    arguments = custom_oracle_arguments(oracle)
-    literal_arguments = generate_statement(eval_bundle, arguments)
+    check_function_call = FunctionCall(
+        type=FunctionType.FUNCTION,
+        name=oracle.function.name,
+        arguments=[expected, actual, *oracle.arguments],
+    )
+    literal_function_call = generate_statement(eval_bundle, check_function_call)
 
     with _catch_output() as (stdout_, stderr_):
-        exec(
-            f"__tested_test__result = {oracle.function.name}("
-            f"{literal_expected}, {literal_actual}, {literal_arguments})",
-            global_env,
-        )
+        exec(f"__tested_test__result = {literal_function_call}", global_env)
 
     stdout_ = stdout_.getvalue()
     stderr_ = stderr_.getvalue()
@@ -267,13 +262,12 @@ def _evaluate_python(
                 permission=Permission.STAFF,
             )
         )
-        return EvalResult(
+        return BooleanEvalResult(
             result=Status.INTERNAL_ERROR,
             readable_expected=None,
             readable_actual=None,
             messages=messages,
         )
 
-    assert isinstance(result_, BooleanEvalResult)
     result_.messages.extend(messages)
-    return result_.as_eval_result()
+    return result_

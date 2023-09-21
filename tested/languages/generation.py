@@ -17,7 +17,7 @@ from pygments.formatters.html import HtmlFormatter
 from pygments.lexers import get_lexer_by_name
 
 from tested.configs import Bundle
-from tested.datatypes import AllTypes, BasicObjectTypes, BasicSequenceTypes
+from tested.datatypes import AllTypes, BasicObjectTypes
 from tested.dodona import ExtendedMessage
 from tested.internationalization import get_i18n_string
 from tested.judge.planning import PlannedExecutionUnit
@@ -40,7 +40,6 @@ from tested.serialisation import (
     Expression,
     FunctionType,
     Identifier,
-    SequenceType,
     Statement,
     Value,
     VariableType,
@@ -294,12 +293,6 @@ def generate_selector(
     return selector_filename
 
 
-def custom_oracle_arguments(oracle: CustomCheckOracle) -> Value:
-    return SequenceType(
-        type=BasicSequenceTypes.SEQUENCE, data=oracle.arguments  # pyright: ignore
-    )
-
-
 def generate_custom_evaluator(
     bundle: Bundle,
     destination: Path,
@@ -321,13 +314,12 @@ def generate_custom_evaluator(
     evaluator_name = conventionalize_namespace(
         bundle.language, evaluator.function.file.stem
     )
-    arguments = custom_oracle_arguments(evaluator)
 
     function = PreparedFunctionCall(
         type=FunctionType.FUNCTION,
         namespace=Identifier(evaluator_name),
         name=evaluator.function.name,
-        arguments=[expected_value, actual_value, arguments],
+        arguments=[expected_value, actual_value, *evaluator.arguments],
         has_root_namespace=False,
     )
 

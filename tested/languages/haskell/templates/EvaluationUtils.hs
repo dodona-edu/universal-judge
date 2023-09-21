@@ -11,7 +11,9 @@ data EvaluationResult = EvaluationResult {
     result :: Bool,
     readableExpected :: Maybe (String),
     readableActual :: Maybe (String),
-    messages :: [Message]
+    messages :: [Message],
+    dslExpected :: Maybe (String),
+    dslActual :: Maybe (String)
 } deriving Show
 
 message description = Message {
@@ -24,5 +26,7 @@ evaluationResult = EvaluationResult {
     result = False,
     readableExpected = Nothing,
     readableActual = Nothing,
+    dslExpected = Nothing,
+    dslActual = Nothing,
     messages = []
 }

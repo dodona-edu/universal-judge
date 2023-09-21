@@ -31,8 +31,10 @@ from attrs import define, field
 
 from tested.configs import Bundle
 from tested.dodona import Message, Status, StatusMessage
+from tested.dsl import parse_string
+from tested.languages.generation import generate_statement
 from tested.languages.utils import convert_stacktrace_to_clickable_feedback
-from tested.serialisation import EvalResult
+from tested.parsing import fallback_field, get_converter
 from tested.testsuite import ExceptionOutputChannel, NormalOutputChannel, OutputChannel
 
 
@@ -49,6 +51,78 @@ class OracleResult:
     is_multiline_string: bool = (
         False  # Indicates if the evaluation result is a multiline string.
     )
+
+
+@fallback_field(
+    get_converter(),
+    {
+        "readableExpected": "readable_expected",
+        "readableActual": "readable_actual",
+        "dslExpected": "dsl_expected",
+        "dslActual": "dsl_actual",
+    },
+)
+@define
+class BooleanEvalResult:
+    """
+    Allows a boolean result.
+
+    Note: this class is used directly in the Python oracle, so keep it backwards
+    compatible (also positional arguments) or make a new class for the oracle.
+    """
+
+    result: bool | Status
+    readable_expected: str | None = None
+    readable_actual: str | None = None
+    messages: list[Message] = field(factory=list)
+    dsl_expected: str | None = None
+    dsl_actual: str | None = None
+
+    def to_oracle_result(
+        self,
+        bundle: Bundle,
+        channel: NormalOutputChannel,
+        fallback_actual: str,
+        fallback_expected: str,
+    ) -> OracleResult:
+        if isinstance(self.result, Status):
+            status = self.result
+        else:
+            status = Status.CORRECT if self.result else Status.WRONG
+
+        if self.readable_expected:
+            readable_expected = self.readable_expected
+        elif self.dsl_expected:
+            parsed_statement = parse_string(self.dsl_expected, True)
+            readable_expected = generate_statement(bundle, parsed_statement)
+        else:
+            readable_expected = fallback_expected
+        if self.readable_actual:
+            readable_actual = self.readable_actual
+        elif self.dsl_actual:
+            parsed_statement = parse_string(self.dsl_actual, True)
+            readable_actual = generate_statement(bundle, parsed_statement)
+        else:
+            readable_actual = fallback_actual
+        messages = self.messages
+
+        if isinstance(channel, ExceptionOutputChannel):
+            readable_expected = bundle.language.cleanup_stacktrace(readable_expected)
+            message = convert_stacktrace_to_clickable_feedback(
+                bundle.language, readable_actual
+            )
+            if message:
+                messages.append(message)
+
+            if status == Status.CORRECT:
+                readable_actual = ""
+
+        return OracleResult(
+            result=StatusMessage(enum=status),
+            readable_expected=readable_expected,
+            readable_actual=readable_actual,
+            messages=messages,
+        )
 
 
 @define
@@ -86,24 +160,3 @@ def try_outputs(
         if possible is not None:
             return possible, msg
     return actual, None
-
-
-def cleanup_specific_programmed(
-    config: OracleConfig, channel: NormalOutputChannel, actual: EvalResult
-) -> EvalResult:
-    if isinstance(channel, ExceptionOutputChannel):
-        lang_config = config.bundle.language
-        actual.readable_expected = lang_config.cleanup_stacktrace(
-            actual.readable_expected or ""
-        )
-        message = convert_stacktrace_to_clickable_feedback(
-            lang_config, actual.readable_actual
-        )
-
-        if message:
-            actual.messages.append(message)
-
-        if actual.result == Status.CORRECT:
-            actual.readable_actual = ""
-
-    return actual

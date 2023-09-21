@@ -15,8 +15,8 @@ evaluate value  =
     }
 
 
-evaluate_value :: String -> String -> [String] -> EvaluationResult
-evaluate_value expected actual arguments =
+evaluate_value :: String -> String -> EvaluationResult
+evaluate_value expected actual =
     let correct = if actual == expected then True else False
     in evaluationResult {
         result = correct,

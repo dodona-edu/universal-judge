@@ -6,13 +6,8 @@ import traceback
 
 from tested.dodona import ExtendedMessage, Permission, Status, StatusMessage
 from tested.internationalization import get_i18n_string
-from tested.oracles.common import (
-    OracleConfig,
-    OracleResult,
-    cleanup_specific_programmed,
-)
+from tested.oracles.common import BooleanEvalResult, OracleConfig, OracleResult
 from tested.parsing import get_converter
-from tested.serialisation import BooleanEvalResult
 from tested.testsuite import LanguageSpecificOracle, OracleOutputChannel, OutputChannel
 
 _logger = logging.getLogger(__name__)
@@ -40,7 +35,7 @@ def evaluate(
         )
 
     try:
-        actual = get_converter().loads(actual_str, BooleanEvalResult).as_eval_result()
+        actual = get_converter().loads(actual_str, BooleanEvalResult)
     except Exception as e:
         _logger.exception(e)
         staff_message = ExtendedMessage(
@@ -61,11 +56,4 @@ def evaluate(
             messages=[staff_message, student_message],
         )
 
-    actual = cleanup_specific_programmed(config, channel, actual)
-
-    return OracleResult(
-        result=StatusMessage(enum=actual.result),
-        readable_expected=actual.readable_expected or "",
-        readable_actual=actual.readable_actual or "",
-        messages=actual.messages,
-    )
+    return actual.to_oracle_result(config.bundle, channel, "", "")

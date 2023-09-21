@@ -15,6 +15,8 @@ typedef struct EvaluationResult {
     char* readableActual;
     size_t nrOfMessages;
     Message** messages;
+    char* dslExpected;
+    char* dslActual;
 } EvaluationResult;
 
 

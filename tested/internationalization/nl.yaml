@@ -77,7 +77,7 @@ nl:
         Contacteer de lesgever.
       unsupported: "Evaluation in %{lang} wordt niet ondersteund."
       unknown:
-        compilation: "Ongekende compilatie fout"
+        compilation: "Ongekende compilatiefout"
       produced:
         stderr: "De evaluatiecode produceerde volgende uitvoer op stderr:"
         stdout: "De evaluatiecode produceerde volgende uitvoer op stdout:"
@@ -86,7 +86,7 @@ nl:
   languages:
     config:
       unknown:
-        compilation: "Ongekende compilatie fout"
+        compilation: "Ongekende compilatiefout"
     generator:
       missing:
         input: "Geen invoer gevonden."

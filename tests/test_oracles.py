@@ -6,7 +6,7 @@ import tested
 from tested.configs import create_bundle
 from tested.datatypes import BasicObjectTypes, BasicSequenceTypes, BasicStringTypes
 from tested.dodona import Status
-from tested.oracles.common import OracleConfig, OracleResult
+from tested.oracles.common import OracleConfig
 from tested.oracles.exception import evaluate as evaluate_exception
 from tested.oracles.text import evaluate_file, evaluate_text
 from tested.oracles.value import evaluate as evaluate_value

@@ -128,9 +128,13 @@ public class Values {
 
     private static String encode(Object value) {
         var typeAndData = internalEncode(value);
-        return "{ \"data\": " + typeAndData.get(1) + "," +
-                " \"type\": \"" + typeAndData.get(0) + "\", " +
-                " \"diagnostic\": " + typeAndData.get(2) + "}";
+        return """
+               {
+                 "data": %s,
+                 "type": "%s",
+                 "diagnostic": %s
+               }
+               """.formatted(typeAndData.get(1), typeAndData.get(0), typeAndData.get(2));
     }
 
     public static void send(PrintWriter writer, Object value) {
@@ -145,37 +149,57 @@ public class Values {
         exception.printStackTrace(new PrintWriter(sw));
         var trace = sw.toString();
         var msg = exception.getMessage();
-        var result = "{ \"message\": \"" + escape(msg == null ? "" : msg) +
-                     "\", \"stacktrace\": \"" + escape(trace) +
-                     "\", \"type\": \"" + exception.getClass().getSimpleName() + "\"}";
+        String result = """
+                {
+                  "message": %s,
+                  "stacktrace": %s,
+                  "type": "%s"
+                }
+                """.formatted(asJson(msg), asJson(trace), exception.getClass().getSimpleName());
         writer.write(result);
     }
 
     private static String convertMessage(EvaluationResult.Message message) {
-        String result = "{" +
-            "\"description\": \"" + message.description + "\"," +
-            "\"format\": \"" + message.format + "\"";
-        if (message.permission instanceof String) {
-            result += ", \"permission\": \"" + message.permission + "\"";
-        }
-        return result + "}";
+        var description = asJson(message.description);
+        var format = asJson(message.format);
+        var permission = asJson(message.permission);
+        
+        return """
+                {
+                  "description": %s,
+                  "format": %s,
+                  "permission": %s
+                }
+                """.formatted(description, format, permission);
     }
-
-    public static void evaluated(PrintWriter writer,
-                                 boolean result, String expected, String actual, Collection<EvaluationResult.Message> messages) {
-        List<String> converted = messages.stream().map(Values::convertMessage).collect(Collectors.toList());
-        String builder = "{" +
-            "\"result\": " +
-            result +
-            ", \"readable_expected\": \"" + expected + "\"" +
-            ", \"readable_actual\": \"" + actual + "\"" +
-            ", \"messages\": [" +
-            String.join(", ", converted) +
-            "]}";
-        writer.print(builder);
+    
+    private static String asJson(String value) {
+        if (value == null) {
+            return "null";
+        } else {
+            return "\"%s\"".formatted(escape(value));
+        }
     }
 
     public static void sendEvaluated(PrintWriter writer, EvaluationResult r) {
-        evaluated(writer, r.result, r.readableExpected, r.readableActual, r.messages);
+        List<String> converted = r.messages.stream().map(Values::convertMessage).collect(Collectors.toList());
+        var readableExpected = asJson(r.readableExpected);
+        var readableActual = asJson(r.readableActual);
+        var dslExpected = asJson(r.dslExpected);
+        var dslActual = asJson(r.dslActual);
+        var messages = String.join(", ", converted);
+        
+        String result = """
+                {
+                  "result": %b,
+                  "readable_expected": %s,
+                  "readable_actual": %s,
+                  "dsl_expected": %s,
+                  "dsl_actual": %s,
+                  "messages": [%s]
+                }
+                """.formatted(r.result, readableExpected, readableActual, dslExpected, dslActual, messages);
+
+        writer.print(result);
     }
 }

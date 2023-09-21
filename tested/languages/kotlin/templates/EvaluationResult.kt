@@ -2,6 +2,8 @@ class EvaluationResult private constructor(
         val result: Boolean,
         val readableExpected: String?,
         val readableActual: String?,
+        val dslExpected: String?,
+        val dslActual: String?,
         val messages: List<Message>
 ) {
     class Message(val description: String,
@@ -11,7 +13,9 @@ class EvaluationResult private constructor(
     class Builder(
             private val result: Boolean,
             private var readableActual: String? = null,
-            private var readableExpected: String? = null
+            private var readableExpected: String? = null,
+            private var dslActual: String? = null,
+            private var dslExpected: String? = null
     ) {
         private val messages: MutableList<Message> = ArrayList()
 
@@ -22,6 +26,16 @@ class EvaluationResult private constructor(
 
         fun withReadableExpected(readableExpected: String?): Builder {
             this.readableExpected = readableExpected
+            return this
+        }
+
+        fun withDslActual(dslActual: String?): Builder {
+            this.dslActual = dslActual
+            return this
+        }
+
+        fun withDslExpected(dslExpected: String?): Builder {
+            this.dslExpected = dslExpected
             return this
         }
 
@@ -37,7 +51,7 @@ class EvaluationResult private constructor(
 
         fun build(): EvaluationResult {
             return EvaluationResult(result, readableExpected,
-                    readableActual, messages)
+                    readableActual, dslExpected, dslActual, messages)
         }
     }
 }
