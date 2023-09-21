@@ -523,7 +523,7 @@ def complete_evaluation(bundle: Bundle, collector: OutputManager):
             collector.add(CloseContext(accepted=False))
         collector.add(CloseTab())
         context_start = 0  # For the next tab, start from the beginning.
-    collector.add(CloseJudgement(accepted=False))
+    collector.add(CloseJudgement())
 
 
 def terminate(

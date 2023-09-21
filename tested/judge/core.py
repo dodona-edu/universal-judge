@@ -200,8 +200,7 @@ def judge(bundle: Bundle):
             return
 
     # Close the last tab.
-    collector.add(CloseTab(), currently_open_tab)
-    collector.add(CloseJudgement())
+    terminate(bundle, collector, Status.CORRECT)
 
 
 def _execute_one_unit(
