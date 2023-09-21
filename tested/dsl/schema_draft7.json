@@ -326,9 +326,6 @@
             "integer",
             "boolean"
           ]
-        },
-        "config" : {
-          "$ref" : "#/definitions/textConfigurationOptions"
         }
       },
       "oneOf" : [
@@ -339,6 +336,9 @@
               "enum" : [
                 "builtin"
               ]
+            },
+            "config" : {
+              "$ref" : "#/definitions/textConfigurationOptions"
             }
           }
         },
