@@ -210,7 +210,7 @@ touch {pu.value_file} {pu.exception_file}
             # Prepare command arguments if needed.
             if tc.testcase.is_main_testcase():
                 assert isinstance(tc.input, MainInput)
-                result += f"{indent}source {pu.submission_name}.sh "
+                result += f"{indent}bash {pu.submission_name}.sh "
                 result += " ".join(shlex.quote(s) for s in tc.input.arguments) + "\n"
             else:
                 assert isinstance(tc.input, PreparedTestcaseStatement)
@@ -218,11 +218,13 @@ touch {pu.value_file} {pu.exception_file}
             result += "\n"
 
         result += indent + ctx.after + "\n"
+        result += indent + "return $?" + "\n"
         result += "}\n"
 
     for i, ctx in enumerate(pu.contexts):
         result += "write_context_separator\n"
-        result += f"context_{i}\n"
+        result += f"context_{i} || (exit $?)\n"
+        result += f""
 
     result += "exit $?\n"
 
