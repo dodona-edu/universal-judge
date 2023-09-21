@@ -39,10 +39,6 @@
     "_rootObject" : {
       "type" : "object",
       "properties" : {
-        "config" : {
-          "$ref" : "#/definitions/globalConfig",
-          "description" : "Configuration applicable to the whole test suite."
-        },
         "files" : {
           "type" : "array",
           "items" : {
@@ -70,6 +66,10 @@
             }
           ],
           "default" : "tested"
+        },
+        "definitions": {
+          "description": "Define hashes to use elsewhere.",
+          "type": "object"
         }
       },
       "oneOf" : [
@@ -88,10 +88,6 @@
     "unit" : {
       "type" : "object",
       "properties" : {
-        "config" : {
-          "$ref" : "#/definitions/globalConfig",
-          "description" : "Configuration applicable to this unit/tab"
-        },
         "files" : {
           "type" : "array",
           "items" : {
@@ -121,6 +117,10 @@
         },
         "testcases" : {
           "$ref" : "#/definitions/_scriptList"
+        },
+        "definitions": {
+          "description": "Define hashes to use elsewhere.",
+          "type": "object"
         }
       },
       "oneOf" : [
@@ -163,10 +163,6 @@
     "testcase" : {
       "type" : "object",
       "properties" : {
-        "config" : {
-          "$ref" : "#/definitions/globalConfig",
-          "description" : "Configuration settings at context level"
-        },
         "files" : {
           "type" : "array",
           "items" : {
@@ -275,10 +271,6 @@
         "stdout" : {
           "description" : "Expected output at stdout",
           "$ref" : "#/definitions/textOutputChannel"
-        },
-        "config" : {
-          "$ref" : "#/definitions/globalConfig",
-          "description" : "Configuration settings at testcase level"
         },
         "exitCode" : {
           "type" : "integer",
@@ -484,19 +476,6 @@
         "hideExpected" : {
           "description" : "Hide the expected value in feedback (default: false), not recommended to use!",
           "type" : "boolean"
-        }
-      }
-    },
-    "globalConfig" : {
-      "type" : "object",
-      "description" : "Global configuration properties",
-      "minProperties" : 1,
-      "properties" : {
-        "stdout" : {
-          "$ref" : "#/definitions/textConfigurationOptions"
-        },
-        "stderr" : {
-          "$ref" : "#/definitions/textConfigurationOptions"
         }
       }
     },
