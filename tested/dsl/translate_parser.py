@@ -60,7 +60,7 @@ from tested.testsuite import (
     TextOutputChannel,
     ValueOutputChannel,
 )
-from tested.utils import get_args, recursive_dict_merge
+from tested.utils import get_args
 
 OptionDict = dict[str, int | bool]
 YamlDict = dict[str, "YamlObject"]
@@ -136,48 +136,28 @@ class DslContext:
     Carries context in each level.
     """
 
-    config: dict
     files: list[FileUrl]
     language: SupportedLanguage | Literal["tested"] = "tested"
 
-    def deepen_context(
-        self,
-        new_level: YamlDict | None,
-        include_config=True,
-        include_files=True,
-        merge_with: str | None = None,
-    ) -> "DslContext":
+    def deepen_context(self, new_level: YamlDict | None) -> "DslContext":
         """
         Merge certain fields of the new object with the current context, resulting
         in a new context for the new level.
 
         :param new_level: The new object from the DSL to get information from.
-        :param include_config: If config should be considered.
-        :param include_files: If files should be considered.
-        :param merge_with: If merging configs, the key of the subsection to update.
 
         :return: A new context.
         """
         if new_level is None:
             return self
 
-        new_config = self.config
-        if include_config and "config" in new_level:
-            assert isinstance(new_level["config"], dict)
-            if merge_with:
-                original_config = self.config.get(merge_with, {})
-            else:
-                original_config = self.config
-
-            new_config = recursive_dict_merge(original_config, new_level["config"])
-
         new_files = self.files
-        if include_files and "files" in new_level:
+        if "files" in new_level:
             assert isinstance(new_level["files"], list)
             additional_files = {_convert_file(f) for f in new_level["files"]}
             new_files = list(set(self.files) | additional_files)
 
-        return evolve(self, config=new_config, files=new_files)
+        return evolve(self, files=new_files)
 
 
 def convert_validation_error_to_group(
@@ -317,20 +297,15 @@ def _convert_custom_check_oracle(stream: dict) -> CustomCheckOracle:
     )
 
 
-def _convert_text_output_channel(
-    stream: YamlObject, context: DslContext, config_name: str
-) -> TextOutputChannel:
+def _convert_text_output_channel(stream: YamlObject) -> TextOutputChannel:
     if isinstance(stream, str):
         data = stream
-        config = context.config.get(config_name, {})
-        return TextOutputChannel(data=data, oracle=GenericTextOracle(options=config))
+        return TextOutputChannel(data=data, oracle=GenericTextOracle())
     else:
         assert isinstance(stream, dict)
         data = str(stream["data"])
         if "oracle" not in stream or stream["oracle"] == "builtin":
-            config = context.deepen_context(
-                stream, include_files=False, merge_with=config_name
-            ).config
+            config = cast(dict, stream.get("config", {}))
             return TextOutputChannel(
                 data=data, oracle=GenericTextOracle(options=config)
             )
@@ -430,9 +405,9 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
         output.result = return_channel
 
     if (stdout := testcase.get("stdout")) is not None:
-        output.stdout = _convert_text_output_channel(stdout, context, "stdout")
+        output.stdout = _convert_text_output_channel(stdout)
     if (stderr := testcase.get("stderr")) is not None:
-        output.stderr = _convert_text_output_channel(stderr, context, "stderr")
+        output.stderr = _convert_text_output_channel(stderr)
     if (exception := testcase.get("exception")) is not None:
         if isinstance(exception, str):
             message = exception
@@ -525,7 +500,7 @@ def _convert_dsl(dsl_object: YamlObject) -> Suite:
     :param dsl_object: A validated DSL test suite object.
     :return: A full test suite.
     """
-    context = DslContext(config={}, files=[])
+    context = DslContext(files=[])
     if isinstance(dsl_object, list):
         namespace = None
         tab_list = dsl_object

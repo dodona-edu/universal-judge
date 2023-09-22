@@ -40,10 +40,6 @@
       "type" : "object",
       "unevaluatedProperties" : false,
       "properties" : {
-        "config" : {
-          "$ref" : "#/$defs/globalConfig",
-          "description" : "Configuration applicable to the whole test suite."
-        },
         "files" : {
           "type" : "array",
           "items" : {
@@ -71,6 +67,10 @@
             }
           ],
           "default" : "tested"
+        },
+        "definitions": {
+          "description": "Define hashes to use elsewhere.",
+          "type": "object"
         }
       },
       "oneOf" : [
@@ -90,10 +90,6 @@
       "type" : "object",
       "unevaluatedProperties" : false,
       "properties" : {
-        "config" : {
-          "$ref" : "#/$defs/globalConfig",
-          "description" : "Configuration applicable to this unit/tab"
-        },
         "files" : {
           "type" : "array",
           "items" : {
@@ -123,6 +119,10 @@
         },
         "testcases" : {
           "$ref" : "#/$defs/_scriptList"
+        },
+        "definitions": {
+          "description": "Define hashes to use elsewhere.",
+          "type": "object"
         }
       },
       "oneOf" : [
@@ -166,10 +166,6 @@
       "type" : "object",
       "unevaluatedProperties" : false,
       "properties" : {
-        "config" : {
-          "$ref" : "#/$defs/globalConfig",
-          "description" : "Configuration settings at context level"
-        },
         "files" : {
           "type" : "array",
           "items" : {
@@ -280,10 +276,6 @@
           "description" : "Expected output at stdout",
           "$ref" : "#/$defs/textOutputChannel"
         },
-        "config" : {
-          "$ref" : "#/$defs/globalConfig",
-          "description" : "Configuration settings at testcase level"
-        },
         "exit_code" : {
           "type" : "integer",
           "description" : "Expected exit code for the run"
@@ -339,9 +331,6 @@
             "integer",
             "boolean"
           ]
-        },
-        "config" : {
-          "$ref" : "#/$defs/textConfigurationOptions"
         }
       },
       "oneOf" : [
@@ -352,6 +341,9 @@
               "enum" : [
                 "builtin"
               ]
+            },
+            "config" : {
+              "$ref" : "#/$defs/textConfigurationOptions"
             }
           }
         },
@@ -491,20 +483,6 @@
         "hideExpected" : {
           "description" : "Hide the expected value in feedback (default: false), not recommended to use!",
           "type" : "boolean"
-        }
-      }
-    },
-    "globalConfig" : {
-      "type" : "object",
-      "description" : "Global configuration properties",
-      "minProperties" : 1,
-      "unevaluatedProperties" : false,
-      "properties" : {
-        "stdout" : {
-          "$ref" : "#/$defs/textConfigurationOptions"
-        },
-        "stderr" : {
-          "$ref" : "#/$defs/textConfigurationOptions"
         }
       }
     },

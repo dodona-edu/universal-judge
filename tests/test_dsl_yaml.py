@@ -170,29 +170,33 @@ def test_parse_ctx_exception_types():
 def test_parse_ctx_with_config():
     yaml_str = """
 - tab: "Config ctx"
-  config:
-    stdout:
+  definitions:
+    stdout: &stdout
       tryFloatingPoint: true
       applyRounding: true
       roundTo: 2
-    stderr:
+    stderr: &stderr
       ignoreWhitespace: true
       caseInsensitive: false
   testcases:
   - arguments: [ '-a', '2.125', '1.212' ]
-    stdout: "3.34"
+    stdout:
+      data: "3.34"
+      config: *stdout
   - arguments: [ '-a', '2.125', '1.212' ]
     stdout:
       data: "3.337"
       config:
+        <<: *stdout
         roundTo: 3
-  - config:
-      stdout:
-        roundTo: 1
-    arguments: [ '-a', '2.125', '1.212' ]
-    stdout: "3.3"
+  - arguments: [ '-a', '2.125', '1.212' ]
+    stdout:
+      config: *stdout
+      data: "3.3"
   - arguments: [ '-e' ]
-    stderr: " Fail "
+    stderr:
+      config: *stderr
+      data: " Fail "
     """
     args = ["-a", "2.125", "1.212"]
     json_str = translate_to_test_suite(yaml_str)
@@ -234,7 +238,7 @@ def test_parse_ctx_with_config():
     assert len(options) == 3
     assert options["tryFloatingPoint"]
     assert options["applyRounding"]
-    assert options["roundTo"] == 1
+    assert options["roundTo"] == 2
 
     stderr = tc3.output.stderr
     assert stderr.data == " Fail "
@@ -247,13 +251,15 @@ def test_parse_ctx_with_config():
 def test_statements():
     yaml_str = """
 - tab: "Statements"
-  config:
-    stdout:
+  definitions:
+    stdout: &stdout
       ignoreWhitespace: true
   contexts:
   - testcases:
     - statement: 'safe: Safe = Safe("Ignore whitespace")'
-      stdout: "New safe"
+      stdout:
+        data: "New safe"
+        config: *stdout
     - expression: 'safe.content()'
       return: !v "Ignore whitespace"
   - testcases:
@@ -261,6 +267,7 @@ def test_statements():
       stdout:
         data: "New safe"
         config:
+          <<: *stdout
           ignoreWhitespace: false
     - expression: 'safe.content()'
       return: 'uint8(5)'
@@ -419,8 +426,8 @@ def test_statement_with_yaml_dict():
 
 def test_global_config_trickles_down():
     yaml_str = """
-config:
-  stdout:
+definitions:
+  config: &stdout
     applyRounding: true
     roundTo: 63
     tryFloatingPoint: true
@@ -432,7 +439,9 @@ tabs:
   testcases:
   - arguments: [ "--arg", "argument" ]
     stdin: "Input string"
-    stdout: "Output string"
+    stdout:
+      data: "Output string"
+      config: *stdout
     stderr: "Error string"
     exit_code: 1
     """
