@@ -93,6 +93,7 @@ def convert_value(value: Value) -> str:
 
 
 def convert_function_call(function: FunctionCall) -> str:
+    assert function.type != FunctionType.ARRAY_ACCESS, "C doesn't support array access"
     result = function.name
     if function.type != FunctionType.PROPERTY:
         result += f"({convert_arguments(function.arguments)})"  # pyright: ignore

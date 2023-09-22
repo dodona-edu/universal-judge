@@ -461,3 +461,54 @@ def test_parse_chained_property():
     assert namespace.namespace is None
     assert namespace.type == FunctionType.FUNCTION
     assert namespace.name == "get_container"
+
+
+def test_parse_list_access_simple():
+    parsed = parse_string("some_array[0]")
+    assert parsed.type == FunctionType.ARRAY_ACCESS
+    assert parsed.name == ""
+    assert isinstance(parsed.namespace, Identifier)
+    assert parsed.namespace == "some_array"
+    assert parsed.arguments == [NumberType(type=BasicNumericTypes.INTEGER, data=0)]
+
+
+def test_parse_list_access_complex_namespace():
+    parsed = parse_string("some_array.test[0]")
+    assert parsed.type == FunctionType.ARRAY_ACCESS
+    assert parsed.name == ""
+    namespace = parsed.namespace
+    assert namespace.namespace is not None
+    assert namespace.type == FunctionType.PROPERTY
+    assert namespace.name == "test"
+    namespace = namespace.namespace
+    assert isinstance(namespace, Identifier)
+    assert namespace == "some_array"
+    assert parsed.arguments == [NumberType(type=BasicNumericTypes.INTEGER, data=0)]
+
+
+def test_parse_list_access_nested_subscripts():
+    parsed = parse_string("some_array[0][0]")
+    assert parsed.type == FunctionType.ARRAY_ACCESS
+    assert parsed.name == ""
+    namespace = parsed.namespace
+    assert namespace.namespace is not None
+    assert namespace.type == FunctionType.ARRAY_ACCESS
+    assert namespace.name == ""
+    assert namespace.arguments == [NumberType(type=BasicNumericTypes.INTEGER, data=0)]
+    namespace = namespace.namespace
+    assert isinstance(namespace, Identifier)
+    assert namespace == "some_array"
+    assert parsed.arguments == [NumberType(type=BasicNumericTypes.INTEGER, data=0)]
+
+
+def test_parse_list_access_complex_index():
+    parsed = parse_string("some_array[array[some_variable]]")
+    assert parsed.type == FunctionType.ARRAY_ACCESS
+    assert parsed.name == ""
+    assert isinstance(parsed.namespace, Identifier)
+    assert parsed.namespace == "some_array"
+    [index_argument] = parsed.arguments
+    assert isinstance(index_argument, FunctionCall)
+    assert index_argument.namespace == "array"
+    assert index_argument.name == ""
+    assert index_argument.arguments == [Identifier("some_variable")]

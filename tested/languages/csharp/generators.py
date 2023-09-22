@@ -134,10 +134,15 @@ def convert_function_call(function: FunctionCall) -> str:
         (isinstance(function, PreparedFunctionCall) and function.has_root_namespace)
         and function.type == FunctionType.CONSTRUCTOR
     ):
-        result += convert_statement(function.namespace) + "."
+        result += convert_statement(function.namespace)
+        if function.type != FunctionType.ARRAY_ACCESS:
+            result += "."
     result += function.name
-    if function.type != FunctionType.PROPERTY:
-        result += f"({convert_arguments(function.arguments)})"  # pyright: ignore
+    args = convert_arguments(function.arguments)  # pyright: ignore
+    if function.type == FunctionType.ARRAY_ACCESS:
+        result += f"![(int) {args}]"
+    elif function.type != FunctionType.PROPERTY:
+        result += f"({args})"
     return result
 
 
@@ -145,6 +150,7 @@ def convert_declaration(
     tp: AllTypes | VariableType | Literal["Object"],
     value: Statement | None,
     nt=None,
+    inner=False,
 ) -> str:
     def extract_type_tuple(type_, generic=True):
         if isinstance(type_, tuple):
@@ -182,23 +188,23 @@ def convert_declaration(
         converted_type = convert_declaration(base_type, None, sub_type)
         return "(" + ", ".join(converted_type for _ in range(len(value.data)))
     elif tp in (AdvancedNumericTypes.U_INT_64, AdvancedNumericTypes.BIG_INT):
-        return "BigInteger"
+        return "BigInteger" + ("?" if inner else "")
     elif tp == AdvancedNumericTypes.INT_8:
-        return "Byte"
+        return "Byte" + ("?" if inner else "")
     elif tp == AdvancedNumericTypes.U_INT_8:
-        return "SByte"
+        return "SByte" + ("?" if inner else "")
     elif tp == AdvancedNumericTypes.INT_16:
-        return "Int16"
+        return "Int16" + ("?" if inner else "")
     elif tp == AdvancedNumericTypes.U_INT_16:
-        return "UInt16"
+        return "UInt16" + ("?" if inner else "")
     elif tp == AdvancedNumericTypes.U_INT_32:
-        return "UInt32"
+        return "UInt32" + ("?" if inner else "")
     elif tp == AdvancedNumericTypes.INT_64:
-        return "Int64"
+        return "Int64" + ("?" if inner else "")
     elif tp == AdvancedNumericTypes.U_INT_64:
-        return "UInt64"
+        return "UInt64" + ("?" if inner else "")
     elif tp == AdvancedNumericTypes.SINGLE_PRECISION:
-        return "Single"
+        return "Single" + ("?" if inner else "")
     elif tp == "Object":
         return tp
     basic = resolve_to_basic(tp)
@@ -223,13 +229,13 @@ def convert_declaration(
         base_type, sub_type = extract_type_tuple(type_)
         return f"Set<{convert_declaration(base_type, None, sub_type)}>"
     elif basic == BasicBooleanTypes.BOOLEAN:
-        return "Boolean"
+        return "Boolean" + ("?" if inner else "")
     elif basic == BasicStringTypes.TEXT:
-        return "string"
+        return "string" + ("?" if inner else "")
     elif basic == BasicNumericTypes.INTEGER:
-        return "Int32"
+        return "Int32" + ("?" if inner else "")
     elif basic == BasicNumericTypes.REAL:
-        return "Double"
+        return "Double" + ("?" if inner else "")
     elif basic == BasicObjectTypes.MAP:
         if isinstance(value, ObjectType):
             key_type_ = value.get_key_type() or "Object"
@@ -281,13 +287,13 @@ def _generate_internal_context(ctx: PreparedContext, pu: PreparedExecutionUnit) 
         ):
             result += (
                 convert_declaration(
-                    tc.input.statement.type, tc.input.statement.expression
+                    tc.input.statement.type, tc.input.statement.expression, inner=True
                 )
                 + " "
             )
             result += tc.input.statement.variable + " = null;\n"
 
-        result += "try {"
+        result += "try {\n"
         if tc.testcase.is_main_testcase():
             assert isinstance(tc.input, MainInput)
             result += " " * 4 + f"{pu.submission_name}.Main(new string[]{{"

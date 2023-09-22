@@ -42,6 +42,8 @@ ALL_SPECIFIC_LANGUAGES = COMPILE_LANGUAGES + [
 ]
 ALL_LANGUAGES = ALL_SPECIFIC_LANGUAGES + ["bash"]
 
+ARRAY_LANGUAGES = [x for x in ALL_LANGUAGES if x not in ("bash", "c")]
+
 quotes = {
     "python": "'",
     "java": '"',
@@ -980,6 +982,22 @@ def test_language_literals_work(language: str, tmp_path: Path, pytestconfig):
         language,
         tmp_path,
         "one-language-literals.yaml",
+        "correct",
+    )
+
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]
+
+
+@pytest.mark.parametrize("language", ARRAY_LANGUAGES)
+def test_array_access(language: str, tmp_path: Path, pytestconfig):
+    conf = configuration(
+        pytestconfig,
+        "array-access",
+        language,
+        tmp_path,
+        "suite.yaml",
         "correct",
     )
 

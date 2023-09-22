@@ -369,6 +369,13 @@ class FunctionType(StrEnum):
     """
     Access a property on an object.
     """
+    ARRAY_ACCESS = auto()
+    """
+    Access for SEQUENCE types, including arrays and lists. This only supports
+    numeric indices, even if the underlying language supports other types. The
+    variable on which this is called (the array) must be in the namespace of the
+    function.
+    """
 
 
 @define

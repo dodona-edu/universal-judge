@@ -143,10 +143,15 @@ def convert_function_call(function: FunctionCall) -> str:
     if function.namespace and not (
         isinstance(function, PreparedFunctionCall) and function.has_root_namespace
     ):
-        result += f"{convert_statement(function.namespace)}!!."
+        result += f"{convert_statement(function.namespace)}!!"
+        if function.type != FunctionType.ARRAY_ACCESS:
+            result += "."
     result += function.name
-    if function.type != FunctionType.PROPERTY:
-        result += f"({convert_arguments(function.arguments)})"  # pyright: ignore
+    args = convert_arguments(function.arguments)  # pyright: ignore
+    if function.type == FunctionType.ARRAY_ACCESS:
+        result += f"[{args}!!]"
+    elif function.type != FunctionType.PROPERTY:
+        result += f"({args})"
     return result
 
 

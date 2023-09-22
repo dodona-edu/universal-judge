@@ -100,10 +100,15 @@ def convert_function_call(call: FunctionCall, internal=False) -> str:
     if call.type == FunctionType.CONSTRUCTOR:
         result += "new "
     if call.namespace:
-        result += convert_statement(call.namespace, True) + "."
+        result += convert_statement(call.namespace, True)
+        if call.type != FunctionType.ARRAY_ACCESS:
+            result += "."
     result += call.name
-    if call.type != FunctionType.PROPERTY:
-        result += f"({convert_arguments(cast(list[Expression], call.arguments))})"
+    args = convert_arguments(cast(list[Expression], call.arguments))
+    if call.type == FunctionType.ARRAY_ACCESS:
+        result += f"[{args}]"
+    elif call.type != FunctionType.PROPERTY:
+        result += f"({args})"
     return result
 
 

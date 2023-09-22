@@ -1,0 +1,7 @@
+- unit: "Tab 1"
+  cases:
+    - script:
+        - statement: "the_array = [1, 2, 6]"
+        - statement: "the_index = 2"
+        - expression: "the_array[the_index]"
+          return: 6

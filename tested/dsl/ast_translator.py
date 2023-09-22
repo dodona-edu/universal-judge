@@ -280,6 +280,17 @@ def _convert_expression(node: ast.expr, is_return: bool) -> Expression:
             raise InvalidDslError("'-' is only supported on literal numbers")
         assert isinstance(value.data, Decimal | int | float)
         return NumberType(type=value.type, data=-value.data)
+    elif isinstance(node, ast.Subscript):
+        namespace = _convert_expression(node.value, False)
+        if isinstance(node.slice, (ast.Slice, ast.Tuple)):
+            raise InvalidDslError(f"Slicing is not supported in the DSL: {node}")
+        index = _convert_expression(node.slice, False)
+        return FunctionCall(
+            type=FunctionType.ARRAY_ACCESS,
+            name="",
+            namespace=namespace,
+            arguments=[index],
+        )
     else:
         raise InvalidDslError(f"Unsupported expression type: {type(node)}")
 

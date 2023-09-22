@@ -1,4 +1,5 @@
 import json
+from typing import cast
 
 from tested.datatypes import (
     AdvancedNumericTypes,
@@ -23,6 +24,7 @@ from tested.serialisation import (
     Assignment,
     Expression,
     FunctionCall,
+    FunctionType,
     Identifier,
     NamedArgument,
     SequenceType,
@@ -89,6 +91,11 @@ def convert_value(value: Value) -> str:
 
 
 def convert_function_call(function: FunctionCall) -> str:
+    if function.type == FunctionType.ARRAY_ACCESS:
+        assert function.namespace is not None
+        the_namespace = convert_statement(function.namespace)
+        the_args = convert_arguments(cast(list[Expression], function.arguments))
+        return f"{the_namespace} !! {the_args}"
     result = ""
     if function.namespace:
         result += convert_statement(function.namespace) + "."

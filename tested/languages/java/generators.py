@@ -130,6 +130,11 @@ def convert_value(value: Value) -> str:
 
 
 def convert_function_call(function: FunctionCall) -> str:
+    the_args = convert_arguments(cast(list[Expression], function.arguments))
+    if function.type == FunctionType.ARRAY_ACCESS:
+        assert function.namespace is not None
+        the_namespace = convert_statement(function.namespace)
+        return f"get({the_namespace}, {the_args})"
     result = ""
     if function.type == FunctionType.CONSTRUCTOR:
         result += "new "
@@ -140,7 +145,7 @@ def convert_function_call(function: FunctionCall) -> str:
         result += convert_statement(function.namespace) + "."
     result += function.name
     if function.type != FunctionType.PROPERTY:
-        result += f"({convert_arguments(cast(list[Expression], function.arguments))})"
+        result += f"({the_args})"
     return result
 
 
@@ -274,7 +279,7 @@ def _generate_internal_context(ctx: PreparedContext, pu: PreparedExecutionUnit) 
         ):
             result += (
                 convert_declaration(
-                    tc.input.statement.type, tc.input.statement.expression
+                    tc.input.statement.type, tc.input.statement.expression, inner=True
                 )
                 + " "
             )
@@ -323,6 +328,46 @@ def convert_execution_unit(pu: PreparedExecutionUnit) -> str:
     
         private final PrintWriter valueWriter;
         private final PrintWriter exceptionWriter;
+        
+        public <T> T get(List<T> list, int index) {{
+            return list.get(index);
+        }}
+        
+        public boolean get(boolean[] a, int index) {{
+            return a[index];
+        }}
+        
+        public byte get(byte[] a, int index) {{
+            return a[index];
+        }}
+        
+        public char get(char[] a, int index) {{
+            return a[index];
+        }}
+        
+        public double get(double[] a, int index) {{
+            return a[index];
+        }}
+        
+        public float get(float[] a, int index) {{
+            return a[index];
+        }}
+        
+        public int get(int[] a, int index) {{
+            return a[index];
+        }}
+        
+        public long get(long[] a, int index) {{
+            return a[index];
+        }}
+        
+        public Object get(Object[] a, int index) {{
+            return a[index];
+        }}
+        
+        public short get(short[] a, int index) {{
+            return a[index];
+        }}
     
         public {pu.unit.name}() throws Exception {{
             this.valueWriter = new PrintWriter("{pu.value_file}");
