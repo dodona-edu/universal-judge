@@ -58,13 +58,10 @@ en:
         source-code: "Invalid source code"
       initialization: "Error while initializing the code:"
     evaluation:
-      early-exit: "The evaluation has stopped early."
       time-limit: "Time limit exceeded"
       memory-limit: "Memory limit exceeded"
-      missing:
-        context: "Context not executed"
-        output: "Missing output"
-        test: "Test not executed"
+      not-executed: "These test(s) were not executed"
+      missing: "Missing result"
       files:
         zero: "No files"
         one: "File: %{files}"

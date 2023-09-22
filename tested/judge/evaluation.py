@@ -82,7 +82,7 @@ def _evaluate_channel(
     unexpected_status: Status = Status.WRONG,
     timeout: bool = False,
     memory: bool = False,
-) -> bool | None:
+) -> bool:
     """
     Evaluate the output on a given channel. This function will output the
     appropriate messages to start and end a new test in Dodona.
@@ -104,7 +104,7 @@ def _evaluate_channel(
     :param bundle: The configuration bundle.
     :param context_directory: The directory in which the execution took place.
 
-    :return: True if successful, otherwise False.
+    :return: True indicates missing values.
     """
     evaluator = get_oracle(
         bundle, context_directory, output, testcase, unexpected_status=unexpected_status
@@ -119,7 +119,7 @@ def _evaluate_channel(
 
     if not should_report_case and is_correct:
         # We do report that a test is correct, to set the status.
-        return True
+        return False
 
     expected = evaluation_result.readable_expected
     out.add(StartTest(expected=expected, channel=channel))
@@ -128,9 +128,10 @@ def _evaluate_channel(
     for message in evaluation_result.messages:
         out.add(AppendMessage(message=message))
 
-    # Report missing output
+    missing = False
     if actual is None:
-        out.add(AppendMessage(message=get_i18n_string("judge.evaluation.early-exit")))
+        out.add(AppendMessage(message=get_i18n_string("judge.evaluation.missing")))
+        missing = True
     elif should_report_case and timeout and not is_correct:
         status.human = get_i18n_string("judge.evaluation.time-limit")
         status.enum = Status.TIME_LIMIT_EXCEEDED
@@ -143,7 +144,7 @@ def _evaluate_channel(
     # Close the test.
     out.add(CloseTest(generated=evaluation_result.readable_actual, status=status))
 
-    return is_correct
+    return missing
 
 
 def evaluate_context_results(
@@ -210,17 +211,15 @@ def evaluate_context_results(
     could_delete = all(deletions)
 
     # Add a message indicating there were missing values.
-    missing_values = []
+    missing_values = None
     if not could_delete:
         _logger.warning("Missing output in context testcase.")
-        missing_values.append(
-            AppendMessage(message=get_i18n_string("judge.evaluation.early-exit"))
-        )
+        missing_values = []
         missing_values.append(
             EscalateStatus(
                 status=StatusMessage(
                     enum=Status.WRONG,
-                    human=get_i18n_string("judge.evaluation.missing.output"),
+                    human=get_i18n_string("judge.evaluation.missing"),
                 )
             )
         )
@@ -263,7 +262,7 @@ def evaluate_context_results(
         actual_stdout = safe_get(stdout_, i)
         actual_value = safe_get(values, i)
 
-        _evaluate_channel(
+        missing_file = _evaluate_channel(
             bundle,
             context_dir,
             t_col,
@@ -273,7 +272,7 @@ def evaluate_context_results(
             timeout=exec_results.timeout,
             memory=exec_results.memory,
         )
-        _evaluate_channel(
+        missing_stderr = _evaluate_channel(
             bundle,
             context_dir,
             t_col,
@@ -283,7 +282,7 @@ def evaluate_context_results(
             timeout=exec_results.timeout and len(stderr_) == i + 1,
             memory=exec_results.memory and len(stderr_) == i + 1,
         )
-        _evaluate_channel(
+        missing_exception = _evaluate_channel(
             bundle,
             context_dir,
             t_col,
@@ -294,7 +293,7 @@ def evaluate_context_results(
             timeout=exec_results.timeout and len(exceptions) == i + 1,
             memory=exec_results.memory and len(exceptions) == i + 1,
         )
-        _evaluate_channel(
+        missing_stdout = _evaluate_channel(
             bundle,
             context_dir,
             t_col,
@@ -304,7 +303,7 @@ def evaluate_context_results(
             timeout=exec_results.timeout and len(stdout_) == i + 1,
             memory=exec_results.memory and len(stdout_) == i + 1,
         )
-        _evaluate_channel(
+        missing_return = _evaluate_channel(
             bundle,
             context_dir,
             t_col,
@@ -318,7 +317,7 @@ def evaluate_context_results(
 
         # If this is the last testcase, do the exit channel.
         if i == len(context.testcases) - 1:
-            _evaluate_channel(
+            missing_exit = _evaluate_channel(
                 bundle,
                 context_dir,
                 t_col,
@@ -329,12 +328,24 @@ def evaluate_context_results(
                 memory=exec_results.memory,
             )
         else:
+            missing_exit = False
             assert (
                 testcase.output.exit_code == IgnoredChannel.IGNORED
             ), "Only the last testcase may check the exit code."
 
         # Add messages if there was no output.
-        if missing_values:
+        if missing_values is not None:
+            if not (
+                missing_file
+                or missing_stderr
+                or missing_exception
+                or missing_stdout
+                or missing_return
+                or missing_exit
+            ):
+                t_col.add(
+                    AppendMessage(message=get_i18n_string("judge.evaluation.missing"))
+                )
             for u in missing_values:
                 t_col.add(u)
 
@@ -457,10 +468,7 @@ def _add_channel(
         updates.append(
             CloseTest(
                 generated="",
-                status=StatusMessage(
-                    enum=Status.NOT_EXECUTED,
-                    human=get_i18n_string("judge.evaluation.missing.test"),
-                ),
+                status=StatusMessage(enum=Status.NOT_EXECUTED),
                 accepted=False,
             )
         )
@@ -483,9 +491,7 @@ def complete_evaluation(bundle: Bundle, collector: OutputManager):
         assert tab.contexts
         for context in tab.contexts[context_start:]:
             updates: list[Update] = [
-                AppendMessage(
-                    message=get_i18n_string("judge.evaluation.missing.context")
-                )
+                AppendMessage(message=get_i18n_string("judge.evaluation.not-executed"))
             ]
             if testcase_start == 0:
                 collector.add(StartContext(description=context.description))
