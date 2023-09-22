@@ -512,3 +512,12 @@ def test_parse_list_access_complex_index():
     assert index_argument.namespace == "array"
     assert index_argument.name == ""
     assert index_argument.arguments == [Identifier("some_variable")]
+
+
+def test_parse_slicing_not_supported():
+    with pytest.raises(InvalidDslError):
+        parse_string("some_array[array[1:5]]")
+    with pytest.raises(InvalidDslError):
+        parse_string("some_array[array[:5]]")
+    with pytest.raises(InvalidDslError):
+        parse_string("some_array[array[1:5:96]]")
