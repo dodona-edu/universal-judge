@@ -15,6 +15,7 @@ from typing import Any, Literal, Union
 from attrs import define, field
 
 from tested.datatypes import BasicStringTypes
+from tested.dodona import Message
 from tested.features import (
     NOTHING,
     Construct,
@@ -510,7 +511,7 @@ class Testcase(WithFeatures, WithFunctions):
     """
 
     input: Statement | MainInput | LanguageLiterals
-    description: str | None = None
+    description: Message | None = None
     output: Output = field(factory=Output)
     link_files: list[FileUrl] = field(factory=list)
 

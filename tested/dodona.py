@@ -16,6 +16,8 @@ from typing import IO, Literal, Union
 from attrs import define
 from cattrs.preconf.json import make_converter
 
+from tested.parsing import get_converter
+
 
 @unique
 class Permission(StrEnum):
@@ -236,6 +238,6 @@ def report_update(to: IO, update: Update):
     """
     as_dict = dodona_converter.unstructure(update)
     cleaned = _clean_dictionary(as_dict)
-    json.dump(cleaned, to)
+    json.dump(cleaned, to, ensure_ascii=False)
     if __debug__:
         print("", file=to)

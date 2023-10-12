@@ -125,7 +125,11 @@ def get_readable_input(
     """
     format_ = "text"  # By default, we use text as input.
     if case.description:
-        text = case.description
+        if isinstance(case.description, ExtendedMessage):
+            text = case.description.description
+            format_ = case.description.format
+        else:
+            text = case.description
     elif case.is_main_testcase():
         assert isinstance(case.input, MainInput)
         # See https://rouge-ruby.github.io/docs/Rouge/Lexers/ConsoleLexer.html
@@ -151,6 +155,7 @@ def get_readable_input(
     else:
         assert isinstance(case.input, LanguageLiterals)
         text = case.input.get_for(bundle.config.programming_language)
+        format_ = bundle.config.programming_language
 
     # If there are no files, return now. This means we don't need to do ugly stuff.
     if not case.link_files:
