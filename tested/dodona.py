@@ -236,6 +236,6 @@ def report_update(to: IO, update: Update):
     """
     as_dict = dodona_converter.unstructure(update)
     cleaned = _clean_dictionary(as_dict)
-    json.dump(cleaned, to)
+    json.dump(cleaned, to, ensure_ascii=False)
     if __debug__:
         print("", file=to)

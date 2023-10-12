@@ -2,3 +2,6 @@
   testcases:
     - expression: "GLOBAL_VAR"
       return: !v "GLOBAL"
+      description:
+        description: "Hallo"
+        format: "code"

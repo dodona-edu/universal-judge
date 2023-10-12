@@ -197,6 +197,9 @@
       "type" : "object",
       "description" : "An individual test for a statement or expression",
       "properties" : {
+        "description": {
+          "$ref": "#/definitions/message"
+        },
         "stdin" : {
           "description" : "Stdin for this context",
           "type" : [
@@ -510,6 +513,28 @@
         "python",
         "runhaskell",
         "csharp"
+      ]
+    },
+    "message": {
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "object",
+          "required" : [
+            "description"
+          ],
+          "properties" : {
+            "description": {
+              "type" : "string"
+            },
+            "format": {
+              "type" : "string",
+              "default" : "text"
+            }
+          }
+        }
       ]
     }
   }

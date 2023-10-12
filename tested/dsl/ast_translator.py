@@ -125,7 +125,8 @@ def _convert_assignment(node: ast.Assign) -> Assignment:
         )
     variable = node.targets[0]
     if not isinstance(variable, ast.Name):
-        raise InvalidDslError("You can only assign to simple variables")
+        actual = ast.dump(node)
+        raise InvalidDslError(f"You can only assign to simple variables, got: {actual}")
     value = _convert_expression(node.value, False)
 
     # Support a few obvious ones, such as constructor calls or literal values.

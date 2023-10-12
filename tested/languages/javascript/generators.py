@@ -65,7 +65,7 @@ def convert_value(value: Value) -> str:
         else:
             return "(-Infinity)"
     elif value.type == BasicStringTypes.TEXT:
-        return json.dumps(value.data)
+        return json.dumps(value.data, ensure_ascii=False)
     elif value.type == BasicBooleanTypes.BOOLEAN:
         return str(value.data).lower()
     elif value.type == BasicNothingTypes.NOTHING:

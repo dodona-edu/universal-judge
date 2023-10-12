@@ -26,6 +26,7 @@ from tested.datatypes import (
     StringTypes,
     resolve_to_basic,
 )
+from tested.dodona import ExtendedMessage
 from tested.dsl.ast_translator import parse_string
 from tested.parsing import get_converter, suite_to_json
 from tested.serialisation import (
@@ -328,7 +329,9 @@ def _convert_yaml_value(stream: YamlObject) -> Value | None:
         value = parse_string(stream, is_return=True)
     else:
         return None
-    assert isinstance(value, Value)
+    assert isinstance(
+        value, Value
+    ), f"{value} is not of type Value, got {type(value)} instead"
     return value
 
 
@@ -427,7 +430,32 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
         assert not return_channel
         output.result = _convert_advanced_value_output_channel(result)
 
-    return Testcase(input=the_input, output=output, link_files=context.files)
+    if (description := testcase.get("description")) is not None:
+        if isinstance(description, str):
+            the_description = description
+        else:
+            assert isinstance(description, dict)
+            dd = description["description"]
+            assert isinstance(
+                dd, str
+            ), f"The description.description field must be a string, got {dd!r}."
+            df = description.get("format", "text")
+            assert isinstance(
+                df, str
+            ), f"The description.format field must be a string, got {df!r}."
+            the_description = ExtendedMessage(
+                description=dd,
+                format=df,
+            )
+    else:
+        the_description = None
+
+    return Testcase(
+        description=the_description,
+        input=the_input,
+        output=output,
+        link_files=context.files,
+    )
 
 
 def _convert_context(context: YamlDict, dsl_context: DslContext) -> Context:
