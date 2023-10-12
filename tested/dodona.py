@@ -16,8 +16,6 @@ from typing import IO, Literal, Union
 from attrs import define
 from cattrs.preconf.json import make_converter
 
-from tested.parsing import get_converter
-
 
 @unique
 class Permission(StrEnum):
