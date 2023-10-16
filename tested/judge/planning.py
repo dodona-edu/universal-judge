@@ -79,10 +79,10 @@ class PlanStrategy(Enum):
 
 
 def _flattened_contexts_to_units(
-    bundle: Bundle, flattened_contexts: list[PlannedContext]
-) -> list[PlannedExecutionUnit]:
-    units = []
-    current_unit = []
+    flattened_contexts: list[PlannedContext],
+) -> list[list[PlannedContext]]:
+    contexts_per_unit = []
+    current_unit_contexts = []
 
     for planned in flattened_contexts:
         # If we get stdin, start a new execution unit.
@@ -91,38 +91,20 @@ def _flattened_contexts_to_units(
             and cast(MainInput, planned.context.testcases[0].input).stdin
             != EmptyChannel.NONE
         ):
-            if current_unit:
-                units.append(
-                    PlannedExecutionUnit(
-                        contexts=current_unit,
-                        name=execution_name(bundle.language, len(units)),
-                        index=len(units),
-                    )
-                )
-            current_unit = []
+            if current_unit_contexts:
+                contexts_per_unit.append(current_unit_contexts)
+            current_unit_contexts = []
 
-        current_unit.append(planned)
+        current_unit_contexts.append(planned)
 
         if planned.context.has_exit_testcase():
-            units.append(
-                PlannedExecutionUnit(
-                    contexts=current_unit,
-                    name=execution_name(bundle.language, len(units)),
-                    index=len(units),
-                )
-            )
-            current_unit = []
+            contexts_per_unit.append(current_unit_contexts)
+            current_unit_contexts = []
 
-    if current_unit:
-        units.append(
-            PlannedExecutionUnit(
-                contexts=current_unit,
-                name=execution_name(bundle.language, len(units)),
-                index=len(units),
-            )
-        )
+    if current_unit_contexts:
+        contexts_per_unit.append(current_unit_contexts)
 
-    return units
+    return contexts_per_unit
 
 
 def plan_test_suite(
@@ -164,8 +146,15 @@ def plan_test_suite(
                 ]
                 flattened_contexts_list.append(flattened_contexts)
 
-    nested_units = []
+    flattened_units = []
     for flattened_contexts in flattened_contexts_list:
-        nested_units.extend(_flattened_contexts_to_units(bundle, flattened_contexts))
+        for contexts in _flattened_contexts_to_units(flattened_contexts):
+            flattened_units.append(
+                PlannedExecutionUnit(
+                    contexts=contexts,
+                    name=execution_name(bundle.language, len(flattened_units)),
+                    index=len(flattened_units),
+                )
+            )
 
-    return nested_units
+    return flattened_units
