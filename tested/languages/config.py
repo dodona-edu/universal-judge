@@ -213,12 +213,18 @@ class Language(ABC):
     @abstractmethod
     def needs_selector(self) -> bool:
         """
-        Return if the language needs a selector for batch compilation or not. This
-        is a mandatory option in the config.json file.
+        Return if the language needs a selector for batch compilation or not.
 
         :return: True if a selector is needed, false otherwise.
         """
         raise NotImplementedError
+
+    def supports_debug_information(self) -> bool:
+        """
+        If the language supports Dodona debug information for the Python tutor.
+        :return: True if yes, false otherwise.
+        """
+        return False
 
     def supported_constructs(self) -> set[Construct]:
         """

@@ -40,6 +40,9 @@ class Python(Language):
     def needs_selector(self):
         return False
 
+    def supports_debug_information(self) -> bool:
+        return True
+
     def file_extension(self) -> str:
         return "py"
 

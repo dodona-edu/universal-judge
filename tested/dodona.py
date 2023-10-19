@@ -33,6 +33,14 @@ class ExtendedMessage:
     permission: Permission | None = None
 
 
+@define
+class Metadata:
+    """Currently only used for the Python tutor"""
+
+    statements: str | None
+    stdin: str | None
+
+
 Message = ExtendedMessage | str
 
 BadgeCount = int
@@ -177,6 +185,7 @@ class CloseContext:
     """
 
     accepted: bool | None = None
+    data: Metadata | None = None
     command: Literal["close-context"] = "close-context"
 
 

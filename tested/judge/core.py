@@ -9,6 +9,7 @@ from tested.dodona import (
     CloseContext,
     CloseJudgement,
     CloseTab,
+    Metadata,
     StartContext,
     StartJudgement,
     StartTab,
@@ -38,7 +39,13 @@ from tested.judge.planning import (
 )
 from tested.judge.utils import copy_from_paths_to_path
 from tested.languages.conventionalize import submission_file
-from tested.languages.generation import generate_execution, generate_selector
+from tested.languages.generation import (
+    generate_execution,
+    generate_selector,
+    generate_statement,
+)
+from tested.serialisation import Statement
+from tested.testsuite import LanguageLiterals, MainInput, TextData
 
 _logger = logging.getLogger(__name__)
 
@@ -324,7 +331,43 @@ def _process_results(
             compilation_results=compilation_results,
         )
 
-        collector.add(CloseContext(), planned.context_index)
+        # TODO: this is currently very Python-specific
+        # See if we need a callback to the language modules in the future.
+        # TODO: we could probably re-use the "readable_input" function here,
+        #       since it only differs a bit.
+        meta_statements = []
+        meta_stdin = None
+        for case in planned.context.testcases:
+            if case.is_main_testcase():
+                assert isinstance(case.input, MainInput)
+                if isinstance(case.input.stdin, TextData):
+                    meta_stdin = case.input.stdin.get_data_as_string(
+                        bundle.config.resources
+                    )
+            elif isinstance(case.input, Statement):
+                stmt = generate_statement(bundle, case.input)
+                meta_statements.append(stmt)
+            elif isinstance(case.input, LanguageLiterals):
+                stmt = case.input.get_for(bundle.config.programming_language)
+                meta_statements.append(stmt)
+            else:
+                raise AssertionError(f"Found unknown case input type: {case.input}")
+
+        if meta_statements:
+            meta_statements = "\n".join(meta_statements)
+        else:
+            # Don't add empty statements
+            meta_statements = None
+
+        collector.add(
+            CloseContext(
+                data=Metadata(
+                    statements=meta_statements,
+                    stdin=meta_stdin,
+                )
+            ),
+            planned.context_index,
+        )
         if continue_ in (Status.TIME_LIMIT_EXCEEDED, Status.MEMORY_LIMIT_EXCEEDED):
             return continue_, currently_open_tab
 
