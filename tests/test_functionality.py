@@ -986,3 +986,18 @@ def test_language_literals_work(language: str, tmp_path: Path, pytestconfig):
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["correct"]
+
+
+def test_python_input_prompt_is_ignored(tmp_path: Path, pytestconfig):
+    conf = configuration(
+        pytestconfig,
+        "echo",
+        "python",
+        tmp_path,
+        "one.tson",
+        "input-prompt",
+    )
+
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]
