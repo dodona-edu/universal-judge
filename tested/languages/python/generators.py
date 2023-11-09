@@ -141,6 +141,7 @@ import values
 import sys
 import importlib
 from decimal import Decimal
+import builtins
 """
 
     # Import the language specific functions we will need.
@@ -151,6 +152,14 @@ from decimal import Decimal
     result += f"""
 value_file = open("{pu.value_file}", "w")
 exception_file = open("{pu.exception_file}", "w")
+
+
+# Overwrite the input function
+__old_input = builtins.input
+def _our_input(_prompt=None):
+    return __old_input()
+builtins.input = _our_input
+
 
 def write_separator():
     value_file.write("--{pu.testcase_separator_secret}-- SEP")
