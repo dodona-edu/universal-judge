@@ -7,6 +7,11 @@ If you use this software in research, please cite:
 
 - Strijbol, N., Van Petegem, C., Maertens, R., Sels, B., Scholliers, C., Dawyndt, P., & Mesuere, B. (2023). TESTed—An educational testing framework with language-agnostic test suites for programming exercises. SoftwareX, 22, 101404. [doi:10.1016/j.softx.2023.101404](https://doi.org/10.1016/j.softx.2023.101404)
 
+> [!IMPORTANT]
+> The documentation below is intended for running TESTed as a standalone tool.
+> If you are looking to create exercises for Dodona, we have [more suitable documentation available](https://docs.dodona.be/nl/guides/exercises/).
+
+
 ## Installing TESTed
 
 TESTed is implemented in Python, but has various dependencies for its language-specific modules.
@@ -162,23 +167,56 @@ optional arguments:
 Adjust the configuration file if you want to evaluate the wrong submission.
 
 For reference, the file `tested/dsl/schema.json` contains the JSON Schema of the test suite format.
-Some other useful commands are:
+
+## Running TESTed locally
+
+The `python -m tested` command is intended for production use.
+However, it is not always convenient to create a `config.json` file for each exercise to run.
+
+TESTed supports two ways of running TESTed without a config file.
+The first way is:
 
 ```bash
 # Run a hard-coded exercise with logs enabled, useful for debugging
 $ python -m tested.manual
-# Convert a YAML test suite into JSON
-$ python -m tested.dsl
 ```
+
+This command is useful when debugging TESTed itself or a particularly challenging exercise.
+It will execute a hardcoded config, which is set in `tested/manual.py`.
+
+The second way is:
+
+```bash
+# Run an exercise with CLI paramaters
+$ python -m tested.cli --help
+usage: cli.py [-h] -e EXERCISE [-s SUBMISSION] [-t TESTSUITE] [-f] [-p PROGRAMMING_LANGUAGE]
+
+Simple CLI for TESTed
+
+options:
+  -h, --help            show this help message and exit
+  -e EXERCISE, --exercise EXERCISE
+                        Path to a directory containing an exercise
+  -s SUBMISSION, --submission SUBMISSION
+                        Path to a submission to evaluate
+  -t TESTSUITE, --testsuite TESTSUITE
+                        Path to a test suite
+  -f, --full            If the output should be shown in full (default: false)
+  -p PROGRAMMING_LANGUAGE, --programming_language PROGRAMMING_LANGUAGE
+                        The programming language to use
+
+additional information: The CLI only looks at a config.json file in the exercise directory. It does not look in folders above the exercise directory.
+```
+
+This is the "CLI mode": here you can pass various options as command line parameters.
+For example, for exercises following a standardized directory structure, the path to the exercise folder is often enough.
 
 ## TESTed repository
 
 The repository of TESTed is organized as follows:
 
-- `exercise`: exercises with preconfigured test suites; useful to play around with TESTed and also used by unit tests for TESTed itself
 - `tested`: Python code of the actual judge (run by Dodona)
 - `tests`: unit tests for TESTed
-- `benchmarking`: utilities to benchmark TESTed
 
 You can run the basic unit tests with:
 

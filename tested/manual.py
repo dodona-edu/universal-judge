@@ -3,17 +3,16 @@ Run the judge manually from code. In this mode, the config is hardcoded into thi
 file, allowing rapid testing (and, most importantly, debugging).
 """
 import logging
-import os
-import shutil
 import sys
 import time
 from pathlib import Path
 
+from tested.cli import create_and_populate_workdir
 from tested.configs import DodonaConfig, Options
 from tested.main import run
 from tested.testsuite import SupportedLanguage
 
-exercise_dir = "/home/niko/Ontwikkeling/universal-judge/tests/exercises/global"
+exercise_dir = "/home/niko/Ontwikkeling/universal-judge/tests/exercises/echo"
 
 
 def read_config() -> DodonaConfig:
@@ -51,21 +50,7 @@ if __name__ == "__main__":
     logger = logging.getLogger("tested.parsing")
     logger.setLevel(logging.INFO)
 
-    # Create workdir if needed.
-    config.workdir.mkdir(exist_ok=True)
-
-    # Delete content in work dir
-    for root, dirs, files in os.walk(config.workdir):
-        for f in files:
-            os.unlink(os.path.join(root, f))
-        for d in dirs:
-            shutil.rmtree(os.path.join(root, d), ignore_errors=True)
-
-        # Copy existing files to workdir if needed.
-    if Path(exercise_dir, "workdir").is_dir():
-        shutil.copytree(
-            Path(exercise_dir, "workdir"), config.workdir, dirs_exist_ok=True
-        )
+    create_and_populate_workdir(config)
 
     start = time.time()
     run(config, sys.stdout)
