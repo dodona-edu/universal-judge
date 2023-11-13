@@ -1,8 +1,10 @@
 import json
+import sys
+import textwrap
 from collections.abc import Callable
 from decimal import Decimal
 from pathlib import Path
-from typing import Any, Literal, TextIO, TypeVar, cast
+from typing import Any, Literal, TypeVar, cast
 
 import yaml
 from attrs import define, evolve
@@ -100,7 +102,7 @@ def _yaml_value_constructor(loader: yaml.Loader, node: yaml.Node) -> YamlValue:
     return YamlValue(value=_parse_yaml_value(loader, node))
 
 
-def _parse_yaml(yaml_stream: str | TextIO) -> YamlObject:
+def _parse_yaml(yaml_stream: str) -> YamlObject:
     """
     Parse a string or stream to YAML.
     """
@@ -110,7 +112,35 @@ def _parse_yaml(yaml_stream: str | TextIO) -> YamlObject:
             yaml.add_constructor("!" + actual_type, _custom_type_constructors, loader)
     yaml.add_constructor("!v", _yaml_value_constructor, loader)
     yaml.add_constructor("!value", _yaml_value_constructor, loader)
-    return yaml.load(yaml_stream, loader)
+
+    try:
+        return yaml.load(yaml_stream, loader)
+    except yaml.MarkedYAMLError as exc:
+        lines = yaml_stream.splitlines()
+
+        if exc.problem_mark is None:
+            # There is no additional information, so what can we do?
+            raise exc
+
+        sys.stderr.write(
+            textwrap.dedent(
+                f"""
+        YAML error while parsing test suite. This means there is a YAML syntax error.
+
+        The YAML parser indicates the problem lies at line {exc.problem_mark.line + 1}, column {exc.problem_mark.column + 1}:
+            
+            {lines[exc.problem_mark.line]}
+            {" " * exc.problem_mark.column + "^"}
+        
+        The error message was:
+            {exc.problem} {exc.context}
+            
+        The detailed exception is provided below.
+        You might also find help by validating your YAML file with a YAML validator.\n
+        """
+            )
+        )
+        raise exc
 
 
 def _load_schema_validator():
@@ -128,6 +158,10 @@ _SCHEMA_VALIDATOR = _load_schema_validator()
 
 
 class DslValidationError(ValueError):
+    pass
+
+
+class InvalidYamlError(ValueError):
     pass
 
 
