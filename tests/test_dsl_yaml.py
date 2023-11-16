@@ -261,7 +261,7 @@ def test_statements():
         data: "New safe"
         config: *stdout
     - expression: 'safe.content()'
-      return: !v "Ignore whitespace"
+      return: "Ignore whitespace"
   - testcases:
     - statement: 'safe: Safe = Safe(uint8(5))'
       stdout:
@@ -270,7 +270,7 @@ def test_statements():
           <<: *stdout
           ignoreWhitespace: false
     - expression: 'safe.content()'
-      return: 'uint8(5)'
+      return: !expression 'uint8(5)'
     """
     json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
@@ -385,7 +385,7 @@ def test_invalid_yaml():
     stderr: []
     testcases:
     - statement: 'data = () ()'
-      return: '() {}'
+      return: !expression '() {}'
     """
     with pytest.raises(Exception):
         translate_to_test_suite(yaml_str)
@@ -408,7 +408,7 @@ def test_statement_with_yaml_dict():
 - tab: "Feedback"
   testcases:
   - expression: "get_dict()"
-    return: !v
+    return:
         alpha: 5
         beta: 6
 """
@@ -462,7 +462,7 @@ def test_expression_raw_return():
   contexts:
     - testcases:
         - expression: 'test()'
-          return: '[(4, 4), (4, 3), (4, 2), (4, 1), (4, 0), (3, 0), (3, 1), (4, 1)]'
+          return: !expression '[(4, 4), (4, 3), (4, 2), (4, 1), (4, 0), (3, 0), (3, 1), (4, 1)]'
 """
     json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
@@ -494,7 +494,7 @@ def test_empty_constructor(function_name, result):
   contexts:
     - testcases:
         - expression: 'test()'
-          return: '{function_name}()'
+          return: !expression '{function_name}()'
 """
     json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
@@ -524,7 +524,7 @@ def test_empty_constructor_with_param(function_name, result):
   contexts:
     - testcases:
         - expression: 'test()'
-          return: '{function_name}([])'
+          return: !expression '{function_name}([])'
 """
     json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
@@ -598,7 +598,7 @@ def test_text_custom_checks_correct():
                 language: "python"
                 file: "test.py"
                 name: "evaluate_test"
-                arguments: ["'yes'", "5", "set([5, 5])"]
+                arguments: [!expression "'yes'", 5, !expression "set([5, 5])"]
     """
     json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
@@ -635,8 +635,8 @@ def test_value_built_in_checks_implied():
       contexts:
         - testcases:
             - expression: 'test()'
-              return:
-                value: "'hallo'"
+              return: !oracle
+                value: !expression "'hallo'"
     """
     json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
@@ -660,8 +660,8 @@ def test_value_built_in_checks_explicit():
       contexts:
         - testcases:
             - expression: 'test()'
-              return:
-                value: "'hallo'"
+              return: !oracle
+                value: "hallo"
                 oracle: "builtin"
     """
     json_str = translate_to_test_suite(yaml_str)
@@ -686,13 +686,13 @@ def test_value_custom_checks_correct():
       contexts:
         - testcases:
             - expression: 'test()'
-              return:
-                value: "'hallo'"
+              return: !oracle
+                value: "hallo"
                 oracle: "custom_check"
                 language: "python"
                 file: "test.py"
                 name: "evaluate_test"
-                arguments: ["'yes'", "5", "set([5, 5])"]
+                arguments: ['yes', 5, !expression "set([5, 5])"]
     """
     json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)

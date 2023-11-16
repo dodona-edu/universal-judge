@@ -1,4 +1,4 @@
 - tab: "My tab"
   testcases:
     - expression: 'echo("input")'
-      return: !v "input"
+      return: "input"

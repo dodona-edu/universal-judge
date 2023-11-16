@@ -65,9 +65,7 @@ from tested.testsuite import (
 )
 from tested.utils import get_args
 
-OptionDict = dict[str, int | bool]
 YamlDict = dict[str, "YamlObject"]
-YamlObject = YamlDict | list | bool | float | int | str | None
 
 
 @define
@@ -77,8 +75,19 @@ class TestedType:
 
 
 @define
-class YamlValue:
-    value: Any
+class ExpressionString:
+    expression: str
+
+
+@define
+class ReturnOracle:
+    value: YamlDict
+
+
+OptionDict = dict[str, int | bool]
+YamlObject = (
+    YamlDict | list | bool | float | int | str | None | ExpressionString | ReturnOracle
+)
 
 
 def _parse_yaml_value(loader: yaml.Loader, node: yaml.Node) -> Any:
@@ -98,8 +107,18 @@ def _custom_type_constructors(loader: yaml.Loader, node: yaml.Node) -> TestedTyp
     return TestedType(type=tested_tag, value=base_result)
 
 
-def _yaml_value_constructor(loader: yaml.Loader, node: yaml.Node) -> YamlValue:
-    return YamlValue(value=_parse_yaml_value(loader, node))
+def _expression_string(loader: yaml.Loader, node: yaml.Node) -> ExpressionString:
+    result = _parse_yaml_value(loader, node)
+    assert isinstance(result, str), f"An expression must be a string, got {result}"
+    return ExpressionString(expression=result)
+
+
+def _return_oracle(loader: yaml.Loader, node: yaml.Node) -> ReturnOracle:
+    result = _parse_yaml_value(loader, node)
+    assert isinstance(
+        result, dict
+    ), f"A custom oracle must be an object, got {result} which is a {type(result)}."
+    return ReturnOracle(value=result)
 
 
 def _parse_yaml(yaml_stream: str) -> YamlObject:
@@ -110,8 +129,8 @@ def _parse_yaml(yaml_stream: str) -> YamlObject:
     for types in get_args(AllTypes):
         for actual_type in types:
             yaml.add_constructor("!" + actual_type, _custom_type_constructors, loader)
-    yaml.add_constructor("!v", _yaml_value_constructor, loader)
-    yaml.add_constructor("!value", _yaml_value_constructor, loader)
+    yaml.add_constructor("!expression", _expression_string, loader)
+    yaml.add_constructor("!oracle", _return_oracle, loader)
 
     try:
         return yaml.load(yaml_stream, loader)
@@ -352,15 +371,12 @@ def _convert_text_output_channel(stream: YamlObject) -> TextOutputChannel:
 
 
 def _convert_yaml_value(stream: YamlObject) -> Value | None:
-    if isinstance(stream, YamlValue):
-        # A normal yaml type tagged explicitly.
-        value = _convert_value(stream.value)
-    elif isinstance(stream, (int, float, bool, TestedType, list, set)):
+    if isinstance(stream, ExpressionString):
+        # We have an expression string.
+        value = parse_string(stream.expression, is_return=True)
+    elif isinstance(stream, (int, float, bool, TestedType, list, set, str, dict)):
         # Simple values where no confusion is possible.
         value = _convert_value(stream)
-    elif isinstance(stream, str):
-        # A normal YAML string is considered a "Python" string.
-        value = parse_string(stream, is_return=True)
     else:
         return None
     assert isinstance(
@@ -370,22 +386,21 @@ def _convert_yaml_value(stream: YamlObject) -> Value | None:
 
 
 def _convert_advanced_value_output_channel(stream: YamlObject) -> ValueOutputChannel:
-    yaml_value = _convert_yaml_value(stream)
-    if yaml_value:
-        return ValueOutputChannel(value=yaml_value)
-    else:
-        # We have an object, which means we have an output channel.
-        assert isinstance(stream, dict)
-        value = _convert_yaml_value(stream["value"])
-        assert isinstance(value, Value)
-        if "oracle" not in stream or stream["oracle"] == "builtin":
+    if isinstance(stream, ReturnOracle):
+        return_object = stream.value
+        value = _convert_yaml_value(return_object["value"])
+        assert isinstance(value, Value), "You must specify a value for a return oracle."
+        if "oracle" not in return_object or return_object["oracle"] == "builtin":
             return ValueOutputChannel(value=value)
-        elif stream["oracle"] == "custom_check":
+        elif return_object["oracle"] == "custom_check":
             return ValueOutputChannel(
                 value=value,
-                oracle=_convert_custom_check_oracle(stream),
+                oracle=_convert_custom_check_oracle(return_object),
             )
-        raise TypeError(f"Unknown value oracle type: {stream['oracle']}")
+        raise TypeError(f"Unknown value oracle type: {return_object['oracle']}")
+    else:
+        yaml_value = _convert_yaml_value(stream)
+        return ValueOutputChannel(value=yaml_value)
 
 
 def _validate_testcase_combinations(testcase: YamlDict):
