@@ -1,7 +1,7 @@
 - tab: "Global variable"
   testcases:
     - expression: "GLOBAL_VAR"
-      return: !v "GLOBAL"
+      return: "GLOBAL"
       description:
         description: "Hallo"
         format: "code"

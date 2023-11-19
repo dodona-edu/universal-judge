@@ -373,10 +373,7 @@
             },
             "arguments" : {
               "type" : "array",
-              "description" : "List of 'Python' values to use as arguments to the function.",
-              "items" : {
-                "type" : "string"
-              }
+              "description" : "List of YAML (or tagged expression) values to use as arguments to the function."
             }
           }
         }
@@ -440,10 +437,7 @@
                 },
                 "arguments" : {
                   "type" : "array",
-                  "description" : "List of 'Python' values to use as arguments to the function.",
-                  "items" : {
-                    "type" : "string"
-                  }
+                  "description" : "List of YAML (or tagged expression) values to use as arguments to the function."
                 }
               }
             }
