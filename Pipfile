@@ -5,15 +5,15 @@ name = "pypi"
 
 [packages]
 psutil = "==5.9.5"
-attrs = "==22.2.0"
+attrs = "==23.1.0"
 cattrs = "==23.1.2"
-jsonschema = "==4.18.4"
+jsonschema = "==4.19.1"
 typing-inspect = "==0.9.0"
-pyyaml = "==6.0"
-pygments = "==2.15.1"
+pyyaml = "==6.0.1"
+pygments = "==2.16.1"
 python-i18n = "==0.3.9"
 # Required for the Python language module
-pylint = "==2.17.1"
+pylint = "==3.0.1"
 # Needed for exercise instantiation
 # You'll need to install these if you want to use it.
 jinja2 = "==3.1.2"
@@ -26,5 +26,5 @@ pytest-cov = ""
 pytest-xdist = ""
 
 [requires]
-python_version = "3.11"
-python_full_version = "3.11.2"
+python_version = "3.12"
+python_full_version = "3.12.0"
