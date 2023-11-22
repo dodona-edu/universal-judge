@@ -64,6 +64,10 @@ class Options:
     Longer exercises, or exercises where the solution might depend on optimization
     may need this option.
     """
+    profile: bool = False
+    """
+    Profile the execution or not.
+    """
 
 
 @fallback_field(get_converter(), {"testplan": "test_suite", "plan_name": "test_suite"})

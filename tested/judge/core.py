@@ -28,6 +28,7 @@ from tested.judge.execution import (
     execute_unit,
     set_up_unit,
 )
+from tested.judge.internal_profiler import DummyProfiler, Profiler
 from tested.judge.linter import run_linter
 from tested.judge.planning import (
     CompilationResult,
@@ -73,7 +74,7 @@ def _handle_time_or_memory_compilation(
     )
 
 
-def judge(bundle: Bundle):
+def judge(bundle: Bundle, profiler: Profiler | DummyProfiler):
     """
     Evaluate a solution for an exercise. Execute the tests present in the
     test suite. The result (the judgment) is sent to stdout, so Dodona can pick it
@@ -92,6 +93,7 @@ def judge(bundle: Bundle):
        c. Process the results.
 
     :param bundle: The configuration bundle.
+    :param profiler: The (dummy) profiler to measure timings.
     """
     # Begin by checking if the given test suite is executable in this language.
     _logger.info("Checking supported features...")
@@ -116,17 +118,21 @@ def judge(bundle: Bundle):
     max_time = float(bundle.config.time_limit) * 0.9
     start = time.perf_counter()
 
+    profiler.start("Linter")
     # Run the linter.
     # TODO: do this in parallel
     run_linter(bundle, collector, max_time)
     if time.perf_counter() - start > max_time:
         terminate(bundle, collector, Status.TIME_LIMIT_EXCEEDED)
         return
+    profiler.stop("Linter")
 
     planned_units = plan_test_suite(bundle, strategy=PlanStrategy.OPTIMAL)
 
+    profiler.start("Supporting file generation")
     # Attempt to precompile everything.
     common_dir, dependencies, selector = _generate_files(bundle, planned_units)
+    profiler.stop("Supporting file generation")
 
     # Create an execution plan.
     plan = ExecutionPlan(
@@ -138,8 +144,10 @@ def judge(bundle: Bundle):
         start_time=start,
     )
 
+    profiler.start("Precompilation")
     _logger.debug("Attempting precompilation")
     compilation_results = precompile(bundle, plan)
+    profiler.stop("Precompilation")
 
     # If something went horribly wrong, and the compilation itself caused a timeout or memory issue, bail now.
     if _is_fatal_compilation_error(compilation_results):
@@ -161,9 +169,12 @@ def judge(bundle: Bundle):
     def _process_one_unit(
         index: int,
     ) -> tuple[CompilationResult, ExecutionResult | None, Path]:
-        return _execute_one_unit(bundle, plan, compilation_results, index)
+        profiler.start(f"Running execution unit {index}")
+        result = _execute_one_unit(bundle, plan, compilation_results, index, profiler)
+        profiler.stop(f"Running execution unit {index}")
+        return result
 
-    if bundle.config.options.parallel:
+    if bundle.config.options.parallel and not bundle.config.options.profile:
         max_workers = None
     else:
         max_workers = 1
@@ -206,6 +217,9 @@ def judge(bundle: Bundle):
             terminate(bundle, collector, Status.TIME_LIMIT_EXCEEDED)
             return
 
+    if isinstance(profiler, Profiler):
+        collector.add_messages([profiler.to_message()])
+
     # Close the last tab.
     terminate(bundle, collector, Status.CORRECT)
 
@@ -215,25 +229,32 @@ def _execute_one_unit(
     plan: ExecutionPlan,
     compilation_results: CompilationResult | None,
     index: int,
+    profiler: Profiler | DummyProfiler,
 ) -> tuple[CompilationResult, ExecutionResult | None, Path]:
     planned_unit = plan.units[index]
+    profiler.start("Preparing")
     # Prepare the unit.
     execution_dir, dependencies = set_up_unit(bundle, plan, index)
+    profiler.stop("Preparing")
 
     # If compilation is necessary, do it.
     if compilation_results is None:
+        profiler.start("Compiling")
         local_compilation_results, dependencies = compile_unit(
             bundle, plan, index, execution_dir, dependencies
         )
+        profiler.stop("Compiling")
     else:
         local_compilation_results = compilation_results
 
     # Execute the unit.
     if local_compilation_results.status == Status.CORRECT:
         remaining_time = plan.remaining_time()
+        profiler.start("Executing")
         execution_result, status = execute_unit(
             bundle, planned_unit, execution_dir, dependencies, remaining_time
         )
+        profiler.stop("Executing")
         local_compilation_results.status = status
     else:
         execution_result = None
