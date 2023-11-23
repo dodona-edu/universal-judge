@@ -84,13 +84,15 @@ def run_shellcheck(
         start_col = shellcheck_object.get("column", 1)
         end_col = shellcheck_object.get("endColumn")
         cols = end_col - start_col if end_col else None
+        if cols and cols < 1:
+            cols = 1
         annotations.append(
             AnnotateCode(
                 row=start_row + config.source_offset,
                 rows=rows,
                 text=text,
                 externalUrl=external,
-                column=start_col,
+                column=start_col - 1,
                 columns=cols,
                 type=message_categories.get(
                     shellcheck_object.get("level", "warning"), Severity.WARNING
