@@ -38,7 +38,7 @@ def run_shellcheck(
         command=[
             "shellcheck",
             "-f",
-            "json",
+            "json1",
             "-s",
             language,
             str(submission.absolute()),
@@ -66,6 +66,7 @@ def run_shellcheck(
             ),
         ], []
     annotations = []
+    shellcheck_objects = shellcheck_objects.get("comments", [])
 
     for shellcheck_object in shellcheck_objects:
         if Path(shellcheck_object.get("file", submission)).name != submission.name:
@@ -79,17 +80,17 @@ def run_shellcheck(
             external = f"https://github.com/koalaman/shellcheck/wiki/SC{code}"
         start_row = shellcheck_object.get("line", 1)
         end_row = shellcheck_object.get("endLine")
-        rows = end_row - start_row if end_row else None
+        rows = end_row + 1 - start_row if end_row else None
         start_col = shellcheck_object.get("column", 1)
         end_col = shellcheck_object.get("endColumn")
         cols = end_col - start_col if end_col else None
         annotations.append(
             AnnotateCode(
-                row=start_row - 1 + config.source_offset,
+                row=start_row + config.source_offset,
                 rows=rows,
                 text=text,
                 externalUrl=external,
-                column=start_col - 1,
+                column=start_col,
                 columns=cols,
                 type=message_categories.get(
                     shellcheck_object.get("level", "warning"), Severity.WARNING
