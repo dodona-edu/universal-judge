@@ -43,7 +43,7 @@ def run_pylint(
     try:
         args = [f"--rcfile={config_path}", str(submission)]
         logger.debug("Running with template_args %s", args)
-        lint.Run(args, reporter=JSONReporter(output=pylint_out), do_exit=False)
+        lint.Run(args, reporter=JSONReporter(output=pylint_out), exit=False)
     except Exception as e:
         logger.warning("Pylint crashed with", exc_info=e)
         return [
