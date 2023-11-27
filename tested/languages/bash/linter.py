@@ -88,7 +88,7 @@ def run_shellcheck(
             cols = 1
         annotations.append(
             AnnotateCode(
-                row=start_row + config.source_offset,
+                row=start_row + config.source_offset - 1,
                 rows=rows,
                 text=text,
                 externalUrl=external,
