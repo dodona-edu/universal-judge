@@ -16,6 +16,7 @@ from tested.languages.conventionalize import (
     Conventionable,
     NamingConventions,
     submission_file,
+    submission_name,
 )
 from tested.serialisation import Statement, Value
 
@@ -49,6 +50,12 @@ class Bash(Language):
             Construct.DEFAULT_PARAMETERS,
             Construct.GLOBAL_VARIABLES,
         }
+
+    def is_source_file(self, file: Path) -> bool:
+        return file.suffix == ""
+
+    def submission_file(self) -> str:
+        return submission_name(self)
 
     def compilation(self, files: list[str]) -> CallbackResult:
         submission = submission_file(self)

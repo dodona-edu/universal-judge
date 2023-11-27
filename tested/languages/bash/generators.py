@@ -2,6 +2,7 @@ import shlex
 from collections.abc import Callable
 
 from tested.datatypes import AdvancedStringTypes, BasicStringTypes
+from tested.languages.conventionalize import submission_file
 from tested.languages.preparation import (
     PreparedContext,
     PreparedExecutionUnit,
@@ -200,7 +201,7 @@ touch {pu.value_file} {pu.exception_file}
 
         # Import the submission if there is no main call.
         if not ctx.context.has_main_testcase():
-            result += f"{indent}source {pu.submission_name}.sh\n"
+            result += f"{indent}source {submission_file(pu.language)}\n"
 
         # Generate code for each testcase
         tc: PreparedTestcase
@@ -210,7 +211,7 @@ touch {pu.value_file} {pu.exception_file}
             # Prepare command arguments if needed.
             if tc.testcase.is_main_testcase():
                 assert isinstance(tc.input, MainInput)
-                result += f"{indent}bash {pu.submission_name}.sh "
+                result += f"{indent}bash {submission_file(pu.language)} "
                 result += " ".join(shlex.quote(s) for s in tc.input.arguments) + "\n"
             else:
                 assert isinstance(tc.input, PreparedTestcaseStatement)
