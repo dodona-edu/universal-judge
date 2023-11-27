@@ -11,6 +11,7 @@ from tested.datatypes import (
     BasicSequenceTypes,
     BasicStringTypes,
 )
+from tested.languages.conventionalize import submission_file
 from tested.languages.preparation import (
     PreparedContext,
     PreparedExecutionUnit,
@@ -132,8 +133,8 @@ def _generate_internal_context(ctx: PreparedContext, pu: PreparedExecutionUnit) 
     # Import the submission if there is no main call.
     if not ctx.context.has_main_testcase():
         result += f"""
-            delete require.cache[require.resolve("./{pu.submission_name}.js")];
-            const {pu.submission_name} = require("./{pu.submission_name}.js");
+            delete require.cache[require.resolve("./{submission_file(pu.language)}")];
+            const {pu.submission_name} = require("./{submission_file(pu.language)}");
             """
 
     # Generate code for each testcase

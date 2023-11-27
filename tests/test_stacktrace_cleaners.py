@@ -203,7 +203,7 @@ def test_java_runtime_error():
 
 
 def test_bash_runtime_error():
-    original = "submission.sh: rule 1: d: opdracht niet gevonden\n"
+    original = "submission: rule 1: d: opdracht niet gevonden\n"
     language_config = get_language("test", "bash")
     expected = "<code>:1: d: opdracht niet gevonden\n"
     actual = language_config.cleanup_stacktrace(original)
@@ -212,8 +212,8 @@ def test_bash_runtime_error():
 
 def test_bash_compilation_error():
     original = """
-    submission.sh: rule 1: syntaxfout nabij onverwacht symbool '('
-    submission.sh: rule 1: `def isISBN10(code):'
+    submission: rule 1: syntaxfout nabij onverwacht symbool '('
+    submission: rule 1: `def isISBN10(code):'
     """
     language_config = get_language("test", "bash")
     expected = """

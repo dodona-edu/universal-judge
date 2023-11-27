@@ -19,6 +19,7 @@ from tested.languages.conventionalize import (
     Conventionable,
     NamingConventions,
     conventionalize_namespace,
+    submission_name,
 )
 from tested.serialisation import FunctionCall, Statement, Value
 
@@ -199,6 +200,12 @@ class Language(ABC):
         :return: The file name with the language's extension appended to it.
         """
         return f"{file_name}.{self.file_extension()}"
+
+    def submission_file(self) -> str:
+        """
+        :return: The name of the submission.
+        """
+        return self.with_extension(submission_name(self))
 
     @abstractmethod
     def initial_dependencies(self) -> list[str]:

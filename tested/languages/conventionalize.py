@@ -425,7 +425,7 @@ def submission_file(language: "Language") -> str:
     """
     :return: The file name of a submission.
     """
-    return language.with_extension(submission_name(language))
+    return language.submission_file()
 
 
 def selector_name(language: "Language") -> str:
