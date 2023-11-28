@@ -8,9 +8,6 @@
       "$ref" : "#/$defs/_rootObject"
     },
     {
-      "$ref" : "#/$defs/unit"
-    },
-    {
       "$ref" : "#/$defs/_unitList"
     }
   ],

@@ -8,9 +8,6 @@
       "$ref" : "#/definitions/_rootObject"
     },
     {
-      "$ref" : "#/definitions/unit"
-    },
-    {
       "$ref" : "#/definitions/_unitList"
     }
   ],
