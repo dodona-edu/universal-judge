@@ -3,7 +3,7 @@ import traceback
 
 from tested.dodona import ExtendedMessage, Message, Permission, Status, StatusMessage
 from tested.internationalization import get_i18n_string
-from tested.judge.programmed import evaluate_programmed
+from tested.judge.programmed import OracleContext, evaluate_programmed
 from tested.judge.utils import BaseExecutionResult
 from tested.oracles.common import BooleanEvalResult, OracleConfig, OracleResult
 from tested.oracles.value import get_values
@@ -51,8 +51,16 @@ def evaluate(
         f"expected: {expected}\n"
         f"actual: {actual}"
     )
+    context = OracleContext(
+        expected=expected,
+        actual=actual,
+        execution_directory=str(config.context_dir.absolute()),
+        evaluation_directory=str(config.bundle.config.resources.absolute()),
+        programming_language=str(config.bundle.config.programming_language),
+        natural_language=config.bundle.config.natural_language,
+    )
     result = evaluate_programmed(
-        config.bundle, evaluator=channel.oracle, expected=expected, actual=actual
+        config.bundle, evaluator=channel.oracle, context=context
     )
 
     if isinstance(result, BaseExecutionResult):

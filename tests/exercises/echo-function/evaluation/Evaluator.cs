@@ -8,13 +8,13 @@ public class Evaluator {
         return new EvaluationResult(correct, "correct", actual != null ? actual.ToString() : "", messages);
     }
 
-    public static EvaluationResult EvaluateValue(Object expected, Object actual) {
+    public static EvaluationResult EvaluateValue(IDictionary context) {
         var messages = new List<Message>() {new Tested.Message("Hallo")};
-        return new EvaluationResult(expected == actual, expected.ToString(), actual != null ? actual.ToString() : "", messages);
+        return new EvaluationResult(context["expected"] == context["actual"], context["expected"].ToString(), context["actual"] != null ? context["actual"].ToString() : "", messages);
     }
-    
-    public static EvaluationResult EvaluateValueDsl(Object expected, Object actual) {
+
+    public static EvaluationResult EvaluateValueDsl(IDictionary context) {
             var messages = new List<Message>() {new Tested.Message("Hallo")};
-            return new EvaluationResult(expected == actual, null, null, messages, "{5, 5}", "{4, 4}");
+            return new EvaluationResult(context["expected"] == context["actual"], null, null, messages, "{5, 5}", "{4, 4}");
         }
 }

@@ -15,12 +15,12 @@ evaluate value  =
     }
 
 
-evaluate_value :: String -> String -> EvaluationResult
-evaluate_value expected actual =
-    let correct = if actual == expected then True else False
+evaluate_value :: Map -> EvaluationResult
+evaluate_value context =
+    let correct = if (lookup "actual" actual) == (lookup "expected" expected) then True else False
     in evaluationResult {
         result = correct,
-        readableExpected = Just expected,
-        readableActual = Just actual,
+        readableExpected = Just (lookup "expected" expected),
+        readableActual = Just (lookup "actual" actual),
         messages = [message "Hallo"]
     }

@@ -2,9 +2,9 @@
 from evaluation_utils import EvaluationResult
 
 
-def evaluate_correct(expected, actual):
-    return EvaluationResult(expected.strip() == actual.strip())
+def evaluate_correct(context):
+    return EvaluationResult(context["expected"].strip() == context["actual"].strip())
 
 
-def evaluate_wrong(_expected, _actual):
+def evaluate_wrong(_context):
     return EvaluationResult(False)

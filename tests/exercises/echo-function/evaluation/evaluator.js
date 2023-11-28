@@ -8,18 +8,18 @@ function evaluate(actual) {
     }
 }
 
-function evaluateValue(expected, actual) {
+function evaluateValue(context) {
     return {
-        "result": expected === actual,
-        "readable_expected": expected,
-        "readable_actual": actual,
+        "result": context.expected === context.actual,
+        "readable_expected": context.expected,
+        "readable_actual": context.actual,
         "messages": [{"description": "Hallo", "format": "text"}]
     }
 }
 
-function evaluateValueDsl(expected, actual) {
+function evaluateValueDsl(context) {
     return {
-        "result": expected === actual,
+        "result": context.expected === context.actual,
         "dsl_expected": "{5, 5}",
         "dsl_actual": "{4, 4}",
         "messages": [{"description": "Hallo", "format": "text"}]

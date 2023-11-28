@@ -10,17 +10,17 @@ class Evaluator {
         }
 
         @JvmStatic
-        fun evaluateValue(expected: Any, actual: Any?): EvaluationResult {
-            return EvaluationResult.Builder(result = expected == actual,
-                    readableExpected = expected.toString(),
-                    readableActual = actual?.toString() ?: "")
+        fun evaluateValue(context: Map<String, Any>): EvaluationResult {
+            return EvaluationResult.Builder(result = context["expected"] == context["actual"],
+                    readableExpected = context["expected"].toString(),
+                    readableActual = context["actual"]?.toString() ?: "")
                     .withMessage(EvaluationResult.Message("Hallo"))
                     .build()
         }
 
         @JvmStatic
-        fun evaluateValueDsl(expected: Any, actual: Any?): EvaluationResult {
-            return EvaluationResult.Builder(result = expected == actual,
+        fun evaluateValueDsl(context: Map<String, Any>): EvaluationResult {
+            return EvaluationResult.Builder(result = context["expected"] == context["actual"],
                     dslExpected = "{5, 5}",
                     dslActual = "{4, 4}")
                     .withMessage(EvaluationResult.Message("Hallo"))

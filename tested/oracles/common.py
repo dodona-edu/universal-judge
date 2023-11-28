@@ -30,12 +30,71 @@ from typing import Any
 from attrs import define, field
 
 from tested.configs import Bundle
+from tested.datatypes import BasicObjectTypes, BasicStringTypes
 from tested.dodona import Message, Status, StatusMessage
 from tested.dsl import parse_string
 from tested.languages.generation import generate_statement
 from tested.languages.utils import convert_stacktrace_to_clickable_feedback
 from tested.parsing import fallback_field, get_converter
+from tested.serialisation import ObjectKeyValuePair, ObjectType, StringType, Value
 from tested.testsuite import ExceptionOutputChannel, NormalOutputChannel, OutputChannel
+
+
+@define
+class OracleContext:
+    expected: Value
+    actual: Value
+    execution_directory: str
+    evaluation_directory: str
+    programming_language: str
+    natural_language: str
+
+    def as_value(self) -> Value:
+        # TODO: if we remove non-Python, we can pass a class, or otherwise,
+        #  we could re-use parts of the DSL for this...
+        return ObjectType(
+            type=BasicObjectTypes.MAP,
+            data=[
+                ObjectKeyValuePair(
+                    key=StringType(type=BasicStringTypes.TEXT, data="expected"),
+                    value=self.expected,
+                ),
+                ObjectKeyValuePair(
+                    key=StringType(type=BasicStringTypes.TEXT, data="actual"),
+                    value=self.actual,
+                ),
+                ObjectKeyValuePair(
+                    key=StringType(
+                        type=BasicStringTypes.TEXT, data="execution_directory"
+                    ),
+                    value=StringType(
+                        type=BasicStringTypes.TEXT, data=self.execution_directory
+                    ),
+                ),
+                ObjectKeyValuePair(
+                    key=StringType(
+                        type=BasicStringTypes.TEXT, data="evaluation_directory"
+                    ),
+                    value=StringType(
+                        type=BasicStringTypes.TEXT, data=self.evaluation_directory
+                    ),
+                ),
+                ObjectKeyValuePair(
+                    key=StringType(
+                        type=BasicStringTypes.TEXT, data="programming_language"
+                    ),
+                    value=StringType(
+                        type=BasicStringTypes.TEXT, data=self.programming_language
+                    ),
+                ),
+                ObjectKeyValuePair(
+                    key=StringType(type=BasicStringTypes.TEXT, data="natural_language"),
+                    value=StringType(
+                        type=BasicStringTypes.TEXT, data=self.natural_language
+                    ),
+                ),
+            ],
+        )
 
 
 @define

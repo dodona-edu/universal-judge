@@ -10,7 +10,7 @@ import urllib.parse
 from collections.abc import Iterable
 from pathlib import Path
 from re import Match
-from typing import TypeAlias
+from typing import TYPE_CHECKING, TypeAlias
 
 from pygments import highlight
 from pygments.formatters.html import HtmlFormatter
@@ -20,7 +20,6 @@ from tested.configs import Bundle
 from tested.datatypes import AllTypes, BasicObjectTypes
 from tested.dodona import ExtendedMessage
 from tested.internationalization import get_i18n_string
-from tested.judge.planning import PlannedExecutionUnit
 from tested.languages import Language
 from tested.languages.conventionalize import (
     conventionalize_namespace,
@@ -41,7 +40,6 @@ from tested.serialisation import (
     FunctionType,
     Identifier,
     Statement,
-    Value,
     VariableType,
 )
 from tested.testsuite import (
@@ -53,6 +51,11 @@ from tested.testsuite import (
     Testcase,
     TextData,
 )
+
+if TYPE_CHECKING:
+    from tested.judge.planning import PlannedExecutionUnit
+    from tested.oracles.common import OracleContext
+
 
 _logger = logging.getLogger(__name__)
 _html_formatter = HtmlFormatter(nowrap=True)
@@ -248,7 +251,7 @@ def generate_statement(bundle: Bundle, statement: Statement) -> str:
 def generate_execution(
     bundle: Bundle,
     destination: Path,
-    execution_unit: PlannedExecutionUnit,
+    execution_unit: "PlannedExecutionUnit",
 ) -> tuple[str, list[str]]:
     """
     Generate the files related to the execution.
@@ -302,8 +305,7 @@ def generate_custom_evaluator(
     bundle: Bundle,
     destination: Path,
     evaluator: CustomCheckOracle,
-    expected_value: Value,
-    actual_value: Value,
+    context: "OracleContext",
 ) -> str:
     """
     Generate the code for running a programmed oracle.
@@ -311,8 +313,7 @@ def generate_custom_evaluator(
     :param bundle: The configuration bundle.
     :param destination: The folder where the code should be generated.
     :param evaluator: The oracle data from the test suite.
-    :param expected_value: The preprocessed expected value.
-    :param actual_value: The preprocessed actual value.
+    :param context: Context for the oracle.
 
     :return: The name of the generated file.
     """
@@ -324,7 +325,7 @@ def generate_custom_evaluator(
         type=FunctionType.FUNCTION,
         namespace=Identifier(evaluator_name),
         name=evaluator.function.name,
-        arguments=[expected_value, actual_value, *evaluator.arguments],
+        arguments=[context.as_value(), *evaluator.arguments],
         has_root_namespace=False,
     )
 

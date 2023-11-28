@@ -18,8 +18,8 @@ from tested.internationalization import get_i18n_string
 from tested.judge.execution import execute_file, filter_files
 from tested.judge.utils import BaseExecutionResult, copy_from_paths_to_path, run_command
 from tested.languages.generation import generate_custom_evaluator, generate_statement
-from tested.oracles.common import BooleanEvalResult
-from tested.serialisation import FunctionCall, FunctionType, Value
+from tested.oracles.common import BooleanEvalResult, OracleContext
+from tested.serialisation import FunctionCall, FunctionType
 from tested.testsuite import CustomCheckOracle
 from tested.utils import get_identifier
 
@@ -29,8 +29,7 @@ _logger = logging.getLogger(__name__)
 def evaluate_programmed(
     bundle: Bundle,
     evaluator: CustomCheckOracle,
-    expected: Value,
-    actual: Value,
+    context: OracleContext,
 ) -> BaseExecutionResult | BooleanEvalResult:
     """
     Run the custom evaluation. Concerning structure and execution, the custom
@@ -42,16 +41,15 @@ def evaluate_programmed(
 
     # We have special support for Python.
     if evaluator.language == "python" and bundle.config.options.optimized:
-        return _evaluate_python(bundle, evaluator, expected, actual)
+        return _evaluate_python(bundle, evaluator, context)
     else:
-        return _evaluate_others(bundle, evaluator, expected, actual)
+        return _evaluate_others(bundle, evaluator, context)
 
 
 def _evaluate_others(
     bundle: Bundle,
     evaluator: CustomCheckOracle,
-    expected: Value,
-    actual: Value,
+    context: OracleContext,
 ) -> BaseExecutionResult:
     """
     Evaluate in all languages but Python. The re-uses the infrastructure of the
@@ -107,11 +105,7 @@ def _evaluate_others(
     # Generate the oracle.
     _logger.debug("Generating custom oracle.")
     evaluator_name = generate_custom_evaluator(
-        eval_bundle,
-        destination=custom_path,
-        evaluator=evaluator,
-        expected_value=expected,
-        actual_value=actual,
+        eval_bundle, destination=custom_path, evaluator=evaluator, context=context
     )
     dependencies.append(evaluator_name)
     _logger.debug("Generated oracle executor %s", evaluator_name)
@@ -176,8 +170,7 @@ def _catch_output() -> Generator[tuple[StringIO, StringIO], None, None]:
 def _evaluate_python(
     bundle: Bundle,
     oracle: CustomCheckOracle,
-    expected: Value,
-    actual: Value,
+    context: OracleContext,
 ) -> BooleanEvalResult:
     """
     Run an evaluation in Python. While the templates are still used to generate
@@ -213,7 +206,7 @@ def _evaluate_python(
     check_function_call = FunctionCall(
         type=FunctionType.FUNCTION,
         name=oracle.function.name,
-        arguments=[expected, actual, *oracle.arguments],
+        arguments=[context.as_value(), *oracle.arguments],
     )
     literal_function_call = generate_statement(eval_bundle, check_function_call)
 
