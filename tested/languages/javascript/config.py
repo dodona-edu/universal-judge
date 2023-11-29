@@ -20,7 +20,7 @@ from tested.languages.conventionalize import (
     submission_name,
 )
 from tested.languages.utils import cleanup_description
-from tested.serialisation import FunctionCall, Statement, Value
+from tested.serialisation import Statement, Value
 
 if TYPE_CHECKING:
     from tested.languages.generation import PreparedExecutionUnit
@@ -196,11 +196,6 @@ class JavaScript(Language):
         from tested.languages.javascript import generators
 
         return generators.convert_execution_unit(execution_unit)
-
-    def generate_check_function(self, name: str, function: FunctionCall) -> str:
-        from tested.languages.javascript import generators
-
-        return generators.convert_check_function(name, function)
 
     def generate_encoder(self, values: list[Value]) -> str:
         from tested.languages.javascript import generators

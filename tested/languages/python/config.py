@@ -18,7 +18,7 @@ from tested.languages.conventionalize import (
     NamingConventions,
     submission_file,
 )
-from tested.serialisation import FunctionCall, Statement, Value
+from tested.serialisation import Statement, Value
 
 if TYPE_CHECKING:
     from tested.languages.generation import PreparedExecutionUnit
@@ -222,11 +222,6 @@ class Python(Language):
         from tested.languages.python import generators
 
         return generators.convert_execution_unit(execution_unit)
-
-    def generate_check_function(self, name: str, function: FunctionCall) -> str:
-        from tested.languages.python import generators
-
-        return generators.convert_check_function(name, function)
 
     def generate_encoder(self, values: list[Value]) -> str:
         from tested.languages.python import generators

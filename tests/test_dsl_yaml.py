@@ -595,7 +595,6 @@ def test_text_custom_checks_correct():
               stdout:
                 data: "hallo"
                 oracle: "custom_check"
-                language: "python"
                 file: "test.py"
                 name: "evaluate_test"
                 arguments: [!expression "'yes'", 5, !expression "set([5, 5])"]
@@ -613,7 +612,6 @@ def test_text_custom_checks_correct():
     assert isinstance(test.output.stdout.oracle, CustomCheckOracle)
     assert test.output.stdout.data == "hallo"
     oracle = test.output.stdout.oracle
-    assert oracle.language == "python"
     assert oracle.function.name == "evaluate_test"
     assert oracle.function.file == Path("test.py")
     assert oracle.arguments == [
@@ -689,7 +687,6 @@ def test_value_custom_checks_correct():
               return: !oracle
                 value: "hallo"
                 oracle: "custom_check"
-                language: "python"
                 file: "test.py"
                 name: "evaluate_test"
                 arguments: ['yes', 5, !expression "set([5, 5])"]
@@ -709,7 +706,6 @@ def test_value_custom_checks_correct():
         type=BasicStringTypes.TEXT, data="hallo"
     )
     oracle = test.output.result.oracle
-    assert oracle.language == "python"
     assert oracle.function.name == "evaluate_test"
     assert oracle.function.file == Path("test.py")
     assert oracle.arguments == [

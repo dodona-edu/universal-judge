@@ -18,7 +18,6 @@
                 "data": "input-1",
                 "evaluator": {
                   "type": "programmed",
-                  "language": "python",
                   "function": {
                     "file": "evaluator.py",
                     "name": "evaluate_wrong"

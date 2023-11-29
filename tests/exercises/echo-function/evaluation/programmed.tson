@@ -14,62 +14,6 @@
                     "arguments": [
                       {
                         "type": "text",
-                        "data": "input-1"
-                      }
-                    ]
-                  },
-                  "output": {
-                    "result": {
-                      "value": {
-                        "type": "text",
-                        "data": "input-1"
-                      },
-                      "evaluator": {
-                        "type": "programmed",
-                        "function": {
-                          "file": "Evaluator.hs",
-                          "name": "evaluate_value"
-                        },
-                        "language": "haskell"
-                      }
-                    }
-                  }
-                },
-                {
-                  "input": {
-                    "type": "function",
-                    "name": "echo",
-                    "arguments": [
-                      {
-                        "type": "text",
-                        "data": "input-2"
-                      }
-                    ]
-                  },
-                  "output": {
-                    "result": {
-                      "value": {
-                        "type": "text",
-                        "data": "input-2"
-                      },
-                      "evaluator": {
-                        "type": "programmed",
-                        "function": {
-                          "file": "Evaluator.java",
-                          "name": "evaluateValue"
-                        },
-                        "language": "java"
-                      }
-                    }
-                  }
-                },
-                {
-                  "input": {
-                    "type": "function",
-                    "name": "echo",
-                    "arguments": [
-                      {
-                        "type": "text",
                         "data": "input-3"
                       }
                     ]
@@ -85,64 +29,7 @@
                         "function": {
                           "file": "evaluator.py",
                           "name": "evaluate_value"
-                        },
-                        "language": "python"
-                      }
-                    }
-                  }
-                },
-                {
-                  "input": {
-                    "type": "function",
-                    "name": "echo",
-                    "arguments": [
-                      {
-                        "type": "text",
-                        "data": "input-4"
-                      }
-                    ]
-                  },
-                  "output": {
-                    "result": {
-                      "value": {
-                        "type": "text",
-                        "data": "input-4"
-                      },
-                      "evaluator": {
-                        "type": "programmed",
-                        "function": {
-                          "file": "evaluator.js",
-                          "name": "evaluateValue"
-                        },
-                        "language": "javascript"
-                      }
-                    }
-                  }
-                },
-                {
-                  "input": {
-                    "type": "function",
-                    "name": "echo",
-                    "arguments": [
-                      {
-                        "type": "text",
-                        "data": "input-5"
-                      }
-                    ]
-                  },
-                  "output": {
-                    "result": {
-                      "value": {
-                        "type": "text",
-                        "data": "input-5"
-                      },
-                      "evaluator": {
-                        "type": "programmed",
-                        "function": {
-                          "file": "Evaluator.kt",
-                          "name": "evaluateValue"
-                        },
-                        "language": "kotlin"
+                        }
                       }
                     }
                   }

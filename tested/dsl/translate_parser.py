@@ -343,7 +343,6 @@ def _convert_custom_check_oracle(stream: dict) -> CustomCheckOracle:
         assert isinstance(cv, Value)
         converted_args.append(cv)
     return CustomCheckOracle(
-        language=stream["language"],
         function=EvaluationFunction(
             file=stream["file"], name=stream.get("name", "evaluate")
         ),
