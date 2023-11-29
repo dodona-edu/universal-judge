@@ -345,7 +345,6 @@
         {
           "required" : [
             "oracle",
-            "language",
             "file"
           ],
           "properties" : {
@@ -354,10 +353,6 @@
               "enum" : [
                 "custom_check"
               ]
-            },
-            "language" : {
-              "type" : "string",
-              "description" : "The programming language of the custom check function."
             },
             "file" : {
               "type" : "string",
@@ -409,7 +404,6 @@
             {
               "required" : [
                 "oracle",
-                "language",
                 "file"
               ],
               "properties" : {
@@ -418,10 +412,6 @@
                   "enum" : [
                     "custom_check"
                   ]
-                },
-                "language" : {
-                  "type" : "string",
-                  "description" : "The programming language of the custom check function."
                 },
                 "file" : {
                   "type" : "string",

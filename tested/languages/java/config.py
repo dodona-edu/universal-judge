@@ -18,7 +18,7 @@ from tested.languages.conventionalize import (
     submission_file,
 )
 from tested.languages.utils import jvm_cleanup_stacktrace, jvm_memory_limit
-from tested.serialisation import FunctionCall, Statement, Value
+from tested.serialisation import Statement, Value
 
 if TYPE_CHECKING:
     from tested.languages.generation import PreparedExecutionUnit
@@ -152,11 +152,6 @@ class Java(Language):
         from tested.languages.java import generators
 
         return generators.convert_selector(contexts)
-
-    def generate_check_function(self, name: str, function: FunctionCall) -> str:
-        from tested.languages.java import generators
-
-        return generators.convert_check_function(function)
 
     def generate_encoder(self, values: list[Value]) -> str:
         from tested.languages.java import generators

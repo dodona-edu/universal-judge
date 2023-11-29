@@ -162,7 +162,6 @@ class CustomCheckOracle:
     or evaluating non-deterministic return values.
     """
 
-    language: str
     function: EvaluationFunction
     arguments: list[Value] = field(factory=list)
     type: Literal["programmed", "custom_check"] = "custom_check"

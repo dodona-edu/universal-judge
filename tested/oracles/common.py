@@ -35,7 +35,18 @@ from tested.dsl import parse_string
 from tested.languages.generation import generate_statement
 from tested.languages.utils import convert_stacktrace_to_clickable_feedback
 from tested.parsing import fallback_field, get_converter
+from tested.serialisation import Value
 from tested.testsuite import ExceptionOutputChannel, NormalOutputChannel, OutputChannel
+
+
+@define
+class OracleContext:
+    expected: Value
+    actual: Value
+    execution_directory: str
+    evaluation_directory: str
+    programming_language: str
+    natural_language: str
 
 
 @define

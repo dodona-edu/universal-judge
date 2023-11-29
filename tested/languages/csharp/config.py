@@ -20,7 +20,7 @@ from tested.languages.conventionalize import (
     submission_file,
     submission_name,
 )
-from tested.serialisation import FunctionCall, Statement, Value
+from tested.serialisation import Statement, Value
 
 logger = logging.getLogger(__name__)
 
@@ -232,11 +232,6 @@ class {class_name}
         from tested.languages.csharp import generators
 
         return generators.convert_selector(contexts)
-
-    def generate_check_function(self, name: str, function: FunctionCall) -> str:
-        from tested.languages.csharp import generators
-
-        return generators.convert_check_function(function)
 
     def generate_encoder(self, values: list[Value]) -> str:
         from tested.languages.csharp import generators

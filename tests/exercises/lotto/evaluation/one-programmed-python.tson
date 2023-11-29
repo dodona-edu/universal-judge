@@ -16,7 +16,6 @@
                       },
                       "evaluator": {
                         "type": "programmed",
-                        "language": "python",
                         "function": {
                           "file": "./evaluator.py"
                         },

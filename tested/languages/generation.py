@@ -10,7 +10,7 @@ import urllib.parse
 from collections.abc import Iterable
 from pathlib import Path
 from re import Match
-from typing import TypeAlias
+from typing import TYPE_CHECKING, TypeAlias
 
 from pygments import highlight
 from pygments.formatters.html import HtmlFormatter
@@ -20,39 +20,27 @@ from tested.configs import Bundle
 from tested.datatypes import AllTypes, BasicObjectTypes
 from tested.dodona import ExtendedMessage
 from tested.internationalization import get_i18n_string
-from tested.judge.planning import PlannedExecutionUnit
 from tested.languages import Language
-from tested.languages.conventionalize import (
-    conventionalize_namespace,
-    selector_file,
-    submission_name,
-)
+from tested.languages.conventionalize import selector_file, submission_name
 from tested.languages.preparation import (
     PreparedExecutionUnit,
-    PreparedFunctionCall,
     prepare_assignment,
     prepare_execution_unit,
     prepare_expression,
 )
 from tested.parsing import get_converter
-from tested.serialisation import (
-    Assignment,
-    Expression,
-    FunctionType,
-    Identifier,
-    Statement,
-    Value,
-    VariableType,
-)
+from tested.serialisation import Assignment, Expression, Statement, VariableType
 from tested.testsuite import (
     Context,
-    CustomCheckOracle,
     FileUrl,
     LanguageLiterals,
     MainInput,
     Testcase,
     TextData,
 )
+
+if TYPE_CHECKING:
+    from tested.judge.planning import PlannedExecutionUnit
 
 _logger = logging.getLogger(__name__)
 _html_formatter = HtmlFormatter(nowrap=True)
@@ -248,7 +236,7 @@ def generate_statement(bundle: Bundle, statement: Statement) -> str:
 def generate_execution(
     bundle: Bundle,
     destination: Path,
-    execution_unit: PlannedExecutionUnit,
+    execution_unit: "PlannedExecutionUnit",
 ) -> tuple[str, list[str]]:
     """
     Generate the files related to the execution.
@@ -296,47 +284,6 @@ def generate_selector(
     with open(selector_destination, "w") as execution_file:
         execution_file.write(selector_code)
     return selector_filename
-
-
-def generate_custom_evaluator(
-    bundle: Bundle,
-    destination: Path,
-    evaluator: CustomCheckOracle,
-    expected_value: Value,
-    actual_value: Value,
-) -> str:
-    """
-    Generate the code for running a programmed oracle.
-
-    :param bundle: The configuration bundle.
-    :param destination: The folder where the code should be generated.
-    :param evaluator: The oracle data from the test suite.
-    :param expected_value: The preprocessed expected value.
-    :param actual_value: The preprocessed actual value.
-
-    :return: The name of the generated file.
-    """
-    evaluator_name = conventionalize_namespace(
-        bundle.language, evaluator.function.file.stem
-    )
-
-    function = PreparedFunctionCall(
-        type=FunctionType.FUNCTION,
-        namespace=Identifier(evaluator_name),
-        name=evaluator.function.name,
-        arguments=[expected_value, actual_value, *evaluator.arguments],
-        has_root_namespace=False,
-    )
-
-    code = bundle.language.generate_check_function(evaluator_name, function)
-
-    if destination.is_dir():
-        destination /= bundle.language.with_extension("EvaluatorExecutor")
-
-    with open(destination, "w") as check_function_file:
-        check_function_file.write(code)
-
-    return destination.name
 
 
 def _convert_single_type(

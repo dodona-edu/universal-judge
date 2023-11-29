@@ -21,7 +21,7 @@ from tested.languages.conventionalize import (
     conventionalize_namespace,
     submission_name,
 )
-from tested.serialisation import FunctionCall, Statement, Value
+from tested.serialisation import Statement, Value
 
 if typing.TYPE_CHECKING:
     from tested.configs import GlobalConfig
@@ -289,18 +289,6 @@ class Language(ABC):
         """
         pass
 
-    def modify_specific_evaluator(self, evaluator: Path):
-        """
-        An opportunity to modify the language-specific oracle. By default,
-        this does nothing. If you modify the oracle, you must overwrite the
-        contents of the oracle in-place.
-
-        This callback is called before any compilation.
-
-        :param evaluator: Path to the oracle and path for the modified oracle.
-        """
-        pass
-
     def compiler_output(
         self, stdout: str, stderr: str
     ) -> tuple[list[Message], list[AnnotateCode], str, str]:
@@ -440,16 +428,6 @@ class Language(ABC):
 
         :param contexts: The contexts the selector must support.
         :return: A string representing the selector.
-        """
-        raise NotImplementedError
-
-    def generate_check_function(self, name: str, function: FunctionCall) -> str:
-        """
-        Generate code that calls the given function as a custom check function.
-
-        :param name: The name of the custom check function.
-        :param function: The function to call.
-        :return: A string representing the custom check function.
         """
         raise NotImplementedError
 

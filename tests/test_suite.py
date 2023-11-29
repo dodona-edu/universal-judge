@@ -13,7 +13,6 @@ from tested.testsuite import (
 def test_text_output_is_compatible_oracle():
     old_structure = {
         "evaluator": {
-            "language": "python",
             "function": {"file": "evaluate.py"},
             "type": "custom_check",
         },
@@ -23,14 +22,12 @@ def test_text_output_is_compatible_oracle():
     result = get_converter().structure(old_structure, TextOutputChannel)
 
     assert isinstance(result.oracle, CustomCheckOracle)
-    assert result.oracle.language == "python"
     assert result.oracle.function.file.name == "evaluate.py"
 
 
 def test_file_output_is_compatible_oracle():
     old_structure = {
         "evaluator": {
-            "language": "python",
             "function": {"file": "evaluate.py"},
             "type": "custom_check",
         },
@@ -41,14 +38,12 @@ def test_file_output_is_compatible_oracle():
     result = get_converter().structure(old_structure, FileOutputChannel)
 
     assert isinstance(result.oracle, CustomCheckOracle)
-    assert result.oracle.language == "python"
     assert result.oracle.function.file.name == "evaluate.py"
 
 
 def test_value_output_is_compatible_oracle():
     old_structure = {
         "evaluator": {
-            "language": "python",
             "function": {"file": "evaluate.py"},
             "type": "custom_check",
         },
@@ -58,14 +53,12 @@ def test_value_output_is_compatible_oracle():
     result = get_converter().structure(old_structure, ValueOutputChannel)
 
     assert isinstance(result.oracle, CustomCheckOracle)
-    assert result.oracle.language == "python"
     assert result.oracle.function.file.name == "evaluate.py"
 
 
 def test_exception_output_is_compatible_oracle():
     old_structure = {
         "evaluator": {
-            "language": "python",
             "function": {"file": "evaluate.py"},
             "type": "custom_check",
         },
@@ -75,7 +68,6 @@ def test_exception_output_is_compatible_oracle():
     result = get_converter().structure(old_structure, ValueOutputChannel)
 
     assert isinstance(result.oracle, CustomCheckOracle)
-    assert result.oracle.language == "python"
     assert result.oracle.function.file.name == "evaluate.py"
 
 

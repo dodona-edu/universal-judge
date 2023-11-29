@@ -10,20 +10,4 @@ public class Evaluator {
                 .withMessage(new EvaluationResult.Message("Hallo"))
                 .build();
     }
-
-    public static EvaluationResult evaluateValue(Object expected, Object actual) {
-        return EvaluationResult.builder(expected.equals(actual))
-                .withReadableExpected(expected.toString())
-                .withReadableActual(actual != null ? actual.toString() : "")
-                .withMessage(new EvaluationResult.Message("Hallo"))
-                .build();
-    }
-
-    public static EvaluationResult evaluateValueDsl(Object expected, Object actual) {
-        return EvaluationResult.builder(expected.equals(actual))
-                .withDslExpected("{5, 5}")
-                .withDslActual("{4, 4}")
-                .withMessage(new EvaluationResult.Message("Hallo"))
-                .build();
-    }
 }
