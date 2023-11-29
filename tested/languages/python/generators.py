@@ -202,6 +202,7 @@ def send_specific_exception(exception):
         result += indent + ctx.before + "\n"
 
         if not ctx.context.has_main_testcase():
+            result += indent + "write_separator()\n"
             result += indent + f"import {pu.submission_name}\n"
             if i != 0:
                 result += (
@@ -209,16 +210,17 @@ def send_specific_exception(exception):
                 )
 
         tc: PreparedTestcase
-        for tc in ctx.testcases:
-            result += indent + "write_separator()\n"
-
+        for j, tc in enumerate(ctx.testcases):
             # Prepare command arguments if needed.
             if tc.testcase.is_main_testcase():
+                result += indent + "write_separator()\n"
                 assert isinstance(tc.input, MainInput)
                 result += indent + "new_args = [sys.argv[0]]\n"
                 wrapped = [json.dumps(a) for a in tc.input.arguments]
                 result += f"{indent}new_args.extend([{', '.join(wrapped)}])\n"
                 result += indent + "sys.argv = new_args\n"
+            elif j != 0:
+                result += indent + "write_separator()\n"
 
             result += indent + "try:\n"
             if tc.testcase.is_main_testcase():

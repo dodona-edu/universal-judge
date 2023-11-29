@@ -197,9 +197,9 @@ def evaluate_context_results(
     values = exec_results.results.split(exec_results.separator)
 
     # The first item should always be empty, since the separator must be printed
-    # before the test suite runs. We remove the first item; for stdout and stderr
-    # we only remove the first item if it is indeed empty. This is to keep error
-    # messages present for debugging.
+    # before the test suite runs. We remove the first item; but only
+    # if it is indeed empty. This is to keep error messages present for
+    # debugging.
 
     deletions = (
         safe_del(stdout_, 0, lambda e: e == ""),

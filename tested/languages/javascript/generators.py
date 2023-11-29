@@ -133,24 +133,26 @@ def _generate_internal_context(ctx: PreparedContext, pu: PreparedExecutionUnit) 
     # Import the submission if there is no main call.
     if not ctx.context.has_main_testcase():
         result += f"""
+            writeSeparator();
             delete require.cache[require.resolve("./{submission_file(pu.language)}")];
             const {pu.submission_name} = require("./{submission_file(pu.language)}");
             """
 
     # Generate code for each testcase
     tc: PreparedTestcase
-    for tc in ctx.testcases:
-        result += "writeSeparator();\n"
-
+    for i, tc in enumerate(ctx.testcases):
         # Prepare command arguments if needed.
         if tc.testcase.is_main_testcase():
             assert isinstance(tc.input, MainInput)
             wrapped = [json.dumps(a) for a in tc.input.arguments]
             result += f"""
+            writeSeparator();
             let new_args = [process.argv[0]];
             new_args = new_args.concat([{", ".join(wrapped)}]);
             process.argv = new_args;
             """
+        elif i != 0:
+            result += "writeSeparator();\n"
 
         # We need special code to make variables available outside of the try-catch block.
         if (

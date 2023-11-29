@@ -982,3 +982,36 @@ def test_python_input_prompt_is_ignored(tmp_path: Path, pytestconfig):
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["correct"]
+
+
+# Check that the test suite is valid with a correct submission.
+# This test suite is used for the test below "test_output_in_script_is_caught".
+@pytest.mark.parametrize("language", ["python", "javascript", "bash"])
+def test_two_suite_is_valid(language: str, tmp_path: Path, pytestconfig):
+    conf = configuration(
+        pytestconfig,
+        "echo-function",
+        "python",
+        tmp_path,
+        "two.yaml",
+        "correct",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"] * 2
+
+
+@pytest.mark.parametrize("language", ["python", "javascript", "bash"])
+def test_output_in_script_is_caught(language: str, tmp_path: Path, pytestconfig):
+    conf = configuration(
+        pytestconfig,
+        "echo-function",
+        language,
+        tmp_path,
+        "two.yaml",
+        "top-level-output",
+    )
+    result = execute_config(conf)
+    print(result)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["wrong", "correct", "correct"]
