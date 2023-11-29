@@ -1,0 +1,8 @@
+- tab: "My tab"
+  contexts:
+    - testcases:
+        - expression: 'echo("input-1")'
+          return: "input-1"
+        - expression: 'echo("input-2")'
+          return: "input-2"
+

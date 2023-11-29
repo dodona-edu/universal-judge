@@ -201,19 +201,21 @@ touch {pu.value_file} {pu.exception_file}
 
         # Import the submission if there is no main call.
         if not ctx.context.has_main_testcase():
+            result += indent + "write_separator\n"
             result += f"{indent}source {submission_file(pu.language)}\n"
 
         # Generate code for each testcase
         tc: PreparedTestcase
-        for tc in ctx.testcases:
-            result += indent + "write_separator\n"
-
+        for j, tc in enumerate(ctx.testcases):
             # Prepare command arguments if needed.
             if tc.testcase.is_main_testcase():
+                result += indent + "write_separator\n"
                 assert isinstance(tc.input, MainInput)
                 result += f"{indent}bash {submission_file(pu.language)} "
                 result += " ".join(shlex.quote(s) for s in tc.input.arguments) + "\n"
             else:
+                if j != 0:
+                    result += indent + "write_separator\n"
                 assert isinstance(tc.input, PreparedTestcaseStatement)
                 result += indent + convert_statement(tc.input.input_statement()) + "\n"
             result += "\n"
