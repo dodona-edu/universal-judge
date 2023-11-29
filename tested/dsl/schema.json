@@ -453,7 +453,7 @@
           "type" : "boolean"
         },
         "ignoreWhitespace" : {
-          "description" : "Ignore leading and trailing whitespace",
+          "description" : "Ignore and trailing whitespace",
           "type" : "boolean"
         },
         "roundTo" : {
