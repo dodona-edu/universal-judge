@@ -46,7 +46,7 @@ def compare_text(options: dict[str, Any], expected: str, actual: str) -> OracleR
     expected_eval, actual_eval = str(expected), str(actual)
 
     if options["ignoreWhitespace"]:
-        expected_eval, actual_eval = expected_eval.strip(), actual_eval.strip()
+        expected_eval, actual_eval = expected_eval.rstrip(), actual_eval.rstrip()
 
     if options["caseInsensitive"]:
         expected_eval, actual_eval = expected_eval.lower(), actual_eval.lower()
