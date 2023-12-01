@@ -46,7 +46,8 @@ class PlannedExecutionUnit:
     index: int
 
     def get_stdin(self, resources: Path) -> str:
-        return "\n".join(c.context.get_stdin(resources) or "" for c in self.contexts)
+        potential = [c.context.get_stdin(resources) for c in self.contexts]
+        return "\n".join(p for p in potential if p)
 
     def has_main_testcase(self) -> bool:
         return self.contexts[0].context.has_main_testcase()

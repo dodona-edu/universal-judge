@@ -60,8 +60,8 @@ def run_command(
         )
     except subprocess.TimeoutExpired as e:
         return BaseExecutionResult(
-            stdout=str(e.stdout or ""),
-            stderr=str(e.stderr or ""),
+            stdout=e.stdout.decode("utf-8", "backslashreplace") if e.stdout else "",
+            stderr=e.stderr.decode("utf-8", "backslashreplace") if e.stderr else "",
             exit=0,
             timeout=True,
             memory=False,
