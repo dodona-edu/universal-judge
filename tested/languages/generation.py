@@ -89,15 +89,6 @@ def _handle_link_files(link_files: Iterable[FileUrl], language: str) -> tuple[st
     )
 
 
-def _escape_shell(arg: str) -> str:
-    # We want to always quote...
-    quoted = shlex.quote(arg)
-    if quoted.startswith("'") and quoted.endswith("'"):
-        return quoted
-    else:
-        return f"'{quoted}'"
-
-
 def get_readable_input(
     bundle: Bundle, case: Testcase
 ) -> tuple[ExtendedMessage, set[FileUrl]]:
@@ -122,9 +113,9 @@ def get_readable_input(
         assert isinstance(case.input, MainInput)
         # See https://rouge-ruby.github.io/docs/Rouge/Lexers/ConsoleLexer.html
         format_ = "console"
-        arguments = " ".join(_escape_shell(x) for x in case.input.arguments)
         submission = submission_name(bundle.language)
-        args = f"$ {submission} {arguments}"
+        command = shlex.join([submission] + case.input.arguments)
+        args = f"$ {command}"
         if isinstance(case.input.stdin, TextData):
             stdin = case.input.stdin.get_data_as_string(bundle.config.resources)
         else:

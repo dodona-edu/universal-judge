@@ -17,7 +17,7 @@ from tested.datatypes import BasicBooleanTypes, BasicNumericTypes, BasicStringTy
 from tested.judge.execution import ExecutionResult
 from tested.languages import LANGUAGES
 from tested.languages.conventionalize import submission_name
-from tested.languages.generation import generate_statement
+from tested.languages.generation import generate_statement, get_readable_input
 from tested.serialisation import (
     BooleanType,
     FunctionCall,
@@ -25,7 +25,7 @@ from tested.serialisation import (
     NumberType,
     StringType,
 )
-from tested.testsuite import Suite
+from tested.testsuite import Context, MainInput, Suite, Tab, Testcase
 from tests.manual_utils import assert_valid_output, configuration, execute_config
 
 COMPILE_LANGUAGES = [
@@ -1015,3 +1015,24 @@ def test_output_in_script_is_caught(language: str, tmp_path: Path, pytestconfig)
     print(result)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["wrong", "correct", "correct"]
+
+
+def test_main_call_quotes(tmp_path: Path, pytestconfig):
+    conf = configuration(
+        pytestconfig,
+        "echo-function",
+        "bash",
+        tmp_path,
+        "two.yaml",
+        "top-level-output",
+    )
+    the_input = Testcase(
+        input=MainInput(arguments=["hello", "it's", "$yes", "--hello=no", "-hello"])
+    )
+    suite = Suite(tabs=[Tab(contexts=[Context(testcases=[the_input])], name="hallo")])
+    bundle = create_bundle(conf, sys.stdout, suite)
+    actual, _ = get_readable_input(bundle, the_input)
+
+    assert (
+        actual.description == "$ submission hello 'it'\"'\"'s' '$yes' --hello=no -hello"
+    )

@@ -212,7 +212,7 @@ touch {pu.value_file} {pu.exception_file}
                 result += indent + "write_separator\n"
                 assert isinstance(tc.input, MainInput)
                 result += f"{indent}bash {submission_file(pu.language)} "
-                result += " ".join(shlex.quote(s) for s in tc.input.arguments) + "\n"
+                result += shlex.join(tc.input.arguments) + "\n"
             else:
                 if j != 0:
                     result += indent + "write_separator\n"
