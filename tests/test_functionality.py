@@ -25,7 +25,7 @@ from tested.serialisation import (
     NumberType,
     StringType,
 )
-from tested.testsuite import Context, MainInput, Suite, Tab, Testcase
+from tested.testsuite import Context, MainInput, Suite, Tab, Testcase, TextData
 from tests.manual_utils import assert_valid_output, configuration, execute_config
 
 COMPILE_LANGUAGES = [
@@ -1035,4 +1035,49 @@ def test_main_call_quotes(tmp_path: Path, pytestconfig):
 
     assert (
         actual.description == "$ submission hello 'it'\"'\"'s' '$yes' --hello=no -hello"
+    )
+
+
+def test_stdin_and_arguments_use_heredoc(tmp_path: Path, pytestconfig):
+    conf = configuration(
+        pytestconfig,
+        "echo-function",
+        "bash",
+        tmp_path,
+        "two.yaml",
+        "top-level-output",
+    )
+    the_input = Testcase(
+        input=MainInput(
+            arguments=["hello"], stdin=TextData(data="One line\nSecond line\n")
+        )
+    )
+    suite = Suite(tabs=[Tab(contexts=[Context(testcases=[the_input])], name="hallo")])
+    bundle = create_bundle(conf, sys.stdout, suite)
+    actual, _ = get_readable_input(bundle, the_input)
+
+    assert (
+        actual.description
+        == "$ submission hello << 'STDIN'\nOne line\nSecond line\nSTDIN"
+    )
+
+
+def test_stdin_token_is_unique(tmp_path: Path, pytestconfig):
+    conf = configuration(
+        pytestconfig,
+        "echo-function",
+        "bash",
+        tmp_path,
+        "two.yaml",
+        "top-level-output",
+    )
+    the_input = Testcase(
+        input=MainInput(arguments=["hello"], stdin=TextData(data="One line\nSTDIN\n"))
+    )
+    suite = Suite(tabs=[Tab(contexts=[Context(testcases=[the_input])], name="hallo")])
+    bundle = create_bundle(conf, sys.stdout, suite)
+    actual, _ = get_readable_input(bundle, the_input)
+
+    assert (
+        actual.description == "$ submission hello << 'STDINN'\nOne line\nSTDIN\nSTDINN"
     )
