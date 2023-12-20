@@ -62,7 +62,7 @@ tabs:
     assert len(context.testcases) == 1
     tc = context.testcases[0]
     assert tc.is_main_testcase()
-    assert tc.input.stdin.data == "Input string"
+    assert tc.input.stdin.data == "Input string\n"
     assert tc.input.arguments == ["--arg", "argument"]
     assert tc.output.stderr.data == "Error string"
     assert tc.output.stdout.data == "Output string"
