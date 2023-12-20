@@ -90,6 +90,13 @@ YamlObject = (
 )
 
 
+def _ensure_trailing_newline(text: str) -> str:
+    if text[-1] != "\n":
+        return text + "\n"
+    else:
+        return text
+
+
 def _parse_yaml_value(loader: yaml.Loader, node: yaml.Node) -> Any:
     if isinstance(node, yaml.MappingNode):
         result = loader.construct_mapping(node)
@@ -442,7 +449,7 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
     else:
         if "stdin" in testcase:
             assert isinstance(testcase["stdin"], str)
-            stdin = TextData(data=testcase["stdin"])
+            stdin = TextData(data=_ensure_trailing_newline(testcase["stdin"]))
         else:
             stdin = EmptyChannel.NONE
         arguments = testcase.get("arguments", [])

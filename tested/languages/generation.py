@@ -89,6 +89,14 @@ def _handle_link_files(link_files: Iterable[FileUrl], language: str) -> tuple[st
     )
 
 
+def _get_heredoc_token(stdin: str) -> str:
+    delimiter = "STDIN"
+    stdin_lines = stdin.splitlines()
+    while delimiter in stdin:
+        delimiter = delimiter + "N"
+    return delimiter
+
+
 def get_readable_input(
     bundle: Bundle, case: Testcase
 ) -> tuple[ExtendedMessage, set[FileUrl]]:
@@ -113,20 +121,26 @@ def get_readable_input(
         assert isinstance(case.input, MainInput)
         # See https://rouge-ruby.github.io/docs/Rouge/Lexers/ConsoleLexer.html
         format_ = "console"
+        # Determine the command (with arguments)
         submission = submission_name(bundle.language)
         command = shlex.join([submission] + case.input.arguments)
         args = f"$ {command}"
+        # Determine the stdin
         if isinstance(case.input.stdin, TextData):
             stdin = case.input.stdin.get_data_as_string(bundle.config.resources)
         else:
             stdin = ""
-        if not stdin:
-            text = args
+
+        # If we have both stdin and arguments, we use a here-document.
+        if case.input.arguments and stdin:
+            assert stdin[-1] == "\n", "stdin must end with a newline"
+            delimiter = _get_heredoc_token(stdin)
+            text = f"{args} << '{delimiter}'\n{stdin}{delimiter}"
+        elif stdin:
+            assert not case.input.arguments
+            text = stdin
         else:
-            if case.input.arguments:
-                text = f"{args}\n{stdin}"
-            else:
-                text = stdin
+            text = args
     elif isinstance(case.input, Statement):
         format_ = bundle.config.programming_language
         text = generate_statement(bundle, case.input)
