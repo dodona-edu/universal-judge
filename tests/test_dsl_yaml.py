@@ -64,8 +64,8 @@ tabs:
     assert tc.is_main_testcase()
     assert tc.input.stdin.data == "Input string\n"
     assert tc.input.arguments == ["--arg", "argument"]
-    assert tc.output.stderr.data == "Error string"
-    assert tc.output.stdout.data == "Output string"
+    assert tc.output.stderr.data == "Error string\n"
+    assert tc.output.stdout.data == "Output string\n"
     assert tc.output.exit_code.value == 1
 
 
@@ -217,7 +217,7 @@ def test_parse_ctx_with_config():
     assert tc3.input.arguments == ["-e"]
 
     stdout = tc0.output.stdout
-    assert stdout.data == "3.34"
+    assert stdout.data == "3.34\n"
     options = stdout.oracle.options
     assert len(options) == 3
     assert options["tryFloatingPoint"]
@@ -225,7 +225,7 @@ def test_parse_ctx_with_config():
     assert options["roundTo"] == 2
 
     stdout = tc1.output.stdout
-    assert stdout.data == "3.337"
+    assert stdout.data == "3.337\n"
     options = stdout.oracle.options
     assert len(options) == 3
     assert options["tryFloatingPoint"]
@@ -233,7 +233,7 @@ def test_parse_ctx_with_config():
     assert options["roundTo"] == 3
 
     stdout = tc2.output.stdout
-    assert stdout.data == "3.3"
+    assert stdout.data == "3.3\n"
     options = stdout.oracle.options
     assert len(options) == 3
     assert options["tryFloatingPoint"]
@@ -241,7 +241,7 @@ def test_parse_ctx_with_config():
     assert options["roundTo"] == 2
 
     stderr = tc3.output.stderr
-    assert stderr.data == " Fail "
+    assert stderr.data == " Fail \n"
     options = stderr.oracle.options
     assert len(options) == 2
     assert not options["caseInsensitive"]
@@ -282,14 +282,14 @@ def test_statements():
 
     assert len(tests0) == 2
     assert isinstance(tests0[0].input, Assignment)
-    assert tests0[0].output.stdout.data == "New safe"
+    assert tests0[0].output.stdout.data == "New safe\n"
     assert tests0[0].output.stdout.oracle.options["ignoreWhitespace"]
     assert isinstance(tests0[1].input, FunctionCall)
     assert tests0[1].output.result.value.data == "Ignore whitespace"
 
     assert len(tests1) == 2
     assert isinstance(tests1[0].input, Assignment)
-    assert tests1[0].output.stdout.data == "New safe"
+    assert tests1[0].output.stdout.data == "New safe\n"
     assert not tests1[0].output.stdout.oracle.options["ignoreWhitespace"]
     assert isinstance(tests1[1].input, FunctionCall)
     assert tests1[1].output.result.value.data == 5
@@ -318,7 +318,7 @@ def test_expression_and_main():
     assert len(ctx.testcases) == 2
     tc = ctx.testcases[0]
     assert tc.input.arguments == ["-a", "5", "7"]
-    assert tc.output.stdout.data == "12"
+    assert tc.output.stdout.data == "12\n"
     assert tc.output.stdout.oracle.options["tryFloatingPoint"]
     test = ctx.testcases[1]
     assert isinstance(test.input, FunctionCall)
@@ -559,7 +559,7 @@ def test_text_built_in_checks_implied():
     assert isinstance(test.input, FunctionCall)
     assert isinstance(test.output.stdout, TextOutputChannel)
     assert isinstance(test.output.stdout.oracle, GenericTextOracle)
-    assert test.output.stdout.data == "hallo"
+    assert test.output.stdout.data == "hallo\n"
 
 
 def test_text_built_in_checks_explicit():
@@ -583,7 +583,7 @@ def test_text_built_in_checks_explicit():
     assert isinstance(test.input, FunctionCall)
     assert isinstance(test.output.stdout, TextOutputChannel)
     assert isinstance(test.output.stdout.oracle, GenericTextOracle)
-    assert test.output.stdout.data == "hallo"
+    assert test.output.stdout.data == "hallo\n"
 
 
 def test_text_custom_checks_correct():
@@ -610,7 +610,7 @@ def test_text_custom_checks_correct():
     assert isinstance(test.input, FunctionCall)
     assert isinstance(test.output.stdout, TextOutputChannel)
     assert isinstance(test.output.stdout.oracle, CustomCheckOracle)
-    assert test.output.stdout.data == "hallo"
+    assert test.output.stdout.data == "hallo\n"
     oracle = test.output.stdout.oracle
     assert oracle.function.name == "evaluate_test"
     assert oracle.function.file == Path("test.py")

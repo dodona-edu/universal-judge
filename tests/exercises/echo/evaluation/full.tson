@@ -7,13 +7,13 @@
           "run": {
             "output": {
               "stdout": {
-                "data": "invoertekst-0",
+                "data": "invoertekst-0\n",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst-0",
+                "data": "invoertekst-0\n",
                 "type": "text"
               },
               "main_call": true
@@ -24,13 +24,13 @@
           "run": {
             "output": {
               "stdout": {
-                "data": "invoertekst-1",
+                "data": "invoertekst-1\n",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst-1",
+                "data": "invoertekst-1\n",
                 "type": "text"
               },
               "main_call": true
@@ -41,13 +41,13 @@
           "run": {
             "output": {
               "stdout": {
-                "data": "invoertekst-2",
+                "data": "invoertekst-2\n",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst-2",
+                "data": "invoertekst-2\n",
                 "type": "text"
               },
               "main_call": true
@@ -58,13 +58,13 @@
           "run": {
             "output": {
               "stdout": {
-                "data": "invoertekst-3",
+                "data": "invoertekst-3\n",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst-3",
+                "data": "invoertekst-3\n",
                 "type": "text"
               },
               "main_call": true
@@ -75,13 +75,13 @@
           "run": {
             "output": {
               "stdout": {
-                "data": "invoertekst-4",
+                "data": "invoertekst-4\n",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst-4",
+                "data": "invoertekst-4\n",
                 "type": "text"
               },
               "main_call": true
@@ -92,13 +92,13 @@
           "run": {
             "output": {
               "stdout": {
-                "data": "invoertekst-5",
+                "data": "invoertekst-5\n",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst-5",
+                "data": "invoertekst-5\n",
                 "type": "text"
               },
               "main_call": true
@@ -109,13 +109,13 @@
           "run": {
             "output": {
               "stdout": {
-                "data": "invoertekst-6",
+                "data": "invoertekst-6\n",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst-6",
+                "data": "invoertekst-6\n",
                 "type": "text"
               },
               "main_call": true
@@ -126,13 +126,13 @@
           "run": {
             "output": {
               "stdout": {
-                "data": "invoertekst-7",
+                "data": "invoertekst-7\n",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst-7",
+                "data": "invoertekst-7\n",
                 "type": "text"
               },
               "main_call": true
@@ -143,13 +143,13 @@
           "run": {
             "output": {
               "stdout": {
-                "data": "invoertekst-8",
+                "data": "invoertekst-8\n",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst-8",
+                "data": "invoertekst-8\n",
                 "type": "text"
               },
               "main_call": true
@@ -160,13 +160,13 @@
           "run": {
             "output": {
               "stdout": {
-                "data": "invoertekst-9",
+                "data": "invoertekst-9\n",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst-9",
+                "data": "invoertekst-9\n",
                 "type": "text"
               },
               "main_call": true
@@ -177,13 +177,13 @@
           "run": {
             "output": {
               "stdout": {
-                "data": "invoertekst-10",
+                "data": "invoertekst-0\n",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst-10",
+                "data": "invoertekst-0\n",
                 "type": "text"
               },
               "main_call": true
@@ -194,13 +194,13 @@
           "run": {
             "output": {
               "stdout": {
-                "data": "invoertekst-11",
+                "data": "invoertekst-1\n",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst-11",
+                "data": "invoertekst-1\n",
                 "type": "text"
               },
               "main_call": true
@@ -211,13 +211,13 @@
           "run": {
             "output": {
               "stdout": {
-                "data": "invoertekst-12",
+                "data": "invoertekst-2\n",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst-12",
+                "data": "invoertekst-2\n",
                 "type": "text"
               },
               "main_call": true
@@ -228,13 +228,13 @@
           "run": {
             "output": {
               "stdout": {
-                "data": "invoertekst-13",
+                "data": "invoertekst-3\n",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst-13",
+                "data": "invoertekst-3\n",
                 "type": "text"
               },
               "main_call": true
@@ -245,13 +245,13 @@
           "run": {
             "output": {
               "stdout": {
-                "data": "invoertekst-14",
+                "data": "invoertekst-4\n",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst-14",
+                "data": "invoertekst-4\n",
                 "type": "text"
               },
               "main_call": true
@@ -262,13 +262,13 @@
           "run": {
             "output": {
               "stdout": {
-                "data": "invoertekst-15",
+                "data": "invoertekst-5\n",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst-15",
+                "data": "invoertekst-5\n",
                 "type": "text"
               },
               "main_call": true
@@ -279,13 +279,13 @@
           "run": {
             "output": {
               "stdout": {
-                "data": "invoertekst-16",
+                "data": "invoertekst-6\n",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst-16",
+                "data": "invoertekst-6\n",
                 "type": "text"
               },
               "main_call": true
@@ -296,13 +296,13 @@
           "run": {
             "output": {
               "stdout": {
-                "data": "invoertekst-17",
+                "data": "invoertekst-7\n",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst-17",
+                "data": "invoertekst-7\n",
                 "type": "text"
               },
               "main_call": true
@@ -313,13 +313,13 @@
           "run": {
             "output": {
               "stdout": {
-                "data": "invoertekst-18",
+                "data": "invoertekst-8\n",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst-18",
+                "data": "invoertekst-8\n",
                 "type": "text"
               },
               "main_call": true
@@ -330,13 +330,13 @@
           "run": {
             "output": {
               "stdout": {
-                "data": "invoertekst-19",
+                "data": "invoertekst-9\n",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst-19",
+                "data": "invoertekst-9\n",
                 "type": "text"
               },
               "main_call": true
@@ -347,13 +347,13 @@
           "run": {
             "output": {
               "stdout": {
-                "data": "invoertekst-20",
+                "data": "invoertekst-0\n",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst-20",
+                "data": "invoertekst-0\n",
                 "type": "text"
               },
               "main_call": true
@@ -364,13 +364,13 @@
           "run": {
             "output": {
               "stdout": {
-                "data": "invoertekst-21",
+                "data": "invoertekst-1\n",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst-21",
+                "data": "invoertekst-1\n",
                 "type": "text"
               },
               "main_call": true
@@ -381,13 +381,13 @@
           "run": {
             "output": {
               "stdout": {
-                "data": "invoertekst-22",
+                "data": "invoertekst-2\n",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst-22",
+                "data": "invoertekst-2\n",
                 "type": "text"
               },
               "main_call": true
@@ -398,13 +398,13 @@
           "run": {
             "output": {
               "stdout": {
-                "data": "invoertekst-23",
+                "data": "invoertekst-3\n",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst-23",
+                "data": "invoertekst-3\n",
                 "type": "text"
               },
               "main_call": true
@@ -415,13 +415,13 @@
           "run": {
             "output": {
               "stdout": {
-                "data": "invoertekst-24",
+                "data": "invoertekst-4\n",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst-24",
+                "data": "invoertekst-4\n",
                 "type": "text"
               },
               "main_call": true
@@ -432,13 +432,13 @@
           "run": {
             "output": {
               "stdout": {
-                "data": "invoertekst-25",
+                "data": "invoertekst-5\n",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst-25",
+                "data": "invoertekst-5\n",
                 "type": "text"
               },
               "main_call": true
@@ -449,13 +449,13 @@
           "run": {
             "output": {
               "stdout": {
-                "data": "invoertekst-26",
+                "data": "invoertekst-6\n",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst-26",
+                "data": "invoertekst-6\n",
                 "type": "text"
               },
               "main_call": true
@@ -466,13 +466,13 @@
           "run": {
             "output": {
               "stdout": {
-                "data": "invoertekst-27",
+                "data": "invoertekst-7\n",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst-27",
+                "data": "invoertekst-7\n",
                 "type": "text"
               },
               "main_call": true
@@ -483,13 +483,13 @@
           "run": {
             "output": {
               "stdout": {
-                "data": "invoertekst-28",
+                "data": "invoertekst-8\n",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst-28",
+                "data": "invoertekst-8\n",
                 "type": "text"
               },
               "main_call": true
@@ -500,13 +500,13 @@
           "run": {
             "output": {
               "stdout": {
-                "data": "invoertekst-29",
+                "data": "invoertekst-9\n",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst-29",
+                "data": "invoertekst-9\n",
                 "type": "text"
               },
               "main_call": true
@@ -517,13 +517,13 @@
           "run": {
             "output": {
               "stdout": {
-                "data": "invoertekst-30",
+                "data": "invoertekst-0\n",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst-30",
+                "data": "invoertekst-0\n",
                 "type": "text"
               },
               "main_call": true
@@ -534,13 +534,13 @@
           "run": {
             "output": {
               "stdout": {
-                "data": "invoertekst-31",
+                "data": "invoertekst-1\n",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst-31",
+                "data": "invoertekst-1\n",
                 "type": "text"
               },
               "main_call": true
@@ -551,13 +551,13 @@
           "run": {
             "output": {
               "stdout": {
-                "data": "invoertekst-32",
+                "data": "invoertekst-2\n",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst-32",
+                "data": "invoertekst-2\n",
                 "type": "text"
               },
               "main_call": true
@@ -568,13 +568,13 @@
           "run": {
             "output": {
               "stdout": {
-                "data": "invoertekst-33",
+                "data": "invoertekst-3\n",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst-33",
+                "data": "invoertekst-3\n",
                 "type": "text"
               },
               "main_call": true
@@ -585,13 +585,13 @@
           "run": {
             "output": {
               "stdout": {
-                "data": "invoertekst-34",
+                "data": "invoertekst-4\n",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst-34",
+                "data": "invoertekst-4\n",
                 "type": "text"
               },
               "main_call": true
@@ -602,13 +602,13 @@
           "run": {
             "output": {
               "stdout": {
-                "data": "invoertekst-35",
+                "data": "invoertekst-5\n",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst-35",
+                "data": "invoertekst-5\n",
                 "type": "text"
               },
               "main_call": true
@@ -619,13 +619,13 @@
           "run": {
             "output": {
               "stdout": {
-                "data": "invoertekst-36",
+                "data": "invoertekst-6\n",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst-36",
+                "data": "invoertekst-6\n",
                 "type": "text"
               },
               "main_call": true
@@ -636,13 +636,13 @@
           "run": {
             "output": {
               "stdout": {
-                "data": "invoertekst-37",
+                "data": "invoertekst-7\n",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst-37",
+                "data": "invoertekst-7\n",
                 "type": "text"
               },
               "main_call": true
@@ -653,13 +653,13 @@
           "run": {
             "output": {
               "stdout": {
-                "data": "invoertekst-38",
+                "data": "invoertekst-8\n",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst-38",
+                "data": "invoertekst-8\n",
                 "type": "text"
               },
               "main_call": true
@@ -670,13 +670,13 @@
           "run": {
             "output": {
               "stdout": {
-                "data": "invoertekst-39",
+                "data": "invoertekst-9\n",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst-39",
+                "data": "invoertekst-9\n",
                 "type": "text"
               },
               "main_call": true
@@ -687,13 +687,13 @@
           "run": {
             "output": {
               "stdout": {
-                "data": "invoertekst-40",
+                "data": "invoertekst-0\n",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst-40",
+                "data": "invoertekst-0\n",
                 "type": "text"
               },
               "main_call": true
@@ -704,13 +704,13 @@
           "run": {
             "output": {
               "stdout": {
-                "data": "invoertekst-41",
+                "data": "invoertekst-1\n",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst-41",
+                "data": "invoertekst-1\n",
                 "type": "text"
               },
               "main_call": true
@@ -721,13 +721,13 @@
           "run": {
             "output": {
               "stdout": {
-                "data": "invoertekst-42",
+                "data": "invoertekst-2\n",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst-42",
+                "data": "invoertekst-2\n",
                 "type": "text"
               },
               "main_call": true
@@ -738,13 +738,13 @@
           "run": {
             "output": {
               "stdout": {
-                "data": "invoertekst-43",
+                "data": "invoertekst-3\n",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst-43",
+                "data": "invoertekst-3\n",
                 "type": "text"
               },
               "main_call": true
@@ -755,13 +755,13 @@
           "run": {
             "output": {
               "stdout": {
-                "data": "invoertekst-44",
+                "data": "invoertekst-4\n",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst-44",
+                "data": "invoertekst-4\n",
                 "type": "text"
               },
               "main_call": true
@@ -772,13 +772,13 @@
           "run": {
             "output": {
               "stdout": {
-                "data": "invoertekst-45",
+                "data": "invoertekst-5\n",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst-45",
+                "data": "invoertekst-5\n",
                 "type": "text"
               },
               "main_call": true
@@ -789,13 +789,13 @@
           "run": {
             "output": {
               "stdout": {
-                "data": "invoertekst-46",
+                "data": "invoertekst-6\n",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst-46",
+                "data": "invoertekst-6\n",
                 "type": "text"
               },
               "main_call": true
@@ -806,13 +806,13 @@
           "run": {
             "output": {
               "stdout": {
-                "data": "invoertekst-47",
+                "data": "invoertekst-7\n",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst-47",
+                "data": "invoertekst-7\n",
                 "type": "text"
               },
               "main_call": true
@@ -823,13 +823,13 @@
           "run": {
             "output": {
               "stdout": {
-                "data": "invoertekst-48",
+                "data": "invoertekst-8\n",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst-48",
+                "data": "invoertekst-8\n",
                 "type": "text"
               },
               "main_call": true
@@ -840,13 +840,13 @@
           "run": {
             "output": {
               "stdout": {
-                "data": "invoertekst-49",
+                "data": "invoertekst-9\n",
                 "type": "text"
               }
             },
             "input": {
               "stdin": {
-                "data": "invoertekst-49",
+                "data": "invoertekst-9\n",
                 "type": "text"
               },
               "main_call": true

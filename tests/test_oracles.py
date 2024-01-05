@@ -251,7 +251,7 @@ def test_file_oracle_dont_strip_lines_correct(tmp_path: Path, pytestconfig, mock
     s = mocker.spy(tested.oracles.text, name="compare_text")
     mock_files = [
         mocker.mock_open(read_data=content).return_value
-        for content in ["expected\nexpected2\n", "expected\nexpected2"]
+        for content in ["expected\nexpected2\n", "expected\nexpected2\n"]
     ]
     mock_opener = mocker.mock_open()
     mock_opener.side_effect = mock_files
@@ -261,11 +261,11 @@ def test_file_oracle_dont_strip_lines_correct(tmp_path: Path, pytestconfig, mock
     )
     result = evaluate_file(config, channel, "")
     s.assert_any_call(ANY, "expected\n", "expected\n")
-    s.assert_any_call(ANY, "expected2\n", "expected2")
+    s.assert_any_call(ANY, "expected2\n", "expected2\n")
     assert s.call_count == 2
     assert result.result.enum == Status.CORRECT
     assert result.readable_expected == "expected\nexpected2\n"
-    assert result.readable_actual == "expected\nexpected2"
+    assert result.readable_actual == "expected\nexpected2\n"
 
 
 def test_exception_oracle_only_messages_correct(tmp_path: Path, pytestconfig):
