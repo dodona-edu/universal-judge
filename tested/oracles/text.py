@@ -20,12 +20,14 @@ def _is_number(string: str) -> float | None:
 def _text_options(config: OracleConfig) -> dict:
     defaults = {
         # Options for textual comparison
-        "ignoreWhitespace": True,
+        "ignoreWhitespace": False,
         "caseInsensitive": False,
         # Options for numerical comparison
         "tryFloatingPoint": False,
         "applyRounding": False,
         "roundTo": 3,
+        # This option is used in the DSL, no in the actual oracle.
+        "normalizeTrailingNewlines": True,
     }
     defaults.update(config.options)
     return defaults

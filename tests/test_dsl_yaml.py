@@ -994,3 +994,95 @@ def test_files_are_propagated():
         FileUrl(name="test", url="test.md"),
         FileUrl(name="two", url="two.md"),
     }
+
+
+def test_newlines_are_added_to_stdout():
+    yaml_str = """
+- unit: "Statement and main"
+  cases:
+  - script:
+      - arguments: [ '-a', '5', '7' ]
+        stdout:
+          data: 12
+          config:
+            tryFloatingPoint: true
+        """
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    actual_stdout = suite.tabs[0].contexts[0].testcases[0].output.stdout.data
+    assert actual_stdout == "12\n"
+
+    yaml_str2 = """
+- unit: "Statement and main"
+  cases:
+  - script:
+      - arguments: [ '-a', '5', '7' ]
+        stdout: "hello"
+        """
+    json_str = translate_to_test_suite(yaml_str2)
+    suite = parse_test_suite(json_str)
+    actual_stdout = suite.tabs[0].contexts[0].testcases[0].output.stdout.data
+    assert actual_stdout == "hello\n"
+
+
+def test_newlines_are_added_to_stderr():
+    yaml_str = """
+- unit: "Statement and main"
+  cases:
+  - script:
+      - arguments: [ '-a', '5', '7' ]
+        stderr:
+          data: 12
+          config:
+            tryFloatingPoint: true
+        """
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    actual_stderr = suite.tabs[0].contexts[0].testcases[0].output.stderr.data
+    assert actual_stderr == "12\n"
+
+    yaml_str2 = """
+- unit: "Statement and main"
+  cases:
+  - script:
+      - arguments: [ '-a', '5', '7' ]
+        stderr: "hello"
+        """
+    json_str = translate_to_test_suite(yaml_str2)
+    suite = parse_test_suite(json_str)
+    actual_stderr = suite.tabs[0].contexts[0].testcases[0].output.stderr.data
+    assert actual_stderr == "hello\n"
+
+
+def test_no_duplicate_newlines_are_added():
+    yaml_str = """
+- unit: "Statement and main"
+  cases:
+  - script:
+      - arguments: [ '-a', '5', '7' ]
+        stdout: |
+            hello
+            world
+        """
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    actual = suite.tabs[0].contexts[0].testcases[0].output.stdout.data
+    assert actual == "hello\nworld\n"
+
+
+def test_can_disable_normalizing_newlines():
+    yaml_str = """
+- unit: "Statement and main"
+  cases:
+  - script:
+      - arguments: [ '-a', '5', '7' ]
+        stderr:
+          data: 12
+          config:
+            tryFloatingPoint: true
+            normalizeTrailingNewlines: false
+        """
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    actual_stderr = suite.tabs[0].contexts[0].testcases[0].output.stderr.data
+    assert actual_stderr == "12"

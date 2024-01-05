@@ -359,17 +359,20 @@ def _convert_custom_check_oracle(stream: dict) -> CustomCheckOracle:
 
 def _convert_text_output_channel(stream: YamlObject) -> TextOutputChannel:
     if isinstance(stream, str):
-        data = stream
+        data = _ensure_trailing_newline(stream)
         return TextOutputChannel(data=data, oracle=GenericTextOracle())
     else:
         assert isinstance(stream, dict)
         data = str(stream["data"])
         if "oracle" not in stream or stream["oracle"] == "builtin":
             config = cast(dict, stream.get("config", {}))
+            if config.get("normalizeTrailingNewlines", True):
+                data = _ensure_trailing_newline(data)
             return TextOutputChannel(
                 data=data, oracle=GenericTextOracle(options=config)
             )
         elif stream["oracle"] == "custom_check":
+            data = _ensure_trailing_newline(data)
             return TextOutputChannel(
                 data=data, oracle=_convert_custom_check_oracle(stream)
             )
