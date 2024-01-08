@@ -456,6 +456,10 @@
           "description" : "Ignore trailing whitespace",
           "type" : "boolean"
         },
+        "normalizeTrailingNewlines": {
+          "description": "Normalize trailing newlines",
+          "type": "boolean"
+        },
         "roundTo" : {
           "description" : "The number of decimals to round at, when applying the rounding on floats",
           "type" : "integer"

@@ -34,11 +34,11 @@ int main(int argc, char** argv) {
         if (result == 0) {
             sum += number;
         } else {
-            fprintf(stderr, "som: ongeldige argumenten");
+            fprintf(stderr, "som: ongeldige argumenten\n");
             exit(1);
         }
     }
 
-    printf("%ld", sum);
+    printf("%ld\n", sum);
     exit(0);
 }
