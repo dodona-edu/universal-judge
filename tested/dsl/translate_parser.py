@@ -91,7 +91,7 @@ YamlObject = (
 
 
 def _ensure_trailing_newline(text: str) -> str:
-    if not text or text[-1] != "\n":
+    if not text.endswith("\n"):
         return text + "\n"
     else:
         return text
