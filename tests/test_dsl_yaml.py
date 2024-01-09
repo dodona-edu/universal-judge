@@ -1086,3 +1086,17 @@ def test_can_disable_normalizing_newlines():
     suite = parse_test_suite(json_str)
     actual_stderr = suite.tabs[0].contexts[0].testcases[0].output.stderr.data
     assert actual_stderr == "12"
+
+
+def test_empty_text_data_newlines():
+    yaml_str = """
+- unit: "Statement and main"
+  cases:
+  - script:
+      - arguments: [ '-a', '5', '7' ]
+        stderr: ""
+        """
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    actual_stderr = suite.tabs[0].contexts[0].testcases[0].output.stderr.data
+    assert actual_stderr == "\n"
