@@ -91,6 +91,10 @@ class AdvancedStringTypes(_AdvancedDataType):
     """
     A single character
     """
+    STRING = "string", BasicStringTypes.TEXT
+    """
+    A string (sequence of characters).
+    """
 
 
 class AdvancedNothingTypes(_AdvancedDataType):

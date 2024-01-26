@@ -43,40 +43,34 @@ def test_template_function_name(lang: str, expected: str):
 @pytest.mark.parametrize(
     ("lang", "tested_type", "expected"),
     [
-        # Python
         ("python", "'integer'", "int"),
         ("python", "'real'", "float"),
         ("python", "'text'", "str"),
-        ("python", '"sequence", "integer"', "List[int]"),
-        ("python", '"array", ("set", ("integer", ))', "List[Set[int]]"),
+        ("python", '"sequence", "integer"', "list[int]"),
+        ("python", '"array", ("set", ("integer", ))', "list[set[int]]"),
         (
             "python",
             '"tuple", ("sequence", ("real", )), "text"',
-            "Tuple[List[float], str]",
+            "tuple[list[float], str]",
         ),
-        # Java
         ("java", "'integer'", "int"),
         ("java", "'real'", "double"),
         ("java", "'text'", "String"),
         ("java", '"sequence", "integer"', "List<Integer>"),
         ("java", '"array", ("set", ("integer", ))', "Set<Integer>[]"),
-        # c
         ("c", "'integer'", "int"),
         ("c", "'real'", "double"),
         ("c", "'text'", "char*"),
-        # Kotlin
         ("kotlin", "'integer'", "Int"),
         ("kotlin", "'real'", "Double"),
         ("kotlin", "'text'", "String"),
         ("kotlin", '"sequence", "integer"', "List<Int>"),
         ("kotlin", '"array", ("set", ("integer", ))', "Array<Set<Int>>"),
-        # JavaScript
         ("javascript", "'integer'", "number"),
         ("javascript", "'real'", "number"),
         ("javascript", "'text'", "string"),
         ("javascript", '"sequence", "integer"', "array<number>"),
         ("javascript", '"array", ("set", ("integer", ))', "array<set<number>>"),
-        # Haskell
         ("haskell", "'integer'", "Int"),
         ("haskell", "'real'", "Double"),
         ("haskell", "'text'", "String"),
@@ -89,7 +83,7 @@ def test_template_function_name(lang: str, expected: str):
     ],
 )
 def test_template_type_name(lang: str, tested_type: Any, expected: str):
-    template = f"""{{{{ datatype({tested_type}) }}}}"""
+    template = f"""{{{{ datatype({tested_type}).simple }}}}"""
     instance = process_problem_statement(template, lang)
     assert instance == f"{expected}"
 
@@ -97,25 +91,20 @@ def test_template_type_name(lang: str, tested_type: Any, expected: str):
 @pytest.mark.parametrize(
     ("lang", "tested_type", "expected"),
     [
-        # Python
         ("python", "'sequence'", "sequence"),
         ("python", "'map'", "map"),
-        # Java
         ("java", "'sequence'", "sequence"),
         ("java", "'map'", "map"),
-        # Kotlin
         ("kotlin", "'sequence'", "sequence"),
         ("kotlin", "'map'", "map"),
-        # JavaScript
         ("javascript", "'sequence'", "sequence"),
         ("javascript", "'map'", "map"),
-        # Haskell
         ("haskell", "'sequence'", "sequence"),
         ("haskell", "'list'", "list"),
     ],
 )
 def test_template_natural_type_name(lang: str, tested_type: Any, expected: str):
-    template = f"""{{{{ datatype_common({tested_type}) }}}}"""
+    template = f"""{{{{ datatype({tested_type}).singular }}}}"""
     instance = process_problem_statement(template, lang)
     assert instance == f"{expected}"
 
@@ -123,25 +112,20 @@ def test_template_natural_type_name(lang: str, tested_type: Any, expected: str):
 @pytest.mark.parametrize(
     ("lang", "tested_type", "expected"),
     [
-        # Python
         ("python", "'sequence'", "sequentie"),
         ("python", "'map'", "afbeelding"),
-        # Java
         ("java", "'sequence'", "sequentie"),
         ("java", "'map'", "afbeelding"),
-        # Kotlin
         ("kotlin", "'sequence'", "sequentie"),
         ("kotlin", "'map'", "afbeelding"),
-        # JavaScript
         ("javascript", "'sequence'", "sequentie"),
         ("javascript", "'map'", "afbeelding"),
-        # Haskell
         ("haskell", "'sequence'", "sequentie"),
         ("haskell", "'list'", "lijst"),
     ],
 )
 def test_template_natural_type_name_nl(lang: str, tested_type: Any, expected: str):
-    template = f"""{{{{ datatype_common({tested_type}) }}}}"""
+    template = f"""{{{{ datatype({tested_type}).singular }}}}"""
     instance = process_problem_statement(template, lang, "nl")
     assert instance == f"{expected}"
 

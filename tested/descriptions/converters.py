@@ -38,14 +38,13 @@ class Datatype:
         elif isinstance(self.type_, AdvancedTypes):
             result = [generate_type_declaration(self.language, self.type_)]
         else:
-            possible_types = []
+            possible_types = [self.type_]
             supported_types = self.language.datatype_support()
             for advanced_type_enum in get_args(AdvancedTypes):
                 for advanced_type in advanced_type_enum:
                     if (
                         advanced_type.base_type == self.type_
-                        and supported_types.get(advanced_type)
-                        != TypeSupport.UNSUPPORTED
+                        and supported_types.get(advanced_type) == TypeSupport.SUPPORTED
                     ):
                         possible_types.append(advanced_type)
 
@@ -66,6 +65,13 @@ class Datatype:
         return last_sep.join(
             [", ".join(types[:-1]), types[-1]] if len(types) > 2 else types
         )
+
+    @property
+    def simple(self) -> str:
+        if len(self.others):
+            return generate_type_declaration(self.language, (self.type_, self.others))
+        else:
+            return generate_type_declaration(self.language, self.type_)
 
     @property
     def singular(self) -> str:
