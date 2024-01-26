@@ -107,7 +107,7 @@ $ cat exercise/simple-example/config.json
   "source": "exercise/simple-example/correct.py",
   "judge": ".",
   "workdir": "workdir/",
-  "plan_name": "suite.yaml",
+  "test_suite": "suite.yaml",
   "memory_limit": 536870912,
   "time_limit": 60
 }
@@ -120,7 +120,7 @@ These attributes are used by TESTed:
 - `source`: path of the submission that must be evaluated
 - `judge`: path of the root directory of TESTEd
 - `workdir`: path of a temporary directory (see below)
-- `plan_name`: path of the test suite, relative to the resources directory (as defined above)
+- `test_suite`: path of the test suite, relative to the resources directory (as defined above)
 
 Before evaluating a submission, TESTed generates test code in the workdir.
 Create that directory:
