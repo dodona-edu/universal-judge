@@ -170,6 +170,7 @@ en:
       return: "Parse YAML return values"
       return-raw: "Parse return-raw values"
   types:
+    joiner: "or"
     singular:
       integer: "integer"
       real: "real number"
@@ -189,7 +190,7 @@ en:
       bigint: "big integer"
       single_precision: "single precision floating point number"
       double_precision: "double precision floating point number"
-      fixed_precision: "fixed precision number"  
+      fixed_precision: "fixed precision number"
       any: "any"
       list: "list"
       tuple: "tuple"

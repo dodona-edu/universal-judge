@@ -170,6 +170,7 @@ nl:
       return: "Parsen van YAML returnwaarden"
       return-raw: "Parsen return-raw waarden"
   types:
+    joiner: "of"
     singular:
       integer: "geheel getal"
       real: "reëel getal"

@@ -297,3 +297,16 @@ def test_multiline_statement():
 ```
 """
     assert actual == expected
+
+
+def test_long_description():
+    test_dir = Path(__file__).parent
+    description_template = test_dir / "descriptions" / "recoupling.md.j2"
+    description_python = test_dir / "descriptions" / f"recoupling.python.md"
+    with open(description_template, "r") as dp:
+        template = dp.read()
+    with open(description_python, "r") as dp:
+        expected = dp.read()
+    actual = process_problem_statement(template, "python")
+
+    assert actual == expected

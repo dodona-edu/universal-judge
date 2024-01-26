@@ -64,6 +64,8 @@ def resolve_to_basic(type_: AllTypes) -> BasicTypes:
 def string_to_type(type_string: str) -> AllTypes:
     enums = get_args(AllTypes)
     for enum in enums:
-        if type_string in enum.__members__:
-            return enum[type_string]
+        try:
+            return enum(type_string)
+        except ValueError:
+            pass
     raise ValueError(f"Unknown type string {type_string}")
