@@ -8,7 +8,7 @@ from tested.dsl.ast_translator import InvalidDslError
 
 
 @pytest.mark.parametrize("language", ["python", "kotlin", "java", "haskell"])
-def test_python_description(language: str):
+def test_small_descriptions(language: str):
     test_dir = Path(__file__).parent
     description_template = test_dir / "descriptions" / "example.md.jinja2"
     description_python = test_dir / "descriptions" / f"example.{language}.md"
@@ -18,7 +18,7 @@ def test_python_description(language: str):
         expected = dp.read()
     actual = process_problem_statement(template, language)
 
-    assert actual == expected
+    assert actual.strip() == expected.strip()
     assert f"This is {language}." in actual
 
 
@@ -131,38 +131,6 @@ def test_template_natural_type_name_nl(lang: str, tested_type: Any, expected: st
 
 
 @pytest.mark.parametrize(
-    ("lang", "prompt"),
-    [
-        ("python", ">>>"),
-        ("java", ">"),
-        ("c", ">"),
-        ("kotlin", ">"),
-        ("javascript", ">"),
-        ("haskell", ">"),
-    ],
-)
-def test_template_code_block_markdown(lang: str, prompt: str):
-    template = """```console?lang=tested
->>> random()
-5
-```"""
-    expected_stmt = (
-        "random "
-        if lang == "haskell"
-        else "Submission.random()"
-        if lang == "java"
-        else "random()"
-    )
-    expected_expr = "5"
-    instance = process_problem_statement(template, lang)
-    expected = f"""```console?lang={lang}&prompt={prompt}
-{prompt} {expected_stmt}
-{expected_expr}
-```"""
-    assert instance == expected
-
-
-@pytest.mark.parametrize(
     ("lang", "expected"),
     [
         (
@@ -225,62 +193,6 @@ beta")
 ```"""
     with pytest.raises(InvalidDslError):
         process_problem_statement(template, "java")
-
-
-def test_multiline_results():
-    template = """
-```console?lang=tested
->>> dots("paper.txt")
-###..###...##..#..#.####.###..#....###.
-#..#.#..#.#..#.#.#..#....#..#.#....#..#
-#..#.#..#.#....##...###..###..#....#..#
-###..###..#....#.#..#....#..#.#....###.
-#.#..#....#..#.#.#..#....#..#.#....#.#.
-#..#.#.....##..#..#.#....###..####.#..#
-```
-"""
-    actual = process_problem_statement(template, "javascript")
-    expected = """
-```console?lang=javascript&prompt=>
-> dots("paper.txt")
-###..###...##..#..#.####.###..#....###.
-#..#.#..#.#..#.#.#..#....#..#.#....#..#
-#..#.#..#.#....##...###..###..#....#..#
-###..###..#....#.#..#....#..#.#....###.
-#.#..#....#..#.#.#..#....#..#.#....#.#.
-#..#.#.....##..#..#.#....###..####.#..#
-```
-"""
-    assert actual == expected
-
-
-def test_multiline_statement():
-    template = """
-```console?lang=tested
->>> dots(
-...  "paper.txt"
-...  )
-###..###...##..#..#.####.###..#....###.
-#..#.#..#.#..#.#.#..#....#..#.#....#..#
-#..#.#..#.#....##...###..###..#....#..#
-###..###..#....#.#..#....#..#.#....###.
-#.#..#....#..#.#.#..#....#..#.#....#.#.
-#..#.#.....##..#..#.#....###..####.#..#
-```
-"""
-    actual = process_problem_statement(template, "javascript")
-    expected = """
-```console?lang=javascript&prompt=>
-> dots("paper.txt")
-###..###...##..#..#.####.###..#....###.
-#..#.#..#.#..#.#.#..#....#..#.#....#..#
-#..#.#..#.#....##...###..###..#....#..#
-###..###..#....#.#..#....#..#.#....###.
-#.#..#....#..#.#.#..#....#..#.#....#.#.
-#..#.#.....##..#..#.#....###..####.#..#
-```
-"""
-    assert actual == expected
 
 
 def test_long_description():

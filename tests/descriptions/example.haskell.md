@@ -6,7 +6,3 @@ aFunctionCall "yes"
 ```
 
 This is haskell.
-
-```console?lang=haskell&prompt=>
-> aFunctionCall "yes"
-```

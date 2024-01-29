@@ -262,4 +262,5 @@ class Python(Language):
                 "any": "Any",
             },
             "prompt": ">>>",
+            "exception": "Exception",
         }

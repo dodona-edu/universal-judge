@@ -209,4 +209,5 @@ class Haskell(Language):
                 "sequence": True,
             },
             "nested_overrides": {"tuple": ("(", ")")},  # type: ignore
+            "exception": "Exception",
         }

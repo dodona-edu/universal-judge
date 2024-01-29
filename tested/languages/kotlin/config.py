@@ -262,4 +262,5 @@ class Kotlin(Language):
                 "any": "Any",
             },
             "nested": ("<", ">"),
+            "exception": "Exception",
         }
