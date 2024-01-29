@@ -6,7 +6,3 @@ a_function_call('yes')
 ```
 
 This is python.
-
-```console?lang=python&prompt=>>>
->>> a_function_call('yes')
-```

@@ -41,6 +41,7 @@ class TypeDeclarationMetadata(TypedDict):
     nested_overrides: NotRequired[dict[AllTypes, tuple[str, str]]]
     prompt: NotRequired[str]
     natural_overrides: NotRequired[dict[str, dict[AllTypes, tuple[str, str]]]]
+    exception: NotRequired[str]
 
 
 class Language(ABC):

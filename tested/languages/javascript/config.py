@@ -235,4 +235,5 @@ class JavaScript(Language):
                 "any": "object",
             },
             "nested": ("<", ">"),
+            "exception": "Error",
         }

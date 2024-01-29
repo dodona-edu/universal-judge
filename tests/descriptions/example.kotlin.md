@@ -6,7 +6,3 @@ aFunctionCall("yes")
 ```
 
 This is kotlin.
-
-```console?lang=kotlin&prompt=>
-> aFunctionCall("yes")
-```

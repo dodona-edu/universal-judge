@@ -266,7 +266,8 @@ class {class_name}
                 "list": "List",
                 "tuple": "Tuple",
                 "any": "Object",
-            }
+            },
+            "exception": "Exception",
         }
 
     def is_void_method(self, name: str) -> bool:

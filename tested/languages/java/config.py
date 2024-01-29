@@ -207,6 +207,7 @@ class Java(Language):
             },
             "nested": ("<", ">"),
             "nested_overrides": {"array": ("[", "]")},  # type: ignore
+            "exception": "Exception",
         }
 
     def is_void_method(self, name: str) -> bool:

@@ -1,7 +1,6 @@
 """
 A Marko renderer that only renders TESTed code; all other things are left alone.
 """
-from doctest import DocTestParser
 
 from marko import block
 from marko.md_renderer import MarkdownRenderer
@@ -10,9 +9,7 @@ from tested.configs import Bundle
 from tested.dsl import parse_dsl, parse_string
 from tested.judge.evaluation import Channel, guess_expected_value, should_show
 from tested.languages.generation import generate_statement, get_readable_input
-from tested.testsuite import OutputChannel, Testcase
-
-TESTED_EXAMPLE_FORMAT = "console?lang=tested"
+from tested.testsuite import ExceptionOutputChannel, OutputChannel, Testcase
 
 
 def render_one_statement(bundle: Bundle, statement: str) -> str:
@@ -31,6 +28,17 @@ def _add_output(
 ):
     if should_show(output, channel):
         expected = guess_expected_value(bundle, output)
+        # Special handling of exceptions
+        if channel == Channel.EXCEPTION:
+            assert isinstance(output, ExceptionOutputChannel)
+            if output.exception and not output.exception.get_type(
+                bundle.config.programming_language
+            ):
+                name = bundle.language.get_declaration_metadata().get(
+                    "exception", "Exception"
+                )
+                expected = f"{name}: {expected}"
+
         results.append(expected)
 
 
@@ -48,35 +56,6 @@ def get_expected_output(bundle: Bundle, tc: Testcase) -> list[str]:
 
 class TestedRenderer(MarkdownRenderer):
     bundle: Bundle
-    _doctest_parser: DocTestParser
-
-    def __init__(self):
-        super().__init__()
-        self._doctest_parser = DocTestParser()
-
-    def _render_doctest(self, element: block.FencedCode) -> str:
-        """
-        Render a "doctest" code block.
-        """
-        assert element.lang == TESTED_EXAMPLE_FORMAT
-        raw_code = self.render_children(element)
-        doctests = self._doctest_parser.get_examples(raw_code)
-
-        resulting_lines = []
-        prompt = self.bundle.language.get_declaration_metadata().get("prompt", ">")
-
-        # Both the doctests and the results are parsed as values in the DSL.
-        for examples in doctests:
-            generated_statement = render_one_statement(self.bundle, examples.source)
-            resulting_lines.append(f"{prompt} {generated_statement}")
-            resulting_lines.append(examples.want.lstrip())
-
-        language = (
-            f"console?lang={self.bundle.config.programming_language}&prompt={prompt}"
-        )
-        body = "\n".join(resulting_lines)
-
-        return f"```{language}\n{body}```\n"
 
     def _render_normal_statements(self, element: block.FencedCode) -> str:
         """
@@ -133,7 +112,5 @@ class TestedRenderer(MarkdownRenderer):
             return self._render_normal_statements(element)
         elif element.lang == "dsl":
             return self._render_dsl_statements(element)
-        elif element.lang == TESTED_EXAMPLE_FORMAT:
-            return self._render_doctest(element)
         else:
             return super().render_fenced_code(element)

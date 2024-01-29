@@ -6,7 +6,3 @@ Submission.aFunctionCall("yes")
 ```
 
 This is java.
-
-```console?lang=java&prompt=>
-> Submission.aFunctionCall("yes")
-```
