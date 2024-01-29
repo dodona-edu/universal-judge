@@ -10,7 +10,7 @@ from tested.languages.utils import (
     _convert_stacktrace_to_html,
     _replace_code_line_number,
 )
-from tested.testsuite import Suite
+from tested.testsuite import Suite, SupportedLanguage
 
 
 def get_language(workdir: str, language: str) -> Language:
@@ -20,7 +20,7 @@ def get_language(workdir: str, language: str) -> Language:
         time_limit=0,
         memory_limit=0,
         natural_language="nl",
-        programming_language=language,
+        programming_language=SupportedLanguage(language),
         workdir=Path(workdir),
         judge=Path(),
     )
@@ -210,10 +210,24 @@ def test_bash_runtime_error():
     assert actual == expected
 
 
-def test_bash_compilation_error():
+def test_bash_compilation_error_nl():
     original = """
     submission: rule 1: syntaxfout nabij onverwacht symbool '('
     submission: rule 1: `def isISBN10(code):'
+    """
+    language_config = get_language("test", "bash")
+    expected = """
+    <code>:1: syntaxfout nabij onverwacht symbool '('
+    <code>:1: `def isISBN10(code):'
+    """
+    actual = language_config.cleanup_stacktrace(original)
+    assert actual == expected
+
+
+def test_bash_compilation_error_en():
+    original = """
+    submission: line 1: syntaxfout nabij onverwacht symbool '('
+    submission: line 1: `def isISBN10(code):'
     """
     language_config = get_language("test", "bash")
     expected = """
