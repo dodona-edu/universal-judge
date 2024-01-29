@@ -206,3 +206,24 @@ def test_long_description():
     actual = process_problem_statement(template, "python")
 
     assert actual == expected
+
+
+def test_language_specific_construct_works():
+    template = r"{{ datatype({'python': 'result'}) }}"
+    actual = process_problem_statement(template, "python")
+    assert actual == "result"
+
+    template = r"{{ datatype({'python': 'result'}).singular }}"
+    actual = process_problem_statement(template, "python")
+    assert actual == "result"
+
+    template = r"{{ datatype({'python': 'result'}).plural }}"
+    actual = process_problem_statement(template, "python")
+    assert actual == "result"
+
+
+def test_language_specific_construct_rejects_missing():
+    template = r"{{ datatype({'python': 'result'}) }}"
+
+    with pytest.raises(AssertionError):
+        process_problem_statement(template, "java")
