@@ -1,9 +1,11 @@
+from abc import ABC, abstractmethod
 from functools import partial
-from typing import cast
+from typing import Callable, cast
 
 from attr import dataclass
-from jinja2 import Template
+from jinja2 import Environment, FileSystemLoader
 from marko import Markdown
+from typing_extensions import override
 
 from tested.configs import Bundle
 from tested.datatypes import AdvancedTypes, AllTypes, string_to_type
@@ -20,11 +22,33 @@ from tested.languages.conventionalize import (
     conventionalize_property,
 )
 from tested.languages.generation import NestedTypeDeclaration, generate_type_declaration
+from tested.testsuite import LanguageMapping
 from tested.utils import get_args
 
 
+class Datatype(ABC):
+    @abstractmethod
+    def __str__(self) -> str:
+        raise NotImplementedError()
+
+    @property
+    @abstractmethod
+    def simple(self) -> str:
+        raise NotImplementedError()
+
+    @property
+    @abstractmethod
+    def singular(self) -> str:
+        raise NotImplementedError()
+
+    @property
+    @abstractmethod
+    def plural(self) -> str:
+        raise NotImplementedError()
+
+
 @dataclass
-class Datatype:
+class GenericDatatype(Datatype):
     locale: str
     language: Language
     type_: AllTypes
@@ -58,6 +82,7 @@ class Datatype:
         ), f"Could not find concrete type for {self.type_} in {self.language.__class__.__name__}"
         return result
 
+    @override
     def __str__(self) -> str:
         types = self._types()
         types = [f"`{x}`" for x in types]
@@ -67,6 +92,7 @@ class Datatype:
         )
 
     @property
+    @override
     def simple(self) -> str:
         if len(self.others):
             return generate_type_declaration(self.language, (self.type_, self.others))
@@ -74,20 +100,75 @@ class Datatype:
             return generate_type_declaration(self.language, self.type_)
 
     @property
+    @override
     def singular(self) -> str:
         return get_i18n_string(f"types.singular.{self.type_}")
 
     @property
+    @override
     def plural(self) -> str:
         return get_i18n_string(f"types.singular.{self.type_}")
 
 
-def construct_datatype(
-    locale: str, language: Language, type_: str, *others: NestedTypeDeclaration
+@dataclass
+class LanguageSpecificDatatype(Datatype):
+    result: str
+
+    @override
+    def __str__(self) -> str:
+        return self.result
+
+    @property
+    @override
+    def simple(self) -> str:
+        return self.result
+
+    @property
+    @override
+    def singular(self) -> str:
+        return self.result
+
+    @property
+    @override
+    def plural(self) -> str:
+        return self.result
+
+
+def _construct_datatype(
+    bundle: Bundle, type_: str | LanguageMapping, *others: NestedTypeDeclaration
 ) -> Datatype:
-    enum_type = string_to_type(type_)
-    # noinspection PyTypeChecker
-    return Datatype(locale=locale, language=language, type_=enum_type, others=others)
+    if isinstance(type_, dict):
+        assert bundle.config.programming_language in type_, (
+            f"Cannot convert to {bundle.config.programming_language}, as a language-specific"
+            f" type was request while not provided. The provided languages are {type_.keys()}."
+        )
+        return LanguageSpecificDatatype(
+            result=type_[bundle.config.programming_language]
+        )
+    else:
+        enum_type = string_to_type(type_)
+        # noinspection PyTypeChecker
+        return GenericDatatype(
+            locale=bundle.config.natural_language,
+            language=bundle.language,
+            type_=enum_type,
+            others=others,
+        )
+
+
+def _support_language_specific_arguments(
+    normal: Callable[[Language, str], str],
+    bundle: Bundle,
+    actual: str | LanguageMapping,
+) -> str:
+    if isinstance(actual, dict):
+        assert bundle.config.programming_language in actual, (
+            f"Cannot convert to {bundle.config.programming_language}, as a language-specific"
+            f" construct was request while not provided. The provided languages are {actual.keys()}."
+        )
+        return actual[bundle.config.programming_language]
+    else:
+        return normal(bundle.language, actual)
 
 
 def convert_templated_problem(bundle: Bundle, raw_description: str) -> str:
@@ -98,24 +179,41 @@ def convert_templated_problem(bundle: Bundle, raw_description: str) -> str:
     :param raw_description: The raw, Mako description.
     :return: The processed (Markdown) description.
     """
-
-    description_template = Template(
-        source=raw_description, autoescape=False, keep_trailing_newline=True
+    environment = Environment(
+        loader=FileSystemLoader(
+            searchpath=bundle.config.resources,
+        ),
+        autoescape=False,
+        keep_trailing_newline=True,
     )
-    language = bundle.language
+    description_template = environment.from_string(source=raw_description)
     set_locale(bundle.config.natural_language)
     return description_template.render(
         # Conventionalize functions
-        namespace=partial(conventionalize_namespace, language),
-        function=partial(conventionalize_function, language),
-        identifier=partial(conventionalize_identifier, language),
-        property=partial(conventionalize_property, language),
-        clazz=partial(conventionalize_class, language),
-        global_identifier=partial(conventionalize_global_identifier, language),
+        namespace=partial(
+            _support_language_specific_arguments, conventionalize_namespace, bundle
+        ),
+        function=partial(
+            _support_language_specific_arguments, conventionalize_function, bundle
+        ),
+        identifier=partial(
+            _support_language_specific_arguments, conventionalize_identifier, bundle
+        ),
+        property=partial(
+            _support_language_specific_arguments, conventionalize_property, bundle
+        ),
+        clazz=partial(
+            _support_language_specific_arguments, conventionalize_class, bundle
+        ),
+        global_identifier=partial(
+            _support_language_specific_arguments,
+            conventionalize_global_identifier,
+            bundle,
+        ),
         # Access to the current programming language
         programming_language=bundle.config.programming_language,
         # Data type conversion
-        datatype=partial(construct_datatype, bundle.config.natural_language, language),
+        datatype=partial(_construct_datatype, bundle),
         t=partial(render_one_statement, bundle),
     )
 
