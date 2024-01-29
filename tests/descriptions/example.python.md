@@ -1,5 +1,5 @@
 Aan de functie `splits_in_woorden` moet een string (`str`) doorgegeven worden.
-De functie geeft een lijst van letters (`List[str]`) terug.
+De functie geeft een lijst van letters (`list[str]`) terug.
 
 ```python
 a_function_call('yes')

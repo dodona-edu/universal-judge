@@ -91,7 +91,6 @@ def _handle_link_files(link_files: Iterable[FileUrl], language: str) -> tuple[st
 
 def _get_heredoc_token(stdin: str) -> str:
     delimiter = "STDIN"
-    stdin_lines = stdin.splitlines()
     while delimiter in stdin:
         delimiter = delimiter + "N"
     return delimiter
@@ -305,9 +304,13 @@ def _convert_single_type(
 
 def generate_type_declaration(
     language: Language, declaration: NestedTypeDeclaration, inner: bool = False
-) -> str | bool:
+) -> str:
     if not isinstance(declaration, tuple):
-        return _convert_single_type(language, declaration, inner)
+        simple_result = _convert_single_type(language, declaration, inner)
+        assert isinstance(
+            simple_result, str
+        ), f"{declaration} is a simple type and should generate a string"
+        return simple_result
 
     meta = language.get_declaration_metadata()
     base_type, nested = declaration
@@ -326,7 +329,6 @@ def generate_type_declaration(
     converted_nested = []
     for x in nested:
         converted_x = generate_type_declaration(language, x, True)
-        assert isinstance(converted_x, str)
         converted_nested.append(converted_x)
 
     if base is True:

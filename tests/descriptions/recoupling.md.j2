@@ -1,0 +1,45 @@
+Write a function `{{ function('divide') }}` that takes two arguments:
+_i_) a word (`{{ datatype("text")}}`) and
+_ii_) the number of (non-overlapping) groups $$n \\in \\mathbb{N}\_0$$ (`{{datatype("integer")}}`) into which the word must be divided.
+If the word passed to the function `{{function('divide')}}` cannot be divided into $$n$$ groups that have the same length, an `AssertionError` must be raised with the message `invalid division`.
+Otherwise, the function must return a {{datatype("list").singular}} (`{{datatype("list")}}`) containing the $$n$$ groups (`{{datatype("text")}}`) into which the given word can be divided.
+All groups need to have the same length (same number of letters).
+
+Write another function `{{function('recouple')}}` that takes two arguments:
+_i_) a {{datatype("sequence").singular}} (`{{datatype("sequence")}}`) of $$m \\in \\mathbb{N}\_0$$ words (`{{datatype("text")}}`) and
+_ii_) the number of (non-overlapping) groups $$n \\in \\mathbb{N}\_0$$ (`{{datatype("integer")}}`) into which the words must be divided.
+If at least one of the words passed to the function `{{function('recouple')}}` cannot be divided into $$n$$ groups that have the same length, an `AssertionError` must be raised with the message `invalid division`.
+Otherwise, the function must return a {{datatype("sequence").singular}} containing the $$n$$ new words (`{{datatype("text")}}`) obtained when each of the $$m$$ given words is divided into $$n$$ groups that have the same length, and if each of the $$m$$ corresponding groups is merged into a new word.
+The type of the returned {{datatype("sequence").singular}} (`{{datatype("sequence")}}`) must correspond to the type of the {{datatype("sequence").singular}} passed as a first argument to the function.
+
+### Example
+
+```dsl
+units:
+- unit: "Divide"
+  scripts:
+    - expression: "divide('accost', 3)"
+      return: ["ac", "co", "st"]
+    - expression: "divide('COMMUNED', 4)"
+      return: ["CO", "MM", "UN", "ED"]
+    - expression: "divide('programming', 5)"
+      exception:
+        message: "invalid division"
+        types:
+          python: AssertionError
+          javascript: AssertionError
+          java: IllegalArgumentException
+- unit: "Recouple"
+  scripts:
+    - expression: "recouple(['ACcoST', 'COmmIT', 'LAunCH', 'DEedED'], 3)"
+      return: !list ["ACCOLADE", "communed", "STITCHED"]
+    - expression: "recouple(('ACCOLADE', 'communed', 'STITCHED'), 4)"
+      return: !tuple ["ACcoST", "COmmIT", "LAunCH", "DEedED"]
+    - expression: "recouple(['programming', 'computer', 'games'], 5)"
+      exception:
+        message: "invalid division"
+        types:
+          python: AssertionError
+          javascript: AssertionError
+          java: IllegalArgumentException
+```

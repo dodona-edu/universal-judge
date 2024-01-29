@@ -31,6 +31,7 @@ class Bash(Language):
     def datatype_support(self) -> dict[AllTypes, TypeSupport]:
         return {
             AdvancedStringTypes.CHAR: TypeSupport.REDUCED,
+            AdvancedStringTypes.STRING: TypeSupport.SUPPORTED,
             BasicStringTypes.TEXT: TypeSupport.SUPPORTED,
         }
 
@@ -107,9 +108,6 @@ class Bash(Language):
 
     def get_declaration_metadata(self) -> TypeDeclarationMetadata:
         return {
-            "names": {  # type: ignore
-                "text": "str",
-                "char": "str",
-            },
+            "names": {"text": "str", "char": "str", "string": "str"},  # type: ignore
             "prompt": "$",
         }
