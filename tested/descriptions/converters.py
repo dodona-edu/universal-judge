@@ -3,7 +3,7 @@ from functools import partial
 from typing import Callable, cast
 
 from attr import dataclass
-from jinja2 import Template
+from jinja2 import Environment, FileSystemLoader
 from marko import Markdown
 from typing_extensions import override
 
@@ -179,10 +179,14 @@ def convert_templated_problem(bundle: Bundle, raw_description: str) -> str:
     :param raw_description: The raw, Mako description.
     :return: The processed (Markdown) description.
     """
-
-    description_template = Template(
-        source=raw_description, autoescape=False, keep_trailing_newline=True
+    environment = Environment(
+        loader=FileSystemLoader(
+            searchpath=bundle.config.resources,
+        ),
+        autoescape=False,
+        keep_trailing_newline=True,
     )
+    description_template = environment.from_string(source=raw_description)
     set_locale(bundle.config.natural_language)
     return description_template.render(
         # Conventionalize functions
