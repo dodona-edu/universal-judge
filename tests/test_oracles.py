@@ -552,3 +552,112 @@ def test_too_many_object_values_dont_crash(tmp_path: Path, pytestconfig):
         get_converter().dumps(actual_value),
     )
     assert result.result.enum == Status.WRONG
+
+
+def test_values_different_lengths_are_detected_empty_actual(
+    tmp_path: Path, pytestconfig
+):
+    channel = ValueOutputChannel(
+        value=SequenceType(
+            type=BasicSequenceTypes.SEQUENCE,
+            data=[
+                StringType(type=BasicStringTypes.TEXT, data="S", diagnostic=None),
+                StringType(type=BasicStringTypes.TEXT, data="S", diagnostic=None),
+            ],
+        )
+    )
+    actual_value = get_converter().dumps(
+        SequenceType(type=BasicSequenceTypes.SEQUENCE, data=[])
+    )
+    config = oracle_config(tmp_path, pytestconfig, language="python")
+    result = evaluate_value(config, channel, actual_value)
+    assert result.result.enum == Status.WRONG
+
+
+def test_values_different_lengths_are_detected_empty_expected(
+    tmp_path: Path, pytestconfig
+):
+    channel = ValueOutputChannel(
+        value=SequenceType(type=BasicSequenceTypes.SEQUENCE, data=[])
+    )
+    actual_value = get_converter().dumps(
+        SequenceType(
+            type=BasicSequenceTypes.SEQUENCE,
+            data=[
+                StringType(type=BasicStringTypes.TEXT, data="S", diagnostic=None),
+                StringType(type=BasicStringTypes.TEXT, data="S", diagnostic=None),
+            ],
+        )
+    )
+    config = oracle_config(tmp_path, pytestconfig, language="python")
+    result = evaluate_value(config, channel, actual_value)
+    assert result.result.enum == Status.WRONG
+
+
+def test_values_different_lengths_are_detected_different(tmp_path: Path, pytestconfig):
+    channel = ValueOutputChannel(
+        value=SequenceType(
+            type=BasicSequenceTypes.SEQUENCE,
+            data=[
+                StringType(type=BasicStringTypes.TEXT, data="S", diagnostic=None),
+                StringType(type=BasicStringTypes.TEXT, data="S", diagnostic=None),
+            ],
+        )
+    )
+    actual_value = get_converter().dumps(
+        SequenceType(
+            type=BasicSequenceTypes.SEQUENCE,
+            data=[StringType(type=BasicStringTypes.TEXT, data="S", diagnostic=None)],
+        )
+    )
+    config = oracle_config(tmp_path, pytestconfig, language="python")
+    result = evaluate_value(config, channel, actual_value)
+    assert result.result.enum == Status.WRONG
+
+
+def test_values_same_lengths_are_detected_different(tmp_path: Path, pytestconfig):
+    channel = ValueOutputChannel(
+        value=SequenceType(
+            type=BasicSequenceTypes.SEQUENCE,
+            data=[
+                StringType(type=BasicStringTypes.TEXT, data="S", diagnostic=None),
+                StringType(type=BasicStringTypes.TEXT, data="S", diagnostic=None),
+            ],
+        )
+    )
+    actual_value = get_converter().dumps(
+        SequenceType(
+            type=BasicSequenceTypes.SEQUENCE,
+            data=[
+                StringType(type=BasicStringTypes.TEXT, data="S", diagnostic=None),
+                StringType(type=BasicStringTypes.TEXT, data="A", diagnostic=None),
+            ],
+        )
+    )
+    config = oracle_config(tmp_path, pytestconfig, language="python")
+    result = evaluate_value(config, channel, actual_value)
+    assert result.result.enum == Status.WRONG
+
+
+def test_values_identical_list_is_detected(tmp_path: Path, pytestconfig):
+    channel = ValueOutputChannel(
+        value=SequenceType(
+            type=BasicSequenceTypes.SEQUENCE,
+            data=[
+                StringType(type=BasicStringTypes.TEXT, data="S", diagnostic=None),
+                StringType(type=BasicStringTypes.TEXT, data="S", diagnostic=None),
+            ],
+        )
+    )
+    actual_value = get_converter().dumps(
+        SequenceType(
+            type=BasicSequenceTypes.SEQUENCE,
+            data=[
+                StringType(type=BasicStringTypes.TEXT, data="S", diagnostic=None),
+                StringType(type=BasicStringTypes.TEXT, data="S", diagnostic=None),
+            ],
+        )
+    )
+    config = oracle_config(tmp_path, pytestconfig, language="python")
+    result = evaluate_value(config, channel, actual_value)
+    assert result.result.enum == Status.CORRECT

@@ -207,6 +207,23 @@ def _check_data_type(
             )
             prepared_elements.append(prepared_element)
             valid = valid and element_valid
+
+        # If one of the lists is not the same length as the other, we must do more.
+        if len(prepared_elements) != len(expected_elements):
+            valid = False
+            if len(expected_elements) > len(prepared_elements):
+                longest_list = expected_elements
+            else:
+                assert len(actual_elements) > len(prepared_elements)
+                longest_list = actual_elements
+
+            for remaining_element in longest_list[len(longest_list) :]:
+                assert remaining_element is None or isinstance(remaining_element, Value)
+                _, prepared_element = _check_data_type(
+                    bundle, remaining_element, remaining_element
+                )
+                prepared_elements.append(prepared_element)
+
         prepared_expected.data = prepared_elements
     elif isinstance(prepared_expected, ObjectType):
         expected_elements = prepared_expected.data
