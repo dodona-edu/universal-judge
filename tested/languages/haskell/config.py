@@ -183,7 +183,7 @@ class Haskell(Language):
 
     def get_declaration_metadata(self) -> TypeDeclarationMetadata:
         return {
-            "names": {  # type: ignore
+            "names": {
                 "integer": "Int",
                 "real": "Double",
                 "char": "Char",
@@ -204,9 +204,9 @@ class Haskell(Language):
                 "single_precision": "Float",
                 "double_precision": "Double",
                 "any": "Object",
-                "list": True,
-                "tuple": True,
-                "sequence": True,
+                "list": (True, "Data.List"),
+                "tuple": (True, "Data.Tuple"),
+                "sequence": (True, "Data.List"),
             },
             "nested_overrides": {"tuple": ("(", ")")},  # type: ignore
             "exception": "Exception",

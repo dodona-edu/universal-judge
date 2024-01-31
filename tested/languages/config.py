@@ -35,7 +35,7 @@ _logger = logging.getLogger(__name__)
 
 
 class TypeDeclarationMetadata(TypedDict):
-    names: dict[AllTypes, str | bool]
+    names: dict[AllTypes, str | tuple[bool, str]]
     inner_names: NotRequired[dict[AllTypes, str]]
     nested: NotRequired[tuple[str, str]]
     nested_overrides: NotRequired[dict[AllTypes, tuple[str, str]]]

@@ -292,7 +292,7 @@ def generate_selector(
 
 def _convert_single_type(
     language: Language, type_: AllTypes | VariableType, inner: bool
-) -> str | bool:
+) -> str | tuple[bool, str]:
     if isinstance(type_, VariableType):
         return type_.data
     meta = language.get_declaration_metadata()
@@ -307,6 +307,8 @@ def generate_type_declaration(
 ) -> str:
     if not isinstance(declaration, tuple):
         simple_result = _convert_single_type(language, declaration, inner)
+        if isinstance(simple_result, tuple):
+            simple_result = simple_result[1]
         assert isinstance(
             simple_result, str
         ), f"{declaration} is a simple type and should generate a string"
@@ -315,6 +317,8 @@ def generate_type_declaration(
     meta = language.get_declaration_metadata()
     base_type, nested = declaration
     base = _convert_single_type(language, base_type, inner)
+    if isinstance(base, tuple):
+        base = base[0]
 
     start, finish = meta.get("nested", ("[", "]"))
 
@@ -335,7 +339,7 @@ def generate_type_declaration(
         # This is a type with "inner" types, i.e. no name, such as Tuple[bool]
         return f"{start}{', '.join(converted_nested)}{finish}"
     elif base is False:
-        # This is a type with "rigt" types, i.e. no name, such as bool[]
+        # This is a type with "right" types, i.e. no name, such as bool[]
         return f"{', '.join(converted_nested)}{start}{finish}"
     else:
         return f"{base}{start}{', '.join(converted_nested)}{finish}"

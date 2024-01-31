@@ -188,7 +188,7 @@ class Java(Language):
                 "fixed_precision": "BigDecimal",
                 "list": "List",
                 "any": "Object",
-                "array": False,
+                "array": (False, "array"),
             },
             "inner_names": {
                 "boolean": "Boolean",
