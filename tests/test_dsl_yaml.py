@@ -1099,4 +1099,4 @@ def test_empty_text_data_newlines():
     json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
     actual_stderr = suite.tabs[0].contexts[0].testcases[0].output.stderr.data
-    assert actual_stderr == "\n"
+    assert actual_stderr == ""
