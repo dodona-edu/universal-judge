@@ -134,9 +134,20 @@ if __name__ == "__main__":
     parser.add_argument(
         "-f",
         "--full",
-        action="store_false",
+        action="store_true",
         help="If the output should be shown in full (default: false)",
-        default=None,
+    )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="If the judge should be verbose in its output (default: false)",
+    )
+    parser.add_argument(
+        "-d",
+        "--debug",
+        action="store_true",
+        help="If the judge should be outputing the debug messages (default: false)",
     )
     parser.add_argument(
         "-p",
@@ -177,21 +188,37 @@ if __name__ == "__main__":
         suite_path = args.testsuite.relative_to(evaluation_path)
     elif "evaluation" in config_file and "test_suite" in config_file["evaluation"]:
         # The config file contains a location, so try to use it.
-        suite_path = evaluation_path / config_file["evaluation"]["test_suite"]
-        if not suite_path.is_file():
+        suite_path = config_file["evaluation"]["test_suite"]
+        suite_full_path = evaluation_path / suite_path
+        if not suite_full_path.is_file():
             raise FileNotFoundError(
-                f"The test suite at {suite_path} does not exist (read value from the config file).\n"
-                "Create the file, correct the config.json file or provide the path to the test suite via the --testsuite parameter on the command line."
+                f"The test suite at {suite_full_path} does not exist (read value {suite_path} from the config file).\n"
+                "Create the file, correct the config.json file or provide the full path to the test suite via the --testsuite parameter on the command line."
             )
     else:
-        suite_path = evaluation_path / "suite.yaml"
-        if not suite_path.is_file():
+        suite_path = "suite.yaml"
+        suite_full_path = evaluation_path / suite_path
+        if not suite_full_path.is_file():
             raise FileNotFoundError(
-                f"The test suite at {suite_path} does not exist (used default value).\n"
-                "Create the file, add the location to the config.json file or provide the path to the test suite via the --testsuite parameter on the command line."
+                f"The test suite at {suite_full_path} does not exist (used default value).\n"
+                "Create the file, add the location to the config.json file or provide the full path to the test suite via the --testsuite parameter on the command line."
             )
     submission_path = find_submission()
     workdir_path = judge_path / "workdir"
+
+    if args.verbose or args.debug:
+        import logging
+        import sys
+
+        logger = logging.getLogger()
+        if args.debug:
+            logger.setLevel(logging.DEBUG)
+        elif args.verbose:
+            logger.setLevel(logging.INFO)
+        ch = logging.StreamHandler(stream=sys.stdout)
+        formatter = logging.Formatter("%(levelname)s:%(name)s:%(message)s")
+        ch.setFormatter(formatter)
+        logger.addHandler(ch)
 
     dodona_config = DodonaConfig(
         resources=evaluation_path,
@@ -211,7 +238,7 @@ if __name__ == "__main__":
 
     print(f"Locally executing exercise {exercise_path}...")
     print("The following options will be used:")
-    print(f" - Test suite: {suite_path}")
+    print(f" - Test suite: {evaluation_path}/{suite_path}")
     print(f" - Submission: {submission_path}")
     print("")
     print(
