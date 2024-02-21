@@ -189,7 +189,7 @@ The second way is:
 ```bash
 # Run an exercise with CLI paramaters
 $ python -m tested.cli --help
-usage: cli.py [-h] -e EXERCISE [-s SUBMISSION] [-t TESTSUITE] [-f] [-p PROGRAMMING_LANGUAGE]
+usage: cli.py [-h] -e EXERCISE [-s SUBMISSION] [-t TESTSUITE] [-f] [-v] [-d] [-p PROGRAMMING_LANGUAGE]
 
 Simple CLI for TESTed
 
@@ -202,6 +202,8 @@ options:
   -t TESTSUITE, --testsuite TESTSUITE
                         Path to a test suite
   -f, --full            If the output should be shown in full (default: false)
+  -v, --verbose         If the judge should be verbose in its output (default: false)
+  -d, --debug           If the judge should be outputing the debug messages (default: false)
   -p PROGRAMMING_LANGUAGE, --programming_language PROGRAMMING_LANGUAGE
                         The programming language to use
 
