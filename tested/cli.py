@@ -135,19 +135,19 @@ if __name__ == "__main__":
         "-f",
         "--full",
         action="store_true",
-        help="If the output should be shown in full (default: false)"
+        help="If the output should be shown in full (default: false)",
     )
     parser.add_argument(
         "-v",
         "--verbose",
         action="store_true",
-        help="If the judge should be verbose in its output (default: false)"
+        help="If the judge should be verbose in its output (default: false)",
     )
     parser.add_argument(
         "-d",
         "--debug",
         action="store_true",
-        help="If the judge should be outputing the debug messages (default: false)"
+        help="If the judge should be outputing the debug messages (default: false)",
     )
     parser.add_argument(
         "-p",
@@ -207,7 +207,9 @@ if __name__ == "__main__":
     workdir_path = judge_path / "workdir"
 
     if args.verbose or args.debug:
-        import logging, sys
+        import logging
+        import sys
+
         logger = logging.getLogger()
         if args.debug:
             logger.setLevel(logging.DEBUG)
