@@ -88,7 +88,7 @@ namespace Tested
                 type = "set";
                 data = encodeSequence((IEnumerable) value);
             } else if (value is IDictionary) {
-                type = "map";
+                type = "dictionary";
                 List<DictionaryEntry> entries = new List<DictionaryEntry>();
                 foreach (DictionaryEntry entry in (IDictionary) value)
                 {

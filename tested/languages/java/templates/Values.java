@@ -112,7 +112,7 @@ public class Values {
             type = "set";
             data = encodeSequence((Iterable<?>) value);
         } else if (value instanceof Map) {
-            type = "map";
+            type = "dictionary";
             var elements = new ArrayList<String>();
             for (Map.Entry<?, ?> entry : ((Map<?, ?>) value).entrySet()) {
                 elements.add("{ \"key\":" + encode(entry.getKey()) + ",\"value\": " + encode(entry.getValue()) + "}");
@@ -163,7 +163,7 @@ public class Values {
         var description = asJson(message.description);
         var format = asJson(message.format);
         var permission = asJson(message.permission);
-        
+
         return """
                 {
                   "description": %s,
@@ -172,7 +172,7 @@ public class Values {
                 }
                 """.formatted(description, format, permission);
     }
-    
+
     private static String asJson(String value) {
         if (value == null) {
             return "null";
@@ -188,7 +188,7 @@ public class Values {
         var dslExpected = asJson(r.dslExpected);
         var dslActual = asJson(r.dslActual);
         var messages = String.join(", ", converted);
-        
+
         String result = """
                 {
                   "result": %b,

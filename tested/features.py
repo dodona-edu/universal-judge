@@ -12,7 +12,14 @@ from typing import TYPE_CHECKING
 
 from attrs import define
 
-from tested.datatypes import AllTypes, BasicObjectTypes, BasicSequenceTypes, NestedTypes
+from tested.datatypes import (
+    AllTypes,
+    BasicObjectTypes,
+    BasicSequenceTypes,
+    ComplexExpressionTypes,
+    NestedTypes,
+    resolve_to_basic,
+)
 from tested.dodona import ExtendedMessage, Message, Permission
 
 if TYPE_CHECKING:
@@ -203,16 +210,19 @@ def is_supported(language: "Language") -> list[Message] | None:
 
     nested_types = []
     for key, value_types in required.nested_types:
-        if key in (BasicSequenceTypes.SET, BasicObjectTypes.MAP):
+        if isinstance(key, ComplexExpressionTypes):
+            continue
+        basic_key = resolve_to_basic(key)
+        if basic_key in (BasicSequenceTypes.SET, BasicObjectTypes.MAP):
             nested_types.append((key, value_types))
 
-    restricted = {
-        BasicSequenceTypes.SET: language.set_type_restrictions(),
-        BasicObjectTypes.MAP: language.map_type_restrictions(),
-    }
+    collection_restrictions = language.collection_restrictions()
 
     for key, value_types in nested_types:
-        from tested.serialisation import resolve_to_basic
+        basic_key = resolve_to_basic(key)
+        restrictions = collection_restrictions.get(
+            key, collection_restrictions.get(basic_key)
+        )
 
         # Types that have reduced support are converted, so we also need to
         # convert them here in the checks.
@@ -228,8 +238,8 @@ def is_supported(language: "Language") -> list[Message] | None:
             _logger.warning(
                 f"Required {key} types are {value_types} (or {basic_value_types})."
             )
-            _logger.warning(f"The language supports {restricted[key]}.")
-            missing = (value_types ^ restricted[key]) & value_types
+            _logger.warning(f"The language supports {restrictions}.")
+            missing = (value_types ^ restrictions) & value_types
             _logger.warning(f"Missing types are: {missing}.")
             message_text = f"""
             This test suite is not solvable in {language.__class__.__name__}.
@@ -238,7 +248,7 @@ def is_supported(language: "Language") -> list[Message] | None:
             {value_types}
             
             The programming language has support for:
-            {restricted[key]}
+            {restrictions}
             
             This means support is lacking for these:
             {missing}

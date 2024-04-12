@@ -124,7 +124,7 @@ private fun internalEncode(value: Any?): Array<String?> {
         type = "set"
         data = encodeSequence(value.asIterable())
     } else if (value is Map<*, *>) {
-        type = "map"
+        type = "dictionary"
         data = value.asSequence()
                 .map { e ->
                     String.format("{\"key\": %s, \"value\": %s }", encode(e.key),

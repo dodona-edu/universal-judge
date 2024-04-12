@@ -1,0 +1,4 @@
+- tab: "Feedback"
+  testcases:
+    - expression: 'dictionary({5: "a"})'
+      return: {5: "a"}

@@ -33,6 +33,7 @@ from tested.datatypes import (
     BasicTypes,
     resolve_to_basic,
 )
+from tested.datatypes.advanced import AdvancedObjectTypes
 from tested.features import TypeSupport, fallback_type_support_map
 from tested.judge.compilation import run_compilation
 from tested.judge.execution import execute_file, filter_files
@@ -161,9 +162,26 @@ ADVANCED_VALUES = [
             StringType(type=BasicStringTypes.TEXT, data="data"),
         ],
     ),
-    # Char
     StringType(type=AdvancedStringTypes.CHAR, data="h"),
     NothingType(type=AdvancedNothingTypes.UNDEFINED),
+    ObjectType(
+        type=AdvancedObjectTypes.DICTIONARY,
+        data=[
+            ObjectKeyValuePair(
+                key=StringType(type=BasicStringTypes.TEXT, data="data"),
+                value=NumberType(type=BasicNumericTypes.INTEGER, data=5),
+            )
+        ],
+    ),
+    ObjectType(
+        type=AdvancedObjectTypes.OBJECT,
+        data=[
+            ObjectKeyValuePair(
+                key=StringType(type=BasicStringTypes.TEXT, data="data"),
+                value=NumberType(type=BasicNumericTypes.INTEGER, data=5),
+            )
+        ],
+    ),
 ]
 
 

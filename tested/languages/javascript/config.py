@@ -3,7 +3,12 @@ import re
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from tested.datatypes import AllTypes, BasicStringTypes, ExpressionTypes
+from tested.datatypes import (
+    AdvancedObjectTypes,
+    AllTypes,
+    BasicStringTypes,
+    ExpressionTypes,
+)
 from tested.dodona import AnnotateCode, Message
 from tested.features import Construct, TypeSupport
 from tested.languages.config import (
@@ -72,6 +77,8 @@ class JavaScript(Language):
             "sequence": "supported",
             "set": "supported",
             "map": "supported",
+            "dictionary": "supported",
+            "object": "supported",
             "nothing": "supported",
             "undefined": "supported",
             "null": "supported",
@@ -92,21 +99,8 @@ class JavaScript(Language):
             "tuple": "reduced",
         }
 
-    def map_type_restrictions(self) -> set[ExpressionTypes] | None:
-        return {BasicStringTypes.TEXT}
-
-    def set_type_restrictions(self) -> set[ExpressionTypes] | None:
-        return {  # type: ignore
-            "integer",
-            "real",
-            "text",
-            "boolean",
-            "sequence",
-            "set",
-            "map",
-            "function_calls",
-            "identifiers",
-        }
+    def collection_restrictions(self) -> dict[AllTypes, set[ExpressionTypes]]:
+        return {AdvancedObjectTypes.OBJECT: {BasicStringTypes.TEXT}}
 
     def compilation(self, files: list[str]) -> CallbackResult:
         submission = submission_file(self)

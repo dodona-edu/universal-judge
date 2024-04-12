@@ -11,6 +11,7 @@ from typing import Union
 from tested.datatypes.basic import (
     BasicNothingTypes,
     BasicNumericTypes,
+    BasicObjectTypes,
     BasicSequenceTypes,
     BasicStringTypes,
     BasicTypes,
@@ -111,9 +112,21 @@ class AdvancedNothingTypes(_AdvancedDataType):
     """
 
 
+class AdvancedObjectTypes(_AdvancedDataType):
+    DICTIONARY = "dictionary", BasicObjectTypes.MAP
+    """
+    A proper map/dictionary/associative array data structure.
+    """
+    OBJECT = "object", BasicObjectTypes.MAP
+    """
+    An object like in JavaScript.
+    """
+
+
 AdvancedTypes = Union[
     AdvancedNumericTypes,
     AdvancedSequenceTypes,
     AdvancedStringTypes,
     AdvancedNothingTypes,
+    AdvancedObjectTypes,
 ]

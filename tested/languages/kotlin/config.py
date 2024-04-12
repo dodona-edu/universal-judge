@@ -4,7 +4,12 @@ import re
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from tested.datatypes import AllTypes, ExpressionTypes
+from tested.datatypes import (
+    AllTypes,
+    BasicObjectTypes,
+    BasicSequenceTypes,
+    ExpressionTypes,
+)
 from tested.dodona import AnnotateCode, Message, Status
 from tested.features import Construct, TypeSupport
 from tested.languages.config import (
@@ -80,6 +85,8 @@ class Kotlin(Language):
             "sequence": "supported",
             "set": "supported",
             "map": "supported",
+            "dictionary": "supported",
+            "object": "reduced",
             "nothing": "supported",
             "undefined": "reduced",
             "null": "reduced",
@@ -101,8 +108,8 @@ class Kotlin(Language):
             "tuple": "reduced",
         }
 
-    def map_type_restrictions(self) -> set[ExpressionTypes] | None:
-        return {  # type: ignore
+    def collection_restrictions(self) -> dict[AllTypes, set[ExpressionTypes]]:
+        restrictions = {
             "integer",
             "real",
             "char",
@@ -124,9 +131,10 @@ class Kotlin(Language):
             "function_calls",
             "identifiers",
         }
-
-    def set_type_restrictions(self) -> set[ExpressionTypes] | None:
-        return self.map_type_restrictions()
+        return {
+            BasicObjectTypes.MAP: restrictions,  # type: ignore
+            BasicSequenceTypes.SET: restrictions,  # type: ignore
+        }
 
     def compilation(self, files: list[str]) -> CallbackResult:
         def file_filter(file: Path) -> bool:

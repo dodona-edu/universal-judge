@@ -11,6 +11,7 @@ from tested.datatypes import (
     BasicSequenceTypes,
     BasicStringTypes,
 )
+from tested.datatypes.advanced import AdvancedObjectTypes
 from tested.languages.conventionalize import submission_file
 from tested.languages.preparation import (
     PreparedContext,
@@ -48,6 +49,17 @@ def convert_value(value: Value) -> str:
         raise AssertionError("Double extended values are not supported in js.")
     elif value.type == AdvancedNumericTypes.FIXED_PRECISION:
         raise AssertionError("Fixed precision values are not supported in js.")
+    elif value.type == AdvancedObjectTypes.OBJECT:
+        assert isinstance(value, ObjectType)
+        result = "{"
+        for i, pair in enumerate(value.data):
+            result += convert_statement(pair.key, True)
+            result += ": "
+            result += convert_statement(pair.value, True)
+            if i != len(value.data) - 1:
+                result += ", "
+        result += "}"
+        return result
     elif value.type in (
         AdvancedNumericTypes.INT_64,
         AdvancedNumericTypes.U_INT_64,
@@ -79,14 +91,16 @@ def convert_value(value: Value) -> str:
         return f"new Set([{convert_arguments(value.data)}])"
     elif value.type == BasicObjectTypes.MAP:
         assert isinstance(value, ObjectType)
-        result = "{"
+        result = "new Map(["
         for i, pair in enumerate(value.data):
+            result += "["
             result += convert_statement(pair.key, True)
-            result += ": "
+            result += ", "
             result += convert_statement(pair.value, True)
+            result += "]"
             if i != len(value.data) - 1:
                 result += ", "
-        result += "}"
+        result += "])"
         return result
     elif value.type == BasicStringTypes.UNKNOWN:
         assert isinstance(value, StringType)

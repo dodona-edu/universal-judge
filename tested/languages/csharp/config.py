@@ -76,6 +76,8 @@ class CSharp(Language):
             "sequence": "supported",
             "set": "supported",
             "map": "supported",
+            "dictionary": "supported",
+            "object": "reduced",
             "nothing": "supported",
             "undefined": "reduced",
             "null": "reduced",
