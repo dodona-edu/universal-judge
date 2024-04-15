@@ -201,7 +201,8 @@ def _check_data_type(
         prepared_elements = []
         for expected_element, actual_element in zip(expected_elements, actual_elements):
             assert expected_element is None or isinstance(expected_element, Value)
-            assert actual_element is None or isinstance(actual_element, Value)
+            if not isinstance(actual_element, Value):
+                actual_element = None
             element_valid, prepared_element = _check_data_type(
                 bundle, expected_element, actual_element
             )
@@ -232,11 +233,18 @@ def _check_data_type(
         )
         prepared_elements = []
         for expected_element, actual_element in zip(expected_elements, actual_elements):
-            assert isinstance(actual_element, ObjectKeyValuePair)
-            actual_key, actual_value = actual_element.key, actual_element.value
-            assert isinstance(actual_key, Value) and isinstance(actual_value, Value)
             expected_key, expected_value = expected_element.key, expected_element.value
             assert isinstance(expected_key, Value) and isinstance(expected_value, Value)
+
+            # Handle the case where the elements are not part of a map.
+            # For example, the actual value is a list.
+            if not isinstance(actual_element, ObjectKeyValuePair):
+                actual_key = None
+                actual_value = None
+            else:
+                actual_key, actual_value = actual_element.key, actual_element.value
+                assert isinstance(actual_key, Value) and isinstance(actual_value, Value)
+
             key_valid, prepared_key = _check_data_type(bundle, expected_key, actual_key)
             value_valid, prepared_value = _check_data_type(
                 bundle, expected_value, actual_value
