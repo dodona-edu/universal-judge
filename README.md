@@ -19,17 +19,18 @@ We only use the Python language module in this README, but see [dependencies.md]
 
 Install [Python 3.11](https://www.python.org/downloads/) or later (including pip).
 Next, [clone](https://github.com/git-guides/git-clone) the TESTed repository and open a command prompt in the cloned repository.
-TESTed uses [pipenv](https://pipenv.pypa.io/en/latest/installation/) to manage its Python dependencies.
+TESTed uses [poetry](https://python-poetry.org/) to manage its Python dependencies.
 Now you can run the following commands to install them:
 
 ```bash
 # Pipenv install
-$ pip install pipenv --user
+$ pip install poetry --user
 # Install dependencies (include --dev for tests/development)
-$ pipenv sync --dev
-# Activate the virtualenv
-$ pipenv shell
+$ poetry install
 ```
+
+Those using [Nix](https://nixos.org/) can use `nix develop` to get a development environment.
+`nix run` will run TESTed.
 
 ## Running TESTed
 
@@ -219,6 +220,8 @@ The repository of TESTed is organized as follows:
 
 - `tested`: Python code of the actual judge (run by Dodona)
 - `tests`: unit tests for TESTed
+
+
 
 You can run the basic unit tests with:
 

@@ -8,13 +8,47 @@
       url = "github:numtide/devshell";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    poetry2nix = {
+      url = "github:nix-community/poetry2nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs, devshell, flake-utils, mach-nix, ... }:
+  outputs = { self, nixpkgs, devshell, flake-utils, poetry2nix, ... }:
     flake-utils.lib.eachDefaultSystem (system:
       let
-        pkgs = import nixpkgs { inherit system; overlays = [ devshell.overlays.default ]; };
+        pkgs = import nixpkgs {
+          inherit system;
+          overlays = [ devshell.overlays.default ];
+        };
+        poetry = poetry2nix.lib.mkPoetry2Nix { inherit pkgs; };
+
         python = pkgs.python311;
+
+        overrides = final: prev: {
+          marko = prev.buildPythonPackage rec {
+            pname = "marko";
+            version = "2.0.0";
+            format = "pyproject";
+
+            src = pkgs.fetchPypi {
+              inherit pname version;
+              hash = "sha256-78JkYIkyUME3UQJa6SAuuxOJiHA2/A35AJxquHVGcDA=";
+            };
+
+            nativeBuildInputs =
+              [ python.pkgs.pdm-pep517 python.pkgs.pdm-backend ];
+
+            doCheck = false;
+
+            meta = with pkgs.lib; {
+              homepage = "https://github.com/frostming/marko";
+              license = licenses.mit;
+              maintainers = [ ];
+            };
+          };
+        };
+
         ast = pkgs.buildNpmPackage rec {
           pname = "abstract-syntax-tree";
           version = "2.20.6";
@@ -33,128 +67,72 @@
           meta = with pkgs.lib; {
             description = "A library for working with abstract syntax trees";
             license = licenses.mit;
-            maintainers = [];
-          };
-        };
-        marko = python.pkgs.buildPythonPackage rec {
-          pname = "marko";
-          version = "2.0.0";
-          format = "pyproject";
-           
-          src = pkgs.fetchPypi {
-            inherit pname version;
-            hash = "sha256-78JkYIkyUME3UQJa6SAuuxOJiHA2/A35AJxquHVGcDA=";
-          };
-            
-          nativeBuildInputs = [
-            python.pkgs.pdm-pep517 python.pkgs.pdm-backend
-          ];
-           
-          doCheck = false;
-           
-          meta = with pkgs.lib; {
-            homepage = "https://github.com/frostming/marko";
-            license = licenses.mit;
             maintainers = [ ];
           };
         };
-        core-packages = ps: with ps; [
-            psutil
-            pydantic
-            attrs
-            cattrs
-            jsonschema
-            typing-inspect
-            pyyaml
-            pygments
-            python-i18n
-        ];
-        python-env = python.withPackages(ps: (core-packages ps) ++ [
-            ps.pylint
-            ps.pytest
-            ps.pytest-mock
-            ps.pytest-cov
-            ps.pytest-xdist
-            # For Pycharm
-            ps.setuptools
-            ps.isort
-            ps.black
-            ps.jinja2
-            marko
-        ]);
-        core-deps = [
-            (python.withPackages(ps: (core-packages ps) ++ [ps.pylint]))
-        ];
+
         haskell-deps = [
-            (pkgs.haskell.packages.ghc94.ghcWithPackages (p: [p.aeson]))
-            pkgs.hlint
+          (pkgs.haskell.packages.ghc94.ghcWithPackages (p: [ p.aeson ]))
+          pkgs.hlint
         ];
-        node-deps = [
-            pkgs.nodejs-18_x
-            pkgs.nodePackages.eslint
-            ast
-        ];
-        bash-deps = [
-            pkgs.shellcheck
-        ];
-        c-deps = [
-            pkgs.cppcheck
-            pkgs.gcc
-        ];
-        java-deps = [
-            pkgs.openjdk17
-            pkgs.checkstyle
-        ];
-        kotlin-deps = [
-            pkgs.kotlin
-            pkgs.ktlint
-        ];
-        csharp-deps = [
-            pkgs.dotnetCorePackages.sdk_6_0
-        ];
-      in
-      {
+        node-deps = [ pkgs.nodejs-18_x pkgs.nodePackages.eslint ast ];
+        bash-deps = [ pkgs.shellcheck ];
+        c-deps = [ pkgs.cppcheck pkgs.gcc ];
+        java-deps = [ pkgs.openjdk17 pkgs.checkstyle ];
+        kotlin-deps = [ pkgs.kotlin pkgs.ktlint ];
+        csharp-deps = [ pkgs.dotnetCorePackages.sdk_6_0 ];
+
+        all-other-dependencies = haskell-deps ++ node-deps ++ bash-deps
+          ++ c-deps ++ java-deps ++ kotlin-deps ++ csharp-deps;
+
+        python-base-env = {
+          projectDir = self;
+          python = python;
+          overrides = poetry.overrides.withDefaults overrides;
+        };
+
+        python-dev-env = poetry.mkPoetryEnv python-base-env;
+
+        tested-env = {
+          inherit (python-base-env) projectDir python overrides;
+          propagatedBuildInputs = all-other-dependencies;
+        };
+
+      in {
+        packages = rec {
+          default = tested;
+          tested = poetry.mkPoetryApplication {
+            inherit (tested-env)
+              projectDir python overrides propagatedBuildInputs;
+            doCheck = false;
+          };
+        };
+
         devShells = rec {
           default = tested;
           tested = pkgs.devshell.mkShell {
             name = "TESTed";
-            packages = [python-env pkgs.nodePackages.pyright pkgs.pipenv] ++ haskell-deps ++ node-deps ++ bash-deps ++ c-deps ++ java-deps ++ kotlin-deps ++ csharp-deps;
+
+            packages = [ python-dev-env pkgs.nodePackages.pyright pkgs.poetry ]
+              ++ all-other-dependencies;
+
             devshell.startup.link.text = ''
               mkdir -p "$PRJ_DATA_DIR/current"
-              ln -sfn "${python-env}/${python-env.sitePackages}" "$PRJ_DATA_DIR/current/python-packages"
-              ln -sfn "${python-env}" "$PRJ_DATA_DIR/current/python"
+              ln -sfn "${python-dev-env}/${python-dev-env.sitePackages}" "$PRJ_DATA_DIR/current/python-packages"
+              ln -sfn "${python-dev-env}" "$PRJ_DATA_DIR/current/python"
             '';
             env = [
               {
                 name = "DOTNET_ROOT";
                 eval = "${pkgs.dotnetCorePackages.sdk_6_0}";
               }
-             {
+              {
                 name = "NODE_PATH";
                 prefix = "$(npm get prefix)";
               }
             ];
-            commands = [
-              {
-                name = "test:stable";
-                category = "tests";
-                help = "Run the non-flaky tests.";
-                command = ''
-                  python -m pytest tests/ -m "not flaky"
-                '';
-              }
-              {
-                name = "test:all";
-                category = "tests";
-                help = "Run all tests.";
-                command = ''
-                  python -m pytest tests/
-                '';
-              }
-            ];
           };
         };
-      }
-    );
+      });
 }
 

@@ -7,7 +7,7 @@ each language, we list the required dependencies, and their install instructions
 
 See https://github.com/dodona-edu/docker-images/blob/master/dodona-tested.dockerfile
 
-You can also take a look at the `.github/workflows/ci.yml` file, as it will also install most dependencies.
+You can also take a look at the `flake.nix` file, as it will also install most dependencies.
 
 ## Languages
 
