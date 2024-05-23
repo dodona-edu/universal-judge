@@ -122,9 +122,7 @@ class CSharp(Language):
         file = OUTPUT_DIRECTORY + "/" + file
         return ["dotnet", file, *arguments]
 
-    def find_main_file(
-        self, files: list[Path], name: str
-    ) -> tuple[Path | None, Status]:
+    def find_main_file(self, files: list[Path], name: str) -> Path | Status:
         # TODO: specify the extension (if any) of the output files, so we don't need to
         # override this.
         logger.debug("Finding %s in %s", name, files)
@@ -132,9 +130,9 @@ class CSharp(Language):
             x for x in files if x.name.startswith(name) and x.suffix == ".dll"
         ]
         if possible_main_files:
-            return possible_main_files[0], Status.CORRECT
+            return possible_main_files[0]
         else:
-            return None, Status.COMPILATION_ERROR
+            return Status.COMPILATION_ERROR
 
     def modify_solution(self, solution: Path):
         with open(solution, "r") as file:

@@ -300,6 +300,7 @@ def _create_handling_function(
         evaluator_name = conventionalize_namespace(lang_config, evaluator.file.stem)
     else:
         evaluator_name = None
+        evaluator = None
 
     def generator(expression: Expression) -> Statement:
         if isinstance(output, OracleOutputChannel) and isinstance(

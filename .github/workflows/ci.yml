@@ -8,10 +8,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: DeterminateSystems/nix-installer-action@main
+        with:
+          nix-package-url: https://releases.nixos.org/nix/nix-2.18.2/nix-2.18.2-x86_64-linux.tar.xz
       - uses: DeterminateSystems/magic-nix-cache-action@main
       - uses: DeterminateSystems/flake-checker-action@main
       - run: echo "${GITHUB_WORKSPACE}" >> $GITHUB_PATH
-      - run: nix develop -c poetry run pytest -n auto --cov=tested --cov-report=xml tests/
+      - run: nix flake check --print-build-logs
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
   lint:
@@ -22,8 +24,8 @@ jobs:
       - uses: DeterminateSystems/magic-nix-cache-action@main
       - uses: DeterminateSystems/flake-checker-action@main
       - run: echo "${GITHUB_WORKSPACE}" >> $GITHUB_PATH
-      - run: nix develop -c poetry run isort ./tested ./tests
-      - run: nix develop -c black ./tested ./tests
+      - run: nix develop .#format -c poetry run isort --check-only ./tested ./tests
+      - run: nix develop .#format -c poetry run black --check ./tested ./tests
   types:
     runs-on: ubuntu-latest
     steps:
@@ -32,4 +34,4 @@ jobs:
       - uses: DeterminateSystems/magic-nix-cache-action@main
       - uses: DeterminateSystems/flake-checker-action@main
       - run: echo "${GITHUB_WORKSPACE}" >> $GITHUB_PATH
-      - run: nix develop -c pyright ./tested
+      - run: nix develop .#types -c pyright ./tested

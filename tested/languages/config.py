@@ -158,7 +158,7 @@ class Language(ABC):
         """
         raise NotImplementedError
 
-    def get_string_quote(self):
+    def get_string_quote(self) -> str:
         """
         :return: The symbol used to quote strings.
         """
@@ -347,39 +347,30 @@ class Language(ABC):
 
         return list(x for x in files if filter_function(x))
 
-    @typing.overload
     def find_main_file(
         self,
         files: list[Path],
         name: str,
-    ) -> tuple[Path, typing.Literal[Status.CORRECT]]:
-        ...
-
-    @typing.overload
-    def find_main_file(self, files: list[Path], name: str) -> tuple[None, Status]:
-        ...
-
-    def find_main_file(
-        self,
-        files: list[Path],
-        name: str,
-    ) -> tuple[Path | None, Status]:
+    ) -> Path | Status:
         """
         Find the "main" file in a list of files.
 
         This method is invoked to find the "main" file, i.e. the file with the main
         method (or at least the file that should be executed).
 
+        If something went wrong, an error status is returned. Otherwise, a path to
+        the main file is returned.
+
         :param files: A list of files.
         :param name: The name of the main file.
-        :return: The main file or a list of messages.
+        :return: The main file or an error status.
         """
         _logger.debug("Finding %s in %s", name, files)
         possible_main_files = [x for x in files if x.name.startswith(name)]
         if possible_main_files:
-            return possible_main_files[0], Status.CORRECT
+            return possible_main_files[0]
         else:
-            return None, Status.COMPILATION_ERROR
+            return Status.COMPILATION_ERROR
 
     def cleanup_stacktrace(self, stacktrace: str) -> str:
         """

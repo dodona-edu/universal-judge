@@ -153,7 +153,7 @@ class JavaScript(Language):
         assert self.config
         return linter.run_eslint(self.config.dodona, remaining)
 
-    def cleanup_stacktrace(self, traceback: str) -> str:
+    def cleanup_stacktrace(self, stacktrace: str) -> str:
         assert self.config
         # What this does:
         # 1a. While inside the submission code, replace all references to the location with <code>
@@ -168,7 +168,7 @@ class JavaScript(Language):
         submission_namespace = f"{submission_name(self)}."
 
         resulting_lines = ""
-        for line in traceback.splitlines(keepends=True):
+        for line in stacktrace.splitlines(keepends=True):
             # If we encounter an execution location, we are done.
             if re.search(execution_location_regex, line):
                 break
@@ -183,10 +183,10 @@ class JavaScript(Language):
 
         return resulting_lines
 
-    def cleanup_description(self, description: str) -> str:
-        description = cleanup_description(self, description)
+    def cleanup_description(self, statement: str) -> str:
+        statement = cleanup_description(self, statement)
         await_regex = re.compile(r"await\s+")
-        return await_regex.sub("", description)
+        return await_regex.sub("", statement)
 
     def generate_statement(self, statement: Statement) -> str:
         from tested.languages.javascript import generators

@@ -79,4 +79,5 @@ ipython_config.py
 generated/
 venv/
 venv-*/
+.venv/
 node_modules/

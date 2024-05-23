@@ -24,24 +24,14 @@ def run_ktlint(
 
     if path := language_options.get("editorconfig", None):
         assert isinstance(path, str)
-        command.append(f"--editorconfig={config.resources / path}")
-
-    if language_options.get("disabled_rules_ktlint", None):
-        rules = language_options["disabled_rules_ktlint"]
-        if isinstance(rules, list):
-            rules = ",".join(rules)
-        if "filename" not in rules:
-            rules += ",filename"
-        command.append(f"--disabled_rules={rules}")
+        editorconfig = config.resources / path
     else:
-        command.append("--disabled_rules=filename")
+        editorconfig = config.judge / "tested/languages/kotlin/ktlint.editorconfig"
+    command.append(f"--editorconfig={editorconfig}")
 
     if path := language_options.get("ktlint_ruleset", None):
         assert isinstance(path, str)
         command.append(f"--ruleset={config.resources / path}")
-
-    if language_options.get("ktlint_experimental", True):
-        command.append("--experimental")
 
     submission = submission.absolute()
 
@@ -85,20 +75,29 @@ def run_ktlint(
             message = error.get("message", None)
             if not message:
                 continue
-            rule = error.get("rule", None)
-            if rule:
-                message += f"({rule})"
+            rule = error["rule"]
+
+            # Attempt to extract rule information.
+            if ":" in rule:
+                ruleset, name = rule.split(":")
+                external_url = (
+                    f"https://pinterest.github.io/ktlint/latest/rules/{ruleset}/#{name}"
+                )
+                message += f" ({name})"
+            else:
+                external_url = (
+                    "https://pinterest.github.io/ktlint/latest/rules/standard/"
+                )
+                message += f" ({rule})"
 
             annotations.append(
                 AnnotateCode(
                     row=error.get("line", 1) - 1 + config.source_offset,
                     text=message,
-                    externalUrl="https://ktlint.github.io/#rules",
+                    externalUrl=external_url,
                     column=error.get("column", 1) - 1,
                     type=Severity.INFO,
                 )
             )
 
-    # sort linting messages on line, column and code
-    annotations.sort(key=lambda a: (a.row, a.column, a.text))
     return [], annotations

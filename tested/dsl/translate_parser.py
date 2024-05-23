@@ -272,7 +272,7 @@ def _validate_dsl(dsl_object: YamlObject):
 
 
 def _tested_type_to_value(tested_type: TestedType) -> Value:
-    type_enum = get_converter().structure(tested_type.type, AllTypes)
+    type_enum = get_converter().structure(tested_type.type, AllTypes)  # pyright: ignore
     if isinstance(type_enum, NumericTypes):
         # Some special cases for advanced numeric types.
         if type_enum == AdvancedNumericTypes.FIXED_PRECISION:

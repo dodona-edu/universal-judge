@@ -208,7 +208,7 @@ def execute_unit(
     execution_dir: Path,
     dependencies: list[Path],
     remaining_time: float,
-) -> tuple[ExecutionResult | None, Status]:
+) -> ExecutionResult | Status:
     """
     Execute a unit.
 
@@ -232,12 +232,12 @@ def execute_unit(
         main_file_name = unit.name
         argument = None
 
-    executable, status = bundle.language.find_main_file(files, main_file_name)
-    _logger.debug(f"Found main file: {executable}")
+    executable_or_status = bundle.language.find_main_file(files, main_file_name)
+    _logger.debug(f"Searched for main file: {executable_or_status}")
+    if isinstance(executable_or_status, Status):
+        return executable_or_status
 
-    if status != Status.CORRECT:
-        return None, status
-
+    executable = executable_or_status
     files.remove(executable)
     stdin = unit.get_stdin(bundle.config.resources)
 
@@ -257,7 +257,7 @@ def execute_unit(
     values = _get_contents_or_empty(value_file(bundle, execution_dir))
     exceptions = _get_contents_or_empty(exception_file(bundle, execution_dir))
 
-    result = ExecutionResult(
+    return ExecutionResult(
         stdout=base_result.stdout,
         stderr=base_result.stderr,
         exit=base_result.exit,
@@ -268,5 +268,3 @@ def execute_unit(
         timeout=base_result.timeout,
         memory=base_result.memory,
     )
-
-    return result, status

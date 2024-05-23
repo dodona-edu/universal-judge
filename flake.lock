@@ -132,6 +132,7 @@
       },
       "original": {
         "owner": "nix-community",
+        "ref": "refs/tags/2024.5.939250",
         "repo": "poetry2nix",
         "type": "github"
       }

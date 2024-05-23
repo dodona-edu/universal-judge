@@ -231,10 +231,14 @@ def _execute_one_unit(
     # Execute the unit.
     if local_compilation_results.status == Status.CORRECT:
         remaining_time = plan.remaining_time()
-        execution_result, status = execute_unit(
+        execution_result_or_status = execute_unit(
             bundle, planned_unit, execution_dir, dependencies, remaining_time
         )
-        local_compilation_results.status = status
+        if isinstance(execution_result_or_status, Status):
+            local_compilation_results.status = execution_result_or_status
+            execution_result = None
+        else:
+            execution_result = execution_result_or_status
     else:
         execution_result = None
 

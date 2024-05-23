@@ -94,7 +94,7 @@ def parse_json_value(value: str) -> "Value":
     initialise_converter()
     from tested.serialisation import Value
 
-    return _suite_converter.loads(value, Value)
+    return _suite_converter.loads(value, Value)  # pyright: ignore
 
 
 def parse_json_suite(value: str) -> "Suite":

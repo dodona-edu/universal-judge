@@ -9,7 +9,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     poetry2nix = {
-      url = "github:nix-community/poetry2nix";
+      url = "github:nix-community/poetry2nix?ref=refs/tags/2024.5.939250";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
@@ -25,6 +25,7 @@
 
         python = pkgs.python311;
 
+        # For some Python packages, we want customization, as Nix can't build it.
         overrides = final: prev: {
           marko = prev.buildPythonPackage rec {
             pname = "marko";
@@ -36,8 +37,7 @@
               hash = "sha256-78JkYIkyUME3UQJa6SAuuxOJiHA2/A35AJxquHVGcDA=";
             };
 
-            nativeBuildInputs =
-              [ python.pkgs.pdm-pep517 python.pkgs.pdm-backend ];
+            nativeBuildInputs = [ prev.pdm-pep517 prev.pdm-backend ];
 
             doCheck = false;
 
@@ -47,8 +47,44 @@
               maintainers = [ ];
             };
           };
+          # We need PyYAML with C support, but poetry2nix does not do that apparently...
+          # Taken from nixpkgs.
+          pyyaml = prev.buildPythonPackage rec {
+            pname = "pyyaml";
+            version = "6.0.1";
+
+            format = "pyproject";
+
+            src = pkgs.fetchFromGitHub {
+              owner = "yaml";
+              repo = "pyyaml";
+              rev = version;
+              hash = "sha256-YjWMyMVDByLsN5vEecaYjHpR1sbBey1L/khn4oH9SPA=";
+            };
+
+            nativeBuildInputs = [ prev.cython_0 prev.setuptools ];
+
+            buildInputs = [ pkgs.libyaml ];
+
+            checkPhase = ''
+              runHook preCheck
+              PYTHONPATH="tests/lib:$PYTHONPATH" ${python.interpreter} -m test_all
+              runHook postCheck
+            '';
+
+            pythonImportsCheck = [ "yaml" ];
+
+            meta = with pkgs.lib; {
+              description =
+                "The next generation YAML parser and emitter for Python";
+              homepage = "https://github.com/yaml/pyyaml";
+              license = licenses.mit;
+              maintainers = with maintainers; [ ];
+            };
+          };
         };
 
+        # This one isn't in Nix, so do it manually.
         ast = pkgs.buildNpmPackage rec {
           pname = "abstract-syntax-tree";
           version = "2.20.6";
@@ -71,6 +107,7 @@
           };
         };
 
+        # General dependencies for other languages
         haskell-deps = [
           (pkgs.haskell.packages.ghc94.ghcWithPackages (p: [ p.aeson ]))
           pkgs.hlint
@@ -83,7 +120,8 @@
         csharp-deps = [ pkgs.dotnetCorePackages.sdk_6_0 ];
 
         all-other-dependencies = haskell-deps ++ node-deps ++ bash-deps
-          ++ c-deps ++ java-deps ++ kotlin-deps ++ csharp-deps;
+          ++ c-deps ++ java-deps ++ kotlin-deps ++ csharp-deps
+          ++ [ pkgs.coreutils ];
 
         python-base-env = {
           projectDir = self;
@@ -98,7 +136,35 @@
           propagatedBuildInputs = all-other-dependencies;
         };
 
+        unit-test = pkgs.writeShellApplication {
+          name = "unit-test";
+          runtimeInputs = [ python-dev-env pkgs.poetry ] ++ all-other-dependencies;
+          text = ''
+            DOTNET_CLI_HOME="$(mktemp -d)"
+            export DOTNET_CLI_HOME
+            poetry run pytest -n auto --cov=tested --cov-report=xml tests/
+          '';
+        };
+
       in {
+        checks = rec {
+          default = simple-tests;
+          simple-tests = pkgs.stdenvNoCC.mkDerivation {
+            name = "simple-tests";
+            src = self;
+            doCheck = true;
+            checkInputs = [ python-dev-env pkgs.poetry ] ++ all-other-dependencies;
+            checkPhase = ''
+              DOTNET_CLI_HOME="$(mktemp -d)"
+              export DOTNET_CLI_HOME
+              poetry run pytest -n auto --cov=tested --cov-report=xml tests/
+            '';
+            installPhase = ''
+              touch $out # it worked!
+            '';
+          };
+        };
+
         packages = rec {
           default = tested;
           tested = poetry.mkPoetryApplication {
@@ -132,6 +198,10 @@
               }
             ];
           };
+          types = pkgs.mkShell {
+            packages = [ python-dev-env pkgs.nodePackages.pyright ];
+          };
+          format = pkgs.mkShell { packages = [ python-dev-env pkgs.poetry ]; };
         };
       });
 }
