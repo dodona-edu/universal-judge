@@ -1,6 +1,5 @@
 import itertools
 import logging
-import shutil
 from pathlib import Path
 
 from attrs import define
@@ -176,7 +175,10 @@ def set_up_unit(
         _logger.debug(f"Copying {origin} to {destination}")
         if origin == destination:
             continue  # Don't copy the file to itself
-        shutil.copy2(origin, destination)
+
+        # Use hard links instead of copying, due to issues with busy files.
+        # See https://github.com/dodona-edu/universal-judge/issues/57
+        destination.hardlink_to(origin)
 
     return execution_dir, dependencies
 
