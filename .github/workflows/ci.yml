@@ -8,8 +8,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: DeterminateSystems/nix-installer-action@main
-        with:
-          nix-package-url: https://releases.nixos.org/nix/nix-2.18.2/nix-2.18.2-x86_64-linux.tar.xz
       - uses: DeterminateSystems/magic-nix-cache-action@main
       - uses: DeterminateSystems/flake-checker-action@main
       - run: echo "${GITHUB_WORKSPACE}" >> $GITHUB_PATH
