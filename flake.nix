@@ -71,7 +71,7 @@
           (pkgs.haskell.packages.ghc94.ghcWithPackages (p: [ p.aeson ]))
           pkgs.hlint
         ];
-        node-deps = [ pkgs.nodejs-18_x pkgs.nodePackages.eslint ast ];
+        node-deps = [ pkgs.nodejs_22 pkgs.nodePackages.eslint ast ];
         bash-deps = [ pkgs.shellcheck ];
         c-deps = [ pkgs.cppcheck pkgs.gcc ];
         java-deps = [ pkgs.openjdk17 pkgs.checkstyle ];
