@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: docker build -t "local-image" -f ./.github/dodona-image.dockerfile --network=host .
+      - run: docker build -t "local-image" -f ${{ github.workspace }}/.github/dodona-image.dockerfile --network=host .
         name: Build Dodona Docker image
-      - run: docker run -v /home/niko/Ontwikkeling/universal-judge:${GITHUB_WORKSPACE} -e TESTED_SOURCE=${GITHUB_WORKSPACE} local-image
+      - run: docker run -v ${{ github.workspace }}:/github/workspace -e TESTED_SOURCE=/github/workspace local-image
         name: Run tests in Dodona Docker image
