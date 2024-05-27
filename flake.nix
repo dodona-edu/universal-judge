@@ -76,7 +76,7 @@
         c-deps = [ pkgs.cppcheck pkgs.gcc13 ];
         java-deps = [ pkgs.openjdk21 pkgs.checkstyle ];
         kotlin-deps = [ pkgs.kotlin pkgs.ktlint ];
-        csharp-deps = [ pkgs.dotnetCorePackages.sdk_6_0 ];
+        csharp-deps = [ pkgs.dotnetCorePackages.sdk_8_0 ];
 
         all-other-dependencies = haskell-deps ++ node-deps ++ bash-deps
           ++ c-deps ++ java-deps ++ kotlin-deps ++ csharp-deps
