@@ -9,7 +9,6 @@ jobs:
       - uses: actions/checkout@v4
       - uses: DeterminateSystems/nix-installer-action@main
       - uses: DeterminateSystems/magic-nix-cache-action@main
-      - uses: DeterminateSystems/flake-checker-action@main
       - run: echo "${GITHUB_WORKSPACE}" >> $GITHUB_PATH
       - run: nix flake check --print-build-logs
       - name: Upload coverage to Codecov
@@ -20,7 +19,6 @@ jobs:
       - uses: actions/checkout@v4
       - uses: DeterminateSystems/nix-installer-action@main
       - uses: DeterminateSystems/magic-nix-cache-action@main
-      - uses: DeterminateSystems/flake-checker-action@main
       - run: echo "${GITHUB_WORKSPACE}" >> $GITHUB_PATH
       - run: nix develop .#format -c poetry run isort --check-only ./tested ./tests
       - run: nix develop .#format -c poetry run black --check ./tested ./tests
@@ -30,6 +28,5 @@ jobs:
       - uses: actions/checkout@v4
       - uses: DeterminateSystems/nix-installer-action@main
       - uses: DeterminateSystems/magic-nix-cache-action@main
-      - uses: DeterminateSystems/flake-checker-action@main
       - run: echo "${GITHUB_WORKSPACE}" >> $GITHUB_PATH
       - run: nix develop .#types -c pyright ./tested
