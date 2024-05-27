@@ -46,16 +46,16 @@
         # This one isn't in Nix, so do it manually.
         ast = pkgs.buildNpmPackage rec {
           pname = "abstract-syntax-tree";
-          version = "2.20.6";
+          version = "2.22.0";
 
           src = pkgs.fetchFromGitHub {
             owner = "buxlabs";
             repo = pname;
-            rev = "94115dc1f1fd01731c7d43f3d7773dda12b9446f";
-            hash = "sha256-jiXZQ0CbU2QSuDKaUBLin4LPSgiasEyBO/TlyNhNqrI=";
+            rev = "36b343c80d94383d2c8cd8883dba52d9bf51be71";
+            hash = "sha256-ACZf8BwWY476PZ+9mqsiOx6L4yGOvDPMZNFEHmqz4j4=";
           };
 
-          npmDepsHash = "sha256-ZSJvh3IP1VKJ0WR9axKEm4prUBVGyOKHyacIPSpImsU=";
+          npmDepsHash = "sha256-+I0Nu7KgZgjFQR12Z8iRNaFq269B7ythiq8sdi5or3Y=";
 
           dontNpmBuild = true;
 
