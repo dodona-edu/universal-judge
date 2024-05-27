@@ -74,7 +74,7 @@
         node-deps = [ pkgs.nodejs_22 pkgs.nodePackages.eslint ast ];
         bash-deps = [ pkgs.shellcheck ];
         c-deps = [ pkgs.cppcheck pkgs.gcc13 ];
-        java-deps = [ pkgs.openjdk17 pkgs.checkstyle ];
+        java-deps = [ pkgs.openjdk21 pkgs.checkstyle ];
         kotlin-deps = [ pkgs.kotlin pkgs.ktlint ];
         csharp-deps = [ pkgs.dotnetCorePackages.sdk_6_0 ];
 
