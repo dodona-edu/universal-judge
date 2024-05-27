@@ -1,6 +1,6 @@
 name: Integration tests
 
-on: [ workflow_dispatch ]
+on: [ push ]
 
 jobs:
   # Runs the test suite in a slightly modified Docker image used by Dodona.
