@@ -112,7 +112,9 @@ def suite_to_json(suite: "Suite") -> str:
 
 def fallback_field(converter_arg: Converter, old_to_new_field: dict[str, str]):
     def decorator(cls):
-        struct = make_dict_structure_fn(cls, converter_arg)
+        struct = make_dict_structure_fn(
+            cls, converter_arg, _cattrs_forbid_extra_keys=False
+        )
 
         def structure(d, cl):
             for k, v in old_to_new_field.items():
@@ -133,7 +135,9 @@ def custom_fallback_field(
     old_to_new_field: dict[str, tuple[str, Callable[[Any], Any]]],
 ):
     def decorator(cls):
-        struct = make_dict_structure_fn(cls, converter_arg)
+        struct = make_dict_structure_fn(
+            cls, converter_arg, _cattrs_forbid_extra_keys=False
+        )
 
         def structure(d, cl):
             for k, (new_name, mapper) in old_to_new_field.items():
@@ -155,7 +159,9 @@ def custom_fallback_field(
 
 def ignore_field(converter_arg: Converter, *fields: str):
     def decorator(cls):
-        struct = make_dict_structure_fn(cls, converter_arg)
+        struct = make_dict_structure_fn(
+            cls, converter_arg, _cattrs_forbid_extra_keys=False
+        )
 
         def structure(d, cl):
             for to_ignore in fields:
