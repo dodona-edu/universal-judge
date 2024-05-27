@@ -68,7 +68,7 @@
 
         # General dependencies for other languages
         haskell-deps = [
-          (pkgs.haskell.packages.ghc94.ghcWithPackages (p: [ p.aeson ]))
+          (pkgs.haskell.packages.ghc96.ghcWithPackages (p: [ p.aeson ]))
           pkgs.hlint
         ];
         node-deps = [ pkgs.nodejs_22 pkgs.nodePackages.eslint ast ];
