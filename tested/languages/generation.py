@@ -1,6 +1,7 @@
 """
 Translates items from the test suite into the actual programming language.
 """
+
 import html
 import json
 import logging

@@ -5,6 +5,7 @@ This module is the authoritative source on the format and behaviour of the test 
 When executing this module, a json-schema is generated for the format, which can be
 of assistance when checking existing test suites.
 """
+
 from collections import defaultdict
 from collections.abc import Iterable
 from enum import StrEnum, auto, unique

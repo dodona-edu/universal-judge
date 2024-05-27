@@ -10,6 +10,7 @@ This template takes one value and must pass it to the "values" module.
 Testing advanced types is a work-in progress at this point, since we test in Python,
 and Python doesn't have explicit support for e.g. int32, int64.
 """
+
 import itertools
 import sys
 from decimal import Decimal

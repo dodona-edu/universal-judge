@@ -145,15 +145,13 @@ def _replace_code_line_number(offset: int, stacktrace: str) -> str:
 @overload
 def convert_stacktrace_to_clickable_feedback(
     lang: "Language", stacktrace: str
-) -> ExtendedMessage:
-    ...
+) -> ExtendedMessage: ...
 
 
 @overload
 def convert_stacktrace_to_clickable_feedback(
     lang: "Language", stacktrace: None
-) -> None:
-    ...
+) -> None: ...
 
 
 def convert_stacktrace_to_clickable_feedback(

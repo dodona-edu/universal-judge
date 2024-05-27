@@ -4,6 +4,7 @@ Utilities to parse JSON into the data we have.
 Since we need to set up quite a few converters, we re-use
 a single converter for all, both the serialization and suite.
 """
+
 import logging
 from collections.abc import Callable
 from decimal import Decimal

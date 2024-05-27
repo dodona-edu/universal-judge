@@ -1,6 +1,7 @@
 """
 Main file, responsible for running TESTed based on the input given by Dodona.
 """
+
 import os
 from typing import IO
 

@@ -2,6 +2,7 @@
 Support linting Python code.
 Most of this code is taken from the code from Pythia.
 """
+
 import logging
 from io import StringIO
 

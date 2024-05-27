@@ -46,9 +46,11 @@ def run_ktlint(
 
     if execution_results.timeout or execution_results.memory:
         return [
-            get_i18n_string("languages.kotlin.linter.timeout")
-            if execution_results.timeout
-            else get_i18n_string("languages.kotlin.linter.memory")
+            (
+                get_i18n_string("languages.kotlin.linter.timeout")
+                if execution_results.timeout
+                else get_i18n_string("languages.kotlin.linter.memory")
+            )
         ], []
 
     try:

@@ -4,6 +4,7 @@ Prepare test suite input for code generation.
 Most input from a test suite needs to be prepared to easily generated code. This
 module handles that.
 """
+
 from pathlib import Path
 from typing import TYPE_CHECKING, Callable, Literal, cast
 
@@ -78,9 +79,9 @@ class PreparedTestcaseStatement:
     """
 
     statement: Statement | PreparedLanguageLiteral  # The original statement.
-    value_function: Callable[
-        [Expression], Statement
-    ] | None  # The function to handle the return value of the statement, if any.
+    value_function: (
+        Callable[[Expression], Statement] | None
+    )  # The function to handle the return value of the statement, if any.
 
     def input_statement(self, override: str | None = None) -> Statement:
         """

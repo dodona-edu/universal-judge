@@ -1,6 +1,7 @@
 """
 Tests where full exercises are run. These are inherently slower.
 """
+
 from pathlib import Path
 
 import pytest

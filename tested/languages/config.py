@@ -4,6 +4,7 @@ The configuration class for a programming language.
 This class is the API between the core of TESTed and the language-specific details.
 Everything that depends on the programming language passes through this class.
 """
+
 import logging
 import typing
 from abc import ABC, abstractmethod

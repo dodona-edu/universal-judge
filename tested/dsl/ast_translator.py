@@ -318,13 +318,11 @@ def _translate_to_ast(node: ast.Interactive, is_return: bool) -> Statement:
 
 
 @overload
-def parse_string(code: str, is_return: Literal[True]) -> Value:
-    ...
+def parse_string(code: str, is_return: Literal[True]) -> Value: ...
 
 
 @overload
-def parse_string(code: str, is_return: Literal[False] = False) -> Statement:
-    ...
+def parse_string(code: str, is_return: Literal[False] = False) -> Statement: ...
 
 
 def parse_string(code: str, is_return=False) -> Statement:

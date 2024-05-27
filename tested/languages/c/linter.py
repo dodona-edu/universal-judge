@@ -43,9 +43,11 @@ def run_cppcheck(
 
     if execution_results.timeout or execution_results.memory:
         return [
-            get_i18n_string("languages.c.linter.timeout")
-            if execution_results.timeout
-            else get_i18n_string("languages.c.linter.memory")
+            (
+                get_i18n_string("languages.c.linter.timeout")
+                if execution_results.timeout
+                else get_i18n_string("languages.c.linter.memory")
+            )
         ], []
 
     try:

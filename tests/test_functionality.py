@@ -6,6 +6,7 @@ make them usable for multiple languages.
 Running the tests should happen in with the root directory (the one with src/ and
 tests/) as the working directory.
 """
+
 import shutil
 import sys
 from pathlib import Path

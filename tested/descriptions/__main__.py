@@ -41,6 +41,7 @@ more information.
 Note that the file is first converted by Mako to a normal Markdown file.
 Afterwards, the code blocks are replaced.
 """
+
 import sys
 from argparse import ArgumentParser, FileType
 

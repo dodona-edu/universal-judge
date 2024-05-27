@@ -1,6 +1,7 @@
 """
 Module containing the definitions of the features we can support.
 """
+
 import logging
 import operator
 from collections import defaultdict

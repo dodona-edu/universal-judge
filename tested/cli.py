@@ -1,6 +1,7 @@
 """
 A module that provides a simpler CLI to TESTed.
 """
+
 import json
 import os
 import re

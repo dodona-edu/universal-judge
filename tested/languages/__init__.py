@@ -6,6 +6,7 @@ needed to execute the templates.
 In short, if it has to do with the templates or is programming language specific,
 you will probably find it in this package.
 """
+
 from typing import TYPE_CHECKING, Optional
 
 from tested.languages.bash.config import Bash
