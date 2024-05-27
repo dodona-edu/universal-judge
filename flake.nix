@@ -23,65 +23,24 @@
         };
         poetry = poetry2nix.lib.mkPoetry2Nix { inherit pkgs; };
 
-        python = pkgs.python311;
+        python = pkgs.python312;
 
         # For some Python packages, we want customization, as Nix can't build it.
         overrides = final: prev: {
-          marko = prev.buildPythonPackage rec {
-            pname = "marko";
-            version = "2.0.0";
-            format = "pyproject";
-
-            src = pkgs.fetchPypi {
-              inherit pname version;
-              hash = "sha256-78JkYIkyUME3UQJa6SAuuxOJiHA2/A35AJxquHVGcDA=";
-            };
-
-            nativeBuildInputs = [ prev.pdm-pep517 prev.pdm-backend ];
-
-            doCheck = false;
-
-            meta = with pkgs.lib; {
-              homepage = "https://github.com/frostming/marko";
-              license = licenses.mit;
-              maintainers = [ ];
-            };
-          };
+          marko = prev.marko.overridePythonAttrs (
+            old: {
+              format = "pyproject";
+              nativeBuildInputs = [ prev.pdm-pep517 prev.pdm-backend ];
+              doCheck = false;
+            }
+          );
           # We need PyYAML with C support, but poetry2nix does not do that apparently...
-          # Taken from nixpkgs.
-          pyyaml = prev.buildPythonPackage rec {
-            pname = "pyyaml";
-            version = "6.0.1";
-
-            format = "pyproject";
-
-            src = pkgs.fetchFromGitHub {
-              owner = "yaml";
-              repo = "pyyaml";
-              rev = version;
-              hash = "sha256-YjWMyMVDByLsN5vEecaYjHpR1sbBey1L/khn4oH9SPA=";
-            };
-
-            nativeBuildInputs = [ prev.cython_0 prev.setuptools ];
-
-            buildInputs = [ pkgs.libyaml ];
-
-            checkPhase = ''
-              runHook preCheck
-              PYTHONPATH="tests/lib:$PYTHONPATH" ${python.interpreter} -m test_all
-              runHook postCheck
-            '';
-
-            pythonImportsCheck = [ "yaml" ];
-
-            meta = with pkgs.lib; {
-              description =
-                "The next generation YAML parser and emitter for Python";
-              homepage = "https://github.com/yaml/pyyaml";
-              license = licenses.mit;
-              maintainers = with maintainers; [ ];
-            };
-          };
+          pyyaml = prev.pyyaml.overridePythonAttrs (
+            old: {
+              nativeBuildInputs = old.nativeBuildInputs ++ [ prev.cython_0 prev.setuptools ];
+              buildInputs = old.buildInputs ++ [ pkgs.libyaml ];
+            }
+          );
         };
 
         # This one isn't in Nix, so do it manually.
