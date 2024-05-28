@@ -1,4 +1,5 @@
 import json
+import shutil
 from io import StringIO
 from pathlib import Path
 
@@ -35,20 +36,34 @@ def configuration(
     solution: str = "solution",
     options=None,
 ) -> DodonaConfig:
+    exercise_dir = Path(config.rootdir) / "tests" / "exercises"
+    ep = exercise_dir / exercise
+    return exercise_configuration(
+        config, ep, language, work_dir, suite, solution, options
+    )
+
+
+def exercise_configuration(
+    config,
+    exercise_directory: Path,
+    language: str,
+    work_dir: Path,
+    suite: str,
+    solution: str,
+    options=None,
+) -> DodonaConfig:
     # Get the file extension for this language.
     ext = get_language(None, language).file_extension()
     if options is None:
         options = {}
-    exercise_dir = Path(config.rootdir) / "tests" / "exercises"
-    ep = f"{exercise_dir}/{exercise}"
     option_dict = recursive_dict_merge(
         {
             "memory_limit": 536870912,
             "time_limit": 3600,  # One hour
             "programming_language": language,
             "natural_language": "nl",
-            "resources": Path(f"{ep}/evaluation"),
-            "source": Path(f"{ep}/solution/{solution}.{ext}"),
+            "resources": exercise_directory / "evaluation",
+            "source": exercise_directory / "solution" / f"{solution}.{ext}",
             "judge": Path(f"{config.rootdir}"),
             "workdir": work_dir,
             "test_suite": suite,
@@ -56,6 +71,11 @@ def configuration(
         },
         options,
     )
+
+    # Check if we need to populate the workdir.
+    if (workdir_files := exercise_directory / "workdir").is_dir():
+        shutil.copytree(workdir_files, work_dir, dirs_exist_ok=True)
+
     return get_converter().structure(option_dict, DodonaConfig)
 
 

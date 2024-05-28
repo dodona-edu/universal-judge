@@ -94,17 +94,6 @@
           inherit (python-base-env) projectDir python overrides;
           propagatedBuildInputs = all-other-dependencies;
         };
-
-        unit-test = pkgs.writeShellApplication {
-          name = "unit-test";
-          runtimeInputs = [ python-dev-env pkgs.poetry ] ++ all-other-dependencies;
-          text = ''
-            DOTNET_CLI_HOME="$(mktemp -d)"
-            export DOTNET_CLI_HOME
-            poetry run pytest -n auto --cov=tested --cov-report=xml tests/
-          '';
-        };
-
       in {
         checks = rec {
           default = simple-tests;

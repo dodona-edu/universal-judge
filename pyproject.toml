@@ -15,6 +15,7 @@ markers = [
     "linter", # Run linter tests
     "slow", # Slow tests
 ]
+addopts = "--ignore=tests/test_integration_javascript.py"
 
 [tool.poetry]
 name = "tested"
