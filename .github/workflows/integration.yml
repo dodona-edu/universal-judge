@@ -51,4 +51,6 @@ jobs:
           JAVASCRIPT_EXERCISES_KEY: ${{ secrets.JAVASCRIPT_EXERCISES_KEY }}
       - run: git checkout $EXERCISES_COMMIT
         working-directory: ./javascript-oefeningen
-      - run: nix develop -c bash -c 'EXERCISE_REPO=${{ github.workspace }}/javascript-oefeningen poetry run pytest -n auto /tests/test_integration_javascript.py'
+      - run: nix run .#devShell -- run-intergation-tests
+        env:
+          EXERCISE_REPO: ${{ github.workspace }}/javascript-oefeningen
