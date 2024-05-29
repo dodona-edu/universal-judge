@@ -21,7 +21,7 @@ For example, the versions in the table below are the ones we currently use to ru
 | gcc (C)             | 13      |
 | ghc (Haskell)       | 9.6     |
 | Java                | 21      |
-| NodeJS (Javascript) | 21      |
+| NodeJS (Javascript) | 22      |
 | Kotlin              | 2.0     |
 | C# (.NET 8)         | 12.0    |
 
@@ -53,7 +53,7 @@ $ pip install pylint
 
 | Name         | Versions | Installation |
 |--------------|----------|--------------|
-| `shellcheck` | 0.10      | OS package   |
+| `shellcheck` | 0.10     | OS package   |
 
 ## C
 
