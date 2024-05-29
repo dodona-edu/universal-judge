@@ -22,6 +22,7 @@ For example, such a function looks like this:
    def evaluate_text(configs, channel, actual):
         pass
 """
+
 import functools
 from collections.abc import Callable
 from pathlib import Path
@@ -56,7 +57,9 @@ class OracleResult:
     """
 
     result: StatusMessage  # The result of the evaluation.
-    readable_expected: str  # A human-friendly version of what the channel should have been.
+    readable_expected: (
+        str  # A human-friendly version of what the channel should have been.
+    )
     readable_actual: str  # A human-friendly version (on a best-efforts basis) of what the channel is.
     messages: list[Message] = field(factory=list)
     is_multiline_string: bool = (

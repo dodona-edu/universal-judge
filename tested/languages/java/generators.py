@@ -166,9 +166,7 @@ def convert_declaration(
         type_ = (
             (value.get_content_type() or "Object")
             if isinstance(value, SequenceType)
-            else nt
-            if nt
-            else "Object"
+            else nt if nt else "Object"
         )
         base_type, sub_type = extract_type_tuple(type_, False)
         return convert_declaration(base_type, None, sub_type, False) + "[]"
@@ -198,9 +196,7 @@ def convert_declaration(
         type_ = (
             (value.get_content_type() or "Object")
             if isinstance(value, SequenceType)
-            else nt
-            if nt
-            else "Object"
+            else nt if nt else "Object"
         )
         base_type, sub_type = extract_type_tuple(type_)
         return f"List<{convert_declaration(base_type, None, sub_type, True)}>"
@@ -208,9 +204,7 @@ def convert_declaration(
         type_ = (
             (value.get_content_type() or "Object")
             if isinstance(value, SequenceType)
-            else nt
-            if nt
-            else "Object"
+            else nt if nt else "Object"
         )
         base_type, sub_type = extract_type_tuple(type_)
         return f"Set<{convert_declaration(base_type, None, sub_type, True)}>"

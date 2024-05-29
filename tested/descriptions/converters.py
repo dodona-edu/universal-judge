@@ -52,7 +52,7 @@ class GenericDatatype(Datatype):
     locale: str
     language: Language
     type_: AllTypes
-    others: tuple[NestedTypeDeclaration]
+    others: tuple[NestedTypeDeclaration, ...]
 
     def _types(self) -> list[str]:
         if len(self.others):

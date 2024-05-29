@@ -109,10 +109,10 @@ class Haskell(Language):
         assert self.config
         return linter.run_hlint(self.config.dodona, remaining)
 
-    def cleanup_description(self, description: str) -> str:
-        return cleanup_description(self, description)
+    def cleanup_description(self, statement: str) -> str:
+        return cleanup_description(self, statement)
 
-    def cleanup_stacktrace(self, traceback_str: str) -> str:
+    def cleanup_stacktrace(self, stacktrace: str) -> str:
         filename = submission_file(self)
         context_file_regex = re.compile(r"(Context[0-9]+|Selector)")
         compile_line_regex = re.compile(r"^([0-9]+)(\s*\|.*)$")
@@ -121,7 +121,7 @@ class Haskell(Language):
         )
         parse_module = r"error: parse error on input ‘module’"
         replace_module = r"error: unexpected ‘module’"
-        traceback = traceback_str.splitlines()
+        traceback = stacktrace.splitlines()
         skip_line, lines = False, []
         for line in traceback:
             if not line or line == "undefined":

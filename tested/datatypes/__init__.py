@@ -12,6 +12,7 @@ As mentioned in the manuscript, the context_testcase use is scenario 1.
 Additionally, the types in this file are organized by their JSON encoding type.
 They are also split in "basic types" and "advanced types".
 """
+
 from tested.datatypes.advanced import (
     AdvancedNothingTypes,
     AdvancedNumericTypes,

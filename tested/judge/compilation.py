@@ -1,6 +1,7 @@
 """
 Functions responsible for the compilation step.
 """
+
 import logging
 from pathlib import Path
 

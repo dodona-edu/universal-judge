@@ -4,69 +4,29 @@ on: [ push ]
 
 jobs:
   test:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
-        with:
-          python-version: 3.11.2
-          cache: 'pipenv'
-      - run: pip install pipenv
-      - run: pipenv install --dev
-      - uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-      - uses: haskell/actions/setup@v2
-        with:
-          ghc-version: '9.2'
-          cabal-version: '3.6'
-      - uses: actions/cache@v3
-        name: Cache cabal
-        with:
-          path: |
-            ~/.cabal
-            ~/.ghc
-            dist-newstyle
-          key: ${{ runner.os }}-ghc-9.2.1-20220111
-          restore-keys: |
-            ${{ runner.os }}-ghc-9.2.1-
-      - run: cabal v1-install aeson
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 16
-      - run: npm install abstract-syntax-tree@2.20
-      - run: npm install -g eslint@8.36
-      - run: sudo apt -y install hlint cppcheck shellcheck checkstyle
-      - run: curl -sSLO https://github.com/pinterest/ktlint/releases/download/0.48.2/ktlint && chmod a+x ktlint
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@main
+      - uses: DeterminateSystems/magic-nix-cache-action@main
       - run: echo "${GITHUB_WORKSPACE}" >> $GITHUB_PATH
-      - run: pipenv run pytest -n auto --cov=tested --cov-report=xml tests/
+      - run: nix flake check --print-build-logs
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: isort/isort-action@v1.0.0
-        with:
-          sortPaths: "./tested ./tests"
-      - uses: psf/black@stable
-        with:
-          version: "~= 23.0"
-          src: "./tested ./tests"
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@main
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+      - run: echo "${GITHUB_WORKSPACE}" >> $GITHUB_PATH
+      - run: nix develop .#format -c poetry run isort --check-only ./tested ./tests
+      - run: nix develop .#format -c poetry run black --check ./tested ./tests
   types:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
-        with:
-          python-version: 3.11.2
-          cache: 'pipenv'
-      - run: pip install pipenv
-      - run: pipenv install --dev
-      - run: echo "$(pipenv --venv)/bin" >> $GITHUB_PATH
-      - uses: jakebailey/pyright-action@v1
-        with:
-          version: '1.1.316'
-          warnings: true
-          working-directory: tested/
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@main
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+      - run: echo "${GITHUB_WORKSPACE}" >> $GITHUB_PATH
+      - run: nix develop .#types -c pyright ./tested

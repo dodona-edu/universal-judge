@@ -47,9 +47,11 @@ def run_eslint(
 
     if execution_results.timeout or execution_results.memory:
         return [
-            get_i18n_string("languages.javascript.linter.timeout")
-            if execution_results.timeout
-            else get_i18n_string("languages.javascript.linter.memory")
+            (
+                get_i18n_string("languages.javascript.linter.timeout")
+                if execution_results.timeout
+                else get_i18n_string("languages.javascript.linter.memory")
+            )
         ], []
 
     try:

@@ -9,6 +9,7 @@ When running the module from the command line, a json-schema of the structure wi
 be printed to stdout. This might be useful to test this implementation against
 the authoritative json-schema, provided by Dodona.
 """
+
 import json
 from enum import StrEnum, auto, unique
 from typing import IO, Literal, Union

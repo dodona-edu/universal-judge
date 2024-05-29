@@ -1,6 +1,7 @@
 """
 Module for handling and bundling various configuration options for TESTed.
 """
+
 import logging
 from pathlib import Path
 from typing import IO, TYPE_CHECKING, Any, Optional

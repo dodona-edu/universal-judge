@@ -1,6 +1,7 @@
 """
 Functions to conventionalize various aspects of a programming langauge.
 """
+
 import logging
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Literal

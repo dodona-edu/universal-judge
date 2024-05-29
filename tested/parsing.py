@@ -4,6 +4,7 @@ Utilities to parse JSON into the data we have.
 Since we need to set up quite a few converters, we re-use
 a single converter for all, both the serialization and suite.
 """
+
 import logging
 from collections.abc import Callable
 from decimal import Decimal
@@ -94,7 +95,7 @@ def parse_json_value(value: str) -> "Value":
     initialise_converter()
     from tested.serialisation import Value
 
-    return _suite_converter.loads(value, Value)
+    return _suite_converter.loads(value, Value)  # pyright: ignore
 
 
 def parse_json_suite(value: str) -> "Suite":
@@ -112,7 +113,9 @@ def suite_to_json(suite: "Suite") -> str:
 
 def fallback_field(converter_arg: Converter, old_to_new_field: dict[str, str]):
     def decorator(cls):
-        struct = make_dict_structure_fn(cls, converter_arg)
+        struct = make_dict_structure_fn(
+            cls, converter_arg, _cattrs_forbid_extra_keys=False
+        )
 
         def structure(d, cl):
             for k, v in old_to_new_field.items():
@@ -133,7 +136,9 @@ def custom_fallback_field(
     old_to_new_field: dict[str, tuple[str, Callable[[Any], Any]]],
 ):
     def decorator(cls):
-        struct = make_dict_structure_fn(cls, converter_arg)
+        struct = make_dict_structure_fn(
+            cls, converter_arg, _cattrs_forbid_extra_keys=False
+        )
 
         def structure(d, cl):
             for k, (new_name, mapper) in old_to_new_field.items():
@@ -155,7 +160,9 @@ def custom_fallback_field(
 
 def ignore_field(converter_arg: Converter, *fields: str):
     def decorator(cls):
-        struct = make_dict_structure_fn(cls, converter_arg)
+        struct = make_dict_structure_fn(
+            cls, converter_arg, _cattrs_forbid_extra_keys=False
+        )
 
         def structure(d, cl):
             for to_ignore in fields:

@@ -1,6 +1,7 @@
 """
 Value oracle.
 """
+
 import logging
 from typing import cast
 

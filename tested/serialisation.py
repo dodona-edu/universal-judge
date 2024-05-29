@@ -16,6 +16,7 @@ A json-schema can be generated from this format by executing the module on the
 command line. The schema will be printed to stdout. This can be used to generate
 classes for implementations in other configs.
 """
+
 import copy
 import logging
 import math

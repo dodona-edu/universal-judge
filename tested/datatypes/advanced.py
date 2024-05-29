@@ -4,6 +4,7 @@ Advanced data types.
 Note that these are often complementary types: the default type suffice in many
 cases.
 """
+
 from enum import StrEnum
 from typing import Union
 

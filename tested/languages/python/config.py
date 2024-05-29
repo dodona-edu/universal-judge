@@ -46,7 +46,7 @@ class Python(Language):
     def file_extension(self) -> str:
         return "py"
 
-    def get_string_quote(self):
+    def get_string_quote(self) -> str:
         return "'"
 
     def naming_conventions(self) -> dict[Conventionable, NamingConventions]:
@@ -158,14 +158,14 @@ class Python(Language):
         return linter.run_pylint(self.config.dodona, remaining)
 
     # Idea and original code: dodona/judge-pythia
-    def cleanup_stacktrace(self, stacktrace_str: str) -> str:
+    def cleanup_stacktrace(self, stacktrace: str) -> str:
         context_file_regex = re.compile(r"context_[0-9]+_[0-9]+\.py")
         file_line_regex = re.compile(rf"\({submission_file(self)}, line (\d+)\)")
         file_full_regex = re.compile(rf'File "./{submission_file(self)}", line (\d+)')
-        stacktrace = stacktrace_str.splitlines(True)
+        stacktrace_split = stacktrace.splitlines(True)
 
         skip_line, lines = False, []
-        for line in stacktrace:
+        for line in stacktrace_split:
             line = line.strip("\n")
             logger.debug(line)
 

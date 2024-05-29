@@ -1,0 +1,15 @@
+name: Integration tests
+
+on: [ workflow_dispatch ]
+
+jobs:
+  # Runs the test suite in a slightly modified Docker image used by Dodona.
+  # This is the closest to actually running the production environment there is.
+  dodona-docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t "local-image" -f ${{ github.workspace }}/.github/dodona-image.dockerfile --network=host .
+        name: Build Dodona Docker image
+      - run: docker run -v ${{ github.workspace }}:/github/workspace -e TESTED_SOURCE=/github/workspace local-image
+        name: Run tests in Dodona Docker image

@@ -184,13 +184,11 @@ class Kotlin(Language):
         assert self.config
         return linter.run_ktlint(self.config.dodona, remaining)
 
-    def find_main_file(
-        self, files: list[Path], name: str
-    ) -> tuple[Path | None, Status]:
+    def find_main_file(self, files: list[Path], name: str) -> Path | Status:
         logger.debug("Finding %s in %s", name, files)
-        main, status = Language.find_main_file(self, files, name + "Kt")
-        if status == Status.CORRECT:
-            return main, status
+        main_or_status = Language.find_main_file(self, files, name + "Kt")
+        if isinstance(main_or_status, Path):
+            return main_or_status
         else:
             return Language.find_main_file(self, files, name)
 
@@ -207,8 +205,8 @@ class Kotlin(Language):
 
         return list(x for x in files if filter_function(x))
 
-    def cleanup_stacktrace(self, traceback: str) -> str:
-        return jvm_cleanup_stacktrace(traceback, submission_file(self))
+    def cleanup_stacktrace(self, stacktrace: str) -> str:
+        return jvm_cleanup_stacktrace(stacktrace, submission_file(self))
 
     def generate_statement(self, statement: Statement) -> str:
         from tested.languages.kotlin import generators

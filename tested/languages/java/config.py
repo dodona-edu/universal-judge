@@ -136,8 +136,8 @@ class Java(Language):
         assert self.config
         return linter.run_checkstyle(self.config.dodona, remaining)
 
-    def cleanup_stacktrace(self, traceback: str) -> str:
-        return jvm_cleanup_stacktrace(traceback, submission_file(self))
+    def cleanup_stacktrace(self, stacktrace: str) -> str:
+        return jvm_cleanup_stacktrace(stacktrace, submission_file(self))
 
     def generate_statement(self, statement: Statement) -> str:
         from tested.languages.java import generators

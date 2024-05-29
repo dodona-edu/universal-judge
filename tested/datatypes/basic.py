@@ -1,6 +1,7 @@
 """
 Basic data types.
 """
+
 from enum import StrEnum, auto, unique
 from typing import Union
 

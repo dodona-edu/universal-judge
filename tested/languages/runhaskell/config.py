@@ -17,7 +17,7 @@ class RunHaskell(Haskell):
     def execution(self, cwd: Path, file: str, arguments: list[str]) -> Command:
         return ["runhaskell", file, *arguments]
 
-    def filter_dependencies(self, files: list[str], context_name: str) -> list[str]:
+    def filter_dependencies(self, files: list[Path], context_name: str) -> list[Path]:
         return files
 
     def path_to_dependencies(self) -> list[Path]:
