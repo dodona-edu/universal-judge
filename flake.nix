@@ -102,8 +102,18 @@
           doCheck = false;
         };
       in {
-        checks = rec {
-          default = simple-tests;
+        packages = rec {
+          default = tested;
+          tested = poetry.mkPoetryApplication {
+            inherit (tested-env)
+              projectDir python overrides propagatedBuildInputs;
+            doCheck = false;
+            postInstall = ''
+              wrapProgram "$out/bin/tested" \
+                --prefix NODE_PATH : ${ast}/lib/node_modules
+            '';
+          };
+          devShell = self.outputs.devShells.${system}.default;
           simple-tests = pkgs.stdenvNoCC.mkDerivation {
             name = "simple-tests";
             src = self;
@@ -117,23 +127,10 @@
               poetry run pytest -n auto --cov=tested --cov-report=xml tests/test_functionality.py
             '';
             installPhase = ''
-              touch $out # it worked!
+              mkdir -p $out
+              cp coverage.xml $out/coverage.xml
             '';
           };
-        };
-
-        packages = rec {
-          default = tested;
-          tested = poetry.mkPoetryApplication {
-            inherit (tested-env)
-              projectDir python overrides propagatedBuildInputs;
-            doCheck = false;
-            postInstall = ''
-              wrapProgram "$out/bin/tested" \
-                --prefix NODE_PATH : ${ast}/lib/node_modules
-            '';
-          };
-          devShell = self.outputs.devShells.${system}.default;
         };
 
         devShells = rec {
