@@ -6,7 +6,7 @@ USER root
 WORKDIR /
 
 # Install some additional dependencies needed for testing.
-RUN pip install --no-cache-dir --upgrade pytest pytest-mock pytest-xdist jinja2 marko
+RUN pip install --no-cache-dir --upgrade pytest pytest-mock pytest-xdist jinja2 marko syrupy
 
 # The source of the judge is available in TESTED_SOURCE.
 CMD pytest -x -n auto --ignore=${TESTED_SOURCE}/tests/test_integration_javascript.py ${TESTED_SOURCE}/tests/
