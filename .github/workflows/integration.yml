@@ -1,11 +1,11 @@
 name: Integration tests
 
-on: [ workflow_dispatch ]
+on: [ pull_request ]
 
 jobs:
   # Runs the test suite in a slightly modified Docker image used by Dodona.
   # This is the closest to actually running the production environment there is.
-  dodona-docker:
+  tests-dodona:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -13,3 +13,27 @@ jobs:
         name: Build Dodona Docker image
       - run: docker run -v ${{ github.workspace }}:/github/workspace -e TESTED_SOURCE=/github/workspace local-image
         name: Run tests in Dodona Docker image
+  # Runs in the Docker image to check if the JS exercises still work.
+  javascript-dodona:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: git clone git@github.ugent.be:Scriptingtalen/javascript-oefeningen.git
+      - run: git checkout 4a2094135abe972eb38072be129171f685c18ec3
+        working-directory: ./javascript-oefeningen
+      - run: docker build -t "integration-image" -f ${{ github.workspace }}/.github/dodona-image-integration.dockerfile --network=host .
+        name: Build Dodona Docker image
+      - run: docker run -v ${{ github.workspace }}:/github/workspace -e TESTED_SOURCE=/github/workspace -e EXERCISE_REPO=/github/workspace/javascript-oefeningen integration-image
+        name: Run integration tests in Dodona Docker image
+  # Runs in the repo to check if the JS exercises still work.
+  javascript-repository:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@main
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+      - run: echo "${GITHUB_WORKSPACE}" >> $GITHUB_PATH
+      - run: git clone git@github.ugent.be:Scriptingtalen/javascript-oefeningen.git
+      - run: git checkout 4a2094135abe972eb38072be129171f685c18ec3
+        working-directory: ./javascript-oefeningen
+      - run: nix develop -c bash -c 'EXERCISE_REPO=${{ github.workspace }}/javascript-oefeningen poetry run pytest -n auto /tests/test_integration_javascript.py'
