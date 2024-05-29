@@ -34,6 +34,7 @@ def run_command(
     timeout: float | None,
     command: list[str] | None = None,
     stdin: str | None = None,
+    check: bool = False,
 ) -> BaseExecutionResult | None:
     """
     Run a command and get the result of said command.
@@ -42,6 +43,7 @@ def run_command(
     :param command: Optional, the command to execute.
     :param stdin: Optional stdin for the process.
     :param timeout: The max time for this command.
+    :param check: Raise if the command fails.
 
     :return: The result of the execution if the command was not None.
     """
@@ -58,6 +60,7 @@ def run_command(
             capture_output=True,
             input=stdin,
             timeout=timeout,
+            check=check,
         )
     except subprocess.TimeoutExpired as e:
         return BaseExecutionResult(
