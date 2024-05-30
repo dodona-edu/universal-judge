@@ -24,7 +24,7 @@ import operator
 from collections.abc import Iterable
 from decimal import Decimal
 from enum import StrEnum, auto, unique
-from functools import reduce
+from functools import reduce, total_ordering
 from types import NoneType
 from typing import Any, Literal, Optional, Union, cast
 
@@ -611,6 +611,7 @@ def serialize_from_python(value: Any, type_: AllTypes | None = None) -> Value:
         raise TypeError(f"No clue how to convert {value} into TESTed value.")
 
 
+@total_ordering
 class ComparableFloat:
     def __init__(self, value):
         self.value = value
@@ -623,6 +624,11 @@ class ComparableFloat:
             return math.isclose(self.value, other.value)
         except Exception:
             return False
+
+    def __lt__(self, other):
+        if not isinstance(other, ComparableFloat):
+            return NotImplemented
+        return self.value < other.value
 
     def __str__(self):
         return str(self.value)

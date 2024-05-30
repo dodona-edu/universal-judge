@@ -35,7 +35,7 @@ from tested.testsuite import (
     TextOutputChannel,
     ValueOutputChannel,
 )
-from tested.utils import sorted_no_duplicates
+from tested.utils import sorted_no_duplicates, sorting_value_extract
 
 logger = logging.getLogger(__name__)
 
@@ -106,12 +106,12 @@ def _prepare_value_for_type_check(value: Value) -> Value:
         basic_type = as_basic_type(value)
         if basic_type.type == BasicSequenceTypes.SET:
             value.data = sorted_no_duplicates(
-                value.data, recursive_key=lambda x: x.data  # type: ignore
+                value.data, recursive_key=sorting_value_extract
             )
     elif isinstance(value, ObjectType):
         assert isinstance(value, ObjectType)
         value.data = sorted_no_duplicates(
-            value.data, key=lambda x: x.key, recursive_key=lambda x: x.data  # type: ignore
+            value.data, key=lambda x: x.key, recursive_key=sorting_value_extract
         )
     else:
         assert isinstance(value.type, SimpleTypes)

@@ -162,6 +162,13 @@ def recursive_dict_merge(one: dict, two: dict) -> dict:
     return new_dictionary
 
 
+def sorting_value_extract(maybe_value: Any) -> Any:
+    if hasattr(maybe_value, "data"):
+        return maybe_value.data
+    else:
+        return maybe_value
+
+
 def sorted_no_duplicates(
     iterable: Iterable[T],
     key: Callable[[T], K] = lambda x: x,
@@ -200,18 +207,34 @@ def sorted_no_duplicates(
         :param y: second value
         :return: 1 if x < y else -1 if x > y else 0
         """
+        # Attempt to use a key to extract the data if needed.
         if recursive_key:  # Parent function parameter
             if x is not None:
                 x = recursive_key(x)
             if y is not None:
                 y = recursive_key(y)
-        cmp = type_order(x, y)
-        if cmp != 0:
-            return cmp
-        elif not isinstance(x, str) and isinstance(x, Iterable):
+
+        # Try to compare types; this might be enough.
+        type_compare = type_order(x, y)
+        if type_compare != 0:
+            return type_compare
+
+        # Next, if we have iterables, attempt to use those (but not for strings)
+        # Both should be iterable in this case, since the types are the same.
+        if (
+            not isinstance(x, str)
+            and not isinstance(y, str)
+            and isinstance(x, Iterable)
+            and isinstance(y, Iterable)
+        ):
             return order_iterable(x, y)
-        else:
-            return int(x < y) - int(x > y)
+
+        # Finally, attempt to use the values themselves.
+        try:
+            return int(x < y) - int(x > y)  # type: ignore
+        except TypeError:
+            # These types cannot be compared, so fallback to string comparison.
+            return str(x) < str(y)
 
     # Sort functions, custom implementation needed for efficient recursive ordering
     # of values that have different types
