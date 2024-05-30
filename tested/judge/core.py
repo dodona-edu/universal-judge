@@ -6,6 +6,7 @@ from pathlib import Path
 
 from tested.configs import Bundle
 from tested.dodona import (
+    AppendMessage,
     CloseContext,
     CloseJudgement,
     CloseTab,
@@ -96,8 +97,10 @@ def judge(bundle: Bundle):
     # Begin by checking if the given test suite is executable in this language.
     _logger.info("Checking supported features...")
     set_locale(bundle.config.natural_language)
-    if not is_supported(bundle.language):
+    if messages := is_supported(bundle.language):
         report_update(bundle.out, StartJudgement())
+        for message in messages:
+            report_update(bundle.out, AppendMessage(message=message))
         report_update(
             bundle.out,
             CloseJudgement(
