@@ -43,10 +43,14 @@
           );
         };
 
+        nodejs_base = pkgs.nodejs_22;
+
         # This one isn't in Nix, so do it manually.
         ast = pkgs.buildNpmPackage rec {
           pname = "abstract-syntax-tree";
           version = "2.22.0";
+
+          nodejs = nodejs_base;
 
           src = pkgs.fetchFromGitHub {
             owner = "buxlabs";
@@ -71,7 +75,7 @@
           (pkgs.haskell.packages.ghc96.ghcWithPackages (p: [ p.aeson ]))
           pkgs.hlint
         ];
-        node-deps = [ pkgs.nodejs_22 pkgs.nodePackages.eslint ast ];
+        node-deps = [ nodejs_base pkgs.nodePackages.eslint ast ];
         bash-deps = [ pkgs.shellcheck ];
         c-deps = [ pkgs.cppcheck pkgs.gcc13 ];
         java-deps = [ pkgs.openjdk21 pkgs.checkstyle ];
@@ -94,17 +98,9 @@
           inherit (python-base-env) projectDir python overrides;
           propagatedBuildInputs = all-other-dependencies;
         };
-
-        unit-test = pkgs.writeShellApplication {
-          name = "unit-test";
-          runtimeInputs = [ python-dev-env pkgs.poetry ] ++ all-other-dependencies;
-          text = ''
-            DOTNET_CLI_HOME="$(mktemp -d)"
-            export DOTNET_CLI_HOME
-            poetry run pytest -n auto --cov=tested --cov-report=xml tests/
-          '';
+        poetry-package = (pkgs.poetry.override {python3 = python;}).overridePythonAttrs {
+          doCheck = false;
         };
-
       in {
         checks = rec {
           default = simple-tests;
@@ -112,11 +108,13 @@
             name = "simple-tests";
             src = self;
             doCheck = true;
-            checkInputs = [ python-dev-env pkgs.poetry ] ++ all-other-dependencies;
+            checkInputs = [ python-dev-env poetry-package ] ++ all-other-dependencies;
             checkPhase = ''
               DOTNET_CLI_HOME="$(mktemp -d)"
               export DOTNET_CLI_HOME
-              poetry run pytest -n auto --cov=tested --cov-report=xml tests/
+              NODE_PATH=${ast}/lib/node_modules
+              export NODE_PATH
+              poetry run pytest -n auto --cov=tested --cov-report=xml tests/test_functionality.py
             '';
             installPhase = ''
               touch $out # it worked!
@@ -130,7 +128,12 @@
             inherit (tested-env)
               projectDir python overrides propagatedBuildInputs;
             doCheck = false;
+            postInstall = ''
+              wrapProgram "$out/bin/tested" \
+                --prefix NODE_PATH : ${ast}/lib/node_modules
+            '';
           };
+          devShell = self.outputs.devShells.${system}.default;
         };
 
         devShells = rec {
@@ -138,7 +141,7 @@
           tested = pkgs.devshell.mkShell {
             name = "TESTed";
 
-            packages = [ python-dev-env pkgs.nodePackages.pyright pkgs.poetry ]
+            packages = [ python-dev-env pkgs.nodePackages.pyright poetry-package ]
               ++ all-other-dependencies;
 
             devshell.startup.link.text = ''
@@ -149,18 +152,32 @@
             env = [
               {
                 name = "DOTNET_ROOT";
-                eval = "${pkgs.dotnetCorePackages.sdk_6_0}";
+                eval = "${pkgs.dotnetCorePackages.sdk_8_0}";
               }
               {
                 name = "NODE_PATH";
-                prefix = "$(npm get prefix)";
+                prefix = "${ast}/lib/node_modules";
+              }
+            ];
+            commands = [
+              {
+                name = "run-intergation-tests";
+                command = "poetry run pytest -x -n auto tests/test_integration_javascript.py";
+                help = "Run JavaScript integration tests";
+                category = "tests";
+              }
+              {
+                name = "run-tests";
+                command = "poetry run pytest -n auto tests/";
+                help = "Run unit tests";
+                category = "tests";
               }
             ];
           };
           types = pkgs.mkShell {
             packages = [ python-dev-env pkgs.nodePackages.pyright ];
           };
-          format = pkgs.mkShell { packages = [ python-dev-env pkgs.poetry ]; };
+          format = pkgs.mkShell { packages = [ python-dev-env poetry-package ]; };
         };
       });
 }

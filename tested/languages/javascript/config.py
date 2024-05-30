@@ -126,18 +126,16 @@ class JavaScript(Language):
         assert self.config
 
         parse_file = str(Path(__file__).parent / "parseAst.js")
-        try:
-            output = run_command(
-                solution.parent,
-                timeout=None,
-                command=["node", parse_file, str(solution.absolute())],
-            )
-            if output:
-                namings = output.stdout.strip()
-                with open(solution, "a") as file:
-                    print(f"\nmodule.exports = {{{namings}}};", file=file)
-        except TimeoutError:
-            pass
+        output = run_command(
+            solution.parent,
+            timeout=None,
+            command=["node", parse_file, str(solution.absolute())],
+            check=True,
+        )
+        assert output, "Missing output from JavaScript's modify_solution"
+        namings = output.stdout.strip()
+        with open(solution, "a") as file:
+            print(f"\nmodule.exports = {{{namings}}};", file=file)
 
         # Add strict mode to the script.
         with open(solution, "r") as file:
