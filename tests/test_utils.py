@@ -3,7 +3,14 @@ from pathlib import Path
 
 import yaml
 
-from tested.utils import sorted_no_duplicates
+from tested.datatypes import (
+    AdvancedNothingTypes,
+    AdvancedSequenceTypes,
+    BasicNumericTypes,
+    BasicSequenceTypes,
+)
+from tested.serialisation import NothingType, NumberType, SequenceType
+from tested.utils import sorted_no_duplicates, sorting_value_extract
 from tests.manual_utils import assert_valid_output, configuration, execute_config
 
 
@@ -208,6 +215,21 @@ def test_sort_recursive():
 
 def test_sort_empty():
     assert [] == sorted_no_duplicates([])
+
+
+def test_can_sort_nested_sets():
+    value = SequenceType(
+        type=AdvancedSequenceTypes.LIST,
+        data=[
+            NumberType(type=BasicNumericTypes.INTEGER, data=5, diagnostic=None),
+            NothingType(
+                type=AdvancedNothingTypes.UNDEFINED, data=None, diagnostic=None
+            ),
+        ],
+        diagnostic=None,
+    )
+    result = sorted_no_duplicates([value, value], key=sorting_value_extract)
+    assert [value] == result
 
 
 def test_valid_yaml_and_json():
