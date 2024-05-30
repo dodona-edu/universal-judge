@@ -13,6 +13,7 @@ from typing import TYPE_CHECKING
 from attrs import define
 
 from tested.datatypes import AllTypes, BasicObjectTypes, BasicSequenceTypes, NestedTypes
+from tested.dodona import ExtendedMessage, Message, Permission
 
 if TYPE_CHECKING:
     from tested.languages.config import Language
@@ -122,7 +123,7 @@ def combine_features(iterable: Iterable[FeatureSet]) -> FeatureSet:
     return FeatureSet(constructs=constructs, types=types, nested_types=nexted_types)
 
 
-def is_supported(language: "Language") -> bool:
+def is_supported(language: "Language") -> list[Message] | None:
     """
     Check if the given configuration bundle is supported. This will check if the
     test suite inside the bundle can be executed by the programming language in the
@@ -144,13 +145,38 @@ def is_supported(language: "Language") -> bool:
         _logger.warning(f"The language supports {available_constructs}.")
         missing = (required.constructs ^ available_constructs) & required.constructs
         _logger.warning(f"Missing features are: {missing}.")
-        return False
+        message_text = f"""
+        This test suite is not solvable in {language.__class__.__name__}.
+        
+        The required language constructs are:
+        {required.constructs}
+        
+        The programming language has support for:
+        {available_constructs}
+        
+        This means support is lacking for these:
+        {missing}
+        
+        Note that support for certain types means real support, not reduced support.
+        For example, if tuples are required, the language must have a dedicated tuple
+        type.
+        
+        One solution is to use less-specific types, e.g. using a sequence instead of
+        a tuple.
+        """
+        return [ExtendedMessage(description=message_text, permission=Permission.STAFF)]
 
     mapping = fallback_type_support_map(language)
     for t in required.types:
         if mapping[t] == TypeSupport.UNSUPPORTED:
             _logger.warning(f"Test suite requires unsupported type {t}")
-            return False
+            message_text = f"""
+            This test suite is not solvable in {language.__class__.__name__}.
+            The test suite requires type {t}, which is not supported.
+            """
+            return [
+                ExtendedMessage(description=message_text, permission=Permission.STAFF)
+            ]
 
     # Check language-specific oracles
     for tab in language.config.suite.tabs:
@@ -164,7 +190,17 @@ def is_supported(language: "Language") -> bool:
                             f"Language-specific constructs are available only in "
                             f"{languages}!"
                         )
-                        return False
+                        message_text = f"""
+                        This test suite is not solvable in {language.__class__.__name__}.
+                        The test suite contains language-specific code, but code is only
+                        provided for {languages}.
+                        """
+                        return [
+                            ExtendedMessage(
+                                description=message_text, permission=Permission.STAFF
+                            )
+                        ]
+
     nested_types = []
     for key, value_types in required.nested_types:
         if key in (BasicSequenceTypes.SET, BasicObjectTypes.MAP):
@@ -176,12 +212,46 @@ def is_supported(language: "Language") -> bool:
     }
 
     for key, value_types in nested_types:
-        if not (value_types <= restricted[key]):
+        from tested.serialisation import resolve_to_basic
+
+        # Types that have reduced support are converted, so we also need to
+        # convert them here in the checks.
+        basic_value_types = set()
+        for value_type in value_types:
+            if mapping[value_type] == TypeSupport.REDUCED:
+                basic_value_types.add(resolve_to_basic(value_type))
+            else:
+                basic_value_types.add(value_type)
+
+        if not (basic_value_types <= restricted[key]):  # type: ignore
             _logger.warning("This test suite is not compatible!")
-            _logger.warning(f"Required {key} types are {value_types}.")
+            _logger.warning(
+                f"Required {key} types are {value_types} (or {basic_value_types})."
+            )
             _logger.warning(f"The language supports {restricted[key]}.")
             missing = (value_types ^ restricted[key]) & value_types
             _logger.warning(f"Missing types are: {missing}.")
-            return False
+            message_text = f"""
+            This test suite is not solvable in {language.__class__.__name__}.
+            
+            The required {key} types are:
+            {value_types}
+            
+            The programming language has support for:
+            {restricted[key]}
+            
+            This means support is lacking for these:
+            {missing}
+            
+            Note that support for certain types means real support, not reduced support.
+            For example, if tuples are required, the language must have a dedicated tuple
+            type.
+            
+            One solution is to use less-specific types, e.g. using a sequence instead of
+            a tuple.
+            """
+            return [
+                ExtendedMessage(description=message_text, permission=Permission.STAFF)
+            ]
 
-    return True
+    return None
