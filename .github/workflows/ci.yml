@@ -10,9 +10,12 @@ jobs:
       - uses: DeterminateSystems/nix-installer-action@main
       - uses: DeterminateSystems/magic-nix-cache-action@main
       - run: echo "${GITHUB_WORKSPACE}" >> $GITHUB_PATH
-      - run: nix flake check --print-build-logs
+      - run: nix build .#simple-tests --print-build-logs
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./result/coverage.xml
   lint:
     runs-on: ubuntu-latest
     steps:
