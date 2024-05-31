@@ -74,6 +74,7 @@ class Java(Language):
             "text": "supported",
             "boolean": "supported",
             "sequence": "supported",
+            "tuple": "reduced",
             "set": "supported",
             "map": "supported",
             "dictionary": "supported",

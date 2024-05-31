@@ -6,6 +6,8 @@ from typing import TYPE_CHECKING
 from tested.datatypes import (
     AdvancedObjectTypes,
     AllTypes,
+    BasicNumericTypes,
+    BasicSequenceTypes,
     BasicStringTypes,
     ExpressionTypes,
 )
@@ -100,7 +102,13 @@ class JavaScript(Language):
         }
 
     def collection_restrictions(self) -> dict[AllTypes, set[ExpressionTypes]]:
-        return {AdvancedObjectTypes.OBJECT: {BasicStringTypes.TEXT}}
+        return {
+            AdvancedObjectTypes.OBJECT: {BasicStringTypes.TEXT},
+            BasicSequenceTypes.SET: {
+                BasicSequenceTypes.SEQUENCE,
+                BasicNumericTypes.INTEGER,
+            },
+        }
 
     def compilation(self, files: list[str]) -> CallbackResult:
         submission = submission_file(self)

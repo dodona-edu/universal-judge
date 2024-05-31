@@ -224,6 +224,10 @@ def is_supported(language: "Language") -> list[Message] | None:
             key, collection_restrictions.get(basic_key)
         )
 
+        # If None, skip as there are no restrictions.
+        if restrictions is None:
+            continue
+
         # Types that have reduced support are converted, so we also need to
         # convert them here in the checks.
         basic_value_types = set()
@@ -233,7 +237,7 @@ def is_supported(language: "Language") -> list[Message] | None:
             else:
                 basic_value_types.add(value_type)
 
-        if not (basic_value_types <= restricted[key]):  # type: ignore
+        if not (basic_value_types <= restrictions):  # type: ignore
             _logger.warning("This test suite is not compatible!")
             _logger.warning(
                 f"Required {key} types are {value_types} (or {basic_value_types})."

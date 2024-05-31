@@ -552,6 +552,22 @@ def test_missing_key_types_detected_js_dictionary(
     assert updates.find_status_enum() == ["correct"]
 
 
+@pytest.mark.parametrize("lang", ["java"])
+def test_advanced_types_are_allowed(lang: str, tmp_path: Path, pytestconfig):
+    conf = configuration(
+        pytestconfig,
+        "objects",
+        lang,
+        tmp_path,
+        "advanced_values_in_set.yaml",
+        "correct",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert len(updates.find_all("start-testcase")) == 1
+    assert updates.find_status_enum() == ["correct"]
+
+
 @pytest.mark.parametrize("lang", ["python", "java", "kotlin", "javascript", "csharp"])
 def test_programmed_evaluator_lotto(lang: str, tmp_path: Path, pytestconfig):
     conf = configuration(
