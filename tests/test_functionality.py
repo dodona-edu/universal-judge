@@ -776,7 +776,7 @@ def test_objects_error(language: str, tmp_path: Path, pytestconfig):
         ("csharp", ["correct"]),
         ("java", ["internal error"]),
         ("c", ["internal error"]),
-        ("javascript", ["internal error"]),
+        ("javascript", ["correct"]),
         ("haskell", ["internal error"]),
         ("runhaskell", ["internal error"]),
     ],

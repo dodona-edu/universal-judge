@@ -18,7 +18,7 @@ from tests.manual_utils import (
 LOCAL_REPOSITORY: str | None = os.getenv("EXERCISE_REPO")
 
 # Exercises to exclude, using the exercise folder name.
-BLACKLIST = ["mad libs", "speleologie", "turbolift", "bifidcodering", "blockchain"]
+BLACKLIST = ["mad libs", "bifidcodering"]
 
 
 def prepare_repository() -> Path:
