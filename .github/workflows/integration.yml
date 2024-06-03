@@ -3,7 +3,7 @@ name: Integration tests
 on: [ pull_request ]
 
 env:
-  EXERCISES_COMMIT: 10ce1d2a5211514d219924a9bb26c9655daee464
+  EXERCISES_COMMIT: c3785b61574885564499ddf14943dfc7c6fe1aa6
 
 jobs:
   # Runs the test suite in a slightly modified Docker image used by Dodona.
