@@ -11,13 +11,13 @@ from tested.languages.preparation import (
 )
 from tested.languages.utils import convert_unknown_type
 from tested.serialisation import (
-    Assignment,
     FunctionCall,
     FunctionType,
     Identifier,
     Statement,
     StringType,
     Value,
+    VariableAssignment,
 )
 from tested.testsuite import MainInput
 
@@ -153,7 +153,7 @@ def convert_statement(statement: Statement) -> str:
         return convert_function_call(statement, index_fun, [])
     elif isinstance(statement, Value):
         return convert_value(statement)
-    elif isinstance(statement, Assignment):
+    elif isinstance(statement, VariableAssignment):
         result = f"local {statement.variable}="
         if isinstance(statement.expression, FunctionCall):
             result += f"$({convert_statement(statement.expression)})"

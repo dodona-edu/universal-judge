@@ -51,9 +51,11 @@ from tested.serialisation import (
     NumberType,
     ObjectKeyValuePair,
     ObjectType,
+    PropertyAssignment,
     SequenceType,
     Statement,
     Value,
+    VariableAssignment,
     VariableType,
     serialize_from_python,
 )
@@ -95,7 +97,15 @@ def _is_type_cast(node: ast.expr) -> bool:
 
 def _convert_ann_assignment(node: ast.AnnAssign) -> Assignment:
     if not isinstance(node.target, ast.Name):
-        raise InvalidDslError("You can only assign to simple variables")
+        actual = ast.dump(node)
+        raise InvalidDslError(
+            f"""
+            You can only assign to simple variables when using type hints.
+            You are trying to assign to a target of type {type(node.target)}.
+            The full assignment is:
+            {actual}
+            """
+        )
     assert node.value
     value = _convert_expression(node.value, False)
     if isinstance(node.annotation, ast.Name):
@@ -110,7 +120,7 @@ def _convert_ann_assignment(node: ast.AnnAssign) -> Assignment:
     if not is_our_type:
         type_ = VariableType(data=type_)
 
-    return Assignment(
+    return VariableAssignment(
         variable=node.target.id,
         expression=value,
         type=cast(VariableType | AllTypes, type_),
@@ -118,31 +128,37 @@ def _convert_ann_assignment(node: ast.AnnAssign) -> Assignment:
 
 
 def _convert_assignment(node: ast.Assign) -> Assignment:
-    # raise InvalidDslError("You need to annotate the variable with a type.")
     if n := len(node.targets) != 1:
         raise InvalidDslError(
             f"You must assign to exactly one variable, but got {n} variables."
         )
     variable = node.targets[0]
-    if not isinstance(variable, ast.Name):
-        actual = ast.dump(node)
-        raise InvalidDslError(f"You can only assign to simple variables, got: {actual}")
     value = _convert_expression(node.value, False)
 
-    # Support a few obvious ones, such as constructor calls or literal values.
-    type_ = None
-    if isinstance(value, Value):
-        type_ = value.type
-    elif isinstance(value, FunctionCall) and value.type == FunctionType.CONSTRUCTOR:
-        type_ = VariableType(data=value.name)
+    if isinstance(variable, ast.Name):
+        # Support a few obvious ones, such as constructor calls or literal values.
+        type_ = None
+        if isinstance(value, Value):
+            type_ = value.type
+        elif isinstance(value, FunctionCall) and value.type == FunctionType.CONSTRUCTOR:
+            type_ = VariableType(data=value.name)
 
-    if not type_:
+        if not type_:
+            raise InvalidDslError(
+                f"Could not deduce the type of variable {variable.id}: add a type annotation."
+            )
+
+        assert isinstance(type_, AllTypes | VariableType)
+        return VariableAssignment(variable=variable.id, expression=value, type=type_)
+    elif isinstance(variable, ast.Attribute):
+        property_access = _convert_expression(variable, False)
+        assert isinstance(property_access, FunctionCall)
+        return PropertyAssignment(property=property_access, expression=value)
+    else:
+        actual = ast.dump(node)
         raise InvalidDslError(
-            f"Could not deduce the type of variable {variable.id}: add a type annotation."
+            f"You can only assign to simple variables or attributes, got: {actual}."
         )
-
-    assert isinstance(type_, AllTypes | VariableType)
-    return Assignment(variable=variable.id, expression=value, type=type_)
 
 
 def _convert_call(node: ast.Call) -> FunctionCall:

@@ -21,17 +21,18 @@ from tested.languages.preparation import (
 )
 from tested.languages.utils import convert_unknown_type
 from tested.serialisation import (
-    Assignment,
     Expression,
     FunctionCall,
     FunctionType,
     Identifier,
     ObjectType,
+    PropertyAssignment,
     SequenceType,
     SpecialNumbers,
     Statement,
     StringType,
     Value,
+    VariableAssignment,
     as_basic_type,
 )
 from tested.testsuite import MainInput
@@ -129,7 +130,12 @@ def convert_statement(statement: Statement, internal=False, full=False) -> str:
         return convert_function_call(statement, internal)
     elif isinstance(statement, Value):
         return convert_value(statement)
-    elif isinstance(statement, Assignment):
+    elif isinstance(statement, PropertyAssignment):
+        return (
+            f"{convert_statement(statement.property, True)} = "
+            f"{convert_statement(statement.expression, True)}"
+        )
+    elif isinstance(statement, VariableAssignment):
         if full:
             prefix = "let "
         else:
@@ -172,7 +178,7 @@ def _generate_internal_context(ctx: PreparedContext, pu: PreparedExecutionUnit) 
         if (
             not tc.testcase.is_main_testcase()
             and isinstance(tc.input, PreparedTestcaseStatement)
-            and isinstance(tc.input.statement, Assignment)
+            and isinstance(tc.input.statement, VariableAssignment)
         ):
             result += f"let {tc.input.statement.variable}\n"
 

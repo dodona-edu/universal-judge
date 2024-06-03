@@ -30,8 +30,10 @@ from tested.serialisation import (
     NothingType,
     ObjectKeyValuePair,
     ObjectType,
+    PropertyAssignment,
     SequenceType,
     Statement,
+    VariableAssignment,
     VariableType,
 )
 from tested.testsuite import (
@@ -200,13 +202,22 @@ def prepare_argument(
 
 
 def prepare_assignment(bundle: Bundle, assignment: Assignment) -> Assignment:
-    if isinstance(assignment.type, VariableType):
-        class_type = conventionalize_class(bundle.language, assignment.type.data)
-        assignment = assignment.replace_type(VariableType(data=class_type))
+    if isinstance(assignment, VariableAssignment):
+        if isinstance(assignment.type, VariableType):
+            class_type = conventionalize_class(bundle.language, assignment.type.data)
+            assignment = assignment.replace_type(VariableType(data=class_type))
 
-    assignment = assignment.replace_variable(
-        conventionalize_identifier(bundle.language, assignment.variable)
-    )
+        assignment = assignment.replace_variable(
+            conventionalize_identifier(bundle.language, assignment.variable)
+        )
+    elif isinstance(assignment, PropertyAssignment):
+        prepared = prepare_expression(bundle, assignment.property)
+        assert isinstance(prepared, FunctionCall)
+        assignment = assignment.replace_property(prepared)
+    else:
+        raise AssertionError(
+            f"Unknown assignment class {type(assignment)} for {assignment}"
+        )
     prepared = prepare_expression(bundle, assignment.expression)
     return assignment.replace_expression(prepared)
 

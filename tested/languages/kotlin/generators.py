@@ -30,11 +30,13 @@ from tested.serialisation import (
     Identifier,
     NamedArgument,
     ObjectType,
+    PropertyAssignment,
     SequenceType,
     SpecialNumbers,
     Statement,
     StringType,
     Value,
+    VariableAssignment,
     VariableType,
     as_basic_type,
 )
@@ -244,7 +246,12 @@ def convert_statement(statement: Statement, full=False) -> str:
         return convert_function_call(statement)
     elif isinstance(statement, Value):
         return convert_value(statement)
-    elif isinstance(statement, Assignment):
+    elif isinstance(statement, PropertyAssignment):
+        return (
+            f"{convert_statement(statement.property)} = "
+            f"{convert_statement(statement.expression)};"
+        )
+    elif isinstance(statement, VariableAssignment):
         prefix = "var " if full else ""
         return (
             f"{prefix}{statement.variable} = "
@@ -320,7 +327,7 @@ class {pu.unit.name}: AutoCloseable {{
             if (
                 not tc.testcase.is_main_testcase()
                 and isinstance(tc.input, PreparedTestcaseStatement)
-                and isinstance(tc.input.statement, Assignment)
+                and isinstance(tc.input.statement, VariableAssignment)
             ):
                 decl = convert_declaration(
                     tc.input.statement.type, tc.input.statement.expression

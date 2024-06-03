@@ -1,0 +1,7 @@
+- tab: "Feedback"
+  contexts:
+    - testcases:
+        - statement: 'instance = Equal_checker(10)'
+        - statement: 'instance.prop = 5'
+        - expression: 'instance.prop'
+          return: 5

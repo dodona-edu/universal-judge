@@ -20,7 +20,6 @@ from tested.languages.preparation import (
 )
 from tested.languages.utils import convert_unknown_type
 from tested.serialisation import (
-    Assignment,
     Expression,
     FunctionCall,
     Identifier,
@@ -30,6 +29,7 @@ from tested.serialisation import (
     Statement,
     StringType,
     Value,
+    VariableAssignment,
     VariableType,
     as_basic_type,
 )
@@ -161,7 +161,7 @@ def convert_statement(statement: Statement, lifting=False) -> str:
             result += ")"
         return result
     else:
-        assert isinstance(statement, Assignment)
+        assert isinstance(statement, VariableAssignment)
         return f"let {statement.variable} = {convert_statement(statement.expression)}"
 
 

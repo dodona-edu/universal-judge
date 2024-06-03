@@ -30,7 +30,7 @@ from tested.languages.preparation import (
     prepare_expression,
 )
 from tested.parsing import get_converter
-from tested.serialisation import Assignment, Expression, Statement, VariableType
+from tested.serialisation import Expression, Statement, VariableType
 from tested.testsuite import (
     Context,
     FileUrl,
@@ -39,6 +39,7 @@ from tested.testsuite import (
     Testcase,
     TextData,
 )
+from tested.utils import is_statement_strict
 
 if TYPE_CHECKING:
     from tested.judge.planning import PlannedExecutionUnit
@@ -232,7 +233,7 @@ def generate_statement(bundle: Bundle, statement: Statement) -> str:
     if isinstance(statement, Expression):
         statement = prepare_expression(bundle, statement)
     else:
-        assert isinstance(statement, Assignment)
+        assert is_statement_strict(statement)
         statement = prepare_assignment(bundle, statement)
 
     return bundle.language.generate_statement(statement)
