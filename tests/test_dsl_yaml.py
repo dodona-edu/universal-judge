@@ -19,12 +19,12 @@ from tested.datatypes import (
 )
 from tested.dsl import parse_dsl, translate_to_test_suite
 from tested.serialisation import (
-    Assignment,
     FunctionCall,
     NumberType,
     ObjectType,
     SequenceType,
     StringType,
+    VariableAssignment,
 )
 from tested.testsuite import (
     CustomCheckOracle,
@@ -281,14 +281,14 @@ def test_statements():
     tests0, tests1 = ctx0.testcases, ctx1.testcases
 
     assert len(tests0) == 2
-    assert isinstance(tests0[0].input, Assignment)
+    assert isinstance(tests0[0].input, VariableAssignment)
     assert tests0[0].output.stdout.data == "New safe\n"
     assert tests0[0].output.stdout.oracle.options["ignoreWhitespace"]
     assert isinstance(tests0[1].input, FunctionCall)
     assert tests0[1].output.result.value.data == "Ignore whitespace"
 
     assert len(tests1) == 2
-    assert isinstance(tests1[0].input, Assignment)
+    assert isinstance(tests1[0].input, VariableAssignment)
     assert tests1[0].output.stdout.data == "New safe\n"
     assert not tests1[0].output.stdout.oracle.options["ignoreWhitespace"]
     assert isinstance(tests1[1].input, FunctionCall)

@@ -3,6 +3,7 @@ import java.util.*;
 class EqualChecker {
 
     private final int number;
+    public int prop = 0;
 
     EqualChecker(int number) {
         this.number = number;

@@ -26,7 +26,7 @@ from decimal import Decimal
 from enum import StrEnum, auto, unique
 from functools import reduce, total_ordering
 from types import NoneType
-from typing import Any, Literal, Optional, Union, cast
+from typing import Any, Literal, Optional, Self, Union, cast, override
 
 from attrs import define, field, resolve_types, validators
 
@@ -451,28 +451,19 @@ Expression = Identifier | Value | FunctionCall
 
 
 @define
-class Assignment(WithFeatures, WithFunctions):
+class AbstractAssignment(WithFeatures, WithFunctions):
     """
-    Assigns the return value of a function to a variable. Because the expression
-    part is pretty simple, the type of the value is determined by looking at the
-    expression. It is also possible to define the type. If the type cannot be
-    determined and it is not specified, this is an error.
+    Assign the result of an expression to a variable or property.
+
+    When assigning to a variable, TESTed will attempt to deduce the type of the
+    variable by looking at the expression. For example, if the expression is a
+    constructor call, the type of the variable is trivially determinable.
+
+    However, the type deduction is not smart: anything more complex needs an explicit
+    type on the variable, or an error will be thrown.
     """
 
-    variable: str
     expression: Expression
-    type: AllTypes | VariableType
-
-    def replace_expression(self, expression: Expression) -> "Assignment":
-        return Assignment(variable=self.variable, expression=expression, type=self.type)
-
-    def replace_variable(self, variable: str) -> "Assignment":
-        return Assignment(variable=variable, expression=self.expression, type=self.type)
-
-    def replace_type(self, type_name: AllTypes | VariableType) -> "Assignment":
-        return Assignment(
-            variable=self.variable, expression=self.expression, type=type_name
-        )
 
     def get_used_features(self) -> FeatureSet:
         base = FeatureSet({Construct.ASSIGNMENTS}, set(), set())
@@ -483,6 +474,72 @@ class Assignment(WithFeatures, WithFunctions):
     def get_functions(self) -> Iterable["FunctionCall"]:
         return self.expression.get_functions()
 
+    def replace_expression(self, expression: Expression) -> Self:
+        raise NotImplementedError()
+
+
+@define
+class VariableAssignment(AbstractAssignment):
+    """
+    Assign the result of an expression to a variable.
+
+    When assigning to a variable in the DSL, TESTed will attempt to deduce the type
+    of the variable by looking at the expression. For example, if the expression is a
+    constructor call, the type of the variable is trivially determinable.
+
+    However, the type deduction is not smart: anything more complex needs an explicit
+    type on the variable, or an error will be thrown.
+    """
+
+    variable: str
+    type: AllTypes | VariableType
+
+    def replace_variable(self, variable: str) -> "VariableAssignment":
+        return VariableAssignment(
+            variable=variable, expression=self.expression, type=self.type
+        )
+
+    def replace_type(self, type_name: AllTypes | VariableType) -> "VariableAssignment":
+        return VariableAssignment(
+            variable=self.variable, expression=self.expression, type=type_name
+        )
+
+    def replace_expression(self, expression: Expression) -> "VariableAssignment":
+        return VariableAssignment(
+            variable=self.variable, expression=expression, type=self.type
+        )
+
+
+@define
+class PropertyAssignment(AbstractAssignment):
+    """
+    Assign the result of an expression to a property.
+    """
+
+    property: FunctionCall = field()
+
+    @property.validator  # type: ignore
+    def check(self, attribute, value: FunctionCall):
+        if not value.type == FunctionType.PROPERTY:
+            raise ValueError(
+                f"Assigning to a property requires a property to assign to, got {value} instead."
+            )
+
+    @override
+    def get_used_features(self) -> FeatureSet:
+        base = FeatureSet({Construct.ASSIGNMENTS, Construct.OBJECTS}, set(), set())
+        other = self.expression.get_used_features()
+
+        return combine_features([base, other])
+
+    def replace_expression(self, expression: Expression) -> "PropertyAssignment":
+        return PropertyAssignment(property=self.property, expression=expression)
+
+    def replace_property(self, prop: FunctionCall) -> "PropertyAssignment":
+        return PropertyAssignment(property=prop, expression=self.expression)
+
+
+Assignment = VariableAssignment | PropertyAssignment
 
 # If changing this, also update is_statement_strict in the utils.
 Statement = Assignment | Expression

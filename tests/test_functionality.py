@@ -698,6 +698,24 @@ def test_objects_chained(language: str, tmp_path: Path, pytestconfig):
 @pytest.mark.parametrize(
     "language", ["python", "java", "kotlin", "javascript", "csharp"]
 )
+def test_property_assignment(language: str, tmp_path: Path, pytestconfig):
+    conf = configuration(
+        pytestconfig,
+        "objects",
+        language,
+        tmp_path,
+        "property_assignment.yaml",
+        "correct",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"] * 1
+    assert len(updates.find_all("start-testcase")) == 3
+
+
+@pytest.mark.parametrize(
+    "language", ["python", "java", "kotlin", "javascript", "csharp"]
+)
 def test_counter(language: str, tmp_path: Path, pytestconfig):
     conf = configuration(
         pytestconfig, "counter", language, tmp_path, "plan.yaml", "solution"

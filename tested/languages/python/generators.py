@@ -26,11 +26,13 @@ from tested.serialisation import (
     Identifier,
     NamedArgument,
     ObjectType,
+    PropertyAssignment,
     SequenceType,
     SpecialNumbers,
     Statement,
     StringType,
     Value,
+    VariableAssignment,
     as_basic_type,
 )
 from tested.testsuite import MainInput
@@ -127,7 +129,12 @@ def convert_statement(statement: Statement, with_namespace=False) -> str:
         return convert_function_call(statement, with_namespace)
     elif isinstance(statement, Value):
         return convert_value(statement)
-    elif isinstance(statement, Assignment):
+    elif isinstance(statement, PropertyAssignment):
+        return (
+            f"{convert_statement(statement.property)} = "
+            f"{convert_statement(statement.expression, with_namespace)}"
+        )
+    elif isinstance(statement, VariableAssignment):
         return (
             f"{statement.variable} = "
             f"{convert_statement(statement.expression, with_namespace)}"

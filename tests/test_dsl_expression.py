@@ -14,11 +14,9 @@ from tested.datatypes import (
     BasicObjectTypes,
     BasicSequenceTypes,
     BasicStringTypes,
-    ObjectTypes,
 )
 from tested.dsl.ast_translator import InvalidDslError, parse_string
 from tested.serialisation import (
-    Assignment,
     BooleanType,
     FunctionCall,
     FunctionType,
@@ -26,8 +24,10 @@ from tested.serialisation import (
     NumberType,
     ObjectKeyValuePair,
     ObjectType,
+    PropertyAssignment,
     SequenceType,
     StringType,
+    VariableAssignment,
     VariableType,
 )
 
@@ -324,7 +324,7 @@ def test_parse_error_fun_assign():
 
 def test_parse_fun_assign():
     assign = parse_string("data: integer = first([object.gen_int()])")
-    assert isinstance(assign, Assignment)
+    assert isinstance(assign, VariableAssignment)
     assert assign.type == BasicNumericTypes.INTEGER
     assert assign.variable == "data"
     expr = assign.expression
@@ -346,7 +346,7 @@ def test_parse_fun_assign():
 
 def test_parse_constructor_assign():
     assign = parse_string("cont: Container = Container({object.version})")
-    assert isinstance(assign, Assignment)
+    assert isinstance(assign, VariableAssignment)
     assert isinstance(assign.type, VariableType)
     assert assign.type.data == "Container"
     assert assign.variable == "cont"
@@ -369,7 +369,7 @@ def test_parse_constructor_assign():
 
 def test_parse_constructor_assign2():
     assign = parse_string("cont = Container({object.version})")
-    assert isinstance(assign, Assignment)
+    assert isinstance(assign, VariableAssignment)
     assert isinstance(assign.type, VariableType)
     assert assign.type.data == "Container"
     assert assign.variable == "cont"
@@ -392,7 +392,7 @@ def test_parse_constructor_assign2():
 
 def test_parse_value_assign():
     assign = parse_string("lijst: list = list([Container(5, true)])")
-    assert isinstance(assign, Assignment)
+    assert isinstance(assign, VariableAssignment)
     assert assign.type == AdvancedSequenceTypes.LIST
     assert assign.variable == "lijst"
     expr = assign.expression
@@ -409,6 +409,34 @@ def test_parse_value_assign():
     assert elem.arguments[0].data == 5
     assert isinstance(elem.arguments[1], Identifier)
     assert elem.arguments[1] == "true"
+
+
+def test_parse_attribute_assign():
+    assign = parse_string("the_object.data = first([object.gen_int()])")
+    assert isinstance(assign, PropertyAssignment)
+    assert assign.property.type == FunctionType.PROPERTY
+    assert assign.property.name == "data"
+    assert assign.property.namespace == "the_object"
+    expr = assign.expression
+    assert isinstance(expr, FunctionCall)
+    assert expr.namespace is None
+    assert expr.name == "first"
+    assert expr.type == FunctionType.FUNCTION
+    assert len(expr.arguments) == 1
+    arg = expr.arguments[0]
+    assert arg.type == BasicSequenceTypes.SEQUENCE
+    assert len(arg.data) == 1
+    data = arg.data[0]
+    assert isinstance(data, FunctionCall)
+    assert data.type == FunctionType.FUNCTION
+    assert data.namespace == "object"
+    assert data.name == "gen_int"
+    assert len(data.arguments) == 0
+
+
+def test_parse_attribute_assign_hinted():
+    with pytest.raises(InvalidDslError):
+        parse_string("the_object.data: Test = first([object.gen_int()])")
 
 
 def test_parse_function():

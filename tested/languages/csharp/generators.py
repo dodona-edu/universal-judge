@@ -22,18 +22,19 @@ from tested.languages.preparation import (
 )
 from tested.languages.utils import convert_unknown_type, is_special_void_call
 from tested.serialisation import (
-    Assignment,
     Expression,
     FunctionCall,
     FunctionType,
     Identifier,
     NamedArgument,
     ObjectType,
+    PropertyAssignment,
     SequenceType,
     SpecialNumbers,
     Statement,
     StringType,
     Value,
+    VariableAssignment,
     VariableType,
     as_basic_type,
 )
@@ -245,13 +246,18 @@ def convert_statement(statement: Statement, full=False) -> str:
         return convert_function_call(statement)
     elif isinstance(statement, Value):
         return convert_value(statement)
-    elif isinstance(statement, Assignment):
+    elif isinstance(statement, PropertyAssignment):
+        return (
+            f"{convert_statement(statement.property)} = "
+            f"{convert_statement(statement.expression)};"
+        )
+    elif isinstance(statement, VariableAssignment):
         if full:
             prefix = convert_declaration(statement.type, statement.expression)
         else:
             prefix = ""
         return (
-            f"{prefix}{statement.variable} = "
+            f"{prefix} {statement.variable} = "
             f"{convert_statement(statement.expression)}"
         )
     raise AssertionError(f"Unknown statement: {statement!r}")
@@ -269,7 +275,7 @@ def _generate_internal_context(ctx: PreparedContext, pu: PreparedExecutionUnit) 
         if (
             not tc.testcase.is_main_testcase()
             and isinstance(tc.input, PreparedTestcaseStatement)
-            and isinstance(tc.input.statement, Assignment)
+            and isinstance(tc.input.statement, VariableAssignment)
         ):
             result += (
                 convert_declaration(
