@@ -64,6 +64,7 @@ class JavaScript(Language):
             Construct.EVALUATION,
             Construct.DEFAULT_PARAMETERS,
             Construct.GLOBAL_VARIABLES,
+            Construct.NAMED_ARGUMENTS,
         }
 
     def datatype_support(self) -> dict[AllTypes, TypeSupport]:
