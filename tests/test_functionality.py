@@ -1127,3 +1127,17 @@ def test_stdin_token_is_unique(tmp_path: Path, pytestconfig):
     assert (
         actual.description == "$ submission hello << 'STDINN'\nOne line\nSTDIN\nSTDINN"
     )
+
+
+def test_javascript_vanilla_object(tmp_path: Path, pytestconfig):
+    conf = configuration(
+        pytestconfig,
+        "echo-function",
+        "javascript",
+        tmp_path,
+        "javascript-object.yaml",
+        "javascript-object",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]

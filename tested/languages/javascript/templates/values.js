@@ -1,6 +1,14 @@
 // Minimal RPC language in JSON to send data from the tests to the judge."""
 const fs = require("fs");
 
+function isVanillaObject(value) {
+    try {
+        return Reflect.getPrototypeOf(value) === null;
+    } catch {
+        return false;
+    }
+}
+
 function encode(value) {
 
     let type;
@@ -63,7 +71,7 @@ function encode(value) {
                                 };
                             }
                     );
-        } else if (value?.constructor === Object) {
+        } else if (value?.constructor === Object || isVanillaObject(value)) {
             // Plain objects
             type = "object";
             // Process the elements of the object.
