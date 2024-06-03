@@ -52,7 +52,7 @@ def encode(value):
         type_ = "set"
         data_ = [encode(x) for x in value]
     elif isinstance(value, dict):
-        type_ = "map"
+        type_ = "dictionary"
         data_ = [{"key": encode(k), "value": encode(v)} for k, v in value.items()]
     else:
         type_ = "unknown"

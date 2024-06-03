@@ -7,3 +7,7 @@ class EqualChecker {
         return other === this.number;
     }
 }
+
+function setTest() {
+    return new Set([[1, 2], [2, 3]]);
+}

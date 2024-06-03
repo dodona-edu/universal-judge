@@ -244,29 +244,24 @@ class Language(ABC):
         """
         return set()
 
-    def map_type_restrictions(self) -> set[ExpressionTypes] | None:
+    def collection_restrictions(self) -> dict[AllTypes, set[ExpressionTypes]]:
         """
-        Get type restrictions that apply to map types in this language.
+        Get type restrictions for other types.
 
-        If you return None, all data types are assumed to be usable as the key in
-        a map data type, such as a dictionary or hashmap. Otherwise, you must return
-        a whitelist of the allowed types.
+        The exact interpretation varies by the type. Only some restrictions are
+        currently recognized:
 
-        :return: The whitelist of allowed types, or everything is allowed.
+        Restrictions on `BasicObjectTypes.Map` (or related advanced types) are
+        interpreted as restrictions on the type of the keys. The provided types
+        are a whitelist: the only allowed types.
+
+        Restrictions on `BasicSetTypes.SET` (or related advanced types) are
+        interpreted as restrictions on the type of the elements. The provided
+        types are a whitelist: the only allowed types.
+
+        :return: Mapping of types to their restrictions. Unmapped types are unrestricted.
         """
-        return None
-
-    def set_type_restrictions(self) -> set[ExpressionTypes] | None:
-        """
-        Get type restrictions that apply to the set types in this language.
-
-        If you return None, all data types are assumed to be usable as the key in
-        a set data type, such as a HashSet. Otherwise, you must return a whitelist
-        of the allowed types.
-
-        :return: The whitelist of allowed types, or everything is allowed.
-        """
-        return None
+        return dict()
 
     def datatype_support(self) -> dict[AllTypes, TypeSupport]:
         """

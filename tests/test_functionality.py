@@ -512,15 +512,60 @@ def test_heterogeneous_arguments_are_detected(lang: str, tmp_path: Path, pytestc
     assert updates.find_status_enum() == ["internal error"]
 
 
-@pytest.mark.parametrize("lang", ["python", "javascript"])
-def test_missing_key_types_detected(lang: str, tmp_path: Path, pytestconfig):
+def test_missing_key_types_detected(tmp_path: Path, pytestconfig):
     conf = configuration(
-        pytestconfig, "objects", lang, tmp_path, "missing_key_types.yaml", "solution"
+        pytestconfig, "objects", "python", tmp_path, "missing_key_types.yaml", "correct"
     )
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert len(updates.find_all("start-testcase")) == 0
     assert updates.find_status_enum() == ["internal error"]
+
+
+def test_missing_key_types_detected_js_object(tmp_path: Path, pytestconfig):
+    conf = configuration(
+        pytestconfig,
+        "objects",
+        "javascript",
+        tmp_path,
+        "missing_key_types_js_object.yaml",
+        "correct",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert len(updates.find_all("start-testcase")) == 0
+    assert updates.find_status_enum() == ["internal error"]
+
+
+@pytest.mark.parametrize(
+    "suite", ["missing_key_types_js_dictionary", "missing_key_types"]
+)
+def test_missing_key_types_detected_js_dictionary(
+    suite: str, tmp_path: Path, pytestconfig
+):
+    conf = configuration(
+        pytestconfig, "objects", "javascript", tmp_path, f"{suite}.yaml", "correct"
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert len(updates.find_all("start-testcase")) == 1
+    assert updates.find_status_enum() == ["correct"]
+
+
+@pytest.mark.parametrize("lang", ["java"])
+def test_advanced_types_are_allowed(lang: str, tmp_path: Path, pytestconfig):
+    conf = configuration(
+        pytestconfig,
+        "objects",
+        lang,
+        tmp_path,
+        "advanced_values_in_set.yaml",
+        "correct",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert len(updates.find_all("start-testcase")) == 1
+    assert updates.find_status_enum() == ["correct"]
 
 
 @pytest.mark.parametrize("lang", ["python", "java", "kotlin", "javascript", "csharp"])

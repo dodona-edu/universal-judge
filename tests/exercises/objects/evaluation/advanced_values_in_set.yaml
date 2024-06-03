@@ -1,0 +1,6 @@
+namespace: "EqualChecker"
+tabs:
+- tab: "Feedback"
+  testcases:
+    - expression: 'set_test()'
+      return: !expression "{(1, 2), (2, 3)}"

@@ -1,0 +1,4 @@
+- tab: "Feedback"
+  testcases:
+    - expression: 'object({5: "a"})'
+      return: "invalid"

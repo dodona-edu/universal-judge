@@ -16,6 +16,7 @@ They are also split in "basic types" and "advanced types".
 from tested.datatypes.advanced import (
     AdvancedNothingTypes,
     AdvancedNumericTypes,
+    AdvancedObjectTypes,
     AdvancedSequenceTypes,
     AdvancedStringTypes,
     AdvancedTypes,
@@ -37,7 +38,7 @@ StringTypes = BasicStringTypes | AdvancedStringTypes
 BooleanTypes = BasicBooleanTypes
 NothingTypes = BasicNothingTypes | AdvancedNothingTypes
 SequenceTypes = BasicSequenceTypes | AdvancedSequenceTypes
-ObjectTypes = BasicObjectTypes
+ObjectTypes = BasicObjectTypes | AdvancedObjectTypes
 
 SimpleTypes = NumericTypes | StringTypes | BooleanTypes | NothingTypes
 ComplexTypes = SequenceTypes | ObjectTypes

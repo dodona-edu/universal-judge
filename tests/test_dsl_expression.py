@@ -5,11 +5,13 @@ import pytest
 from tested.datatypes import (
     AdvancedNothingTypes,
     AdvancedNumericTypes,
+    AdvancedObjectTypes,
     AdvancedSequenceTypes,
     AdvancedStringTypes,
     BasicBooleanTypes,
     BasicNothingTypes,
     BasicNumericTypes,
+    BasicObjectTypes,
     BasicSequenceTypes,
     BasicStringTypes,
     ObjectTypes,
@@ -229,7 +231,49 @@ def test_parse_value_adv_sequence():
 
 def test_parse_value_dict():
     parsed = parse_string('{"ignore": True, 5: 0}')
-    assert parsed.type == ObjectTypes.MAP
+    assert parsed.type == BasicObjectTypes.MAP
+    parsed: ObjectType
+    assert len(parsed.data) == 2
+    key, value = parsed.data[0].key, parsed.data[0].value
+    assert isinstance(key, StringType)
+    assert key.type == BasicStringTypes.TEXT
+    assert key.data == "ignore"
+    assert isinstance(value, BooleanType)
+    assert value.type == BasicBooleanTypes.BOOLEAN
+    assert value.data is True
+    key, value = parsed.data[1].key, parsed.data[1].value
+    assert isinstance(key, NumberType)
+    assert key.type == BasicNumericTypes.INTEGER
+    assert key.data == 5
+    assert isinstance(value, NumberType)
+    assert value.type == BasicNumericTypes.INTEGER
+    assert value.data == 0
+
+
+def test_parse_value_dictionary():
+    parsed = parse_string('dictionary({"ignore": True, 5: 0})')
+    assert parsed.type == AdvancedObjectTypes.DICTIONARY
+    parsed: ObjectType
+    assert len(parsed.data) == 2
+    key, value = parsed.data[0].key, parsed.data[0].value
+    assert isinstance(key, StringType)
+    assert key.type == BasicStringTypes.TEXT
+    assert key.data == "ignore"
+    assert isinstance(value, BooleanType)
+    assert value.type == BasicBooleanTypes.BOOLEAN
+    assert value.data is True
+    key, value = parsed.data[1].key, parsed.data[1].value
+    assert isinstance(key, NumberType)
+    assert key.type == BasicNumericTypes.INTEGER
+    assert key.data == 5
+    assert isinstance(value, NumberType)
+    assert value.type == BasicNumericTypes.INTEGER
+    assert value.data == 0
+
+
+def test_parse_value_object():
+    parsed = parse_string('object({"ignore": True, 5: 0})')
+    assert parsed.type == AdvancedObjectTypes.OBJECT
     parsed: ObjectType
     assert len(parsed.data) == 2
     key, value = parsed.data[0].key, parsed.data[0].value
@@ -375,7 +419,7 @@ def test_parse_function():
     assert function.name == "generate"
     assert len(function.arguments) == 1
     arg = function.arguments[0]
-    assert arg.type == ObjectTypes.MAP
+    assert arg.type == BasicObjectTypes.MAP
     arg: ObjectType
     assert len(arg.data) == 1
     pair: ObjectKeyValuePair = arg.data[0]

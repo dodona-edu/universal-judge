@@ -3,7 +3,12 @@ import re
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from tested.datatypes import AllTypes, ExpressionTypes
+from tested.datatypes import (
+    AllTypes,
+    BasicObjectTypes,
+    BasicSequenceTypes,
+    ExpressionTypes,
+)
 from tested.dodona import AnnotateCode, Message
 from tested.features import Construct, TypeSupport
 from tested.languages.config import (
@@ -69,8 +74,11 @@ class Java(Language):
             "text": "supported",
             "boolean": "supported",
             "sequence": "supported",
+            "tuple": "reduced",
             "set": "supported",
             "map": "supported",
+            "dictionary": "supported",
+            "object": "reduced",
             "nothing": "supported",
             "undefined": "reduced",
             "null": "reduced",
@@ -91,8 +99,8 @@ class Java(Language):
             "list": "supported",
         }
 
-    def map_type_restrictions(self) -> set[ExpressionTypes] | None:
-        return {  # type: ignore
+    def collection_restrictions(self) -> dict[AllTypes, set[ExpressionTypes]]:
+        restrictions = {
             "integer",
             "real",
             "char",
@@ -113,9 +121,10 @@ class Java(Language):
             "function_calls",
             "identifiers",
         }
-
-    def set_type_restrictions(self) -> set[ExpressionTypes] | None:
-        return self.map_type_restrictions()
+        return {
+            BasicObjectTypes.MAP: restrictions,  # type: ignore
+            BasicSequenceTypes.SET: restrictions,
+        }
 
     def compilation(self, files: list[str]) -> CallbackResult:
         def file_filter(file: Path) -> bool:
@@ -171,6 +180,8 @@ class Java(Language):
                 "sequence": "List",
                 "set": "Set",
                 "map": "Map",
+                "dictionary": "Map",
+                "object": "Map",
                 "nothing": "Void",
                 "undefined": "Void",
                 "int8": "byte",

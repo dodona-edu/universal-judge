@@ -53,7 +53,7 @@ function encode(value) {
             type = "set";
             value = Array.from(value).map(encode);
         } else if (value instanceof Map) {
-            type = "map";
+            type = "dictionary";
             value = Array
                     .from(value)
                     .map(([key, value]) => {
@@ -65,7 +65,7 @@ function encode(value) {
                     );
         } else if (value?.constructor === Object) {
             // Plain objects
-            type = "map";
+            type = "object";
             // Process the elements of the object.
             value = Object.entries(value).map(([key, value]) => {
                 return {
