@@ -98,18 +98,22 @@ def _evaluate_programmed(
 
     # The context in which to execute.
     global_env = {
-        "__tested_test__": utils,
-        "__tested_context__": ConvertedOracleContext.from_context(eval_bundle, context),
+        "t__tested_test__": utils,
+        "t__tested_context__": ConvertedOracleContext.from_context(
+            eval_bundle, context
+        ),
     }
-    exec("import sys\n" "sys.modules['evaluation_utils'] = __tested_test__", global_env)
+    exec(
+        "import sys\n" "sys.modules['evaluation_utils'] = t__tested_test__", global_env
+    )
     # Make the oracle available.
     exec(evaluator_code, global_env)
 
     # Since we pass a class value, we don't want to
     check_function_call = FunctionCall(
         type=FunctionType.FUNCTION,
-        name=oracle.function.name,
-        arguments=[Identifier("__tested_context__"), *oracle.arguments],
+        name=Identifier(oracle.function.name),
+        arguments=[Identifier("t__tested_context__"), *oracle.arguments],
     )
     literal_function_call = generate_statement(eval_bundle, check_function_call)
 

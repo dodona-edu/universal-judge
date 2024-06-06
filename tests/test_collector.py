@@ -17,7 +17,7 @@ from tested.dodona import (
 )
 from tested.judge.collector import OutputManager
 from tested.judge.evaluation import terminate
-from tested.serialisation import FunctionCall, FunctionType
+from tested.serialisation import FunctionCall, FunctionType, Identifier
 from tested.testsuite import (
     Context,
     MainInput,
@@ -41,7 +41,9 @@ TEST_SUITE = Suite(
                         ),
                         Testcase(
                             input=FunctionCall(
-                                type=FunctionType.FUNCTION, name="test 2", arguments=[]
+                                type=FunctionType.FUNCTION,
+                                name=Identifier("test 2"),
+                                arguments=[],
                             ),
                             output=Output(),
                         ),
@@ -51,7 +53,9 @@ TEST_SUITE = Suite(
                     testcases=[
                         Testcase(
                             input=FunctionCall(
-                                type=FunctionType.FUNCTION, name="test 22", arguments=[]
+                                type=FunctionType.FUNCTION,
+                                name=Identifier("test 22"),
+                                arguments=[],
                             ),
                             output=Output(),
                         ),
@@ -67,7 +71,7 @@ TEST_SUITE = Suite(
                         Testcase(
                             input=FunctionCall(
                                 type=FunctionType.FUNCTION,
-                                name="test 2.1",
+                                name=Identifier("test 2.1"),
                                 arguments=[],
                             ),
                             output=Output(),

@@ -461,6 +461,31 @@ def test_parse_function():
     assert len(value.arguments) == 0
 
 
+def test_parse_raw_capitalization_function():
+    function = parse_string("__TheFunction__(5)")
+    assert isinstance(function, FunctionCall)
+    assert function.type == FunctionType.FUNCTION
+    assert function.namespace is None
+    assert function.name == "TheFunction"
+    assert len(function.arguments) == 1
+    arg = function.arguments[0]
+    assert arg.type == BasicNumericTypes.INTEGER
+
+
+def test_parse_raw_capitalization_property():
+    function = parse_string("__test__.__some_class__")
+    assert isinstance(function, FunctionCall)
+    assert function.type == FunctionType.PROPERTY
+    assert function.namespace == "test"
+    assert function.name == "some_class"
+
+
+def test_parse_raw_capitalization_variable():
+    assign = parse_string("__test__ = 5")
+    assert isinstance(assign, VariableAssignment)
+    assert assign.variable == "test"
+
+
 def test_parse_identifier():
     parsed = parse_string("id")
     assert isinstance(parsed, Identifier)

@@ -1,4 +1,5 @@
 from tested.parsing import get_converter
+from tested.serialisation import FunctionCall, FunctionType
 from tested.testsuite import (
     CustomCheckOracle,
     ExceptionOutputChannel,
@@ -146,3 +147,16 @@ def test_exit_show_expected_is_accepted():
     """
     result = get_converter().loads(scheme, ExitCodeOutputChannel)
     assert result.value == 0
+
+
+def test_generic_functions_are_kept():
+    scheme = """
+    {
+        "type": "function",
+        "name": "__TeSt__"
+    }
+    """
+    result = get_converter().loads(scheme, FunctionCall)
+    assert result.type == FunctionType.FUNCTION
+    assert result.name == "TeSt"
+    assert result.name.is_raw

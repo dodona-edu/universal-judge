@@ -338,9 +338,14 @@ class Identifier(str, WithFeatures, WithFunctions):
 
     is_raw: bool
 
-    def __new__(cls, *args, **kwargs):
-        the_class = str.__new__(cls, *args, **kwargs)
-        the_class.is_raw = False
+    def __new__(cls, content: str):
+        if content.startswith("__") and content.endswith("__"):
+            the_class = str.__new__(cls, content.removeprefix("__").removesuffix("__"))
+            the_class.is_raw = True
+        else:
+            the_class = str.__new__(cls, content)
+            the_class.is_raw = False
+
         return the_class
 
     def get_used_features(self) -> FeatureSet:
@@ -397,7 +402,7 @@ class FunctionCall(WithFeatures, WithFunctions):
     """
 
     type: FunctionType
-    name: str
+    name: Identifier
     namespace: Optional["Expression"] = None
     arguments: list[Union[NamedArgument, "Expression"]] = field(factory=list)
 
@@ -443,7 +448,7 @@ class FunctionCall(WithFeatures, WithFunctions):
 
 @define
 class VariableType:
-    data: str
+    data: Identifier
     type: Literal["custom"] = "custom"
 
 
@@ -491,10 +496,10 @@ class VariableAssignment(AbstractAssignment):
     type on the variable, or an error will be thrown.
     """
 
-    variable: str
+    variable: Identifier
     type: AllTypes | VariableType
 
-    def replace_variable(self, variable: str) -> "VariableAssignment":
+    def replace_variable(self, variable: Identifier) -> "VariableAssignment":
         return VariableAssignment(
             variable=variable, expression=self.expression, type=self.type
         )
@@ -545,10 +550,15 @@ Assignment = VariableAssignment | PropertyAssignment
 Statement = Assignment | Expression
 
 # Update the forward references, which fixes the schema generation.
+# noinspection PyTypeChecker
 resolve_types(ObjectType)
+# noinspection PyTypeChecker
 resolve_types(SequenceType)
+# noinspection PyTypeChecker
 resolve_types(NamedArgument)
+# noinspection PyTypeChecker
 resolve_types(FunctionCall)
+# noinspection PyTypeChecker
 resolve_types(ObjectKeyValuePair)
 
 

@@ -13,6 +13,9 @@ Some useful notes:
 - Two special values exist: Null and Undefined.
 - Function calls whose name begins with a capital are considered constructors.
 - Identifiers in call caps are considered "global" variables.
+- Most identifiers with __ (e.g. __X__) are considered raw and will not be changed
+  to adhere to the conventions of a programming language.
+  This is currently not possible with constructors.
 
 From the Python grammar (at https://docs.python.org/3/library/ast.html#abstract-grammar),
 the following is supported:
@@ -115,13 +118,13 @@ def _convert_ann_assignment(node: ast.AnnAssign) -> Assignment:
     else:
         raise InvalidDslError("Type hints should be simple values.")
 
-    # Check if the type is built-in type or not.
+    # Check if the type is a built-in type or not.
     is_our_type = any(type_ in x.__members__.values() for x in get_args(AllTypes))
     if not is_our_type:
-        type_ = VariableType(data=type_)
+        type_ = VariableType(data=Identifier(type_))
 
     return VariableAssignment(
-        variable=node.target.id,
+        variable=Identifier(node.target.id),
         expression=value,
         type=cast(VariableType | AllTypes, type_),
     )
@@ -141,7 +144,7 @@ def _convert_assignment(node: ast.Assign) -> Assignment:
         if isinstance(value, Value):
             type_ = value.type
         elif isinstance(value, FunctionCall) and value.type == FunctionType.CONSTRUCTOR:
-            type_ = VariableType(data=value.name)
+            type_ = VariableType(data=Identifier(value.name))
 
         if not type_:
             raise InvalidDslError(
@@ -149,8 +152,11 @@ def _convert_assignment(node: ast.Assign) -> Assignment:
             )
 
         assert isinstance(type_, AllTypes | VariableType)
-        return VariableAssignment(variable=variable.id, expression=value, type=type_)
+        return VariableAssignment(
+            variable=Identifier(variable.id), expression=value, type=type_
+        )
     elif isinstance(variable, ast.Attribute):
+        # noinspection PyTypeChecker
         property_access = _convert_expression(variable, False)
         assert isinstance(property_access, FunctionCall)
         return PropertyAssignment(property=property_access, expression=value)
@@ -194,7 +200,7 @@ def _convert_call(node: ast.Call) -> FunctionCall:
         raise InvalidDslError("Passing arguments to property calls is not supported.")
 
     return FunctionCall(
-        type=our_type, name=name, namespace=namespace, arguments=arguments
+        type=our_type, name=Identifier(name), namespace=namespace, arguments=arguments
     )
 
 
@@ -256,7 +262,7 @@ def _convert_expression(node: ast.expr, is_return: bool) -> Expression:
             )
         return FunctionCall(
             type=FunctionType.PROPERTY,
-            name=node.attr,
+            name=Identifier(node.attr),
             namespace=_convert_expression(node.value, is_return),
             arguments=[],
         )
@@ -267,7 +273,9 @@ def _convert_expression(node: ast.expr, is_return: bool) -> Expression:
         elif node.id == "Undefined":
             return serialize_from_python(None, AdvancedNothingTypes.UNDEFINED)
         elif node.id.isupper():
-            return FunctionCall(type=FunctionType.PROPERTY, name=node.id.lower())
+            return FunctionCall(
+                type=FunctionType.PROPERTY, name=Identifier(node.id.lower())
+            )
         else:
             return Identifier(node.id)
     elif isinstance(node, ast.List):

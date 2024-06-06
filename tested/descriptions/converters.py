@@ -22,6 +22,7 @@ from tested.languages.conventionalize import (
     conventionalize_property,
 )
 from tested.languages.generation import NestedTypeDeclaration, generate_type_declaration
+from tested.serialisation import Identifier
 from tested.testsuite import LanguageMapping
 from tested.utils import get_args
 
@@ -157,7 +158,7 @@ def _construct_datatype(
 
 
 def _support_language_specific_arguments(
-    normal: Callable[[Language, str], str],
+    normal: Callable[[Language, Identifier], Identifier],
     bundle: Bundle,
     actual: str | LanguageMapping,
 ) -> str:
@@ -168,7 +169,7 @@ def _support_language_specific_arguments(
         )
         return actual[bundle.config.programming_language]
     else:
-        return normal(bundle.language, actual)
+        return normal(bundle.language, Identifier(actual))
 
 
 def convert_templated_problem(bundle: Bundle, raw_description: str) -> str:

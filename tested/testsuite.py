@@ -34,6 +34,7 @@ from tested.serialisation import (
     Expression,
     FunctionCall,
     FunctionType,
+    Identifier,
     NamedArgument,
     SequenceType,
     Statement,
@@ -717,7 +718,7 @@ class Suite(WithFeatures, WithFunctions):
     """General test suite, which is used to run tests of some code."""
 
     tabs: list[Tab] = field(factory=list)
-    namespace: str = "submission"
+    namespace: Identifier = Identifier("submission")
 
     def get_used_features(self) -> FeatureSet:
         """

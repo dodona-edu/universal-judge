@@ -249,7 +249,7 @@ function send_value {{
     for value in values:
         index_fun = unique_index_function()
         function_call = FunctionCall(
-            type=FunctionType.FUNCTION, name="send_value", arguments=[value]
+            type=FunctionType.FUNCTION, name=Identifier("send_value"), arguments=[value]
         )
         result += f"{convert_function_call(function_call, index_fun, [])}\n"
     return result

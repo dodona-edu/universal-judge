@@ -204,7 +204,9 @@ def prepare_argument(
 def prepare_assignment(bundle: Bundle, assignment: Assignment) -> Assignment:
     if isinstance(assignment, VariableAssignment):
         if isinstance(assignment.type, VariableType):
-            class_type = conventionalize_class(bundle.language, assignment.type.data)
+            class_type = conventionalize_class(
+                bundle.language, Identifier(assignment.type.data)
+            )
             assignment = assignment.replace_type(VariableType(data=class_type))
 
         assignment = assignment.replace_variable(
@@ -309,7 +311,9 @@ def _create_handling_function(
         output.oracle, LanguageSpecificOracle
     ):
         evaluator = output.oracle.for_language(bundle.config.programming_language)
-        evaluator_name = conventionalize_namespace(lang_config, evaluator.file.stem)
+        evaluator_name = conventionalize_namespace(
+            lang_config, Identifier(evaluator.file.stem)
+        )
     else:
         evaluator_name = None
         evaluator = None
@@ -319,10 +323,13 @@ def _create_handling_function(
             output.oracle, LanguageSpecificOracle
         ):
             assert evaluator
+            assert evaluator_name
             arguments = [
                 PreparedFunctionCall(
                     type=FunctionType.FUNCTION,
-                    name=conventionalize_function(lang_config, evaluator.name),
+                    name=conventionalize_function(
+                        lang_config, Identifier(evaluator.name)
+                    ),
                     namespace=Identifier(evaluator_name),
                     arguments=[prepare_expression(bundle, expression)],
                     has_root_namespace=False,
@@ -335,7 +342,7 @@ def _create_handling_function(
 
         internal = PreparedFunctionCall(
             type=FunctionType.FUNCTION,
-            name=conventionalize_function(lang_config, function_name),
+            name=conventionalize_function(lang_config, Identifier(function_name)),
             arguments=[prepare_argument(bundle, arg) for arg in arguments],
             has_root_namespace=False,
         )

@@ -2,13 +2,13 @@
 Test the serialization format.
 
 While the normal exercise-based tests already use serialization,
-they don't actually test all datatypes and such.
+they do not test all datatypes and such.
 
 To make testing easy, your language module needs to implement an "encode" template.
 This template takes one value and must pass it to the "values" module.
 
-Testing advanced types is a work-in progress at this point, since we test in Python,
-and Python doesn't have explicit support for e.g. int32, int64.
+Testing advanced types is work-in progress at this point, since we test in Python,
+and Python does not have explicit support for e.g. int32, int64.
 """
 
 import itertools
@@ -42,6 +42,7 @@ from tested.languages.conventionalize import conventionalize_namespace
 from tested.oracles.value import _check_simple_type
 from tested.serialisation import (
     BooleanType,
+    Identifier,
     NothingType,
     NumberType,
     ObjectKeyValuePair,
@@ -192,7 +193,7 @@ def run_encoder(bundle: Bundle, values: list[Value]) -> list[str]:
     dest = bundle.config.workdir
     copy_from_paths_to_path(dependency_paths, dependencies, dest)
 
-    name = conventionalize_namespace(bundle.language, "encode")
+    name = conventionalize_namespace(bundle.language, Identifier("encode"))
     encoder_name = bundle.language.with_extension(name)
     encoder_destination = dest / encoder_name
     encode_code = bundle.language.generate_encoder(values)

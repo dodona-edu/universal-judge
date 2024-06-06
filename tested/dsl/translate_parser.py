@@ -33,6 +33,7 @@ from tested.dsl.ast_translator import parse_string
 from tested.parsing import get_converter, suite_to_json
 from tested.serialisation import (
     BooleanType,
+    Identifier,
     NothingType,
     NumberType,
     ObjectKeyValuePair,
@@ -603,7 +604,7 @@ def _convert_dsl(dsl_object: YamlObject) -> Suite:
 
     if namespace:
         assert isinstance(namespace, str)
-        return Suite(tabs=tabs, namespace=namespace)
+        return Suite(tabs=tabs, namespace=Identifier(namespace))
     else:
         return Suite(tabs=tabs)
 
