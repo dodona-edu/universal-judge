@@ -23,6 +23,7 @@ from tested.serialisation import (
     BooleanType,
     FunctionCall,
     FunctionType,
+    Identifier,
     NumberType,
     StringType,
 )
@@ -895,7 +896,7 @@ def test_function_arguments_without_brackets(tmp_path: Path, pytestconfig):
 
     statement = FunctionCall(
         type=FunctionType.FUNCTION,
-        name="test",
+        name=Identifier("test"),
         namespace=None,
         arguments=[
             NumberType(type=BasicNumericTypes.REAL, data=5.5),
