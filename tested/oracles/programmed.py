@@ -119,9 +119,13 @@ def _evaluate_programmed(
         with _catch_output() as (stdout_, stderr_):
             exec(f"__tested_test__result = {literal_function_call}", global_env)
         result_ = cast(BooleanEvalResult | None, global_env["__tested_test__result"])
+        stdout_ = stdout_.getvalue()
+        stderr_ = stderr_.getvalue()
     except Exception as e:
         _logger.exception(e)
         result_ = None
+        stdout_ = None
+        stderr_ = None
         messages.append(
             ExtendedMessage(
                 description="The custom check oracle failed with the following exception:",
@@ -133,9 +137,6 @@ def _evaluate_programmed(
         messages.append(
             ExtendedMessage(description=tb, format="code", permission=Permission.STAFF)
         )
-
-    stdout_ = stdout_.getvalue()
-    stderr_ = stderr_.getvalue()
 
     if stdout_:
         messages.append(
