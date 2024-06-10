@@ -252,7 +252,7 @@ def convert_validation_error_to_group(
     if not error.context and not error.cause:
         if len(error.message) > 150:
             message = error.message.replace(str(error.instance), "<DSL>")
-            note = "With <DSL> being: " + str(error.instance)
+            note = "With <DSL> being: " + textwrap.shorten(str(error.instance), 500)
         else:
             message = error.message
             note = None
