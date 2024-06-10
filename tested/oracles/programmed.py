@@ -113,13 +113,30 @@ def _evaluate_programmed(
     )
     literal_function_call = generate_statement(eval_bundle, check_function_call)
 
-    with _catch_output() as (stdout_, stderr_):
-        exec(f"__tested_test__result = {literal_function_call}", global_env)
+    messages = []
+    # noinspection PyBroadException
+    try:
+        with _catch_output() as (stdout_, stderr_):
+            exec(f"__tested_test__result = {literal_function_call}", global_env)
+        result_ = cast(BooleanEvalResult | None, global_env["__tested_test__result"])
+    except Exception as e:
+        _logger.exception(e)
+        result_ = None
+        messages.append(
+            ExtendedMessage(
+                description="The custom check oracle failed with the following exception:",
+                format="text",
+                permission=Permission.STAFF,
+            )
+        )
+        tb = traceback.format_exc()
+        messages.append(
+            ExtendedMessage(description=tb, format="code", permission=Permission.STAFF)
+        )
 
     stdout_ = stdout_.getvalue()
     stderr_ = stderr_.getvalue()
 
-    messages = []
     if stdout_:
         messages.append(
             ExtendedMessage(
@@ -141,8 +158,6 @@ def _evaluate_programmed(
                 description=stderr_, format="code", permission=Permission.STAFF
             )
         )
-
-    result_ = cast(BooleanEvalResult | None, global_env["__tested_test__result"])
 
     # If the result is None, the oracle is broken.
     if result_ is None:
