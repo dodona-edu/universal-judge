@@ -12,6 +12,7 @@ import sys
 from pathlib import Path
 
 import pytest
+from language_markers import ALL_LANGUAGES, ALL_SPECIFIC_LANGUAGES
 
 from tested.configs import create_bundle
 from tested.datatypes import BasicBooleanTypes, BasicNumericTypes, BasicStringTypes
@@ -28,20 +29,6 @@ from tested.serialisation import (
 )
 from tested.testsuite import Context, MainInput, Suite, Tab, Testcase, TextData
 from tests.manual_utils import assert_valid_output, configuration, execute_config
-
-COMPILE_LANGUAGES = [
-    "python",
-    "java",
-    "c",
-    "kotlin",
-    pytest.param("haskell", marks=pytest.mark.haskell),
-    "csharp",
-]
-ALL_SPECIFIC_LANGUAGES = COMPILE_LANGUAGES + [
-    "javascript",
-    pytest.param("runhaskell", marks=pytest.mark.haskell),
-]
-ALL_LANGUAGES = ALL_SPECIFIC_LANGUAGES + ["bash"]
 
 quotes = {
     "python": "'",
@@ -89,31 +76,6 @@ def test_io_exercise(language: str, tmp_path: Path, pytestconfig):
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
 def test_io_exercise_wrong(language: str, tmp_path: Path, pytestconfig):
     conf = configuration(pytestconfig, "echo", language, tmp_path, "one.tson", "wrong")
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["wrong"]
-
-
-@pytest.mark.parametrize("language", ALL_LANGUAGES)
-def test_simple_programmed_eval(language: str, tmp_path: Path, pytestconfig):
-    conf = configuration(
-        pytestconfig,
-        "echo",
-        language,
-        tmp_path,
-        "one-programmed-correct.tson",
-        "correct",
-    )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["correct"]
-
-
-@pytest.mark.parametrize("language", ALL_LANGUAGES)
-def test_simple_programmed_eval_wrong(language: str, tmp_path: Path, pytestconfig):
-    conf = configuration(
-        pytestconfig, "echo", language, tmp_path, "one-programmed-wrong.tson", "correct"
-    )
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["wrong"]
@@ -276,22 +238,6 @@ def test_specific_evaluation(language: str, tmp_path: Path, pytestconfig):
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["wrong", "correct"]
     assert len(updates.find_all("append-message")) == 2
-
-
-@pytest.mark.parametrize("language", ALL_LANGUAGES)
-def test_programmed_evaluation(language: str, tmp_path: Path, pytestconfig):
-    conf = configuration(
-        pytestconfig,
-        "echo-function",
-        language,
-        tmp_path,
-        "programmed.tson",
-        "correct",
-    )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["correct"]
-    assert len(updates.find_all("append-message"))
 
 
 @pytest.mark.parametrize(

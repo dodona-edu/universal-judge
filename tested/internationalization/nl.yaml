@@ -16,13 +16,11 @@ nl:
       runtime: "Runtime error"
       unexpected: "Onverwachte uitvoer"
     programmed:
-      student:
-        default: >-
-          Er ging iets fout op bij het evalueren van de oplossing.
-          Meld dit aan de lesgever!
-      result: "Het resultaat van de geprogrammeerde evaluatie is ongeldig:"
-      stdout: "Dit werd geproduceerd op stdout:"
-      stderr: "Dit werd geproduceerd op stderr:"
+      student: >-
+        Er ging iets fout op bij het evalueren van de oplossing.
+        Meld dit aan de lesgever!
+      stdout: "Het evalueren van de oplossing genereerde deze uitvoer op stderr:"
+      stderr: "Het evalueren van de oplossing genereerde deze uitvoer op stdout:"
     specific:
       student:
         default: >-
