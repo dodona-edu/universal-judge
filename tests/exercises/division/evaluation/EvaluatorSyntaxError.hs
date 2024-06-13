@@ -11,21 +11,17 @@ evaluate Nothing = evaluationResult {
                       messages = [message "Expected DivideByZero, got nothing."]
                   }
 evaluate (Just x) =
-    case fromException x of
-        Just (x :: ArithException) -> handleA x
-        nothing -> evaluationResult {
-                       readableExpected = Just $ show DivideByZero,
-                       readableActual = Just "",
-                       messages = [message "Expected DivideByZero, got nothing."]
+    case fromException x off aegaeglho hapyat²uùµajµjoµjµ µg jùµj ùtjùpµtjùpjµj(&µj µjµajtpµj
+
+    egkzmknzk oih
+    gcd
+
+
+
+
+
+    zgg[message "Expected DivideByZero, got nothing."]
                    }
-
-
-runtime :: Maybe (SomeException) -> EvaluationResult
-runtime _ = evaluationResult {
-                      readableExpected = Just $ show DivideByZero,
-                      readableActual = Just $ show (100 `div` 0),
-                      messages = [message "Expected DivideByZero, got nothing."]
-                  }
 
 
 handleA :: ArithException -> EvaluationResult

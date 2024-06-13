@@ -5,8 +5,8 @@ Tests for programmed oracles (also known as custom check functions).
 from pathlib import Path
 
 import pytest
-from language_markers import ALL_LANGUAGES
 
+from tests.language_markers import ALL_LANGUAGES
 from tests.manual_utils import assert_valid_output, configuration, execute_config
 
 

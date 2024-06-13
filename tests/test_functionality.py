@@ -12,7 +12,6 @@ import sys
 from pathlib import Path
 
 import pytest
-from language_markers import ALL_LANGUAGES, ALL_SPECIFIC_LANGUAGES
 
 from tested.configs import create_bundle
 from tested.datatypes import BasicBooleanTypes, BasicNumericTypes, BasicStringTypes
@@ -28,6 +27,11 @@ from tested.serialisation import (
     StringType,
 )
 from tested.testsuite import Context, MainInput, Suite, Tab, Testcase, TextData
+from tests.language_markers import (
+    ALL_LANGUAGES,
+    ALL_SPECIFIC_LANGUAGES,
+    EXCEPTION_LANGUAGES,
+)
 from tests.manual_utils import assert_valid_output, configuration, execute_config
 
 quotes = {
@@ -224,55 +228,21 @@ def test_io_function_exercise_haskell_io(language: str, tmp_path: Path, pytestco
     assert updates.find_status_enum() == ["correct"]
 
 
-@pytest.mark.parametrize("language", ALL_SPECIFIC_LANGUAGES)
-def test_specific_evaluation(language: str, tmp_path: Path, pytestconfig):
+@pytest.mark.parametrize("lang", EXCEPTION_LANGUAGES)
+def test_generic_exception_wrong(
+    lang: str, tmp_path: Path, pytestconfig: pytest.Config
+):
     conf = configuration(
-        pytestconfig,
-        "echo-function",
-        language,
-        tmp_path,
-        "two-specific.tson",
-        "correct",
+        pytestconfig, "division", lang, tmp_path, "plan-generic-exception.json", "wrong"
     )
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["wrong", "correct"]
-    assert len(updates.find_all("append-message")) == 2
+    assert updates.find_status_enum() == ["wrong"]
 
 
-@pytest.mark.parametrize(
-    "lang",
-    [
-        "python",
-        "java",
-        "kotlin",
-        "csharp",
-        pytest.param("haskell", marks=pytest.mark.haskell),
-        pytest.param("runhaskell", marks=pytest.mark.haskell),
-    ],
-)
-def test_language_evaluator_exception_correct(lang: str, tmp_path: Path, pytestconfig):
-    conf = configuration(
-        pytestconfig, "division", lang, tmp_path, "plan.json", "correct"
-    )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["correct"]
-
-
-@pytest.mark.parametrize(
-    "lang",
-    [
-        "python",
-        "java",
-        "kotlin",
-        "csharp",
-        pytest.param("haskell", marks=pytest.mark.haskell),
-        pytest.param("runhaskell", marks=pytest.mark.haskell),
-    ],
-)
-def test_language_evaluator_generic_exception_correct(
-    lang: str, tmp_path: Path, pytestconfig
+@pytest.mark.parametrize("lang", EXCEPTION_LANGUAGES)
+def test_generic_exception_correct(
+    lang: str, tmp_path: Path, pytestconfig: pytest.Config
 ):
     conf = configuration(
         pytestconfig,
@@ -287,38 +257,9 @@ def test_language_evaluator_generic_exception_correct(
     assert updates.find_status_enum() == ["correct"]
 
 
-@pytest.mark.parametrize(
-    "lang",
-    [
-        "python",
-        "java",
-        "kotlin",
-        "csharp",
-        pytest.param("haskell", marks=pytest.mark.haskell),
-        pytest.param("runhaskell", marks=pytest.mark.haskell),
-    ],
-)
-def test_language_evaluator_exception_wrong(lang: str, tmp_path: Path, pytestconfig):
-    conf = configuration(pytestconfig, "division", lang, tmp_path, "plan.json", "wrong")
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["wrong"]
-    assert len(updates.find_all("append-message")) == 1
-
-
-@pytest.mark.parametrize(
-    "lang",
-    [
-        "python",
-        "java",
-        "kotlin",
-        "csharp",
-        pytest.param("haskell", marks=pytest.mark.haskell),
-        pytest.param("runhaskell", marks=pytest.mark.haskell),
-    ],
-)
-def test_language_evaluator_generic_exception_wrong_error(
-    lang: str, tmp_path: Path, pytestconfig
+@pytest.mark.parametrize("lang", EXCEPTION_LANGUAGES)
+def test_generic_exception_wrong_error(
+    lang: str, tmp_path: Path, pytestconfig: pytest.Config
 ):
     conf = configuration(
         pytestconfig,
@@ -327,50 +268,6 @@ def test_language_evaluator_generic_exception_wrong_error(
         tmp_path,
         "plan-generic-exception.json",
         "wrong-error",
-    )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["wrong"]
-
-
-@pytest.mark.parametrize(
-    "lang",
-    [
-        "python",
-        "java",
-        "kotlin",
-        "csharp",
-        pytest.param("haskell", marks=pytest.mark.haskell),
-        pytest.param("runhaskell", marks=pytest.mark.haskell),
-    ],
-)
-def test_language_evaluator_exception_wrong_error(
-    lang: str, tmp_path: Path, pytestconfig
-):
-    conf = configuration(
-        pytestconfig, "division", lang, tmp_path, "plan.json", "wrong-error"
-    )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["wrong"]
-
-
-@pytest.mark.parametrize(
-    "lang",
-    [
-        "python",
-        "java",
-        "kotlin",
-        "csharp",
-        pytest.param("haskell", marks=pytest.mark.haskell),
-        pytest.param("runhaskell", marks=pytest.mark.haskell),
-    ],
-)
-def test_language_evaluator_generic_exception_wrong(
-    lang: str, tmp_path: Path, pytestconfig
-):
-    conf = configuration(
-        pytestconfig, "division", lang, tmp_path, "plan-generic-exception.json", "wrong"
     )
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)

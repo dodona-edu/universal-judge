@@ -10,4 +10,8 @@ public class Evaluator {
             return new EvaluationResult(false, "System.DivideByZeroException", actual == null ? "" : actual.ToString(), messages);
         }
     }
+
+    public static EvaluationResult Runtime(object? actual) {
+        throw new ArgumentOutOfRangeException("hello");
+    }
 }

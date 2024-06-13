@@ -13,3 +13,5 @@ ALL_SPECIFIC_LANGUAGES = COMPILE_LANGUAGES + [
     pytest.param("runhaskell", marks=pytest.mark.haskell),
 ]
 ALL_LANGUAGES = ALL_SPECIFIC_LANGUAGES + ["bash"]
+
+EXCEPTION_LANGUAGES = ["python", "java", "kotlin", "csharp", "haskell"]
