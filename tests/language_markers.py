@@ -1,17 +1,21 @@
-import pytest
+from tested.languages import LANGUAGES
 
 COMPILE_LANGUAGES = [
     "python",
     "java",
     "c",
     "kotlin",
-    pytest.param("haskell", marks=pytest.mark.haskell),
+    "haskell",
     "csharp",
 ]
 ALL_SPECIFIC_LANGUAGES = COMPILE_LANGUAGES + [
     "javascript",
-    pytest.param("runhaskell", marks=pytest.mark.haskell),
+    "runhaskell",
 ]
 ALL_LANGUAGES = ALL_SPECIFIC_LANGUAGES + ["bash"]
 
 EXCEPTION_LANGUAGES = ["python", "java", "kotlin", "csharp", "haskell"]
+
+
+def test_no_missing_languages_from_tests():
+    assert sorted(ALL_LANGUAGES) == sorted(LANGUAGES.keys())

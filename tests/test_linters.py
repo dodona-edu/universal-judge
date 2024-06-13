@@ -5,16 +5,15 @@ import pytest
 from tests.manual_utils import assert_valid_output, configuration, execute_config
 
 
-def _get_config_options(language: str):
+def _get_config_options(language: str) -> list[dict]:
     return [
         {"options": {"language": {language: {"linter": True}}}},
         {"options": {"linter": True}},
     ]
 
 
-@pytest.mark.linter
 @pytest.mark.parametrize("config", _get_config_options("c"))
-def test_cppcheck(tmp_path: Path, config, pytestconfig):
+def test_cppcheck(tmp_path: Path, config: dict, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig,
         "echo-function",
@@ -29,9 +28,8 @@ def test_cppcheck(tmp_path: Path, config, pytestconfig):
     assert len(updates.find_all("annotate-code")) > 0
 
 
-@pytest.mark.linter
 @pytest.mark.parametrize("config", _get_config_options("java"))
-def test_checkstyle(tmp_path: Path, config, pytestconfig):
+def test_checkstyle(tmp_path: Path, config: dict, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig,
         "counter",
@@ -46,9 +44,8 @@ def test_checkstyle(tmp_path: Path, config, pytestconfig):
     assert len(updates.find_all("annotate-code")) > 0
 
 
-@pytest.mark.linter
 @pytest.mark.parametrize("config", _get_config_options("javascript"))
-def test_eslint(tmp_path: Path, config, pytestconfig):
+def test_eslint(tmp_path: Path, config: dict, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig,
         "counter",
@@ -63,7 +60,6 @@ def test_eslint(tmp_path: Path, config, pytestconfig):
     assert len(updates.find_all("annotate-code")) > 0
 
 
-@pytest.mark.linter
 @pytest.mark.parametrize(
     ("language", "config"),
     [
@@ -73,7 +69,9 @@ def test_eslint(tmp_path: Path, config, pytestconfig):
         ("runhaskell", _get_config_options("runhaskell")[1]),
     ],
 )
-def test_hlint(language: str, config, tmp_path: Path, pytestconfig):
+def test_hlint(
+    language: str, config: dict, tmp_path: Path, pytestconfig: pytest.Config
+):
     conf = configuration(
         pytestconfig,
         "echo-function",
@@ -88,9 +86,8 @@ def test_hlint(language: str, config, tmp_path: Path, pytestconfig):
     assert len(updates.find_all("annotate-code")) > 0
 
 
-@pytest.mark.linter
 @pytest.mark.parametrize("config", _get_config_options("kotlin"))
-def test_ktlint(tmp_path: Path, config, pytestconfig):
+def test_ktlint(tmp_path: Path, config: dict, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig, "counter", "kotlin", tmp_path, "plan.yaml", "solution", config
     )
@@ -99,9 +96,8 @@ def test_ktlint(tmp_path: Path, config, pytestconfig):
     assert len(updates.find_all("annotate-code")) > 0
 
 
-@pytest.mark.linter
 @pytest.mark.parametrize("config", _get_config_options("python"))
-def test_pylint(tmp_path: Path, config, pytestconfig):
+def test_pylint(tmp_path: Path, config: dict, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig,
         "counter",
@@ -116,9 +112,8 @@ def test_pylint(tmp_path: Path, config, pytestconfig):
     assert len(updates.find_all("annotate-code")) > 0
 
 
-@pytest.mark.linter
 @pytest.mark.parametrize("config", _get_config_options("bash"))
-def test_shellcheck(tmp_path: Path, config, pytestconfig):
+def test_shellcheck_wrong(tmp_path: Path, config: dict, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig, "echo", "bash", tmp_path, "one.tson", "wrong", config
     )
@@ -127,9 +122,8 @@ def test_shellcheck(tmp_path: Path, config, pytestconfig):
     assert len(updates.find_all("annotate-code")) > 0
 
 
-@pytest.mark.linter
 @pytest.mark.parametrize("config", _get_config_options("bash"))
-def test_shellcheck(tmp_path: Path, config, pytestconfig):
+def test_shellcheck_warning(tmp_path: Path, config: dict, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig, "echo", "bash", tmp_path, "one.tson", "warning", config
     )

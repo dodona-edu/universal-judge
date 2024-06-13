@@ -11,7 +11,9 @@ from tests.manual_utils import assert_valid_output, configuration, execute_confi
 
 
 @pytest.mark.parametrize("language", ALL_SPECIFIC_LANGUAGES)
-def test_specific_oracle_return(language: str, tmp_path: Path, pytestconfig):
+def test_specific_oracle_return(
+    language: str, tmp_path: Path, pytestconfig: pytest.Config
+):
     conf = configuration(
         pytestconfig,
         "echo-function",

@@ -51,7 +51,7 @@ from tested.testsuite import (
 
 if TYPE_CHECKING:
     from tested.judge.planning import PlannedExecutionUnit
-    from tested.languages.config import Language
+    from tested.languages.language import Language
 
 # Names of the predefined functions that must be available.
 SEND_VALUE = "send_value"

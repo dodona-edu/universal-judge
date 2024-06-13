@@ -11,18 +11,18 @@ from tested.datatypes import (
 )
 from tested.dodona import AnnotateCode, Message
 from tested.features import Construct, TypeSupport
-from tested.languages.config import (
-    CallbackResult,
-    Command,
-    Language,
-    TypeDeclarationMetadata,
-)
 from tested.languages.conventionalize import (
     EXECUTION_PREFIX,
     Conventionable,
     NamingConventions,
     submission_file,
     submission_name,
+)
+from tested.languages.language import (
+    CallbackResult,
+    Command,
+    Language,
+    TypeDeclarationMetadata,
 )
 from tested.languages.utils import cleanup_description
 from tested.serialisation import Statement, Value

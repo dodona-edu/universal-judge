@@ -11,12 +11,12 @@ from typing import TYPE_CHECKING, Optional
 
 from tested.languages.bash.config import Bash
 from tested.languages.c.config import C
-from tested.languages.config import Language
 from tested.languages.csharp.config import CSharp
 from tested.languages.haskell.config import Haskell
 from tested.languages.java.config import Java
 from tested.languages.javascript.config import JavaScript
 from tested.languages.kotlin.config import Kotlin
+from tested.languages.language import Language
 from tested.languages.python.config import Python
 from tested.languages.runhaskell.config import RunHaskell
 

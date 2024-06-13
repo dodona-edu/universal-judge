@@ -2,6 +2,9 @@ import sys
 from pathlib import Path
 from unittest.mock import ANY
 
+import pytest
+from pytest_mock import MockerFixture
+
 import tested
 from tested.configs import create_bundle
 from tested.datatypes import BasicObjectTypes, BasicSequenceTypes, BasicStringTypes
@@ -40,7 +43,7 @@ def oracle_config(
     return OracleConfig(bundle=bundle, options=options, context_dir=tmp_path)
 
 
-def test_text_oracle(tmp_path: Path, pytestconfig):
+def test_text_oracle(tmp_path: Path, pytestconfig: pytest.Config):
     config = oracle_config(tmp_path, pytestconfig, {"ignoreWhitespace": False})
     channel = TextOutputChannel(data="expected")
     result = evaluate_text(config, channel, "expected")
@@ -54,7 +57,7 @@ def test_text_oracle(tmp_path: Path, pytestconfig):
     assert result.readable_actual == "nothing"
 
 
-def test_text_oracle_whitespace(tmp_path: Path, pytestconfig):
+def test_text_oracle_whitespace(tmp_path: Path, pytestconfig: pytest.Config):
     config = oracle_config(tmp_path, pytestconfig, {"ignoreWhitespace": True})
     channel = TextOutputChannel(data="expected")
     result = evaluate_text(config, channel, "expected      ")
@@ -68,7 +71,7 @@ def test_text_oracle_whitespace(tmp_path: Path, pytestconfig):
     assert result.readable_actual == "nothing"
 
 
-def test_text_oracle_case_sensitive(tmp_path: Path, pytestconfig):
+def test_text_oracle_case_sensitive(tmp_path: Path, pytestconfig: pytest.Config):
     config = oracle_config(tmp_path, pytestconfig, {"caseInsensitive": True})
     channel = TextOutputChannel(data="expected")
     result = evaluate_text(config, channel, "Expected")
@@ -82,7 +85,7 @@ def test_text_oracle_case_sensitive(tmp_path: Path, pytestconfig):
     assert result.readable_actual == "nothing"
 
 
-def test_text_oracle_combination(tmp_path: Path, pytestconfig):
+def test_text_oracle_combination(tmp_path: Path, pytestconfig: pytest.Config):
     config = oracle_config(
         tmp_path, pytestconfig, {"caseInsensitive": True, "ignoreWhitespace": True}
     )
@@ -98,7 +101,7 @@ def test_text_oracle_combination(tmp_path: Path, pytestconfig):
     assert result.readable_actual == "nothing"
 
 
-def test_text_oracle_rounding(tmp_path: Path, pytestconfig):
+def test_text_oracle_rounding(tmp_path: Path, pytestconfig: pytest.Config):
     config = oracle_config(
         tmp_path, pytestconfig, {"tryFloatingPoint": True, "applyRounding": True}
     )
@@ -114,7 +117,7 @@ def test_text_oracle_rounding(tmp_path: Path, pytestconfig):
     assert result.readable_actual == "1.5"
 
 
-def test_text_oracle_round_to(tmp_path: Path, pytestconfig):
+def test_text_oracle_round_to(tmp_path: Path, pytestconfig: pytest.Config):
     config = oracle_config(
         tmp_path,
         pytestconfig,
@@ -132,9 +135,11 @@ def test_text_oracle_round_to(tmp_path: Path, pytestconfig):
     assert result.readable_actual == "1.5"
 
 
-def test_file_oracle_full_wrong(tmp_path: Path, pytestconfig, mocker):
+def test_file_oracle_full_wrong(
+    tmp_path: Path, pytestconfig: pytest.Config, mocker: MockerFixture
+):
     config = oracle_config(tmp_path, pytestconfig, {"mode": "full"})
-    s = mocker.spy(tested.oracles.text, name="compare_text")
+    s = mocker.spy(tested.oracles.text, name="compare_text")  # type: ignore[reportAttributeAccessIssue]
     mock_files = [
         mocker.mock_open(read_data=content).return_value
         for content in ["expected\nexpected", "actual\nactual"]
@@ -152,9 +157,11 @@ def test_file_oracle_full_wrong(tmp_path: Path, pytestconfig, mocker):
     assert result.readable_actual == "actual\nactual"
 
 
-def test_file_oracle_full_correct(tmp_path: Path, pytestconfig, mocker):
+def test_file_oracle_full_correct(
+    tmp_path: Path, pytestconfig: pytest.Config, mocker: MockerFixture
+):
     config = oracle_config(tmp_path, pytestconfig, {"mode": "full"})
-    s = mocker.spy(tested.oracles.text, name="compare_text")
+    s = mocker.spy(tested.oracles.text, name="compare_text")  # type: ignore[reportAttributeAccessIssue]
     mock_files = [
         mocker.mock_open(read_data=content).return_value
         for content in ["expected\nexpected", "expected\nexpected"]
@@ -172,11 +179,13 @@ def test_file_oracle_full_correct(tmp_path: Path, pytestconfig, mocker):
     assert result.readable_actual == "expected\nexpected"
 
 
-def test_file_oracle_line_wrong(tmp_path: Path, pytestconfig, mocker):
+def test_file_oracle_line_wrong(
+    tmp_path: Path, pytestconfig: pytest.Config, mocker: MockerFixture
+):
     config = oracle_config(
         tmp_path, pytestconfig, {"mode": "line", "stripNewlines": True}
     )
-    s = mocker.spy(tested.oracles.text, name="compare_text")
+    s = mocker.spy(tested.oracles.text, name="compare_text")  # type: ignore[reportAttributeAccessIssue]
     mock_files = [
         mocker.mock_open(read_data=content).return_value
         for content in ["expected\nexpected2", "actual\nactual2"]
@@ -196,11 +205,13 @@ def test_file_oracle_line_wrong(tmp_path: Path, pytestconfig, mocker):
     assert result.readable_actual == "actual\nactual2"
 
 
-def test_file_oracle_line_correct(tmp_path: Path, pytestconfig, mocker):
+def test_file_oracle_line_correct(
+    tmp_path: Path, pytestconfig: pytest.Config, mocker: MockerFixture
+):
     config = oracle_config(
         tmp_path, pytestconfig, {"mode": "line", "stripNewlines": True}
     )
-    s = mocker.spy(tested.oracles.text, name="compare_text")
+    s = mocker.spy(tested.oracles.text, name="compare_text")  # type: ignore[reportAttributeAccessIssue]
     mock_files = [
         mocker.mock_open(read_data=content).return_value
         for content in ["expected\nexpected2", "expected\nexpected2"]
@@ -220,11 +231,13 @@ def test_file_oracle_line_correct(tmp_path: Path, pytestconfig, mocker):
     assert result.readable_actual == "expected\nexpected2"
 
 
-def test_file_oracle_strip_lines_correct(tmp_path: Path, pytestconfig, mocker):
+def test_file_oracle_strip_lines_correct(
+    tmp_path: Path, pytestconfig: pytest.Config, mocker: MockerFixture
+):
     config = oracle_config(
         tmp_path, pytestconfig, {"mode": "line", "stripNewlines": True}
     )
-    s = mocker.spy(tested.oracles.text, name="compare_text")
+    s = mocker.spy(tested.oracles.text, name="compare_text")  # type: ignore[reportAttributeAccessIssue]
     mock_files = [
         mocker.mock_open(read_data=content).return_value
         for content in ["expected\nexpected2\n", "expected\nexpected2"]
@@ -244,11 +257,13 @@ def test_file_oracle_strip_lines_correct(tmp_path: Path, pytestconfig, mocker):
     assert result.readable_actual == "expected\nexpected2"
 
 
-def test_file_oracle_dont_strip_lines_correct(tmp_path: Path, pytestconfig, mocker):
+def test_file_oracle_dont_strip_lines_correct(
+    tmp_path: Path, pytestconfig: pytest.Config, mocker: MockerFixture
+):
     config = oracle_config(
         tmp_path, pytestconfig, {"mode": "line", "stripNewlines": False}
     )
-    s = mocker.spy(tested.oracles.text, name="compare_text")
+    s = mocker.spy(tested.oracles.text, name="compare_text")  # type: ignore[reportAttributeAccessIssue]
     mock_files = [
         mocker.mock_open(read_data=content).return_value
         for content in ["expected\nexpected2\n", "expected\nexpected2\n"]
@@ -268,7 +283,9 @@ def test_file_oracle_dont_strip_lines_correct(tmp_path: Path, pytestconfig, mock
     assert result.readable_actual == "expected\nexpected2\n"
 
 
-def test_exception_oracle_only_messages_correct(tmp_path: Path, pytestconfig):
+def test_exception_oracle_only_messages_correct(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
     config = oracle_config(tmp_path, pytestconfig)
     channel = ExceptionOutputChannel(exception=ExpectedException(message="Test error"))
     actual_value = get_converter().dumps(
@@ -280,7 +297,9 @@ def test_exception_oracle_only_messages_correct(tmp_path: Path, pytestconfig):
     assert result.readable_actual == "ZeroDivisionError: Test error"
 
 
-def test_exception_oracle_only_messages_wrong(tmp_path: Path, pytestconfig):
+def test_exception_oracle_only_messages_wrong(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
     config = oracle_config(tmp_path, pytestconfig)
     channel = ExceptionOutputChannel(exception=ExpectedException(message="Test error"))
     actual_value = get_converter().dumps(
@@ -292,7 +311,9 @@ def test_exception_oracle_only_messages_wrong(tmp_path: Path, pytestconfig):
     assert result.readable_actual == "Pief poef"
 
 
-def test_exception_oracle_correct_message_wrong_type(tmp_path: Path, pytestconfig):
+def test_exception_oracle_correct_message_wrong_type(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
     channel = ExceptionOutputChannel(
         exception=ExpectedException(
             message="Test error",
@@ -318,7 +339,9 @@ def test_exception_oracle_correct_message_wrong_type(tmp_path: Path, pytestconfi
     assert result.readable_actual == "ZeroDivisionError: Test error"
 
 
-def test_exception_oracle_wrong_message_correct_type(tmp_path: Path, pytestconfig):
+def test_exception_oracle_wrong_message_correct_type(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
     channel = ExceptionOutputChannel(
         exception=ExpectedException(
             message="Test error",
@@ -347,7 +370,9 @@ def test_exception_oracle_wrong_message_correct_type(tmp_path: Path, pytestconfi
     assert result.readable_actual == "PafError: Test errors"
 
 
-def test_exception_oracle_correct_type_and_message(tmp_path: Path, pytestconfig):
+def test_exception_oracle_correct_type_and_message(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
     channel = ExceptionOutputChannel(
         exception=ExpectedException(
             message="Test error",
@@ -376,7 +401,7 @@ def test_exception_oracle_correct_type_and_message(tmp_path: Path, pytestconfig)
     assert result.readable_actual == "PafError: Test error"
 
 
-def test_value_string_as_text_is_detected(tmp_path: Path, pytestconfig):
+def test_value_string_as_text_is_detected(tmp_path: Path, pytestconfig: pytest.Config):
     channel = ValueOutputChannel(
         value=StringType(type=BasicStringTypes.TEXT, data="multi\nline\nstring")
     )
@@ -390,7 +415,9 @@ def test_value_string_as_text_is_detected(tmp_path: Path, pytestconfig):
     assert result.readable_actual == "multi\nline\nstring"
 
 
-def test_value_string_as_text_is_not_detected_if_disabled(tmp_path: Path, pytestconfig):
+def test_value_string_as_text_is_not_detected_if_disabled(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
     channel = ValueOutputChannel(
         value=StringType(type=BasicStringTypes.TEXT, data="multi\nline\nstring")
     )
@@ -407,7 +434,7 @@ def test_value_string_as_text_is_not_detected_if_disabled(tmp_path: Path, pytest
 
 
 def test_value_string_as_text_is_not_detected_if_not_multiline(
-    tmp_path: Path, pytestconfig
+    tmp_path: Path, pytestconfig: pytest.Config
 ):
     channel = ValueOutputChannel(
         value=StringType(type=BasicStringTypes.TEXT, data="multi")
@@ -424,7 +451,9 @@ def test_value_string_as_text_is_not_detected_if_not_multiline(
     assert result.readable_actual == "'multi\\nline\\nstring'"
 
 
-def test_value_string_as_text_is_detected_when_no_actual(tmp_path: Path, pytestconfig):
+def test_value_string_as_text_is_detected_when_no_actual(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
     channel = ValueOutputChannel(
         value=StringType(type=BasicStringTypes.TEXT, data="multi\nline\nstring")
     )
@@ -435,7 +464,9 @@ def test_value_string_as_text_is_detected_when_no_actual(tmp_path: Path, pytestc
     assert result.readable_actual == ""
 
 
-def test_nested_sets_type_check_works_if_correct(tmp_path: Path, pytestconfig):
+def test_nested_sets_type_check_works_if_correct(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
     expected_value = SequenceType(
         type=BasicSequenceTypes.SET,
         data=[
@@ -482,7 +513,9 @@ def test_nested_sets_type_check_works_if_correct(tmp_path: Path, pytestconfig):
     assert result.result.enum == Status.CORRECT
 
 
-def test_too_many_sequence_values_dont_crash(tmp_path: Path, pytestconfig):
+def test_too_many_sequence_values_dont_crash(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
     expected_value = SequenceType(
         type=BasicSequenceTypes.SEQUENCE,
         data=[
@@ -521,7 +554,7 @@ def test_too_many_sequence_values_dont_crash(tmp_path: Path, pytestconfig):
     assert result.result.enum == Status.WRONG
 
 
-def test_too_many_object_values_dont_crash(tmp_path: Path, pytestconfig):
+def test_too_many_object_values_dont_crash(tmp_path: Path, pytestconfig: pytest.Config):
     expected_value = ObjectType(
         type=BasicObjectTypes.MAP,
         data=[
@@ -555,7 +588,7 @@ def test_too_many_object_values_dont_crash(tmp_path: Path, pytestconfig):
 
 
 def test_values_different_lengths_are_detected_empty_actual(
-    tmp_path: Path, pytestconfig
+    tmp_path: Path, pytestconfig: pytest.Config
 ):
     channel = ValueOutputChannel(
         value=SequenceType(
@@ -575,7 +608,7 @@ def test_values_different_lengths_are_detected_empty_actual(
 
 
 def test_values_different_lengths_are_detected_empty_expected(
-    tmp_path: Path, pytestconfig
+    tmp_path: Path, pytestconfig: pytest.Config
 ):
     channel = ValueOutputChannel(
         value=SequenceType(type=BasicSequenceTypes.SEQUENCE, data=[])
@@ -594,7 +627,9 @@ def test_values_different_lengths_are_detected_empty_expected(
     assert result.result.enum == Status.WRONG
 
 
-def test_values_different_lengths_are_detected_different(tmp_path: Path, pytestconfig):
+def test_values_different_lengths_are_detected_different(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
     channel = ValueOutputChannel(
         value=SequenceType(
             type=BasicSequenceTypes.SEQUENCE,
@@ -615,7 +650,9 @@ def test_values_different_lengths_are_detected_different(tmp_path: Path, pytestc
     assert result.result.enum == Status.WRONG
 
 
-def test_values_same_lengths_are_detected_different(tmp_path: Path, pytestconfig):
+def test_values_same_lengths_are_detected_different(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
     channel = ValueOutputChannel(
         value=SequenceType(
             type=BasicSequenceTypes.SEQUENCE,
@@ -639,7 +676,7 @@ def test_values_same_lengths_are_detected_different(tmp_path: Path, pytestconfig
     assert result.result.enum == Status.WRONG
 
 
-def test_values_identical_list_is_detected(tmp_path: Path, pytestconfig):
+def test_values_identical_list_is_detected(tmp_path: Path, pytestconfig: pytest.Config):
     channel = ValueOutputChannel(
         value=SequenceType(
             type=BasicSequenceTypes.SEQUENCE,
@@ -663,7 +700,7 @@ def test_values_identical_list_is_detected(tmp_path: Path, pytestconfig):
     assert result.result.enum == Status.CORRECT
 
 
-def test_list_and_map_works(tmp_path: Path, pytestconfig):
+def test_list_and_map_works(tmp_path: Path, pytestconfig: pytest.Config):
     channel = ValueOutputChannel(
         value=SequenceType(
             type=BasicSequenceTypes.SEQUENCE,
@@ -693,7 +730,7 @@ def test_list_and_map_works(tmp_path: Path, pytestconfig):
     assert result.result.enum == Status.WRONG
 
 
-def test_map_and_list_works(tmp_path: Path, pytestconfig):
+def test_map_and_list_works(tmp_path: Path, pytestconfig: pytest.Config):
     channel = ValueOutputChannel(
         value=ObjectType(
             type=BasicObjectTypes.MAP,

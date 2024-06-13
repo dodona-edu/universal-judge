@@ -23,7 +23,7 @@ from tested.datatypes import (
 from tested.dodona import ExtendedMessage, Message, Permission
 
 if TYPE_CHECKING:
-    from tested.languages.config import Language
+    from tested.languages.language import Language
 
 _logger = logging.getLogger(__name__)
 

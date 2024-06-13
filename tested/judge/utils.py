@@ -10,8 +10,8 @@ from pathlib import Path
 from attrs import define
 
 from tested.configs import Bundle
-from tested.languages.config import FileFilter
 from tested.languages.conventionalize import EXECUTION_PREFIX
+from tested.languages.language import FileFilter
 
 _logger = logging.getLogger(__name__)
 

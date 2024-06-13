@@ -11,16 +11,16 @@ from tested.datatypes import (
 )
 from tested.dodona import AnnotateCode, Message
 from tested.features import Construct, TypeSupport
-from tested.languages.config import (
-    CallbackResult,
-    Command,
-    Language,
-    TypeDeclarationMetadata,
-)
 from tested.languages.conventionalize import (
     Conventionable,
     NamingConventions,
     submission_file,
+)
+from tested.languages.language import (
+    CallbackResult,
+    Command,
+    Language,
+    TypeDeclarationMetadata,
 )
 from tested.languages.utils import jvm_cleanup_stacktrace, jvm_memory_limit
 from tested.serialisation import Statement, Value

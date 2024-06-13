@@ -1,3 +1,8 @@
+"""
+Tests for the test suites, mainly to check backwards compatibility.
+If making a breaking change, add a test here to ensure it doesn't break later.
+"""
+
 from tested.parsing import get_converter
 from tested.testsuite import (
     CustomCheckOracle,
@@ -5,6 +10,7 @@ from tested.testsuite import (
     ExitCodeOutputChannel,
     FileOutputChannel,
     MainInput,
+    TextData,
     TextOutputChannel,
     ValueOutputChannel,
 )
@@ -82,6 +88,7 @@ def test_input_deprecated_attribute_is_accepted():
     }
     """
     result = get_converter().loads(scheme, MainInput)
+    assert isinstance(result.stdin, TextData)
     assert result.stdin.data == "input-1"
 
 
@@ -121,6 +128,7 @@ def test_value_show_expected_is_accepted():
     }
     """
     result = get_converter().loads(scheme, ValueOutputChannel)
+    assert result.value
     assert result.value.data == "yes"
 
 
@@ -134,6 +142,7 @@ def test_exception_show_expected_is_accepted():
     }
     """
     result = get_converter().loads(scheme, ExceptionOutputChannel)
+    assert result.exception
     assert result.exception.message == "text"
 
 

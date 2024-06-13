@@ -1,8 +1,9 @@
+# type: ignore[reportAttributeAccessIssue]
 import json
 from pathlib import Path
 
-import jsonschema
 import pytest
+from jsonschema.validators import validator_for
 
 from tested.datatypes import (
     AdvancedNumericTypes,
@@ -1110,11 +1111,12 @@ def test_strict_json_schema_is_valid():
         schema_object = json.load(schema_file)
 
     validator = load_schema_validator()
-    meta_validator = jsonschema.validators.validator_for(schema_object)(schema_object)
+    meta_validator = validator_for(schema_object)(schema_object)
 
     meta_validator.validate(validator.schema)
 
 
 def test_editor_json_schema_is_valid():
     validator = load_schema_validator("schema.json")
+    assert isinstance(validator.schema, dict)
     validator.check_schema(validator.schema)

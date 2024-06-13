@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 
 import pytest
+from syrupy import SnapshotAssertion  # type: ignore[reportPrivateImportUsage]
 
 from tests.manual_utils import (
     assert_valid_output,
@@ -80,7 +81,12 @@ ALL_EXERCISES = get_exercises()
 
 
 @pytest.mark.parametrize("exercise", ALL_EXERCISES, ids=lambda ex: ex.name)
-def test_javascript_exercise(exercise: Path, tmp_path: Path, pytestconfig, snapshot):
+def test_javascript_exercise(
+    exercise: Path,
+    tmp_path: Path,
+    pytestconfig: pytest.Config,
+    snapshot: SnapshotAssertion,
+):
     conf = exercise_configuration(
         pytestconfig,
         exercise,

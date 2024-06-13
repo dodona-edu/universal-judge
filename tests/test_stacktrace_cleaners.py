@@ -3,7 +3,8 @@ from pathlib import Path
 import pytest
 
 from tested.configs import DodonaConfig, GlobalConfig
-from tested.languages import LANGUAGES, Language
+from tested.languages import Language
+from tested.languages import get_language as upstream_get_language
 
 # noinspection PyProtectedMember
 from tested.languages.utils import (
@@ -11,6 +12,7 @@ from tested.languages.utils import (
     _replace_code_line_number,
 )
 from tested.testsuite import Suite, SupportedLanguage
+from tests.language_markers import ALL_LANGUAGES
 
 
 def get_language(workdir: str, language: str) -> Language:
@@ -30,7 +32,7 @@ def get_language(workdir: str, language: str) -> Language:
         context_separator_secret="",
         suite=Suite(tabs=[]),
     )
-    return LANGUAGES[language](global_config)
+    return upstream_get_language(global_config, language)
 
 
 def test_javascript_assertion_error():
@@ -73,7 +75,7 @@ def test_javascript_type_error():
     assert actual_cleaned == expected_cleaned
 
 
-@pytest.mark.parametrize("language", LANGUAGES.keys())
+@pytest.mark.parametrize("language", ALL_LANGUAGES)
 def test_empty_stacktrace(language):
     workdir = "/home/bliep/bloep/universal-judge/workdir"
     language_config = get_language(workdir, language)

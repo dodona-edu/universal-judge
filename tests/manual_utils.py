@@ -14,8 +14,8 @@ from tested.parsing import get_converter
 from tested.utils import recursive_dict_merge
 
 
-def assert_valid_output(output: str, config) -> CommandDict:
-    with open(Path(config.rootdir) / "tests/partial_output.json", "r") as f:
+def assert_valid_output(output: str, config: pytest.Config) -> CommandDict:
+    with open(config.rootpath / "tests/partial_output.json", "r") as f:
         schema = json.load(f)
 
     updates = CommandDict()
@@ -35,7 +35,7 @@ def configuration(
     work_dir: Path,
     suite: str = "plan.json",
     solution: str = "solution",
-    options=None,
+    options: dict | None = None,
 ) -> DodonaConfig:
     exercise_dir = config.rootpath / "tests" / "exercises"
     ep = exercise_dir / exercise
