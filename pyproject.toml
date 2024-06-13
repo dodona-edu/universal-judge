@@ -10,12 +10,10 @@ line-length = 88
 extend-exclude="tests/exercises/*"
 
 [tool.pytest.ini_options]
-markers = [
-    "haskell", # Run the haskell tests
-    "linter", # Run linter tests
-    "slow", # Slow tests
-]
 addopts = "--ignore=tests/test_integration_javascript.py"
+
+[tool.pyright]
+exclude = ["tests/exercises/", "tests/snapshots/", "tests/descriptions/"]
 
 [tool.poetry]
 name = "tested"

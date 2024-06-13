@@ -32,4 +32,4 @@ jobs:
       - uses: DeterminateSystems/nix-installer-action@main
       - uses: DeterminateSystems/magic-nix-cache-action@main
       - run: echo "${GITHUB_WORKSPACE}" >> $GITHUB_PATH
-      - run: nix develop .#types -c pyright ./tested
+      - run: nix develop .#types -c pyright ./tested ./tests
