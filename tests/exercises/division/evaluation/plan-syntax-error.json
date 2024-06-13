@@ -15,7 +15,7 @@
                   "type": "specific",
                   "evaluators": {
                     "python": {
-                      "file": "evaluator.py"
+                      "file": "evaluator-syntax-error.py"
                     },
                     "java": {
                       "file": "EvaluatorSyntaxError.java"
