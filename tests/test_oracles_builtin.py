@@ -26,6 +26,7 @@ from tested.testsuite import (
     ExpectedException,
     FileOutputChannel,
     Suite,
+    SupportedLanguage,
     TextOutputChannel,
     ValueOutputChannel,
 )
@@ -317,7 +318,10 @@ def test_exception_oracle_correct_message_wrong_type(
     channel = ExceptionOutputChannel(
         exception=ExpectedException(
             message="Test error",
-            types={"python": "PiefError", "javascript": "PafError"},
+            types={
+                SupportedLanguage.PYTHON: "PiefError",
+                SupportedLanguage.JAVASCRIPT: "PafError",
+            },
         )
     )
     actual_value = get_converter().dumps(
@@ -345,7 +349,10 @@ def test_exception_oracle_wrong_message_correct_type(
     channel = ExceptionOutputChannel(
         exception=ExpectedException(
             message="Test error",
-            types={"python": "PiefError", "javascript": "PafError"},
+            types={
+                SupportedLanguage.PYTHON: "PiefError",
+                SupportedLanguage.JAVASCRIPT: "PafError",
+            },
         )
     )
 
@@ -376,7 +383,10 @@ def test_exception_oracle_correct_type_and_message(
     channel = ExceptionOutputChannel(
         exception=ExpectedException(
             message="Test error",
-            types={"python": "PiefError", "javascript": "PafError"},
+            types={
+                SupportedLanguage.PYTHON: "PiefError",
+                SupportedLanguage.JAVASCRIPT: "PafError",
+            },
         )
     )
 

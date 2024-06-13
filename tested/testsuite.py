@@ -11,7 +11,7 @@ from collections.abc import Iterable
 from enum import StrEnum, auto, unique
 from os import path
 from pathlib import Path
-from typing import Any, Literal, Union
+from typing import Any, Literal, Protocol, TypeGuard, Union
 
 from attrs import define, field
 
@@ -155,17 +155,28 @@ class CustomCheckOracle:
     independent. The oracle is run through the judge infrastructure to translate
     values between different programming languages.
 
-    Although most programming languages are supported, we recommend using Python,
-    as TESTed can then apply specific optimisations, meaning it will be faster than
-    other languages.
+    Some examples of what is possible with this oracle are sequence alignment
+    checking, or evaluating non-deterministic return values. Another example is
+    rendering the value into another representation, such as providing a message
+    with the rendered SVG image.
 
-    Some examples of intended use of this oracle are sequence alignment checking,
-    or evaluating non-deterministic return values.
+    While nominally language agnostic, the oracle supports a "languages" property,
+    which allows limiting for which programming languages the oracle is supported.
+    If provided, the oracle will be provided with the location of the source code,
+    enabling language-specific static analysis without having to use language-
+    specific oracles.
     """
 
     function: EvaluationFunction
     arguments: list[Value] = field(factory=list)
     type: Literal["programmed", "custom_check"] = "custom_check"
+    languages: set[SupportedLanguage] | None = field(default=None)
+
+    @languages.validator  # type: ignore
+    def validate_languages(self, _, value):
+        """There should be at least one evaluator."""
+        if value and not len(value):
+            raise ValueError("At least one language is required.")
 
 
 @fallback_field(get_converter(), {"evaluators": "functions"})
@@ -310,7 +321,7 @@ class ExpectedException(WithFeatures):
     # - Specify nothing, in which case the type is not checked.
     # - Specify a dictionary mapping programming names to exception names.
     #   These exception names should already be in the right convention.
-    types: dict[str, str] | None = None
+    types: dict[SupportedLanguage, str] | None = None
 
     def __attrs_post_init__(self):
         if self.message is None and self.types is None:
@@ -319,12 +330,12 @@ class ExpectedException(WithFeatures):
     def get_used_features(self) -> FeatureSet:
         return FeatureSet({Construct.EXCEPTIONS}, types=set(), nested_types=set())
 
-    def get_type(self, language: str) -> str | None:
+    def get_type(self, language: SupportedLanguage) -> str | None:
         if not self.types:
             return None
         return self.types.get(language)
 
-    def readable(self, language: str) -> str:
+    def readable(self, language: SupportedLanguage) -> str:
         type_ = self.get_type(language)
         if self.message and type_:
             return f"{type_}: {self.message}"
@@ -404,6 +415,29 @@ ValueOutput = ValueOutputChannel | SpecialOutputChannel
 ExitOutput = ExitCodeOutputChannel | IgnoredChannel | EmptyChannel
 
 
+def _get_text_channel_languages(
+    output: TextOutput | ValueOutput | ExceptionOutput | FileOutput,
+) -> set[SupportedLanguage] | None:
+
+    class _OracleChannel(Protocol):
+        oracle: Any
+
+    def _is_oracle_channel(value: Any) -> TypeGuard[_OracleChannel]:
+        return hasattr(value, "oracle")
+
+    if not _is_oracle_channel(output):
+        return None
+
+    # For language-specific oracles, it is easy.
+    if isinstance(output.oracle, LanguageSpecificOracle):
+        return set(output.oracle.functions.keys())
+
+    if isinstance(output.oracle, CustomCheckOracle):
+        return output.oracle.languages
+
+    return None
+
+
 @define
 class Output(WithFeatures):
     """The output channels for a testcase."""
@@ -432,29 +466,28 @@ class Output(WithFeatures):
 
         :return: None if no language-specific stuff is used, a set of supported languages otherwise.
         """
-        languages = None
-        if isinstance(self.exception, ExceptionOutputChannel):
-            if isinstance(self.exception.oracle, LanguageSpecificOracle):
-                languages = {
-                    SupportedLanguage(x) for x in self.exception.oracle.functions.keys()
-                }
-            elif (
-                self.exception.exception is not None and self.exception.exception.types
-            ):
-                languages = {
-                    SupportedLanguage(x) for x in self.exception.exception.types.keys()
-                }
-        if isinstance(self.result, ValueOutputChannel):
-            if isinstance(self.result.oracle, LanguageSpecificOracle):
-                langs = {
-                    SupportedLanguage(x) for x in self.result.oracle.functions.keys()
-                }
-                if languages is not None:
-                    languages &= langs
-                else:
-                    languages = langs
+        # Check generic oracles.
+        individual_languages = [
+            _get_text_channel_languages(self.stdout),
+            _get_text_channel_languages(self.stderr),
+            _get_text_channel_languages(self.file),
+            _get_text_channel_languages(self.exception),
+            _get_text_channel_languages(self.result),
+        ]
 
-        return languages
+        # Handle special cases
+        if isinstance(self.exception, ExceptionOutputChannel):
+            if self.exception.exception is not None and self.exception.exception.types:
+                individual_languages.append(set(self.exception.exception.types.keys()))
+
+        # Remove all None elements and merge the rest.
+        without_none = [x for x in individual_languages if x is not None]
+
+        # If we do not have anything, bail now.
+        if len(without_none) == 0:
+            return None
+
+        return set().union(*without_none)
 
 
 @define

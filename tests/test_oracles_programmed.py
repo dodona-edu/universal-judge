@@ -130,3 +130,56 @@ def test_custom_check_function_lotto_wrong(
     assert len(updates.find_all("start-testcase")) == 1
     assert updates.find_status_enum() == ["wrong"]
     assert len(updates.find_all("append-message")) == 1
+
+
+def test_custom_check_function_static_analysis_correct(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig,
+        "lotto",
+        "python",
+        tmp_path,
+        "one-programmed-analysis-correct.yaml",
+        "correct",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert len(updates.find_all("start-testcase")) == 1
+    assert updates.find_status_enum() == ["correct"]
+    assert len(updates.find_all("append-message")) == 0
+
+
+def test_custom_check_function_static_analysis_wrong(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig,
+        "lotto",
+        "python",
+        tmp_path,
+        "one-programmed-analysis-wrong.yaml",
+        "correct",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert len(updates.find_all("start-testcase")) == 1
+    assert updates.find_status_enum() == ["wrong"]
+    assert len(updates.find_all("append-message")) == 1
+
+
+def test_custom_check_function_static_analysis_missing_language(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig,
+        "lotto",
+        "python",
+        tmp_path,
+        "one-programmed-analysis-without-language.yaml",
+        "correct",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert len(updates.find_all("start-testcase")) == 1
+    assert updates.find_status_enum() == ["internal error"]

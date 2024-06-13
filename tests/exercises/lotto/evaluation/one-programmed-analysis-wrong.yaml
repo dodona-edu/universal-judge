@@ -1,0 +1,10 @@
+- tab: "Feedback"
+  testcases:
+    - expression: "loterij(18, 172)"
+      return: !oracle
+        oracle: "custom_check"
+        file: "evaluator.py"
+        name: "check_for_for"
+        value: "7 - 37 - 48 - 54 - 70 - 78 - 81 - 90 - 102 - 103 - 113 - 119 - 120 - 137 - 140 - 154 - 157 - 159"
+        arguments: [18, 172]
+        languages: ["python"]
