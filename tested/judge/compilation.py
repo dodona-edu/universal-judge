@@ -15,7 +15,7 @@ from tested.judge.utils import (
     filter_files,
     run_command,
 )
-from tested.languages.config import FileFilter, Language
+from tested.languages.language import FileFilter, Language
 from tested.languages.utils import convert_stacktrace_to_clickable_feedback
 
 _logger = logging.getLogger(__name__)

@@ -68,19 +68,24 @@ def _catch_output() -> Generator[tuple[StringIO, StringIO], None, None]:
         sys.stderr = old_stderr
 
 
-def _evaluate_programmed(
-    bundle: Bundle,
-    oracle: CustomCheckOracle,
-    context: OracleContext,
-) -> BaseExecutionResult | BooleanEvalResult:
+def _execute_custom_check_function(
+    bundle: Bundle, oracle: CustomCheckOracle, context: OracleContext
+):
     """
-    Run the custom evaluation. Concerning structure and execution, the custom
-    oracle is very similar to the execution of the whole evaluation. It a
-    mini-evaluation if you will.
-    """
-    _logger.debug("Doing evaluation in Python mode.")
+    Execute a custom check function, returning the captured stdout and stderr if
+    the execution got to that point.
 
-    # Create a configs bundle for the language of the oracle.
+    This function will throw various errors, depending on where in the process it
+    might fail. For example, invalid syntax will result in SyntaxErrors, but all
+    exceptions raised by the custom oracles also need to be caught.
+
+    :param bundle: The bundle of the original execution.
+    :param oracle: The oracle that is executing.
+    :param context: The context of said oracle.
+
+    :return: A tuple with (result, stdout, stderr), but all can be None.
+    """
+    # Create a config bundle for Python, the programming language of the oracle.
     eval_bundle = create_bundle(bundle.config, bundle.out, bundle.suite, "python")
 
     # Path to the oracle.
@@ -102,62 +107,86 @@ def _evaluate_programmed(
         "__tested_context__": ConvertedOracleContext.from_context(eval_bundle, context),
     }
     exec("import sys\n" "sys.modules['evaluation_utils'] = __tested_test__", global_env)
-    # Make the oracle available.
+
+    # Make the oracle available. This will fail on syntax errors.
     exec(evaluator_code, global_env)
 
-    # Since we pass a class value, we don't want to
+    # Create the function we will call.
     check_function_call = FunctionCall(
         type=FunctionType.FUNCTION,
         name=oracle.function.name,
         arguments=[Identifier("__tested_context__"), *oracle.arguments],
     )
+    # The actual code for calling the function.
     literal_function_call = generate_statement(eval_bundle, check_function_call)
 
+    # Call the function while intercepting all output.
     with _catch_output() as (stdout_, stderr_):
         exec(f"__tested_test__result = {literal_function_call}", global_env)
-
+    result_ = cast(BooleanEvalResult | None, global_env["__tested_test__result"])
     stdout_ = stdout_.getvalue()
     stderr_ = stderr_.getvalue()
 
+    return result_, stdout_, stderr_
+
+
+def _evaluate_programmed(
+    bundle: Bundle,
+    oracle: CustomCheckOracle,
+    context: OracleContext,
+) -> BaseExecutionResult | BooleanEvalResult:
+    """
+    Run the custom evaluation. This will call a function to do the execution, but
+    mainly provides error handling.
+    """
+
+    result_ = None
+    stdout_ = None
+    stderr_ = None
     messages = []
-    if stdout_:
-        messages.append(
-            ExtendedMessage(
-                description=get_i18n_string("judge.programmed.produced.stdout"),
-                format="text",
-            )
+    try:
+        result_, stdout_, stderr_ = _execute_custom_check_function(
+            bundle, oracle, context
         )
-        messages.append(ExtendedMessage(description=stdout_, format="code"))
-    if stderr_:
+    except SyntaxError as e:
+        # The oracle might be rubbish, so handle any exception.
+        _logger.exception(e)
         messages.append(
             ExtendedMessage(
-                description=get_i18n_string("judge.programmed.produced.stderr"),
-                format="text",
-                permission=Permission.STUDENT,
-            )
-        )
-        messages.append(
-            ExtendedMessage(
-                description=stderr_, format="code", permission=Permission.STAFF
-            )
-        )
-
-    result_ = cast(BooleanEvalResult | None, global_env["__tested_test__result"])
-
-    # If the result is None, the oracle is broken.
-    if result_ is None:
-        messages.append(
-            ExtendedMessage(
-                description=get_i18n_string("judge.programmed.student"), format="text"
-            )
-        )
-        messages.append(
-            ExtendedMessage(
-                description=get_i18n_string("judge.programmed.failed"),
+                description="The custom check oracle failed with the following syntax error:",
                 format="text",
                 permission=Permission.STAFF,
             )
         )
+        tb = traceback.format_exc()
+        messages.append(
+            ExtendedMessage(description=tb, format="code", permission=Permission.STAFF)
+        )
+    except Exception as e:
+        _logger.exception(e)
+        messages.append(
+            ExtendedMessage(
+                description="The custom check oracle failed with the following exception:",
+                format="text",
+                permission=Permission.STAFF,
+            )
+        )
+        tb = traceback.format_exc()
+        messages.append(
+            ExtendedMessage(description=tb, format="code", permission=Permission.STAFF)
+        )
+
+    if stdout_:
+        messages.append(get_i18n_string("judge.programmed.produced.stdout"))
+        messages.append(ExtendedMessage(description=stdout_, format="code"))
+    if stderr_:
+        messages.append(get_i18n_string("judge.programmed.produced.stderr"))
+        messages.append(ExtendedMessage(description=stderr_, format="code"))
+
+    # If the result is None, the oracle is broken.
+    if result_ is None:
+        messages.append(get_i18n_string("judge.programmed.student"))
+        messages.append("The custom check oracle did not produce a valid return value.")
         return BooleanEvalResult(
             result=Status.INTERNAL_ERROR,
             readable_expected=None,

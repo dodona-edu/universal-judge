@@ -1,13 +1,13 @@
 import json
 from pathlib import Path
 
+import pytest
 import yaml
 
 from tested.datatypes import (
     AdvancedNothingTypes,
     AdvancedSequenceTypes,
     BasicNumericTypes,
-    BasicSequenceTypes,
 )
 from tested.serialisation import NothingType, NumberType, SequenceType
 from tested.utils import sorted_no_duplicates, sorting_value_extract
@@ -38,8 +38,9 @@ def test_javascript_ast_parse():
     output = run_command(
         demo_file.parent,
         timeout=None,
-        command=["node", parse_file, demo_file.absolute()],
+        command=["node", str(parse_file), str(demo_file.absolute())],
     )
+    assert output
     namings = frozenset(output.stdout.strip().split(", "))
     assert namings == expected
 
@@ -263,7 +264,7 @@ def test_valid_yaml_and_json():
     assert True
 
 
-def test_invalid_utf8_output_is_caught(tmp_path: Path, pytestconfig):
+def test_invalid_utf8_output_is_caught(tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig, "sum", "bash", tmp_path, "short.tson", "non-utf8-output"
     )

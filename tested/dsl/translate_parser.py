@@ -4,12 +4,15 @@ import textwrap
 from collections.abc import Callable
 from decimal import Decimal
 from pathlib import Path
-from typing import Any, Literal, TypeVar, cast
+from typing import Any, Literal, Type, TypeVar, cast
 
 import yaml
 from attrs import define, evolve
+from jsonschema import TypeChecker
 from jsonschema.exceptions import ValidationError
-from jsonschema.validators import Draft201909Validator
+from jsonschema.protocols import Validator
+from jsonschema.validators import extend as extend_validator
+from jsonschema.validators import validator_for
 
 from tested.datatypes import (
     AdvancedNumericTypes,
@@ -74,14 +77,12 @@ class TestedType:
     type: str | AllTypes
 
 
-@define
-class ExpressionString:
-    expression: str
+class ExpressionString(str):
+    pass
 
 
-@define
-class ReturnOracle:
-    value: YamlDict
+class ReturnOracle(dict):
+    pass
 
 
 OptionDict = dict[str, int | bool]
@@ -117,7 +118,7 @@ def _custom_type_constructors(loader: yaml.Loader, node: yaml.Node) -> TestedTyp
 def _expression_string(loader: yaml.Loader, node: yaml.Node) -> ExpressionString:
     result = _parse_yaml_value(loader, node)
     assert isinstance(result, str), f"An expression must be a string, got {result}"
-    return ExpressionString(expression=result)
+    return ExpressionString(result)
 
 
 def _return_oracle(loader: yaml.Loader, node: yaml.Node) -> ReturnOracle:
@@ -125,7 +126,7 @@ def _return_oracle(loader: yaml.Loader, node: yaml.Node) -> ReturnOracle:
     assert isinstance(
         result, dict
     ), f"A custom oracle must be an object, got {result} which is a {type(result)}."
-    return ReturnOracle(value=result)
+    return ReturnOracle(result)
 
 
 def _parse_yaml(yaml_stream: str) -> YamlObject:
@@ -169,18 +170,42 @@ def _parse_yaml(yaml_stream: str) -> YamlObject:
         raise exc
 
 
-def _load_schema_validator():
+def is_oracle(_checker: TypeChecker, instance: Any) -> bool:
+    return isinstance(instance, ReturnOracle)
+
+
+def is_expression(_checker: TypeChecker, instance: Any) -> bool:
+    return isinstance(instance, ExpressionString)
+
+
+def test(value: object) -> bool:
+    if not isinstance(value, str):
+        return False
+    import ast
+
+    ast.parse(value)
+    return True
+
+
+def load_schema_validator(file: str = "schema-strict.json") -> Validator:
     """
     Load the JSON Schema validator used to check DSL test suites.
     """
-    path_to_schema = Path(__file__).parent / "schema.json"
+    path_to_schema = Path(__file__).parent / file
     with open(path_to_schema, "r") as schema_file:
         schema_object = json.load(schema_file)
-    Draft201909Validator.check_schema(schema_object)
-    return Draft201909Validator(schema_object)
+
+    original_validator: Type[Validator] = validator_for(schema_object)
+    type_checker = original_validator.TYPE_CHECKER.redefine(
+        "oracle", is_oracle
+    ).redefine("expression", is_expression)
+    format_checker = original_validator.FORMAT_CHECKER
+    format_checker.checks("tested-dsl-expression", SyntaxError)(test)
+    tested_validator = extend_validator(original_validator, type_checker=type_checker)
+    return tested_validator(schema_object, format_checker=format_checker)
 
 
-_SCHEMA_VALIDATOR = _load_schema_validator()
+_SCHEMA_VALIDATOR = load_schema_validator()
 
 
 class DslValidationError(ValueError):
@@ -227,7 +252,7 @@ def convert_validation_error_to_group(
     if not error.context and not error.cause:
         if len(error.message) > 150:
             message = error.message.replace(str(error.instance), "<DSL>")
-            note = "With <DSL> being: " + str(error.instance)
+            note = "With <DSL> being: " + textwrap.shorten(str(error.instance), 500)
         else:
             message = error.message
             note = None
@@ -382,7 +407,7 @@ def _convert_text_output_channel(stream: YamlObject) -> TextOutputChannel:
 def _convert_yaml_value(stream: YamlObject) -> Value | None:
     if isinstance(stream, ExpressionString):
         # We have an expression string.
-        value = parse_string(stream.expression, is_return=True)
+        value = parse_string(stream, is_return=True)
     elif isinstance(stream, (int, float, bool, TestedType, list, set, str, dict)):
         # Simple values where no confusion is possible.
         value = _convert_value(stream)
@@ -396,7 +421,7 @@ def _convert_yaml_value(stream: YamlObject) -> Value | None:
 
 def _convert_advanced_value_output_channel(stream: YamlObject) -> ValueOutputChannel:
     if isinstance(stream, ReturnOracle):
-        return_object = stream.value
+        return_object = stream
         value = _convert_yaml_value(return_object["value"])
         assert isinstance(value, Value), "You must specify a value for a return oracle."
         if "oracle" not in return_object or return_object["oracle"] == "builtin":

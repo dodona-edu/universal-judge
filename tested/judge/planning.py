@@ -11,8 +11,8 @@ from attrs import define, field
 
 from tested.configs import Bundle
 from tested.dodona import AnnotateCode, Message, Status
-from tested.languages.config import FileFilter
 from tested.languages.conventionalize import execution_name
+from tested.languages.language import FileFilter
 from tested.testsuite import Context, EmptyChannel, MainInput
 
 

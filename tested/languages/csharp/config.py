@@ -6,12 +6,6 @@ from typing import TYPE_CHECKING
 from tested.datatypes import AllTypes
 from tested.dodona import AnnotateCode, Message, Status
 from tested.features import Construct, TypeSupport
-from tested.languages.config import (
-    CallbackResult,
-    Command,
-    Language,
-    TypeDeclarationMetadata,
-)
 from tested.languages.conventionalize import (
     EXECUTION_PREFIX,
     Conventionable,
@@ -19,6 +13,12 @@ from tested.languages.conventionalize import (
     conventionalize_namespace,
     submission_file,
     submission_name,
+)
+from tested.languages.language import (
+    CallbackResult,
+    Command,
+    Language,
+    TypeDeclarationMetadata,
 )
 from tested.serialisation import Statement, Value
 

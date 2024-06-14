@@ -1,6 +1,8 @@
 from io import StringIO
 from pathlib import Path
 
+import pytest
+
 from tested.configs import create_bundle
 from tested.dodona import (
     CloseContext,
@@ -80,7 +82,7 @@ TEST_SUITE = Suite(
 )
 
 
-def test_mid_judgement_is_completed(tmp_path: Path, pytestconfig):
+def test_mid_judgement_is_completed(tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(pytestconfig, "", SupportedLanguage.JAVASCRIPT, tmp_path)
     result = StringIO()
     bundle = create_bundle(conf, result, TEST_SUITE)
@@ -127,7 +129,7 @@ def test_mid_judgement_is_completed(tmp_path: Path, pytestconfig):
     ]
 
 
-def test_mid_context_is_completed(tmp_path: Path, pytestconfig):
+def test_mid_context_is_completed(tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(pytestconfig, "", SupportedLanguage.JAVASCRIPT, tmp_path)
     result = StringIO()
     bundle = create_bundle(conf, result, TEST_SUITE)
@@ -158,7 +160,7 @@ def test_mid_context_is_completed(tmp_path: Path, pytestconfig):
     ]
 
 
-def test_mid_tab_is_completed(tmp_path: Path, pytestconfig):
+def test_mid_tab_is_completed(tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(pytestconfig, "", SupportedLanguage.JAVASCRIPT, tmp_path)
     result = StringIO()
     bundle = create_bundle(conf, result, TEST_SUITE)

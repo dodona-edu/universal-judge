@@ -12,16 +12,16 @@ from tested.datatypes import (
 )
 from tested.dodona import AnnotateCode, Message, Severity
 from tested.features import Construct, TypeSupport
-from tested.languages.config import (
-    CallbackResult,
-    Command,
-    Language,
-    TypeDeclarationMetadata,
-)
 from tested.languages.conventionalize import (
     Conventionable,
     NamingConventions,
     submission_file,
+)
+from tested.languages.language import (
+    CallbackResult,
+    Command,
+    Language,
+    TypeDeclarationMetadata,
 )
 from tested.serialisation import Statement, Value
 
@@ -50,9 +50,6 @@ class Python(Language):
 
     def file_extension(self) -> str:
         return "py"
-
-    def get_string_quote(self) -> str:
-        return "'"
 
     def naming_conventions(self) -> dict[Conventionable, NamingConventions]:
         return {"class": "pascal_case", "global_identifier": "macro_case"}

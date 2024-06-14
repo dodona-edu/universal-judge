@@ -1,0 +1,50 @@
+{
+  "tabs": [
+    {
+      "name": "Feedback",
+      "runs": [
+        {
+          "run": {
+            "description": "Uitvoeren code",
+            "input": {
+              "main_call": true
+            },
+            "output": {
+              "exception": {
+                "evaluator": {
+                  "type": "specific",
+                  "evaluators": {
+                    "python": {
+                      "file": "evaluator.py",
+                      "name": "runtime"
+                    },
+                    "java": {
+                      "file": "Evaluator.java",
+                      "name": "runtime"
+                    },
+                    "kotlin": {
+                      "file": "Evaluator.kt",
+                      "name": "runtime"
+                    },
+                    "haskell": {
+                      "file": "Evaluator.hs",
+                      "name": "runtime"
+                    },
+                    "runhaskell": {
+                      "file": "Evaluator.hs",
+                      "name": "runtime"
+                    },
+                    "csharp": {
+                      "file": "Evaluator.cs",
+                      "name": "runtime"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

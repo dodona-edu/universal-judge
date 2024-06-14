@@ -18,3 +18,7 @@ def evaluate_value_dsl(context):
         dsl_expected="{5, 5}",
         dsl_actual="{4, 4}"
     )
+
+
+def evaluate_runtime_crash(context):
+    return len(context) / 0

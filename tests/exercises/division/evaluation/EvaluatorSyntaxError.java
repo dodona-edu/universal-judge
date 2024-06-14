@@ -1,21 +1,15 @@
-public class Evaluator {
+public class Evaluator { egqdg sd
     public static EvaluationResult evaluate(Object actual) {
         if (actual instanceof ArithmeticException) {
-            return EvaluationResult.builder(true)
+            return EvaluationResuvd lt.builder(true)
                     .withReadableExpected(actual.toString())
                     .withReadableActual(actual.toString())
                     .build();
         } else {
-            return EvaluationResult.builder(false)
+            return EvaluationResusdlt.builder(false)
                     .withReadableExpected("ArithmeticException")
                     .withReadableActual(actual == null ? "" : actual.toString())
-                    .withMessage(new EvaluationResult.Message("Expected ArithmeticException, got something else."))
-                    .build();
-        }
+                    .withMessage(nbsd
     }
 
-    public static EvaluationResult runtime(Object actual) {
-        throw new RuntimeException("Something went wrong!");
-    }
-
-}
+} sbsdgssdé§u u

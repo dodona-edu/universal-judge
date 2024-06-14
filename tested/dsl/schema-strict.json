@@ -461,7 +461,7 @@
           "$ref" : "#/definitions/yamlValue"
         },
         {
-          "type" : "string",
+          "type" : "expression",
           "format" : "tested-dsl-expression",
           "description" : "An expression in Python-syntax."
         }
@@ -541,7 +541,7 @@
           "$ref" : "#/definitions/yamlValueOrPythonExpression"
         },
         {
-          "type" : "object",
+          "type" : "oracle",
           "additionalProperties" : false,
           "required" : [
             "value"
@@ -556,7 +556,7 @@
           }
         },
         {
-          "type" : "object",
+          "type" : "oracle",
           "additionalProperties" : false,
           "required" : [
             "value",
@@ -675,7 +675,10 @@
       ]
     },
     "yamlValue": {
-      "description" : "A value represented as YAML."
+      "description" : "A value represented as YAML.",
+      "not": {
+        "type": ["oracle", "expression"]
+      }
     }
   }
 }

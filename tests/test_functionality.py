@@ -7,57 +7,27 @@ Running the tests should happen in with the root directory (the one with src/ an
 tests/) as the working directory.
 """
 
-import shutil
 import sys
 from pathlib import Path
 
 import pytest
+from pytest_mock import MockerFixture
 
 from tested.configs import create_bundle
-from tested.datatypes import BasicBooleanTypes, BasicNumericTypes, BasicStringTypes
 from tested.judge.execution import ExecutionResult
 from tested.languages import LANGUAGES
-from tested.languages.conventionalize import submission_name
-from tested.languages.generation import generate_statement, get_readable_input
-from tested.serialisation import (
-    BooleanType,
-    FunctionCall,
-    FunctionType,
-    NumberType,
-    StringType,
-)
+from tested.languages.generation import get_readable_input
 from tested.testsuite import Context, MainInput, Suite, Tab, Testcase, TextData
+from tests.language_markers import (
+    ALL_LANGUAGES,
+    ALL_SPECIFIC_LANGUAGES,
+    EXCEPTION_LANGUAGES,
+)
 from tests.manual_utils import assert_valid_output, configuration, execute_config
-
-COMPILE_LANGUAGES = [
-    "python",
-    "java",
-    "c",
-    "kotlin",
-    pytest.param("haskell", marks=pytest.mark.haskell),
-    "csharp",
-]
-ALL_SPECIFIC_LANGUAGES = COMPILE_LANGUAGES + [
-    "javascript",
-    pytest.param("runhaskell", marks=pytest.mark.haskell),
-]
-ALL_LANGUAGES = ALL_SPECIFIC_LANGUAGES + ["bash"]
-
-quotes = {
-    "python": "'",
-    "java": '"',
-    "c": '"',
-    "kotlin": '"',
-    "haskell": '"',
-    "javascript": '"',
-    "runhaskell": '"',
-    "bash": "'",
-    "csharp": '"',
-}
 
 
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
-def test_global_variable(language: str, tmp_path: Path, pytestconfig):
+def test_global_variable(language: str, tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig, "global", language, tmp_path, "one.tson", "correct"
     )
@@ -67,7 +37,9 @@ def test_global_variable(language: str, tmp_path: Path, pytestconfig):
 
 
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
-def test_global_variable_yaml(language: str, tmp_path: Path, pytestconfig):
+def test_global_variable_yaml(
+    language: str, tmp_path: Path, pytestconfig: pytest.Config
+):
     conf = configuration(
         pytestconfig, "global", language, tmp_path, "plan.yaml", "correct"
     )
@@ -76,257 +48,21 @@ def test_global_variable_yaml(language: str, tmp_path: Path, pytestconfig):
     assert updates.find_status_enum() == ["correct"]
 
 
-@pytest.mark.parametrize("language", ALL_LANGUAGES)
-def test_io_exercise(language: str, tmp_path: Path, pytestconfig):
+@pytest.mark.parametrize("lang", EXCEPTION_LANGUAGES)
+def test_generic_exception_wrong(
+    lang: str, tmp_path: Path, pytestconfig: pytest.Config
+):
     conf = configuration(
-        pytestconfig, "echo", language, tmp_path, "one.tson", "correct"
-    )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["correct"]
-
-
-@pytest.mark.parametrize("language", ALL_LANGUAGES)
-def test_io_exercise_wrong(language: str, tmp_path: Path, pytestconfig):
-    conf = configuration(pytestconfig, "echo", language, tmp_path, "one.tson", "wrong")
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["wrong"]
-
-
-@pytest.mark.parametrize("language", ALL_LANGUAGES)
-def test_simple_programmed_eval(language: str, tmp_path: Path, pytestconfig):
-    conf = configuration(
-        pytestconfig,
-        "echo",
-        language,
-        tmp_path,
-        "one-programmed-correct.tson",
-        "correct",
-    )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["correct"]
-
-
-@pytest.mark.parametrize("language", ALL_LANGUAGES)
-def test_simple_programmed_eval_wrong(language: str, tmp_path: Path, pytestconfig):
-    conf = configuration(
-        pytestconfig, "echo", language, tmp_path, "one-programmed-wrong.tson", "correct"
+        pytestconfig, "division", lang, tmp_path, "plan-generic-exception.json", "wrong"
     )
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["wrong"]
 
 
-@pytest.mark.parametrize("language", ALL_LANGUAGES)
-def test_io_function_exercise(language: str, tmp_path: Path, pytestconfig):
-    conf = configuration(
-        pytestconfig, "echo-function", language, tmp_path, "one.tson", "correct"
-    )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["correct"]
-
-
-@pytest.mark.parametrize("language", ALL_LANGUAGES)
-def test_io_function_file_exercise(language: str, tmp_path: Path, pytestconfig):
-    conf = configuration(
-        pytestconfig, "echo-function-file", language, tmp_path, "one.tson", "correct"
-    )
-    shutil.copytree(
-        Path(conf.resources).parent / "workdir", tmp_path, dirs_exist_ok=True
-    )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["correct"]
-
-
-@pytest.mark.parametrize("language", ALL_LANGUAGES)
-def test_io_function_additional_source_files(
-    language: str, tmp_path: Path, pytestconfig
-):
-    conf = configuration(
-        pytestconfig,
-        "echo-function-additional-source-files",
-        language,
-        tmp_path,
-        "one.tson",
-        "correct",
-    )
-    shutil.copytree(
-        Path(conf.resources).parent / "workdir", tmp_path, dirs_exist_ok=True
-    )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["correct"]
-
-
-@pytest.mark.parametrize("exercise", ["echo-function-file", "echo-function"])
-def test_javascript_async(exercise: str, tmp_path: Path, pytestconfig):
-    conf = configuration(
-        pytestconfig, exercise, "javascript", tmp_path, "one.tson", "correct-async"
-    )
-    workdir = Path(conf.resources).parent / "workdir"
-    if workdir.exists():
-        shutil.copytree(workdir, tmp_path, dirs_exist_ok=True)
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["correct"]
-
-
-@pytest.mark.parametrize("language", ALL_LANGUAGES)
-def test_io_function_escape_exercise(language: str, tmp_path: Path, pytestconfig):
-    conf = configuration(
-        pytestconfig, "echo-function", language, tmp_path, "one-escape.tson", "correct"
-    )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["correct"]
-
-
-@pytest.mark.parametrize("language", ALL_LANGUAGES)
-def test_io_function_display_multiline_exercise(
-    language: str, tmp_path: Path, pytestconfig
-):
-    conf = configuration(
-        pytestconfig,
-        "echo-function",
-        language,
-        tmp_path,
-        "one-display-multiline.tson",
-        "correct",
-    )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["correct"]
-    start_test = updates.find_all("start-test")
-    close_test = updates.find_all("close-test")
-    assert 1 == len(start_test)
-    assert 1 == len(close_test)
-    assert "return" == start_test[0].get("channel", "")
-    expected, actual = start_test[0].get("expected", ""), close_test[0].get(
-        "generated", ""
-    )
-    quote = quotes[language]
-    assert expected[0] != quote and expected[-1] != quote
-    assert actual[0] != quote and actual[-1] != quote
-
-
-@pytest.mark.parametrize("language", ALL_LANGUAGES)
-def test_io_function_display_no_multiline_exercise(
-    language: str, tmp_path: Path, pytestconfig
-):
-    conf = configuration(
-        pytestconfig,
-        "echo-function",
-        language,
-        tmp_path,
-        "one-display-no-multiline.tson",
-        "correct",
-    )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["correct"]
-    start_test = updates.find_all("start-test")
-    close_test = updates.find_all("close-test")
-    assert 1 == len(start_test)
-    assert 1 == len(close_test)
-    assert "return" == start_test[0].get("channel", "")
-    expected, actual = start_test[0].get("expected", ""), close_test[0].get(
-        "generated", ""
-    )
-    quote = quotes[language]
-    assert expected[0] == quote and expected[-1] == quote
-    assert actual[0] == quote and actual[-1] == quote
-
-
-@pytest.mark.parametrize("language", ALL_LANGUAGES)
-def test_io_function_nested_call_exercise(language: str, tmp_path: Path, pytestconfig):
-    conf = configuration(
-        pytestconfig, "echo-function", language, tmp_path, "one-nested.yaml", "correct"
-    )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["correct"]
-
-
-@pytest.mark.haskell
-@pytest.mark.parametrize("language", ("haskell", "runhaskell"))
-def test_io_function_exercise_haskell_io(language: str, tmp_path: Path, pytestconfig):
-    conf = configuration(
-        pytestconfig, "echo-function", language, tmp_path, "one.tson", "correct_io"
-    )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["correct"]
-
-
-@pytest.mark.parametrize("language", ALL_SPECIFIC_LANGUAGES)
-def test_specific_evaluation(language: str, tmp_path: Path, pytestconfig):
-    conf = configuration(
-        pytestconfig,
-        "echo-function",
-        language,
-        tmp_path,
-        "two-specific.tson",
-        "correct",
-    )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["wrong", "correct"]
-    assert len(updates.find_all("append-message")) == 2
-
-
-@pytest.mark.parametrize("language", ALL_LANGUAGES)
-def test_programmed_evaluation(language: str, tmp_path: Path, pytestconfig):
-    conf = configuration(
-        pytestconfig,
-        "echo-function",
-        language,
-        tmp_path,
-        "programmed.tson",
-        "correct",
-    )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["correct"]
-    assert len(updates.find_all("append-message"))
-
-
-@pytest.mark.parametrize(
-    "lang",
-    [
-        "python",
-        "java",
-        "kotlin",
-        "csharp",
-        pytest.param("haskell", marks=pytest.mark.haskell),
-        pytest.param("runhaskell", marks=pytest.mark.haskell),
-    ],
-)
-def test_language_evaluator_exception_correct(lang: str, tmp_path: Path, pytestconfig):
-    conf = configuration(
-        pytestconfig, "division", lang, tmp_path, "plan.json", "correct"
-    )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["correct"]
-
-
-@pytest.mark.parametrize(
-    "lang",
-    [
-        "python",
-        "java",
-        "kotlin",
-        "csharp",
-        pytest.param("haskell", marks=pytest.mark.haskell),
-        pytest.param("runhaskell", marks=pytest.mark.haskell),
-    ],
-)
-def test_language_evaluator_generic_exception_correct(
-    lang: str, tmp_path: Path, pytestconfig
+@pytest.mark.parametrize("lang", EXCEPTION_LANGUAGES)
+def test_generic_exception_correct(
+    lang: str, tmp_path: Path, pytestconfig: pytest.Config
 ):
     conf = configuration(
         pytestconfig,
@@ -341,38 +77,9 @@ def test_language_evaluator_generic_exception_correct(
     assert updates.find_status_enum() == ["correct"]
 
 
-@pytest.mark.parametrize(
-    "lang",
-    [
-        "python",
-        "java",
-        "kotlin",
-        "csharp",
-        pytest.param("haskell", marks=pytest.mark.haskell),
-        pytest.param("runhaskell", marks=pytest.mark.haskell),
-    ],
-)
-def test_language_evaluator_exception_wrong(lang: str, tmp_path: Path, pytestconfig):
-    conf = configuration(pytestconfig, "division", lang, tmp_path, "plan.json", "wrong")
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["wrong"]
-    assert len(updates.find_all("append-message")) == 1
-
-
-@pytest.mark.parametrize(
-    "lang",
-    [
-        "python",
-        "java",
-        "kotlin",
-        "csharp",
-        pytest.param("haskell", marks=pytest.mark.haskell),
-        pytest.param("runhaskell", marks=pytest.mark.haskell),
-    ],
-)
-def test_language_evaluator_generic_exception_wrong_error(
-    lang: str, tmp_path: Path, pytestconfig
+@pytest.mark.parametrize("lang", EXCEPTION_LANGUAGES)
+def test_generic_exception_wrong_error(
+    lang: str, tmp_path: Path, pytestconfig: pytest.Config
 ):
     conf = configuration(
         pytestconfig,
@@ -387,52 +94,10 @@ def test_language_evaluator_generic_exception_wrong_error(
     assert updates.find_status_enum() == ["wrong"]
 
 
-@pytest.mark.parametrize(
-    "lang",
-    [
-        "python",
-        "java",
-        "kotlin",
-        "csharp",
-        pytest.param("haskell", marks=pytest.mark.haskell),
-        pytest.param("runhaskell", marks=pytest.mark.haskell),
-    ],
-)
-def test_language_evaluator_exception_wrong_error(
-    lang: str, tmp_path: Path, pytestconfig
-):
-    conf = configuration(
-        pytestconfig, "division", lang, tmp_path, "plan.json", "wrong-error"
-    )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["wrong"]
-
-
-@pytest.mark.parametrize(
-    "lang",
-    [
-        "python",
-        "java",
-        "kotlin",
-        "csharp",
-        pytest.param("haskell", marks=pytest.mark.haskell),
-        pytest.param("runhaskell", marks=pytest.mark.haskell),
-    ],
-)
-def test_language_evaluator_generic_exception_wrong(
-    lang: str, tmp_path: Path, pytestconfig
-):
-    conf = configuration(
-        pytestconfig, "division", lang, tmp_path, "plan-generic-exception.json", "wrong"
-    )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["wrong"]
-
-
 @pytest.mark.parametrize("lang", ["python", "java", "kotlin", "csharp"])
-def test_assignment_and_use_in_expression(lang: str, tmp_path: Path, pytestconfig):
+def test_assignment_and_use_in_expression(
+    lang: str, tmp_path: Path, pytestconfig: pytest.Config
+):
     conf = configuration(
         pytestconfig, "isbn", lang, tmp_path, "one-with-assignment.tson", "solution"
     )
@@ -457,7 +122,9 @@ def test_assignment_and_use_in_expression(lang: str, tmp_path: Path, pytestconfi
         pytest.param("runhaskell", marks=pytest.mark.haskell),
     ],
 )
-def test_assignment_and_use_in_expression_list(lang: str, tmp_path: Path, pytestconfig):
+def test_assignment_and_use_in_expression_list(
+    lang: str, tmp_path: Path, pytestconfig: pytest.Config
+):
     conf = configuration(
         pytestconfig,
         "isbn-list",
@@ -477,7 +144,9 @@ def test_assignment_and_use_in_expression_list(lang: str, tmp_path: Path, pytest
 
 
 @pytest.mark.parametrize("lang", ["python", "java", "kotlin", "csharp"])
-def test_crashing_assignment_with_before(lang: str, tmp_path: Path, pytestconfig):
+def test_crashing_assignment_with_before(
+    lang: str, tmp_path: Path, pytestconfig: pytest.Config
+):
     conf = configuration(
         pytestconfig,
         "isbn",
@@ -504,7 +173,9 @@ def test_crashing_assignment_with_before(lang: str, tmp_path: Path, pytestconfig
         pytest.param("runhaskell", marks=pytest.mark.haskell),
     ],
 )
-def test_heterogeneous_arguments_are_detected(lang: str, tmp_path: Path, pytestconfig):
+def test_heterogeneous_arguments_are_detected(
+    lang: str, tmp_path: Path, pytestconfig: pytest.Config
+):
     conf = configuration(pytestconfig, "isbn", lang, tmp_path, "full.tson", "solution")
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
@@ -512,7 +183,7 @@ def test_heterogeneous_arguments_are_detected(lang: str, tmp_path: Path, pytestc
     assert updates.find_status_enum() == ["internal error"]
 
 
-def test_missing_key_types_detected(tmp_path: Path, pytestconfig):
+def test_missing_key_types_detected(tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig, "objects", "python", tmp_path, "missing_key_types.yaml", "correct"
     )
@@ -522,7 +193,9 @@ def test_missing_key_types_detected(tmp_path: Path, pytestconfig):
     assert updates.find_status_enum() == ["internal error"]
 
 
-def test_missing_key_types_detected_js_object(tmp_path: Path, pytestconfig):
+def test_missing_key_types_detected_js_object(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
     conf = configuration(
         pytestconfig,
         "objects",
@@ -541,7 +214,7 @@ def test_missing_key_types_detected_js_object(tmp_path: Path, pytestconfig):
     "suite", ["missing_key_types_js_dictionary", "missing_key_types"]
 )
 def test_missing_key_types_detected_js_dictionary(
-    suite: str, tmp_path: Path, pytestconfig
+    suite: str, tmp_path: Path, pytestconfig: pytest.Config
 ):
     conf = configuration(
         pytestconfig, "objects", "javascript", tmp_path, f"{suite}.yaml", "correct"
@@ -553,7 +226,9 @@ def test_missing_key_types_detected_js_dictionary(
 
 
 @pytest.mark.parametrize("lang", ["java"])
-def test_advanced_types_are_allowed(lang: str, tmp_path: Path, pytestconfig):
+def test_advanced_types_are_allowed(
+    lang: str, tmp_path: Path, pytestconfig: pytest.Config
+):
     conf = configuration(
         pytestconfig,
         "objects",
@@ -568,31 +243,10 @@ def test_advanced_types_are_allowed(lang: str, tmp_path: Path, pytestconfig):
     assert updates.find_status_enum() == ["correct"]
 
 
-@pytest.mark.parametrize("lang", ["python", "java", "kotlin", "javascript", "csharp"])
-def test_programmed_evaluator_lotto(lang: str, tmp_path: Path, pytestconfig):
-    conf = configuration(
-        pytestconfig, "lotto", lang, tmp_path, "one-programmed-python.tson", "correct"
-    )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    assert len(updates.find_all("start-testcase")) == 1
-    assert updates.find_status_enum() == ["correct"]
-
-
-@pytest.mark.parametrize("lang", ["python", "java", "kotlin", "javascript", "csharp"])
-def test_programmed_evaluator_wrong(lang: str, tmp_path: Path, pytestconfig):
-    conf = configuration(
-        pytestconfig, "lotto", lang, tmp_path, "one-programmed-python.tson", "wrong"
-    )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    assert len(updates.find_all("start-testcase")) == 1
-    assert updates.find_status_enum() == ["wrong"]
-    assert len(updates.find_all("append-message")) == 1
-
-
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
-def test_batch_compilation(language: str, tmp_path: Path, pytestconfig, mocker):
+def test_batch_compilation(
+    language: str, tmp_path: Path, pytestconfig: pytest.Config, mocker: MockerFixture
+):
     config_ = {"options": {"mode": "batch"}}
     lang_class = LANGUAGES[language]
     spy = mocker.spy(lang_class, "compilation")
@@ -608,7 +262,7 @@ def test_batch_compilation(language: str, tmp_path: Path, pytestconfig, mocker):
 
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
 def test_batch_compilation_fallback(
-    language: str, tmp_path: Path, pytestconfig, mocker
+    language: str, tmp_path: Path, pytestconfig: pytest.Config, mocker: MockerFixture
 ):
     config_ = {"options": {"allow_fallback": True}}
     lang_class = LANGUAGES[language]
@@ -625,7 +279,7 @@ def test_batch_compilation_fallback(
 
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
 def test_batch_compilation_no_fallback(
-    language: str, tmp_path: Path, pytestconfig, mocker
+    language: str, tmp_path: Path, pytestconfig: pytest.Config, mocker: MockerFixture
 ):
     config_ = {"options": {"allow_fallback": False}}
     lang_class = LANGUAGES[language]
@@ -642,7 +296,7 @@ def test_batch_compilation_no_fallback(
 
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
 def test_batch_compilation_no_fallback_runtime(
-    language: str, tmp_path: Path, pytestconfig
+    language: str, tmp_path: Path, pytestconfig: pytest.Config
 ):
     config_ = {"options": {"allow_fallback": False}}
     conf = configuration(
@@ -660,7 +314,7 @@ def test_batch_compilation_no_fallback_runtime(
 @pytest.mark.parametrize(
     "lang", ["python", "java", "c", "javascript", "kotlin", "bash", "csharp"]
 )
-def test_program_params(lang: str, tmp_path: Path, pytestconfig):
+def test_program_params(lang: str, tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(pytestconfig, "sum", lang, tmp_path, "short.tson", "correct")
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
@@ -672,7 +326,7 @@ def test_program_params(lang: str, tmp_path: Path, pytestconfig):
 @pytest.mark.parametrize(
     "language", ["python", "java", "kotlin", "javascript", "csharp"]
 )
-def test_objects(language: str, tmp_path: Path, pytestconfig):
+def test_objects(language: str, tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig, "objects", language, tmp_path, "plan.tson", "correct"
     )
@@ -685,7 +339,7 @@ def test_objects(language: str, tmp_path: Path, pytestconfig):
 @pytest.mark.parametrize(
     "language", ["python", "java", "kotlin", "javascript", "csharp"]
 )
-def test_objects_chained(language: str, tmp_path: Path, pytestconfig):
+def test_objects_chained(language: str, tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig, "objects", language, tmp_path, "chained.tson", "correct"
     )
@@ -698,7 +352,9 @@ def test_objects_chained(language: str, tmp_path: Path, pytestconfig):
 @pytest.mark.parametrize(
     "language", ["python", "java", "kotlin", "javascript", "csharp"]
 )
-def test_property_assignment(language: str, tmp_path: Path, pytestconfig):
+def test_property_assignment(
+    language: str, tmp_path: Path, pytestconfig: pytest.Config
+):
     conf = configuration(
         pytestconfig,
         "objects",
@@ -716,7 +372,7 @@ def test_property_assignment(language: str, tmp_path: Path, pytestconfig):
 @pytest.mark.parametrize(
     "language", ["python", "java", "kotlin", "javascript", "csharp"]
 )
-def test_counter(language: str, tmp_path: Path, pytestconfig):
+def test_counter(language: str, tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig, "counter", language, tmp_path, "plan.yaml", "solution"
     )
@@ -729,7 +385,7 @@ def test_counter(language: str, tmp_path: Path, pytestconfig):
 @pytest.mark.parametrize(
     "language", ["python", "java", "kotlin", "javascript", "csharp"]
 )
-def test_counter_chained(language: str, tmp_path: Path, pytestconfig):
+def test_counter_chained(language: str, tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig, "counter", language, tmp_path, "chained.yaml", "solution"
     )
@@ -742,7 +398,7 @@ def test_counter_chained(language: str, tmp_path: Path, pytestconfig):
 @pytest.mark.parametrize(
     "language", ["python", "java", "kotlin", "javascript", "csharp"]
 )
-def test_objects_yaml(language: str, tmp_path: Path, pytestconfig):
+def test_objects_yaml(language: str, tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig, "objects", language, tmp_path, "plan.yaml", "correct"
     )
@@ -760,7 +416,7 @@ def test_objects_yaml(language: str, tmp_path: Path, pytestconfig):
         pytest.param("runhaskell", marks=pytest.mark.haskell),
     ],
 )
-def test_objects_error(language: str, tmp_path: Path, pytestconfig):
+def test_objects_error(language: str, tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig, "objects", language, tmp_path, "plan.tson", "correct"
     )
@@ -781,87 +437,15 @@ def test_objects_error(language: str, tmp_path: Path, pytestconfig):
         ("runhaskell", ["internal error"]),
     ],
 )
-def test_named_parameters(language: str, result: list, tmp_path: Path, pytestconfig):
+def test_named_parameters(
+    language: str, result: list, tmp_path: Path, pytestconfig: pytest.Config
+):
     conf = configuration(
         pytestconfig, "echo-function", language, tmp_path, "one-named.tson", "correct"
     )
     all_results = execute_config(conf)
     updates = assert_valid_output(all_results, pytestconfig)
     assert updates.find_status_enum() == result
-
-
-def test_javascript_exception_correct(tmp_path: Path, pytestconfig):
-    conf = configuration(
-        pytestconfig,
-        "js-exceptions",
-        "javascript",
-        tmp_path,
-        "plan.yaml",
-        "correct",
-    )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["correct"]
-    assert len(updates.find_all("append-message")) == 0
-
-
-def test_javascript_exception_correct_temp(tmp_path: Path, pytestconfig):
-    conf = configuration(
-        pytestconfig,
-        "js-exceptions",
-        "javascript",
-        tmp_path,
-        "plan.yaml",
-        "correct-temp",
-    )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["correct"]
-    assert len(updates.find_all("append-message")) == 0
-
-
-def test_javascript_exception_wrong(tmp_path: Path, pytestconfig):
-    conf = configuration(
-        pytestconfig,
-        "js-exceptions",
-        "javascript",
-        tmp_path,
-        "plan.yaml",
-        "wrong",
-    )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["wrong"]
-    assert len(updates.find_all("append-message")) == 1
-
-
-def test_javascript_exception_wrong_null(tmp_path: Path, pytestconfig):
-    conf = configuration(
-        pytestconfig,
-        "js-exceptions",
-        "javascript",
-        tmp_path,
-        "plan.yaml",
-        "wrong-null",
-    )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["wrong"]
-    assert len(updates.find_all("append-message")) == 0
-
-
-def test_javascript_exception_missing_message(tmp_path: Path, pytestconfig):
-    conf = configuration(
-        pytestconfig,
-        "js-exceptions",
-        "javascript",
-        tmp_path,
-        "plan.yaml",
-        "wrong-message",
-    )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["wrong"]
 
 
 def test_timeouts_propagate_to_contexts():
@@ -888,28 +472,6 @@ def test_timeouts_propagate_to_contexts():
     assert context_result.exceptions == execution_result.testcase_separator
 
 
-def test_function_arguments_without_brackets(tmp_path: Path, pytestconfig):
-    conf = configuration(pytestconfig, "", "haskell", tmp_path)
-    plan = Suite()
-    bundle = create_bundle(conf, sys.stdout, plan)
-
-    statement = FunctionCall(
-        type=FunctionType.FUNCTION,
-        name="test",
-        namespace=None,
-        arguments=[
-            NumberType(type=BasicNumericTypes.REAL, data=5.5),
-            StringType(type=BasicStringTypes.TEXT, data="hallo"),
-            BooleanType(type=BasicBooleanTypes.BOOLEAN, data=True),
-        ],
-    )
-
-    result = generate_statement(bundle, statement)
-    assert (
-        result == f'{submission_name(bundle.language)}.test 5.5 :: Double "hallo" True'
-    )
-
-
 @pytest.mark.parametrize(
     "language_and_expected",
     [
@@ -920,7 +482,9 @@ def test_function_arguments_without_brackets(tmp_path: Path, pytestconfig):
         ("python", "(<class 'submission.Coord'>) Coord(x=5, y=6)"),
     ],
 )
-def test_unknown_return_type(tmp_path: Path, pytestconfig, language_and_expected):
+def test_unknown_return_type(
+    tmp_path: Path, pytestconfig: pytest.Config, language_and_expected: tuple[str, str]
+):
     language, expected = language_and_expected
     conf = configuration(
         pytestconfig,
@@ -938,7 +502,9 @@ def test_unknown_return_type(tmp_path: Path, pytestconfig, language_and_expected
 
 
 @pytest.mark.parametrize("language", ALL_SPECIFIC_LANGUAGES)
-def test_expected_no_return_but_got_some(language: str, tmp_path: Path, pytestconfig):
+def test_expected_no_return_but_got_some(
+    language: str, tmp_path: Path, pytestconfig: pytest.Config
+):
     conf = configuration(
         pytestconfig,
         "echo-function",
@@ -954,7 +520,9 @@ def test_expected_no_return_but_got_some(language: str, tmp_path: Path, pytestco
 
 
 @pytest.mark.parametrize("language", ALL_SPECIFIC_LANGUAGES)
-def test_expected_no_return_and_got_none(language: str, tmp_path: Path, pytestconfig):
+def test_expected_no_return_and_got_none(
+    language: str, tmp_path: Path, pytestconfig: pytest.Config
+):
     conf = configuration(
         pytestconfig,
         "echo-function",
@@ -970,7 +538,9 @@ def test_expected_no_return_and_got_none(language: str, tmp_path: Path, pytestco
 
 
 @pytest.mark.parametrize("language", ALL_SPECIFIC_LANGUAGES)
-def test_expected_return_but_got_none(language: str, tmp_path: Path, pytestconfig):
+def test_expected_return_but_got_none(
+    language: str, tmp_path: Path, pytestconfig: pytest.Config
+):
     conf = configuration(
         pytestconfig,
         "echo-function",
@@ -986,7 +556,9 @@ def test_expected_return_but_got_none(language: str, tmp_path: Path, pytestconfi
 
 
 @pytest.mark.parametrize("language", ALL_SPECIFIC_LANGUAGES)
-def test_expected_return_and_got_some(language: str, tmp_path: Path, pytestconfig):
+def test_expected_return_and_got_some(
+    language: str, tmp_path: Path, pytestconfig: pytest.Config
+):
     conf = configuration(
         pytestconfig,
         "echo-function",
@@ -1002,7 +574,9 @@ def test_expected_return_and_got_some(language: str, tmp_path: Path, pytestconfi
 
 
 @pytest.mark.parametrize("language", ALL_SPECIFIC_LANGUAGES)
-def test_ignored_return_and_got_some(language: str, tmp_path: Path, pytestconfig):
+def test_ignored_return_and_got_some(
+    language: str, tmp_path: Path, pytestconfig: pytest.Config
+):
     conf = configuration(
         pytestconfig,
         "echo-function",
@@ -1018,7 +592,9 @@ def test_ignored_return_and_got_some(language: str, tmp_path: Path, pytestconfig
 
 
 @pytest.mark.parametrize("language", ALL_SPECIFIC_LANGUAGES)
-def test_language_literals_work(language: str, tmp_path: Path, pytestconfig):
+def test_language_literals_work(
+    language: str, tmp_path: Path, pytestconfig: pytest.Config
+):
     conf = configuration(
         pytestconfig,
         "echo-function",
@@ -1033,25 +609,10 @@ def test_language_literals_work(language: str, tmp_path: Path, pytestconfig):
     assert updates.find_status_enum() == ["correct"]
 
 
-def test_python_input_prompt_is_ignored(tmp_path: Path, pytestconfig):
-    conf = configuration(
-        pytestconfig,
-        "echo",
-        "python",
-        tmp_path,
-        "one.tson",
-        "input-prompt",
-    )
-
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["correct"]
-
-
 # Check that the test suite is valid with a correct submission.
 # This test suite is used for the test below "test_output_in_script_is_caught".
 @pytest.mark.parametrize("language", ["python", "javascript", "bash"])
-def test_two_suite_is_valid(language: str, tmp_path: Path, pytestconfig):
+def test_two_suite_is_valid(language: str, tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig,
         "echo-function",
@@ -1066,7 +627,9 @@ def test_two_suite_is_valid(language: str, tmp_path: Path, pytestconfig):
 
 
 @pytest.mark.parametrize("language", ["python", "javascript", "bash"])
-def test_output_in_script_is_caught(language: str, tmp_path: Path, pytestconfig):
+def test_output_in_script_is_caught(
+    language: str, tmp_path: Path, pytestconfig: pytest.Config
+):
     conf = configuration(
         pytestconfig,
         "echo-function",
@@ -1081,7 +644,7 @@ def test_output_in_script_is_caught(language: str, tmp_path: Path, pytestconfig)
     assert updates.find_status_enum() == ["wrong", "correct", "correct"]
 
 
-def test_main_call_quotes(tmp_path: Path, pytestconfig):
+def test_main_call_quotes(tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig,
         "echo-function",
@@ -1102,7 +665,7 @@ def test_main_call_quotes(tmp_path: Path, pytestconfig):
     )
 
 
-def test_stdin_and_arguments_use_heredoc(tmp_path: Path, pytestconfig):
+def test_stdin_and_arguments_use_heredoc(tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig,
         "echo-function",
@@ -1126,7 +689,7 @@ def test_stdin_and_arguments_use_heredoc(tmp_path: Path, pytestconfig):
     )
 
 
-def test_stdin_token_is_unique(tmp_path: Path, pytestconfig):
+def test_stdin_token_is_unique(tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig,
         "echo-function",
@@ -1145,17 +708,3 @@ def test_stdin_token_is_unique(tmp_path: Path, pytestconfig):
     assert (
         actual.description == "$ submission hello << 'STDINN'\nOne line\nSTDIN\nSTDINN"
     )
-
-
-def test_javascript_vanilla_object(tmp_path: Path, pytestconfig):
-    conf = configuration(
-        pytestconfig,
-        "echo-function",
-        "javascript",
-        tmp_path,
-        "javascript-object.yaml",
-        "javascript-object",
-    )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["correct"]

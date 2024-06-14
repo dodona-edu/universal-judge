@@ -5,16 +5,16 @@ from typing import TYPE_CHECKING
 from tested.datatypes import AllTypes
 from tested.dodona import AnnotateCode, Message
 from tested.features import Construct, TypeSupport
-from tested.languages.config import (
-    CallbackResult,
-    Command,
-    Language,
-    TypeDeclarationMetadata,
-)
 from tested.languages.conventionalize import (
     Conventionable,
     NamingConventions,
     submission_file,
+)
+from tested.languages.language import (
+    CallbackResult,
+    Command,
+    Language,
+    TypeDeclarationMetadata,
 )
 from tested.languages.utils import (
     cleanup_description,

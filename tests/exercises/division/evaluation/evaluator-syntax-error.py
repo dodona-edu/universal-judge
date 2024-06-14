@@ -1,4 +1,4 @@
-import traceback
+ jdhbkd mbzough import traceback
 
 from evaluation_utils import EvaluationResult, Message
 
@@ -16,7 +16,3 @@ def evaluate(value):
         # Else show the str of the value.
         actual = str(value) if value else ""
         return EvaluationResult(False, "ZeroDivisionError", actual, [Message("Verwachtte een ZeroDivisionError.")])
-
-
-def runtime(_value):
-    raise ValueError("Hallo")

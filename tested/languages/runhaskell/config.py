@@ -1,8 +1,8 @@
 from pathlib import Path
 
-from tested.languages.config import CallbackResult, Command
 from tested.languages.conventionalize import submission_file
 from tested.languages.haskell.config import Haskell
+from tested.languages.language import CallbackResult, Command
 
 
 class RunHaskell(Haskell):

@@ -1,7 +1,9 @@
+# type: ignore[reportAttributeAccessIssue]
 import json
 from pathlib import Path
 
 import pytest
+from jsonschema.validators import validator_for
 
 from tested.datatypes import (
     AdvancedNumericTypes,
@@ -18,6 +20,7 @@ from tested.datatypes import (
     StringTypes,
 )
 from tested.dsl import parse_dsl, translate_to_test_suite
+from tested.dsl.translate_parser import load_schema_validator
 from tested.serialisation import (
     FunctionCall,
     NumberType,
@@ -1100,3 +1103,20 @@ def test_empty_text_data_newlines():
     suite = parse_test_suite(json_str)
     actual_stderr = suite.tabs[0].contexts[0].testcases[0].output.stderr.data
     assert actual_stderr == ""
+
+
+def test_strict_json_schema_is_valid():
+    path_to_schema = Path(__file__).parent / "tested-draft7.json"
+    with open(path_to_schema, "r") as schema_file:
+        schema_object = json.load(schema_file)
+
+    validator = load_schema_validator()
+    meta_validator = validator_for(schema_object)(schema_object)
+
+    meta_validator.validate(validator.schema)
+
+
+def test_editor_json_schema_is_valid():
+    validator = load_schema_validator("schema.json")
+    assert isinstance(validator.schema, dict)
+    validator.check_schema(validator.schema)

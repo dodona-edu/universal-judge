@@ -1,0 +1,44 @@
+{
+  "tabs": [
+    {
+      "name": "Feedback",
+      "runs": [
+        {
+          "run": {
+            "description": "Uitvoeren code",
+            "input": {
+              "main_call": true
+            },
+            "output": {
+              "exception": {
+                "evaluator": {
+                  "type": "specific",
+                  "evaluators": {
+                    "python": {
+                      "file": "evaluator-syntax-error.py"
+                    },
+                    "java": {
+                      "file": "EvaluatorSyntaxError.java"
+                    },
+                    "kotlin": {
+                      "file": "EvaluatorSyntaxError.kt"
+                    },
+                    "haskell": {
+                      "file": "EvaluatorSyntaxError.hs"
+                    },
+                    "runhaskell": {
+                      "file": "EvaluatorSyntaxError.hs"
+                    },
+                    "csharp": {
+                      "file": "EvaluatorSyntaxError.cs"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

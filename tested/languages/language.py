@@ -6,11 +6,11 @@ Everything that depends on the programming language passes through this class.
 """
 
 import logging
-import typing
 from abc import ABC, abstractmethod
+from collections import defaultdict
 from collections.abc import Callable
 from pathlib import Path
-from typing import NotRequired, Optional, TypedDict
+from typing import TYPE_CHECKING, NotRequired, Optional, TypedDict
 
 from tested.datatypes import AllTypes, ExpressionTypes
 from tested.dodona import AnnotateCode, Message, Status
@@ -23,8 +23,9 @@ from tested.languages.conventionalize import (
     submission_name,
 )
 from tested.serialisation import Statement, Value
+from tested.testsuite import SupportedLanguage
 
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
     from tested.configs import GlobalConfig
     from tested.languages.generation import PreparedExecutionUnit
 
@@ -33,6 +34,11 @@ FileFilter = Callable[[Path], bool]
 CallbackResult = tuple[Command, list[str] | FileFilter]
 
 _logger = logging.getLogger(__name__)
+
+
+STRING_QUOTES: dict[SupportedLanguage, str] = defaultdict(
+    lambda: '"', {SupportedLanguage.PYTHON: "'", SupportedLanguage.BASH: "'"}
+)
 
 
 class TypeDeclarationMetadata(TypedDict):
@@ -161,9 +167,10 @@ class Language(ABC):
 
     def get_string_quote(self) -> str:
         """
-        :return: The symbol used to quote strings.
+        :return: The quote symbol used to quote strings.
         """
-        return '"'
+        assert self.config
+        return STRING_QUOTES[self.config.dodona.programming_language]
 
     @abstractmethod
     def naming_conventions(self) -> dict[Conventionable, NamingConventions]:

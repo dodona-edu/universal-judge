@@ -13,7 +13,7 @@ from tested.languages.preparation import PreparedTestcaseStatement
 from tested.serialisation import FunctionCall, StringType
 
 if TYPE_CHECKING:
-    from tested.languages.config import Language
+    from tested.languages.language import Language
 
 _logger = logging.getLogger(__name__)
 code_regex = re.compile(r"<code>:(\d+)")

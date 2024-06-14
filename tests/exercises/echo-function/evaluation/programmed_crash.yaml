@@ -1,0 +1,9 @@
+- tab: "My tab"
+  contexts:
+    - testcases:
+        - expression: 'echo("input-1")'
+          return: !oracle
+            oracle: "custom_check"
+            file: "evaluator.py"
+            name: "evaluate_runtime_crash"
+            value: "input-2"

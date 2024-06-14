@@ -1,17 +1,17 @@
 """
-Tests where full exercises are run. These are inherently slower.
+Test full exercises with the parallel option.
 """
 
 from pathlib import Path
 
 import pytest
 
+from tests.language_markers import ALL_LANGUAGES
 from tests.manual_utils import assert_valid_output, configuration, execute_config
 
 
-@pytest.mark.slow
 @pytest.mark.parametrize("lang", ["python", "java", "kotlin"])
-def test_full_isbn(lang: str, tmp_path: Path, pytestconfig):
+def test_parallel_isbn(lang: str, tmp_path: Path, pytestconfig: pytest.Config):
     config_ = {"options": {"parallel": True}}
     conf = configuration(
         pytestconfig, "isbn", lang, tmp_path, "full.tson", "solution", options=config_
@@ -22,18 +22,17 @@ def test_full_isbn(lang: str, tmp_path: Path, pytestconfig):
     assert updates.find_status_enum() == ["correct"] * 100
 
 
-@pytest.mark.slow
 @pytest.mark.parametrize(
     "lang",
     [
         "java",
         "python",
         "kotlin",
-        pytest.param("haskell", marks=pytest.mark.haskell),
-        pytest.param("runhaskell", marks=pytest.mark.haskell),
+        "haskell",
+        "runhaskell",
     ],
 )
-def test_full_isbn_list(lang: str, tmp_path: Path, pytestconfig):
+def test_parallel_isbn_list(lang: str, tmp_path: Path, pytestconfig: pytest.Config):
     config_ = {"options": {"parallel": True}}
     conf = configuration(
         pytestconfig,
@@ -50,9 +49,8 @@ def test_full_isbn_list(lang: str, tmp_path: Path, pytestconfig):
     assert updates.find_status_enum() == ["correct"] * 100
 
 
-@pytest.mark.slow
 @pytest.mark.parametrize("lang", ["java", "python", "kotlin"])
-def test_full_lotto(lang: str, tmp_path: Path, pytestconfig):
+def test_parallel_lotto(lang: str, tmp_path: Path, pytestconfig: pytest.Config):
     config_ = {"options": {"parallel": True}}
     conf = configuration(
         pytestconfig, "lotto", lang, tmp_path, "plan.tson", "correct", options=config_
@@ -63,20 +61,8 @@ def test_full_lotto(lang: str, tmp_path: Path, pytestconfig):
     assert updates.find_status_enum() == ["correct"] * 45
 
 
-@pytest.mark.slow
-@pytest.mark.parametrize(
-    "lang",
-    [
-        "java",
-        "python",
-        "c",
-        "javascript",
-        "kotlin",
-        "bash",
-        pytest.param("haskell", marks=pytest.mark.haskell),
-    ],
-)
-def test_full_echo(lang: str, tmp_path: Path, pytestconfig):
+@pytest.mark.parametrize("lang", ALL_LANGUAGES)
+def test_parallel_echo(lang: str, tmp_path: Path, pytestconfig: pytest.Config):
     config_ = {"options": {"parallel": True}}
     conf = configuration(
         pytestconfig, "echo", lang, tmp_path, "full.tson", "correct", options=config_

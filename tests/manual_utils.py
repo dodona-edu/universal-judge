@@ -3,6 +3,7 @@ import shutil
 from io import StringIO
 from pathlib import Path
 
+import pytest
 from jsonschema import validate
 
 from tested.cli import CommandDict, split_output
@@ -13,8 +14,8 @@ from tested.parsing import get_converter
 from tested.utils import recursive_dict_merge
 
 
-def assert_valid_output(output: str, config) -> CommandDict:
-    with open(Path(config.rootdir) / "tests/partial_output.json", "r") as f:
+def assert_valid_output(output: str, config: pytest.Config) -> CommandDict:
+    with open(config.rootpath / "tests/partial_output.json", "r") as f:
         schema = json.load(f)
 
     updates = CommandDict()
@@ -28,15 +29,15 @@ def assert_valid_output(output: str, config) -> CommandDict:
 
 
 def configuration(
-    config,
+    config: pytest.Config,
     exercise: str,
     language: str,
     work_dir: Path,
     suite: str = "plan.json",
     solution: str = "solution",
-    options=None,
+    options: dict | None = None,
 ) -> DodonaConfig:
-    exercise_dir = Path(config.rootdir) / "tests" / "exercises"
+    exercise_dir = config.rootpath / "tests" / "exercises"
     ep = exercise_dir / exercise
     return exercise_configuration(
         config, ep, language, work_dir, suite, solution, options
@@ -44,7 +45,7 @@ def configuration(
 
 
 def exercise_configuration(
-    config,
+    config: pytest.Config,
     exercise_directory: Path,
     language: str,
     work_dir: Path,
@@ -64,7 +65,7 @@ def exercise_configuration(
             "natural_language": "nl",
             "resources": exercise_directory / "evaluation",
             "source": exercise_directory / "solution" / f"{solution}.{ext}",
-            "judge": Path(f"{config.rootdir}"),
+            "judge": config.rootpath,
             "workdir": work_dir,
             "test_suite": suite,
             "options": {"linter": False},

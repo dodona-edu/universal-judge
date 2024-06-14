@@ -1,3 +1,5 @@
+# type: ignore[reportAttributeAccessIssue]
+
 import math
 
 import pytest
