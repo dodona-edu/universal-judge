@@ -198,12 +198,12 @@ class LanguageSpecificOracle:
 
     functions: dict[SupportedLanguage, EvaluationFunction] = field()
     type: Literal["specific"] = "specific"
-    arguments: dict[SupportedLanguage, list[str | Value]] = field(factory=dict)
+    arguments: dict[SupportedLanguage, list[str]] = field(factory=dict)
 
     def for_language(self, language: SupportedLanguage) -> EvaluationFunction:
         return self.functions[language]
 
-    def get_arguments(self, language: SupportedLanguage) -> list[str | Value]:
+    def get_arguments(self, language: SupportedLanguage) -> list[str]:
         return self.arguments.get(language, [])
 
     @functions.validator  # type: ignore

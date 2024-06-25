@@ -25,60 +25,60 @@
                         "evaluators" : {
                           "python" : {
                             "file" : "evaluator.py",
-                            "name": "evaluate_sum"
+                            "name" : "evaluate_sum"
                           },
                           "java" : {
                             "file" : "Evaluator.java",
-                            "name": "evaluate_sum"
+                            "name" : "evaluate_sum"
                           },
                           "kotlin" : {
                             "file" : "Evaluator.kt",
-                            "name": "evaluate_sum"
+                            "name" : "evaluate_sum"
                           },
                           "haskell" : {
                             "file" : "Evaluator.hs",
-                            "name": "evaluate_sum"
+                            "name" : "evaluate_sum"
                           },
                           "runhaskell" : {
                             "file" : "Evaluator.hs",
-                            "name": "evaluate_sum"
+                            "name" : "evaluate_sum"
                           },
                           "c" : {
                             "file" : "evaluator.c",
-                            "name": "evaluate_sum"
+                            "name" : "evaluate_sum"
                           },
                           "javascript" : {
                             "file" : "evaluator.js",
-                            "name": "evaluate_sum"
+                            "name" : "evaluate_sum"
                           },
                           "csharp" : {
                             "file" : "Evaluator.cs",
-                            "name": "evaluate_sum"
+                            "name" : "evaluate_sum"
                           }
                         },
                         "arguments" : {
-                          "python": [
+                          "python" : [
                             "5 + 5"
                           ],
-                          "java": [
+                          "java" : [
                             "5 + 5"
                           ],
-                          "kotlin": [
+                          "kotlin" : [
                             "5 + 5"
                           ],
-                          "haskell": [
+                          "haskell" : [
                             "5 + 5"
                           ],
-                          "runhaskell": [
+                          "runhaskell" : [
                             "5 + 5"
                           ],
-                          "c": [
+                          "c" : [
                             "5 + 5"
                           ],
-                          "javascript": [
+                          "javascript" : [
                             "5 + 5"
                           ],
-                          "csharp": [
+                          "csharp" : [
                             "5 + 5"
                           ]
                         }

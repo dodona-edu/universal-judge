@@ -110,3 +110,21 @@ def test_specific_oracle_return_specific_argument(
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["correct"]
     assert len(updates.find_all("append-message")) == 1
+
+
+@pytest.mark.parametrize("language", ALL_SPECIFIC_LANGUAGES)
+def test_specific_oracle_return_specific_argument_dsl(
+    language: str, tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig,
+        "echo-function",
+        language,
+        tmp_path,
+        "one-specific-argument.yaml",
+        "correct",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]
+    assert len(updates.find_all("append-message")) == 1

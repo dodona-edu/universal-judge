@@ -33,7 +33,6 @@ from tested.serialisation import (
     PropertyAssignment,
     SequenceType,
     Statement,
-    Value,
     VariableAssignment,
     VariableType,
 )
@@ -314,13 +313,9 @@ def _create_handling_function(
         raw_args = output.oracle.get_arguments(bundle.config.programming_language)
         evaluator_arguments = []
         for raw_arg in raw_args:
-            if isinstance(raw_arg, Value):
-                evaluator_arguments.append(prepare_argument(bundle, raw_arg))
-            else:
-                assert isinstance(raw_arg, str)
-                the_arg = Identifier(raw_arg)
-                the_arg.is_raw = True
-                evaluator_arguments.append(prepare_argument(bundle, the_arg))
+            the_arg = Identifier(raw_arg)
+            the_arg.is_raw = True
+            evaluator_arguments.append(prepare_argument(bundle, the_arg))
     else:
         evaluator_name = None
         evaluator = None
