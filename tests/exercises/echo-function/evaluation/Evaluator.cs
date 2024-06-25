@@ -7,4 +7,10 @@ public class Evaluator {
         var messages = new List<Message>() {new Tested.Message("Hallo")};
         return new EvaluationResult(correct, "correct", actual != null ? actual.ToString() : "", messages);
     }
+
+    public static EvaluationResult EvaluateSum(Object actual, int sum) {
+            var correct = sum == 10;
+            var messages = new List<Message>() {new Tested.Message("Hallo")};
+            return new EvaluationResult(correct, "correct", actual != null ? actual.ToString() : "", messages);
+        }
 }

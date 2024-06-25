@@ -1,0 +1,96 @@
+{
+  "tabs" : [
+    {
+      "name" : "Tab",
+      "runs" : [
+        {
+          "contexts" : [
+            {
+              "testcases" : [
+                {
+                  "input" : {
+                    "type" : "function",
+                    "name" : "echo",
+                    "arguments" : [
+                      {
+                        "type" : "text",
+                        "data" : "input-1"
+                      }
+                    ]
+                  },
+                  "output" : {
+                    "result" : {
+                      "evaluator" : {
+                        "type" : "specific",
+                        "evaluators" : {
+                          "python" : {
+                            "file" : "evaluator.py",
+                            "name": "evaluate_sum"
+                          },
+                          "java" : {
+                            "file" : "Evaluator.java",
+                            "name": "evaluate_sum"
+                          },
+                          "kotlin" : {
+                            "file" : "Evaluator.kt",
+                            "name": "evaluate_sum"
+                          },
+                          "haskell" : {
+                            "file" : "Evaluator.hs",
+                            "name": "evaluate_sum"
+                          },
+                          "runhaskell" : {
+                            "file" : "Evaluator.hs",
+                            "name": "evaluate_sum"
+                          },
+                          "c" : {
+                            "file" : "evaluator.c",
+                            "name": "evaluate_sum"
+                          },
+                          "javascript" : {
+                            "file" : "evaluator.js",
+                            "name": "evaluate_sum"
+                          },
+                          "csharp" : {
+                            "file" : "Evaluator.cs",
+                            "name": "evaluate_sum"
+                          }
+                        },
+                        "arguments" : {
+                          "python": [
+                            "5 + 5"
+                          ],
+                          "java": [
+                            "5 + 5"
+                          ],
+                          "kotlin": [
+                            "5 + 5"
+                          ],
+                          "haskell": [
+                            "5 + 5"
+                          ],
+                          "runhaskell": [
+                            "5 + 5"
+                          ],
+                          "c": [
+                            "5 + 5"
+                          ],
+                          "javascript": [
+                            "5 + 5"
+                          ],
+                          "csharp": [
+                            "5 + 5"
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
