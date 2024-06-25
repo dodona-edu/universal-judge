@@ -37,16 +37,22 @@ from tested.languages.generation import generate_statement
 from tested.languages.utils import convert_stacktrace_to_clickable_feedback
 from tested.parsing import fallback_field, get_converter
 from tested.serialisation import Value
-from tested.testsuite import ExceptionOutputChannel, NormalOutputChannel, OutputChannel
+from tested.testsuite import (
+    ExceptionOutputChannel,
+    NormalOutputChannel,
+    OutputChannel,
+    SupportedLanguage,
+)
 
 
 @define
 class OracleContext:
     expected: Value
     actual: Value
-    execution_directory: str
-    evaluation_directory: str
-    programming_language: str
+    execution_directory: Path
+    evaluation_directory: Path
+    submission_path: Path | None
+    programming_language: SupportedLanguage
     natural_language: str
 
 

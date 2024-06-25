@@ -91,6 +91,12 @@ YamlObject = (
 )
 
 
+def _convert_language_dictionary(
+    original: dict[str, str]
+) -> dict[SupportedLanguage, str]:
+    return {SupportedLanguage(k): v for k, v in original.items()}
+
+
 def _ensure_trailing_newline(text: str) -> str:
     if text and not text.endswith("\n"):
         return text + "\n"
@@ -374,11 +380,13 @@ def _convert_custom_check_oracle(stream: dict) -> CustomCheckOracle:
         cv = _convert_yaml_value(v)
         assert isinstance(cv, Value)
         converted_args.append(cv)
+    languages = stream.get("languages")
     return CustomCheckOracle(
         function=EvaluationFunction(
             file=stream["file"], name=stream.get("name", "evaluate")
         ),
         arguments=converted_args,
+        languages=set(languages) if languages else None,
     )
 
 
@@ -503,7 +511,9 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
             message = exception.get("message")
             assert isinstance(message, str)
             assert isinstance(exception["types"], dict)
-            types = cast(dict[str, str], exception["types"])
+            types = _convert_language_dictionary(
+                cast(dict[str, str], exception["types"])
+            )
         output.exception = ExceptionOutputChannel(
             exception=ExpectedException(message=message, types=types)
         )

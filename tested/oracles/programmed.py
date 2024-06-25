@@ -32,12 +32,18 @@ DEFAULT_STUDENT = get_i18n_string("oracles.programmed.student.default")
 
 @define
 class ConvertedOracleContext:
+    """
+    This is the oracle context that is passed to the actual function.
+    It should thus remain backwards compatible.
+    """
+
     expected: Any
     actual: Any
     execution_directory: str
     evaluation_directory: str
     programming_language: str
     natural_language: str
+    submission_path: str | None
 
     @staticmethod
     def from_context(
@@ -46,10 +52,15 @@ class ConvertedOracleContext:
         return ConvertedOracleContext(
             expected=eval(generate_statement(bundle, context.expected)),
             actual=eval(generate_statement(bundle, context.actual)),
-            execution_directory=context.execution_directory,
-            evaluation_directory=context.evaluation_directory,
+            execution_directory=str(context.execution_directory.absolute()),
+            evaluation_directory=str(context.evaluation_directory.absolute()),
             programming_language=context.programming_language,
             natural_language=context.natural_language,
+            submission_path=(
+                str(context.submission_path.absolute())
+                if context.submission_path
+                else None
+            ),
         )
 
 
@@ -237,10 +248,13 @@ def evaluate(
     context = OracleContext(
         expected=expected,
         actual=actual,
-        execution_directory=str(config.context_dir.absolute()),
-        evaluation_directory=str(config.bundle.config.resources.absolute()),
-        programming_language=str(config.bundle.config.programming_language),
+        execution_directory=config.context_dir,
+        evaluation_directory=config.bundle.config.resources,
+        programming_language=config.bundle.config.programming_language,
         natural_language=config.bundle.config.natural_language,
+        submission_path=(
+            config.bundle.config.source if channel.oracle.languages else None
+        ),
     )
     result = _evaluate_programmed(config.bundle, channel.oracle, context)
 

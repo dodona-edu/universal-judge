@@ -530,6 +530,13 @@
               "items" : {
                 "$ref" : "#/definitions/yamlValueOrPythonExpression"
               }
+            },
+            "languages": {
+              "type" : "array",
+              "description" : "Which programming languages are supported by this oracle.",
+              "items" : {
+                "$ref" : "#/definitions/programmingLanguage"
+              }
             }
           }
         }
@@ -584,6 +591,13 @@
               "description" : "List of YAML (or tagged expression) values to use as arguments to the function.",
               "items" : {
                 "$ref" : "#/definitions/yamlValueOrPythonExpression"
+              }
+            },
+            "languages": {
+              "type" : "array",
+              "description" : "Which programming languages are supported by this oracle.",
+              "items" : {
+                "$ref" : "#/definitions/programmingLanguage"
               }
             }
           }
