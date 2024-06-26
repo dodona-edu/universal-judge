@@ -32,7 +32,7 @@ from tested.datatypes import (
     resolve_to_basic,
 )
 from tested.dodona import ExtendedMessage
-from tested.dsl.ast_translator import parse_string
+from tested.dsl.ast_translator import InvalidDslError, parse_string
 from tested.parsing import get_converter, suite_to_json
 from tested.serialisation import (
     BooleanType,
@@ -56,6 +56,7 @@ from tested.testsuite import (
     GenericTextOracle,
     IgnoredChannel,
     LanguageLiterals,
+    LanguageSpecificOracle,
     MainInput,
     Output,
     Suite,
@@ -374,6 +375,12 @@ def _convert_file(link_file: YamlDict) -> FileUrl:
     return FileUrl(name=link_file["name"], url=link_file["url"])
 
 
+def _convert_evaluation_function(stream: dict) -> EvaluationFunction:
+    return EvaluationFunction(
+        file=Path(stream["file"]), name=stream.get("name", "evaluate")
+    )
+
+
 def _convert_custom_check_oracle(stream: dict) -> CustomCheckOracle:
     converted_args = []
     for v in stream.get("arguments", []):
@@ -382,12 +389,31 @@ def _convert_custom_check_oracle(stream: dict) -> CustomCheckOracle:
         converted_args.append(cv)
     languages = stream.get("languages")
     return CustomCheckOracle(
-        function=EvaluationFunction(
-            file=stream["file"], name=stream.get("name", "evaluate")
-        ),
+        function=_convert_evaluation_function(stream),
         arguments=converted_args,
         languages=set(languages) if languages else None,
     )
+
+
+def _convert_language_specific_oracle(stream: dict) -> LanguageSpecificOracle:
+    the_functions = dict()
+    for lang, a_function in stream["functions"].items():
+        the_functions[SupportedLanguage(lang)] = _convert_evaluation_function(
+            a_function
+        )
+
+    the_args = dict()
+    for lang, args in stream.get("arguments", dict()).items():
+        the_args[SupportedLanguage(lang)] = args
+
+    if not set(the_args.keys()).issubset(the_functions.keys()):
+        raise InvalidDslError(
+            "Language-specific oracle found with arguments for non-oracle languages.\n\n"
+            f"You provided check functions for {the_functions.keys()}, but arguments for {the_args.keys()}.\n"
+            f"This means you have arguments for {the_args.keys() - the_functions.keys()} but no check function!"
+        )
+
+    return LanguageSpecificOracle(functions=the_functions, arguments=the_args)
 
 
 def _convert_text_output_channel(stream: YamlObject) -> TextOutputChannel:
@@ -430,14 +456,24 @@ def _convert_yaml_value(stream: YamlObject) -> Value | None:
 def _convert_advanced_value_output_channel(stream: YamlObject) -> ValueOutputChannel:
     if isinstance(stream, ReturnOracle):
         return_object = stream
-        value = _convert_yaml_value(return_object["value"])
-        assert isinstance(value, Value), "You must specify a value for a return oracle."
         if "oracle" not in return_object or return_object["oracle"] == "builtin":
+            value = _convert_yaml_value(return_object["value"])
+            assert isinstance(
+                value, Value
+            ), "You must specify a value for a return oracle."
             return ValueOutputChannel(value=value)
         elif return_object["oracle"] == "custom_check":
+            value = _convert_yaml_value(return_object["value"])
+            assert isinstance(
+                value, Value
+            ), "You must specify a value for a return oracle."
             return ValueOutputChannel(
                 value=value,
                 oracle=_convert_custom_check_oracle(return_object),
+            )
+        elif return_object["oracle"] == "specific_check":
+            return ValueOutputChannel(
+                oracle=_convert_language_specific_oracle(return_object)
             )
         raise TypeError(f"Unknown value oracle type: {return_object['oracle']}")
     else:

@@ -26,5 +26,14 @@ class Evaluator {
                     .withMessage(EvaluationResult.Message("Hallo"))
                     .build()
         }
+
+        @JvmStatic
+        fun evaluateSum(actual: Any?, sum: Int): EvaluationResult {
+            return EvaluationResult.Builder(result = sum == 10,
+                readableExpected = actual.toString(),
+                readableActual = actual?.toString() ?: "")
+                .withMessage(EvaluationResult.Message("Hallo"))
+                .build()
+        }
     }
 }

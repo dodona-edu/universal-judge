@@ -10,4 +10,13 @@ public class Evaluator {
                 .withMessage(new EvaluationResult.Message("Hallo"))
                 .build();
     }
+
+    public static EvaluationResult evaluateSum(Object actual, Integer sum) {
+        var correct = sum == 10;
+        return EvaluationResult.builder(correct)
+                .withReadableExpected("correct")
+                .withReadableActual(actual != null ? actual.toString() : "")
+                .withMessage(new EvaluationResult.Message("Hallo"))
+                .build();
+    }
 }

@@ -35,6 +35,8 @@ from tested.testsuite import (
     GenericTextOracle,
     GenericValueOracle,
     LanguageLiterals,
+    LanguageSpecificOracle,
+    SupportedLanguage,
     TextOutputChannel,
     ValueOutputChannel,
     parse_test_suite,
@@ -722,6 +724,85 @@ def test_value_custom_checks_correct():
             ],
         ),
     ]
+
+
+def test_value_specific_checks_correct():
+    yaml_str = f"""
+    - tab: 'Test'
+      contexts:
+        - testcases:
+            - expression: 'test()'
+              return: !oracle
+                oracle: "specific_check"
+                functions:
+                  python:
+                    file: result.py
+                  javascript:
+                    file: result.js    
+                arguments:
+                  python:
+                    - "yes"
+                  javascript:
+                    - "js"
+    """
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    assert len(suite.tabs) == 1
+    tab = suite.tabs[0]
+    assert len(tab.contexts) == 1
+    testcases = tab.contexts[0].testcases
+    assert len(testcases) == 1
+    test = testcases[0]
+    assert isinstance(test.input, FunctionCall)
+    assert isinstance(test.output.result, ValueOutputChannel)
+    assert isinstance(test.output.result.oracle, LanguageSpecificOracle)
+    oracle = test.output.result.oracle
+    assert oracle.functions[SupportedLanguage.PYTHON].name == "evaluate"
+    assert oracle.functions[SupportedLanguage.PYTHON].file == Path("result.py")
+    assert oracle.functions[SupportedLanguage.JAVASCRIPT].name == "evaluate"
+    assert oracle.functions[SupportedLanguage.JAVASCRIPT].file == Path("result.js")
+    assert oracle.arguments == {
+        SupportedLanguage.PYTHON: ["yes"],
+        SupportedLanguage.JAVASCRIPT: ["js"],
+    }
+
+
+def test_value_specific_checks_missing_evaluators():
+    yaml_str = f"""
+    - tab: 'Test'
+      contexts:
+        - testcases:
+            - expression: 'test()'
+              return: !oracle
+                oracle: "specific_check"
+                functions:
+                arguments:
+                  python:
+                    - "yes"
+                  javascript:
+                    - "js"
+    """
+    with pytest.raises(Exception):
+        translate_to_test_suite(yaml_str)
+
+
+def test_value_specific_checks_weird_arguments():
+    yaml_str = f"""
+    - tab: 'Test'
+      contexts:
+        - testcases:
+            - expression: 'test()'
+              return: !oracle
+                oracle: "specific_check"
+                functions:
+                  python:
+                    file: "yes.py"
+                arguments:
+                  javascript:
+                    - "js"
+    """
+    with pytest.raises(Exception):
+        translate_to_test_suite(yaml_str)
 
 
 def test_yaml_set_tag_is_supported():

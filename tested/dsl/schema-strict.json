@@ -14,19 +14,27 @@
     }
   ],
   "definitions" : {
-    "_rootObject": {
-      "type": "object",
+    "_rootObject" : {
+      "type" : "object",
       "oneOf" : [
         {
-          "required" : ["tabs"],
-          "not": {
-            "required" : ["units"]
+          "required" : [
+            "tabs"
+          ],
+          "not" : {
+            "required" : [
+              "units"
+            ]
           }
         },
         {
-          "required" : ["units"],
-          "not": {
-            "required" : ["tabs"]
+          "required" : [
+            "units"
+          ],
+          "not" : {
+            "required" : [
+              "tabs"
+            ]
           }
         }
       ],
@@ -45,7 +53,7 @@
         "tabs" : {
           "$ref" : "#/definitions/_tabList"
         },
-        "units": {
+        "units" : {
           "$ref" : "#/definitions/_unitList"
         },
         "language" : {
@@ -59,9 +67,9 @@
             }
           ]
         },
-        "definitions": {
-          "description": "Define hashes to use elsewhere.",
-          "type": "object"
+        "definitions" : {
+          "description" : "Define hashes to use elsewhere.",
+          "type" : "object"
         }
       }
     },
@@ -100,9 +108,9 @@
           "type" : "string",
           "description" : "The name of this tab."
         },
-        "definitions": {
-          "description": "Define objects to use elsewhere.",
-          "type": "object"
+        "definitions" : {
+          "description" : "Define objects to use elsewhere.",
+          "type" : "object"
         }
       },
       "oneOf" : [
@@ -149,9 +157,9 @@
           "type" : "string",
           "description" : "The name of this tab."
         },
-        "definitions": {
-          "description": "Define objects to use elsewhere.",
-          "type": "object"
+        "definitions" : {
+          "description" : "Define objects to use elsewhere.",
+          "type" : "object"
         }
       },
       "oneOf" : [
@@ -177,28 +185,28 @@
         }
       ]
     },
-    "_contextList": {
+    "_contextList" : {
       "type" : "array",
       "minItems" : 1,
       "items" : {
         "$ref" : "#/definitions/context"
       }
     },
-    "_caseList": {
+    "_caseList" : {
       "type" : "array",
       "minItems" : 1,
       "items" : {
         "$ref" : "#/definitions/case"
       }
     },
-    "_testcaseList": {
+    "_testcaseList" : {
       "type" : "array",
       "minItems" : 1,
       "items" : {
         "$ref" : "#/definitions/testcase"
       }
     },
-    "_scriptList": {
+    "_scriptList" : {
       "type" : "array",
       "minItems" : 1,
       "items" : {
@@ -254,8 +262,8 @@
       "description" : "An individual test for a statement or expression",
       "additionalProperties" : false,
       "properties" : {
-        "description": {
-          "$ref": "#/definitions/message"
+        "description" : {
+          "$ref" : "#/definitions/message"
         },
         "stdin" : {
           "description" : "Stdin for this context",
@@ -346,8 +354,8 @@
       "type" : "object",
       "description" : "An individual test (script) for a statement or expression",
       "properties" : {
-        "description": {
-          "$ref": "#/definitions/message"
+        "description" : {
+          "$ref" : "#/definitions/message"
         },
         "stdin" : {
           "description" : "Stdin for this context",
@@ -455,7 +463,7 @@
         }
       ]
     },
-    "yamlValueOrPythonExpression": {
+    "yamlValueOrPythonExpression" : {
       "oneOf" : [
         {
           "$ref" : "#/definitions/yamlValue"
@@ -494,12 +502,14 @@
         {
           "type" : "object",
           "description" : "Built-in oracle for text values.",
-          "required" : ["data"],
+          "required" : [
+            "data"
+          ],
           "properties" : {
-            "data": {
+            "data" : {
               "$ref" : "#/definitions/textualType"
             },
-            "oracle": {
+            "oracle" : {
               "const" : "builtin"
             },
             "config" : {
@@ -510,9 +520,13 @@
         {
           "type" : "object",
           "description" : "Custom oracle for text values.",
-          "required" : ["oracle", "file", "data"],
+          "required" : [
+            "oracle",
+            "file",
+            "data"
+          ],
           "properties" : {
-            "oracle": {
+            "oracle" : {
               "const" : "custom_check"
             },
             "file" : {
@@ -542,7 +556,7 @@
         }
       ]
     },
-    "returnOutputChannel": {
+    "returnOutputChannel" : {
       "oneOf" : [
         {
           "$ref" : "#/definitions/yamlValueOrPythonExpression"
@@ -601,6 +615,63 @@
               }
             }
           }
+        },
+        {
+          "type" : "oracle",
+          "additionalProperties" : false,
+          "required" : [
+            "oracle",
+            "functions"
+          ],
+          "properties" : {
+            "oracle" : {
+              "const" : "specific_check"
+            },
+            "functions" : {
+              "minProperties" : 1,
+              "description" : "Language mapping of oracle functions.",
+              "type" : "object",
+              "propertyNames" : {
+                "$ref" : "#/definitions/programmingLanguage"
+              },
+              "items" : {
+                "type" : "object",
+                "required" : [
+                  "file"
+                ],
+                "properties" : {
+                  "file" : {
+                    "type" : "string",
+                    "description" : "The path to the file containing the custom check function."
+                  },
+                  "name" : {
+                    "type" : "string",
+                    "description" : "The name of the custom check function.",
+                    "default" : "evaluate"
+                  }
+                }
+              }
+            },
+            "arguments" : {
+              "minProperties" : 1,
+              "description" : "Language mapping of oracle arguments.",
+              "type" : "object",
+              "propertyNames" : {
+                "$ref" : "#/definitions/programmingLanguage"
+              },
+              "items" : {
+                "type" : "array",
+                "description" : "List of YAML (or tagged expression) values to use as arguments to the function.",
+                "items" : {
+                  "type" : "string",
+                  "description" : "A language-specific literal, which will be used verbatim."
+                }
+              }
+            },
+            "value" : {
+              "$ref" : "#/definitions/yamlValueOrPythonExpression"
+            }
+          }
         }
       ]
     },
@@ -619,23 +690,23 @@
         "csharp"
       ]
     },
-    "message": {
-      "oneOf": [
+    "message" : {
+      "oneOf" : [
         {
-          "type": "string",
+          "type" : "string",
           "description" : "A simple message to display."
         },
         {
-          "type": "object",
+          "type" : "object",
           "required" : [
             "description"
           ],
           "properties" : {
-            "description": {
+            "description" : {
               "type" : "string",
               "description" : "The message to display."
             },
-            "format": {
+            "format" : {
               "type" : "string",
               "default" : "text",
               "description" : "The format of the message, either a programming language, 'text' or 'html'."
@@ -661,9 +732,9 @@
           "description" : "Ignore trailing whitespace",
           "type" : "boolean"
         },
-        "normalizeTrailingNewlines": {
-          "description": "Normalize trailing newlines",
-          "type": "boolean"
+        "normalizeTrailingNewlines" : {
+          "description" : "Normalize trailing newlines",
+          "type" : "boolean"
         },
         "roundTo" : {
           "description" : "The number of decimals to round at, when applying the rounding on floats",
@@ -679,7 +750,7 @@
         }
       }
     },
-    "textualType": {
+    "textualType" : {
       "description" : "Simple textual value, converted to string.",
       "type" : [
         "string",
@@ -688,10 +759,13 @@
         "boolean"
       ]
     },
-    "yamlValue": {
+    "yamlValue" : {
       "description" : "A value represented as YAML.",
-      "not": {
-        "type": ["oracle", "expression"]
+      "not" : {
+        "type" : [
+          "oracle",
+          "expression"
+        ]
       }
     }
   }

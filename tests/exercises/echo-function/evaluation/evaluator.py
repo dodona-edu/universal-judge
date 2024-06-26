@@ -22,3 +22,9 @@ def evaluate_value_dsl(context):
 
 def evaluate_runtime_crash(context):
     return len(context) / 0
+
+
+def evaluate_sum(actual, the_sum):
+    correct = the_sum == 10
+    return EvaluationResult(correct, "correct", actual, [Message("Hallo")])
+

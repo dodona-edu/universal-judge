@@ -183,11 +183,9 @@ class CustomCheckOracle:
 @define
 class LanguageSpecificOracle:
     """
-    Evaluate the result with a custom check function written in a specific programming
-    language. Every programming language needs its own check function.
-
-    While this is very powerful and allows you to test language-specific constructs,
-    there are a few caveats:
+    Evaluate the result with a custom check function written in the same programming
+    language as the submission. While this allows using language-specific constructs
+    not supported by TESTed, there are a few downsides:
 
     1. The code is run alongside the user code. This means the user can potentially
        take control of the code.
@@ -196,17 +194,28 @@ class LanguageSpecificOracle:
     3. It is a lot of work. You need to return the correct values, since the judge
        needs to understand what the result was.
 
-    The code you must write should be a function that accepts the result of a user
-    expression. Note: this type of oracle is only supported when using function
-    calls. If you want to evaluate stdout, you should use the custom check oracle
-    instead.
+    The code you must write should be a function that accepts:
+
+    1. The value produced by the submission (the "actual" value)
+    2. Optionally, any additional arguments provided in the test suite.
+
+    The function must return a `BooleanEvaluationResult`, which, depending on the
+    programming language, takes the form of an instance of a class or a map/object.
+    See the examples in the tests for specifics.
+
+    Note: this type of oracle is only supported when using function calls. If you
+    want to evaluate stdout, you should use the custom check oracle instead.
     """
 
     functions: dict[SupportedLanguage, EvaluationFunction] = field()
     type: Literal["specific"] = "specific"
+    arguments: dict[SupportedLanguage, list[str]] = field(factory=dict)
 
     def for_language(self, language: SupportedLanguage) -> EvaluationFunction:
         return self.functions[language]
+
+    def get_arguments(self, language: SupportedLanguage) -> list[str]:
+        return self.arguments.get(language, [])
 
     @functions.validator  # type: ignore
     def validate_evaluator(self, _, value):

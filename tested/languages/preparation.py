@@ -89,10 +89,10 @@ class PreparedTestcaseStatement:
         """
         Get the input statement for the testcase.
 
-        This will return, depending on the command, either an expression which will
+        This will return, depending on the command, either an expression, which will
         pass the value to the correct handling function or the statement itself.
 
-        :param override: Optionally override the value argument.
+        :param override: Optionally, override the value argument.
         :return: The input statement.
         """
         input_statement = (
@@ -285,24 +285,24 @@ def _create_handling_function(
     """
     Create a function to handle the result of a return value or an exception.
 
-    There are two possibilities:
-    - There is a language-specific oracle. In that case, we wrap the value in
-      a function call to the oracle, and then send off the result. An example of
-      the result:
+    Either we need to evaluate the result in-process by using a language-specific
+    oracle or not. When using a language-specific oracle, we wrap the result in the
+    function call to the oracle and send the result of said evaluation to TESTed.
+    For example:
 
-        send_evaluated(evaluate(value))
+        send_evaluated(oracle_function(result))
 
-    - There is no language-specific oracle. In that case, we just send off the
-      value directly. An example of the result:
+    In the other case, we send the result directly to TESTed, where it will be
+    evaluated internally or with a custom check function. For example:
 
-        send_value(value)
+        send_value(result)
 
     :param bundle: The configuration bundle.
     :param send_evaluated: The name of the function that will handle sending the
                            result of an evaluation.
     :param send_value: The name of the function that will handle sending the value.
     :param output: The oracle.
-    :return: A tuple containing the call and the name of the oracle if present.
+    :return: A tuple containing a function that can wrap a value and the name of the oracle if present.
     """
     lang_config = bundle.language
     if isinstance(output, OracleOutputChannel) and isinstance(
@@ -310,33 +310,46 @@ def _create_handling_function(
     ):
         evaluator = output.oracle.for_language(bundle.config.programming_language)
         evaluator_name = conventionalize_namespace(lang_config, evaluator.file.stem)
+        raw_args = output.oracle.get_arguments(bundle.config.programming_language)
+        evaluator_arguments = []
+        for raw_arg in raw_args:
+            the_arg = Identifier(raw_arg)
+            the_arg.is_raw = True
+            evaluator_arguments.append(prepare_argument(bundle, the_arg))
     else:
         evaluator_name = None
         evaluator = None
+        evaluator_arguments = []
 
     def generator(expression: Expression) -> Statement:
         if isinstance(output, OracleOutputChannel) and isinstance(
             output.oracle, LanguageSpecificOracle
         ):
             assert evaluator
-            arguments = [
+            oracle_arguments = [
+                # Next, pass the actual value.
+                prepare_expression(bundle, expression),
+                # Finally, prepare evaluator arguments.
+                *[prepare_argument(bundle, arg) for arg in evaluator_arguments],
+            ]
+            send_arguments = [
                 PreparedFunctionCall(
                     type=FunctionType.FUNCTION,
                     name=conventionalize_function(lang_config, evaluator.name),
                     namespace=Identifier(evaluator_name),
-                    arguments=[prepare_expression(bundle, expression)],
+                    arguments=oracle_arguments,
                     has_root_namespace=False,
                 )
             ]
             function_name = send_evaluated
         else:
-            arguments = [expression]
+            send_arguments = [expression]
             function_name = send_value
 
         internal = PreparedFunctionCall(
             type=FunctionType.FUNCTION,
             name=conventionalize_function(lang_config, function_name),
-            arguments=[prepare_argument(bundle, arg) for arg in arguments],
+            arguments=[prepare_argument(bundle, arg) for arg in send_arguments],
             has_root_namespace=False,
         )
         return internal
