@@ -13,7 +13,7 @@ from tested.configs import DodonaConfig, Options
 from tested.main import run
 from tested.testsuite import SupportedLanguage
 
-exercise_dir = "/home/niko/Ontwikkeling/universal-judge/tests/exercises/echo-function"
+exercise_dir = "/home/jorg/Documents/universal-judge/tests/exercises/echo"
 
 
 def read_config() -> DodonaConfig:
@@ -21,13 +21,13 @@ def read_config() -> DodonaConfig:
     return DodonaConfig(
         memory_limit=536870912,
         time_limit=60,
-        programming_language=SupportedLanguage("haskell"),
+        programming_language=SupportedLanguage("cpp"),
         natural_language="nl",
         resources=Path(exercise_dir, "evaluation"),
-        source=Path(exercise_dir, "solution/correct.hs"),
+        source=Path(exercise_dir, "solution/wrong.cpp"),
         judge=Path("."),
         workdir=Path("workdir"),
-        test_suite="two-specific.tson",
+        test_suite="two.tson",
         options=Options(
             linter=False,
         ),
