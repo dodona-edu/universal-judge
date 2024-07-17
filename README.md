@@ -15,9 +15,21 @@ If you use this software in research, please cite:
 ## Installing TESTed
 
 TESTed is implemented in Python, but has various dependencies for its language-specific modules.
-We only use the Python language module in this README, but see [dependencies.md](./dependencies.md) for an overview of dependencies for each of the supported programming languages.
+See [dependencies.md](./dependencies.md) for an overview of dependencies for each of the supported programming languages.
 
-Install [Python 3.11](https://www.python.org/downloads/) or later (including pip).
+### Nix installation
+The easiest way to install TESTed with all its dependencies is using the [Nix](https://nixos.org/) package manager.
+
+Install Nix using [The Determinate Nix Installer](https://github.com/DeterminateSystems/nix-installer).
+Next, [clone](https://github.com/git-guides/git-clone) the TESTed repository and open a command prompt in the cloned repository.
+
+Then run `nix develop` to open a shell environment with all dependencies installed.
+The first time you run this command, it will take a while to download and build all dependencies.
+
+### Poetry installation
+If you only need the Python language module, or want to manually install a subset of the [dependencies](./dependencies.md), you can use [poetry](https://python-poetry.org/).
+
+Install [Python 3.12](https://www.python.org/downloads/) or later (including pip).
 Next, [clone](https://github.com/git-guides/git-clone) the TESTed repository and open a command prompt in the cloned repository.
 TESTed uses [poetry](https://python-poetry.org/) to manage its Python dependencies.
 Now you can run the following commands to install them:
@@ -29,8 +41,7 @@ $ pip install poetry --user
 $ poetry install
 ```
 
-Those using [Nix](https://nixos.org/) can use `nix develop` to get a development environment.
-`nix run` will run TESTed.
+Running `poetry shell` will open a shell environment with all python dependencies installed.
 
 ## Running TESTed
 
