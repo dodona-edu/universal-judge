@@ -18,7 +18,7 @@ TESTed is implemented in Python, but has various dependencies for its language-s
 See [dependencies.md](./dependencies.md) for an overview of dependencies for each of the supported programming languages.
 
 ### Nix installation
-The easiest way to install TESTed with all it's dependencies is using the [Nix](https://nixos.org/) package manager.
+The easiest way to install TESTed with all its dependencies is using the [Nix](https://nixos.org/) package manager.
 
 Install Nix using [The Determinate Nix Installer](https://github.com/DeterminateSystems/nix-installer).
 Next, [clone](https://github.com/git-guides/git-clone) the TESTed repository and open a command prompt in the cloned repository.
