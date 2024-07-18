@@ -3,7 +3,6 @@ import re
 
 from tested.languages.c.config import C
 from tested.languages.language import CallbackResult
-from tested.languages.preparation import PreparedExecutionUnit
 from tested.languages.utils import executable_name
 
 
@@ -33,11 +32,3 @@ class CPP(C):
             [result],
         )
 
-    def generate_execution_unit(self, execution_unit: "PreparedExecutionUnit") -> str:
-        from tested.languages.cpp import generators
-        return generators.convert_execution_unit(execution_unit)
-
-    def generate_selector(self, contexts: list[str]) -> str:
-        from tested.languages.cpp import generators
-
-        return generators.convert_selector(contexts)

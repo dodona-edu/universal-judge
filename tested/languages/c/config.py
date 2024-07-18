@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 from tested.datatypes import AllTypes
 from tested.dodona import AnnotateCode, Message
 from tested.features import Construct, TypeSupport
+from tested.languages.c.generators import CGenerator
 from tested.languages.conventionalize import (
     EXECUTION_PREFIX,
     Conventionable,
@@ -103,7 +104,7 @@ class C(Language):
         # First, check if we have a no-arg main function.
         # If so, replace it with a renamed main function that does have args.
         no_args = re.compile(r"(int|void)(\s+)main(\s*)\((\s*)\)(\s*{)")
-        replacement = r"int\2solution_main\3(\4int argc, char** argv)\5"
+        replacement = r"int\2solution_main\3(\4int argc, char* argv[])\5"
         contents, nr = re.subn(no_args, replacement, contents, count=1)
         if nr == 0:
             # There was no main function without arguments. Now we try a main
@@ -139,26 +140,21 @@ class C(Language):
 
     def is_source_file(self, file: Path) -> bool:
         return file.suffix in (".c", ".h")
+    
+    def generator(self) -> CGenerator:
+        return CGenerator(self.file_extension())
 
     def generate_statement(self, statement: Statement) -> str:
-        from tested.languages.c import generators
-
-        return generators.convert_statement(statement, full=True)
+        return self.generator().convert_statement(statement, full=True)
 
     def generate_execution_unit(self, execution_unit: "PreparedExecutionUnit") -> str:
-        from tested.languages.c import generators
-
-        return generators.convert_execution_unit(execution_unit)
+        return self.generator().convert_execution_unit(execution_unit)
 
     def generate_selector(self, contexts: list[str]) -> str:
-        from tested.languages.c import generators
-
-        return generators.convert_selector(contexts)
+        return self.generator().convert_selector(contexts)
 
     def generate_encoder(self, values: list[Value]) -> str:
-        from tested.languages.c import generators
-
-        return generators.convert_encoder(values)
+        return self.generator().convert_encoder(values)
 
     def get_declaration_metadata(self) -> TypeDeclarationMetadata:
         return {
