@@ -162,9 +162,35 @@ class CGenerator:
                 f"{self.convert_statement(statement.expression)};"
             )
         raise AssertionError(f"Unknown statement: {statement!r}")
+    
+    def convert_testcase(self, tc: PreparedTestcase, pu: PreparedExecutionUnit) -> str:
+        result = ""
+        if tc.testcase.is_main_testcase():
+            assert isinstance(tc.input, MainInput)
+            wrapped = [json.dumps(a) for a in tc.input.arguments]
+            result += f'char* args[] = {{"{pu.submission_name}", '
+            result += ", ".join(wrapped)
+            result += "};\n"
+            result += (
+                f"exit_code = solution_main({len(tc.input.arguments) + 1}, args);\n"
+            )
+        else:
+            assert isinstance(tc.input, PreparedTestcaseStatement)
+            result += "exit_code = 0;\n"
+            if is_special_void_call(tc.input, pu.language):
+                # The method has a "void" return type, so don't wrap it.
+                result += (
+                    " " * 4
+                    + self.convert_statement(tc.input.unwrapped_input_statement())
+                    + ";\n"
+                )
+                result += " " * 4 + self.convert_statement(tc.input.no_value_call()) + ";\n"
+            else:
+                result += self.convert_statement(tc.input.input_statement()) + ";\n"
+        return result
 
 
-    def _generate_internal_context(self, ctx: PreparedContext, pu: PreparedExecutionUnit) -> str:
+    def generate_internal_context(self, ctx: PreparedContext, pu: PreparedExecutionUnit) -> str:
         result = f"""
         {ctx.before}
         
@@ -175,30 +201,8 @@ class CGenerator:
         tc: PreparedTestcase
         for tc in ctx.testcases:
             result += f"{pu.unit.name}_write_separator();\n"
-
-            if tc.testcase.is_main_testcase():
-                assert isinstance(tc.input, MainInput)
-                wrapped = [json.dumps(a) for a in tc.input.arguments]
-                result += f'char* args[] = {{"{pu.submission_name}", '
-                result += ", ".join(wrapped)
-                result += "};\n"
-                result += (
-                    f"exit_code = solution_main({len(tc.input.arguments) + 1}, args);\n"
-                )
-            else:
-                assert isinstance(tc.input, PreparedTestcaseStatement)
-                result += "exit_code = 0;\n"
-                if is_special_void_call(tc.input, pu.language):
-                    # The method has a "void" return type, so don't wrap it.
-                    result += (
-                        " " * 4
-                        + self.convert_statement(tc.input.unwrapped_input_statement())
-                        + ";\n"
-                    )
-                    result += " " * 4 + self.convert_statement(tc.input.no_value_call()) + ";\n"
-                else:
-                    result += self.convert_statement(tc.input.input_statement()) + ";\n"
-
+            result += self.convert_testcase(tc, pu)
+            
         result += ctx.after + "\n"
         result += "return exit_code;\n"
         return result
@@ -247,7 +251,7 @@ class CGenerator:
         for i, ctx in enumerate(pu.contexts):
             result += f"""
             int {pu.unit.name}_context_{i}(void) {{
-                {self._generate_internal_context(ctx, pu)}
+                {self.generate_internal_context(ctx, pu)}
             }}
             """
 

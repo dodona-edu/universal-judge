@@ -82,3 +82,9 @@ venv-*/
 .venv/
 node_modules/
 result/
+
+# Visual Studio Code
+universal-judge.sln
+.data/current/python
+.data/current/python-packages
+.vscode/

@@ -31,10 +31,8 @@ string escape(const string &buffer) {
     return dest;
 }
 
-// Format macro equivalent
 #define FORMAT(name, x) "{\"type\": \"" name "\", \"data\":" x "}"
 
-// Function to write a formatted string to an output stream
 void write_formatted(FILE* out, const char* format, ...) {
     va_list args;
     va_start(args, format);
@@ -42,70 +40,57 @@ void write_formatted(FILE* out, const char* format, ...) {
     va_end(args);
 }
 
-// Function to write boolean values
-void write_bool(FILE* out, bool value) {
+void write_value(FILE* out, bool value) {
     write_formatted(out, FORMAT("boolean", "%s"), value ? "true" : "false");
 }
 
-// Function to write char values
-void write_char(FILE* out, char value) {
+void write_value(FILE* out, char value) {
     string buffer(1, value);
     string result = escape(buffer);
     write_formatted(out, FORMAT("char", "\"%s\""), result.c_str());
 }
 
-// Function to write signed char values
-void write_signed_char(FILE* out, signed char value) {
+void write_value(FILE* out, signed char value) {
     write_formatted(out, FORMAT("int8", "%d"), static_cast<int>(value));
 }
 
-// Function to write unsigned char values
-void write_unsigned_char(FILE* out, unsigned char value) {
+void write_value(FILE* out, unsigned char value) {
     write_formatted(out, FORMAT("uint8", "%u"), static_cast<unsigned int>(value));
 }
 
-// Function to write short int values
-void write_sint(FILE* out, short int value) {
+void write_value(FILE* out, short int value) {
     write_formatted(out, FORMAT("int16", "%d"), value);
 }
 
-// Function to write unsigned short int values
-void write_usint(FILE* out, unsigned short int value) {
+void write_value(FILE* out, unsigned short int value) {
     write_formatted(out, FORMAT("uint16", "%u"), value);
 }
 
-// Function to write int values
-void write_int(FILE* out, int value) {
+void write_value(FILE* out, int value) {
     write_formatted(out, FORMAT("int32", "%d"), value);
 }
 
-// Function to write unsigned int values
-void write_uint(FILE* out, unsigned int value) {
+void write_value(FILE* out, unsigned int value) {
     write_formatted(out, FORMAT("uint32", "%u"), value);
 }
 
-// Function to write long values
-void write_long(FILE* out, long value) {
+void write_value(FILE* out, long value) {
     write_formatted(out, FORMAT("int64", "%ld"), value);
 }
 
-// Function to write unsigned long values
-void write_ulong(FILE* out, unsigned long value) {
+void write_value(FILE* out, unsigned long value) {
     write_formatted(out, FORMAT("uint64", "%lu"), value);
 }
 
-// Function to write long long values
-void write_llong(FILE* out, long long value) {
+void write_value(FILE* out, long long value) {
     write_formatted(out, FORMAT("integer", "%lld"), value);
 }
 
-// Function to write unsigned long long values
-void write_ullong(FILE* out, unsigned long long value) {
+void write_value(FILE* out, unsigned long long value) {
     write_formatted(out, FORMAT("bigint", "%llu"), value);
 }
 
-// Function to write float values
-void write_float(FILE* out, float value) {
+void write_value(FILE* out, float value) {
     if (isnan(value)) {
         write_formatted(out, FORMAT("single_precision", "\"%s\""), "nan");
     } else if (isinf(value)) {
@@ -115,8 +100,7 @@ void write_float(FILE* out, float value) {
     }
 }
 
-// Function to write double values
-void write_double(FILE* out, double value) {
+void write_value(FILE* out, double value) {
     if (isnan(value)) {
         write_formatted(out, FORMAT("double_precision", "\"%s\""), "nan");
     } else if (isinf(value)) {
@@ -126,8 +110,7 @@ void write_double(FILE* out, double value) {
     }
 }
 
-// Function to write long double values
-void write_ldouble(FILE* out, long double value) {
+void write_value(FILE* out, long double value) {
     if (isnan(value)) {
         write_formatted(out, FORMAT("double_extended", "\"%s\""), "nan");
     } else if (isinf(value)) {
@@ -137,20 +120,18 @@ void write_ldouble(FILE* out, long double value) {
     }
 }
 
-// Function to write string values
-void write_string(FILE* out, const string &value) {
+void write_value(FILE* out, const string &value) {
     string result = escape(value);
     write_formatted(out, FORMAT("text", "\"%s\""), result.c_str());
 }
 
-// Function to write unknown values
-void write_unknown(FILE* out, void* value) {
-    write_formatted(out, FORMAT("unknown", "\"%s\""), "?");
+void write_value(FILE* out, void* value) {
+    write_formatted(out, FORMAT("nothing", "\"%s\""), "null");
 }
 
-// Function to write void values
-void write_void(FILE* out, void* value) {
-    write_formatted(out, FORMAT("nothing", "\"%s\""), "null");
+template <typename T> void write_value(FILE* out, T value)
+{
+    write_formatted(out, FORMAT("unknown", "%p"), "?");
 }
 
 // Function to write evaluated results
