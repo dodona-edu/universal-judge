@@ -98,11 +98,11 @@ class CPPGenerator(CGenerator):
     def convert_function_call(self, function: FunctionCall) -> str:
         result = super().convert_function_call(function)
 
-        # add the namespace to the function call if it is not a constructor
-        if function.namespace and not (
-            (isinstance(function, PreparedFunctionCall) and function.has_root_namespace)
-            and function.type == FunctionType.CONSTRUCTOR
-        ):
+        # if the function has a namespace, that is not the root namespace we assume it is a method call
+        if (function.namespace 
+            and not function.has_root_namespace
+            and not function.type == FunctionType.CONSTRUCTOR
+            ):
             result = self.convert_statement(function.namespace) + "->" + result
         # add the new keyword to constructors
         if function.type == FunctionType.CONSTRUCTOR:
