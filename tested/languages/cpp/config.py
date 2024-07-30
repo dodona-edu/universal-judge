@@ -1,6 +1,6 @@
 from pathlib import Path
-from tested.features import Construct
-
+from tested.features import Construct, TypeSupport
+from tested.datatypes import AllTypes
 from tested.languages.c.config import C
 from tested.languages.conventionalize import Conventionable, NamingConventions
 from tested.languages.cpp.generators import CPPGenerator
@@ -10,7 +10,7 @@ from tested.languages.utils import executable_name
 
 class CPP(C):
     def initial_dependencies(self) -> list[str]:
-        return ["values.h", "values.cpp", "evaluation_result.h", "evaluation_result.cpp"]
+        return ["values.h", "values.cpp", "values.tpp", "evaluation_result.h", "evaluation_result.cpp"]
 
     def file_extension(self) -> str:
         return "cpp"
@@ -29,6 +29,21 @@ class CPP(C):
             Construct.ASSIGNMENTS,
             Construct.GLOBAL_VARIABLES,
             Construct.OBJECTS,
+            Construct.HETEROGENEOUS_COLLECTIONS,
+            Construct.DEFAULT_PARAMETERS,
+            Construct.HETEROGENEOUS_ARGUMENTS
+        }
+    
+    def datatype_support(self) -> dict[AllTypes, TypeSupport]:
+        return super().datatype_support() | {  # type: ignore
+            "sequence": "supported",
+            "set": "supported",
+            "map": "supported",
+            "dictionary": "supported",
+            "object": "reduced",
+            "array": "supported",
+            "list": "supported",
+            "tuple": "supported",
         }
 
     def compilation(self, files: list[str]) -> CallbackResult:
@@ -38,7 +53,7 @@ class CPP(C):
         return (
             [
                 "g++",
-                "-std=c++11",
+                "-std=c++17",
                 "-Wall",
                 "-O3" if self.config.options.compiler_optimizations else "-O0",
                 "evaluation_result.cpp",

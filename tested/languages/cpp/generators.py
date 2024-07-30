@@ -1,10 +1,10 @@
 
 from tested.datatypes import AllTypes, resolve_to_basic
 from tested.datatypes.advanced import AdvancedObjectTypes, AdvancedSequenceTypes, AdvancedStringTypes
-from tested.datatypes.basic import BasicObjectTypes, BasicSequenceTypes, BasicTypes
+from tested.datatypes.basic import BasicObjectTypes, BasicSequenceTypes, BasicStringTypes, BasicTypes
 from tested.languages.c.generators import CGenerator
 from tested.languages.preparation import PreparedExecutionUnit, PreparedFunctionCall, PreparedTestcase, PreparedTestcaseStatement
-from tested.serialisation import FunctionCall, FunctionType, ObjectType, PropertyAssignment, SequenceType, Statement, VariableAssignment, VariableType, WrappedAllTypes
+from tested.serialisation import FunctionCall, FunctionType, ObjectType, PropertyAssignment, SequenceType, Statement, Value, VariableAssignment, VariableType, WrappedAllTypes
 
 
 class CPPGenerator(CGenerator):
@@ -41,6 +41,18 @@ class CPPGenerator(CGenerator):
         value_type_str = self.convert_declaration(value_base_type, None, value_sub_type)
 
         return key_type_str, value_type_str
+    
+    def convert_value(self, value: Value) -> str:
+        tp = value.type
+        basic = resolve_to_basic(tp)
+        if basic == BasicObjectTypes.MAP:
+            return "{" + ", ".join(f"{self.convert_value(k), self.convert_value(v)}" for k, v in value.data.items()) + "}"
+        elif basic == BasicSequenceTypes.SEQUENCE or basic == BasicSequenceTypes.SET:
+            return "{" + ", ".join(self.convert_value(v) for v in value.data) + "}"
+        elif basic == BasicStringTypes.TEXT:
+            return f'std::string("{value.data}")'
+
+        return super().convert_value(value)
         
 
 
@@ -73,6 +85,14 @@ class CPPGenerator(CGenerator):
         elif basic == BasicSequenceTypes.SET:
             subtype = self.convert_sequence_subtype(value, subtype)
             return f"std::set<{subtype}>"
+        elif basic == BasicSequenceTypes.SEQUENCE:
+            subtype = self.convert_sequence_subtype(value, subtype)
+            return f"std::vector<{subtype}>"
+        elif basic == BasicStringTypes.TEXT:
+            return "std::string"
+        elif basic == BasicStringTypes.ANY:
+            return "std::any"
+
 
         return super().convert_declaration(tp)
     
