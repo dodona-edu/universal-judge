@@ -24,7 +24,7 @@ def read_config() -> DodonaConfig:
         programming_language=SupportedLanguage("cpp"),
         natural_language="nl",
         resources=Path(exercise_dir, "evaluation"),
-        source=Path(exercise_dir, "solution/correct.cpp"),
+        source=Path(exercise_dir, "solution/wrong.cpp"),
         judge=Path("."),
         workdir=Path("workdir"),
         test_suite="full.tson",

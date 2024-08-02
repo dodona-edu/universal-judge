@@ -1,7 +1,7 @@
 
 from tested.datatypes import AllTypes, resolve_to_basic
 from tested.datatypes.advanced import AdvancedNumericTypes, AdvancedObjectTypes, AdvancedSequenceTypes, AdvancedStringTypes
-from tested.datatypes.basic import BasicObjectTypes, BasicSequenceTypes, BasicStringTypes, BasicTypes
+from tested.datatypes.basic import BasicNumericTypes, BasicObjectTypes, BasicSequenceTypes, BasicStringTypes, BasicTypes
 from tested.languages.c.generators import CGenerator
 from tested.languages.preparation import PreparedExecutionUnit, PreparedFunctionCall, PreparedTestcase, PreparedTestcaseStatement
 from tested.serialisation import FunctionCall, FunctionType, ObjectType, PropertyAssignment, SequenceType, Statement, Value, VariableAssignment, VariableType, WrappedAllTypes
@@ -110,6 +110,8 @@ class CPPGenerator(CGenerator):
             return "std::string"
         elif basic == BasicStringTypes.ANY:
             return "std::any"
+        elif basic == BasicNumericTypes.INTEGER:
+            return "std::intmax_t"
 
 
         return super().convert_declaration(tp)
