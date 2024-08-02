@@ -1,6 +1,6 @@
 
 from tested.datatypes import AllTypes, resolve_to_basic
-from tested.datatypes.advanced import AdvancedObjectTypes, AdvancedSequenceTypes, AdvancedStringTypes
+from tested.datatypes.advanced import AdvancedNumericTypes, AdvancedObjectTypes, AdvancedSequenceTypes, AdvancedStringTypes
 from tested.datatypes.basic import BasicObjectTypes, BasicSequenceTypes, BasicStringTypes, BasicTypes
 from tested.languages.c.generators import CGenerator
 from tested.languages.preparation import PreparedExecutionUnit, PreparedFunctionCall, PreparedTestcase, PreparedTestcaseStatement
@@ -61,6 +61,24 @@ class CPPGenerator(CGenerator):
                             subtype: WrappedAllTypes| None = None) -> str:
         if isinstance(tp, VariableType):
             return tp.data + "*"
+        elif tp == AdvancedNumericTypes.BIG_INT:
+            return "std::intmax_t"
+        elif tp == AdvancedNumericTypes.U_INT_64:
+            return "std::uint64_t"
+        elif tp == AdvancedNumericTypes.INT_64:
+            return "std::int64_t"
+        elif tp == AdvancedNumericTypes.U_INT_32:
+            return "std::uint32_t"
+        elif tp == AdvancedNumericTypes.INT_32:
+            return "std::int32_t"
+        elif tp == AdvancedNumericTypes.U_INT_16:
+            return "std::uint16_t"
+        elif tp == AdvancedNumericTypes.INT_16:
+            return "std::int16_t"
+        elif tp == AdvancedNumericTypes.U_INT_8:
+            return "std::uint8_t"
+        elif tp == AdvancedNumericTypes.INT_8:
+            return "std::int8_t"
         if tp == AdvancedSequenceTypes.LIST:
             subtype = self.convert_sequence_subtype(value, subtype)
             return f"std::list<{subtype}>"
