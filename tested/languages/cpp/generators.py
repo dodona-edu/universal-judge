@@ -3,7 +3,7 @@ from tested.datatypes import AllTypes, resolve_to_basic
 from tested.datatypes.advanced import AdvancedNumericTypes, AdvancedObjectTypes, AdvancedSequenceTypes, AdvancedStringTypes
 from tested.datatypes.basic import BasicNumericTypes, BasicObjectTypes, BasicSequenceTypes, BasicStringTypes, BasicTypes
 from tested.languages.c.generators import CGenerator
-from tested.languages.preparation import PreparedExecutionUnit, PreparedFunctionCall, PreparedTestcase, PreparedTestcaseStatement
+from tested.languages.preparation import PreparedContext, PreparedExecutionUnit, PreparedFunctionCall, PreparedTestcase, PreparedTestcaseStatement
 from tested.serialisation import FunctionCall, FunctionType, ObjectType, PropertyAssignment, SequenceType, Statement, Value, VariableAssignment, VariableType, WrappedAllTypes
 
 
@@ -151,7 +151,7 @@ class CPPGenerator(CGenerator):
     
     def convert_testcase(self, tc: PreparedTestcase, pu: PreparedExecutionUnit) -> str:
         result = ""
-        # Define variables before asignment
+        # Define variables before asignment outside the try block
         if ( not tc.testcase.is_main_testcase()
              and isinstance(tc.input, PreparedTestcaseStatement)
              and isinstance(tc.input.statement, VariableAssignment)
@@ -159,5 +159,21 @@ class CPPGenerator(CGenerator):
             prefix = self.convert_declaration(tc.input.statement.type, tc.input.statement.expression)
             result += f"{prefix} {tc.input.statement.variable};\n"
         
+        # catch exceptions and write them to the output
+        result += "try {" + "\n"
         result += super().convert_testcase(tc, pu)
+        result += "\n} catch (std::exception_ptr e) {\n"
+        result += self.convert_statement(tc.exception_statement('e'))+ ";\n"
+        result += "exit_code = 1;\n"
+        result += "}\n"
+        return result
+    
+    def define_write_funtions(self, pu: PreparedExecutionUnit) -> str:
+        result = super().define_write_funtions(pu)
+
+        # add a write function for exceptions
+        result += f"""
+        #undef send_exception
+        #define send_exception(value) write_exception({pu.unit.name}_value_file, value)
+        """
         return result

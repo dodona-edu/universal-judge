@@ -31,6 +31,10 @@ template <typename T> void write_value(FILE* out, const T& value);
 // Function to write evaluated results
 void write_evaluated(FILE* out, EvaluationResult* result);
 
+// writes an exception to json as
+// { "type" : "exception", "message" : "message", "stacktrace" : "stacktrace" }
+void write_exception(FILE* out, std::exception_ptr e);
+
 // Include the implementation file for template functions
 #include "values.tpp"
 

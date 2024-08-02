@@ -1,1 +1,1 @@
-#define GLOBAL_VAR "GLOBAL"
+#define GLOBAL_VAR std::string("GLOBAL")

@@ -63,3 +63,13 @@ void write_evaluated(FILE* out, EvaluationResult* result) {
 
     delete result;
 }
+
+
+// writes an exception to json as
+// { "type" : "exception", "message" : "message", "stacktrace" : "stacktrace" }
+void write_exception(FILE* out, std::exception_ptr e)
+{
+    // Stacktrace and exception messages is not easily available in C++
+    string json = "{ \"type\" : \"exception\", \"message\" : \"\", \"stacktrace\" : \"\" }";
+    fprintf(out, "%s", json.c_str());
+}

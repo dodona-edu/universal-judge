@@ -17,10 +17,11 @@ class CPP(C):
     
     def naming_conventions(self) -> dict[Conventionable, NamingConventions]:
         return {
-            "identifier": "pascal_case",
-            "property": "pascal_case",
+            "identifier": "camel_case",
+            "property": "camel_case",
             "class": "pascal_case",
             "global_identifier": "macro_case",
+
         }
 
     def supported_constructs(self) -> set[Construct]:

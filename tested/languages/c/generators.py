@@ -206,22 +206,9 @@ class CGenerator:
         result += ctx.after + "\n"
         result += "return exit_code;\n"
         return result
-
-
-    def convert_execution_unit(self, pu: PreparedExecutionUnit) -> str:
-        result = f"""
-        #include <stdio.h>
-        #include <math.h>
-        
-        #include "values.h"
-        #include "{pu.submission_name}.{self.extension}"
-        """
-
-        # Import functions
-        for name in pu.evaluator_names:
-            result += f'#include "{name}.{self.extension}"\n'
-
-        result += f"""
+    
+    def define_write_funtions(self, pu: PreparedExecutionUnit) -> str:
+        return f"""
         static FILE* {pu.unit.name}_value_file = NULL;
         static FILE* {pu.unit.name}_exception_file = NULL;
         
@@ -245,6 +232,22 @@ class CGenerator:
         #undef send_specific_value
         #define send_specific_value(value) write_evaluated({pu.unit.name}_value_file, value)
         """
+
+
+    def convert_execution_unit(self, pu: PreparedExecutionUnit) -> str:
+        result = f"""
+        #include <stdio.h>
+        #include <math.h>
+        
+        #include "values.h"
+        #include "{pu.submission_name}.{self.extension}"
+        """
+
+        # Import functions
+        for name in pu.evaluator_names:
+            result += f'#include "{name}.{self.extension}"\n'
+
+        result += self.define_write_funtions(pu)
 
         # Generate code for each context.
         ctx: PreparedContext
