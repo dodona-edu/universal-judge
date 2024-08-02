@@ -13,7 +13,7 @@ from tested.configs import DodonaConfig, Options
 from tested.main import run
 from tested.testsuite import SupportedLanguage
 
-exercise_dir = "/home/jorg/Documents/universal-judge/tests/exercises/isbn"
+exercise_dir = "/home/jorg/Documents/universal-judge/tests/exercises/isbn-list"
 
 
 def read_config() -> DodonaConfig:
