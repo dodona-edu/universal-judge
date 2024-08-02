@@ -13,7 +13,7 @@ from tested.configs import DodonaConfig, Options
 from tested.main import run
 from tested.testsuite import SupportedLanguage
 
-exercise_dir = "/home/jorg/Documents/universal-judge/tests/exercises/remove"
+exercise_dir = "/home/jorg/Documents/universal-judge/tests/exercises/sum"
 
 
 def read_config() -> DodonaConfig:
@@ -24,10 +24,10 @@ def read_config() -> DodonaConfig:
         programming_language=SupportedLanguage("cpp"),
         natural_language="nl",
         resources=Path(exercise_dir, "evaluation"),
-        source=Path(exercise_dir, "solution/wrong.cpp"),
+        source=Path(exercise_dir, "solution/correct.cpp"),
         judge=Path("."),
         workdir=Path("workdir"),
-        test_suite="full.tson",
+        test_suite="plan.tson",
         options=Options(
             linter=False,
         ),
