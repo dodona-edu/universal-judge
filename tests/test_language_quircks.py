@@ -152,7 +152,7 @@ def test_javascript_exception_missing_message(
     assert updates.find_status_enum() == ["wrong"]
 
 
-@pytest.mark.parametrize("exercise", ["echo-function-file", "echo-function"])
+@pytest.mark.parametrize("exercise", ["echo-function-file-input", "echo-function"])
 def test_javascript_async(exercise: str, tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig, exercise, "javascript", tmp_path, "one.tson", "correct-async"

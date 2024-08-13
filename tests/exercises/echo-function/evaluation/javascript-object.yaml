@@ -3,4 +3,3 @@
     - testcases:
         - expression: 'echo("input-1")'
           return: !object {}
-
