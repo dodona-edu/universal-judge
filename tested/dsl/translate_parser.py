@@ -52,6 +52,7 @@ from tested.testsuite import (
     ExceptionOutputChannel,
     ExitCodeOutputChannel,
     ExpectedException,
+    FileOutputChannel,
     FileUrl,
     GenericTextOracle,
     IgnoredChannel,
@@ -63,6 +64,7 @@ from tested.testsuite import (
     SupportedLanguage,
     Tab,
     Testcase,
+    TextBuiltin,
     TextData,
     TextOutputChannel,
     ValueOutputChannel,
@@ -438,6 +440,35 @@ def _convert_text_output_channel(stream: YamlObject) -> TextOutputChannel:
         raise TypeError(f"Unknown text oracle type: {stream['oracle']}")
 
 
+def _convert_file_output_channel(stream: YamlObject) -> FileOutputChannel:
+    assert isinstance(stream, dict)
+
+    expected = str(stream["content"])
+    actual = str(stream["location"])
+
+    if "oracle" not in stream or stream["oracle"] == "builtin":
+        config = cast(dict, stream.get("config", {}))
+        if "mode" not in config:
+            config["mode"] = "full"
+
+        assert config["mode"] in (
+            "full",
+            "line",
+        ), f"The file oracle only supports modes full and line, not {config['mode']}"
+        return FileOutputChannel(
+            expected_path=expected,
+            actual_path=actual,
+            oracle=GenericTextOracle(name=TextBuiltin.FILE, options=config),
+        )
+    elif stream["oracle"] == "custom_check":
+        return FileOutputChannel(
+            expected_path=expected,
+            actual_path=actual,
+            oracle=_convert_custom_check_oracle(stream),
+        )
+    raise TypeError(f"Unknown file oracle type: {stream['oracle']}")
+
+
 def _convert_yaml_value(stream: YamlObject) -> Value | None:
     if isinstance(stream, ExpressionString):
         # We have an expression string.
@@ -536,6 +567,8 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
 
     if (stdout := testcase.get("stdout")) is not None:
         output.stdout = _convert_text_output_channel(stdout)
+    if (file := testcase.get("file")) is not None:
+        output.file = _convert_file_output_channel(file)
     if (stderr := testcase.get("stderr")) is not None:
         output.stderr = _convert_text_output_channel(stderr)
     if (exception := testcase.get("exception")) is not None:
