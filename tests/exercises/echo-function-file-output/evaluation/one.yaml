@@ -1,0 +1,7 @@
+- tab: "Test"
+  testcases:
+    - statement: echo_function("result.txt", "Hallo")
+      file:
+        content: "contents.txt"
+        location: "result.txt"
+        oracle: builtin

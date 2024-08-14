@@ -44,14 +44,36 @@ def test_io_function_exercise(
 
 
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
-def test_io_function_file_exercise(
+def test_io_function_file_input_exercise(
     language: str, tmp_path: Path, pytestconfig: pytest.Config
 ):
     conf = configuration(
-        pytestconfig, "echo-function-file", language, tmp_path, "one.tson", "correct"
+        pytestconfig,
+        "echo-function-file-input",
+        language,
+        tmp_path,
+        "one.tson",
+        "correct",
     )
     shutil.copytree(
         Path(conf.resources).parent / "workdir", tmp_path, dirs_exist_ok=True
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]
+
+
+@pytest.mark.parametrize("language", ALL_LANGUAGES)
+def test_io_function_file_output_exercise(
+    language: str, tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig,
+        "echo-function-file-output",
+        language,
+        tmp_path,
+        "one.yaml",
+        "correct",
     )
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
