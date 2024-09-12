@@ -70,6 +70,9 @@
         "definitions" : {
           "description" : "Define hashes to use elsewhere.",
           "type" : "object"
+        },
+        "config": {
+          "$ref": "#/definitions/inheritableConfigObject"
         }
       }
     },
@@ -111,6 +114,9 @@
         "definitions" : {
           "description" : "Define objects to use elsewhere.",
           "type" : "object"
+        },
+        "config": {
+          "$ref": "#/definitions/inheritableConfigObject"
         }
       },
       "oneOf" : [
@@ -160,6 +166,9 @@
         "definitions" : {
           "description" : "Define objects to use elsewhere.",
           "type" : "object"
+        },
+        "config": {
+          "$ref": "#/definitions/inheritableConfigObject"
         }
       },
       "oneOf" : [
@@ -585,21 +594,7 @@
               "const" : "builtin"
             },
             "config" : {
-              "anyOf" : [
-                {
-                  "$ref" : "#/definitions/textConfigurationOptions"
-                },
-                {
-                  "type" : "object",
-                  "properties" : {
-                    "mode": {
-                      "type" : "string",
-                      "enum" : ["full", "line"],
-                      "default" : "full"
-                    }
-                  }
-                }
-              ]
+              "$ref" : "#/definitions/fileConfigurationOptions"
             }
           }
         },
@@ -845,6 +840,23 @@
         }
       }
     },
+    "fileConfigurationOptions": {
+      "anyOf" : [
+        {
+          "$ref" : "#/definitions/textConfigurationOptions"
+        },
+        {
+          "type" : "object",
+          "properties" : {
+            "mode": {
+              "type" : "string",
+              "enum" : ["full", "line"],
+              "default" : "full"
+            }
+          }
+        }
+      ]
+    },
     "textualType" : {
       "description" : "Simple textual value, converted to string.",
       "type" : [
@@ -861,6 +873,20 @@
           "oracle",
           "expression"
         ]
+      }
+    },
+    "inheritableConfigObject": {
+      "type": "object",
+      "properties" : {
+        "stdout": {
+          "$ref" : "#/definitions/textConfigurationOptions"
+        },
+        "stderr": {
+          "$ref" : "#/definitions/textConfigurationOptions"
+        },
+        "file": {
+          "$ref" : "#/definitions/fileConfigurationOptions"
+        }
       }
     }
   }
