@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING, Optional
 
 from tested.languages.bash.config import Bash
 from tested.languages.c.config import C
+from tested.languages.cpp.config import CPP
 from tested.languages.csharp.config import CSharp
 from tested.languages.haskell.config import Haskell
 from tested.languages.java.config import Java
@@ -34,6 +35,7 @@ LANGUAGES = {
     "python": Python,
     "runhaskell": RunHaskell,
     "csharp": CSharp,
+    "cpp": CPP,
 }
 
 
