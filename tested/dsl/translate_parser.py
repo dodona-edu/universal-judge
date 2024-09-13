@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any, Literal, Type, TypeVar, cast
 
 import yaml
-from attrs import define, evolve
+from attrs import define, evolve, field
 from jsonschema import TypeChecker
 from jsonschema.exceptions import ValidationError
 from jsonschema.protocols import Validator
@@ -69,7 +69,7 @@ from tested.testsuite import (
     TextOutputChannel,
     ValueOutputChannel,
 )
-from tested.utils import get_args
+from tested.utils import get_args, recursive_dict_merge
 
 YamlDict = dict[str, "YamlObject"]
 
@@ -229,9 +229,16 @@ class InvalidYamlError(ValueError):
 class DslContext:
     """
     Carries context in each level.
+
+    This function will, in essence, make two properties inheritable from the global
+    and tab context:
+
+    - The "config" property, which has config for "stdout", "stderr", and "file".
+    - The "files" property, which is a list of files.
     """
 
-    files: list[FileUrl]
+    files: list[FileUrl] = field(factory=list)
+    config: dict[str, dict] = field(factory=dict)
     language: SupportedLanguage | Literal["tested"] = "tested"
 
     def deepen_context(self, new_level: YamlDict | None) -> "DslContext":
@@ -246,13 +253,28 @@ class DslContext:
         if new_level is None:
             return self
 
-        new_files = self.files
+        the_files = self.files
         if "files" in new_level:
             assert isinstance(new_level["files"], list)
             additional_files = {_convert_file(f) for f in new_level["files"]}
-            new_files = list(set(self.files) | additional_files)
+            the_files = list(set(self.files) | additional_files)
 
-        return evolve(self, files=new_files)
+        the_config = self.config
+        if "config" in new_level:
+            assert isinstance(new_level["config"], dict)
+            the_config = recursive_dict_merge(the_config, new_level["config"])
+
+        return evolve(self, files=the_files, config=the_config)
+
+    def merge_inheritable_with_specific_config(
+        self, level: YamlDict, config_name: str
+    ) -> dict:
+        inherited_options = self.config.get(config_name, dict())
+        specific_options = level.get("config", dict())
+        assert isinstance(
+            specific_options, dict
+        ), f"The config options for {config_name} must be a dictionary, not a {type(specific_options)}"
+        return recursive_dict_merge(inherited_options, specific_options)
 
 
 def convert_validation_error_to_group(
@@ -418,36 +440,50 @@ def _convert_language_specific_oracle(stream: dict) -> LanguageSpecificOracle:
     return LanguageSpecificOracle(functions=the_functions, arguments=the_args)
 
 
-def _convert_text_output_channel(stream: YamlObject) -> TextOutputChannel:
+def _convert_text_output_channel(
+    stream: YamlObject, context: DslContext, config_name: str
+) -> TextOutputChannel:
+    # Get the config applicable to this level.
+    # Either attempt to get it from an object, or using the inherited options as is.
     if isinstance(stream, str):
-        data = _ensure_trailing_newline(stream)
-        return TextOutputChannel(data=data, oracle=GenericTextOracle())
+        config = context.config.get(config_name, dict())
+        raw_data = stream
     else:
         assert isinstance(stream, dict)
-        data = str(stream["data"])
+        config = context.merge_inheritable_with_specific_config(stream, config_name)
+        raw_data = str(stream["data"])
+
+    # Normalize the data if necessary.
+    if config.get("normalizeTrailingNewlines", True):
+        data = _ensure_trailing_newline(raw_data)
+    else:
+        data = raw_data
+
+    if isinstance(stream, str):
+        return TextOutputChannel(data=data, oracle=GenericTextOracle(options=config))
+    else:
+        assert isinstance(stream, dict)
         if "oracle" not in stream or stream["oracle"] == "builtin":
-            config = cast(dict, stream.get("config", {}))
-            if config.get("normalizeTrailingNewlines", True):
-                data = _ensure_trailing_newline(data)
             return TextOutputChannel(
                 data=data, oracle=GenericTextOracle(options=config)
             )
         elif stream["oracle"] == "custom_check":
-            data = _ensure_trailing_newline(data)
             return TextOutputChannel(
                 data=data, oracle=_convert_custom_check_oracle(stream)
             )
         raise TypeError(f"Unknown text oracle type: {stream['oracle']}")
 
 
-def _convert_file_output_channel(stream: YamlObject) -> FileOutputChannel:
+def _convert_file_output_channel(
+    stream: YamlObject, context: DslContext, config_name: str
+) -> FileOutputChannel:
     assert isinstance(stream, dict)
 
     expected = str(stream["content"])
     actual = str(stream["location"])
 
     if "oracle" not in stream or stream["oracle"] == "builtin":
-        config = cast(dict, stream.get("config", {}))
+        config = context.merge_inheritable_with_specific_config(stream, config_name)
         if "mode" not in config:
             config["mode"] = "full"
 
@@ -566,11 +602,11 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
         output.result = return_channel
 
     if (stdout := testcase.get("stdout")) is not None:
-        output.stdout = _convert_text_output_channel(stdout)
+        output.stdout = _convert_text_output_channel(stdout, context, "stdout")
     if (file := testcase.get("file")) is not None:
-        output.file = _convert_file_output_channel(file)
+        output.file = _convert_file_output_channel(file, context, "file")
     if (stderr := testcase.get("stderr")) is not None:
-        output.stderr = _convert_text_output_channel(stderr)
+        output.stderr = _convert_text_output_channel(stderr, context, "stderr")
     if (exception := testcase.get("exception")) is not None:
         if isinstance(exception, str):
             message = exception
@@ -690,7 +726,7 @@ def _convert_dsl(dsl_object: YamlObject) -> Suite:
     :param dsl_object: A validated DSL test suite object.
     :return: A full test suite.
     """
-    context = DslContext(files=[])
+    context = DslContext()
     if isinstance(dsl_object, list):
         namespace = None
         tab_list = dsl_object

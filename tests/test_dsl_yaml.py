@@ -430,7 +430,7 @@ def test_statement_with_yaml_dict():
     assert isinstance(test.output.result.value, ObjectType)
 
 
-def test_global_config_trickles_down():
+def test_global_definition_config_trickles_down():
     yaml_str = """
 definitions:
   config: &stdout
@@ -456,6 +456,92 @@ tabs:
     stdout = suite.tabs[0].contexts[0].testcases[0].output.stdout
     assert isinstance(stdout.oracle, GenericTextOracle)
     config = stdout.oracle.options
+    assert config["applyRounding"]
+    assert config["roundTo"] == 63
+    assert config["tryFloatingPoint"]
+    assert config["caseInsensitive"]
+
+
+def test_global_config_trickles_down():
+    yaml_str = """
+config:
+  stdout:
+    applyRounding: true
+    roundTo: 63
+    tryFloatingPoint: true
+    caseInsensitive: true
+    namespace: "solution"
+tabs:
+- tab: "Ctx"
+  hidden: true
+  testcases:
+  - arguments: [ "--arg", "argument" ]
+    stdin: "Input string"
+    stdout: "Output string"
+    stderr: "Error string"
+    exit_code: 1
+    """
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    stdout = suite.tabs[0].contexts[0].testcases[0].output.stdout
+    assert isinstance(stdout.oracle, GenericTextOracle)
+    config = stdout.oracle.options
+    assert config["applyRounding"]
+    assert config["roundTo"] == 63
+    assert config["tryFloatingPoint"]
+    assert config["caseInsensitive"]
+
+
+def test_tab_config_trickles_down_stdout():
+    yaml_str = """
+- tab: "Ctx"
+  config:
+    stdout:
+      applyRounding: true
+      roundTo: 63
+      tryFloatingPoint: true
+      caseInsensitive: true
+      namespace: "solution"
+  testcases:
+  - arguments: [ "--arg", "argument" ]
+    stdin: "Input string"
+    stdout: "Output string"
+    stderr: "Error string"
+    exit_code: 1
+    """
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    stdout = suite.tabs[0].contexts[0].testcases[0].output.stdout
+    assert isinstance(stdout.oracle, GenericTextOracle)
+    config = stdout.oracle.options
+    assert config["applyRounding"]
+    assert config["roundTo"] == 63
+    assert config["tryFloatingPoint"]
+    assert config["caseInsensitive"]
+
+
+def test_tab_config_trickles_down_stderr():
+    yaml_str = """
+- tab: "Ctx"
+  config:
+    stderr:
+      applyRounding: true
+      roundTo: 63
+      tryFloatingPoint: true
+      caseInsensitive: true
+      namespace: "solution"
+  testcases:
+  - arguments: [ "--arg", "argument" ]
+    stdin: "Input string"
+    stdout: "Output string"
+    stderr: "Error string"
+    exit_code: 1
+    """
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    stderr = suite.tabs[0].contexts[0].testcases[0].output.stderr
+    assert isinstance(stderr.oracle, GenericTextOracle)
+    config = stderr.oracle.options
     assert config["applyRounding"]
     assert config["roundTo"] == 63
     assert config["tryFloatingPoint"]

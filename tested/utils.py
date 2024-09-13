@@ -148,7 +148,6 @@ def recursive_dict_merge(one: dict, two: dict) -> dict:
     """
     new_dictionary = {}
 
-    # noinspection PyTypeChecker
     for key, value in one.items():
         new_dictionary[key] = value
 
