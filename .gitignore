@@ -73,6 +73,7 @@ ipython_config.py
 
 # pyenv
 .python-version
+.data
 
 # workdir for judge
 /workdir/
@@ -82,3 +83,9 @@ venv-*/
 .venv/
 node_modules/
 result/
+
+# Nextflow
+.nextflow*
+
+# .NET
+obj/

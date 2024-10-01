@@ -17,6 +17,7 @@ from tested.languages.java.config import Java
 from tested.languages.javascript.config import JavaScript
 from tested.languages.kotlin.config import Kotlin
 from tested.languages.language import Language
+from tested.languages.nextflow.config import Nextflow
 from tested.languages.python.config import Python
 from tested.languages.runhaskell.config import RunHaskell
 
@@ -31,6 +32,7 @@ LANGUAGES = {
     "java": Java,
     "javascript": JavaScript,
     "kotlin": Kotlin,
+    "nextflow": Nextflow,
     "python": Python,
     "runhaskell": RunHaskell,
     "csharp": CSharp,
