@@ -79,6 +79,7 @@ class Haskell(Language):
             Construct.ASSIGNMENTS,
             Construct.EVALUATION,
             Construct.GLOBAL_VARIABLES,
+            Construct.HETEROGENEOUS_ARGUMENTS
         }
 
     def compilation(self, files: list[str]) -> CallbackResult:
