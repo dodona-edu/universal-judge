@@ -73,6 +73,7 @@ class SupportedLanguage(StrEnum):
     JAVA = auto()
     JAVASCRIPT = auto()
     KOTLIN = auto()
+    NEXTFLOW = auto()
     PYTHON = auto()
     RUNHASKELL = auto()
     CSHARP = auto()
