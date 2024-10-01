@@ -12,7 +12,7 @@ ALL_SPECIFIC_LANGUAGES = COMPILE_LANGUAGES + [
     "javascript",
     "runhaskell",
 ]
-ALL_LANGUAGES = ALL_SPECIFIC_LANGUAGES + ["bash"]
+ALL_LANGUAGES = ALL_SPECIFIC_LANGUAGES + ["bash", "nextflow"]
 
 EXCEPTION_LANGUAGES = ["python", "java", "kotlin", "csharp", "haskell"]
 
