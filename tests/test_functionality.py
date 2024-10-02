@@ -14,8 +14,9 @@ import pytest
 from pytest_mock import MockerFixture
 
 from tested.configs import create_bundle
+from tested.features import Construct
 from tested.judge.execution import ExecutionResult
-from tested.languages import LANGUAGES
+from tested.languages import get_language, LANGUAGES
 from tested.languages.generation import get_readable_input
 from tested.testsuite import Context, MainInput, Suite, Tab, Testcase, TextData
 from tests.language_markers import (
@@ -31,6 +32,8 @@ def test_global_variable(language: str, tmp_path: Path, pytestconfig: pytest.Con
     conf = configuration(
         pytestconfig, "global", language, tmp_path, "one.tson", "correct"
     )
+    if Construct.GLOBAL_VARIABLES not in get_language(None, conf.programming_language).supported_constructs():
+        pytest.skip("Language doesn't support global variables")
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["correct"]
@@ -43,6 +46,8 @@ def test_global_variable_yaml(
     conf = configuration(
         pytestconfig, "global", language, tmp_path, "plan.yaml", "correct"
     )
+    if Construct.GLOBAL_VARIABLES not in get_language(None, conf.programming_language).supported_constructs():
+        pytest.skip("Language doesn't support global variables")
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["correct"]
@@ -585,7 +590,6 @@ def test_ignored_return_and_got_some(
         "ignored_return_but_got_some.json",
         "correct",
     )
-
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == []  # Empty means correct
