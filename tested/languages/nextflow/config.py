@@ -24,6 +24,9 @@ if TYPE_CHECKING:
     from tested.languages.generation import PreparedExecutionUnit
 
 class Nextflow(Language):
+    def compilation(self, files: list[str]) -> CallbackResult:
+        return ["groovyc", *files], files
+
     def execution(self, cwd: Path, file: str, arguments: list[str]) -> Command:
         named_arguments = [f"--p{i}={x}" for i, x in enumerate(arguments)]
         return ["nextflow", "-quiet", "run", file, *named_arguments]
