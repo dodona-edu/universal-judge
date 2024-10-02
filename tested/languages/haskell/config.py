@@ -177,8 +177,6 @@ class Haskell(Language):
     def generate_execution_unit(self, execution_unit: "PreparedExecutionUnit") -> str:
         from tested.languages.haskell import generators
 
-        print(generators.convert_execution_unit(execution_unit))
-
         return generators.convert_execution_unit(execution_unit)
 
     def generate_selector(self, contexts: list[str]) -> str:
