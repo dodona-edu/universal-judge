@@ -71,9 +71,7 @@ def test_haskell_function_arguments_without_brackets(
     )
 
     result = generate_statement(bundle, statement)
-    assert (
-        result == f'{submission_name(bundle.language)}.test 5.5 "hallo" True'
-    )
+    assert result == f'{submission_name(bundle.language)}.test 5.5 "hallo" True'
 
 
 def test_javascript_exception_correct(tmp_path: Path, pytestconfig: pytest.Config):
