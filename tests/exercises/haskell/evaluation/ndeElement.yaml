@@ -1,0 +1,16 @@
+tabs:
+  - tab: geefNde
+    testcases:
+      - expression: geefNde(0, [1, 2, 3, 4])
+        description:
+          description: geefNde 0 [1, 2, 3, 4]
+          format: haskell
+        return: 1
+      - expression: geefNde(0, [1.0, 2.0, 3.0, 4.0])
+        return: 1.0
+      - expression: geefNde(0, ['a', 'b', 'c', 'd'])
+        return: a
+      - expression: geefNde(1, [(1, 2), (3, 4), (5, 6), (7, 8)])
+        return: !tuple [3, 4]
+      - expression: geefNde(1, [(1.0, 2.0), (3.0, 4.0), (5.0, 6.0), (7.0, 8.0)])
+        return: !tuple [3.0, 4.0]

@@ -24,10 +24,10 @@ def read_config() -> DodonaConfig:
         programming_language=SupportedLanguage("haskell"),
         natural_language="nl",
         resources=Path(exercise_dir, "evaluation"),
-        source=Path(exercise_dir, "solution/voorlaatste.hs"),
+        source=Path(exercise_dir, "solution/ndeElement.hs"),
         judge=Path("."),
         workdir=Path("workdir"),
-        test_suite="voorlaatste.yaml",
+        test_suite="ndeElement.yaml",
         options=Options(
             linter=False,
         ),

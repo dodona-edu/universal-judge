@@ -40,7 +40,6 @@ from tested.utils import is_statement_strict
 def convert_arguments(arguments: list[Expression]) -> str:
     return ", ".join(convert_statement(arg) for arg in arguments)
 
-
 def convert_value(value: Value) -> str:
     # Handle some advanced types.
     if value.type == AdvancedSequenceTypes.TUPLE:
@@ -48,37 +47,37 @@ def convert_value(value: Value) -> str:
         return f"({convert_arguments(value.data)})"
     elif isinstance(value.type, AdvancedNumericTypes):
         if not isinstance(value.data, SpecialNumbers):
-            return f"{value.data} :: {convert_declaration(value.type)}"
+            return f"({value.data} :: {convert_declaration(value.type)})"
         elif value.data == SpecialNumbers.NOT_A_NUMBER:
-            return f"(0/0) :: {convert_declaration(value.type)}"
+            return f"((0/0) :: {convert_declaration(value.type)})"
         elif value.data == SpecialNumbers.POS_INFINITY:
-            return f"(1/0) :: {convert_declaration(value.type)}"
+            return f"((1/0) :: {convert_declaration(value.type)})"
         else:
             assert value.data == SpecialNumbers.NEG_INFINITY
-            return f"(-1/0) :: {convert_declaration(value.type)}"
+            return f"((-1/0) :: {convert_declaration(value.type)})"
     elif value.type == AdvancedStringTypes.CHAR:
         assert isinstance(value, StringType)
         return "'" + value.data.replace("'", "\\'") + "'"
     # Handle basic types
     value = as_basic_type(value)
     if value.type == BasicNumericTypes.INTEGER:
-        return f"{value.data} :: Int"
+        return f"({value.data} :: Int)"
     elif value.type == BasicNumericTypes.REAL:
         if not isinstance(value.data, SpecialNumbers):
-            return f"{value.data} :: Double"
+            return f"({value.data} :: Double)"
         elif value.data == SpecialNumbers.NOT_A_NUMBER:
-            return "(0/0) :: Double"
+            return "((0/0) :: Double)"
         elif value.data == SpecialNumbers.POS_INFINITY:
-            return "(1/0) :: Double"
+            return "((1/0) :: Double)"
         else:
             assert SpecialNumbers.NEG_INFINITY
-            return "(-1/0) :: Double"
+            return "((-1/0) :: Double)"
     elif value.type == BasicStringTypes.TEXT:
         return json.dumps(value.data)
     elif value.type == BasicBooleanTypes.BOOLEAN:
         return str(value.data)
     elif value.type == BasicNothingTypes.NOTHING:
-        return "Nothing :: Maybe Integer"
+        return "(Nothing :: Maybe Integer)"
     elif value.type == BasicSequenceTypes.SEQUENCE:
         assert isinstance(value, SequenceType)
         return f"[{convert_arguments(value.data)}]"
