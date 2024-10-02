@@ -1,14 +1,13 @@
-process readfile {
+process echoFile {
     input:
-    path p
+    val x
     output:
     stdout
+
+    script:
+    p = file(x)
 
     """
     cat "${p}"
     """
-}
-
-workflow {
-    readfile(${params.p1}) | view(newLine: false)
 }

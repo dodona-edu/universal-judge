@@ -5,6 +5,6 @@ class Submission
 {
     public static string EchoFile(string value)
     {
-        return System.IO.File.ReadAllText(value).Trim();
+        return System.IO.File.ReadAllText(value);
     }
 }

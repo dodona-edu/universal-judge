@@ -1,15 +1,5 @@
 #include <ctype.h>
 
-void trim(char *s) {
-    char * p = s;
-    int l = strlen(p);
-
-    while(isspace(p[l - 1])) p[--l] = 0;
-    while(*p && isspace(* p)) ++p, --l;
-
-    memmove(s, p, l + 1);
-}
-
 char* echo_file(const char* filename) {
     char *buffer = 0;
     long length;
@@ -26,7 +16,6 @@ char* echo_file(const char* filename) {
       fclose (f);
     }
     if (buffer) {
-        trim(buffer);
         return buffer;
     }
     return "";
