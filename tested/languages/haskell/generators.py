@@ -40,6 +40,7 @@ from tested.utils import is_statement_strict
 def convert_arguments(arguments: list[Expression]) -> str:
     return ", ".join(convert_statement(arg) for arg in arguments)
 
+
 def convert_value(value: Value) -> str:
     # Handle some advanced types.
     if value.type == AdvancedSequenceTypes.TUPLE:
