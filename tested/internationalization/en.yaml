@@ -107,6 +107,11 @@ en:
         timeout: "HLint exceeded time limit"
         memory: "HLint exceeded memory limit"
         output: "HLint produced bad output."
+    nextflow:
+      linter:
+        timeout: "CodeNarc exceeded time limit"
+        memory: "CodeNarc exceeded memory limit"
+        output: "CodeNarc produced bad output."
     kotlin:
       linter:
         timeout: "KTLint exceeded time limit"
