@@ -5,13 +5,7 @@ from typing import TYPE_CHECKING
 from tested.datatypes import AdvancedStringTypes, AllTypes, BasicNumericTypes, BasicStringTypes
 from tested.dodona import AnnotateCode, Message
 from tested.features import Construct, TypeSupport
-from tested.languages.conventionalize import (
-    EXECUTION_PREFIX,
-    Conventionable,
-    NamingConventions,
-    submission_file,
-    submission_name,
-)
+from tested.languages.conventionalize import Conventionable, NamingConventions
 from tested.languages.language import (
     CallbackResult,
     Command,
@@ -78,6 +72,13 @@ class Nextflow(Language):
             contents = re.sub(with_name, replacement, contents, count=1)
         with open(solution, "w") as file:
             file.write(contents)
+
+    def linter(self, remaining: float) -> tuple[list[Message], list[AnnotateCode]]:
+        # Import locally to prevent errors.
+        from tested.languages.nextflow import linter
+
+        assert self.config
+        return linter.run_codenarc(self.config.dodona, remaining)
 
     def generate_statement(self, statement: Statement) -> str:
         from tested.languages.nextflow import generators
