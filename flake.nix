@@ -75,6 +75,7 @@
           (pkgs.haskell.packages.ghc96.ghcWithPackages (p: [ p.aeson ]))
           pkgs.hlint
         ];
+        ts-deps = [ nodejs_base pkgs.typescript pkgs.nodePackages.ts-node ];
         node-deps = [ nodejs_base pkgs.nodePackages.eslint ast ];
         bash-deps = [ pkgs.shellcheck ];
         c-deps = [ pkgs.cppcheck pkgs.gcc13 ];
@@ -82,7 +83,7 @@
         kotlin-deps = [ pkgs.kotlin pkgs.ktlint ];
         csharp-deps = [ pkgs.dotnetCorePackages.sdk_8_0 ];
 
-        all-other-dependencies = haskell-deps ++ node-deps ++ bash-deps
+        all-other-dependencies = ts-deps ++ haskell-deps ++ node-deps ++ bash-deps
           ++ c-deps ++ java-deps ++ kotlin-deps ++ csharp-deps
           ++ [ pkgs.coreutils ];
 
