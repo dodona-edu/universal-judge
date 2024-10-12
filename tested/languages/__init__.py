@@ -19,6 +19,7 @@ from tested.languages.kotlin.config import Kotlin
 from tested.languages.language import Language
 from tested.languages.python.config import Python
 from tested.languages.runhaskell.config import RunHaskell
+from tested.languages.typescript.config import TypeScript
 
 if TYPE_CHECKING:
     from tested.configs import GlobalConfig
@@ -30,6 +31,7 @@ LANGUAGES = {
     "haskell": Haskell,
     "java": Java,
     "javascript": JavaScript,
+    "typescript": TypeScript,
     "kotlin": Kotlin,
     "python": Python,
     "runhaskell": RunHaskell,

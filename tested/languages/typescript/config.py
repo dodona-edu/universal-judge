@@ -32,7 +32,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-class Typescript(Language):
+class TypeScript(Language):
 
     def initial_dependencies(self) -> list[str]:
         return ["values.ts"]
@@ -112,7 +112,8 @@ class Typescript(Language):
             return [], files
 
     def execution(self, cwd: Path, file: str, arguments: list[str]) -> Command:
-        return ["ts-node", file, *arguments]
+        # Used es2022 because of the top-level await feature (most up-to data).
+        return ["ts-node",  "-O", '{"module": "es2022"}', file, *arguments]
 
     def modify_solution(self, solution: Path):
         # import local to prevent errors
@@ -129,8 +130,9 @@ class Typescript(Language):
         )
         assert output, "Missing output from TypesScript's modify_solution"
         namings = output.stdout.strip()
+        breakpoint()
         with open(solution, "a") as file:
-            print(f"\nmodule.exports = {{{namings}}};", file=file)
+            print(f"\nexports.{namings} = {{{namings}}};", file=file)
 
         # Add strict mode to the script.
         with open(solution, "r") as file:

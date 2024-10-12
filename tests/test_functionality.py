@@ -94,7 +94,7 @@ def test_generic_exception_wrong_error(
     assert updates.find_status_enum() == ["wrong"]
 
 
-@pytest.mark.parametrize("lang", ["python", "java", "kotlin", "csharp"])
+@pytest.mark.parametrize("lang", ["python", "java", "kotlin", "csharp", "typescript"])
 def test_assignment_and_use_in_expression(
     lang: str, tmp_path: Path, pytestconfig: pytest.Config
 ):

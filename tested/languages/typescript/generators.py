@@ -214,12 +214,12 @@ def _generate_internal_context(ctx: PreparedContext, pu: PreparedExecutionUnit) 
 def convert_execution_unit(pu: PreparedExecutionUnit) -> str:
     result = """
     const fs = require('fs');
-    const values = require("./values.js");
+    const values = require("./values.ts");
     """
 
     # Import the language specific functions we will need.
     for name in pu.evaluator_names:
-        result += f'const {name} = require("./{name}.js");\n'
+        result += f'const {name} = require("./{name}.ts");\n'
 
     # We now open files for results and define some functions.
     result += f"""
@@ -240,19 +240,19 @@ def convert_execution_unit(pu: PreparedExecutionUnit) -> str:
         fs.writeSync(process.stderr.fd, "--{pu.context_separator_secret}-- SEP");
     }}
 
-    async function sendValue(value) {{
+    async function sendValue(value: unknown) {{
         values.sendValue(valueFile, await value);
     }}
 
-    async function sendException(exception) {{
+    async function sendException(exception: unknown) {{
         values.sendException(exceptionFile, await exception);
     }}
 
-    async function sendSpecificValue(value) {{
+    async function sendSpecificValue(value: unknown) {{
         values.sendEvaluated(valueFile, await value);
     }}
 
-    async function sendSpecificException(exception) {{
+    async function sendSpecificException(exception: unknown) {{
         values.sendEvaluated(exceptionFile, await exception);
     }}
     """
@@ -287,8 +287,8 @@ def convert_execution_unit(pu: PreparedExecutionUnit) -> str:
 def convert_check_function(evaluator: str, function: FunctionCall) -> str:
     return f"""
     (async () => {{
-        const {evaluator} = require('./{evaluator}.js');
-        const values = require('./values.js');
+        const {evaluator} = require('./{evaluator}.ts');
+        const values = require('./values.ts');
 
         const result = {convert_function_call(function)};
         values.sendEvaluated(process.stdout.fd, result);
@@ -298,7 +298,7 @@ def convert_check_function(evaluator: str, function: FunctionCall) -> str:
 
 def convert_encoder(values: list[Value]) -> str:
     result = """
-    const values = require('./values.js');
+    const values = require('./values.ts');
     const fs = require("fs");
     """
 

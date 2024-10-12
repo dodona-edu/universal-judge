@@ -1,6 +1,6 @@
-import * as fs from "fs";
+const fileSystem = require('fs');
 
-function isVanillaObject(value) : boolean {
+function isVanillaObject(value: Object) : boolean {
     try {
         return Reflect.getPrototypeOf(value) === null;
     } catch {
@@ -8,7 +8,7 @@ function isVanillaObject(value) : boolean {
     }
 }
 
-function encode(value) {
+function encode(value: Object): { data: Object; diagnostic: any; type: string } {
     let diagnostic = null;
     let type = null;
 
@@ -76,7 +76,7 @@ function encode(value) {
             value = Object.keys(value).map(key => {
                 return {
                     key: encode(key),
-                    value: encode(value[key])
+                    value: encode((value as Record<string, any>)[key])
                 };
             });
         } else {
@@ -86,7 +86,7 @@ function encode(value) {
         }
     } else {
         type = "unknown";
-        diagnostic = value?.constructor?.name;
+        diagnostic = (value as Object)?.constructor?.name;
         value = Object.prototype.toString.call(value);
     }
 
@@ -99,18 +99,18 @@ function encode(value) {
 }
 
 // Send a value to the given stream.
-export function sendValue(stream, value) {
-    fs.writeSync(stream, JSON.stringify(encode(value)));
+function sendValue(stream: number, value: Object) {
+    fileSystem.writeSync(stream, JSON.stringify(encode(value)));
 }
 
 // Send an exception to the given stream.
-export function sendException(stream, exception) {
+function sendException(stream: number, exception: Error | Object | {constructor: {name: any}}): void {
     if (!exception) {
         return;
     }
     if (exception instanceof Error) {
         // We have a proper error...
-        fs.writeSync(stream, JSON.stringify({
+        fileSystem.writeSync(stream, JSON.stringify({
             "message": exception.message,
             "stacktrace": exception.stack ?? "",
             "type": exception.constructor.name
@@ -121,17 +121,17 @@ export function sendException(stream, exception) {
         // TODO: remove this once the semester is over
         // noinspection PointlessBooleanExpressionJS
         if (typeof exception === 'object') {
-            fs.writeSync(stream, JSON.stringify({
-                "message": exception.message ?? "",
+            fileSystem.writeSync(stream, JSON.stringify({
+                "message": (exception as Error).message ?? "",
                 "stacktrace": "",
-                "type": exception.name ?? ""
+                "type": (exception as Error).name ?? ""
             }));
         } else {
             // We have something else, so we cannot rely on stuff being present.
-            fs.writeSync(stream, JSON.stringify({
+            fileSystem.writeSync(stream, JSON.stringify({
                 "message": JSON.stringify(exception),
                 "stacktrace": "",
-                "type": exception.constructor.name ?? (Object.prototype.toString.call(exception)),
+                "type": (exception as Object).constructor.name ?? (Object.prototype.toString.call(exception)),
                 "additional_message_keys": ["languages.javascript.runtime.invalid.exception"]
             }));
         }
@@ -139,6 +139,10 @@ export function sendException(stream, exception) {
 }
 
 // Send an evaluation result to the given stream.
-export function sendEvaluated(stream, result) {
-    fs.writeSync(stream, JSON.stringify(result));
+function sendEvaluated(stream: number, result: Object) {
+    fileSystem.writeSync(stream, JSON.stringify(result));
 }
+
+exports.sendValue = sendValue;
+exports.sendException = sendException;
+exports.sendEvaluated = sendEvaluated;

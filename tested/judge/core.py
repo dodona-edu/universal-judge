@@ -127,7 +127,7 @@ def judge(bundle: Bundle):
         return
 
     planned_units = plan_test_suite(bundle, strategy=PlanStrategy.OPTIMAL)
-
+    breakpoint()
     # Attempt to precompile everything.
     common_dir, dependencies, selector = _generate_files(bundle, planned_units)
 
