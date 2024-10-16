@@ -1,14 +1,43 @@
-
 from tested.datatypes import AllTypes, resolve_to_basic
-from tested.datatypes.advanced import AdvancedNumericTypes, AdvancedObjectTypes, AdvancedSequenceTypes, AdvancedStringTypes
-from tested.datatypes.basic import BasicNumericTypes, BasicObjectTypes, BasicSequenceTypes, BasicStringTypes, BasicTypes
+from tested.datatypes.advanced import (
+    AdvancedNumericTypes,
+    AdvancedObjectTypes,
+    AdvancedSequenceTypes,
+    AdvancedStringTypes,
+)
+from tested.datatypes.basic import (
+    BasicNumericTypes,
+    BasicObjectTypes,
+    BasicSequenceTypes,
+    BasicStringTypes,
+    BasicTypes,
+)
 from tested.languages.c.generators import CGenerator
-from tested.languages.preparation import PreparedContext, PreparedExecutionUnit, PreparedFunctionCall, PreparedTestcase, PreparedTestcaseStatement
-from tested.serialisation import FunctionCall, FunctionType, ObjectType, PropertyAssignment, SequenceType, Statement, Value, VariableAssignment, VariableType, WrappedAllTypes
+from tested.languages.preparation import (
+    PreparedContext,
+    PreparedExecutionUnit,
+    PreparedFunctionCall,
+    PreparedTestcase,
+    PreparedTestcaseStatement,
+)
+from tested.serialisation import (
+    FunctionCall,
+    FunctionType,
+    ObjectType,
+    PropertyAssignment,
+    SequenceType,
+    Statement,
+    Value,
+    VariableAssignment,
+    VariableType,
+    WrappedAllTypes,
+)
 
 
 class CPPGenerator(CGenerator):
-    def  unpack_wrapped_types(self, type_or_types: WrappedAllTypes) -> tuple[AllTypes, WrappedAllTypes]:
+    def unpack_wrapped_types(
+        self, type_or_types: WrappedAllTypes
+    ) -> tuple[AllTypes, WrappedAllTypes]:
         if isinstance(type_or_types, tuple):
             return type_or_types
         return type_or_types, None
@@ -26,8 +55,10 @@ class CPPGenerator(CGenerator):
 
         tp, subtype = self.unpack_wrapped_types(type_or_types)
         return self.convert_declaration(tp, None, subtype)
-    
-    def convert_map_subtypes(self, value: Statement, subtype: WrappedAllTypes) -> tuple[str, str] | None:
+
+    def convert_map_subtypes(
+        self, value: Statement, subtype: WrappedAllTypes
+    ) -> tuple[str, str] | None:
         if isinstance(value, ObjectType):
             key_type = value.get_key_type()
             value_type = value.get_value_type()
@@ -41,24 +72,32 @@ class CPPGenerator(CGenerator):
         value_type_str = self.convert_declaration(value_base_type, None, value_sub_type)
 
         return key_type_str, value_type_str
-    
+
     def convert_value(self, value: Value) -> str:
         tp = value.type
         basic = resolve_to_basic(tp)
         if basic == BasicObjectTypes.MAP:
-            return "{" + ", ".join(f"{self.convert_value(k), self.convert_value(v)}" for k, v in value.data.items()) + "}"
+            return (
+                "{"
+                + ", ".join(
+                    f"{self.convert_value(k), self.convert_value(v)}"
+                    for k, v in value.data.items()
+                )
+                + "}"
+            )
         elif basic == BasicSequenceTypes.SEQUENCE or basic == BasicSequenceTypes.SET:
             return "{" + ", ".join(self.convert_value(v) for v in value.data) + "}"
         elif basic == BasicStringTypes.TEXT:
             return f'std::string("{value.data}")'
 
         return super().convert_value(value)
-        
 
-
-    def convert_declaration(self, tp: AllTypes | VariableType, 
-                            value: Statement | None = None,
-                            subtype: WrappedAllTypes| None = None) -> str:
+    def convert_declaration(
+        self,
+        tp: AllTypes | VariableType,
+        value: Statement | None = None,
+        subtype: WrappedAllTypes | None = None,
+    ) -> str:
         if isinstance(tp, VariableType):
             return tp.data + "*"
         elif tp == AdvancedNumericTypes.BIG_INT:
@@ -95,7 +134,7 @@ class CPPGenerator(CGenerator):
             return f"std::vector<{subtype}>"
         elif tp == AdvancedStringTypes.STRING:
             return "std::string"
-        
+
         basic = resolve_to_basic(tp)
         if basic == BasicObjectTypes.MAP:
             key_type, value_type = self.convert_map_subtypes(value, subtype)
@@ -113,20 +152,19 @@ class CPPGenerator(CGenerator):
         elif basic == BasicNumericTypes.INTEGER:
             return "std::intmax_t"
 
-
         return super().convert_declaration(tp)
-    
+
     def convert_statement(self, statement: Statement, full=False) -> str:
         # support for property assignments
         if isinstance(statement, PropertyAssignment):
-           return (
-            f"{self.convert_statement(statement.property)} = "
-            f"{self.convert_statement(statement.expression)};"
-        ) 
+            return (
+                f"{self.convert_statement(statement.property)} = "
+                f"{self.convert_statement(statement.expression)};"
+            )
         # overwrite the default implementation for variable assignments to allow for
         # object declarations
         elif full and isinstance(statement, VariableAssignment):
-        
+
             prefix = self.convert_declaration(statement.type, statement.expression)
             return (
                 f"{prefix} {statement.variable} = "
@@ -134,40 +172,44 @@ class CPPGenerator(CGenerator):
             )
 
         return super().convert_statement(statement, full)
-    
+
     def convert_function_call(self, function: FunctionCall) -> str:
         result = super().convert_function_call(function)
 
         # if the function has a namespace, that is not the root namespace we assume it is a method call
-        if (function.namespace 
+        if (
+            function.namespace
             and not function.has_root_namespace
             and not function.type == FunctionType.CONSTRUCTOR
-            ):
+        ):
             result = self.convert_statement(function.namespace) + "->" + result
         # add the new keyword to constructors
         if function.type == FunctionType.CONSTRUCTOR:
             result = "new " + result
         return result
-    
+
     def convert_testcase(self, tc: PreparedTestcase, pu: PreparedExecutionUnit) -> str:
         result = ""
         # Define variables before asignment outside the try block
-        if ( not tc.testcase.is_main_testcase()
-             and isinstance(tc.input, PreparedTestcaseStatement)
-             and isinstance(tc.input.statement, VariableAssignment)
+        if (
+            not tc.testcase.is_main_testcase()
+            and isinstance(tc.input, PreparedTestcaseStatement)
+            and isinstance(tc.input.statement, VariableAssignment)
         ):
-            prefix = self.convert_declaration(tc.input.statement.type, tc.input.statement.expression)
+            prefix = self.convert_declaration(
+                tc.input.statement.type, tc.input.statement.expression
+            )
             result += f"{prefix} {tc.input.statement.variable};\n"
-        
+
         # catch exceptions and write them to the output
         result += "try {" + "\n"
         result += super().convert_testcase(tc, pu)
         result += "\n} catch (std::exception_ptr e) {\n"
-        result += self.convert_statement(tc.exception_statement('e'))+ ";\n"
+        result += self.convert_statement(tc.exception_statement("e")) + ";\n"
         result += "exit_code = 1;\n"
         result += "}\n"
         return result
-    
+
     def define_write_funtions(self, pu: PreparedExecutionUnit) -> str:
         result = super().define_write_funtions(pu)
 

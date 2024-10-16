@@ -140,7 +140,7 @@ class C(Language):
 
     def is_source_file(self, file: Path) -> bool:
         return file.suffix in (".c", ".h")
-    
+
     def generator(self) -> CGenerator:
         return CGenerator(self.file_extension())
 

@@ -34,13 +34,15 @@ from tested.serialisation import (
 )
 from tested.testsuite import MainInput
 
+
 class CGenerator:
     def __init__(self, extension: str = "c"):
         self.extension = extension
 
     def convert_arguments(self, arguments: list[Expression | NamedArgument]) -> str:
-        return ", ".join(self.convert_statement(cast(Expression, arg)) for arg in arguments)
-
+        return ", ".join(
+            self.convert_statement(cast(Expression, arg)) for arg in arguments
+        )
 
     def convert_value(self, value: Value) -> str:
         # Handle some advanced types.
@@ -67,7 +69,9 @@ class CGenerator:
             else:
                 return str(value.data)
         elif value.type == BasicNumericTypes.REAL:
-            suffix = "f" if original.type == AdvancedNumericTypes.SINGLE_PRECISION else ""
+            suffix = (
+                "f" if original.type == AdvancedNumericTypes.SINGLE_PRECISION else ""
+            )
             if not isinstance(value.data, SpecialNumbers):
                 return str(value.data) + suffix
             elif value.data == SpecialNumbers.NOT_A_NUMBER:
@@ -94,13 +98,13 @@ class CGenerator:
             return convert_unknown_type(value)
         raise AssertionError(f"Invalid literal: {value!r}")
 
-
     def convert_function_call(self, function: FunctionCall) -> str:
         result = function.name
         if function.type != FunctionType.PROPERTY:
-            result += f"({self.convert_arguments(function.arguments)})"  # pyright: ignore
+            result += (
+                f"({self.convert_arguments(function.arguments)})"  # pyright: ignore
+            )
         return result
-
 
     def convert_declaration(self, tp: AllTypes | VariableType) -> str:
         if isinstance(tp, VariableType):
@@ -144,7 +148,6 @@ class CGenerator:
             return "void"
         raise AssertionError(f"Unknown type: {tp!r}")
 
-
     def convert_statement(self, statement: Statement, full=False) -> str:
         if isinstance(statement, Identifier):
             return statement
@@ -162,7 +165,7 @@ class CGenerator:
                 f"{self.convert_statement(statement.expression)};"
             )
         raise AssertionError(f"Unknown statement: {statement!r}")
-    
+
     def convert_testcase(self, tc: PreparedTestcase, pu: PreparedExecutionUnit) -> str:
         result = ""
         if tc.testcase.is_main_testcase():
@@ -184,13 +187,16 @@ class CGenerator:
                     + self.convert_statement(tc.input.unwrapped_input_statement())
                     + ";\n"
                 )
-                result += " " * 4 + self.convert_statement(tc.input.no_value_call()) + ";\n"
+                result += (
+                    " " * 4 + self.convert_statement(tc.input.no_value_call()) + ";\n"
+                )
             else:
                 result += self.convert_statement(tc.input.input_statement()) + ";\n"
         return result
 
-
-    def generate_internal_context(self, ctx: PreparedContext, pu: PreparedExecutionUnit) -> str:
+    def generate_internal_context(
+        self, ctx: PreparedContext, pu: PreparedExecutionUnit
+    ) -> str:
         result = f"""
         {ctx.before}
         
@@ -202,11 +208,11 @@ class CGenerator:
         for tc in ctx.testcases:
             result += f"{pu.unit.name}_write_separator();\n"
             result += self.convert_testcase(tc, pu)
-            
+
         result += ctx.after + "\n"
         result += "return exit_code;\n"
         return result
-    
+
     def define_write_funtions(self, pu: PreparedExecutionUnit) -> str:
         return f"""
         static FILE* {pu.unit.name}_value_file = NULL;
@@ -232,7 +238,6 @@ class CGenerator:
         #undef send_specific_value
         #define send_specific_value(value) write_evaluated({pu.unit.name}_value_file, value)
         """
-
 
     def convert_execution_unit(self, pu: PreparedExecutionUnit) -> str:
         result = f"""
@@ -283,7 +288,6 @@ class CGenerator:
         """
         return result
 
-
     def convert_selector(self, contexts: list[str]) -> str:
         result = """
         #include <string.h>
@@ -324,7 +328,6 @@ class CGenerator:
         }
         """
         return result
-
 
     def convert_encoder(self, values: list[Value]) -> str:
         result = """
