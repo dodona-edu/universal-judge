@@ -70,6 +70,30 @@
           };
         };
 
+        nextflow-linter = let
+          codenarc = pkgs.fetchurl {
+            url = "https://repo1.maven.org/maven2/org/codenarc/CodeNarc/3.5.0/CodeNarc-3.5.0-all.jar";
+            hash = "sha256-wTGPxP5sjMPPake3WM6Fcz551WIe8C+c6AtCtjBa3jI=";
+          };
+          linter-rules = pkgs.fetchurl {
+            url = "https://github.com/awslabs/linter-rules-for-nextflow/releases/download/v0.1.0/linter-rules-0.1.jar";
+            hash = "sha256-IHl2jAtZyloZLXybLNBELnTyld+ZA9q5Srta7LeUeHs=";
+          };
+          slf4j-api = pkgs.fetchurl {
+            url = "https://repo1.maven.org/maven2/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar";
+            hash = "sha256-0+9XXj5JeWeNwBvx3M5RAhSTtNEft/G+itmCh3wWocA=";
+          };
+          slf4j-simple = pkgs.fetchurl {
+            url = "https://repo1.maven.org/maven2/org/slf4j/slf4j-simple/1.7.36/slf4j-simple-1.7.36.jar";
+            hash = "sha256-Lzm+2UPWJN+o9BAtBXEoOhCHC2qjbxl6ilBvFHAQwQ8=";
+          };
+        in pkgs.writeScriptBin "nextflow-linter" ''
+            ${pkgs.jre_minimal}/bin/java \
+              -Dorg.slf4j.simpleLogger.defaultLogLevel=error \
+              -classpath "${linter-rules}/linter-rules-0.1.jar:${codenarc}/CodeNarc-3.5.0-all.jar:${slf4j-api}/slf4j-api-1.7.36.jar:${slf4j-simple}/slf4j-simple-1.7.36.jar" \
+              "org.codenarc.CodeNarc"
+        '';
+
         # General dependencies for other languages
         haskell-deps = [
           (pkgs.haskell.packages.ghc96.ghcWithPackages (p: [ p.aeson ]))
@@ -81,7 +105,7 @@
         java-deps = [ pkgs.openjdk21 pkgs.checkstyle ];
         kotlin-deps = [ pkgs.kotlin pkgs.ktlint ];
         csharp-deps = [ pkgs.dotnetCorePackages.sdk_8_0 ];
-        nextflow-deps = [ pkgs.groovy ];
+        nextflow-deps = [ pkgs.groovy nextflow-linter ];
 
         all-other-dependencies = haskell-deps ++ node-deps ++ bash-deps
           ++ c-deps ++ java-deps ++ kotlin-deps ++ csharp-deps ++ nextflow-deps

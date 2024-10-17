@@ -24,24 +24,13 @@ def run_codenarc(
     submission = config.source
     language_options = config.config_for()
 
-    # TODO: find a better solution
-    if path := language_options.get("codenarc_path", None):
-        assert isinstance(path, str)
-        codenarc_path = config.resources / path
-    else:
-        return [], []
-    codenarc_path = str(codenarc_path.absolute())
     report_file = str((config.workdir / "report.json").absolute())
 
     execution_results = run_command(
         directory=submission.parent,
         timeout=remaining,
         command=[
-            "java",
-            "-Dorg.slf4j.simpleLogger.defaultLogLevel=error",
-            "-classpath",
-            f"{codenarc_path}/linter-rules-0.1.jar:{codenarc_path}/CodeNarc-3.5.0-all.jar:{codenarc_path}/slf4j-api-1.7.36.jar:{codenarc_path}/slf4j-simple-1.7.36.jar",
-            "org.codenarc.CodeNarc",
+            "nextflow-linter",
             f"-report=json:{report_file}",
             "-rulesetfiles=rulesets/general.xml",
             "-includes=**/*.nf",
