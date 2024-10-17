@@ -1,0 +1,52 @@
+tabs:
+  - tab: geefNde (Int)
+    testcases:
+      - expression: geefNde(0, [1, 2, 3, 4, 5])
+        return: 1
+      - expression: geefNde(1, [1, 2, 3, 4, 5])
+        return: 2
+      - expression: geefNde(2, [1, 2, 3, 4, 5])
+        return: 3
+      - expression: geefNde(3, [1, 2, 3, 4, 5])
+        return: 4
+      - expression: geefNde(4, [1, 2, 3, 4, 5])
+        return: 5
+
+  - tab: geefNde (Double)
+    testcases:
+      - expression: geefNde(0, [1.0, 2.0, 3.0, 4.0, 5.0])
+        return: 1.0
+      - expression: geefNde(1, [1.0, 2.0, 3.0, 4.0, 5.0])
+        return: 2.0
+      - expression: geefNde(2, [1.0, 2.0, 3.0, 4.0, 5.0])
+        return: 3.0
+      - expression: geefNde(3, [1.0, 2.0, 3.0, 4.0, 5.0])
+        return: 4.0
+      - expression: geefNde(4, [1.0, 2.0, 3.0, 4.0, 5.0])
+        return: 5.0
+
+  - tab: geefNde (Char)
+    testcases:
+      - expression: geefNde(0, ['a', 'b', 'c', 'd', 'e'])
+        return: a
+      - expression: geefNde(1, ['a', 'b', 'c', 'd', 'e'])
+        return: b
+      - expression: geefNde(2, ['a', 'b', 'c', 'd', 'e'])
+        return: c
+      - expression: geefNde(3, ['a', 'b', 'c', 'd', 'e'])
+        return: d
+      - expression: geefNde(4, ['a', 'b', 'c', 'd', 'e'])
+        return: e
+
+  - tab: geefNde (Tuple)
+    testcases:
+      - expression: geefNde(0, [(1, 5), (2, 4), (3, 3), (4, 2), (5, 1)])
+        return: [1, 5]
+      - expression: geefNde(1, [(1, 5), (2, 4), (3, 3), (4, 2), (5, 1)])
+        return: [2, 4]
+      - expression: geefNde(2, [(1, 5), (2, 4), (3, 3), (4, 2), (5, 1)])
+        return: [3, 3]
+      - expression: geefNde(3, [(1, 5), (2, 4), (3, 3), (4, 2), (5, 1)])
+        return: [4, 2]
+      - expression: geefNde(4, [(1, 5), (2, 4), (3, 3), (4, 2), (5, 1)])
+        return: [5, 1]
