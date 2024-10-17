@@ -10,9 +10,12 @@ on:
       - '**/*.txt'
   schedule:
     - cron: "18 21 2 * *"
+  pull_request_target:
+    types: [labeled]
 
 jobs:
   analyze:
+    if: ${{ github.event.action != 'labeled' || (github.event.action == 'labeled' && github.event.label.name == 'run tests') }}
     name: Analyze
     runs-on: ubuntu-latest
     permissions:
