@@ -105,7 +105,7 @@
         java-deps = [ pkgs.openjdk21 pkgs.checkstyle ];
         kotlin-deps = [ pkgs.kotlin pkgs.ktlint ];
         csharp-deps = [ pkgs.dotnetCorePackages.sdk_8_0 ];
-        nextflow-deps = [ pkgs.groovy nextflow-linter ];
+        nextflow-deps = [ pkgs.nextflow pkgs.groovy nextflow-linter ];
 
         all-other-dependencies = haskell-deps ++ node-deps ++ bash-deps
           ++ c-deps ++ java-deps ++ kotlin-deps ++ csharp-deps ++ nextflow-deps
@@ -179,6 +179,10 @@
               {
                 name = "NODE_PATH";
                 prefix = "${ast}/lib/node_modules";
+              }
+              {
+                name = "NXF_VER";
+                eval = "${builtins.head (pkgs.lib.splitString "-" pkgs.nextflow.version)}";
               }
             ];
             commands = [
