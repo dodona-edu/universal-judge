@@ -9,7 +9,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     poetry2nix = {
-      url = "github:nix-community/poetry2nix?ref=refs/tags/2024.5.939250";
+      url = "github:nix-community/poetry2nix?ref=refs/tags/2024.10.1637698";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
@@ -81,9 +81,10 @@
         java-deps = [ pkgs.openjdk21 pkgs.checkstyle ];
         kotlin-deps = [ pkgs.kotlin pkgs.ktlint ];
         csharp-deps = [ pkgs.dotnetCorePackages.sdk_8_0 ];
+        nextflow-deps = [ pkgs.groovy ];
 
         all-other-dependencies = haskell-deps ++ node-deps ++ bash-deps
-          ++ c-deps ++ java-deps ++ kotlin-deps ++ csharp-deps
+          ++ c-deps ++ java-deps ++ kotlin-deps ++ csharp-deps ++ nextflow-deps
           ++ [ pkgs.coreutils ];
 
         python-base-env = {
@@ -138,7 +139,7 @@
           tested = pkgs.devshell.mkShell {
             name = "TESTed";
 
-            packages = [ python-dev-env pkgs.nodePackages.pyright poetry-package ]
+            packages = [ python-dev-env pkgs.pyright poetry-package ]
               ++ all-other-dependencies;
 
             devshell.startup.link.text = ''
@@ -172,7 +173,7 @@
             ];
           };
           types = pkgs.mkShell {
-            packages = [ python-dev-env pkgs.nodePackages.pyright ];
+            packages = [ python-dev-env pkgs.pyright ];
           };
           format = pkgs.mkShell { packages = [ python-dev-env poetry-package ]; };
         };
