@@ -1,6 +1,9 @@
 name: Integration tests
 
-on: [ pull_request ]
+on: 
+  pull_request:
+  pull_request_target:
+    types: [labeled]
 
 env:
   EXERCISES_COMMIT: 31ef0f174efaeba2a37415115e7fd0332573d9b2
@@ -9,6 +12,7 @@ jobs:
   # Runs the test suite in a slightly modified Docker image used by Dodona.
   # This is the closest to actually running the production environment there is.
   tests-dodona:
+    if: ${{ github.event.action != 'labeled' || (github.event.action == 'labeled' && github.event.label.name == 'run tests') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -18,6 +22,7 @@ jobs:
         name: Run tests in Dodona Docker image
   # Runs in the Docker image to check if the JS exercises still work.
   javascript-dodona:
+    if: ${{ github.event.action != 'labeled' || (github.event.action == 'labeled' && github.event.label.name == 'run tests') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -36,6 +41,7 @@ jobs:
         name: Run integration tests in Dodona Docker image
   # Runs in the repo to check if the JS exercises still work.
   javascript-repository:
+    if: ${{ github.event.action != 'labeled' || (github.event.action == 'labeled' && github.event.label.name == 'run tests') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
