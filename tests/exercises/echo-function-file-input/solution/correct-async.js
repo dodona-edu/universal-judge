@@ -9,5 +9,5 @@ function echoFile(content) {
                 resolve(data);
             }
         });
-    }).then(c => c.trim());
+    });
 }

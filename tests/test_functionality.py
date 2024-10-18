@@ -16,13 +16,14 @@ from pytest_mock import MockerFixture
 from tested.configs import create_bundle
 from tested.features import Construct
 from tested.judge.execution import ExecutionResult
-from tested.languages import get_language, LANGUAGES
+from tested.languages import LANGUAGES, get_language
 from tested.languages.generation import get_readable_input
 from tested.testsuite import Context, MainInput, Suite, Tab, Testcase, TextData
 from tests.language_markers import (
     ALL_LANGUAGES,
     ALL_SPECIFIC_LANGUAGES,
     EXCEPTION_LANGUAGES,
+    all_languages_except,
 )
 from tests.manual_utils import assert_valid_output, configuration, execute_config
 
@@ -316,9 +317,7 @@ def test_batch_compilation_no_fallback_runtime(
     assert all(s in ("runtime error", "wrong") for s in updates.find_status_enum())
 
 
-@pytest.mark.parametrize(
-    "lang", ["python", "java", "c", "javascript", "kotlin", "bash", "csharp"]
-)
+@pytest.mark.parametrize("lang", all_languages_except("haskell", "runhaskell", "nextflow"))
 def test_program_params(lang: str, tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(pytestconfig, "sum", lang, tmp_path, "short.tson", "correct")
     result = execute_config(conf)
