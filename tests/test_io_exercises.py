@@ -9,7 +9,7 @@ import pytest
 
 from tested.languages.language import STRING_QUOTES
 from tested.testsuite import SupportedLanguage
-from tests.language_markers import ALL_LANGUAGES
+from tests.language_markers import ALL_LANGUAGES, all_languages_except
 from tests.manual_utils import assert_valid_output, configuration, execute_config
 
 
@@ -80,7 +80,7 @@ def test_io_function_file_output_exercise(
     assert updates.find_status_enum() == ["correct"]
 
 
-@pytest.mark.parametrize("language", ALL_LANGUAGES)
+@pytest.mark.parametrize("language", all_languages_except("nextflow"))
 def test_io_function_additional_source_files(
     language: str, tmp_path: Path, pytestconfig: pytest.Config
 ):
@@ -168,7 +168,7 @@ def test_io_function_display_no_multiline_exercise(
     assert actual[0] == quote and actual[-1] == quote
 
 
-@pytest.mark.parametrize("language", ALL_LANGUAGES)
+@pytest.mark.parametrize("language", all_languages_except("nextflow"))
 def test_io_function_nested_call_exercise(
     language: str, tmp_path: Path, pytestconfig: pytest.Config
 ):

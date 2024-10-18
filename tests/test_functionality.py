@@ -21,6 +21,7 @@ from tested.languages.generation import get_readable_input
 from tested.testsuite import Context, MainInput, Suite, Tab, Testcase, TextData
 from tests.language_markers import (
     ALL_LANGUAGES,
+    all_languages_except,
     ALL_SPECIFIC_LANGUAGES,
     EXCEPTION_LANGUAGES,
 )
@@ -322,9 +323,7 @@ def test_batch_compilation_no_fallback_runtime(
     assert all(s in ("runtime error", "wrong") for s in updates.find_status_enum())
 
 
-@pytest.mark.parametrize(
-    "lang", ["python", "java", "c", "javascript", "kotlin", "bash", "csharp"]
-)
+@pytest.mark.parametrize("lang", all_languages_except("haskell", "runhaskell", "nextflow"))
 def test_program_params(lang: str, tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(pytestconfig, "sum", lang, tmp_path, "short.tson", "correct")
     result = execute_config(conf)
