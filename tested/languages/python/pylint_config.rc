@@ -10,5 +10,6 @@
 # C0111 Missing docstring
 # C0301 Line too long
 # C0303 Trailing whitespace
+# C0304 Final newline missing
 # I0011 Warning locally suppressed using disable-msg
-disable=W0621,W0622,R0902,R0903,R0904,R0911,C0103,C0111,C0301,C0303,I0011
+disable=W0621,W0622,R0902,R0903,R0904,R0911,C0103,C0111,C0301,C0303,C0304,I0011
