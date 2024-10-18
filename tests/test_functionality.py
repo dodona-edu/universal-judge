@@ -21,9 +21,9 @@ from tested.languages.generation import get_readable_input
 from tested.testsuite import Context, MainInput, Suite, Tab, Testcase, TextData
 from tests.language_markers import (
     ALL_LANGUAGES,
-    all_languages_except,
     ALL_SPECIFIC_LANGUAGES,
     EXCEPTION_LANGUAGES,
+    all_languages_except,
 )
 from tests.manual_utils import assert_valid_output, configuration, execute_config
 

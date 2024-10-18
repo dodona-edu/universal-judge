@@ -1,8 +1,7 @@
 import json
 import shlex
-
-from typing import Literal, cast
 from pathlib import Path
+from typing import Literal, cast
 
 from tested.datatypes import AdvancedStringTypes, BasicNumericTypes, BasicStringTypes
 from tested.languages.conventionalize import submission_file
@@ -24,6 +23,7 @@ from tested.serialisation import (
     VariableAssignment,
 )
 from tested.testsuite import MainInput
+
 
 def convert_value(value: Value) -> str:
     if value.type in (AdvancedStringTypes.CHAR, BasicStringTypes.TEXT):
