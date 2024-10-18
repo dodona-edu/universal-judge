@@ -6,6 +6,7 @@
         runhaskell: "Submission.toString (1+1)"
         java: "Submission.toString(1+1)"
         javascript: "submission.toString(1+1)"
+        typescript: "submission.toString(1+1)"
         kotlin: "toString(1+1)"
         python: "submission.to_string(1+1)"
         csharp: "Submission.toString(1+1)"

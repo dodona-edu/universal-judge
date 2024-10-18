@@ -192,8 +192,8 @@ def _generate_internal_context(ctx: PreparedContext, pu: PreparedExecutionUnit) 
         if tc.testcase.is_main_testcase():
             assert isinstance(tc.input, MainInput)
             result += f"""
-                delete require.cache[require.resolve("./{pu.submission_name}.js")];
-                const {pu.submission_name} = require("./{pu.submission_name}.js");
+                delete require.cache[require.resolve("./{pu.submission_name}.ts")];
+                const {pu.submission_name} = require("./{pu.submission_name}.ts");
             """
         else:
             assert isinstance(tc.input, PreparedTestcaseStatement)
@@ -212,8 +212,10 @@ def _generate_internal_context(ctx: PreparedContext, pu: PreparedExecutionUnit) 
 
 
 def convert_execution_unit(pu: PreparedExecutionUnit) -> str:
-    result = """
-    const fs = require('fs');
+    result = f"""
+    const {pu.testcase_separator_secret}Namespace = {{
+        fs: require('fs')
+    }}
     const values = require("./values.ts");
     """
 
@@ -223,21 +225,21 @@ def convert_execution_unit(pu: PreparedExecutionUnit) -> str:
 
     # We now open files for results and define some functions.
     result += f"""
-    const valueFile = fs.openSync("{pu.value_file}", "w");
-    const exceptionFile = fs.openSync("{pu.exception_file}", "w");
+    const valueFile = {pu.testcase_separator_secret}Namespace.fs.openSync("{pu.value_file}", "w");
+    const exceptionFile = {pu.testcase_separator_secret}Namespace.fs.openSync("{pu.exception_file}", "w");
 
     function writeSeparator() {{
-        fs.writeSync(valueFile, "--{pu.testcase_separator_secret}-- SEP");
-        fs.writeSync(exceptionFile, "--{pu.testcase_separator_secret}-- SEP");
-        fs.writeSync(process.stdout.fd, "--{pu.testcase_separator_secret}-- SEP");
-        fs.writeSync(process.stderr.fd, "--{pu.testcase_separator_secret}-- SEP");
+        {pu.testcase_separator_secret}Namespace.fs.writeSync(valueFile, "--{pu.testcase_separator_secret}-- SEP");
+        {pu.testcase_separator_secret}Namespace.fs.writeSync(exceptionFile, "--{pu.testcase_separator_secret}-- SEP");
+        {pu.testcase_separator_secret}Namespace.fs.writeSync(process.stdout.fd, "--{pu.testcase_separator_secret}-- SEP");
+        {pu.testcase_separator_secret}Namespace.fs.writeSync(process.stderr.fd, "--{pu.testcase_separator_secret}-- SEP");
     }}
 
     function writeContextSeparator() {{
-        fs.writeSync(valueFile, "--{pu.context_separator_secret}-- SEP");
-        fs.writeSync(exceptionFile, "--{pu.context_separator_secret}-- SEP");
-        fs.writeSync(process.stdout.fd, "--{pu.context_separator_secret}-- SEP");
-        fs.writeSync(process.stderr.fd, "--{pu.context_separator_secret}-- SEP");
+        {pu.testcase_separator_secret}Namespace.fs.writeSync(valueFile, "--{pu.context_separator_secret}-- SEP");
+        {pu.testcase_separator_secret}Namespace.fs.writeSync(exceptionFile, "--{pu.context_separator_secret}-- SEP");
+        {pu.testcase_separator_secret}Namespace.fs.writeSync(process.stdout.fd, "--{pu.context_separator_secret}-- SEP");
+        {pu.testcase_separator_secret}Namespace.fs.writeSync(process.stderr.fd, "--{pu.context_separator_secret}-- SEP");
     }}
 
     async function sendValue(value: unknown) {{
@@ -275,10 +277,10 @@ def convert_execution_unit(pu: PreparedExecutionUnit) -> str:
             await context{i}();
         """
 
-    result += """
-        fs.closeSync(valueFile);
-        fs.closeSync(exceptionFile);
-    })();
+    result += f"""
+        {pu.testcase_separator_secret}Namespace.fs.closeSync(valueFile);
+        {pu.testcase_separator_secret}Namespace.fs.closeSync(exceptionFile);
+    }})();
     """
 
     return result
@@ -297,13 +299,13 @@ def convert_check_function(evaluator: str, function: FunctionCall) -> str:
 
 
 def convert_encoder(values: list[Value]) -> str:
-    result = """
+    result = f"""
     const values = require('./values.ts');
-    const fs = require("fs");
+    const fileSystem = require("fs");
     """
 
     for value in values:
         result += f"values.sendValue(process.stdout.fd, {convert_value(value)});\n"
-        result += 'fs.writeSync(process.stdout.fd, "␞");\n'
+        result += f'fileSystem.writeSync(process.stdout.fd, "␞");\n'
 
     return result

@@ -52,7 +52,6 @@ def run_command(
 
     try:
         timeout = int(timeout) if timeout is not None else None
-        breakpoint()
         process = subprocess.run(
             command,
             cwd=directory,

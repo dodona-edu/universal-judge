@@ -107,13 +107,15 @@ class TypeScript(Language):
         submission = submission_file(self)
         main_file = list(filter(lambda x: x == submission, files))
         if main_file:
-            return ["tsc", "--noEmit", main_file[0]], files
+            return (["tsc", "--module", "nodenext", "--moduleResolution",
+                    "nodenext", "--noEmit", main_file[0]],
+                    files)
         else:
             return [], files
 
     def execution(self, cwd: Path, file: str, arguments: list[str]) -> Command:
         # Used es2022 because of the top-level await feature (most up-to data).
-        return ["ts-node",  "-O", '{"module": "es2022"}', file, *arguments]
+        return ["ts-node",  "-O", '{"module": "commonjs"}', file, *arguments]
 
     def modify_solution(self, solution: Path):
         # import local to prevent errors
@@ -125,19 +127,21 @@ class TypeScript(Language):
         output = run_command(
             solution.parent,
             timeout=None,
-            command=["node", parse_file, str(solution.absolute())],
+            command=["ts-node", "-O", '{"module": "commonjs"}', parse_file, str(solution.absolute())],
             check=True,
         )
         assert output, "Missing output from TypesScript's modify_solution"
         namings = output.stdout.strip()
-        breakpoint()
         with open(solution, "a") as file:
-            print(f"\nexports.{namings} = {{{namings}}};", file=file)
+            print(f"\ndeclare var module: any;", file=file)
+            print(f"\nmodule.exports = {{{namings}}};", file=file)
 
         # Add strict mode to the script.
         with open(solution, "r") as file:
             non_strict = file.read()
         with open(solution, "w") as file:
+            # This rule is added because Typescript might
+            # complain about "require('fs')" being redeclared.
             file.write('"use strict";\n\n' + non_strict)
         self.config.dodona.source_offset -= 2
 

@@ -1,4 +1,7 @@
-const fileSystem = require('fs');
+const valueNamespace = {
+    fs: require('fs')
+}
+//const fs = require('fs');
 
 function isVanillaObject(value: Object) : boolean {
     try {
@@ -100,7 +103,7 @@ function encode(value: Object): { data: Object; diagnostic: any; type: string } 
 
 // Send a value to the given stream.
 function sendValue(stream: number, value: Object) {
-    fileSystem.writeSync(stream, JSON.stringify(encode(value)));
+    valueNamespace.fs.writeSync(stream, JSON.stringify(encode(value)));
 }
 
 // Send an exception to the given stream.
@@ -110,7 +113,7 @@ function sendException(stream: number, exception: Error | Object | {constructor:
     }
     if (exception instanceof Error) {
         // We have a proper error...
-        fileSystem.writeSync(stream, JSON.stringify({
+        valueNamespace.fs.writeSync(stream, JSON.stringify({
             "message": exception.message,
             "stacktrace": exception.stack ?? "",
             "type": exception.constructor.name
@@ -121,14 +124,14 @@ function sendException(stream: number, exception: Error | Object | {constructor:
         // TODO: remove this once the semester is over
         // noinspection PointlessBooleanExpressionJS
         if (typeof exception === 'object') {
-            fileSystem.writeSync(stream, JSON.stringify({
+            valueNamespace.fs.writeSync(stream, JSON.stringify({
                 "message": (exception as Error).message ?? "",
                 "stacktrace": "",
                 "type": (exception as Error).name ?? ""
             }));
         } else {
             // We have something else, so we cannot rely on stuff being present.
-            fileSystem.writeSync(stream, JSON.stringify({
+            valueNamespace.fs.writeSync(stream, JSON.stringify({
                 "message": JSON.stringify(exception),
                 "stacktrace": "",
                 "type": (exception as Object).constructor.name ?? (Object.prototype.toString.call(exception)),
@@ -140,7 +143,7 @@ function sendException(stream: number, exception: Error | Object | {constructor:
 
 // Send an evaluation result to the given stream.
 function sendEvaluated(stream: number, result: Object) {
-    fileSystem.writeSync(stream, JSON.stringify(result));
+    valueNamespace.fs.writeSync(stream, JSON.stringify(result));
 }
 
 exports.sendValue = sendValue;

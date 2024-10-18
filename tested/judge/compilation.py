@@ -63,7 +63,6 @@ def run_compilation(
     _logger.debug(
         "Generating files with command %s in directory %s", command, directory
     )
-    breakpoint()
     result = run_command(directory, remaining, command)
     _logger.debug(f"Compilation dependencies are: {files}")
     return result, files
