@@ -2,7 +2,12 @@ import re
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from tested.datatypes import AdvancedStringTypes, AllTypes, BasicNumericTypes, BasicStringTypes
+from tested.datatypes import (
+    AdvancedStringTypes,
+    AllTypes,
+    BasicNumericTypes,
+    BasicStringTypes,
+)
 from tested.dodona import AnnotateCode, Message
 from tested.features import Construct, TypeSupport
 from tested.languages.conventionalize import Conventionable, NamingConventions
@@ -16,6 +21,7 @@ from tested.serialisation import Statement, Value
 
 if TYPE_CHECKING:
     from tested.languages.generation import PreparedExecutionUnit
+
 
 class Nextflow(Language):
     def compilation(self, files: list[str]) -> CallbackResult:
