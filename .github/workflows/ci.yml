@@ -28,7 +28,7 @@ jobs:
       - uses: DeterminateSystems/nix-installer-action@main
       - uses: DeterminateSystems/magic-nix-cache-action@main
       - run: echo "${GITHUB_WORKSPACE}" >> $GITHUB_PATH
-      - run: nix develop .#format -c poetry run isort --check-only ./tested ./tests
+      - run: nix develop .#format -c poetry run isort --check-only --diff ./tested ./tests
       - run: nix develop .#format -c poetry run black --check ./tested ./tests
   types:
     if: ${{ github.event.action != 'labeled' || (github.event.action == 'labeled' && github.event.label.name == 'run tests') }}
