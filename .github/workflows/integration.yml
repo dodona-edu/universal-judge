@@ -16,6 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }} 
       - run: docker build -t "local-image" -f ${{ github.workspace }}/.github/dodona-image.dockerfile --network=host .
         name: Build Dodona Docker image
       - run: docker run -v ${{ github.workspace }}:/github/workspace -e TESTED_SOURCE=/github/workspace local-image
@@ -26,6 +28,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }} 
       - run: |
           echo "$JAVASCRIPT_EXERCISES_KEY" > private
           chmod 0600 private
@@ -45,6 +49,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }} 
       - uses: DeterminateSystems/nix-installer-action@main
       - uses: DeterminateSystems/magic-nix-cache-action@main
       - run: echo "${GITHUB_WORKSPACE}" >> $GITHUB_PATH
