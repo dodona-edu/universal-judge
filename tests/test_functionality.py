@@ -16,7 +16,7 @@ from pytest_mock import MockerFixture
 from tested.configs import create_bundle
 from tested.features import Construct
 from tested.judge.execution import ExecutionResult
-from tested.languages import get_language, LANGUAGES
+from tested.languages import LANGUAGES, get_language
 from tested.languages.generation import get_readable_input
 from tested.testsuite import Context, MainInput, Suite, Tab, Testcase, TextData
 from tests.language_markers import (
