@@ -84,13 +84,13 @@ $ cabal v1-install aeson
 
 | Name                    | Versions | Installation |
 |-------------------------|----------|--------------|
-| `eslint`                | 8.57     | npm package  |
+| `eslint`                | 9.10     | npm package  |
 | `abstract-syntax-tree`  | 2.22     | npm package  |
 
 Install npm packages as follows:
 
 ```shell
-$ npm install eslint@8.57 abstract-syntax-tree@2.22
+$ npm install eslint@9.10 abstract-syntax-tree@2.22
 ```
 
 ## Kotlin

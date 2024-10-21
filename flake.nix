@@ -99,7 +99,7 @@
           (pkgs.haskell.packages.ghc96.ghcWithPackages (p: [ p.aeson ]))
           pkgs.hlint
         ];
-        node-deps = [ nodejs_base pkgs.nodePackages.eslint ast ];
+        node-deps = [ nodejs_base pkgs.eslint ast ];
         bash-deps = [ pkgs.shellcheck ];
         c-deps = [ pkgs.cppcheck pkgs.gcc13 ];
         java-deps = [ pkgs.openjdk21 pkgs.checkstyle ];
@@ -179,6 +179,11 @@
               {
                 name = "NODE_PATH";
                 prefix = "${ast}/lib/node_modules";
+              }
+
+              {
+                name = "ESLINT_USE_FLAT_CONFIG";
+                eval = "false";
               }
               {
                 name = "NXF_VER";

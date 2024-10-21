@@ -20,7 +20,7 @@ def run_hlint(
     config: DodonaConfig, remaining: float
 ) -> tuple[list[Message], list[AnnotateCode]]:
     """
-    Calls eslint to annotate submitted source code and adds resulting score and
+    Calls hlint to annotate submitted source code and adds resulting score and
     annotations to tab.
     """
     submission = config.source
