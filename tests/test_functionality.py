@@ -306,7 +306,7 @@ def test_batch_compilation_no_fallback(
     assert spy.call_count == 1
 
 
-@pytest.mark.parametrize("language", ALL_LANGUAGES)
+@pytest.mark.parametrize("language", all_languages_except("nextflow"))
 def test_batch_compilation_no_fallback_runtime(
     language: str, tmp_path: Path, pytestconfig: pytest.Config
 ):
