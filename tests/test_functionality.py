@@ -32,7 +32,10 @@ def test_global_variable(language: str, tmp_path: Path, pytestconfig: pytest.Con
     conf = configuration(
         pytestconfig, "global", language, tmp_path, "one.tson", "correct"
     )
-    if Construct.GLOBAL_VARIABLES not in get_language(None, conf.programming_language).supported_constructs():
+    if (
+        Construct.GLOBAL_VARIABLES
+        not in get_language(None, conf.programming_language).supported_constructs()
+    ):
         pytest.skip("Language doesn't support global variables")
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
@@ -46,7 +49,10 @@ def test_global_variable_yaml(
     conf = configuration(
         pytestconfig, "global", language, tmp_path, "plan.yaml", "correct"
     )
-    if Construct.GLOBAL_VARIABLES not in get_language(None, conf.programming_language).supported_constructs():
+    if (
+        Construct.GLOBAL_VARIABLES
+        not in get_language(None, conf.programming_language).supported_constructs()
+    ):
         pytest.skip("Language doesn't support global variables")
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
