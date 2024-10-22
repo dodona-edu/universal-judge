@@ -323,7 +323,9 @@ def test_batch_compilation_no_fallback_runtime(
     assert all(s in ("runtime error", "wrong") for s in updates.find_status_enum())
 
 
-@pytest.mark.parametrize("lang", all_languages_except("haskell", "runhaskell", "nextflow"))
+@pytest.mark.parametrize(
+    "lang", all_languages_except("haskell", "runhaskell", "nextflow")
+)
 def test_program_params(lang: str, tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(pytestconfig, "sum", lang, tmp_path, "short.tson", "correct")
     result = execute_config(conf)

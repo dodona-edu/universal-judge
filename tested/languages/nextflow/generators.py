@@ -34,14 +34,17 @@ def convert_value(value: Value) -> str:
         return convert_unknown_type(value)
     raise AssertionError(f"Invalid literal: {value!r}")
 
+
 def convert_arguments(arguments: list[Expression]) -> str:
     return ", ".join(convert_statement(arg) for arg in arguments)
+
 
 def convert_function_call(function: FunctionCall) -> str:
     result = function.name
     if function.type != FunctionType.PROPERTY:
-            result += f"({convert_arguments(cast(list[Expression], function.arguments))})"
+        result += f"({convert_arguments(cast(list[Expression], function.arguments))})"
     return result
+
 
 def convert_statement(statement: Statement) -> str:
     if isinstance(statement, Identifier):
@@ -58,11 +61,15 @@ def convert_statement(statement: Statement) -> str:
             result += convert_statement(statement.expression)
     raise AssertionError(f"Unknown statement: {statement!r}")
 
+
 indent = " " * 4
+
 
 def convert_execution_unit(pu: PreparedExecutionUnit) -> str:
     includes = []
-    if any(isinstance(tc.input, MainInput) for ctx in pu.contexts for tc in ctx.testcases):
+    if any(
+        isinstance(tc.input, MainInput) for ctx in pu.contexts for tc in ctx.testcases
+    ):
         includes.append("solution_main")
 
     for ctx in pu.contexts:

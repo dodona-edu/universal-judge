@@ -14,6 +14,7 @@ message_categories = {
     "p3": Severity.INFO,
 }
 
+
 def run_codenarc(
     config: DodonaConfig, remaining: float
 ) -> tuple[list[Message], list[AnnotateCode]]:
@@ -34,7 +35,8 @@ def run_codenarc(
             f"-report=json:{report_file}",
             "-rulesetfiles=rulesets/general.xml",
             "-includes=**/*.nf",
-            f"-includes={submission.name}"]
+            f"-includes={submission.name}",
+        ],
     )
 
     if execution_results is None:

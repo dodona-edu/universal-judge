@@ -50,7 +50,7 @@ class Nextflow(Language):
             Construct.ASSIGNMENTS,
             Construct.FUNCTION_CALLS,
             Construct.HETEROGENEOUS_ARGUMENTS,
-            Construct.NAMED_ARGUMENTS
+            Construct.NAMED_ARGUMENTS,
         }
 
     def datatype_support(self) -> dict[AllTypes, TypeSupport]:
