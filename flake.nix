@@ -149,6 +149,8 @@
               export DOTNET_CLI_HOME
               NODE_PATH=${ast}/lib/node_modules
               export NODE_PATH
+              ESLINT_USE_FLAT_CONFIG=false
+              export ESLINT_USE_FLAT_CONFIG
               poetry run pytest -n auto --cov=tested --cov-report=xml tests/
             '';
             installPhase = ''
