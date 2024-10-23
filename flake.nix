@@ -111,7 +111,7 @@
             doCheck = false;
             postInstall = ''
               wrapProgram "$out/bin/tested" \
-                --prefix NODE_PATH : ${ast}/lib/node_modules
+                --prefix NODE_PATH : ${ast}/lib/node_modules:/nix/store/1vkwbqyd02jfmgyaxq3bly78rlx5mqx9-TESTed-dir/bin/ts-node
             '';
           };
           devShell = self.outputs.devShells.${system}.default;
@@ -123,8 +123,10 @@
             checkPhase = ''
               DOTNET_CLI_HOME="$(mktemp -d)"
               export DOTNET_CLI_HOME
-              NODE_PATH=${ast}/lib/node_modules
+              TS_NODE_PROJECT=./tsconfig.json
+              NODE_PATH=${ast}/lib/node_modules:/nix/store/1vkwbqyd02jfmgyaxq3bly78rlx5mqx9-TESTed-dir/bin/ts-node
               export NODE_PATH
+              export TS_NODE_PROJECT
               poetry run pytest -n auto --cov=tested --cov-report=xml tests/
             '';
             installPhase = ''
@@ -154,7 +156,11 @@
               }
               {
                 name = "NODE_PATH";
-                prefix = "${ast}/lib/node_modules";
+                prefix = "${ast}/lib/node_modules:/nix/store/1vkwbqyd02jfmgyaxq3bly78rlx5mqx9-TESTed-dir/bin/ts-node";
+              }
+              {
+                name = "TS_NODE_PROJECT";
+                prefix = "./tsconfig.json";
               }
             ];
             commands = [
