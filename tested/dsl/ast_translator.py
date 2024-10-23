@@ -27,7 +27,9 @@ the following is supported:
 """
 
 import ast
+import tokenize
 from decimal import Decimal
+from io import BytesIO
 from typing import Literal, cast, overload
 
 from attrs import evolve
@@ -332,6 +334,21 @@ def _translate_to_ast(node: ast.Interactive, is_return: bool) -> Statement:
     else:
         return _convert_statement(statement_or_expression)
 
+def extract_comment(code: str) -> str:
+    """
+    Extract the comment from the code.
+
+    :param code: The code to extract the comment from.
+    :return: The comment if it exists, otherwise an empty string.
+    """
+    tokens = tokenize.tokenize(BytesIO(code.encode('utf-8')).readline)
+    comments = list(map(lambda t: t.string,
+                       filter(lambda t: t.type == tokenize.COMMENT, tokens)))
+    if len(comments) == 0:
+        return ""
+    comment = comments[0][1:]
+    assert isinstance(comment, str)
+    return comment.strip()
 
 @overload
 def parse_string(code: str, is_return: Literal[True]) -> Value: ...

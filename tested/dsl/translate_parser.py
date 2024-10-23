@@ -32,7 +32,7 @@ from tested.datatypes import (
     resolve_to_basic,
 )
 from tested.dodona import ExtendedMessage
-from tested.dsl.ast_translator import InvalidDslError, parse_string
+from tested.dsl.ast_translator import InvalidDslError, parse_string, extract_comment
 from tested.parsing import get_converter, suite_to_json
 from tested.serialisation import (
     BooleanType,
@@ -583,6 +583,7 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
             the_input = LanguageLiterals(literals=the_dict, type=the_type)
         else:
             assert isinstance(expr_stmt, str)
+            comment = extract_comment(expr_stmt)
             the_input = parse_string(expr_stmt)
         return_channel = IgnoredChannel.IGNORED if "statement" in testcase else None
     else:
@@ -657,6 +658,7 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
 
 
 def _convert_context(context: YamlDict, dsl_context: DslContext) -> Context:
+    breakpoint()
     dsl_context = dsl_context.deepen_context(context)
     raw_testcases = context.get("script", context.get("testcases"))
     assert isinstance(raw_testcases, list)
@@ -709,6 +711,7 @@ def _convert_dsl_list(
     """
     Convert a list of YAML objects into a test suite object.
     """
+    breakpoint()
     objects = []
     for dsl_object in dsl_list:
         assert isinstance(dsl_object, dict)
