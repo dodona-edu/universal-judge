@@ -1,11 +1,15 @@
 {
+  "extends": "ts-node/node16/tsconfig.json",
   "compilerOptions" : {
     "esModuleInterop" : true,
-    "module" : "es2022",
-    "moduleResolution" : "nodenext",
+    "module" : "ESNext",
+    "moduleResolution" : "node",
+    "allowImportingTsExtensions" : true,
+    "types" : ["node"],
   },
   "ts-node" : {
     "esm" : true,
+    "transpileOnly": true,
     "experimentalSpecifierResolution" : "node"
   }
 }

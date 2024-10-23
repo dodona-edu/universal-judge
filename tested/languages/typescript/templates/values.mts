@@ -1,6 +1,4 @@
-const valueNamespace = {
-    fs: require('fs')
-}
+import * as fs from 'fs';
 //const fs = require('fs');
 
 function isVanillaObject(value: Object) : boolean {
@@ -103,7 +101,7 @@ function encode(value: Object): { data: Object; diagnostic: any; type: string } 
 
 // Send a value to the given stream.
 function sendValue(stream: number, value: Object) {
-    valueNamespace.fs.writeSync(stream, JSON.stringify(encode(value)));
+    fs.writeSync(stream, JSON.stringify(encode(value)));
 }
 
 // Send an exception to the given stream.
@@ -113,7 +111,7 @@ function sendException(stream: number, exception: Error | Object | {constructor:
     }
     if (exception instanceof Error) {
         // We have a proper error...
-        valueNamespace.fs.writeSync(stream, JSON.stringify({
+        fs.writeSync(stream, JSON.stringify({
             "message": exception.message,
             "stacktrace": exception.stack ?? "",
             "type": exception.constructor.name
@@ -124,14 +122,14 @@ function sendException(stream: number, exception: Error | Object | {constructor:
         // TODO: remove this once the semester is over
         // noinspection PointlessBooleanExpressionJS
         if (typeof exception === 'object') {
-            valueNamespace.fs.writeSync(stream, JSON.stringify({
+            fs.writeSync(stream, JSON.stringify({
                 "message": (exception as Error).message ?? "",
                 "stacktrace": "",
                 "type": (exception as Error).name ?? ""
             }));
         } else {
             // We have something else, so we cannot rely on stuff being present.
-            valueNamespace.fs.writeSync(stream, JSON.stringify({
+            fs.writeSync(stream, JSON.stringify({
                 "message": JSON.stringify(exception),
                 "stacktrace": "",
                 "type": (exception as Object).constructor.name ?? (Object.prototype.toString.call(exception)),
@@ -143,9 +141,7 @@ function sendException(stream: number, exception: Error | Object | {constructor:
 
 // Send an evaluation result to the given stream.
 function sendEvaluated(stream: number, result: Object) {
-    valueNamespace.fs.writeSync(stream, JSON.stringify(result));
+    fs.writeSync(stream, JSON.stringify(result));
 }
 
-exports.sendValue = sendValue;
-exports.sendException = sendException;
-exports.sendEvaluated = sendEvaluated;
+export { sendValue, sendException, sendEvaluated };

@@ -35,13 +35,13 @@ logger = logging.getLogger(__name__)
 class TypeScript(Language):
 
     def initial_dependencies(self) -> list[str]:
-        return ["values.ts"]
+        return ["values.mts"]
 
     def needs_selector(self) -> bool:
         return False
 
     def file_extension(self) -> str:
-        return "ts"
+        return "mts"
 
     def naming_conventions(self) -> dict[Conventionable, NamingConventions]:
         return {
@@ -115,7 +115,7 @@ class TypeScript(Language):
 
     def execution(self, cwd: Path, file: str, arguments: list[str]) -> Command:
         # Used es2022 because of the top-level await feature (most up-to data).
-        return ["ts-node",  "-O", '{"module": "commonjs"}', file, *arguments]
+        return ["node", "--no-warnings", "--loader", "ts-node/esm", file, *arguments]
 
     def modify_solution(self, solution: Path):
         # import local to prevent errors
@@ -123,18 +123,18 @@ class TypeScript(Language):
 
         assert self.config
 
-        parse_file = str(Path(__file__).parent / "parseAst.ts")
+        parse_file = str(Path(__file__).parent / "parseAst.mts")
         output = run_command(
             solution.parent,
             timeout=None,
-            command=["ts-node", "-O", '{"module": "commonjs"}', parse_file, str(solution.absolute())],
-            check=True,
+            command=["node", "--no-warnings",  "--loader", "ts-node/esm", parse_file, str(solution.absolute())],
+            check=False,
         )
         assert output, "Missing output from TypesScript's modify_solution"
         namings = output.stdout.strip()
         with open(solution, "a") as file:
-            print(f"\ndeclare var module: any;", file=file)
-            print(f"\nmodule.exports = {{{namings}}};", file=file)
+           # print(f"\ndeclare var module: any;", file=file)
+            print(f"\nexport {{{namings}}};", file=file)
 
         # Add strict mode to the script.
         with open(solution, "r") as file:

@@ -160,8 +160,8 @@ def _generate_internal_context(ctx: PreparedContext, pu: PreparedExecutionUnit) 
     if not ctx.context.has_main_testcase():
         result += f"""
             writeSeparator();
-            delete require.cache[require.resolve("./{submission_file(pu.language)}")];
-            const {pu.submission_name} = require("./{submission_file(pu.language)}");
+            //delete require.cache[require.resolve("./{submission_file(pu.language)}")];
+            let {pu.submission_name} = await import('./{submission_file(pu.language)}');
             """
 
     # Generate code for each testcase
@@ -192,8 +192,8 @@ def _generate_internal_context(ctx: PreparedContext, pu: PreparedExecutionUnit) 
         if tc.testcase.is_main_testcase():
             assert isinstance(tc.input, MainInput)
             result += f"""
-                delete require.cache[require.resolve("./{pu.submission_name}.ts")];
-                const {pu.submission_name} = require("./{pu.submission_name}.ts");
+                //delete require.cache[require.resolve("./{pu.submission_name}.mts")];
+                let {pu.submission_name} = await import('./{pu.submission_name}.mts');
             """
         else:
             assert isinstance(tc.input, PreparedTestcaseStatement)
@@ -213,33 +213,31 @@ def _generate_internal_context(ctx: PreparedContext, pu: PreparedExecutionUnit) 
 
 def convert_execution_unit(pu: PreparedExecutionUnit) -> str:
     result = f"""
-    const {pu.testcase_separator_secret}Namespace = {{
-        fs: require('fs')
-    }}
-    const values = require("./values.ts");
+    import * as fs from 'fs';
+    import * as values from './values.mts';
     """
 
     # Import the language specific functions we will need.
     for name in pu.evaluator_names:
-        result += f'const {name} = require("./{name}.ts");\n'
+        result += f"import * as {name} from './{name}.mts';\n"
 
     # We now open files for results and define some functions.
     result += f"""
-    const valueFile = {pu.testcase_separator_secret}Namespace.fs.openSync("{pu.value_file}", "w");
-    const exceptionFile = {pu.testcase_separator_secret}Namespace.fs.openSync("{pu.exception_file}", "w");
+    const valueFile = fs.openSync("{pu.value_file}", "w");
+    const exceptionFile = fs.openSync("{pu.exception_file}", "w");
 
     function writeSeparator() {{
-        {pu.testcase_separator_secret}Namespace.fs.writeSync(valueFile, "--{pu.testcase_separator_secret}-- SEP");
-        {pu.testcase_separator_secret}Namespace.fs.writeSync(exceptionFile, "--{pu.testcase_separator_secret}-- SEP");
-        {pu.testcase_separator_secret}Namespace.fs.writeSync(process.stdout.fd, "--{pu.testcase_separator_secret}-- SEP");
-        {pu.testcase_separator_secret}Namespace.fs.writeSync(process.stderr.fd, "--{pu.testcase_separator_secret}-- SEP");
+        fs.writeSync(valueFile, "--{pu.testcase_separator_secret}-- SEP");
+        fs.writeSync(exceptionFile, "--{pu.testcase_separator_secret}-- SEP");
+        fs.writeSync(process.stdout.fd, "--{pu.testcase_separator_secret}-- SEP");
+        fs.writeSync(process.stderr.fd, "--{pu.testcase_separator_secret}-- SEP");
     }}
 
     function writeContextSeparator() {{
-        {pu.testcase_separator_secret}Namespace.fs.writeSync(valueFile, "--{pu.context_separator_secret}-- SEP");
-        {pu.testcase_separator_secret}Namespace.fs.writeSync(exceptionFile, "--{pu.context_separator_secret}-- SEP");
-        {pu.testcase_separator_secret}Namespace.fs.writeSync(process.stdout.fd, "--{pu.context_separator_secret}-- SEP");
-        {pu.testcase_separator_secret}Namespace.fs.writeSync(process.stderr.fd, "--{pu.context_separator_secret}-- SEP");
+        fs.writeSync(valueFile, "--{pu.context_separator_secret}-- SEP");
+        fs.writeSync(exceptionFile, "--{pu.context_separator_secret}-- SEP");
+        fs.writeSync(process.stdout.fd, "--{pu.context_separator_secret}-- SEP");
+        fs.writeSync(process.stderr.fd, "--{pu.context_separator_secret}-- SEP");
     }}
 
     async function sendValue(value: unknown) {{
@@ -278,8 +276,8 @@ def convert_execution_unit(pu: PreparedExecutionUnit) -> str:
         """
 
     result += f"""
-        {pu.testcase_separator_secret}Namespace.fs.closeSync(valueFile);
-        {pu.testcase_separator_secret}Namespace.fs.closeSync(exceptionFile);
+        fs.closeSync(valueFile);
+        fs.closeSync(exceptionFile);
     }})();
     """
 
@@ -289,8 +287,8 @@ def convert_execution_unit(pu: PreparedExecutionUnit) -> str:
 def convert_check_function(evaluator: str, function: FunctionCall) -> str:
     return f"""
     (async () => {{
-        const {evaluator} = require('./{evaluator}.ts');
-        const values = require('./values.ts');
+        import * as {evaluator} from './{evaluator}.mts';
+        import * as values from './values.mts';
 
         const result = {convert_function_call(function)};
         values.sendEvaluated(process.stdout.fd, result);
@@ -300,12 +298,12 @@ def convert_check_function(evaluator: str, function: FunctionCall) -> str:
 
 def convert_encoder(values: list[Value]) -> str:
     result = f"""
-    const values = require('./values.ts');
-    const fileSystem = require("fs");
+    import * as values from './values.mts';
+    import * as fs from 'fs';
     """
 
     for value in values:
         result += f"values.sendValue(process.stdout.fd, {convert_value(value)});\n"
-        result += f'fileSystem.writeSync(process.stdout.fd, "␞");\n'
+        result += f'fs.writeSync(process.stdout.fd, "␞");\n'
 
     return result
