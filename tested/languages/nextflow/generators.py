@@ -31,6 +31,7 @@ def convert_value(value: Value) -> str:
     elif value.type in BasicNumericTypes.INTEGER:
         return str(value.data)
     elif value.type == BasicStringTypes.UNKNOWN:
+        assert isinstance(value, StringType)
         return convert_unknown_type(value)
     raise AssertionError(f"Invalid literal: {value!r}")
 
@@ -54,11 +55,7 @@ def convert_statement(statement: Statement) -> str:
     elif isinstance(statement, Value):
         return convert_value(statement)
     elif isinstance(statement, VariableAssignment):
-        result = f"{statement.variable}="
-        if isinstance(statement.expression, FunctionCall):
-            result += f"$({convert_statement(statement.expression)})"
-        else:
-            result += convert_statement(statement.expression)
+        result = f"{statement.variable} = " + convert_statement(statement.expression)
     raise AssertionError(f"Unknown statement: {statement!r}")
 
 
@@ -74,8 +71,10 @@ def convert_execution_unit(pu: PreparedExecutionUnit) -> str:
 
     for ctx in pu.contexts:
         for tc in ctx.testcases:
-            if isinstance(tc.input, PreparedTestcaseStatement):
-                name = tc.input.unwrapped_input_statement().name
+            if isinstance(tc.input, PreparedTestcaseStatement) and isinstance(
+                tc.input.statement, FunctionCall
+            ):
+                name = tc.input.statement.name
                 if name not in includes:
                     includes.append(name)
     result = f"""include {{ {"; ".join(includes)} }} from './{pu.submission_name}'
