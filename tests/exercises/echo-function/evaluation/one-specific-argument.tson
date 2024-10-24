@@ -51,6 +51,10 @@
                             "file" : "evaluator.js",
                             "name" : "evaluate_sum"
                           },
+                          "typescript" : {
+                            "file" : "evaluator.ts",
+                            "name" : "evaluate_sum"
+                          },
                           "csharp" : {
                             "file" : "Evaluator.cs",
                             "name" : "evaluate_sum"
@@ -76,6 +80,9 @@
                             "5 + 5"
                           ],
                           "javascript" : [
+                            "5 + 5"
+                          ],
+                          "typescript" : [
                             "5 + 5"
                           ],
                           "csharp" : [

@@ -44,6 +44,9 @@
                           "javascript": {
                             "file": "evaluator.js"
                           },
+                          "typescript": {
+                            "file": "evaluator.ts"
+                          },
                           "csharp": {
                             "file": "Evaluator.cs"
                           }
@@ -88,6 +91,9 @@
                           },
                           "javascript": {
                             "file": "evaluator.js"
+                          },
+                          "typescript": {
+                            "file": "evaluator.ts"
                           },
                           "csharp": {
                             "file": "Evaluator.cs"

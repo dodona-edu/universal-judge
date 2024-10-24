@@ -774,6 +774,7 @@
         "haskell",
         "java",
         "javascript",
+        "typescript",
         "kotlin",
         "python",
         "runhaskell",

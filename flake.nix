@@ -9,7 +9,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     poetry2nix = {
-      url = "github:nix-community/poetry2nix?ref=refs/tags/2024.5.939250";
+      url = "github:nix-community/poetry2nix?ref=refs/tags/2024.10.2267247";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
@@ -45,6 +45,47 @@
 
         nodejs_base = pkgs.nodejs_22;
 
+        tsx = pkgs.stdenvNoCC.mkDerivation rec {
+          pname = "tsx";
+          version = "4.19.1";
+
+          src = pkgs.fetchFromGitHub {
+            owner = "privatenumber";
+            repo = pname;
+            rev = "v${version}";
+            hash = "sha256-3fEH1KiQqsw3NOtyvbx0DCWwWz+n8YFHUJAw8/8mMR8=";
+          };
+
+          nativeBuildInputs = [
+            nodejs_base
+            pkgs.pnpm.configHook
+            pkgs.makeWrapper
+          ];
+
+          pnpmDeps = pkgs.pnpm.fetchDeps {
+            inherit pname version src;
+            hash = "sha256-wOw7kHP6ajFwOefvl4vphxSmm1jhJXTQ+2knqSjyuek=";
+          };
+
+          buildPhase = ''
+            runHook preBuild
+
+            pnpm build
+
+            runHook postBuild
+          '';
+
+          installPhase = ''
+            runHook preInstall
+
+            mkdir -p "$out/bin" "$out/lib/tsx"
+            cp -r dist node_modules "$out/lib/tsx"
+            makeWrapper "${pkgs.lib.getExe nodejs_base}" "$out/bin/tsx" --add-flags "$out/lib/tsx/dist/cli.mjs"
+
+            runHook postInstall
+          '';
+        };
+
         # This one isn't in Nix, so do it manually.
         ast = pkgs.buildNpmPackage rec {
           pname = "abstract-syntax-tree";
@@ -75,6 +116,7 @@
           (pkgs.haskell.packages.ghc96.ghcWithPackages (p: [ p.aeson ]))
           pkgs.hlint
         ];
+        ts-deps = [ nodejs_base pkgs.typescript tsx ];
         node-deps = [ nodejs_base pkgs.nodePackages.eslint ast ];
         bash-deps = [ pkgs.shellcheck ];
         c-deps = [ pkgs.cppcheck pkgs.gcc13 ];
@@ -82,7 +124,7 @@
         kotlin-deps = [ pkgs.kotlin pkgs.ktlint ];
         csharp-deps = [ pkgs.dotnetCorePackages.sdk_8_0 ];
 
-        all-other-dependencies = haskell-deps ++ node-deps ++ bash-deps
+        all-other-dependencies = ts-deps ++ haskell-deps ++ node-deps ++ bash-deps
           ++ c-deps ++ java-deps ++ kotlin-deps ++ csharp-deps
           ++ [ pkgs.coreutils ];
 
@@ -122,8 +164,10 @@
             checkPhase = ''
               DOTNET_CLI_HOME="$(mktemp -d)"
               export DOTNET_CLI_HOME
+              TS_NODE_PROJECT=./tsconfig.json
               NODE_PATH=${ast}/lib/node_modules
               export NODE_PATH
+              export TS_NODE_PROJECT
               poetry run pytest -n auto --cov=tested --cov-report=xml tests/
             '';
             installPhase = ''
@@ -138,7 +182,7 @@
           tested = pkgs.devshell.mkShell {
             name = "TESTed";
 
-            packages = [ python-dev-env pkgs.nodePackages.pyright poetry-package ]
+            packages = [ python-dev-env pkgs.pyright poetry-package ]
               ++ all-other-dependencies;
 
             devshell.startup.link.text = ''

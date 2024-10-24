@@ -72,6 +72,7 @@ class SupportedLanguage(StrEnum):
     HASKELL = auto()
     JAVA = auto()
     JAVASCRIPT = auto()
+    TYPESCRIPT = auto()
     KOTLIN = auto()
     PYTHON = auto()
     RUNHASKELL = auto()
