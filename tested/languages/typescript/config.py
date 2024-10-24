@@ -138,12 +138,11 @@ class TypeScript(Language):
             solution.parent,
             timeout=None,
             command=["tsx", parse_file, str(solution.absolute())],
-            check=True,
+            check=False,
         )
         assert output, "Missing output from TypesScript's modify_solution"
         namings = output.stdout.strip()
         with open(solution, "a") as file:
-            # print(f"\ndeclare var module: any;", file=file)
             print(f"\nexport {{{namings}}};", file=file)
 
         # Add strict mode to the script.

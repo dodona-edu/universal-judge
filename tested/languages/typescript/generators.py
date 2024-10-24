@@ -160,7 +160,7 @@ def _generate_internal_context(ctx: PreparedContext, pu: PreparedExecutionUnit) 
     if not ctx.context.has_main_testcase():
         result += f"""
             writeSeparator();
-            //delete require.cache[require.resolve("./{submission_file(pu.language)}")];
+            delete require.cache[require.resolve("./{submission_file(pu.language)}")];
             let {pu.submission_name} = await import('./{submission_file(pu.language)}');
             """
 
@@ -192,7 +192,7 @@ def _generate_internal_context(ctx: PreparedContext, pu: PreparedExecutionUnit) 
         if tc.testcase.is_main_testcase():
             assert isinstance(tc.input, MainInput)
             result += f"""
-                //delete require.cache[require.resolve("./{pu.submission_name}.ts")];
+                delete require.cache[require.resolve("./{pu.submission_name}.ts")];
                 let {pu.submission_name} = await import('./{pu.submission_name}.ts');
             """
         else:
