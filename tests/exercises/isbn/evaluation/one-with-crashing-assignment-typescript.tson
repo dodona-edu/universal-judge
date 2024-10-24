@@ -7,8 +7,8 @@
           "contexts": [
             {
               "before": {
-                "java": {
-                  "data": "Supplier<List<Object>> ex = () -> {throw new AssertionError();};"
+                "typescript": {
+                  "data": "const ex: () => Array<any> = () => {throw new Error("AssertionError");};"
                 }
               },
               "testcases": [

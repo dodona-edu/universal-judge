@@ -1,4 +1,4 @@
-const e = require("./echo.ts");
+import * as e from "./echo.ts";
 
 function echo(content) {
     return e.echo(content);
