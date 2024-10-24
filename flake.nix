@@ -199,10 +199,6 @@
                 name = "NODE_PATH";
                 prefix = "${ast}/lib/node_modules";
               }
-              {
-                name = "TS_NODE_PROJECT";
-                prefix = "./tsconfig.json";
-              }
             ];
             commands = [
               {

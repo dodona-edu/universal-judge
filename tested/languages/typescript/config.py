@@ -32,6 +32,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+
 class TypeScript(Language):
 
     def initial_dependencies(self) -> list[str]:
@@ -107,9 +108,18 @@ class TypeScript(Language):
         submission = submission_file(self)
         main_file = list(filter(lambda x: x == submission, files))
         if main_file:
-            return (["tsc", "--module", "nodenext", "--moduleResolution",
-                    "nodenext", "--noEmit", main_file[0]],
-                    files)
+            return (
+                [
+                    "tsc",
+                    "--module",
+                    "nodenext",
+                    "--moduleResolution",
+                    "nodenext",
+                    "--noEmit",
+                    main_file[0],
+                ],
+                files,
+            )
         else:
             return [], files
 
@@ -133,7 +143,7 @@ class TypeScript(Language):
         assert output, "Missing output from TypesScript's modify_solution"
         namings = output.stdout.strip()
         with open(solution, "a") as file:
-           # print(f"\ndeclare var module: any;", file=file)
+            # print(f"\ndeclare var module: any;", file=file)
             print(f"\nexport {{{namings}}};", file=file)
 
         # Add strict mode to the script.
@@ -197,38 +207,36 @@ class TypeScript(Language):
 
     def get_declaration_metadata(self) -> TypeDeclarationMetadata:
         return {
-            "names":     {  # type: ignore
-                "integer":          "number",
-                "real":             "number",
-                "char":             "string",
-                "text":             "string",
-                "string":           "string",
-                "boolean":          "boolean",
-                "sequence":         "array",
-                "set":              "set",
-                "map":              "object",
-                "nothing":          "null",
-                "undefined":        "undefined",
-                "int8":             "number",
-                "uint8":            "number",
-                "int16":            "number",
-                "uint16":           "number",
-                "int32":            "number",
-                "uint32":           "number",
-                "int64":            "number",
-                "uint64":           "number",
-                "bigint":           "number",
+            "names": {  # type: ignore
+                "integer": "number",
+                "real": "number",
+                "char": "string",
+                "text": "string",
+                "string": "string",
+                "boolean": "boolean",
+                "sequence": "array",
+                "set": "set",
+                "map": "object",
+                "nothing": "null",
+                "undefined": "undefined",
+                "int8": "number",
+                "uint8": "number",
+                "int16": "number",
+                "uint16": "number",
+                "int32": "number",
+                "uint32": "number",
+                "int64": "number",
+                "uint64": "number",
+                "bigint": "number",
                 "single_precision": "number",
                 "double_precision": "number",
-                "double_extended":  "number",
-                "fixed_precision":  "number",
-                "array":            "array",
-                "list":             "array",
-                "tuple":            "array",
-                "any":              "object",
+                "double_extended": "number",
+                "fixed_precision": "number",
+                "array": "array",
+                "list": "array",
+                "tuple": "array",
+                "any": "object",
             },
-            "nested":    ("<", ">"),
+            "nested": ("<", ">"),
             "exception": "Error",
         }
-
-

@@ -56,7 +56,6 @@ def test_eslint(tmp_path: Path, config: dict, pytestconfig: pytest.Config):
         config,
     )
     result = execute_config(conf)
-    print(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert len(updates.find_all("annotate-code")) > 0
 

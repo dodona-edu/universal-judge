@@ -68,9 +68,9 @@ def convert_value(value: Value) -> str:
         result += "}"
         return result
     elif value.type in (
-            AdvancedNumericTypes.INT_64,
-            AdvancedNumericTypes.U_INT_64,
-            AdvancedNumericTypes.BIG_INT,
+        AdvancedNumericTypes.INT_64,
+        AdvancedNumericTypes.U_INT_64,
+        AdvancedNumericTypes.BIG_INT,
     ):
         return f'BigInt("{value.data}")'
     # Handle basic types
@@ -182,9 +182,9 @@ def _generate_internal_context(ctx: PreparedContext, pu: PreparedExecutionUnit) 
 
         # We need special code to make variables available outside of the try-catch block.
         if (
-                not tc.testcase.is_main_testcase()
-                and isinstance(tc.input, PreparedTestcaseStatement)
-                and isinstance(tc.input.statement, VariableAssignment)
+            not tc.testcase.is_main_testcase()
+            and isinstance(tc.input, PreparedTestcaseStatement)
+            and isinstance(tc.input.statement, VariableAssignment)
         ):
             result += f"let {tc.input.statement.variable}\n"
 
