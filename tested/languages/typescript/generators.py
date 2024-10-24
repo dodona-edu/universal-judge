@@ -192,8 +192,8 @@ def _generate_internal_context(ctx: PreparedContext, pu: PreparedExecutionUnit) 
         if tc.testcase.is_main_testcase():
             assert isinstance(tc.input, MainInput)
             result += f"""
-                //delete require.cache[require.resolve("./{pu.submission_name}.mts")];
-                let {pu.submission_name} = await import('./{pu.submission_name}.mts');
+                //delete require.cache[require.resolve("./{pu.submission_name}.ts")];
+                let {pu.submission_name} = await import('./{pu.submission_name}.ts');
             """
         else:
             assert isinstance(tc.input, PreparedTestcaseStatement)
@@ -214,12 +214,12 @@ def _generate_internal_context(ctx: PreparedContext, pu: PreparedExecutionUnit) 
 def convert_execution_unit(pu: PreparedExecutionUnit) -> str:
     result = f"""
     import * as fs from 'fs';
-    import * as values from './values.mts';
+    import * as values from './values.ts';
     """
 
     # Import the language specific functions we will need.
     for name in pu.evaluator_names:
-        result += f"import * as {name} from './{name}.mts';\n"
+        result += f"import * as {name} from './{name}.ts';\n"
 
     # We now open files for results and define some functions.
     result += f"""
@@ -287,8 +287,8 @@ def convert_execution_unit(pu: PreparedExecutionUnit) -> str:
 def convert_check_function(evaluator: str, function: FunctionCall) -> str:
     return f"""
     (async () => {{
-        import * as {evaluator} from './{evaluator}.mts';
-        import * as values from './values.mts';
+        import * as {evaluator} from './{evaluator}.ts';
+        import * as values from './values.ts';
 
         const result = {convert_function_call(function)};
         values.sendEvaluated(process.stdout.fd, result);
@@ -298,7 +298,7 @@ def convert_check_function(evaluator: str, function: FunctionCall) -> str:
 
 def convert_encoder(values: list[Value]) -> str:
     result = f"""
-    import * as values from './values.mts';
+    import * as values from './values.ts';
     import * as fs from 'fs';
     """
 

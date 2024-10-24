@@ -1,5 +1,4 @@
 import * as fs from 'fs';
-//const fs = require('fs');
 
 function isVanillaObject(value: Object) : boolean {
     try {
@@ -133,7 +132,7 @@ function sendException(stream: number, exception: Error | Object | {constructor:
                 "message": JSON.stringify(exception),
                 "stacktrace": "",
                 "type": (exception as Object).constructor.name ?? (Object.prototype.toString.call(exception)),
-                "additional_message_keys": ["languages.javascript.runtime.invalid.exception"]
+                "additional_message_keys": ["languages.typescript.runtime.invalid.exception"]
             }));
         }
     }

@@ -35,13 +35,13 @@ logger = logging.getLogger(__name__)
 class TypeScript(Language):
 
     def initial_dependencies(self) -> list[str]:
-        return ["values.mts"]
+        return ["values.ts"]
 
     def needs_selector(self) -> bool:
         return False
 
     def file_extension(self) -> str:
-        return "mts"
+        return "ts"
 
     def naming_conventions(self) -> dict[Conventionable, NamingConventions]:
         return {
@@ -115,7 +115,7 @@ class TypeScript(Language):
 
     def execution(self, cwd: Path, file: str, arguments: list[str]) -> Command:
         # Used es2022 because of the top-level await feature (most up-to data).
-        return ["node", "--no-warnings", "--loader", "ts-node/esm", file, *arguments]
+        return ["tsx", file, *arguments]
 
     def modify_solution(self, solution: Path):
         # import local to prevent errors
@@ -123,11 +123,11 @@ class TypeScript(Language):
 
         assert self.config
 
-        parse_file = str(Path(__file__).parent / "parseAst.mts")
+        parse_file = str(Path(__file__).parent / "parseAst.ts")
         output = run_command(
             solution.parent,
             timeout=None,
-            command=["node", "--no-warnings",  "--loader", "ts-node/esm", parse_file, str(solution.absolute())],
+            command=["tsx", parse_file, str(solution.absolute())],
             check=False,
         )
         assert output, "Missing output from TypesScript's modify_solution"
