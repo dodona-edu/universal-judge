@@ -32,7 +32,7 @@ from tested.datatypes import (
     resolve_to_basic,
 )
 from tested.dodona import ExtendedMessage
-from tested.dsl.ast_translator import InvalidDslError, parse_string, extract_comment
+from tested.dsl.ast_translator import InvalidDslError, extract_comment, parse_string
 from tested.parsing import get_converter, suite_to_json
 from tested.serialisation import (
     BooleanType,
