@@ -151,6 +151,8 @@ def get_readable_input(
         text = case.input.get_for(bundle.config.programming_language)
         format_ = bundle.config.programming_language
 
+    text = f"{text} {bundle.language.comment(case.line_comment)}"
+
     # If there are no files, return now. This means we don't need to do ugly stuff.
     if not case.link_files:
         return ExtendedMessage(description=text, format=format_), set()

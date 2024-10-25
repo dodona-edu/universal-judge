@@ -556,6 +556,7 @@ class Testcase(WithFeatures, WithFunctions):
     description: Message | None = None
     output: Output = field(factory=Output)
     link_files: list[FileUrl] = field(factory=list)
+    line_comment: str = ""
 
     def get_used_features(self) -> FeatureSet:
         return combine_features(

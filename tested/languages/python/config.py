@@ -51,6 +51,9 @@ class Python(Language):
     def file_extension(self) -> str:
         return "py"
 
+    def comment(self, text: str) -> str:
+        return f"# {text}"
+
     def naming_conventions(self) -> dict[Conventionable, NamingConventions]:
         return {"class": "pascal_case", "global_identifier": "macro_case"}
 
