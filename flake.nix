@@ -80,7 +80,10 @@
 
             mkdir -p "$out/bin" "$out/lib/tsx"
             cp -r dist node_modules "$out/lib/tsx"
-            makeWrapper "${pkgs.lib.getExe nodejs_base}" "$out/bin/tsx" --add-flags "$out/lib/tsx/dist/cli.mjs"
+            cp -r ${pkgs.typescript}/lib/node_modules/typescript/* "$out/lib/tsx/node_modules/typescript"
+            makeWrapper "${pkgs.lib.getExe nodejs_base}" "$out/bin/tsx" \
+                      --add-flags "$out/lib/tsx/dist/cli.mjs" \
+                      --set NODE_PATH "$out/lib/tsx/node_modules"
 
             runHook postInstall
           '';
@@ -124,7 +127,7 @@
         kotlin-deps = [ pkgs.kotlin pkgs.ktlint ];
         csharp-deps = [ pkgs.dotnetCorePackages.sdk_8_0 ];
 
-        all-other-dependencies = ts-deps ++ haskell-deps ++ node-deps ++ bash-deps
+        all-other-dependencies = haskell-deps ++ ts-deps ++ node-deps ++ bash-deps
           ++ c-deps ++ java-deps ++ kotlin-deps ++ csharp-deps
           ++ [ pkgs.coreutils ];
 
@@ -164,10 +167,8 @@
             checkPhase = ''
               DOTNET_CLI_HOME="$(mktemp -d)"
               export DOTNET_CLI_HOME
-              TS_NODE_PROJECT=./tsconfig.json
               NODE_PATH=${ast}/lib/node_modules
               export NODE_PATH
-              export TS_NODE_PROJECT
               poetry run pytest -n auto --cov=tested --cov-report=xml tests/
             '';
             installPhase = ''

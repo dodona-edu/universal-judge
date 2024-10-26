@@ -1,3 +1,4 @@
+import * as values from "./templates/values.ts";
 import * as ts from 'typescript';
 import * as fs from 'fs';
 const source = fs.readFileSync(process.argv[2], 'utf-8');

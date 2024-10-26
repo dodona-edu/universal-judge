@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "module": "esnext",
+    "strict": true,
+    "target": "es6",
+    "moduleDetection": "force",
+    "resolveJsonModule": true,
+    "allowJs": true,
+	"esModuleInterop": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax" : true,
+    "types" : ["node"],
+    "moduleResolution" : "node",
+    "allowImportingTsExtensions" : true,
+  },
+
+}

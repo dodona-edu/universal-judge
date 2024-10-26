@@ -1,4 +1,5 @@
 import logging
+import os
 import re
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -125,7 +126,7 @@ class TypeScript(Language):
 
     def execution(self, cwd: Path, file: str, arguments: list[str]) -> Command:
         # Used es2022 because of the top-level await feature (most up-to data).
-        return ["tsx", file, *arguments]
+        return ["tsx", "--tsconfig", str(Path(__file__).parent / "tsconfig.json"), file, *arguments]
 
     def modify_solution(self, solution: Path):
         # import local to prevent errors
@@ -137,9 +138,10 @@ class TypeScript(Language):
         output = run_command(
             solution.parent,
             timeout=None,
-            command=["tsx", parse_file, str(solution.absolute())],
+            command=["tsx", "--tsconfig", str(Path(__file__).parent / "tsconfig.json"), parse_file, str(solution.absolute())],
             check=False,
         )
+        print(output.stderr)
         assert output, "Missing output from TypesScript's modify_solution"
         namings = output.stdout.strip()
         with open(solution, "a") as file:
