@@ -13,6 +13,7 @@
     "types" : ["node"],
     "moduleResolution" : "node",
     "allowImportingTsExtensions" : true,
+    "noEmit" : true
   },
 
 }

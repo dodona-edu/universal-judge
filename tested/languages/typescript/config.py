@@ -111,12 +111,9 @@ class TypeScript(Language):
         if main_file:
             return (
                 [
-                    "tsc",
-                    "--module",
-                    "nodenext",
-                    "--moduleResolution",
-                    "nodenext",
-                    "--noEmit",
+                    "tsx",
+                    "--tsconfig",
+                    str(Path(__file__).parent / "tsconfig-compilation.json"),
                     main_file[0],
                 ],
                 files,
@@ -125,8 +122,7 @@ class TypeScript(Language):
             return [], files
 
     def execution(self, cwd: Path, file: str, arguments: list[str]) -> Command:
-        # Used es2022 because of the top-level await feature (most up-to data).
-        return ["tsx", "--tsconfig", str(Path(__file__).parent / "tsconfig.json"), file, *arguments]
+        return ["tsx", file, *arguments]
 
     def modify_solution(self, solution: Path):
         # import local to prevent errors
@@ -138,10 +134,10 @@ class TypeScript(Language):
         output = run_command(
             solution.parent,
             timeout=None,
-            command=["tsx", "--tsconfig", str(Path(__file__).parent / "tsconfig.json"), parse_file, str(solution.absolute())],
-            check=False,
+            command=["tsx", parse_file, str(solution.absolute())],
+            check=True,
         )
-        print(output.stderr)
+        print(output)
         assert output, "Missing output from TypesScript's modify_solution"
         namings = output.stdout.strip()
         with open(solution, "a") as file:
