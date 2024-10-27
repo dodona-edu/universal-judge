@@ -47,10 +47,6 @@ def run_command(
 
     :return: The result of the execution if the command was not None.
     """
-    print(f"Running command {command} in {directory}")
-    print(f"Timeout: {timeout}")
-    print(f"Check: {check}")
-    print(f"Stdin: {stdin}")
     if not command:
         return None
 

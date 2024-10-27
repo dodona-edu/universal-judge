@@ -111,9 +111,8 @@ class TypeScript(Language):
         if main_file:
             return (
                 [
-                    "tsx",
-                    "--tsconfig",
-                    str(Path(__file__).parent / "tsconfig-compilation.json"),
+                    "tsc",
+                    "--noEmit",
                     main_file[0],
                 ],
                 files,
@@ -137,7 +136,6 @@ class TypeScript(Language):
             command=["tsx", parse_file, str(solution.absolute())],
             check=True,
         )
-        print(output)
         assert output, "Missing output from TypesScript's modify_solution"
         namings = output.stdout.strip()
         with open(solution, "a") as file:
@@ -147,9 +145,7 @@ class TypeScript(Language):
         with open(solution, "r") as file:
             non_strict = file.read()
         with open(solution, "w") as file:
-            # This rule is added because Typescript might
-            # complain about "require('fs')" being redeclared.
-            file.write('"use strict";\n\n' + non_strict)
+            file.write('"use strict";\n' + non_strict)
         self.config.dodona.source_offset -= 2
 
     def cleanup_stacktrace(self, stacktrace: str) -> str:
