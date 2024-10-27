@@ -241,10 +241,14 @@ def test_valid_yaml_and_json():
     def recursive_iter_dir(directory: Path) -> list[Path]:
         yaml_and_json_files = []
         for file in directory.iterdir():
-            if file.is_file() and not file.name.startswith("tsconfig") and (
-                file.name.endswith(".yml")
-                or file.name.endswith(".yaml")
-                or file.name.endswith(".json")
+            if (
+                file.is_file()
+                and not file.name.startswith("tsconfig")
+                and (
+                    file.name.endswith(".yml")
+                    or file.name.endswith(".yaml")
+                    or file.name.endswith(".json")
+                )
             ):
                 yaml_and_json_files.append(file)
             elif file.is_dir():
