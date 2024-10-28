@@ -188,8 +188,12 @@
                 eval = "false";
               }
               {
-                name = "NXF_VER";
-                eval = "${builtins.head (pkgs.lib.splitString "-" pkgs.nextflow.version)}";
+                name = "NXF_DISABLE_CHECK_LATEST";
+                eval = "true";
+              }
+              {
+                name = "NXF_OFFLINE";
+                eval = "true";
               }
             ];
             commands = [
