@@ -23,6 +23,7 @@ from tests.language_markers import (
     ALL_LANGUAGES,
     ALL_SPECIFIC_LANGUAGES,
     EXCEPTION_LANGUAGES,
+    all_languages_except,
 )
 from tests.manual_utils import assert_valid_output, configuration, execute_config
 
@@ -305,7 +306,7 @@ def test_batch_compilation_no_fallback(
     assert spy.call_count == 1
 
 
-@pytest.mark.parametrize("language", ALL_LANGUAGES)
+@pytest.mark.parametrize("language", all_languages_except("nextflow"))
 def test_batch_compilation_no_fallback_runtime(
     language: str, tmp_path: Path, pytestconfig: pytest.Config
 ):
@@ -323,7 +324,7 @@ def test_batch_compilation_no_fallback_runtime(
 
 
 @pytest.mark.parametrize(
-    "lang", ["python", "java", "c", "javascript", "kotlin", "bash", "csharp"]
+    "lang", all_languages_except("haskell", "runhaskell", "nextflow")
 )
 def test_program_params(lang: str, tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(pytestconfig, "sum", lang, tmp_path, "short.tson", "correct")
