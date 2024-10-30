@@ -29,9 +29,6 @@ RUN <<EOF
         zip \
         unzip
 
-    # Java dependencies
-    apt-get install -y --no-install-recommends checkstyle
-
     # C/C++ dependencies
     apt-get install -y --no-install-recommends \
         gcc \
@@ -66,14 +63,14 @@ RUN <<EOF
     cabal v1-install --global aeson
 
     # JavaScript dependencies
-    curl https://packages.microsoft.com/config/debian/11/packages-microsoft-prod.deb --output packages-microsoft-prod.deb
-    dpkg -i packages-microsoft-prod.deb
-    rm packages-microsoft-prod.deb
     bash -c 'set -o pipefail && curl -fsSL https://deb.nodesource.com/setup_22.x | bash -'
     apt-get install -y --no-install-recommends nodejs
     npm install -g eslint@8.57 abstract-syntax-tree@2.22
 
     # C# dependencies
+    curl https://packages.microsoft.com/config/debian/11/packages-microsoft-prod.deb --output packages-microsoft-prod.deb
+    dpkg -i packages-microsoft-prod.deb
+    rm packages-microsoft-prod.deb
     apt-get install -y --no-install-recommends dotnet-sdk-8.0
 
     # Python dependencies
@@ -88,13 +85,16 @@ RUN <<EOF
         python-i18n==0.3.9 \
         pylint==3.0.1
 
-    # Kotlin dependencies
+    # Java and Kotlin dependencies
     bash -c 'set -o pipefail && curl -s "https://get.sdkman.io?rcupdate=false" | bash'
     chmod a+x "$SDKMAN_DIR/bin/sdkman-init.sh"
     bash -c "source \"$SDKMAN_DIR/bin/sdkman-init.sh\" && sdk install java 21.0.3-tem && sdk install kotlin"
     curl -sSLO https://github.com/pinterest/ktlint/releases/download/1.2.1/ktlint
     chmod a+x ktlint
     mv ktlint /usr/local/bin
+
+    # Java specific dependencies
+    apt-get install -y --no-install-recommends checkstyle
 
     # Clean up apt caches
     apt-get clean
