@@ -54,6 +54,7 @@ RUN <<EOF
 
     # Haskell dependencies
     apt-get install -y --no-install-recommends \
+        hlint \
         autoconf \
         build-essential \
         zlib1g-dev \
