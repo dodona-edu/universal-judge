@@ -66,4 +66,4 @@ jobs:
           imageName: dodona/dodona-tested
           imageTag: dev
           push: never
-          runCmd: pyright ./tested ./tests
+          runCmd: poetry run pyright ./tested ./tests
