@@ -1,12 +1,9 @@
-// For format details, see https://aka.ms/devcontainer.json. For config options, see the
 {
 	"name": "dodona-tested",
-
-//  image: "dodona/dodona-tested:latest",
-  build: {
-    dockerfile: "dodona-tested.dockerfile",
-    context: "."
+  "build": {
+    "dockerfile": "dodona-tested.dockerfile",
+    "context": "."
   },
   // install dev dependencies
-  postCreateCommand: "pip install poetry --user; python -m poetry install --with dev"
+  "postCreateCommand": "pip install poetry --user; python -m poetry install --with dev"
 }
