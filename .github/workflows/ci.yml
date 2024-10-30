@@ -6,17 +6,26 @@ on:
     types: [labeled]
 
 jobs:
-  test:
+  should-run:
     if: ${{ github.event.action != 'labeled' || (github.event.action == 'labeled' && github.event.label.name == 'run tests') }}
+    runs-on: ubuntu-latest
+  build_devcontainer:
+    needs: [should-run]
+    uses: ./.github/workflows/build_devcontainer.yml
+    secrets: inherit
+  test:
+    needs: [build_devcontainer]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           repository: ${{ github.event.pull_request.head.repo.full_name }}
-      - name: Build and run dev container task
+      - name: Run tests in container
         uses: devcontainers/ci@v0.3
         with:
+          imageName: dodona/dodona-tested
+          imageTag: dev
           runCmd: poetry run pytest -n auto --cov=tested --cov-report=xml tests/
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
@@ -24,27 +33,36 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./result/coverage.xml
   lint:
-    if: ${{ github.event.action != 'labeled' || (github.event.action == 'labeled' && github.event.label.name == 'run tests') }}
+    needs: [build_devcontainer]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           repository: ${{ github.event.pull_request.head.repo.full_name }}
-      - uses: DeterminateSystems/nix-installer-action@main
-      - uses: DeterminateSystems/magic-nix-cache-action@main
-      - run: echo "${GITHUB_WORKSPACE}" >> $GITHUB_PATH
-      - run: nix develop .#format -c poetry run isort --check-only --diff ./tested ./tests
-      - run: nix develop .#format -c poetry run black --check ./tested ./tests
+      - name: Run isort
+        uses: devcontainers/ci@v0.3
+        with:
+          imageName: dodona/dodona-tested
+          imageTag: dev
+          runCmd: poetry run isort --check-only --diff ./tested ./tests
+      - name: Run black
+        uses: devcontainers/ci@v0.3
+        with:
+          imageName: dodona/dodona-tested
+          imageTag: dev
+          runCmd: poetry run black --check ./tested ./tests
   types:
-    if: ${{ github.event.action != 'labeled' || (github.event.action == 'labeled' && github.event.label.name == 'run tests') }}
+    needs: [build_devcontainer]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           repository: ${{ github.event.pull_request.head.repo.full_name }}
-      - uses: DeterminateSystems/nix-installer-action@main
-      - uses: DeterminateSystems/magic-nix-cache-action@main
-      - run: echo "${GITHUB_WORKSPACE}" >> $GITHUB_PATH
-      - run: nix develop .#types -c pyright ./tested ./tests
+      - name: Run pyright
+        uses: devcontainers/ci@v0.3
+        with:
+          imageName: dodona/dodona-tested
+          imageTag: dev
+          runCmd: pyright ./tested ./tests

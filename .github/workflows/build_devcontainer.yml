@@ -1,0 +1,26 @@
+# this file is used to build the devcontainer image and push it to the docker registry
+# it is used to speed up other ci jobs by using the prebuilt image
+# this does not create the production image, as that should only be done when merging to main
+name: 'Build devcontainer'
+on:
+   workflow_call:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout (GitHub)
+        uses: actions/checkout@v3
+
+      - name: Login to Docker Container Registry
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and run Dev Container task
+        uses: devcontainers/ci@v0.3
+        with:
+          imageName: dodona/dodona-tested
+          imageTag: dev
