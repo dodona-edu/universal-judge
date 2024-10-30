@@ -4,6 +4,5 @@
     "dockerfile": "dodona-tested.dockerfile",
     "context": "."
   },
-  // install dev dependencies
-  "postCreateCommand": "pip install poetry --user; python -m poetry install --with dev"
+  "postCreateCommand": "./.devcontainer/dev-dependencies.sh",
 }

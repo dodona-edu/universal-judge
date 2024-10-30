@@ -4,5 +4,5 @@
 
 # install poetry
 pip install poetry --user
-# Install dependencies (include --dev for tests/development)
-poetry install --dev
+# Install dependencies
+python -m poetry install --with dev
