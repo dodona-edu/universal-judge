@@ -23,6 +23,7 @@ jobs:
         with:
           imageName: dodona/dodona-tested
           imageTag: dev
+          push: never
           runCmd: poetry run pytest -n auto --cov=tested --cov-report=xml tests/
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
@@ -42,12 +43,14 @@ jobs:
         with:
           imageName: dodona/dodona-tested
           imageTag: dev
+          push: never
           runCmd: poetry run isort --check-only --diff ./tested ./tests
       - name: Run black
         uses: devcontainers/ci@v0.3
         with:
           imageName: dodona/dodona-tested
           imageTag: dev
+          push: never
           runCmd: poetry run black --check ./tested ./tests
   types:
     needs: [build_devcontainer]
@@ -62,4 +65,5 @@ jobs:
         with:
           imageName: dodona/dodona-tested
           imageTag: dev
+          push: never
           runCmd: pyright ./tested ./tests
