@@ -9,7 +9,8 @@ pip install --no-cache-dir --upgrade \
     syrupy==4.6.1 \
     black==24.4.2 \
     isort==5.13.2 \
-    pyright==1.1.387
+    pyright==1.1.387\
+    jinja2==3.1.4
 
 # add installed packages to path
 cat <<EOF >> /home/runner/.bashrc
