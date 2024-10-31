@@ -10,3 +10,8 @@ pip install --no-cache-dir --upgrade \
     black==24.4.2 \
     isort==5.13.2 \
     pyright==1.1.387
+
+# add installed packages to path
+cat <<EOF >> /home/runner/.bashrc
+export PATH=$PATH:/home/runner/.local/bin
+EOF
