@@ -91,7 +91,7 @@ jobs:
       - name: Run tests in container
         uses: devcontainers/ci@v0.3
         env:
-          EXERCISE_REPO: ${{ github.workspace }}/javascript-oefeningen
+          EXERCISE_REPO: javascript-oefeningen
         with:
           imageName: dodona/dodona-tested
           imageTag: dev
