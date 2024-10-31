@@ -9,8 +9,13 @@ pip install --no-cache-dir --upgrade \
     syrupy==4.6.1 \
     black==24.4.2 \
     isort==5.13.2 \
-    pyright==1.1.387\
-    jinja2==3.1.4
+    pyright==1.1.387
+
+
+# Install dependencies for the description generator
+pip install --no-cache-dir --upgrade \
+    jinja2==3.1.4\
+    marko==2.0.3
 
 # add installed packages to path
 cat <<EOF >> /home/runner/.bashrc
