@@ -11,6 +11,7 @@ extend-exclude="tests/exercises/*"
 
 [tool.pytest.ini_options]
 addopts = "--ignore=tests/test_integration_javascript.py"
+markers = ["haskell"]
 
 [tool.pyright]
 exclude = ["tests/exercises/", "tests/snapshots/", "tests/descriptions/"]
