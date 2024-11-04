@@ -1,5 +1,5 @@
 {
-	"name": "dodona-tested",
+  "name": "dodona-tested",
   "build": {
     "dockerfile": "dodona-tested.dockerfile",
     "context": "."
