@@ -1,6 +1,10 @@
 # This is the Dockerfile for the tested judge.
 # It can be downloaded using docker pull dodona/dodona-tested.
 
+# This docker image is run in our production environment.
+# It should not contain any development tools or dependencies.
+# Add those to dev-dependencies.sh instead.
+
 FROM python:3.12.4-slim-bullseye
 
 # Set up the environment
@@ -28,6 +32,18 @@ RUN <<EOF
         curl \
         zip \
         unzip
+
+    # Python dependencies
+    pip install --no-cache-dir --upgrade \
+        psutil==5.9.8 \
+        attrs==23.2.0 \
+        cattrs==23.2.3 \
+        jsonschema==4.22.0 \
+        typing_inspect==0.9.0 \
+        pyyaml==6.0.1 \
+        Pygments==2.18.0 \
+        python-i18n==0.3.9 \
+        pylint==3.0.1
 
     # C/C++ dependencies
     apt-get install -y --no-install-recommends \
@@ -73,18 +89,6 @@ RUN <<EOF
     rm packages-microsoft-prod.deb
     apt-get update
     apt-get install -y --no-install-recommends dotnet-sdk-8.0
-
-    # Python dependencies
-    pip install --no-cache-dir --upgrade \
-        psutil==5.9.8 \
-        attrs==23.2.0 \
-        cattrs==23.2.3 \
-        jsonschema==4.22.0 \
-        typing_inspect==0.9.0 \
-        pyyaml==6.0.1 \
-        Pygments==2.18.0 \
-        python-i18n==0.3.9 \
-        pylint==3.0.1
 
     # Java and Kotlin dependencies
     bash -c 'set -o pipefail && curl -s "https://get.sdkman.io?rcupdate=false" | bash'
