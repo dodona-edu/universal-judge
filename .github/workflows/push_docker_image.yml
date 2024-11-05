@@ -4,6 +4,7 @@
 name: Create pr for docker image
 
 on:
+  push:
   pull_request:
     types:
       - closed
@@ -12,7 +13,7 @@ on:
 
 jobs:
   pr:
-    if: github.event.pull_request.merged == true
+#    if: github.event.pull_request.merged == true
     name: Create pr for docker image
     runs-on: ubuntu-latest
     steps:
