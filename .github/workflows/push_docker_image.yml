@@ -24,7 +24,8 @@ jobs:
           PR_NUMBER: ${{ github.event.number }}
           REPOSITORY: dodona-edu/docker-images
           TOKEN: ${{ secrets.PUSH_TO_DOCKER_IMAGES_ACCESS_TOKEN }}
-          USER_EMAIL:
+          USER: dodona-server
+          EMAIL: dodona@ugent.be
         run: |
           FOLDER="docker-images"
           BRANCH_NAME="update-dodona-tested-$PR_NUMBER"
@@ -44,8 +45,6 @@ jobs:
           gh auth setup-git
           
           # Setup the committers email and username, required until https://github.com/cli/cli/issues/6096 is resolved
-          USER=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /user | jq -r .login)
-          EMAIL=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /user/emails | jq -r ".[1].email")
           git config --global user.name "$USER"
           git config --global user.email "$EMAIL" 
           
