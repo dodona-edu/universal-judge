@@ -35,7 +35,7 @@ jobs:
           # Authorize GitHub CLI for the current repository
           gh auth login --with-token < token.txt
           
-          gh repo clone $REPOSITORY $FOLDER --depth=1
+          gh repo clone $REPOSITORY $FOLDER -- --depth=1
           
           cd $FOLDER
           
