@@ -25,7 +25,7 @@ jobs:
           REPOSITORY: dodona-edu/docker-images
           TOKEN: ${{ secrets.PUSH_TO_DOCKER_IMAGES_ACCESS_TOKEN }}
         run: |
-          FOLDER="$REPOSITORY"
+          FOLDER="docker-images"
           BRANCH_NAME="update-dodona-tested-$PR_NUMBER"
           
           # Store the PAT in a file that can be accessed by the
