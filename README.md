@@ -15,33 +15,14 @@ If you use this software in research, please cite:
 ## Installing TESTed
 
 TESTed is implemented in Python, but has various dependencies for its language-specific modules.
-See [dependencies.md](./dependencies.md) for an overview of dependencies for each of the supported programming languages.
 
-### Nix installation
-The easiest way to install TESTed with all its dependencies is using the [Nix](https://nixos.org/) package manager.
+To be able to work with all these dependencies on different platforms we make use of [devcontainers](https://containers.dev/).
+This means that you can use the provided `.devcontainer/devcontainer.json` to open a container with all dependencies installed.
 
-Install Nix using [The Determinate Nix Installer](https://github.com/DeterminateSystems/nix-installer).
-Next, [clone](https://github.com/git-guides/git-clone) the TESTed repository and open a command prompt in the cloned repository.
+Modern IDEs like [Visual Studio Code](https://code.visualstudio.com/) and [PyCharm](https://www.jetbrains.com/pycharm/) support devcontainers out of the box.
 
-Then run `nix develop` to open a shell environment with all dependencies installed.
-The first time you run this command, it will take a while to download and build all dependencies.
-
-### Poetry installation
-If you only need the Python language module, or want to manually install a subset of the [dependencies](./dependencies.md), you can use [poetry](https://python-poetry.org/).
-
-Install [Python 3.12](https://www.python.org/downloads/) or later (including pip).
-Next, [clone](https://github.com/git-guides/git-clone) the TESTed repository and open a command prompt in the cloned repository.
-TESTed uses [poetry](https://python-poetry.org/) to manage its Python dependencies.
-Now you can run the following commands to install them:
-
-```bash
-# Pipenv install
-$ pip install poetry --user
-# Install dependencies (include --dev for tests/development)
-$ poetry install
-```
-
-Running `poetry shell` will open a shell environment with all python dependencies installed.
+If you prefer installing all dependencies on your local machine, you can find the installed dependencies in the [dockerfile](./.devcontainer/dodona-tested.dockerfile).
+The extra development dependencies are listed in the [dev-dependencies.sh](./devcontainer/dev-dependencies.sh) file.
 
 ## Running TESTed
 
@@ -233,9 +214,27 @@ The repository of TESTed is organized as follows:
 - `tests`: unit tests for TESTed
 
 
+## Useful commands
 
 You can run the basic unit tests with:
 
 ```bash
-$ python -m pytest tests/test_functionality.py
+pytest tests/test_functionality.py
 ```
+
+You can run the full test suite with:
+
+```bash
+pytest -n auto tests/
+```
+
+We use `black` and `isort` for code formatting. `pyright` is used for type checking.
+You can run them with:
+
+```bash
+black ./tested ./tests
+isort ./tested ./tests
+pyright ./tested ./tests
+```
+
+
