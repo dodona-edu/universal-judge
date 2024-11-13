@@ -58,7 +58,7 @@ class Bash(Language):
     def submission_file(self) -> str:
         return submission_name(self)
 
-    def compilation(self, files: list[str]) -> CallbackResult:
+    def compilation(self, files: list[str], directory: Path) -> CallbackResult:
         submission = submission_file(self)
         main_file = list(filter(lambda x: x == submission, files))
         if main_file:

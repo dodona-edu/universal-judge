@@ -74,7 +74,7 @@ class Language(ABC):
         """
         self.config = config
 
-    def compilation(self, files: list[str]) -> CallbackResult:
+    def compilation(self, files: list[str], directory: Path) -> CallbackResult:
         """
         Callback for generating the compilation command.
 
@@ -138,6 +138,8 @@ class Language(ABC):
         :param files: A suggestion containing the dependencies TESTed thinks might
                       be useful to compile. By convention, the last file in the list
                       is the file containing the "main" function.
+
+        :param directory: The directory in which these files can be found.
 
         :return: The compilation command and either the resulting files or a filter
                  for the resulting files.

@@ -126,7 +126,7 @@ class Java(Language):
             BasicSequenceTypes.SET: restrictions,
         }
 
-    def compilation(self, files: list[str]) -> CallbackResult:
+    def compilation(self, files: list[str], directory: Path) -> CallbackResult:
         def file_filter(file: Path) -> bool:
             return file.suffix == ".class"
 

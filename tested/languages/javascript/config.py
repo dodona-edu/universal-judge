@@ -103,7 +103,7 @@ class JavaScript(Language):
     def collection_restrictions(self) -> dict[AllTypes, set[ExpressionTypes]]:
         return {AdvancedObjectTypes.OBJECT: {BasicStringTypes.TEXT}}
 
-    def compilation(self, files: list[str]) -> CallbackResult:
+    def compilation(self, files: list[str], directory: Path) -> CallbackResult:
         submission = submission_file(self)
         main_file = list(filter(lambda x: x == submission, files))
         if main_file:

@@ -97,7 +97,7 @@ class CSharp(Language):
             "tuple": "supported",
         }
 
-    def compilation(self, files: list[str]) -> CallbackResult:
+    def compilation(self, files: list[str], directory: Path) -> CallbackResult:
         # In C#, all output files are located in a subdirectory, so we just
         # want to copy over the subdirectory.
         def file_filter(file: Path) -> bool:

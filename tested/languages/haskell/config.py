@@ -81,7 +81,7 @@ class Haskell(Language):
             Construct.GLOBAL_VARIABLES,
         }
 
-    def compilation(self, files: list[str]) -> CallbackResult:
+    def compilation(self, files: list[str], directory: Path) -> CallbackResult:
         main_ = files[-1]
         exec_ = main_.rstrip(".hs")
         assert self.config

@@ -119,7 +119,7 @@ class Python(Language):
             BasicSequenceTypes.SET: restrictions,  # type: ignore
         }
 
-    def compilation(self, files: list[str]) -> CallbackResult:
+    def compilation(self, files: list[str], directory: Path) -> CallbackResult:
         result = [x.replace(".py", ".pyc") for x in files]
         return [
             _executable(),

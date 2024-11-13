@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import re
@@ -105,15 +106,26 @@ class TypeScript(Language):
     def collection_restrictions(self) -> dict[AllTypes, set[ExpressionTypes]]:
         return {AdvancedObjectTypes.OBJECT: {BasicStringTypes.TEXT}}
 
-    def compilation(self, files: list[str]) -> CallbackResult:
+    def compilation(self, files: list[str], directory: Path) -> CallbackResult:
         submission = submission_file(self)
         main_file = list(filter(lambda x: x == submission, files))
+
+        # Create a config file to just that extends tsconfig.
+        # This way it will only run tsc on the current file.
+        config_file = {
+            "extends": str(Path(__file__).parent / "tsconfig.json"),
+            "include": [f"{main_file[0]}"]
+        }
+        with open(str(directory / "tsconfig-sub.json"), "w") as file:
+            file.write(json.dumps(config_file, indent=4))
+
+
         if main_file:
             return (
                 [
                     "tsc",
-                    "--noEmit",
-                    main_file[0],
+                    "--project",
+                    "tsconfig-sub.json",
                 ],
                 files,
             )

@@ -72,7 +72,7 @@ class C(Language):
             "double_extended": "supported",
         }
 
-    def compilation(self, files: list[str]) -> CallbackResult:
+    def compilation(self, files: list[str], directory: Path) -> CallbackResult:
         main_file = files[-1]
         exec_file = Path(main_file).stem
         result = executable_name(exec_file)
