@@ -114,11 +114,10 @@ class TypeScript(Language):
         # This way it will only run tsc on the current file.
         config_file = {
             "extends": str(Path(__file__).parent / "tsconfig.json"),
-            "include": [f"{main_file[0]}"]
+            "include": [f"{main_file[0]}"],
         }
         with open(str(directory / "tsconfig-sub.json"), "w") as file:
             file.write(json.dumps(config_file, indent=4))
-
 
         if main_file:
             return (

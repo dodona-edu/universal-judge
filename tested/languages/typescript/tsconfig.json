@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "module": "esnext",
+    "target": "es6",
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": false,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "typeRoots": [
+      "/usr/lib/node_modules/@types"],
+    "noResolve": false,
+    "esModuleInterop": true,
+    "moduleResolution": "node"
+  },
+  "include" : []
+}
