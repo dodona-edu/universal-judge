@@ -83,6 +83,11 @@ RUN <<EOF
     apt-get install -y --no-install-recommends nodejs
     npm install -g eslint@8.57 abstract-syntax-tree@2.22
 
+    # TypeScript dependencies
+    npm install -g typescript@5.6.3
+    npm install -g @types/node --save-dev
+    npm install -g tsx@4.19.2
+
     # C# dependencies
     curl https://packages.microsoft.com/config/debian/11/packages-microsoft-prod.deb --output packages-microsoft-prod.deb
     dpkg -i packages-microsoft-prod.deb
