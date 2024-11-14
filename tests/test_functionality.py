@@ -129,6 +129,7 @@ def test_assignment_and_use_in_expression(
         "java",
         "kotlin",
         "csharp",
+        "typescript",
         pytest.param("haskell", marks=pytest.mark.haskell),
         pytest.param("runhaskell", marks=pytest.mark.haskell),
     ],
@@ -154,7 +155,7 @@ def test_assignment_and_use_in_expression_list(
     assert len(updates.find_all("start-test")) == 1
 
 
-@pytest.mark.parametrize("lang", ["python", "java", "kotlin", "csharp"])
+@pytest.mark.parametrize("lang", ["python", "java", "kotlin", "csharp", "typescript"])
 def test_crashing_assignment_with_before(
     lang: str, tmp_path: Path, pytestconfig: pytest.Config
 ):

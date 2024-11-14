@@ -155,9 +155,18 @@ class TypeScript(Language):
         # Add strict mode to the script.
         with open(solution, "r") as file:
             non_strict = file.read()
+
+        # TODO: This may be deleted in the future.
         with open(solution, "w") as file:
             file.write('"use strict";\n' + non_strict)
         self.config.dodona.source_offset -= 2
+
+    def linter(self, remaining: float) -> tuple[list[Message], list[AnnotateCode]]:
+        # Import locally to prevent errors.
+        from tested.languages.typescript import linter
+
+        assert self.config
+        return linter.run_eslint(self.config.dodona, remaining)
 
     def cleanup_stacktrace(self, stacktrace: str) -> str:
         assert self.config

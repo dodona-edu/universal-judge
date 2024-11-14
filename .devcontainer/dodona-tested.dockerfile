@@ -84,9 +84,8 @@ RUN <<EOF
     npm install -g eslint@8.57 abstract-syntax-tree@2.22
 
     # TypeScript dependencies
-    npm install -g typescript@5.6.3
-    npm install -g @types/node --save-dev
-    npm install -g tsx@4.19.2
+    npm install -g typescript@5.6.3 tsx@4.19.2
+    npm install -g @types/node @typescript-eslint/parser @typescript-eslint/eslint-plugin --save-dev
 
     # C# dependencies
     curl https://packages.microsoft.com/config/debian/11/packages-microsoft-prod.deb --output packages-microsoft-prod.deb
