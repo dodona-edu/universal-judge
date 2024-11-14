@@ -11,6 +11,12 @@ const ast = ts.createSourceFile(
 
 // Helper function to extract relevant identifiers from AST nodes
 function mapSubTreeToIds(node: ts.Node): Array<ts.Node|undefined> {
+    // Make sure that no definitions inside a block of some kind are accounted with.
+    if (ts.isForOfStatement(node) || ts.isForInStatement(node) || ts.isIfStatement(node) ||
+        ts.isForStatement(node) || ts.isWhileStatement(node) || ts.isBlock(node)) {
+        return []
+    }
+
     if (ts.isVariableDeclaration(node)) {
         return [node.name];
     } else if (ts.isFunctionDeclaration(node) || ts.isClassDeclaration(node)) {

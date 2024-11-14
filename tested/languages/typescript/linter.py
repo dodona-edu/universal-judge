@@ -14,7 +14,7 @@ severity = [Severity.INFO, Severity.WARNING, Severity.ERROR]
 def run_eslint(
     config: DodonaConfig, remaining: float
 ) -> tuple[list[Message], list[AnnotateCode]]:
-    print("ping")
+
     """
     Calls eslint to annotate submitted source code and adds resulting score and
     annotations to tab.

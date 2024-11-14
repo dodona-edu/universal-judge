@@ -8,7 +8,7 @@
             {
               "before": {
                 "typescript": {
-                  "data": "const ex: () => Array<any> = () => {throw new Error("AssertionError");};"
+                  "data": "const ex: () => Array<any> = () => {throw new Error('AssertionError');};"
                 }
               },
               "testcases": [

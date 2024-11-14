@@ -6,10 +6,11 @@ class Counter {
     }
 
     add() {
-    this.count++;
+        this.count++;
+        return this;
     }
 
     get() {
-    this.count--;
+        return this.count;
     }
 }
