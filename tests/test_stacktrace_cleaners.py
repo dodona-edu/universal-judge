@@ -55,6 +55,7 @@ def test_javascript_assertion_error():
     actual_cleaned = language_config.cleanup_stacktrace(original)
     assert actual_cleaned == expected_cleaned
 
+
 def test_typescript_assertion_error():
     workdir = "/home/bliep/bloep/universal-judge/workdir"
     language_config = get_language(workdir, "typescript")
@@ -93,6 +94,7 @@ def test_javascript_type_error():
     expected_cleaned = f"TypeError: Codeersleutel is not a constructor\n"
     actual_cleaned = language_config.cleanup_stacktrace(original)
     assert actual_cleaned == expected_cleaned
+
 
 def test_typescript_type_error():
     workdir = "/home/bliep/bloep/universal-judge/workdir"

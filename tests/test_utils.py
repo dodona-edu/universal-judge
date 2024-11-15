@@ -44,6 +44,7 @@ def test_javascript_ast_parse():
     namings = frozenset(output.stdout.strip().split(", "))
     assert namings == expected
 
+
 def test_typescript_ast_parse():
     expected = frozenset(
         [
