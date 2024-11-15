@@ -27,9 +27,9 @@ the following is supported:
 """
 
 import ast
+import io
 import tokenize
 from decimal import Decimal
-from io import BytesIO
 from typing import Literal, cast, overload
 
 from attrs import evolve
@@ -342,15 +342,11 @@ def extract_comment(code: str) -> str:
     :param code: The code to extract the comment from.
     :return: The comment if it exists, otherwise an empty string.
     """
-    tokens = tokenize.tokenize(BytesIO(code.encode("utf-8")).readline)
-    comments = list(
-        map(lambda t: t.string, filter(lambda t: t.type == tokenize.COMMENT, tokens))
-    )
-    if len(comments) == 0:
-        return ""
-    comment = comments[0][1:]
-    assert isinstance(comment, str)
-    return comment.strip()
+    comment = ""
+    tokens = tuple(tokenize.generate_tokens(io.StringIO(code).readline))
+    if len(tokens) and tokens[-3].type == tokenize.COMMENT:
+        comment = tokens[-3].string.lstrip('#').strip()
+    return comment
 
 
 @overload

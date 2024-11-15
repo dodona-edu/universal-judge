@@ -10,6 +10,9 @@ from tested.dsl import parse_dsl
 from tested.testsuite import parse_test_suite
 
 
+import time
+
+
 def run(config: DodonaConfig, judge_output: IO):
     """
     Run the TESTed judge.
@@ -27,6 +30,8 @@ def run(config: DodonaConfig, judge_output: IO):
         )
         raise e
 
+    start_time = time.time()
+
     _, ext = os.path.splitext(config.test_suite)
     is_yaml = ext.lower() in (".yaml", ".yml")
     if is_yaml:
@@ -37,3 +42,8 @@ def run(config: DodonaConfig, judge_output: IO):
     from .judge import judge
 
     judge(pack)
+
+    end_time = time.time()
+
+    with open("times.txt", "a") as myfile:
+        myfile.write(f"{end_time - start_time}\n")
