@@ -48,6 +48,35 @@ def test_global_variable_yaml(
     assert updates.find_status_enum() == ["correct"]
 
 
+@pytest.mark.parametrize(
+    "language, comment_start",
+    [
+        ("bash", "#"),
+        ("python", "#"),
+        ("kotlin", "//"),
+        ("csharp", "//"),
+        ("java", "//"),
+        ("c", "//"),
+        ("javascript", "//"),
+        ("haskell", "--"),
+    ],
+)
+def test_global_variable_yaml(
+    language: str, comment_start: str, tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig, "global", language, tmp_path, "plan.yaml", "correct"
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    description = updates.find_next("start-testcase")
+
+    assert "description" in description and "description" in description["description"]
+    assert description["description"]["description"].endswith(
+        f"{comment_start} The name of the global variable"
+    )
+
+
 @pytest.mark.parametrize("lang", EXCEPTION_LANGUAGES)
 def test_generic_exception_wrong(
     lang: str, tmp_path: Path, pytestconfig: pytest.Config

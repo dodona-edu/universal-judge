@@ -10,9 +10,6 @@ from tested.dsl import parse_dsl
 from tested.testsuite import parse_test_suite
 
 
-import time
-
-
 def run(config: DodonaConfig, judge_output: IO):
     """
     Run the TESTed judge.

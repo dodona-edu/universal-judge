@@ -345,7 +345,7 @@ def extract_comment(code: str) -> str:
     comment = ""
     tokens = tuple(tokenize.generate_tokens(io.StringIO(code).readline))
     if len(tokens) and tokens[-3].type == tokenize.COMMENT:
-        comment = tokens[-3].string.lstrip('#').strip()
+        comment = tokens[-3].string.lstrip("#").strip()
     return comment
 
 
