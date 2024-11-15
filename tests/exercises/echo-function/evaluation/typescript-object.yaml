@@ -1,0 +1,5 @@
+- tab: "My tab"
+  contexts:
+    - testcases:
+        - expression: 'echo("input-1")'
+          return: !object {}
