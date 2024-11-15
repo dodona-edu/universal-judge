@@ -105,7 +105,9 @@ def test_generic_exception_wrong_error(
     assert updates.find_status_enum() == ["wrong"]
 
 
-@pytest.mark.parametrize("lang", ["python", "java", "kotlin", "csharp", "typescript", "javascript"])
+@pytest.mark.parametrize(
+    "lang", ["python", "java", "kotlin", "csharp", "typescript", "javascript"]
+)
 def test_assignment_and_use_in_expression(
     lang: str, tmp_path: Path, pytestconfig: pytest.Config
 ):
@@ -156,7 +158,9 @@ def test_assignment_and_use_in_expression_list(
     assert len(updates.find_all("start-test")) == 1
 
 
-@pytest.mark.parametrize("lang", ["python", "java", "kotlin", "csharp", "typescript", "javascript"])
+@pytest.mark.parametrize(
+    "lang", ["python", "java", "kotlin", "csharp", "typescript", "javascript"]
+)
 def test_crashing_assignment_with_before(
     lang: str, tmp_path: Path, pytestconfig: pytest.Config
 ):
@@ -236,6 +240,7 @@ def test_missing_key_types_detected_js_dictionary(
     updates = assert_valid_output(result, pytestconfig)
     assert len(updates.find_all("start-testcase")) == 1
     assert updates.find_status_enum() == ["correct"]
+
 
 def test_missing_key_types_detected_ts_object(
     tmp_path: Path, pytestconfig: pytest.Config
@@ -356,7 +361,8 @@ def test_batch_compilation_no_fallback_runtime(
 
 
 @pytest.mark.parametrize(
-    "lang", ["python", "java", "c", "javascript", "typescript", "kotlin", "bash", "csharp"]
+    "lang",
+    ["python", "java", "c", "javascript", "typescript", "kotlin", "bash", "csharp"],
 )
 def test_program_params(lang: str, tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(pytestconfig, "sum", lang, tmp_path, "short.tson", "correct")

@@ -36,6 +36,7 @@ def test_javascript_vanilla_object(tmp_path: Path, pytestconfig: pytest.Config):
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["correct"]
 
+
 def test_typescript_vanilla_object(tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig,
@@ -48,6 +49,7 @@ def test_typescript_vanilla_object(tmp_path: Path, pytestconfig: pytest.Config):
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["correct"]
+
 
 def test_python_input_prompt_is_ignored(tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
@@ -89,7 +91,9 @@ def test_haskell_function_arguments_without_brackets(
 
 
 @pytest.mark.parametrize("lang", ["javascript", "typescript"])
-def test_js_ts_exception_correct(lang:str, tmp_path: Path, pytestconfig: pytest.Config):
+def test_js_ts_exception_correct(
+    lang: str, tmp_path: Path, pytestconfig: pytest.Config
+):
     conf = configuration(
         pytestconfig,
         "js-ts-exceptions",
@@ -105,7 +109,9 @@ def test_js_ts_exception_correct(lang:str, tmp_path: Path, pytestconfig: pytest.
 
 
 @pytest.mark.parametrize("lang", ["javascript", "typescript"])
-def test_js_ts_exception_correct_temp(lang:str, tmp_path: Path, pytestconfig: pytest.Config):
+def test_js_ts_exception_correct_temp(
+    lang: str, tmp_path: Path, pytestconfig: pytest.Config
+):
     conf = configuration(
         pytestconfig,
         "js-ts-exceptions",
@@ -121,7 +127,7 @@ def test_js_ts_exception_correct_temp(lang:str, tmp_path: Path, pytestconfig: py
 
 
 @pytest.mark.parametrize("lang", ["javascript", "typescript"])
-def test_js_ts_exception_wrong(lang:str, tmp_path: Path, pytestconfig: pytest.Config):
+def test_js_ts_exception_wrong(lang: str, tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig,
         "js-ts-exceptions",
@@ -137,7 +143,9 @@ def test_js_ts_exception_wrong(lang:str, tmp_path: Path, pytestconfig: pytest.Co
 
 
 @pytest.mark.parametrize("lang", ["javascript", "typescript"])
-def test_js_ts_exception_wrong_null(lang:str, tmp_path: Path, pytestconfig: pytest.Config):
+def test_js_ts_exception_wrong_null(
+    lang: str, tmp_path: Path, pytestconfig: pytest.Config
+):
     conf = configuration(
         pytestconfig,
         "js-ts-exceptions",
@@ -154,7 +162,7 @@ def test_js_ts_exception_wrong_null(lang:str, tmp_path: Path, pytestconfig: pyte
 
 @pytest.mark.parametrize("lang", ["javascript", "typescript"])
 def test_js_ts_exception_missing_message(
-    lang:str, tmp_path: Path, pytestconfig: pytest.Config
+    lang: str, tmp_path: Path, pytestconfig: pytest.Config
 ):
     conf = configuration(
         pytestconfig,
@@ -180,6 +188,7 @@ def test_javascript_async(exercise: str, tmp_path: Path, pytestconfig: pytest.Co
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["correct"]
+
 
 @pytest.mark.parametrize("exercise", ["echo-function-file-input", "echo-function"])
 def test_typescript_async(exercise: str, tmp_path: Path, pytestconfig: pytest.Config):
