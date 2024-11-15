@@ -62,6 +62,7 @@ LANGUAGES = [
     "java",
     "c",
     "javascript",
+    "typescript",
     "kotlin",
     pytest.param("runhaskell", marks=pytest.mark.haskell),
     "bash",

@@ -44,6 +44,37 @@ def test_javascript_ast_parse():
     namings = frozenset(output.stdout.strip().split(", "))
     assert namings == expected
 
+def test_typescript_ast_parse():
+    expected = frozenset(
+        [
+            "c",
+            "d",
+            "a",
+            "b",
+            "x",
+            "y",
+            "demoFunction",
+            "SimpleClass",
+            "StaticClass",
+            "tryCatch",
+            "z",
+            "asyncFunction",
+        ]
+    )
+    from tested.judge.utils import run_command
+
+    test_dir = Path(__file__).parent
+    parse_file = test_dir.parent / "tested" / "languages" / "typescript" / "parseAst.js"
+    demo_file = test_dir / "testTypeScriptAstParserFile.ts"
+    output = run_command(
+        demo_file.parent,
+        timeout=None,
+        command=["tsx", str(parse_file), str(demo_file.absolute())],
+    )
+    assert output
+    namings = frozenset(output.stdout.strip().split(", "))
+    assert namings == expected
+
 
 def test_run_doctests_tested_utils():
     import doctest
