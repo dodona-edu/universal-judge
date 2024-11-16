@@ -567,6 +567,7 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
     if "statement" in testcase and "return" in testcase:
         testcase["expression"] = testcase.pop("statement")
 
+    print(f"testcase: {testcase}")
     line_comment = ""
     _validate_testcase_combinations(testcase)
     if (expr_stmt := testcase.get("statement", testcase.get("expression"))) is not None:
@@ -639,6 +640,10 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
             assert isinstance(
                 dd, str
             ), f"The description.description field must be a string, got {dd!r}."
+            line_comment = extract_comment(dd)
+            if line_comment and dd.endswith(line_comment):
+                dd = dd[:-len(line_comment)].rstrip().rstrip("#").rstrip()
+
             df = description.get("format", "text")
             assert isinstance(
                 df, str

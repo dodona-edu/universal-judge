@@ -58,7 +58,6 @@ def test_global_variable_yaml(
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["correct"]
 
-
 @pytest.mark.parametrize(
     "language, comment_start",
     [
@@ -76,7 +75,7 @@ def test_global_comment(
     language: str, comment_start: str, tmp_path: Path, pytestconfig: pytest.Config
 ):
     conf = configuration(
-        pytestconfig, "global", language, tmp_path, "plan.yaml", "correct"
+        pytestconfig, "global", language, tmp_path, "plan_no_description.yaml", "correct"
     )
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
@@ -85,6 +84,62 @@ def test_global_comment(
     assert "description" in description and "description" in description["description"]
     assert description["description"]["description"].endswith(
         f"{comment_start} The name of the global variable"
+    )
+
+@pytest.mark.parametrize(
+    "language, comment_start",
+    [
+        ("bash", "#"),
+        ("python", "#"),
+        ("kotlin", "//"),
+        ("csharp", "//"),
+        ("java", "//"),
+        ("c", "//"),
+        ("javascript", "//"),
+        ("haskell", "--"),
+    ],
+)
+def test_global_no_comment(
+    language: str, comment_start: str, tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig, "global", language, tmp_path, "plan.yaml", "correct"
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    description = updates.find_next("start-testcase")
+
+    assert "description" in description and "description" in description["description"]
+    assert not description["description"]["description"].endswith(
+        f"{comment_start} The name of the global variable"
+    )
+
+@pytest.mark.parametrize(
+    "language, comment_start",
+    [
+        ("bash", "#"),
+        ("python", "#"),
+        ("kotlin", "//"),
+        ("csharp", "//"),
+        ("java", "//"),
+        ("c", "//"),
+        ("javascript", "//"),
+        ("haskell", "--"),
+    ],
+)
+def test_global_comment_description(
+    language: str, comment_start: str, tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig, "global", language, tmp_path, "comment_description_plan.yaml", "correct"
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    description = updates.find_next("start-testcase")
+
+    assert "description" in description and "description" in description["description"]
+    assert description["description"]["description"].endswith(
+        f"{comment_start} This is a greeting"
     )
 
 
