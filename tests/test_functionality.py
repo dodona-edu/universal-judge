@@ -61,7 +61,7 @@ def test_global_variable_yaml(
         ("haskell", "--"),
     ],
 )
-def test_global_variable_yaml(
+def test_global_comment(
     language: str, comment_start: str, tmp_path: Path, pytestconfig: pytest.Config
 ):
     conf = configuration(
