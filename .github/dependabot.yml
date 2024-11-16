@@ -1,0 +1,16 @@
+version: 2
+updates:
+- package-ecosystem: docker
+  directory: "/"
+  schedule:
+    interval: monthly
+    time: "13:00"
+    timezone: Europe/Brussels
+  open-pull-requests-limit: 99
+- package-ecosystem: "devcontainers"
+  directory: ".github/workflows"
+  schedule:
+    interval: monthly
+    time: "13:00"
+    timezone: Europe/Brussels
+  open-pull-requests-limit: 99
