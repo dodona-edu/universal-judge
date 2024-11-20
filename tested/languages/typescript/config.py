@@ -122,11 +122,21 @@ class TypeScript(Language):
             with open(str(directory / "tsconfig-sub.json"), "w") as file:
                 file.write(json.dumps(config_file, indent=4))
 
+            path_to_modules = os.environ['NODE_PATH']
             return (
                 [
                     "tsc",
-                    "--project",
-                    "tsconfig-sub.json",
+                    "--target",
+                    "esnext",
+                    "--module",
+                    "nodenext",
+                    "--allowJs",
+                    "--allowImportingTsExtensions",
+                    "--noEmit",
+                    "--esModuleInterop",
+                    "--typeRoots",
+                    f"{path_to_modules}/@types",
+                    main_file[0],
                 ],
                 files,
             )
