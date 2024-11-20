@@ -27,9 +27,11 @@ the following is supported:
 """
 
 import ast
+import collections
 import io
 import tokenize
 from decimal import Decimal
+from itertools import islice
 from typing import Literal, cast, overload
 
 from attrs import evolve
@@ -343,9 +345,10 @@ def extract_comment(code: str) -> str:
     :return: The comment if it exists, otherwise an empty string.
     """
     comment = ""
-    tokens = tuple(tokenize.generate_tokens(io.StringIO(code).readline))
-    if len(tokens) and tokens[-3].type == tokenize.COMMENT:
-        comment = tokens[-3].string.lstrip("#").strip()
+    tokens = tokenize.generate_tokens(io.StringIO(code).readline)
+    candidate = list(collections.deque(tokens, maxlen=3))
+    if len(candidate) and candidate[0].type == tokenize.COMMENT:
+        comment = candidate[0].string.lstrip("#").strip()
     return comment
 
 
