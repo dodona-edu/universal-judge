@@ -640,10 +640,6 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
             assert isinstance(
                 dd, str
             ), f"The description.description field must be a string, got {dd!r}."
-            line_comment = extract_comment(dd)
-            if line_comment and dd.endswith(line_comment):
-                dd = dd[:-len(line_comment)].rstrip().rstrip("#").rstrip()
-
             df = description.get("format", "text")
             assert isinstance(
                 df, str

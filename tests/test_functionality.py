@@ -86,21 +86,9 @@ def test_global_comment(
         f"{comment_start} The name of the global variable"
     )
 
-@pytest.mark.parametrize(
-    "language, comment_start",
-    [
-        ("bash", "#"),
-        ("python", "#"),
-        ("kotlin", "//"),
-        ("csharp", "//"),
-        ("java", "//"),
-        ("c", "//"),
-        ("javascript", "//"),
-        ("haskell", "--"),
-    ],
-)
+@pytest.mark.parametrize("language", ALL_LANGUAGES)
 def test_global_no_comment(
-    language: str, comment_start: str, tmp_path: Path, pytestconfig: pytest.Config
+    language: str, tmp_path: Path, pytestconfig: pytest.Config
 ):
     conf = configuration(
         pytestconfig, "global", language, tmp_path, "plan.yaml", "correct"
@@ -110,25 +98,11 @@ def test_global_no_comment(
     description = updates.find_next("start-testcase")
 
     assert "description" in description and "description" in description["description"]
-    assert not description["description"]["description"].endswith(
-        f"{comment_start} The name of the global variable"
-    )
+    assert description["description"]["description"] == "Hallo"
 
-@pytest.mark.parametrize(
-    "language, comment_start",
-    [
-        ("bash", "#"),
-        ("python", "#"),
-        ("kotlin", "//"),
-        ("csharp", "//"),
-        ("java", "//"),
-        ("c", "//"),
-        ("javascript", "//"),
-        ("haskell", "--"),
-    ],
-)
+@pytest.mark.parametrize("language", ALL_LANGUAGES)
 def test_global_comment_description(
-    language: str, comment_start: str, tmp_path: Path, pytestconfig: pytest.Config
+    language: str, tmp_path: Path, pytestconfig: pytest.Config
 ):
     conf = configuration(
         pytestconfig, "global", language, tmp_path, "comment_description_plan.yaml", "correct"
@@ -138,9 +112,7 @@ def test_global_comment_description(
     description = updates.find_next("start-testcase")
 
     assert "description" in description and "description" in description["description"]
-    assert description["description"]["description"].endswith(
-        f"{comment_start} This is a greeting"
-    )
+    assert description["description"]["description"] == "Hallo # This is a greeting"
 
 
 @pytest.mark.parametrize("lang", EXCEPTION_LANGUAGES)
