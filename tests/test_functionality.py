@@ -58,6 +58,7 @@ def test_global_variable_yaml(
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["correct"]
 
+
 @pytest.mark.parametrize(
     "language, comment_start",
     [
@@ -75,7 +76,12 @@ def test_global_comment(
     language: str, comment_start: str, tmp_path: Path, pytestconfig: pytest.Config
 ):
     conf = configuration(
-        pytestconfig, "global", language, tmp_path, "plan_no_description.yaml", "correct"
+        pytestconfig,
+        "global",
+        language,
+        tmp_path,
+        "plan_no_description.yaml",
+        "correct",
     )
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
@@ -86,10 +92,9 @@ def test_global_comment(
         f"{comment_start} The name of the global variable"
     )
 
+
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
-def test_global_no_comment(
-    language: str, tmp_path: Path, pytestconfig: pytest.Config
-):
+def test_global_no_comment(language: str, tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig, "global", language, tmp_path, "plan.yaml", "correct"
     )
@@ -100,12 +105,18 @@ def test_global_no_comment(
     assert "description" in description and "description" in description["description"]
     assert description["description"]["description"] == "Hallo"
 
+
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
 def test_global_comment_description(
     language: str, tmp_path: Path, pytestconfig: pytest.Config
 ):
     conf = configuration(
-        pytestconfig, "global", language, tmp_path, "comment_description_plan.yaml", "correct"
+        pytestconfig,
+        "global",
+        language,
+        tmp_path,
+        "comment_description_plan.yaml",
+        "correct",
     )
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
