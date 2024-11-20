@@ -115,13 +115,6 @@ class TypeScript(Language):
 
         if main_file:
 
-            config_file = {
-                "extends": str(Path(__file__).parent / "tsconfig.json"),
-                "include": [f"{main_file[0]}"],
-            }
-            with open(str(directory / "tsconfig-sub.json"), "w") as file:
-                file.write(json.dumps(config_file, indent=4))
-
             path_to_modules = os.environ['NODE_PATH']
             return (
                 [
