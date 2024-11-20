@@ -31,7 +31,6 @@ import collections
 import io
 import tokenize
 from decimal import Decimal
-from itertools import islice
 from typing import Literal, cast, overload
 
 from attrs import evolve
