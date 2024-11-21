@@ -118,5 +118,6 @@ EOF
 
 USER runner
 WORKDIR /home/runner/workdir
+RUN dotnet --version
 
 COPY main.sh /main.sh
