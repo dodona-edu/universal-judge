@@ -41,7 +41,6 @@ def run_eslint(
             str(submission.absolute()),
         ],
     )
-    print(execution_results)
 
     if execution_results is None:
         return [], []

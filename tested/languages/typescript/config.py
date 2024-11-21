@@ -108,10 +108,12 @@ class TypeScript(Language):
 
     def compilation(self, files: list[str]) -> CallbackResult:
         submission = submission_file(self)
-        main_file =  self.find_main_file(list(map(lambda name: Path(name), files)), submission)
+        main_file = self.find_main_file(
+            list(map(lambda name: Path(name), files)), submission
+        )
 
         if main_file != Status.COMPILATION_ERROR:
-            path_to_modules = os.environ['NODE_PATH']
+            path_to_modules = os.environ["NODE_PATH"]
             return (
                 [
                     "tsc",
@@ -125,7 +127,7 @@ class TypeScript(Language):
                     "--esModuleInterop",
                     "--typeRoots",
                     f"{path_to_modules}/@types",
-                    main_file,
+                    str(main_file.name),
                 ],
                 files,
             )
