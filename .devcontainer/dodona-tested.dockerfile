@@ -65,8 +65,6 @@ RUN <<EOF
         xxd \
         shellcheck
 
-
-
     # JavaScript dependencies
     bash -c 'set -o pipefail && curl -fsSL https://deb.nodesource.com/setup_22.x | bash -'
     apt-get install -y --no-install-recommends nodejs
