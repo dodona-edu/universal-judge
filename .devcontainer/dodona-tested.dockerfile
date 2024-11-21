@@ -93,6 +93,7 @@ RUN <<EOF
     rm packages-microsoft-prod.deb
     apt-get update
     apt-get install -y --no-install-recommends dotnet-sdk-8.0
+    ENV PATH="${PATH}:/root/.dotnet/tools"
 
     # Java and Kotlin dependencies
     bash -c 'set -o pipefail && curl -s "https://get.sdkman.io?rcupdate=false" | bash'
