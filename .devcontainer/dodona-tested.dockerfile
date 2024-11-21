@@ -78,14 +78,14 @@ RUN <<EOF
     cabal update
     cabal v1-install --global aeson
 
+    # TypeScript dependencies
+    npm install -g typescript@5.6.3 tsx@4.19.2
+    npm install -g @types/node @typescript-eslint/parser @typescript-eslint/eslint-plugin --save-dev
+
     # JavaScript dependencies
     bash -c 'set -o pipefail && curl -fsSL https://deb.nodesource.com/setup_22.x | bash -'
     apt-get install -y --no-install-recommends nodejs
     npm install -g eslint@8.57 abstract-syntax-tree@2.22
-
-    # TypeScript dependencies
-    npm install -g typescript@5.6.3 tsx@4.19.2
-    npm install -g @types/node @typescript-eslint/parser @typescript-eslint/eslint-plugin --save-dev
 
     # C# dependencies
     curl https://packages.microsoft.com/config/debian/11/packages-microsoft-prod.deb --output packages-microsoft-prod.deb
