@@ -11,7 +11,7 @@ from tested.datatypes import (
     BasicStringTypes,
     ExpressionTypes,
 )
-from tested.dodona import AnnotateCode, Message
+from tested.dodona import AnnotateCode, Message, Status
 from tested.features import Construct, TypeSupport
 from tested.languages.conventionalize import (
     EXECUTION_PREFIX,
@@ -108,9 +108,9 @@ class TypeScript(Language):
 
     def compilation(self, files: list[str]) -> CallbackResult:
         submission = submission_file(self)
-        main_file = list(filter(lambda x: x == submission, files))
+        main_file =  self.find_main_file(list(map(lambda name: Path(name), files)), submission)
 
-        if main_file:
+        if main_file != Status.COMPILATION_ERROR:
             path_to_modules = os.environ['NODE_PATH']
             return (
                 [
@@ -125,7 +125,7 @@ class TypeScript(Language):
                     "--esModuleInterop",
                     "--typeRoots",
                     f"{path_to_modules}/@types",
-                    main_file[0],
+                    main_file,
                 ],
                 files,
             )
