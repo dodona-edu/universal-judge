@@ -1,4 +1,4 @@
-function echo(content) {
+function echo(content: Object): Object {
     return content;
 }
 

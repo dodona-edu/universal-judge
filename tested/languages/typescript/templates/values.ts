@@ -47,7 +47,7 @@ function encode(value: Object): { data: Object; diagnostic: any; type: string } 
             // Handle holes in arrays...
             const unholed = [];
             for (let i = 0; i < value.length; i++) {
-                if (!value.hasOwnProperty(i)) {
+                if (!(i in value)) {
                     unholed.push(`<empty at index ${i}>`)
                 } else {
                     unholed.push(value[i]);
