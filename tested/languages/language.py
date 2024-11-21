@@ -74,7 +74,7 @@ class Language(ABC):
         """
         self.config = config
 
-    def compilation(self, files: list[str], directory: Path) -> CallbackResult:
+    def compilation(self, files: list[str]) -> CallbackResult:
         """
         Callback for generating the compilation command.
 

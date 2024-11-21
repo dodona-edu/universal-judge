@@ -136,7 +136,7 @@ class Kotlin(Language):
             BasicSequenceTypes.SET: restrictions,  # type: ignore
         }
 
-    def compilation(self, files: list[str], directory: Path) -> CallbackResult:
+    def compilation(self, files: list[str]) -> CallbackResult:
         def file_filter(file: Path) -> bool:
             return file.suffix == ".class"
 
