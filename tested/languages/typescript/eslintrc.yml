@@ -12,4 +12,5 @@ env:
 rules:
     no-var: "warn"
     semi: "warn"
+    '@typescript-eslint/no-unused-expressions': "off"
 
