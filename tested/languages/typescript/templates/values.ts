@@ -117,24 +117,13 @@ function sendException(stream: number, exception: Error | Object | {constructor:
         }));
     } else {
         // Comes out of the values.js:
-        // Temporarily allow objects with "message" and "name".
-        // TODO: remove this once the semester is over
-        // noinspection PointlessBooleanExpressionJS
-        if (typeof exception === 'object') {
-            fs.writeSync(stream, JSON.stringify({
-                "message": (exception as Error).message ?? "",
-                "stacktrace": "",
-                "type": (exception as Error).name ?? ""
-            }));
-        } else {
             // We have something else, so we cannot rely on stuff being present.
-            fs.writeSync(stream, JSON.stringify({
-                "message": JSON.stringify(exception),
-                "stacktrace": "",
-                "type": (exception as Object).constructor.name ?? (Object.prototype.toString.call(exception)),
-                "additional_message_keys": ["languages.typescript.runtime.invalid.exception"]
-            }));
-        }
+        fs.writeSync(stream, JSON.stringify({
+            "message": JSON.stringify(exception),
+            "stacktrace": "",
+            "type": (exception as Object).constructor.name ?? (Object.prototype.toString.call(exception)),
+            "additional_message_keys": ["languages.typescript.runtime.invalid.exception"]
+        }));
     }
 }
 
