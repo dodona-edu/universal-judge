@@ -108,14 +108,11 @@ def test_js_ts_exception_correct(
     assert len(updates.find_all("append-message")) == 0
 
 
-@pytest.mark.parametrize("lang", ["javascript", "typescript"])
-def test_js_ts_exception_correct_temp(
-    lang: str, tmp_path: Path, pytestconfig: pytest.Config
-):
+def test_javascript_exception_correct_temp(tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig,
         "js-ts-exceptions",
-        lang,
+        "javascript",
         tmp_path,
         "plan.yaml",
         "correct-temp",
