@@ -72,7 +72,7 @@ RUN <<EOF
 
     # TypeScript dependencies
     npm install -g typescript@5.6.3 tsx@4.19.2
-    npm install -g @types/node @typescript-eslint/parser @typescript-eslint/eslint-plugin --save-dev
+    npm install -g @types/node @typescript-eslint/parser @typescript-eslint/eslint-plugin
 
     # Haskell dependencies
     apt-get install -y --no-install-recommends \
