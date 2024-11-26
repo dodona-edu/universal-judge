@@ -105,7 +105,9 @@ def test_generic_exception_wrong_error(
     assert updates.find_status_enum() == ["wrong"]
 
 
-@pytest.mark.parametrize("lang", ["python", "java", "kotlin", "csharp"])
+@pytest.mark.parametrize(
+    "lang", ["python", "java", "kotlin", "csharp", "typescript", "javascript"]
+)
 def test_assignment_and_use_in_expression(
     lang: str, tmp_path: Path, pytestconfig: pytest.Config
 ):
@@ -129,6 +131,8 @@ def test_assignment_and_use_in_expression(
         "java",
         "kotlin",
         "csharp",
+        "typescript",
+        "javascript",
         pytest.param("haskell", marks=pytest.mark.haskell),
         pytest.param("runhaskell", marks=pytest.mark.haskell),
     ],
@@ -154,7 +158,9 @@ def test_assignment_and_use_in_expression_list(
     assert len(updates.find_all("start-test")) == 1
 
 
-@pytest.mark.parametrize("lang", ["python", "java", "kotlin", "csharp"])
+@pytest.mark.parametrize(
+    "lang", ["python", "java", "kotlin", "csharp", "typescript", "javascript"]
+)
 def test_crashing_assignment_with_before(
     lang: str, tmp_path: Path, pytestconfig: pytest.Config
 ):
@@ -229,6 +235,38 @@ def test_missing_key_types_detected_js_dictionary(
 ):
     conf = configuration(
         pytestconfig, "objects", "javascript", tmp_path, f"{suite}.yaml", "correct"
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert len(updates.find_all("start-testcase")) == 1
+    assert updates.find_status_enum() == ["correct"]
+
+
+def test_missing_key_types_detected_ts_object(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig,
+        "objects",
+        "typescript",
+        tmp_path,
+        "missing_key_types_js_object.yaml",
+        "correct",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert len(updates.find_all("start-testcase")) == 0
+    assert updates.find_status_enum() == ["internal error"]
+
+
+@pytest.mark.parametrize(
+    "suite", ["missing_key_types_js_dictionary", "missing_key_types"]
+)
+def test_missing_key_types_detected_ts_dictionary(
+    suite: str, tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig, "objects", "typescript", tmp_path, f"{suite}.yaml", "correct"
     )
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
@@ -323,7 +361,8 @@ def test_batch_compilation_no_fallback_runtime(
 
 
 @pytest.mark.parametrize(
-    "lang", ["python", "java", "c", "javascript", "kotlin", "bash", "csharp"]
+    "lang",
+    ["python", "java", "c", "javascript", "typescript", "kotlin", "bash", "csharp"],
 )
 def test_program_params(lang: str, tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(pytestconfig, "sum", lang, tmp_path, "short.tson", "correct")
@@ -335,7 +374,7 @@ def test_program_params(lang: str, tmp_path: Path, pytestconfig: pytest.Config):
 
 
 @pytest.mark.parametrize(
-    "language", ["python", "java", "kotlin", "javascript", "csharp"]
+    "language", ["python", "java", "kotlin", "javascript", "typescript", "csharp"]
 )
 def test_objects(language: str, tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
@@ -348,7 +387,7 @@ def test_objects(language: str, tmp_path: Path, pytestconfig: pytest.Config):
 
 
 @pytest.mark.parametrize(
-    "language", ["python", "java", "kotlin", "javascript", "csharp"]
+    "language", ["python", "java", "kotlin", "javascript", "typescript", "csharp"]
 )
 def test_objects_chained(language: str, tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
@@ -361,7 +400,7 @@ def test_objects_chained(language: str, tmp_path: Path, pytestconfig: pytest.Con
 
 
 @pytest.mark.parametrize(
-    "language", ["python", "java", "kotlin", "javascript", "csharp"]
+    "language", ["python", "java", "kotlin", "javascript", "typescript", "csharp"]
 )
 def test_property_assignment(
     language: str, tmp_path: Path, pytestconfig: pytest.Config
@@ -381,7 +420,7 @@ def test_property_assignment(
 
 
 @pytest.mark.parametrize(
-    "language", ["python", "java", "kotlin", "javascript", "csharp"]
+    "language", ["python", "java", "kotlin", "javascript", "typescript", "csharp"]
 )
 def test_counter(language: str, tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
@@ -394,7 +433,7 @@ def test_counter(language: str, tmp_path: Path, pytestconfig: pytest.Config):
 
 
 @pytest.mark.parametrize(
-    "language", ["python", "java", "kotlin", "javascript", "csharp"]
+    "language", ["python", "java", "kotlin", "javascript", "typescript", "csharp"]
 )
 def test_counter_chained(language: str, tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
@@ -407,7 +446,7 @@ def test_counter_chained(language: str, tmp_path: Path, pytestconfig: pytest.Con
 
 
 @pytest.mark.parametrize(
-    "language", ["python", "java", "kotlin", "javascript", "csharp"]
+    "language", ["python", "java", "kotlin", "javascript", "typescript", "csharp"]
 )
 def test_objects_yaml(language: str, tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
@@ -444,6 +483,7 @@ def test_objects_error(language: str, tmp_path: Path, pytestconfig: pytest.Confi
         ("java", ["internal error"]),
         ("c", ["internal error"]),
         ("javascript", ["correct"]),
+        ("typescript", ["correct"]),
         ("haskell", ["internal error"]),
         ("runhaskell", ["internal error"]),
     ],
@@ -489,6 +529,7 @@ def test_timeouts_propagate_to_contexts():
         ("csharp", '(Coords) {"X":5.5,"Y":7.5}'),
         ("java", "Coord[x=5, y=7]"),
         ("javascript", '(Coord) {"x":5,"y":7}'),
+        ("typescript", '(Coord) {"x":5,"y":7}'),
         ("kotlin", "Coord(x=5, y=6)"),
         ("python", "(<class 'submission.Coord'>) Coord(x=5, y=6)"),
     ],
@@ -621,7 +662,7 @@ def test_language_literals_work(
 
 # Check that the test suite is valid with a correct submission.
 # This test suite is used for the test below "test_output_in_script_is_caught".
-@pytest.mark.parametrize("language", ["python", "javascript", "bash"])
+@pytest.mark.parametrize("language", ["python", "javascript", "typescript", "bash"])
 def test_two_suite_is_valid(language: str, tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig,
@@ -636,7 +677,7 @@ def test_two_suite_is_valid(language: str, tmp_path: Path, pytestconfig: pytest.
     assert updates.find_status_enum() == ["correct"] * 2
 
 
-@pytest.mark.parametrize("language", ["python", "javascript", "bash"])
+@pytest.mark.parametrize("language", ["python", "javascript", "typescript", "bash"])
 def test_output_in_script_is_caught(
     language: str, tmp_path: Path, pytestconfig: pytest.Config
 ):

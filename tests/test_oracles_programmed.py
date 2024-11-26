@@ -105,7 +105,9 @@ def test_missing_custom_check_function(tmp_path: Path, pytestconfig: pytest.Conf
     assert len(updates.find_all("append-message")) == 4
 
 
-@pytest.mark.parametrize("lang", ["python", "java", "kotlin", "javascript", "csharp"])
+@pytest.mark.parametrize(
+    "lang", ["python", "java", "kotlin", "javascript", "typescript", "csharp"]
+)
 def test_custom_check_function_lotto_correct(
     lang: str, tmp_path: Path, pytestconfig: pytest.Config
 ):
@@ -118,7 +120,9 @@ def test_custom_check_function_lotto_correct(
     assert updates.find_status_enum() == ["correct"]
 
 
-@pytest.mark.parametrize("lang", ["python", "java", "kotlin", "javascript", "csharp"])
+@pytest.mark.parametrize(
+    "lang", ["python", "java", "kotlin", "javascript", "typescript", "csharp"]
+)
 def test_custom_check_function_lotto_wrong(
     lang: str, tmp_path: Path, pytestconfig: pytest.Config
 ):
