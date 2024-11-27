@@ -451,7 +451,7 @@ Expression = Identifier | Value | FunctionCall
 
 
 @define
-class AbstractAssignment(WithFeatures, WithFunctions):
+class AbstractAssignment(Statements, WithFeatures, WithFunctions):
     """
     Assign the result of an expression to a variable or property.
 
@@ -464,6 +464,9 @@ class AbstractAssignment(WithFeatures, WithFunctions):
     """
 
     expression: Expression
+
+    def accept(self, visitor):
+        raise NotImplementedError()
 
     def get_used_features(self) -> FeatureSet:
         base = FeatureSet({Construct.ASSIGNMENTS}, set(), set())
@@ -493,6 +496,9 @@ class VariableAssignment(AbstractAssignment):
 
     variable: str
     type: AllTypes | VariableType
+
+    def accept(self, visitor: Visitor):
+        visitor.visit_variableassignment(self)
 
     def replace_variable(self, variable: str) -> "VariableAssignment":
         return VariableAssignment(
@@ -542,7 +548,21 @@ class PropertyAssignment(AbstractAssignment):
 Assignment = VariableAssignment | PropertyAssignment
 
 # If changing this, also update is_statement_strict in the utils.
-Statement = Assignment | Expression
+# Statement = Assignment | Expression
+
+class Statement():
+
+    @abstractmethod
+    def accept(self, visitor):
+        pass
+
+class Visitor():
+
+    def visit_functioncall(self, functioncall: FunctionCall):
+        pass
+
+    def vist_variableassignment(self, variableassignment):
+        pass
 
 # Update the forward references, which fixes the schema generation.
 resolve_types(ObjectType)
