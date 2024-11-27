@@ -60,6 +60,23 @@ def test_eslint(tmp_path: Path, config: dict, pytestconfig: pytest.Config):
     assert len(updates.find_all("annotate-code")) > 0
 
 
+@pytest.mark.parametrize("config", _get_config_options("typescript"))
+def test_eslint_typescript(tmp_path: Path, config: dict, pytestconfig: pytest.Config):
+    conf = configuration(
+        pytestconfig,
+        "counter",
+        "typescript",
+        tmp_path,
+        "plan.yaml",
+        "solution-eslint",
+        config,
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    print(updates)
+    assert len(updates.find_all("annotate-code")) > 0
+
+
 @pytest.mark.parametrize(
     ("language", "config"),
     [
