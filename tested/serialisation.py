@@ -21,6 +21,7 @@ import copy
 import logging
 import math
 import operator
+from abc import abstractmethod
 from collections.abc import Iterable
 from decimal import Decimal
 from enum import StrEnum, auto, unique
@@ -153,7 +154,49 @@ class SpecialNumbers(StrEnum):
 
 
 @define
-class NumberType(WithFeatures, WithFunctions):
+class Statement(WithFeatures, WithFunctions):
+    """
+        Base class for representing Statements which represent Expressions and Assignments
+    """
+    def accept(self, visitor: "ConvertStatementVisitor") -> None:
+        visitor.visit(self)
+
+
+@define
+class Expression(Statement):
+    """
+        Base class for representing Expressions which represent Values, Identifiers
+        and FunctionCalls.
+    """
+    pass
+
+@define
+class Value(Expression):
+    """
+        Base class for representing values with associated type, data, and diagnostics.
+        Intended for use by subclasses.
+    """
+    type: any = field(default=None,
+                                metadata={"description": "The type of the value"})
+    data: any = field(default=None, metadata={
+        "description": "The actual data stored in the value"
+    })
+    diagnostics: any = field(default=None, metadata={
+        "description": "Diagnostics or metadata for the value"
+    })
+
+
+# These visitors are defined for the generation files of each language.
+@define
+class ConvertStatementVisitor:
+
+    @abstractmethod
+    def visit(self, statement: Statement) -> str:
+        raise AssertionError(f"Unknown statement: {statement!r}")
+
+
+@define
+class NumberType(Value):
     type: NumericTypes = field(validator=validators.instance_of(NumericTypes))
     data: SpecialNumbers | int | float | Decimal = field(
         validator=validators.instance_of(Union[SpecialNumbers, int, float, Decimal])
@@ -182,7 +225,7 @@ class NumberType(WithFeatures, WithFunctions):
 
 
 @define
-class StringType(WithFeatures, WithFunctions):
+class StringType(Value):
     type: StringTypes = field(validator=validators.instance_of(StringTypes))
     data: str = field(validator=validators.instance_of(str))
 
@@ -200,7 +243,7 @@ class StringType(WithFeatures, WithFunctions):
 
 
 @define
-class BooleanType(WithFeatures, WithFunctions):
+class BooleanType(Value):
     type: BooleanTypes = field(validator=validators.instance_of(BooleanTypes))
     data: bool = field(validator=validators.instance_of(bool))
     diagnostic: Literal[None] = None  # Unused in this type.
@@ -213,7 +256,7 @@ class BooleanType(WithFeatures, WithFunctions):
 
 
 @define
-class SequenceType(WithFeatures, WithFunctions):
+class SequenceType(Value):
     type: SequenceTypes = field(validator=validators.instance_of(SequenceTypes))
     data: list["Expression"]
     diagnostic: Literal[None] = None  # Unused in this type.
@@ -276,7 +319,7 @@ class ObjectKeyValuePair(WithFeatures, WithFunctions):
 
 
 @define
-class ObjectType(WithFeatures, WithFunctions):
+class ObjectType(Value):
     type: ObjectTypes = field(validator=validators.instance_of(ObjectTypes))
     data: list[ObjectKeyValuePair]
     diagnostic: Literal[None] = None  # Unused in this type.
@@ -312,7 +355,7 @@ class ObjectType(WithFeatures, WithFunctions):
 
 
 @define
-class NothingType(WithFeatures, WithFunctions):
+class NothingType(Value):
     type: NothingTypes = field(
         default=BasicNothingTypes.NOTHING,
         validator=validators.instance_of(NothingTypes),  # type: ignore
@@ -328,12 +371,12 @@ class NothingType(WithFeatures, WithFunctions):
 
 
 # A value is one of the preceding types.
-Value = Union[
-    NumberType, StringType, BooleanType, SequenceType, ObjectType, NothingType
-]
+# Value = Union[
+#     NumberType, StringType, BooleanType, SequenceType, ObjectType, NothingType
+# ]
 
 
-class Identifier(str, WithFeatures, WithFunctions):
+class Identifier(str, Expression):
     """Represents an variable name."""
 
     is_raw: bool
@@ -391,7 +434,7 @@ class NamedArgument(WithFeatures, WithFunctions):
 
 
 @define
-class FunctionCall(WithFeatures, WithFunctions):
+class FunctionCall(Expression):
     """
     Represents a function expression.
     """
@@ -447,11 +490,11 @@ class VariableType:
     type: Literal["custom"] = "custom"
 
 
-Expression = Identifier | Value | FunctionCall
+# Expression = Identifier | Value | FunctionCall
 
 
 @define
-class AbstractAssignment(Statements, WithFeatures, WithFunctions):
+class Assignment(Statement):
     """
     Assign the result of an expression to a variable or property.
 
@@ -464,9 +507,6 @@ class AbstractAssignment(Statements, WithFeatures, WithFunctions):
     """
 
     expression: Expression
-
-    def accept(self, visitor):
-        raise NotImplementedError()
 
     def get_used_features(self) -> FeatureSet:
         base = FeatureSet({Construct.ASSIGNMENTS}, set(), set())
@@ -481,8 +521,9 @@ class AbstractAssignment(Statements, WithFeatures, WithFunctions):
         raise NotImplementedError()
 
 
+
 @define
-class VariableAssignment(AbstractAssignment):
+class VariableAssignment(Assignment):
     """
     Assign the result of an expression to a variable.
 
@@ -496,9 +537,6 @@ class VariableAssignment(AbstractAssignment):
 
     variable: str
     type: AllTypes | VariableType
-
-    def accept(self, visitor: Visitor):
-        visitor.visit_variableassignment(self)
 
     def replace_variable(self, variable: str) -> "VariableAssignment":
         return VariableAssignment(
@@ -517,7 +555,7 @@ class VariableAssignment(AbstractAssignment):
 
 
 @define
-class PropertyAssignment(AbstractAssignment):
+class PropertyAssignment(Assignment):
     """
     Assign the result of an expression to a property.
     """
@@ -545,24 +583,11 @@ class PropertyAssignment(AbstractAssignment):
         return PropertyAssignment(property=prop, expression=self.expression)
 
 
-Assignment = VariableAssignment | PropertyAssignment
+#Assignment = VariableAssignment | PropertyAssignment
 
 # If changing this, also update is_statement_strict in the utils.
-# Statement = Assignment | Expression
+# Statements = Assignment | Expression
 
-class Statement():
-
-    @abstractmethod
-    def accept(self, visitor):
-        pass
-
-class Visitor():
-
-    def visit_functioncall(self, functioncall: FunctionCall):
-        pass
-
-    def vist_variableassignment(self, variableassignment):
-        pass
 
 # Update the forward references, which fixes the schema generation.
 resolve_types(ObjectType)
