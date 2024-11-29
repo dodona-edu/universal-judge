@@ -120,7 +120,7 @@ class TypeScript(Language):
                     "--target",
                     "esnext",
                     "--module",
-                    "esnext",
+                    "nodenext",
                     "--allowImportingTsExtensions",
                     "--noEmit",
                     "--typeRoots",
