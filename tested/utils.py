@@ -11,7 +11,7 @@ from typing import IO, TYPE_CHECKING, Any, TypeGuard, TypeVar
 from typing import get_args as typing_get_args
 
 if TYPE_CHECKING:
-    from tested.serialisation import Assignment
+    from tested.serialisation import AbstractAssignment
 
 _logger = logging.getLogger(__name__)
 
@@ -316,7 +316,7 @@ def sorted_no_duplicates(
     return no_dup
 
 
-def is_statement_strict(statement: Any) -> TypeGuard["Assignment"]:
+def is_statement_strict(statement: Any) -> TypeGuard["AbstractAssignment"]:
     """
     Check that the given value is a strict statement: it must be a statement but
     not an expression.
@@ -324,6 +324,6 @@ def is_statement_strict(statement: Any) -> TypeGuard["Assignment"]:
     :param statement: The potential statement to check.
     :return: True if it is, False otherwise.
     """
-    from tested.serialisation import Assignment
+    from tested.serialisation import AbstractAssignment
 
-    return isinstance(statement, Assignment)
+    return isinstance(statement, AbstractAssignment)

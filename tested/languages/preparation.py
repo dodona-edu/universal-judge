@@ -21,7 +21,7 @@ from tested.languages.conventionalize import (
     submission_name,
 )
 from tested.serialisation import (
-    Assignment,
+    AbstractAssignment,
     Expression,
     FunctionCall,
     FunctionType,
@@ -201,7 +201,7 @@ def prepare_argument(
     return prepare_expression(bundle, argument)
 
 
-def prepare_assignment(bundle: Bundle, assignment: Assignment) -> Assignment:
+def prepare_assignment(bundle: Bundle, assignment: AbstractAssignment) -> AbstractAssignment:
     if isinstance(assignment, VariableAssignment):
         if isinstance(assignment.type, VariableType):
             class_type = conventionalize_class(bundle.language, assignment.type.data)
@@ -409,7 +409,7 @@ def prepare_testcase(
                 names.append(evaluator_name)
             if result_channel == IgnoredChannel.IGNORED:
                 value_function_call = None
-        elif isinstance(testcase.input, Assignment):
+        elif isinstance(testcase.input, AbstractAssignment):
             command = prepare_assignment(bundle, testcase.input)
             assert (
                 result_channel == IgnoredChannel.IGNORED

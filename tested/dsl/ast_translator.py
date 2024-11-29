@@ -42,7 +42,7 @@ from tested.datatypes import (
 )
 from tested.parsing import get_converter
 from tested.serialisation import (
-    Assignment,
+    AbstractAssignment,
     Expression,
     FunctionCall,
     FunctionType,
@@ -95,7 +95,7 @@ def _is_type_cast(node: ast.expr) -> bool:
     return any(node.func.id in x.__members__.values() for x in get_args(AllTypes))
 
 
-def _convert_ann_assignment(node: ast.AnnAssign) -> Assignment:
+def _convert_ann_assignment(node: ast.AnnAssign) -> AbstractAssignment:
     if not isinstance(node.target, ast.Name):
         actual = ast.dump(node)
         raise InvalidDslError(
@@ -127,7 +127,7 @@ def _convert_ann_assignment(node: ast.AnnAssign) -> Assignment:
     )
 
 
-def _convert_assignment(node: ast.Assign) -> Assignment:
+def _convert_assignment(node: ast.Assign) -> AbstractAssignment:
     if n := len(node.targets) != 1:
         raise InvalidDslError(
             f"You must assign to exactly one variable, but got {n} variables."

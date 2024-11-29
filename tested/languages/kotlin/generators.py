@@ -23,7 +23,7 @@ from tested.languages.preparation import (
 )
 from tested.languages.utils import convert_unknown_type
 from tested.serialisation import (
-    Assignment,
+    AbstractAssignment,
     Expression,
     FunctionCall,
     FunctionType,

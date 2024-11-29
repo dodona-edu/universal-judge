@@ -153,50 +153,38 @@ class SpecialNumbers(StrEnum):
     NEG_INFINITY = "-inf"
 
 
-@define
-class Statement(WithFeatures, WithFunctions):
-    """
-        Base class for representing Statements which represent Expressions and Assignments
-    """
-    def accept(self, visitor: "ConvertStatementVisitor") -> None:
-        visitor.visit(self)
+#   class Statement(WithFeatures, WithFunctions):
+#       """
+#           Base class for representing Statements which represent Expressions and Assignments
+#       """
+#
+#       def accept(self, visitor: "ConvertStatementVisitor") -> None:
+#           visitor.visit(self)
+#
 
-
-@define
-class Expression(Statement):
+class Expression(WithFeatures, WithFunctions):
     """
         Base class for representing Expressions which represent Values, Identifiers
         and FunctionCalls.
     """
-    pass
 
-@define
-class Value(Expression):
-    """
-        Base class for representing values with associated type, data, and diagnostics.
-        Intended for use by subclasses.
-    """
-    type: any = field(default=None,
-                                metadata={"description": "The type of the value"})
-    data: any = field(default=None, metadata={
-        "description": "The actual data stored in the value"
-    })
-    diagnostics: any = field(default=None, metadata={
-        "description": "Diagnostics or metadata for the value"
-    })
+    type: Any
+    data: Any
+    diagnostic: Any
 
-
-# These visitors are defined for the generation files of each language.
-@define
-class ConvertStatementVisitor:
-
-    @abstractmethod
-    def visit(self, statement: Statement) -> str:
-        raise AssertionError(f"Unknown statement: {statement!r}")
+#
+#
+#   # These visitors are defined for the generation files of each language.
+#   @define
+#   class ConvertStatementVisitor:
+#
+#       @abstractmethod
+#       def visit(self, statement: Statement) -> str:
+#           raise AssertionError(f"Unknown statement: {statement!r}")
 
 
 @define
-class NumberType(Value):
+class NumberType(Expression):
     type: NumericTypes = field(validator=validators.instance_of(NumericTypes))
     data: SpecialNumbers | int | float | Decimal = field(
         validator=validators.instance_of(Union[SpecialNumbers, int, float, Decimal])
@@ -205,15 +193,15 @@ class NumberType(Value):
 
     def __attrs_post_init__(self):
         if (
-            isinstance(self.data, SpecialNumbers)
-            and resolve_to_basic(self.type) == BasicNumericTypes.INTEGER
+                isinstance(self.data, SpecialNumbers)
+                and resolve_to_basic(self.type) == BasicNumericTypes.INTEGER
         ):
             raise ValueError(
                 f"SpecialNumber '{self.data}' is only supported for " f"real numbers."
             )
 
         if resolve_to_basic(self.type) == BasicNumericTypes.INTEGER and isinstance(
-            self.data, Decimal
+                self.data, Decimal
         ):
             self.data = self.data.to_integral_value()
 
@@ -225,7 +213,7 @@ class NumberType(Value):
 
 
 @define
-class StringType(Value):
+class StringType(Expression):
     type: StringTypes = field(validator=validators.instance_of(StringTypes))
     data: str = field(validator=validators.instance_of(str))
 
@@ -243,7 +231,7 @@ class StringType(Value):
 
 
 @define
-class BooleanType(Value):
+class BooleanType(Expression):
     type: BooleanTypes = field(validator=validators.instance_of(BooleanTypes))
     data: bool = field(validator=validators.instance_of(bool))
     diagnostic: Literal[None] = None  # Unused in this type.
@@ -256,7 +244,7 @@ class BooleanType(Value):
 
 
 @define
-class SequenceType(Value):
+class SequenceType(Expression):
     type: SequenceTypes = field(validator=validators.instance_of(SequenceTypes))
     data: list["Expression"]
     diagnostic: Literal[None] = None  # Unused in this type.
@@ -319,7 +307,7 @@ class ObjectKeyValuePair(WithFeatures, WithFunctions):
 
 
 @define
-class ObjectType(Value):
+class ObjectType(Expression):
     type: ObjectTypes = field(validator=validators.instance_of(ObjectTypes))
     data: list[ObjectKeyValuePair]
     diagnostic: Literal[None] = None  # Unused in this type.
@@ -355,7 +343,7 @@ class ObjectType(Value):
 
 
 @define
-class NothingType(Value):
+class NothingType(Expression):
     type: NothingTypes = field(
         default=BasicNothingTypes.NOTHING,
         validator=validators.instance_of(NothingTypes),  # type: ignore
@@ -371,9 +359,9 @@ class NothingType(Value):
 
 
 # A value is one of the preceding types.
-# Value = Union[
-#     NumberType, StringType, BooleanType, SequenceType, ObjectType, NothingType
-# ]
+Value = Union[
+    NumberType, StringType, BooleanType, SequenceType, ObjectType, NothingType
+]
 
 
 class Identifier(str, Expression):
@@ -456,8 +444,8 @@ class FunctionCall(Expression):
 
         # Get OOP features.
         if self.type in (
-            FunctionType.PROPERTY,
-            FunctionType.CONSTRUCTOR,
+                FunctionType.PROPERTY,
+                FunctionType.CONSTRUCTOR,
         ) or not isinstance(self.namespace, (Identifier, NoneType)):
             constructs.add(Construct.OBJECTS)
 
@@ -490,11 +478,11 @@ class VariableType:
     type: Literal["custom"] = "custom"
 
 
-# Expression = Identifier | Value | FunctionCall
+Expression = Identifier | Value | FunctionCall
 
 
 @define
-class Assignment(Statement):
+class AbstractAssignment(WithFeatures, WithFunctions):
     """
     Assign the result of an expression to a variable or property.
 
@@ -521,9 +509,8 @@ class Assignment(Statement):
         raise NotImplementedError()
 
 
-
 @define
-class VariableAssignment(Assignment):
+class VariableAssignment(AbstractAssignment):
     """
     Assign the result of an expression to a variable.
 
@@ -555,7 +542,7 @@ class VariableAssignment(Assignment):
 
 
 @define
-class PropertyAssignment(Assignment):
+class PropertyAssignment(AbstractAssignment):
     """
     Assign the result of an expression to a property.
     """
@@ -583,10 +570,10 @@ class PropertyAssignment(Assignment):
         return PropertyAssignment(property=prop, expression=self.expression)
 
 
-#Assignment = VariableAssignment | PropertyAssignment
+Assignment = VariableAssignment | PropertyAssignment
 
 # If changing this, also update is_statement_strict in the utils.
-# Statements = Assignment | Expression
+Statement = Assignment | Expression
 
 
 # Update the forward references, which fixes the schema generation.
@@ -642,8 +629,8 @@ def _convert_to_python(value: Value | None, for_printing=False) -> Any:
     if isinstance(value.type, SimpleTypes):
         # If we have floats or ints, convert them to Python.
         if value.type in (
-            AdvancedNumericTypes.SINGLE_PRECISION,
-            AdvancedNumericTypes.DOUBLE_PRECISION,
+                AdvancedNumericTypes.SINGLE_PRECISION,
+                AdvancedNumericTypes.DOUBLE_PRECISION,
         ):
             return float(str(value.data))
         if value.type != AdvancedNumericTypes.FIXED_PRECISION:
@@ -785,11 +772,11 @@ def to_python_comparable(value: Value | None) -> Any:
         assert isinstance(value, NumberType)
         return value.data
     if basic_type in (
-        BasicBooleanTypes.BOOLEAN,
-        BasicStringTypes.TEXT,
-        BasicNothingTypes.NOTHING,
-        BasicStringTypes.ANY,
-        BasicStringTypes.UNKNOWN,
+            BasicBooleanTypes.BOOLEAN,
+            BasicStringTypes.TEXT,
+            BasicNothingTypes.NOTHING,
+            BasicStringTypes.ANY,
+            BasicStringTypes.UNKNOWN,
     ):
         return value.data
 
