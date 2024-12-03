@@ -345,9 +345,13 @@ def extract_comment(code: str) -> str:
     """
     comment = ""
     tokens = tokenize.generate_tokens(io.StringIO(code).readline)
-    candidate = list(collections.deque(tokens, maxlen=3))
-    if len(candidate) and candidate[0].type == tokenize.COMMENT:
-        comment = candidate[0].string.lstrip("#").strip()
+    # The "maxlen" is 3 because, the tokenizer will always generate a NEWLINE
+    # and ENDMARKER token at the end. So a comment comes just before those 2 tokens.
+    candidates = collections.deque(tokens, maxlen=3)
+    if len(candidates):
+        candidate = candidates.popleft()
+        if candidate.type == tokenize.COMMENT:
+            comment = candidate.string.lstrip("#").strip()
     return comment
 
 
