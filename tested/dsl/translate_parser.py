@@ -584,7 +584,8 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
             the_input = LanguageLiterals(literals=the_dict, type=the_type)
         else:
             assert isinstance(expr_stmt, str)
-            line_comment = extract_comment(expr_stmt)
+            if testcase.get("description") is None:
+                line_comment = extract_comment(expr_stmt)
             the_input = parse_string(expr_stmt)
         return_channel = IgnoredChannel.IGNORED if "statement" in testcase else None
     else:
