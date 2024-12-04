@@ -1,7 +1,8 @@
 import re
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
+from tested.configs import GlobalConfig
 from tested.datatypes import AllTypes
 from tested.dodona import AnnotateCode, Message
 from tested.features import Construct, TypeSupport
@@ -28,6 +29,10 @@ if TYPE_CHECKING:
 
 
 class Haskell(Language):
+    def __init__(self, config: Optional["GlobalConfig"]):
+        super().__init__(config)
+        self.clean_types_regex = re.compile(r"\(([^:\s]*)\s*::\s*([A-Z][a-zA-Z0-9]*)\)")
+
     def initial_dependencies(self) -> list[str]:
         return ["Values.hs", "EvaluationUtils.hs"]
 
@@ -82,6 +87,7 @@ class Haskell(Language):
             Construct.ASSIGNMENTS,
             Construct.EVALUATION,
             Construct.GLOBAL_VARIABLES,
+            Construct.HETEROGENEOUS_ARGUMENTS,
         }
 
     def compilation(self, files: list[str]) -> CallbackResult:
@@ -113,7 +119,7 @@ class Haskell(Language):
         return linter.run_hlint(self.config.dodona, remaining)
 
     def cleanup_description(self, statement: str) -> str:
-        return cleanup_description(self, statement)
+        return cleanup_description(self, self.clean_types_regex.sub(r"\1", statement))
 
     def cleanup_stacktrace(self, stacktrace: str) -> str:
         filename = submission_file(self)
@@ -167,7 +173,9 @@ class Haskell(Language):
     def generate_statement(self, statement: Statement) -> str:
         from tested.languages.haskell import generators
 
-        return generators.convert_statement(statement)
+        return self.clean_types_regex.sub(
+            r"\1", generators.convert_statement(statement)
+        )
 
     def generate_execution_unit(self, execution_unit: "PreparedExecutionUnit") -> str:
         from tested.languages.haskell import generators
