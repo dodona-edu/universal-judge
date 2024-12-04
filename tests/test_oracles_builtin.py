@@ -769,3 +769,174 @@ def test_map_and_list_works(tmp_path: Path, pytestconfig: pytest.Config):
     config = oracle_config(tmp_path, pytestconfig, language="javascript")
     result = evaluate_value(config, channel, actual_value)
     assert result.result.enum == Status.WRONG
+
+
+def test_empty_map_is_not_accepted(tmp_path: Path, pytestconfig: pytest.Config):
+    channel = ValueOutputChannel(
+        value=ObjectType(
+            type=BasicObjectTypes.MAP,
+            data=[
+                ObjectKeyValuePair(
+                    key=StringType(type=BasicStringTypes.TEXT, data="a"),
+                    value=StringType(type=BasicStringTypes.TEXT, data="b"),
+                ),
+                ObjectKeyValuePair(
+                    key=StringType(type=BasicStringTypes.TEXT, data="c"),
+                    value=StringType(type=BasicStringTypes.TEXT, data="d"),
+                ),
+            ],
+        )
+    )
+
+    actual_value = get_converter().dumps(ObjectType(type=BasicObjectTypes.MAP, data=[]))
+    config = oracle_config(tmp_path, pytestconfig, language="javascript")
+    result = evaluate_value(config, channel, actual_value)
+    assert result.result.enum == Status.WRONG
+
+
+def test_smaller_map_is_not_accepted(tmp_path: Path, pytestconfig: pytest.Config):
+    channel = ValueOutputChannel(
+        value=ObjectType(
+            type=BasicObjectTypes.MAP,
+            data=[
+                ObjectKeyValuePair(
+                    key=StringType(type=BasicStringTypes.TEXT, data="a"),
+                    value=StringType(type=BasicStringTypes.TEXT, data="b"),
+                ),
+                ObjectKeyValuePair(
+                    key=StringType(type=BasicStringTypes.TEXT, data="c"),
+                    value=StringType(type=BasicStringTypes.TEXT, data="d"),
+                ),
+            ],
+        )
+    )
+
+    actual_value = get_converter().dumps(
+        ObjectType(
+            type=BasicObjectTypes.MAP,
+            data=[
+                ObjectKeyValuePair(
+                    key=StringType(type=BasicStringTypes.TEXT, data="a"),
+                    value=StringType(type=BasicStringTypes.TEXT, data="b"),
+                ),
+            ],
+        )
+    )
+    config = oracle_config(tmp_path, pytestconfig, language="javascript")
+    result = evaluate_value(config, channel, actual_value)
+    assert result.result.enum == Status.WRONG
+
+
+def test_bigger_map_is_not_accepted(tmp_path: Path, pytestconfig: pytest.Config):
+    channel = ValueOutputChannel(
+        value=ObjectType(
+            type=BasicObjectTypes.MAP,
+            data=[
+                ObjectKeyValuePair(
+                    key=StringType(type=BasicStringTypes.TEXT, data="a"),
+                    value=StringType(type=BasicStringTypes.TEXT, data="b"),
+                ),
+                ObjectKeyValuePair(
+                    key=StringType(type=BasicStringTypes.TEXT, data="c"),
+                    value=StringType(type=BasicStringTypes.TEXT, data="d"),
+                ),
+            ],
+        )
+    )
+
+    actual_value = get_converter().dumps(
+        ObjectType(
+            type=BasicObjectTypes.MAP,
+            data=[
+                ObjectKeyValuePair(
+                    key=StringType(type=BasicStringTypes.TEXT, data="a"),
+                    value=StringType(type=BasicStringTypes.TEXT, data="b"),
+                ),
+                ObjectKeyValuePair(
+                    key=StringType(type=BasicStringTypes.TEXT, data="c"),
+                    value=StringType(type=BasicStringTypes.TEXT, data="d"),
+                ),
+                ObjectKeyValuePair(
+                    key=StringType(type=BasicStringTypes.TEXT, data="b"),
+                    value=StringType(type=BasicStringTypes.TEXT, data="d"),
+                ),
+            ],
+        )
+    )
+    config = oracle_config(tmp_path, pytestconfig, language="javascript")
+    result = evaluate_value(config, channel, actual_value)
+    assert result.result.enum == Status.WRONG
+
+
+def test_exact_map_is_accepted(tmp_path: Path, pytestconfig: pytest.Config):
+    channel = ValueOutputChannel(
+        value=ObjectType(
+            type=BasicObjectTypes.MAP,
+            data=[
+                ObjectKeyValuePair(
+                    key=StringType(type=BasicStringTypes.TEXT, data="a"),
+                    value=StringType(type=BasicStringTypes.TEXT, data="b"),
+                ),
+                ObjectKeyValuePair(
+                    key=StringType(type=BasicStringTypes.TEXT, data="c"),
+                    value=StringType(type=BasicStringTypes.TEXT, data="d"),
+                ),
+            ],
+        )
+    )
+
+    actual_value = get_converter().dumps(
+        ObjectType(
+            type=BasicObjectTypes.MAP,
+            data=[
+                ObjectKeyValuePair(
+                    key=StringType(type=BasicStringTypes.TEXT, data="a"),
+                    value=StringType(type=BasicStringTypes.TEXT, data="b"),
+                ),
+                ObjectKeyValuePair(
+                    key=StringType(type=BasicStringTypes.TEXT, data="c"),
+                    value=StringType(type=BasicStringTypes.TEXT, data="d"),
+                ),
+            ],
+        )
+    )
+    config = oracle_config(tmp_path, pytestconfig, language="javascript")
+    result = evaluate_value(config, channel, actual_value)
+    assert result.result.enum == Status.CORRECT
+
+
+def test_wrong_map_is_accepted(tmp_path: Path, pytestconfig: pytest.Config):
+    channel = ValueOutputChannel(
+        value=ObjectType(
+            type=BasicObjectTypes.MAP,
+            data=[
+                ObjectKeyValuePair(
+                    key=StringType(type=BasicStringTypes.TEXT, data="a"),
+                    value=StringType(type=BasicStringTypes.TEXT, data="b"),
+                ),
+                ObjectKeyValuePair(
+                    key=StringType(type=BasicStringTypes.TEXT, data="c"),
+                    value=StringType(type=BasicStringTypes.TEXT, data="d"),
+                ),
+            ],
+        )
+    )
+
+    actual_value = get_converter().dumps(
+        ObjectType(
+            type=BasicObjectTypes.MAP,
+            data=[
+                ObjectKeyValuePair(
+                    key=StringType(type=BasicStringTypes.TEXT, data="a"),
+                    value=StringType(type=BasicStringTypes.TEXT, data="b"),
+                ),
+                ObjectKeyValuePair(
+                    key=StringType(type=BasicStringTypes.TEXT, data="c"),
+                    value=StringType(type=BasicStringTypes.TEXT, data="wrong"),
+                ),
+            ],
+        )
+    )
+    config = oracle_config(tmp_path, pytestconfig, language="javascript")
+    result = evaluate_value(config, channel, actual_value)
+    assert result.result.enum == Status.WRONG
