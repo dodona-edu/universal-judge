@@ -46,6 +46,9 @@ class TypeScript(Language):
     def file_extension(self) -> str:
         return "ts"
 
+    def comment(self, text: str) -> str:
+        return f"// {text}"
+
     def naming_conventions(self) -> dict[Conventionable, NamingConventions]:
         return {
             "namespace": "camel_case",

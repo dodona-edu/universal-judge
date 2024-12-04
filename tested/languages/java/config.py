@@ -42,6 +42,9 @@ class Java(Language):
     def file_extension(self) -> str:
         return "java"
 
+    def comment(self, text: str) -> str:
+        return f"// {text}"
+
     def naming_conventions(self) -> dict[Conventionable, NamingConventions]:
         return {
             "namespace": "pascal_case",

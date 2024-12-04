@@ -191,6 +191,16 @@ class Language(ABC):
         """
         raise NotImplementedError
 
+    @abstractmethod
+    def comment(self, text: str) -> str:
+        """
+        Generate a comment for the given text.
+
+        :param text: The text to comment.
+        :return: The comment.
+        """
+        raise NotImplementedError
+
     def is_source_file(self, file: Path) -> bool:
         """
         Check if the given file could be a source file for this programming language.

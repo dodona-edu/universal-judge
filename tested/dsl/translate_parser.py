@@ -32,7 +32,7 @@ from tested.datatypes import (
     resolve_to_basic,
 )
 from tested.dodona import ExtendedMessage
-from tested.dsl.ast_translator import InvalidDslError, parse_string
+from tested.dsl.ast_translator import InvalidDslError, extract_comment, parse_string
 from tested.parsing import get_converter, suite_to_json
 from tested.serialisation import (
     BooleanType,
@@ -567,6 +567,7 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
     if "statement" in testcase and "return" in testcase:
         testcase["expression"] = testcase.pop("statement")
 
+    line_comment = ""
     _validate_testcase_combinations(testcase)
     if (expr_stmt := testcase.get("statement", testcase.get("expression"))) is not None:
         if isinstance(expr_stmt, dict) or context.language != "tested":
@@ -583,6 +584,8 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
             the_input = LanguageLiterals(literals=the_dict, type=the_type)
         else:
             assert isinstance(expr_stmt, str)
+            if testcase.get("description") is None:
+                line_comment = extract_comment(expr_stmt)
             the_input = parse_string(expr_stmt)
         return_channel = IgnoredChannel.IGNORED if "statement" in testcase else None
     else:
@@ -653,6 +656,7 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
         input=the_input,
         output=output,
         link_files=context.files,
+        line_comment=line_comment,
     )
 
 

@@ -2,6 +2,3 @@
   testcases:
     - expression: "GLOBAL_VAR # The name of the global variable"
       return: "GLOBAL"
-      description:
-        description: "Hallo"
-        format: "code"
