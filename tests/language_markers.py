@@ -4,6 +4,7 @@ COMPILE_LANGUAGES = [
     "python",
     "java",
     "c",
+    "cpp",
     "kotlin",
     "haskell",
     "csharp",

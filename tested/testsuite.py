@@ -77,6 +77,7 @@ class SupportedLanguage(StrEnum):
     PYTHON = auto()
     RUNHASKELL = auto()
     CSHARP = auto()
+    CPP = auto()
 
 
 LanguageMapping = dict[SupportedLanguage, str]
