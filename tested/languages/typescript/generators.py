@@ -128,6 +128,32 @@ def convert_function_call(call: FunctionCall, internal=False) -> str:
         result += f"({convert_arguments(call.arguments)})"  # pyright: ignore
     return result
 
+def convert_declaration(tp: AllTypes | VariableType) -> str:
+    if isinstance(tp, VariableType):
+        return tp.data
+    elif tp == AdvancedStringTypes.CHAR:
+        return "string"
+    elif isinstance(tp, AdvancedNumericTypes):
+        return "number"
+    elif tp == AdvancedNothingTypes.NULL:
+        return "null"
+    elif tp == AdvancedNothingTypes.UNDEFINED:
+        return "undefined"
+
+    basic = resolve_to_basic(tp)
+    if basic == BasicBooleanTypes.BOOLEAN:
+        return "boolean"
+    elif basic == BasicStringTypes.TEXT:
+        return "string"
+    elif basic == BasicNumericTypes.INTEGER:
+        return "number"
+    elif basic == BasicNumericTypes.REAL:
+        return "number"
+    elif basic == BasicNothingTypes.NOTHING:
+        return "null"
+    elif basic == BasicSequenceTypes.MAP:
+        return "object"
+    raise AssertionError(f"Unknown type: {tp!r}")
 
 def convert_statement(statement: Statement, internal=False, full=False) -> str:
     if isinstance(statement, Identifier):
