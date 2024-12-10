@@ -1,6 +1,7 @@
 """
 Tests for specific aspects of certain language implementations.
 """
+
 import itertools
 import shutil
 import sys
@@ -24,6 +25,7 @@ from tested.serialisation import (
 from tested.testsuite import Suite
 from tests.manual_utils import assert_valid_output, configuration, execute_config
 
+
 def test_typescript_array_typing(tmp_path: Path, pytestconfig: pytest.Config):
     statement_string = "test = ['test', True, 10, 10.1, None, {'wow': 10}]"
     result = convert_statement(parse_string(statement_string), full=True)
@@ -36,6 +38,7 @@ def test_typescript_array_typing(tmp_path: Path, pytestconfig: pytest.Config):
 
     assert result in valid_results
 
+
 def test_typescript_set_typing(tmp_path: Path, pytestconfig: pytest.Config):
     statement_string = "test = {'test', True, 10, 10.1, None, {'wow': 10}}"
     result = convert_statement(parse_string(statement_string), full=True)
@@ -47,6 +50,7 @@ def test_typescript_set_typing(tmp_path: Path, pytestconfig: pytest.Config):
     ]
 
     assert result in valid_results
+
 
 def test_javascript_vanilla_object(tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(

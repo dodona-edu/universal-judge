@@ -37,7 +37,8 @@ from tested.serialisation import (
     Value,
     VariableAssignment,
     VariableType,
-    as_basic_type, _get_type_for,
+    as_basic_type,
+    _get_type_for,
 )
 from tested.testsuite import MainInput
 
@@ -132,8 +133,8 @@ def convert_function_call(call: FunctionCall, internal=False) -> str:
         result += f"({convert_arguments(call.arguments)})"  # pyright: ignore
     return result
 
-def convert_declaration(statement: Statement) -> str:
-    tp = statement.type
+
+def convert_declaration(statement: Statement, tp: AllTypes | VariableType) -> str:
     if isinstance(tp, VariableType):
         return tp.data
     elif tp == AdvancedStringTypes.CHAR:
@@ -161,23 +162,51 @@ def convert_declaration(statement: Statement) -> str:
     elif basic == BasicSequenceTypes.SEQUENCE:
         type_ = "Object"
 
-        expression = statement.expression
+        if isinstance(statement, VariableAssignment):
+            expression = statement.expression
+        else:
+            expression = statement
         if isinstance(expression, SequenceType):
-            type_ = {convert_declaration(element) for element in expression.data}
-            type_ = '|'.join(type_)
+            type_ = {
+                (
+                    convert_declaration(element, element.type)
+                    if not isinstance(element, Identifier)
+                    and not isinstance(element, FunctionCall)
+                    else "id"
+                )
+                for element in expression.data
+            }
+            if "id" in type_:
+                type_ = "any"
+            else:
+                type_ = "|".join(type_)
 
-        
         return f"Array<{type_}>"
     elif basic == BasicSequenceTypes.SET:
         type_ = "Object"
 
-        expression = statement.expression
+        if isinstance(statement, VariableAssignment):
+            expression = statement.expression
+        else:
+            expression = statement
         if isinstance(expression, SequenceType):
-            type_ = {convert_declaration(element) for element in expression.data}
-            type_ = '|'.join(type_)
+            type_ = {
+                (
+                    convert_declaration(element, element.type)
+                    if not isinstance(element, Identifier)
+                    and not isinstance(element, FunctionCall)
+                    else "id"
+                )
+                for element in expression.data
+            }
+            if "id" in type_:
+                type_ = "any"
+            else:
+                type_ = "|".join(type_)
 
         return f"Set<{type_}>"
     raise AssertionError(f"Unknown type: {tp!r}")
+
 
 def convert_statement(statement: Statement, internal=False, full=False) -> str:
     if isinstance(statement, Identifier):
@@ -197,7 +226,7 @@ def convert_statement(statement: Statement, internal=False, full=False) -> str:
         else:
             prefix = ""
         return (
-            f"{prefix}{statement.variable} : {convert_declaration(statement)} = "
+            f"{prefix}{statement.variable} : {convert_declaration(statement, statement.type)} = "
             f"{convert_statement(statement.expression, True)}"
         )
     raise AssertionError(f"Unknown statement: {statement!r}")
