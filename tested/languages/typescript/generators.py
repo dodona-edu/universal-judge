@@ -38,7 +38,6 @@ from tested.serialisation import (
     VariableAssignment,
     VariableType,
     as_basic_type,
-    _get_type_for,
 )
 from tested.testsuite import MainInput
 
@@ -136,7 +135,7 @@ def convert_function_call(call: FunctionCall, internal=False) -> str:
 
 def convert_declaration(statement: Statement, tp: AllTypes | VariableType) -> str:
     if isinstance(tp, VariableType):
-        return tp.data
+        return f"{tp.data}"
     elif tp == AdvancedStringTypes.CHAR:
         return "string"
     elif isinstance(tp, AdvancedNumericTypes):
@@ -222,11 +221,13 @@ def convert_statement(statement: Statement, internal=False, full=False) -> str:
         )
     elif isinstance(statement, VariableAssignment):
         if full:
-            prefix = "let "
-        else:
-            prefix = ""
+            return (
+                f"let {statement.variable} : {convert_declaration(statement, statement.type)} = "
+                f"{convert_statement(statement.expression, True)}"
+            )
+
         return (
-            f"{prefix}{statement.variable} : {convert_declaration(statement, statement.type)} = "
+            f"{statement.variable} = "
             f"{convert_statement(statement.expression, True)}"
         )
     raise AssertionError(f"Unknown statement: {statement!r}")

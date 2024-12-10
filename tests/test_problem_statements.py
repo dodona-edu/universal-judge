@@ -161,7 +161,7 @@ def test_template_natural_type_name_nl(lang: str, tested_type: Any, expected: st
         ),
         (
             "typescript",
-            "let random = new Random()\nrandom.newSequence(10, 10)\n[10, 5, 2, 8, 7, 1, 3, 4, 9, 6]",
+            "let random : Random = new Random()\nrandom.newSequence(10, 10)\n[10, 5, 2, 8, 7, 1, 3, 4, 9, 6]",
         ),
     ],
 )
