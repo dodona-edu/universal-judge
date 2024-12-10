@@ -3,12 +3,15 @@ import json
 from tested.datatypes import (
     AdvancedNothingTypes,
     AdvancedNumericTypes,
+    AdvancedStringTypes,
+    AllTypes,
     BasicBooleanTypes,
     BasicNothingTypes,
     BasicNumericTypes,
     BasicObjectTypes,
     BasicSequenceTypes,
     BasicStringTypes,
+    resolve_to_basic,
 )
 from tested.datatypes.advanced import AdvancedObjectTypes
 from tested.languages.conventionalize import submission_file
@@ -33,7 +36,8 @@ from tested.serialisation import (
     StringType,
     Value,
     VariableAssignment,
-    as_basic_type,
+    VariableType,
+    as_basic_type, _get_type_for,
 )
 from tested.testsuite import MainInput
 
@@ -128,7 +132,8 @@ def convert_function_call(call: FunctionCall, internal=False) -> str:
         result += f"({convert_arguments(call.arguments)})"  # pyright: ignore
     return result
 
-def convert_declaration(tp: AllTypes | VariableType) -> str:
+def convert_declaration(statement: Statement) -> str:
+    tp = statement.type
     if isinstance(tp, VariableType):
         return tp.data
     elif tp == AdvancedStringTypes.CHAR:
@@ -151,8 +156,27 @@ def convert_declaration(tp: AllTypes | VariableType) -> str:
         return "number"
     elif basic == BasicNothingTypes.NOTHING:
         return "null"
-    elif basic == BasicSequenceTypes.MAP:
+    elif basic == BasicObjectTypes.MAP:
         return "object"
+    elif basic == BasicSequenceTypes.SEQUENCE:
+        type_ = "Object"
+
+        expression = statement.expression
+        if isinstance(expression, SequenceType):
+            type_ = {convert_declaration(element) for element in expression.data}
+            type_ = '|'.join(type_)
+
+        
+        return f"Array<{type_}>"
+    elif basic == BasicSequenceTypes.SET:
+        type_ = "Object"
+
+        expression = statement.expression
+        if isinstance(expression, SequenceType):
+            type_ = {convert_declaration(element) for element in expression.data}
+            type_ = '|'.join(type_)
+
+        return f"Set<{type_}>"
     raise AssertionError(f"Unknown type: {tp!r}")
 
 def convert_statement(statement: Statement, internal=False, full=False) -> str:
@@ -173,7 +197,7 @@ def convert_statement(statement: Statement, internal=False, full=False) -> str:
         else:
             prefix = ""
         return (
-            f"{prefix}{statement.variable} = "
+            f"{prefix}{statement.variable} : {convert_declaration(statement)} = "
             f"{convert_statement(statement.expression, True)}"
         )
     raise AssertionError(f"Unknown statement: {statement!r}")
