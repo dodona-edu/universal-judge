@@ -136,10 +136,6 @@ def convert_function_call(call: FunctionCall, internal=False) -> str:
 def convert_declaration(statement: Statement, tp: AllTypes | VariableType) -> str:
     if isinstance(tp, VariableType):
         return f"{tp.data}"
-    elif tp == AdvancedStringTypes.CHAR:
-        return "string"
-    elif isinstance(tp, AdvancedNumericTypes):
-        return "number"
     elif tp == AdvancedNothingTypes.NULL:
         return "null"
     elif tp == AdvancedNothingTypes.UNDEFINED:
