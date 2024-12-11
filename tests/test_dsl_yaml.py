@@ -20,7 +20,8 @@ from tested.datatypes import (
     StringTypes,
 )
 from tested.dsl import parse_dsl, translate_to_test_suite
-from tested.dsl.translate_parser import load_schema_validator
+from tested.dsl.translate_parser import load_schema_validator, _parse_yaml
+from tested.nat_translation import translate_dsl, convert_to_yaml
 from tested.serialisation import (
     FunctionCall,
     NumberType,
@@ -1319,3 +1320,63 @@ def test_editor_json_schema_is_valid():
     validator = load_schema_validator("schema.json")
     assert isinstance(validator.schema, dict)
     validator.check_schema(validator.schema)
+
+def test_natural_translate_unit_test():
+    # Everywhere where !natural_language is used, it is mandatory to do so.
+    # Everywhere else it isn't.
+    yaml_str = """- tab:
+    en: "counting"
+    nl: "tellen"
+  contexts:
+    - testcases:
+      - statement: !natural_language
+          en: 'result = trying(10)'
+          nl: 'resultaat = proberen(10)'
+      - expression: !natural_language
+          en: 'count_words(result)'
+          nl: 'tel_woorden(resultaat)'
+        return: !natural_language
+          en: 'The result is 10'
+          nl: 'Het resultaat is 10'
+      - expression: !natural_language
+          en: !expression "count"
+          nl: !expression "tellen"
+        return: !natural_language
+          en: 'count'
+          nl: 'tellen'
+      - expression: 'ok(10)'
+        return: !oracle
+          value: !natural_language
+            en: "The value 10 is OK!"
+            nl: "De waarde 10 is OK!"
+          oracle: "custom_check"
+          file: "test.py"
+          name: "evaluate_test"
+          arguments:
+            en: ["The value", "is OK!", "is not OK!"]
+            nl: ["De waarde", "is OK!", "is niet OK!"]    
+    """
+    translated_yaml_str = """- tab: counting
+  contexts:
+  - testcases:
+    - statement: result = trying(10)
+    - expression: count_words(result)
+      return: The result is 10
+    - expression: !expression 'count'
+      return: count
+    - expression: ok(10)
+      return: !oracle
+        value: The value 10 is OK!
+        oracle: custom_check
+        file: test.py
+        name: evaluate_test
+        arguments:
+        - The value
+        - is OK!
+        - is not OK!
+"""
+    parsed_yaml = _parse_yaml(yaml_str)
+    translated_dsl = translate_dsl(parsed_yaml, "en")
+    translated_yaml = convert_to_yaml(translated_dsl)
+    print(translated_yaml)
+    assert translated_yaml == translated_yaml_str

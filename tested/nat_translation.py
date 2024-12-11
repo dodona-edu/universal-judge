@@ -1,14 +1,15 @@
 import sys
 
 import yaml
+
 from tested.dsl.translate_parser import (
-    _parse_yaml,
-    YamlObject,
-    YamlDict,
-    ReturnOracle,
     ExpressionString,
-    _validate_testcase_combinations,
     NaturalLanguageMap,
+    ReturnOracle,
+    YamlDict,
+    YamlObject,
+    _parse_yaml,
+    _validate_testcase_combinations,
 )
 
 
@@ -118,9 +119,11 @@ def translate_contexts(contexts: list, language: str) -> list:
     result = []
     for context in contexts:
         assert isinstance(context, dict)
-        raw_testcases = context.get("script", context.get("testcases"))
+        key_to_set = "script" if "script" in context else "testcases"
+        raw_testcases = context.get(key_to_set)
         assert isinstance(raw_testcases, list)
-        result.append(translate_testcases(raw_testcases, language))
+        context[key_to_set] = translate_testcases(raw_testcases, language)
+        result.append(context)
 
     return result
 
@@ -196,12 +199,13 @@ def convert_to_yaml(yaml_object: YamlObject) -> str:
     return yaml.dump(yaml_object, sort_keys=False)
 
 
-if __name__ == "__main__":
-    n = len(sys.argv)
-    assert n > 1, "Expected atleast two argument (path to yaml file and language)."
-
-    path = sys.argv[1]
-    lang = sys.argv[2]
-    new_yaml = parse_yaml(path)
-    translated_dsl = translate_dsl(new_yaml, lang)
-    print(convert_to_yaml(translated_dsl))
+# if __name__ == "__main__":
+#     n = len(sys.argv)
+#     assert n > 1, "Expected atleast two argument (path to yaml file and language)."
+#
+#     path = sys.argv[1]
+#     lang = sys.argv[2]
+#     new_yaml = parse_yaml(path)
+#     print(new_yaml)
+#     translated_dsl = translate_dsl(new_yaml, lang)
+#     print(convert_to_yaml(translated_dsl))
