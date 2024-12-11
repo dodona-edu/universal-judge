@@ -2,6 +2,7 @@
 Tests for specific aspects of certain language implementations.
 """
 
+import itertools
 import shutil
 import sys
 from pathlib import Path
@@ -10,8 +11,10 @@ import pytest
 
 from tested.configs import create_bundle
 from tested.datatypes import BasicBooleanTypes, BasicNumericTypes, BasicStringTypes
+from tested.dsl import parse_string
 from tested.languages.conventionalize import submission_name
 from tested.languages.generation import generate_statement
+from tested.languages.typescript.generators import convert_statement
 from tested.serialisation import (
     BooleanType,
     FunctionCall,
@@ -21,6 +24,42 @@ from tested.serialisation import (
 )
 from tested.testsuite import Suite
 from tests.manual_utils import assert_valid_output, configuration, execute_config
+
+
+def test_typescript_array_typing(tmp_path: Path, pytestconfig: pytest.Config):
+    statement_string = "test = ['test', True, 10, 10.1, None, {'wow': 10}]"
+    result = convert_statement(parse_string(statement_string), full=True)
+    types = ["string", "boolean", "number", "object", "null"]
+    permutations = list(itertools.permutations(types))
+    valid_results = [
+        f'let test : Array<{"|".join(perm)}> = ["test", true, 10, 10.1, null, new Map([["wow", 10]])]'
+        for perm in permutations
+    ]
+
+    assert result in valid_results
+
+
+def test_typescript_set_typing(tmp_path: Path, pytestconfig: pytest.Config):
+    statement_string = "test = {'test', True, 10, 10.1, None, {'wow': 10}}"
+    result = convert_statement(parse_string(statement_string), full=True)
+    types = ["string", "boolean", "number", "object", "null"]
+    permutations = list(itertools.permutations(types))
+    valid_results = [
+        f'let test : Set<{"|".join(perm)}> = new Set(["test", true, 10, 10.1, null, new Map([["wow", 10]])])'
+        for perm in permutations
+    ]
+
+    assert result in valid_results
+
+
+def test_typescript_function_call_typing(tmp_path: Path, pytestconfig: pytest.Config):
+    statement_string = "test = {'test', True, testing(10)}"
+    result = convert_statement(parse_string(statement_string), full=True)
+    assert result == 'let test : Set<any> = new Set(["test", true, testing(10)])'
+
+    statement_string = "test = ['test', True, testing(10)]"
+    result = convert_statement(parse_string(statement_string), full=True)
+    assert result == 'let test : Array<any> = ["test", true, testing(10)]'
 
 
 def test_javascript_vanilla_object(tmp_path: Path, pytestconfig: pytest.Config):
