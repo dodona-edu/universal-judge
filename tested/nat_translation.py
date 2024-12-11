@@ -1,5 +1,4 @@
 import sys
-from typing import cast
 
 import yaml
 from tested.dsl.translate_parser import (
@@ -38,9 +37,12 @@ def translate_testcase(testcase: YamlDict, language: str) -> YamlDict:
         if isinstance(stdout, NaturalLanguageMap):
             assert language in stdout
             testcase["stdout"] = stdout[language]
-        elif isinstance(stdout["data"], dict):
-            assert language in stdout["data"]
-            testcase["stdout"]["data"] = stdout["data"][language]
+        elif isinstance(stdout, dict):
+            data = stdout["data"]
+            if isinstance(data, dict):
+                assert language in data
+                stdout["data"] = data[language]
+                testcase["stdout"] = stdout
     if (file := testcase.get("file")) is not None:
         # Must use !natural_language
         if isinstance(file, NaturalLanguageMap):
@@ -51,16 +53,23 @@ def translate_testcase(testcase: YamlDict, language: str) -> YamlDict:
         if isinstance(stderr, NaturalLanguageMap):
             assert language in stderr
             testcase["stderr"] = stderr[language]
-        elif isinstance(stderr["data"], dict):
-            assert language in stderr["data"]
-            testcase["stderr"]["data"] = stderr["data"][language]
+        elif isinstance(stderr, dict):
+            data = stderr["data"]
+            if isinstance(data, dict):
+                assert language in data
+                stderr["data"] = data[language]
+                testcase["stderr"] = stderr
+
     if (exception := testcase.get("exception")) is not None:
         if isinstance(exception, NaturalLanguageMap):
             assert language in exception
             testcase["exception"] = exception[language]
-        elif isinstance(exception["message"], dict):
-            assert language in exception["message"]
-            testcase["exception"]["message"] = exception["message"][language]
+        elif isinstance(exception, dict):
+            message = exception["message"]
+            if isinstance(message, dict):
+                assert language in message
+                exception["message"] = message[language]
+                testcase["exception"] = exception
 
     if (result := testcase.get("return")) is not None:
         if isinstance(result, ReturnOracle):
@@ -86,12 +95,12 @@ def translate_testcase(testcase: YamlDict, language: str) -> YamlDict:
         if isinstance(description, NaturalLanguageMap):
             assert language in description
             testcase["description"] = description[language]
-        elif isinstance(description, dict) and isinstance(
-            description["description"], dict
-        ):
-            assert language in description["description"]
-            description["description"] = description["description"][language]
-            testcase["description"] = description
+        elif isinstance(description, dict):
+            dd = description["description"]
+            if isinstance(dd, dict):
+                assert language in dd
+                description["description"] = dd[language]
+                testcase["description"] = description
 
     return testcase
 
