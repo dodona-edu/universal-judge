@@ -2,8 +2,15 @@ import sys
 from typing import cast
 
 import yaml
-from tested.dsl.translate_parser import _parse_yaml, YamlObject, YamlDict, ReturnOracle, \
-    ExpressionString, _validate_testcase_combinations, NaturalLanguageMap
+from tested.dsl.translate_parser import (
+    _parse_yaml,
+    YamlObject,
+    YamlDict,
+    ReturnOracle,
+    ExpressionString,
+    _validate_testcase_combinations,
+    NaturalLanguageMap,
+)
 
 
 def translate_testcase(testcase: YamlDict, language: str) -> YamlDict:
@@ -79,12 +86,15 @@ def translate_testcase(testcase: YamlDict, language: str) -> YamlDict:
         if isinstance(description, NaturalLanguageMap):
             assert language in description
             testcase["description"] = description[language]
-        elif isinstance(description, dict) and isinstance(description["description"], dict):
+        elif isinstance(description, dict) and isinstance(
+            description["description"], dict
+        ):
             assert language in description["description"]
             description["description"] = description["description"][language]
             testcase["description"] = description
 
     return testcase
+
 
 def translate_testcases(testcases: list, language: str) -> list:
     result = []
@@ -93,6 +103,7 @@ def translate_testcases(testcases: list, language: str) -> list:
         result.append(translate_testcase(testcase, language))
 
     return result
+
 
 def translate_contexts(contexts: list, language: str) -> list:
     result = []
@@ -103,6 +114,7 @@ def translate_contexts(contexts: list, language: str) -> list:
         result.append(translate_testcases(raw_testcases, language))
 
     return result
+
 
 def translate_tab(tab: YamlDict, language: str) -> YamlDict:
     key_to_set = "units" if "units" in tab else "tab"
@@ -133,6 +145,7 @@ def translate_tab(tab: YamlDict, language: str) -> YamlDict:
         tab["scripts"] = translate_testcases(tab["scripts"], language)
     return tab
 
+
 def translate_tabs(dsl_list: list, language: str) -> list:
     result = []
     for tab in dsl_list:
@@ -141,7 +154,8 @@ def translate_tabs(dsl_list: list, language: str) -> list:
 
     return result
 
-def translate_dsl(dsl_object: YamlObject, language:str) -> YamlObject:
+
+def translate_dsl(dsl_object: YamlObject, language: str) -> YamlObject:
     if isinstance(dsl_object, list):
         return translate_tabs(dsl_object, language)
     else:
@@ -152,25 +166,28 @@ def translate_dsl(dsl_object: YamlObject, language:str) -> YamlObject:
         dsl_object[key_to_set] = translate_tabs(tab_list, language)
         return dsl_object
 
-def parse_yaml(yaml_path:str) -> YamlObject:
-    with open(yaml_path, 'r') as stream:
+
+def parse_yaml(yaml_path: str) -> YamlObject:
+    with open(yaml_path, "r") as stream:
         result = _parse_yaml(stream.read())
 
     return result
 
+
 def convert_to_yaml(yaml_object: YamlObject) -> str:
     def oracle_representer(dumper, data):
-        return dumper.represent_mapping('!oracle', data)
+        return dumper.represent_mapping("!oracle", data)
 
     def expression_representer(dumper, data):
-        return dumper.represent_scalar('!expression', data)
+        return dumper.represent_scalar("!expression", data)
 
     # Register the representer for the ReturnOracle object
     yaml.add_representer(ReturnOracle, oracle_representer)
     yaml.add_representer(ExpressionString, expression_representer)
     return yaml.dump(yaml_object, sort_keys=False)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     n = len(sys.argv)
     assert n > 1, "Expected atleast two argument (path to yaml file and language)."
 
@@ -179,4 +196,3 @@ if __name__ == '__main__':
     new_yaml = parse_yaml(path)
     translated_dsl = translate_dsl(new_yaml, lang)
     print(convert_to_yaml(translated_dsl))
-

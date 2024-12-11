@@ -83,8 +83,10 @@ class TestedType:
 class ExpressionString(str):
     pass
 
+
 class ReturnOracle(dict):
     pass
+
 
 class NaturalLanguageMap(dict):
     pass
@@ -92,7 +94,16 @@ class NaturalLanguageMap(dict):
 
 OptionDict = dict[str, int | bool]
 YamlObject = (
-    YamlDict | list | bool | float | int | str | None | ExpressionString | ReturnOracle | NaturalLanguageMap
+    YamlDict
+    | list
+    | bool
+    | float
+    | int
+    | str
+    | None
+    | ExpressionString
+    | ReturnOracle
+    | NaturalLanguageMap
 )
 
 
@@ -139,12 +150,14 @@ def _return_oracle(loader: yaml.Loader, node: yaml.Node) -> ReturnOracle:
     ), f"A custom oracle must be an object, got {result} which is a {type(result)}."
     return ReturnOracle(result)
 
+
 def _natural_language_map(loader: yaml.Loader, node: yaml.Node) -> NaturalLanguageMap:
     result = _parse_yaml_value(loader, node)
     assert isinstance(
         result, dict
     ), f"A natural language map must be an object, got {result} which is a {type(result)}."
     return NaturalLanguageMap(result)
+
 
 def _parse_yaml(yaml_stream: str) -> YamlObject:
     """
