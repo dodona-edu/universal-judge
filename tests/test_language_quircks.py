@@ -51,6 +51,12 @@ def test_typescript_set_typing(tmp_path: Path, pytestconfig: pytest.Config):
 
     assert result in valid_results
 
+def test_typescript_function_call_typing(tmp_path: Path, pytestconfig: pytest.Config):
+    statement_string = "test = {'test', True, testing(10)}"
+    result = convert_statement(parse_string(statement_string), full=True)
+
+    assert result == 'let test : Set<any> = new Set(["test", true, testing(10)])'
+
 
 def test_javascript_vanilla_object(tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
