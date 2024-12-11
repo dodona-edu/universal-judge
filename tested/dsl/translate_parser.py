@@ -83,14 +83,16 @@ class TestedType:
 class ExpressionString(str):
     pass
 
-
 class ReturnOracle(dict):
+    pass
+
+class NaturalLanguageMap(dict):
     pass
 
 
 OptionDict = dict[str, int | bool]
 YamlObject = (
-    YamlDict | list | bool | float | int | str | None | ExpressionString | ReturnOracle
+    YamlDict | list | bool | float | int | str | None | ExpressionString | ReturnOracle | NaturalLanguageMap
 )
 
 
@@ -137,6 +139,12 @@ def _return_oracle(loader: yaml.Loader, node: yaml.Node) -> ReturnOracle:
     ), f"A custom oracle must be an object, got {result} which is a {type(result)}."
     return ReturnOracle(result)
 
+def _natural_language_map(loader: yaml.Loader, node: yaml.Node) -> NaturalLanguageMap:
+    result = _parse_yaml_value(loader, node)
+    assert isinstance(
+        result, dict
+    ), f"A natural language map must be an object, got {result} which is a {type(result)}."
+    return NaturalLanguageMap(result)
 
 def _parse_yaml(yaml_stream: str) -> YamlObject:
     """
@@ -148,6 +156,7 @@ def _parse_yaml(yaml_stream: str) -> YamlObject:
             yaml.add_constructor("!" + actual_type, _custom_type_constructors, loader)
     yaml.add_constructor("!expression", _expression_string, loader)
     yaml.add_constructor("!oracle", _return_oracle, loader)
+    yaml.add_constructor("!natural_language", _natural_language_map, loader)
 
     try:
         return yaml.load(yaml_stream, loader)
