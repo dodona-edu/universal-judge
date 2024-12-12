@@ -20,8 +20,8 @@ from tested.datatypes import (
     StringTypes,
 )
 from tested.dsl import parse_dsl, translate_to_test_suite
-from tested.dsl.translate_parser import load_schema_validator, _parse_yaml
-from tested.nat_translation import translate_dsl, convert_to_yaml
+from tested.dsl.translate_parser import _parse_yaml, load_schema_validator
+from tested.nat_translation import convert_to_yaml, translate_dsl
 from tested.serialisation import (
     FunctionCall,
     NumberType,
@@ -1321,6 +1321,7 @@ def test_editor_json_schema_is_valid():
     assert isinstance(validator.schema, dict)
     validator.check_schema(validator.schema)
 
+
 def test_natural_translate_unit_test():
     # Everywhere where !natural_language is used, it is mandatory to do so.
     # Everywhere else it isn't.
@@ -1414,6 +1415,7 @@ def test_natural_translate_unit_test():
     translated_yaml = convert_to_yaml(translated_dsl)
     print(translated_yaml)
     assert translated_yaml.strip() == translated_yaml_str
+
 
 def test_natural_translate_io_test():
     # Everywhere where !natural_language is used, it is mandatory to do so.

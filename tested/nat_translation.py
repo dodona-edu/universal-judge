@@ -202,15 +202,15 @@ def convert_to_yaml(yaml_object: YamlObject) -> str:
     return yaml.dump(yaml_object, sort_keys=False)
 
 
-# if __name__ == "__main__":
-#     n = len(sys.argv)
-#     assert n > 1, "Expected atleast two argument (path to yaml file and language)."
-#
-#     path = sys.argv[1]
-#     lang = sys.argv[2]
-#     new_yaml = parse_yaml(path)
-#     print(new_yaml)
-#     translated_dsl = translate_dsl(new_yaml, lang)
-#     yaml_string = convert_to_yaml(translated_dsl)
-#     print(yaml_string)
-#     _validate_dsl(_parse_yaml(yaml_string))
+if __name__ == "__main__":
+    n = len(sys.argv)
+    assert n > 1, "Expected atleast two argument (path to yaml file and language)."
+
+    path = sys.argv[1]
+    lang = sys.argv[2]
+    new_yaml = parse_yaml(path)
+    print(new_yaml)
+    translated_dsl = translate_dsl(new_yaml, lang)
+    yaml_string = convert_to_yaml(translated_dsl)
+    print(yaml_string)
+    _validate_dsl(_parse_yaml(yaml_string))
