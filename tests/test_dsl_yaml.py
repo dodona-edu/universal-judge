@@ -20,7 +20,8 @@ from tested.datatypes import (
     StringTypes,
 )
 from tested.dsl import parse_dsl, translate_to_test_suite
-from tested.dsl.translate_parser import load_schema_validator
+from tested.dsl.translate_parser import _parse_yaml, load_schema_validator
+from tested.nat_translation import convert_to_yaml, translate_dsl
 from tested.serialisation import (
     FunctionCall,
     NumberType,
@@ -1319,3 +1320,182 @@ def test_editor_json_schema_is_valid():
     validator = load_schema_validator("schema.json")
     assert isinstance(validator.schema, dict)
     validator.check_schema(validator.schema)
+
+
+def test_natural_translate_unit_test():
+    # Everywhere where !natural_language is used, it is mandatory to do so.
+    # Everywhere else it isn't.
+    yaml_str = """
+- tab:
+    en: "counting"
+    nl: "tellen"
+  contexts:
+    - testcases:
+      - statement: !natural_language
+          en: 'result = Trying(10)'
+          nl: 'resultaat = Proberen(10)'
+      - expression: !natural_language
+          en: 'count_words(result)'
+          nl: 'tel_woorden(resultaat)'
+        return: !natural_language
+          en: 'The result is 10'
+          nl: 'Het resultaat is 10'
+      - expression: !natural_language
+          en: !expression "count"
+          nl: !expression "tellen"
+        return: !natural_language
+          en: 'count'
+          nl: 'tellen'
+      - expression: 'ok(10)'
+        return: !oracle
+          value: !natural_language
+            en: "The value 10 is OK!"
+            nl: "De waarde 10 is OK!"
+          oracle: "custom_check"
+          file: "test.py"
+          name: "evaluate_test"
+          arguments:
+            en: ["The value", "is OK!", "is not OK!"]
+            nl: ["De waarde", "is OK!", "is niet OK!"]
+        description: !natural_language
+          en: "Ten"
+          nl: "Tien"
+      files:
+        - name: "file.txt"
+          url: "media/workdir/file.txt"
+        - name: "fileNL.txt"
+          url: "media/workdir/fileNL.txt"
+    - testcases:
+        - statement: !natural_language
+            en: 'result = Trying(11)'
+            nl: 'resultaat = Proberen(11)'
+        - expression: 'result'
+          return: '11'
+          description:
+            description:
+              en: "Eleven"
+              nl: "Elf"
+            format: "code"
+""".strip()
+    translated_yaml_str = """
+- tab: counting
+  contexts:
+  - testcases:
+    - statement: result = Trying(10)
+    - expression: count_words(result)
+      return: The result is 10
+    - expression: !expression 'count'
+      return: count
+    - expression: ok(10)
+      return: !oracle
+        value: The value 10 is OK!
+        oracle: custom_check
+        file: test.py
+        name: evaluate_test
+        arguments:
+        - The value
+        - is OK!
+        - is not OK!
+      description: Ten
+    files:
+    - name: file.txt
+      url: media/workdir/file.txt
+    - name: fileNL.txt
+      url: media/workdir/fileNL.txt
+  - testcases:
+    - statement: result = Trying(11)
+    - expression: result
+      return: '11'
+      description:
+        description: Eleven
+        format: code
+""".strip()
+    parsed_yaml = _parse_yaml(yaml_str)
+    translated_dsl = translate_dsl(parsed_yaml, "en")
+    translated_yaml = convert_to_yaml(translated_dsl)
+    print(translated_yaml)
+    assert translated_yaml.strip() == translated_yaml_str
+
+
+def test_natural_translate_io_test():
+    # Everywhere where !natural_language is used, it is mandatory to do so.
+    # Everywhere else it isn't.
+    yaml_str = """
+units:
+  - unit:
+      en: "Arguments"
+      nl: "Argumenten"
+    scripts:
+      - stdin:
+          en: "User"
+          nl: "Gebruiker"
+        arguments:
+          en: [ "input", "output" ]
+          nl: [ "invoer", "uitvoer" ]
+        stdout: !natural_language
+          en: "Hi User"
+          nl: "Hallo Gebruiker"
+        stderr: !natural_language
+          en: "Nothing to see here"
+          nl: "Hier is niets te zien"
+        exception: !natural_language
+          en: "Does not look good"
+          nl: "Ziet er niet goed uit"
+      - stdin:
+          en: "Friend"
+          nl: "Vriend"
+        arguments:
+          en: [ "input", "output" ]
+          nl: [ "invoer", "uitvoer" ]
+        stdout:
+          data:
+            en: "Hi Friend"
+            nl: "Hallo Vriend"
+          config:
+            ignoreWhitespace: true
+        stderr:
+          data:
+            en: "Nothing to see here"
+            nl: "Hier is niets te zien"
+          config:
+            ignoreWhitespace: true
+        exception:
+          message:
+            en: "Does not look good"
+            nl: "Ziet er niet goed uit"
+          types:
+            typescript: "ERROR"
+""".strip()
+    translated_yaml_str = """
+units:
+- unit: Arguments
+  scripts:
+  - stdin: User
+    arguments:
+    - input
+    - output
+    stdout: Hi User
+    stderr: Nothing to see here
+    exception: Does not look good
+  - stdin: Friend
+    arguments:
+    - input
+    - output
+    stdout:
+      data: Hi Friend
+      config:
+        ignoreWhitespace: true
+    stderr:
+      data: Nothing to see here
+      config:
+        ignoreWhitespace: true
+    exception:
+      message: Does not look good
+      types:
+        typescript: ERROR
+""".strip()
+    parsed_yaml = _parse_yaml(yaml_str)
+    translated_dsl = translate_dsl(parsed_yaml, "en")
+    translated_yaml = convert_to_yaml(translated_dsl)
+    print(translated_yaml)
+    assert translated_yaml.strip() == translated_yaml_str
