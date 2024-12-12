@@ -120,12 +120,15 @@ def translate_contexts(contexts: list, language: str) -> list:
     result = []
     for context in contexts:
         assert isinstance(context, dict)
-        print(f"context: {context}")
-        if "script" in context or "testcases" in context:
-            key_to_set = "script" if "script" in context else "testcases"
-            raw_testcases = context.get(key_to_set)
-            assert isinstance(raw_testcases, list)
-            context[key_to_set] = translate_testcases(raw_testcases, language)
+        key_to_set = "script" if "script" in context else "testcases"
+        raw_testcases = context.get(key_to_set)
+        assert isinstance(raw_testcases, list)
+        context[key_to_set] = translate_testcases(raw_testcases, language)
+        if "files" in context:
+            files = context.get("files")
+            if isinstance(files, NaturalLanguageMap):
+                assert language in files
+                context["files"] = files[language]
         result.append(context)
 
     return result

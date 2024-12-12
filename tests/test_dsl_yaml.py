@@ -1360,11 +1360,13 @@ def test_natural_translate_unit_test():
         description: !natural_language
           en: "Ten"
           nl: "Tien"
-      files:
-        - name: "file.txt"
-          url: "media/workdir/file.txt"
-        - name: "fileNL.txt"
-          url: "media/workdir/fileNL.txt"
+      files: !natural_language
+        en:
+          - name: "file.txt"
+            url: "media/workdir/file.txt"
+        nl:
+          - name: "fileNL.txt"
+            url: "media/workdir/fileNL.txt"
     - testcases:
         - statement: !natural_language
             en: 'result = Trying(11)'
@@ -1400,8 +1402,6 @@ def test_natural_translate_unit_test():
     files:
     - name: file.txt
       url: media/workdir/file.txt
-    - name: fileNL.txt
-      url: media/workdir/fileNL.txt
   - testcases:
     - statement: result = Trying(11)
     - expression: result
