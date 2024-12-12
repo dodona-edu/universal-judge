@@ -9,6 +9,7 @@ from tested.dsl.translate_parser import (
     YamlDict,
     YamlObject,
     _parse_yaml,
+    _validate_dsl,
     _validate_testcase_combinations,
 )
 
@@ -119,17 +120,19 @@ def translate_contexts(contexts: list, language: str) -> list:
     result = []
     for context in contexts:
         assert isinstance(context, dict)
-        key_to_set = "script" if "script" in context else "testcases"
-        raw_testcases = context.get(key_to_set)
-        assert isinstance(raw_testcases, list)
-        context[key_to_set] = translate_testcases(raw_testcases, language)
+        print(f"context: {context}")
+        if "script" in context or "testcases" in context:
+            key_to_set = "script" if "script" in context else "testcases"
+            raw_testcases = context.get(key_to_set)
+            assert isinstance(raw_testcases, list)
+            context[key_to_set] = translate_testcases(raw_testcases, language)
         result.append(context)
 
     return result
 
 
 def translate_tab(tab: YamlDict, language: str) -> YamlDict:
-    key_to_set = "units" if "units" in tab else "tab"
+    key_to_set = "unit" if "unit" in tab else "tab"
     name = tab.get(key_to_set)
 
     if isinstance(name, dict):
@@ -208,4 +211,6 @@ def convert_to_yaml(yaml_object: YamlObject) -> str:
 #     new_yaml = parse_yaml(path)
 #     print(new_yaml)
 #     translated_dsl = translate_dsl(new_yaml, lang)
-#     print(convert_to_yaml(translated_dsl))
+#     yaml_string = convert_to_yaml(translated_dsl)
+#     print(yaml_string)
+#     _validate_dsl(_parse_yaml(yaml_string))
