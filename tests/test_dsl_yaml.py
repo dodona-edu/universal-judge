@@ -1425,74 +1425,76 @@ units:
   - unit:
       en: "Arguments"
       nl: "Argumenten"
-    scripts:
-      - stdin:
-          en: "User"
-          nl: "Gebruiker"
-        arguments:
-          en: [ "input", "output" ]
-          nl: [ "invoer", "uitvoer" ]
-        stdout: !natural_language
-          en: "Hi User"
-          nl: "Hallo Gebruiker"
-        stderr: !natural_language
-          en: "Nothing to see here"
-          nl: "Hier is niets te zien"
-        exception: !natural_language
-          en: "Does not look good"
-          nl: "Ziet er niet goed uit"
-      - stdin:
-          en: "Friend"
-          nl: "Vriend"
-        arguments:
-          en: [ "input", "output" ]
-          nl: [ "invoer", "uitvoer" ]
-        stdout:
-          data:
-            en: "Hi Friend"
-            nl: "Hallo Vriend"
-          config:
-            ignoreWhitespace: true
-        stderr:
-          data:
+    cases:
+      - script:
+        - stdin:
+            en: "User"
+            nl: "Gebruiker"
+          arguments:
+            en: [ "input", "output" ]
+            nl: [ "invoer", "uitvoer" ]
+          stdout: !natural_language
+            en: "Hi User"
+            nl: "Hallo Gebruiker"
+          stderr: !natural_language
             en: "Nothing to see here"
             nl: "Hier is niets te zien"
-          config:
-            ignoreWhitespace: true
-        exception:
-          message:
+          exception: !natural_language
             en: "Does not look good"
             nl: "Ziet er niet goed uit"
-          types:
-            typescript: "ERROR"
+        - stdin:
+            en: "Friend"
+            nl: "Vriend"
+          arguments:
+            en: [ "input", "output" ]
+            nl: [ "invoer", "uitvoer" ]
+          stdout:
+            data:
+              en: "Hi Friend"
+              nl: "Hallo Vriend"
+            config:
+              ignoreWhitespace: true
+          stderr:
+            data:
+              en: "Nothing to see here"
+              nl: "Hier is niets te zien"
+            config:
+              ignoreWhitespace: true
+          exception:
+            message:
+              en: "Does not look good"
+              nl: "Ziet er niet goed uit"
+            types:
+              typescript: "ERROR"
 """.strip()
     translated_yaml_str = """
 units:
 - unit: Arguments
-  scripts:
-  - stdin: User
-    arguments:
-    - input
-    - output
-    stdout: Hi User
-    stderr: Nothing to see here
-    exception: Does not look good
-  - stdin: Friend
-    arguments:
-    - input
-    - output
-    stdout:
-      data: Hi Friend
-      config:
-        ignoreWhitespace: true
-    stderr:
-      data: Nothing to see here
-      config:
-        ignoreWhitespace: true
-    exception:
-      message: Does not look good
-      types:
-        typescript: ERROR
+  cases:
+  - script:
+    - stdin: User
+      arguments:
+      - input
+      - output
+      stdout: Hi User
+      stderr: Nothing to see here
+      exception: Does not look good
+    - stdin: Friend
+      arguments:
+      - input
+      - output
+      stdout:
+        data: Hi Friend
+        config:
+          ignoreWhitespace: true
+      stderr:
+        data: Nothing to see here
+        config:
+          ignoreWhitespace: true
+      exception:
+        message: Does not look good
+        types:
+          typescript: ERROR
 """.strip()
     parsed_yaml = _parse_yaml(yaml_str)
     translated_dsl = translate_dsl(parsed_yaml, "en")

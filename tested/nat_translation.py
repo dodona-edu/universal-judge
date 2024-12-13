@@ -122,6 +122,7 @@ def translate_contexts(contexts: list, language: str) -> list:
         assert isinstance(context, dict)
         key_to_set = "script" if "script" in context else "testcases"
         raw_testcases = context.get(key_to_set)
+        print(raw_testcases)
         assert isinstance(raw_testcases, list)
         context[key_to_set] = translate_testcases(raw_testcases, language)
         if "files" in context:
