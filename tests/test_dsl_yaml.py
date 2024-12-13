@@ -1378,6 +1378,13 @@ def test_natural_translate_unit_test():
               en: "Eleven"
               nl: "Elf"
             format: "code"
+- tab: 'test'
+  testcases:
+    - expression: !natural_language
+        en: "tests(11)"
+        nl: "testen(11)"
+      return: 11
+
 """.strip()
     translated_yaml_str = """
 - tab: counting
@@ -1409,6 +1416,10 @@ def test_natural_translate_unit_test():
       description:
         description: Eleven
         format: code
+- tab: test
+  testcases:
+  - expression: tests(11)
+    return: 11
 """.strip()
     parsed_yaml = _parse_yaml(yaml_str)
     translated_dsl = translate_dsl(parsed_yaml, "en")
@@ -1466,6 +1477,12 @@ units:
               nl: "Ziet er niet goed uit"
             types:
               typescript: "ERROR"
+  - unit: "test"
+    scripts:
+      - expression: !natural_language
+            en: "tests(11)"
+            nl: "testen(11)"
+        return: 11
 """.strip()
     translated_yaml_str = """
 units:
@@ -1495,6 +1512,10 @@ units:
         message: Does not look good
         types:
           typescript: ERROR
+- unit: test
+  scripts:
+  - expression: tests(11)
+    return: 11
 """.strip()
     parsed_yaml = _parse_yaml(yaml_str)
     translated_dsl = translate_dsl(parsed_yaml, "en")

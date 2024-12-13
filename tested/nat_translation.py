@@ -122,7 +122,6 @@ def translate_contexts(contexts: list, language: str) -> list:
         assert isinstance(context, dict)
         key_to_set = "script" if "script" in context else "testcases"
         raw_testcases = context.get(key_to_set)
-        print(raw_testcases)
         assert isinstance(raw_testcases, list)
         context[key_to_set] = translate_testcases(raw_testcases, language)
         if "files" in context:
@@ -158,7 +157,6 @@ def translate_tab(tab: YamlDict, language: str) -> YamlDict:
         assert isinstance(tab["testcases"], list)
         tab["testcases"] = translate_testcases(tab["testcases"], language)
     else:
-        print(tab)
         assert "scripts" in tab
         assert isinstance(tab["scripts"], list)
         tab["scripts"] = translate_testcases(tab["scripts"], language)
@@ -213,7 +211,6 @@ if __name__ == "__main__":
     path = sys.argv[1]
     lang = sys.argv[2]
     new_yaml = parse_yaml(path)
-    print(new_yaml)
     translated_dsl = translate_dsl(new_yaml, lang)
     yaml_string = convert_to_yaml(translated_dsl)
     print(yaml_string)
