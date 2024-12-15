@@ -55,6 +55,25 @@ def format_string(string: str, flattened) -> str:
     return string.format(**flattened)
 
 
+def translate_io(
+    io_object: YamlObject, key: str, language: str, flat_stack: dict
+) -> str:
+    if isinstance(io_object, NaturalLanguageMap):
+        assert language in io_object
+        io_object = io_object[language]
+    elif isinstance(io_object, dict):
+        data = io_object[key]
+        if isinstance(data, dict):
+            assert language in data
+            data = data[language]
+            assert isinstance(data, str)
+            io_object[key] = format_string(data, flat_stack)
+
+    # Perform translation based of translation stack.
+    assert isinstance(io_object, str)
+    return format_string(io_object, flat_stack)
+
+
 def translate_testcase(
     testcase: YamlDict, language: str, translation_stack: list
 ) -> YamlDict:
@@ -66,10 +85,9 @@ def translate_testcase(
         # Must use !natural_language
         if isinstance(expr_stmt, NaturalLanguageMap):
             assert language in expr_stmt
-            testcase[key_to_set] = expr_stmt[language]
+            expr_stmt = expr_stmt[language]
 
         # Perform translation based of translation stack.
-        expr_stmt = testcase.get(key_to_set)
         if isinstance(expr_stmt, dict):
             testcase[key_to_set] = {
                 k: format_string(cast(str, v), flat_stack) for k, v in expr_stmt.items()
@@ -81,39 +99,26 @@ def translate_testcase(
         if (stdin_stmt := testcase.get("stdin")) is not None:
             if isinstance(stdin_stmt, dict):
                 assert language in stdin_stmt
-                testcase["stdin"] = stdin_stmt[language]
+                stdin_stmt = stdin_stmt[language]
 
             # Perform translation based of translation stack.
-            testcase["stdin"] = format_string(testcase["stdin"], flat_stack)
+            assert isinstance(stdin_stmt, str)
+            testcase["stdin"] = format_string(stdin_stmt, flat_stack)
 
         arguments = testcase.get("arguments", [])
         if isinstance(arguments, dict):
             assert language in arguments
-            testcase["arguments"] = arguments[language]
+            arguments = arguments[language]
 
         # Perform translation based of translation stack.
+        assert isinstance(arguments, list)
         testcase["arguments"] = [
-            format_string(arg, flat_stack) for arg in testcase["arguments"]
+            format_string(str(arg), flat_stack) for arg in arguments
         ]
 
     if (stdout := testcase.get("stdout")) is not None:
         # Must use !natural_language
-        if isinstance(stdout, NaturalLanguageMap):
-            assert language in stdout
-            testcase["stdout"] = stdout[language]
-        elif isinstance(stdout, dict):
-            data = stdout["data"]
-            if isinstance(data, dict):
-                assert language in data
-                stdout["data"] = data[language]
-                testcase["stdout"] = stdout
-
-        # Perform translation based of translation stack.
-        stdout = testcase.get("stdout")
-        if isinstance(stdout, dict):
-            testcase["stdout"]["data"] = format_string(stdout["data"], flat_stack)
-        elif isinstance(stdout, str):
-            testcase["stdout"] = format_string(stdout, flat_stack)
+        testcase["stdout"] = translate_io(stdout, "data", language, flat_stack)
 
     if (file := testcase.get("file")) is not None:
         # Must use !natural_language
@@ -122,90 +127,55 @@ def translate_testcase(
             testcase["file"] = file[language]
         # TODO: SHOULD I ADD SUPPORT FOR TRANSLATION STACK HERE?
     if (stderr := testcase.get("stderr")) is not None:
-        # Must use !natural_language
-        if isinstance(stderr, NaturalLanguageMap):
-            assert language in stderr
-            testcase["stderr"] = stderr[language]
-        elif isinstance(stderr, dict):
-            data = stderr["data"]
-            if isinstance(data, dict):
-                assert language in data
-                stderr["data"] = data[language]
-                testcase["stderr"] = stderr
-
-        # Perform translation based of translation stack.
-        stderr = testcase.get("stderr")
-        if isinstance(stderr, dict):
-            testcase["stderr"]["data"] = format_string(stderr["data"], flat_stack)
-        elif isinstance(stderr, str):
-            testcase["stderr"] = format_string(stderr, flat_stack)
+        testcase["stderr"] = translate_io(stderr, "data", language, flat_stack)
 
     if (exception := testcase.get("exception")) is not None:
-        if isinstance(exception, NaturalLanguageMap):
-            assert language in exception
-            testcase["exception"] = exception[language]
-        elif isinstance(exception, dict):
-            message = exception["message"]
-            if isinstance(message, dict):
-                assert language in message
-                exception["message"] = message[language]
-                testcase["exception"] = exception
-
-        # Perform translation based of translation stack.
-        exception = testcase.get("exception")
-        if isinstance(stderr, dict):
-            testcase["exception"]["message"] = format_string(
-                exception["message"], flat_stack
-            )
-        elif isinstance(stderr, str):
-            testcase["exception"] = format_string(exception, flat_stack)
+        testcase["exception"] = translate_io(exception, "message", language, flat_stack)
 
     if (result := testcase.get("return")) is not None:
         if isinstance(result, ReturnOracle):
             arguments = result.get("arguments", [])
             if isinstance(arguments, dict):
                 assert language in arguments
-                result["arguments"] = arguments[language]
+                arguments = arguments[language]
 
             # Perform translation based of translation stack.
             result["arguments"] = [
-                format_string(arg, flat_stack) for arg in result["arguments"]
+                format_string(str(arg), flat_stack) for arg in arguments
             ]
 
             value = result.get("value")
             # Must use !natural_language
             if isinstance(value, NaturalLanguageMap):
                 assert language in value
-                result["value"] = value[language]
+                value = value[language]
 
-            result["value"] = parse_value(result["value"], flat_stack)
+            assert isinstance(value, str)
+            result["value"] = parse_value(value, flat_stack)
 
-            testcase["return"] = result
         elif isinstance(result, NaturalLanguageMap):
             # Must use !natural_language
             assert language in result
-            testcase["return"] = result[language]
+            result = result[language]
 
-        testcase["return"] = parse_value(testcase["return"], flat_stack)
+        testcase["return"] = parse_value(result, flat_stack)
 
     if (description := testcase.get("description")) is not None:
         # Must use !natural_language
         if isinstance(description, NaturalLanguageMap):
             assert language in description
-            testcase["description"] = description[language]
+            description = description[language]
 
-        if isinstance(testcase["description"], dict):
+        if isinstance(description, dict):
             dd = description["description"]
             if isinstance(dd, dict):
                 assert language in dd
-                description["description"] = dd[language]
-                testcase["description"] = description
+                dd = dd[language]
 
-            if isinstance(description["description"], str):
-                description["description"] = format_string(
-                    description["description"], flat_stack
-                )
-                testcase["description"] = description
+            if isinstance(dd, str):
+                description["description"] = format_string(dd, flat_stack)
+
+        testcase["description"] = description
 
     return testcase
 
@@ -252,11 +222,10 @@ def translate_tab(tab: YamlDict, language: str, translation_stack: list) -> Yaml
 
     if isinstance(name, dict):
         assert language in name
-        tab[key_to_set] = name[language]
+        name = name[language]
 
-    tab[key_to_set] = format_string(
-        tab[key_to_set], flatten_stack(translation_stack, language)
-    )
+    assert isinstance(name, str)
+    tab[key_to_set] = format_string(name, flatten_stack(translation_stack, language))
 
     # The tab can have testcases or contexts.
     if "contexts" in tab:
