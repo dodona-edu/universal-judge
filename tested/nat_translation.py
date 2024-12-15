@@ -1,6 +1,6 @@
 import re
 import sys
-from typing import cast
+from typing import cast, Any
 
 import yaml
 
@@ -47,7 +47,6 @@ def flatten_stack(translation_stack: list, language: str) -> dict:
     for d in translation_stack:
 
         flattened.update({k: v[language] for k, v in d.items() if language in v})
-    print(f"flattened: {flattened}")
     return flattened
 
 
@@ -57,7 +56,7 @@ def format_string(string: str, flattened) -> str:
 
 def translate_io(
     io_object: YamlObject, key: str, language: str, flat_stack: dict
-) -> str:
+) -> str | dict:
     if isinstance(io_object, NaturalLanguageMap):
         assert language in io_object
         io_object = io_object[language]
@@ -70,8 +69,11 @@ def translate_io(
             io_object[key] = format_string(data, flat_stack)
 
     # Perform translation based of translation stack.
-    assert isinstance(io_object, str)
-    return format_string(io_object, flat_stack)
+    print(io_object)
+    if isinstance(io_object, str):
+        return format_string(io_object, flat_stack)
+
+    return io_object
 
 
 def translate_testcase(
@@ -158,7 +160,10 @@ def translate_testcase(
             assert language in result
             result = result[language]
 
-        testcase["return"] = parse_value(result, flat_stack)
+        if isinstance(result, str):
+            result = parse_value(result, flat_stack)
+
+        testcase["return"] = result
 
     if (description := testcase.get("description")) is not None:
         # Must use !natural_language
@@ -197,7 +202,7 @@ def translate_contexts(contexts: list, language: str, translation_stack: list) -
         assert isinstance(context, dict)
         if "translation" in context:
             translation_stack.append(context["translation"])
-            context.pop("translation")
+
         key_to_set = "script" if "script" in context else "testcases"
         raw_testcases = context.get(key_to_set)
         assert isinstance(raw_testcases, list)
@@ -212,6 +217,7 @@ def translate_contexts(contexts: list, language: str, translation_stack: list) -
         result.append(context)
         if "translation" in context:
             translation_stack.pop()
+            context.pop("translation")
 
     return result
 
@@ -264,7 +270,6 @@ def translate_tabs(dsl_list: list, language: str, translation_stack=None) -> lis
 
         if "translation" in tab:
             translation_stack.append(tab["translation"])
-        print(f"tab : {translation_stack}")
 
         result.append(translate_tab(tab, language, translation_stack))
         if "translation" in tab:

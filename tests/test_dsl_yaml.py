@@ -1326,78 +1326,95 @@ def test_natural_translate_unit_test():
     # Everywhere where !natural_language is used, it is mandatory to do so.
     # Everywhere else it isn't.
     yaml_str = """
-- tab:
-    en: "counting"
-    nl: "tellen"
-  contexts:
-    - testcases:
-      - statement: !natural_language
-          en: 'result = Trying(10)'
-          nl: 'resultaat = Proberen(10)'
-      - expression: !natural_language
-          en: 'count_words(result)'
-          nl: 'tel_woorden(resultaat)'
-        return: !natural_language
-          en: 'The result is 10'
-          nl: 'Het resultaat is 10'
-      - expression: !natural_language
-          en: !expression "count"
-          nl: !expression "tellen"
-        return: !natural_language
-          en: 'count'
-          nl: 'tellen'
-      - expression: 'ok(10)'
-        return: !oracle
-          value: !natural_language
-            en: "The value 10 is OK!"
-            nl: "De waarde 10 is OK!"
-          oracle: "custom_check"
-          file: "test.py"
-          name: "evaluate_test"
-          arguments:
-            en: ["The value", "is OK!", "is not OK!"]
-            nl: ["De waarde", "is OK!", "is niet OK!"]
-        description: !natural_language
-          en: "Ten"
-          nl: "Tien"
-      files: !natural_language
-        en:
-          - name: "file.txt"
-            url: "media/workdir/file.txt"
-        nl:
-          - name: "fileNL.txt"
-            url: "media/workdir/fileNL.txt"
-    - testcases:
+translation:
+  animal:
+    en: "animals"
+    nl: "dieren"
+  result:
+    en: "results"
+    nl: "resultaten"
+  elf:
+    en: "eleven"
+    nl: "elf"
+tabs:
+  - tab: "{{{animal}}}_{{{result}}}"
+    translation:
+      animal:
+        en: "animal_tab"
+        nl: "dier_tab"
+    contexts:
+      - testcases:
         - statement: !natural_language
-            en: 'result = Trying(11)'
-            nl: 'resultaat = Proberen(11)'
-        - expression: 'result'
-          return: '11'
-          description:
+            en: '{result} = Trying(10)'
+            nl: '{result} = Proberen(10)'
+        - expression: !natural_language
+            en: 'count_words({result})'
+            nl: 'tel_woorden({result})'
+          return: !natural_language
+            en: 'The {result} is 10'
+            nl: 'Het {result} is 10'
+        - expression: !natural_language
+            en: !expression "count"
+            nl: !expression "tellen"
+          return: !natural_language
+            en: 'count'
+            nl: 'tellen'
+        - expression: 'ok(10)'
+          return: !oracle
+            value: !natural_language
+              en: "The {result} 10 is OK!"
+              nl: "Het {result} 10 is OK!"
+            oracle: "custom_check"
+            file: "test.py"
+            name: "evaluate_test"
+            arguments:
+              en: ["The value", "is OK!", "is not OK!"]
+              nl: ["Het {result}", "is OK!", "is niet OK!"]
+          description: !natural_language
+            en: "Ten"
+            nl: "Tien"
+        files: !natural_language
+          en:
+            - name: "file.txt"
+              url: "media/workdir/file.txt"
+          nl:
+            - name: "fileNL.txt"
+              url: "media/workdir/fileNL.txt"
+        translation:
+          result:
+            en: "results_context"
+            nl: "resultaten_context"
+      - testcases:
+          - statement: !natural_language
+              en: 'result = Trying(11)'
+              nl: 'resultaat = Proberen(11)'
+          - expression: 'result'
+            return: '11_{elf}'
             description:
-              en: "Eleven"
-              nl: "Elf"
-            format: "code"
-- tab: 'test'
-  testcases:
-    - expression: !natural_language
-        en: "tests(11)"
-        nl: "testen(11)"
-      return: 11
-
+              description:
+                en: "Eleven_{elf}"
+                nl: "Elf_{elf}"
+              format: "code"
+  - tab: '{animal}'
+    testcases:
+      - expression: !natural_language
+          en: "tests(11)"
+          nl: "testen(11)"
+        return: 11
 """.strip()
     translated_yaml_str = """
-- tab: counting
+tabs:
+- tab: '{animal_tab}_{results}'
   contexts:
   - testcases:
-    - statement: result = Trying(10)
-    - expression: count_words(result)
-      return: The result is 10
+    - statement: results_context = Trying(10)
+    - expression: count_words(results_context)
+      return: The results_context is 10
     - expression: !expression 'count'
       return: count
     - expression: ok(10)
       return: !oracle
-        value: The value 10 is OK!
+        value: The results_context 10 is OK!
         oracle: custom_check
         file: test.py
         name: evaluate_test
@@ -1412,11 +1429,11 @@ def test_natural_translate_unit_test():
   - testcases:
     - statement: result = Trying(11)
     - expression: result
-      return: '11'
+      return: 11_eleven
       description:
-        description: Eleven
+        description: Eleven_eleven
         format: code
-- tab: test
+- tab: animals
   testcases:
   - expression: tests(11)
     return: 11
@@ -1436,45 +1453,49 @@ units:
   - unit:
       en: "Arguments"
       nl: "Argumenten"
+    translation:
+      User:
+        en: "user"
+        nl: "gebruiker"
     cases:
       - script:
         - stdin:
-            en: "User"
-            nl: "Gebruiker"
+            en: "User_{User}"
+            nl: "Gebruiker_{User}"
           arguments:
-            en: [ "input", "output" ]
-            nl: [ "invoer", "uitvoer" ]
+            en: [ "input_{User}", "output_{User}" ]
+            nl: [ "invoer_{User}", "uitvoer_{User}" ]
           stdout: !natural_language
-            en: "Hi User"
-            nl: "Hallo Gebruiker"
+            en: "Hi {User}"
+            nl: "Hallo {User}"
           stderr: !natural_language
-            en: "Nothing to see here"
-            nl: "Hier is niets te zien"
+            en: "Nothing to see here {User}"
+            nl: "Hier is niets te zien {User}"
           exception: !natural_language
             en: "Does not look good"
             nl: "Ziet er niet goed uit"
         - stdin:
-            en: "Friend"
-            nl: "Vriend"
+            en: "Friend of {User}"
+            nl: "Vriend van {User}"
           arguments:
             en: [ "input", "output" ]
             nl: [ "invoer", "uitvoer" ]
           stdout:
             data:
-              en: "Hi Friend"
-              nl: "Hallo Vriend"
+              en: "Hi Friend of {User}"
+              nl: "Hallo Vriend van {User}"
             config:
               ignoreWhitespace: true
           stderr:
             data:
-              en: "Nothing to see here"
-              nl: "Hier is niets te zien"
+              en: "Nothing to see here {User}"
+              nl: "Hier is niets te zien {User}"
             config:
               ignoreWhitespace: true
           exception:
             message:
-              en: "Does not look good"
-              nl: "Ziet er niet goed uit"
+              en: "Does not look good {User}"
+              nl: "Ziet er niet goed uit {User}"
             types:
               typescript: "ERROR"
   - unit: "test"
@@ -1489,27 +1510,27 @@ units:
 - unit: Arguments
   cases:
   - script:
-    - stdin: User
+    - stdin: User_user
       arguments:
-      - input
-      - output
-      stdout: Hi User
-      stderr: Nothing to see here
+      - input_user
+      - output_user
+      stdout: Hi user
+      stderr: Nothing to see here user
       exception: Does not look good
-    - stdin: Friend
+    - stdin: Friend of user
       arguments:
       - input
       - output
       stdout:
-        data: Hi Friend
+        data: Hi Friend of user
         config:
           ignoreWhitespace: true
       stderr:
-        data: Nothing to see here
+        data: Nothing to see here user
         config:
           ignoreWhitespace: true
       exception:
-        message: Does not look good
+        message: Does not look good user
         types:
           typescript: ERROR
 - unit: test
