@@ -1,6 +1,6 @@
 import re
 import sys
-from typing import cast, Any
+from typing import cast
 
 import yaml
 
@@ -56,7 +56,7 @@ def format_string(string: str, flattened) -> str:
 
 def translate_io(
     io_object: YamlObject, key: str, language: str, flat_stack: dict
-) -> str | dict:
+) -> YamlObject:
     if isinstance(io_object, NaturalLanguageMap):
         assert language in io_object
         io_object = io_object[language]
