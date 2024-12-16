@@ -3,12 +3,15 @@ import json
 from tested.datatypes import (
     AdvancedNothingTypes,
     AdvancedNumericTypes,
+    AdvancedStringTypes,
+    AllTypes,
     BasicBooleanTypes,
     BasicNothingTypes,
     BasicNumericTypes,
     BasicObjectTypes,
     BasicSequenceTypes,
     BasicStringTypes,
+    resolve_to_basic,
 )
 from tested.datatypes.advanced import AdvancedObjectTypes
 from tested.languages.conventionalize import submission_file
@@ -33,6 +36,7 @@ from tested.serialisation import (
     StringType,
     Value,
     VariableAssignment,
+    VariableType,
     as_basic_type,
 )
 from tested.testsuite import MainInput
@@ -129,6 +133,74 @@ def convert_function_call(call: FunctionCall, internal=False) -> str:
     return result
 
 
+def convert_declaration(statement: Statement, tp: AllTypes | VariableType) -> str:
+    if isinstance(tp, VariableType):
+        return f"{tp.data}"
+    elif tp == AdvancedNothingTypes.UNDEFINED:
+        return "undefined"
+
+    basic = resolve_to_basic(tp)
+    if basic == BasicBooleanTypes.BOOLEAN:
+        return "boolean"
+    elif basic == BasicStringTypes.TEXT:
+        return "string"
+    elif basic == BasicNumericTypes.INTEGER:
+        return "number"
+    elif basic == BasicNumericTypes.REAL:
+        return "number"
+    elif basic == BasicNothingTypes.NOTHING:
+        return "null"
+    elif basic == BasicObjectTypes.MAP:
+        return "object"
+    elif basic == BasicSequenceTypes.SEQUENCE:
+        type_ = "Object"
+
+        if isinstance(statement, VariableAssignment):
+            expression = statement.expression
+        else:
+            expression = statement
+        if isinstance(expression, SequenceType):
+            type_ = {
+                (
+                    convert_declaration(element, element.type)
+                    if not isinstance(element, Identifier)
+                    and not isinstance(element, FunctionCall)
+                    else "id"
+                )
+                for element in expression.data
+            }
+            if "id" in type_:
+                type_ = "any"
+            else:
+                type_ = "|".join(type_)
+
+        return f"Array<{type_}>"
+    elif basic == BasicSequenceTypes.SET:
+        type_ = "Object"
+
+        if isinstance(statement, VariableAssignment):
+            expression = statement.expression
+        else:
+            expression = statement
+        if isinstance(expression, SequenceType):
+            type_ = {
+                (
+                    convert_declaration(element, element.type)
+                    if not isinstance(element, Identifier)
+                    and not isinstance(element, FunctionCall)
+                    else "id"
+                )
+                for element in expression.data
+            }
+            if "id" in type_:
+                type_ = "any"
+            else:
+                type_ = "|".join(type_)
+
+        return f"Set<{type_}>"
+    raise AssertionError(f"Unknown type: {tp!r}")
+
+
 def convert_statement(statement: Statement, internal=False, full=False) -> str:
     if isinstance(statement, Identifier):
         return statement
@@ -143,11 +215,13 @@ def convert_statement(statement: Statement, internal=False, full=False) -> str:
         )
     elif isinstance(statement, VariableAssignment):
         if full:
-            prefix = "let "
-        else:
-            prefix = ""
+            return (
+                f"let {statement.variable} : {convert_declaration(statement, statement.type)} = "
+                f"{convert_statement(statement.expression, True)}"
+            )
+
         return (
-            f"{prefix}{statement.variable} = "
+            f"{statement.variable} = "
             f"{convert_statement(statement.expression, True)}"
         )
     raise AssertionError(f"Unknown statement: {statement!r}")
