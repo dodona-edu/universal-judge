@@ -60,13 +60,13 @@ def translate_io(
     if isinstance(io_object, NaturalLanguageMap):
         assert language in io_object
         io_object = io_object[language]
-    elif isinstance(io_object, dict):
+    if isinstance(io_object, dict):
         data = io_object[key]
         if isinstance(data, dict):
             assert language in data
             data = data[language]
-            assert isinstance(data, str)
-            io_object[key] = format_string(data, flat_stack)
+        assert isinstance(data, str)
+        io_object[key] = format_string(data, flat_stack)
 
     # Perform translation based of translation stack.
     print(io_object)
@@ -154,16 +154,14 @@ def translate_testcase(
 
             assert isinstance(value, str)
             result["value"] = parse_value(value, flat_stack)
+            testcase["return"] = result
 
         elif isinstance(result, NaturalLanguageMap):
             # Must use !natural_language
             assert language in result
-            result = result[language]
-
-        if isinstance(result, str):
-            result = parse_value(result, flat_stack)
-
-        testcase["return"] = result
+            testcase["return"] = parse_value(result[language], flat_stack)
+        elif result is not None:
+            testcase["return"] = parse_value(result, flat_stack)
 
     if (description := testcase.get("description")) is not None:
         # Must use !natural_language
@@ -171,14 +169,17 @@ def translate_testcase(
             assert language in description
             description = description[language]
 
+        if isinstance(description, str):
+            testcase["description"] = format_string(description, flat_stack)
+
         if isinstance(description, dict):
             dd = description["description"]
             if isinstance(dd, dict):
                 assert language in dd
                 dd = dd[language]
 
-            if isinstance(dd, str):
-                description["description"] = format_string(dd, flat_stack)
+            assert isinstance(dd, str)
+            description["description"] = format_string(dd, flat_stack)
 
         testcase["description"] = description
 
