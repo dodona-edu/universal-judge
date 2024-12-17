@@ -16,7 +16,7 @@ from tested.dsl.translate_parser import (
 )
 
 
-def parse_value(value: list | str | int | float | dict, flattened_stack: dict):
+def parse_value(value: list | str | int | float | dict, flattened_stack: dict) -> list | str | int | float | dict:
     if isinstance(value, str):
         return format_string(value, flattened_stack)
     elif isinstance(value, dict):

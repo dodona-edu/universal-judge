@@ -21,7 +21,7 @@ from tested.datatypes import (
 )
 from tested.dsl import parse_dsl, translate_to_test_suite
 from tested.dsl.translate_parser import _parse_yaml, load_schema_validator
-from tested.nat_translation import convert_to_yaml, translate_dsl
+from tested.nat_translation import convert_to_yaml, translate_dsl, parse_value
 from tested.serialisation import (
     FunctionCall,
     NumberType,
@@ -1543,3 +1543,10 @@ units:
     translated_yaml = convert_to_yaml(translated_dsl)
     print(translated_yaml)
     assert translated_yaml.strip() == translated_yaml_str
+
+def test_translate_parse():
+    flattend_stack = {"animal": "dier", "human": "mens", "number": "getal"}
+    value = {"key1": ["value1_{animal}", "value1_{human}"], "key2": "value2_{number}", "key3": 10}
+    expected_value = {"key1": ["value1_dier", "value1_mens"], "key2": "value2_getal", "key3": 10}
+    parsed_result = parse_value(value, flattend_stack)
+    assert parsed_result == expected_value
