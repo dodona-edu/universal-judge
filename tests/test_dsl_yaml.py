@@ -21,7 +21,7 @@ from tested.datatypes import (
 )
 from tested.dsl import parse_dsl, translate_to_test_suite
 from tested.dsl.translate_parser import _parse_yaml, load_schema_validator
-from tested.nat_translation import convert_to_yaml, translate_dsl, parse_value
+from tested.nat_translation import convert_to_yaml, parse_value, translate_dsl
 from tested.serialisation import (
     FunctionCall,
     NumberType,
@@ -1401,6 +1401,12 @@ tabs:
           en: "tests(11)"
           nl: "testen(11)"
         return: 11
+      - expression:
+          javascript: "{animal}_javascript(1 + 1)"
+          typescript: "{animal}_typescript(1 + 1)"
+          java: "Submission.{animal}_java(1 + 1)"
+          python: "{animal}_python(1 + 1)"
+        return: 2
 """.strip()
     translated_yaml_str = """
 tabs:
@@ -1437,6 +1443,12 @@ tabs:
   testcases:
   - expression: tests(11)
     return: 11
+  - expression:
+      javascript: animals_javascript(1 + 1)
+      typescript: animals_typescript(1 + 1)
+      java: Submission.animals_java(1 + 1)
+      python: animals_python(1 + 1)
+    return: 2
 """.strip()
     parsed_yaml = _parse_yaml(yaml_str)
     translated_dsl = translate_dsl(parsed_yaml, "en")
