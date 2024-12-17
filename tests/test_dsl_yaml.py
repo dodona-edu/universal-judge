@@ -1545,8 +1545,8 @@ units:
     assert translated_yaml.strip() == translated_yaml_str
 
 def test_translate_parse():
-    flattend_stack = {"animal": "dier", "human": "mens", "number": "getal"}
+    flattened_stack = {"animal": "dier", "human": "mens", "number": "getal"}
     value = {"key1": ["value1_{animal}", "value1_{human}"], "key2": "value2_{number}", "key3": 10}
     expected_value = {"key1": ["value1_dier", "value1_mens"], "key2": "value2_getal", "key3": 10}
-    parsed_result = parse_value(value, flattend_stack)
+    parsed_result = parse_value(value, flattened_stack)
     assert parsed_result == expected_value
