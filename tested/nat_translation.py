@@ -29,21 +29,6 @@ def parse_value(
     return value
 
 
-def get_replacement(language: str, translation_stack: list, match: re.Match) -> str:
-    word = match.group(1)
-    current = -1
-    stack = translation_stack[current]
-    while abs(current) <= len(translation_stack) and word not in stack:
-        current -= 1
-        stack = translation_stack[current]
-    if abs(current) <= len(translation_stack):
-        translations = stack[word]
-        assert language in translations
-        word = translations[language]
-
-    return word
-
-
 def flatten_stack(translation_stack: list, language: str) -> dict:
     flattened = {}
     for d in translation_stack:
