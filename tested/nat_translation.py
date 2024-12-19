@@ -1,4 +1,3 @@
-import re
 import sys
 from typing import cast
 
@@ -19,6 +18,8 @@ from tested.dsl.translate_parser import (
 def parse_value(
     value: list | str | int | float | dict, flattened_stack: dict
 ) -> list | str | int | float | dict:
+    # Will format the strings in different values.
+
     if isinstance(value, str):
         return format_string(value, flattened_stack)
     elif isinstance(value, dict):
@@ -30,9 +31,12 @@ def parse_value(
 
 
 def flatten_stack(translation_stack: list, language: str) -> dict:
+    # Will transform a list of translation maps into a dict that
+    # has all the keys defined over all the different translation map and will have
+    # the value of the newest definition. In this definition we also chose
+    # the translation of the provided language.
     flattened = {}
     for d in translation_stack:
-
         flattened.update({k: v[language] for k, v in d.items() if language in v})
     return flattened
 
