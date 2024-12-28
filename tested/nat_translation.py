@@ -1,11 +1,11 @@
 import sys
-from typing import cast
 
 import yaml
 
 from tested.dsl.translate_parser import (
     ExpressionString,
     NaturalLanguageMap,
+    ProgrammingLanguageMap,
     ReturnOracle,
     YamlDict,
     YamlObject,
@@ -96,17 +96,16 @@ def translate_testcase(
 
     key_to_set = "statement" if "statement" in testcase else "expression"
     if (expr_stmt := testcase.get(key_to_set)) is not None:
-        # Translate NaturalLanguageMap
-        expr_stmt = natural_langauge_map_translation(expr_stmt, language)
-
-        # Perform translation based of translation stack.
-        if isinstance(expr_stmt, dict):
-            testcase[key_to_set] = {
-                k: format_string(cast(str, v), flat_stack) for k, v in expr_stmt.items()
+        # Program language translation found
+        if isinstance(expr_stmt, ProgrammingLanguageMap):
+            expr_stmt = {
+                k: natural_langauge_map_translation(v, language) for k, v in expr_stmt.items()
             }
-        elif isinstance(expr_stmt, str):
-            testcase[key_to_set] = format_string(expr_stmt, flat_stack)
+        elif isinstance(expr_stmt, NaturalLanguageMap): # Natural language translation found
+            assert language in expr_stmt
+            expr_stmt = expr_stmt[language]
 
+        testcase[key_to_set] = parse_value(expr_stmt, flat_stack)
     else:
         if (stdin_stmt := testcase.get("stdin")) is not None:
             # Translate NaturalLanguageMap

@@ -91,6 +91,9 @@ class ReturnOracle(dict):
 class NaturalLanguageMap(dict):
     pass
 
+class ProgrammingLanguageMap(dict):
+    pass
+
 
 OptionDict = dict[str, int | bool]
 YamlObject = (
@@ -104,6 +107,7 @@ YamlObject = (
     | ExpressionString
     | ReturnOracle
     | NaturalLanguageMap
+    | ProgrammingLanguageMap
 )
 
 
@@ -158,6 +162,13 @@ def _natural_language_map(loader: yaml.Loader, node: yaml.Node) -> NaturalLangua
     ), f"A natural language map must be an object, got {result} which is a {type(result)}."
     return NaturalLanguageMap(result)
 
+def _programming_language_map(loader: yaml.Loader, node: yaml.Node) -> ProgrammingLanguageMap:
+    result = _parse_yaml_value(loader, node)
+    assert isinstance(
+        result, dict
+    ), f"A programming language map must be an object, got {result} which is a {type(result)}."
+    return ProgrammingLanguageMap(result)
+
 
 def _parse_yaml(yaml_stream: str) -> YamlObject:
     """
@@ -170,6 +181,7 @@ def _parse_yaml(yaml_stream: str) -> YamlObject:
     yaml.add_constructor("!expression", _expression_string, loader)
     yaml.add_constructor("!oracle", _return_oracle, loader)
     yaml.add_constructor("!natural_language", _natural_language_map, loader)
+    yaml.add_constructor("!programming_language", _programming_language_map, loader)
 
     try:
         return yaml.load(yaml_stream, loader)
