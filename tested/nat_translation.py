@@ -225,7 +225,10 @@ def translate_tab(tab: YamlDict, language: str, translation_stack: list) -> Yaml
     name = natural_langauge_map_translation(name, language)
 
     assert isinstance(name, str)
-    tab[key_to_set] = format_string(name, flatten_stack(translation_stack, language))
+    flat_stack = flatten_stack(translation_stack, language)
+    tab[key_to_set] = format_string(name, flat_stack)
+
+    tab = translate_input_files(tab, language, flat_stack)
 
     # The tab can have testcases or contexts.
     if "contexts" in tab:
