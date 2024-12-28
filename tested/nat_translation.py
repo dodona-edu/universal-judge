@@ -11,8 +11,34 @@ from tested.dsl.translate_parser import (
     YamlObject,
     _parse_yaml,
     _validate_dsl,
-    _validate_testcase_combinations,
+    _validate_testcase_combinations, load_schema_validator,
+    convert_validation_error_to_group, DslValidationError,
 )
+
+
+def validate_pre_dsl(dsl_object: YamlObject):
+    """
+    Validate a DSl object.
+
+    :param dsl_object: The object to validate.
+    :return: True if valid, False otherwise.
+    """
+    _SCHEMA_VALIDATOR = load_schema_validator("schema-strict-nat-translation.json")
+    errors = list(_SCHEMA_VALIDATOR.iter_errors(dsl_object))
+    if len(errors) == 1:
+        message = (
+            "Validating the DSL resulted in an error. "
+            "The most specific sub-exception is often the culprit. "
+        )
+        error = convert_validation_error_to_group(errors[0])
+        if isinstance(error, ExceptionGroup):
+            raise ExceptionGroup(message, error.exceptions)
+        else:
+            raise DslValidationError(message + str(error)) from error
+    elif len(errors) > 1:
+        the_errors = [convert_validation_error_to_group(e) for e in errors]
+        message = "Validating the DSL resulted in some errors."
+        raise ExceptionGroup(message, the_errors)
 
 def natural_langauge_map_translation(value: YamlObject, language: str):
     if isinstance(value, NaturalLanguageMap):
@@ -78,11 +104,10 @@ def translate_io(
 
     if isinstance(io_object, dict):
         data = natural_langauge_map_translation(io_object[key], language)
-        assert isinstance(data, str)
-        io_object[key] = format_string(data, flat_stack)
+        io_object[key] = parse_value(data, flat_stack)
 
     # Perform translation based of translation stack.
-    if isinstance(io_object, str):
+    elif isinstance(io_object, str):
         return format_string(io_object, flat_stack)
 
     return io_object
@@ -322,6 +347,7 @@ if __name__ == "__main__":
     path = sys.argv[1]
     lang = sys.argv[2]
     new_yaml = parse_yaml(path)
+    validate_pre_dsl(new_yaml)
     translated_dsl = translate_dsl(new_yaml, lang)
     yaml_string = convert_to_yaml(translated_dsl)
     print(yaml_string)
