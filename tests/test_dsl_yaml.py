@@ -1367,7 +1367,7 @@ tabs:
             oracle: "custom_check"
             file: "test.py"
             name: "evaluate_test"
-            arguments:
+            arguments: !natural_language
               en: ["The value", "is OK!", "is not OK!"]
               nl: ["Het {result}", "is OK!", "is niet OK!"]
           description: !natural_language
@@ -1391,7 +1391,7 @@ tabs:
           - expression: 'result'
             return: '11_{elf}'
             description:
-              description:
+              description: !natural_language
                 en: "Eleven_{elf}"
                 nl: "Elf_{elf}"
               format: "code"
@@ -1401,11 +1401,13 @@ tabs:
           en: "tests(11)"
           nl: "testen(11)"
         return: 11
-      - expression:
+      - expression: !programming_language
           javascript: "{animal}_javascript(1 + 1)"
           typescript: "{animal}_typescript(1 + 1)"
           java: "Submission.{animal}_java(1 + 1)"
-          python: "{animal}_python(1 + 1)"
+          python: !natural_language
+            en: "{animal}_python_en(1 + 1)"
+            nl: "{animal}_python_nl(1 + 1)"
         return: 2
 """.strip()
     translated_yaml_str = """
@@ -1447,7 +1449,7 @@ tabs:
       javascript: animals_javascript(1 + 1)
       typescript: animals_typescript(1 + 1)
       java: Submission.animals_java(1 + 1)
-      python: animals_python(1 + 1)
+      python: animals_python_en(1 + 1)
     return: 2
 """.strip()
     parsed_yaml = _parse_yaml(yaml_str)
@@ -1462,7 +1464,7 @@ def test_natural_translate_io_test():
     # Everywhere else it isn't.
     yaml_str = """
 units:
-  - unit:
+  - unit: !natural_language
       en: "Arguments"
       nl: "Argumenten"
     translation:
@@ -1471,10 +1473,10 @@ units:
         nl: "gebruiker"
     cases:
       - script:
-        - stdin:
+        - stdin: !natural_language
             en: "User_{User}"
             nl: "Gebruiker_{User}"
-          arguments:
+          arguments: !natural_language
             en: [ "input_{User}", "output_{User}" ]
             nl: [ "invoer_{User}", "uitvoer_{User}" ]
           stdout: !natural_language
@@ -1486,26 +1488,26 @@ units:
           exception: !natural_language
             en: "Does not look good"
             nl: "Ziet er niet goed uit"
-        - stdin:
+        - stdin: !natural_language
             en: "Friend of {User}"
             nl: "Vriend van {User}"
-          arguments:
+          arguments: !natural_language
             en: [ "input", "output" ]
             nl: [ "invoer", "uitvoer" ]
           stdout:
-            data:
+            data: !natural_language
               en: "Hi Friend of {User}"
               nl: "Hallo Vriend van {User}"
             config:
               ignoreWhitespace: true
           stderr:
-            data:
+            data: !natural_language
               en: "Nothing to see here {User}"
               nl: "Hier is niets te zien {User}"
             config:
               ignoreWhitespace: true
           exception:
-            message:
+            message: !natural_language
               en: "Does not look good {User}"
               nl: "Ziet er niet goed uit {User}"
             types:

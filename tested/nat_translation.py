@@ -3,6 +3,7 @@ import sys
 import yaml
 
 from tested.dsl.translate_parser import (
+    DslValidationError,
     ExpressionString,
     NaturalLanguageMap,
     ProgrammingLanguageMap,
@@ -11,8 +12,9 @@ from tested.dsl.translate_parser import (
     YamlObject,
     _parse_yaml,
     _validate_dsl,
-    _validate_testcase_combinations, load_schema_validator,
-    convert_validation_error_to_group, DslValidationError,
+    _validate_testcase_combinations,
+    convert_validation_error_to_group,
+    load_schema_validator,
 )
 
 
@@ -40,13 +42,17 @@ def validate_pre_dsl(dsl_object: YamlObject):
         message = "Validating the DSL resulted in some errors."
         raise ExceptionGroup(message, the_errors)
 
+
 def natural_langauge_map_translation(value: YamlObject, language: str):
     if isinstance(value, NaturalLanguageMap):
         assert language in value
         value = value[language]
     return value
 
-def translate_input_files(dsl_object: dict, language: str, flattened_stack: dict) -> dict:
+
+def translate_input_files(
+    dsl_object: dict, language: str, flattened_stack: dict
+) -> dict:
     if (files := dsl_object.get("files")) is not None:
         # Translation map can happen at the top level.
         files = natural_langauge_map_translation(files, language)
@@ -124,9 +130,12 @@ def translate_testcase(
         # Program language translation found
         if isinstance(expr_stmt, ProgrammingLanguageMap):
             expr_stmt = {
-                k: natural_langauge_map_translation(v, language) for k, v in expr_stmt.items()
+                k: natural_langauge_map_translation(v, language)
+                for k, v in expr_stmt.items()
             }
-        elif isinstance(expr_stmt, NaturalLanguageMap): # Natural language translation found
+        elif isinstance(
+            expr_stmt, NaturalLanguageMap
+        ):  # Natural language translation found
             assert language in expr_stmt
             expr_stmt = expr_stmt[language]
 

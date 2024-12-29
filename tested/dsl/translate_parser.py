@@ -91,6 +91,7 @@ class ReturnOracle(dict):
 class NaturalLanguageMap(dict):
     pass
 
+
 class ProgrammingLanguageMap(dict):
     pass
 
@@ -162,7 +163,10 @@ def _natural_language_map(loader: yaml.Loader, node: yaml.Node) -> NaturalLangua
     ), f"A natural language map must be an object, got {result} which is a {type(result)}."
     return NaturalLanguageMap(result)
 
-def _programming_language_map(loader: yaml.Loader, node: yaml.Node) -> ProgrammingLanguageMap:
+
+def _programming_language_map(
+    loader: yaml.Loader, node: yaml.Node
+) -> ProgrammingLanguageMap:
     result = _parse_yaml_value(loader, node)
     assert isinstance(
         result, dict
@@ -220,6 +224,7 @@ def is_oracle(_checker: TypeChecker, instance: Any) -> bool:
 def is_expression(_checker: TypeChecker, instance: Any) -> bool:
     return isinstance(instance, ExpressionString)
 
+
 def is_natural_language_map(_checker: TypeChecker, instance: Any) -> bool:
     return isinstance(instance, NaturalLanguageMap)
 
@@ -242,9 +247,11 @@ def load_schema_validator(file: str = "schema-strict.json") -> Validator:
         schema_object = json.load(schema_file)
 
     original_validator: Type[Validator] = validator_for(schema_object)
-    type_checker = original_validator.TYPE_CHECKER.redefine(
-        "oracle", is_oracle
-    ).redefine("expression", is_expression).redefine("natural_language", is_natural_language_map)
+    type_checker = (
+        original_validator.TYPE_CHECKER.redefine("oracle", is_oracle)
+        .redefine("expression", is_expression)
+        .redefine("natural_language", is_natural_language_map)
+    )
     format_checker = original_validator.FORMAT_CHECKER
     format_checker.checks("tested-dsl-expression", SyntaxError)(test)
     tested_validator = extend_validator(original_validator, type_checker=type_checker)

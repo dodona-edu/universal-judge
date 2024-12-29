@@ -467,8 +467,7 @@
                 "$ref" : "#/definitions/exceptionChannel"
               }
             }
-          ],
-          "$ref" : "#/definitions/exceptionChannel"
+          ]
         },
         "files" : {
           "description" : "A list of files used in the test suite.",
@@ -644,8 +643,7 @@
                 "$ref" : "#/definitions/exceptionChannel"
               }
             }
-          ],
-          "$ref" : "#/definitions/exceptionChannel"
+          ]
         },
         "files" : {
           "description" : "A list of files used in the test suite.",
