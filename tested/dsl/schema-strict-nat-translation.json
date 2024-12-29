@@ -558,68 +558,94 @@
       "description" : "An individual test (script) for a statement or expression",
       "properties" : {
         "description" : {
-          "$ref" : "#/definitions/message"
+          "oneOf": [
+            {
+              "$ref" : "#/definitions/message"
+            },
+            {
+              "type" : "natural_language",
+              "additionalProperties": {
+                "$ref" : "#/definitions/message"
+              }
+            }
+          ]
         },
         "stdin" : {
           "description" : "Stdin for this context",
-          "type" : [
-            "string",
-            "number",
-            "integer",
-            "boolean"
+          "oneOf": [
+            {
+              "type" : [
+                "string",
+                "number",
+                "integer",
+                "boolean"
+              ]
+            },
+            {
+              "type" : "natural_language",
+              "additionalProperties": {
+                "type" : [
+                  "string",
+                  "number",
+                  "integer",
+                  "boolean"
+                ]
+              }
+            }
           ]
         },
         "arguments" : {
-          "type" : "array",
-          "description" : "Array of program call arguments",
-          "items" : {
-            "type" : [
-              "string",
-              "number",
-              "integer",
-              "boolean"
-            ]
-          }
+          "oneOf": [
+            {
+              "type" : "array",
+              "items" : {
+                "type" : [
+                  "string",
+                  "number",
+                  "integer",
+                  "boolean"
+                ]
+              }
+            },
+            {
+              "type" : "natural_language",
+              "additionalProperties": {
+                "type" : "array",
+                "items" : {
+                  "type" : [
+                    "string",
+                    "number",
+                    "integer",
+                    "boolean"
+                  ]
+                }
+              }
+            }
+          ],
+          "description" : "Array of program call arguments"
         },
         "statement" : {
           "description" : "The statement to evaluate.",
-          "$ref" : "#/definitions/expressionOrStatement"
+          "$ref" : "#/definitions/expressionOrStatementWithNatTranslation"
         },
         "expression" : {
           "description" : "The expression to evaluate.",
-          "$ref" : "#/definitions/expressionOrStatement"
+          "$ref" : "#/definitions/expressionOrStatementWithNatTranslation"
         },
         "exception" : {
           "description" : "Expected exception message",
           "oneOf" : [
             {
-              "type" : "string",
-              "description" : "Message of the expected exception."
+              "$ref" : "#/definitions/exceptionChannel"
             },
             {
-              "type" : "object",
-              "required" : [
-                "types"
-              ],
-              "properties" : {
-                "message" : {
-                  "type" : "string",
-                  "description" : "Message of the expected exception."
-                },
-                "types" : {
-                  "minProperties" : 1,
-                  "description" : "Language mapping of expected exception types.",
-                  "type" : "object",
-                  "propertyNames" : {
-                    "$ref" : "#/definitions/programmingLanguage"
-                  },
-                  "items" : {
-                    "type" : "string"
-                  }
-                }
+              "type" : "natural_language",
+              "additionalProperties": {
+                "$ref" : "#/definitions/exceptionChannel"
               }
             }
-          ]
+          ],
+          "$ref" : "#/definitions/exceptionChannel"
         },
         "files" : {
           "description" : "A list of files used in the test suite.",
@@ -643,15 +669,60 @@
         },
         "return" : {
           "description" : "Expected return value",
-          "$ref" : "#/definitions/returnOutputChannel"
+          "oneOf" : [
+            {
+              "$ref" : "#/definitions/returnOutputChannel"
+            },
+            {
+              "type" : "natural_language",
+              "additionalProperties": {
+                "$ref" : "#/definitions/returnOutputChannel"
+              }
+            }
+          ]
+
         },
         "stderr" : {
           "description" : "Expected output at stderr",
-          "$ref" : "#/definitions/textOutputChannel"
+          "oneOf" : [
+            {
+              "$ref" : "#/definitions/textOutputChannel"
+            },
+            {
+              "type" : "natural_language",
+              "additionalProperties": {
+                "$ref" : "#/definitions/textOutputChannel"
+              }
+            }
+          ]
         },
         "stdout" : {
           "description" : "Expected output at stdout",
-          "$ref" : "#/definitions/textOutputChannel"
+          "oneOf" : [
+            {
+              "$ref" : "#/definitions/textOutputChannel"
+            },
+            {
+              "type" : "natural_language",
+              "additionalProperties": {
+                "$ref" : "#/definitions/textOutputChannel"
+              }
+            }
+          ]
+        },
+        "file": {
+          "description" : "Expected files generated by the submission.",
+          "oneOf" : [
+            {
+              "$ref" : "#/definitions/fileOutputChannel"
+            },
+            {
+              "type" : "natural_language",
+              "additionalProperties": {
+                "$ref" : "#/definitions/fileOutputChannel"
+              }
+            }
+          ]
         },
         "exit_code" : {
           "type" : "integer",
@@ -663,7 +734,6 @@
       "oneOf" : [
         {
           "type" : "string",
-          "format" : "tested-dsl-expression",
           "description" : "A statement of expression in Python-like syntax as YAML string."
         },
         {
@@ -684,7 +754,6 @@
       "oneOf" : [
         {
           "type" : "string",
-          "format" : "tested-dsl-expression",
           "description" : "A statement of expression in Python-like syntax as YAML string."
         },
         {
@@ -1163,7 +1232,6 @@
                   "type" : "string"
                 }
               ],
-              "type" : "string",
               "description" : "The message to display."
             },
             "format" : {
@@ -1241,7 +1309,8 @@
       "not" : {
         "type" : [
           "oracle",
-          "expression"
+          "expression",
+          "natural_language"
         ]
       }
     },
