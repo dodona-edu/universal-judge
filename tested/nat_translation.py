@@ -1,4 +1,5 @@
 import sys
+from pathlib import Path
 
 import yaml
 
@@ -329,11 +330,19 @@ def translate_dsl(dsl_object: YamlObject, language: str) -> YamlObject:
         return dsl_object
 
 
-def parse_yaml(yaml_path: str) -> YamlObject:
+def parse_yaml(yaml_path: Path) -> YamlObject:
     with open(yaml_path, "r") as stream:
         result = _parse_yaml(stream.read())
 
     return result
+
+
+def generate_new_yaml(yaml_path: Path, yaml_string: str, language: str):
+    file_name = yaml_path.name
+    split_name = file_name.split(".")
+    path_to_new_yaml = yaml_path.parent / f"{'.'.join(split_name[:-1])}-{language}.yaml"
+    with open(path_to_new_yaml, "w") as yaml_file:
+        yaml_file.write(yaml_string)
 
 
 def convert_to_yaml(yaml_object: YamlObject) -> str:
@@ -349,15 +358,18 @@ def convert_to_yaml(yaml_object: YamlObject) -> str:
     return yaml.dump(yaml_object, sort_keys=False)
 
 
+def run(path: Path, language: str):
+    new_yaml = parse_yaml(path)
+    validate_pre_dsl(new_yaml)
+    translated_dsl = translate_dsl(new_yaml, language)
+    yaml_string = convert_to_yaml(translated_dsl)
+    _validate_dsl(_parse_yaml(yaml_string))
+
+    generate_new_yaml(path, yaml_string, language)
+
+
 if __name__ == "__main__":
     n = len(sys.argv)
     assert n > 1, "Expected atleast two argument (path to yaml file and language)."
 
-    path = sys.argv[1]
-    lang = sys.argv[2]
-    new_yaml = parse_yaml(path)
-    validate_pre_dsl(new_yaml)
-    translated_dsl = translate_dsl(new_yaml, lang)
-    yaml_string = convert_to_yaml(translated_dsl)
-    print(yaml_string)
-    _validate_dsl(_parse_yaml(yaml_string))
+    run(Path(sys.argv[1]), sys.argv[2])

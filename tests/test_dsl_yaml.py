@@ -21,8 +21,12 @@ from tested.datatypes import (
 )
 from tested.dsl import parse_dsl, translate_to_test_suite
 from tested.dsl.translate_parser import _parse_yaml, load_schema_validator
-from tested.nat_translation import convert_to_yaml, parse_value, translate_dsl, \
-    validate_pre_dsl
+from tested.nat_translation import (
+    convert_to_yaml,
+    parse_value,
+    translate_dsl,
+    validate_pre_dsl,
+)
 from tested.serialisation import (
     FunctionCall,
     NumberType,
@@ -1574,6 +1578,7 @@ def test_translate_parse():
     }
     parsed_result = parse_value(value, flattened_stack)
     assert parsed_result == expected_value
+
 
 def test_wrong_natural_translation_suite():
     yaml_str = """

@@ -228,6 +228,7 @@ def is_expression(_checker: TypeChecker, instance: Any) -> bool:
 def is_natural_language_map(_checker: TypeChecker, instance: Any) -> bool:
     return isinstance(instance, NaturalLanguageMap)
 
+
 def is_programming_language_map(_checker: TypeChecker, instance: Any) -> bool:
     return isinstance(instance, ProgrammingLanguageMap)
 
