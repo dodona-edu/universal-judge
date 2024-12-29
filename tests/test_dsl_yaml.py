@@ -21,7 +21,8 @@ from tested.datatypes import (
 )
 from tested.dsl import parse_dsl, translate_to_test_suite
 from tested.dsl.translate_parser import _parse_yaml, load_schema_validator
-from tested.nat_translation import convert_to_yaml, parse_value, translate_dsl
+from tested.nat_translation import convert_to_yaml, parse_value, translate_dsl, \
+    validate_pre_dsl
 from tested.serialisation import (
     FunctionCall,
     NumberType,
@@ -1573,3 +1574,27 @@ def test_translate_parse():
     }
     parsed_result = parse_value(value, flattened_stack)
     assert parsed_result == expected_value
+
+def test_wrong_natural_translation_suite():
+    yaml_str = """
+tabs:
+- tab: animals
+  testcases:
+  - expression: tests(11)
+    return: 11
+  - expression:
+      javascript: animals_javascript(1 + 1)
+      typescript: animals_typescript(1 + 1)
+      java: Submission.animals_java(1 + 1)
+      python:
+        en: animals_python_en(1 + 1)
+        nl: animals_python_nl(1 + 1)
+    return: 2
+    """.strip()
+    parsed_yaml = _parse_yaml(yaml_str)
+    try:
+        validate_pre_dsl(parsed_yaml)
+    except ExceptionGroup:
+        print("As expected")
+    else:
+        assert False, "Expected ExceptionGroup, but no exception was raised"

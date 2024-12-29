@@ -736,7 +736,7 @@
         },
         {
           "description" : "Programming-language-specific statement or expression.",
-          "type" : "object",
+          "type" : "programming_language",
           "minProperties" : 1,
           "propertyNames" : {
             "$ref" : "#/definitions/programmingLanguage"
@@ -756,7 +756,7 @@
         },
         {
           "description" : "Programming-language-specific statement or expression.",
-          "type" : "object",
+          "type" : "programming_language",
           "minProperties" : 1,
           "propertyNames" : {
             "$ref" : "#/definitions/programmingLanguage"
@@ -1308,7 +1308,8 @@
         "type" : [
           "oracle",
           "expression",
-          "natural_language"
+          "natural_language",
+          "programming_language"
         ]
       }
     },

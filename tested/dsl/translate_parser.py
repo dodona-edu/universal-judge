@@ -228,6 +228,9 @@ def is_expression(_checker: TypeChecker, instance: Any) -> bool:
 def is_natural_language_map(_checker: TypeChecker, instance: Any) -> bool:
     return isinstance(instance, NaturalLanguageMap)
 
+def is_programming_language_map(_checker: TypeChecker, instance: Any) -> bool:
+    return isinstance(instance, ProgrammingLanguageMap)
+
 
 def test(value: object) -> bool:
     if not isinstance(value, str):
@@ -251,6 +254,7 @@ def load_schema_validator(file: str = "schema-strict.json") -> Validator:
         original_validator.TYPE_CHECKER.redefine("oracle", is_oracle)
         .redefine("expression", is_expression)
         .redefine("natural_language", is_natural_language_map)
+        .redefine("programming_language", is_programming_language_map)
     )
     format_checker = original_validator.FORMAT_CHECKER
     format_checker.checks("tested-dsl-expression", SyntaxError)(test)

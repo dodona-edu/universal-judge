@@ -75,8 +75,8 @@ def translate_input_files(
 
 
 def parse_value(value: YamlObject, flattened_stack: dict) -> YamlObject:
-    # Will format the strings in different values.
 
+    # Will format the strings in different values.
     if isinstance(value, str):
         return format_string(value, flattened_stack)
     elif isinstance(value, dict):
