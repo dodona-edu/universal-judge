@@ -2,7 +2,7 @@ import sys
 from pathlib import Path
 
 import yaml
-from jinja2 import Environment, Template
+from jinja2 import Environment
 
 from tested.dsl.translate_parser import (
     DslValidationError,
