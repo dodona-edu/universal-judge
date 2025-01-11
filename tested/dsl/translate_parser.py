@@ -396,7 +396,7 @@ def _convert_value(value: YamlObject) -> Value:
 def _convert_file(link_file: YamlDict) -> FileUrl:
     assert isinstance(link_file["name"], str)
     assert isinstance(link_file["path"], str)
-    return FileUrl(name=link_file["name"], url=link_file["path"])
+    return FileUrl(name=link_file["name"], path=link_file["path"])
 
 
 def _convert_evaluation_function(stream: dict) -> EvaluationFunction:

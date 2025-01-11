@@ -528,7 +528,7 @@ class MainInput(WithFeatures, WithFunctions):
 
 @define(frozen=True)
 class FileUrl:
-    url: str
+    path: str
     name: str
 
 

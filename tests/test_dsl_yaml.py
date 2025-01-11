@@ -750,10 +750,10 @@ def test_file_custom_check_correct():
       contexts:
         - testcases:
             - statement: 'test()'
-              file:
-                content: "test/hallo.txt"
+              out_files:
+                path_expected: "test/hallo.txt"
                 oracle: "custom_check"
-                location: "test.txt"
+                path_generated: "test.txt"
                 name: "evaluate_test"
                 file: "test.py"
     """
@@ -1174,9 +1174,9 @@ def test_files_are_propagated():
 - tab: "Config ctx"
   files:
     - name: "test"
-      url: "test.md"
+      path: "test.md"
     - name: "two"
-      url: "two.md"
+      path: "two.md"
   testcases:
   - arguments: [ '-a', '2.125', '1.212' ]
     stdout: "3.34"
@@ -1184,7 +1184,7 @@ def test_files_are_propagated():
     stdout: "3.337"
     files:
         - name: "test"
-          url: "twooo.md"
+          path: "twooo.md"
     """
     json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
@@ -1193,8 +1193,8 @@ def test_files_are_propagated():
     testcases0, testcases1 = ctx0.testcases, ctx1.testcases
     test0, test1 = testcases0[0], testcases1[0]
     assert set(test0.link_files) == {
-        FileUrl(name="test", url="test.md"),
-        FileUrl(name="two", url="two.md"),
+        FileUrl(name="test", path="test.md"),
+        FileUrl(name="two", path="two.md"),
     }
 
 
