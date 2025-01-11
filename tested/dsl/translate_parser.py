@@ -254,9 +254,9 @@ class DslContext:
             return self
 
         the_files = self.files
-        if "files" in new_level:
-            assert isinstance(new_level["files"], list)
-            additional_files = {_convert_file(f) for f in new_level["files"]}
+        if "in_files" in new_level:
+            assert isinstance(new_level["in_files"], list)
+            additional_files = {_convert_file(f) for f in new_level["in_files"]}
             the_files = list(set(self.files) | additional_files)
 
         the_config = self.config
@@ -395,8 +395,8 @@ def _convert_value(value: YamlObject) -> Value:
 
 def _convert_file(link_file: YamlDict) -> FileUrl:
     assert isinstance(link_file["name"], str)
-    assert isinstance(link_file["url"], str)
-    return FileUrl(name=link_file["name"], url=link_file["url"])
+    assert isinstance(link_file["path"], str)
+    return FileUrl(name=link_file["name"], url=link_file["path"])
 
 
 def _convert_evaluation_function(stream: dict) -> EvaluationFunction:
@@ -479,8 +479,8 @@ def _convert_file_output_channel(
 ) -> FileOutputChannel:
     assert isinstance(stream, dict)
 
-    expected = str(stream["content"])
-    actual = str(stream["location"])
+    expected = str(stream["path_expected"])
+    actual = str(stream["path_generated"])
 
     if "oracle" not in stream or stream["oracle"] == "builtin":
         config = context.merge_inheritable_with_specific_config(stream, config_name)
@@ -606,8 +606,8 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
 
     if (stdout := testcase.get("stdout")) is not None:
         output.stdout = _convert_text_output_channel(stdout, context, "stdout")
-    if (file := testcase.get("file")) is not None:
-        output.file = _convert_file_output_channel(file, context, "file")
+    if (file := testcase.get("out_files")) is not None:
+        output.file = _convert_file_output_channel(file, context, "out_files")
     if (stderr := testcase.get("stderr")) is not None:
         output.stderr = _convert_text_output_channel(stderr, context, "stderr")
     if (exception := testcase.get("exception")) is not None:
