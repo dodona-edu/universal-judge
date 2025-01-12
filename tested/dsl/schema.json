@@ -276,11 +276,27 @@
         },
         "stdin" : {
           "description" : "Stdin for this context",
-          "type" : [
-            "string",
-            "number",
-            "integer",
-            "boolean"
+          "oneOf": [
+            {
+              "type" : [
+                "string",
+                "number",
+                "integer",
+                "boolean"
+              ]
+            },
+            {
+              "type": "object",
+              "required" : [
+                "path"
+              ],
+              "properties" : {
+                "path": {
+                  "type": "string",
+                  "description": "Path to the file that contains the stdin"
+                }
+              }
+            }
           ]
         },
         "arguments" : {
@@ -372,11 +388,27 @@
         },
         "stdin" : {
           "description" : "Stdin for this context",
-          "type" : [
-            "string",
-            "number",
-            "integer",
-            "boolean"
+          "oneOf": [
+            {
+              "type" : [
+                "string",
+                "number",
+                "integer",
+                "boolean"
+              ]
+            },
+            {
+              "type": "object",
+              "required" : [
+                "path"
+              ],
+              "properties" : {
+                "path": {
+                  "type": "string",
+                  "description": "Path to the file that contains the stdin"
+                }
+              }
+            }
           ]
         },
         "arguments" : {
@@ -519,10 +551,23 @@
         {
           "type" : "object",
           "description" : "Built-in oracle for text values.",
-          "required" : [
-            "data"
+          "oneOf": [
+            {
+              "required" : [
+                "data"
+              ]
+            },
+            {
+              "required" : [
+                "path"
+              ]
+            }
           ],
           "properties" : {
+            "path": {
+              "type" : "string",
+              "description" : "The path to the file containing the text value."
+            },
             "data" : {
               "$ref" : "#/definitions/textualType"
             },
@@ -537,12 +582,32 @@
         {
           "type" : "object",
           "description" : "Custom oracle for text values.",
+          "oneOf": [
+            {
+              "required" : [
+                "oracle",
+                "file",
+                "data"
+              ]
+            },
+            {
+              "required" : [
+                "oracle",
+                "file",
+                "path"
+              ]
+            }
+          ],
           "required" : [
             "oracle",
             "file",
             "data"
           ],
           "properties" : {
+            "path": {
+              "type" : "string",
+              "description" : "The path to the file containing the text value."
+            },
             "data" : {
               "$ref" : "#/definitions/textualType"
             },

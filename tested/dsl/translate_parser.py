@@ -67,7 +67,7 @@ from tested.testsuite import (
     TextBuiltin,
     TextData,
     TextOutputChannel,
-    ValueOutputChannel,
+    ValueOutputChannel, TextChannelType,
 )
 from tested.utils import get_args, recursive_dict_merge
 
@@ -590,8 +590,12 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
         return_channel = IgnoredChannel.IGNORED if "statement" in testcase else None
     else:
         if "stdin" in testcase:
-            assert isinstance(testcase["stdin"], str)
-            stdin = TextData(data=_ensure_trailing_newline(testcase["stdin"]))
+            if isinstance(testcase["stdin"], dict):
+                path = testcase["stdin"].get("path")
+                stdin = TextData(data=path, type=TextChannelType.FILE)
+            else:
+                assert isinstance(testcase["stdin"], str)
+                stdin = TextData(data=_ensure_trailing_newline(testcase["stdin"]))
         else:
             stdin = EmptyChannel.NONE
         arguments = testcase.get("arguments", [])
