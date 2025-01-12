@@ -445,16 +445,22 @@ def _convert_text_output_channel(
 ) -> TextOutputChannel:
     # Get the config applicable to this level.
     # Either attempt to get it from an object, or using the inherited options as is.
+    path = None
+
     if isinstance(stream, str):
         config = context.config.get(config_name, dict())
         raw_data = stream
     else:
         assert isinstance(stream, dict)
-        config = context.merge_inheritable_with_specific_config(stream, config_name)
-        raw_data = str(stream["data"])
+        if (path := stream.get("path")) is not None:
+            config = context.config.get(config_name, dict())
+            raw_data = path
+        else:
+            config = context.merge_inheritable_with_specific_config(stream, config_name)
+            raw_data = str(stream["data"])
 
     # Normalize the data if necessary.
-    if config.get("normalizeTrailingNewlines", True):
+    if config.get("normalizeTrailingNewlines", True) and path is None:
         data = _ensure_trailing_newline(raw_data)
     else:
         data = raw_data
@@ -464,10 +470,18 @@ def _convert_text_output_channel(
     else:
         assert isinstance(stream, dict)
         if "oracle" not in stream or stream["oracle"] == "builtin":
+            if path is not None:
+                return TextOutputChannel(
+                    data=data, oracle=GenericTextOracle(options=config), type=TextChannelType.FILE
+                )
             return TextOutputChannel(
                 data=data, oracle=GenericTextOracle(options=config)
             )
         elif stream["oracle"] == "custom_check":
+            if path is not None:
+                return TextOutputChannel(
+                    data=data, oracle=_convert_custom_check_oracle(stream), type=TextChannelType.FILE
+                )
             return TextOutputChannel(
                 data=data, oracle=_convert_custom_check_oracle(stream)
             )
@@ -592,6 +606,7 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
         if "stdin" in testcase:
             if isinstance(testcase["stdin"], dict):
                 path = testcase["stdin"].get("path")
+                assert isinstance(path, str)
                 stdin = TextData(data=path, type=TextChannelType.FILE)
             else:
                 assert isinstance(testcase["stdin"], str)
