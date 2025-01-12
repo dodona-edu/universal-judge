@@ -1172,7 +1172,7 @@ def test_additional_properties_are_not_allowed():
 def test_files_are_propagated():
     yaml_str = """
 - tab: "Config ctx"
-  files:
+  in_files:
     - name: "test"
       path: "test.md"
     - name: "two"
@@ -1182,7 +1182,7 @@ def test_files_are_propagated():
     stdout: "3.34"
   - arguments: [ '-a', '2.125', '1.212' ]
     stdout: "3.337"
-    files:
+    in_files:
         - name: "test"
           path: "twooo.md"
     """
