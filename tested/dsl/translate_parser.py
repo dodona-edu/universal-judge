@@ -65,9 +65,10 @@ from tested.testsuite import (
     Tab,
     Testcase,
     TextBuiltin,
+    TextChannelType,
     TextData,
     TextOutputChannel,
-    ValueOutputChannel, TextChannelType,
+    ValueOutputChannel,
 )
 from tested.utils import get_args, recursive_dict_merge
 
@@ -454,7 +455,7 @@ def _convert_text_output_channel(
         assert isinstance(stream, dict)
         if (path := stream.get("path")) is not None:
             config = context.config.get(config_name, dict())
-            raw_data = path
+            raw_data = str(path)
         else:
             config = context.merge_inheritable_with_specific_config(stream, config_name)
             raw_data = str(stream["data"])
@@ -472,7 +473,9 @@ def _convert_text_output_channel(
         if "oracle" not in stream or stream["oracle"] == "builtin":
             if path is not None:
                 return TextOutputChannel(
-                    data=data, oracle=GenericTextOracle(options=config), type=TextChannelType.FILE
+                    data=data,
+                    oracle=GenericTextOracle(options=config),
+                    type=TextChannelType.FILE,
                 )
             return TextOutputChannel(
                 data=data, oracle=GenericTextOracle(options=config)
@@ -480,7 +483,9 @@ def _convert_text_output_channel(
         elif stream["oracle"] == "custom_check":
             if path is not None:
                 return TextOutputChannel(
-                    data=data, oracle=_convert_custom_check_oracle(stream), type=TextChannelType.FILE
+                    data=data,
+                    oracle=_convert_custom_check_oracle(stream),
+                    type=TextChannelType.FILE,
                 )
             return TextOutputChannel(
                 data=data, oracle=_convert_custom_check_oracle(stream)
