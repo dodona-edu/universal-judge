@@ -1,7 +1,7 @@
 - tab: "Test"
   testcases:
     - statement: echo_function("result.txt", "Hallo")
-      file:
-        content: "contents.txt"
-        location: "result.txt"
+      out_files:
+        path_expected: "contents.txt"
+        path_generated: "result.txt"
         oracle: builtin
