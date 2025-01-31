@@ -134,28 +134,34 @@ def evaluate_file(
             messages=[message],
         )
 
-    expected_path = f"{config.bundle.config.resources}/{channel.expected_path}"
+    expected = []
+    for expected_path in channel.expected_path:
+        expected_path = f"{config.bundle.config.resources}/{expected_path}"
 
-    try:
-        with open(expected_path, "r") as file:
-            expected = file.read()
-    except FileNotFoundError:
-        raise ValueError(f"File {expected_path} not found in resources.")
+        try:
+            with open(expected_path, "r") as file:
+                expected.append(file.read())
+        except FileNotFoundError:
+            raise ValueError(f"File {expected_path} not found in resources.")
+    expected = '\n'.join(expected)
 
-    actual_path = config.context_dir / channel.actual_path
+    actual = []
+    for actual_path in channel.actual_path:
+        actual_path = config.context_dir / actual_path
 
-    try:
-        with open(str(actual_path), "r") as file:
-            actual = file.read()
-    except FileNotFoundError:
-        return OracleResult(
-            result=StatusMessage(
-                enum=Status.RUNTIME_ERROR,
-                human=get_i18n_string("oracles.text.file.not-found"),
-            ),
-            readable_expected=expected,
-            readable_actual="",
-        )
+        try:
+            with open(str(actual_path), "r") as file:
+                actual.append(file.read())
+        except FileNotFoundError:
+            return OracleResult(
+                result=StatusMessage(
+                    enum=Status.RUNTIME_ERROR,
+                    human=get_i18n_string("oracles.text.file.not-found"),
+                ),
+                readable_expected=expected,
+                readable_actual="",
+            )
+    actual = '\n'.join(actual)
 
     if options["mode"] == "full":
         return compare_text(options, expected, actual)

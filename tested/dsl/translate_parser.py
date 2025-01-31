@@ -255,9 +255,9 @@ class DslContext:
             return self
 
         the_files = self.files
-        if "in_files" in new_level:
-            assert isinstance(new_level["in_files"], list)
-            additional_files = {_convert_file(f) for f in new_level["in_files"]}
+        if "input_files" in new_level:
+            assert isinstance(new_level["input_files"], list)
+            additional_files = {_convert_file(f) for f in new_level["input_files"]}
             the_files = list(set(self.files) | additional_files)
 
         the_config = self.config
@@ -496,13 +496,21 @@ def _convert_text_output_channel(
 def _convert_file_output_channel(
     stream: YamlObject, context: DslContext, config_name: str
 ) -> FileOutputChannel:
-    assert isinstance(stream, dict)
+    expected = []
+    actual = []
+    data = stream
+    if isinstance(stream, dict):
+        data = stream["data"]
+    assert isinstance(data, list)
 
-    expected = str(stream["path_expected"])
-    actual = str(stream["path_generated"])
+    for item in stream:
+        assert isinstance(item, dict)
+        expected.append(str(item["path_expected"]))
+        actual.append(str(item["path_generated"]))
 
-    if "oracle" not in stream or stream["oracle"] == "builtin":
-        config = context.merge_inheritable_with_specific_config(stream, config_name)
+    if not isinstance(stream, dict) or "oracle" not in stream or stream["oracle"] == "builtin":
+        level = {} if not isinstance(stream, dict) else stream
+        config = context.merge_inheritable_with_specific_config(level, config_name)
         if "mode" not in config:
             config["mode"] = "full"
 
@@ -511,16 +519,16 @@ def _convert_file_output_channel(
             "line",
         ), f"The file oracle only supports modes full and line, not {config['mode']}"
         return FileOutputChannel(
-            expected_path=expected,
-            actual_path=actual,
-            oracle=GenericTextOracle(name=TextBuiltin.FILE, options=config),
-        )
+                expected_path=expected,
+                actual_path=actual,
+                oracle=GenericTextOracle(name=TextBuiltin.FILE, options=config),
+            )
     elif stream["oracle"] == "custom_check":
         return FileOutputChannel(
-            expected_path=expected,
-            actual_path=actual,
-            oracle=_convert_custom_check_oracle(stream),
-        )
+                expected_path=expected,
+                actual_path=actual,
+                oracle=_convert_custom_check_oracle(stream),
+            )
     raise TypeError(f"Unknown file oracle type: {stream['oracle']}")
 
 
@@ -630,8 +638,8 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
 
     if (stdout := testcase.get("stdout")) is not None:
         output.stdout = _convert_text_output_channel(stdout, context, "stdout")
-    if (file := testcase.get("out_files")) is not None:
-        output.file = _convert_file_output_channel(file, context, "out_files")
+    if (file := testcase.get("output_files")) is not None:
+        output.file = _convert_file_output_channel(file, context, "output_files")
     if (stderr := testcase.get("stderr")) is not None:
         output.stderr = _convert_text_output_channel(stderr, context, "stderr")
     if (exception := testcase.get("exception")) is not None:
