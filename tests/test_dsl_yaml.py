@@ -21,7 +21,6 @@ from tested.datatypes import (
 )
 from tested.dsl import parse_dsl, translate_to_test_suite
 from tested.dsl.translate_parser import load_schema_validator
-
 from tested.serialisation import (
     FunctionCall,
     NumberType,
