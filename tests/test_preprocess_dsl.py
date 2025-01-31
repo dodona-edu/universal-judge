@@ -1,6 +1,11 @@
 from tested.dsl.translate_parser import _parse_yaml
-from tested.nat_translation import validate_pre_dsl, translate_dsl, convert_to_yaml, \
-    create_enviroment, parse_value
+from tested.nat_translation import (
+    convert_to_yaml,
+    create_enviroment,
+    parse_value,
+    translate_dsl,
+    validate_pre_dsl,
+)
 
 
 def test_natural_translate_unit_test():

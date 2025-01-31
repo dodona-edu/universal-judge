@@ -20,14 +20,8 @@ from tested.datatypes import (
     StringTypes,
 )
 from tested.dsl import parse_dsl, translate_to_test_suite
-from tested.dsl.translate_parser import _parse_yaml, load_schema_validator
-from tested.nat_translation import (
-    convert_to_yaml,
-    create_enviroment,
-    parse_value,
-    translate_dsl,
-    validate_pre_dsl,
-)
+from tested.dsl.translate_parser import load_schema_validator
+
 from tested.serialisation import (
     FunctionCall,
     NumberType,
@@ -1326,5 +1320,3 @@ def test_editor_json_schema_is_valid():
     validator = load_schema_validator("schema.json")
     assert isinstance(validator.schema, dict)
     validator.check_schema(validator.schema)
-
-
