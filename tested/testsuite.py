@@ -279,8 +279,9 @@ class TextOutputChannel(TextData):
 class FileOutputChannel(WithFeatures):
     """Describes the output for files."""
 
-    expected_path: list[str]  # Paths to the file to compare to.
-    actual_path: list[str]  # Paths to the generated file (by the user code)
+    content_type: list[TextChannelType] # True is the actual content
+    content: list[str]  # Paths to the file to compare to.
+    path: list[str]  # Paths to the generated file (by the user code)
     oracle: GenericTextOracle | CustomCheckOracle = field(
         factory=lambda: GenericTextOracle(name=TextBuiltin.FILE)
     )
@@ -290,9 +291,13 @@ class FileOutputChannel(WithFeatures):
 
     def get_data_as_string(self, resources: Path) -> str:
         file_content = []
-        file_path = _resolve_path(resources, self.expected_path)
-        with open(file_path, "r") as file:
-            file_content.append(file.read())
+        for i in range(len(self.content)):
+            if self.content_type[i] == TextChannelType.FILE:
+                file_path = _resolve_path(resources, self.content[i])
+                with open(file_path, "r") as file:
+                    file_content.append(file.read())
+            else:
+                file_content.append(self.content[i])
         return '\n'.join(file_content)
 
 

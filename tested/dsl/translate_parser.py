@@ -84,6 +84,8 @@ class TestedType:
 class ExpressionString(str):
     pass
 
+class PathString(str):
+    pass
 
 class ReturnOracle(dict):
     pass
@@ -91,7 +93,7 @@ class ReturnOracle(dict):
 
 OptionDict = dict[str, int | bool]
 YamlObject = (
-    YamlDict | list | bool | float | int | str | None | ExpressionString | ReturnOracle
+    YamlDict | list | bool | float | int | str | None | ExpressionString | ReturnOracle | PathString
 )
 
 
@@ -130,6 +132,11 @@ def _expression_string(loader: yaml.Loader, node: yaml.Node) -> ExpressionString
     assert isinstance(result, str), f"An expression must be a string, got {result}"
     return ExpressionString(result)
 
+def _path_string(loader: yaml.Loader, node: yaml.Node) -> PathString:
+    result = _parse_yaml_value(loader, node)
+    assert isinstance(result, str), f"A path must be a string, got {result}"
+    return PathString(result)
+
 
 def _return_oracle(loader: yaml.Loader, node: yaml.Node) -> ReturnOracle:
     result = _parse_yaml_value(loader, node)
@@ -149,6 +156,7 @@ def _parse_yaml(yaml_stream: str) -> YamlObject:
             yaml.add_constructor("!" + actual_type, _custom_type_constructors, loader)
     yaml.add_constructor("!expression", _expression_string, loader)
     yaml.add_constructor("!oracle", _return_oracle, loader)
+    yaml.add_constructor("!path", _path_string, loader)
 
     try:
         return yaml.load(yaml_stream, loader)
@@ -187,6 +195,9 @@ def is_oracle(_checker: TypeChecker, instance: Any) -> bool:
 def is_expression(_checker: TypeChecker, instance: Any) -> bool:
     return isinstance(instance, ExpressionString)
 
+def is_path(_checker: TypeChecker, instance: Any) -> bool:
+    return isinstance(instance, PathString)
+
 
 def test(value: object) -> bool:
     if not isinstance(value, str):
@@ -208,7 +219,7 @@ def load_schema_validator(file: str = "schema-strict.json") -> Validator:
     original_validator: Type[Validator] = validator_for(schema_object)
     type_checker = original_validator.TYPE_CHECKER.redefine(
         "oracle", is_oracle
-    ).redefine("expression", is_expression)
+    ).redefine("expression", is_expression).redefine("path", is_path)
     format_checker = original_validator.FORMAT_CHECKER
     format_checker.checks("tested-dsl-expression", SyntaxError)(test)
     tested_validator = extend_validator(original_validator, type_checker=type_checker)
@@ -496,7 +507,8 @@ def _convert_text_output_channel(
 def _convert_file_output_channel(
     stream: YamlObject, context: DslContext, config_name: str
 ) -> FileOutputChannel:
-    expected = []
+    content_type = []
+    content = []
     actual = []
     data = stream
     if isinstance(stream, dict):
@@ -505,8 +517,13 @@ def _convert_file_output_channel(
 
     for item in stream:
         assert isinstance(item, dict)
-        expected.append(str(item["path_expected"]))
-        actual.append(str(item["path_generated"]))
+        if isinstance(item["content"], PathString):
+            content_type.append(TextChannelType.FILE)
+        else:
+            content_type.append(TextChannelType.TEXT)
+
+        content.append(str(item["content"]))
+        actual.append(str(item["path"]))
 
     if not isinstance(stream, dict) or "oracle" not in stream or stream["oracle"] == "builtin":
         level = {} if not isinstance(stream, dict) else stream
@@ -519,14 +536,16 @@ def _convert_file_output_channel(
             "line",
         ), f"The file oracle only supports modes full and line, not {config['mode']}"
         return FileOutputChannel(
-                expected_path=expected,
-                actual_path=actual,
+                content_type=content_type,
+                content=content,
+                path=actual,
                 oracle=GenericTextOracle(name=TextBuiltin.FILE, options=config),
             )
     elif stream["oracle"] == "custom_check":
         return FileOutputChannel(
-                expected_path=expected,
-                actual_path=actual,
+                content_type=content_type,
+                content=content,
+                path=actual,
                 oracle=_convert_custom_check_oracle(stream),
             )
     raise TypeError(f"Unknown file oracle type: {stream['oracle']}")
@@ -617,10 +636,8 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
         return_channel = IgnoredChannel.IGNORED if "statement" in testcase else None
     else:
         if "stdin" in testcase:
-            if isinstance(testcase["stdin"], dict):
-                path = testcase["stdin"].get("path")
-                assert isinstance(path, str)
-                stdin = TextData(data=path, type=TextChannelType.FILE)
+            if isinstance(testcase["stdin"], PathString):
+                stdin = TextData(data=testcase["stdin"], type=TextChannelType.FILE)
             else:
                 assert isinstance(testcase["stdin"], str)
                 stdin = TextData(data=_ensure_trailing_newline(testcase["stdin"]))

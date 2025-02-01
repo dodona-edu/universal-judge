@@ -113,8 +113,8 @@ def test_file_show_expected_is_accepted():
     }
     """
     result = get_converter().loads(scheme, FileOutputChannel)
-    assert result.expected_path == "hallo"
-    assert result.actual_path == "hallo"
+    assert result.content == "hallo"
+    assert result.path == "hallo"
 
 
 def test_value_show_expected_is_accepted():

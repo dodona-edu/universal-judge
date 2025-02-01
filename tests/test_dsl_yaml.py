@@ -768,8 +768,8 @@ def test_file_custom_check_correct():
     assert isinstance(test.input, FunctionCall)
     assert isinstance(test.output.file, FileOutputChannel)
     assert isinstance(test.output.file.oracle, CustomCheckOracle)
-    assert test.output.file.actual_path == "test.txt"
-    assert test.output.file.expected_path == "test/hallo.txt"
+    assert test.output.file.path == "test.txt"
+    assert test.output.file.content == "test/hallo.txt"
     oracle = test.output.file.oracle
     assert oracle.function.name == "evaluate_test"
     assert oracle.function.file == Path("test.py")

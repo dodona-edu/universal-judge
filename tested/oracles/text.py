@@ -8,7 +8,8 @@ from typing import Any
 from tested.dodona import Status, StatusMessage
 from tested.internationalization import get_i18n_string
 from tested.oracles.common import OracleConfig, OracleResult
-from tested.testsuite import FileOutputChannel, OutputChannel, TextOutputChannel
+from tested.testsuite import FileOutputChannel, OutputChannel, TextOutputChannel, \
+    TextChannelType
 
 
 def _is_number(string: str) -> float | None:
@@ -41,8 +42,7 @@ def _file_defaults(config: OracleConfig) -> dict:
         raise ValueError(f"Unknown mode for file oracle: {defaults['mode']}")
     return defaults
 
-
-def compare_text(options: dict[str, Any], expected: str, actual: str) -> OracleResult:
+def _text_comparison(options: dict[str, Any], expected: str, actual: str) -> (bool, str):
     # Temporary variables that may modified by the evaluation options,
     # Don't modify the actual values, otherwise there maybe confusion with the
     # solution submitted by the student
@@ -61,15 +61,15 @@ def compare_text(options: dict[str, Any], expected: str, actual: str) -> OracleR
         expected_float = float(expected_eval.strip())
         if options["applyRounding"]:
             numbers = int(options["roundTo"])
-            # noinspection PyUnboundLocalVariable
             actual_float = round(actual_float, numbers)
             expected_float = round(expected_float, numbers)
-        # noinspection PyUnboundLocalVariable
-        result = math.isclose(actual_float, expected_float)
-        expected = str(expected_float)
-    else:
-        result = actual_eval == expected_eval
+        return math.isclose(actual_float, expected_float), str(expected_float)
 
+    return actual_eval == expected_eval, expected
+
+def compare_text(options: dict[str, Any], expected: str, actual: str) -> OracleResult:
+
+    result, expected = _text_comparison(options, expected, actual)
     return OracleResult(
         result=StatusMessage(enum=Status.CORRECT if result else Status.WRONG),
         readable_expected=str(expected),
@@ -134,48 +134,63 @@ def evaluate_file(
             messages=[message],
         )
 
-    expected = []
-    for expected_path in channel.expected_path:
-        expected_path = f"{config.bundle.config.resources}/{expected_path}"
-
-        try:
-            with open(expected_path, "r") as file:
-                expected.append(file.read())
-        except FileNotFoundError:
-            raise ValueError(f"File {expected_path} not found in resources.")
-    expected = '\n'.join(expected)
-
     actual = []
-    for actual_path in channel.actual_path:
-        actual_path = config.context_dir / actual_path
+    expected = []
+    file_not_found = False
+    for i in range(len(channel.content)):
+        actual_path = config.context_dir / channel.path[i]
+
+        if channel.content_type[i] == TextChannelType.FILE:
+            expected_path = f"{config.bundle.config.resources}/{channel.content[i]}"
+            try:
+                with open(expected_path, "r") as file:
+                    expected.append(file.read())
+            except FileNotFoundError:
+                raise ValueError(f"File {expected_path} not found in resources.")
+        else:
+            expected.append(channel.content[i])
 
         try:
             with open(str(actual_path), "r") as file:
                 actual.append(file.read())
         except FileNotFoundError:
-            return OracleResult(
-                result=StatusMessage(
-                    enum=Status.RUNTIME_ERROR,
-                    human=get_i18n_string("oracles.text.file.not-found"),
-                ),
-                readable_expected=expected,
-                readable_actual="",
-            )
-    actual = '\n'.join(actual)
+            file_not_found = True
+
+    actual_string = '\n'.join(actual)
+    expected_string = '\n'.join(expected)
+    if file_not_found:
+        return OracleResult(
+            result=StatusMessage(
+                enum=Status.RUNTIME_ERROR,
+                human=get_i18n_string("oracles.text.file.not-found"),
+            ),
+            readable_expected=expected_string,
+            readable_actual=actual_string,
+        )
+
+    result = True
 
     if options["mode"] == "full":
-        return compare_text(options, expected, actual)
+        for i in range(len(expected)):
+            expected_value = expected[i]
+            actual_value = actual[i]
+            new_result, expected[i] = _text_comparison(options, expected_value, actual_value)
+            result = result and new_result
     else:
         assert options["mode"] == "line"
-        strip_newlines = options.get("stripNewlines", False)
-        expected_lines = expected.splitlines(keepends=not strip_newlines)
-        actual_lines = actual.splitlines(keepends=not strip_newlines)
-        correct = len(actual_lines) == len(expected_lines)
-        for expected_line, actual_line in zip(expected_lines, actual_lines):
-            r = compare_text(options, expected_line, actual_line)
-            correct = correct and r.result.enum == Status.CORRECT
-        return OracleResult(
-            result=StatusMessage(enum=Status.CORRECT if correct else Status.WRONG),
-            readable_expected=expected,
-            readable_actual=actual,
-        )
+        for i in range(len(expected)):
+            expected_value = expected[i]
+            actual_value = actual[i]
+            strip_newlines = options.get("stripNewlines", False)
+            expected_lines = expected_value.splitlines(keepends=not strip_newlines)
+            actual_lines = actual_value.splitlines(keepends=not strip_newlines)
+            correct = len(actual_lines) == len(expected_lines)
+            for expected_line, actual_line in zip(expected_lines, actual_lines):
+                new_result, _ = _text_comparison(options, expected_line, actual_line)
+                correct = correct and new_result
+
+    return OracleResult(
+        result=StatusMessage(enum=Status.CORRECT if result else Status.WRONG),
+        readable_expected='\n'.join(expected),
+        readable_actual=actual_string,
+    )
