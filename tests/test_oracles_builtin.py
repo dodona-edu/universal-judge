@@ -148,9 +148,7 @@ def test_file_oracle_full_wrong(
     mock_opener = mocker.mock_open()
     mock_opener.side_effect = mock_files
     mocker.patch("builtins.open", mock_opener)
-    channel = FileOutputChannel(
-        content="expected.txt", path="expected.txt"
-    )
+    channel = FileOutputChannel(content="expected.txt", path="expected.txt")
     result = evaluate_file(config, channel, "")
     s.assert_called_once_with(ANY, "expected\nexpected", "actual\nactual")
     assert result.result.enum == Status.WRONG
@@ -170,9 +168,7 @@ def test_file_oracle_full_correct(
     mock_opener = mocker.mock_open()
     mock_opener.side_effect = mock_files
     mocker.patch("builtins.open", mock_opener)
-    channel = FileOutputChannel(
-        content="expected.txt", path="expected.txt"
-    )
+    channel = FileOutputChannel(content="expected.txt", path="expected.txt")
     result = evaluate_file(config, channel, "")
     s.assert_called_once_with(ANY, "expected\nexpected", "expected\nexpected")
     assert result.result.enum == Status.CORRECT
@@ -194,9 +190,7 @@ def test_file_oracle_line_wrong(
     mock_opener = mocker.mock_open()
     mock_opener.side_effect = mock_files
     mocker.patch("builtins.open", mock_opener)
-    channel = FileOutputChannel(
-        content="expected.txt", path="expected.txt"
-    )
+    channel = FileOutputChannel(content="expected.txt", path="expected.txt")
     result = evaluate_file(config, channel, "")
     s.assert_any_call(ANY, "expected", "actual")
     s.assert_any_call(ANY, "expected2", "actual2")
@@ -220,9 +214,7 @@ def test_file_oracle_line_correct(
     mock_opener = mocker.mock_open()
     mock_opener.side_effect = mock_files
     mocker.patch("builtins.open", mock_opener)
-    channel = FileOutputChannel(
-        content="expected.txt", path="expected.txt"
-    )
+    channel = FileOutputChannel(content="expected.txt", path="expected.txt")
     result = evaluate_file(config, channel, "")
     s.assert_any_call(ANY, "expected", "expected")
     s.assert_any_call(ANY, "expected2", "expected2")
@@ -246,9 +238,7 @@ def test_file_oracle_strip_lines_correct(
     mock_opener = mocker.mock_open()
     mock_opener.side_effect = mock_files
     mocker.patch("builtins.open", mock_opener)
-    channel = FileOutputChannel(
-        content="expected.txt", path="expected.txt"
-    )
+    channel = FileOutputChannel(content="expected.txt", path="expected.txt")
     result = evaluate_file(config, channel, "")
     s.assert_any_call(ANY, "expected", "expected")
     s.assert_any_call(ANY, "expected2", "expected2")
@@ -272,9 +262,7 @@ def test_file_oracle_dont_strip_lines_correct(
     mock_opener = mocker.mock_open()
     mock_opener.side_effect = mock_files
     mocker.patch("builtins.open", mock_opener)
-    channel = FileOutputChannel(
-        content="expected.txt", path="expected.txt"
-    )
+    channel = FileOutputChannel(content="expected.txt", path="expected.txt")
     result = evaluate_file(config, channel, "")
     s.assert_any_call(ANY, "expected\n", "expected\n")
     s.assert_any_call(ANY, "expected2\n", "expected2\n")

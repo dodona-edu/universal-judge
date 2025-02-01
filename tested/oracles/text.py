@@ -8,8 +8,12 @@ from typing import Any
 from tested.dodona import Status, StatusMessage
 from tested.internationalization import get_i18n_string
 from tested.oracles.common import OracleConfig, OracleResult
-from tested.testsuite import FileOutputChannel, OutputChannel, TextOutputChannel, \
-    TextChannelType
+from tested.testsuite import (
+    FileOutputChannel,
+    OutputChannel,
+    TextChannelType,
+    TextOutputChannel,
+)
 
 
 def _is_number(string: str) -> float | None:
@@ -42,7 +46,10 @@ def _file_defaults(config: OracleConfig) -> dict:
         raise ValueError(f"Unknown mode for file oracle: {defaults['mode']}")
     return defaults
 
-def _text_comparison(options: dict[str, Any], expected: str, actual: str) -> (bool, str):
+
+def _text_comparison(
+    options: dict[str, Any], expected: str, actual: str
+) -> tuple[bool, str]:
     # Temporary variables that may modified by the evaluation options,
     # Don't modify the actual values, otherwise there maybe confusion with the
     # solution submitted by the student
@@ -66,6 +73,7 @@ def _text_comparison(options: dict[str, Any], expected: str, actual: str) -> (bo
         return math.isclose(actual_float, expected_float), str(expected_float)
 
     return actual_eval == expected_eval, expected
+
 
 def compare_text(options: dict[str, Any], expected: str, actual: str) -> OracleResult:
 
@@ -134,8 +142,8 @@ def evaluate_file(
             messages=[message],
         )
 
-    actual = []
-    expected = []
+    actual_list = []
+    expected_list = []
     file_not_found = False
     for i in range(len(channel.content)):
         actual_path = config.context_dir / channel.path[i]
@@ -144,43 +152,45 @@ def evaluate_file(
             expected_path = f"{config.bundle.config.resources}/{channel.content[i]}"
             try:
                 with open(expected_path, "r") as file:
-                    expected.append(file.read())
+                    expected_list.append(file.read())
             except FileNotFoundError:
                 raise ValueError(f"File {expected_path} not found in resources.")
         else:
-            expected.append(channel.content[i])
+            expected_list.append(channel.content[i])
 
         try:
             with open(str(actual_path), "r") as file:
-                actual.append(file.read())
+                actual_list.append(file.read())
         except FileNotFoundError:
             file_not_found = True
 
-    actual_string = '\n'.join(actual)
-    expected_string = '\n'.join(expected)
+    actual = "\n".join(actual_list)
+    expected = "\n".join(expected_list)
     if file_not_found:
         return OracleResult(
             result=StatusMessage(
                 enum=Status.RUNTIME_ERROR,
                 human=get_i18n_string("oracles.text.file.not-found"),
             ),
-            readable_expected=expected_string,
-            readable_actual=actual_string,
+            readable_expected=expected,
+            readable_actual=actual,
         )
 
     result = True
 
     if options["mode"] == "full":
-        for i in range(len(expected)):
-            expected_value = expected[i]
-            actual_value = actual[i]
-            new_result, expected[i] = _text_comparison(options, expected_value, actual_value)
+        for i in range(len(expected_list)):
+            expected_value = expected_list[i]
+            actual_value = actual_list[i]
+            new_result, expected_list[i] = _text_comparison(
+                options, expected_value, actual_value
+            )
             result = result and new_result
     else:
         assert options["mode"] == "line"
-        for i in range(len(expected)):
-            expected_value = expected[i]
-            actual_value = actual[i]
+        for i in range(len(expected_list)):
+            expected_value = expected_list[i]
+            actual_value = actual_list[i]
             strip_newlines = options.get("stripNewlines", False)
             expected_lines = expected_value.splitlines(keepends=not strip_newlines)
             actual_lines = actual_value.splitlines(keepends=not strip_newlines)
@@ -191,6 +201,6 @@ def evaluate_file(
 
     return OracleResult(
         result=StatusMessage(enum=Status.CORRECT if result else Status.WRONG),
-        readable_expected='\n'.join(expected),
-        readable_actual=actual_string,
+        readable_expected="\n".join(expected_list),
+        readable_actual=actual,
     )

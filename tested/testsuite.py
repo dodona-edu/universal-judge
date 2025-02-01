@@ -279,7 +279,7 @@ class TextOutputChannel(TextData):
 class FileOutputChannel(WithFeatures):
     """Describes the output for files."""
 
-    content_type: list[TextChannelType] # True is the actual content
+    content_type: list[TextChannelType]  # True is the actual content
     content: list[str]  # Paths to the file to compare to.
     path: list[str]  # Paths to the generated file (by the user code)
     oracle: GenericTextOracle | CustomCheckOracle = field(
@@ -298,7 +298,7 @@ class FileOutputChannel(WithFeatures):
                     file_content.append(file.read())
             else:
                 file_content.append(self.content[i])
-        return '\n'.join(file_content)
+        return "\n".join(file_content)
 
 
 @fallback_field(get_converter(), {"evaluator": "oracle"})
