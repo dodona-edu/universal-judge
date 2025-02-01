@@ -194,10 +194,12 @@ def evaluate_file(
             strip_newlines = options.get("stripNewlines", False)
             expected_lines = expected_value.splitlines(keepends=not strip_newlines)
             actual_lines = actual_value.splitlines(keepends=not strip_newlines)
-            correct = len(actual_lines) == len(expected_lines)
+            result = len(actual_lines) == len(expected_lines)
             for expected_line, actual_line in zip(expected_lines, actual_lines):
+                print(f"{expected_line}: {actual_line}")
                 new_result, _ = _text_comparison(options, expected_line, actual_line)
-                correct = correct and new_result
+                print(f"{new_result}")
+                result = result and new_result
 
     return OracleResult(
         result=StatusMessage(enum=Status.CORRECT if result else Status.WRONG),
