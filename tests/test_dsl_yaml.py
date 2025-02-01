@@ -750,10 +750,11 @@ def test_file_custom_check_correct():
       contexts:
         - testcases:
             - statement: 'test()'
-              out_files:
-                path_expected: "test/hallo.txt"
+              output_files:
+                data: 
+                    - content: !path "test/hallo.txt"
+                      path: "test.txt"
                 oracle: "custom_check"
-                path_generated: "test.txt"
                 name: "evaluate_test"
                 file: "test.py"
     """
@@ -768,8 +769,8 @@ def test_file_custom_check_correct():
     assert isinstance(test.input, FunctionCall)
     assert isinstance(test.output.file, FileOutputChannel)
     assert isinstance(test.output.file.oracle, CustomCheckOracle)
-    assert test.output.file.path == "test.txt"
-    assert test.output.file.content == "test/hallo.txt"
+    assert test.output.file.path[0] == "test.txt"
+    assert test.output.file.content[0] == "test/hallo.txt"
     oracle = test.output.file.oracle
     assert oracle.function.name == "evaluate_test"
     assert oracle.function.file == Path("test.py")
@@ -1172,7 +1173,7 @@ def test_additional_properties_are_not_allowed():
 def test_files_are_propagated():
     yaml_str = """
 - tab: "Config ctx"
-  in_files:
+  input_files:
     - name: "test"
       path: "test.md"
     - name: "two"
@@ -1182,7 +1183,7 @@ def test_files_are_propagated():
     stdout: "3.34"
   - arguments: [ '-a', '2.125', '1.212' ]
     stdout: "3.337"
-    in_files:
+    input_files:
         - name: "test"
           path: "twooo.md"
     """

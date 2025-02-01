@@ -279,7 +279,7 @@ class TextOutputChannel(TextData):
 class FileOutputChannel(WithFeatures):
     """Describes the output for files."""
 
-    content_type: list[TextChannelType]  # True is the actual content
+    content_type: list[TextChannelType]
     content: list[str]  # Paths to the file to compare to.
     path: list[str]  # Paths to the generated file (by the user code)
     oracle: GenericTextOracle | CustomCheckOracle = field(
