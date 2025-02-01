@@ -461,12 +461,18 @@ def _convert_text_output_channel(
 
     if isinstance(stream, str):
         config = context.config.get(config_name, dict())
+        if isinstance(stream, PathString):
+            path = stream
         raw_data = stream
     else:
         assert isinstance(stream, dict)
-        if (path := stream.get("path")) is not None:
+        data = stream.get("content", stream.get("data"))
+        assert data is not None
+
+        if isinstance(data, PathString):
+            path = data
             config = context.config.get(config_name, dict())
-            raw_data = str(path)
+            raw_data = data
         else:
             config = context.merge_inheritable_with_specific_config(stream, config_name)
             raw_data = str(stream["data"])
@@ -478,7 +484,15 @@ def _convert_text_output_channel(
         data = raw_data
 
     if isinstance(stream, str):
-        return TextOutputChannel(data=data, oracle=GenericTextOracle(options=config))
+        if path is not None:
+            return TextOutputChannel(
+                data=data,
+                oracle=GenericTextOracle(options=config),
+                type=TextChannelType.FILE,
+            )
+        return TextOutputChannel(
+            data=data, oracle=GenericTextOracle(options=config)
+        )
     else:
         assert isinstance(stream, dict)
         if "oracle" not in stream or stream["oracle"] == "builtin":

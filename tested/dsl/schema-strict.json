@@ -527,14 +527,13 @@
             },
             {
               "required" : [
-                "path"
+                "content"
               ]
             }
           ],
           "properties" : {
-            "path": {
-              "type" : "string",
-              "description" : "The path to the file containing the text value."
+            "content": {
+              "$ref" : "#/definitions/textualType"
             },
             "data" : {
               "$ref" : "#/definitions/textualType"
@@ -562,19 +561,13 @@
               "required" : [
                 "oracle",
                 "file",
-                "path"
+                "content"
               ]
             }
           ],
-          "required" : [
-            "oracle",
-            "file",
-            "data"
-          ],
           "properties" : {
-            "path": {
-              "type" : "string",
-              "description" : "The path to the file containing the text value."
+            "content": {
+              "$ref" : "#/definitions/textualType"
             },
             "data" : {
               "$ref" : "#/definitions/textualType"
