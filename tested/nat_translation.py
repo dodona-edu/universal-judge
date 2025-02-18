@@ -16,7 +16,7 @@ from tested.dsl.translate_parser import (
     _validate_dsl,
     _validate_testcase_combinations,
     convert_validation_error_to_group,
-    load_schema_validator,
+    load_schema_validator, visit_yaml_object,
 )
 
 
@@ -46,7 +46,7 @@ def validate_pre_dsl(dsl_object: YamlObject):
 
 
 def natural_language_map_translation(value: YamlObject, language: str):
-    if isinstance(value, NaturalLanguageMap):
+    if visit_yaml_object(value, "NaturalLanguageMap"):
         assert language in value
         value = value[language]
     return value
@@ -58,17 +58,17 @@ def translate_input_files(
     if (files := dsl_object.get("files")) is not None:
         # Translation map can happen at the top level.
         files = natural_language_map_translation(files, language)
-        assert isinstance(files, list)
+        assert visit_yaml_object(files, "list")
         for i in range(len(files)):
             file = files[i]
 
             # Do the formatting.
-            if isinstance(file, dict):
+            if visit_yaml_object(file, "dict"):
                 name = file["name"]
-                assert isinstance(name, str)
+                assert visit_yaml_object(name, "str")
                 file["name"] = format_string(name, flattened_stack, env)
                 url = file["url"]
-                assert isinstance(url, str)
+                assert visit_yaml_object(url, "str")
                 file["url"] = format_string(url, flattened_stack, env)
             files[i] = file
 
@@ -81,11 +81,11 @@ def parse_value(
 ) -> YamlObject:
 
     # Will format the strings in different values.
-    if isinstance(value, str):
+    if visit_yaml_object(value, "str"):
         return format_string(value, flattened_stack, env)
-    elif isinstance(value, dict):
+    elif visit_yaml_object(value, "dict"):
         return {k: parse_value(v, flattened_stack, env) for k, v in value.items()}
-    elif isinstance(value, list):
+    elif visit_yaml_object(value, "list"):
         return [parse_value(v, flattened_stack, env) for v in value]
 
     return value
@@ -117,12 +117,12 @@ def translate_io(
     # Translate NaturalLanguageMap
     io_object = natural_language_map_translation(io_object, language)
 
-    if isinstance(io_object, dict):
+    if visit_yaml_object(io_object, "dict"):
         data = natural_language_map_translation(io_object[key], language)
         io_object[key] = parse_value(data, flat_stack, env)
 
     # Perform translation based of translation stack.
-    elif isinstance(io_object, str):
+    elif visit_yaml_object(io_object, "str"):
         return format_string(io_object, flat_stack, env)
 
     return io_object
@@ -137,14 +137,12 @@ def translate_testcase(
     key_to_set = "statement" if "statement" in testcase else "expression"
     if (expr_stmt := testcase.get(key_to_set)) is not None:
         # Program language translation found
-        if isinstance(expr_stmt, ProgrammingLanguageMap):
+        if visit_yaml_object(expr_stmt, "ProgrammingLanguageMap"):
             expr_stmt = {
                 k: natural_language_map_translation(v, language)
                 for k, v in expr_stmt.items()
             }
-        elif isinstance(
-            expr_stmt, NaturalLanguageMap
-        ):  # Natural language translation found
+        elif visit_yaml_object(expr_stmt, "NaturalLanguageMap"):
             assert language in expr_stmt
             expr_stmt = expr_stmt[language]
 
@@ -155,7 +153,7 @@ def translate_testcase(
             stdin_stmt = natural_language_map_translation(stdin_stmt, language)
 
             # Perform translation based of translation stack.
-            assert isinstance(stdin_stmt, str)
+            assert visit_yaml_object(stdin_stmt, "str")
             testcase["stdin"] = format_string(stdin_stmt, flat_stack, env)
 
         # Translate NaturalLanguageMap
@@ -163,7 +161,7 @@ def translate_testcase(
         arguments = natural_language_map_translation(arguments, language)
 
         # Perform translation based of translation stack.
-        assert isinstance(arguments, list)
+        assert visit_yaml_object(arguments, "list")
         testcase["arguments"] = parse_value(arguments, flat_stack, env)
 
     if (stdout := testcase.get("stdout")) is not None:
@@ -173,7 +171,7 @@ def translate_testcase(
         # Translate NaturalLanguageMap
         file = natural_language_map_translation(file, language)
 
-        assert isinstance(file, dict)
+        assert visit_yaml_object(file, "dict")
         file["content"] = format_string(str(file["content"]), flat_stack, env)
         file["location"] = format_string(str(file["location"]), flat_stack, env)
 
@@ -188,7 +186,7 @@ def translate_testcase(
         )
 
     if (result := testcase.get("return")) is not None:
-        if isinstance(result, ReturnOracle):
+        if visit_yaml_object(result, "ReturnOracle"):
             arguments = result.get("arguments", [])
             arguments = natural_language_map_translation(arguments, language)
 
@@ -201,7 +199,7 @@ def translate_testcase(
             result["value"] = parse_value(value, flat_stack, env)
             testcase["return"] = result
 
-        elif isinstance(result, NaturalLanguageMap):
+        elif visit_yaml_object(result, "NaturalLanguageMap"):
             assert language in result
             testcase["return"] = parse_value(result[language], flat_stack, env)
         elif result is not None:
@@ -210,14 +208,14 @@ def translate_testcase(
     if (description := testcase.get("description")) is not None:
         description = natural_language_map_translation(description, language)
 
-        if isinstance(description, str):
+        if visit_yaml_object(description, "str"):
             testcase["description"] = format_string(description, flat_stack, env)
         else:
-            assert isinstance(description, dict)
+            assert visit_yaml_object(description, "dict")
             dd = description["description"]
             dd = natural_language_map_translation(dd, language)
 
-            assert isinstance(dd, str)
+            assert visit_yaml_object(dd, "str")
             description["description"] = format_string(dd, flat_stack, env)
 
     testcase = translate_input_files(testcase, language, flat_stack, env)
@@ -230,7 +228,7 @@ def translate_testcases(
 ) -> list:
     result = []
     for testcase in testcases:
-        assert isinstance(testcase, dict)
+        assert visit_yaml_object(testcase, "dict")
         result.append(translate_testcase(testcase, language, translation_stack, env))
 
     return result
@@ -241,7 +239,7 @@ def translate_contexts(
 ) -> list:
     result = []
     for context in contexts:
-        assert isinstance(context, dict)
+        assert visit_yaml_object(context, "dict")
 
         # Add translation to stack
         if "translations" in context:
@@ -249,7 +247,7 @@ def translate_contexts(
 
         key_to_set = "script" if "script" in context else "testcases"
         raw_testcases = context.get(key_to_set)
-        assert isinstance(raw_testcases, list)
+        assert visit_yaml_object(raw_testcases, "list")
         context[key_to_set] = translate_testcases(
             raw_testcases, language, translation_stack, env
         )
@@ -273,7 +271,7 @@ def translate_tab(
     name = tab.get(key_to_set)
     name = natural_language_map_translation(name, language)
 
-    assert isinstance(name, str)
+    assert visit_yaml_object(name, "str")
     flat_stack = flatten_stack(translation_stack, language)
     tab[key_to_set] = format_string(name, flat_stack, env)
 
@@ -281,27 +279,27 @@ def translate_tab(
 
     # The tab can have testcases or contexts.
     if "contexts" in tab:
-        assert isinstance(tab["contexts"], list)
+        assert visit_yaml_object(tab["contexts"], "list")
         tab["contexts"] = translate_contexts(
             tab["contexts"], language, translation_stack, env
         )
     elif "cases" in tab:
         assert "unit" in tab
         # We have testcases N.S. / contexts O.S.
-        assert isinstance(tab["cases"], list)
+        assert visit_yaml_object(tab["cases"], "list")
         tab["cases"] = translate_contexts(
             tab["cases"], language, translation_stack, env
         )
     elif "testcases" in tab:
         # We have scripts N.S. / testcases O.S.
         assert "tab" in tab
-        assert isinstance(tab["testcases"], list)
+        assert visit_yaml_object(tab["testcases"], "list")
         tab["testcases"] = translate_testcases(
             tab["testcases"], language, translation_stack, env
         )
     else:
         assert "scripts" in tab
-        assert isinstance(tab["scripts"], list)
+        assert visit_yaml_object(tab["scripts"], "list")
         tab["scripts"] = translate_testcases(
             tab["scripts"], language, translation_stack, env
         )
@@ -316,7 +314,7 @@ def translate_tabs(
 
     result = []
     for tab in dsl_list:
-        assert isinstance(tab, dict)
+        assert visit_yaml_object(tab, "dict")
 
         if "translations" in tab:
             translation_stack.append(tab["translations"])
@@ -343,13 +341,13 @@ def translate_dsl(dsl_object: YamlObject, language: str) -> YamlObject:
 
     env = create_enviroment()
 
-    if isinstance(dsl_object, list):
+    if visit_yaml_object(dsl_object,"lists"):
         return translate_tabs(dsl_object, language, env)
     else:
-        assert isinstance(dsl_object, dict)
+        assert visit_yaml_object(dsl_object,"dict")
         key_to_set = "units" if "units" in dsl_object else "tabs"
         tab_list = dsl_object.get(key_to_set)
-        assert isinstance(tab_list, list)
+        assert visit_yaml_object(tab_list,"list")
         translation_stack = []
         if "translations" in dsl_object:
             translation_stack.append(dsl_object["translations"])
