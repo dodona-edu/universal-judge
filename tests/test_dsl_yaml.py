@@ -88,7 +88,8 @@ tabs:
   - arguments: [ "--arg", "argument" ]
     stdin: !path "input.text"
     stdout: !path "output.text"
-    stderr: !path "error.text"
+    stderr: 
+      content: !path "error.text"
     exit_code: 1
     """
     json_str = translate_to_test_suite(yaml_str)
