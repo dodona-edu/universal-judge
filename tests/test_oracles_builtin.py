@@ -160,6 +160,7 @@ def test_file_oracle_full_wrong(
     assert result.readable_expected == "expected\nexpected"
     assert result.readable_actual == "actual\nactual"
 
+
 def test_file_oracle_full_correct(
     tmp_path: Path, pytestconfig: pytest.Config, mocker: MockerFixture
 ):
@@ -191,7 +192,12 @@ def test_file_oracle_full_correct_with_mixed_content(
     s = mocker.spy(tested.oracles.text, name="_text_comparison")  # type: ignore[reportAttributeAccessIssue]
     mock_files = [
         mocker.mock_open(read_data=content).return_value
-        for content in ["expected\nexpected", "expected\nexpected", "expected\nexpected", "expected\nexpected"]
+        for content in [
+            "expected\nexpected",
+            "expected\nexpected",
+            "expected\nexpected",
+            "expected\nexpected",
+        ]
     ]
     mock_opener = mocker.mock_open()
     mock_opener.side_effect = mock_files
