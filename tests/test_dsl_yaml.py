@@ -38,6 +38,7 @@ from tested.testsuite import (
     LanguageLiterals,
     LanguageSpecificOracle,
     SupportedLanguage,
+    TextChannelType,
     TextOutputChannel,
     ValueOutputChannel,
     parse_test_suite,
@@ -69,9 +70,45 @@ tabs:
     tc = context.testcases[0]
     assert tc.is_main_testcase()
     assert tc.input.stdin.data == "Input string\n"
+    assert tc.input.stdin.type == TextChannelType.TEXT
     assert tc.input.arguments == ["--arg", "argument"]
     assert tc.output.stderr.data == "Error string\n"
+    assert tc.output.stderr.type == TextChannelType.TEXT
     assert tc.output.stdout.data == "Output string\n"
+    assert tc.output.stdout.type == TextChannelType.TEXT
+    assert tc.output.exit_code.value == 1
+
+
+def test_parse_one_tab_ctx_with_files():
+    yaml_str = """
+namespace: "solution"
+tabs:
+- tab: "Ctx"
+  testcases:
+  - arguments: [ "--arg", "argument" ]
+    stdin: !path "input.text"
+    stdout: !path "output.text"
+    stderr: !path "error.text"
+    exit_code: 1
+    """
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    assert suite.namespace == "solution"
+    assert len(suite.tabs) == 1
+    tab = suite.tabs[0]
+    assert tab.name == "Ctx"
+    assert len(tab.contexts) == 1
+    context = tab.contexts[0]
+    assert len(context.testcases) == 1
+    tc = context.testcases[0]
+    assert tc.is_main_testcase()
+    assert tc.input.stdin.data == "input.text"
+    assert tc.input.stdin.type == TextChannelType.FILE
+    assert tc.input.arguments == ["--arg", "argument"]
+    assert tc.output.stderr.data == "error.text"
+    assert tc.output.stderr.type == TextChannelType.FILE
+    assert tc.output.stdout.data == "output.text"
+    assert tc.output.stdout.type == TextChannelType.FILE
     assert tc.output.exit_code.value == 1
 
 

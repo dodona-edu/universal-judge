@@ -10,9 +10,10 @@ from tested.testsuite import (
     ExitCodeOutputChannel,
     FileOutputChannel,
     MainInput,
+    TextChannelType,
     TextData,
     TextOutputChannel,
-    ValueOutputChannel, TextChannelType,
+    ValueOutputChannel,
 )
 
 
@@ -34,8 +35,8 @@ def test_text_output_is_compatible_oracle():
 def test_file_output_is_compatible_oracle():
     old_structure = {
         "content_type": [TextChannelType.TEXT],
-        "content":      ["some content"],
-        "path":         ["output.py"],
+        "content": ["some content"],
+        "path": ["output.py"],
         "evaluator": {
             "function": {"file": "evaluate.py"},
             "type": "custom_check",
