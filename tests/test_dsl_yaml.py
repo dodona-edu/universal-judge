@@ -782,7 +782,7 @@ def test_value_built_in_checks_implied():
     )
 
 
-def test_file_custom_check_correct():
+def test_output_files_custom_check_correct():
     yaml_str = f"""
     - tab: 'Test'
       contexts:
@@ -792,6 +792,8 @@ def test_file_custom_check_correct():
                 data: 
                     - content: !path "test/hallo.txt"
                       path: "test.txt"
+                    - content: "Hallo world!"
+                      path: "test2.txt"  
                 oracle: "custom_check"
                 name: "evaluate_test"
                 file: "test.py"
@@ -809,6 +811,10 @@ def test_file_custom_check_correct():
     assert isinstance(test.output.file.oracle, CustomCheckOracle)
     assert test.output.file.path[0] == "test.txt"
     assert test.output.file.content[0] == "test/hallo.txt"
+    assert test.output.file.content_type[0] == TextChannelType.FILE
+    assert test.output.file.path[1] == "test2.txt"
+    assert test.output.file.content[1] == "Hallo world!"
+    assert test.output.file.content_type[1] == TextChannelType.TEXT
     oracle = test.output.file.oracle
     assert oracle.function.name == "evaluate_test"
     assert oracle.function.file == Path("test.py")
