@@ -137,10 +137,10 @@ YamlObject = (
 
 
 # Function that calls translate if available
-def visit_yaml_object(obj: YamlObject, type: str) -> bool:
+def visit_yaml_object(obj: YamlObject, type_name: str) -> bool:
     if hasattr(obj, "get_type_name"):
-        return obj.get_type_name() == type
-    return obj.__class__.__name__ == type
+        return obj.get_type_name() == type_name
+    return obj.__class__.__name__ == type_name
 
 
 def _convert_language_dictionary(
