@@ -111,7 +111,7 @@ tabs:
     - statement: results_context = Trying(10)
     - expression: count_words(results_context)
       return: The results_context is 10
-    - expression: count
+    - expression: !expression 'count'
       return: count
     - expression: ok(10)
       return: !oracle

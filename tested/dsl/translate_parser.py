@@ -95,25 +95,30 @@ class TestedType:
 # class ProgrammingLanguageMap(dict):
 #     pass
 
+
 class ExpressionString(str):
     @staticmethod
     def get_type_name() -> str:
         return "ExpressionString"
+
 
 class ReturnOracle(dict):
     @staticmethod
     def get_type_name() -> str:
         return "ReturnOracle"
 
+
 class NaturalLanguageMap(dict):
     @staticmethod
     def get_type_name() -> str:
         return "NaturalLanguageMap"
 
+
 class ProgrammingLanguageMap(dict):
     @staticmethod
     def get_type_name() -> str:
         return "ProgrammingLanguageMap"
+
 
 OptionDict = dict[str, int | bool]
 YamlObject = (
@@ -132,7 +137,7 @@ YamlObject = (
 
 
 # Function that calls translate if available
-def visit_yaml_object(obj: YamlObject, type:str) -> bool:
+def visit_yaml_object(obj: YamlObject, type: str) -> bool:
     if hasattr(obj, "get_type_name"):
         return obj.get_type_name() == type
     return obj.__class__.__name__ == type

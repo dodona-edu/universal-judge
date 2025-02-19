@@ -16,7 +16,8 @@ from tested.dsl.translate_parser import (
     _validate_dsl,
     _validate_testcase_combinations,
     convert_validation_error_to_group,
-    load_schema_validator, visit_yaml_object,
+    load_schema_validator,
+    visit_yaml_object,
 )
 
 
@@ -341,13 +342,13 @@ def translate_dsl(dsl_object: YamlObject, language: str) -> YamlObject:
 
     env = create_enviroment()
 
-    if visit_yaml_object(dsl_object,"lists"):
+    if visit_yaml_object(dsl_object, "lists"):
         return translate_tabs(dsl_object, language, env)
     else:
-        assert visit_yaml_object(dsl_object,"dict")
+        assert visit_yaml_object(dsl_object, "dict")
         key_to_set = "units" if "units" in dsl_object else "tabs"
         tab_list = dsl_object.get(key_to_set)
-        assert visit_yaml_object(tab_list,"list")
+        assert visit_yaml_object(tab_list, "list")
         translation_stack = []
         if "translations" in dsl_object:
             translation_stack.append(dsl_object["translations"])
