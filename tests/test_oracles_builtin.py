@@ -325,6 +325,19 @@ def test_file_oracle_dont_strip_lines_correct(
     assert result.readable_expected == "expected\nexpected2\n"
     assert result.readable_actual == "expected\nexpected2\n"
 
+def test_correct_error_actual_not_found(tmp_path: Path, pytestconfig: pytest.Config):
+    config = oracle_config(
+        tmp_path, pytestconfig, {"mode": "line", "stripNewlines": False}
+    )
+    channel = FileOutputChannel(
+        content=["Hallo world!"],
+        path=["expected.txt"],
+        content_type=[TextChannelType.TEXT],
+    )
+    result = evaluate_file(config, channel, "")
+    assert result.result.enum == Status.RUNTIME_ERROR
+    assert result.result.human == "File not found."
+
 
 def test_exception_oracle_only_messages_correct(
     tmp_path: Path, pytestconfig: pytest.Config
