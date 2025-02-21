@@ -241,7 +241,7 @@ handleException (Right _) = Nothing
             if tc.testcase.is_main_testcase():
                 assert isinstance(tc.input, MainInput)
                 wrapped = [json.dumps(a) for a in tc.input.arguments]
-                result += indent + f"let mainArgs = [{' '.join(wrapped)}]\n"
+                result += indent + f"let mainArgs = [{' ,'.join(wrapped)}]\n"
                 result += (
                     indent
                     + f"result <- try (withArgs mainArgs {pu.submission_name}.main) :: IO (Either SomeException ())\n"
