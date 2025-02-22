@@ -215,8 +215,6 @@ def _parse_yaml(yaml_stream: str) -> YamlObject:
             yaml.add_constructor("!" + actual_type, _custom_type_constructors, loader)
     yaml.add_constructor("!expression", _expression_string, loader)
     yaml.add_constructor("!oracle", _return_oracle, loader)
-    yaml.add_constructor("!natural_language", _natural_language_map, loader)
-    yaml.add_constructor("!programming_language", _programming_language_map, loader)
 
     try:
         return yaml.load(yaml_stream, loader)
