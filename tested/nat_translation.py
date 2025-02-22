@@ -108,7 +108,6 @@ class StateLoader(yaml.SafeLoader):
             trans_map = flatten_stack(translation_stack)
             result = parse_dict(result, trans_map, self.env)
 
-        print(f"dict {result}")
         if children > 0:
             new_state = State(children, translation_stack, self.nat_language_indicator)
             self.state_queue.append(new_state)
@@ -124,10 +123,8 @@ class StateLoader(yaml.SafeLoader):
 
         self.state_queue[0].total_children -= 1
         if self.state_queue[0].is_finished():
-            print(f"popping state {self.state_queue[0].translations_stack}")
             self.state_queue.popleft()
 
-        # print(f"list {result}")
         return result
 
 
@@ -241,7 +238,6 @@ def translate_translations_map(trans_map: dict, language: str) -> dict:
 
 def natural_language_map(loader: StateLoader, node: yaml.Node) -> Any:
     result = parse_yaml_value(loader, node)
-    # print("nat_trans", result)
     assert isinstance(
         result, dict
     ), f"A natural language map must be an object, got {result} which is a {type(result)}."
