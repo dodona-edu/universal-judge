@@ -80,44 +80,20 @@ class TestedType:
     type: str | AllTypes
 
 
-# class ExpressionString(str):
-#     pass
-#
-#
-# class ReturnOracle(dict):
-#     pass
-#
-#
-# class NaturalLanguageMap(dict):
-#     pass
-#
-#
-# class ProgrammingLanguageMap(dict):
-#     pass
-
-
 class ExpressionString(str):
-    @staticmethod
-    def get_type_name() -> str:
-        return "ExpressionString"
+    pass
 
 
 class ReturnOracle(dict):
-    @staticmethod
-    def get_type_name() -> str:
-        return "ReturnOracle"
+    pass
 
 
 class NaturalLanguageMap(dict):
-    @staticmethod
-    def get_type_name() -> str:
-        return "NaturalLanguageMap"
+    pass
 
 
 class ProgrammingLanguageMap(dict):
-    @staticmethod
-    def get_type_name() -> str:
-        return "ProgrammingLanguageMap"
+    pass
 
 
 OptionDict = dict[str, int | bool]
@@ -134,13 +110,6 @@ YamlObject = (
     | NaturalLanguageMap
     | ProgrammingLanguageMap
 )
-
-
-# Function that calls translate if available
-def visit_yaml_object(obj: YamlObject, type_name: str) -> bool:
-    if hasattr(obj, "get_type_name"):
-        return obj.get_type_name() == type_name
-    return obj.__class__.__name__ == type_name
 
 
 def _convert_language_dictionary(

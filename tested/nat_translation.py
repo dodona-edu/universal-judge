@@ -1,34 +1,134 @@
+import copy
 import sys
 import textwrap
 from collections import deque
 from pathlib import Path
-from typing import cast, Any
+from typing import Any, Hashable
 
 import yaml
 from jinja2 import Environment
 
 from tested.datatypes import AllTypes
 from tested.dsl.translate_parser import (
-    DslValidationError,
     ExpressionString,
-    NaturalLanguageMap,
     ProgrammingLanguageMap,
     ReturnOracle,
-    YamlDict,
     YamlObject,
-    _parse_yaml,
-    _validate_dsl,
-    _validate_testcase_combinations,
-    convert_validation_error_to_group,
-    load_schema_validator,
-    visit_yaml_object,
     _custom_type_constructors,
     _expression_string,
-    _return_oracle,
-    _natural_language_map,
+    _parse_yaml,
     _programming_language_map,
+    _return_oracle,
+    _validate_dsl,
 )
 from tested.utils import get_args
+
+
+class State:
+    def __init__(
+        self, children: int, translations_stack: list, nat_language_indicator: list
+    ):
+        self.nat_language_indicator = nat_language_indicator
+        self.translations_stack = translations_stack
+        self.children = children
+        self.total_children = 0
+        for i in range(self.children):
+            if i < len(self.nat_language_indicator):
+                self.total_children += self.nat_language_indicator[i]
+            else:
+                self.total_children += 1
+
+    def is_finished(self) -> bool:
+        return self.total_children == 0
+
+
+class StateLoader(yaml.SafeLoader):
+    def __init__(self, stream):
+        super().__init__(stream)
+        self.level_state = 0
+        self.lang = ""
+        self.state_queue: deque[State] = deque()
+        start_state = State(1, [], [])
+        self.state_queue.append(start_state)
+        self.nat_language_indicator = []
+        self.env = create_enviroment()
+
+        self.tab_count = 0
+        self.tab_has_context = []
+        self.context_count = 0
+        self.tab_translations = {}
+        self.context_translations = {}
+        self.context_to_tab = {}
+
+    @staticmethod
+    def count_children(dictionary: dict):
+        return sum(1 for v in dictionary.values() if isinstance(v, list) and not v)
+
+    def set_language(self, lang: str):
+        self.lang = lang
+
+    def add_nat_language_indication(self, children: int):
+        self.nat_language_indicator.append(children)
+        if children > 0:
+            self.state_queue.pop()
+
+    def construct_mapping(
+        self, node: yaml.MappingNode, deep=False
+    ) -> dict[Hashable, Any]:
+        result = super().construct_mapping(node, deep)
+        translation_stack = copy.deepcopy(self.state_queue[0].translations_stack)
+
+        if "tabs" in result or "units" in result:
+            assert (
+                self.level_state == 0
+            ), "Tabs can't be redefined or can't be defined when a tab is already defined."
+            self.level_state = 1
+            self.state_queue.popleft()
+
+        elif "tab" in result or "unit" in result:
+            assert (
+                self.level_state < 2
+            ), "Can't define a tab when a context or testcases are already defined."
+            self.level_state = 1
+
+        elif "testcases" in result or "scripts" in result:
+
+            if self.level_state == 1:
+                self.level_state = 2
+            assert (
+                self.level_state == 2
+            ), "Can't define a context when when a tab isn't defined yet."
+
+        children = self.count_children(result)
+
+        if "translations" in result:
+            translation_stack.append(
+                translate_translations_map(result.pop("translations"), self.lang)
+            )
+            trans_map = flatten_stack(translation_stack)
+            result = parse_dict(result, trans_map, self.env)
+
+        print(f"dict {result}")
+        if children > 0:
+            new_state = State(children, translation_stack, self.nat_language_indicator)
+            self.state_queue.append(new_state)
+            self.nat_language_indicator = []
+
+        return result
+
+    def construct_sequence(self, node: yaml.SequenceNode, deep=False) -> list[Any]:
+        result = super().construct_sequence(node, deep)
+        translation_stack = self.state_queue[0].translations_stack
+        trans_map = flatten_stack(translation_stack)
+        result = parse_list(result, trans_map, self.env)
+
+        self.state_queue[0].total_children -= 1
+        if self.state_queue[0].is_finished():
+            print(f"popping state {self.state_queue[0].translations_stack}")
+            self.state_queue.popleft()
+
+        # print(f"list {result}")
+        return result
 
 
 def parse_value(
@@ -36,14 +136,28 @@ def parse_value(
 ) -> YamlObject:
 
     # Will format the strings in different values.
-    if visit_yaml_object(value, "str"):
-        return format_string(value, flattened_stack, env)
-    elif visit_yaml_object(value, "dict"):
-        return {k: parse_value(v, flattened_stack, env) for k, v in value.items()}
-    elif visit_yaml_object(value, "list") and len(value) > 0:
+    if isinstance(value, str):
+        return type(value)(format_string(value, flattened_stack, env))
+    elif isinstance(value, dict):
+        return type(value)(
+            {k: parse_value(v, flattened_stack, env) for k, v in value.items()}
+        )
+    elif isinstance(value, list) and len(value) > 0:
         return [parse_value(v, flattened_stack, env) for v in value]
 
     return value
+
+
+def parse_list(value: list[Any], flattened_stack: dict, env: Environment) -> list[Any]:
+    if len(value) > 0:
+        return [parse_value(v, flattened_stack, env) for v in value]
+    return value
+
+
+def parse_dict(
+    value: dict[Hashable, Any], flattened_stack: dict, env: Environment
+) -> dict[Hashable, Any]:
+    return {k: parse_value(v, flattened_stack, env) for k, v in value.items()}
 
 
 def flatten_stack(translation_stack: list) -> dict:
@@ -103,7 +217,7 @@ def convert_to_yaml(yaml_object: YamlObject) -> str:
     return yaml.dump(yaml_object, sort_keys=False)
 
 
-def parse_yaml_value(loader: yaml.Loader, node: yaml.Node) -> Any:
+def parse_yaml_value(loader: StateLoader, node: yaml.Node) -> Any:
     if isinstance(node, yaml.MappingNode):
         result = loader.construct_mapping(node)
     elif isinstance(node, yaml.SequenceNode):
@@ -125,109 +239,9 @@ def translate_translations_map(trans_map: dict, language: str) -> dict:
     return {k: translate_map(v, language) for k, v in trans_map.items()}
 
 
-class State:
-    def __init__(
-        self, children: int, translations_stack: list, nat_language_indicator: list
-    ):
-        self.nat_language_indicator = nat_language_indicator
-        self.translations_stack = translations_stack
-        self.children = children
-        self.total_children = 0
-        for i in range(self.children):
-            if i < len(self.nat_language_indicator):
-                self.total_children += self.nat_language_indicator[i]
-            else:
-                self.total_children += 1
-
-    def is_finished(self) -> bool:
-        return self.total_children == 0
-
-
-class StateLoader(yaml.SafeLoader):
-    def __init__(self, stream):
-        super().__init__(stream)
-        self.level_state = 0
-        self.lang = ""
-        self.state_queue: deque[State] = deque()
-        start_state = State(1, [], [])
-        self.state_queue.append(start_state)
-        self.nat_language_indicator = []
-        self.env = create_enviroment()
-
-        self.tab_count = 0
-        self.tab_has_context = []
-        self.context_count = 0
-        self.tab_translations = {}
-        self.context_translations = {}
-        self.context_to_tab = {}
-
-    @staticmethod
-    def count_children(dictionary: dict):
-        return sum(1 for v in dictionary.values() if isinstance(v, list) and not v)
-
-    def set_language(self, lang: str):
-        self.lang = lang
-
-    def add_nat_language_indication(self, children: int):
-        self.nat_language_indicator.append(children)
-
-    def construct_mapping(self, node: yaml.Node, deep=False):
-        result = super().construct_mapping(node, deep)
-        if "tabs" in result or "units" in result:
-            assert (
-                self.level_state == 0
-            ), "Tabs can't be redefined or can't be defined when a tab is already defined."
-            self.level_state = 1
-
-        elif "tab" in result or "unit" in result:
-            assert (
-                self.level_state < 2
-            ), "Can't define a tab when a context or testcases are already defined."
-            self.level_state = 1
-
-        elif "testcases" in result or "scripts" in result:
-
-            if self.level_state == 1:
-                self.level_state = 2
-            assert (
-                self.level_state == 2
-            ), "Can't define a context when when a tab isn't defined yet."
-
-        children = self.count_children(result)
-        translation_stack = self.state_queue[0].translations_stack
-        if "translations" in result:
-            translation_stack.append(
-                translate_translations_map(result.pop("translations"), self.lang)
-            )
-            trans_map = flatten_stack(translation_stack)
-            result = parse_value(result, trans_map, self.env)
-
-        if children > 0:
-            new_state = State(children, translation_stack, self.nat_language_indicator)
-            self.state_queue.append(new_state)
-            self.nat_language_indicator = []
-
-        print(f"dict {result}")
-        return result
-
-    def construct_sequence(self, node: yaml.Node, deep=False):
-        result = super().construct_sequence(node, deep)
-
-        translation_stack = self.state_queue[0].translations_stack
-        trans_map = flatten_stack(translation_stack)
-        result = parse_value(result, trans_map, self.env)
-
-        self.state_queue[0].total_children -= 1
-        if self.state_queue[0].is_finished():
-            self.state_queue.popleft()
-
-        print(f"list {result}")
-        return result
-
-
 def natural_language_map(loader: StateLoader, node: yaml.Node) -> Any:
     result = parse_yaml_value(loader, node)
-    print("nat_trans", result)
+    # print("nat_trans", result)
     assert isinstance(
         result, dict
     ), f"A natural language map must be an object, got {result} which is a {type(result)}."
@@ -263,14 +277,14 @@ def translate_yaml(yaml_stream: str, language: str) -> YamlObject:
         loader.set_language(language)
         for types in get_args(AllTypes):
             for actual_type in types:
-                yaml.add_constructor("!" + actual_type, _custom_type_constructors, loader)
-        yaml.add_constructor("!expression", _expression_string, loader)
-        yaml.add_constructor("!oracle", _return_oracle, loader)
-        yaml.add_constructor("!natural_language", natural_language_map, loader)
-        yaml.add_constructor("!programming_language", _programming_language_map, loader)
-        # Otherwise i won't have the full translations map on time
-        yaml.add_constructor(
-            yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, dict_trans, loader
+                loader.add_constructor("!" + actual_type, _custom_type_constructors)
+        loader.add_constructor("!expression", _expression_string)
+        loader.add_constructor("!oracle", _return_oracle)
+        loader.add_constructor("!natural_language", natural_language_map)
+        loader.add_constructor("!programming_language", _programming_language_map)
+        # Otherwise you won't have the full translations map on time
+        loader.add_constructor(
+            yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, dict_trans
         )
 
         return loader.get_data()

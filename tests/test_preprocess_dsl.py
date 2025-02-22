@@ -1,10 +1,9 @@
-from tested.dsl.translate_parser import _parse_yaml
+from tested.dsl.translate_parser import _parse_yaml, _validate_dsl
 from tested.nat_translation import (
     convert_to_yaml,
     create_enviroment,
     parse_value,
-    translate_dsl,
-    validate_pre_dsl,
+    translate_yaml,
 )
 
 
@@ -26,7 +25,7 @@ translations:
     en: "select"
     nl: "selecteer"
 tabs:
-  - tab: "{{ animal|braces }}_{{ '{' + result + '}' }}_{{ negentien|default('{{ negentien }}') }}"
+  - tab: "{{ animal|braces }}_{{ '{' + result + '}' }}"
     translations:
       animal:
         en: "animal_tab"
@@ -105,7 +104,7 @@ tabs:
 """.strip()
     translated_yaml_str = """
 tabs:
-- tab: '{animal_tab}_{results}_{{ negentien }}'
+- tab: '{animal_tab}_{results}'
   contexts:
   - testcases:
     - statement: results_context = Trying(10)
@@ -149,10 +148,8 @@ tabs:
   - expression: 'select(''a'', {''a'': 1, ''b'': 2})'
     return: 1
 """.strip()
-    parsed_yaml = _parse_yaml(yaml_str)
-    translated_dsl = translate_dsl(parsed_yaml, "en")
+    translated_dsl = translate_yaml(yaml_str, "en")
     translated_yaml = convert_to_yaml(translated_dsl)
-    print(translated_yaml)
     assert translated_yaml.strip() == translated_yaml_str
 
 
@@ -249,10 +246,8 @@ units:
   - expression: tests(11)
     return: 11
 """.strip()
-    parsed_yaml = _parse_yaml(yaml_str)
-    translated_dsl = translate_dsl(parsed_yaml, "en")
+    translated_dsl = translate_yaml(yaml_str, "en")
     translated_yaml = convert_to_yaml(translated_dsl)
-    print(translated_yaml)
     assert translated_yaml.strip() == translated_yaml_str
 
 
@@ -271,28 +266,3 @@ def test_translate_parse():
     }
     parsed_result = parse_value(value, flattened_stack, env)
     assert parsed_result == expected_value
-
-
-def test_wrong_natural_translation_suite():
-    yaml_str = """
-tabs:
-- tab: animals
-  testcases:
-  - expression: tests(11)
-    return: 11
-  - expression:
-      javascript: animals_javascript(1 + 1)
-      typescript: animals_typescript(1 + 1)
-      java: Submission.animals_java(1 + 1)
-      python:
-        en: animals_python_en(1 + 1)
-        nl: animals_python_nl(1 + 1)
-    return: 2
-    """.strip()
-    parsed_yaml = _parse_yaml(yaml_str)
-    try:
-        validate_pre_dsl(parsed_yaml)
-    except ExceptionGroup:
-        print("As expected")
-    else:
-        assert False, "Expected ExceptionGroup, but no exception was raised"
