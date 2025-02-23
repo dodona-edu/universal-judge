@@ -29,9 +29,8 @@ class State:
     ):
         self.nat_language_of_lists_indicator = nat_language_indicator
         self.translations_stack = translations_stack
-        self.children = children
         self.total_children = 0
-        for i in range(self.children):
+        for i in range(children):
             if i < len(self.nat_language_of_lists_indicator):
                 self.total_children += self.nat_language_of_lists_indicator[i]
             else:
@@ -219,7 +218,6 @@ def natural_language_map(loader: StateLoader, node: yaml.MappingNode) -> Any:
 
     children = loader.count_children(result)
     loader.add_nat_language_indication(children)
-
     return result[loader.lang]
 
 
