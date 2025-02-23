@@ -27,13 +27,13 @@ class State:
     def __init__(
         self, children: int, translations_stack: list, nat_language_indicator: list
     ):
-        self.nat_language_indicator = nat_language_indicator
+        self.nat_language_of_lists_indicator = nat_language_indicator
         self.translations_stack = translations_stack
         self.children = children
         self.total_children = 0
         for i in range(self.children):
-            if i < len(self.nat_language_indicator):
-                self.total_children += self.nat_language_indicator[i]
+            if i < len(self.nat_language_of_lists_indicator):
+                self.total_children += self.nat_language_of_lists_indicator[i]
             else:
                 self.total_children += 1
 
@@ -52,15 +52,10 @@ class StateLoader(yaml.SafeLoader):
         self.nat_language_indicator = []
         self.env = create_enviroment()
 
-        self.tab_count = 0
-        self.tab_has_context = []
-        self.context_count = 0
-        self.tab_translations = {}
-        self.context_translations = {}
-        self.context_to_tab = {}
-
     @staticmethod
     def count_children(dictionary: dict):
+        # The children of a dictionary will always be stored into a list that will
+        # be empty at the moment it is being parsed.
         return sum(1 for v in dictionary.values() if isinstance(v, list) and not v)
 
     def set_language(self, lang: str):
@@ -74,9 +69,12 @@ class StateLoader(yaml.SafeLoader):
     def construct_mapping(
         self, node: yaml.MappingNode, deep=False
     ) -> dict[Hashable, Any]:
+        # This method will run for each map in a YamlObject.
         result = super().construct_mapping(node, deep)
         translation_stack = copy.deepcopy(self.state_queue[0].translations_stack)
 
+        # These checks are here to make sure that the order between tabs, a tab
+        # and testcases is preserved.
         if "tabs" in result or "units" in result:
             assert (
                 self.level_state == 0
@@ -104,6 +102,8 @@ class StateLoader(yaml.SafeLoader):
             translation_stack.append(
                 translate_translations_map(result.pop("translations"), self.lang)
             )
+            # A translation already happens here because when it should wait for the
+            # list that contains this dictionary, the state will not have this dictionary.
             trans_map = flatten_stack(translation_stack)
             result = parse_dict(result, trans_map, self.env)
 
@@ -116,6 +116,9 @@ class StateLoader(yaml.SafeLoader):
 
     def construct_sequence(self, node: yaml.SequenceNode, deep=False) -> list[Any]:
         result = super().construct_sequence(node, deep)
+        # After a lot of dictionaries have been parsed, the list will be
+        # parsed containing them. It is here that the formatting will take place.
+        # This way formatting will also happen as little as possible.
         translation_stack = self.state_queue[0].translations_stack
         trans_map = flatten_stack(translation_stack)
         result = parse_list(result, trans_map, self.env)
@@ -131,7 +134,6 @@ def parse_value(
     value: YamlObject, flattened_stack: dict, env: Environment
 ) -> YamlObject:
 
-    # Will format the strings in different values.
     if isinstance(value, str):
         return type(value)(format_string(value, flattened_stack, env))
     elif isinstance(value, dict):
@@ -202,14 +204,9 @@ def convert_to_yaml(yaml_object: YamlObject) -> str:
     def programming_language_map_representer(dumper, data):
         return dumper.represent_mapping("tag:yaml.org,2002:map", dict(data))
 
-    # def represent_str(dumper, data):
-    #     return dumper.represent_scalar('tag:yaml.org,2002:str', data, style='"')
-
-    # Register the representer for the ReturnOracle object
     yaml.add_representer(ReturnOracle, oracle_representer)
     yaml.add_representer(ExpressionString, expression_representer)
     yaml.add_representer(ProgrammingLanguageMap, programming_language_map_representer)
-    # yaml.add_representer(str, represent_str)
     return yaml.dump(yaml_object, sort_keys=False)
 
 
@@ -260,7 +257,8 @@ def translate_yaml(yaml_stream: str, language: str) -> YamlObject:
         loader.add_constructor("!oracle", _return_oracle)
         loader.add_constructor("!natural_language", natural_language_map)
         loader.add_constructor("!programming_language", _programming_language_map)
-        # Otherwise you won't have the full translations map on time
+        # This line is need because otherwise there won't
+        # be a full translations map on time.
         loader.add_constructor(
             yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, dict_trans
         )
