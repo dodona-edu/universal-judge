@@ -15,9 +15,7 @@ from tests.manual_utils import assert_valid_output, configuration, execute_confi
 
 
 @pytest.mark.parametrize("language", ["haskell"])
-def test_cli_params(
-    language: str, tmp_path: Path, pytestconfig: pytest.Config
-):
+def test_cli_params(language: str, tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig,
         "dedup",
