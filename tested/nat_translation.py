@@ -17,7 +17,6 @@ from tested.dsl.translate_parser import (
     _custom_type_constructors,
     _expression_string,
     _parse_yaml,
-    _programming_language_map,
     _return_oracle,
     _validate_dsl,
 )
@@ -214,21 +213,10 @@ def convert_to_yaml(yaml_object: YamlObject) -> str:
     return yaml.dump(yaml_object, sort_keys=False)
 
 
-def parse_yaml_value(loader: StateLoader, node: yaml.Node) -> Any:
-    if isinstance(node, yaml.MappingNode):
-        result = loader.construct_mapping(node)
-    elif isinstance(node, yaml.SequenceNode):
-        result = loader.construct_sequence(node)
-    else:
-        assert isinstance(node, yaml.ScalarNode)
-        result = loader.construct_scalar(node)
-    return result
-
-
 def translate_map(value: YamlObject, language: str):
-    if isinstance(value, dict):
-        assert language in value
-        value = value[language]
+    assert isinstance(value, dict)
+    assert language in value
+    value = value[language]
     return value
 
 
@@ -236,11 +224,8 @@ def translate_translations_map(trans_map: dict, language: str) -> dict:
     return {k: translate_map(v, language) for k, v in trans_map.items()}
 
 
-def natural_language_map(loader: StateLoader, node: yaml.Node) -> Any:
-    result = parse_yaml_value(loader, node)
-    assert isinstance(
-        result, dict
-    ), f"A natural language map must be an object, got {result} which is a {type(result)}."
+def natural_language_map(loader: StateLoader, node: yaml.MappingNode) -> Any:
+    result = loader.construct_mapping(node)
 
     children = loader.count_children(result)
     loader.add_nat_language_indication(children)
@@ -248,20 +233,19 @@ def natural_language_map(loader: StateLoader, node: yaml.Node) -> Any:
     return result[loader.lang]
 
 
-def dict_trans(loader: StateLoader, node: yaml.Node):
-    result = parse_yaml_value(loader, node)
-    assert isinstance(
-        result, dict
-    ), f"A natural language map must be an object, got {result} which is a {type(result)}."
-    return result
+def _programming_language_map(
+    loader: StateLoader, node: yaml.MappingNode
+) -> ProgrammingLanguageMap:
+    result = loader.construct_mapping(node)
+    return ProgrammingLanguageMap(result)
 
 
-def seq_trans(loader: StateLoader, node: yaml.Node):
-    result = parse_yaml_value(loader, node)
-    assert isinstance(
-        result, list
-    ), f"A natural language map must be a list, got {result} which is a {type(result)}."
-    return result
+def dict_trans(loader: StateLoader, node: yaml.MappingNode) -> dict[Hashable, Any]:
+    return loader.construct_mapping(node)
+
+
+def seq_trans(loader: StateLoader, node: yaml.SequenceNode):
+    return loader.construct_sequence(node)
 
 
 def translate_yaml(yaml_stream: str, language: str) -> YamlObject:

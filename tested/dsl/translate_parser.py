@@ -79,7 +79,6 @@ class TestedType:
     value: Any
     type: str | AllTypes
 
-
 class ExpressionString(str):
     pass
 
@@ -110,7 +109,6 @@ YamlObject = (
     | NaturalLanguageMap
     | ProgrammingLanguageMap
 )
-
 
 def _convert_language_dictionary(
     original: dict[str, str]
@@ -154,24 +152,6 @@ def _return_oracle(loader: yaml.Loader, node: yaml.Node) -> ReturnOracle:
         result, dict
     ), f"A custom oracle must be an object, got {result} which is a {type(result)}."
     return ReturnOracle(result)
-
-
-def _natural_language_map(loader: yaml.Loader, node: yaml.Node) -> NaturalLanguageMap:
-    result = _parse_yaml_value(loader, node)
-    assert isinstance(
-        result, dict
-    ), f"A natural language map must be an object, got {result} which is a {type(result)}."
-    return NaturalLanguageMap(result)
-
-
-def _programming_language_map(
-    loader: yaml.Loader, node: yaml.Node
-) -> ProgrammingLanguageMap:
-    result = _parse_yaml_value(loader, node)
-    assert isinstance(
-        result, dict
-    ), f"A programming language map must be an object, got {result} which is a {type(result)}."
-    return ProgrammingLanguageMap(result)
 
 
 def _parse_yaml(yaml_stream: str) -> YamlObject:
