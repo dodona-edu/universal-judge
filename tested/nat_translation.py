@@ -214,7 +214,9 @@ def convert_to_yaml(yaml_object: YamlObject) -> str:
 
 
 def translate_map(value: YamlObject, language: str):
-    assert isinstance(value, dict)
+    assert isinstance(
+        value, dict
+    ), "The translation map does not consist of dictionaries."
     assert language in value
     value = value[language]
     return value
@@ -242,10 +244,6 @@ def _programming_language_map(
 
 def dict_trans(loader: StateLoader, node: yaml.MappingNode) -> dict[Hashable, Any]:
     return loader.construct_mapping(node)
-
-
-def seq_trans(loader: StateLoader, node: yaml.SequenceNode):
-    return loader.construct_sequence(node)
 
 
 def translate_yaml(yaml_stream: str, language: str) -> YamlObject:

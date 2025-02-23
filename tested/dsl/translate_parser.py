@@ -79,6 +79,7 @@ class TestedType:
     value: Any
     type: str | AllTypes
 
+
 class ExpressionString(str):
     pass
 
@@ -109,6 +110,7 @@ YamlObject = (
     | NaturalLanguageMap
     | ProgrammingLanguageMap
 )
+
 
 def _convert_language_dictionary(
     original: dict[str, str]
