@@ -302,4 +302,3 @@ if __name__ == "__main__":
     assert n > 1, "Expected atleast two argument (path to yaml file and language)."
 
     run(Path(sys.argv[1]), sys.argv[2])
-
