@@ -102,10 +102,9 @@ class StateLoader(yaml.SafeLoader):
             translation_stack.append(
                 translate_translations_map(result.pop("translations"), self.lang)
             )
-            # A translation already happens here because when it should wait for the
-            # list that contains this dictionary, the state will not have this dictionary.
-            trans_map = flatten_stack(translation_stack)
-            result = parse_dict(result, trans_map, self.env)
+
+        trans_map = flatten_stack(translation_stack)
+        result = parse_dict(result, trans_map, self.env)
 
         if children > 0:
             new_state = State(children, translation_stack, self.nat_language_indicator)
@@ -116,9 +115,7 @@ class StateLoader(yaml.SafeLoader):
 
     def construct_sequence(self, node: yaml.SequenceNode, deep=False) -> list[Any]:
         result = super().construct_sequence(node, deep)
-        # After a lot of dictionaries have been parsed, the list will be
-        # parsed containing them. It is here that the formatting will take place.
-        # This way formatting will also happen as little as possible.
+
         translation_stack = self.state_queue[0].translations_stack
         trans_map = flatten_stack(translation_stack)
         result = parse_list(result, trans_map, self.env)
@@ -136,12 +133,6 @@ def parse_value(
 
     if isinstance(value, str):
         return type(value)(format_string(value, flattened_stack, env))
-    elif isinstance(value, dict):
-        return type(value)(
-            {k: parse_value(v, flattened_stack, env) for k, v in value.items()}
-        )
-    elif isinstance(value, list) and len(value) > 0:
-        return [parse_value(v, flattened_stack, env) for v in value]
 
     return value
 
@@ -311,3 +302,4 @@ if __name__ == "__main__":
     assert n > 1, "Expected atleast two argument (path to yaml file and language)."
 
     run(Path(sys.argv[1]), sys.argv[2])
+

@@ -1,9 +1,7 @@
-from tested.dsl.translate_parser import _parse_yaml, _validate_dsl
 from tested.nat_translation import (
     convert_to_yaml,
     create_enviroment,
-    parse_value,
-    translate_yaml,
+    translate_yaml, parse_dict, parse_list,
 )
 
 
@@ -253,16 +251,23 @@ units:
 
 def test_translate_parse():
     env = create_enviroment()
-    flattened_stack = {"animal": "dier", "human": "mens", "number": "getal"}
+    flattened_stack = {"human": "mens", "number": "getal"}
     value = {
-        "key1": ["value1_{{animal}}", "value1_{{human}}"],
+        "key1": "value1_{{human}}",
         "key2": "value2_{{number}}",
         "key3": 10,
     }
     expected_value = {
-        "key1": ["value1_dier", "value1_mens"],
+        "key1": "value1_mens",
         "key2": "value2_getal",
         "key3": 10,
     }
-    parsed_result = parse_value(value, flattened_stack, env)
+    parsed_result = parse_dict(value, flattened_stack, env)
+    print(parsed_result)
+    assert parsed_result == expected_value
+
+    value = ["value1_{{human}}", "value2_{{number}}",  10]
+    expected_value = ["value1_mens", "value2_getal",  10]
+    parsed_result = parse_list(value, flattened_stack, env)
+    print(parsed_result)
     assert parsed_result == expected_value
