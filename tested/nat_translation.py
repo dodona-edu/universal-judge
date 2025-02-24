@@ -81,11 +81,21 @@ class StateLoader(yaml.SafeLoader):
             self.level_state = 1
             self.state_queue.popleft()
 
+            if "translations" in result:
+                translation_stack.append(
+                    translate_translations_map(result.pop("translations"), self.lang)
+                )
+
         elif "tab" in result or "unit" in result:
             assert (
                 self.level_state < 2
             ), "Can't define a tab when a context or testcases are already defined."
             self.level_state = 1
+
+            if "translations" in result:
+                translation_stack.append(
+                    translate_translations_map(result.pop("translations"), self.lang)
+                )
 
         elif "testcases" in result or "scripts" in result:
 
@@ -95,12 +105,12 @@ class StateLoader(yaml.SafeLoader):
                 self.level_state == 2
             ), "Can't define a context when when a tab isn't defined yet."
 
-        children = self.count_children(result)
+            if "translations" in result:
+                translation_stack.append(
+                    translate_translations_map(result.pop("translations"), self.lang)
+                )
 
-        if "translations" in result:
-            translation_stack.append(
-                translate_translations_map(result.pop("translations"), self.lang)
-            )
+        children = self.count_children(result)
 
         trans_map = flatten_stack(translation_stack)
         result = parse_dict(result, trans_map, self.env)
