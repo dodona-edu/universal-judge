@@ -223,7 +223,7 @@ def translate_translations_map(trans_map: dict, language: str) -> dict:
     return {k: translate_map(v, language) for k, v in trans_map.items()}
 
 
-def natural_language_map(loader: StateLoader, node: yaml.MappingNode) -> Any:
+def _natural_language_map(loader: StateLoader, node: yaml.MappingNode) -> Any:
     result = loader.construct_mapping(node)
 
     children = loader.count_children(result)
@@ -254,7 +254,7 @@ def translate_yaml(yaml_stream: str, language: str) -> YamlObject:
                 loader.add_constructor("!" + actual_type, _custom_type_constructors)
         loader.add_constructor("!expression", _expression_string)
         loader.add_constructor("!oracle", _return_oracle)
-        loader.add_constructor("!natural_language", natural_language_map)
+        loader.add_constructor("!natural_language", _natural_language_map)
         loader.add_constructor("!programming_language", _programming_language_map)
         # This line is need because otherwise there won't
         # be a full translations map on time.
