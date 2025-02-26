@@ -13,7 +13,7 @@ from tested.configs import DodonaConfig, Options
 from tested.main import run
 from tested.testsuite import SupportedLanguage
 
-exercise_dir = "/home/niko/Ontwikkeling/universal-judge/tests/exercises/echo-function"
+exercise_dir = "/Users/tibvdm/PycharmProjects/universal-judge/tests/exercises/haskell"
 
 
 def read_config() -> DodonaConfig:
@@ -24,10 +24,10 @@ def read_config() -> DodonaConfig:
         programming_language=SupportedLanguage("haskell"),
         natural_language="nl",
         resources=Path(exercise_dir, "evaluation"),
-        source=Path(exercise_dir, "solution/correct.hs"),
+        source=Path(exercise_dir, "solution/ndeElement.hs"),
         judge=Path("."),
         workdir=Path("workdir"),
-        test_suite="two-specific.tson",
+        test_suite="ndeElement.yaml",
         options=Options(
             linter=False,
         ),

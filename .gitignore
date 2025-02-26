@@ -82,3 +82,4 @@ venv-*/
 .venv/
 node_modules/
 result/
+.data/
