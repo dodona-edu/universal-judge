@@ -498,33 +498,23 @@ def _convert_text_output_channel(
     else:
         data = raw_data
 
+    if path is not None:
+        return TextOutputChannel(
+            data=data,
+            oracle=GenericTextOracle(options=config),
+            type=TextChannelType.FILE,
+        )
+
     if isinstance(stream, str):
-        if path is not None:
-            return TextOutputChannel(
-                data=data,
-                oracle=GenericTextOracle(options=config),
-                type=TextChannelType.FILE,
-            )
         return TextOutputChannel(data=data, oracle=GenericTextOracle(options=config))
     else:
         assert isinstance(stream, dict)
         if "oracle" not in stream or stream["oracle"] == "builtin":
-            if path is not None:
-                return TextOutputChannel(
-                    data=data,
-                    oracle=GenericTextOracle(options=config),
-                    type=TextChannelType.FILE,
-                )
+
             return TextOutputChannel(
                 data=data, oracle=GenericTextOracle(options=config)
             )
         elif stream["oracle"] == "custom_check":
-            if path is not None:
-                return TextOutputChannel(
-                    data=data,
-                    oracle=_convert_custom_check_oracle(stream),
-                    type=TextChannelType.FILE,
-                )
             return TextOutputChannel(
                 data=data, oracle=_convert_custom_check_oracle(stream)
             )

@@ -196,9 +196,7 @@ def evaluate_file(
             actual_lines = actual_value.splitlines(keepends=not strip_newlines)
             result = len(actual_lines) == len(expected_lines)
             for expected_line, actual_line in zip(expected_lines, actual_lines):
-                print(f"{expected_line}: {actual_line}")
                 new_result, _ = _text_comparison(options, expected_line, actual_line)
-                print(f"{new_result}")
                 result = result and new_result
 
     return OracleResult(
