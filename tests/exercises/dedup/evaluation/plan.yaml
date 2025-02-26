@@ -1,0 +1,9 @@
+- tab: "command_line_arguments"
+  testcases:
+  - arguments: [haskell, rust, java, haskell, c, rust]
+    stdout: "c haskell java rust"
+  - arguments: ["banana", "apple", "apple", "orange", "apple", "apple", "banana", "orange"]
+    stdout: "apple banana orange"
+  - arguments: []
+    stdout: "\n"
+  
