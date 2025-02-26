@@ -10,9 +10,12 @@ on:
       - '**/*.txt'
   schedule:
     - cron: "18 21 2 * *"
+  pull_request_target:
+    types: [labeled]
 
 jobs:
   analyze:
+    if: ${{ github.event.action != 'labeled' || (github.event.action == 'labeled' && github.event.label.name == 'run tests') }}
     name: Analyze
     runs-on: ubuntu-latest
     permissions:
@@ -23,6 +26,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v2

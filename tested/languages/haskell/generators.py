@@ -252,7 +252,7 @@ handleException (Right _) = Nothing
                 )
             else:
                 assert isinstance(tc.input, PreparedTestcaseStatement)
-                # In Haskell we do not actually have statements, so we need to keep them separate.
+                # In Haskell we do not have statements, so we need to keep them separate.
                 # Additionally, exceptions with "statements" are not supported at this time.
                 if is_statement_strict(tc.input.statement):
                     result += (
@@ -262,30 +262,30 @@ handleException (Right _) = Nothing
                     )
                 else:
                     result += indent + f"result{i1} <- catch\n"
-                    result += (
-                        indent * 2
-                        + f"({convert_statement(tc.input.unwrapped_input_statement(), True)}\n"
-                    )
+                    result += indent * 2 + f"(do\n"  # Start a `do` block
                     id_result = tc.input.input_statement("r")
-                    if isinstance(id_result, Identifier):
-                        # In this case, we don't catch the value in the sendValues function.
-                        # This results in pure value instead of an IO monad, so lift the value into the monad.
-                        result += (
-                            indent * 3
-                            + f">>= \\r -> return {convert_statement(id_result)}\n"
-                        )
-                    else:
-                        result += (
-                            indent * 3 + f">>= \\r -> {convert_statement(id_result)}\n"
-                        )
                     result += (
                         indent * 3
-                        + f">> let ee = (Nothing :: Maybe SomeException) in {convert_statement(tc.exception_statement('ee'))})\n"
+                        + f"r <- {convert_statement(tc.input.unwrapped_input_statement(), True)}\n"
+                    )  # Bind the result to 'r'
+                    if isinstance(id_result, Identifier):
+                        result += (
+                            indent * 3 + f"sendValue {convert_statement(id_result)}\n"
+                        )  # Send the value if it's an identifier
+                    else:
+                        result += (
+                            indent * 3 + convert_statement(id_result) + "\n"
+                        )  # Otherwise, execute the statement
+                    result += indent * 3 + "return ()\n"  # Explicitly return unit
+                    result += indent * 2 + ") (\\e -> do\n"  # Handle exceptions
+                    result += (
+                        indent * 3
+                        + f"let ee = (Just (e :: SomeException)) in {convert_statement(tc.exception_statement('ee'))}\n"
                     )
                     result += (
-                        indent * 2
-                        + f"(\\e -> let ee = (Just (e :: SomeException)) in {convert_statement(tc.exception_statement('ee'))})\n"
-                    )
+                        indent * 3 + "return ()\n"
+                    )  # Explicitly return unit in the exception case
+                    result += indent * 2 + ")\n"  # End the `catch` block
         result += indent + ctx.after + "\n"
         result += indent + 'putStr ""\n'
 

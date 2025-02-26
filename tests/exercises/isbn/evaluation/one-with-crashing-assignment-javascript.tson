@@ -1,0 +1,88 @@
+{
+  "tabs": [
+    {
+      "name": "are_isbn",
+      "runs": [
+        {
+          "contexts": [
+            {
+              "before": {
+                "typescript": {
+                  "data": "const ex = () => {throw new Error('AssertionError');};"
+                }
+              },
+              "testcases": [
+                {
+                  "input": {
+                    "type": "sequence",
+                    "variable": "codes01",
+                    "expression": {
+                      "type": "function",
+                      "namespace": "ex",
+                      "name": "get",
+                      "arguments": []
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "are_isbn",
+                    "arguments": [
+                      "codes01"
+                    ]
+                  },
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "data": false,
+                            "type": "boolean"
+                          },
+                          {
+                            "data": true,
+                            "type": "boolean"
+                          },
+                          {
+                            "data": true,
+                            "type": "boolean"
+                          },
+                          {
+                            "data": true,
+                            "type": "boolean"
+                          },
+                          {
+                            "data": false,
+                            "type": "boolean"
+                          },
+                          {
+                            "data": false,
+                            "type": "boolean"
+                          },
+                          {
+                            "data": false,
+                            "type": "boolean"
+                          },
+                          {
+                            "data": true,
+                            "type": "boolean"
+                          },
+                          {
+                            "data": false,
+                            "type": "boolean"
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

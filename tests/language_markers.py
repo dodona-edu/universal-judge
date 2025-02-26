@@ -11,6 +11,7 @@ COMPILE_LANGUAGES = [
 ]
 ALL_SPECIFIC_LANGUAGES = COMPILE_LANGUAGES + [
     "javascript",
+    "typescript",
     "runhaskell",
 ]
 ALL_LANGUAGES = ALL_SPECIFIC_LANGUAGES + ["bash"]

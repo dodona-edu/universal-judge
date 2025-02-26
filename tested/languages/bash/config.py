@@ -38,6 +38,9 @@ class Bash(Language):
     def file_extension(self) -> str:
         return "sh"
 
+    def comment(self, text: str) -> str:
+        return f"# {text}"
+
     def initial_dependencies(self) -> list[str]:
         return []
 

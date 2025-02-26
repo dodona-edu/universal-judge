@@ -27,6 +27,9 @@ the following is supported:
 """
 
 import ast
+import collections
+import io
+import tokenize
 from decimal import Decimal
 from typing import Literal, cast, overload
 
@@ -331,6 +334,25 @@ def _translate_to_ast(node: ast.Interactive, is_return: bool) -> Statement:
         return _convert_expression(statement_or_expression.value, is_return)
     else:
         return _convert_statement(statement_or_expression)
+
+
+def extract_comment(code: str) -> str:
+    """
+    Extract the comment from the code.
+
+    :param code: The code to extract the comment from.
+    :return: The comment if it exists, otherwise an empty string.
+    """
+    comment = ""
+    tokens = tokenize.generate_tokens(io.StringIO(code).readline)
+    # The "maxlen" is 3 because, the tokenizer will always generate a NEWLINE
+    # and ENDMARKER token at the end. So a comment comes just before those 2 tokens.
+    candidates = collections.deque(tokens, maxlen=3)
+    if len(candidates):
+        candidate = candidates.popleft()
+        if candidate.type == tokenize.COMMENT:
+            comment = candidate.string.lstrip("#").strip()
+    return comment
 
 
 @overload

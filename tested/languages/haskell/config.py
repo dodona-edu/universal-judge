@@ -37,6 +37,9 @@ class Haskell(Language):
     def file_extension(self) -> str:
         return "hs"
 
+    def comment(self, text: str) -> str:
+        return f"-- {text}"
+
     def naming_conventions(self) -> dict[Conventionable, NamingConventions]:
         return {
             "namespace": "pascal_case",

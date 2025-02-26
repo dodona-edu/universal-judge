@@ -31,6 +31,7 @@ from tested.serialisation import (
 )
 from tested.testsuite import (
     CustomCheckOracle,
+    FileOutputChannel,
     FileUrl,
     GenericTextOracle,
     GenericValueOracle,
@@ -429,7 +430,7 @@ def test_statement_with_yaml_dict():
     assert isinstance(test.output.result.value, ObjectType)
 
 
-def test_global_config_trickles_down():
+def test_global_definition_config_trickles_down():
     yaml_str = """
 definitions:
   config: &stdout
@@ -455,6 +456,92 @@ tabs:
     stdout = suite.tabs[0].contexts[0].testcases[0].output.stdout
     assert isinstance(stdout.oracle, GenericTextOracle)
     config = stdout.oracle.options
+    assert config["applyRounding"]
+    assert config["roundTo"] == 63
+    assert config["tryFloatingPoint"]
+    assert config["caseInsensitive"]
+
+
+def test_global_config_trickles_down():
+    yaml_str = """
+config:
+  stdout:
+    applyRounding: true
+    roundTo: 63
+    tryFloatingPoint: true
+    caseInsensitive: true
+    namespace: "solution"
+tabs:
+- tab: "Ctx"
+  hidden: true
+  testcases:
+  - arguments: [ "--arg", "argument" ]
+    stdin: "Input string"
+    stdout: "Output string"
+    stderr: "Error string"
+    exit_code: 1
+    """
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    stdout = suite.tabs[0].contexts[0].testcases[0].output.stdout
+    assert isinstance(stdout.oracle, GenericTextOracle)
+    config = stdout.oracle.options
+    assert config["applyRounding"]
+    assert config["roundTo"] == 63
+    assert config["tryFloatingPoint"]
+    assert config["caseInsensitive"]
+
+
+def test_tab_config_trickles_down_stdout():
+    yaml_str = """
+- tab: "Ctx"
+  config:
+    stdout:
+      applyRounding: true
+      roundTo: 63
+      tryFloatingPoint: true
+      caseInsensitive: true
+      namespace: "solution"
+  testcases:
+  - arguments: [ "--arg", "argument" ]
+    stdin: "Input string"
+    stdout: "Output string"
+    stderr: "Error string"
+    exit_code: 1
+    """
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    stdout = suite.tabs[0].contexts[0].testcases[0].output.stdout
+    assert isinstance(stdout.oracle, GenericTextOracle)
+    config = stdout.oracle.options
+    assert config["applyRounding"]
+    assert config["roundTo"] == 63
+    assert config["tryFloatingPoint"]
+    assert config["caseInsensitive"]
+
+
+def test_tab_config_trickles_down_stderr():
+    yaml_str = """
+- tab: "Ctx"
+  config:
+    stderr:
+      applyRounding: true
+      roundTo: 63
+      tryFloatingPoint: true
+      caseInsensitive: true
+      namespace: "solution"
+  testcases:
+  - arguments: [ "--arg", "argument" ]
+    stdin: "Input string"
+    stdout: "Output string"
+    stderr: "Error string"
+    exit_code: 1
+    """
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    stderr = suite.tabs[0].contexts[0].testcases[0].output.stderr
+    assert isinstance(stderr.oracle, GenericTextOracle)
+    config = stderr.oracle.options
     assert config["applyRounding"]
     assert config["roundTo"] == 63
     assert config["tryFloatingPoint"]
@@ -655,6 +742,37 @@ def test_value_built_in_checks_implied():
     assert test.output.result.value == StringType(
         type=BasicStringTypes.TEXT, data="hallo"
     )
+
+
+def test_file_custom_check_correct():
+    yaml_str = f"""
+    - tab: 'Test'
+      contexts:
+        - testcases:
+            - statement: 'test()'
+              file:
+                content: "test/hallo.txt"
+                oracle: "custom_check"
+                location: "test.txt"
+                name: "evaluate_test"
+                file: "test.py"
+    """
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    assert len(suite.tabs) == 1
+    tab = suite.tabs[0]
+    assert len(tab.contexts) == 1
+    testcases = tab.contexts[0].testcases
+    assert len(testcases) == 1
+    test = testcases[0]
+    assert isinstance(test.input, FunctionCall)
+    assert isinstance(test.output.file, FileOutputChannel)
+    assert isinstance(test.output.file.oracle, CustomCheckOracle)
+    assert test.output.file.actual_path == "test.txt"
+    assert test.output.file.expected_path == "test/hallo.txt"
+    oracle = test.output.file.oracle
+    assert oracle.function.name == "evaluate_test"
+    assert oracle.function.file == Path("test.py")
 
 
 def test_value_built_in_checks_explicit():

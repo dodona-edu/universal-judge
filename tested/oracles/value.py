@@ -233,9 +233,10 @@ def _check_data_type(
             prepared_actual.data if isinstance(prepared_actual.data, list) else []
         )
         prepared_elements = []
-        for expected_element, actual_element in zip(expected_elements, actual_elements):
+        for i, expected_element in enumerate(expected_elements):
             expected_key, expected_value = expected_element.key, expected_element.value
             assert isinstance(expected_key, Value) and isinstance(expected_value, Value)
+            actual_element = actual_elements[i] if i < len(actual_elements) else None
 
             # Handle the case where the elements are not part of a map.
             # For example, the actual value is a list.
