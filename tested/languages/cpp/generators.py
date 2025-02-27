@@ -10,7 +10,7 @@ from tested.datatypes.basic import (
     BasicObjectTypes,
     BasicSequenceTypes,
     BasicStringTypes,
-    BasicTypes,
+    BasicTypes, BasicNothingTypes,
 )
 from tested.languages.c.generators import CGenerator
 from tested.languages.preparation import (
@@ -89,6 +89,8 @@ class CPPGenerator(CGenerator):
             return "{" + ", ".join(self.convert_value(v) for v in value.data) + "}"
         elif basic == BasicStringTypes.TEXT:
             return f'std::string("{value.data}")'
+        elif value.type == BasicNothingTypes.NOTHING:
+            return ""
 
         return super().convert_value(value)
 

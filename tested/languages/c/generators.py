@@ -233,7 +233,7 @@ class CGenerator:
         }}
         
         #undef send_value
-        #define send_value(value) write_value({pu.unit.name}_value_file, value)
+        #define send_value(...) write_value({pu.unit.name}_value_file __VA_OPT__(,) __VA_ARGS__)
         
         #undef send_specific_value
         #define send_specific_value(value) write_evaluated({pu.unit.name}_value_file, value)

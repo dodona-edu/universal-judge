@@ -73,3 +73,9 @@ void write_exception(FILE* out, std::exception_ptr e)
     string json = "{ \"type\" : \"exception\", \"message\" : \"\", \"stacktrace\" : \"\" }";
     fprintf(out, "%s", json.c_str());
 }
+
+void write_value(FILE* out)
+{
+    string json = "{ \"type\" : \"nothing\", \"data\" : null }";
+    fprintf(out, "%s", json.c_str());
+}

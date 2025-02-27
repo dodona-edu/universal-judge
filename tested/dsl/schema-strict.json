@@ -778,7 +778,8 @@
         "kotlin",
         "python",
         "runhaskell",
-        "csharp"
+        "csharp",
+        "cpp"
       ]
     },
     "message" : {
