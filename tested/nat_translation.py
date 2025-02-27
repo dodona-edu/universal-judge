@@ -25,10 +25,10 @@ from tested.utils import get_args
 
 class State:
     def __init__(
-        self, children: int, translations_stack: list, nat_language_indicator: list
+        self, children: int, translations_map: dict, nat_language_indicator: list
     ):
         self.nat_language_of_lists_indicator = nat_language_indicator
-        self.translations_stack = translations_stack
+        self.translations_map = translations_map
         self.total_children = 0
         for i in range(children):
             if i < len(self.nat_language_of_lists_indicator):
@@ -46,7 +46,7 @@ class StateLoader(yaml.SafeLoader):
         self.level_state = 0
         self.lang = ""
         self.state_queue: deque[State] = deque()
-        start_state = State(1, [], [])
+        start_state = State(1, {}, [])
         self.state_queue.append(start_state)
         self.nat_language_indicator = []
         self.env = create_enviroment()
@@ -70,7 +70,7 @@ class StateLoader(yaml.SafeLoader):
     ) -> dict[Hashable, Any]:
         # This method will run for each map in a YamlObject.
         result = super().construct_mapping(node, deep)
-        translation_stack = copy.deepcopy(self.state_queue[0].translations_stack)
+        new_translations_map = self.state_queue[0].translations_map
 
         # These checks are here to make sure that the order between tabs, a tab
         # and testcases is preserved.
@@ -82,8 +82,13 @@ class StateLoader(yaml.SafeLoader):
             self.state_queue.popleft()
 
             if "translations" in result:
-                translation_stack.append(
-                    translate_translations_map(result.pop("translations"), self.lang)
+                new_translations_map = flatten_stack(
+                    [
+                        new_translations_map,
+                        translate_translations_map(
+                            result.pop("translations"), self.lang
+                        ),
+                    ]
                 )
 
         elif "tab" in result or "unit" in result:
@@ -93,8 +98,13 @@ class StateLoader(yaml.SafeLoader):
             self.level_state = 1
 
             if "translations" in result:
-                translation_stack.append(
-                    translate_translations_map(result.pop("translations"), self.lang)
+                new_translations_map = flatten_stack(
+                    [
+                        new_translations_map,
+                        translate_translations_map(
+                            result.pop("translations"), self.lang
+                        ),
+                    ]
                 )
 
         elif "testcases" in result or "scripts" in result:
@@ -106,17 +116,22 @@ class StateLoader(yaml.SafeLoader):
             ), "Can't define a context when when a tab isn't defined yet."
 
             if "translations" in result:
-                translation_stack.append(
-                    translate_translations_map(result.pop("translations"), self.lang)
+                new_translations_map = flatten_stack(
+                    [
+                        new_translations_map,
+                        translate_translations_map(
+                            result.pop("translations"), self.lang
+                        ),
+                    ]
                 )
 
         children = self.count_children(result)
-
-        trans_map = flatten_stack(translation_stack)
-        result = parse_dict(result, trans_map, self.env)
+        result = parse_dict(result, new_translations_map, self.env)
 
         if children > 0:
-            new_state = State(children, translation_stack, self.nat_language_indicator)
+            new_state = State(
+                children, new_translations_map, self.nat_language_indicator
+            )
             self.state_queue.append(new_state)
             self.nat_language_indicator = []
 
@@ -125,9 +140,7 @@ class StateLoader(yaml.SafeLoader):
     def construct_sequence(self, node: yaml.SequenceNode, deep=False) -> list[Any]:
         result = super().construct_sequence(node, deep)
 
-        translation_stack = self.state_queue[0].translations_stack
-        trans_map = flatten_stack(translation_stack)
-        result = parse_list(result, trans_map, self.env)
+        result = parse_list(result, self.state_queue[0].translations_map, self.env)
 
         self.state_queue[0].total_children -= 1
         if self.state_queue[0].is_finished():
