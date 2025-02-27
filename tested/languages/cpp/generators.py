@@ -1,3 +1,4 @@
+import json
 from tested.datatypes import AllTypes, resolve_to_basic
 from tested.datatypes.advanced import (
     AdvancedNumericTypes,
@@ -88,7 +89,7 @@ class CPPGenerator(CGenerator):
         elif basic == BasicSequenceTypes.SEQUENCE or basic == BasicSequenceTypes.SET:
             return "{" + ", ".join(self.convert_value(v) for v in value.data) + "}"
         elif basic == BasicStringTypes.TEXT:
-            return f'std::string("{value.data}")'
+            return f'std::string({json.dumps(value.data)})'
         elif value.type == BasicNothingTypes.NOTHING:
             return ""
 
