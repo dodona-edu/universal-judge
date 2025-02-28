@@ -57,6 +57,7 @@ class CPP(C):
         main_file = files[-1]
         exec_file = Path(main_file).stem
         result = executable_name(exec_file)
+        assert self.config
         return (
             [
                 "g++",
