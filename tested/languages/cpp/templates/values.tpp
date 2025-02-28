@@ -33,7 +33,7 @@ string getTypeName(const T&) {
     if (is_same<T, double>::value) return "double_precision";
     if (is_same<T, float>::value) return "single_precision";
     if (is_same<T, char>::value) return "char";
-    if (is_same<T, string>::value) return "string";
+    if (is_same<T, string>::value) return "text";
     if (is_same<T, bool>::value) return "boolean";
     if (is_same<T, nullptr_t>::value) return "null";
     if (is_same<T, int8_t>::value) return "int8";
