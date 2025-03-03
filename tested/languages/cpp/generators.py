@@ -118,9 +118,9 @@ class CPPGenerator:
             assert isinstance(value, StringType)
             return f"(char) '" + value.data.replace("'", "\\'") + "'"
         elif value.type == AdvancedNumericTypes.INT_16:
-            return f"((short) {value.data})"
+            return f"((int16_t) {value.data})"
         elif value.type == AdvancedNumericTypes.U_INT_16:
-            return f"((unsigned short) {value.data})"
+            return f"((uint16_t) {value.data})"
         elif value.type == AdvancedNumericTypes.INT_64:
             return f"{value.data}L"
         elif value.type == AdvancedNumericTypes.U_INT_64:
@@ -175,26 +175,26 @@ class CPPGenerator:
         if isinstance(tp, VariableType):
             return tp.data + "*"
         elif tp == AdvancedNumericTypes.BIG_INT:
-            return "std::intmax_t"
+            return "intmax_t"
         elif tp == AdvancedNumericTypes.U_INT_64:
-            return "std::uint64_t"
+            return "uint64_t"
         elif tp == AdvancedNumericTypes.INT_64:
-            return "std::int64_t"
+            return "int64_t"
         elif tp == AdvancedNumericTypes.U_INT_32:
-            return "std::uint32_t"
+            return "uint32_t"
         elif tp == AdvancedNumericTypes.INT_32:
-            return "std::int32_t"
+            return "int32_t"
         elif tp == AdvancedNumericTypes.U_INT_16:
-            return "std::uint16_t"
+            return "uint16_t"
         elif tp == AdvancedNumericTypes.INT_16:
-            return "std::int16_t"
+            return "int16_t"
         elif tp == AdvancedNumericTypes.U_INT_8:
-            return "std::uint8_t"
+            return "uint8_t"
         elif tp == AdvancedNumericTypes.INT_8:
-            return "std::int8_t"
+            return "int8_t"
         if tp == AdvancedSequenceTypes.LIST:
             subtype_string = self.convert_sequence_subtype(value, subtype)
-            return f"std::list<{subtype_string}>"
+            return f"list<{subtype_string}>"
         elif tp == AdvancedSequenceTypes.TUPLE:
             # this method does not support tuples within sequences such as list<tuple<int, int>>
             # as value won't be defined in that case and we cant't infer the tuple's length
@@ -204,54 +204,13 @@ class CPPGenerator:
             subtype_string = self.convert_sequence_subtype(value, subtype)
             assert subtype_string is not None
             return (
-                f"std::tuple<{", ".join(subtype_string for _ in range(tuple_length))}>"
+                f"tuple<{", ".join(subtype_string for _ in range(tuple_length))}>"
             )
         elif tp == AdvancedSequenceTypes.ARRAY:
             subtype_string = self.convert_sequence_subtype(value, subtype)
-            return f"std::vector<{subtype_string}>"
+            return f"vector<{subtype_string}>"
         elif tp == AdvancedStringTypes.STRING:
-            return "std::string"
-
-        basic = resolve_to_basic(tp)
-        if basic == BasicObjectTypes.MAP:
-            subtype_strings = self.convert_map_subtypes(value, subtype)
-            if subtype_strings is None:
-                return "std::map<>"
-            key_type, value_type = subtype_strings
-            return f"std::map<{key_type}, {value_type}>"
-        elif basic == BasicSequenceTypes.SET:
-            subtype_string = self.convert_sequence_subtype(value, subtype)
-            return f"std::set<{subtype_string}>"
-        elif basic == BasicSequenceTypes.SEQUENCE:
-            subtype_string = self.convert_sequence_subtype(value, subtype)
-            return f"std::vector<{subtype_string}>"
-        elif basic == BasicStringTypes.TEXT:
-            return "std::string"
-        elif basic == BasicStringTypes.ANY:
-            return "std::any"
-        elif basic == BasicNumericTypes.INTEGER:
-            return "std::intmax_t"
-
-        if isinstance(tp, VariableType):
-            return tp.data
-        elif tp == AdvancedNumericTypes.BIG_INT:
-            return "long long"
-        elif tp == AdvancedNumericTypes.U_INT_64:
-            return "unsigned long"
-        elif tp == AdvancedNumericTypes.INT_64:
-            return "long"
-        elif tp == AdvancedNumericTypes.U_INT_32:
-            return "unsigned int"
-        elif tp == AdvancedNumericTypes.INT_32:
-            return "int"
-        elif tp == AdvancedNumericTypes.U_INT_16:
-            return "unsigned short int"
-        elif tp == AdvancedNumericTypes.INT_16:
-            return "short int"
-        elif tp == AdvancedNumericTypes.U_INT_8:
-            return "unsigned char"
-        elif tp == AdvancedNumericTypes.INT_8:
-            return "signed char"
+            return "string"
         elif tp == AdvancedNumericTypes.DOUBLE_EXTENDED:
             return "long double"
         elif tp == AdvancedNumericTypes.DOUBLE_PRECISION:
@@ -260,13 +219,28 @@ class CPPGenerator:
             return "float"
         elif tp == AdvancedStringTypes.CHAR:
             return "char"
+
         basic = resolve_to_basic(tp)
+        if basic == BasicObjectTypes.MAP:
+            subtype_strings = self.convert_map_subtypes(value, subtype)
+            if subtype_strings is None:
+                return "map<>"
+            key_type, value_type = subtype_strings
+            return f"map<{key_type}, {value_type}>"
+        elif basic == BasicSequenceTypes.SET:
+            subtype_string = self.convert_sequence_subtype(value, subtype)
+            return f"set<{subtype_string}>"
+        elif basic == BasicSequenceTypes.SEQUENCE:
+            subtype_string = self.convert_sequence_subtype(value, subtype)
+            return f"vector<{subtype_string}>"
+        elif basic == BasicStringTypes.TEXT:
+            return "string"
+        elif basic == BasicStringTypes.ANY:
+            return "any"
+        elif basic == BasicNumericTypes.INTEGER:
+            return "intmax_t"
         if basic == BasicBooleanTypes.BOOLEAN:
             return "bool"
-        elif basic == BasicStringTypes.TEXT:
-            return "char*"
-        elif basic == BasicNumericTypes.INTEGER:
-            return "long long"
         elif basic == BasicNumericTypes.REAL:
             return "double"
         elif basic == BasicNothingTypes.NOTHING:
@@ -274,23 +248,12 @@ class CPPGenerator:
         raise AssertionError(f"Unknown type: {tp!r}")
 
     def convert_statement(self, statement: Statement, full=False) -> str:
-        # support for property assignments
         if isinstance(statement, PropertyAssignment):
             return (
                 f"{self.convert_statement(statement.property)} = "
                 f"{self.convert_statement(statement.expression)};"
             )
-        # overwrite the default implementation for variable assignments to allow for
-        # object declarations
-        elif full and isinstance(statement, VariableAssignment):
-
-            prefix = self.convert_declaration(statement.type, statement.expression)
-            return (
-                f"{prefix} {statement.variable} = "
-                f"{self.convert_statement(statement.expression)}"
-            )
-
-        if isinstance(statement, Identifier):
+        elif isinstance(statement, Identifier):
             return statement
         elif isinstance(statement, FunctionCall):
             return self.convert_function_call(statement)
@@ -298,7 +261,7 @@ class CPPGenerator:
             return self.convert_value(statement)
         elif isinstance(statement, VariableAssignment):
             if full:
-                prefix = self.convert_declaration(statement.type) + " "
+                prefix = self.convert_declaration(statement.type, statement.expression)
             else:
                 prefix = ""
             return (
@@ -370,7 +333,7 @@ class CPPGenerator:
                 )
             else:
                 result += self.convert_statement(tc.input.input_statement()) + ";\n"
-        result += " " * 4 + "} catch (std::exception_ptr e) {\n"
+        result += " " * 4 + "} catch (exception_ptr e) {\n"
         result += " " * 8 + self.convert_statement(tc.exception_statement("e")) + ";\n"
         result += " " * 8 + "exit_code = 1;\n"
         result += " " * 4 + "}\n"
@@ -416,10 +379,7 @@ static void {pu.unit.name}_write_context_separator() {{
 
 #undef send_specific_value
 #define send_specific_value(value) write_evaluated({pu.unit.name}_value_file, value)
-"""
 
-        # add a write function for exceptions
-        result += f"""
 #undef send_exception
 #define send_exception(value) write_exception({pu.unit.name}_value_file, value)
 """
@@ -436,6 +396,8 @@ static void {pu.unit.name}_write_context_separator() {{
             result += f'#include "{name}.{self.extension}"\n'
 
         result += self.define_write_funtions(pu)
+
+        result += "using namespace std;\n\n"
 
         # Generate code for each context.
         ctx: PreparedContext
