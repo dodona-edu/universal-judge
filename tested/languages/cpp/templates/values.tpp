@@ -106,7 +106,6 @@ string to_json_value(const T& value) {
     }
 }
 
-
 template<typename T>
 string to_json_value(const vector<T>& vec) {
     string result = "[";
