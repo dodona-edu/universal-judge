@@ -340,101 +340,96 @@ class CPPGenerator:
             prefix = self.convert_declaration(
                 tc.input.statement.type, tc.input.statement.expression
             )
-            result += f"{prefix} {tc.input.statement.variable};\n"
+            result += " " * 8 + f"{prefix} {tc.input.statement.variable};\n"
 
         # catch exceptions and write them to the output
-        result += "try {" + "\n"
+        result += " " * 4 + "try {" + "\n"
         if tc.testcase.is_main_testcase():
             assert isinstance(tc.input, MainInput)
             wrapped = [json.dumps(a) for a in tc.input.arguments]
-            result += f'char* args[] = {{"{pu.submission_name}", '
+            result += " " * 8 + f'char* args[] = {{"{pu.submission_name}", '
             result += ", ".join(wrapped)
             result += "};\n"
             result += (
+                " " * 8 +
                 f"exit_code = solution_main({len(tc.input.arguments) + 1}, args);\n"
             )
         else:
             assert isinstance(tc.input, PreparedTestcaseStatement)
-            result += "exit_code = 0;\n"
+            result += " " * 8 + "exit_code = 0;\n"
             if is_special_void_call(tc.input, pu.language):
                 # The method has a "void" return type, so don't wrap it.
                 result += (
-                        " " * 4
+                        " " * 8
                         + self.convert_statement(tc.input.unwrapped_input_statement())
                         + ";\n"
                 )
                 result += (
-                        " " * 4 + self.convert_statement(
+                        " " * 8 + self.convert_statement(
                     tc.input.no_value_call()) + ";\n"
                 )
             else:
                 result += self.convert_statement(tc.input.input_statement()) + ";\n"
-        result += "\n} catch (std::exception_ptr e) {\n"
-        result += self.convert_statement(tc.exception_statement("e")) + ";\n"
-        result += "exit_code = 1;\n"
-        result += "}\n"
+        result += " " * 4 + "} catch (std::exception_ptr e) {\n"
+        result += " " * 8 + self.convert_statement(tc.exception_statement("e")) + ";\n"
+        result += " " * 8 + "exit_code = 1;\n"
+        result += " " * 4 + "}\n"
         return result
 
     def generate_internal_context(
             self, ctx: PreparedContext, pu: PreparedExecutionUnit
     ) -> str:
-        result = f"""
-        {ctx.before}
-
-        int exit_code;
-        """
+        result = " " * 4 + ctx.before + "\n"
+        result += " " * 4 + "int exit_code;" + "\n"
 
         # Generate code for each testcase
         tc: PreparedTestcase
         for tc in ctx.testcases:
-            result += f"{pu.unit.name}_write_separator();\n"
+            result += " " * 4 + f"{pu.unit.name}_write_separator();\n"
             result += self.convert_testcase(tc, pu)
 
-        result += ctx.after + "\n"
-        result += "return exit_code;\n"
+        result += " " * 4 + ctx.after + "\n"
+        result += " " * 4 + "return exit_code;\n"
         return result
 
     def define_write_funtions(self, pu: PreparedExecutionUnit) -> str:
         result = f"""
-        static FILE* {pu.unit.name}_value_file = NULL;
-        static FILE* {pu.unit.name}_exception_file = NULL;
-        
-        static void {pu.unit.name}_write_separator() {{
-            fprintf({pu.unit.name}_value_file, "--{pu.testcase_separator_secret}-- SEP");
-            fprintf({pu.unit.name}_exception_file, "--{pu.testcase_separator_secret}-- SEP");
-            fprintf(stdout, "--{pu.testcase_separator_secret}-- SEP");
-            fprintf(stderr, "--{pu.testcase_separator_secret}-- SEP");
-        }}
-        
-        static void {pu.unit.name}_write_context_separator() {{
-            fprintf({pu.unit.name}_value_file, "--{pu.context_separator_secret}-- SEP");
-            fprintf({pu.unit.name}_exception_file, "--{pu.context_separator_secret}-- SEP");
-            fprintf(stdout, "--{pu.context_separator_secret}-- SEP");
-            fprintf(stderr, "--{pu.context_separator_secret}-- SEP");
-        }}
-        
-        #undef send_value
-        #define send_value(...) write_value({pu.unit.name}_value_file __VA_OPT__(,) __VA_ARGS__)
-        
-        #undef send_specific_value
-        #define send_specific_value(value) write_evaluated({pu.unit.name}_value_file, value)
-        """
+static FILE* {pu.unit.name}_value_file = NULL;
+static FILE* {pu.unit.name}_exception_file = NULL;
+
+static void {pu.unit.name}_write_separator() {{
+    fprintf({pu.unit.name}_value_file, "--{pu.testcase_separator_secret}-- SEP");
+    fprintf({pu.unit.name}_exception_file, "--{pu.testcase_separator_secret}-- SEP");
+    fprintf(stdout, "--{pu.testcase_separator_secret}-- SEP");
+    fprintf(stderr, "--{pu.testcase_separator_secret}-- SEP");
+}}
+
+static void {pu.unit.name}_write_context_separator() {{
+    fprintf({pu.unit.name}_value_file, "--{pu.context_separator_secret}-- SEP");
+    fprintf({pu.unit.name}_exception_file, "--{pu.context_separator_secret}-- SEP");
+    fprintf(stdout, "--{pu.context_separator_secret}-- SEP");
+    fprintf(stderr, "--{pu.context_separator_secret}-- SEP");
+}}
+
+#undef send_value
+#define send_value(...) write_value({pu.unit.name}_value_file __VA_OPT__(,) __VA_ARGS__)
+
+#undef send_specific_value
+#define send_specific_value(value) write_evaluated({pu.unit.name}_value_file, value)
+"""
 
         # add a write function for exceptions
         result += f"""
-        #undef send_exception
-        #define send_exception(value) write_exception({pu.unit.name}_value_file, value)
-        """
+#undef send_exception
+#define send_exception(value) write_exception({pu.unit.name}_value_file, value)
+"""
         return result
 
     def convert_execution_unit(self, pu: PreparedExecutionUnit) -> str:
         result = f"""
-        #include <stdio.h>
-        #include <math.h>
-
-        #include "values.h"
-        #include "{pu.submission_name}.{self.extension}"
-        """
+#include "values.h"
+#include "{pu.submission_name}.{self.extension}"
+"""
 
         # Import functions
         for name in pu.evaluator_names:
@@ -446,87 +441,80 @@ class CPPGenerator:
         ctx: PreparedContext
         for i, ctx in enumerate(pu.contexts):
             result += f"""
-            int {pu.unit.name}_context_{i}(void) {{
-                {self.generate_internal_context(ctx, pu)}
-            }}
-            """
+int {pu.unit.name}_context_{i}(void) {{
+    {self.generate_internal_context(ctx, pu)}
+}}
+"""
 
         result += f"""
-        int {pu.unit.name}() {{
-            {pu.unit.name}_value_file = fopen("{pu.value_file}", "w");
-            {pu.unit.name}_exception_file = fopen("{pu.exception_file}", "w");
-            int exit_code;
-        """
+int {pu.unit.name}() {{
+    {pu.unit.name}_value_file = fopen("{pu.value_file}", "w");
+    {pu.unit.name}_exception_file = fopen("{pu.exception_file}", "w");
+    int exit_code;
+"""
 
         for i, ctx in enumerate(pu.contexts):
             result += " " * 4 + f"{pu.unit.name}_write_context_separator();\n"
             result += " " * 4 + f"exit_code = {pu.unit.name}_context_{i}();\n"
 
         result += f"""
-            fclose({pu.unit.name}_value_file);
-            fclose({pu.unit.name}_exception_file);
-            return exit_code;
-        }}
+    fclose({pu.unit.name}_value_file);
+    fclose({pu.unit.name}_exception_file);
+    return exit_code;
+}}
 
-        #ifndef INCLUDED
-        int main() {{
-            return {pu.unit.name}();
-        }}
-        #endif
-        """
+#ifndef INCLUDED
+int main() {{
+    return {pu.unit.name}();
+}}
+#endif
+"""
         return result
 
     def convert_selector(self, contexts: list[str]) -> str:
         result = """
-        #include <string.h>
-        #include <stdio.h>
-
-        #define INCLUDED true
-        """
+#define INCLUDED true
+"""
 
         for ctx in contexts:
             result += f"""
-            #if __has_include("{ctx}.{self.extension}")
-            #include "{ctx}.{self.extension}"
-            #endif
-            """
+#if __has_include("{ctx}.{self.extension}")
+#include "{ctx}.{self.extension}"
+#endif
+"""
 
         result += """
-        int main(int argc, const char* argv[]) {
+int main(int argc, const char* argv[]) {
 
-            if (argc < 1) {
-                fprintf(stderr, "No context selected.");
-                return -2;
-            }
+    if (argc < 1) {
+        fprintf(stderr, "No context selected.");
+        return -2;
+    }
 
-            const char* name = argv[1];
-        """
+    const char* name = argv[1];
+"""
         for ctx in contexts:
             result += f"""
-                #if __has_include("{ctx}.{self.extension}")
-                if (strcmp("{ctx}", name) == 0) {{
-                    return {ctx}();
-                }}
-                #endif
-            """
+    #if __has_include("{ctx}.{self.extension}")
+    if (strcmp("{ctx}", name) == 0) {{
+        return {ctx}();
+    }}
+    #endif
+"""
 
         result += """
-            fprintf(stderr, "Non-existing context '%s' selected.", name);
-            return -1;
-        }
-        """
+    fprintf(stderr, "Non-existing context '%s' selected.", name);
+    return -1;
+}
+"""
         return result
 
     def convert_encoder(self, values: list[Value]) -> str:
         result = """
-    #include <stdio.h>
-    #include <stdlib.h>
-    #include <math.h>
+#include "values.h"
 
-    #include "values.h"
-
-    int main() {
-    """
+int main() {
+"""
         for value in values:
             result += " " * 4 + f"write_value(stdout, {self.convert_value(value)});\n"
             result += " " * 4 + 'printf("␞");\n'
