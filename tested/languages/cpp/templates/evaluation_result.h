@@ -7,17 +7,17 @@
 
 using namespace std;
 
-// Define the Message structure
-struct Message {
+class Message {
+public:
     string description;
     string format;
     string permission;
 
-    Message(const string &desc, const string &fmt, const string &perm);
+    Message(const string &description, const string &format = "text", const string &permission = "");
 };
 
-// Define the EvaluationResult structure
-struct EvaluationResult {
+class EvaluationResult {
+public:
     vector<Message*> messages;
     bool result;
     string readableExpected;
@@ -26,18 +26,5 @@ struct EvaluationResult {
     EvaluationResult(size_t nrOfMessages);
     ~EvaluationResult();
 };
-
-
-// Function to create an EvaluationResult object
-EvaluationResult* create_result(size_t nrOfMessages);
-
-// Function to free an EvaluationResult object
-void free_result(EvaluationResult *result);
-
-// Function to create a Message object
-Message* create_message(const string &description, const string &format, const string &permission);
-
-// Function to free a Message object
-void free_message(Message *message);
 
 #endif //EVALUATION_RESULT_H

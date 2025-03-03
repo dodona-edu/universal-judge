@@ -3,7 +3,6 @@
 
 #include "values.h"
 
-
 using namespace std;
 
 // Function to escape special characters in a string
@@ -25,16 +24,12 @@ string escape(const string &buffer) {
     return dest;
 }
 
-
-
-
 void write_formatted(FILE* out, const char* format, ...) {
     va_list args;
     va_start(args, format);
     vfprintf(out, format, args);
     va_end(args);
 }
-
 
 // Function to write evaluated results
 void write_evaluated(FILE* out, EvaluationResult* result) {
@@ -63,7 +58,6 @@ void write_evaluated(FILE* out, EvaluationResult* result) {
 
     delete result;
 }
-
 
 // writes an exception to json as
 // { "type" : "exception", "message" : "message", "stacktrace" : "stacktrace" }
