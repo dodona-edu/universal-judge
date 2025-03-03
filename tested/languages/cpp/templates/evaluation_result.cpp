@@ -39,11 +39,3 @@ Message* create_message(const std::string &description, const std::string &forma
 void free_message(Message *message) {
     delete message;
 }
-
-
-
-
-
-
-
-
