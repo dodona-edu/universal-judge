@@ -55,20 +55,8 @@ from tested.serialisation import (
 )
 from tested.testsuite import Suite
 from tested.utils import get_args
+from tests.language_markers import all_languages_except, SERIALIZABLE_LANGUAGES
 from tests.manual_utils import configuration
-
-LANGUAGES = [
-    "python",
-    "java",
-    "c",
-    "javascript",
-    "typescript",
-    "kotlin",
-    pytest.param("runhaskell", marks=pytest.mark.haskell),
-    "bash",
-    "csharp",
-]
-
 
 # A list of example values for basic types.
 # Add types here you want to test for all languages.
@@ -225,7 +213,7 @@ def assert_serialisation(bundle: Bundle, expected: Value):
     assert actual.data == expected.data
 
 
-@pytest.mark.parametrize("language", LANGUAGES)
+@pytest.mark.parametrize("language", SERIALIZABLE_LANGUAGES)
 def test_basic_types(language, tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(pytestconfig, "", language, tmp_path)
     plan = Suite()
@@ -250,7 +238,7 @@ def test_basic_types(language, tmp_path: Path, pytestconfig: pytest.Config):
         assert py_expected == py_actual
 
 
-@pytest.mark.parametrize("language", LANGUAGES)
+@pytest.mark.parametrize("language", SERIALIZABLE_LANGUAGES)
 def test_advanced_types(language, tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(pytestconfig, "", language, tmp_path)
     plan = Suite()
@@ -276,7 +264,7 @@ def test_advanced_types(language, tmp_path: Path, pytestconfig: pytest.Config):
         assert py_expected == py_actual
 
 
-@pytest.mark.parametrize("language", LANGUAGES)
+@pytest.mark.parametrize("language", SERIALIZABLE_LANGUAGES)
 def test_escape_double(language, tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(pytestconfig, "", language, tmp_path)
     plan = Suite()
@@ -284,7 +272,7 @@ def test_escape_double(language, tmp_path: Path, pytestconfig: pytest.Config):
     assert_serialisation(bundle, StringType(type=BasicStringTypes.TEXT, data='"hallo"'))
 
 
-@pytest.mark.parametrize("language", LANGUAGES)
+@pytest.mark.parametrize("language", SERIALIZABLE_LANGUAGES)
 def test_escape_single(language, tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(pytestconfig, "", language, tmp_path)
     plan = Suite()
@@ -292,7 +280,7 @@ def test_escape_single(language, tmp_path: Path, pytestconfig: pytest.Config):
     assert_serialisation(bundle, StringType(type=AdvancedStringTypes.CHAR, data="'"))
 
 
-@pytest.mark.parametrize("language", LANGUAGES)
+@pytest.mark.parametrize("language", SERIALIZABLE_LANGUAGES)
 def test_special_numbers(language, tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(pytestconfig, "", language, tmp_path)
     plan = Suite()
@@ -332,7 +320,7 @@ def test_special_numbers(language, tmp_path: Path, pytestconfig: pytest.Config):
         assert py_expected == py_actual
 
 
-@pytest.mark.parametrize("language", LANGUAGES)
+@pytest.mark.parametrize("language", SERIALIZABLE_LANGUAGES)
 def test_valid_type_map(language: str, tmp_path: Path, pytestconfig: pytest.Config):
     # Get a type map.
     conf = configuration(pytestconfig, "", language, tmp_path)

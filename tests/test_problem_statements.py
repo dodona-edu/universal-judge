@@ -28,6 +28,7 @@ def test_small_descriptions(language: str):
         ("python", "this_is_a_function_name"),
         ("java", "thisIsAFunctionName"),
         ("c", "this_is_a_function_name"),
+        ("cpp", "this_is_a_function_name"),
         ("kotlin", "thisIsAFunctionName"),
         ("javascript", "thisIsAFunctionName"),
         ("typescript", "thisIsAFunctionName"),

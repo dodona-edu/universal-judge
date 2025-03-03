@@ -1,23 +1,44 @@
+import pytest
+
+from tested.features import Construct
 from tested.languages import LANGUAGES
 
-COMPILE_LANGUAGES = [
-    "python",
-    "java",
+ALL_LANGUAGES = LANGUAGES.keys()
+
+def all_languages_except(*languages):
+    return [l for l in ALL_LANGUAGES if l not in languages]
+
+EXCEPTION_LANGUAGES = all_languages_except(
     "c",
-    "cpp",
-    "kotlin",
-    "haskell",
-    "csharp",
-]
-ALL_SPECIFIC_LANGUAGES = COMPILE_LANGUAGES + [
     "javascript",
     "typescript",
     "runhaskell",
-]
-ALL_LANGUAGES = ALL_SPECIFIC_LANGUAGES + ["bash"]
+    "bash")
 
-EXCEPTION_LANGUAGES = ["python", "java", "kotlin", "csharp", "haskell"]
+OBJECT_LANGUAGES = all_languages_except(
+    "c",
+    "haskell",
+    "runhaskell",
+    "bash")
 
+ALL_SPECIFIC_LANGUAGES = all_languages_except("bash")
+
+COMPILE_LANGUAGES = all_languages_except(
+    "javascript",
+    "typescript",
+    "runhaskell",
+    "bash")
+
+
+SERIALIZABLE_LANGUAGES = all_languages_except("haskell")
+
+@pytest.mark.parametrize("language", OBJECT_LANGUAGES)
+def test_object_languages_support_objects(language: str):
+    assert language in LANGUAGES.keys()
+
+    config = LANGUAGES[language](None)
+
+    assert Construct.OBJECTS in config.supported_constructs()
 
 def test_no_missing_languages_from_tests():
     assert sorted(ALL_LANGUAGES) == sorted(LANGUAGES.keys())
