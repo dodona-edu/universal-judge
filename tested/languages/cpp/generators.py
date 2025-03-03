@@ -160,7 +160,7 @@ class CPPGenerator:
         elif value.type == BasicBooleanTypes.BOOLEAN:
             return f"(bool) " + str(value.data).lower()
         elif value.type == BasicNothingTypes.NOTHING:
-            return "NULL"
+            return "nullptr"
         elif value.type == BasicStringTypes.UNKNOWN:
             assert isinstance(value, StringType)
             return convert_unknown_type(value)
@@ -357,8 +357,8 @@ class CPPGenerator:
 
     def define_write_funtions(self, pu: PreparedExecutionUnit) -> str:
         result = f"""
-static FILE* {pu.unit.name}_value_file = NULL;
-static FILE* {pu.unit.name}_exception_file = NULL;
+static FILE* {pu.unit.name}_value_file = nullptr;
+static FILE* {pu.unit.name}_exception_file = nullptr;
 
 static void {pu.unit.name}_write_separator() {{
     fprintf({pu.unit.name}_value_file, "--{pu.testcase_separator_secret}-- SEP");
