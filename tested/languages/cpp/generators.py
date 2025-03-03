@@ -112,9 +112,8 @@ class CPPGenerator:
                 + "}"
             )
         elif value.type == BasicNothingTypes.NOTHING:
-            return ""
-
-        if value.type == AdvancedStringTypes.CHAR:
+            return "nullptr"
+        elif value.type == AdvancedStringTypes.CHAR:
             assert isinstance(value, StringType)
             return f"(char) '" + value.data.replace("'", "\\'") + "'"
         elif value.type == AdvancedNumericTypes.INT_16:
@@ -375,13 +374,16 @@ static void {pu.unit.name}_write_context_separator() {{
 }}
 
 #undef send_value
-#define send_value(...) write_value({pu.unit.name}_value_file __VA_OPT__(,) __VA_ARGS__)
+#define send_value(value) write_value({pu.unit.name}_value_file, value)
 
 #undef send_specific_value
 #define send_specific_value(value) write_evaluated({pu.unit.name}_value_file, value)
 
 #undef send_exception
-#define send_exception(value) write_exception({pu.unit.name}_value_file, value)
+#define send_exception(value) write_exception({pu.unit.name}_exception_file, value)
+
+#undef send_specific_exception
+#define send_specific_exception(value) write_evaluated({pu.unit.name}_exception_file, value)
 """
         return result
 

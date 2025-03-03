@@ -28,8 +28,6 @@ string escape(const string &buffer);
 // Function to write a value as a json object with type information to a file
 template <typename T> void write_value(FILE* out, const T& value);
 
-void write_value(FILE* out);
-
 // Function to write evaluated results
 void write_evaluated(FILE* out, EvaluationResult* result);
 
