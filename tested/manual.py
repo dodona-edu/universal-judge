@@ -27,7 +27,7 @@ def read_config() -> DodonaConfig:
         source=Path(exercise_dir, "solution/correct.cpp"),
         judge=Path("."),
         workdir=Path("workdir"),
-        test_suite="one-display-multiline.tson",
+        test_suite="expected_return_but_got_none.yaml",
         options=Options(
             linter=False,
         ),
