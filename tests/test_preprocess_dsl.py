@@ -1,5 +1,5 @@
 from typing import Any, Hashable, cast
-
+import yaml
 from tested.dsl.translate_parser import _parse_yaml, _validate_dsl
 from tested.nat_translation import (
     convert_to_yaml,
@@ -395,4 +395,28 @@ tabs:
     except ExceptionGroup:
         print("As expected")
     else:
-        assert False, "Expected ExceptionGroup, but no exception was raised"
+        assert False, "Expected ExceptionGroup error"
+
+def test_yaml_with_syntax_error():
+    yaml_str = """
+tabs:
+- tab: animals
+  testcases:
+  - expression: tests(11)
+    return: 11
+  - expression: !programming_language
+      javascript: animals_javascript(1 + 1)
+      typescript: animals_typescript(1 + 1)
+      java: Submission.animals_java(1 + 1)
+      python: !nat_language
+        en: animals_python_en(1 + 1)
+        nl: animals_python_nl(1 + 1)
+    return: 2
+    """.strip()
+
+    try:
+        parse_yaml(yaml_str)
+    except yaml.MarkedYAMLError:
+        print("As expected")
+    else:
+        assert False, "Expected yaml.MarkedYAMLError error"
