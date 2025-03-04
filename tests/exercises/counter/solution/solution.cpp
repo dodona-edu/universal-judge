@@ -7,9 +7,9 @@ public:
     Counter() : counter(0) {}
 
     // Method to add to the counter
-    Counter& add() {
+    Counter* add() {
         counter++;
-        return *this;
+        return this;
     }
 
     // Method to get the current counter value
