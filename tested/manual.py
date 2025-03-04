@@ -13,7 +13,7 @@ from tested.configs import DodonaConfig, Options
 from tested.main import run
 from tested.testsuite import SupportedLanguage
 
-exercise_dir = "/IdeaProjects/universal-judge/tests/exercises/objects"
+exercise_dir = "/IdeaProjects/universal-judge/tests/exercises/sum"
 
 
 def read_config() -> DodonaConfig:
@@ -27,7 +27,7 @@ def read_config() -> DodonaConfig:
         source=Path(exercise_dir, "solution/correct.cpp"),
         judge=Path("."),
         workdir=Path("workdir"),
-        test_suite="property_assignment.yaml",
+        test_suite="short.tson",
         options=Options(
             linter=False,
         ),

@@ -1,3 +1,3 @@
-int main(int argv, const char* args[]){
+int main(){
     int hallo = 100 / 1;
 }

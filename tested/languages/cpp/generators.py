@@ -310,7 +310,7 @@ class CPPGenerator:
         if tc.testcase.is_main_testcase():
             assert isinstance(tc.input, MainInput)
             wrapped = [json.dumps(a) for a in tc.input.arguments]
-            result += " " * 8 + f'const char* args[] = {{"{pu.submission_name}", '
+            result += " " * 8 + f'char* args[] = {{"{pu.submission_name}", '
             result += ", ".join(wrapped)
             result += "};\n"
             result += (
@@ -449,14 +449,14 @@ int main() {{
 """
 
         result += """
-int main(int argc, const char* argv[]) {
+int main(int argc, char* argv[]) {
 
     if (argc < 1) {
         fprintf(stderr, "No context selected.");
         return -2;
     }
 
-    const char* name = argv[1];
+    char* name = argv[1];
 """
         for ctx in contexts:
             result += f"""

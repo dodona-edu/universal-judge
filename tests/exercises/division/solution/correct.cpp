@@ -1,5 +1,5 @@
 #include <exception>
 
-int main(int argv, const char* args[]){
+int main(){
     throw logic_error("Division by zero");
 }
