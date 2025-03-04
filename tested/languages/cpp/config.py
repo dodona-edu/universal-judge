@@ -133,7 +133,7 @@ class CPP(Language):
         from tested.languages.c import linter
 
         assert self.config
-        return linter.run_cppcheck(self.config.dodona, remaining, self.file_extension())
+        return linter.run_cppcheck(self.config.dodona, remaining, 'c++')
 
     def cleanup_stacktrace(self, stacktrace: str) -> str:
         included_regex = rf"from ({EXECUTION_PREFIX}|selector)"
