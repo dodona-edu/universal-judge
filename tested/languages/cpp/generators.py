@@ -206,7 +206,7 @@ class CPPGenerator:
                 f"tuple<{", ".join(subtype_string for _ in range(tuple_length))}>"
             )
         elif tp == AdvancedSequenceTypes.ARRAY:
-            subtype_string = self.convert_sequence_subtype(value, subtype)
+            subtype_string = self.convert_sequence_subtype(value, subtype) or "any"
             return f"vector<{subtype_string}>"
         elif tp == AdvancedStringTypes.STRING:
             return "string"
@@ -227,10 +227,10 @@ class CPPGenerator:
             key_type, value_type = subtype_strings
             return f"map<{key_type}, {value_type}>"
         elif basic == BasicSequenceTypes.SET:
-            subtype_string = self.convert_sequence_subtype(value, subtype)
+            subtype_string = self.convert_sequence_subtype(value, subtype) or "any"
             return f"set<{subtype_string}>"
         elif basic == BasicSequenceTypes.SEQUENCE:
-            subtype_string = self.convert_sequence_subtype(value, subtype)
+            subtype_string = self.convert_sequence_subtype(value, subtype) or "any"
             return f"vector<{subtype_string}>"
         elif basic == BasicStringTypes.TEXT:
             return "string"
@@ -250,7 +250,7 @@ class CPPGenerator:
         if isinstance(statement, PropertyAssignment):
             return (
                 f"{self.convert_statement(statement.property)} = "
-                f"{self.convert_statement(statement.expression)};"
+                f"{self.convert_statement(statement.expression)}"
             )
         elif isinstance(statement, Identifier):
             return statement
@@ -261,11 +261,12 @@ class CPPGenerator:
         elif isinstance(statement, VariableAssignment):
             if full:
                 prefix = self.convert_declaration(statement.type, statement.expression)
+                prefix += " "
             else:
                 prefix = ""
             return (
                 f"{prefix}{statement.variable} = "
-                f"{self.convert_statement(statement.expression)};"
+                f"{self.convert_statement(statement.expression)}"
             )
         raise AssertionError(f"Unknown statement: {statement!r}")
 
@@ -302,7 +303,7 @@ class CPPGenerator:
             prefix = self.convert_declaration(
                 tc.input.statement.type, tc.input.statement.expression
             )
-            result += " " * 8 + f"{prefix} {tc.input.statement.variable};\n"
+            result += " " * 4 + f"{prefix} {tc.input.statement.variable};\n"
 
         # catch exceptions and write them to the output
         result += " " * 4 + "try {" + "\n"
@@ -331,8 +332,8 @@ class CPPGenerator:
                     tc.input.no_value_call()) + ";\n"
                 )
             else:
-                result += self.convert_statement(tc.input.input_statement()) + ";\n"
-        result += " " * 4 + "} catch (exception_ptr e) {\n"
+                result += " " * 8 + self.convert_statement(tc.input.input_statement()) + ";\n"
+        result += " " * 4 + "} catch (const std::exception& e) {\n"
         result += " " * 8 + self.convert_statement(tc.exception_statement("e")) + ";\n"
         result += " " * 8 + "exit_code = 1;\n"
         result += " " * 4 + "}\n"
@@ -341,7 +342,7 @@ class CPPGenerator:
     def generate_internal_context(
             self, ctx: PreparedContext, pu: PreparedExecutionUnit
     ) -> str:
-        result = " " * 4 + ctx.before + "\n"
+        result = ctx.before + "\n"
         result += " " * 4 + "int exit_code;" + "\n"
 
         # Generate code for each testcase

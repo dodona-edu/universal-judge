@@ -7,9 +7,8 @@
           "contexts": [
             {
               "before": {
-                "csharp": {
-                  "data": "#include <stdexcept>"
-                  "data": "String Ex = () => {throw "An error occurred!";};"
+                "cpp": {
+                  "data": "auto ex = []()->vector<any>{throw invalid_argument(\"An error occurred!\");};"
                 }
               },
               "testcases": [

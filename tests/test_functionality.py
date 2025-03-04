@@ -242,7 +242,11 @@ def test_crashing_assignment_with_before(
     # Only the assignment was started.
     assert len(updates.find_all("start-testcase")) == 2
     print(updates.find_status_enum())
-    assert updates.find_status_enum() == ["runtime error", "runtime error", "wrong"]
+    if lang == "cpp":
+        # cpp doesn't crash on an uninitialised vector (as they are always validly initialised upon definition)
+        assert updates.find_status_enum() == ["runtime error", "wrong"]
+    else:
+        assert updates.find_status_enum() == ["runtime error", "runtime error", "wrong"]
     # Assert the exception is included.
     assert updates.find_next("start-test")["channel"] == "exception"
 
