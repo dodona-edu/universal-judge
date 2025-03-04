@@ -286,7 +286,7 @@ class CPPGenerator:
             )
             and not function.type == FunctionType.CONSTRUCTOR
         ):
-            result = self.convert_statement(function.namespace) + "->" + result
+            result = "(" + self.convert_statement(function.namespace) + ")->" + result
         # add the new keyword to constructors
         if function.type == FunctionType.CONSTRUCTOR:
             result = "new " + result
