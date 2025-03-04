@@ -80,7 +80,7 @@
             }
           ]
         },
-        "translation" : {
+        "translations" : {
           "type" : "object",
           "description": "Define translations in the global scope."
         },
@@ -94,18 +94,46 @@
       }
     },
     "_tabList" : {
-      "type" : "array",
-      "minItems" : 1,
-      "items" : {
-        "$ref" : "#/definitions/tab"
-      }
+      "oneOf" : [
+        {
+          "type" : "array",
+          "minItems" : 1,
+          "items" : {
+            "$ref" : "#/definitions/tab"
+          }
+        },
+        {
+          "type" : "natural_language",
+          "additionalProperties": {
+            "type" : "array",
+            "minItems" : 1,
+            "items" : {
+              "$ref" : "#/definitions/tab"
+            }
+          }
+        }
+      ]
     },
     "_unitList" : {
-      "type" : "array",
-      "minItems" : 1,
-      "items" : {
-        "$ref" : "#/definitions/unit"
-      }
+      "oneOf" : [
+        {
+          "type" : "array",
+          "minItems" : 1,
+          "items" : {
+            "$ref" : "#/definitions/unit"
+          }
+        },
+        {
+          "type" : "natural_language",
+          "additionalProperties": {
+            "type" : "array",
+            "minItems" : 1,
+            "items" : {
+              "$ref" : "#/definitions/unit"
+            }
+          }
+        }
+      ]
     },
     "tab" : {
       "type" : "object",
@@ -232,7 +260,7 @@
           ],
           "description" : "The name of this tab."
         },
-        "translation" : {
+        "translations" : {
           "type" : "object",
           "description": "Define translations in the unit scope."
         },
@@ -268,32 +296,88 @@
       ]
     },
     "_contextList" : {
-      "type" : "array",
-      "minItems" : 1,
-      "items" : {
-        "$ref" : "#/definitions/context"
-      }
+      "anyOf" : [
+        {
+          "type" : "array",
+          "minItems" : 1,
+          "items" : {
+            "$ref" : "#/definitions/context"
+          }
+        },
+        {
+          "type" : "natural_language",
+          "additionalProperties": {
+            "type" : "array",
+            "minItems" : 1,
+            "items" : {
+              "$ref" : "#/definitions/context"
+            }
+          }
+        }
+      ]
     },
     "_caseList" : {
-      "type" : "array",
-      "minItems" : 1,
-      "items" : {
-        "$ref" : "#/definitions/case"
-      }
+      "anyOf" : [
+        {
+          "type" : "array",
+          "minItems" : 1,
+          "items" : {
+            "$ref" : "#/definitions/case"
+          }
+        },
+        {
+          "type" : "natural_language",
+          "additionalProperties": {
+            "type" : "array",
+            "minItems" : 1,
+            "items" : {
+              "$ref" : "#/definitions/case"
+            }
+          }
+        }
+      ]
     },
     "_testcaseList" : {
-      "type" : "array",
-      "minItems" : 1,
-      "items" : {
-        "$ref" : "#/definitions/testcase"
-      }
+      "anyOf" : [
+        {
+          "type" : "array",
+          "minItems" : 1,
+          "items" : {
+            "$ref" : "#/definitions/testcase"
+          }
+        },
+        {
+          "type" : "natural_language",
+          "additionalProperties": {
+            "type" : "array",
+            "minItems" : 1,
+            "items" : {
+              "$ref" : "#/definitions/testcase"
+            }
+          }
+        }
+      ]
     },
     "_scriptList" : {
-      "type" : "array",
-      "minItems" : 1,
-      "items" : {
-        "$ref" : "#/definitions/script"
-      }
+      "anyOf" : [
+        {
+          "type" : "array",
+          "minItems" : 1,
+          "items" : {
+            "$ref" : "#/definitions/script"
+          }
+        },
+        {
+          "type" : "natural_language",
+          "additionalProperties": {
+            "type" : "array",
+            "minItems" : 1,
+            "items" : {
+              "$ref" : "#/definitions/script"
+            }
+          }
+        }
+      ]
     },
     "context" : {
       "type" : "object",
@@ -322,7 +406,7 @@
             }
           ]
         },
-        "translation" : {
+        "translations" : {
           "type" : "object",
           "description": "Define translations in the context scope."
         },
@@ -362,7 +446,7 @@
             }
           ]
         },
-        "translation" : {
+        "translations" : {
           "type" : "object",
           "description": "Define translations in the case scope."
         },

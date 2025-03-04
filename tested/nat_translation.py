@@ -1,26 +1,51 @@
-import copy
 import sys
-import textwrap
 from collections import deque
 from pathlib import Path
-from typing import Any, Hashable
+from typing import Any, Hashable, cast
 
 import yaml
 from jinja2 import Environment
 
 from tested.datatypes import AllTypes
 from tested.dsl.translate_parser import (
+    DslValidationError,
     ExpressionString,
+    NaturalLanguageMap,
     ProgrammingLanguageMap,
     ReturnOracle,
     YamlObject,
     _custom_type_constructors,
     _expression_string,
-    _parse_yaml,
     _return_oracle,
-    _validate_dsl,
+    convert_validation_error_to_group,
+    load_schema_validator,
+    raise_yaml_error,
 )
 from tested.utils import get_args
+
+
+def validate_pre_dsl(dsl_object: YamlObject):
+    """
+    Validate a DSl object.
+    :param dsl_object: The object to validate.
+    :return: True if valid, False otherwise.
+    """
+    _SCHEMA_VALIDATOR = load_schema_validator("schema-strict-nat-translation.json")
+    errors = list(_SCHEMA_VALIDATOR.iter_errors(dsl_object))
+    if len(errors) == 1:
+        message = (
+            "Validating the DSL resulted in an error. "
+            "The most specific sub-exception is often the culprit. "
+        )
+        error = convert_validation_error_to_group(errors[0])
+        if isinstance(error, ExceptionGroup):
+            raise ExceptionGroup(message, error.exceptions)
+        else:
+            raise DslValidationError(message + str(error)) from error
+    elif len(errors) > 1:
+        the_errors = [convert_validation_error_to_group(e) for e in errors]
+        message = "Validating the DSL resulted in some errors."
+        raise ExceptionGroup(message, the_errors)
 
 
 class State:
@@ -72,58 +97,16 @@ class StateLoader(yaml.SafeLoader):
         result = super().construct_mapping(node, deep)
         new_translations_map = self.state_queue[0].translations_map
 
-        # These checks are here to make sure that the order between tabs, a tab
-        # and testcases is preserved.
         if "tabs" in result or "units" in result:
-            assert (
-                self.level_state == 0
-            ), "Tabs can't be redefined or can't be defined when a tab is already defined."
-            self.level_state = 1
             self.state_queue.popleft()
 
-            if "translations" in result:
-                new_translations_map = flatten_stack(
-                    [
-                        new_translations_map,
-                        translate_translations_map(
-                            result.pop("translations"), self.lang
-                        ),
-                    ]
-                )
-
-        elif "tab" in result or "unit" in result:
-            assert (
-                self.level_state < 2
-            ), "Can't define a tab when a context or testcases are already defined."
-            self.level_state = 1
-
-            if "translations" in result:
-                new_translations_map = flatten_stack(
-                    [
-                        new_translations_map,
-                        translate_translations_map(
-                            result.pop("translations"), self.lang
-                        ),
-                    ]
-                )
-
-        elif "testcases" in result or "scripts" in result:
-
-            if self.level_state == 1:
-                self.level_state = 2
-            assert (
-                self.level_state == 2
-            ), "Can't define a context when when a tab isn't defined yet."
-
-            if "translations" in result:
-                new_translations_map = flatten_stack(
-                    [
-                        new_translations_map,
-                        translate_translations_map(
-                            result.pop("translations"), self.lang
-                        ),
-                    ]
-                )
+        if "translations" in result:
+            new_translations_map = flatten_stack(
+                [
+                    new_translations_map,
+                    translate_translations_map(result.pop("translations"), self.lang),
+                ]
+            )
 
         children = self.count_children(result)
         result = parse_dict(result, new_translations_map, self.env)
@@ -236,7 +219,9 @@ def translate_translations_map(trans_map: dict, language: str) -> dict:
     return {k: translate_map(v, language) for k, v in trans_map.items()}
 
 
-def _natural_language_map(loader: StateLoader, node: yaml.MappingNode) -> Any:
+def _natural_language_map_translation(
+    loader: StateLoader, node: yaml.MappingNode
+) -> Any:
     result = loader.construct_mapping(node)
 
     children = loader.count_children(result)
@@ -244,8 +229,15 @@ def _natural_language_map(loader: StateLoader, node: yaml.MappingNode) -> Any:
     return result[loader.lang]
 
 
-def _programming_language_map(
+def _natural_language_map(
     loader: StateLoader, node: yaml.MappingNode
+) -> NaturalLanguageMap:
+    result = loader.construct_mapping(node)
+    return NaturalLanguageMap(result)
+
+
+def _programming_language_map(
+    loader: yaml.Loader, node: yaml.MappingNode
 ) -> ProgrammingLanguageMap:
     result = loader.construct_mapping(node)
     return ProgrammingLanguageMap(result)
@@ -267,7 +259,7 @@ def translate_yaml(yaml_stream: str, language: str) -> YamlObject:
                 loader.add_constructor("!" + actual_type, _custom_type_constructors)
         loader.add_constructor("!expression", _expression_string)
         loader.add_constructor("!oracle", _return_oracle)
-        loader.add_constructor("!natural_language", _natural_language_map)
+        loader.add_constructor("!natural_language", _natural_language_map_translation)
         loader.add_constructor("!programming_language", _programming_language_map)
         # This line is need because otherwise there won't
         # be a full translations map on time.
@@ -277,45 +269,42 @@ def translate_yaml(yaml_stream: str, language: str) -> YamlObject:
 
         return loader.get_data()
     except yaml.MarkedYAMLError as exc:
-        lines = yaml_stream.splitlines()
-
-        if exc.problem_mark is None:
-            # There is no additional information, so what can we do?
-            raise exc
-
-        sys.stderr.write(
-            textwrap.dedent(
-                f"""
-        YAML error while parsing test suite. This means there is a YAML syntax error.
-
-        The YAML parser indicates the problem lies at line {exc.problem_mark.line + 1}, column {exc.problem_mark.column + 1}:
-
-            {lines[exc.problem_mark.line]}
-            {" " * exc.problem_mark.column + "^"}
-
-        The error message was:
-            {exc.problem} {exc.context}
-
-        The detailed exception is provided below.
-        You might also find help by validating your YAML file with a YAML validator.\n
-        """
-            )
-        )
-        raise exc
+        raise_yaml_error(yaml_stream, exc)
 
 
-def parse_yaml(yaml_path: Path, language: str) -> YamlObject:
+def parse_yaml(yaml_stream: str) -> YamlObject:
+    """
+    Parse a string or stream to YAML.
+    """
+    loader: type[yaml.Loader] = cast(type[yaml.Loader], yaml.CSafeLoader)
+    for types in get_args(AllTypes):
+        for actual_type in types:
+            yaml.add_constructor("!" + actual_type, _custom_type_constructors, loader)
+    yaml.add_constructor("!expression", _expression_string, loader)
+    yaml.add_constructor("!oracle", _return_oracle, loader)
+    yaml.add_constructor("!natural_language", _natural_language_map, loader)
+    yaml.add_constructor("!programming_language", _programming_language_map, loader)
+
+    try:
+        return yaml.load(yaml_stream, loader)
+    except yaml.MarkedYAMLError as exc:
+        raise_yaml_error(yaml_stream, exc)
+
+
+def read_yaml(yaml_path: Path):
     with open(yaml_path, "r") as stream:
-        result = translate_yaml(stream.read(), language)
-
-    return result
+        return stream.read()
 
 
 def run(path: Path, language: str):
-    new_yaml = parse_yaml(path, language)
-    yaml_string = convert_to_yaml(new_yaml)
-    _validate_dsl(_parse_yaml(yaml_string))
-    generate_new_yaml(path, yaml_string, language)
+    yaml_stream = read_yaml(path)
+    yaml_object = parse_yaml(yaml_stream)
+    validate_pre_dsl(yaml_object)
+
+    translated_yaml_ob = translate_yaml(yaml_stream, language)
+    translated_yaml_string = convert_to_yaml(translated_yaml_ob)
+    # _validate_dsl(_parse_yaml(yaml_string))
+    generate_new_yaml(path, translated_yaml_string, language)
 
 
 if __name__ == "__main__":

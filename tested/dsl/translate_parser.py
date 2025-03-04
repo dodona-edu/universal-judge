@@ -156,6 +156,34 @@ def _return_oracle(loader: yaml.Loader, node: yaml.Node) -> ReturnOracle:
     return ReturnOracle(result)
 
 
+def raise_yaml_error(yaml_stream: str, exc: yaml.MarkedYAMLError):
+    lines = yaml_stream.splitlines()
+
+    if exc.problem_mark is None:
+        # There is no additional information, so what can we do?
+        raise exc
+
+    sys.stderr.write(
+        textwrap.dedent(
+            f"""
+            YAML error while parsing test suite. This means there is a YAML syntax error.
+
+            The YAML parser indicates the problem lies at line {exc.problem_mark.line + 1}, column {exc.problem_mark.column + 1}:
+
+                {lines[exc.problem_mark.line]}
+                {" " * exc.problem_mark.column + "^"}
+
+            The error message was:
+                {exc.problem} {exc.context}
+
+            The detailed exception is provided below.
+            You might also find help by validating your YAML file with a YAML validator.\n
+            """
+        )
+    )
+    raise exc
+
+
 def _parse_yaml(yaml_stream: str) -> YamlObject:
     """
     Parse a string or stream to YAML.
@@ -170,31 +198,7 @@ def _parse_yaml(yaml_stream: str) -> YamlObject:
     try:
         return yaml.load(yaml_stream, loader)
     except yaml.MarkedYAMLError as exc:
-        lines = yaml_stream.splitlines()
-
-        if exc.problem_mark is None:
-            # There is no additional information, so what can we do?
-            raise exc
-
-        sys.stderr.write(
-            textwrap.dedent(
-                f"""
-        YAML error while parsing test suite. This means there is a YAML syntax error.
-
-        The YAML parser indicates the problem lies at line {exc.problem_mark.line + 1}, column {exc.problem_mark.column + 1}:
-            
-            {lines[exc.problem_mark.line]}
-            {" " * exc.problem_mark.column + "^"}
-        
-        The error message was:
-            {exc.problem} {exc.context}
-            
-        The detailed exception is provided below.
-        You might also find help by validating your YAML file with a YAML validator.\n
-        """
-            )
-        )
-        raise exc
+        raise_yaml_error(yaml_stream, exc)
 
 
 def is_oracle(_checker: TypeChecker, instance: Any) -> bool:
@@ -203,6 +207,14 @@ def is_oracle(_checker: TypeChecker, instance: Any) -> bool:
 
 def is_expression(_checker: TypeChecker, instance: Any) -> bool:
     return isinstance(instance, ExpressionString)
+
+
+def is_natural_language_map(_checker: TypeChecker, instance: Any) -> bool:
+    return isinstance(instance, NaturalLanguageMap)
+
+
+def is_programming_language_map(_checker: TypeChecker, instance: Any) -> bool:
+    return isinstance(instance, ProgrammingLanguageMap)
 
 
 def test(value: object) -> bool:
@@ -223,9 +235,12 @@ def load_schema_validator(file: str = "schema-strict.json") -> Validator:
         schema_object = json.load(schema_file)
 
     original_validator: Type[Validator] = validator_for(schema_object)
-    type_checker = original_validator.TYPE_CHECKER.redefine(
-        "oracle", is_oracle
-    ).redefine("expression", is_expression)
+    type_checker = (
+        original_validator.TYPE_CHECKER.redefine("oracle", is_oracle)
+        .redefine("expression", is_expression)
+        .redefine("natural_language", is_natural_language_map)
+        .redefine("programming_language", is_programming_language_map)
+    )
     format_checker = original_validator.FORMAT_CHECKER
     format_checker.checks("tested-dsl-expression", SyntaxError)(test)
     tested_validator = extend_validator(original_validator, type_checker=type_checker)

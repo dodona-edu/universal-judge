@@ -1,18 +1,17 @@
 from typing import Any, Hashable, cast
 
+from tested.dsl.translate_parser import _parse_yaml, _validate_dsl
 from tested.nat_translation import (
     convert_to_yaml,
     create_enviroment,
     parse_dict,
     parse_list,
+    parse_yaml,
     translate_yaml,
+    validate_pre_dsl,
 )
 
-
-def test_natural_translate_unit_test():
-    # Everywhere where !natural_language is used, it is mandatory to do so.
-    # Everywhere else it isn't.
-    yaml_str = """
+test_unit_yaml_str = """
 translations:
   animal:
     en: "animals"
@@ -103,7 +102,57 @@ tabs:
     testcases:
       - expression: "{{select}}('a', {'a': 1, 'b': 2})"
         return: 1
+  - tab: "task"
+    contexts: !natural_language
+        en:
+          - testcases:
+            - statement: '{{result}} = Trying(10)'
+            - expression: 'count_words({{result}})'
+              return: 'The {{result}} is 10'
+            - expression: !expression "count"
+              return: 'count'
+        nl:
+          - testcases:
+            - statement: '{{result}} = Proberen(10)'
+            - expression: 'tel_woorden({{result}})'
+              return: 'Het {{result}} is 10'
+            - expression: !expression "tellen"
+              return: 'tellen'
+  - tab: "task2"
+    contexts:
+        - testcases: !natural_language
+            en:
+              - statement: '{{result}} = Trying(10)'
+              - expression: 'count_words({{result}})'
+                return: 'The {{result}} is 10'
+              - expression: !expression "count"
+                return: 'count'
+            nl:
+              - statement: '{{result}} = Proberen(10)'
+              - expression: 'tel_woorden({{result}})'
+                return: 'Het {{result}} is 10'
+              - expression: !expression "tellen"
+                return: 'tellen'
+  - tab: "task3"
+    testcases: !natural_language
+        en:
+          - statement: '{{result}} = Trying(10)'
+          - expression: 'count_words({{result}})'
+            return: 'The {{result}} is 10'
+          - expression: !expression "count"
+            return: 'count'
+        nl:
+          - statement: '{{result}} = Proberen(10)'
+          - expression: 'tel_woorden({{result}})'
+            return: 'Het {{result}} is 10'
+          - expression: !expression "tellen"
+            return: 'tellen'
 """.strip()
+
+
+def test_natural_translate_unit_test():
+    # Everywhere where !natural_language is used, it is mandatory to do so.
+    # Everywhere else it isn't.
     translated_yaml_str = """
 tabs:
 - tab: '{animal_tab}_{results}'
@@ -149,8 +198,31 @@ tabs:
   testcases:
   - expression: 'select(''a'', {''a'': 1, ''b'': 2})'
     return: 1
+- tab: task
+  contexts:
+  - testcases:
+    - statement: results = Trying(10)
+    - expression: count_words(results)
+      return: The results is 10
+    - expression: !expression 'count'
+      return: count
+- tab: task2
+  contexts:
+  - testcases:
+    - statement: results = Trying(10)
+    - expression: count_words(results)
+      return: The results is 10
+    - expression: !expression 'count'
+      return: count
+- tab: task3
+  testcases:
+  - statement: results = Trying(10)
+  - expression: count_words(results)
+    return: The results is 10
+  - expression: !expression 'count'
+    return: count
 """.strip()
-    translated_dsl = translate_yaml(yaml_str, "en")
+    translated_dsl = translate_yaml(test_unit_yaml_str, "en")
     translated_yaml = convert_to_yaml(translated_dsl)
     assert translated_yaml.strip() == translated_yaml_str
 
@@ -214,6 +286,14 @@ units:
             en: "tests(11)"
             nl: "testen(11)"
         return: 11
+  - unit: "test2"
+    scripts: !natural_language
+      en: 
+        - expression: "tests(11)"
+          return: 11
+      nl:
+        - expression: "testen(11)"
+          return: 11
 """.strip()
     translated_yaml_str = """
 units:
@@ -244,6 +324,10 @@ units:
         types:
           typescript: ERROR
 - unit: test
+  scripts:
+  - expression: tests(11)
+    return: 11
+- unit: test2
   scripts:
   - expression: tests(11)
     return: 11
@@ -278,3 +362,12 @@ def test_translate_parse():
     expected_value = []
     parsed_result = parse_list(value, flattened_stack, env)
     assert parsed_result == expected_value
+
+
+def test_validation():
+    yaml_object = parse_yaml(test_unit_yaml_str)
+    validate_pre_dsl(yaml_object)
+
+    translated_yaml_ob = translate_yaml(test_unit_yaml_str, "en")
+    translated_yaml_string = convert_to_yaml(translated_yaml_ob)
+    _validate_dsl(_parse_yaml(translated_yaml_string))
