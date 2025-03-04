@@ -13,7 +13,7 @@ from tested.configs import DodonaConfig, Options
 from tested.main import run
 from tested.testsuite import SupportedLanguage
 
-exercise_dir = "/IdeaProjects/universal-judge/tests/exercises/division"
+exercise_dir = "/IdeaProjects/universal-judge/tests/exercises/isbn"
 
 
 def read_config() -> DodonaConfig:
@@ -21,13 +21,13 @@ def read_config() -> DodonaConfig:
     return DodonaConfig(
         memory_limit=536870912,
         time_limit=60,
-        programming_language=SupportedLanguage("csharp"),
+        programming_language=SupportedLanguage("cpp"),
         natural_language="nl",
         resources=Path(exercise_dir, "evaluation"),
-        source=Path(exercise_dir, "solution/correct.cs"),
+        source=Path(exercise_dir, "solution/solution.cpp"),
         judge=Path("."),
         workdir=Path("workdir"),
-        test_suite="plan-generic-exception.json",
+        test_suite="one-with-assignment.tson",
         options=Options(
             linter=False,
         ),

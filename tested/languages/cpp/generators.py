@@ -155,9 +155,9 @@ class CPPGenerator:
                 else:
                     return "(-INFINITY)"
         elif value.type == BasicStringTypes.TEXT:
-            return json.dumps(value.data)
+            return f"std::string({json.dumps(value.data)})"
         elif value.type == BasicBooleanTypes.BOOLEAN:
-            return f"(bool) " + str(value.data).lower()
+            return str(value.data).lower()
         elif value.type == BasicNothingTypes.NOTHING:
             return "nullptr"
         elif value.type == BasicStringTypes.UNKNOWN:
