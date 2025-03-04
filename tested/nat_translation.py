@@ -16,6 +16,7 @@ from tested.dsl.translate_parser import (
     YamlObject,
     _custom_type_constructors,
     _expression_string,
+    _parse_yaml_value,
     _return_oracle,
     convert_validation_error_to_group,
     load_schema_validator,
@@ -229,17 +230,21 @@ def _natural_language_map_translation(
     return result[loader.lang]
 
 
-def _natural_language_map(
-    loader: StateLoader, node: yaml.MappingNode
-) -> NaturalLanguageMap:
-    result = loader.construct_mapping(node)
+def _natural_language_map(loader: yaml.Loader, node: yaml.Node) -> NaturalLanguageMap:
+    result = _parse_yaml_value(loader, node)
+    assert isinstance(
+        result, dict
+    ), f"A natural language map must be an object, got {result} which is a {type(result)}."
     return NaturalLanguageMap(result)
 
 
 def _programming_language_map(
-    loader: yaml.Loader, node: yaml.MappingNode
+    loader: yaml.Loader, node: yaml.Node
 ) -> ProgrammingLanguageMap:
-    result = loader.construct_mapping(node)
+    result = _parse_yaml_value(loader, node)
+    assert isinstance(
+        result, dict
+    ), f"A programming language map must be an object, got {result} which is a {type(result)}."
     return ProgrammingLanguageMap(result)
 
 
