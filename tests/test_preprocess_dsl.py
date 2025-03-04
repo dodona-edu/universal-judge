@@ -1,5 +1,7 @@
 from typing import Any, Hashable, cast
+
 import yaml
+
 from tested.dsl.translate_parser import _parse_yaml, _validate_dsl
 from tested.nat_translation import (
     convert_to_yaml,
@@ -396,6 +398,7 @@ tabs:
         print("As expected")
     else:
         assert False, "Expected ExceptionGroup error"
+
 
 def test_yaml_with_syntax_error():
     yaml_str = """
