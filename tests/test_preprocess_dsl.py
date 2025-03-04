@@ -371,3 +371,28 @@ def test_validation():
     translated_yaml_ob = translate_yaml(test_unit_yaml_str, "en")
     translated_yaml_string = convert_to_yaml(translated_yaml_ob)
     _validate_dsl(_parse_yaml(translated_yaml_string))
+
+
+def test_wrong_natural_translation_suite():
+    yaml_str = """
+tabs:
+- tab: animals
+  testcases:
+  - expression: tests(11)
+    return: 11
+  - expression:
+      javascript: animals_javascript(1 + 1)
+      typescript: animals_typescript(1 + 1)
+      java: Submission.animals_java(1 + 1)
+      python:
+        en: animals_python_en(1 + 1)
+        nl: animals_python_nl(1 + 1)
+    return: 2
+    """.strip()
+    parsed_yaml = parse_yaml(yaml_str)
+    try:
+        validate_pre_dsl(parsed_yaml)
+    except ExceptionGroup:
+        print("As expected")
+    else:
+        assert False, "Expected ExceptionGroup, but no exception was raised"

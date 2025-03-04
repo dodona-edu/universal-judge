@@ -296,19 +296,15 @@ def parse_yaml(yaml_stream: str) -> YamlObject:
         raise_yaml_error(yaml_stream, exc)
 
 
-def read_yaml(yaml_path: Path):
-    with open(yaml_path, "r") as stream:
-        return stream.read()
-
-
 def run(path: Path, language: str):
-    yaml_stream = read_yaml(path)
+    with open(path, "r") as stream:
+        yaml_stream = stream.read()
+
     yaml_object = parse_yaml(yaml_stream)
     validate_pre_dsl(yaml_object)
 
     translated_yaml_ob = translate_yaml(yaml_stream, language)
     translated_yaml_string = convert_to_yaml(translated_yaml_ob)
-    # _validate_dsl(_parse_yaml(yaml_string))
     generate_new_yaml(path, translated_yaml_string, language)
 
 
