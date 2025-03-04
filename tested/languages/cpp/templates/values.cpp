@@ -63,6 +63,8 @@ void write_evaluated(FILE* out, EvaluationResult* result) {
 // { "type" : "exception", "message" : "message", "stacktrace" : "stacktrace" }
 void write_exception(FILE* out, const std::exception& e) {
     // Stacktrace is not easily available in C++
-    string json = "{ \"type\" : \"exception\", \"message\" : \"%s\", \"stacktrace\" : \"\" }";
-    write_formatted(out, json.c_str(), e.what());
+    string json = "{ \"type\" : \"%s\", \"message\" : \"%s\", \"stacktrace\" : \"\" }";
+    // Whats returned as name is compiler implementation specific
+    const char* exception_name = typeid(e).name();
+    write_formatted(out, json.c_str(), exception_name, e.what());
 }

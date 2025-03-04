@@ -50,6 +50,7 @@ class CPP(Language):
             Construct.HETEROGENEOUS_COLLECTIONS,
             Construct.DEFAULT_PARAMETERS,
             Construct.HETEROGENEOUS_ARGUMENTS,
+            Construct.EXCEPTIONS
         }
 
     def datatype_support(self) -> dict[AllTypes, TypeSupport]:

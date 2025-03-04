@@ -40,5 +40,13 @@ def test_object_languages_support_objects(language: str):
 
     assert Construct.OBJECTS in config.supported_constructs()
 
+@pytest.mark.parametrize("language", EXCEPTION_LANGUAGES)
+def test_exception_languages_support_exceptions(language: str):
+    assert language in LANGUAGES.keys()
+
+    config = LANGUAGES[language](None)
+
+    assert Construct.EXCEPTIONS in config.supported_constructs()
+
 def test_no_missing_languages_from_tests():
     assert sorted(ALL_LANGUAGES) == sorted(LANGUAGES.keys())

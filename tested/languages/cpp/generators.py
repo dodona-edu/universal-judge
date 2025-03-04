@@ -310,7 +310,7 @@ class CPPGenerator:
         if tc.testcase.is_main_testcase():
             assert isinstance(tc.input, MainInput)
             wrapped = [json.dumps(a) for a in tc.input.arguments]
-            result += " " * 8 + f'char* args[] = {{"{pu.submission_name}", '
+            result += " " * 8 + f'const char* args[] = {{"{pu.submission_name}", '
             result += ", ".join(wrapped)
             result += "};\n"
             result += (
