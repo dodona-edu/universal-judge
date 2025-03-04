@@ -116,7 +116,7 @@ class CPP(Language):
         # First, check if we have a no-arg main function.
         # If so, replace it with a renamed main function that does have args.
         no_args = re.compile(r"(int|void)(\s+)main(\s*)\((\s*)\)(\s*{)")
-        replacement = r"int\2solution_main\3(\4int argc, char* argv[])\5"
+        replacement = r"int\2solution_main\3(\4int argc, const char* argv[])\5"
         contents, nr = re.subn(no_args, replacement, contents, count=1)
         if nr == 0:
             # There was no main function without arguments. Now we try a main
