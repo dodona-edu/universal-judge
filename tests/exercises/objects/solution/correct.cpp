@@ -10,6 +10,7 @@ public:
         return other == number;
     }
 
+    int prop;
 private:
     int number;
 };
