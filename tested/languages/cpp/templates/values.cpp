@@ -87,5 +87,5 @@ void write_exception(FILE* out, const std::exception_ptr &eptr) {
     // Stacktrace is not easily available in C++
     string json = "{ \"type\" : \"%s\", \"message\" : \"%s\", \"stacktrace\" : \"\" }";
     // Whats returned as name is compiler implementation specific
-    write_formatted(out, json.c_str(), exception_message(eptr), exception_type(eptr));
+    write_formatted(out, json.c_str(), exception_type(eptr).c_str(), exception_message(eptr).c_str());
 }
