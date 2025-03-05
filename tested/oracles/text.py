@@ -152,15 +152,15 @@ def evaluate_file(
             expected_path = f"{config.bundle.config.resources}/{channel.content[i]}"
             try:
                 with open(expected_path, "r") as file:
-                    expected_list.append(file.read())
+                    expected_list.append(f"--- <{channel.path[i]}> ---\n{file.read()}")
             except FileNotFoundError:
                 raise ValueError(f"File {expected_path} not found in resources.")
         else:
-            expected_list.append(channel.content[i])
+            expected_list.append(f"--- <{channel.path[i]}> ---\n{channel.content[i]}")
 
         try:
             with open(str(actual_path), "r") as file:
-                actual_list.append(file.read())
+                actual_list.append(f"--- <{channel.path[i]}> ---\n{file.read()}")
         except FileNotFoundError:
             file_not_found = True
 

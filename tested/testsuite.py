@@ -295,9 +295,9 @@ class FileOutputChannel(WithFeatures):
             if self.content_type[i] == TextChannelType.FILE:
                 file_path = _resolve_path(resources, self.content[i])
                 with open(file_path, "r") as file:
-                    file_content.append(file.read())
+                    file_content.append(f"--- <{self.path[i]}> ---\n{file.read()}")
             else:
-                file_content.append(self.content[i])
+                file_content.append(f"--- <{self.path[i]}> ---\n{self.content[i]}")
         return "\n".join(file_content)
 
 
