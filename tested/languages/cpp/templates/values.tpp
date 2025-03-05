@@ -64,7 +64,7 @@ string getTypeName(const set<T>&) {
 // Specialization for map
 template<typename K, typename V>
 string getTypeName(const map<K, V>&) {
-    return "map";
+    return "dictionary";
 }
 
 // Specialization for array
@@ -134,14 +134,17 @@ string to_json_value(const set<T>& set) {
 
 template<typename K, typename V>
 string to_json_value(const map<K, V>& map) {
-    string result = "{";
+    string result = "[";
     for (const auto& item : map) {
-        result += "\"" + to_json_value(item.first) + "\": " + to_json(item.second) + ",";
+        result += "{";
+        result += "\"key\": " + to_json(item.first) + ", ";
+        result += "\"value\": " + to_json(item.second);
+        result += "},";
     }
     if (!map.empty()) {
         result.pop_back(); // remove trailing comma
     }
-    result += "}";
+    result += "]";
     return result;
 }
 

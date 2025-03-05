@@ -91,29 +91,7 @@ class CPPGenerator:
         return key_type_str, value_type_str
 
     def convert_value(self, value: Value) -> str:
-        tp = value.type
-        basic = resolve_to_basic(tp)
-        if basic == BasicObjectTypes.MAP:
-            return (
-                "{"
-                + ", ".join(
-                    f"{self.convert_value(cast(Value, kvp.key)), self.convert_value(cast(Value, kvp.value))}"
-                    for kvp in cast(ObjectType, value).data
-                )
-                + "}"
-            )
-        elif basic == BasicSequenceTypes.SEQUENCE or basic == BasicSequenceTypes.SET:
-            return (
-                "{"
-                + ", ".join(
-                    self.convert_value(cast(Value, v))
-                    for v in cast(SequenceType, value).data
-                )
-                + "}"
-            )
-        elif value.type == BasicNothingTypes.NOTHING:
-            return "nullptr"
-        elif value.type == AdvancedStringTypes.CHAR:
+        if value.type == AdvancedStringTypes.CHAR:
             assert isinstance(value, StringType)
             return f"(char) '" + value.data.replace("'", "\\'") + "'"
         elif value.type == AdvancedNumericTypes.INT_16:
@@ -127,42 +105,63 @@ class CPPGenerator:
         elif value.type == AdvancedNumericTypes.U_INT_32:
             return f"{value.data}U"
         # Handle basic types
-        original = value
-        value = as_basic_type(value)
-        if value.type == BasicNumericTypes.INTEGER:
-            # Basic heuristic for long numbers
-            if (value.data > (2 ** 31 - 1)) or (value.data < -(2 ** 31)):
-                return f"{value.data}L"
-            else:
-                return str(value.data)
-        elif value.type == BasicNumericTypes.REAL:
-            suffix = (
-                "f" if original.type == AdvancedNumericTypes.SINGLE_PRECISION else ""
+        basic = as_basic_type(value)
+        if basic.type == BasicObjectTypes.MAP:
+            type_string = self.convert_declaration(value.type, value)
+            return (
+                type_string
+                + "({"
+                + ", ".join(
+                    f"{{{self.convert_value(kvp.key)}, {self.convert_value(kvp.value)}}}"
+                    for kvp in basic.data
+                )
+                + "})"
             )
-            if not isinstance(value.data, SpecialNumbers):
-                return str(value.data) + suffix
-            elif value.data == SpecialNumbers.NOT_A_NUMBER:
+        elif basic.type == BasicSequenceTypes.SEQUENCE or basic == BasicSequenceTypes.SET:
+            type_string = self.convert_declaration(value.type, value)
+            return (
+                type_string
+                + "({"
+                + ", ".join(
+                    self.convert_value(cast(Value, v))
+                    for v in basic.data
+                )
+                + "})"
+            )
+        elif basic.type == BasicNumericTypes.INTEGER:
+            # Basic heuristic for long numbers
+            if (basic.data > (2 ** 31 - 1)) or (basic.data < -(2 ** 31)):
+                return f"{basic.data}L"
+            else:
+                return str(basic.data)
+        elif basic.type == BasicNumericTypes.REAL:
+            suffix = (
+                "f" if value.type == AdvancedNumericTypes.SINGLE_PRECISION else ""
+            )
+            if not isinstance(basic.data, SpecialNumbers):
+                return str(basic.data) + suffix
+            elif basic.data == SpecialNumbers.NOT_A_NUMBER:
                 return "nan" + suffix + '("")'
-            elif value.data == SpecialNumbers.POS_INFINITY:
-                if original.type == AdvancedNumericTypes.DOUBLE_PRECISION:
+            elif basic.data == SpecialNumbers.POS_INFINITY:
+                if value.type == AdvancedNumericTypes.DOUBLE_PRECISION:
                     return "((double) INFINITY)"
                 else:
                     return "INFINITY"
             else:
                 assert SpecialNumbers.NEG_INFINITY
-                if original.type == AdvancedNumericTypes.DOUBLE_PRECISION:
+                if value.type == AdvancedNumericTypes.DOUBLE_PRECISION:
                     return "((double) -INFINITY)"
                 else:
                     return "(-INFINITY)"
-        elif value.type == BasicStringTypes.TEXT:
-            return f"std::string({json.dumps(value.data)})"
-        elif value.type == BasicBooleanTypes.BOOLEAN:
-            return str(value.data).lower()
-        elif value.type == BasicNothingTypes.NOTHING:
+        elif basic.type == BasicStringTypes.TEXT:
+            return f"std::string({json.dumps(basic.data)})"
+        elif basic.type == BasicBooleanTypes.BOOLEAN:
+            return str(basic.data).lower()
+        elif basic.type == BasicNothingTypes.NOTHING:
             return "nullptr"
-        elif value.type == BasicStringTypes.UNKNOWN:
-            assert isinstance(value, StringType)
-            return convert_unknown_type(value)
+        elif basic.type == BasicStringTypes.UNKNOWN:
+            assert isinstance(basic, StringType)
+            return convert_unknown_type(basic)
         raise AssertionError(f"Invalid literal: {value!r}")
 
     def convert_declaration(
