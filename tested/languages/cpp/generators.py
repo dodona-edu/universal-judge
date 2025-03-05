@@ -123,8 +123,8 @@ class CPPGenerator:
                 type_string
                 + "({"
                 + ", ".join(
-                    f"{{{self.convert_value(kvp.key)}, {self.convert_value(kvp.value)}}}"
-                    for kvp in basic.data
+                    f"{{{self.convert_value(cast(Value, kvp.key))}, {self.convert_value(cast(Value, kvp.value))}}}"
+                    for kvp in cast(ObjectType, basic).data
                 )
                 + "})"
             )
@@ -135,7 +135,10 @@ class CPPGenerator:
             return (
                 type_string
                 + "({"
-                + ", ".join(self.convert_value(cast(Value, v)) for v in basic.data)
+                + ", ".join(
+                    self.convert_value(cast(Value, cast(Value, v)))
+                    for v in cast(SequenceType, basic).data
+                )
                 + "})"
             )
         elif basic.type == BasicNumericTypes.INTEGER:
