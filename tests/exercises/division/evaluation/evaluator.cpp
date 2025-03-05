@@ -14,6 +14,8 @@ public:
             r->readableExpected = e.what();
             r->readableActual = e.what();
             return r;
+        } catch (...) {
+            // do nothing
         }
 
         EvaluationResult* r = new EvaluationResult(1);
