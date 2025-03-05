@@ -22,7 +22,9 @@ from tested.testsuite import Context, MainInput, Suite, Tab, Testcase, TextData
 from tests.language_markers import (
     ALL_LANGUAGES,
     ALL_SPECIFIC_LANGUAGES,
-    EXCEPTION_LANGUAGES, OBJECT_LANGUAGES, all_languages_except,
+    EXCEPTION_LANGUAGES,
+    OBJECT_LANGUAGES,
+    all_languages_except,
 )
 from tests.manual_utils import assert_valid_output, configuration, execute_config
 
@@ -172,9 +174,7 @@ def test_generic_exception_wrong_error(
     assert updates.find_status_enum() == ["wrong"]
 
 
-@pytest.mark.parametrize(
-    "lang", OBJECT_LANGUAGES
-)
+@pytest.mark.parametrize("lang", OBJECT_LANGUAGES)
 def test_assignment_and_use_in_expression(
     lang: str, tmp_path: Path, pytestconfig: pytest.Config
 ):

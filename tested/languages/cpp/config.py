@@ -2,13 +2,21 @@ import re
 from pathlib import Path
 
 from tested.datatypes import AllTypes
-from tested.dodona import Message, AnnotateCode
+from tested.dodona import AnnotateCode, Message
 from tested.features import Construct, TypeSupport
-from tested.languages.conventionalize import Conventionable, NamingConventions, \
-    submission_file, EXECUTION_PREFIX
+from tested.languages.conventionalize import (
+    EXECUTION_PREFIX,
+    Conventionable,
+    NamingConventions,
+    submission_file,
+)
 from tested.languages.cpp.generators import CPPGenerator
-from tested.languages.language import CallbackResult, Language, Command, \
-    TypeDeclarationMetadata
+from tested.languages.language import (
+    CallbackResult,
+    Command,
+    Language,
+    TypeDeclarationMetadata,
+)
 from tested.languages.preparation import PreparedExecutionUnit
 from tested.languages.utils import executable_name
 from tested.serialisation import Statement, Value
@@ -50,7 +58,7 @@ class CPP(Language):
             Construct.HETEROGENEOUS_COLLECTIONS,
             Construct.DEFAULT_PARAMETERS,
             Construct.HETEROGENEOUS_ARGUMENTS,
-            Construct.EXCEPTIONS
+            Construct.EXCEPTIONS,
         }
 
     def datatype_support(self) -> dict[AllTypes, TypeSupport]:
@@ -133,7 +141,7 @@ class CPP(Language):
         from tested.languages.c import linter
 
         assert self.config
-        return linter.run_cppcheck(self.config.dodona, remaining, 'c++')
+        return linter.run_cppcheck(self.config.dodona, remaining, "c++")
 
     def cleanup_stacktrace(self, stacktrace: str) -> str:
         included_regex = rf"from ({EXECUTION_PREFIX}|selector)"

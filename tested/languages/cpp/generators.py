@@ -8,31 +8,38 @@ from tested.datatypes.advanced import (
     AdvancedStringTypes,
 )
 from tested.datatypes.basic import (
+    BasicBooleanTypes,
     BasicNothingTypes,
     BasicNumericTypes,
     BasicObjectTypes,
     BasicSequenceTypes,
-    BasicStringTypes, BasicBooleanTypes,
+    BasicStringTypes,
 )
 from tested.languages.preparation import (
+    PreparedContext,
     PreparedExecutionUnit,
     PreparedFunctionCall,
     PreparedTestcase,
-    PreparedTestcaseStatement, PreparedContext,
+    PreparedTestcaseStatement,
 )
 from tested.languages.utils import convert_unknown_type, is_special_void_call
 from tested.serialisation import (
+    Expression,
     FunctionCall,
     FunctionType,
+    Identifier,
+    NamedArgument,
     ObjectType,
     PropertyAssignment,
     SequenceType,
+    SpecialNumbers,
     Statement,
+    StringType,
     Value,
     VariableAssignment,
     VariableType,
-    WrappedAllTypes, Expression, NamedArgument, SpecialNumbers, StringType,
-    as_basic_type, Identifier,
+    WrappedAllTypes,
+    as_basic_type,
 )
 from tested.testsuite import MainInput
 
@@ -121,27 +128,24 @@ class CPPGenerator:
                 )
                 + "})"
             )
-        elif basic.type == BasicSequenceTypes.SEQUENCE or basic == BasicSequenceTypes.SET:
+        elif (
+            basic.type == BasicSequenceTypes.SEQUENCE or basic == BasicSequenceTypes.SET
+        ):
             type_string = self.convert_declaration(value.type, value)
             return (
                 type_string
                 + "({"
-                + ", ".join(
-                    self.convert_value(cast(Value, v))
-                    for v in basic.data
-                )
+                + ", ".join(self.convert_value(cast(Value, v)) for v in basic.data)
                 + "})"
             )
         elif basic.type == BasicNumericTypes.INTEGER:
             # Basic heuristic for long numbers
-            if (basic.data > (2 ** 31 - 1)) or (basic.data < -(2 ** 31)):
+            if (basic.data > (2**31 - 1)) or (basic.data < -(2**31)):
                 return f"{basic.data}L"
             else:
                 return str(basic.data)
         elif basic.type == BasicNumericTypes.REAL:
-            suffix = (
-                "f" if value.type == AdvancedNumericTypes.SINGLE_PRECISION else ""
-            )
+            suffix = "f" if value.type == AdvancedNumericTypes.SINGLE_PRECISION else ""
             if not isinstance(basic.data, SpecialNumbers):
                 return str(basic.data) + suffix
             elif basic.data == SpecialNumbers.NOT_A_NUMBER:
@@ -205,9 +209,7 @@ class CPPGenerator:
             tuple_length = len(value.data)
             subtype_string = self.convert_sequence_subtype(value, subtype)
             assert subtype_string is not None
-            return (
-                f"tuple<{", ".join(subtype_string for _ in range(tuple_length))}>"
-            )
+            return f"tuple<{", ".join(subtype_string for _ in range(tuple_length))}>"
         elif tp == AdvancedSequenceTypes.ARRAY:
             subtype_string = self.convert_sequence_subtype(value, subtype) or "any"
             return f"vector<{subtype_string}>"
@@ -317,8 +319,8 @@ class CPPGenerator:
             result += ", ".join(wrapped)
             result += "};\n"
             result += (
-                " " * 8 +
-                f"exit_code = solution_main({len(tc.input.arguments) + 1}, args);\n"
+                " " * 8
+                + f"exit_code = solution_main({len(tc.input.arguments) + 1}, args);\n"
             )
         else:
             assert isinstance(tc.input, PreparedTestcaseStatement)
@@ -326,16 +328,17 @@ class CPPGenerator:
             if is_special_void_call(tc.input, pu.language):
                 # The method has a "void" return type, so don't wrap it.
                 result += (
-                        " " * 8
-                        + self.convert_statement(tc.input.unwrapped_input_statement())
-                        + ";\n"
+                    " " * 8
+                    + self.convert_statement(tc.input.unwrapped_input_statement())
+                    + ";\n"
                 )
                 result += (
-                        " " * 8 + self.convert_statement(
-                    tc.input.no_value_call()) + ";\n"
+                    " " * 8 + self.convert_statement(tc.input.no_value_call()) + ";\n"
                 )
             else:
-                result += " " * 8 + self.convert_statement(tc.input.input_statement()) + ";\n"
+                result += (
+                    " " * 8 + self.convert_statement(tc.input.input_statement()) + ";\n"
+                )
         result += " " * 4 + "} catch (...) {\n"
         result += " " * 8 + "const std::exception_ptr &e = std::current_exception();\n"
         result += " " * 8 + self.convert_statement(tc.exception_statement("e")) + ";\n"
@@ -344,7 +347,7 @@ class CPPGenerator:
         return result
 
     def generate_internal_context(
-            self, ctx: PreparedContext, pu: PreparedExecutionUnit
+        self, ctx: PreparedContext, pu: PreparedExecutionUnit
     ) -> str:
         result = ctx.before + "\n"
         result += " " * 4 + "int exit_code;" + "\n"

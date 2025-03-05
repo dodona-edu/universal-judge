@@ -165,10 +165,10 @@ def test_io_function_display_no_multiline_exercise(
     )
     if language == "cpp":
         # for cpp, string values are cast to std::string
-        assert expected.startswith("std::string(\"")
-        assert expected.endswith("\")")
-        assert actual.startswith("std::string(\"")
-        assert actual.endswith("\")")
+        assert expected.startswith('std::string("')
+        assert expected.endswith('")')
+        assert actual.startswith('std::string("')
+        assert actual.endswith('")')
     else:
         quote = STRING_QUOTES[SupportedLanguage(language)]
         assert expected[0] == quote and expected[-1] == quote
