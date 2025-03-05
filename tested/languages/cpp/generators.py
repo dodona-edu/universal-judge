@@ -333,7 +333,8 @@ class CPPGenerator:
                 )
             else:
                 result += " " * 8 + self.convert_statement(tc.input.input_statement()) + ";\n"
-        result += " " * 4 + "} catch (const std::exception& e) {\n"
+        result += " " * 4 + "} catch (...) {\n"
+        result += " " * 8 + "const std::exception_ptr &e = std::current_exception();\n"
         result += " " * 8 + self.convert_statement(tc.exception_statement("e")) + ";\n"
         result += " " * 8 + "exit_code = 1;\n"
         result += " " * 4 + "}\n"

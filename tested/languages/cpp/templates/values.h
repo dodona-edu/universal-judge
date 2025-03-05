@@ -33,7 +33,7 @@ void write_evaluated(FILE* out, EvaluationResult* result);
 
 // writes an exception to json as
 // { "type" : "exception", "message" : "message", "stacktrace" : "stacktrace" }
-void write_exception(FILE* out, const std::exception& e);
+void write_exception(FILE* out, const std::exception_ptr &eptr);
 
 // Include the implementation file for template functions
 #include "values.tpp"
