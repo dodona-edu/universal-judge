@@ -3,18 +3,16 @@
 
 #include "values.h"
 
-using namespace std;
-
 // Function to escape special characters in a string
-string escape(const string &buffer) {
-    string dest;
+std::string escape(const std::string &buffer) {
+    std::string dest;
     dest.reserve(buffer.length() * 2); // Reserve enough space to avoid reallocations
-    const string esc_char = "\a\b\f\n\r\t\v\\\"";
-    const string essc_str = "abfnrtv\\\"";
+    const std::string esc_char = "\a\b\f\n\r\t\v\\\"";
+    const std::string essc_str = "abfnrtv\\\"";
 
     for (char ch : buffer) {
         auto pos = esc_char.find(ch);
-        if (pos != string::npos) {
+        if (pos != std::string::npos) {
             dest += '\\';
             dest += essc_str[pos];
         } else {
@@ -33,10 +31,10 @@ void write_formatted(FILE* out, const char* format, ...) {
 
 // Function to write evaluated results
 void write_evaluated(FILE* out, EvaluationResult* result) {
-    string concatMessages;
+    std::string concatMessages;
 
     for (const auto& message : result->messages) {
-        string messageStr;
+        std::string messageStr;
         if (message->permission.empty()) {
             messageStr = "{\"description\": \"" + escape(message->description) + "\", \"format\": \"" + escape(message->format) + "\"}";
         } else {
@@ -48,7 +46,7 @@ void write_evaluated(FILE* out, EvaluationResult* result) {
         concatMessages += messageStr;
     }
 
-    string resultStr = result->result ? "true" : "false";
+    std::string resultStr = result->result ? "true" : "false";
     write_formatted(out, "{"
                         "\"result\": %s, "
                         "\"readable_expected\": \"%s\", "
@@ -85,7 +83,7 @@ std::string exception_type(const std::exception_ptr &eptr = std::current_excepti
 // { "type" : "exception", "message" : "message", "stacktrace" : "stacktrace" }
 void write_exception(FILE* out, const std::exception_ptr &eptr) {
     // Stacktrace is not easily available in C++
-    string json = "{ \"type\" : \"%s\", \"message\" : \"%s\", \"stacktrace\" : \"\" }";
+    std::string json = "{ \"type\" : \"%s\", \"message\" : \"%s\", \"stacktrace\" : \"\" }";
     // Whats returned as name is compiler implementation specific
     write_formatted(out, json.c_str(), exception_type(eptr).c_str(), exception_message(eptr).c_str());
 }

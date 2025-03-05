@@ -1,5 +1,5 @@
 #include <exception>
 
 int main(){
-    throw runtime_error("Illegal!");
+    throw std::runtime_error("Illegal!");
 }

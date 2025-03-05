@@ -23,7 +23,7 @@
 
 #include "evaluation_result.h"
 
-string escape(const string &buffer);
+std::string escape(const std::string &buffer);
 
 // Function to write a value as a json object with type information to a file
 template <typename T> void write_value(FILE* out, const T& value);

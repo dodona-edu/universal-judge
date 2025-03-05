@@ -5,25 +5,23 @@
 #include <vector>
 #include <string>
 
-using namespace std;
-
 class Message {
 public:
-    string description;
-    string format;
-    string permission;
+    std::string description;
+    std::string format;
+    std::string permission;
 
-    Message(const string &description, const string &format = "text", const string &permission = "");
+    Message(const std::string &description, const std::string &format = "text", const std::string &permission = "");
 };
 
 class EvaluationResult {
 public:
-    vector<Message*> messages;
+    std::vector<Message*> messages;
     bool result;
-    string readableExpected;
-    string readableActual;
+    std::string readableExpected;
+    std::string readableActual;
 
-    EvaluationResult(size_t nrOfMessages);
+    EvaluationResult(std::size_t nrOfMessages);
     ~EvaluationResult();
 };
 
