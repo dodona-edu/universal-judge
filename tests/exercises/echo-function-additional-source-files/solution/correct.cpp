@@ -1,8 +1,6 @@
 #include "echo_cpp.h"
 #include <string>
-using namespace std;
 
-
-string echo(string content) {
+std::string echo(std::string content) {
     return source_echo(content);
 }

@@ -8,7 +8,7 @@
             {
               "before": {
                 "cpp": {
-                  "data": "auto ex = []()->vector<any>{throw invalid_argument(\"An error occurred!\");};"
+                  "data": "auto ex = []()->std::vector<std::any>{throw std::invalid_argument(\"An error occurred!\");};"
                 }
               },
               "testcases": [

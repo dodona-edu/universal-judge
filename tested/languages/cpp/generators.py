@@ -64,7 +64,7 @@ class CPPGenerator:
 
     def convert_sequence_subtype(
         self, value: Statement | None, subtype: Subtype
-    ) -> str | None:
+    ) -> str:
         if value and isinstance(value, SequenceType):
             # if the value is a sequence, we need to know the types of it's elements
             type_or_types = value.get_content_type()
@@ -72,15 +72,14 @@ class CPPGenerator:
             # we might already have a subtype extracted from a previous recursive call
             type_or_types = cast(WrappedAllTypes, subtype)
         else:
-            # c++ has no default type such as Object in java, so we can't infer the type
-            return None
+            return "std::any"
 
         tp, new_subtype = self.unpack_wrapped_types(type_or_types)
         return self.convert_declaration(tp, None, new_subtype)
 
     def convert_map_subtypes(
         self, value: Statement | None, subtype: Subtype
-    ) -> tuple[str, str] | None:
+    ) -> tuple[str, str]:
         if value and isinstance(value, ObjectType):
             key_type = value.get_key_type()
             value_type = value.get_value_type()
@@ -89,7 +88,7 @@ class CPPGenerator:
                 tuple[WrappedAllTypes, WrappedAllTypes], subtype
             )
         else:
-            return None
+            return "std::any", "std::any"
         key_base_type, key_sub_type = self.unpack_wrapped_types(key_type)
         value_base_type, value_sub_type = self.unpack_wrapped_types(value_type)
         key_type_str = self.convert_declaration(key_base_type, None, key_sub_type)
@@ -214,7 +213,7 @@ class CPPGenerator:
             assert subtype_string is not None
             return f"std::tuple<{", ".join(subtype_string for _ in range(tuple_length))}>"
         elif tp == AdvancedSequenceTypes.ARRAY:
-            subtype_string = self.convert_sequence_subtype(value, subtype) or "any"
+            subtype_string = self.convert_sequence_subtype(value, subtype)
             return f"std::vector<{subtype_string}>"
         elif tp == AdvancedStringTypes.STRING:
             return "std::string"
@@ -229,16 +228,13 @@ class CPPGenerator:
 
         basic = resolve_to_basic(tp)
         if basic == BasicObjectTypes.MAP:
-            subtype_strings = self.convert_map_subtypes(value, subtype)
-            if subtype_strings is None:
-                return "std::map<>"
-            key_type, value_type = subtype_strings
+            key_type, value_type = self.convert_map_subtypes(value, subtype)
             return f"std::map<{key_type}, {value_type}>"
         elif basic == BasicSequenceTypes.SET:
-            subtype_string = self.convert_sequence_subtype(value, subtype) or "any"
+            subtype_string = self.convert_sequence_subtype(value, subtype)
             return f"std::set<{subtype_string}>"
         elif basic == BasicSequenceTypes.SEQUENCE:
-            subtype_string = self.convert_sequence_subtype(value, subtype) or "any"
+            subtype_string = self.convert_sequence_subtype(value, subtype)
             return f"std::vector<{subtype_string}>"
         elif basic == BasicStringTypes.TEXT:
             return "std::string"
@@ -409,8 +405,6 @@ static void {pu.unit.name}_write_context_separator() {{
             result += f'#include "{name}.{self.extension}"\n'
 
         result += self.define_write_funtions(pu)
-
-        result += "using namespace std;\n\n"
 
         # Generate code for each context.
         ctx: PreparedContext

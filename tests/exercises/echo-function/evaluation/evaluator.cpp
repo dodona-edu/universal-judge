@@ -3,13 +3,11 @@
 
 #include "evaluation_result.h"
 
-using namespace std;
-
 class Evaluator {
     public:
     Evaluator() {}
 
-    EvaluationResult* evaluate(string actual) {
+    EvaluationResult* evaluate(std::string actual) {
         bool result = (actual == "correct");
         EvaluationResult* r = new EvaluationResult(1);
         r->result = result;
