@@ -37,6 +37,10 @@
                     "csharp": {
                       "file": "Evaluator.cs",
                       "name": "runtime"
+                    },
+                    "cpp": {
+                      "file": "evaluator.cpp",
+                      "name": "runtime"
                     }
                   }
                 }
