@@ -98,6 +98,14 @@ string to_json_value(const T& value) {
     } else if constexpr (is_same<T, const char*>::value) {
         return "\"" + string(value) + "\"";
     } else if constexpr (is_same<T, float>::value || is_same<T, double>::value || is_same<T, long double>::value) {
+        if(isnan(value)) {
+            return "\"nan\"";
+        } else if (isinf(value) && value > 0) {
+            return "\"inf\"";
+        } else if (isinf(value) && value < 0) {
+            return "\"-inf\"";
+        }
+
         ostringstream oss;
         oss << value;
         return oss.str();
