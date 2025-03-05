@@ -29,13 +29,6 @@ string to_json(const T& value);
 
 template<typename T>
 string getTypeName(const T&) {
-    if (is_same<T, int>::value) return "integer";
-    if (is_same<T, double>::value) return "double_precision";
-    if (is_same<T, float>::value) return "single_precision";
-    if (is_same<T, char>::value) return "char";
-    if (is_same<T, string>::value) return "text";
-    if (is_same<T, bool>::value) return "boolean";
-    if (is_same<T, nullptr_t>::value) return "null";
     if (is_same<T, int8_t>::value) return "int8";
     if (is_same<T, uint8_t>::value) return "uint8";
     if (is_same<T, int16_t>::value) return "int16";
@@ -44,6 +37,13 @@ string getTypeName(const T&) {
     if (is_same<T, uint32_t>::value) return "uint32";
     if (is_same<T, int64_t>::value) return "int64";
     if (is_same<T, uint64_t>::value) return "uint64";
+    if (is_same<T, int>::value) return "integer";
+    if (is_same<T, double>::value) return "double_precision";
+    if (is_same<T, float>::value) return "single_precision";
+    if (is_same<T, char>::value) return "char";
+    if (is_same<T, string>::value) return "text";
+    if (is_same<T, bool>::value) return "boolean";
+    if (is_same<T, nullptr_t>::value) return "null";
     if (is_same<T, long double>::value) return "double_extended";
     if (is_same<T, void>::value) return "nothing";
     return "undefined";
@@ -52,7 +52,7 @@ string getTypeName(const T&) {
 // Specialization for vector
 template<typename T>
 string getTypeName(const vector<T>&) {
-    return "sequence";
+    return "array";
 }
 
 // Specialization for set
@@ -106,13 +106,14 @@ string to_json_value(const T& value) {
     }
 }
 
-template<typename T>
-string to_json_value(const vector<T>& vec) {
+// helper vector, list, set, ...
+template<typename T, template<typename, typename...> typename S>
+string sequence_to_json_value(const S<T>& sequence) {
     string result = "[";
-    for (const auto& item : vec) {
+    for (const auto& item : sequence) {
         result += to_json(item) + ",";
     }
-    if (!vec.empty()) {
+    if (!sequence.empty()) {
         result.pop_back(); // remove trailing comma
     }
     result += "]";
@@ -120,16 +121,18 @@ string to_json_value(const vector<T>& vec) {
 }
 
 template<typename T>
-string to_json_value(const set<T>& set) {
-    string result = "[";
-    for (const auto& item : set) {
-        result += to_json(item) + ",";
-    }
-    if (!set.empty()) {
-        result.pop_back(); // remove trailing comma
-    }
-    result += "]";
-    return result;
+string to_json_value(const vector<T>& sequence) {
+    return sequence_to_json_value(sequence);
+}
+
+template<typename T>
+string to_json_value(const list<T>& sequence) {
+    return sequence_to_json_value(sequence);
+}
+
+template<typename T>
+string to_json_value(const set<T>& sequence) {
+    return sequence_to_json_value(sequence);
 }
 
 template<typename K, typename V>

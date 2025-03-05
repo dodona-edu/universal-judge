@@ -94,6 +94,10 @@ class CPPGenerator:
         if value.type == AdvancedStringTypes.CHAR:
             assert isinstance(value, StringType)
             return f"(char) '" + value.data.replace("'", "\\'") + "'"
+        elif value.type == AdvancedNumericTypes.INT_8:
+            return f"((int8_t) {value.data})"
+        elif value.type == AdvancedNumericTypes.U_INT_8:
+            return f"((uint8_t) {value.data})"
         elif value.type == AdvancedNumericTypes.INT_16:
             return f"((int16_t) {value.data})"
         elif value.type == AdvancedNumericTypes.U_INT_16:
