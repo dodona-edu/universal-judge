@@ -112,15 +112,19 @@ def test_file_show_expected_is_accepted():
     scheme = """
     {
         "show_expected": true,
-        "content": ["hallo"],
-        "path": ["hallo"],
-        "content_type": ["text"]
+        "output_data": [
+            {
+                "content_type": "text",
+                "content": "hallo",
+                "path": "hallo.txt"
+            }
+        ]
     }
     """
     result = get_converter().loads(scheme, FileOutputChannel)
 
-    assert result.content == ["hallo"]
-    assert result.path == ["hallo"]
+    assert result.output_data[0].content == "hallo"
+    assert result.output_data[0].path == "hallo.txt"
 
 
 def test_value_show_expected_is_accepted():

@@ -273,15 +273,20 @@ class TextOutputChannel(TextData):
     oracle: GenericTextOracle | CustomCheckOracle = field(factory=GenericTextOracle)
 
 
+@define(frozen=True)
+class OutputFileData:
+    content_type: TextChannelType
+    content: str
+    path: str
+
+
 @fallback_field(get_converter(), {"evaluator": "oracle"})
 @ignore_field(get_converter(), "show_expected")
 @define
 class FileOutputChannel(WithFeatures):
     """Describes the output for files."""
 
-    content_type: list[TextChannelType]
-    content: list[str]  # Paths to the file to compare to.
-    path: list[str]  # Paths to the generated file (by the user code)
+    output_data: list[OutputFileData]
     oracle: GenericTextOracle | CustomCheckOracle = field(
         factory=lambda: GenericTextOracle(name=TextBuiltin.FILE)
     )
@@ -291,13 +296,16 @@ class FileOutputChannel(WithFeatures):
 
     def get_data_as_string(self, resources: Path) -> str:
         file_content = []
-        for i in range(len(self.content)):
-            if self.content_type[i] == TextChannelType.FILE:
-                file_path = _resolve_path(resources, self.content[i])
+        for i in range(len(self.output_data)):
+            output_data = self.output_data[i]
+            if output_data.content_type == TextChannelType.FILE:
+                file_path = _resolve_path(resources, output_data.content)
                 with open(file_path, "r") as file:
-                    file_content.append(f"--- <{self.path[i]}> ---\n{file.read()}")
+                    file_content.append(f"--- <{output_data.path}> ---\n{file.read()}")
             else:
-                file_content.append(f"--- <{self.path[i]}> ---\n{self.content[i]}")
+                file_content.append(
+                    f"--- <{output_data.path}> ---\n{output_data.content[i]}"
+                )
         return "\n".join(file_content)
 
 

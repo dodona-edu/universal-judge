@@ -60,6 +60,7 @@ from tested.testsuite import (
     LanguageSpecificOracle,
     MainInput,
     Output,
+    OutputFileData,
     Suite,
     SupportedLanguage,
     Tab,
@@ -520,9 +521,8 @@ def _convert_text_output_channel(
 def _convert_file_output_channel(
     stream: YamlObject, context: DslContext, config_name: str
 ) -> FileOutputChannel:
-    content_type = []
-    content = []
-    actual = []
+
+    file_data = []
     data = stream
     if isinstance(stream, dict):
         data = stream["data"]
@@ -531,12 +531,17 @@ def _convert_file_output_channel(
     for item in data:
         assert isinstance(item, dict)
         if isinstance(item["content"], PathString):
-            content_type.append(TextChannelType.FILE)
+            content_type = TextChannelType.FILE
         else:
-            content_type.append(TextChannelType.TEXT)
+            content_type = TextChannelType.TEXT
 
-        content.append(str(item["content"]))
-        actual.append(str(item["path"]))
+        file_data.append(
+            OutputFileData(
+                content_type=content_type,
+                content=str(item["content"]),
+                path=str(item["path"]),
+            )
+        )
 
     if (
         not isinstance(stream, dict)
@@ -553,16 +558,12 @@ def _convert_file_output_channel(
             "line",
         ), f"The file oracle only supports modes full and line, not {config['mode']}"
         return FileOutputChannel(
-            content_type=content_type,
-            content=content,
-            path=actual,
+            output_data=file_data,
             oracle=GenericTextOracle(name=TextBuiltin.FILE, options=config),
         )
     elif stream["oracle"] == "custom_check":
         return FileOutputChannel(
-            content_type=content_type,
-            content=content,
-            path=actual,
+            output_data=file_data,
             oracle=_convert_custom_check_oracle(stream),
         )
     raise TypeError(f"Unknown file oracle type: {stream['oracle']}")

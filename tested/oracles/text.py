@@ -145,22 +145,23 @@ def evaluate_file(
     actual_list = []
     expected_list = []
     file_not_found = False
-    for i in range(len(channel.content)):
-        actual_path = config.context_dir / channel.path[i]
+    for i in range(len(channel.output_data)):
+        output_data = channel.output_data[i]
+        actual_path = config.context_dir / output_data.path
 
-        if channel.content_type[i] == TextChannelType.FILE:
-            expected_path = f"{config.bundle.config.resources}/{channel.content[i]}"
+        if output_data.content_type == TextChannelType.FILE:
+            expected_path = f"{config.bundle.config.resources}/{output_data.content}"
             try:
                 with open(expected_path, "r") as file:
-                    expected_list.append(f"--- <{channel.path[i]}> ---\n{file.read()}")
+                    expected_list.append(file.read())
             except FileNotFoundError:
                 raise ValueError(f"File {expected_path} not found in resources.")
         else:
-            expected_list.append(f"--- <{channel.path[i]}> ---\n{channel.content[i]}")
+            expected_list.append(output_data.content)
 
         try:
             with open(str(actual_path), "r") as file:
-                actual_list.append(f"--- <{channel.path[i]}> ---\n{file.read()}")
+                actual_list.append(file.read())
         except FileNotFoundError:
             file_not_found = True
 
@@ -185,6 +186,12 @@ def evaluate_file(
             new_result, expected_list[i] = _text_comparison(
                 options, expected_value, actual_value
             )
+            expected_list[i] = (
+                f"--- <{channel.output_data[i].path}> ---\n{expected_list[i]}"
+            )
+            actual_list[i] = (
+                f"--- <{channel.output_data[i].path}> ---\n{actual_list[i]}"
+            )
             result = result and new_result
     else:
         assert options["mode"] == "line"
@@ -198,9 +205,15 @@ def evaluate_file(
             for expected_line, actual_line in zip(expected_lines, actual_lines):
                 new_result, _ = _text_comparison(options, expected_line, actual_line)
                 result = result and new_result
+            expected_list[i] = (
+                f"--- <{channel.output_data[i].path}> ---\n{expected_list[i]}"
+            )
+            actual_list[i] = (
+                f"--- <{channel.output_data[i].path}> ---\n{actual_list[i]}"
+            )
 
     return OracleResult(
         result=StatusMessage(enum=Status.CORRECT if result else Status.WRONG),
         readable_expected="\n".join(expected_list),
-        readable_actual=actual,
+        readable_actual="\n".join(actual_list),
     )
