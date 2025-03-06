@@ -151,25 +151,25 @@ ADVANCED_VALUES = [
             StringType(type=BasicStringTypes.TEXT, data="data"),
         ],
     ),
-    SequenceType(
-        type=AdvancedSequenceTypes.TUPLE,
+    ObjectType(
+        type=AdvancedObjectTypes.DICTIONARY,
         data=[
-            SequenceType(
-                type=AdvancedSequenceTypes.TUPLE,
-                data=[
-                    StringType(type=BasicStringTypes.TEXT, data="data"),
-                    StringType(type=BasicStringTypes.TEXT, data="data"),
-                ],
-            ),
-            ObjectType(
-                type=AdvancedObjectTypes.DICTIONARY,
-                data=[
-                    ObjectKeyValuePair(
-                        key=StringType(type=BasicStringTypes.TEXT, data="data"),
-                        value=NumberType(type=BasicNumericTypes.INTEGER, data=5),
-                    )
-                ],
-            ),
+            ObjectKeyValuePair(
+                key=StringType(type=BasicStringTypes.TEXT, data="data"),
+                value=SequenceType(
+                    type=AdvancedSequenceTypes.TUPLE,
+                    data=[
+                        SequenceType(
+                            type=AdvancedSequenceTypes.TUPLE,
+                            data=[
+                                StringType(type=BasicStringTypes.TEXT, data="data"),
+                                StringType(type=BasicStringTypes.TEXT, data="data"),
+                            ],
+                        ),
+                        NumberType(type=BasicNumericTypes.INTEGER, data=5),
+                    ],
+                ),
+            )
         ],
     ),
     StringType(type=AdvancedStringTypes.CHAR, data="h"),
