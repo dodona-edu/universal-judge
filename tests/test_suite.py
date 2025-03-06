@@ -34,9 +34,13 @@ def test_text_output_is_compatible_oracle():
 
 def test_file_output_is_compatible_oracle():
     old_structure = {
-        "content_type": [TextChannelType.TEXT],
-        "content": ["some content"],
-        "path": ["output.py"],
+        "output_data": [
+            {
+                "content_type": TextChannelType.TEXT,
+                "content": "some content",
+                "path": "output.py",
+            }
+        ],
         "evaluator": {
             "function": {"file": "evaluate.py"},
             "type": "custom_check",
