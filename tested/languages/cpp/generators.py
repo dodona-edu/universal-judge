@@ -55,8 +55,14 @@ class CPPGenerator:
             self.convert_statement(cast(Expression, arg)) for arg in arguments
         )
 
+    def convert_type(self, value: Expression) -> str:
+        if isinstance(value, Identifier) or isinstance(value, FunctionCall):
+            return "std::any"
+        else:
+            return self.convert_declaration(value.type, value)
+
     def combine_types(self, expressions: list[Expression]) -> str:
-            content_types = set(self.convert_declaration(content.type, content) for content in expressions)
+            content_types = set(self.convert_type(content) for content in expressions)
             if len(content_types) == 1:
                 return content_types.pop()
             elif len(content_types) > 1:
@@ -96,13 +102,13 @@ class CPPGenerator:
                 type_string
                 + "({"
                 + ", ".join(
-                    f"{{{self.convert_value(cast(Value, kvp.key))}, {self.convert_value(cast(Value, kvp.value))}}}"
+                    f"{{{self.convert_statement(kvp.key)}, {self.convert_statement(kvp.value)}}}"
                     for kvp in cast(ObjectType, basic).data
                 )
                 + "})"
             )
         elif (
-            basic.type == BasicSequenceTypes.SEQUENCE or basic == BasicSequenceTypes.SET
+            basic.type == BasicSequenceTypes.SEQUENCE or basic.type == BasicSequenceTypes.SET
         ):
             type_string = self.convert_declaration(value.type, value)
             return (
@@ -189,7 +195,7 @@ class CPPGenerator:
             return f"std::vector<{self.sequence_subtype(value)}>"
         elif tp == AdvancedSequenceTypes.TUPLE:
             if isinstance(value, SequenceType):
-                subtype_string = ", ".join(self.convert_declaration(content.type, content) for content in value.data)
+                subtype_string = ", ".join(self.convert_type(content) for content in value.data)
                 return f"std::tuple<{subtype_string}>"
             else:
                 return "std::tuple<std::any>"

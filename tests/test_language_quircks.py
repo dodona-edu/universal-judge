@@ -12,9 +12,9 @@ import pytest
 from tested.configs import create_bundle
 from tested.datatypes import BasicBooleanTypes, BasicNumericTypes, BasicStringTypes
 from tested.dsl import parse_string
+from tested.languages import LANGUAGES
 from tested.languages.conventionalize import submission_name
 from tested.languages.generation import generate_statement
-from tested.languages.typescript.generators import convert_statement
 from tested.serialisation import (
     BooleanType,
     FunctionCall,
@@ -25,10 +25,38 @@ from tested.serialisation import (
 from tested.testsuite import Suite
 from tests.manual_utils import assert_valid_output, configuration, execute_config
 
+def test_cpp_function_assignment(tmp_path: Path, pytestconfig: pytest.Config):
+    statement_string = "test: string = foo()"
+    cpp = LANGUAGES["cpp"](pytestconfig)
+    result = cpp.generate_statement(parse_string(statement_string))
+
+    assert result == "std::string test = foo()"
+
+def test_cpp_complex_function_assignment(tmp_path: Path, pytestconfig: pytest.Config):
+    statement_string = "test = { \"a\": foo() }"
+    cpp = LANGUAGES["cpp"](pytestconfig)
+    result = cpp.generate_statement(parse_string(statement_string))
+
+    assert result == "std::map<std::string, std::any> test = std::map<std::string, std::any>({{std::string(\"a\"), foo()}})"
+
+def test_cpp_complex_type_assignment(tmp_path: Path, pytestconfig: pytest.Config):
+    statement_string = "test = {'1': [2 , (3, {4, 5})]}"
+    cpp = LANGUAGES["cpp"](pytestconfig)
+    result = cpp.generate_statement(parse_string(statement_string))
+
+    tuple_type = "std::tuple<std::intmax_t, std::set<std::intmax_t>>"
+    variant_types = ["std::intmax_t", tuple_type]
+    permutations = list(itertools.permutations(variant_types))
+    valid_types = [f"std::map<std::string, std::vector<std::variant<{", ".join(perm)}>>>" for perm in permutations]
+    valid_values = [f"({{{{std::string(\"1\"), std::vector<std::variant<{", ".join(perm)}>>({{2, {tuple_type}({{3, std::set<std::intmax_t>({{4, 5}})}})}})}}}})" for perm in permutations]
+    valid_results = [f"{tp1} test = {tp2}{value}" for tp1 in valid_types  for tp2 in valid_types for value in valid_values]
+
+    assert result in valid_results
 
 def test_typescript_array_typing(tmp_path: Path, pytestconfig: pytest.Config):
     statement_string = "test = ['test', True, 10, 10.1, None, {'wow': 10}]"
-    result = convert_statement(parse_string(statement_string), full=True)
+    ts = LANGUAGES["typescript"](pytestconfig)
+    result = ts.generate_statement(parse_string(statement_string))
     types = ["string", "boolean", "number", "object", "null"]
     permutations = list(itertools.permutations(types))
     valid_results = [
@@ -41,7 +69,8 @@ def test_typescript_array_typing(tmp_path: Path, pytestconfig: pytest.Config):
 
 def test_typescript_set_typing(tmp_path: Path, pytestconfig: pytest.Config):
     statement_string = "test = {'test', True, 10, 10.1, None, {'wow': 10}}"
-    result = convert_statement(parse_string(statement_string), full=True)
+    ts = LANGUAGES["typescript"](pytestconfig)
+    result = ts.generate_statement(parse_string(statement_string))
     types = ["string", "boolean", "number", "object", "null"]
     permutations = list(itertools.permutations(types))
     valid_results = [
@@ -54,11 +83,13 @@ def test_typescript_set_typing(tmp_path: Path, pytestconfig: pytest.Config):
 
 def test_typescript_function_call_typing(tmp_path: Path, pytestconfig: pytest.Config):
     statement_string = "test = {'test', True, testing(10)}"
-    result = convert_statement(parse_string(statement_string), full=True)
+    ts = LANGUAGES["typescript"](pytestconfig)
+    result = ts.generate_statement(parse_string(statement_string))
     assert result == 'let test : Set<any> = new Set(["test", true, testing(10)])'
 
     statement_string = "test = ['test', True, testing(10)]"
-    result = convert_statement(parse_string(statement_string), full=True)
+    ts = LANGUAGES["typescript"](pytestconfig)
+    result = ts.generate_statement(parse_string(statement_string))
     assert result == 'let test : Array<any> = ["test", true, testing(10)]'
 
 
