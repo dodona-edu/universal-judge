@@ -21,11 +21,12 @@
 #include <list>
 #include <tuple>
 #include <any>
+#include <variant>
 #include <sstream>
 
 template<typename T>
 std::string to_json(const T& value);
-
+std::string any_to_json_value(const std::any& value);
 
 template<typename T>
 std::string getTypeName(const T&) {
@@ -87,7 +88,9 @@ std::string getTypeName(const std::tuple<Args...>&) {
 
 template<typename T>
 std::string to_json_value(const T& value) {
-    if constexpr (std::is_same<T, std::string>::value) {
+    if constexpr (std::is_same<T, std::any>::value) {
+        return any_to_json_value(value);
+    } else if constexpr (std::is_same<T, std::string>::value) {
         return "\"" + escape(value) + "\"";
     } else if constexpr (std::is_same<T, char>::value) {
         return "\"" + std::string(1, value) + "\"";
@@ -96,7 +99,7 @@ std::string to_json_value(const T& value) {
     } else if constexpr (std::is_same<T, std::nullptr_t>::value) {
         return "null";
     } else if constexpr (std::is_same<T, const char*>::value) {
-        return "\"" + string(value) + "\"";
+        return "\"" + std::string(value) + "\"";
     } else if constexpr (std::is_same<T, float>::value || std::is_same<T, double>::value || std::is_same<T, long double>::value) {
         if(std::isnan(value)) {
             return "\"nan\"";
@@ -141,6 +144,11 @@ std::string to_json_value(const std::list<T>& sequence) {
 template<typename T>
 std::string to_json_value(const std::set<T>& sequence) {
     return sequence_to_json_value(sequence);
+}
+
+template<typename ...Ts>
+std::string to_json_value(const std::variant<Ts...>& variant) {
+    return std::visit(to_json_value, variant);
 }
 
 template<typename K, typename V>

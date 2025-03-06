@@ -1,10 +1,10 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <any>
+#include <variant>
 #include <cctype>
 
-bool is_isbn10_st(const std::string &code) {
+bool is_isbn10(const std::string &code) {
     // Helper function for computing ISBN-10 check digit
     auto check_digit = [](const std::string &code) -> char {
         int check = 0;
@@ -27,14 +27,15 @@ bool is_isbn10_st(const std::string &code) {
     return check_digit(code) == code[9];
 }
 
-template <typename T>
-bool is_isbn10(const T &code) {
-    if(code.type() != typeid(std::string)) return false;
-    
-    return is_isbn10_st(std::any_cast<std::string>(code));
+template <typename T> bool is_isbn10(const T &code) {
+    return false;
 }
 
-bool is_isbn13_st(const std::string &code) {
+template <typename ...Ts> bool is_isbn10(const std::variant<Ts...> &code) {
+    return std::visit(is_isbn10, code);
+}
+
+bool is_isbn13(const std::string &code) {
     // Helper function for computing ISBN-13 check digit
     auto check_digit = [](const std::string &code) -> char {
         int check = 0;
@@ -57,11 +58,12 @@ bool is_isbn13_st(const std::string &code) {
     return check_digit(code) == code[12];
 }
 
-template <typename T>
-bool is_isbn13(const T &code) {
-    if(code.type() != typeid(std::string)) return false;
-    
-    return is_isbn13_st(std::any_cast<std::string>(code));
+template <typename T> bool is_isbn13(const T &code) {
+    return false;
+}
+
+template <typename ...Ts> bool is_isbn13(const std::variant<Ts...> &code) {
+    return std::visit(is_isbn10, code);
 }
 
 template <typename T>
@@ -69,19 +71,25 @@ bool is_isbn(const T &code, bool isbn13 = true) {
     return isbn13 ? is_isbn13(code) : is_isbn10(code);
 }
 
+bool _is_isbn(const std::string &code) {
+    bool isbn13 = code.length() == 13;
+    return is_isbn(code, isbn13);
+}
+
+template <typename T> bool _is_isbn(const T &code) {
+    return false;
+}
+
+template <typename ...Ts> bool _is_isbn(const std::variant<Ts...> &code) {
+    return std::visit([](const auto& value) { return _is_isbn(value); }, code);
+}
+
 
 template <typename T>
 std::vector<bool> are_isbn(const std::vector<T> &codes) {
     std::vector<bool> checks;
     for (const auto &code : codes) {
-        if(code.type() != typeid(std::string)){
-            checks.push_back(false);
-            continue;
-        }
-        std::string isbn = std::any_cast<std::string>(code);
-        bool isbn13 = isbn.length() == 13;
-
-        checks.push_back(is_isbn(code, isbn13));
+        checks.push_back(_is_isbn(code));
     }
     return checks;
 }

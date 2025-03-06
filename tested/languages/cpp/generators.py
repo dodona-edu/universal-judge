@@ -55,46 +55,20 @@ class CPPGenerator:
             self.convert_statement(cast(Expression, arg)) for arg in arguments
         )
 
-    def unpack_wrapped_types(
-        self, type_or_types: WrappedAllTypes
-    ) -> tuple[AllTypes, Subtype]:
-        if isinstance(type_or_types, tuple):
-            return type_or_types
-        return type_or_types, None
+    def combine_types(self, expressions: list[Expression]) -> str:
+            content_types = set(self.convert_declaration(content.type, content) for content in expressions)
+            if len(content_types) == 1:
+                return content_types.pop()
+            elif len(content_types) > 1:
+                return f"std::variant<{', '.join(content_types)}>"
+            else:
+                return "std::any"
 
-    def convert_sequence_subtype(
-        self, value: Statement | None, subtype: Subtype
-    ) -> str:
-        if value and isinstance(value, SequenceType):
-            # if the value is a sequence, we need to know the types of it's elements
-            type_or_types = value.get_content_type()
-        elif subtype:
-            # we might already have a subtype extracted from a previous recursive call
-            type_or_types = cast(WrappedAllTypes, subtype)
+    def sequence_subtype(self, value: Statement) -> str:
+        if isinstance(value, SequenceType):
+            return self.combine_types(value.data)
         else:
             return "std::any"
-
-        tp, new_subtype = self.unpack_wrapped_types(type_or_types)
-        return self.convert_declaration(tp, None, new_subtype)
-
-    def convert_map_subtypes(
-        self, value: Statement | None, subtype: Subtype
-    ) -> tuple[str, str]:
-        if value and isinstance(value, ObjectType):
-            key_type = value.get_key_type()
-            value_type = value.get_value_type()
-        elif subtype:
-            key_type, value_type = cast(
-                tuple[WrappedAllTypes, WrappedAllTypes], subtype
-            )
-        else:
-            return "std::any", "std::any"
-        key_base_type, key_sub_type = self.unpack_wrapped_types(key_type)
-        value_base_type, value_sub_type = self.unpack_wrapped_types(value_type)
-        key_type_str = self.convert_declaration(key_base_type, None, key_sub_type)
-        value_type_str = self.convert_declaration(value_base_type, None, value_sub_type)
-
-        return key_type_str, value_type_str
 
     def convert_value(self, value: Value) -> str:
         if value.type == AdvancedStringTypes.CHAR:
@@ -177,8 +151,7 @@ class CPPGenerator:
     def convert_declaration(
         self,
         tp: AllTypes | VariableType,
-        value: Statement | None = None,
-        subtype: Subtype = None,
+        value: Statement,
     ) -> str:
         if isinstance(tp, VariableType):
             return tp.data + "*"
@@ -200,21 +173,6 @@ class CPPGenerator:
             return "std::uint8_t"
         elif tp == AdvancedNumericTypes.INT_8:
             return "std::int8_t"
-        if tp == AdvancedSequenceTypes.LIST:
-            subtype_string = self.convert_sequence_subtype(value, subtype)
-            return f"std::list<{subtype_string}>"
-        elif tp == AdvancedSequenceTypes.TUPLE:
-            # this method does not support tuples within sequences such as list<tuple<int, int>>
-            # as value won't be defined in that case and we cant't infer the tuple's length
-            # we also don't support tuples with different types, as we can only extract one type
-            assert value is not None and isinstance(value, SequenceType)
-            tuple_length = len(value.data)
-            subtype_string = self.convert_sequence_subtype(value, subtype)
-            assert subtype_string is not None
-            return f"std::tuple<{", ".join(subtype_string for _ in range(tuple_length))}>"
-        elif tp == AdvancedSequenceTypes.ARRAY:
-            subtype_string = self.convert_sequence_subtype(value, subtype)
-            return f"std::vector<{subtype_string}>"
         elif tp == AdvancedStringTypes.STRING:
             return "std::string"
         elif tp == AdvancedNumericTypes.DOUBLE_EXTENDED:
@@ -225,17 +183,29 @@ class CPPGenerator:
             return "float"
         elif tp == AdvancedStringTypes.CHAR:
             return "char"
+        elif tp == AdvancedSequenceTypes.LIST:
+            return f"std::list<{self.sequence_subtype(value)}>"
+        elif tp == AdvancedSequenceTypes.ARRAY:
+            return f"std::vector<{self.sequence_subtype(value)}>"
+        elif tp == AdvancedSequenceTypes.TUPLE:
+            if isinstance(value, SequenceType):
+                subtype_string = ", ".join(self.convert_declaration(content.type, content) for content in value.data)
+                return f"std::tuple<{subtype_string}>"
+            else:
+                return "std::tuple<std::any>"
 
         basic = resolve_to_basic(tp)
         if basic == BasicObjectTypes.MAP:
-            key_type, value_type = self.convert_map_subtypes(value, subtype)
-            return f"std::map<{key_type}, {value_type}>"
+            if isinstance(value, ObjectType):
+                key_type = self.combine_types([p.key for p in value.data])
+                value_type = self.combine_types([p.value for p in value.data])
+                return f"std::map<{key_type}, {value_type}>"
+            else:
+                return "std::map<std::any, std::any>"
         elif basic == BasicSequenceTypes.SET:
-            subtype_string = self.convert_sequence_subtype(value, subtype)
-            return f"std::set<{subtype_string}>"
+            return f"std::set<{self.sequence_subtype(value)}>"
         elif basic == BasicSequenceTypes.SEQUENCE:
-            subtype_string = self.convert_sequence_subtype(value, subtype)
-            return f"std::vector<{subtype_string}>"
+            return f"std::vector<{self.sequence_subtype(value)}>"
         elif basic == BasicStringTypes.TEXT:
             return "std::string"
         elif basic == BasicStringTypes.ANY:

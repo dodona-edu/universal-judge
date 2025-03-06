@@ -87,3 +87,40 @@ void write_exception(FILE* out, const std::exception_ptr &eptr) {
     // Whats returned as name is compiler implementation specific
     write_formatted(out, json.c_str(), exception_type(eptr).c_str(), exception_message(eptr).c_str());
 }
+
+std::string any_to_json_value(const std::any& value) {
+    if (value.type() == typeid(std::string)) {
+        return to_json_value(std::any_cast<std::string>(value));
+    } else if (value.type() == typeid(char)) {
+        return to_json_value(std::any_cast<char>(value));
+    } else if (value.type() == typeid(bool)) {
+        return to_json_value(std::any_cast<bool>(value));
+    } else if (value.type() == typeid(std::nullptr_t)) {
+        return to_json_value(std::any_cast<std::nullptr_t>(value));
+    } else if (value.type() == typeid(const char*)) {
+        return to_json_value(std::any_cast<const char*>(value));
+    } else if (value.type() == typeid(float)) {
+        return to_json_value(std::any_cast<float>(value));
+    } else if (value.type() == typeid(double)) {
+        return to_json_value(std::any_cast<double>(value));
+    } else if (value.type() == typeid(long double)) {
+        return to_json_value(std::any_cast<long double>(value));
+    } else if (value.type() == typeid(int)) {
+        return to_json_value(std::any_cast<int>(value));
+    } else if (value.type() == typeid(long)) {
+        return to_json_value(std::any_cast<long>(value));
+    } else if (value.type() == typeid(long long)) {
+        return to_json_value(std::any_cast<long long>(value));
+    } else if (value.type() == typeid(unsigned int)) {
+        return to_json_value(std::any_cast<unsigned int>(value));
+    } else if (value.type() == typeid(unsigned long)) {
+        return to_json_value(std::any_cast<unsigned long>(value));
+    } else if (value.type() == typeid(unsigned long long)) {
+        return to_json_value(std::any_cast<unsigned long long>(value));
+    }
+    // We only support any conversion to most basic types
+    // as c++ doesn't support casting to generic `vector<x>`
+    // supporting more types would explode these if statements
+
+    return "null"; // Default case if type is not supported
+}
