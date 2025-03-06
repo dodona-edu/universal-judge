@@ -47,7 +47,7 @@ std::string getTypeName(const T&) {
     if (std::is_same<T, std::nullptr_t>::value) return "null";
     if (std::is_same<T, long double>::value) return "double_extended";
     if (std::is_same<T, void>::value) return "nothing";
-    return "undefined";
+    return "unknown";
 }
 
 // Specialization for vector
@@ -112,8 +112,25 @@ std::string to_json_value(const T& value) {
         std::ostringstream oss;
         oss << value;
         return oss.str();
-    } else {
+    } else if constexpr (std::is_same<T, int>::value
+                        || std::is_same<T, std::int8_t>::value
+                        || std::is_same<T, std::uint8_t>::value
+                        || std::is_same<T, std::int16_t>::value
+                        || std::is_same<T, std::uint16_t>::value
+                        || std::is_same<T, std::int32_t>::value
+                        || std::is_same<T, std::uint32_t>::value
+                        || std::is_same<T, std::int64_t>::value
+                        || std::is_same<T, std::uint64_t>::value
+                        || std::is_same<T, long>::value
+                        || std::is_same<T, long long>::value
+                        || std::is_same<T, unsigned>::value
+                        || std::is_same<T, unsigned long>::value
+                        || std::is_same<T, unsigned long long>::value) {
         return std::to_string(value);
+    } else {
+        std::ostringstream oss;
+        oss << value;
+        return "\"" + escape(oss.str()) + "\"";
     }
 }
 
@@ -207,8 +224,16 @@ std::string to_json_value(const std::tuple<Args...>& tup) {
 
 template<typename T>
 std::string to_json(const T& value) {
-    std::string json = "{ \"type\" : \"" + getTypeName(value) + "\", \"data\" : " + to_json_value(value) + " }";
-    return json;
+    std::string type = getTypeName(value);
+
+    std::ostringstream json;
+    json << "{ \"type\" : \"" << type << "\", \"data\" : " << to_json_value(value);
+    if (type == "undefined"){
+        std::string diagnostic = typeid(value).name();
+        json << ", \"diagnostic\" : \"" << diagnostic << "\"";
+    }
+    json <<  " }";
+    return json.str();
 }
 
 template <typename T> void write_value(FILE* out, const T& value)
