@@ -53,6 +53,24 @@ def test_cpp_complex_type_assignment(tmp_path: Path, pytestconfig: pytest.Config
 
     assert result in valid_results
 
+def test_cpp_unknown_return_type_without_streamable_is_null(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig,
+        "echo-function",
+        "cpp",
+        tmp_path,
+        "one.tson",
+        "unknown-return-type-non-streamable",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["wrong"]
+    received_data = updates.find_next("close-test")["generated"]
+    assert received_data == 'None'
+
+
 def test_typescript_array_typing(tmp_path: Path, pytestconfig: pytest.Config):
     statement_string = "test = ['test', True, 10, 10.1, None, {'wow': 10}]"
     ts = LANGUAGES["typescript"](pytestconfig)

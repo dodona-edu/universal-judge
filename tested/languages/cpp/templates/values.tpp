@@ -23,6 +23,17 @@
 #include <any>
 #include <variant>
 #include <sstream>
+#include <concepts>
+#include <type_traits>
+
+// Define a concept to check if a type supports the << operator with std::ostream
+template <typename T>
+concept Streamable = requires(std::ostream& os, T value) {
+    { os << value } -> std::convertible_to<std::ostream&>;
+};
+
+template <typename T, typename... U>
+concept IsAnyOf = (std::same_as<T, U> || ...);
 
 template<typename T>
 std::string to_json(const T& value);
@@ -99,8 +110,8 @@ std::string to_json_value(const T& value) {
     } else if constexpr (std::is_same<T, std::nullptr_t>::value) {
         return "null";
     } else if constexpr (std::is_same<T, const char*>::value) {
-        return "\"" + std::string(value) + "\"";
-    } else if constexpr (std::is_same<T, float>::value || std::is_same<T, double>::value || std::is_same<T, long double>::value) {
+        return "\"" + escape(std::string(value)) + "\"";
+    } else if constexpr (IsAnyOf<T, float, double, long double>) {
         if(std::isnan(value)) {
             return "\"nan\"";
         } else if (std::isinf(value) && value > 0) {
@@ -112,25 +123,16 @@ std::string to_json_value(const T& value) {
         std::ostringstream oss;
         oss << value;
         return oss.str();
-    } else if constexpr (std::is_same<T, int>::value
-                        || std::is_same<T, std::int8_t>::value
-                        || std::is_same<T, std::uint8_t>::value
-                        || std::is_same<T, std::int16_t>::value
-                        || std::is_same<T, std::uint16_t>::value
-                        || std::is_same<T, std::int32_t>::value
-                        || std::is_same<T, std::uint32_t>::value
-                        || std::is_same<T, std::int64_t>::value
-                        || std::is_same<T, std::uint64_t>::value
-                        || std::is_same<T, long>::value
-                        || std::is_same<T, long long>::value
-                        || std::is_same<T, unsigned>::value
-                        || std::is_same<T, unsigned long>::value
-                        || std::is_same<T, unsigned long long>::value) {
+    } else if constexpr (IsAnyOf<T, int, std::int8_t, std::uint8_t, std::int16_t, std::uint16_t,
+                                         std::int32_t, std::uint32_t, std::int64_t, std::uint64_t,
+                                         long, long long, unsigned, unsigned long, unsigned long long>) {
         return std::to_string(value);
-    } else {
+    } else if constexpr (Streamable<T>) {
         std::ostringstream oss;
         oss << value;
         return "\"" + escape(oss.str()) + "\"";
+    } else {
+        return "null"; // default case, we have no info to convert this value.
     }
 }
 

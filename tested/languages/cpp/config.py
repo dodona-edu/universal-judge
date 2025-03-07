@@ -101,7 +101,7 @@ class CPP(Language):
         return (
             [
                 "g++",
-                "-std=c++17",
+                "-std=c++20",
                 "-Wall",
                 "-O3" if self.config.options.compiler_optimizations else "-O0",
                 "evaluation_result.cpp",
