@@ -16,13 +16,12 @@ public:
 
 class EvaluationResult {
 public:
-    std::vector<Message*> messages;
     bool result;
     std::string readableExpected;
     std::string readableActual;
+    std::vector<Message> messages;
 
-    EvaluationResult(std::size_t nrOfMessages);
-    ~EvaluationResult();
+    EvaluationResult(const bool &result, const std::string &readableExpected = "", const std::string &readableActual = "", const std::vector<Message> &messages = std::vector<Message>());
 };
 
 #endif //EVALUATION_RESULT_H

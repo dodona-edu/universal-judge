@@ -1,4 +1,5 @@
 import json
+from operator import indexOf
 from typing import cast
 
 from tested.datatypes import AllTypes, resolve_to_basic
@@ -160,7 +161,7 @@ class CPPGenerator:
         value: Statement,
     ) -> str:
         if isinstance(tp, VariableType):
-            return tp.data + "*"
+            return tp.data
         elif tp == AdvancedNumericTypes.BIG_INT:
             return "std::intmax_t"
         elif tp == AdvancedNumericTypes.U_INT_64:
@@ -226,7 +227,7 @@ class CPPGenerator:
             return "void"
         raise AssertionError(f"Unknown type: {tp!r}")
 
-    def convert_statement(self, statement: Statement, full=False) -> str:
+    def convert_statement(self, statement: Statement) -> str:
         if isinstance(statement, PropertyAssignment):
             return (
                 f"{self.convert_statement(statement.property)} = "
@@ -239,13 +240,10 @@ class CPPGenerator:
         elif isinstance(statement, Value):
             return self.convert_value(statement)
         elif isinstance(statement, VariableAssignment):
-            if full:
-                prefix = self.convert_declaration(statement.type, statement.expression)
-                prefix += " "
-            else:
-                prefix = ""
+            prefix = self.convert_declaration(statement.type, statement.expression)
+
             return (
-                f"{prefix}{statement.variable} = "
+                f"{prefix} {statement.variable} = "
                 f"{self.convert_statement(statement.expression)}"
             )
         raise AssertionError(f"Unknown statement: {statement!r}")
@@ -266,75 +264,67 @@ class CPPGenerator:
             )
             and not function.type == FunctionType.CONSTRUCTOR
         ):
-            result = "(" + self.convert_statement(function.namespace) + ")->" + result
-        # add the new keyword to constructors
-        if function.type == FunctionType.CONSTRUCTOR:
-            result = "new " + result
+            result = "(" + self.convert_statement(function.namespace) + ")." + result
         return result
 
-    def convert_testcase(self, tc: PreparedTestcase, pu: PreparedExecutionUnit) -> str:
-        result = ""
-        # Define variables before asignment outside the try block
-        if (
-            not tc.testcase.is_main_testcase()
-            and isinstance(tc.input, PreparedTestcaseStatement)
-            and isinstance(tc.input.statement, VariableAssignment)
-        ):
-            prefix = self.convert_declaration(
-                tc.input.statement.type, tc.input.statement.expression
-            )
-            result += " " * 4 + f"{prefix} {tc.input.statement.variable};\n"
+    def spacing(self, depth):
+        return " " * depth * 4
 
-        # catch exceptions and write them to the output
-        result += " " * 4 + "try {" + "\n"
+    def convert_testcase(self, tc: PreparedTestcase, pu: PreparedExecutionUnit, depth = 1) -> str:
+        indent = self.spacing(depth)
+        result = ""
         if tc.testcase.is_main_testcase():
             assert isinstance(tc.input, MainInput)
             wrapped = [json.dumps(a) for a in tc.input.arguments]
-            result += " " * 8 + f'char* args[] = {{"{pu.submission_name}", '
+            result += indent + f'char* args[] = {{"{pu.submission_name}", '
             result += ", ".join(wrapped)
             result += "};\n"
             result += (
-                " " * 8
+                indent
                 + f"exit_code = solution_main({len(tc.input.arguments) + 1}, args);\n"
             )
         else:
             assert isinstance(tc.input, PreparedTestcaseStatement)
-            result += " " * 8 + "exit_code = 0;\n"
+            result += indent + "exit_code = 0;\n"
             if is_special_void_call(tc.input, pu.language):
                 # The method has a "void" return type, so don't wrap it.
                 result += (
-                    " " * 8
+                    indent
                     + self.convert_statement(tc.input.unwrapped_input_statement())
                     + ";\n"
                 )
                 result += (
-                    " " * 8 + self.convert_statement(tc.input.no_value_call()) + ";\n"
+                    indent + self.convert_statement(tc.input.no_value_call()) + ";\n"
                 )
             else:
                 result += (
-                    " " * 8 + self.convert_statement(tc.input.input_statement()) + ";\n"
+                    indent + self.convert_statement(tc.input.input_statement()) + ";\n"
                 )
-        result += " " * 4 + "} catch (...) {\n"
-        result += " " * 8 + "const std::exception_ptr &e = std::current_exception();\n"
-        result += " " * 8 + self.convert_statement(tc.exception_statement("e")) + ";\n"
-        result += " " * 8 + "exit_code = 1;\n"
-        result += " " * 4 + "}\n"
         return result
 
     def generate_internal_context(
         self, ctx: PreparedContext, pu: PreparedExecutionUnit
     ) -> str:
         result = ctx.before + "\n"
-        result += " " * 4 + "int exit_code;" + "\n"
+        result += self.spacing(1) + "int exit_code;" + "\n"
 
         # Generate code for each testcase
         tc: PreparedTestcase
-        for tc in ctx.testcases:
-            result += " " * 4 + f"{pu.unit.name}_write_separator();\n"
-            result += self.convert_testcase(tc, pu)
+        for i, tc in enumerate(ctx.testcases):
+            result += self.spacing(i+1) + "try {" + "\n"
+            result += self.spacing(i+2) + f"{pu.unit.name}_write_separator();\n"
+            result += self.convert_testcase(tc, pu, i+2)
 
-        result += " " * 4 + ctx.after + "\n"
-        result += " " * 4 + "return exit_code;\n"
+        for i in range(len(ctx.testcases), 0, -1):
+            result += self.spacing(i) + "} catch (...) {\n"
+            result += self.spacing(i+1) + "const std::exception_ptr &e = std::current_exception();\n"
+            result += self.spacing(i+1) + self.convert_statement(
+                tc.exception_statement("e")) + ";\n"
+            result += self.spacing(i+1)+ "exit_code = 1;\n"
+            result += self.spacing(i) + "}\n"
+
+        result += self.spacing(1) + ctx.after + "\n"
+        result += self.spacing(1) + "return exit_code;\n"
         return result
 
     def define_write_funtions(self, pu: PreparedExecutionUnit) -> str:
@@ -399,8 +389,8 @@ int {pu.unit.name}() {{
 """
 
         for i, ctx in enumerate(pu.contexts):
-            result += " " * 4 + f"{pu.unit.name}_write_context_separator();\n"
-            result += " " * 4 + f"exit_code = {pu.unit.name}_context_{i}();\n"
+            result += self.spacing(1) + f"{pu.unit.name}_write_context_separator();\n"
+            result += self.spacing(1) + f"exit_code = {pu.unit.name}_context_{i}();\n"
 
         result += f"""
     fclose({pu.unit.name}_value_file);
@@ -461,7 +451,7 @@ int main(int argc, char* argv[]) {
 int main() {
 """
         for value in values:
-            result += " " * 4 + f"write_value(stdout, {self.convert_value(value)});\n"
-            result += " " * 4 + 'printf("␞");\n'
+            result += self.spacing(1) + f"write_value(stdout, {self.convert_value(value)});\n"
+            result += self.spacing(1) + 'printf("␞");\n'
         result += "}\n"
         return result

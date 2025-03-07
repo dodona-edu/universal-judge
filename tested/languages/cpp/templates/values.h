@@ -29,7 +29,7 @@ std::string escape(const std::string &buffer);
 template <typename T> void write_value(FILE* out, const T& value);
 
 // Function to write evaluated results
-void write_evaluated(FILE* out, EvaluationResult* result);
+void write_evaluated(FILE* out, const EvaluationResult& result);
 
 // writes an exception to json as
 // { "type" : "exception", "message" : "message", "stacktrace" : "stacktrace" }

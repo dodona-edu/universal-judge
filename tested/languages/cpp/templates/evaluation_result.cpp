@@ -8,13 +8,5 @@ Message::Message(const std::string &description, const std::string &format, cons
     : description(description), format(format.empty() ? "text" : format), permission(permission) {}
 
 // Define the EvaluationResult constructor
-EvaluationResult::EvaluationResult(std::size_t nrOfMessages) {
-    messages.reserve(nrOfMessages);
-}
-
-// Define the EvaluationResult destructor
-EvaluationResult::~EvaluationResult() {
-    for (auto message : messages) {
-        delete message;
-    }
-}
+EvaluationResult::EvaluationResult(const bool &result, const std::string &readableExpected, const std::string &readableActual, const std::vector<Message> &messages)
+    : result(result), readableExpected(readableExpected), readableActual(readableActual), messages(messages) {}

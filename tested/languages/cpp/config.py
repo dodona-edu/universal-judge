@@ -165,7 +165,7 @@ class CPP(Language):
         return CPPGenerator(self.file_extension())
 
     def generate_statement(self, statement: Statement) -> str:
-        return self.generator().convert_statement(statement, full=True)
+        return self.generator().convert_statement(statement)
 
     def generate_execution_unit(self, execution_unit: "PreparedExecutionUnit") -> str:
         return self.generator().convert_execution_unit(execution_unit)

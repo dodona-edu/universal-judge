@@ -7,24 +7,17 @@ class Evaluator {
     public:
     Evaluator() {}
 
-    EvaluationResult* evaluate(std::string actual) {
-        bool result = (actual == "correct");
-        EvaluationResult* r = new EvaluationResult(1);
-        r->result = result;
-        r->readableExpected = "correct";
-        r->readableActual = actual;
-        r->messages.push_back(new Message("Hallo"));
-        return r;
+    EvaluationResult evaluate(std::string actual) {
+        return EvaluationResult((actual == "correct"), "correct", actual, {
+            Message("Hallo")
+        });
     }
 
-    EvaluationResult* evaluate_sum(std::string actual, int sum) {
-        EvaluationResult* r = new EvaluationResult(1);
-        r->result = sum == 10;
-        r->readableExpected = "correct";
-        r->readableActual = actual;
-        r->messages.push_back(new Message("Hallo"));
-        return r;
+    EvaluationResult evaluate_sum(std::string actual, int sum) {
+        return EvaluationResult((sum == 10), "correct", actual, {
+            Message("Hallo")
+        });
     }
 };
 
-Evaluator* evaluator = new Evaluator();
+Evaluator evaluator = Evaluator();

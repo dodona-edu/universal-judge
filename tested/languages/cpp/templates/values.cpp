@@ -30,15 +30,15 @@ void write_formatted(FILE* out, const char* format, ...) {
 }
 
 // Function to write evaluated results
-void write_evaluated(FILE* out, EvaluationResult* result) {
+void write_evaluated(FILE* out, const EvaluationResult& result) {
     std::string concatMessages;
 
-    for (const auto& message : result->messages) {
+    for (const auto& message : result.messages) {
         std::string messageStr;
-        if (message->permission.empty()) {
-            messageStr = "{\"description\": \"" + escape(message->description) + "\", \"format\": \"" + escape(message->format) + "\"}";
+        if (message.permission.empty()) {
+            messageStr = "{\"description\": \"" + escape(message.description) + "\", \"format\": \"" + escape(message.format) + "\"}";
         } else {
-            messageStr = "{\"description\": \"" + escape(message->description) + "\", \"format\": \"" + escape(message->format) + "\", \"permission\": \"" + escape(message->permission) + "\"}";
+            messageStr = "{\"description\": \"" + escape(message.description) + "\", \"format\": \"" + escape(message.format) + "\", \"permission\": \"" + escape(message.permission) + "\"}";
         }
         if (!concatMessages.empty()) {
             concatMessages += ",";
@@ -46,15 +46,13 @@ void write_evaluated(FILE* out, EvaluationResult* result) {
         concatMessages += messageStr;
     }
 
-    std::string resultStr = result->result ? "true" : "false";
+    std::string resultStr = result.result ? "true" : "false";
     write_formatted(out, "{"
                         "\"result\": %s, "
                         "\"readable_expected\": \"%s\", "
                         "\"readable_actual\": \"%s\", "
                         "\"messages\": [%s]"
-                        "}", resultStr.c_str(), escape(result->readableExpected).c_str(), escape(result->readableActual).c_str(), concatMessages.c_str());
-
-    delete result;
+                        "}", resultStr.c_str(), escape(result.readableExpected).c_str(), escape(result.readableActual).c_str(), concatMessages.c_str());
 }
 
 std::string exception_message(const std::exception_ptr &eptr = std::current_exception())
