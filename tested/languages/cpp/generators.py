@@ -53,7 +53,7 @@ class CPPGenerator:
 
     def convert_arguments(self, arguments: list[Expression | NamedArgument]) -> str:
         return ", ".join(
-            self.convert_statement(cast(Expression, arg)) for arg in arguments
+            self.convert_statement(cast(Expression, arg), True) for arg in arguments
         )
 
     def convert_type(self, value: Expression) -> str:
@@ -77,49 +77,55 @@ class CPPGenerator:
         else:
             return "std::any"
 
-    def convert_value(self, value: Value) -> str:
+    def convert_value(self, value: Value, add_type = False) -> str:
+        basic = as_basic_type(value)
+        if add_type:
+            tp = value.type
+            bt = basic.type
+            value_string = self.convert_value(value)
+            type_string = self.convert_declaration(tp, value)
+
+            if bt == BasicNothingTypes.NOTHING:
+                return value_string
+
+            if (tp == AdvancedNumericTypes.DOUBLE_EXTENDED
+                or tp == AdvancedNumericTypes.DOUBLE_PRECISION
+                or tp == AdvancedNumericTypes.SINGLE_PRECISION
+                or tp == AdvancedStringTypes.CHAR
+                or bt == BasicBooleanTypes.BOOLEAN
+                or bt == BasicNumericTypes.REAL):
+                return f"(({type_string}) {value_string})"
+
+            return f"{type_string}({value_string})"
+
         if value.type == AdvancedStringTypes.CHAR:
             assert isinstance(value, StringType)
-            return f"(char) '" + value.data.replace("'", "\\'") + "'"
-        elif value.type == AdvancedNumericTypes.INT_8:
-            return f"((std::int8_t) {value.data})"
-        elif value.type == AdvancedNumericTypes.U_INT_8:
-            return f"((std::uint8_t) {value.data})"
-        elif value.type == AdvancedNumericTypes.INT_16:
-            return f"((std::int16_t) {value.data})"
-        elif value.type == AdvancedNumericTypes.U_INT_16:
-            return f"((std::uint16_t) {value.data})"
+            return f"'{value.data.replace("'", "\\'")}'"
         elif value.type == AdvancedNumericTypes.INT_64:
             return f"{value.data}L"
         elif value.type == AdvancedNumericTypes.U_INT_64:
             return f"{value.data}UL"
         elif value.type == AdvancedNumericTypes.U_INT_32:
             return f"{value.data}U"
-        # Handle basic types
-        basic = as_basic_type(value)
         if basic.type == BasicObjectTypes.MAP:
-            type_string = self.convert_declaration(value.type, value)
             return (
-                type_string
-                + "({"
+                "{"
                 + ", ".join(
                     f"{{{self.convert_statement(kvp.key)}, {self.convert_statement(kvp.value)}}}"
                     for kvp in cast(ObjectType, basic).data
                 )
-                + "})"
+                + "}"
             )
         elif (
             basic.type == BasicSequenceTypes.SEQUENCE or basic.type == BasicSequenceTypes.SET
         ):
-            type_string = self.convert_declaration(value.type, value)
             return (
-                type_string
-                + "({"
+                "{"
                 + ", ".join(
                     self.convert_value(cast(Value, cast(Value, v)))
                     for v in cast(SequenceType, basic).data
                 )
-                + "})"
+                + "}"
             )
         elif basic.type == BasicNumericTypes.INTEGER:
             # Basic heuristic for long numbers
@@ -134,18 +140,12 @@ class CPPGenerator:
             elif basic.data == SpecialNumbers.NOT_A_NUMBER:
                 return "nan" + suffix + '("")'
             elif basic.data == SpecialNumbers.POS_INFINITY:
-                if value.type == AdvancedNumericTypes.DOUBLE_PRECISION:
-                    return "((double) INFINITY)"
-                else:
-                    return "INFINITY"
+                return "INFINITY"
             else:
                 assert SpecialNumbers.NEG_INFINITY
-                if value.type == AdvancedNumericTypes.DOUBLE_PRECISION:
-                    return "((double) -INFINITY)"
-                else:
-                    return "(-INFINITY)"
+                return "(-INFINITY)"
         elif basic.type == BasicStringTypes.TEXT:
-            return f"std::string({json.dumps(basic.data)})"
+            return json.dumps(basic.data)
         elif basic.type == BasicBooleanTypes.BOOLEAN:
             return str(basic.data).lower()
         elif basic.type == BasicNothingTypes.NOTHING:
@@ -227,7 +227,7 @@ class CPPGenerator:
             return "void"
         raise AssertionError(f"Unknown type: {tp!r}")
 
-    def convert_statement(self, statement: Statement) -> str:
+    def convert_statement(self, statement: Statement, add_value_type = False) -> str:
         if isinstance(statement, PropertyAssignment):
             return (
                 f"{self.convert_statement(statement.property)} = "
@@ -238,7 +238,7 @@ class CPPGenerator:
         elif isinstance(statement, FunctionCall):
             return self.convert_function_call(statement)
         elif isinstance(statement, Value):
-            return self.convert_value(statement)
+            return self.convert_value(statement, add_value_type)
         elif isinstance(statement, VariableAssignment):
             prefix = self.convert_declaration(statement.type, statement.expression)
 
@@ -451,7 +451,7 @@ int main(int argc, char* argv[]) {
 int main() {
 """
         for value in values:
-            result += self.spacing(1) + f"write_value(stdout, {self.convert_value(value)});\n"
+            result += self.spacing(1) + f"write_value(stdout, {self.convert_value(value, True)});\n"
             result += self.spacing(1) + 'printf("␞");\n'
         result += "}\n"
         return result

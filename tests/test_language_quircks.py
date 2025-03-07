@@ -37,19 +37,30 @@ def test_cpp_complex_function_assignment(tmp_path: Path, pytestconfig: pytest.Co
     cpp = LANGUAGES["cpp"](pytestconfig)
     result = cpp.generate_statement(parse_string(statement_string))
 
-    assert result == "std::map<std::string, std::any> test = std::map<std::string, std::any>({{std::string(\"a\"), foo()}})"
+    assert result == "std::map<std::string, std::any> test = {{\"a\", foo()}}"
+
+def test_cpp_types_get_cast_within_functions(tmp_path: Path, pytestconfig: pytest.Config):
+    statement_string = "test: string = foo(1, \"2\", [3, 4], (5, 6), {7: 8})"
+    cpp = LANGUAGES["cpp"](pytestconfig)
+    result = cpp.generate_statement(parse_string(statement_string))
+
+    int_p = "std::intmax_t(1)"
+    str_p = "std::string(\"2\")"
+    vec_p = "std::vector<std::intmax_t>({3, 4})"
+    tuple_p = "std::tuple<std::intmax_t, std::intmax_t>({5, 6})"
+    map_p = "std::map<std::intmax_t, std::intmax_t>({{7, 8}})"
+    assert result == f"std::string test = foo({int_p}, {str_p}, {vec_p}, {tuple_p}, {map_p})"
 
 def test_cpp_complex_type_assignment(tmp_path: Path, pytestconfig: pytest.Config):
     statement_string = "test = {'1': [2 , (3, {4, 5})]}"
     cpp = LANGUAGES["cpp"](pytestconfig)
     result = cpp.generate_statement(parse_string(statement_string))
 
-    tuple_type = "std::tuple<std::intmax_t, std::set<std::intmax_t>>"
-    variant_types = ["std::intmax_t", tuple_type]
+    variant_types = ["std::intmax_t", "std::tuple<std::intmax_t, std::set<std::intmax_t>>"]
     permutations = list(itertools.permutations(variant_types))
     valid_types = [f"std::map<std::string, std::vector<std::variant<{", ".join(perm)}>>>" for perm in permutations]
-    valid_values = [f"({{{{std::string(\"1\"), std::vector<std::variant<{", ".join(perm)}>>({{2, {tuple_type}({{3, std::set<std::intmax_t>({{4, 5}})}})}})}}}})" for perm in permutations]
-    valid_results = [f"{tp1} test = {tp2}{value}" for tp1 in valid_types  for tp2 in valid_types for value in valid_values]
+    valid_value = "{{\"1\", {2, {3, {4, 5}}}}}"
+    valid_results = [f"{tp1} test = {valid_value}" for tp1 in valid_types]
 
     assert result in valid_results
 
