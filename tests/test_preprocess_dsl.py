@@ -1,7 +1,12 @@
+from pathlib import Path
 from typing import Any, Hashable, cast
+from unittest.mock import ANY
 
 import yaml
+import pytest
+from pytest_mock import MockerFixture
 
+import tested
 from tested.dsl.translate_parser import _parse_yaml, _validate_dsl
 from tested.nat_translation import (
     convert_to_yaml,
@@ -10,7 +15,7 @@ from tested.nat_translation import (
     parse_list,
     parse_yaml,
     translate_yaml,
-    validate_pre_dsl,
+    validate_pre_dsl, run_translation,
 )
 
 test_unit_yaml_str = """
@@ -423,3 +428,43 @@ tabs:
         print("As expected")
     else:
         assert False, "Expected yaml.MarkedYAMLError error"
+
+
+def test_run_is_correct(mocker: MockerFixture):
+    s = mocker.spy(tested.nat_translation, name="generate_new_yaml")  # type: ignore[reportAttributeAccessIssue]
+    mock_files = [
+        mocker.mock_open(read_data=content).return_value
+        for content in ["""
+tabs:
+- tab: task3
+  testcases:
+  - statement: !natural_language
+        nl: resultaten = Proberen(10)
+        en: results = Tries(10)
+  - expression: !natural_language
+        nl: tel_woorden(resultaten)
+        en: count_words(results)
+    return: !natural_language
+        nl: Het resultaat is 10
+        en: The result is 10"""]
+    ]
+    mock_files.append(mocker.mock_open(read_data="{}").return_value)
+    mock_opener = mocker.mock_open()
+    mock_opener.side_effect = mock_files
+    mocker.patch("builtins.open", mock_opener)
+
+    yaml_object = run_translation(Path("suite.yaml"), "en", False)
+
+    assert s.call_count == 0
+    assert yaml_object["tabs"][0]["testcases"][0] == {'statement': 'results = Tries(10)'}
+    assert yaml_object["tabs"][0]["testcases"][1] == {'expression': 'count_words(results)',
+                                                      'return': 'The result is 10'}
+
+def test_run_is_correct_when_no_file():
+
+    try:
+        run_translation(Path("suite.yaml"), "en", False)
+    except FileNotFoundError as e:
+        print("As expected")
+    else:
+        assert False, "Expected FileNotFoundError error"
