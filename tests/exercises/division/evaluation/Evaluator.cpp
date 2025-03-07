@@ -3,7 +3,7 @@
 
 class Evaluator {
 public:
-    EvaluationResult evaluate(const std::exception_ptr &actual) {
+    static EvaluationResult evaluate(const std::exception_ptr &actual) {
         try {
             if(actual) {
                 std::rethrow_exception(actual);
@@ -19,9 +19,7 @@ public:
         });
     }
 
-    EvaluationResult runtime(const std::exception_ptr &actual) {
+    static EvaluationResult runtime(const std::exception_ptr &actual) {
         throw std::out_of_range("hello");
     }
 };
-
-Evaluator evaluator = Evaluator();

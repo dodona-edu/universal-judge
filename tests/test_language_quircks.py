@@ -64,6 +64,23 @@ def test_cpp_complex_type_assignment(tmp_path: Path, pytestconfig: pytest.Config
 
     assert result in valid_results
 
+def test_cpp_static_functions(tmp_path: Path, pytestconfig: pytest.Config):
+    cpp = LANGUAGES["cpp"](pytestconfig)
+    object_function = "foo.bar()"
+    result = cpp.generate_statement(parse_string(object_function))
+
+    assert result == "foo.bar()"
+
+    class_function = "Foo.bar()"
+    result = cpp.generate_statement(parse_string(class_function))
+
+    assert result == "Foo::bar()"
+
+    unknown_function = "foo().bar()"
+    result = cpp.generate_statement(parse_string(unknown_function))
+
+    assert result == "(foo()).bar()"
+
 def test_cpp_unknown_return_type_without_streamable_is_null(
     tmp_path: Path, pytestconfig: pytest.Config
 ):

@@ -248,6 +248,9 @@ class CPPGenerator:
             )
         raise AssertionError(f"Unknown statement: {statement!r}")
 
+    def is_pascal_case(self, identifier: Identifier) -> bool:
+        return len(identifier) > 0 and identifier[0].isupper() and not identifier[1:].isupper()
+
     def convert_function_call(self, function: FunctionCall) -> str:
         result = function.name
         if function.type != FunctionType.PROPERTY:
@@ -264,7 +267,14 @@ class CPPGenerator:
             )
             and not function.type == FunctionType.CONSTRUCTOR
         ):
-            result = "(" + self.convert_statement(function.namespace) + ")." + result
+            if isinstance(function.namespace, Identifier):
+                if self.is_pascal_case(function.namespace):
+                    # Assume namespace is a class, thus this is a static function
+                    result = f"{function.namespace}::{result}"
+                else:
+                    result = f"{function.namespace}.{result}"
+            else:
+                result = "(" + self.convert_statement(function.namespace) + ")." + result
         return result
 
     def spacing(self, depth):
