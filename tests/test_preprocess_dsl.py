@@ -2,8 +2,8 @@ from pathlib import Path
 from typing import Any, Hashable, cast
 from unittest.mock import ANY
 
-import yaml
 import pytest
+import yaml
 from pytest_mock import MockerFixture
 
 import tested
@@ -14,8 +14,9 @@ from tested.nat_translation import (
     parse_dict,
     parse_list,
     parse_yaml,
+    run_translation,
     translate_yaml,
-    validate_pre_dsl, run_translation,
+    validate_pre_dsl,
 )
 
 test_unit_yaml_str = """
@@ -434,7 +435,8 @@ def test_run_is_correct(mocker: MockerFixture):
     s = mocker.spy(tested.nat_translation, name="generate_new_yaml")  # type: ignore[reportAttributeAccessIssue]
     mock_files = [
         mocker.mock_open(read_data=content).return_value
-        for content in ["""
+        for content in [
+            """
 tabs:
 - tab: task3
   testcases:
@@ -446,7 +448,8 @@ tabs:
         en: count_words(results)
     return: !natural_language
         nl: Het resultaat is 10
-        en: The result is 10"""]
+        en: The result is 10"""
+        ]
     ]
     mock_files.append(mocker.mock_open(read_data="{}").return_value)
     mock_opener = mocker.mock_open()
@@ -456,9 +459,15 @@ tabs:
     yaml_object = run_translation(Path("suite.yaml"), "en", False)
 
     assert s.call_count == 0
-    assert yaml_object["tabs"][0]["testcases"][0] == {'statement': 'results = Tries(10)'}
-    assert yaml_object["tabs"][0]["testcases"][1] == {'expression': 'count_words(results)',
-                                                      'return': 'The result is 10'}
+    assert isinstance(yaml_object, dict)
+    tabs = yaml_object["tabs"]
+    assert isinstance(tabs, list)
+    assert tabs[0]["testcases"][0] == {"statement": "results = Tries(10)"}
+    assert tabs[0]["testcases"][1] == {
+        "expression": "count_words(results)",
+        "return": "The result is 10",
+    }
+
 
 def test_run_is_correct_when_no_file():
 
