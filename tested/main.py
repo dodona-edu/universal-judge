@@ -13,7 +13,7 @@ from tested.nat_translation import run_translation
 from tested.testsuite import parse_test_suite
 
 
-def run(config: DodonaConfig, judge_output: IO, language: str):
+def run(config: DodonaConfig, judge_output: IO, language: str = "-"):
     """
     Run the TESTed judge.
 
@@ -26,7 +26,9 @@ def run(config: DodonaConfig, judge_output: IO, language: str):
             with open(f"{config.resources}/{config.test_suite}", "r") as t:
                 textual_suite = t.read()
         except FileNotFoundError as e:
-            print("The test suite was not found. Check your exercise's config.json file.")
+            print(
+                "The test suite was not found. Check your exercise's config.json file."
+            )
             print(
                 "Remember that the test suite is a path relative to the 'evaluation' folder of your exercise."
             )
@@ -39,7 +41,11 @@ def run(config: DodonaConfig, judge_output: IO, language: str):
         else:
             suite = parse_test_suite(textual_suite)
     else:
-        translated_yaml_ob = run_translation(Path(f"{config.resources}/{config.test_suite}"), language=language, to_file=False)
+        translated_yaml_ob = run_translation(
+            Path(f"{config.resources}/{config.test_suite}"),
+            language=language,
+            to_file=False,
+        )
         suite = convert_dsl(translated_yaml_ob)
     pack = create_bundle(config, judge_output, suite)
     from .judge import judge

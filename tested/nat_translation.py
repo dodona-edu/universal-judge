@@ -18,11 +18,13 @@ from tested.dsl.translate_parser import (
     YamlObject,
     _custom_type_constructors,
     _expression_string,
+    _parse_yaml,
     _parse_yaml_value,
     _return_oracle,
+    _validate_dsl,
     convert_validation_error_to_group,
     load_schema_validator,
-    raise_yaml_error, _validate_dsl, _parse_yaml,
+    raise_yaml_error,
 )
 from tested.utils import get_args
 
@@ -298,7 +300,7 @@ def parse_yaml(yaml_stream: str) -> YamlObject:
         raise_yaml_error(yaml_stream, exc)
 
 
-def run_translation(path: Path, language: str, to_file: bool =True) -> YamlObject:
+def run_translation(path: Path, language: str, to_file: bool = True) -> YamlObject:
     try:
         with open(path, "r") as stream:
             yaml_stream = stream.read()
@@ -320,8 +322,6 @@ def run_translation(path: Path, language: str, to_file: bool =True) -> YamlObjec
         generate_new_yaml(path, translated_yaml_string, language)
 
     return translated_yaml_ob
-
-
 
 
 if __name__ == "__main__":
