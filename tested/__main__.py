@@ -30,6 +30,14 @@ parser.add_argument(
     help="Include verbose logs. It is recommended to also use -o in this case.",
     action="store_true",
 )
+
+parser.add_argument(
+    "-t",
+    "--translate",
+    type=str,
+    help="Specifies the language to translate translate the dsl to.",
+    default='-'
+)
 parser = parser.parse_args()
 
 if parser.verbose:
@@ -42,4 +50,4 @@ if parser.verbose:
 
 configuration = read_config(parser.config)
 with smart_close(parser.output) as out:
-    run(configuration, out)
+    run(configuration, out, parser.translate)

@@ -1,4 +1,6 @@
+import os
 import sys
+from argparse import ArgumentParser
 from collections import deque
 from pathlib import Path
 from typing import Any, Hashable, cast
@@ -20,7 +22,7 @@ from tested.dsl.translate_parser import (
     _return_oracle,
     convert_validation_error_to_group,
     load_schema_validator,
-    raise_yaml_error,
+    raise_yaml_error, _validate_dsl, _parse_yaml,
 )
 from tested.utils import get_args
 
@@ -296,20 +298,34 @@ def parse_yaml(yaml_stream: str) -> YamlObject:
         raise_yaml_error(yaml_stream, exc)
 
 
-def run(path: Path, language: str):
-    with open(path, "r") as stream:
-        yaml_stream = stream.read()
-
+def run_translation(path: Path, language: str, to_file: bool =True) -> YamlObject:
+    try:
+        with open(path, "r") as stream:
+            yaml_stream = stream.read()
+    except FileNotFoundError as e:
+        print("The test suite was not found. Check your exercise's config.json file.")
+        print(
+            "Remember that the test suite is a path relative to the 'evaluation' folder of your exercise."
+        )
+        raise e
+    _, ext = os.path.splitext(path)
+    assert ext.lower() in (".yaml", ".yml"), f"expected a yaml file, got {ext}."
     yaml_object = parse_yaml(yaml_stream)
     validate_pre_dsl(yaml_object)
 
     translated_yaml_ob = translate_yaml(yaml_stream, language)
     translated_yaml_string = convert_to_yaml(translated_yaml_ob)
-    generate_new_yaml(path, translated_yaml_string, language)
+    _validate_dsl(_parse_yaml(translated_yaml_string))
+    if to_file:
+        generate_new_yaml(path, translated_yaml_string, language)
+
+    return translated_yaml_ob
+
+
 
 
 if __name__ == "__main__":
     n = len(sys.argv)
     assert n > 1, "Expected atleast two argument (path to yaml file and language)."
 
-    run(Path(sys.argv[1]), sys.argv[2])
+    run_translation(Path(sys.argv[1]), sys.argv[2])

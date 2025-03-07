@@ -753,7 +753,7 @@ def _convert_dsl_list(
     return objects
 
 
-def _convert_dsl(dsl_object: YamlObject) -> Suite:
+def convert_dsl(dsl_object: YamlObject) -> Suite:
     """
     Translate a DSL test suite into a full test suite.
 
@@ -795,7 +795,7 @@ def parse_dsl(dsl_string: str) -> Suite:
     """
     dsl_object = _parse_yaml(dsl_string)
     _validate_dsl(dsl_object)
-    return _convert_dsl(dsl_object)
+    return convert_dsl(dsl_object)
 
 
 def translate_to_test_suite(dsl_string: str) -> str:
