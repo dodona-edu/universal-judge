@@ -2,18 +2,13 @@
 #define WRITER_VALUES_H
 
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <string>
 #include <cstdio>
-#include <set>
-#include <map>
-#include <list>
-#include <tuple>
-#include <iostream>
-#include <string>
 #include <typeinfo>
 #include <type_traits>
-#include <vector>
+#include <exception>
 #include <set>
 #include <map>
 #include <array>
@@ -26,14 +21,14 @@
 std::string escape(const std::string &buffer);
 
 // Function to write a value as a json object with type information to a file
-template <typename T> void write_value(FILE* out, const T& value);
+template <typename T> void write_value(std::ostream& out, const T& value);
 
 // Function to write evaluated results
-void write_evaluated(FILE* out, const EvaluationResult& result);
+void write_evaluated(std::ostream& out, const EvaluationResult& result);
 
 // writes an exception to json as
 // { "type" : "exception", "message" : "message", "stacktrace" : "stacktrace" }
-void write_exception(FILE* out, const std::exception_ptr &eptr);
+void write_exception(std::ostream& out, const std::exception_ptr &eptr);
 
 // Include the implementation file for template functions
 #include "values.tpp"

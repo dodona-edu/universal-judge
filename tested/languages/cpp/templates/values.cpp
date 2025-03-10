@@ -1,6 +1,3 @@
-#include <iostream>
-#include <stdarg.h>
-
 #include "values.h"
 
 // Function to escape special characters in a string
@@ -22,37 +19,28 @@ std::string escape(const std::string &buffer) {
     return dest;
 }
 
-void write_formatted(FILE* out, const char* format, ...) {
-    va_list args;
-    va_start(args, format);
-    vfprintf(out, format, args);
-    va_end(args);
-}
-
 // Function to write evaluated results
-void write_evaluated(FILE* out, const EvaluationResult& result) {
-    std::string concatMessages;
-
+void write_evaluated(std::ostream& out, const EvaluationResult& result) {
+    std::ostringstream messages;
+    bool first = true;
     for (const auto& message : result.messages) {
-        std::string messageStr;
-        if (message.permission.empty()) {
-            messageStr = "{\"description\": \"" + escape(message.description) + "\", \"format\": \"" + escape(message.format) + "\"}";
-        } else {
-            messageStr = "{\"description\": \"" + escape(message.description) + "\", \"format\": \"" + escape(message.format) + "\", \"permission\": \"" + escape(message.permission) + "\"}";
+        if (!first) {
+            messages << ", ";
         }
-        if (!concatMessages.empty()) {
-            concatMessages += ",";
+        messages << R"({"description": ")" << escape(message.description)
+                 << R"(", "format": ")" << escape(message.format) << R"(")";
+
+        if (!message.permission.empty()) {
+            messages << R"(, "permission": ")" << escape(message.permission);
         }
-        concatMessages += messageStr;
+        messages << "}";
+        first = false;
     }
 
-    std::string resultStr = result.result ? "true" : "false";
-    write_formatted(out, "{"
-                        "\"result\": %s, "
-                        "\"readable_expected\": \"%s\", "
-                        "\"readable_actual\": \"%s\", "
-                        "\"messages\": [%s]"
-                        "}", resultStr.c_str(), escape(result.readableExpected).c_str(), escape(result.readableActual).c_str(), concatMessages.c_str());
+    out << R"({"result": )" << (result.result ? "true" : "false")
+        << R"(, "readable_expected": ")" << escape(result.readableExpected)
+        << R"(", "readable_actual": ")" << escape(result.readableActual)
+        << R"(", "messages": [)" << messages.str() << "]}";
 }
 
 std::string exception_message(const std::exception_ptr &eptr = std::current_exception())
@@ -77,13 +65,10 @@ std::string exception_type(const std::exception_ptr &eptr = std::current_excepti
     catch (...)                     { return ""; }
 }
 
-// writes an exception to json as
-// { "type" : "exception", "message" : "message", "stacktrace" : "stacktrace" }
-void write_exception(FILE* out, const std::exception_ptr &eptr) {
-    // Stacktrace is not easily available in C++
-    std::string json = "{ \"type\" : \"%s\", \"message\" : \"%s\", \"stacktrace\" : \"\" }";
-    // Whats returned as name is compiler implementation specific
-    write_formatted(out, json.c_str(), exception_type(eptr).c_str(), exception_message(eptr).c_str());
+void write_exception(std::ostream& out, const std::exception_ptr &eptr) {
+    out << R"({ "type" : ")" << exception_type(eptr)
+        << R"(", "message" : ")" << exception_message(eptr)
+        << R"(", "stacktrace" : "" })";
 }
 
 std::string any_to_json_value(const std::any& value) {

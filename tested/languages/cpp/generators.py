@@ -1,5 +1,4 @@
 import json
-from operator import indexOf
 from typing import cast
 
 from tested.datatypes import AllTypes, resolve_to_basic
@@ -339,21 +338,21 @@ class CPPGenerator:
 
     def define_write_funtions(self, pu: PreparedExecutionUnit) -> str:
         result = f"""
-static FILE* {pu.unit.name}_value_file = nullptr;
-static FILE* {pu.unit.name}_exception_file = nullptr;
+static std::ofstream {pu.unit.name}_value_file;
+static std::ofstream {pu.unit.name}_exception_file;
 
 static void {pu.unit.name}_write_separator() {{
-    fprintf({pu.unit.name}_value_file, "--{pu.testcase_separator_secret}-- SEP");
-    fprintf({pu.unit.name}_exception_file, "--{pu.testcase_separator_secret}-- SEP");
-    fprintf(stdout, "--{pu.testcase_separator_secret}-- SEP");
-    fprintf(stderr, "--{pu.testcase_separator_secret}-- SEP");
+    {pu.unit.name}_value_file << "--{pu.testcase_separator_secret}-- SEP";
+    {pu.unit.name}_exception_file << "--{pu.testcase_separator_secret}-- SEP";
+    std::cout << "--{pu.testcase_separator_secret}-- SEP";
+    std::cerr << "--{pu.testcase_separator_secret}-- SEP";
 }}
 
 static void {pu.unit.name}_write_context_separator() {{
-    fprintf({pu.unit.name}_value_file, "--{pu.context_separator_secret}-- SEP");
-    fprintf({pu.unit.name}_exception_file, "--{pu.context_separator_secret}-- SEP");
-    fprintf(stdout, "--{pu.context_separator_secret}-- SEP");
-    fprintf(stderr, "--{pu.context_separator_secret}-- SEP");
+    {pu.unit.name}_value_file << "--{pu.context_separator_secret}-- SEP";
+    {pu.unit.name}_exception_file << "--{pu.context_separator_secret}-- SEP";
+    std::cout << "--{pu.context_separator_secret}-- SEP";
+    std::cerr << "--{pu.context_separator_secret}-- SEP";
 }}
 
 #undef send_value
@@ -393,8 +392,8 @@ int {pu.unit.name}_context_{i}(void) {{
 
         result += f"""
 int {pu.unit.name}() {{
-    {pu.unit.name}_value_file = fopen("{pu.value_file}", "w");
-    {pu.unit.name}_exception_file = fopen("{pu.exception_file}", "w");
+    {pu.unit.name}_value_file.open("{pu.value_file}", std::ios::out);
+    {pu.unit.name}_exception_file.open("{pu.exception_file}", std::ios::out);
     int exit_code;
 """
 
@@ -403,8 +402,8 @@ int {pu.unit.name}() {{
             result += self.spacing(1) + f"exit_code = {pu.unit.name}_context_{i}();\n"
 
         result += f"""
-    fclose({pu.unit.name}_value_file);
-    fclose({pu.unit.name}_exception_file);
+    {pu.unit.name}_value_file.close();
+    {pu.unit.name}_exception_file.close();
     return exit_code;
 }}
 
@@ -432,7 +431,7 @@ int main() {{
 int main(int argc, char* argv[]) {
 
     if (argc < 1) {
-        fprintf(stderr, "No context selected.");
+        std::cerr << "No context selected.";
         return -2;
     }
 
@@ -441,14 +440,14 @@ int main(int argc, char* argv[]) {
         for ctx in contexts:
             result += f"""
     #if __has_include("{ctx}.{self.extension}")
-    if (strcmp("{ctx}", name) == 0) {{
+    if ("{ctx}" == std::string(name)) {{
         return {ctx}();
     }}
     #endif
 """
 
         result += """
-    fprintf(stderr, "Non-existing context '%s' selected.", name);
+    std::cerr << "Non-existing context '" << name << "' selected.";
     return -1;
 }
 """
@@ -461,7 +460,7 @@ int main(int argc, char* argv[]) {
 int main() {
 """
         for value in values:
-            result += self.spacing(1) + f"write_value(stdout, {self.convert_value(value, True)});\n"
-            result += self.spacing(1) + 'printf("␞");\n'
+            result += self.spacing(1) + f"write_value(std::cout, {self.convert_value(value, True)});\n"
+            result += self.spacing(1) + 'std::cout << "␞";\n'
         result += "}\n"
         return result

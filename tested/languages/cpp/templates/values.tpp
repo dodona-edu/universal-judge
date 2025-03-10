@@ -1,30 +1,17 @@
-#include <vector>
-#include <string>
-#include <cstdio>
-#include <cstring>
-#include <cstdarg>
-#include <cassert>
-#include <cmath>
-#include <cstdint>
-#include <set>
-#include <map>
-#include <list>
-#include <tuple>
 #include <iostream>
 #include <string>
-#include <typeinfo>
-#include <type_traits>
 #include <vector>
 #include <set>
 #include <map>
 #include <array>
 #include <list>
 #include <tuple>
-#include <any>
 #include <variant>
+#include <any>
 #include <sstream>
 #include <concepts>
 #include <type_traits>
+#include <cmath>
 
 // Define a concept to check if a type supports the << operator with std::ostream
 template <typename T>
@@ -41,85 +28,54 @@ std::string any_to_json_value(const std::any& value);
 
 template<typename T>
 std::string getTypeName(const T&) {
-    if (std::is_same<T, std::int8_t>::value) return "int8";
-    if (std::is_same<T, std::uint8_t>::value) return "uint8";
-    if (std::is_same<T, std::int16_t>::value) return "int16";
-    if (std::is_same<T, std::uint16_t>::value) return "uint16";
-    if (std::is_same<T, std::int32_t>::value) return "int32";
-    if (std::is_same<T, std::uint32_t>::value) return "uint32";
-    if (std::is_same<T, std::int64_t>::value) return "int64";
-    if (std::is_same<T, std::uint64_t>::value) return "uint64";
-    if (std::is_same<T, int>::value) return "integer";
-    if (std::is_same<T, double>::value) return "double_precision";
-    if (std::is_same<T, float>::value) return "single_precision";
-    if (std::is_same<T, char>::value) return "char";
-    if (std::is_same<T, std::string>::value) return "text";
-    if (std::is_same<T, bool>::value) return "boolean";
-    if (std::is_same<T, std::nullptr_t>::value) return "null";
-    if (std::is_same<T, long double>::value) return "double_extended";
-    if (std::is_same<T, void>::value) return "nothing";
+    if constexpr (std::is_same_v<T, std::int8_t>) return "int8";
+    if constexpr (std::is_same_v<T, std::uint8_t>) return "uint8";
+    if constexpr (std::is_same_v<T, std::int16_t>) return "int16";
+    if constexpr (std::is_same_v<T, std::uint16_t>) return "uint16";
+    if constexpr (std::is_same_v<T, std::int32_t>) return "int32";
+    if constexpr (std::is_same_v<T, std::uint32_t>) return "uint32";
+    if constexpr (std::is_same_v<T, std::int64_t>) return "int64";
+    if constexpr (std::is_same_v<T, std::uint64_t>) return "uint64";
+    if constexpr (std::is_same_v<T, int>) return "integer";
+    if constexpr (std::is_same_v<T, double>) return "double_precision";
+    if constexpr (std::is_same_v<T, float>) return "single_precision";
+    if constexpr (std::is_same_v<T, char>) return "char";
+    if constexpr (std::is_same_v<T, std::string>) return "text";
+    if constexpr (std::is_same_v<T, bool>) return "boolean";
+    if constexpr (std::is_same_v<T, std::nullptr_t>) return "null";
+    if constexpr (std::is_same_v<T, long double>) return "double_extended";
+    if constexpr (std::is_same_v<T, void>) return "nothing";
     return "unknown";
 }
 
-// Specialization for vector
-template<typename T>
-std::string getTypeName(const std::vector<T>&) {
-    return "array";
-}
-
-// Specialization for set
-template<typename T>
-std::string getTypeName(const std::set<T>&) {
-    return "set";
-}
-
-// Specialization for map
-template<typename K, typename V>
-std::string getTypeName(const std::map<K, V>&) {
-    return "dictionary";
-}
-
-// Specialization for array
-template<typename T, size_t N>
-std::string getTypeName(const std::array<T, N>&) {
-    return "array";
-}
-
-// Specialization for list
-template<typename T>
-std::string getTypeName(const std::list<T>&) {
-    return "list";
-}
-
-// Specialization for tuple
-template<typename... Args>
-std::string getTypeName(const std::tuple<Args...>&) {
-    return "tuple";
-}
+// Specializations for container types
+template<typename T> std::string getTypeName(const std::vector<T>&) { return "array"; }
+template<typename T> std::string getTypeName(const std::set<T>&) { return "set"; }
+template<typename T> std::string getTypeName(const std::list<T>&) { return "list"; }
+template<typename K, typename V> std::string getTypeName(const std::map<K, V>&) { return "dictionary"; }
+template<typename T, std::size_t N> std::string getTypeName(const std::array<T, N>&) { return "array"; }
+template<typename... Args> std::string getTypeName(const std::tuple<Args...>&) { return "tuple"; }
 
 template<typename T>
 std::string to_json_value(const T& value) {
-    if constexpr (std::is_same<T, std::any>::value) {
+    if constexpr (std::is_same_v<T, std::any>) {
         return any_to_json_value(value);
-    } else if constexpr (std::is_same<T, std::string>::value) {
+    } else if constexpr (std::is_same_v<T, std::string>) {
         return "\"" + escape(value) + "\"";
-    } else if constexpr (std::is_same<T, char>::value) {
+    } else if constexpr (std::is_same_v<T, char>) {
         return "\"" + std::string(1, value) + "\"";
-    } else if constexpr (std::is_same<T, bool>::value) {
+    } else if constexpr (std::is_same_v<T, bool>) {
         return value ? "true" : "false";
-    } else if constexpr (std::is_same<T, std::nullptr_t>::value) {
+    } else if constexpr (std::is_same_v<T, std::nullptr_t>) {
         return "null";
-    } else if constexpr (std::is_same<T, const char*>::value) {
+    } else if constexpr (std::is_same_v<T, const char*>) {
         return "\"" + escape(std::string(value)) + "\"";
     } else if constexpr (IsAnyOf<T, float, double, long double>) {
         if(std::isnan(value)) {
             return "\"nan\"";
-        } else if (std::isinf(value) && value > 0) {
-            return "\"inf\"";
-        } else if (std::isinf(value) && value < 0) {
-            return "\"-inf\"";
+        } else if (std::isinf(value)) {
+            return value > 0 ? "\"inf\"" : "\"-inf\"";
         }
-
         std::ostringstream oss;
         oss << value;
         return oss.str();
@@ -170,33 +126,27 @@ std::string to_json_value(const std::variant<Ts...>& variant) {
     return std::visit(to_json_value, variant);
 }
 
-template<typename K, typename V>
-std::string to_json_value(const std::map<K, V>& map) {
-    std::string result = "[";
-    for (const auto& item : map) {
-        result += "{";
-        result += "\"key\": " + to_json(item.first) + ", ";
-        result += "\"value\": " + to_json(item.second);
-        result += "},";
-    }
-    if (!map.empty()) {
-        result.pop_back(); // remove trailing comma
-    }
-    result += "]";
-    return result;
-}
-
 template<typename T, std::size_t N>
 std::string to_json_value(const std::array<T, N>& arr) {
-    std::string result = "[";
-    for (const auto& item : arr) {
-        result += to_json(item) + ",";
+    return sequence_to_json_value(arr);
+}
+
+template<typename K, typename V>
+std::string to_json_value(const std::map<K, V>& map) {
+    std::ostringstream result;
+    result << "[";
+    bool first = true;
+    for (const auto& item : map) {
+        if (!first) {
+            result << ", ";
+        }
+        result << R"({"key": )" << to_json(item.first);
+        result << R"(, "value": )" << to_json(item.second);
+        result << " }";
+        first = false;
     }
-    if (N > 0) {
-        result.pop_back(); // remove trailing comma
-    }
-    result += "]";
-    return result;
+    result << "]";
+    return result.str();
 }
 
 template<typename... Args>
@@ -227,19 +177,18 @@ std::string to_json_value(const std::tuple<Args...>& tup) {
 template<typename T>
 std::string to_json(const T& value) {
     std::string type = getTypeName(value);
-
     std::ostringstream json;
-    json << "{ \"type\" : \"" << type << "\", \"data\" : " << to_json_value(value);
-    if (type == "undefined"){
+    json << "{ \"type\" : \"" << type;
+    json << "\", \"data\" : " << to_json_value(value);
+    if (type == "undefined") {
         std::string diagnostic = typeid(value).name();
         json << ", \"diagnostic\" : \"" << diagnostic << "\"";
     }
-    json <<  " }";
+    json << " }";
     return json.str();
 }
 
-template <typename T> void write_value(FILE* out, const T& value)
+template <typename T> void write_value(std::ostream& out, const T& value)
 {
-    std::string json = to_json(value);
-    fprintf(out, "%s", json.c_str());
+    out << to_json(value);
 }
