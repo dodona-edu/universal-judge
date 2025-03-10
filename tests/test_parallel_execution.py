@@ -24,14 +24,7 @@ def test_parallel_isbn(lang: str, tmp_path: Path, pytestconfig: pytest.Config):
 
 @pytest.mark.parametrize(
     "lang",
-    [
-        "java",
-        "python",
-        "kotlin",
-        "haskell",
-        "runhaskell",
-        "cpp"
-    ],
+    ["java", "python", "kotlin", "haskell", "runhaskell", "cpp"],
 )
 def test_parallel_isbn_list(lang: str, tmp_path: Path, pytestconfig: pytest.Config):
     config_ = {"options": {"parallel": True}}

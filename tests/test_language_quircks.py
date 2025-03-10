@@ -25,6 +25,7 @@ from tested.serialisation import (
 from tested.testsuite import Suite
 from tests.manual_utils import assert_valid_output, configuration, execute_config
 
+
 def test_cpp_function_assignment(tmp_path: Path, pytestconfig: pytest.Config):
     statement_string = "test: string = foo()"
     cpp = LANGUAGES["cpp"](pytestconfig)
@@ -32,37 +33,52 @@ def test_cpp_function_assignment(tmp_path: Path, pytestconfig: pytest.Config):
 
     assert result == "std::string test = foo()"
 
+
 def test_cpp_complex_function_assignment(tmp_path: Path, pytestconfig: pytest.Config):
-    statement_string = "test = { \"a\": foo() }"
+    statement_string = 'test = { "a": foo() }'
     cpp = LANGUAGES["cpp"](pytestconfig)
     result = cpp.generate_statement(parse_string(statement_string))
 
-    assert result == "std::map<std::string, std::any> test = {{\"a\", foo()}}"
+    assert result == 'std::map<std::string, std::any> test = {{"a", foo()}}'
 
-def test_cpp_types_get_cast_within_functions(tmp_path: Path, pytestconfig: pytest.Config):
-    statement_string = "test: string = foo(1, \"2\", [3, 4], (5, 6), {7: 8})"
+
+def test_cpp_types_get_cast_within_functions(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    statement_string = 'test: string = foo(1, "2", [3, 4], (5, 6), {7: 8})'
     cpp = LANGUAGES["cpp"](pytestconfig)
     result = cpp.generate_statement(parse_string(statement_string))
 
     int_p = "std::intmax_t(1)"
-    str_p = "std::string(\"2\")"
+    str_p = 'std::string("2")'
     vec_p = "std::vector<std::intmax_t>({3, 4})"
     tuple_p = "std::tuple<std::intmax_t, std::intmax_t>({5, 6})"
     map_p = "std::map<std::intmax_t, std::intmax_t>({{7, 8}})"
-    assert result == f"std::string test = foo({int_p}, {str_p}, {vec_p}, {tuple_p}, {map_p})"
+    assert (
+        result
+        == f"std::string test = foo({int_p}, {str_p}, {vec_p}, {tuple_p}, {map_p})"
+    )
+
 
 def test_cpp_complex_type_assignment(tmp_path: Path, pytestconfig: pytest.Config):
     statement_string = "test = {'1': [2 , (3, {4, 5})]}"
     cpp = LANGUAGES["cpp"](pytestconfig)
     result = cpp.generate_statement(parse_string(statement_string))
 
-    variant_types = ["std::intmax_t", "std::tuple<std::intmax_t, std::set<std::intmax_t>>"]
+    variant_types = [
+        "std::intmax_t",
+        "std::tuple<std::intmax_t, std::set<std::intmax_t>>",
+    ]
     permutations = list(itertools.permutations(variant_types))
-    valid_types = [f"std::map<std::string, std::vector<std::variant<{", ".join(perm)}>>>" for perm in permutations]
-    valid_value = "{{\"1\", {2, {3, {4, 5}}}}}"
+    valid_types = [
+        f"std::map<std::string, std::vector<std::variant<{", ".join(perm)}>>>"
+        for perm in permutations
+    ]
+    valid_value = '{{"1", {2, {3, {4, 5}}}}}'
     valid_results = [f"{tp1} test = {valid_value}" for tp1 in valid_types]
 
     assert result in valid_results
+
 
 def test_cpp_static_functions(tmp_path: Path, pytestconfig: pytest.Config):
     cpp = LANGUAGES["cpp"](pytestconfig)
@@ -81,6 +97,7 @@ def test_cpp_static_functions(tmp_path: Path, pytestconfig: pytest.Config):
 
     assert result == "(foo()).bar()"
 
+
 def test_cpp_unknown_return_type_without_streamable_is_null(
     tmp_path: Path, pytestconfig: pytest.Config
 ):
@@ -96,7 +113,7 @@ def test_cpp_unknown_return_type_without_streamable_is_null(
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["wrong"]
     received_data = updates.find_next("close-test")["generated"]
-    assert received_data == 'None'
+    assert received_data == "None"
 
 
 def test_typescript_array_typing(tmp_path: Path, pytestconfig: pytest.Config):

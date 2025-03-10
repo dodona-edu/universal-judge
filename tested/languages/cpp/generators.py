@@ -62,13 +62,13 @@ class CPPGenerator:
             return self.convert_declaration(value.type, value)
 
     def combine_types(self, expressions: list[Expression]) -> str:
-            content_types = set(self.convert_type(content) for content in expressions)
-            if len(content_types) == 1:
-                return content_types.pop()
-            elif len(content_types) > 1:
-                return f"std::variant<{', '.join(content_types)}>"
-            else:
-                return "std::any"
+        content_types = set(self.convert_type(content) for content in expressions)
+        if len(content_types) == 1:
+            return content_types.pop()
+        elif len(content_types) > 1:
+            return f"std::variant<{', '.join(content_types)}>"
+        else:
+            return "std::any"
 
     def sequence_subtype(self, value: Statement) -> str:
         if isinstance(value, SequenceType):
@@ -76,7 +76,7 @@ class CPPGenerator:
         else:
             return "std::any"
 
-    def convert_value(self, value: Value, add_type = False) -> str:
+    def convert_value(self, value: Value, add_type=False) -> str:
         basic = as_basic_type(value)
         if add_type:
             tp = value.type
@@ -87,12 +87,14 @@ class CPPGenerator:
             if bt == BasicNothingTypes.NOTHING:
                 return value_string
 
-            if (tp == AdvancedNumericTypes.DOUBLE_EXTENDED
+            if (
+                tp == AdvancedNumericTypes.DOUBLE_EXTENDED
                 or tp == AdvancedNumericTypes.DOUBLE_PRECISION
                 or tp == AdvancedNumericTypes.SINGLE_PRECISION
                 or tp == AdvancedStringTypes.CHAR
                 or bt == BasicBooleanTypes.BOOLEAN
-                or bt == BasicNumericTypes.REAL):
+                or bt == BasicNumericTypes.REAL
+            ):
                 return f"(({type_string}) {value_string})"
 
             return f"{type_string}({value_string})"
@@ -116,7 +118,8 @@ class CPPGenerator:
                 + "}"
             )
         elif (
-            basic.type == BasicSequenceTypes.SEQUENCE or basic.type == BasicSequenceTypes.SET
+            basic.type == BasicSequenceTypes.SEQUENCE
+            or basic.type == BasicSequenceTypes.SET
         ):
             return (
                 "{"
@@ -195,7 +198,9 @@ class CPPGenerator:
             return f"std::vector<{self.sequence_subtype(value)}>"
         elif tp == AdvancedSequenceTypes.TUPLE:
             if isinstance(value, SequenceType):
-                subtype_string = ", ".join(self.convert_type(content) for content in value.data)
+                subtype_string = ", ".join(
+                    self.convert_type(content) for content in value.data
+                )
                 return f"std::tuple<{subtype_string}>"
             else:
                 return "std::tuple<std::any>"
@@ -226,7 +231,7 @@ class CPPGenerator:
             return "void"
         raise AssertionError(f"Unknown type: {tp!r}")
 
-    def convert_statement(self, statement: Statement, add_value_type = False) -> str:
+    def convert_statement(self, statement: Statement, add_value_type=False) -> str:
         if isinstance(statement, PropertyAssignment):
             return (
                 f"{self.convert_statement(statement.property)} = "
@@ -248,7 +253,11 @@ class CPPGenerator:
         raise AssertionError(f"Unknown statement: {statement!r}")
 
     def is_pascal_case(self, identifier: Identifier) -> bool:
-        return len(identifier) > 0 and identifier[0].isupper() and not identifier[1:].isupper()
+        return (
+            len(identifier) > 0
+            and identifier[0].isupper()
+            and not identifier[1:].isupper()
+        )
 
     def convert_function_call(self, function: FunctionCall) -> str:
         result = function.name
@@ -273,13 +282,17 @@ class CPPGenerator:
                 else:
                     result = f"{function.namespace}.{result}"
             else:
-                result = "(" + self.convert_statement(function.namespace) + ")." + result
+                result = (
+                    "(" + self.convert_statement(function.namespace) + ")." + result
+                )
         return result
 
     def spacing(self, depth):
         return " " * depth * 4
 
-    def convert_testcase(self, tc: PreparedTestcase, pu: PreparedExecutionUnit, depth = 1) -> str:
+    def convert_testcase(
+        self, tc: PreparedTestcase, pu: PreparedExecutionUnit, depth=1
+    ) -> str:
         indent = self.spacing(depth)
         result = ""
         if tc.testcase.is_main_testcase():
@@ -320,17 +333,23 @@ class CPPGenerator:
         # Generate code for each testcase
         tc: PreparedTestcase
         for i, tc in enumerate(ctx.testcases):
-            result += self.spacing(i+1) + "try {" + "\n"
-            result += self.spacing(i+2) + f"{pu.unit.name}_write_separator();\n"
-            result += self.convert_testcase(tc, pu, i+2)
+            result += self.spacing(i + 1) + "try {" + "\n"
+            result += self.spacing(i + 2) + f"{pu.unit.name}_write_separator();\n"
+            result += self.convert_testcase(tc, pu, i + 2)
 
-        for i in range(len(ctx.testcases), 0, -1):
-            result += self.spacing(i) + "} catch (...) {\n"
-            result += self.spacing(i+1) + "const std::exception_ptr &e = std::current_exception();\n"
-            result += self.spacing(i+1) + self.convert_statement(
-                tc.exception_statement("e")) + ";\n"
-            result += self.spacing(i+1)+ "exit_code = 1;\n"
-            result += self.spacing(i) + "}\n"
+        for i in range(len(ctx.testcases) - 1, -1, -1):
+            result += self.spacing(i + 1) + "} catch (...) {\n"
+            result += (
+                self.spacing(i + 2)
+                + "const std::exception_ptr &e = std::current_exception();\n"
+            )
+            result += (
+                self.spacing(i + 2)
+                + self.convert_statement(ctx.testcases[i].exception_statement("e"))
+                + ";\n"
+            )
+            result += self.spacing(i + 2) + "exit_code = 1;\n"
+            result += self.spacing(i + 1) + "}\n"
 
         result += self.spacing(1) + ctx.after + "\n"
         result += self.spacing(1) + "return exit_code;\n"
@@ -460,7 +479,10 @@ int main(int argc, char* argv[]) {
 int main() {
 """
         for value in values:
-            result += self.spacing(1) + f"write_value(std::cout, {self.convert_value(value, True)});\n"
+            result += (
+                self.spacing(1)
+                + f"write_value(std::cout, {self.convert_value(value, True)});\n"
+            )
             result += self.spacing(1) + 'std::cout << "␞";\n'
         result += "}\n"
         return result
