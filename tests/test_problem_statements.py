@@ -7,7 +7,7 @@ from tested.descriptions import process_problem_statement
 from tested.dsl.ast_translator import InvalidDslError
 
 
-@pytest.mark.parametrize("language", ["python", "kotlin", "java", "haskell"])
+@pytest.mark.parametrize("language", ["python", "kotlin", "java", "haskell", "cpp"])
 def test_small_descriptions(language: str):
     test_dir = Path(__file__).parent
     description_template = test_dir / "descriptions" / "example.md.jinja2"
