@@ -5,7 +5,6 @@ from tested.datatypes import AllTypes
 from tested.dodona import AnnotateCode, Message
 from tested.features import Construct, TypeSupport
 from tested.languages.conventionalize import (
-    EXECUTION_PREFIX,
     Conventionable,
     NamingConventions,
     submission_file,
