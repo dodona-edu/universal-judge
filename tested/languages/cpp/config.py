@@ -144,18 +144,17 @@ class CPP(Language):
         return linter.run_cppcheck(self.config.dodona, remaining, "c++")
 
     def cleanup_stacktrace(self, stacktrace: str) -> str:
-        included_regex = rf"from ({EXECUTION_PREFIX}|selector)"
         result = ""
+        in_student_file = False
         for line in stacktrace.splitlines(keepends=True):
-            if re.search(included_regex, line):
-                continue
+            if submission_file(self) in line:
+                in_student_file = True
+            elif "|" not in line:
+                in_student_file = False
 
-            # Once we hit the three dots, skip.
-            if "..." in line:
-                break
-
-            line = line.replace(submission_file(self), "<code>")
-            result += line
+            if in_student_file:
+                line = line.replace(submission_file(self), "<code>")
+                result += line
         return result
 
     def is_source_file(self, file: Path) -> bool:
