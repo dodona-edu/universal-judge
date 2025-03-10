@@ -59,7 +59,7 @@ def convert_value(value: Value) -> str:
     value = as_basic_type(value)
     if value.type == BasicNumericTypes.INTEGER:
         # Basic heuristic for long numbers
-        if (value.data > (2 ** 31 - 1)) or (value.data < -(2 ** 31)):
+        if (value.data > (2**31 - 1)) or (value.data < -(2**31)):
             return f"{value.data}L"
         else:
             return str(value.data)
@@ -164,7 +164,7 @@ def convert_statement(statement: Statement, full=False) -> str:
 def _generate_internal_context(ctx: PreparedContext, pu: PreparedExecutionUnit) -> str:
     result = f"""
     {ctx.before}
-
+    
     int exit_code;
     """
 
@@ -188,9 +188,9 @@ def _generate_internal_context(ctx: PreparedContext, pu: PreparedExecutionUnit) 
             if is_special_void_call(tc.input, pu.language):
                 # The method has a "void" return type, so don't wrap it.
                 result += (
-                        " " * 4
-                        + convert_statement(tc.input.unwrapped_input_statement())
-                        + ";\n"
+                    " " * 4
+                    + convert_statement(tc.input.unwrapped_input_statement())
+                    + ";\n"
                 )
                 result += " " * 4 + convert_statement(tc.input.no_value_call()) + ";\n"
             else:
@@ -205,7 +205,7 @@ def convert_execution_unit(pu: PreparedExecutionUnit) -> str:
     result = f"""
     #include <stdio.h>
     #include <math.h>
-
+    
     #include "values.h"
     #include "{pu.submission_name}.c"
     """
@@ -217,24 +217,24 @@ def convert_execution_unit(pu: PreparedExecutionUnit) -> str:
     result += f"""
     static FILE* {pu.unit.name}_value_file = NULL;
     static FILE* {pu.unit.name}_exception_file = NULL;
-
+    
     static void {pu.unit.name}_write_separator() {{
         fprintf({pu.unit.name}_value_file, "--{pu.testcase_separator_secret}-- SEP");
         fprintf({pu.unit.name}_exception_file, "--{pu.testcase_separator_secret}-- SEP");
         fprintf(stdout, "--{pu.testcase_separator_secret}-- SEP");
         fprintf(stderr, "--{pu.testcase_separator_secret}-- SEP");
     }}
-
+    
     static void {pu.unit.name}_write_context_separator() {{
         fprintf({pu.unit.name}_value_file, "--{pu.context_separator_secret}-- SEP");
         fprintf({pu.unit.name}_exception_file, "--{pu.context_separator_secret}-- SEP");
         fprintf(stdout, "--{pu.context_separator_secret}-- SEP");
         fprintf(stderr, "--{pu.context_separator_secret}-- SEP");
     }}
-
+    
     #undef send_value
     #define send_value(value) write_value({pu.unit.name}_value_file, value)
-
+    
     #undef send_specific_value
     #define send_specific_value(value) write_evaluated({pu.unit.name}_value_file, value)
     """
@@ -264,7 +264,7 @@ def convert_execution_unit(pu: PreparedExecutionUnit) -> str:
         fclose({pu.unit.name}_exception_file);
         return exit_code;
     }}
-
+    
     #ifndef INCLUDED
     int main() {{
         return {pu.unit.name}();
@@ -278,7 +278,7 @@ def convert_selector(contexts: list[str]) -> str:
     result = """
     #include <string.h>
     #include <stdio.h>
-
+    
     #define INCLUDED true
     """
 
@@ -292,7 +292,7 @@ def convert_selector(contexts: list[str]) -> str:
             fprintf(stderr, "No context selected.");
             return -2;
         }
-
+    
         const char* name = argv[1];
     """
     for ctx in contexts:
