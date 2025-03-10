@@ -10,7 +10,7 @@ from tests.language_markers import ALL_LANGUAGES
 from tests.manual_utils import assert_valid_output, configuration, execute_config
 
 
-@pytest.mark.parametrize("lang", ["python", "java", "kotlin"])
+@pytest.mark.parametrize("lang", ["python", "java", "kotlin", "cpp"])
 def test_parallel_isbn(lang: str, tmp_path: Path, pytestconfig: pytest.Config):
     config_ = {"options": {"parallel": True}}
     conf = configuration(
@@ -30,6 +30,7 @@ def test_parallel_isbn(lang: str, tmp_path: Path, pytestconfig: pytest.Config):
         "kotlin",
         "haskell",
         "runhaskell",
+        "cpp"
     ],
 )
 def test_parallel_isbn_list(lang: str, tmp_path: Path, pytestconfig: pytest.Config):
@@ -49,7 +50,7 @@ def test_parallel_isbn_list(lang: str, tmp_path: Path, pytestconfig: pytest.Conf
     assert updates.find_status_enum() == ["correct"] * 100
 
 
-@pytest.mark.parametrize("lang", ["java", "python", "kotlin"])
+@pytest.mark.parametrize("lang", ["java", "python", "kotlin", "cpp"])
 def test_parallel_lotto(lang: str, tmp_path: Path, pytestconfig: pytest.Config):
     config_ = {"options": {"parallel": True}}
     conf = configuration(

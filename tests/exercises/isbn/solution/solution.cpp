@@ -27,14 +27,6 @@ bool is_isbn10(const std::string &code) {
     return check_digit(code) == code[9];
 }
 
-template <typename T> bool is_isbn10(const T &code) {
-    return false;
-}
-
-template <typename ...Ts> bool is_isbn10(const std::variant<Ts...> &code) {
-    return std::visit(is_isbn10, code);
-}
-
 bool is_isbn13(const std::string &code) {
     // Helper function for computing ISBN-13 check digit
     auto check_digit = [](const std::string &code) -> char {
@@ -58,12 +50,24 @@ bool is_isbn13(const std::string &code) {
     return check_digit(code) == code[12];
 }
 
-template <typename T> bool is_isbn13(const T &code) {
+template <typename T>
+bool is_isbn10(const T &code) {
     return false;
 }
 
-template <typename ...Ts> bool is_isbn13(const std::variant<Ts...> &code) {
-    return std::visit(is_isbn10, code);
+template <typename ...Ts>
+bool is_isbn10(const std::variant<Ts...> &code) {
+    return std::visit([](const auto& value) { return is_isbn10(value); }, code);
+}
+
+template <typename T>
+bool is_isbn13(const T &code) {
+    return false;
+}
+
+template <typename ...Ts>
+bool is_isbn13(const std::variant<Ts...> &code) {
+    return std::visit([](const auto& value) { return is_isbn13(value); }, code);
 }
 
 template <typename T>
@@ -76,14 +80,15 @@ bool _is_isbn(const std::string &code) {
     return is_isbn(code, isbn13);
 }
 
-template <typename T> bool _is_isbn(const T &code) {
+template <typename T>
+bool _is_isbn(const T &code) {
     return false;
 }
 
-template <typename ...Ts> bool _is_isbn(const std::variant<Ts...> &code) {
+template <typename ...Ts>
+bool _is_isbn(const std::variant<Ts...> &code) {
     return std::visit([](const auto& value) { return _is_isbn(value); }, code);
 }
-
 
 template <typename T>
 std::vector<bool> are_isbn(const std::vector<T> &codes) {
