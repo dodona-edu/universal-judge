@@ -94,9 +94,9 @@ class StateLoader(yaml.SafeLoader):
     ) -> dict[Hashable, Any]:
         # This method will run for each map in a YamlObject.
         result = super().construct_mapping(node, deep)
-        new_translations_map = {}
-        if len(self.state_queue) > 0:
-            new_translations_map = self.state_queue[0].translations_map
+        new_translations_map = (
+            self.state_queue[0].translations_map if self.state_queue else {}
+        )
 
         if "translations" in result:
             new_translations_map = flatten_stack(
