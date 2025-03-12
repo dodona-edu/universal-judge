@@ -91,8 +91,7 @@ class StateLoader(yaml.SafeLoader):
             false_state = self.state_queue.pop()
             # restore nat_language_indicator because it shouldn't of been emptied.
             self.nat_language_indicator = false_state.nat_language_of_lists_indicator
-
-        self.nat_language_indicator.append(children)
+            self.nat_language_indicator.append(children)
 
     def construct_mapping(
         self, node: yaml.MappingNode, deep=False
