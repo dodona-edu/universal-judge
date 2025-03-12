@@ -58,12 +58,10 @@ class State:
     ):
         self.nat_language_of_lists_indicator = nat_language_indicator
         self.translations_map = translations_map
-        self.total_children = 0
-        for i in range(children):
-            if i < len(self.nat_language_of_lists_indicator):
-                self.total_children += self.nat_language_of_lists_indicator[i]
-            else:
-                self.total_children += 1
+        self.total_children = sum(self.nat_language_of_lists_indicator)
+
+        if children > len(self.nat_language_of_lists_indicator):
+            self.total_children += children - len(self.nat_language_of_lists_indicator)
 
     def is_finished(self) -> bool:
         return self.total_children == 0
