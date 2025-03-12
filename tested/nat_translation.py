@@ -72,7 +72,6 @@ class State:
 class StateLoader(yaml.SafeLoader):
     def __init__(self, stream):
         super().__init__(stream)
-        self.level_state = 0
         self.lang = ""
         self.state_queue: deque[State] = deque()
         self.state_queue.append(start_state)
