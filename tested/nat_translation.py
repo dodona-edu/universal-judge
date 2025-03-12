@@ -74,7 +74,6 @@ class StateLoader(yaml.SafeLoader):
         super().__init__(stream)
         self.lang = ""
         self.state_queue: deque[State] = deque()
-        self.state_queue.append(start_state)
         self.nat_language_indicator = []
         self.env = create_enviroment()
 
@@ -100,7 +99,6 @@ class StateLoader(yaml.SafeLoader):
         new_translations_map = {}
         if len(self.state_queue) > 0:
             new_translations_map = self.state_queue[0].translations_map
-
 
         if "translations" in result:
             new_translations_map = flatten_stack(
