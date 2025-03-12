@@ -75,7 +75,6 @@ class StateLoader(yaml.SafeLoader):
         self.level_state = 0
         self.lang = ""
         self.state_queue: deque[State] = deque()
-        start_state = State(1, {}, [])
         self.state_queue.append(start_state)
         self.nat_language_indicator = []
         self.env = create_enviroment()
@@ -99,10 +98,10 @@ class StateLoader(yaml.SafeLoader):
     ) -> dict[Hashable, Any]:
         # This method will run for each map in a YamlObject.
         result = super().construct_mapping(node, deep)
-        new_translations_map = self.state_queue[0].translations_map
+        new_translations_map = {}
+        if len(self.state_queue) > 0:
+            new_translations_map = self.state_queue[0].translations_map
 
-        if "tabs" in result or "units" in result:
-            self.state_queue.popleft()
 
         if "translations" in result:
             new_translations_map = flatten_stack(
