@@ -228,7 +228,9 @@ def _natural_language_map_translation(
     result = loader.construct_mapping(node)
 
     all_types = {type(v) for v in result.values()}
-    assert len(all_types) == 1, "A natural language map should have values with the same type."
+    assert (
+        len(all_types) == 1
+    ), "A natural language map should have values with the same type."
     children = loader.count_children(result)
     loader.add_nat_language_indication(children)
     return result[loader.lang]
