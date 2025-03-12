@@ -85,9 +85,14 @@ class StateLoader(yaml.SafeLoader):
         self.lang = lang
 
     def add_nat_language_indication(self, children: int):
-        self.nat_language_indicator.append(children)
+
+        # construct_mapping runs before this, which will construct a false state
         if children > 0:
-            self.state_queue.pop()
+            false_state = self.state_queue.pop()
+            # restore nat_language_indicator because it shouldn't of been emptied.
+            self.nat_language_indicator = false_state.nat_language_of_lists_indicator
+
+        self.nat_language_indicator.append(children)
 
     def construct_mapping(
         self, node: yaml.MappingNode, deep=False
