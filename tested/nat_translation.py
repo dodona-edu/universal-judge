@@ -125,11 +125,16 @@ class StateLoader(yaml.SafeLoader):
     def construct_sequence(self, node: yaml.SequenceNode, deep=False) -> list[Any]:
         result = super().construct_sequence(node, deep)
 
-        result = parse_list(result, self.state_queue[0].translations_map, self.env)
+        translations_map = (
+            self.state_queue[0].translations_map if self.state_queue else {}
+        )
 
-        self.state_queue[0].total_children -= 1
-        if self.state_queue[0].is_finished():
-            self.state_queue.popleft()
+        result = parse_list(result, translations_map, self.env)
+
+        if len(self.state_queue) > 0:
+            self.state_queue[0].total_children -= 1
+            if self.state_queue[0].is_finished():
+                self.state_queue.popleft()
 
         return result
 
@@ -317,6 +322,7 @@ def run_translation(path: Path, language: str, to_file: bool = True) -> YamlObje
     validate_pre_dsl(yaml_object)
 
     translated_yaml_ob = translate_yaml(yaml_stream, language)
+    print(f"result: {translated_yaml_ob}")
     translated_yaml_string = convert_to_yaml(translated_yaml_ob)
     _validate_dsl(_parse_yaml(translated_yaml_string))
     if to_file:
