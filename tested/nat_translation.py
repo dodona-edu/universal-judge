@@ -86,15 +86,11 @@ class StateLoader(yaml.SafeLoader):
 
     def add_nat_language_indication(self, children: int):
 
-        # construct_mapping runs before this, which will construct a false state
         if children > 0:
-            false_state = self.state_queue.pop()
-            # restore nat_language_indicator because it shouldn't of been emptied.
-            self.nat_language_indicator = false_state.nat_language_of_lists_indicator
             self.nat_language_indicator.append(children)
 
     def construct_mapping(
-        self, node: yaml.MappingNode, deep=False
+        self, node: yaml.MappingNode, deep=False, is_nat_language_map=False
     ) -> dict[Hashable, Any]:
         # This method will run for each map in a YamlObject.
         result = super().construct_mapping(node, deep)
@@ -113,7 +109,7 @@ class StateLoader(yaml.SafeLoader):
         children = self.count_children(result)
         result = parse_dict(result, new_translations_map, self.env)
 
-        if children > 0:
+        if children > 0 and not is_nat_language_map:
             new_state = State(
                 children, new_translations_map, self.nat_language_indicator
             )
@@ -229,7 +225,7 @@ def translate_translations_map(trans_map: dict, language: str) -> dict:
 def _natural_language_map_translation(
     loader: StateLoader, node: yaml.MappingNode
 ) -> Any:
-    result = loader.construct_mapping(node)
+    result = loader.construct_mapping(node, is_nat_language_map=True)
 
     all_types = {type(v) for v in result.values()}
     assert (
@@ -322,7 +318,6 @@ def run_translation(path: Path, language: str, to_file: bool = True) -> YamlObje
     validate_pre_dsl(yaml_object)
 
     translated_yaml_ob = translate_yaml(yaml_stream, language)
-    print(f"result: {translated_yaml_ob}")
     translated_yaml_string = convert_to_yaml(translated_yaml_ob)
     _validate_dsl(_parse_yaml(translated_yaml_string))
     if to_file:
