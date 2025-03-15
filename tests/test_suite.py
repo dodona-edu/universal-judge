@@ -128,7 +128,7 @@ def test_file_show_expected_is_accepted():
     result = get_converter().loads(scheme, FileOutputChannel)
 
     assert result.output_data[0].content == "hallo"
-    assert result.output_data[0].url == "hallo.txt"
+    assert result.output_data[0].path == "hallo.txt"
 
 
 def test_value_show_expected_is_accepted():
