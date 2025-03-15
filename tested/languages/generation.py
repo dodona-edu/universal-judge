@@ -192,7 +192,7 @@ def get_readable_input(
     def replace_link(match: Match) -> str:
         filename = match.group()
         the_file = url_map[filename]
-        the_url = urllib.parse.quote(the_file.path)
+        the_url = urllib.parse.quote(the_file.url)
         the_replacement = (
             f'<a href="{the_url}" class="file-link" target="_blank">{filename}</a>'
         )

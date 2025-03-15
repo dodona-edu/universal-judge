@@ -496,15 +496,18 @@
       "type" : "object",
       "description" : "A file used in the test suite.",
       "required" : [
-        "name",
-        "path"
+        "name"
       ],
       "properties" : {
         "name" : {
           "type" : "string",
           "description" : "The filename, including the file extension."
         },
-        "path" : {
+        "content" : {
+          "type" : "string",
+          "description" : "The actual content of the file."
+        },
+        "url" : {
           "type" : "string",
           "format" : "uri",
           "description" : "Relative path to the file in the `description` folder of an exercise."

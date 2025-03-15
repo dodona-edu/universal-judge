@@ -543,7 +543,7 @@ class MainInput(WithFeatures, WithFunctions):
 
 @define(frozen=True)
 class FileUrl:
-    path: str
+    url: str
     name: str
 
 
