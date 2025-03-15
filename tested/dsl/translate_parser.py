@@ -271,7 +271,9 @@ class DslContext:
     config: dict[str, dict] = field(factory=dict)
     language: SupportedLanguage | Literal["tested"] = "tested"
 
-    def deepen_context(self, new_level: YamlDict | None, workdir: Path|None) -> "DslContext":
+    def deepen_context(
+        self, new_level: YamlDict | None, workdir: Path | None
+    ) -> "DslContext":
         """
         Merge certain fields of the new object with the current context, resulting
         in a new context for the new level.
@@ -433,7 +435,7 @@ def base64_encode(content: str) -> str:
     return base64_bytes.decode("ascii")
 
 
-def _convert_file(link_file: YamlDict, workdir: Path|None) -> FileUrl:
+def _convert_file(link_file: YamlDict, workdir: Path | None) -> FileUrl:
     assert isinstance(link_file["name"], str)
     if "content" in link_file:
         assert isinstance(link_file["content"], str)
@@ -654,7 +656,7 @@ def _validate_testcase_combinations(testcase: YamlDict):
 
 
 def _convert_testcase(
-    testcase: YamlDict, context: DslContext, workdir: Path|None
+    testcase: YamlDict, context: DslContext, workdir: Path | None
 ) -> Testcase:
     context = context.deepen_context(testcase, workdir)
 
@@ -760,7 +762,7 @@ def _convert_testcase(
 
 
 def _convert_context(
-    context: YamlDict, dsl_context: DslContext, workdir: Path|None
+    context: YamlDict, dsl_context: DslContext, workdir: Path | None
 ) -> Context:
     dsl_context = dsl_context.deepen_context(context, workdir)
     raw_testcases = context.get("script", context.get("testcases"))
@@ -771,7 +773,7 @@ def _convert_context(
     return Context(testcases=testcases)
 
 
-def _convert_tab(tab: YamlDict, context: DslContext, workdir: Path|None) -> Tab:
+def _convert_tab(tab: YamlDict, context: DslContext, workdir: Path | None) -> Tab:
     """
     Translate a DSL tab to a full test suite tab.
 
@@ -819,8 +821,8 @@ T = TypeVar("T")
 def _convert_dsl_list(
     dsl_list: list,
     context: DslContext,
-    workdir: Path|None,
-    converter: Callable[[YamlDict, DslContext, Path|None], T],
+    workdir: Path | None,
+    converter: Callable[[YamlDict, DslContext, Path | None], T],
 ) -> list[T]:
     """
     Convert a list of YAML objects into a test suite object.
@@ -832,7 +834,7 @@ def _convert_dsl_list(
     return objects
 
 
-def _convert_dsl(dsl_object: YamlObject, workdir: Path|None) -> Suite:
+def _convert_dsl(dsl_object: YamlObject, workdir: Path | None) -> Suite:
     """
     Translate a DSL test suite into a full test suite.
 
@@ -864,7 +866,7 @@ def _convert_dsl(dsl_object: YamlObject, workdir: Path|None) -> Suite:
         return Suite(tabs=tabs)
 
 
-def parse_dsl(dsl_string: str, workdir: Path|None=None) -> Suite:
+def parse_dsl(dsl_string: str, workdir: Path | None = None) -> Suite:
     """
     Parse a string containing a DSL test suite into our representation,
     a test suite.
