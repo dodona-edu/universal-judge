@@ -1219,9 +1219,9 @@ def test_files_are_propagated():
 - tab: "Config ctx"
   input_files:
     - name: "test"
-      path: "test.md"
+      url: "test.md"
     - name: "two"
-      path: "two.md"
+      url: "two.md"
   testcases:
   - arguments: [ '-a', '2.125', '1.212' ]
     stdout: "3.34"
@@ -1229,7 +1229,7 @@ def test_files_are_propagated():
     stdout: "3.337"
     input_files:
         - name: "test"
-          path: "twooo.md"
+          url: "twooo.md"
     """
     json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
