@@ -128,7 +128,7 @@ def get_readable_input(
         args = f"$ {command}"
         # Determine the stdin
         if isinstance(case.input.stdin, TextData):
-            stdin = case.input.stdin.get_data_as_string(bundle.config.resources)
+            stdin = case.input.stdin.data
         else:
             stdin = ""
 

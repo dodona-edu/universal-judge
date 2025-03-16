@@ -3,6 +3,7 @@ import json
 import os
 import sys
 import textwrap
+import zlib
 from collections.abc import Callable
 from decimal import Decimal
 from pathlib import Path
@@ -431,7 +432,7 @@ def _convert_value(value: YamlObject) -> Value:
 def base64_encode(content: str) -> str:
     sample_string_bytes = content.encode("ascii")
 
-    base64_bytes = base64.b64encode(sample_string_bytes)
+    base64_bytes = base64.b64encode(zlib.compress(sample_string_bytes))
     return base64_bytes.decode("ascii")
 
 
