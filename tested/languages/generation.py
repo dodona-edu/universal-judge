@@ -111,6 +111,14 @@ def get_readable_input(
     3. If it is a context testcase:
         a. The stdin and the arguments.
     """
+    # We have potential files.
+    # Check if the file names are present in the string.
+    # If not, we can also stop before doing ugly things.
+    # We construct a regex, since that can be faster than checking everything.
+    simple_regex = re.compile(
+        "|".join(map(lambda x: re.escape(x.name), case.link_files))
+    )
+
     format_ = "text"  # By default, we use text as input.
     if case.description:
         if isinstance(case.description, ExtendedMessage):
@@ -129,6 +137,8 @@ def get_readable_input(
         # Determine the stdin
         if isinstance(case.input.stdin, TextData):
             stdin = case.input.stdin.data
+            if not case.link_files and not simple_regex.search(stdin):
+                stdin = case.input.stdin.get_data_as_string(bundle.config.resources)
         else:
             stdin = ""
 
@@ -161,13 +171,6 @@ def get_readable_input(
     if not case.link_files:
         return ExtendedMessage(description=text, format=format_), set()
 
-    # We have potential files.
-    # Check if the file names are present in the string.
-    # If not, we can also stop before doing ugly things.
-    # We construct a regex, since that can be faster than checking everything.
-    simple_regex = re.compile(
-        "|".join(map(lambda x: re.escape(x.name), case.link_files))
-    )
 
     if not simple_regex.search(text):
         # There is no match, so bail now.

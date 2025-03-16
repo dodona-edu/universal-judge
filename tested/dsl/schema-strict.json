@@ -280,7 +280,8 @@
             "string",
             "number",
             "integer",
-            "boolean"
+            "boolean",
+            "path"
           ]
         },
         "arguments" : {
@@ -376,7 +377,8 @@
             "string",
             "number",
             "integer",
-            "boolean"
+            "boolean",
+            "path"
           ]
         },
         "arguments" : {
