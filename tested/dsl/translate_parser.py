@@ -1,9 +1,7 @@
-import base64
 import json
 import os
 import sys
 import textwrap
-import zlib
 from collections.abc import Callable
 from decimal import Decimal
 from pathlib import Path
@@ -36,6 +34,7 @@ from tested.datatypes import (
 )
 from tested.dodona import ExtendedMessage
 from tested.dsl.ast_translator import InvalidDslError, extract_comment, parse_string
+from tested.judge.utils import base64_encode
 from tested.parsing import get_converter, suite_to_json
 from tested.serialisation import (
     BooleanType,
@@ -429,13 +428,6 @@ def _convert_value(value: YamlObject) -> Value:
     return _tested_type_to_value(tested_type)
 
 
-def base64_encode(content: str) -> str:
-    sample_string_bytes = content.encode("ascii")
-
-    base64_bytes = base64.b64encode(zlib.compress(sample_string_bytes))
-    return base64_bytes.decode("ascii")
-
-
 def _convert_file(link_file: YamlDict, workdir: Path | None) -> FileUrl:
     assert isinstance(link_file["name"], str)
     if "content" in link_file:
@@ -563,16 +555,19 @@ def _convert_file_output_channel(
 
     for item in data:
         assert isinstance(item, dict)
-        if isinstance(item["content"], PathString):
+        if "url" in item:
             content_type = TextChannelType.FILE
+            content = str(item["url"])
         else:
+            assert "content" in item
             content_type = TextChannelType.TEXT
+            content = str(item["content"])
 
         file_data.append(
             OutputFileData(
                 content_type=content_type,
-                content=str(item["content"]),
-                path=str(item["path"]),
+                content=content,
+                student_path=str(item["student_path"]),
             )
         )
 

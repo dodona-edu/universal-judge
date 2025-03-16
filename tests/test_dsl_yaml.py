@@ -809,10 +809,10 @@ def test_output_files_custom_check_correct():
     assert isinstance(test.input, FunctionCall)
     assert isinstance(test.output.file, FileOutputChannel)
     assert isinstance(test.output.file.oracle, CustomCheckOracle)
-    assert test.output.file.output_data[0].path == "test.txt"
+    assert test.output.file.output_data[0].student_path == "test.txt"
     assert test.output.file.output_data[0].content == "test/hallo.txt"
     assert test.output.file.output_data[0].content_type == TextChannelType.FILE
-    assert test.output.file.output_data[1].path == "test2.txt"
+    assert test.output.file.output_data[1].student_path == "test2.txt"
     assert test.output.file.output_data[1].content == "Hallo world!"
     assert test.output.file.output_data[1].content_type == TextChannelType.TEXT
     oracle = test.output.file.oracle

@@ -154,7 +154,7 @@ def test_file_oracle_full_wrong(
         output_data=[
             OutputFileData(
                 content="expected.txt",
-                path="expected.txt",
+                student_path="expected.txt",
                 content_type=TextChannelType.FILE,
             )
         ]
@@ -182,7 +182,7 @@ def test_file_oracle_full_correct(
         output_data=[
             OutputFileData(
                 content="expected.txt",
-                path="expected.txt",
+                student_path="expected.txt",
                 content_type=TextChannelType.FILE,
             )
         ]
@@ -215,12 +215,12 @@ def test_file_oracle_full_correct_with_mixed_content(
         output_data=[
             OutputFileData(
                 content="expected.txt",
-                path="expected.txt",
+                student_path="expected.txt",
                 content_type=TextChannelType.FILE,
             ),
             OutputFileData(
                 content="expected\nexpected",
-                path="expected.txt",
+                student_path="expected.txt",
                 content_type=TextChannelType.TEXT,
             ),
         ]
@@ -256,7 +256,7 @@ def test_file_oracle_line_wrong(
         output_data=[
             OutputFileData(
                 content="expected.txt",
-                path="expected.txt",
+                student_path="expected.txt",
                 content_type=TextChannelType.FILE,
             )
         ]
@@ -288,7 +288,7 @@ def test_file_oracle_line_correct(
         output_data=[
             OutputFileData(
                 content="expected.txt",
-                path="expected.txt",
+                student_path="expected.txt",
                 content_type=TextChannelType.FILE,
             )
         ]
@@ -320,7 +320,7 @@ def test_file_oracle_strip_lines_correct(
         output_data=[
             OutputFileData(
                 content="expected.txt",
-                path="expected.txt",
+                student_path="expected.txt",
                 content_type=TextChannelType.FILE,
             )
         ]
@@ -352,7 +352,7 @@ def test_file_oracle_dont_strip_lines_correct(
         output_data=[
             OutputFileData(
                 content="expected.txt",
-                path="expected.txt",
+                student_path="expected.txt",
                 content_type=TextChannelType.FILE,
             )
         ]
@@ -374,7 +374,7 @@ def test_correct_error_actual_not_found(tmp_path: Path, pytestconfig: pytest.Con
         output_data=[
             OutputFileData(
                 content="Hallo world!",
-                path="expected.txt",
+                student_path="expected.txt",
                 content_type=TextChannelType.TEXT,
             )
         ]

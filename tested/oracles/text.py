@@ -7,6 +7,7 @@ from typing import Any
 
 from tested.dodona import Status, StatusMessage
 from tested.internationalization import get_i18n_string
+from tested.judge.utils import base64_encode
 from tested.oracles.common import OracleConfig, OracleResult
 from tested.testsuite import (
     FileOutputChannel,
@@ -108,6 +109,16 @@ def evaluate_text(
     result = compare_text(options, expected, actual)
     return result
 
+def make_expected_and_actual_file_output(output_data: OutputChannel, expected: str, actual: str) -> tuple[str, str]:
+    content_type = output_data.content_type
+    expected_str = output_data.content
+    if content_type == TextChannelType.TEXT:
+        expected_str = base64_encode(expected)
+
+    return (
+        f"--- <{output_data.student_path}|{content_type}> ---\n{expected_str}",
+        f"--- <{output_data.student_path}|text> ---\n{base64_encode(actual)}"
+    )
 
 def evaluate_file(
     config: OracleConfig, channel: OutputChannel, actual: str
@@ -147,7 +158,7 @@ def evaluate_file(
     file_not_found = False
     for i in range(len(channel.output_data)):
         output_data = channel.output_data[i]
-        actual_path = config.context_dir / output_data.path
+        actual_path = config.context_dir / output_data.student_path
 
         if output_data.content_type == TextChannelType.FILE:
             expected_path = f"{config.bundle.config.resources}/{output_data.content}"
@@ -186,12 +197,12 @@ def evaluate_file(
             new_result, expected_list[i] = _text_comparison(
                 options, expected_value, actual_value
             )
-            expected_list[i] = (
-                f"--- <{channel.output_data[i].path}> ---\n{expected_list[i]}"
+            expected_list[i], actual_list[i] = make_expected_and_actual_file_output(
+                channel.output_data[i],
+                expected_list[i],
+                actual_list[i]
             )
-            actual_list[i] = (
-                f"--- <{channel.output_data[i].path}> ---\n{actual_list[i]}"
-            )
+
             result = result and new_result
     else:
         assert options["mode"] == "line"
@@ -205,11 +216,11 @@ def evaluate_file(
             for expected_line, actual_line in zip(expected_lines, actual_lines):
                 new_result, _ = _text_comparison(options, expected_line, actual_line)
                 result = result and new_result
-            expected_list[i] = (
-                f"--- <{channel.output_data[i].path}> ---\n{expected_list[i]}"
-            )
-            actual_list[i] = (
-                f"--- <{channel.output_data[i].path}> ---\n{actual_list[i]}"
+
+            expected_list[i], actual_list[i] = make_expected_and_actual_file_output(
+                channel.output_data[i],
+                expected_list[i],
+                actual_list[i]
             )
 
     return OracleResult(

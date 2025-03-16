@@ -277,7 +277,7 @@ class TextOutputChannel(TextData):
 class OutputFileData:
     content_type: TextChannelType
     content: str
-    path: str
+    student_path: str
 
 
 @fallback_field(get_converter(), {"evaluator": "oracle"})
@@ -301,10 +301,10 @@ class FileOutputChannel(WithFeatures):
             if output_data.content_type == TextChannelType.FILE:
                 file_path = _resolve_path(resources, output_data.content)
                 with open(file_path, "r") as file:
-                    file_content.append(f"--- <{output_data.path}> ---\n{file.read()}")
+                    file_content.append(f"--- <{output_data.student_path}> ---\n{file.read()}")
             else:
                 file_content.append(
-                    f"--- <{output_data.path}> ---\n{output_data.content[i]}"
+                    f"--- <{output_data.student_path}> ---\n{output_data.content[i]}"
                 )
         return "\n".join(file_content)
 
