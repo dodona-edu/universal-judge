@@ -684,8 +684,11 @@ def _convert_testcase(
         return_channel = IgnoredChannel.IGNORED if "statement" in testcase else None
     else:
         if "stdin" in testcase:
-            if isinstance(testcase["stdin"], PathString):
-                stdin = TextData(data=testcase["stdin"], type=TextChannelType.FILE)
+            if isinstance(testcase["stdin"], dict):
+                assert "url" in testcase["stdin"]
+                stdin = TextData(
+                    data=str(testcase["stdin"]["url"]), type=TextChannelType.FILE
+                )
             else:
                 assert isinstance(testcase["stdin"], str)
                 stdin = TextData(data=_ensure_trailing_newline(testcase["stdin"]))

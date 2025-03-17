@@ -281,8 +281,18 @@
             "number",
             "integer",
             "boolean",
-            "path"
-          ]
+            "object"
+          ],
+          "required" : [
+            "url"
+          ],
+          "properties" : {
+            "url" : {
+              "type" : "string",
+              "format" : "uri",
+              "description" : "Relative path to the file in the `description` folder of an exercise."
+            }
+          }
         },
         "arguments" : {
           "type" : "array",

@@ -171,7 +171,6 @@ def get_readable_input(
     if not case.link_files:
         return ExtendedMessage(description=text, format=format_), set()
 
-
     if not simple_regex.search(text):
         # There is no match, so bail now.
         return ExtendedMessage(description=text, format=format_), set()

@@ -12,6 +12,7 @@ from tested.oracles.common import OracleConfig, OracleResult
 from tested.testsuite import (
     FileOutputChannel,
     OutputChannel,
+    OutputFileData,
     TextChannelType,
     TextOutputChannel,
 )
@@ -109,7 +110,10 @@ def evaluate_text(
     result = compare_text(options, expected, actual)
     return result
 
-def make_expected_and_actual_file_output(output_data: OutputChannel, expected: str, actual: str) -> tuple[str, str]:
+
+def make_expected_and_actual_file_output(
+    output_data: OutputFileData, expected: str, actual: str
+) -> tuple[str, str]:
     content_type = output_data.content_type
     expected_str = output_data.content
     if content_type == TextChannelType.TEXT:
@@ -117,8 +121,9 @@ def make_expected_and_actual_file_output(output_data: OutputChannel, expected: s
 
     return (
         f"--- <{output_data.student_path}|{content_type}> ---\n{expected_str}",
-        f"--- <{output_data.student_path}|text> ---\n{base64_encode(actual)}"
+        f"--- <{output_data.student_path}|text> ---\n{base64_encode(actual)}",
     )
+
 
 def evaluate_file(
     config: OracleConfig, channel: OutputChannel, actual: str
@@ -198,9 +203,7 @@ def evaluate_file(
                 options, expected_value, actual_value
             )
             expected_list[i], actual_list[i] = make_expected_and_actual_file_output(
-                channel.output_data[i],
-                expected_list[i],
-                actual_list[i]
+                channel.output_data[i], expected_list[i], actual_list[i]
             )
 
             result = result and new_result
@@ -218,9 +221,7 @@ def evaluate_file(
                 result = result and new_result
 
             expected_list[i], actual_list[i] = make_expected_and_actual_file_output(
-                channel.output_data[i],
-                expected_list[i],
-                actual_list[i]
+                channel.output_data[i], expected_list[i], actual_list[i]
             )
 
     return OracleResult(
