@@ -3,6 +3,7 @@ Evaluators for text.
 """
 
 import math
+import os
 from typing import Any
 
 from tested.dodona import Status, StatusMessage
@@ -77,9 +78,16 @@ def _text_comparison(
     return actual_eval == expected_eval, expected
 
 
-def compare_text(options: dict[str, Any], expected: str, actual: str) -> OracleResult:
+def compare_text(
+    options: dict[str, Any], expected: str, actual: str, expected_path: str = ""
+) -> OracleResult:
 
     result, expected = _text_comparison(options, expected, actual)
+    if expected_path:
+        expected = f"--- <{os.path.basename(expected_path)}|file> ---\n{expected_path}"
+        actual = (
+            f"--- <{os.path.basename(expected_path)}|text> ---\n{base64_encode(actual)}"
+        )
     return OracleResult(
         result=StatusMessage(enum=Status.CORRECT if result else Status.WRONG),
         readable_expected=str(expected),
@@ -107,7 +115,12 @@ def evaluate_text(
     options = _text_options(config)
 
     expected = channel.get_data_as_string(config.bundle.config.resources)
-    result = compare_text(options, expected, actual)
+    result = compare_text(
+        options,
+        expected,
+        actual,
+        channel.data if channel.type == TextChannelType.FILE else "",
+    )
     return result
 
 

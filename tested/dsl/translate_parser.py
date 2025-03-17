@@ -502,21 +502,17 @@ def _convert_text_output_channel(
 
     if isinstance(stream, str):
         config = context.config.get(config_name, dict())
-        if isinstance(stream, PathString):
-            path = stream
         raw_data = stream
     else:
         assert isinstance(stream, dict)
-        data = stream.get("content", stream.get("data"))
-        assert data is not None
-
-        if isinstance(data, PathString):
-            path = data
+        if "url" in stream:
             config = context.config.get(config_name, dict())
-            raw_data = data
+            raw_data = str(stream["url"])
+            path = raw_data
         else:
+            raw_data = str(stream.get("content", stream.get("data")))
             config = context.merge_inheritable_with_specific_config(stream, config_name)
-            raw_data = str(stream["data"])
+        assert raw_data is not None
 
     # Normalize the data if necessary.
     if config.get("normalizeTrailingNewlines", True) and path is None:

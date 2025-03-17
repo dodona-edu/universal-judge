@@ -290,7 +290,7 @@
             "url" : {
               "type" : "string",
               "format" : "uri",
-              "description" : "Relative path to the file in the `description` folder of an exercise."
+              "description" : "Relative path to the file in the `evaluation` folder of an exercise."
             }
           }
         },
@@ -387,8 +387,19 @@
             "string",
             "number",
             "integer",
-            "boolean"
-          ]
+            "boolean",
+            "object"
+          ],
+          "required" : [
+            "url"
+          ],
+          "properties" : {
+            "url" : {
+              "type" : "string",
+              "format" : "uri",
+              "description" : "Relative path to the file in the `evaluation` folder of an exercise."
+            }
+          }
         },
         "arguments" : {
           "type" : "array",
@@ -541,6 +552,11 @@
             },
             {
               "required" : [
+                "url"
+              ]
+            },
+            {
+              "required" : [
                 "content"
               ]
             }
@@ -551,6 +567,11 @@
             },
             "data" : {
               "$ref" : "#/definitions/textualType"
+            },
+            "url" : {
+              "type" : "string",
+              "format" : "uri",
+              "description" : "Relative path to the file in the `evaluation` folder of an exercise."
             },
             "oracle" : {
               "const" : "builtin"
@@ -575,6 +596,13 @@
               "required" : [
                 "oracle",
                 "file",
+                "url"
+              ]
+            },
+            {
+              "required" : [
+                "oracle",
+                "file",
                 "content"
               ]
             }
@@ -585,6 +613,11 @@
             },
             "data" : {
               "$ref" : "#/definitions/textualType"
+            },
+            "url" : {
+              "type" : "string",
+              "format" : "uri",
+              "description" : "Relative path to the file in the `evaluation` folder of an exercise."
             },
             "oracle" : {
               "const" : "custom_check"
