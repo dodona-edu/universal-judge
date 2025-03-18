@@ -11,8 +11,6 @@ from tested.dsl.translate_parser import _parse_yaml, _validate_dsl
 from tested.nat_translation import (
     convert_to_yaml,
     create_enviroment,
-    parse_dict,
-    parse_list,
     parse_yaml,
     run_translation,
     translate_yaml,
@@ -51,11 +49,11 @@ tabs:
             en: 'The {{result}} is 10'
             nl: 'Het {{result}} is 10'
         - expression: !natural_language
-            en: !expression "count"
-            nl: !expression "tellen"
+            en: "count"
+            nl: "tellen"
           return: !natural_language
-            en: 'count'
-            nl: 'tellen'
+            en: !expression 'count'
+            nl: !expression 'tellen'
         - expression: 'ok(10)'
           return: !oracle
             value: !natural_language
@@ -117,15 +115,15 @@ tabs:
             - statement: '{{result}} = Trying(10)'
             - expression: 'count_words({{result}})'
               return: 'The {{result}} is 10'
-            - expression: !expression "count"
-              return: 'count'
+            - expression: "count"
+              return: !expression 'count'
         nl:
           - testcases:
             - statement: '{{result}} = Proberen(10)'
             - expression: 'tel_woorden({{result}})'
               return: 'Het {{result}} is 10'
-            - expression: !expression "tellen"
-              return: 'tellen'
+            - expression: "tellen"
+              return: !expression 'tellen'
   - tab: "task2"
     contexts:
         - testcases: !natural_language
@@ -133,28 +131,28 @@ tabs:
               - statement: '{{result}} = Trying(10)'
               - expression: 'count_words({{result}})'
                 return: 'The {{result}} is 10'
-              - expression: !expression "count"
-                return: 'count'
+              - expression: "count"
+                return: !expression 'count'
             nl:
               - statement: '{{result}} = Proberen(10)'
               - expression: 'tel_woorden({{result}})'
                 return: 'Het {{result}} is 10'
-              - expression: !expression "tellen"
-                return: 'tellen'
+              - expression: "tellen"
+                return: !expression 'tellen'
   - tab: "task3"
     testcases: !natural_language
         en:
           - statement: '{{result}} = Trying(10)'
           - expression: 'count_words({{result}})'
             return: 'The {{result}} is 10'
-          - expression: !expression "count"
-            return: 'count'
+          - expression: "count"
+            return: !expression 'count'
         nl:
           - statement: '{{result}} = Proberen(10)'
           - expression: 'tel_woorden({{result}})'
             return: 'Het {{result}} is 10'
-          - expression: !expression "tellen"
-            return: 'tellen'
+          - expression: "tellen"
+            return: !expression 'tellen'
 """.strip()
 
 
@@ -169,8 +167,8 @@ tabs:
     - statement: results_context = Trying(10)
     - expression: count_words(results_context)
       return: The results_context is 10
-    - expression: !expression 'count'
-      return: count
+    - expression: count
+      return: !expression 'count'
     - expression: ok(10)
       return: !oracle
         value: The results_context 10 is OK!
@@ -212,25 +210,27 @@ tabs:
     - statement: results = Trying(10)
     - expression: count_words(results)
       return: The results is 10
-    - expression: !expression 'count'
-      return: count
+    - expression: count
+      return: !expression 'count'
 - tab: task2
   contexts:
   - testcases:
     - statement: results = Trying(10)
     - expression: count_words(results)
       return: The results is 10
-    - expression: !expression 'count'
-      return: count
+    - expression: count
+      return: !expression 'count'
 - tab: task3
   testcases:
   - statement: results = Trying(10)
   - expression: count_words(results)
     return: The results is 10
-  - expression: !expression 'count'
-    return: count
+  - expression: count
+    return: !expression 'count'
 """.strip()
-    translated_dsl = translate_yaml(test_unit_yaml_str, "en")
+    enviroment = create_enviroment()
+    yaml_object = parse_yaml(test_unit_yaml_str)
+    translated_dsl = translate_yaml(yaml_object, {}, "en", enviroment)
     translated_yaml = convert_to_yaml(translated_dsl)
     assert translated_yaml.strip() == translated_yaml_str
 
@@ -340,44 +340,20 @@ units:
   - expression: tests(11)
     return: 11
 """.strip()
-    translated_dsl = translate_yaml(yaml_str, "en")
+    enviroment = create_enviroment()
+    yaml_object = parse_yaml(yaml_str)
+    translated_dsl = translate_yaml(yaml_object, {}, "en", enviroment)
     translated_yaml = convert_to_yaml(translated_dsl)
     assert translated_yaml.strip() == translated_yaml_str
-
-
-def test_translate_parse():
-    env = create_enviroment()
-    flattened_stack = {"human": "mens", "number": "getal"}
-    value = {
-        "key1": "value1_{{human}}",
-        "key2": "value2_{{number}}",
-        "key3": 10,
-    }
-    expected_value = {
-        "key1": "value1_mens",
-        "key2": "value2_getal",
-        "key3": 10,
-    }
-    parsed_result = parse_dict(cast(dict[Hashable, Any], value), flattened_stack, env)
-    assert parsed_result == expected_value
-
-    value = ["value1_{{human}}", "value2_{{number}}", 10]
-    expected_value = ["value1_mens", "value2_getal", 10]
-    parsed_result = parse_list(value, flattened_stack, env)
-    assert parsed_result == expected_value
-
-    value = []
-    expected_value = []
-    parsed_result = parse_list(value, flattened_stack, env)
-    assert parsed_result == expected_value
 
 
 def test_validation():
     yaml_object = parse_yaml(test_unit_yaml_str)
     validate_pre_dsl(yaml_object)
 
-    translated_yaml_ob = translate_yaml(test_unit_yaml_str, "en")
-    translated_yaml_string = convert_to_yaml(translated_yaml_ob)
+    enviroment = create_enviroment()
+    translated_data = translate_yaml(yaml_object, {}, "en", enviroment)
+    translated_yaml_string = convert_to_yaml(translated_data)
     _validate_dsl(_parse_yaml(translated_yaml_string))
 
 
@@ -404,31 +380,6 @@ tabs:
         print("As expected")
     else:
         assert False, "Expected ExceptionGroup error"
-
-
-def test_yaml_with_syntax_error():
-    yaml_str = """
-tabs:
-- tab: animals
-  testcases:
-  - expression: tests(11)
-    return: 11
-  - expression: !programming_language
-      javascript: animals_javascript(1 + 1)
-      typescript: animals_typescript(1 + 1)
-      java: Submission.animals_java(1 + 1)
-      python: !nat_language
-        en: animals_python_en(1 + 1)
-        nl: animals_python_nl(1 + 1)
-    return: 2
-    """.strip()
-
-    try:
-        parse_yaml(yaml_str)
-    except yaml.MarkedYAMLError:
-        print("As expected")
-    else:
-        assert False, "Expected yaml.MarkedYAMLError error"
 
 
 def test_run_is_correct(mocker: MockerFixture):
@@ -473,7 +424,7 @@ def test_run_is_correct_when_no_file():
 
     try:
         run_translation(Path("suite.yaml"), "en", False)
-    except FileNotFoundError as e:
+    except FileNotFoundError:
         print("As expected")
     else:
         assert False, "Expected FileNotFoundError error"

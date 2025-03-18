@@ -49,11 +49,25 @@
               }
             },
             {
-              "type" : "natural_language",
-              "additionalProperties": {
-                "type" : "array",
-                "items" : {
-                  "$ref" : "#/definitions/file"
+              "type" : "object",
+              "required": [
+                "__tag__",
+                "value"
+              ],
+              "properties" : {
+                "__tag__": {
+                  "type" : "string",
+                  "description" : "The tag used in the yaml",
+                  "const":  "!natural_language"
+                },
+                "value":{
+                  "type": "object",
+                  "additionalProperties": {
+                    "type" : "array",
+                    "items" : {
+                      "$ref" : "#/definitions/file"
+                    }
+                  }
                 }
               }
             }
@@ -103,12 +117,26 @@
           }
         },
         {
-          "type" : "natural_language",
-          "additionalProperties": {
-            "type" : "array",
-            "minItems" : 1,
-            "items" : {
-              "$ref" : "#/definitions/tab"
+          "type" : "object",
+          "required": [
+            "__tag__",
+            "value"
+          ],
+          "properties" : {
+            "__tag__": {
+              "type" : "string",
+              "description" : "The tag used in the yaml",
+              "const":  "!natural_language"
+            },
+            "value":{
+              "type": "object",
+              "additionalProperties": {
+                "type" : "array",
+                "minItems" : 1,
+                "items" : {
+                  "$ref" : "#/definitions/tab"
+                }
+              }
             }
           }
         }
@@ -124,12 +152,26 @@
           }
         },
         {
-          "type" : "natural_language",
-          "additionalProperties": {
-            "type" : "array",
-            "minItems" : 1,
-            "items" : {
-              "$ref" : "#/definitions/unit"
+          "type" : "object",
+          "required": [
+            "__tag__",
+            "value"
+          ],
+          "properties" : {
+            "__tag__": {
+              "type" : "string",
+              "description" : "The tag used in the yaml",
+              "const":  "!natural_language"
+            },
+            "value":{
+              "type": "object",
+              "additionalProperties": {
+                "type" : "array",
+                "minItems" : 1,
+                "items" : {
+                  "$ref" : "#/definitions/unit"
+                }
+              }
             }
           }
         }
@@ -152,11 +194,25 @@
               }
             },
             {
-              "type" : "natural_language",
-              "additionalProperties": {
-                "type" : "array",
-                "items" : {
-                  "$ref" : "#/definitions/file"
+              "type" : "object",
+              "required": [
+                "__tag__",
+                "value"
+              ],
+              "properties" : {
+                "__tag__": {
+                  "type" : "string",
+                  "description" : "The tag used in the yaml",
+                  "const":  "!natural_language"
+                },
+                "value":{
+                  "type": "object",
+                  "additionalProperties": {
+                    "type" : "array",
+                    "items" : {
+                      "$ref" : "#/definitions/file"
+                    }
+                  }
                 }
               }
             }
@@ -172,9 +228,23 @@
               "type" : "string"
             },
             {
-              "type" : "natural_language",
-              "additionalProperties": {
-                "type" : "string"
+              "type" : "object",
+              "required": [
+                "__tag__",
+                "value"
+              ],
+              "properties" : {
+                "__tag__": {
+                  "type" : "string",
+                  "description" : "The tag used in the yaml",
+                  "const":  "!natural_language"
+                },
+                "value":{
+                  "type": "object",
+                  "additionalProperties": {
+                    "type" : "string"
+                  }
+                }
               }
             }
           ],
@@ -232,11 +302,25 @@
               }
             },
             {
-              "type" : "natural_language",
-              "additionalProperties": {
-                "type" : "array",
-                "items" : {
-                  "$ref" : "#/definitions/file"
+              "type" : "object",
+              "required": [
+                "__tag__",
+                "value"
+              ],
+              "properties" : {
+                "__tag__": {
+                  "type" : "string",
+                  "description" : "The tag used in the yaml",
+                  "const":  "!natural_language"
+                },
+                "value":{
+                  "type": "object",
+                  "additionalProperties": {
+                    "type" : "array",
+                    "items" : {
+                      "$ref" : "#/definitions/file"
+                    }
+                  }
                 }
               }
             }
@@ -252,9 +336,23 @@
               "type" : "string"
             },
             {
-              "type" : "natural_language",
-              "additionalProperties": {
-                "type" : "string"
+              "type" : "object",
+              "required": [
+                "__tag__",
+                "value"
+              ],
+              "properties" : {
+                "__tag__": {
+                  "type" : "string",
+                  "description" : "The tag used in the yaml",
+                  "const":  "!natural_language"
+                },
+                "value":{
+                  "type": "object",
+                  "additionalProperties": {
+                    "type" : "string"
+                  }
+                }
               }
             }
           ],
@@ -305,12 +403,26 @@
           }
         },
         {
-          "type" : "natural_language",
-          "additionalProperties": {
-            "type" : "array",
-            "minItems" : 1,
-            "items" : {
-              "$ref" : "#/definitions/context"
+          "type" : "object",
+          "required": [
+            "__tag__",
+            "value"
+          ],
+          "properties" : {
+            "__tag__": {
+              "type" : "string",
+              "description" : "The tag used in the yaml",
+              "const":  "!natural_language"
+            },
+            "value":{
+              "type": "object",
+              "additionalProperties": {
+                "type" : "array",
+                "minItems" : 1,
+                "items" : {
+                  "$ref" : "#/definitions/context"
+                }
+              }
             }
           }
         }
@@ -326,12 +438,26 @@
           }
         },
         {
-          "type" : "natural_language",
-          "additionalProperties": {
-            "type" : "array",
-            "minItems" : 1,
-            "items" : {
-              "$ref" : "#/definitions/case"
+          "type" : "object",
+          "required": [
+            "__tag__",
+            "value"
+          ],
+          "properties" : {
+            "__tag__": {
+              "type" : "string",
+              "description" : "The tag used in the yaml",
+              "const":  "!natural_language"
+            },
+            "value":{
+              "type": "object",
+              "additionalProperties": {
+                "type" : "array",
+                "minItems" : 1,
+                "items" : {
+                  "$ref" : "#/definitions/case"
+                }
+              }
             }
           }
         }
@@ -347,12 +473,26 @@
           }
         },
         {
-          "type" : "natural_language",
-          "additionalProperties": {
-            "type" : "array",
-            "minItems" : 1,
-            "items" : {
-              "$ref" : "#/definitions/testcase"
+          "type" : "object",
+          "required": [
+            "__tag__",
+            "value"
+          ],
+          "properties" : {
+            "__tag__": {
+              "type" : "string",
+              "description" : "The tag used in the yaml",
+              "const":  "!natural_language"
+            },
+            "value":{
+              "type": "object",
+              "additionalProperties": {
+                "type" : "array",
+                "minItems" : 1,
+                "items" : {
+                  "$ref" : "#/definitions/testcase"
+                }
+              }
             }
           }
         }
@@ -368,12 +508,26 @@
           }
         },
         {
-          "type" : "natural_language",
-          "additionalProperties": {
-            "type" : "array",
-            "minItems" : 1,
-            "items" : {
-              "$ref" : "#/definitions/script"
+          "type" : "object",
+          "required": [
+            "__tag__",
+            "value"
+          ],
+          "properties" : {
+            "__tag__": {
+              "type" : "string",
+              "description" : "The tag used in the yaml",
+              "const":  "!natural_language"
+            },
+            "value":{
+              "type": "object",
+              "additionalProperties": {
+                "type" : "array",
+                "minItems" : 1,
+                "items" : {
+                  "$ref" : "#/definitions/script"
+                }
+              }
             }
           }
         }
@@ -396,11 +550,25 @@
               }
             },
             {
-              "type" : "natural_language",
-              "additionalProperties": {
-                "type" : "array",
-                "items" : {
-                  "$ref" : "#/definitions/file"
+              "type" : "object",
+              "required": [
+                "__tag__",
+                "value"
+              ],
+              "properties" : {
+                "__tag__": {
+                  "type" : "string",
+                  "description" : "The tag used in the yaml",
+                  "const":  "!natural_language"
+                },
+                "value":{
+                  "type": "object",
+                  "additionalProperties": {
+                    "type" : "array",
+                    "items" : {
+                      "$ref" : "#/definitions/file"
+                    }
+                  }
                 }
               }
             }
@@ -436,11 +604,25 @@
               }
             },
             {
-              "type" : "natural_language",
-              "additionalProperties": {
-                "type" : "array",
-                "items" : {
-                  "$ref" : "#/definitions/file"
+              "type" : "object",
+              "required": [
+                "__tag__",
+                "value"
+              ],
+              "properties" : {
+                "__tag__": {
+                  "type" : "string",
+                  "description" : "The tag used in the yaml",
+                  "const":  "!natural_language"
+                },
+                "value":{
+                  "type": "object",
+                  "additionalProperties": {
+                    "type" : "array",
+                    "items" : {
+                      "$ref" : "#/definitions/file"
+                    }
+                  }
                 }
               }
             }
@@ -470,9 +652,23 @@
               "$ref" : "#/definitions/message"
             },
             {
-              "type" : "natural_language",
-              "additionalProperties": {
-                "$ref" : "#/definitions/message"
+              "type" : "object",
+              "required": [
+                "__tag__",
+                "value"
+              ],
+              "properties" : {
+                "__tag__": {
+                  "type" : "string",
+                  "description" : "The tag used in the yaml",
+                  "const":  "!natural_language"
+                },
+                "value":{
+                  "type": "object",
+                  "additionalProperties": {
+                    "$ref" : "#/definitions/message"
+                  }
+                }
               }
             }
           ]
@@ -489,14 +685,28 @@
               ]
             },
             {
-              "type" : "natural_language",
-              "additionalProperties": {
-                "type" : [
-                  "string",
-                  "number",
-                  "integer",
-                  "boolean"
-                ]
+              "type" : "object",
+              "required": [
+                "__tag__",
+                "value"
+              ],
+              "properties" : {
+                "__tag__": {
+                  "type" : "string",
+                  "description" : "The tag used in the yaml",
+                  "const":  "!natural_language"
+                },
+                "value":{
+                  "type": "object",
+                  "additionalProperties": {
+                    "type" : [
+                      "string",
+                      "number",
+                      "integer",
+                      "boolean"
+                    ]
+                  }
+                }
               }
             }
           ]
@@ -515,16 +725,30 @@
               }
             },
             {
-              "type" : "natural_language",
-              "additionalProperties": {
-                "type" : "array",
-                "items" : {
-                  "type" : [
-                    "string",
-                    "number",
-                    "integer",
-                    "boolean"
-                  ]
+              "type" : "object",
+              "required": [
+                "__tag__",
+                "value"
+              ],
+              "properties" : {
+                "__tag__": {
+                  "type" : "string",
+                  "description" : "The tag used in the yaml",
+                  "const":  "!natural_language"
+                },
+                "value":{
+                  "type": "object",
+                  "additionalProperties": {
+                    "type" : "array",
+                    "items" : {
+                      "type" : [
+                        "string",
+                        "number",
+                        "integer",
+                        "boolean"
+                      ]
+                    }
+                  }
                 }
               }
             }
@@ -546,9 +770,23 @@
               "$ref" : "#/definitions/exceptionChannel"
             },
             {
-              "type" : "natural_language",
-              "additionalProperties": {
-                "$ref" : "#/definitions/exceptionChannel"
+              "type" : "object",
+              "required": [
+                "__tag__",
+                "value"
+              ],
+              "properties" : {
+                "__tag__": {
+                  "type" : "string",
+                  "description" : "The tag used in the yaml",
+                  "const":  "!natural_language"
+                },
+                "value":{
+                  "type": "object",
+                  "additionalProperties": {
+                    "$ref" : "#/definitions/exceptionChannel"
+                  }
+                }
               }
             }
           ]
@@ -563,11 +801,25 @@
               }
             },
             {
-              "type" : "natural_language",
-              "additionalProperties": {
-                "type" : "array",
-                "items" : {
-                  "$ref" : "#/definitions/file"
+              "type" : "object",
+              "required": [
+                "__tag__",
+                "value"
+              ],
+              "properties" : {
+                "__tag__": {
+                  "type" : "string",
+                  "description" : "The tag used in the yaml",
+                  "const":  "!natural_language"
+                },
+                "value":{
+                  "type": "object",
+                  "additionalProperties": {
+                    "type" : "array",
+                    "items" : {
+                      "$ref" : "#/definitions/file"
+                    }
+                  }
                 }
               }
             }
@@ -580,9 +832,23 @@
               "$ref" : "#/definitions/returnOutputChannel"
             },
             {
-              "type" : "natural_language",
-              "additionalProperties": {
-                "$ref" : "#/definitions/returnOutputChannel"
+              "type" : "object",
+              "required": [
+                "__tag__",
+                "value"
+              ],
+              "properties" : {
+                "__tag__": {
+                  "type" : "string",
+                  "description" : "The tag used in the yaml",
+                  "const":  "!natural_language"
+                },
+                "value":{
+                  "type": "object",
+                  "additionalProperties": {
+                    "$ref" : "#/definitions/returnOutputChannel"
+                  }
+                }
               }
             }
           ]
@@ -595,9 +861,23 @@
               "$ref" : "#/definitions/textOutputChannel"
             },
             {
-              "type" : "natural_language",
-              "additionalProperties": {
-                "$ref" : "#/definitions/textOutputChannel"
+              "type" : "object",
+              "required": [
+                "__tag__",
+                "value"
+              ],
+              "properties" : {
+                "__tag__": {
+                  "type" : "string",
+                  "description" : "The tag used in the yaml",
+                  "const":  "!natural_language"
+                },
+                "value":{
+                  "type": "object",
+                  "additionalProperties": {
+                    "$ref" : "#/definitions/textOutputChannel"
+                  }
+                }
               }
             }
           ]
@@ -609,9 +889,23 @@
               "$ref" : "#/definitions/textOutputChannel"
             },
             {
-              "type" : "natural_language",
-              "additionalProperties": {
-                "$ref" : "#/definitions/textOutputChannel"
+              "type" : "object",
+              "required": [
+                "__tag__",
+                "value"
+              ],
+              "properties" : {
+                "__tag__": {
+                  "type" : "string",
+                  "description" : "The tag used in the yaml",
+                  "const":  "!natural_language"
+                },
+                "value":{
+                  "type": "object",
+                  "additionalProperties": {
+                    "$ref" : "#/definitions/textOutputChannel"
+                  }
+                }
               }
             }
           ]
@@ -623,9 +917,23 @@
               "$ref" : "#/definitions/fileOutputChannel"
             },
             {
-              "type" : "natural_language",
-              "additionalProperties": {
-                "$ref" : "#/definitions/fileOutputChannel"
+              "type" : "object",
+              "required": [
+                "__tag__",
+                "value"
+              ],
+              "properties" : {
+                "__tag__": {
+                  "type" : "string",
+                  "description" : "The tag used in the yaml",
+                  "const":  "!natural_language"
+                },
+                "value":{
+                  "type": "object",
+                  "additionalProperties": {
+                    "$ref" : "#/definitions/fileOutputChannel"
+                  }
+                }
               }
             }
           ]
@@ -646,9 +954,23 @@
               "$ref" : "#/definitions/message"
             },
             {
-              "type" : "natural_language",
-              "additionalProperties": {
-                "$ref" : "#/definitions/message"
+              "type" : "object",
+              "required": [
+                "__tag__",
+                "value"
+              ],
+              "properties" : {
+                "__tag__": {
+                  "type" : "string",
+                  "description" : "The tag used in the yaml",
+                  "const":  "!natural_language"
+                },
+                "value":{
+                  "type": "object",
+                  "additionalProperties": {
+                    "$ref" : "#/definitions/message"
+                  }
+                }
               }
             }
           ]
@@ -665,14 +987,28 @@
               ]
             },
             {
-              "type" : "natural_language",
-              "additionalProperties": {
-                "type" : [
-                  "string",
-                  "number",
-                  "integer",
-                  "boolean"
-                ]
+              "type" : "object",
+              "required": [
+                "__tag__",
+                "value"
+              ],
+              "properties" : {
+                "__tag__": {
+                  "type" : "string",
+                  "description" : "The tag used in the yaml",
+                  "const":  "!natural_language"
+                },
+                "value":{
+                  "type": "object",
+                  "additionalProperties": {
+                    "type" : [
+                      "string",
+                      "number",
+                      "integer",
+                      "boolean"
+                    ]
+                  }
+                }
               }
             }
           ]
@@ -691,16 +1027,30 @@
               }
             },
             {
-              "type" : "natural_language",
-              "additionalProperties": {
-                "type" : "array",
-                "items" : {
-                  "type" : [
-                    "string",
-                    "number",
-                    "integer",
-                    "boolean"
-                  ]
+              "type" : "object",
+              "required": [
+                "__tag__",
+                "value"
+              ],
+              "properties" : {
+                "__tag__": {
+                  "type" : "string",
+                  "description" : "The tag used in the yaml",
+                  "const":  "!natural_language"
+                },
+                "value":{
+                  "type": "object",
+                  "additionalProperties": {
+                    "type" : "array",
+                    "items" : {
+                      "type" : [
+                        "string",
+                        "number",
+                        "integer",
+                        "boolean"
+                      ]
+                    }
+                  }
                 }
               }
             }
@@ -722,9 +1072,23 @@
               "$ref" : "#/definitions/exceptionChannel"
             },
             {
-              "type" : "natural_language",
-              "additionalProperties": {
-                "$ref" : "#/definitions/exceptionChannel"
+              "type" : "object",
+              "required": [
+                "__tag__",
+                "value"
+              ],
+              "properties" : {
+                "__tag__": {
+                  "type" : "string",
+                  "description" : "The tag used in the yaml",
+                  "const":  "!natural_language"
+                },
+                "value":{
+                  "type": "object",
+                  "additionalProperties": {
+                    "$ref" : "#/definitions/exceptionChannel"
+                  }
+                }
               }
             }
           ]
@@ -739,11 +1103,25 @@
               }
             },
             {
-              "type" : "natural_language",
-              "additionalProperties": {
-                "type" : "array",
-                "items" : {
-                  "$ref" : "#/definitions/file"
+              "type" : "object",
+              "required": [
+                "__tag__",
+                "value"
+              ],
+              "properties" : {
+                "__tag__": {
+                  "type" : "string",
+                  "description" : "The tag used in the yaml",
+                  "const":  "!natural_language"
+                },
+                "value":{
+                  "type": "object",
+                  "additionalProperties": {
+                    "type" : "array",
+                    "items" : {
+                      "$ref" : "#/definitions/file"
+                    }
+                  }
                 }
               }
             }
@@ -756,9 +1134,23 @@
               "$ref" : "#/definitions/returnOutputChannel"
             },
             {
-              "type" : "natural_language",
-              "additionalProperties": {
-                "$ref" : "#/definitions/returnOutputChannel"
+              "type" : "object",
+              "required": [
+                "__tag__",
+                "value"
+              ],
+              "properties" : {
+                "__tag__": {
+                  "type" : "string",
+                  "description" : "The tag used in the yaml",
+                  "const":  "!natural_language"
+                },
+                "value":{
+                  "type": "object",
+                  "additionalProperties": {
+                    "$ref" : "#/definitions/returnOutputChannel"
+                  }
+                }
               }
             }
           ]
@@ -771,9 +1163,23 @@
               "$ref" : "#/definitions/textOutputChannel"
             },
             {
-              "type" : "natural_language",
-              "additionalProperties": {
-                "$ref" : "#/definitions/textOutputChannel"
+              "type" : "object",
+              "required": [
+                "__tag__",
+                "value"
+              ],
+              "properties" : {
+                "__tag__": {
+                  "type" : "string",
+                  "description" : "The tag used in the yaml",
+                  "const":  "!natural_language"
+                },
+                "value":{
+                  "type": "object",
+                  "additionalProperties": {
+                    "$ref" : "#/definitions/textOutputChannel"
+                  }
+                }
               }
             }
           ]
@@ -785,9 +1191,23 @@
               "$ref" : "#/definitions/textOutputChannel"
             },
             {
-              "type" : "natural_language",
-              "additionalProperties": {
-                "$ref" : "#/definitions/textOutputChannel"
+              "type" : "object",
+              "required": [
+                "__tag__",
+                "value"
+              ],
+              "properties" : {
+                "__tag__": {
+                  "type" : "string",
+                  "description" : "The tag used in the yaml",
+                  "const":  "!natural_language"
+                },
+                "value":{
+                  "type": "object",
+                  "additionalProperties": {
+                    "$ref" : "#/definitions/textOutputChannel"
+                  }
+                }
               }
             }
           ]
@@ -799,9 +1219,23 @@
               "$ref" : "#/definitions/fileOutputChannel"
             },
             {
-              "type" : "natural_language",
-              "additionalProperties": {
-                "$ref" : "#/definitions/fileOutputChannel"
+              "type" : "object",
+              "required": [
+                "__tag__",
+                "value"
+              ],
+              "properties" : {
+                "__tag__": {
+                  "type" : "string",
+                  "description" : "The tag used in the yaml",
+                  "const":  "!natural_language"
+                },
+                "value":{
+                  "type": "object",
+                  "additionalProperties": {
+                    "$ref" : "#/definitions/textOutputChannel"
+                  }
+                }
               }
             }
           ]
@@ -819,15 +1253,29 @@
           "description" : "A statement of expression in Python-like syntax as YAML string."
         },
         {
-          "description" : "Programming-language-specific statement or expression.",
-          "type" : "programming_language",
-          "minProperties" : 1,
-          "propertyNames" : {
-            "$ref" : "#/definitions/programmingLanguage"
-          },
-          "items" : {
-            "type" : "string",
-            "description" : "A language-specific literal, which will be used verbatim."
+          "type" : "object",
+          "required": [
+            "__tag__",
+            "value"
+          ],
+          "properties" : {
+            "__tag__": {
+              "type" : "string",
+              "description" : "The tag used in the yaml",
+              "const":  "!programming_language"
+            },
+            "value":{
+              "type": "object",
+              "description" : "Programming-language-specific statement or expression.",
+              "minProperties" : 1,
+              "propertyNames" : {
+                "$ref" : "#/definitions/programmingLanguage"
+              },
+              "items" : {
+                "type" : "string",
+                "description" : "A language-specific literal, which will be used verbatim."
+              }
+            }
           }
         }
       ]
@@ -839,21 +1287,49 @@
           "description" : "A statement of expression in Python-like syntax as YAML string."
         },
         {
-          "description" : "Programming-language-specific statement or expression.",
-          "type" : "programming_language",
-          "minProperties" : 1,
-          "propertyNames" : {
-            "$ref" : "#/definitions/programmingLanguage"
-          },
-          "items" : {
-            "type" : "string",
-            "description" : "A language-specific literal, which will be used verbatim."
+          "type" : "object",
+          "required": [
+            "__tag__",
+            "value"
+          ],
+          "properties" : {
+            "__tag__": {
+              "type" : "string",
+              "description" : "The tag used in the yaml",
+              "const":  "!programming_language"
+            },
+            "value":{
+              "type": "object",
+              "description" : "Programming-language-specific statement or expression.",
+              "minProperties" : 1,
+              "propertyNames" : {
+                "$ref" : "#/definitions/programmingLanguage"
+              },
+              "items" : {
+                "type" : "string",
+                "description" : "A language-specific literal, which will be used verbatim."
+              }
+            }
           }
         },
         {
-          "type" : "natural_language",
-          "additionalProperties": {
-            "$ref" : "#/definitions/expressionOrStatement"
+          "type" : "object",
+          "required": [
+            "__tag__",
+            "value"
+          ],
+          "properties" : {
+            "__tag__": {
+              "type" : "string",
+              "description" : "The tag used in the yaml",
+              "const":  "!natural_language"
+            },
+            "value":{
+              "type": "object",
+              "additionalProperties": {
+                "$ref" : "#/definitions/expressionOrStatement"
+              }
+            }
           }
         }
       ]
@@ -864,9 +1340,23 @@
           "$ref" : "#/definitions/yamlValue"
         },
         {
-          "type" : "expression",
-          "format" : "tested-dsl-expression",
-          "description" : "An expression in Python-syntax."
+          "type" : "object",
+          "required": [
+            "__tag__",
+            "value"
+          ],
+          "properties" : {
+            "__tag__": {
+              "type" : "string",
+              "description" : "The tag used in the yaml",
+              "const":  "!expression"
+            },
+            "value":{
+              "type": "string",
+              "format" : "tested-dsl-expression",
+              "description" : "An expression in Python-syntax."
+            }
+          }
         }
       ]
     },
@@ -907,9 +1397,23 @@
                   "type" : "string"
                 },
                 {
-                  "type" : "natural_language",
-                  "additionalProperties": {
-                    "type" : "string"
+                  "type" : "object",
+                  "required": [
+                    "__tag__",
+                    "value"
+                  ],
+                  "properties" : {
+                    "__tag__": {
+                      "type" : "string",
+                      "description" : "The tag used in the yaml",
+                      "const":  "!natural_language"
+                    },
+                    "value":{
+                      "type": "object",
+                      "additionalProperties": {
+                        "type" : "string"
+                      }
+                    }
                   }
                 }
               ],
@@ -948,9 +1452,23 @@
                   "$ref" : "#/definitions/textualType"
                 },
                 {
-                  "type" : "natural_language",
-                  "additionalProperties": {
-                    "$ref" : "#/definitions/textualType"
+                  "type" : "object",
+                  "required": [
+                    "__tag__",
+                    "value"
+                  ],
+                  "properties" : {
+                    "__tag__": {
+                      "type" : "string",
+                      "description" : "The tag used in the yaml",
+                      "const":  "!natural_language"
+                    },
+                    "value":{
+                      "type": "object",
+                      "additionalProperties": {
+                        "$ref" : "#/definitions/textualType"
+                      }
+                    }
                   }
                 }
               ]
@@ -978,9 +1496,23 @@
                   "$ref" : "#/definitions/textualType"
                 },
                 {
-                  "type" : "natural_language",
-                  "additionalProperties": {
-                    "$ref" : "#/definitions/textualType"
+                  "type" : "object",
+                  "required": [
+                    "__tag__",
+                    "value"
+                  ],
+                  "properties" : {
+                    "__tag__": {
+                      "type" : "string",
+                      "description" : "The tag used in the yaml",
+                      "const":  "!natural_language"
+                    },
+                    "value":{
+                      "type": "object",
+                      "additionalProperties": {
+                        "$ref" : "#/definitions/textualType"
+                      }
+                    }
                   }
                 }
               ]
@@ -1095,180 +1627,292 @@
           "$ref" : "#/definitions/yamlValueOrPythonExpression"
         },
         {
-          "type" : "oracle",
-          "additionalProperties" : false,
-          "required" : [
+          "type" : "object",
+          "required": [
+            "__tag__",
             "value"
           ],
           "properties" : {
-            "oracle" : {
-              "const" : "builtin"
-            },
-            "value" : {
-              "oneOf" : [
-                {
-                  "$ref" : "#/definitions/yamlValueOrPythonExpression"
-                },
-                {
-                  "type" : "natural_language",
-                  "additionalProperties": {
-                    "$ref" : "#/definitions/yamlValueOrPythonExpression"
-                  }
-                }
-              ]
-            }
-          }
-        },
-        {
-          "type" : "oracle",
-          "additionalProperties" : false,
-          "required" : [
-            "value",
-            "oracle",
-            "file"
-          ],
-          "properties" : {
-            "oracle" : {
-              "const" : "custom_check"
-            },
-            "value" : {
-              "oneOf" : [
-                {
-                  "$ref" : "#/definitions/yamlValueOrPythonExpression"
-                },
-                {
-                  "type" : "natural_language",
-                  "additionalProperties": {
-                    "$ref" : "#/definitions/yamlValueOrPythonExpression"
-                  }
-                }
-              ]
-            },
-            "file" : {
+            "__tag__": {
               "type" : "string",
-              "description" : "The path to the file containing the custom check function."
+              "description" : "The tag used in the yaml",
+              "const":  "!oracle"
             },
-            "name" : {
-              "type" : "string",
-              "description" : "The name of the custom check function.",
-              "default" : "evaluate"
-            },
-            "arguments" : {
-              "oneOf" : [
-                {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/definitions/yamlValueOrPythonExpression"
-                  }
-                },
-                {
-                  "type" : "natural_language",
-                  "additionalProperties": {
-                    "type" : "array",
-                    "items" : {
-                      "$ref" : "#/definitions/yamlValueOrPythonExpression"
-                    }
-                  }
-                }
+            "value":{
+              "type": "object",
+              "additionalProperties" : false,
+              "required" : [
+                "value"
               ],
-              "description" : "List of YAML (or tagged expression) values to use as arguments to the function."
-            },
-            "languages": {
-              "type" : "array",
-              "description" : "Which programming languages are supported by this oracle.",
-              "items" : {
-                "$ref" : "#/definitions/programmingLanguage"
+              "properties" : {
+                "oracle" : {
+                  "const" : "builtin"
+                },
+                "value" : {
+                  "oneOf" : [
+                    {
+                      "$ref" : "#/definitions/yamlValueOrPythonExpression"
+                    },
+                    {
+                      "type" : "object",
+                      "required": [
+                        "__tag__",
+                        "value"
+                      ],
+                      "properties" : {
+                        "__tag__": {
+                          "type" : "string",
+                          "description" : "The tag used in the yaml",
+                          "const":  "!natural_language"
+                        },
+                        "value":{
+                          "type": "object",
+                          "additionalProperties": {
+                            "$ref" : "#/definitions/yamlValueOrPythonExpression"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
               }
             }
           }
         },
         {
-          "type" : "oracle",
-          "additionalProperties" : false,
-          "required" : [
-            "oracle",
-            "functions"
+          "type" : "object",
+          "required": [
+            "__tag__",
+            "value"
           ],
           "properties" : {
-            "oracle" : {
-              "const" : "specific_check"
+            "__tag__": {
+              "type" : "string",
+              "description" : "The tag used in the yaml",
+              "const":  "!oracle"
             },
-            "functions" : {
-              "minProperties" : 1,
-              "description" : "Language mapping of oracle functions.",
-              "type" : "object",
-              "propertyNames" : {
-                "$ref" : "#/definitions/programmingLanguage"
-              },
-              "items" : {
-                "type" : "object",
-                "required" : [
-                  "file"
-                ],
-                "properties" : {
-                  "file" : {
-                    "type" : "string",
-                    "description" : "The path to the file containing the custom check function."
-                  },
-                  "name" : {
-                    "type" : "string",
-                    "description" : "The name of the custom check function.",
-                    "default" : "evaluate"
+            "value":{
+              "type": "object",
+              "additionalProperties" : false,
+              "required" : [
+                "value",
+                "oracle",
+                "file"
+              ],
+              "properties" : {
+                "oracle" : {
+                  "const" : "custom_check"
+                },
+                "value" : {
+                  "oneOf" : [
+                    {
+                      "$ref" : "#/definitions/yamlValueOrPythonExpression"
+                    },
+                    {
+                      "type" : "object",
+                      "required": [
+                        "__tag__",
+                        "value"
+                      ],
+                      "properties" : {
+                        "__tag__": {
+                          "type" : "string",
+                          "description" : "The tag used in the yaml",
+                          "const":  "!natural_language"
+                        },
+                        "value":{
+                          "type": "object",
+                          "additionalProperties": {
+                            "$ref" : "#/definitions/yamlValueOrPythonExpression"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "file" : {
+                  "type" : "string",
+                  "description" : "The path to the file containing the custom check function."
+                },
+                "name" : {
+                  "type" : "string",
+                  "description" : "The name of the custom check function.",
+                  "default" : "evaluate"
+                },
+                "arguments" : {
+                  "oneOf" : [
+                    {
+                      "type" : "array",
+                      "items" : {
+                        "$ref" : "#/definitions/yamlValueOrPythonExpression"
+                      }
+                    },
+                    {
+                      "type" : "object",
+                      "required": [
+                        "__tag__",
+                        "value"
+                      ],
+                      "properties" : {
+                        "__tag__": {
+                          "type" : "string",
+                          "description" : "The tag used in the yaml",
+                          "const":  "!natural_language"
+                        },
+                        "value":{
+                          "type": "object",
+                          "additionalProperties": {
+                            "type" : "array",
+                            "items" : {
+                              "$ref" : "#/definitions/yamlValueOrPythonExpression"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "description" : "List of YAML (or tagged expression) values to use as arguments to the function."
+                },
+                "languages": {
+                  "type" : "array",
+                  "description" : "Which programming languages are supported by this oracle.",
+                  "items" : {
+                    "$ref" : "#/definitions/programmingLanguage"
                   }
                 }
               }
+            }
+          }
+        },
+        {
+          "type" : "object",
+          "required": [
+            "__tag__",
+            "value"
+          ],
+          "properties" : {
+            "__tag__": {
+              "type" : "string",
+              "description" : "The tag used in the yaml",
+              "const":  "!oracle"
             },
-            "arguments" : {
-              "oneOf" : [
-                {
+            "value":{
+              "type": "object",
+              "additionalProperties" : false,
+              "required" : [
+                "oracle",
+                "functions"
+              ],
+              "properties" : {
+                "oracle" : {
+                  "const" : "specific_check"
+                },
+                "functions" : {
                   "minProperties" : 1,
-                  "description" : "Language mapping of oracle arguments.",
+                  "description" : "Language mapping of oracle functions.",
                   "type" : "object",
                   "propertyNames" : {
                     "$ref" : "#/definitions/programmingLanguage"
                   },
                   "items" : {
-                    "type" : "array",
-                    "description" : "List of YAML (or tagged expression) values to use as arguments to the function.",
-                    "items" : {
-                      "type" : "string",
-                      "description" : "A language-specific literal, which will be used verbatim."
-                    }
-                  }
-                },
-                {
-                  "type" : "natural_language",
-                  "additionalProperties": {
-                    "minProperties" : 1,
-                    "description" : "Language mapping of oracle arguments.",
                     "type" : "object",
-                    "propertyNames" : {
-                      "$ref" : "#/definitions/programmingLanguage"
-                    },
-                    "items" : {
-                      "type" : "array",
-                      "description" : "List of YAML (or tagged expression) values to use as arguments to the function.",
-                      "items" : {
+                    "required" : [
+                      "file"
+                    ],
+                    "properties" : {
+                      "file" : {
                         "type" : "string",
-                        "description" : "A language-specific literal, which will be used verbatim."
+                        "description" : "The path to the file containing the custom check function."
+                      },
+                      "name" : {
+                        "type" : "string",
+                        "description" : "The name of the custom check function.",
+                        "default" : "evaluate"
                       }
                     }
                   }
-                }
-              ]
-            },
-            "value" : {
-              "oneOf" : [
-                {
-                  "$ref" : "#/definitions/yamlValueOrPythonExpression"
                 },
-                {
-                  "type" : "natural_language",
-                  "additionalProperties": {
-                    "$ref" : "#/definitions/yamlValueOrPythonExpression"
-                  }
+                "arguments" : {
+                  "oneOf" : [
+                    {
+                      "minProperties" : 1,
+                      "description" : "Language mapping of oracle arguments.",
+                      "type" : "object",
+                      "propertyNames" : {
+                        "$ref" : "#/definitions/programmingLanguage"
+                      },
+                      "items" : {
+                        "type" : "array",
+                        "description" : "List of YAML (or tagged expression) values to use as arguments to the function.",
+                        "items" : {
+                          "type" : "string",
+                          "description" : "A language-specific literal, which will be used verbatim."
+                        }
+                      }
+                    },
+                    {
+                      "type" : "object",
+                      "required": [
+                        "__tag__",
+                        "value"
+                      ],
+                      "properties" : {
+                        "__tag__": {
+                          "type" : "string",
+                          "description" : "The tag used in the yaml",
+                          "const":  "!natural_language"
+                        },
+                        "value":{
+                          "type": "object",
+                          "additionalProperties": {
+                            "minProperties" : 1,
+                            "description" : "Language mapping of oracle arguments.",
+                            "type" : "object",
+                            "propertyNames" : {
+                              "$ref" : "#/definitions/programmingLanguage"
+                            },
+                            "items" : {
+                              "type" : "array",
+                              "description" : "List of YAML (or tagged expression) values to use as arguments to the function.",
+                              "items" : {
+                                "type" : "string",
+                                "description" : "A language-specific literal, which will be used verbatim."
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "value" : {
+                  "oneOf" : [
+                    {
+                      "$ref" : "#/definitions/yamlValueOrPythonExpression"
+                    },
+                    {
+                      "type" : "object",
+                      "required": [
+                        "__tag__",
+                        "value"
+                      ],
+                      "properties" : {
+                        "__tag__": {
+                          "type" : "string",
+                          "description" : "The tag used in the yaml",
+                          "const":  "!natural_language"
+                        },
+                        "value":{
+                          "type": "object",
+                          "additionalProperties": {
+                            "$ref" : "#/definitions/yamlValueOrPythonExpression"
+                          }
+                        }
+                      }
+                    }
+                  ]
                 }
-              ]
+              }
             }
           }
         }
@@ -1305,9 +1949,23 @@
             "description" : {
               "oneOf": [
                 {
-                  "type" : "natural_language",
-                  "additionalProperties": {
-                    "type" : "string"
+                  "type" : "object",
+                  "required": [
+                    "__tag__",
+                    "value"
+                  ],
+                  "properties" : {
+                    "__tag__": {
+                      "type" : "string",
+                      "description" : "The tag used in the yaml",
+                      "const":  "!natural_language"
+                    },
+                    "value":{
+                      "type": "object",
+                      "additionalProperties": {
+                        "type" : "string"
+                      }
+                    }
                   }
                 },
                 {
@@ -1389,12 +2047,10 @@
     "yamlValue" : {
       "description" : "A value represented as YAML.",
       "not" : {
-        "type" : [
-          "oracle",
-          "expression",
-          "natural_language",
-          "programming_language"
-        ]
+        "properties": {
+          "__tag__": { "type": "string" }
+        },
+        "type": "object"
       }
     },
     "inheritableConfigObject": {
