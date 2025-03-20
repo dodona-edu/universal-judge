@@ -110,6 +110,19 @@ def translate_yaml(data: Any, translations:dict, language:str, env: Environment)
         return env.from_string(data).render(translations)
     return data
 
+def to_yaml_object(data: Any) -> YamlObject:
+    if isinstance(data, dict):
+        if '__tag__' in data:
+            value = data['value']
+            if data['__tag__'] == '!oracle':
+                return ReturnOracle(to_yaml_object(value))
+            if data['__tag__'] == '!expression':
+                return ExpressionString(to_yaml_object(value))
+            return value
+    elif isinstance(data, list):
+        return [to_yaml_object(value) for value in data]
+
+    return data
 
 def wrap_in_braces(value):
     return f"{{{value}}}"
@@ -159,20 +172,20 @@ def run_translation(path: Path, language: str, to_file: bool = True) -> YamlObje
         raise e
     _, ext = os.path.splitext(path)
     assert ext.lower() in (".yaml", ".yml"), f"expected a yaml file, got {ext}."
-    yaml_object = parse_yaml(yaml_stream)
-    validate_pre_dsl(yaml_object)
+    parsed_yaml = parse_yaml(yaml_stream)
+    validate_pre_dsl(parsed_yaml)
 
     enviroment = create_enviroment()
-    translated_data = translate_yaml(yaml_object, {}, language, enviroment)
+    translated_data = translate_yaml(parsed_yaml, {}, language, enviroment)
 
-    translated_yaml_string = convert_to_yaml(translated_data)
-    #TODO: FIX redundancy
-    yaml_object = _parse_yaml(translated_yaml_string)
-    _validate_dsl(yaml_object)
     if to_file:
+        translated_yaml_string = convert_to_yaml(translated_data)
         generate_new_yaml(path, translated_yaml_string, language)
-
-    return yaml_object
+        return {}
+    else:
+        yaml_object = to_yaml_object(translated_data)
+        _validate_dsl(yaml_object)
+        return yaml_object
 
 
 if __name__ == "__main__":
