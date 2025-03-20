@@ -75,18 +75,21 @@ class CustomDumper(yaml.SafeDumper):
 
 
 def construct_custom(loader, tag_suffix, node):
-    if isinstance(node, MappingNode):
-        data = loader.construct_mapping(node)
-    elif isinstance(node, ScalarNode):
-        data = loader.construct_scalar(node)
-    elif isinstance(node, SequenceNode):
-        data = loader.construct_sequence(node)
-    else:
+
+    type2method = {
+        MappingNode: loader.construct_mapping,
+        ScalarNode: loader.construct_scalar,
+        SequenceNode: loader.construct_sequence
+    }
+
+    if not type(node) in type2method:
         raise yaml.constructor.ConstructorError(
             None, None,
             f"expected a mapping, scalar, or sequence node, but found {node.id}",
             node.start_mark
         )
+
+    data = type2method[type(node)](node)
 
     return {'__tag__': tag_suffix, 'value': data}
 
@@ -131,7 +134,7 @@ def convert_to_yaml(translated_data: Any) -> str:
     return yaml.dump(translated_data, Dumper=CustomDumper, allow_unicode=True, sort_keys=False)
 
 
-def parse_yaml(yaml_stream: str) -> YamlObject:
+def parse_yaml(yaml_stream: str):
     """
     Parse a string or stream to YAML.
     """
@@ -163,6 +166,7 @@ def run_translation(path: Path, language: str, to_file: bool = True) -> YamlObje
     translated_data = translate_yaml(yaml_object, {}, language, enviroment)
 
     translated_yaml_string = convert_to_yaml(translated_data)
+    #TODO: FIX redundancy
     yaml_object = _parse_yaml(translated_yaml_string)
     _validate_dsl(yaml_object)
     if to_file:
