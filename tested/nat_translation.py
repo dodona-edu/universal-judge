@@ -156,7 +156,8 @@ def parse_yaml(yaml_stream: str) -> Any:
     """
     Parse a string or stream to YAML.
     """
-    loader: type[yaml.Loader] = cast(type[yaml.Loader], yaml.CSafeLoader)
+    print(yaml_stream)
+    loader: type[yaml.Loader] = cast(type[yaml.Loader], yaml.SafeLoader)
     yaml.add_multi_constructor("", construct_custom, loader)
 
     try:
