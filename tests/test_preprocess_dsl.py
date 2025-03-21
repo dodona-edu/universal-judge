@@ -425,8 +425,8 @@ tabs:
 
 def test_file_is_generated(mocker: MockerFixture):
     s = mocker.spy(
-        tested.nat_translation, name="generate_new_yaml"
-    )  # type: ignore[reportAttributeAccessIssue]
+        tested.nat_translation, name="generate_new_yaml" # type: ignore[reportAttributeAccessIssue]
+    )
 
     mock_files = [
         mocker.mock_open(read_data=content).return_value
@@ -496,6 +496,31 @@ def test_to_yaml_object():
     testcase = context["testcases"][3]
     assert isinstance(testcase, dict)
     assert isinstance(testcase["return"], ReturnOracle)
+
+def test_dumper():
+    translated_dsl = {"__tag__": '!tag', "value": [1, 2, 3]}
+    yaml_str = convert_to_yaml(translated_dsl).strip()
+    expected = """
+!tag
+- 1
+- 2
+- 3
+    """.strip()
+    assert yaml_str == expected
+
+    translated_dsl = {"__tag__": '!tag', "value": {"key1": "value1", "key2": "value2"}}
+    yaml_str = convert_to_yaml(translated_dsl).strip()
+    expected = """
+!tag
+key1: value1
+key2: value2
+        """.strip()
+    assert yaml_str == expected
+
+    translated_dsl = {"__tag__": '!tag', "value": "value"}
+    yaml_str = convert_to_yaml(translated_dsl).strip()
+    expected = "!tag 'value'"
+    assert yaml_str == expected
 
 
 def test_run_is_correct_when_no_file():
