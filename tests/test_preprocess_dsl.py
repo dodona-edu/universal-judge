@@ -425,7 +425,7 @@ tabs:
 
 def test_file_is_generated(mocker: MockerFixture):
     s = mocker.spy(
-        tested.nat_translation, name="generate_new_yaml" # type: ignore[reportAttributeAccessIssue]
+        tested.nat_translation, name="generate_new_yaml"  # type: ignore[reportAttributeAccessIssue]
     )
 
     mock_files = [
@@ -497,8 +497,9 @@ def test_to_yaml_object():
     assert isinstance(testcase, dict)
     assert isinstance(testcase["return"], ReturnOracle)
 
+
 def test_dumper():
-    translated_dsl = {"__tag__": '!tag', "value": [1, 2, 3]}
+    translated_dsl = {"__tag__": "!tag", "value": [1, 2, 3]}
     yaml_str = convert_to_yaml(translated_dsl).strip()
     expected = """
 !tag
@@ -508,7 +509,7 @@ def test_dumper():
     """.strip()
     assert yaml_str == expected
 
-    translated_dsl = {"__tag__": '!tag', "value": {"key1": "value1", "key2": "value2"}}
+    translated_dsl = {"__tag__": "!tag", "value": {"key1": "value1", "key2": "value2"}}
     yaml_str = convert_to_yaml(translated_dsl).strip()
     expected = """
 !tag
@@ -517,7 +518,7 @@ key2: value2
         """.strip()
     assert yaml_str == expected
 
-    translated_dsl = {"__tag__": '!tag', "value": "value"}
+    translated_dsl = {"__tag__": "!tag", "value": "value"}
     yaml_str = convert_to_yaml(translated_dsl).strip()
     expected = "!tag 'value'"
     assert yaml_str == expected
