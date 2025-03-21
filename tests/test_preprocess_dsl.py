@@ -4,15 +4,20 @@ import yaml
 from pytest_mock import MockerFixture
 
 import tested
-from tested.dsl.translate_parser import _parse_yaml, _validate_dsl, ExpressionString, \
-    ReturnOracle
+from tested.dsl.translate_parser import (
+    ExpressionString,
+    ReturnOracle,
+    _parse_yaml,
+    _validate_dsl,
+)
 from tested.nat_translation import (
     convert_to_yaml,
     create_enviroment,
     parse_yaml,
     run_translation,
+    to_yaml_object,
     translate_yaml,
-    validate_pre_dsl, to_yaml_object,
+    validate_pre_dsl,
 )
 
 test_unit_yaml_str = """
@@ -361,7 +366,7 @@ tabs:
 - tab: animals
   testcases:
   - expression: tests(11)
-    return: 11
+    return: !exp 11
   - expression:
       javascript: animals_javascript(1 + 1)
       typescript: animals_typescript(1 + 1)
@@ -418,6 +423,43 @@ tabs:
     }
 
 
+def test_file_is_generated(mocker: MockerFixture):
+    s = mocker.spy(
+        tested.nat_translation, name="generate_new_yaml"
+    )  # type: ignore[reportAttributeAccessIssue]
+
+    mock_files = [
+        mocker.mock_open(read_data=content).return_value
+        for content in [
+            """
+tabs:
+- tab: task3
+  testcases:
+  - statement: !natural_language
+        nl: resultaten = Proberen(10)
+        en: results = Tries(10)
+  - expression: !natural_language
+        nl: tel_woorden(resultaten)
+        en: count_words(results)
+    return: !natural_language
+        nl: Het resultaat is 10
+        en: The result is 10"""
+        ]
+    ]
+    mock_files.append(mocker.mock_open(read_data="{}").return_value)
+    mock_files.append(mocker.mock_open().return_value)
+    mock_opener = mocker.mock_open()
+    mock_opener.side_effect = mock_files
+    mocker.patch("builtins.open", mock_opener)
+
+    run_translation(Path("suite.yaml"), "en", True)
+
+    assert s.call_count == 1
+
+    # Check if the file was opened for writing
+    mock_opener.assert_any_call(Path("suite-en.yaml"), "w", encoding="utf-8")
+
+
 def test_parsing_failed():
     yaml_str = """
 tabs:
@@ -434,6 +476,7 @@ tabs:
         print("As expected")
     else:
         assert False, "Expected MarkedYAMLError error"
+
 
 def test_to_yaml_object():
 
@@ -456,7 +499,6 @@ def test_to_yaml_object():
 
 
 def test_run_is_correct_when_no_file():
-
     try:
         run_translation(Path("suite.yaml"), "en", False)
     except FileNotFoundError:

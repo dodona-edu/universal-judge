@@ -142,7 +142,7 @@ def generate_new_yaml(yaml_path: Path, yaml_string: str, language: str):
     file_name = yaml_path.name
     split_name = file_name.split(".")
     path_to_new_yaml = yaml_path.parent / f"{'.'.join(split_name[:-1])}-{language}.yaml"
-    with open(path_to_new_yaml, "w") as yaml_file:
+    with open(path_to_new_yaml, "w", encoding="utf-8") as yaml_file:
         yaml_file.write(yaml_string)
 
 
