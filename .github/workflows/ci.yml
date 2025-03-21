@@ -17,6 +17,7 @@ jobs:
     needs: [build_devcontainer]
     runs-on: ubuntu-latest
     steps:
+      - run: python -c "import yaml; print(yaml.__version__)"
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.ref }}

@@ -73,7 +73,7 @@ def construct_custom(loader, tag_suffix, node):
         ScalarNode: loader.construct_scalar,
         SequenceNode: loader.construct_sequence,
     }
-
+    print(tag_suffix)
     if not type(node) in type2method:
         raise yaml.constructor.ConstructorError(
             None,
