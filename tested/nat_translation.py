@@ -145,10 +145,8 @@ def generate_new_yaml(yaml_path: Path, yaml_string: str, language: str):
         yaml_file.write(yaml_string)
 
 
-CustomDumper.add_representer(dict, CustomDumper.custom_representer)
-
-
 def convert_to_yaml(translated_data: Any) -> str:
+    CustomDumper.add_representer(dict, CustomDumper.custom_representer)
     return yaml.dump(
         translated_data, Dumper=CustomDumper, allow_unicode=True, sort_keys=False
     )

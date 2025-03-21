@@ -226,6 +226,7 @@ tabs:
 """.strip()
     environment = create_enviroment()
     parsed_yaml = parse_yaml(test_unit_yaml_str)
+    print(parsed_yaml)
     translated_dsl = translate_yaml(parsed_yaml, {}, "en", environment)
     translated_yaml = convert_to_yaml(translated_dsl)
     assert translated_yaml.strip() == translated_yaml_str
