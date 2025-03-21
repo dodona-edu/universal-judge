@@ -157,10 +157,11 @@ def parse_yaml(yaml_stream: str) -> Any:
     Parse a string or stream to YAML.
     """
     print(yaml_stream)
-    yaml.SafeLoader.add_multi_constructor("", construct_custom)
+    loader: type[yaml.Loader] = cast(type[yaml.Loader], yaml.SafeLoader)
+    yaml.add_multi_constructor("", construct_custom, loader)
 
     try:
-        return yaml.safe_load(yaml_stream)
+        return yaml.load(yaml_stream, loader)
     except yaml.MarkedYAMLError as exc:
         raise_yaml_error(yaml_stream, exc)
 
