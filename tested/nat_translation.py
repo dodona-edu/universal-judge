@@ -120,7 +120,8 @@ def to_yaml_object(data: Any) -> YamlObject:
                 return ReturnOracle(result)
             if data["__tag__"] == "!expression":
                 return ExpressionString(to_yaml_object(value))
-            return value
+            return to_yaml_object(value)
+        return {k: to_yaml_object(v) for k, v in data.items()}
     elif isinstance(data, list):
         return [to_yaml_object(value) for value in data]
 

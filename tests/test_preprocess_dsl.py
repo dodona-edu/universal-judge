@@ -4,14 +4,15 @@ import yaml
 from pytest_mock import MockerFixture
 
 import tested
-from tested.dsl.translate_parser import _parse_yaml, _validate_dsl
+from tested.dsl.translate_parser import _parse_yaml, _validate_dsl, ExpressionString, \
+    ReturnOracle
 from tested.nat_translation import (
     convert_to_yaml,
     create_enviroment,
     parse_yaml,
     run_translation,
     translate_yaml,
-    validate_pre_dsl,
+    validate_pre_dsl, to_yaml_object,
 )
 
 test_unit_yaml_str = """
@@ -227,7 +228,6 @@ tabs:
 """.strip()
     environment = create_enviroment()
     parsed_yaml = parse_yaml(test_unit_yaml_str)
-    print(parsed_yaml)
     translated_dsl = translate_yaml(parsed_yaml, {}, "en", environment)
     translated_yaml = convert_to_yaml(translated_dsl)
     assert translated_yaml.strip() == translated_yaml_str
@@ -434,6 +434,25 @@ tabs:
         print("As expected")
     else:
         assert False, "Expected MarkedYAMLError error"
+
+def test_to_yaml_object():
+
+    environment = create_enviroment()
+    parsed_yaml = parse_yaml(test_unit_yaml_str)
+    translated_dsl = translate_yaml(parsed_yaml, {}, "en", environment)
+    yaml_object = to_yaml_object(translated_dsl)
+    assert isinstance(yaml_object, dict)
+    tabs = yaml_object["tabs"]
+    assert isinstance(tabs, list)
+    context = tabs[0]["contexts"][0]
+    assert isinstance(context, dict)
+    testcase = context["testcases"][2]
+    assert isinstance(testcase, dict)
+    assert isinstance(testcase["return"], ExpressionString)
+
+    testcase = context["testcases"][3]
+    assert isinstance(testcase, dict)
+    assert isinstance(testcase["return"], ReturnOracle)
 
 
 def test_run_is_correct_when_no_file():
