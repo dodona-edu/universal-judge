@@ -73,7 +73,7 @@ def construct_custom(loader, tag_suffix, node):
         ScalarNode: loader.construct_scalar,
         SequenceNode: loader.construct_sequence,
     }
-    print(tag_suffix)
+
     if not type(node) in type2method:
         raise yaml.constructor.ConstructorError(
             None,
@@ -156,7 +156,6 @@ def parse_yaml(yaml_stream: str) -> Any:
     """
     Parse a string or stream to YAML.
     """
-    print(yaml_stream)
     loader: type[yaml.Loader] = cast(type[yaml.Loader], yaml.SafeLoader)
     yaml.add_multi_constructor("", construct_custom, loader)
 

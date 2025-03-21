@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import yaml
 from pytest_mock import MockerFixture
 
 import tested
@@ -415,6 +416,24 @@ tabs:
         "expression": "count_words(results)",
         "return": "The result is 10",
     }
+
+
+def test_parsing_failed():
+    yaml_str = """
+tabs:
+- tab: animals
+  testcases:
+  - expression: tests(11)
+    return: 11
+  expression: calculator(1 + 1)
+  - return: 2
+        """.strip()
+    try:
+        parse_yaml(yaml_str)
+    except yaml.MarkedYAMLError:
+        print("As expected")
+    else:
+        assert False, "Expected MarkedYAMLError error"
 
 
 def test_run_is_correct_when_no_file():
