@@ -1,9 +1,5 @@
 from pathlib import Path
-from typing import Any, Hashable, cast
-from unittest.mock import ANY
 
-import pytest
-import yaml
 from pytest_mock import MockerFixture
 
 import tested
@@ -228,9 +224,9 @@ tabs:
   - expression: count
     return: !expression 'count'
 """.strip()
-    enviroment = create_enviroment()
-    yaml_object = parse_yaml(test_unit_yaml_str)
-    translated_dsl = translate_yaml(yaml_object, {}, "en", enviroment)
+    environment = create_enviroment()
+    parsed_yaml = parse_yaml(test_unit_yaml_str)
+    translated_dsl = translate_yaml(parsed_yaml, {}, "en", environment)
     translated_yaml = convert_to_yaml(translated_dsl)
     assert translated_yaml.strip() == translated_yaml_str
 

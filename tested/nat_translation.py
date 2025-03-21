@@ -1,33 +1,22 @@
 import os
 import sys
-from collections import deque, OrderedDict
 from pathlib import Path
-from typing import Any, Hashable, cast
+from typing import Any, cast
 
 import yaml
 from jinja2 import Environment
 from yaml.nodes import MappingNode, ScalarNode, SequenceNode
 
-from tested.datatypes import AllTypes
 from tested.dsl.translate_parser import (
     DslValidationError,
     ExpressionString,
-    NaturalLanguageMap,
-    ProgrammingLanguageMap,
     ReturnOracle,
     YamlObject,
-    _custom_type_constructors,
-    _expression_string,
-    _parse_yaml,
-    _parse_yaml_value,
-    _return_oracle,
     _validate_dsl,
     convert_validation_error_to_group,
     load_schema_validator,
     raise_yaml_error,
 )
-from tested.utils import get_args
-
 
 
 def validate_pre_dsl(dsl_object: YamlObject):
@@ -53,6 +42,7 @@ def validate_pre_dsl(dsl_object: YamlObject):
         message = "Validating the DSL resulted in some errors."
         raise ExceptionGroup(message, the_errors)
 
+
 class CustomDumper(yaml.SafeDumper):
 
     def represent_with_tag(self, tag, value):
@@ -65,13 +55,15 @@ class CustomDumper(yaml.SafeDumper):
 
     @staticmethod
     def custom_representer(dumper, data):
-        if '__tag__' in data:
-            if data['__tag__'] != "!programming_language":
-                return dumper.represent_with_tag(data['__tag__'], data['value'])
+        if "__tag__" in data:
+            if data["__tag__"] != "!programming_language":
+                return dumper.represent_with_tag(data["__tag__"], data["value"])
             else:
-                data = data['value']
+                data = data["value"]
 
-        return dumper.represent_mapping(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, data)
+        return dumper.represent_mapping(
+            yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, data
+        )
 
 
 def construct_custom(loader, tag_suffix, node):
@@ -79,50 +71,61 @@ def construct_custom(loader, tag_suffix, node):
     type2method = {
         MappingNode: loader.construct_mapping,
         ScalarNode: loader.construct_scalar,
-        SequenceNode: loader.construct_sequence
+        SequenceNode: loader.construct_sequence,
     }
 
     if not type(node) in type2method:
         raise yaml.constructor.ConstructorError(
-            None, None,
+            None,
+            None,
             f"expected a mapping, scalar, or sequence node, but found {node.id}",
-            node.start_mark
+            node.start_mark,
         )
 
     data = type2method[type(node)](node)
 
-    return {'__tag__': tag_suffix, 'value': data}
+    return {"__tag__": tag_suffix, "value": data}
 
-def translate_yaml(data: Any, translations:dict, language:str, env: Environment):
+
+def translate_yaml(
+    data: Any, translations: dict, language: str, env: Environment
+) -> Any:
     if isinstance(data, dict):
-        if '__tag__' in data and data['__tag__'] == '!natural_language':
-            return translate_yaml(data['value'][language], translations, language, env)
+        if "__tag__" in data and data["__tag__"] == "!natural_language":
+            return translate_yaml(data["value"][language], translations, language, env)
 
-        current_translations = data.pop('translations', {})
+        current_translations = data.pop("translations", {})
         for key, value in current_translations.items():
             current_translations[key] = value[language]
         merged_translations = {**translations, **current_translations}
 
-        return {key: translate_yaml(value, merged_translations, language, env) for key, value in data.items()}
+        return {
+            key: translate_yaml(value, merged_translations, language, env)
+            for key, value in data.items()
+        }
     elif isinstance(data, list):
         return [translate_yaml(item, translations, language, env) for item in data]
     elif isinstance(data, str):
         return env.from_string(data).render(translations)
     return data
 
+
 def to_yaml_object(data: Any) -> YamlObject:
     if isinstance(data, dict):
-        if '__tag__' in data:
-            value = data['value']
-            if data['__tag__'] == '!oracle':
-                return ReturnOracle(to_yaml_object(value))
-            if data['__tag__'] == '!expression':
+        if "__tag__" in data:
+            value = data["value"]
+            if data["__tag__"] == "!oracle":
+                result = to_yaml_object(value)
+                assert isinstance(result, dict)
+                return ReturnOracle(result)
+            if data["__tag__"] == "!expression":
                 return ExpressionString(to_yaml_object(value))
             return value
     elif isinstance(data, list):
         return [to_yaml_object(value) for value in data]
 
     return data
+
 
 def wrap_in_braces(value):
     return f"{{{value}}}"
@@ -142,17 +145,21 @@ def generate_new_yaml(yaml_path: Path, yaml_string: str, language: str):
         yaml_file.write(yaml_string)
 
 
+CustomDumper.add_representer(dict, CustomDumper.custom_representer)
+
+
 def convert_to_yaml(translated_data: Any) -> str:
-    CustomDumper.add_representer(dict, CustomDumper.custom_representer)
-    return yaml.dump(translated_data, Dumper=CustomDumper, allow_unicode=True, sort_keys=False)
+    return yaml.dump(
+        translated_data, Dumper=CustomDumper, allow_unicode=True, sort_keys=False
+    )
 
 
-def parse_yaml(yaml_stream: str):
+def parse_yaml(yaml_stream: str) -> Any:
     """
     Parse a string or stream to YAML.
     """
     loader: type[yaml.Loader] = cast(type[yaml.Loader], yaml.CSafeLoader)
-    yaml.add_multi_constructor('', construct_custom, loader)
+    yaml.add_multi_constructor("", construct_custom, loader)
 
     try:
         return yaml.load(yaml_stream, loader)
