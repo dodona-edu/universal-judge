@@ -79,7 +79,7 @@ def generate_execution_unit(
 
 def _handle_link_files(link_files: Iterable[FileUrl], language: str) -> tuple[str, str]:
     dict_links = dict(
-        (link_file.name, get_converter().unstructure(link_file))
+        (link_file.path, get_converter().unstructure(link_file))
         for link_file in link_files
     )
     files = json.dumps(dict_links)
@@ -116,7 +116,7 @@ def get_readable_input(
     # If not, we can also stop before doing ugly things.
     # We construct a regex, since that can be faster than checking everything.
     simple_regex = re.compile(
-        "|".join(map(lambda x: re.escape(x.name), case.link_files))
+        "|".join(map(lambda x: re.escape(x.path), case.link_files))
     )
 
     format_ = "text"  # By default, we use text as input.
@@ -185,7 +185,7 @@ def get_readable_input(
         generated_html = highlight_code(text, bundle.config.programming_language)
 
     # Map of file URLs.
-    url_map = {html.escape(x.name): x for x in case.link_files}
+    url_map = {html.escape(x.path): x for x in case.link_files}
 
     seen = set()
     escaped_regex = re.compile("|".join(url_map.keys()))

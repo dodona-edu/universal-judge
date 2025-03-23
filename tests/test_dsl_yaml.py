@@ -1238,8 +1238,8 @@ def test_files_are_propagated():
     testcases0, testcases1 = ctx0.testcases, ctx1.testcases
     test0, test1 = testcases0[0], testcases1[0]
     assert set(test0.link_files) == {
-        FileUrl(name="test", url="test.md"),
-        FileUrl(name="two", url="two.md"),
+        FileUrl(path="test", url="test.md"),
+        FileUrl(path="two", url="two.md"),
     }
 
 

@@ -110,39 +110,52 @@ def _evaluate_channel(
         bundle, context_directory, output, testcase, unexpected_status=unexpected_status
     )
     # Run the oracle.
-    evaluation_result = evaluator(output, actual if actual else "")
-    status = evaluation_result.result
-
-    # Decide if we should show this channel or not.
-    is_correct = status.enum == Status.CORRECT
-    should_report_case = should_show(output, channel, evaluation_result)
-
-    if not should_report_case and is_correct:
-        # We do report that a test is correct, to set the status.
-        return False
-
-    expected = evaluation_result.readable_expected
-    out.add(StartTest(expected=expected, channel=channel))
-
-    # Report any messages we received.
-    for message in evaluation_result.messages:
-        out.add(AppendMessage(message=message))
+    print("-------------")
+    print(channel)
+    print(output)
+    print("-------------")
+    if channel == Channel.FILE:
+        assert isinstance(output, FileOutputChannel)
+        new_output = output.output_data
+    else:
+        new_output = [output]
 
     missing = False
     if actual is None:
-        out.add(AppendMessage(message=get_i18n_string("judge.evaluation.missing")))
         missing = True
-    elif should_report_case and timeout and not is_correct:
-        status.human = get_i18n_string("judge.evaluation.time-limit")
-        status.enum = Status.TIME_LIMIT_EXCEEDED
-        out.add(AppendMessage(message=status.human))
-    elif should_report_case and memory and not is_correct:
-        status.human = get_i18n_string("judge.evaluation.memory-limit")
-        status.enum = Status.TIME_LIMIT_EXCEEDED
-        out.add(AppendMessage(message=status.human))
 
-    # Close the test.
-    out.add(CloseTest(generated=evaluation_result.readable_actual, status=status))
+    for output_element in new_output:
+        evaluation_result = evaluator(output_element, actual if actual else "")
+        status = evaluation_result.result
+
+        # Decide if we should show this channel or not.
+        is_correct = status.enum == Status.CORRECT
+        should_report_case = should_show(output, channel, evaluation_result)
+
+        if not should_report_case and is_correct:
+            # We do report that a test is correct, to set the status.
+            return False
+
+        expected = evaluation_result.readable_expected
+        out.add(StartTest(expected=expected, channel=channel))
+
+        # Report any messages we received.
+        for message in evaluation_result.messages:
+            out.add(AppendMessage(message=message))
+
+        if actual is None:
+            out.add(AppendMessage(message=get_i18n_string("judge.evaluation.missing")))
+        elif should_report_case and timeout and not is_correct:
+            status.human = get_i18n_string("judge.evaluation.time-limit")
+            status.enum = Status.TIME_LIMIT_EXCEEDED
+            out.add(AppendMessage(message=status.human))
+        elif should_report_case and memory and not is_correct:
+            status.human = get_i18n_string("judge.evaluation.memory-limit")
+            status.enum = Status.TIME_LIMIT_EXCEEDED
+            out.add(AppendMessage(message=status.human))
+
+        # Close the test.
+        out.add(CloseTest(generated=evaluation_result.readable_actual, status=status))
 
     return missing
 
@@ -365,7 +378,7 @@ def evaluate_context_results(
 def _link_files_message(link_files: Collection[FileUrl]) -> AppendMessage:
     link_list = ", ".join(
         f'<a href="{link_file.url}" class="file-link" target="_blank">'
-        f'<span class="code">{html.escape(link_file.name)}</span></a>'
+        f'<span class="code">{html.escape(link_file.path)}</span></a>'
         for link_file in link_files
     )
     file_list_str = get_i18n_string(

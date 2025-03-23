@@ -278,6 +278,9 @@ class OutputFileData:
     content_type: TextChannelType
     content: str
     student_path: str
+    oracle: GenericTextOracle | CustomCheckOracle = field(
+        factory=lambda: GenericTextOracle(name=TextBuiltin.FILE)
+    )
 
 
 @fallback_field(get_converter(), {"evaluator": "oracle"})
@@ -428,7 +431,11 @@ class IgnoredChannel(WithFeatures, StrEnum):
 SpecialOutputChannel = EmptyChannel | IgnoredChannel
 
 OracleOutputChannel = Union[
-    TextOutputChannel, FileOutputChannel, ValueOutputChannel, ExceptionOutputChannel
+    TextOutputChannel,
+    FileOutputChannel,
+    OutputFileData,
+    ValueOutputChannel,
+    ExceptionOutputChannel,
 ]
 
 NormalOutputChannel = OracleOutputChannel | ExitCodeOutputChannel
@@ -546,7 +553,7 @@ class MainInput(WithFeatures, WithFunctions):
 @define(frozen=True)
 class FileUrl:
     url: str
-    name: str
+    path: str
 
 
 @ignore_field(get_converter(), "essential")

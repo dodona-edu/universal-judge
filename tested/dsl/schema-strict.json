@@ -278,21 +278,12 @@
           "description" : "Stdin for this context",
           "type" : [
             "string",
+            "path",
             "number",
             "integer",
             "boolean",
             "object"
-          ],
-          "required" : [
-            "url"
-          ],
-          "properties" : {
-            "url" : {
-              "type" : "string",
-              "format" : "uri",
-              "description" : "Relative path to the file in the `evaluation` folder of an exercise."
-            }
-          }
+          ]
         },
         "arguments" : {
           "type" : "array",
@@ -385,21 +376,12 @@
           "description" : "Stdin for this context",
           "type" : [
             "string",
+            "path",
             "number",
             "integer",
             "boolean",
             "object"
-          ],
-          "required" : [
-            "url"
-          ],
-          "properties" : {
-            "url" : {
-              "type" : "string",
-              "format" : "uri",
-              "description" : "Relative path to the file in the `evaluation` folder of an exercise."
-            }
-          }
+          ]
         },
         "arguments" : {
           "type" : "array",
@@ -518,10 +500,10 @@
       "type" : "object",
       "description" : "A file used in the test suite.",
       "required" : [
-        "name"
+        "path"
       ],
       "properties" : {
-        "name" : {
+        "path" : {
           "type" : "string",
           "description" : "The filename, including the file extension."
         },
@@ -552,26 +534,17 @@
             },
             {
               "required" : [
-                "url"
-              ]
-            },
-            {
-              "required" : [
                 "content"
               ]
             }
           ],
           "properties" : {
             "content": {
-              "$ref" : "#/definitions/textualType"
+              "$ref" : "#/definitions/textualType",
+              "description" : "Content or relative path to the file in the `evaluation` folder of an exercise."
             },
             "data" : {
               "$ref" : "#/definitions/textualType"
-            },
-            "url" : {
-              "type" : "string",
-              "format" : "uri",
-              "description" : "Relative path to the file in the `evaluation` folder of an exercise."
             },
             "oracle" : {
               "const" : "builtin"
@@ -596,13 +569,6 @@
               "required" : [
                 "oracle",
                 "file",
-                "url"
-              ]
-            },
-            {
-              "required" : [
-                "oracle",
-                "file",
                 "content"
               ]
             }
@@ -613,11 +579,6 @@
             },
             "data" : {
               "$ref" : "#/definitions/textualType"
-            },
-            "url" : {
-              "type" : "string",
-              "format" : "uri",
-              "description" : "Relative path to the file in the `evaluation` folder of an exercise."
             },
             "oracle" : {
               "const" : "custom_check"
@@ -657,16 +618,20 @@
           "items" : {
             "type" : "object",
             "required" : [
-              "student_path"
+              "student_path",
+              "content"
             ],
             "properties" : {
               "content" : {
-                "type" : "string",
-                "description" : "Expected content for the file."
-              },
-              "url" : {
-                "type" : "string",
-                "description" : "Path to file with the expected content for the file, relative to the evaluation directory."
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "path"
+                  }
+                ],
+                "description" : "Expected content for the file or path to file with the expected content for the file, relative to the evaluation directory."
               },
               "student_path" : {
                 "type" : "string",
@@ -687,16 +652,20 @@
               "items" : {
                 "type" : "object",
                 "required" : [
-                  "student_path"
+                  "student_path",
+                  "content"
                 ],
                 "properties" : {
                   "content" : {
-                    "type" : "string",
-                    "description" : "Expected content for the file."
-                  },
-                  "url" : {
-                    "type" : "string",
-                    "description" : "Path to file with the expected content for the file, relative to the evaluation directory."
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "path"
+                      }
+                    ],
+                    "description" : "Expected content for the file or path to file with the expected content for the file, relative to the evaluation directory."
                   },
                   "student_path" : {
                     "type" : "string",
@@ -730,16 +699,20 @@
               "items" : {
                 "type" : "object",
                 "required" : [
-                  "student_path"
+                  "student_path",
+                  "content"
                 ],
                 "properties" : {
                   "content" : {
-                    "type" : "string",
-                    "description" : "Expected content for the file."
-                  },
-                  "url" : {
-                    "type" : "string",
-                    "description" : "Path to file with the expected content for the file, relative to the evaluation directory."
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "path"
+                      }
+                    ],
+                    "description" : "Expected content for the file or path to file with the expected content for the file, relative to the evaluation directory."
                   },
                   "student_path" : {
                     "type" : "string",
@@ -993,7 +966,8 @@
         "string",
         "number",
         "integer",
-        "boolean"
+        "boolean",
+        "path"
       ]
     },
     "yamlValue" : {
@@ -1001,7 +975,8 @@
       "not" : {
         "type" : [
           "oracle",
-          "expression"
+          "expression",
+          "path"
         ]
       }
     },

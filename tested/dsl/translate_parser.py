@@ -429,11 +429,11 @@ def _convert_value(value: YamlObject) -> Value:
 
 
 def _convert_file(link_file: YamlDict, workdir: Path | None) -> FileUrl:
-    assert isinstance(link_file["name"], str)
+    assert isinstance(link_file["path"], str)
     if "content" in link_file:
         assert isinstance(link_file["content"], str)
         if workdir is not None:
-            full_path = workdir / link_file["name"]
+            full_path = workdir / link_file["path"]
             os.makedirs(os.path.dirname(full_path), exist_ok=True)
             with open(full_path, "w", encoding="utf-8") as f:
                 f.write(link_file["content"])
@@ -449,7 +449,7 @@ def _convert_file(link_file: YamlDict, workdir: Path | None) -> FileUrl:
         assert isinstance(link_file["url"], str)
         url = link_file["url"]
 
-    return FileUrl(name=link_file["name"], url=url)
+    return FileUrl(path=link_file["path"], url=url)
 
 
 def _convert_evaluation_function(stream: dict) -> EvaluationFunction:
@@ -503,22 +503,23 @@ def _convert_text_output_channel(
     if isinstance(stream, str):
         config = context.config.get(config_name, dict())
         raw_data = stream
+        if isinstance(raw_data, PathString):
+            path = raw_data
     else:
         assert isinstance(stream, dict)
-        if "url" in stream:
-            config = context.config.get(config_name, dict())
-            raw_data = str(stream["url"])
-            path = raw_data
-        else:
-            raw_data = str(stream.get("content", stream.get("data")))
+        raw_data = stream.get("content", stream.get("data"))
+        if not isinstance(raw_data, PathString):
             config = context.merge_inheritable_with_specific_config(stream, config_name)
+        else:
+            config = context.config.get(config_name, dict())
+            path = raw_data
         assert raw_data is not None
 
     # Normalize the data if necessary.
     if config.get("normalizeTrailingNewlines", True) and path is None:
-        data = _ensure_trailing_newline(raw_data)
+        data = _ensure_trailing_newline(str(raw_data))
     else:
-        data = raw_data
+        data = str(raw_data)
 
     text_output = TextOutputChannel(data=data)
     if path is not None:
@@ -551,13 +552,12 @@ def _convert_file_output_channel(
 
     for item in data:
         assert isinstance(item, dict)
-        if "url" in item:
+        content = item["content"]
+        if isinstance(content, PathString):
             content_type = TextChannelType.FILE
-            content = str(item["url"])
         else:
-            assert "content" in item
+            content = str(content)
             content_type = TextChannelType.TEXT
-            content = str(item["content"])
 
         file_data.append(
             OutputFileData(
@@ -680,11 +680,8 @@ def _convert_testcase(
         return_channel = IgnoredChannel.IGNORED if "statement" in testcase else None
     else:
         if "stdin" in testcase:
-            if isinstance(testcase["stdin"], dict):
-                assert "url" in testcase["stdin"]
-                stdin = TextData(
-                    data=str(testcase["stdin"]["url"]), type=TextChannelType.FILE
-                )
+            if isinstance(testcase["stdin"], PathString):
+                stdin = TextData(data=str(testcase["stdin"]), type=TextChannelType.FILE)
             else:
                 assert isinstance(testcase["stdin"], str)
                 stdin = TextData(data=_ensure_trailing_newline(testcase["stdin"]))
