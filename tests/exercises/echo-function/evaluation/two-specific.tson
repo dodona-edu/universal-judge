@@ -49,6 +49,9 @@
                           },
                           "csharp": {
                             "file": "Evaluator.cs"
+                          },
+                          "cpp": {
+                            "file": "evaluator.cpp"
                           }
                         }
                       }
@@ -97,6 +100,9 @@
                           },
                           "csharp": {
                             "file": "Evaluator.cs"
+                          },
+                          "cpp": {
+                            "file": "evaluator.cpp"
                           }
                         }
                       }

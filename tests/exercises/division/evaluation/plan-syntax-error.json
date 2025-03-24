@@ -31,6 +31,9 @@
                     },
                     "csharp": {
                       "file": "EvaluatorSyntaxError.cs"
+                    },
+                    "cpp": {
+                      "file": "evaluator_syntax_error.cpp"
                     }
                   }
                 }

@@ -1,0 +1,88 @@
+{
+  "tabs": [
+    {
+      "name": "are_isbn",
+      "runs": [
+        {
+          "contexts": [
+            {
+              "before": {
+                "cpp": {
+                  "data": "auto ex = []()->std::vector<std::any>{throw std::invalid_argument(\"An error occurred!\");};"
+                }
+              },
+              "testcases": [
+                {
+                  "input": {
+                    "type": "sequence",
+                    "variable": "codes01",
+                    "expression": {
+                      "type": "function",
+                      "name": "ex",
+                      "namespace": "",
+                      "arguments": []
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "type": "function",
+                    "name": "are_isbn",
+                    "arguments": [
+                      "codes01"
+                    ]
+                  },
+                  "output": {
+                    "result": {
+                      "value": {
+                        "data": [
+                          {
+                            "data": false,
+                            "type": "boolean"
+                          },
+                          {
+                            "data": true,
+                            "type": "boolean"
+                          },
+                          {
+                            "data": true,
+                            "type": "boolean"
+                          },
+                          {
+                            "data": true,
+                            "type": "boolean"
+                          },
+                          {
+                            "data": false,
+                            "type": "boolean"
+                          },
+                          {
+                            "data": false,
+                            "type": "boolean"
+                          },
+                          {
+                            "data": false,
+                            "type": "boolean"
+                          },
+                          {
+                            "data": true,
+                            "type": "boolean"
+                          },
+                          {
+                            "data": false,
+                            "type": "boolean"
+                          }
+                        ],
+                        "type": "sequence"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
