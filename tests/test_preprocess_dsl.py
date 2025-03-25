@@ -93,6 +93,75 @@ tabs:
                 en: "Eleven_{{elf}}"
                 nl: "Elf_{{elf}}"
               format: "code"
+""".strip()
+
+def validate_natural_translate(yaml_str: str, translated_yaml_str: str):
+    enviroment = create_enviroment()
+    yaml_object = parse_yaml(yaml_str)
+    translated_dsl = translate_yaml(yaml_object, {}, "en", enviroment)
+    translated_yaml = convert_to_yaml(translated_dsl)
+    assert translated_yaml.strip() == translated_yaml_str
+
+def test_files_and_descriptions():
+    pass
+
+def test_return():
+    yaml_str = """
+translations:
+  animal:
+    en: "animals"
+    nl: "dieren"
+  result:
+    en: "results"
+    nl: "resultaten"
+tabs:
+  - tab: "{{ animal|braces }}_{{ '{' + result + '}' }}"
+    translations:
+      animal:
+        en: "animal_tab"
+        nl: "dier_tab"
+    contexts:
+      - testcases:
+        - expression: !natural_language
+            en: "count"
+            nl: "tellen"
+          return: !natural_language
+            en: !expression 'count'
+            nl: !expression 'tellen'
+        - expression: 'ok(10)'
+          return: !oracle
+            value: !natural_language
+              en: "The {{result}} 10 is OK!"
+              nl: "Het {{result}} 10 is OK!"
+            oracle: "custom_check"
+            file: "test.py"
+            name: "evaluate_test"
+            arguments: !natural_language
+              en: ["The value", "is OK!", "is not OK!"]
+              nl: ["Het {{result}}", "is OK!", "is niet OK!"]
+    """.strip()
+    translated_yaml_str = """
+tabs:
+- tab: animals
+  testcases:
+  - expression: tests(11)
+    return: 11
+  - expression:
+      javascript: animals_javascript(1 + 1)
+      typescript: animals_typescript(1 + 1)
+      java: Submission.animals_java(1 + 1)
+      python: animals_python_en(1 + 1)
+    return: 2
+""".strip()
+    validate_natural_translate(yaml_str, translated_yaml_str)
+
+def test_nat_lang_and_prog_lang_combo():
+    yaml_str = """
+translations:
+  animal:
+    en: "animals"
+    nl: "dieren"
+tabs:
   - tab: '{{animal}}'
     testcases:
       - expression: !natural_language
@@ -107,10 +176,50 @@ tabs:
             en: "{{animal}}_python_en(1 + 1)"
             nl: "{{animal}}_python_nl(1 + 1)"
         return: 2
+""".strip()
+    translated_yaml_str = """
+tabs:
+- tab: animals
+  testcases:
+  - expression: tests(11)
+    return: 11
+  - expression:
+      javascript: animals_javascript(1 + 1)
+      typescript: animals_typescript(1 + 1)
+      java: Submission.animals_java(1 + 1)
+      python: animals_python_en(1 + 1)
+    return: 2
+""".strip()
+    validate_natural_translate(yaml_str, translated_yaml_str)
+
+def test_format_expression():
+    yaml_str = """
+translations:
+  select:
+    en: "select"
+    nl: "selecteer"
+tabs:
   - tab: 'test'
     testcases:
       - expression: "{{select}}('a', {'a': 1, 'b': 2})"
         return: 1
+""".strip()
+    translated_yaml_str = """
+tabs:
+- tab: test
+  testcases:
+  - expression: 'select(''a'', {''a'': 1, ''b'': 2})'
+    return: 1
+""".strip()
+    validate_natural_translate(yaml_str, translated_yaml_str)
+
+def test_natural_translate_context():
+    yaml_str = """
+translations:
+  result:
+    en: "results"
+    nl: "resultaten"
+tabs:
   - tab: "task"
     contexts: !natural_language
         en:
@@ -127,6 +236,27 @@ tabs:
               return: 'Het {{result}} is 10'
             - expression: "tellen"
               return: !expression 'tellen'
+""".strip()
+    translated_yaml_str = """
+tabs:
+- tab: task
+  contexts:
+  - testcases:
+    - statement: results = Trying(10)
+    - expression: count_words(results)
+      return: The results is 10
+    - expression: count
+      return: !expression 'count'
+""".strip()
+    validate_natural_translate(yaml_str, translated_yaml_str)
+
+def test_natural_translate_testcases_in_context():
+    yaml_str = """
+translations:
+  result:
+    en: "results"
+    nl: "resultaten"
+tabs:
   - tab: "task2"
     contexts:
         - testcases: !natural_language
@@ -142,6 +272,27 @@ tabs:
                 return: 'Het {{result}} is 10'
               - expression: "tellen"
                 return: !expression 'tellen'
+""".strip()
+    translated_yaml_str = """
+tabs:
+- tab: task2
+  contexts:
+  - testcases:
+    - statement: results = Trying(10)
+    - expression: count_words(results)
+      return: The results is 10
+    - expression: count
+      return: !expression 'count'
+""".strip()
+    validate_natural_translate(yaml_str, translated_yaml_str)
+
+def test_natural_translate_testcases():
+    yaml_str = """
+translations:
+  result:
+    en: "results"
+    nl: "resultaten"
+tabs:
   - tab: "task3"
     testcases: !natural_language
         en:
@@ -157,6 +308,17 @@ tabs:
           - expression: "tellen"
             return: !expression 'tellen'
 """.strip()
+    translated_yaml_str = """
+tabs:
+- tab: task3
+  testcases:
+  - statement: results = Trying(10)
+  - expression: count_words(results)
+    return: The results is 10
+  - expression: count
+    return: !expression 'count'
+""".strip()
+    validate_natural_translate(yaml_str, translated_yaml_str)
 
 
 def test_natural_translate_unit_test():
@@ -193,43 +355,6 @@ tabs:
       description:
         description: Eleven_eleven
         format: code
-- tab: animals
-  testcases:
-  - expression: tests(11)
-    return: 11
-  - expression:
-      javascript: animals_javascript(1 + 1)
-      typescript: animals_typescript(1 + 1)
-      java: Submission.animals_java(1 + 1)
-      python: animals_python_en(1 + 1)
-    return: 2
-- tab: test
-  testcases:
-  - expression: 'select(''a'', {''a'': 1, ''b'': 2})'
-    return: 1
-- tab: task
-  contexts:
-  - testcases:
-    - statement: results = Trying(10)
-    - expression: count_words(results)
-      return: The results is 10
-    - expression: count
-      return: !expression 'count'
-- tab: task2
-  contexts:
-  - testcases:
-    - statement: results = Trying(10)
-    - expression: count_words(results)
-      return: The results is 10
-    - expression: count
-      return: !expression 'count'
-- tab: task3
-  testcases:
-  - statement: results = Trying(10)
-  - expression: count_words(results)
-    return: The results is 10
-  - expression: count
-    return: !expression 'count'
 """.strip()
     environment = create_enviroment()
     parsed_yaml = parse_yaml(test_unit_yaml_str)
