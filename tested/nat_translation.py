@@ -1,46 +1,40 @@
+import json
 import os
+import re
 import sys
+# import pystache
 from pathlib import Path
-from typing import Any, cast
+from typing import Any, cast, Type
 
 import yaml
-from jinja2 import Environment
+from jinja2 import Environment, TemplateSyntaxError
+from jsonschema.protocols import Validator
+from jsonschema.validators import validator_for
 from yaml.nodes import MappingNode, ScalarNode, SequenceNode
 
+from tested.dsl.dsl_errors import print_dsl_validation_errors, raise_yaml_error
 from tested.dsl.translate_parser import (
-    DslValidationError,
     ExpressionString,
     ReturnOracle,
     YamlObject,
     _validate_dsl,
-    convert_validation_error_to_group,
-    load_schema_validator,
-    raise_yaml_error,
 )
 
 
-def validate_pre_dsl(dsl_object: YamlObject):
+def validate_pre_dsl(yaml_object: Any):
     """
     Validate a DSl object.
-    :param dsl_object: The object to validate.
+    :param yaml_object: The object to validate.
     :return: True if valid, False otherwise.
     """
-    _SCHEMA_VALIDATOR = load_schema_validator("schema-strict-nat-translation.json")
-    errors = list(_SCHEMA_VALIDATOR.iter_errors(dsl_object))
-    if len(errors) == 1:
-        message = (
-            "Validating the DSL resulted in an error. "
-            "The most specific sub-exception is often the culprit. "
-        )
-        error = convert_validation_error_to_group(errors[0])
-        if isinstance(error, ExceptionGroup):
-            raise ExceptionGroup(message, error.exceptions)
-        else:
-            raise DslValidationError(message + str(error)) from error
-    elif len(errors) > 1:
-        the_errors = [convert_validation_error_to_group(e) for e in errors]
-        message = "Validating the DSL resulted in some errors."
-        raise ExceptionGroup(message, the_errors)
+    path_to_schema = Path(__file__).parent / "dsl/schema-strict-nat-translation.json"
+    with open(path_to_schema, "r") as schema_file:
+        schema_object = json.load(schema_file)
+
+    validator: Type[Validator] = validator_for(schema_object)
+    schema_validator = validator(schema_object)
+    errors = list(schema_validator.iter_errors(yaml_object))
+    print_dsl_validation_errors(errors)
 
 
 class CustomDumper(yaml.SafeDumper):
@@ -105,8 +99,18 @@ def translate_yaml(
         }
     elif isinstance(data, list):
         return [translate_yaml(item, translations, language, env) for item in data]
-    elif isinstance(data, str):
+    elif isinstance(data, str) and translations:
+        # return pystache.render(data, translations)
         return env.from_string(data).render(translations)
+        # try:
+        #     data = "{% raw %}" + data + "{% endraw %}"
+        #     return env.from_string(data).render(translations)
+        # except TemplateSyntaxError as e:
+        #     print(f"error: {e}")
+        #     print(f"data {data}")
+        #     return re.sub(r"{{\s*(.*?)\s*}}",
+        #                   lambda m: translations.get(m.group(1).strip(), m.group(0)),
+        #                   data)
     return data
 
 

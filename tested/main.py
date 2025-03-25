@@ -13,7 +13,7 @@ from tested.nat_translation import run_translation
 from tested.testsuite import parse_test_suite
 
 
-def run(config: DodonaConfig, judge_output: IO, language: str = "-"):
+def run(config: DodonaConfig, judge_output: IO, language: str = None):
     """
     Run the TESTed judge.
 
@@ -21,7 +21,7 @@ def run(config: DodonaConfig, judge_output: IO, language: str = "-"):
     :param judge_output: Where the judge output will be written to.
     :param language: The language to use to translate the test-suite.
     """
-    if language == "-":
+    if language is None:
         try:
             with open(f"{config.resources}/{config.test_suite}", "r") as t:
                 textual_suite = t.read()
