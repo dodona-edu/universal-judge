@@ -12,7 +12,7 @@ from jsonschema.protocols import Validator
 from jsonschema.validators import validator_for
 from yaml.nodes import MappingNode, ScalarNode, SequenceNode
 
-from tested.dsl.dsl_errors import print_dsl_validation_errors, raise_yaml_error
+from tested.dsl.dsl_errors import handle_dsl_validation_errors, raise_yaml_error
 from tested.dsl.translate_parser import (
     ExpressionString,
     ReturnOracle,
@@ -34,7 +34,7 @@ def validate_pre_dsl(yaml_object: Any):
     validator: Type[Validator] = validator_for(schema_object)
     schema_validator = validator(schema_object)
     errors = list(schema_validator.iter_errors(yaml_object))
-    print_dsl_validation_errors(errors)
+    handle_dsl_validation_errors(errors)
 
 
 class CustomDumper(yaml.SafeDumper):

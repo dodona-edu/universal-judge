@@ -33,7 +33,7 @@ from tested.datatypes import (
 )
 from tested.dodona import ExtendedMessage
 from tested.dsl.ast_translator import InvalidDslError, extract_comment, parse_string
-from tested.dsl.dsl_errors import print_dsl_validation_errors, raise_yaml_error
+from tested.dsl.dsl_errors import handle_dsl_validation_errors, raise_yaml_error
 from tested.parsing import get_converter, suite_to_json
 from tested.serialisation import (
     BooleanType,
@@ -254,7 +254,7 @@ def _validate_dsl(dsl_object: YamlObject):
     :return: True if valid, False otherwise.
     """
     errors = list(_SCHEMA_VALIDATOR.iter_errors(dsl_object))
-    print_dsl_validation_errors(errors)
+    handle_dsl_validation_errors(errors)
 
 
 def _tested_type_to_value(tested_type: TestedType) -> Value:

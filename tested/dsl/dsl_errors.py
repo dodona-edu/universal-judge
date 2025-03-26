@@ -35,7 +35,7 @@ def convert_validation_error_to_group(
     else:
         return error
 
-def print_dsl_validation_errors(errors: list):
+def handle_dsl_validation_errors(errors: list):
     if len(errors) == 1:
         message = (
             "Validating the DSL resulted in an error. "
