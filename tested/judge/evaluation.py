@@ -45,6 +45,7 @@ from tested.testsuite import (
     FileUrl,
     IgnoredChannel,
     OutputChannel,
+    OutputFileData,
     SpecialOutputChannel,
     Testcase,
     TextOutput,
@@ -110,11 +111,7 @@ def _evaluate_channel(
         bundle, context_directory, output, testcase, unexpected_status=unexpected_status
     )
     # Run the oracle.
-    print("-------------")
-    print(channel)
-    print(output)
-    print("-------------")
-    if channel == Channel.FILE:
+    if channel == Channel.FILE and output != "ignored":
         assert isinstance(output, FileOutputChannel)
         new_output = output.output_data
     else:
@@ -137,7 +134,10 @@ def _evaluate_channel(
             return False
 
         expected = evaluation_result.readable_expected
-        out.add(StartTest(expected=expected, channel=channel))
+        expected_channel = channel
+        if isinstance(output_element, OutputFileData):
+            expected_channel = output_element.student_path
+        out.add(StartTest(expected=expected, channel=expected_channel))
 
         # Report any messages we received.
         for message in evaluation_result.messages:
