@@ -20,6 +20,7 @@ from tested.nat_translation import (
     validate_pre_dsl,
 )
 
+
 def validate_natural_translate(yaml_str: str, translated_yaml_str: str):
     enviroment = create_enviroment()
     yaml_object = parse_yaml(yaml_str)
@@ -27,6 +28,7 @@ def validate_natural_translate(yaml_str: str, translated_yaml_str: str):
     translated_yaml = convert_to_yaml(translated_dsl)
     print(translated_yaml)
     assert translated_yaml.strip() == translated_yaml_str
+
 
 def test_files_and_descriptions():
     yaml_str = """
@@ -79,6 +81,7 @@ tabs:
       url: media/workdir/file.txt
 """.strip()
     validate_natural_translate(yaml_str, translated_yaml_str)
+
 
 def test_return():
     yaml_str = """
@@ -135,6 +138,7 @@ tabs:
 """.strip()
     validate_natural_translate(yaml_str, translated_yaml_str)
 
+
 def test_nat_lang_and_prog_lang_combo():
     yaml_str = """
 translations:
@@ -172,6 +176,7 @@ tabs:
 """.strip()
     validate_natural_translate(yaml_str, translated_yaml_str)
 
+
 def test_format_expression():
     yaml_str = """
 translations:
@@ -192,6 +197,7 @@ tabs:
     return: 1
 """.strip()
     validate_natural_translate(yaml_str, translated_yaml_str)
+
 
 def test_natural_translate_context():
     yaml_str = """
@@ -230,6 +236,7 @@ tabs:
 """.strip()
     validate_natural_translate(yaml_str, translated_yaml_str)
 
+
 def test_natural_translate_testcases_in_context():
     yaml_str = """
 translations:
@@ -266,6 +273,7 @@ tabs:
 """.strip()
     validate_natural_translate(yaml_str, translated_yaml_str)
 
+
 def test_natural_translate_testcases():
     yaml_str = """
 translations:
@@ -299,6 +307,7 @@ tabs:
     return: !expression 'count'
 """.strip()
     validate_natural_translate(yaml_str, translated_yaml_str)
+
 
 def test_natural_translate_io_test():
     yaml_str = """

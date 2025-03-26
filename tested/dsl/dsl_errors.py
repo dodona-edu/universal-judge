@@ -4,11 +4,14 @@ import textwrap
 import yaml
 from jsonschema.exceptions import ValidationError
 
+
 class InvalidYamlError(ValueError):
     pass
 
+
 class DslValidationError(ValueError):
     pass
+
 
 def convert_validation_error_to_group(
     error: ValidationError,
@@ -34,6 +37,7 @@ def convert_validation_error_to_group(
         return ExceptionGroup(message, causes)
     else:
         return error
+
 
 def handle_dsl_validation_errors(errors: list):
     if len(errors) == 1:

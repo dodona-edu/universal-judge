@@ -13,7 +13,7 @@ from tested.nat_translation import run_translation
 from tested.testsuite import parse_test_suite
 
 
-def run(config: DodonaConfig, judge_output: IO, language: str = None):
+def run(config: DodonaConfig, judge_output: IO, language: str|None = None):
     """
     Run the TESTed judge.
 
