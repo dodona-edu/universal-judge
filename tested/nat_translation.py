@@ -1,14 +1,11 @@
 import json
 import os
-import re
 import sys
-
-# import pystache
 from pathlib import Path
 from typing import Any, Type, cast
 
 import yaml
-from jinja2 import Environment, TemplateSyntaxError
+from jinja2 import Environment, TemplateSyntaxError, Undefined
 from jsonschema.protocols import Validator
 from jsonschema.validators import validator_for
 from yaml.nodes import MappingNode, ScalarNode, SequenceNode
@@ -101,17 +98,13 @@ def translate_yaml(
     elif isinstance(data, list):
         return [translate_yaml(item, translations, language, env) for item in data]
     elif isinstance(data, str) and translations:
-        # return pystache.render(data, translations)
-        return env.from_string(data).render(translations)
-        # try:
-        #     data = "{% raw %}" + data + "{% endraw %}"
-        #     return env.from_string(data).render(translations)
-        # except TemplateSyntaxError as e:
-        #     print(f"error: {e}")
-        #     print(f"data {data}")
-        #     return re.sub(r"{{\s*(.*?)\s*}}",
-        #                   lambda m: translations.get(m.group(1).strip(), m.group(0)),
-        #                   data)
+        try:
+            result = env.from_string(data).render(translations)
+            print("Missing keys:", TrackingUndefined.missing_keys)
+            print(result)
+            return result
+        except TemplateSyntaxError:
+            return data
     return data
 
 
@@ -137,8 +130,20 @@ def wrap_in_braces(value):
     return f"{{{value}}}"
 
 
+class TrackingUndefined(Undefined):
+    missing_keys = set()
+
+    def __str__(self):
+        # Store the missing key name
+        TrackingUndefined.missing_keys.add(self._undefined_name)
+        # Return it in Jinja syntax to keep it in the template
+        return f"{{{{ {self._undefined_name} }}}}"
+
+    __repr__ = __str__
+
+
 def create_enviroment() -> Environment:
-    enviroment = Environment()
+    enviroment = Environment(undefined=TrackingUndefined)
     enviroment.filters["braces"] = wrap_in_braces
     return enviroment
 
@@ -171,7 +176,9 @@ def parse_yaml(yaml_stream: str) -> Any:
         raise_yaml_error(yaml_stream, exc)
 
 
-def run_translation(path: Path, language: str, to_file: bool = True) -> YamlObject:
+def run_translation(
+    path: Path, language: str, to_file: bool = True
+) -> tuple[YamlObject, bool]:
     try:
         with open(path, "r") as stream:
             yaml_stream = stream.read()
@@ -189,14 +196,15 @@ def run_translation(path: Path, language: str, to_file: bool = True) -> YamlObje
     enviroment = create_enviroment()
     translated_data = translate_yaml(parsed_yaml, {}, language, enviroment)
 
+    missing_keys = len(TrackingUndefined.missing_keys) > 0
     if to_file:
         translated_yaml_string = convert_to_yaml(translated_data)
         generate_new_yaml(path, translated_yaml_string, language)
-        return {}
+        return {}, missing_keys
     else:
         yaml_object = to_yaml_object(translated_data)
         _validate_dsl(yaml_object)
-        return yaml_object
+        return yaml_object, missing_keys
 
 
 if __name__ == "__main__":

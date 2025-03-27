@@ -40,14 +40,17 @@ def run(config: DodonaConfig, judge_output: IO, language: str | None = None):
             suite = parse_dsl(textual_suite)
         else:
             suite = parse_test_suite(textual_suite)
+        missing_keys = False
     else:
-        translated_yaml_ob = run_translation(
+        translated_yaml_ob, missing_keys = run_translation(
             Path(f"{config.resources}/{config.test_suite}"),
             language=language,
             to_file=False,
         )
         suite = convert_dsl(translated_yaml_ob)
-    pack = create_bundle(config, judge_output, suite)
+    pack = create_bundle(
+        config, judge_output, suite, translations_missing_key=missing_keys
+    )
     from .judge import judge
 
     judge(pack)

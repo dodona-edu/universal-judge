@@ -449,7 +449,7 @@ tabs:
     mock_opener.side_effect = mock_files
     mocker.patch("builtins.open", mock_opener)
 
-    yaml_object = run_translation(Path("suite.yaml"), "en", False)
+    yaml_object, _ = run_translation(Path("suite.yaml"), "en", False)
 
     assert s.call_count == 0
     assert isinstance(yaml_object, dict)
