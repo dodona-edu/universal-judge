@@ -43,8 +43,7 @@ RUN <<EOF
         pyyaml==6.0.1 \
         Pygments==2.18.0 \
         python-i18n==0.3.9 \
-        pylint==3.0.1 \
-        pystache==0.6.8
+        pylint==3.0.1
 
     # C/C++ dependencies
     apt-get install -y --no-install-recommends \

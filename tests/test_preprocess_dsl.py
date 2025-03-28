@@ -606,3 +606,25 @@ def test_run_is_correct_when_no_file():
         print("As expected")
     else:
         assert False, "Expected FileNotFoundError error"
+
+
+def test_template_syntax_error():
+    yaml_str = """
+translations:
+    works:
+        en: "works"
+        nl: "werkt"
+tabs:
+- tab: animals
+  testcases:
+  - expression: tests(11)
+    return: 11{%{{works}}
+""".strip()
+    translated_yml = """
+tabs:
+- tab: animals
+  testcases:
+  - expression: tests(11)
+    return: 11{%{{works}}
+""".strip()
+    validate_natural_translate(yaml_str, translated_yml)

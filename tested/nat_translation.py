@@ -23,7 +23,6 @@ def validate_pre_dsl(yaml_object: Any):
     """
     Validate a DSl object.
     :param yaml_object: The object to validate.
-    :return: True if valid, False otherwise.
     """
     path_to_schema = Path(__file__).parent / "dsl/schema-strict-nat-translation.json"
     with open(path_to_schema, "r") as schema_file:
@@ -100,8 +99,6 @@ def translate_yaml(
     elif isinstance(data, str) and translations:
         try:
             result = env.from_string(data).render(translations)
-            print("Missing keys:", TrackingUndefined.missing_keys)
-            print(result)
             return result
         except TemplateSyntaxError:
             return data
