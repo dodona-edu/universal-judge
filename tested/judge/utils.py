@@ -147,10 +147,3 @@ def filter_files(files: list[str] | FileFilter, directory: Path) -> list[Path]:
         )
     else:
         return [Path(file) for file in files]
-
-
-def base64_encode(content: str) -> str:
-    sample_string_bytes = content.encode("ascii")
-
-    base64_bytes = base64.b64encode(zlib.compress(sample_string_bytes))
-    return base64_bytes.decode("ascii")

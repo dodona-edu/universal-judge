@@ -345,7 +345,16 @@ def _process_results(
             #       since it only differs a bit.
             meta_statements = []
             meta_stdin = None
+            input_files = []
             for case in planned.context.testcases:
+                for file in case.link_files:
+                    file_data = {"path": file.path}
+                    if file.url != "":
+                        file_data["url"] = file.url
+
+                    if file.content != "":
+                        file_data["content"] = file.content
+                    input_files.append(file_data)
                 if case.is_main_testcase():
                     assert isinstance(case.input, MainInput)
                     if isinstance(case.input.stdin, TextData):
@@ -367,11 +376,15 @@ def _process_results(
                 # Don't add empty statements
                 meta_statements = None
 
+            if not input_files:
+                input_files = None
+
             collector.add(
                 CloseContext(
                     data=Metadata(
                         statements=meta_statements,
                         stdin=meta_stdin,
+                        input_files=input_files
                     )
                 ),
                 planned.context_index,

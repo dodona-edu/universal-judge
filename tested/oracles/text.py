@@ -3,15 +3,12 @@ Evaluators for text.
 """
 
 import math
-import os
 from typing import Any
 
 from tested.dodona import Status, StatusMessage
 from tested.internationalization import get_i18n_string
-from tested.judge.utils import base64_encode
 from tested.oracles.common import OracleConfig, OracleResult
 from tested.testsuite import (
-    FileOutputChannel,
     OutputChannel,
     OutputFileData,
     TextChannelType,
@@ -111,21 +108,6 @@ def evaluate_text(
     expected = channel.get_data_as_string(config.bundle.config.resources)
     result = compare_text(options, expected, actual)
     return result
-
-
-def make_expected_and_actual_file_output(
-    output_data: OutputFileData, expected: str, actual: str
-) -> tuple[str, str]:
-    content_type = output_data.content_type
-    expected_str = output_data.content
-    if content_type == TextChannelType.TEXT:
-        expected_str = base64_encode(expected)
-
-    return (
-        f"--- <{output_data.student_path}|{content_type}> ---\n{expected_str}",
-        f"--- <{output_data.student_path}|text> ---\n{base64_encode(actual)}",
-    )
-
 
 def evaluate_file(
     config: OracleConfig, channel: OutputChannel, actual: str

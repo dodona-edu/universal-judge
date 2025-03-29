@@ -552,8 +552,9 @@ class MainInput(WithFeatures, WithFunctions):
 
 @define(frozen=True)
 class FileUrl:
-    url: str
     path: str
+    content: str = ""
+    url: str = ""
 
 
 @ignore_field(get_converter(), "essential")

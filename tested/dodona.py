@@ -40,6 +40,7 @@ class Metadata:
 
     statements: str | None
     stdin: str | None
+    input_files: list[dict[str, str]] | None
 
 
 Message = ExtendedMessage | str

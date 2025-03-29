@@ -34,7 +34,6 @@ from tested.datatypes import (
 )
 from tested.dodona import ExtendedMessage
 from tested.dsl.ast_translator import InvalidDslError, extract_comment, parse_string
-from tested.judge.utils import base64_encode
 from tested.parsing import get_converter, suite_to_json
 from tested.serialisation import (
     BooleanType,
@@ -430,26 +429,27 @@ def _convert_value(value: YamlObject) -> Value:
 
 def _convert_file(link_file: YamlDict, workdir: Path | None) -> FileUrl:
     assert isinstance(link_file["path"], str)
+    content = ""
+    url = ""
     if "content" in link_file:
-        assert isinstance(link_file["content"], str)
+        content = link_file["content"]
+        assert isinstance(content, str)
         if workdir is not None:
             full_path = workdir / link_file["path"]
             os.makedirs(os.path.dirname(full_path), exist_ok=True)
             with open(full_path, "w", encoding="utf-8") as f:
-                f.write(link_file["content"])
+                f.write(content)
 
         if "url" in link_file:
             assert isinstance(link_file["url"], str)
             url = link_file["url"]
-        else:
-            url = base64_encode(link_file["content"])
     else:
         # Assumed the specified files are already in the working directory.
         assert "url" in link_file
         assert isinstance(link_file["url"], str)
         url = link_file["url"]
 
-    return FileUrl(path=link_file["path"], url=url)
+    return FileUrl(path=link_file["path"], url=url, content=content)
 
 
 def _convert_evaluation_function(stream: dict) -> EvaluationFunction:

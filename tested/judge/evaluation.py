@@ -377,7 +377,7 @@ def evaluate_context_results(
 
 def _link_files_message(link_files: Collection[FileUrl]) -> AppendMessage:
     link_list = ", ".join(
-        f'<a href="{link_file.url}" class="file-link" target="_blank">'
+        f'<a class="file-link" target="_blank">'
         f'<span class="code">{html.escape(link_file.path)}</span></a>'
         for link_file in link_files
     )

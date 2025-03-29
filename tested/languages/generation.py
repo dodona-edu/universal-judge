@@ -77,20 +77,6 @@ def generate_execution_unit(
     return bundle.language.generate_execution_unit(prepared_execution)
 
 
-def _handle_link_files(link_files: Iterable[FileUrl], language: str) -> tuple[str, str]:
-    dict_links = dict(
-        (link_file.path, get_converter().unstructure(link_file))
-        for link_file in link_files
-    )
-    files = json.dumps(dict_links)
-    return (
-        f"<div class='contains-file highlight-{language} highlighter-rouge' "
-        f"data-files={repr(files)}><pre style='padding: 2px; margin-bottom: "
-        f"1px; background: none;'><code>",
-        "</code></pre></div>",
-    )
-
-
 def _get_heredoc_token(stdin: str) -> str:
     delimiter = "STDIN"
     while delimiter in stdin:
@@ -177,12 +163,9 @@ def get_readable_input(
 
     # Now we need to do ugly stuff.
     # Begin by compiling the HTML that will be displayed.
-    if format_ == "text":
-        generated_html = html.escape(text)
-    elif format_ == "console":
+    generated_html = html.escape(text)
+    if format_ == "console":
         generated_html = highlight_code(text)
-    else:
-        generated_html = highlight_code(text, bundle.config.programming_language)
 
     # Map of file URLs.
     url_map = {html.escape(x.path): x for x in case.link_files}
@@ -194,16 +177,13 @@ def get_readable_input(
     def replace_link(match: Match) -> str:
         filename = match.group()
         the_file = url_map[filename]
-        the_url = urllib.parse.quote(the_file.url)
         the_replacement = (
-            f'<a href="{the_url}" class="file-link" target="_blank">{filename}</a>'
+            f'<a class="file-link" target="_blank">{filename}</a>'
         )
         seen.add(the_file)
         return the_replacement
 
     generated_html = escaped_regex.sub(replace_link, generated_html)
-    prefix, suffix = _handle_link_files(seen, format_)
-    generated_html = f"{prefix}{generated_html}{suffix}"
     return ExtendedMessage(description=generated_html, format="html"), seen
 
 
