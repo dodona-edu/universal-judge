@@ -384,7 +384,7 @@ def _process_results(
                     data=Metadata(
                         statements=meta_statements,
                         stdin=meta_stdin,
-                        input_files=input_files
+                        input_files=input_files,
                     )
                 ),
                 planned.context_index,

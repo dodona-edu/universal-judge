@@ -177,9 +177,7 @@ def get_readable_input(
     def replace_link(match: Match) -> str:
         filename = match.group()
         the_file = url_map[filename]
-        the_replacement = (
-            f'<a class="file-link" target="_blank">{filename}</a>'
-        )
+        the_replacement = f'<a class="file-link" target="_blank">{filename}</a>'
         seen.add(the_file)
         return the_replacement
 

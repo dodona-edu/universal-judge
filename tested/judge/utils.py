@@ -2,11 +2,9 @@
 Common utilities for the judge.
 """
 
-import base64
 import logging
 import shutil
 import subprocess
-import zlib
 from pathlib import Path
 
 from attrs import define

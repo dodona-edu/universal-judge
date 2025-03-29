@@ -109,6 +109,7 @@ def evaluate_text(
     result = compare_text(options, expected, actual)
     return result
 
+
 def evaluate_file(
     config: OracleConfig, channel: OutputChannel, actual: str
 ) -> OracleResult:
