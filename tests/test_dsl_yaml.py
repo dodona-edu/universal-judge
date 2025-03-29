@@ -38,6 +38,7 @@ from tested.testsuite import (
     LanguageLiterals,
     LanguageSpecificOracle,
     SupportedLanguage,
+    TextChannelType,
     TextOutputChannel,
     ValueOutputChannel,
     parse_test_suite,
@@ -69,9 +70,46 @@ tabs:
     tc = context.testcases[0]
     assert tc.is_main_testcase()
     assert tc.input.stdin.data == "Input string\n"
+    assert tc.input.stdin.type == TextChannelType.TEXT
     assert tc.input.arguments == ["--arg", "argument"]
     assert tc.output.stderr.data == "Error string\n"
+    assert tc.output.stderr.type == TextChannelType.TEXT
     assert tc.output.stdout.data == "Output string\n"
+    assert tc.output.stdout.type == TextChannelType.TEXT
+    assert tc.output.exit_code.value == 1
+
+
+def test_parse_one_tab_ctx_with_files():
+    yaml_str = """
+namespace: "solution"
+tabs:
+- tab: "Ctx"
+  testcases:
+  - arguments: [ "--arg", "argument" ]
+    stdin: !path "input.text"
+    stdout: !path "output.text"
+    stderr: 
+      content: !path "error.text"
+    exit_code: 1
+    """
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    assert suite.namespace == "solution"
+    assert len(suite.tabs) == 1
+    tab = suite.tabs[0]
+    assert tab.name == "Ctx"
+    assert len(tab.contexts) == 1
+    context = tab.contexts[0]
+    assert len(context.testcases) == 1
+    tc = context.testcases[0]
+    assert tc.is_main_testcase()
+    assert tc.input.stdin.data == "input.text"
+    assert tc.input.stdin.type == TextChannelType.FILE
+    assert tc.input.arguments == ["--arg", "argument"]
+    assert tc.output.stderr.data == "error.text"
+    assert tc.output.stderr.type == TextChannelType.FILE
+    assert tc.output.stdout.data == "output.text"
+    assert tc.output.stdout.type == TextChannelType.FILE
     assert tc.output.exit_code.value == 1
 
 
@@ -744,16 +782,19 @@ def test_value_built_in_checks_implied():
     )
 
 
-def test_file_custom_check_correct():
+def test_output_files_custom_check_correct():
     yaml_str = f"""
     - tab: 'Test'
       contexts:
         - testcases:
             - statement: 'test()'
-              file:
-                content: "test/hallo.txt"
+              output_files:
+                data: 
+                    - content: !path "test/hallo.txt"
+                      path: "test.txt"
+                    - content: "Hallo world!"
+                      path: "test2.txt"  
                 oracle: "custom_check"
-                location: "test.txt"
                 name: "evaluate_test"
                 file: "test.py"
     """
@@ -768,8 +809,12 @@ def test_file_custom_check_correct():
     assert isinstance(test.input, FunctionCall)
     assert isinstance(test.output.file, FileOutputChannel)
     assert isinstance(test.output.file.oracle, CustomCheckOracle)
-    assert test.output.file.actual_path == "test.txt"
-    assert test.output.file.expected_path == "test/hallo.txt"
+    assert test.output.file.output_data[0].student_path == "test.txt"
+    assert test.output.file.output_data[0].content == "test/hallo.txt"
+    assert test.output.file.output_data[0].content_type == TextChannelType.FILE
+    assert test.output.file.output_data[1].student_path == "test2.txt"
+    assert test.output.file.output_data[1].content == "Hallo world!"
+    assert test.output.file.output_data[1].content_type == TextChannelType.TEXT
     oracle = test.output.file.oracle
     assert oracle.function.name == "evaluate_test"
     assert oracle.function.file == Path("test.py")
@@ -1172,7 +1217,7 @@ def test_additional_properties_are_not_allowed():
 def test_files_are_propagated():
     yaml_str = """
 - tab: "Config ctx"
-  files:
+  input_files:
     - name: "test"
       url: "test.md"
     - name: "two"
@@ -1182,7 +1227,7 @@ def test_files_are_propagated():
     stdout: "3.34"
   - arguments: [ '-a', '2.125', '1.212' ]
     stdout: "3.337"
-    files:
+    input_files:
         - name: "test"
           url: "twooo.md"
     """
@@ -1193,8 +1238,8 @@ def test_files_are_propagated():
     testcases0, testcases1 = ctx0.testcases, ctx1.testcases
     test0, test1 = testcases0[0], testcases1[0]
     assert set(test0.link_files) == {
-        FileUrl(name="test", url="test.md"),
-        FileUrl(name="two", url="two.md"),
+        FileUrl(path="test", url="test.md"),
+        FileUrl(path="two", url="two.md"),
     }
 
 

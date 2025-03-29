@@ -8,7 +8,12 @@ from typing import Any
 from tested.dodona import Status, StatusMessage
 from tested.internationalization import get_i18n_string
 from tested.oracles.common import OracleConfig, OracleResult
-from tested.testsuite import FileOutputChannel, OutputChannel, TextOutputChannel
+from tested.testsuite import (
+    OutputChannel,
+    OutputFileData,
+    TextChannelType,
+    TextOutputChannel,
+)
 
 
 def _is_number(string: str) -> float | None:
@@ -42,7 +47,9 @@ def _file_defaults(config: OracleConfig) -> dict:
     return defaults
 
 
-def compare_text(options: dict[str, Any], expected: str, actual: str) -> OracleResult:
+def _text_comparison(
+    options: dict[str, Any], expected: str, actual: str
+) -> tuple[bool, str]:
     # Temporary variables that may modified by the evaluation options,
     # Don't modify the actual values, otherwise there maybe confusion with the
     # solution submitted by the student
@@ -61,14 +68,16 @@ def compare_text(options: dict[str, Any], expected: str, actual: str) -> OracleR
         expected_float = float(expected_eval.strip())
         if options["applyRounding"]:
             numbers = int(options["roundTo"])
-            # noinspection PyUnboundLocalVariable
             actual_float = round(actual_float, numbers)
             expected_float = round(expected_float, numbers)
-        # noinspection PyUnboundLocalVariable
-        result = math.isclose(actual_float, expected_float)
-        expected = str(expected_float)
-    else:
-        result = actual_eval == expected_eval
+        return math.isclose(actual_float, expected_float), str(expected_float)
+
+    return actual_eval == expected_eval, expected
+
+
+def compare_text(options: dict[str, Any], expected: str, actual: str) -> OracleResult:
+
+    result, expected = _text_comparison(options, expected, actual)
 
     return OracleResult(
         result=StatusMessage(enum=Status.CORRECT if result else Status.WRONG),
@@ -118,7 +127,7 @@ def evaluate_file(
 
     When no mode is passed, the oracle will default to ``full``.
     """
-    assert isinstance(channel, FileOutputChannel)
+    assert isinstance(channel, OutputFileData)
     options = _text_options(config)
 
     # There must be nothing as output.
@@ -134,15 +143,17 @@ def evaluate_file(
             messages=[message],
         )
 
-    expected_path = f"{config.bundle.config.resources}/{channel.expected_path}"
+    expected = channel.content
+    if channel.content_type == TextChannelType.FILE:
+        expected_path = f"{config.bundle.config.resources}/{expected}"
 
-    try:
-        with open(expected_path, "r") as file:
-            expected = file.read()
-    except FileNotFoundError:
-        raise ValueError(f"File {expected_path} not found in resources.")
+        try:
+            with open(expected_path, "r") as file:
+                expected = file.read()
+        except FileNotFoundError:
+            raise ValueError(f"File {expected_path} not found in resources.")
 
-    actual_path = config.context_dir / channel.actual_path
+    actual_path = config.context_dir / channel.student_path
 
     try:
         with open(str(actual_path), "r") as file:

@@ -30,7 +30,7 @@ def run(config: DodonaConfig, judge_output: IO):
     _, ext = os.path.splitext(config.test_suite)
     is_yaml = ext.lower() in (".yaml", ".yml")
     if is_yaml:
-        suite = parse_dsl(textual_suite)
+        suite = parse_dsl(textual_suite, config.workdir)
     else:
         suite = parse_test_suite(textual_suite)
     pack = create_bundle(config, judge_output, suite)

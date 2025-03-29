@@ -274,14 +274,23 @@ class TextOutputChannel(TextData):
     oracle: GenericTextOracle | CustomCheckOracle = field(factory=GenericTextOracle)
 
 
+@define(frozen=True)
+class OutputFileData:
+    content_type: TextChannelType
+    content: str
+    student_path: str
+    oracle: GenericTextOracle | CustomCheckOracle = field(
+        factory=lambda: GenericTextOracle(name=TextBuiltin.FILE)
+    )
+
+
 @fallback_field(get_converter(), {"evaluator": "oracle"})
 @ignore_field(get_converter(), "show_expected")
 @define
 class FileOutputChannel(WithFeatures):
     """Describes the output for files."""
 
-    expected_path: str  # Path to the file to compare to.
-    actual_path: str  # Path to the generated file (by the user code)
+    output_data: list[OutputFileData]
     oracle: GenericTextOracle | CustomCheckOracle = field(
         factory=lambda: GenericTextOracle(name=TextBuiltin.FILE)
     )
@@ -290,9 +299,20 @@ class FileOutputChannel(WithFeatures):
         return NOTHING
 
     def get_data_as_string(self, resources: Path) -> str:
-        file_path = _resolve_path(resources, self.expected_path)
-        with open(file_path, "r") as file:
-            return file.read()
+        file_content = []
+        for i in range(len(self.output_data)):
+            output_data = self.output_data[i]
+            if output_data.content_type == TextChannelType.FILE:
+                file_path = _resolve_path(resources, output_data.content)
+                with open(file_path, "r") as file:
+                    file_content.append(
+                        f"--- <{output_data.student_path}> ---\n{file.read()}"
+                    )
+            else:
+                file_content.append(
+                    f"--- <{output_data.student_path}> ---\n{output_data.content[i]}"
+                )
+        return "\n".join(file_content)
 
 
 @fallback_field(get_converter(), {"evaluator": "oracle"})
@@ -412,7 +432,11 @@ class IgnoredChannel(WithFeatures, StrEnum):
 SpecialOutputChannel = EmptyChannel | IgnoredChannel
 
 OracleOutputChannel = Union[
-    TextOutputChannel, FileOutputChannel, ValueOutputChannel, ExceptionOutputChannel
+    TextOutputChannel,
+    FileOutputChannel,
+    OutputFileData,
+    ValueOutputChannel,
+    ExceptionOutputChannel,
 ]
 
 NormalOutputChannel = OracleOutputChannel | ExitCodeOutputChannel
@@ -529,8 +553,9 @@ class MainInput(WithFeatures, WithFunctions):
 
 @define(frozen=True)
 class FileUrl:
-    url: str
-    name: str
+    path: str
+    content: str = ""
+    url: str = ""
 
 
 @ignore_field(get_converter(), "essential")

@@ -25,8 +25,10 @@ from tested.testsuite import (
     ExceptionOutputChannel,
     ExpectedException,
     FileOutputChannel,
+    OutputFileData,
     Suite,
     SupportedLanguage,
+    TextChannelType,
     TextOutputChannel,
     ValueOutputChannel,
 )
@@ -140,7 +142,7 @@ def test_file_oracle_full_wrong(
     tmp_path: Path, pytestconfig: pytest.Config, mocker: MockerFixture
 ):
     config = oracle_config(tmp_path, pytestconfig, {"mode": "full"})
-    s = mocker.spy(tested.oracles.text, name="compare_text")  # type: ignore[reportAttributeAccessIssue]
+    s = mocker.spy(tested.oracles.text, name="_text_comparison")  # type: ignore[reportAttributeAccessIssue]
     mock_files = [
         mocker.mock_open(read_data=content).return_value
         for content in ["expected\nexpected", "actual\nactual"]
@@ -149,20 +151,26 @@ def test_file_oracle_full_wrong(
     mock_opener.side_effect = mock_files
     mocker.patch("builtins.open", mock_opener)
     channel = FileOutputChannel(
-        expected_path="expected.txt", actual_path="expected.txt"
+        output_data=[
+            OutputFileData(
+                content="expected.txt",
+                student_path="expected.txt",
+                content_type=TextChannelType.FILE,
+            )
+        ]
     )
     result = evaluate_file(config, channel, "")
     s.assert_called_once_with(ANY, "expected\nexpected", "actual\nactual")
     assert result.result.enum == Status.WRONG
-    assert result.readable_expected == "expected\nexpected"
-    assert result.readable_actual == "actual\nactual"
+    assert result.readable_expected == "--- <expected.txt> ---\nexpected\nexpected"
+    assert result.readable_actual == "--- <expected.txt> ---\nactual\nactual"
 
 
 def test_file_oracle_full_correct(
     tmp_path: Path, pytestconfig: pytest.Config, mocker: MockerFixture
 ):
     config = oracle_config(tmp_path, pytestconfig, {"mode": "full"})
-    s = mocker.spy(tested.oracles.text, name="compare_text")  # type: ignore[reportAttributeAccessIssue]
+    s = mocker.spy(tested.oracles.text, name="_text_comparison")  # type: ignore[reportAttributeAccessIssue]
     mock_files = [
         mocker.mock_open(read_data=content).return_value
         for content in ["expected\nexpected", "expected\nexpected"]
@@ -171,13 +179,63 @@ def test_file_oracle_full_correct(
     mock_opener.side_effect = mock_files
     mocker.patch("builtins.open", mock_opener)
     channel = FileOutputChannel(
-        expected_path="expected.txt", actual_path="expected.txt"
+        output_data=[
+            OutputFileData(
+                content="expected.txt",
+                student_path="expected.txt",
+                content_type=TextChannelType.FILE,
+            )
+        ]
     )
     result = evaluate_file(config, channel, "")
     s.assert_called_once_with(ANY, "expected\nexpected", "expected\nexpected")
     assert result.result.enum == Status.CORRECT
-    assert result.readable_expected == "expected\nexpected"
-    assert result.readable_actual == "expected\nexpected"
+    assert result.readable_expected == "--- <expected.txt> ---\nexpected\nexpected"
+    assert result.readable_actual == "--- <expected.txt> ---\nexpected\nexpected"
+
+
+def test_file_oracle_full_correct_with_mixed_content(
+    tmp_path: Path, pytestconfig: pytest.Config, mocker: MockerFixture
+):
+    config = oracle_config(tmp_path, pytestconfig, {"mode": "full"})
+    s = mocker.spy(tested.oracles.text, name="_text_comparison")  # type: ignore[reportAttributeAccessIssue]
+    mock_files = [
+        mocker.mock_open(read_data=content).return_value
+        for content in [
+            "expected\nexpected",
+            "expected\nexpected",
+            "expected\nexpected",
+            "expected\nexpected",
+        ]
+    ]
+    mock_opener = mocker.mock_open()
+    mock_opener.side_effect = mock_files
+    mocker.patch("builtins.open", mock_opener)
+    channel = FileOutputChannel(
+        output_data=[
+            OutputFileData(
+                content="expected.txt",
+                student_path="expected.txt",
+                content_type=TextChannelType.FILE,
+            ),
+            OutputFileData(
+                content="expected\nexpected",
+                student_path="expected.txt",
+                content_type=TextChannelType.TEXT,
+            ),
+        ]
+    )
+    result = evaluate_file(config, channel, "")
+    s.assert_called_with(ANY, "expected\nexpected", "expected\nexpected")
+    assert result.result.enum == Status.CORRECT
+    assert (
+        result.readable_expected
+        == "--- <expected.txt> ---\nexpected\nexpected\n--- <expected.txt> ---\nexpected\nexpected"
+    )
+    assert (
+        result.readable_actual
+        == "--- <expected.txt> ---\nexpected\nexpected\n--- <expected.txt> ---\nexpected\nexpected"
+    )
 
 
 def test_file_oracle_line_wrong(
@@ -186,7 +244,7 @@ def test_file_oracle_line_wrong(
     config = oracle_config(
         tmp_path, pytestconfig, {"mode": "line", "stripNewlines": True}
     )
-    s = mocker.spy(tested.oracles.text, name="compare_text")  # type: ignore[reportAttributeAccessIssue]
+    s = mocker.spy(tested.oracles.text, name="_text_comparison")  # type: ignore[reportAttributeAccessIssue]
     mock_files = [
         mocker.mock_open(read_data=content).return_value
         for content in ["expected\nexpected2", "actual\nactual2"]
@@ -195,15 +253,21 @@ def test_file_oracle_line_wrong(
     mock_opener.side_effect = mock_files
     mocker.patch("builtins.open", mock_opener)
     channel = FileOutputChannel(
-        expected_path="expected.txt", actual_path="expected.txt"
+        output_data=[
+            OutputFileData(
+                content="expected.txt",
+                student_path="expected.txt",
+                content_type=TextChannelType.FILE,
+            )
+        ]
     )
     result = evaluate_file(config, channel, "")
     s.assert_any_call(ANY, "expected", "actual")
     s.assert_any_call(ANY, "expected2", "actual2")
     assert s.call_count == 2
     assert result.result.enum == Status.WRONG
-    assert result.readable_expected == "expected\nexpected2"
-    assert result.readable_actual == "actual\nactual2"
+    assert result.readable_expected == "--- <expected.txt> ---\nexpected\nexpected2"
+    assert result.readable_actual == "--- <expected.txt> ---\nactual\nactual2"
 
 
 def test_file_oracle_line_correct(
@@ -212,7 +276,7 @@ def test_file_oracle_line_correct(
     config = oracle_config(
         tmp_path, pytestconfig, {"mode": "line", "stripNewlines": True}
     )
-    s = mocker.spy(tested.oracles.text, name="compare_text")  # type: ignore[reportAttributeAccessIssue]
+    s = mocker.spy(tested.oracles.text, name="_text_comparison")  # type: ignore[reportAttributeAccessIssue]
     mock_files = [
         mocker.mock_open(read_data=content).return_value
         for content in ["expected\nexpected2", "expected\nexpected2"]
@@ -221,15 +285,21 @@ def test_file_oracle_line_correct(
     mock_opener.side_effect = mock_files
     mocker.patch("builtins.open", mock_opener)
     channel = FileOutputChannel(
-        expected_path="expected.txt", actual_path="expected.txt"
+        output_data=[
+            OutputFileData(
+                content="expected.txt",
+                student_path="expected.txt",
+                content_type=TextChannelType.FILE,
+            )
+        ]
     )
     result = evaluate_file(config, channel, "")
     s.assert_any_call(ANY, "expected", "expected")
     s.assert_any_call(ANY, "expected2", "expected2")
     assert s.call_count == 2
     assert result.result.enum == Status.CORRECT
-    assert result.readable_expected == "expected\nexpected2"
-    assert result.readable_actual == "expected\nexpected2"
+    assert result.readable_expected == "--- <expected.txt> ---\nexpected\nexpected2"
+    assert result.readable_actual == "--- <expected.txt> ---\nexpected\nexpected2"
 
 
 def test_file_oracle_strip_lines_correct(
@@ -238,7 +308,7 @@ def test_file_oracle_strip_lines_correct(
     config = oracle_config(
         tmp_path, pytestconfig, {"mode": "line", "stripNewlines": True}
     )
-    s = mocker.spy(tested.oracles.text, name="compare_text")  # type: ignore[reportAttributeAccessIssue]
+    s = mocker.spy(tested.oracles.text, name="_text_comparison")  # type: ignore[reportAttributeAccessIssue]
     mock_files = [
         mocker.mock_open(read_data=content).return_value
         for content in ["expected\nexpected2\n", "expected\nexpected2"]
@@ -247,15 +317,21 @@ def test_file_oracle_strip_lines_correct(
     mock_opener.side_effect = mock_files
     mocker.patch("builtins.open", mock_opener)
     channel = FileOutputChannel(
-        expected_path="expected.txt", actual_path="expected.txt"
+        output_data=[
+            OutputFileData(
+                content="expected.txt",
+                student_path="expected.txt",
+                content_type=TextChannelType.FILE,
+            )
+        ]
     )
     result = evaluate_file(config, channel, "")
     s.assert_any_call(ANY, "expected", "expected")
     s.assert_any_call(ANY, "expected2", "expected2")
     assert s.call_count == 2
     assert result.result.enum == Status.CORRECT
-    assert result.readable_expected == "expected\nexpected2\n"
-    assert result.readable_actual == "expected\nexpected2"
+    assert result.readable_expected == "--- <expected.txt> ---\nexpected\nexpected2\n"
+    assert result.readable_actual == "--- <expected.txt> ---\nexpected\nexpected2"
 
 
 def test_file_oracle_dont_strip_lines_correct(
@@ -264,7 +340,7 @@ def test_file_oracle_dont_strip_lines_correct(
     config = oracle_config(
         tmp_path, pytestconfig, {"mode": "line", "stripNewlines": False}
     )
-    s = mocker.spy(tested.oracles.text, name="compare_text")  # type: ignore[reportAttributeAccessIssue]
+    s = mocker.spy(tested.oracles.text, name="_text_comparison")  # type: ignore[reportAttributeAccessIssue]
     mock_files = [
         mocker.mock_open(read_data=content).return_value
         for content in ["expected\nexpected2\n", "expected\nexpected2\n"]
@@ -273,15 +349,42 @@ def test_file_oracle_dont_strip_lines_correct(
     mock_opener.side_effect = mock_files
     mocker.patch("builtins.open", mock_opener)
     channel = FileOutputChannel(
-        expected_path="expected.txt", actual_path="expected.txt"
+        output_data=[
+            OutputFileData(
+                content="expected.txt",
+                student_path="expected.txt",
+                content_type=TextChannelType.FILE,
+            )
+        ]
     )
     result = evaluate_file(config, channel, "")
     s.assert_any_call(ANY, "expected\n", "expected\n")
     s.assert_any_call(ANY, "expected2\n", "expected2\n")
     assert s.call_count == 2
     assert result.result.enum == Status.CORRECT
-    assert result.readable_expected == "expected\nexpected2\n"
-    assert result.readable_actual == "expected\nexpected2\n"
+    assert result.readable_expected == "--- <expected.txt> ---\nexpected\nexpected2\n"
+    assert result.readable_actual == "--- <expected.txt> ---\nexpected\nexpected2\n"
+
+
+def test_correct_error_actual_not_found(tmp_path: Path, pytestconfig: pytest.Config):
+    config = oracle_config(
+        tmp_path, pytestconfig, {"mode": "line", "stripNewlines": False}
+    )
+    channel = FileOutputChannel(
+        output_data=[
+            OutputFileData(
+                content="Hallo world!",
+                student_path="expected.txt",
+                content_type=TextChannelType.TEXT,
+            )
+        ]
+    )
+    result = evaluate_file(config, channel, "")
+    assert result.result.enum == Status.RUNTIME_ERROR
+    assert (
+        result.result.human == "File not found."
+        or result.result.human == "Bestand niet gevonden."
+    )
 
 
 def test_exception_oracle_only_messages_correct(
