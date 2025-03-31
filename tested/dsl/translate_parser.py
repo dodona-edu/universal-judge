@@ -92,7 +92,16 @@ class ProgrammingLanguageMap(dict):
 
 OptionDict = dict[str, int | bool]
 YamlObject = (
-    YamlDict | list | bool | float | int | str | None | ExpressionString | ReturnOracle | ProgrammingLanguageMap
+    YamlDict
+    | list
+    | bool
+    | float
+    | int
+    | str
+    | None
+    | ExpressionString
+    | ReturnOracle
+    | ProgrammingLanguageMap
 )
 
 
@@ -139,7 +148,10 @@ def _return_oracle(loader: yaml.Loader, node: yaml.Node) -> ReturnOracle:
     ), f"A custom oracle must be an object, got {result} which is a {type(result)}."
     return ReturnOracle(result)
 
-def _return_programming_language_map(loader: yaml.Loader, node: yaml.Node) -> ProgrammingLanguageMap:
+
+def _return_programming_language_map(
+    loader: yaml.Loader, node: yaml.Node
+) -> ProgrammingLanguageMap:
     result = _parse_yaml_value(loader, node)
     assert isinstance(
         result, dict
@@ -157,7 +169,9 @@ def _parse_yaml(yaml_stream: str) -> YamlObject:
             yaml.add_constructor("!" + actual_type, _custom_type_constructors, loader)
     yaml.add_constructor("!expression", _expression_string, loader)
     yaml.add_constructor("!oracle", _return_oracle, loader)
-    yaml.add_constructor("!programming_language", _return_programming_language_map, loader)
+    yaml.add_constructor(
+        "!programming_language", _return_programming_language_map, loader
+    )
 
     try:
         return yaml.load(yaml_stream, loader)
@@ -172,8 +186,10 @@ def is_oracle(_checker: TypeChecker, instance: Any) -> bool:
 def is_expression(_checker: TypeChecker, instance: Any) -> bool:
     return isinstance(instance, ExpressionString)
 
+
 def is_programming_language_map(_checker: TypeChecker, instance: Any) -> bool:
     return isinstance(instance, ProgrammingLanguageMap)
+
 
 def test(value: object) -> bool:
     if not isinstance(value, str):
@@ -193,9 +209,11 @@ def load_schema_validator(file: str = "schema-strict.json") -> Validator:
         schema_object = json.load(schema_file)
 
     original_validator: Type[Validator] = validator_for(schema_object)
-    type_checker = original_validator.TYPE_CHECKER.redefine(
-        "oracle", is_oracle
-    ).redefine("expression", is_expression).redefine("programming_language", is_programming_language_map)
+    type_checker = (
+        original_validator.TYPE_CHECKER.redefine("oracle", is_oracle)
+        .redefine("expression", is_expression)
+        .redefine("programming_language", is_programming_language_map)
+    )
     format_checker = original_validator.FORMAT_CHECKER
     format_checker.checks("tested-dsl-expression", SyntaxError)(test)
     tested_validator = extend_validator(original_validator, type_checker=type_checker)
@@ -511,7 +529,10 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
     line_comment = ""
     _validate_testcase_combinations(testcase)
     if (expr_stmt := testcase.get("statement", testcase.get("expression"))) is not None:
-        if isinstance(expr_stmt, dict | ProgrammingLanguageMap) or context.language != "tested":
+        if (
+            isinstance(expr_stmt, dict | ProgrammingLanguageMap)
+            or context.language != "tested"
+        ):
             if isinstance(expr_stmt, str):
                 the_dict = {context.language: expr_stmt}
             else:
