@@ -15,7 +15,6 @@ from tested.nat_translation import (
     create_enviroment,
     parse_yaml,
     run_translation,
-    to_yaml_object,
     translate_yaml,
     validate_pre_dsl,
 )
@@ -449,7 +448,8 @@ tabs:
     mock_opener.side_effect = mock_files
     mocker.patch("builtins.open", mock_opener)
 
-    yaml_object, _ = run_translation(Path("suite.yaml"), "en", False)
+    translated_yaml, _ = run_translation(Path("suite.yaml"), "en", False)
+    yaml_object = parse_yaml(translated_yaml)
 
     assert s.call_count == 0
     assert isinstance(yaml_object, dict)
@@ -558,7 +558,8 @@ tabs:
     environment = create_enviroment()
     parsed_yaml = parse_yaml(yaml_str)
     translated_dsl = translate_yaml(parsed_yaml, {}, "en", environment)
-    yaml_object = to_yaml_object(translated_dsl)
+    translated_yaml_string = convert_to_yaml(translated_dsl)
+    yaml_object = _parse_yaml(translated_yaml_string)
     assert isinstance(yaml_object, dict)
     tabs = yaml_object["tabs"]
     assert isinstance(tabs, list)

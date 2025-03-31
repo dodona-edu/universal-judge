@@ -8,7 +8,7 @@ from typing import IO
 
 from tested.configs import DodonaConfig, create_bundle
 from tested.dsl import parse_dsl
-from tested.dsl.translate_parser import convert_dsl
+from tested.dsl.translate_parser import _convert_dsl
 from tested.nat_translation import run_translation
 from tested.testsuite import parse_test_suite
 
@@ -42,12 +42,12 @@ def run(config: DodonaConfig, judge_output: IO, language: str | None = None):
             suite = parse_test_suite(textual_suite)
         missing_keys = False
     else:
-        translated_yaml_ob, missing_keys = run_translation(
+        translated_yaml, missing_keys = run_translation(
             Path(f"{config.resources}/{config.test_suite}"),
             language=language,
             to_file=False,
         )
-        suite = convert_dsl(translated_yaml_ob)
+        suite = parse_dsl(translated_yaml)
     pack = create_bundle(
         config, judge_output, suite, translations_missing_key=missing_keys
     )

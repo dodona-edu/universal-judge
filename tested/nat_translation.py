@@ -11,12 +11,6 @@ from jsonschema.validators import validator_for
 from yaml.nodes import MappingNode, ScalarNode, SequenceNode
 
 from tested.dsl.dsl_errors import handle_dsl_validation_errors, raise_yaml_error
-from tested.dsl.translate_parser import (
-    ExpressionString,
-    ReturnOracle,
-    YamlObject,
-    _validate_dsl,
-)
 
 
 def validate_pre_dsl(yaml_object: Any):
@@ -96,30 +90,12 @@ def translate_yaml(
         }
     elif isinstance(data, list):
         return [translate_yaml(item, translations, language, env) for item in data]
-    elif isinstance(data, str) and translations:
+    elif isinstance(data, str):
         try:
             result = env.from_string(data).render(translations)
             return result
         except TemplateSyntaxError:
             return data
-    return data
-
-
-def to_yaml_object(data: Any) -> YamlObject:
-    if isinstance(data, dict):
-        if "__tag__" in data:
-            value = data["value"]
-            if data["__tag__"] == "!oracle":
-                result = to_yaml_object(value)
-                assert isinstance(result, dict)
-                return ReturnOracle(result)
-            if data["__tag__"] == "!expression":
-                return ExpressionString(to_yaml_object(value))
-            return to_yaml_object(value)
-        return {k: to_yaml_object(v) for k, v in data.items()}
-    elif isinstance(data, list):
-        return [to_yaml_object(value) for value in data]
-
     return data
 
 
@@ -175,7 +151,7 @@ def parse_yaml(yaml_stream: str) -> Any:
 
 def run_translation(
     path: Path, language: str, to_file: bool = True
-) -> tuple[YamlObject, bool]:
+) -> tuple[str, bool]:
     try:
         with open(path, "r") as stream:
             yaml_stream = stream.read()
@@ -194,14 +170,12 @@ def run_translation(
     translated_data = translate_yaml(parsed_yaml, {}, language, enviroment)
 
     missing_keys = len(TrackingUndefined.missing_keys) > 0
+    translated_yaml_string = convert_to_yaml(translated_data)
     if to_file:
-        translated_yaml_string = convert_to_yaml(translated_data)
         generate_new_yaml(path, translated_yaml_string, language)
-        return {}, missing_keys
+        return "", missing_keys
     else:
-        yaml_object = to_yaml_object(translated_data)
-        _validate_dsl(yaml_object)
-        return yaml_object, missing_keys
+        return translated_yaml_string, missing_keys
 
 
 if __name__ == "__main__":
