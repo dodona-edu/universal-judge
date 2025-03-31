@@ -1253,6 +1253,18 @@
           "description" : "A statement of expression in Python-like syntax as YAML string."
         },
         {
+          "type": "object",
+          "description" : "Programming-language-specific statement or expression.",
+          "minProperties" : 1,
+          "propertyNames" : {
+            "$ref" : "#/definitions/programmingLanguage"
+          },
+          "items" : {
+            "type" : "string",
+            "description" : "A language-specific literal, which will be used verbatim."
+          }
+        },
+        {
           "type" : "object",
           "required": [
             "__tag__",
@@ -1285,6 +1297,18 @@
         {
           "type" : "string",
           "description" : "A statement of expression in Python-like syntax as YAML string."
+        },
+        {
+          "type": "object",
+          "description" : "Programming-language-specific statement or expression.",
+          "minProperties" : 1,
+          "propertyNames" : {
+            "$ref" : "#/definitions/programmingLanguage"
+          },
+          "items" : {
+            "type" : "string",
+            "description" : "A language-specific literal, which will be used verbatim."
+          }
         },
         {
           "type" : "object",

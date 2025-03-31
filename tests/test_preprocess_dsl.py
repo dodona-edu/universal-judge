@@ -25,7 +25,6 @@ def validate_natural_translate(yaml_str: str, translated_yaml_str: str):
     yaml_object = parse_yaml(yaml_str)
     translated_dsl = translate_yaml(yaml_object, {}, "en", enviroment)
     translated_yaml = convert_to_yaml(translated_dsl)
-    print(translated_yaml)
     assert translated_yaml.strip() == translated_yaml_str
 
 
@@ -138,7 +137,7 @@ tabs:
     validate_natural_translate(yaml_str, translated_yaml_str)
 
 
-def test_nat_lang_and_prog_lang_combo():
+def test_nat_lang_and_prog_lang_combination():
     yaml_str = """
 translations:
   animal:
@@ -166,7 +165,7 @@ tabs:
   testcases:
   - expression: tests(11)
     return: 11
-  - expression:
+  - expression: !programming_language
       javascript: animals_javascript(1 + 1)
       typescript: animals_typescript(1 + 1)
       java: Submission.animals_java(1 + 1)

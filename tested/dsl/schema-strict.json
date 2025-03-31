@@ -464,6 +464,14 @@
         },
         {
           "description" : "Programming-language-specific statement or expression.",
+          "oneOf": [
+            {
+              "type": "object"
+            },
+            {
+              "type": "programming_language"
+            }
+          ],
           "type" : "object",
           "minProperties" : 1,
           "propertyNames" : {
@@ -872,7 +880,8 @@
       "not" : {
         "type" : [
           "oracle",
-          "expression"
+          "expression",
+          "programming_language"
         ]
       }
     },
