@@ -8,7 +8,6 @@ from typing import IO
 
 from tested.configs import DodonaConfig, create_bundle
 from tested.dsl import parse_dsl
-from tested.dsl.translate_parser import _convert_dsl
 from tested.nat_translation import run_translation
 from tested.testsuite import parse_test_suite
 
