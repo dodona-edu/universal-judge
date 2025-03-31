@@ -41,7 +41,7 @@ class CustomDumper(yaml.SafeDumper):
     @staticmethod
     def custom_representer(dumper, data):
         if "__tag__" in data:
-            if data["__tag__"] != "!programming_language":
+            if data["__tag__"]:
                 return dumper.represent_with_tag(data["__tag__"], data["value"])
             else:
                 data = data["value"]
