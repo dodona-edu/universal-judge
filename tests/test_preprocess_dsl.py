@@ -497,6 +497,7 @@ tabs:
     # Check if the file was opened for writing
     mock_opener.assert_any_call(Path("suite-en.yaml"), "w", encoding="utf-8")
 
+
 def test_key_not_found(mocker: MockerFixture):
     s = mocker.spy(
         tested.nat_translation, name="generate_new_yaml"  # type: ignore[reportAttributeAccessIssue]
