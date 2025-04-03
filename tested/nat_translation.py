@@ -104,11 +104,11 @@ def wrap_in_braces(value):
 
 
 class TrackingUndefined(Undefined):
-    missing_keys = set()
+    missing_keys = list()
 
     def __str__(self):
         # Store the missing key name
-        TrackingUndefined.missing_keys.add(self._undefined_name)
+        TrackingUndefined.missing_keys.append(self._undefined_name)
         # Return it in Jinja syntax to keep it in the template
         return f"{{{{ {self._undefined_name} }}}}"
 
@@ -151,7 +151,7 @@ def parse_yaml(yaml_stream: str) -> Any:
 
 def run_translation(
     path: Path, language: str, to_file: bool = True
-) -> tuple[str, bool]:
+) -> tuple[str, list]:
     try:
         with open(path, "r") as stream:
             yaml_stream = stream.read()
@@ -169,7 +169,7 @@ def run_translation(
     enviroment = create_enviroment()
     translated_data = translate_yaml(parsed_yaml, {}, language, enviroment)
 
-    missing_keys = len(TrackingUndefined.missing_keys) > 0
+    missing_keys = TrackingUndefined.missing_keys
     translated_yaml_string = convert_to_yaml(translated_data)
     if to_file:
         generate_new_yaml(path, translated_yaml_string, language)
