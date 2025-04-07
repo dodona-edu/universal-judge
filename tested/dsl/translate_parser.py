@@ -429,8 +429,8 @@ def _convert_value(value: YamlObject) -> Value:
 
 def _convert_file(link_file: YamlDict, workdir: Path | None) -> FileUrl:
     assert isinstance(link_file["path"], str)
+    assert isinstance(link_file["url"], str)
     content = ""
-    url = ""
     if "content" in link_file:
         content = link_file["content"]
         assert isinstance(content, str)
@@ -440,16 +440,7 @@ def _convert_file(link_file: YamlDict, workdir: Path | None) -> FileUrl:
             with open(full_path, "w", encoding="utf-8") as f:
                 f.write(content)
 
-        if "url" in link_file:
-            assert isinstance(link_file["url"], str)
-            url = link_file["url"]
-    else:
-        # Assumed the specified files are already in the working directory.
-        assert "url" in link_file
-        assert isinstance(link_file["url"], str)
-        url = link_file["url"]
-
-    return FileUrl(path=link_file["path"], url=url, content=content)
+    return FileUrl(path=link_file["path"], url=link_file["url"], content=content)
 
 
 def _convert_evaluation_function(stream: dict) -> EvaluationFunction:
