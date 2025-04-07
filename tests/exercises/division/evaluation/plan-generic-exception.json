@@ -20,7 +20,8 @@
                       "java": "ArithmeticException",
                       "kotlin": "ArithmeticException",
                       "csharp": "DivideByZeroException",
-                      "python": "ZeroDivisionError"
+                      "python": "ZeroDivisionError",
+                      "cpp": "St11logic_error"
                     }
                   }
                 }

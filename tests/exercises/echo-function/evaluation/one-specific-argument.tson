@@ -58,6 +58,10 @@
                           "csharp" : {
                             "file" : "Evaluator.cs",
                             "name" : "evaluate_sum"
+                          },
+                          "cpp" : {
+                            "file" : "evaluator.cpp",
+                            "name" : "evaluate_sum"
                           }
                         },
                         "arguments" : {
@@ -86,6 +90,9 @@
                             "5 + 5"
                           ],
                           "csharp" : [
+                            "5 + 5"
+                          ],
+                          "cpp" : [
                             "5 + 5"
                           ]
                         }

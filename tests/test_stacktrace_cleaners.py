@@ -305,6 +305,44 @@ def test_c_compilation_error():
     assert actual == expected
 
 
+def test_cpp_compilation_error():
+    original = """In file included from execution_0.cpp:3,
+                 from selector.cpp:5:
+submission.cpp:3:1: error: ‘mfzej’ does not name a type
+    3 | mfzej àryhg çyh aiogharuio ghqgh
+      | ^~~~~
+In file included from selector.cpp:5:
+execution_0.cpp: In function ‘void execution_0_write_separator()’:
+execution_0.cpp:9:5: error: ‘execution_0_value_file’ was not declared in this scope; did you mean ‘execution_0_exception_file’?
+    9 |     execution_0_value_file << "--Nh9YaHPGI-- SEP";
+      |     ^~~~~~~~~~~~~~~~~~~~~~
+      |     execution_0_exception_file
+execution_0.cpp: In function ‘void execution_0_write_context_separator()’:
+execution_0.cpp:16:5: error: ‘execution_0_value_file’ was not declared in this scope; did you mean ‘execution_0_exception_file’?
+   16 |     execution_0_value_file << "--xxWjFpcXw-- SEP";
+      |     ^~~~~~~~~~~~~~~~~~~~~~
+      |     execution_0_exception_file
+execution_0.cpp: In function ‘int execution_0_context_0()’:
+execution_0.cpp:39:25: warning: ISO C++ forbids converting a string constant to ‘char*’ [-Wwrite-strings]
+   39 |         char* args[] = {"submission", };
+      |                         ^~~~~~~~~~~~
+execution_0.cpp:40:21: error: ‘solution_main’ was not declared in this scope
+   40 |         exit_code = solution_main(1, args);
+      |                     ^~~~~~~~~~~~~
+execution_0.cpp: In function ‘int execution_0()’:
+execution_0.cpp:52:5: error: ‘execution_0_value_file’ was not declared in this scope
+   52 |     execution_0_value_file.open("Nh9YaHPGI_values.txt", std::ios::out);
+      |     ^~~~~~~~~~~~~~~~~~~~~~
+"""
+    language_config = get_language("test", "cpp")
+    expected = """<code>:3:1: error: ‘mfzej’ does not name a type
+    3 | mfzej àryhg çyh aiogharuio ghqgh
+      | ^~~~~
+"""
+    actual = language_config.cleanup_stacktrace(original)
+    assert actual == expected
+
+
 def test_haskell_compilation_error():
     original = """Submission.hs:3:1: error:
         Parse error: module header, import declaration
