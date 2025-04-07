@@ -31,6 +31,9 @@
                     },
                     "csharp": {
                       "file": "Evaluator.cs"
+                    },
+                    "cpp": {
+                      "file": "Evaluator.cpp"
                     }
                   }
                 }

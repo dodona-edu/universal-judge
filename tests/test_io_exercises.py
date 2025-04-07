@@ -163,6 +163,7 @@ def test_io_function_display_no_multiline_exercise(
     expected, actual = start_test[0].get("expected", ""), close_test[0].get(
         "generated", ""
     )
+
     quote = STRING_QUOTES[SupportedLanguage(language)]
     assert expected[0] == quote and expected[-1] == quote
     assert actual[0] == quote and actual[-1] == quote

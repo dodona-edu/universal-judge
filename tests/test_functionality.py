@@ -23,6 +23,8 @@ from tests.language_markers import (
     ALL_LANGUAGES,
     ALL_SPECIFIC_LANGUAGES,
     EXCEPTION_LANGUAGES,
+    OBJECT_LANGUAGES,
+    all_languages_except,
 )
 from tests.manual_utils import assert_valid_output, configuration, execute_config
 
@@ -172,9 +174,7 @@ def test_generic_exception_wrong_error(
     assert updates.find_status_enum() == ["wrong"]
 
 
-@pytest.mark.parametrize(
-    "lang", ["python", "java", "kotlin", "csharp", "typescript", "javascript"]
-)
+@pytest.mark.parametrize("lang", OBJECT_LANGUAGES)
 def test_assignment_and_use_in_expression(
     lang: str, tmp_path: Path, pytestconfig: pytest.Config
 ):
@@ -225,9 +225,7 @@ def test_assignment_and_use_in_expression_list(
     assert len(updates.find_all("start-test")) == 1
 
 
-@pytest.mark.parametrize(
-    "lang", ["python", "java", "kotlin", "csharp", "typescript", "javascript"]
-)
+@pytest.mark.parametrize("lang", OBJECT_LANGUAGES)
 def test_crashing_assignment_with_before(
     lang: str, tmp_path: Path, pytestconfig: pytest.Config
 ):
@@ -244,7 +242,11 @@ def test_crashing_assignment_with_before(
     # Only the assignment was started.
     assert len(updates.find_all("start-testcase")) == 2
     print(updates.find_status_enum())
-    assert updates.find_status_enum() == ["runtime error", "runtime error", "wrong"]
+    if lang == "cpp":
+        # cpp doesn't crash on an uninitialised vector (as they are always validly initialised upon definition)
+        assert updates.find_status_enum() == ["runtime error", "wrong"]
+    else:
+        assert updates.find_status_enum() == ["runtime error", "runtime error", "wrong"]
     # Assert the exception is included.
     assert updates.find_next("start-test")["channel"] == "exception"
 
@@ -427,10 +429,7 @@ def test_batch_compilation_no_fallback_runtime(
     assert all(s in ("runtime error", "wrong") for s in updates.find_status_enum())
 
 
-@pytest.mark.parametrize(
-    "lang",
-    ["python", "java", "c", "javascript", "typescript", "kotlin", "bash", "csharp"],
-)
+@pytest.mark.parametrize("lang", all_languages_except("haskell", "runhaskell"))
 def test_program_params(lang: str, tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(pytestconfig, "sum", lang, tmp_path, "short.tson", "correct")
     result = execute_config(conf)
@@ -440,9 +439,7 @@ def test_program_params(lang: str, tmp_path: Path, pytestconfig: pytest.Config):
     assert len(updates.find_all("start-test")) == 4
 
 
-@pytest.mark.parametrize(
-    "language", ["python", "java", "kotlin", "javascript", "typescript", "csharp"]
-)
+@pytest.mark.parametrize("language", OBJECT_LANGUAGES)
 def test_objects(language: str, tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig, "objects", language, tmp_path, "plan.tson", "correct"
@@ -453,9 +450,7 @@ def test_objects(language: str, tmp_path: Path, pytestconfig: pytest.Config):
     assert len(updates.find_all("start-testcase")) == 3
 
 
-@pytest.mark.parametrize(
-    "language", ["python", "java", "kotlin", "javascript", "typescript", "csharp"]
-)
+@pytest.mark.parametrize("language", OBJECT_LANGUAGES)
 def test_objects_chained(language: str, tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig, "objects", language, tmp_path, "chained.tson", "correct"
@@ -466,9 +461,7 @@ def test_objects_chained(language: str, tmp_path: Path, pytestconfig: pytest.Con
     assert len(updates.find_all("start-testcase")) == 3
 
 
-@pytest.mark.parametrize(
-    "language", ["python", "java", "kotlin", "javascript", "typescript", "csharp"]
-)
+@pytest.mark.parametrize("language", OBJECT_LANGUAGES)
 def test_property_assignment(
     language: str, tmp_path: Path, pytestconfig: pytest.Config
 ):
@@ -486,9 +479,7 @@ def test_property_assignment(
     assert len(updates.find_all("start-testcase")) == 3
 
 
-@pytest.mark.parametrize(
-    "language", ["python", "java", "kotlin", "javascript", "typescript", "csharp"]
-)
+@pytest.mark.parametrize("language", OBJECT_LANGUAGES)
 def test_counter(language: str, tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig, "counter", language, tmp_path, "plan.yaml", "solution"
@@ -499,9 +490,7 @@ def test_counter(language: str, tmp_path: Path, pytestconfig: pytest.Config):
     assert len(updates.find_all("start-testcase")) == 7
 
 
-@pytest.mark.parametrize(
-    "language", ["python", "java", "kotlin", "javascript", "typescript", "csharp"]
-)
+@pytest.mark.parametrize("language", OBJECT_LANGUAGES)
 def test_counter_chained(language: str, tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig, "counter", language, tmp_path, "chained.yaml", "solution"
@@ -512,9 +501,7 @@ def test_counter_chained(language: str, tmp_path: Path, pytestconfig: pytest.Con
     assert len(updates.find_all("start-testcase")) == 4
 
 
-@pytest.mark.parametrize(
-    "language", ["python", "java", "kotlin", "javascript", "typescript", "csharp"]
-)
+@pytest.mark.parametrize("language", OBJECT_LANGUAGES)
 def test_objects_yaml(language: str, tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig, "objects", language, tmp_path, "plan.yaml", "correct"
@@ -549,6 +536,7 @@ def test_objects_error(language: str, tmp_path: Path, pytestconfig: pytest.Confi
         ("csharp", ["correct"]),
         ("java", ["internal error"]),
         ("c", ["internal error"]),
+        ("cpp", ["internal error"]),
         ("javascript", ["correct"]),
         ("typescript", ["correct"]),
         ("haskell", ["internal error"]),
@@ -595,6 +583,7 @@ def test_timeouts_propagate_to_contexts():
     [
         ("csharp", '(Coords) {"X":5.5,"Y":7.5}'),
         ("java", "Coord[x=5, y=7]"),
+        ("cpp", "Coord[x=5, y=7]"),
         ("javascript", '(Coord) {"x":5,"y":7}'),
         ("typescript", '(Coord) {"x":5,"y":7}'),
         ("kotlin", "Coord(x=5, y=6)"),
