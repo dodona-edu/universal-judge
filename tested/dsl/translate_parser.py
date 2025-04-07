@@ -10,6 +10,7 @@ from jsonschema import TypeChecker
 from jsonschema.protocols import Validator
 from jsonschema.validators import extend as extend_validator
 from jsonschema.validators import validator_for
+from typing_extensions import deprecated
 
 from tested.datatypes import (
     AdvancedNumericTypes,
@@ -518,7 +519,8 @@ def _validate_testcase_combinations(testcase: YamlDict):
         raise ValueError("A statement cannot have an expected return value.")
 
 
-def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
+def _convert_testcase(testcase: YamlDict, context: DslContext) -> tuple[Testcase, bool]:
+    using_deprecated_prog_lang = False
     context = context.deepen_context(testcase)
 
     # This is backwards compatability to some extend.
@@ -536,7 +538,9 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
             if isinstance(expr_stmt, str):
                 the_dict = {context.language: expr_stmt}
             else:
-                assert isinstance(expr_stmt, dict | ProgrammingLanguageMap)
+                assert isinstance(expr_stmt, dict)
+                if not isinstance(expr_stmt, ProgrammingLanguageMap):
+                    using_deprecated_prog_lang = True
                 the_dict = expr_stmt
             the_dict = {SupportedLanguage(l): cast(str, v) for l, v in the_dict.items()}
             if "statement" in testcase:
@@ -619,18 +623,18 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
         output=output,
         link_files=context.files,
         line_comment=line_comment,
-    )
+    ), using_deprecated_prog_lang
 
 
-def _convert_context(context: YamlDict, dsl_context: DslContext) -> Context:
+def _convert_context(context: YamlDict, dsl_context: DslContext) -> tuple[Context, bool]:
     dsl_context = dsl_context.deepen_context(context)
     raw_testcases = context.get("script", context.get("testcases"))
     assert isinstance(raw_testcases, list)
-    testcases = _convert_dsl_list(raw_testcases, dsl_context, _convert_testcase)
-    return Context(testcases=testcases)
+    testcases, deprecated_prog = _convert_dsl_list(raw_testcases, dsl_context, _convert_testcase)
+    return Context(testcases=testcases), deprecated_prog
 
 
-def _convert_tab(tab: YamlDict, context: DslContext) -> Tab:
+def _convert_tab(tab: YamlDict, context: DslContext) -> tuple[Tab, bool]:
     """
     Translate a DSL tab to a full test suite tab.
 
@@ -641,45 +645,52 @@ def _convert_tab(tab: YamlDict, context: DslContext) -> Tab:
     context = context.deepen_context(tab)
     name = tab.get("unit", tab.get("tab"))
     assert isinstance(name, str)
+    deprecated_prog = False
 
     # The tab can have testcases or contexts.
     if "contexts" in tab:
         assert isinstance(tab["contexts"], list)
-        contexts = _convert_dsl_list(tab["contexts"], context, _convert_context)
+        contexts, val = _convert_dsl_list(tab["contexts"], context, _convert_context)
+
     elif "cases" in tab:
         assert "unit" in tab
         # We have testcases N.S. / contexts O.S.
         assert isinstance(tab["cases"], list)
-        contexts = _convert_dsl_list(tab["cases"], context, _convert_context)
+        contexts, val = _convert_dsl_list(tab["cases"], context, _convert_context)
+        deprecated_prog = deprecated_prog or val
     elif "testcases" in tab:
         # We have scripts N.S. / testcases O.S.
         assert "tab" in tab
         assert isinstance(tab["testcases"], list)
-        testcases = _convert_dsl_list(tab["testcases"], context, _convert_testcase)
+        testcases, val = _convert_dsl_list(tab["testcases"], context, _convert_testcase)
         contexts = [Context(testcases=[t]) for t in testcases]
     else:
         assert "scripts" in tab
         assert isinstance(tab["scripts"], list)
-        testcases = _convert_dsl_list(tab["scripts"], context, _convert_testcase)
+        testcases, val = _convert_dsl_list(tab["scripts"], context, _convert_testcase)
         contexts = [Context(testcases=[t]) for t in testcases]
 
-    return Tab(name=name, contexts=contexts)
+    deprecated_prog = deprecated_prog or val
+    return Tab(name=name, contexts=contexts), deprecated_prog
 
 
 T = TypeVar("T")
 
 
 def _convert_dsl_list(
-    dsl_list: list, context: DslContext, converter: Callable[[YamlDict, DslContext], T]
-) -> list[T]:
+    dsl_list: list, context: DslContext, converter: Callable[[YamlDict, DslContext], tuple[T, bool]]
+) -> tuple[list[T], bool]:
     """
     Convert a list of YAML objects into a test suite object.
     """
+    deprecated_prog = False
     objects = []
     for dsl_object in dsl_list:
         assert isinstance(dsl_object, dict)
-        objects.append(converter(dsl_object, context))
-    return objects
+        obj, val = converter(dsl_object, context)
+        deprecated_prog = deprecated_prog or val
+        objects.append(obj)
+    return objects, deprecated_prog
 
 
 def _convert_dsl(dsl_object: YamlObject) -> Suite:
@@ -705,13 +716,13 @@ def _convert_dsl(dsl_object: YamlObject) -> Suite:
         if (language := dsl_object.get("language", "tested")) != "tested":
             language = SupportedLanguage(language)
         context = evolve(context, language=language)
-    tabs = _convert_dsl_list(tab_list, context, _convert_tab)
+    tabs, deprecated_prog = _convert_dsl_list(tab_list, context, _convert_tab)
 
     if namespace:
         assert isinstance(namespace, str)
-        return Suite(tabs=tabs, namespace=namespace)
+        return Suite(tabs=tabs, namespace=namespace, using_deprecated_prog_languages=deprecated_prog)
     else:
-        return Suite(tabs=tabs)
+        return Suite(tabs=tabs, using_deprecated_prog_languages=deprecated_prog)
 
 
 def parse_dsl(dsl_string: str) -> Suite:

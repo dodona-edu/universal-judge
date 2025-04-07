@@ -28,7 +28,8 @@
         "object",
         "string",
         "oracle",
-        "expression"
+        "expression",
+        "programming_language"
       ]
     },
     "stringArray": {

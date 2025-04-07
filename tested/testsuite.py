@@ -763,6 +763,7 @@ class Suite(WithFeatures, WithFunctions):
 
     tabs: list[Tab] = field(factory=list)
     namespace: str = "submission"
+    using_deprecated_prog_languages: bool = False
 
     def get_used_features(self) -> FeatureSet:
         """

@@ -464,7 +464,7 @@
         },
         {
           "description" : "Programming-language-specific statement or expression.",
-          "oneOf": [
+          "anyOf": [
             {
               "type": "object"
             },
