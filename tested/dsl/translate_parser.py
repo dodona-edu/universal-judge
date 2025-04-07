@@ -617,20 +617,27 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> tuple[Testcase
     else:
         the_description = None
 
-    return Testcase(
-        description=the_description,
-        input=the_input,
-        output=output,
-        link_files=context.files,
-        line_comment=line_comment,
-    ), using_deprecated_prog_lang
+    return (
+        Testcase(
+            description=the_description,
+            input=the_input,
+            output=output,
+            link_files=context.files,
+            line_comment=line_comment,
+        ),
+        using_deprecated_prog_lang,
+    )
 
 
-def _convert_context(context: YamlDict, dsl_context: DslContext) -> tuple[Context, bool]:
+def _convert_context(
+    context: YamlDict, dsl_context: DslContext
+) -> tuple[Context, bool]:
     dsl_context = dsl_context.deepen_context(context)
     raw_testcases = context.get("script", context.get("testcases"))
     assert isinstance(raw_testcases, list)
-    testcases, deprecated_prog = _convert_dsl_list(raw_testcases, dsl_context, _convert_testcase)
+    testcases, deprecated_prog = _convert_dsl_list(
+        raw_testcases, dsl_context, _convert_testcase
+    )
     return Context(testcases=testcases), deprecated_prog
 
 
@@ -678,7 +685,9 @@ T = TypeVar("T")
 
 
 def _convert_dsl_list(
-    dsl_list: list, context: DslContext, converter: Callable[[YamlDict, DslContext], tuple[T, bool]]
+    dsl_list: list,
+    context: DslContext,
+    converter: Callable[[YamlDict, DslContext], tuple[T, bool]],
 ) -> tuple[list[T], bool]:
     """
     Convert a list of YAML objects into a test suite object.
@@ -720,7 +729,11 @@ def _convert_dsl(dsl_object: YamlObject) -> Suite:
 
     if namespace:
         assert isinstance(namespace, str)
-        return Suite(tabs=tabs, namespace=namespace, using_deprecated_prog_languages=deprecated_prog)
+        return Suite(
+            tabs=tabs,
+            namespace=namespace,
+            using_deprecated_prog_languages=deprecated_prog,
+        )
     else:
         return Suite(tabs=tabs, using_deprecated_prog_languages=deprecated_prog)
 
