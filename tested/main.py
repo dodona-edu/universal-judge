@@ -39,7 +39,7 @@ def run(config: DodonaConfig, judge_output: IO, language: str | None = None):
             suite = parse_dsl(textual_suite)
         else:
             suite = parse_test_suite(textual_suite)
-        missing_keys = False
+        missing_keys = []
     else:
         translated_yaml, missing_keys = run_translation(
             Path(f"{config.resources}/{config.test_suite}"),

@@ -129,7 +129,7 @@ class Bundle:
     language: "Language"
     global_config: GlobalConfig
     out: IO
-    translations_missing_key: bool = False
+    translations_missing_key: list[str] = []
 
     @property
     def config(self) -> DodonaConfig:
@@ -208,7 +208,7 @@ def create_bundle(
     output: IO,
     suite: Suite,
     language: str | None = None,
-    translations_missing_key: bool = False,
+    translations_missing_key: list[str] | None = None,
 ) -> Bundle:
     """
     Create a configuration bundle.
@@ -236,6 +236,8 @@ def create_bundle(
         suite=suite,
     )
     lang_config = langs.get_language(global_config, language)
+    if translations_missing_key is None:
+        translations_missing_key = []
     return Bundle(
         language=lang_config,
         global_config=global_config,

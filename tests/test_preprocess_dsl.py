@@ -150,7 +150,7 @@ tabs:
           en: "tests(11)"
           nl: "testen(11)"
         return: 11
-      - expression: !programming_language
+      - expression:
           javascript: "{{animal}}_javascript(1 + 1)"
           typescript: "{{animal}}_typescript(1 + 1)"
           java: "Submission.{{animal}}_java(1 + 1)"
@@ -492,6 +492,44 @@ tabs:
 
     run_translation(Path("suite.yaml"), "en", True)
 
+    assert s.call_count == 1
+
+    # Check if the file was opened for writing
+    mock_opener.assert_any_call(Path("suite-en.yaml"), "w", encoding="utf-8")
+
+
+def test_key_not_found(mocker: MockerFixture):
+    s = mocker.spy(
+        tested.nat_translation, name="generate_new_yaml"  # type: ignore[reportAttributeAccessIssue]
+    )
+
+    mock_files = [
+        mocker.mock_open(read_data=content).return_value
+        for content in [
+            """
+tabs:
+- tab: task3
+  testcases:
+  - statement: !natural_language
+        nl: resultaten = Proberen({{ten}})
+        en: results = Tries({{ten}})
+  - expression: !natural_language
+        nl: tel_woorden(resultaten)
+        en: count_words(results)
+    return: !natural_language
+        nl: Het resultaat is 10
+        en: The result is 10"""
+        ]
+    ]
+    mock_files.append(mocker.mock_open(read_data="{}").return_value)
+    mock_files.append(mocker.mock_open().return_value)
+    mock_opener = mocker.mock_open()
+    mock_opener.side_effect = mock_files
+    mocker.patch("builtins.open", mock_opener)
+
+    _, missing_keys = run_translation(Path("suite.yaml"), "en", True)
+
+    assert missing_keys
     assert s.call_count == 1
 
     # Check if the file was opened for writing
