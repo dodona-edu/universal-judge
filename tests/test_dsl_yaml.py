@@ -1303,6 +1303,27 @@ def test_empty_text_data_newlines():
     actual_stderr = suite.tabs[0].contexts[0].testcases[0].output.stderr.data
     assert actual_stderr == ""
 
+def test_programming_language_can_be_globally_configured():
+    yaml_str = """
+namespace: "Numbers"
+language: "java"
+tabs:
+  - tab: "Numbers.oddValues"
+    testcases:
+      - expression: "Numbers.oddValues(new int[]{1, 2, 3, 4, 5, 6, 7, 8})"
+        return: [1, 3, 5, 7]
+"""
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    assert len(suite.tabs) == 1
+    tab = suite.tabs[0]
+    assert len(tab.contexts) == 1
+    context = tab.contexts[0]
+    assert len(context.testcases) == 1
+    testcase = context.testcases[0]
+    assert isinstance(testcase.input, LanguageLiterals)
+    assert testcase.input.type == "expression"
+    assert testcase.input.literals.keys() == {"java"}
 
 def test_strict_json_schema_is_valid():
     path_to_schema = Path(__file__).parent / "tested-draft7.json"
@@ -1316,6 +1337,6 @@ def test_strict_json_schema_is_valid():
 
 
 def test_editor_json_schema_is_valid():
-    validator = load_schema_validator("schema.json")
+    validator = load_schema_validator(file= "schema.json")
     assert isinstance(validator.schema, dict)
     validator.check_schema(validator.schema)

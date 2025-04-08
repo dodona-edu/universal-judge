@@ -187,19 +187,23 @@ def is_expression(_checker: TypeChecker, instance: Any) -> bool:
     return isinstance(instance, ExpressionString)
 
 
-def test(value: object) -> bool:
-    if not isinstance(value, str):
-        return False
-    import ast
-
-    ast.parse(value)
-    return True
-
-
-def load_schema_validator(file: str = "schema-strict.json") -> Validator:
+def load_schema_validator(dsl_object: YamlObject = None, file: str = "schema-strict.json") -> Validator:
     """
     Load the JSON Schema validator used to check DSL test suites.
     """
+    # if the programming language is set in the root, tested_dsl_expressions don't need to be parseable
+    language_present =  dsl_object is not None and "language" in dsl_object
+
+    def validate_tested_dsl_expression(value: object) -> bool:
+        if not isinstance(value, str):
+            return False
+        if language_present:
+            return True
+        import ast
+
+        ast.parse(value)
+        return True
+
     path_to_schema = Path(__file__).parent / file
     with open(path_to_schema, "r") as schema_file:
         schema_object = json.load(schema_file)
@@ -209,12 +213,9 @@ def load_schema_validator(file: str = "schema-strict.json") -> Validator:
         "oracle", is_oracle
     ).redefine("expression", is_expression)
     format_checker = original_validator.FORMAT_CHECKER
-    format_checker.checks("tested-dsl-expression", SyntaxError)(test)
+    format_checker.checks("tested-dsl-expression", SyntaxError)(validate_tested_dsl_expression)
     tested_validator = extend_validator(original_validator, type_checker=type_checker)
     return tested_validator(schema_object, format_checker=format_checker)
-
-
-_SCHEMA_VALIDATOR = load_schema_validator()
 
 
 class DslValidationError(ValueError):
@@ -310,7 +311,7 @@ def _validate_dsl(dsl_object: YamlObject):
     :param dsl_object: The object to validate.
     :return: True if valid, False otherwise.
     """
-    errors = list(_SCHEMA_VALIDATOR.iter_errors(dsl_object))
+    errors = list(load_schema_validator(dsl_object).iter_errors(dsl_object))
     if len(errors) == 1:
         message = (
             "Validating the DSL resulted in an error. "
