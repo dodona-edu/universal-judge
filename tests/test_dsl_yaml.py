@@ -1303,6 +1303,7 @@ def test_empty_text_data_newlines():
     actual_stderr = suite.tabs[0].contexts[0].testcases[0].output.stderr.data
     assert actual_stderr == ""
 
+
 def test_programming_language_can_be_globally_configured():
     yaml_str = """
 namespace: "Numbers"
@@ -1325,6 +1326,7 @@ tabs:
     assert testcase.input.type == "expression"
     assert testcase.input.literals.keys() == {"java"}
 
+
 def test_strict_json_schema_is_valid():
     path_to_schema = Path(__file__).parent / "tested-draft7.json"
     with open(path_to_schema, "r") as schema_file:
@@ -1337,6 +1339,6 @@ def test_strict_json_schema_is_valid():
 
 
 def test_editor_json_schema_is_valid():
-    validator = load_schema_validator(file= "schema.json")
+    validator = load_schema_validator(file="schema.json")
     assert isinstance(validator.schema, dict)
     validator.check_schema(validator.schema)

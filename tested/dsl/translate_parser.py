@@ -187,12 +187,18 @@ def is_expression(_checker: TypeChecker, instance: Any) -> bool:
     return isinstance(instance, ExpressionString)
 
 
-def load_schema_validator(dsl_object: YamlObject = None, file: str = "schema-strict.json") -> Validator:
+def load_schema_validator(
+    dsl_object: YamlObject = None, file: str = "schema-strict.json"
+) -> Validator:
     """
     Load the JSON Schema validator used to check DSL test suites.
     """
     # if the programming language is set in the root, tested_dsl_expressions don't need to be parseable
-    language_present =  dsl_object is not None and "language" in dsl_object
+    language_present = (
+        dsl_object is not None
+        and isinstance(dsl_object, dict)
+        and "language" in dsl_object
+    )
 
     def validate_tested_dsl_expression(value: object) -> bool:
         if not isinstance(value, str):
@@ -213,7 +219,9 @@ def load_schema_validator(dsl_object: YamlObject = None, file: str = "schema-str
         "oracle", is_oracle
     ).redefine("expression", is_expression)
     format_checker = original_validator.FORMAT_CHECKER
-    format_checker.checks("tested-dsl-expression", SyntaxError)(validate_tested_dsl_expression)
+    format_checker.checks("tested-dsl-expression", SyntaxError)(
+        validate_tested_dsl_expression
+    )
     tested_validator = extend_validator(original_validator, type_checker=type_checker)
     return tested_validator(schema_object, format_checker=format_checker)
 
