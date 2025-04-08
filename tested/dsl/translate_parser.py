@@ -554,7 +554,7 @@ def _convert_file_output_channel(
             OutputFileData(
                 content_type=content_type,
                 content=content,
-                student_path=str(item["student_path"]),
+                path=str(item["path"]),
             )
         )
 

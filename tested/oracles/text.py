@@ -153,7 +153,7 @@ def evaluate_file(
         except FileNotFoundError:
             raise ValueError(f"File {expected_path} not found in resources.")
 
-    actual_path = config.context_dir / channel.student_path
+    actual_path = config.context_dir / channel.path
 
     try:
         with open(str(actual_path), "r") as file:

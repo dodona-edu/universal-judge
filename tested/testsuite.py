@@ -277,7 +277,7 @@ class TextOutputChannel(TextData):
 class OutputFileData:
     content_type: TextChannelType
     content: str
-    student_path: str
+    path: str
     oracle: GenericTextOracle | CustomCheckOracle = field(
         factory=lambda: GenericTextOracle(name=TextBuiltin.FILE)
     )
@@ -305,11 +305,11 @@ class FileOutputChannel(WithFeatures):
                 file_path = _resolve_path(resources, output_data.content)
                 with open(file_path, "r") as file:
                     file_content.append(
-                        f"--- <{output_data.student_path}> ---\n{file.read()}"
+                        f"--- <{output_data.path}> ---\n{file.read()}"
                     )
             else:
                 file_content.append(
-                    f"--- <{output_data.student_path}> ---\n{output_data.content[i]}"
+                    f"--- <{output_data.path}> ---\n{output_data.content[i]}"
                 )
         return "\n".join(file_content)
 
