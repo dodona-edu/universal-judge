@@ -358,9 +358,7 @@ def _process_results(
                 if case.is_main_testcase():
                     assert isinstance(case.input, MainInput)
                     if isinstance(case.input.stdin, TextData):
-                        meta_stdin = case.input.stdin.get_data_as_string(
-                            bundle.config.resources
-                        )
+                        meta_stdin = case.input.stdin.data
                 elif isinstance(case.input, Statement):
                     stmt = generate_statement(bundle, case.input)
                     meta_statements.append(stmt)

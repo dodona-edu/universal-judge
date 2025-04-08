@@ -37,6 +37,7 @@ from tested.testsuite import (
     LanguageLiterals,
     MainInput,
     Testcase,
+    TextChannelType,
     TextData,
 )
 from tested.utils import is_statement_strict
@@ -121,18 +122,20 @@ def get_readable_input(
         command = shlex.join([submission] + case.input.arguments)
         args = f"$ {command}"
         # Determine the stdin
-        if isinstance(case.input.stdin, TextData):
-            stdin = case.input.stdin.data
-            if not case.link_files and not simple_regex.search(stdin):
-                stdin = case.input.stdin.get_data_as_string(bundle.config.resources)
+        stdin_data = case.input.stdin
+        if isinstance(stdin_data, TextData):
+            stdin = stdin_data.data
         else:
             stdin = ""
 
         # If we have both stdin and arguments, we use a here-document.
         if case.input.arguments and stdin:
-            assert stdin[-1] == "\n", "stdin must end with a newline"
-            delimiter = _get_heredoc_token(stdin)
-            text = f"{args} << '{delimiter}'\n{stdin}{delimiter}"
+            if isinstance(stdin_data, TextData) and stdin_data.type == "file":
+                text = f"{args} << {stdin}"
+            else:
+                assert stdin[-1] == "\n", "stdin must end with a newline"
+                delimiter = _get_heredoc_token(stdin)
+                text = f"{args} << '{delimiter}'\n{stdin}{delimiter}"
         elif stdin:
             assert not case.input.arguments
             text = stdin
@@ -164,8 +167,6 @@ def get_readable_input(
     # Now we need to do ugly stuff.
     # Begin by compiling the HTML that will be displayed.
     generated_html = html.escape(text)
-    if format_ == "console":
-        generated_html = highlight_code(text)
 
     # Map of file URLs.
     url_map = {html.escape(x.path): x for x in case.link_files}
