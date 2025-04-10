@@ -36,7 +36,6 @@ parser.add_argument(
     "--translate",
     type=str,
     help="Specifies the language to translate translate the dsl to.",
-    default="-",
 )
 parser = parser.parse_args()
 
