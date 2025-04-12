@@ -32,7 +32,10 @@ def transform(data: Any) -> Any:
                 assert isinstance(value, dict)
                 assert isinstance(tag, dict) and "const" in tag
 
-                if tag["const"] == "!programming_language" or tag["const"] == "!expression":
+                if (
+                    tag["const"] == "!programming_language"
+                    or tag["const"] == "!expression"
+                ):
                     return {}
 
                 if tag["const"] == "!natural_language":
@@ -48,6 +51,7 @@ def transform(data: Any) -> Any:
         return {k: transform(v) for k, v in data.items()}
     return data
 
+
 def transform_json(json_file):
     _, ext = os.path.splitext(json_file)
     assert ext.lower() == ".json", f"expected a json file, got {ext}."
@@ -61,12 +65,9 @@ def transform_json(json_file):
     result = transform(json_stream)
 
     print(json.dumps(result, indent=2))
-    with open("output.json", "w", encoding='utf-8') as f:
+    with open("output.json", "w", encoding="utf-8") as f:
         json.dump(result, f, indent=2)
-    #print(result)
-
-
-
+    # print(result)
 
 
 if __name__ == "__main__":
