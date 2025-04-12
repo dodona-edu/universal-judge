@@ -10,8 +10,8 @@ def transform(data: Any) -> Any:
         return [transformed for ele in data if (transformed := transform(ele)) != {}]
     elif isinstance(data, dict):
         if "return" in data:
-            # This is necessary since tags aren't recognized in the Json schema
-            # and such natural_language maps wil always be seen as yamlValue.
+            # This is necessary since tags aren't recognized in the Json schema.
+            # So a natural_language maps wil always be seen as yamlValue.
             assert isinstance(data["return"], dict) and "oneOf" in data["return"]
             data["return"]["anyOf"] = data["return"].pop("oneOf")
 
@@ -64,10 +64,10 @@ def transform_json(json_file):
 
     result = transform(json_stream)
 
-    print(json.dumps(result, indent=2))
-    with open("output.json", "w", encoding="utf-8") as f:
+    with open(
+        json_file.parent / "multilingual-schema.json", "w", encoding="utf-8"
+    ) as f:
         json.dump(result, f, indent=2)
-    # print(result)
 
 
 if __name__ == "__main__":
