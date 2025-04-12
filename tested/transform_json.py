@@ -32,12 +32,16 @@ def transform(data: Any) -> Any:
                 assert isinstance(value, dict)
                 assert isinstance(tag, dict) and "const" in tag
 
+                # For !programming_language the same was already defined without the tag.
+                # The only usage for the expression tag is also redundant.
                 if (
                     tag["const"] == "!programming_language"
                     or tag["const"] == "!expression"
                 ):
                     return {}
 
+                # This to help the validator to somewhat distinguish between
+                # a natural_language map and a dictionary.
                 if tag["const"] == "!natural_language":
                     value["not"] = {
                         "anyOf": [
@@ -52,7 +56,13 @@ def transform(data: Any) -> Any:
     return data
 
 
-def transform_json(json_file):
+def transform_json(json_file: Path):
+    """
+    This function transforms the JSON schema used in the DSL translator into
+    a new JSON schema that can be used to validate the multilingual YAML in your IDE.
+
+    :param json_file: The path to the JSON file.
+    """
     _, ext = os.path.splitext(json_file)
     assert ext.lower() == ".json", f"expected a json file, got {ext}."
     try:

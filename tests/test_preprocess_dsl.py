@@ -18,7 +18,7 @@ from tested.nat_translation import (
     translate_yaml,
     validate_pre_dsl,
 )
-from tested.transform_json import transform
+from tested.transform_json import transform, transform_json
 
 
 def validate_natural_translate(yaml_str: str, translated_yaml_str: str):
@@ -797,17 +797,84 @@ def test_expr_json_schema():
 
     assert result == json_schema_expected
 
-def test_list_json_schema():
-    json_schema = [{}, {
-          "type" : "string",
-          "description" : "A statement of expression in Python-like syntax as YAML string."
-    }]
 
-    json_schema_expected = [{
-          "type" : "string",
-          "description" : "A statement of expression in Python-like syntax as YAML string."
-    }]
+def test_list_json_schema():
+    json_schema = [
+        {},
+        {
+            "type": "string",
+            "description": "A statement of expression in Python-like syntax as YAML string.",
+        },
+    ]
+
+    json_schema_expected = [
+        {
+            "type": "string",
+            "description": "A statement of expression in Python-like syntax as YAML string.",
+        }
+    ]
 
     result = transform(json_schema)
 
     assert result == json_schema_expected
+
+
+def test_transform_executed_correct(mocker: MockerFixture):
+    s = mocker.spy(
+        tested.transform_json, name="transform"  # type: ignore[reportAttributeAccessIssue]
+    )
+
+    mock_files = [
+        mocker.mock_open(read_data=content).return_value
+        for content in [
+            """
+{        
+    "files" : {
+      "description" : "A list of files used in the test suite.",
+      "oneOf" : [
+        {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/file"
+          }
+        },
+        {
+          "type" : "object",
+          "required": [
+            "__tag__",
+            "value"
+          ],
+          "properties" : {
+            "__tag__": {
+              "type" : "string",
+              "description" : "The tag used in the yaml",
+              "const":  "!natural_language"
+            },
+            "value":{
+              "type": "object",
+              "additionalProperties": {
+                "type" : "array",
+                "items" : {
+                  "$ref" : "#/definitions/file"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+}"""
+        ]
+    ]
+    mock_files.append(mocker.mock_open(read_data="{}").return_value)
+    mock_files.append(mocker.mock_open().return_value)
+    mock_opener = mocker.mock_open()
+    mock_opener.side_effect = mock_files
+    mocker.patch("builtins.open", mock_opener)
+
+    transform_json(Path("schema.json"))
+
+    assert s.call_count == 25
+
+    # Check if the file was opened for writing
+    mock_opener.assert_any_call(Path("multilingual-schema.json"), "w", encoding="utf-8")
