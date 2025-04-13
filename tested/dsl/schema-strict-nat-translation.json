@@ -250,7 +250,7 @@
           ],
           "description" : "The name of this tab."
         },
-        "translation" : {
+        "translations" : {
           "type" : "object",
           "description": "Define translations in the tab scope."
         },
@@ -331,12 +331,14 @@
           "description" : "Defines if the unit/tab is hidden for the student or not"
         },
         "unit" : {
-          "anyOf" : [
+          "oneOf" : [
             {
-              "type" : "string"
+              "type" : "string",
+              "description" : "The name of this tab."
             },
             {
               "type" : "object",
+              "description" : "The name of this tab.",
               "required": [
                 "__tag__",
                 "value"
@@ -394,7 +396,7 @@
       ]
     },
     "_contextList" : {
-      "anyOf" : [
+      "oneOf" : [
         {
           "type" : "array",
           "minItems" : 1,
@@ -429,7 +431,7 @@
       ]
     },
     "_caseList" : {
-      "anyOf" : [
+      "oneOf" : [
         {
           "type" : "array",
           "minItems" : 1,
@@ -464,7 +466,7 @@
       ]
     },
     "_testcaseList" : {
-      "anyOf" : [
+      "oneOf" : [
         {
           "type" : "array",
           "minItems" : 1,
@@ -499,7 +501,7 @@
       ]
     },
     "_scriptList" : {
-      "anyOf" : [
+      "oneOf" : [
         {
           "type" : "array",
           "minItems" : 1,
@@ -1250,6 +1252,7 @@
       "oneOf" : [
         {
           "type" : "string",
+          "format" : "tested-dsl-expression",
           "description" : "A statement of expression in Python-like syntax as YAML string."
         },
         {
@@ -1296,6 +1299,7 @@
       "oneOf" : [
         {
           "type" : "string",
+          "format" : "tested-dsl-expression",
           "description" : "A statement of expression in Python-like syntax as YAML string."
         },
         {
@@ -1955,7 +1959,8 @@
         "kotlin",
         "python",
         "runhaskell",
-        "csharp"
+        "csharp",
+        "cpp"
       ]
     },
     "message" : {

@@ -18,7 +18,7 @@ from tested.nat_translation import (
     translate_yaml,
     validate_pre_dsl,
 )
-from tested.transform_json import transform, transform_json
+from tested.transform_json import transform_IDE, transform_json
 
 
 def validate_natural_translate(yaml_str: str, translated_yaml_str: str):
@@ -718,7 +718,7 @@ def test_return_json_schema():
         }
     }
 
-    result = transform(json_schema)
+    result = transform_IDE(json_schema)
 
     assert result == json_schema_expected
 
@@ -737,7 +737,7 @@ def test_yaml_value_json_schema():
         }
     }
 
-    result = transform(json_schema)
+    result = transform_IDE(json_schema)
 
     assert result == json_schema_expected
 
@@ -768,7 +768,7 @@ def test_nat_lang_json_schema():
         },
     }
 
-    result = transform(json_schema)
+    result = transform_IDE(json_schema)
 
     assert result == json_schema_expected
 
@@ -793,7 +793,7 @@ def test_expr_json_schema():
 
     json_schema_expected = {}
 
-    result = transform(json_schema)
+    result = transform_IDE(json_schema)
 
     assert result == json_schema_expected
 
@@ -814,7 +814,7 @@ def test_list_json_schema():
         }
     ]
 
-    result = transform(json_schema)
+    result = transform_IDE(json_schema)
 
     assert result == json_schema_expected
 

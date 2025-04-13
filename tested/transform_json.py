@@ -1,13 +1,119 @@
 import json
 import os
 import sys
+from enum import Enum
 from pathlib import Path
 from typing import Any
 
+class SpecialMap(Enum):
+    NATURAL_LANGUAGE = "natural_language"
+    PROGRAMMING_LANGUAGE = "programming_language"
+    ORACLE = "oracle"
+    EXPRESSION = "expression"
+    NONE = "none"
 
-def transform(data: Any) -> Any:
+def map_kind(element: dict) -> SpecialMap:
+    if "required" in element and "properties" in element:
+        required = element["required"]
+        properties = element["properties"]
+        assert isinstance(required, list)
+        assert isinstance(properties, dict)
+        if "__tag__" in required and "value" in required:
+            if  "__tag__" in properties and "value" in properties:
+                tag = properties["__tag__"]
+                if isinstance(tag, dict) and "const" in tag and isinstance(tag["const"], str):
+                    if tag["const"] == "!natural_language":
+                        return SpecialMap.NATURAL_LANGUAGE
+                    elif tag["const"] == "!programming_language":
+                        return SpecialMap.PROGRAMMING_LANGUAGE
+                    elif tag["const"] == "!oracle":
+                        return SpecialMap.ORACLE
+                    elif tag["const"] == "!expression":
+                        return SpecialMap.EXPRESSION
+    return SpecialMap.NONE
+
+def change_prog_lang_type(element: dict, prog_lang: dict) -> dict:
+    if element == prog_lang:
+        ele_type = element.pop("type")
+        element["anyOf"] = [
+            {"type": ele_type},
+            {"type": "programming_language"},
+        ]
+    return element
+
+def transform_monolingual(data: Any, strict: bool) -> Any:
+    if isinstance(data, dict):
+        if "oneOf" in data:
+            new_one_of = []
+            prog_lang = None
+            for element in data["oneOf"]:
+                assert isinstance(element, dict)
+                # Removes all natural translations
+                kind = map_kind(element)
+                if kind == SpecialMap.PROGRAMMING_LANGUAGE:
+                    prog_lang = element["properties"]["value"]
+                elif kind != SpecialMap.NATURAL_LANGUAGE:
+                    if kind == SpecialMap.EXPRESSION or kind == SpecialMap.ORACLE:
+                        element = element["properties"]["value"]
+                        if strict:
+                            if kind == SpecialMap.EXPRESSION:
+                                element["type"] = "expression"
+                            else:
+                                element["type"] = "oracle"
+                    new_one_of.append(element)
+
+            # A programming_langauge map was found. If not strict, just remove.
+            # If strict, still provide the type option for the corresponding object.
+            if prog_lang is not None and strict:
+                new_one_of = [change_prog_lang_type(ele, prog_lang) for ele in new_one_of]
+
+            if len(new_one_of) <= 1:
+                data.pop("oneOf")
+                if len(new_one_of) == 1:
+                    for key, value in new_one_of[0].items():
+                        data[key] = value
+            else:
+                data["oneOf"] = new_one_of
+
+        if "expressionOrStatementWithNatTranslation" in data:
+            data.pop("expressionOrStatementWithNatTranslation")
+
+        if "translations" in data:
+            data.pop("translations")
+
+        if "$ref" in data:
+            if isinstance(data["$ref"], str):
+                if data["$ref"] == "#/definitions/expressionOrStatementWithNatTranslation":
+                    data["$ref"] = "#/definitions/expressionOrStatement"
+
+        if "yamlValue" in data:
+            if strict:
+                data["yamlValue"] = {
+                  "description" : "A value represented as YAML.",
+                  "not" : {
+                    "type" : [
+                      "oracle",
+                      "expression",
+                      "programming_language"
+                    ]
+                  }
+                }
+            else:
+                data["yamlValue"] = {
+                    "description": "A value represented as YAML.",
+                }
+
+
+        return {k: transform_monolingual(v, strict) for k, v in data.items()}
+    elif isinstance(data, list):
+        return [transformed for ele in data if
+                (transformed := transform_monolingual(ele, strict)) != {}]
+    return data
+
+
+def transform_IDE(data: Any) -> Any:
     if isinstance(data, list):
-        return [transformed for ele in data if (transformed := transform(ele)) != {}]
+        return [transformed for ele in data if (transformed := transform_IDE(ele)) != {}]
     elif isinstance(data, dict):
         if "return" in data:
             # This is necessary since tags aren't recognized in the Json schema.
@@ -52,11 +158,11 @@ def transform(data: Any) -> Any:
                     }
                 data = value
 
-        return {k: transform(v) for k, v in data.items()}
+        return {k: transform_IDE(v) for k, v in data.items()}
     return data
 
 
-def transform_json(json_file: Path):
+def transform_json(json_file: Path, monolingual: bool,  strict: bool):
     """
     This function transforms the JSON schema used in the DSL translator into
     a new JSON schema that can be used to validate the multilingual YAML in your IDE.
@@ -72,10 +178,15 @@ def transform_json(json_file: Path):
         print("The json file was not found.")
         raise e
 
-    result = transform(json_stream)
+    if not monolingual:
+        result = transform_IDE(json_stream)
+        file_name = "multilingual-schema.json"
+    else:
+        result = transform_monolingual(json_stream, strict)
+        file_name = "multilingual-schema.json"
 
     with open(
-        json_file.parent / "multilingual-schema.json", "w", encoding="utf-8"
+        json_file.parent / file_name, "w", encoding="utf-8"
     ) as f:
         json.dump(result, f, indent=2)
 
@@ -83,5 +194,12 @@ def transform_json(json_file: Path):
 if __name__ == "__main__":
     n = len(sys.argv)
     assert n > 1, "Expected path to multilingual json schema."
+    monolingual = False
+    strict = False
+    if n > 2:
+        assert sys.argv[2] in ("strict", "not-strict")
+        strict = sys.argv[2] == "strict"
 
-    transform_json(Path(sys.argv[1]))
+        monolingual = True
+
+    transform_json(Path(sys.argv[1]), monolingual=monolingual, strict=strict)
